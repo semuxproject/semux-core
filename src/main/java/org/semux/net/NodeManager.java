@@ -284,5 +284,7 @@ public class NodeManager {
     private void doPersist() {
         List<InetSocketAddress> list = new ArrayList<>(channelMgr.getActiveAddresses());
         setPersistedNodes(Config.NETWORK, list);
+
+        addNodes(getSeedNodes(Config.NETWORK));
     }
 }
