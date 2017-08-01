@@ -1,0 +1,25 @@
+# binary files and logs
+*.class
+*.log
+*.data
+
+# data folders
+/database/
+/keystore/
+/p2p/
+/node*
+
+# maven generated files
+target/
+dist/
+
+# eclipse generated files
+.project
+.classpath
+.settings/
+
+# OSX generated files
+.DS_Store
+
+# JVM crash dumps
+hs_err_pid*

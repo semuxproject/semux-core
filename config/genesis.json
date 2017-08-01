@@ -1,0 +1,31 @@
+{
+    "number": 0,
+    "coinbase": "0x0000000000000000000000000000000000000000",
+    "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "timestamp": 0,
+    "merkleRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "data": "semux",
+    "premine": {
+        "0x0de90f89e9b338f7ae23900af4768d2b33182675": {
+            "balance": 100000000
+        },
+        "0x7073f25e0023f2b3fa25d3fe99e4e9af7b8ae781": {
+            "balance": 100000000
+        },
+        "0xa9bf44eb367c859634e82d5f3470280f261f67c0": {
+            "balance": 100000000
+        },
+        "0x484a2cce01d7b7f6795c8c2b26ebbfaa438040c8": {
+            "balance": 100000000
+        }
+    },
+    "delegates": {
+        "semux_1": "0x1e8237f8f64b2bd626980875b501f01713d99f7f",
+        "semux_2": "0x47f94a46ae01a48f890a1b088bf5e2ff2dbb3b73",
+        "semux_3": "0xe05a5e60fb26ec466620354feff67d1f5239f8c8",
+        "semux_4": "0x5656779afec2314abd4c51666e28bc64f758c621"
+    },
+    "config": {
+        "nextUpgrade": 388800
+    }
+}
