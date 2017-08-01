@@ -7,6 +7,7 @@
 package org.semux.consensus;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -18,9 +19,22 @@ import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 
+/**
+ * <p>
+ * A <code>VoteSet</code> contains all the votes for a specific <height, view>
+ * pair.
+ * </p>
+ * 
+ * <p>
+ * It's assumed that the votes has the same <code>blockHash</code>. In case
+ * where the primary validator send out two different block proposal, either or
+ * neither should be approved by consensus.
+ * </p>
+ *
+ */
 public class VoteSet {
 
-    // TODO group votes by blockHash?
+    private byte[] blockHash;
 
     private Map<String, Vote> approvals;
     private Map<String, Vote> rejections;
@@ -59,7 +73,15 @@ public class VoteSet {
                 && (peerId = Hex.encode(Hash.h160(sig.getPublicKey()))) != null //
                 && validators.contains(peerId)) {
             if (vote.getValue() == Vote.VALUE_APPROVE) {
-                return approvals.put(peerId, vote) == null;
+                /*
+                 * Only allow voting for one blockHash.
+                 */
+                if (blockHash == null || Arrays.equals(blockHash, vote.getBlockHash())) {
+                    blockHash = vote.getBlockHash();
+                    return approvals.put(peerId, vote) == null;
+                } else {
+                    return false;
+                }
             } else {
                 return rejections.put(peerId, vote) == null;
             }

@@ -26,6 +26,15 @@ public class ByteArray {
         return new ByteArray(data);
     }
 
+    public int length() {
+        return data.length;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    @Override
     public boolean equals(Object other) {
         if (other instanceof ByteArray) {
             return Arrays.equals(data, ((ByteArray) other).data);
@@ -37,14 +46,6 @@ public class ByteArray {
     @Override
     public int hashCode() {
         return hash;
-    }
-
-    public int length() {
-        return data.length;
-    }
-
-    public byte[] getData() {
-        return data;
     }
 
     @Override

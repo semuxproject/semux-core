@@ -476,7 +476,9 @@ public class SemuxBFT implements Consensus {
             if (activeValidators != null) {
                 int count = 0;
                 for (Channel c : activeValidators) {
-                    count += (c.getRemotePeer().getLatestBlockNumber() + 1 - height >= 2 ? 1 : 0);
+                    if (c.isActive()) {
+                        count += (c.getRemotePeer().getLatestBlockNumber() + 1 - height >= 2 ? 1 : 0);
+                    }
                 }
 
                 if (count >= (int) Math.ceil(activeValidators.size() * 2.0 / 3.0)) {
