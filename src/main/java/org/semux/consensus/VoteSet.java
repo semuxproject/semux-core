@@ -21,13 +21,12 @@ import org.semux.crypto.Hex;
 
 /**
  * <p>
- * A <code>VoteSet</code> contains all the votes for a specific <height, view>
- * pair.
+ * A <code>VoteSet</code> contains all the votes for a specific height and view.
  * </p>
  * 
  * <p>
- * It's assumed that the votes has the same <code>blockHash</code>. In case
- * where the primary validator send out two different block proposal, either or
+ * It's assumed that the votes have the same <code>blockHash</code>. In case
+ * where the primary validator sends out two different block proposal, either or
  * neither should be approved by consensus.
  * </p>
  *
@@ -44,6 +43,13 @@ public class VoteSet {
     private Set<String> validators;
     private int twoThirds;
 
+    /**
+     * Create a vote set.
+     * 
+     * @param height
+     * @param view
+     * @param validators
+     */
     public VoteSet(long height, int view, List<String> validators) {
         this.approvals = new ConcurrentHashMap<>();
         this.rejections = new ConcurrentHashMap<>();
@@ -57,7 +63,7 @@ public class VoteSet {
     /**
      * Add vote to this set if the height and view match.
      * 
-     * NOTE: signature is not verified.
+     * NOTE: signature is not verified, use {@link Vote#validate()} instead.
      * 
      * @param vote
      * @return
@@ -91,7 +97,7 @@ public class VoteSet {
     }
 
     /**
-     * Add votes to this set, basic check will be enforced as {@code addVote(Vote)}.
+     * Add votes to this set, by iteratively calling {@link #addVote(Vote)}.
      * 
      * @param votes
      */
@@ -101,37 +107,75 @@ public class VoteSet {
         }
     }
 
+    /**
+     * Whether a conclusion has been reached.
+     * 
+     * @return
+     */
     public boolean isFinalized() {
         return isApproved() || isRejected();
     }
 
+    /**
+     * Whether the underlying block proposal is approved.
+     * 
+     * @return
+     */
     public boolean isApproved() {
         return approvals.size() >= twoThirds;
     }
 
+    /**
+     * Whether the underlying block proposal is rejected.
+     * 
+     * @return
+     */
     public boolean isRejected() {
         return rejections.size() >= twoThirds;
     }
 
+    /**
+     * Clear all the votes
+     */
     public void clear() {
         approvals.clear();
         rejections.clear();
     }
 
-    public int size() {
-        return approvals.size() + rejections.size();
-    }
-
+    /**
+     * Get all the approval votes.
+     * 
+     * @return
+     */
     public List<Vote> getApprovals() {
         return new ArrayList<>(approvals.values());
     }
 
+    /**
+     * Get all the rejection votes.
+     * 
+     * @return
+     */
     public List<Vote> getRejections() {
         return new ArrayList<>(rejections.values());
     }
 
+    /**
+     * Get the 2/3 number.
+     * 
+     * @return
+     */
     public int getTwoThirds() {
         return twoThirds;
+    }
+
+    /**
+     * Get the total number of votes.
+     * 
+     * @return
+     */
+    public int size() {
+        return approvals.size() + rejections.size();
     }
 
     @Override
