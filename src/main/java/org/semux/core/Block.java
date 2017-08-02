@@ -13,6 +13,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Config;
@@ -59,6 +61,15 @@ public class Block implements Comparable<Block> {
     protected int txIndexOffset = 36 + 4 + 4;
     protected List<Pair<Integer, Integer>> txIndex = new ArrayList<>();
     protected boolean isGensis = false;
+
+    private static ThreadFactory factory = new ThreadFactory() {
+        AtomicInteger cnt = new AtomicInteger(0);
+
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "block-validator-" + cnt.getAndIncrement());
+        }
+    };
 
     public Block(long number, byte[] coinbase, byte[] prevHash, long timestamp, byte[] merkleRoot, byte[] data,
             List<Transaction> transactions) {
@@ -146,7 +157,7 @@ public class Block implements Comparable<Block> {
                 && Arrays.equals(Hash.h256(encoded), hash) //
                 && (number == 0 || EdDSA.verify(hash, signature))) {
 
-            ExecutorService exec = Executors.newFixedThreadPool(nThreads);
+            ExecutorService exec = Executors.newFixedThreadPool(nThreads, factory);
             try {
                 List<Future<Boolean>> list = exec.invokeAll(transactions);
                 for (Future<Boolean> f : list) {
@@ -171,12 +182,13 @@ public class Block implements Comparable<Block> {
 
     /**
      * Validate block format and signature, along with transaction validation, using
-     * available processors.
+     * half the available core.
      * 
      * @return
      */
     public boolean validate() {
-        return validate(Runtime.getRuntime().availableProcessors());
+        int cores = Runtime.getRuntime().availableProcessors();
+        return validate(cores > 2 ? cores / 2 : 1);
     }
 
     /**
