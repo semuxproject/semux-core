@@ -177,7 +177,9 @@ public class Channel {
     public void setRemotePeer(Peer remotePeer) {
         this.remotePeer = remotePeer;
 
-        channelMgr.active(this);
+        if (remotePeer != null) {
+            channelMgr.active(this); // notify channel manager
+        }
     }
 
     /**

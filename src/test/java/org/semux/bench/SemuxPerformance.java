@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.Scanner;
 
 import org.json.JSONObject;
+import org.semux.Config;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Wallet;
@@ -43,7 +44,7 @@ public class SemuxPerformance {
             byte[] from = key.toAddress();
             byte[] to = Bytes.random(20);
             long value = 1;
-            long fee = 1;
+            long fee = Config.MIN_TRANSACTION_FEE;
             long nonce = startingNonce + i;
             long timestamp = System.currentTimeMillis();
             byte[] data = {};

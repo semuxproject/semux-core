@@ -50,7 +50,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
         int packetId = count.incrementAndGet() % Integer.MAX_VALUE;
         int packetSize = encoded.length;
         byte type = msg.getCode().toByte();
-        byte network = Config.NETWORK;
+        byte network = Config.NETWORK_ID;
 
         int limit = Config.NET_MAX_FRAME_SIZE;
         int total = (encoded.length - 1) / limit + 1;

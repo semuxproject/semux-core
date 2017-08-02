@@ -46,17 +46,17 @@ public class ConsensusHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        logger.debug("Consensus handler active, id = {}", channel.getId());
+        logger.debug("Consensus handler active, cid = {}", channel.getId());
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        logger.debug("Consensus handler inactive, id = {}", channel.getId());
+        logger.debug("Consensus handler inactive, cid = {}", channel.getId());
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.info("Exception in consensus handler, id = {}", channel.getId(), cause);
+        logger.info("Exception in consensus handler, cid = {}", channel.getId(), cause);
 
         ctx.close();
     }

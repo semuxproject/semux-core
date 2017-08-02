@@ -22,12 +22,12 @@ public class CorePerformance {
         long t1 = System.nanoTime();
 
         List<Transaction> txs = new ArrayList<>();
-        for (int i = 0; i < Config.BLOCK_MAX_TRANSACTIONS; i++) {
+        for (int i = 0; i < Config.MAX_BLOCK_SIZE; i++) {
             TransactionType type = TransactionType.TRANSFER;
             byte[] from = key.toAddress();
             byte[] to = Bytes.random(20);
             long value = 1;
-            long fee = 1;
+            long fee = Config.BFT_REGISTRATION_FEE;
             long nonce = 1 + i;
             long timestamp = System.currentTimeMillis();
             byte[] data = {};
@@ -58,10 +58,10 @@ public class CorePerformance {
 
     public static void testBlockValidation(Block block) {
         long t1 = System.nanoTime();
-        block.validate();
+        logger.info("validity: {}", block.validate());
         // proof validation is not counted here
         long t2 = System.nanoTime();
-        logger.info("Perf_block_validation: " + (t2 - t1) / 1_000_000 + " ms");
+        logger.info("Perf_block_validation: {} ms", (t2 - t1) / 1_000_000);
     }
 
     public static void main(String[] args) throws Exception {

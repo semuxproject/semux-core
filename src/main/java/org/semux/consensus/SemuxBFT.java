@@ -531,8 +531,6 @@ public class SemuxBFT implements Consensus {
     protected void onVote(Vote v) {
         logger.trace("On vote: {}", v);
 
-        // TODO check vote blockHash
-
         if (v.getHeight() == height //
                 && v.getView() == view //
                 && isFromValidator(v.getSignature()) //
@@ -693,7 +691,7 @@ public class SemuxBFT implements Consensus {
         TransactionExecutor exec = TransactionExecutor.getInstance();
 
         // validate transactions
-        List<Transaction> list = pendingMgr.getTransactions(Config.BLOCK_MAX_TRANSACTIONS);
+        List<Transaction> list = pendingMgr.getTransactions(Config.MAX_BLOCK_SIZE);
         List<TransactionResult> results = exec.execute(list, as, ds, false);
         for (int i = 0; i < results.size(); i++) {
             if (results.get(i).isSuccess()) {
@@ -799,7 +797,7 @@ public class SemuxBFT implements Consensus {
                             // thread-safe via volatile
                             List<Channel> channels = activeValidators;
                             if (channels != null) {
-                                for (int i = 0; i < Config.BFT_MSG_REDUNDANCY && i < channels.size(); i++) {
+                                for (int i = 0; i < Config.NET_BROADCAST_REDUNDANCY && i < channels.size(); i++) {
                                     if (channels.get(i).isActive()) {
                                         channels.get(i).getMessageQueue().sendMessage(msg);
                                     }

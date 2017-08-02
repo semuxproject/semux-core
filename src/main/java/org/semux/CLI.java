@@ -136,7 +136,7 @@ public class CLI {
             wallet.addAccount(key);
             wallet.flush();
             accounts = wallet.getAccounts();
-            logger.info("A new account has been created: address = {}", key.toAddressString());
+            logger.info("A new account has been created for you: address = {}", key.toAddressString());
         }
 
         if (coinbaseIndex < 0 || coinbaseIndex >= accounts.size()) {
@@ -149,7 +149,7 @@ public class CLI {
         // initialization
         // ====================================
         logger.info("Client: {}", Config.CLIENT_FULL_NAME);
-        logger.info("System booting up: network = {}, coinbase = {}", Config.NETWORK, coinbase);
+        logger.info("System booting up: network = {}, coinbase = {}", Config.NETWORK_ID, coinbase);
 
         Blockchain chain = new BlockchainImpl(new DBFactory() {
             private final KVDB indexDB = new LevelDB(DBName.INDEX);

@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.semux.Config;
 import org.semux.crypto.EdDSA;
 import org.semux.utils.Bytes;
 
@@ -24,7 +25,7 @@ public class TransactionTest {
     private byte[] from = Bytes.random(20);
     private byte[] to = Bytes.random(20);
     private long value = 2;
-    private long fee = 1;
+    private long fee = Config.MIN_TRANSACTION_FEE;
     private long nonce = 1;
     private long timestamp = System.currentTimeMillis();
     private byte[] data = Bytes.of("data");

@@ -72,7 +72,7 @@ public class SemuxFrameHandler extends ByteToMessageCodec<Frame> {
             /*
              * If the peer is not in our network, drop connection immediately.
              */
-            if (network != Config.NETWORK) {
+            if (network != Config.NETWORK_ID) {
                 ctx.close();
                 return;
             }

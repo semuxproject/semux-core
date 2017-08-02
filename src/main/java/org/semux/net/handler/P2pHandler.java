@@ -86,7 +86,7 @@ public class P2pHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        logger.debug("P2P handler active, id = {}", channel.getId());
+        logger.debug("P2P handler active, cid = {}", channel.getId());
 
         msgQueue.activate(ctx);
 
@@ -107,14 +107,14 @@ public class P2pHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        logger.debug("P2P handler inactive, id = {}", channel.getId());
+        logger.debug("P2P handler inactive, cid = {}", channel.getId());
 
         stopTimers();
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.info("Exception in P2P handler, id = {}", channel.getId(), cause);
+        logger.info("Exception in P2P handler, cid = {}", channel.getId(), cause);
 
         ctx.close();
 

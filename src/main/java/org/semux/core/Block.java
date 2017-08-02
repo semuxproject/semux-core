@@ -139,7 +139,7 @@ public class Block implements Comparable<Block> {
                 && timestamp >= 0 //
                 && merkleRoot != null //
                 && data != null && data.length < 1024 //
-                && transactions != null && transactions.size() <= Config.BLOCK_MAX_TRANSACTIONS //
+                && transactions != null && transactions.size() <= Config.MAX_BLOCK_SIZE //
                 && encoded != null //
                 && (number == 0 || signature != null) //
 

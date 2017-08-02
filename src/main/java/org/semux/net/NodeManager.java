@@ -102,8 +102,8 @@ public class NodeManager {
              */
             Set<InetSocketAddress> peers = new HashSet<>();
             peers.addAll(Config.P2P_SEED_NODES);
-            peers.addAll(getSeedNodes(Config.NETWORK));
-            peers.addAll(getPersistedNodes(Config.NETWORK));
+            peers.addAll(getSeedNodes(Config.NETWORK_ID));
+            peers.addAll(getPersistedNodes(Config.NETWORK_ID));
             queue.addAll(peers);
 
             connectFuture = exec.scheduleAtFixedRate(() -> {
@@ -283,8 +283,8 @@ public class NodeManager {
 
     private void doPersist() {
         List<InetSocketAddress> list = new ArrayList<>(channelMgr.getActiveAddresses());
-        setPersistedNodes(Config.NETWORK, list);
+        setPersistedNodes(Config.NETWORK_ID, list);
 
-        addNodes(getSeedNodes(Config.NETWORK));
+        addNodes(getSeedNodes(Config.NETWORK_ID));
     }
 }

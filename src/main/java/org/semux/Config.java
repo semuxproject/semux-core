@@ -39,7 +39,7 @@ public class Config {
 
                 switch (name) {
                 case "network":
-                    NETWORK = Byte.parseByte(props.getProperty(name));
+                    NETWORK_ID = Byte.parseByte(props.getProperty(name));
                     break;
 
                 case "p2p.ip":
@@ -102,7 +102,7 @@ public class Config {
     /**
      * Network id [0: main, 1: test, 2: dev].
      */
-    public static byte NETWORK = 2;
+    public static byte NETWORK_ID = 2;
 
     /**
      * Work directory.
@@ -112,7 +112,12 @@ public class Config {
     /**
      * Maximum number of transactions per block.
      */
-    public static int BLOCK_MAX_TRANSACTIONS = 10000;
+    public static int MAX_BLOCK_SIZE = 10000;
+
+    /**
+     * Minimum transaction fee.
+     */
+    public static long MIN_TRANSACTION_FEE = 5 * Unit.MILLI_SEM;
 
     // =========================
     // Client
@@ -216,6 +221,11 @@ public class Config {
     public static int NET_HANDSHAKE_EXPIRE = 5 * 1000; // 5 seconds
 
     /**
+     * Message broadcast redundancy.
+     */
+    public static int NET_BROADCAST_REDUNDANCY = 8;
+
+    /**
      * Privileged message types
      */
     public static Set<MessageCode> PRIORITIZED_MESSAGES = new HashSet<>();
@@ -272,11 +282,6 @@ public class Config {
      * Maximum number of validators.
      */
     public static int BFT_MAX_VALIDATORS = 100;
-
-    /**
-     * BFT message redundancy.
-     */
-    public static int BFT_MSG_REDUNDANCY = 8;
 
     // =========================
     // Virtual machine

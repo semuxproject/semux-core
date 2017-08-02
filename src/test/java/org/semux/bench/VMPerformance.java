@@ -65,7 +65,5 @@ public class VMPerformance {
         testBench(1);
         testBench(2);
         testBench(4);
-
-        System.out.println("Hello");
     }
 }

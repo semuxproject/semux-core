@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
+import org.semux.Config;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
 import org.semux.utils.Bytes;
@@ -52,7 +53,7 @@ public class CorePerfomanceTest {
             byte[] from = key.toAddress();
             byte[] to = Bytes.random(20);
             long value = 5;
-            long fee = 1;
+            long fee = Config.MIN_TRANSACTION_FEE;
             long nonce = 1;
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.random(16);

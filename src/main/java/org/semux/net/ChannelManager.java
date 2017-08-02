@@ -47,7 +47,7 @@ public class ChannelManager {
      * @return
      */
     public synchronized boolean isBlocked(InetSocketAddress address) {
-        if (Config.NETWORK != 0) {
+        if (Config.NETWORK_ID != 0) {
             return false;
         }
 

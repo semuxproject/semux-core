@@ -12,6 +12,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semux.Config;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
 import org.semux.net.ChannelManager;
@@ -23,6 +24,11 @@ public class PendingManagerTest {
     private static PendingManager pm;
 
     private static TransactionType type = TransactionType.TRANSFER;
+    private static byte[] from = new EdDSA().toAddress();
+    private static byte[] to = new EdDSA().toAddress();
+    private static long value = 100 * Unit.MILLI_SEM;
+    private static long fee = Config.MIN_TRANSACTION_FEE;
+
     private static EdDSA key = new EdDSA();
 
     @BeforeClass
@@ -37,6 +43,7 @@ public class PendingManagerTest {
     @Before
     public void clear() {
         pm.removeTransactions(pm.getTransactions());
+        chain.getAccountState().getAccount(from).setBalance(2 * Unit.SEM);
     }
 
     @Test
@@ -44,7 +51,7 @@ public class PendingManagerTest {
         long now = System.currentTimeMillis();
         assertEquals(0, pm.getTransactions().size());
 
-        Transaction tx = new Transaction(type, new byte[20], new byte[20], 0, 0, 1, now, new byte[32]).sign(key);
+        Transaction tx = new Transaction(type, from, to, value, fee, 1, now, new byte[32]).sign(key);
         pm.addTransaction(tx);
         Thread.sleep(100);
 
@@ -55,9 +62,9 @@ public class PendingManagerTest {
     public void testAddTransaction() throws InterruptedException {
         long now = System.currentTimeMillis();
 
-        Transaction tx = new Transaction(type, new byte[20], new byte[20], 0, 0, 1, now, new byte[32]).sign(key);
+        Transaction tx = new Transaction(type, from, to, value, fee, 1, now, new byte[32]).sign(key);
         pm.addTransaction(tx);
-        Transaction tx2 = new Transaction(type, new byte[20], new byte[20], 0, 0, 1, now, new byte[5 * 1024]).sign(key);
+        Transaction tx2 = new Transaction(type, from, to, value, fee, 1, now, new byte[5 * 1024]).sign(key);
         pm.addTransaction(tx2);
         Thread.sleep(100);
 
@@ -68,7 +75,7 @@ public class PendingManagerTest {
     public void testRemoveTransactions() throws InterruptedException {
         long now = System.currentTimeMillis();
 
-        Transaction tx = new Transaction(type, new byte[20], new byte[20], 0, 0, 1, now + 1, new byte[32]).sign(key);
+        Transaction tx = new Transaction(type, from, to, value, fee, 1, now + 1, new byte[32]).sign(key);
         pm.addTransaction(tx);
         Thread.sleep(100);
 

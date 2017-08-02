@@ -40,12 +40,12 @@ public class NodeManagerTest {
     @Test
     public void testGetPersistedNodes() {
         Set<InetSocketAddress> nodes = new HashSet<>();
-        NodeManager.setPersistedNodes(Config.NETWORK, nodes);
-        assertTrue(NodeManager.getPersistedNodes(Config.NETWORK).isEmpty());
+        NodeManager.setPersistedNodes(Config.NETWORK_ID, nodes);
+        assertTrue(NodeManager.getPersistedNodes(Config.NETWORK_ID).isEmpty());
 
         nodes.add(new InetSocketAddress("127.0.0.1", 1234));
-        NodeManager.setPersistedNodes(Config.NETWORK, nodes);
-        assertFalse(NodeManager.getPersistedNodes(Config.NETWORK).isEmpty());
+        NodeManager.setPersistedNodes(Config.NETWORK_ID, nodes);
+        assertFalse(NodeManager.getPersistedNodes(Config.NETWORK_ID).isEmpty());
     }
 
     @Test

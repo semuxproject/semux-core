@@ -150,7 +150,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         });
 
         if (limit >= 0) {
-            return list.size() > Config.BLOCK_MAX_TRANSACTIONS ? list.subList(0, Config.BLOCK_MAX_TRANSACTIONS) : list;
+            return list.size() > Config.MAX_BLOCK_SIZE ? list.subList(0, Config.MAX_BLOCK_SIZE) : list;
         }
         return list;
     }
@@ -216,7 +216,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                     transactions.put(key, tx);
 
                     List<Channel> channels = channelMgr.getActiveChannels();
-                    for (int i = 0; i < Config.BFT_MSG_REDUNDANCY && i < channels.size(); i++) {
+                    for (int i = 0; i < Config.NET_BROADCAST_REDUNDANCY && i < channels.size(); i++) {
                         if (channels.get(i).isActive()) {
                             TransactionMessage msg = new TransactionMessage(tx);
                             channels.get(i).getMessageQueue().sendMessage(msg);
