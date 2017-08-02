@@ -154,6 +154,16 @@ public class Bytes {
     }
 
     /**
+     * Covert byte array into a byte.
+     * 
+     * @param bytes
+     * @return
+     */
+    public static byte toByte(byte[] bytes) {
+        return bytes[0];
+    }
+
+    /**
      * Covert byte array into a short integer.
      * 
      * @param bytes

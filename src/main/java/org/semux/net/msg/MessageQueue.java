@@ -81,6 +81,8 @@ public class MessageQueue {
                     logger.error("Exception in MessageQueue", t);
                 }
             }, Config.NET_MAX_QUEUE_RATE, Config.NET_MAX_QUEUE_RATE, TimeUnit.MILLISECONDS);
+
+            this.isRunning = true;
         }
     }
 
@@ -99,6 +101,8 @@ public class MessageQueue {
     public void close() {
         if (isRunning) {
             this.timerTask.cancel(false);
+
+            isRunning = false;
         }
     }
 
@@ -124,6 +128,8 @@ public class MessageQueue {
      * @param code
      */
     public void disconnect(ReasonCode code) {
+        logger.debug("Disconnect: reason = {}", code);
+
         ctx.writeAndFlush(new DisconnectMessage(code));
         ctx.close();
     }
