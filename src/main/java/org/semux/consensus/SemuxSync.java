@@ -245,7 +245,7 @@ public class SemuxSync {
                     break;
                 }
                 Long task = toDownload.first();
-                logger.info("Requesting for block #{}", task);
+                logger.debug("Requesting for block #{}", task);
                 c.getMessageQueue().sendMessage(new GetBlockMessage(task));
 
                 toDownload.remove(task);
