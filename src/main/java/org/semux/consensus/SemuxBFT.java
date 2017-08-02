@@ -471,13 +471,14 @@ public class SemuxBFT implements Consensus {
     protected void onNewHeight(long h) {
         logger.trace("On new_height: {}", h);
 
-        if (h - height >= 2) { // 2 blocks difference
+        long minDiff = isValidator() ? 2 : 1;
 
+        if (h - height >= minDiff) {
             if (activeValidators != null) {
                 int count = 0;
                 for (Channel c : activeValidators) {
                     if (c.isActive()) {
-                        count += (c.getRemotePeer().getLatestBlockNumber() + 1 - height >= 2 ? 1 : 0);
+                        count += (c.getRemotePeer().getLatestBlockNumber() + 1 - height >= minDiff) ? 1 : 0;
                     }
                 }
 

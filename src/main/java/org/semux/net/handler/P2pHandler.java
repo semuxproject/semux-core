@@ -239,7 +239,6 @@ public class P2pHandler extends SimpleChannelInboundHandler<Message> {
     private void addConsensusHandler(ChannelHandlerContext ctx) {
         ConsensusHandler ch = new ConsensusHandler(channel);
         ctx.pipeline().addLast("consensusHandler", ch);
-        logger.debug("Consenus handler added: cid = {}", channel.getId());
     }
 
     /**
