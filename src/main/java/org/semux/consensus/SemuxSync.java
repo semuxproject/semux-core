@@ -283,10 +283,10 @@ public class SemuxSync {
             logger.info(nextBlock.toString());
 
             if (validateAndCommit(nextBlock)) {
-                // [5] add block to chain
+                // [7] add block to chain
                 chain.addBlock(nextBlock);
 
-                // [6] flush state changes to disk
+                // [8] flush state changes to disk
                 chain.getAccountState().commit();
                 chain.getDeleteState().commit();
 
@@ -328,7 +328,7 @@ public class SemuxSync {
             TransactionExecutor exec = TransactionExecutor.getInstance();
             List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, false);
             for (int i = 0; i < results.size(); i++) {
-                if (!results.get(i).isSuccess()) {
+                if (!results.get(i).isValid()) {
                     return false;
                 }
             }

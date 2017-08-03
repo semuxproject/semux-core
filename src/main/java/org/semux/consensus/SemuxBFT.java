@@ -215,103 +215,6 @@ public class SemuxBFT implements Consensus {
         return status;
     }
 
-    @Override
-    public boolean onMessage(Channel channel, Message msg) {
-        switch (msg.getCode()) {
-        case GET_BLOCK: {
-            GetBlockMessage m = (GetBlockMessage) msg;
-            Block block = chain.getBlock(m.getNumber());
-            channel.getMessageQueue().sendMessage(new BlockMessage(block));
-            break;
-        }
-        case BLOCK: {
-            sync.onMessage(channel, msg);
-            break;
-        }
-        case GET_BLOCK_HEADER: {
-            GetBlockHeaderMessage m = (GetBlockHeaderMessage) msg;
-            BlockHeader header = chain.getBlockHeader(m.getNumber());
-            channel.getMessageQueue().sendMessage(new BlockHeaderMessage(header));
-            break;
-        }
-        case BLOCK_HEADER: {
-            sync.onMessage(channel, msg);
-            break;
-        }
-
-        case BFT_NEW_HEIGHT: {
-            BFTNewHeightMessage m = (BFTNewHeightMessage) msg;
-
-            // update peer height state
-            channel.getRemotePeer().setLatestBlockNumber(m.getHeight() - 1);
-
-            events.add(new Event(Event.Type.NEW_HEIGHT, m.getHeight()));
-            break;
-        }
-        case BFT_PROPOSAL: {
-            BFTProposalMessage m = (BFTProposalMessage) msg;
-            Proposal proposal = m.getProposal();
-
-            if (proposal.getHeight() == height) {
-                if (proposal.validate()) {
-                    events.add(new Event(Event.Type.PROPOSAL, m.getProposal()));
-                } else {
-                    logger.debug("Invalid proposal from {}", channel.getRemotePeer().getPeerId());
-                    channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
-                }
-            }
-            break;
-        }
-        case BFT_VOTE: {
-            BFTVoteMessage m = (BFTVoteMessage) msg;
-            Vote vote = m.getVote();
-
-            if (vote.getHeight() == height) {
-                if (vote.validate()) {
-                    events.add(new Event(Event.Type.VOTE, vote));
-                } else {
-                    logger.debug("Invalid vote from {}", channel.getRemotePeer().getPeerId());
-                    channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
-                }
-            }
-            break;
-        }
-        default:
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Timeout handler
-     */
-    protected void onTimeout() {
-        switch (state) {
-        case NEW_HEIGHT:
-            enterPropose(false);
-            break;
-        case PROPOSE:
-            enterValidate();
-            break;
-        case VALIDATE:
-            enterPreCommit();
-            break;
-        case PRE_COMMIT:
-            if (precommitVotes.isApproved()) {
-                enterCommit();
-            } else if (precommitVotes.isRejected()) {
-                enterPropose(true);
-            } else {
-                enterPropose(false);
-            }
-            break;
-        case COMMIT:
-            // do nothing
-            break;
-        }
-    }
-
     /**
      * Enter the NEW_HEIGHT state
      */
@@ -378,7 +281,7 @@ public class SemuxBFT implements Consensus {
 
         if (isPrimary()) {
             if (proposal == null) {
-                Block block = createBlock();
+                Block block = proposeBlock();
                 proposal = new Proposal(height, view, block, proof);
                 proposal.sign(coinbase);
             }
@@ -450,7 +353,7 @@ public class SemuxBFT implements Consensus {
 
             // [3] add the block to chain
             logger.info(block.toString());
-            commit(block);
+            commitBlock(block);
 
             // [4] broadcast COMMIT vote
             Vote vote = Vote.newApprove(VoteType.COMMIT, height, view, block.getHash());
@@ -565,6 +468,103 @@ public class SemuxBFT implements Consensus {
         }
     }
 
+    @Override
+    public boolean onMessage(Channel channel, Message msg) {
+        switch (msg.getCode()) {
+        case GET_BLOCK: {
+            GetBlockMessage m = (GetBlockMessage) msg;
+            Block block = chain.getBlock(m.getNumber());
+            channel.getMessageQueue().sendMessage(new BlockMessage(block));
+            break;
+        }
+        case BLOCK: {
+            sync.onMessage(channel, msg);
+            break;
+        }
+        case GET_BLOCK_HEADER: {
+            GetBlockHeaderMessage m = (GetBlockHeaderMessage) msg;
+            BlockHeader header = chain.getBlockHeader(m.getNumber());
+            channel.getMessageQueue().sendMessage(new BlockHeaderMessage(header));
+            break;
+        }
+        case BLOCK_HEADER: {
+            sync.onMessage(channel, msg);
+            break;
+        }
+
+        case BFT_NEW_HEIGHT: {
+            BFTNewHeightMessage m = (BFTNewHeightMessage) msg;
+
+            // update peer height state
+            channel.getRemotePeer().setLatestBlockNumber(m.getHeight() - 1);
+
+            events.add(new Event(Event.Type.NEW_HEIGHT, m.getHeight()));
+            break;
+        }
+        case BFT_PROPOSAL: {
+            BFTProposalMessage m = (BFTProposalMessage) msg;
+            Proposal proposal = m.getProposal();
+
+            if (proposal.getHeight() == height) {
+                if (proposal.validate()) {
+                    events.add(new Event(Event.Type.PROPOSAL, m.getProposal()));
+                } else {
+                    logger.debug("Invalid proposal from {}", channel.getRemotePeer().getPeerId());
+                    channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
+                }
+            }
+            break;
+        }
+        case BFT_VOTE: {
+            BFTVoteMessage m = (BFTVoteMessage) msg;
+            Vote vote = m.getVote();
+
+            if (vote.getHeight() == height) {
+                if (vote.validate()) {
+                    events.add(new Event(Event.Type.VOTE, vote));
+                } else {
+                    logger.debug("Invalid vote from {}", channel.getRemotePeer().getPeerId());
+                    channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
+                }
+            }
+            break;
+        }
+        default:
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Timeout handler
+     */
+    protected void onTimeout() {
+        switch (state) {
+        case NEW_HEIGHT:
+            enterPropose(false);
+            break;
+        case PROPOSE:
+            enterValidate();
+            break;
+        case VALIDATE:
+            enterPreCommit();
+            break;
+        case PRE_COMMIT:
+            if (precommitVotes.isApproved()) {
+                enterCommit();
+            } else if (precommitVotes.isRejected()) {
+                enterPropose(true);
+            } else {
+                enterPropose(false);
+            }
+            break;
+        case COMMIT:
+            // do nothing
+            break;
+        }
+    }
+
     /**
      * Check if this node is a validator.
      * 
@@ -613,64 +613,7 @@ public class SemuxBFT implements Consensus {
     }
 
     /**
-     * Check if a block is valid.
-     * 
-     * NOTOE: this method will NOT check the block data integrity and signature
-     * validity. Use {@link Block#validate()} at that purpose.
-     * 
-     * @param block
-     * @return
-     */
-    protected boolean validateBlock(Block block) {
-        Block latest = chain.getLatestBlock();
-        if (block.getNumber() != latest.getNumber() + 1 || !Arrays.equals(block.getPrevHash(), latest.getHash())) {
-            return false;
-        }
-
-        AccountState as = accountState.track();
-        DelegateState ds = delegateState.track();
-        TransactionExecutor exec = TransactionExecutor.getInstance();
-
-        List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, false);
-        for (int i = 0; i < results.size(); i++) {
-            if (!results.get(i).isSuccess()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Commit a block to the blockchain.
-     * 
-     * @param block
-     */
-    protected void commit(Block block) {
-        AccountState as = chain.getAccountState().track();
-        DelegateState ds = chain.getDeleteState().track();
-
-        // [1] execute all transactions
-        TransactionExecutor exec = TransactionExecutor.getInstance();
-        exec.execute(block.getTransactions(), as, ds, true);
-
-        // [2] apply block reward
-        long reward = Config.getBlockReward(block.getNumber());
-        if (reward > 0) {
-            Account acc = chain.getAccountState().getAccount(block.getCoinbase());
-            acc.setBalance(acc.getBalance() + reward);
-        }
-
-        // [3] add block to chain
-        chain.addBlock(block);
-
-        // [4] flush state changes to disk
-        chain.getAccountState().commit();
-        chain.getDeleteState().commit();
-    }
-
-    /**
-     * Reset votes whenever height or view changes.
+     * Reset all vote sets. This should be invoked whenever height or view changes.
      */
     protected void resetVotes() {
         proposalVotes = new VoteSet(height, view, validators);
@@ -678,12 +621,20 @@ public class SemuxBFT implements Consensus {
         commitVotes = new VoteSet(height, view, validators);
     }
 
+    /**
+     * Clear all timer and internal events.
+     */
     protected void resetEvents() {
         timer.clear();
         events.clear();
     }
 
-    protected Block createBlock() {
+    /**
+     * Create a block for BFT proposal.
+     * 
+     * @return
+     */
+    protected Block proposeBlock() {
         long t1 = System.currentTimeMillis();
         List<Transaction> txs = new ArrayList<>();
 
@@ -695,7 +646,7 @@ public class SemuxBFT implements Consensus {
         List<Transaction> list = pendingMgr.getTransactions(Config.MAX_BLOCK_SIZE);
         List<TransactionResult> results = exec.execute(list, as, ds, false);
         for (int i = 0; i < results.size(); i++) {
-            if (results.get(i).isSuccess()) {
+            if (results.get(i).isValid()) {
                 txs.add(list.get(i));
             } else {
                 pendingMgr.removeTransaction(list.get(i));
@@ -722,6 +673,63 @@ public class SemuxBFT implements Consensus {
         logger.trace("Block creation: # txs = {}, time = {} ms", txs.size(), t2 - t1);
 
         return block;
+    }
+
+    /**
+     * Check if a block is valid.
+     * 
+     * NOTOE: this method will NOT check the block data integrity and signature
+     * validity. Use {@link Block#validate()} at that purpose.
+     * 
+     * @param block
+     * @return
+     */
+    protected boolean validateBlock(Block block) {
+        Block latest = chain.getLatestBlock();
+        if (block.getNumber() != latest.getNumber() + 1 || !Arrays.equals(block.getPrevHash(), latest.getHash())) {
+            return false;
+        }
+
+        AccountState as = accountState.track();
+        DelegateState ds = delegateState.track();
+        TransactionExecutor exec = TransactionExecutor.getInstance();
+
+        List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, false);
+        for (int i = 0; i < results.size(); i++) {
+            if (!results.get(i).isValid()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Commit a block to the blockchain.
+     * 
+     * @param block
+     */
+    protected void commitBlock(Block block) {
+        AccountState as = chain.getAccountState().track();
+        DelegateState ds = chain.getDeleteState().track();
+
+        // [1] execute all transactions
+        TransactionExecutor exec = TransactionExecutor.getInstance();
+        exec.execute(block.getTransactions(), as, ds, true);
+
+        // [2] apply block reward
+        long reward = Config.getBlockReward(block.getNumber());
+        if (reward > 0) {
+            Account acc = chain.getAccountState().getAccount(block.getCoinbase());
+            acc.setBalance(acc.getBalance() + reward);
+        }
+
+        // [3] add block to chain
+        chain.addBlock(block);
+
+        // [4] flush state changes to disk
+        chain.getAccountState().commit();
+        chain.getDeleteState().commit();
     }
 
     public enum State {

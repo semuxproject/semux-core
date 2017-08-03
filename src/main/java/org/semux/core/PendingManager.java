@@ -95,10 +95,11 @@ public class PendingManager implements Runnable, BlockchainListener {
         if (!isRunning) {
             this.chain = chain;
             this.channelMgr = channelMgr;
-            validateFuture = exec.scheduleAtFixedRate(this, 1, 1, TimeUnit.MILLISECONDS);
+
+            this.validateFuture = exec.scheduleAtFixedRate(this, 1, 1, TimeUnit.MILLISECONDS);
 
             logger.debug("Pending manager started");
-            isRunning = true;
+            this.isRunning = true;
         }
     }
 
@@ -133,6 +134,16 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
+     * Add a transaction to the queue, which will be validated by a background
+     * worker.
+     * 
+     * @param tx
+     */
+    public void addTransaction(Transaction tx) {
+        queue.add(tx);
+    }
+
+    /**
      * Get a limited number of transactions in the pool.
      * 
      * @param limit
@@ -150,7 +161,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         });
 
         if (limit >= 0) {
-            return list.size() > Config.MAX_BLOCK_SIZE ? list.subList(0, Config.MAX_BLOCK_SIZE) : list;
+            return list.size() > limit ? list.subList(0, limit) : list;
         }
         return list;
     }
@@ -162,16 +173,6 @@ public class PendingManager implements Runnable, BlockchainListener {
      */
     public List<Transaction> getTransactions() {
         return getTransactions(-1);
-    }
-
-    /**
-     * Add a transaction to the queue, which will be processed by a background
-     * worker.
-     * 
-     * @param tx
-     */
-    public void addTransaction(Transaction tx) {
-        queue.add(tx);
     }
 
     /**
@@ -212,7 +213,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                 AccountState as = chain.getAccountState().track();
                 DelegateState ds = chain.getDeleteState().track();
 
-                if (exec.execute(tx, as, ds, false).isSuccess()) {
+                if (exec.execute(tx, as, ds, false).isValid()) {
                     transactions.put(key, tx);
 
                     List<Channel> channels = channelMgr.getActiveChannels();

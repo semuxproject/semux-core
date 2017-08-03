@@ -91,7 +91,7 @@ public class TransactionExecutor {
                     fromAcc.setBalance(fromAcc.getBalance() - value);
                     toAcc.setBalance(toAcc.getBalance() + value);
 
-                    result.setSuccess(true);
+                    result.setValid(true);
                 }
                 break;
             }
@@ -105,7 +105,7 @@ public class TransactionExecutor {
                     fromAcc.setBalance(fromAcc.getBalance() - value);
                     ds.register(to, data);
 
-                    result.setSuccess(true);
+                    result.setValid(true);
                 }
                 break;
             }
@@ -114,7 +114,7 @@ public class TransactionExecutor {
                     fromAcc.setBalance(fromAcc.getBalance() - value);
                     fromAcc.setLocked(fromAcc.getLocked() + value);
 
-                    result.setSuccess(true);
+                    result.setValid(true);
                 }
                 break;
             }
@@ -123,7 +123,7 @@ public class TransactionExecutor {
                     fromAcc.setBalance(fromAcc.getBalance() + value);
                     fromAcc.setLocked(fromAcc.getLocked() - value);
 
-                    result.setSuccess(true);
+                    result.setValid(true);
                 }
                 break;
             }

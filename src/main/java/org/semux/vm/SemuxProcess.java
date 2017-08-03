@@ -339,10 +339,10 @@ public class SemuxProcess implements Runnable {
                 }
             }
 
-            rt.result().setSuccess(true);
+            rt.result().setValid(true);
         } catch (Throwable e) {
             logger.debug("VM exception", e);
-            rt.result().setSuccess(false);
+            rt.result().setValid(false);
         } finally {
             status = Status.STOPPED;
         }
