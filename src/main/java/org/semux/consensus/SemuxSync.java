@@ -7,12 +7,12 @@
 package org.semux.consensus;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
@@ -47,8 +47,11 @@ public class SemuxSync {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxSync.class);
 
-    private static final int MAX_BATCH_SIZE = 32;
+    private static final int MAX_UNFINISHED_JOBS = 16;
+
     private static final long MAX_DOWNLOAD_TIME = 2 * 60 * 1000;
+
+    private static final int MAX_PENDING_BLOCKS = 256;
 
     private Blockchain chain;
     private ChannelManager channelMgr;
@@ -64,7 +67,6 @@ public class SemuxSync {
     private long target;
     private Object lock = new Object();
 
-    // sync state and notifier
     private boolean isRunning;
     private Object done = new Object();
 
@@ -80,7 +82,7 @@ public class SemuxSync {
     };
 
     /**
-     * Get the singleton instance of sync manager.
+     * Get the singleton instance.
      * 
      * @return
      */
@@ -131,10 +133,10 @@ public class SemuxSync {
             // [2] start tasks
             download = exec.scheduleAtFixedRate(() -> {
                 download();
-            }, 0, 500, TimeUnit.MILLISECONDS);
+            }, 0, 50, TimeUnit.MILLISECONDS);
             process = exec.scheduleAtFixedRate(() -> {
                 process();
-            }, 0, 200, TimeUnit.MILLISECONDS);
+            }, 0, 10, TimeUnit.MILLISECONDS);
 
             isRunning = true;
             logger.info("Sync manager started");
@@ -218,32 +220,30 @@ public class SemuxSync {
         List<Channel> channels = channelMgr.getIdleChannels();
         logger.trace("Idle peers = {}", channels.size());
 
-        if (channels.size() > MAX_BATCH_SIZE) {
-            Collections.shuffle(channels);
-            channels = channels.subList(0, MAX_BATCH_SIZE);
-        }
-
         synchronized (lock) {
-            // quit if too many unfinished jobs
-            if (toComplete.size() > MAX_BATCH_SIZE) {
+            // filter all expired tasks
+            long now = System.currentTimeMillis();
+            Iterator<Entry<Long, Long>> itr = toComplete.entrySet().iterator();
+            while (itr.hasNext()) {
+                Entry<Long, Long> entry = itr.next();
+
+                if (entry.getValue() + MAX_DOWNLOAD_TIME < now) {
+                    itr.remove();
+                    toDownload.add(entry.getKey());
+                }
+            }
+
+            // quit if too many unprocessed blocks
+            if (toProcess.size() > MAX_PENDING_BLOCKS) {
                 return;
             }
 
-            // filter all expired tasks
-            long now = System.currentTimeMillis();
-            for (Long k : toComplete.keySet()) {
-                Long v = toComplete.get(k);
-
-                if (v + MAX_DOWNLOAD_TIME > now) {
-                    toDownload.add(k);
-                }
-            }
-
-            // sending messages to queue
             for (Channel c : channels) {
-                if (toDownload.isEmpty()) {
+                // quit if no more tasks or two many unfinished jobs
+                if (toDownload.isEmpty() || toComplete.size() > MAX_UNFINISHED_JOBS) {
                     break;
                 }
+
                 Long task = toDownload.first();
                 logger.debug("Requesting for block #{}", task);
                 c.getMessageQueue().sendMessage(new GetBlockMessage(task));
@@ -309,56 +309,67 @@ public class SemuxSync {
      * @return
      */
     private boolean validateAndCommit(Block block) {
-        // [0] check block number and prevHash
-        Block latest = chain.getLatestBlock();
-        if (block.getNumber() != latest.getNumber() + 1 || !Arrays.equals(block.getPrevHash(), latest.getHash())) {
+        try {
+            // [2] check block integrity and signature
+            if (!block.validate()) {
+                return false;
+            }
+
+            // [2] check number and prevHash
+            Block latest = chain.getLatestBlock();
+            if (block.getNumber() != latest.getNumber() + 1 || !Arrays.equals(block.getPrevHash(), latest.getHash())) {
+                return false;
+            }
+
+            AccountState as = chain.getAccountState().track();
+            DelegateState ds = chain.getDeleteState().track();
+
+            // [3] check transactions
+            TransactionExecutor exec = TransactionExecutor.getInstance();
+            List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, false);
+            for (int i = 0; i < results.size(); i++) {
+                if (!results.get(i).isSuccess()) {
+                    return false;
+                }
+            }
+
+            // [4] check votes
+            List<Delegate> validators = ds.getValidators();
+            int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
+            if (block.getVotes().size() < twoThirds) {
+                return false;
+            }
+
+            Set<ByteArray> set = new HashSet<>();
+            for (Delegate d : validators) {
+                set.add(ByteArray.of(d.getAddress()));
+            }
+            Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getHash(), block.getNumber(),
+                    block.getView());
+            byte[] encoded = vote.getEncoded();
+            for (Signature sig : block.getVotes()) {
+                ByteArray addr = ByteArray.of(Hash.h160(sig.getPublicKey()));
+
+                if (!set.contains(addr) || !EdDSA.verify(encoded, sig)) {
+                    return false;
+                }
+            }
+
+            // [5] apply block reward
+            long reward = Config.getBlockReward(block.getNumber());
+            if (reward > 0) {
+                Account acc = as.getAccount(block.getCoinbase());
+                acc.setBalance(acc.getBalance() + reward);
+            }
+
+            // [6] commit the updates
+            as.commit();
+            ds.commit();
+        } catch (Exception e) {
+            logger.info("Exception in sync block validation", e);
             return false;
         }
 
-        AccountState as = chain.getAccountState().track();
-        DelegateState ds = chain.getDeleteState().track();
-
-        // [1] execute all transactions
-        TransactionExecutor exec = TransactionExecutor.getInstance();
-        List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, false);
-        for (int i = 0; i < results.size(); i++) {
-            if (!results.get(i).isSuccess()) {
-                return false;
-            }
-        }
-
-        // [2] check validator votes
-        List<Delegate> validators = ds.getValidators();
-        int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
-        if (block.getVotes().size() < twoThirds) {
-            return false;
-        }
-
-        Set<ByteArray> set = new HashSet<>();
-        for (Delegate d : validators) {
-            set.add(ByteArray.of(d.getAddress()));
-        }
-        Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getHash(), block.getNumber(),
-                block.getView());
-        byte[] encoded = vote.getEncoded();
-        for (Signature sig : block.getVotes()) {
-            ByteArray addr = ByteArray.of(Hash.h160(sig.getPublicKey()));
-
-            if (!set.contains(addr) || !EdDSA.verify(encoded, sig)) {
-                return false;
-            }
-        }
-
-        // [3] apply block reward
-        long reward = Config.getBlockReward(block.getNumber());
-        if (reward > 0) {
-            Account acc = as.getAccount(block.getCoinbase());
-            acc.setBalance(acc.getBalance() + reward);
-        }
-
-        // [4] commit the updates
-        as.commit();
-        ds.commit();
         return true;
     }
 }
