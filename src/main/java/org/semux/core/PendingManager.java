@@ -19,13 +19,14 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.collections4.map.LRUMap;
 import org.semux.Config;
 import org.semux.core.state.AccountState;
-import org.semux.core.state.DelegateState;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.p2p.TransactionMessage;
 import org.semux.utils.ByteArray;
+import org.semux.utils.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +52,12 @@ public class PendingManager implements Runnable, BlockchainListener {
         }
     };
 
+    private static int MAX_NONCE_JUMP = 128;
+
     private Blockchain chain;
     private ChannelManager channelMgr;
+
+    private AccountState accountState;
 
     /**
      * Transactions to validate.
@@ -60,9 +65,14 @@ public class PendingManager implements Runnable, BlockchainListener {
     private Queue<Transaction> queue = new LinkedBlockingQueue<>();
 
     /**
-     * Transactions that have been validated.
+     * Main transaction pool.
      */
-    private Map<ByteArray, Transaction> transactions = new ConcurrentHashMap<>();
+    private Map<ByteArray, Transaction> pool = new ConcurrentHashMap<>();
+
+    /**
+     * Transaction cache for nonce dependencies.
+     */
+    private LRUMap<ByteArray, Transaction> cache = new LRUMap<>(4086);
 
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> validateFuture;
@@ -95,6 +105,8 @@ public class PendingManager implements Runnable, BlockchainListener {
         if (!isRunning) {
             this.chain = chain;
             this.channelMgr = channelMgr;
+
+            this.accountState = chain.getAccountState().track();
 
             this.validateFuture = exec.scheduleAtFixedRate(this, 1, 1, TimeUnit.MILLISECONDS);
 
@@ -151,8 +163,8 @@ public class PendingManager implements Runnable, BlockchainListener {
      */
     public List<Transaction> getTransactions(int limit) {
         List<Transaction> list = new ArrayList<>();
-        synchronized (transactions) {
-            list.addAll(transactions.values());
+        synchronized (pool) {
+            list.addAll(pool.values());
         }
 
         list.sort((tx1, tx2) -> {
@@ -182,7 +194,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      */
     public void removeTransactions(List<Transaction> txs) {
         for (Transaction tx : txs) {
-            transactions.remove(ByteArray.of(tx.getHash()));
+            pool.remove(ByteArray.of(tx.getHash()));
         }
     }
 
@@ -192,40 +204,58 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @param tx
      */
     public void removeTransaction(Transaction tx) {
-        transactions.remove(ByteArray.of(tx.getHash()));
+        pool.remove(ByteArray.of(tx.getHash()));
     }
 
     @Override
     public void onBlockAdded(Block block) {
         removeTransactions(block.getTransactions());
+        accountState = chain.getAccountState().track();
     }
 
     @Override
     public void run() {
-        TransactionExecutor exec = TransactionExecutor.getInstance();
-        Transaction tx = null;
-
-        while ((tx = queue.poll()) != null) {
+        for (Transaction tx; (tx = queue.poll()) != null;) {
             ByteArray key = ByteArray.of(tx.getHash());
 
-            if (!transactions.containsKey(key) && chain.getTransaction(tx.getHash()) == null && tx.validate()) {
+            if (!pool.containsKey(key) && chain.getTransaction(tx.getHash()) == null && tx.validate()) {
 
-                AccountState as = chain.getAccountState().track();
-                DelegateState ds = chain.getDeleteState().track();
+                Account acc = accountState.getAccount(tx.getFrom());
 
-                if (exec.execute(tx, as, ds, false).isValid()) {
-                    transactions.put(key, tx);
+                if (tx.getFee() <= acc.getBalance()) {
+                    // next transaction nonce
+                    long nonce = acc.getNonce() + 1;
 
-                    List<Channel> channels = channelMgr.getActiveChannels();
-                    for (int i = 0; i < Config.NET_RELAY_REDUNDANCY && i < channels.size(); i++) {
-                        if (channels.get(i).isActive()) {
-                            TransactionMessage msg = new TransactionMessage(tx);
-                            channels.get(i).getMessageQueue().sendMessage(msg);
-                        }
+                    if (tx.getNonce() == nonce) {
+                        do {
+                            // update state
+                            acc.setNonce(tx.getNonce());
+                            acc.setBalance(acc.getBalance() - tx.getFee());
+
+                            // add to pool
+                            pool.put(key, tx);
+
+                            // relay transaction
+                            List<Channel> channels = channelMgr.getActiveChannels();
+                            for (int j = 0; j < Config.NET_RELAY_REDUNDANCY && j < channels.size(); j++) {
+                                if (channels.get(j).isActive()) {
+                                    TransactionMessage msg = new TransactionMessage(tx);
+                                    channels.get(j).getMessageQueue().sendMessage(msg);
+                                }
+                            }
+
+                            nonce++;
+                            tx = cache.get(ByteArray.of(Bytes.merge(acc.getAddress(), Bytes.of(nonce))));
+                        } while (tx != null);
+
+                        // break the main loop
+                        return;
+                    } else if (tx.getNonce() > nonce && tx.getNonce() < nonce + MAX_NONCE_JUMP) {
+                        // key := <address, nonce>
+                        cache.put(ByteArray.of(Bytes.merge(acc.getAddress(), Bytes.of(tx.getNonce()))), tx);
+                    } else {
+                        // drop transaction
                     }
-
-                    // one new transaction per time, so exit
-                    return;
                 }
             }
         }
