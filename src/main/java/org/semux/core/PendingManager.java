@@ -109,7 +109,13 @@ public class PendingManager implements Runnable, BlockchainListener {
 
             this.accountState = chain.getAccountState().track();
 
-            this.validateFuture = exec.scheduleAtFixedRate(this, 1, 1, TimeUnit.MILLISECONDS);
+            /*
+             * Use a rate smaller than the message queue sending rate to prevent message
+             * queues from hitting the NET_MAX_QUEUE_SIZE, especially when the network load
+             * is heavy.
+             */
+            long rate = Config.NET_MAX_QUEUE_RATE * 1000 * 15 / 10;
+            this.validateFuture = exec.scheduleAtFixedRate(this, rate, rate, TimeUnit.MICROSECONDS);
 
             logger.debug("Pending manager started");
             this.isRunning = true;
@@ -211,7 +217,6 @@ public class PendingManager implements Runnable, BlockchainListener {
     @Override
     public void onBlockAdded(Block block) {
         removeTransactions(block.getTransactions());
-        accountState = chain.getAccountState().track();
     }
 
     @Override
