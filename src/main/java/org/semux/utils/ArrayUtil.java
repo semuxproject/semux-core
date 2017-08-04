@@ -13,7 +13,7 @@ public class ArrayUtil {
      */
     public static int[] permutation(int n) {
         int[] arr = new int[n];
-        for (int i = 0; i < n;) {
+        for (int i = 0; i < n; i++) {
             arr[i] = i;
         }
 
