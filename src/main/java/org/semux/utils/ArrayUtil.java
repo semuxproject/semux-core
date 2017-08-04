@@ -1,0 +1,40 @@
+package org.semux.utils;
+
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
+public class ArrayUtil {
+
+    /**
+     * Generate a random permutation of [0...n)
+     * 
+     * @param n
+     * @return
+     */
+    public static int[] permutation(int n) {
+        int[] arr = new int[n];
+        for (int i = 0; i < n;) {
+            arr[i] = i;
+        }
+
+        shuffle(arr);
+        return arr;
+    }
+
+    /**
+     * Shuffle an integer array.
+     * 
+     * @param arr
+     */
+    public static void shuffle(int[] arr) {
+        Random r = ThreadLocalRandom.current();
+
+        for (int i = arr.length - 1; i > 0; i--) {
+            int index = r.nextInt(i + 1);
+
+            int tmp = arr[index];
+            arr[index] = arr[i];
+            arr[i] = tmp;
+        }
+    }
+}

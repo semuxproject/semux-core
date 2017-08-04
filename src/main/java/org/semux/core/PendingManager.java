@@ -25,6 +25,7 @@ import org.semux.core.state.AccountState;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.p2p.TransactionMessage;
+import org.semux.utils.ArrayUtil;
 import org.semux.utils.ByteArray;
 import org.semux.utils.Bytes;
 import org.slf4j.Logger;
@@ -52,7 +53,8 @@ public class PendingManager implements Runnable, BlockchainListener {
         }
     };
 
-    private static int MAX_NONCE_JUMP = 128;
+    private static int MAX_NONCE_JUMP = 5 * 1024;
+    private static int CACHE_SIZE = 100 * 1024;
 
     private Blockchain chain;
     private ChannelManager channelMgr;
@@ -72,7 +74,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Transaction cache for nonce dependencies.
      */
-    private LRUMap<ByteArray, Transaction> cache = new LRUMap<>(4086);
+    private LRUMap<ByteArray, Transaction> cache = new LRUMap<>(CACHE_SIZE);
 
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> validateFuture;
@@ -237,10 +239,12 @@ public class PendingManager implements Runnable, BlockchainListener {
 
                             // relay transaction
                             List<Channel> channels = channelMgr.getActiveChannels();
-                            for (int j = 0; j < Config.NET_RELAY_REDUNDANCY && j < channels.size(); j++) {
-                                if (channels.get(j).isActive()) {
+                            int[] indexes = ArrayUtil
+                                    .permutation(Math.min(Config.NET_RELAY_REDUNDANCY, channels.size()));
+                            for (int idx : indexes) {
+                                if (channels.get(idx).isActive()) {
                                     TransactionMessage msg = new TransactionMessage(tx);
-                                    channels.get(j).getMessageQueue().sendMessage(msg);
+                                    channels.get(idx).getMessageQueue().sendMessage(msg);
                                 }
                             }
 

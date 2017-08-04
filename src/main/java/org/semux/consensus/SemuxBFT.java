@@ -43,6 +43,7 @@ import org.semux.net.msg.consensus.BlockHeaderMessage;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.GetBlockHeaderMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
+import org.semux.utils.ArrayUtil;
 import org.semux.utils.Bytes;
 import org.semux.utils.MerkleTree;
 import org.slf4j.Logger;
@@ -816,9 +817,11 @@ public class SemuxBFT implements Consensus {
                             // thread-safe via volatile
                             List<Channel> channels = activeValidators;
                             if (channels != null) {
-                                for (int i = 0; i < Config.NET_RELAY_REDUNDANCY && i < channels.size(); i++) {
-                                    if (channels.get(i).isActive()) {
-                                        channels.get(i).getMessageQueue().sendMessage(msg);
+                                int[] indexes = ArrayUtil
+                                        .permutation(Math.min(Config.NET_RELAY_REDUNDANCY, channels.size()));
+                                for (int idx : indexes) {
+                                    if (channels.get(idx).isActive()) {
+                                        channels.get(idx).getMessageQueue().sendMessage(msg);
                                     }
                                 }
                             }
