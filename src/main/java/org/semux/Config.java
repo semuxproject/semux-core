@@ -193,7 +193,7 @@ public class Config {
     /**
      * Maximum message queue sending rate.
      */
-    public static int NET_MAX_QUEUE_RATE = 2; // 2ms
+    public static int NET_MAX_QUEUE_RATE = 1; // 1ms
 
     /**
      * Maximum frame size.

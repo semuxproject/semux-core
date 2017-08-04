@@ -145,6 +145,8 @@ public class MessageQueue {
     public boolean sendMessage(Message msg) {
         if (requests.size() >= maxQueueSize || responses.size() >= maxQueueSize
                 || prioritizedResponses.size() >= maxQueueSize) {
+            logger.debug("Queue sizes: requests = {}, responses = {}, prioritized responses = {}", requests.size(),
+                    responses.size(), prioritizedResponses.size());
             disconnect(ReasonCode.SLOW_PEER);
             return false;
         }
