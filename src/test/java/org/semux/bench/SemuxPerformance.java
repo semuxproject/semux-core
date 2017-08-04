@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import org.semux.Config;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
+import org.semux.core.Unit;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
@@ -34,8 +35,8 @@ public class SemuxPerformance {
         return new JSONObject(sb.toString());
     }
 
-    public static void testTransfer(int n) throws IOException {
-        EdDSA key = wallet.getAccounts().get(0);
+    public static void testTransfer(EdDSA key, int n) throws IOException {
+
         JSONObject obj = request("/get_nonce?address=" + key.toAddressString());
         long startingNonce = obj.getLong("result") + 1;
 
@@ -63,13 +64,18 @@ public class SemuxPerformance {
             return;
         }
 
+        EdDSA key = wallet.getAccounts().get(0);
+        JSONObject obj = request("/get_balance?address=" + key.toAddressString());
+        System.out.println("Address: " + key.toAddressString());
+        System.out.println("Balance: " + obj.getLong("result") / Unit.SEM + " SEM");
+
         while (true) {
             System.out.print("# txs to send: ");
             System.out.flush();
 
             int n = Integer.parseInt(SystemUtil.SCANNER.nextLine());
             if (n > 0) {
-                testTransfer(n);
+                testTransfer(key, n);
             } else {
                 break;
             }
