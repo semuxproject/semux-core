@@ -105,9 +105,15 @@ public class Transaction implements Callable<Boolean> {
     }
 
     /**
-     * Validate transaction format and signature;
+     * <p>
+     * Validate transaction format and signature. </>
      * 
-     * @return
+     * <p>
+     * NOTE: this method does not check transaction validity over the state. Use
+     * {@link TransactionExecutor} for that purpose
+     * </p>
+     * 
+     * @return true if valid, otherwise false
      */
     public boolean validate() {
         return hash != null && hash.length == 32 //

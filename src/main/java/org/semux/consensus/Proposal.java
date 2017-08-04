@@ -92,9 +92,16 @@ public class Proposal {
     }
 
     /**
-     * Validate proposal format and signature; validate block.
+     * <p>
+     * Validate proposal format and signature.
+     * </p>
+     *
+     * <p>
+     * NOTOE: this method will NOT validate the proposed block, nor the transactions
+     * inside the block. Use {@link Block#validate()} for that purpose.
+     * </p>
      * 
-     * @return
+     * @return true if valid, otherwise false
      */
     public boolean validate() {
         return height > 0 //
@@ -102,7 +109,7 @@ public class Proposal {
                 && proof != null //
                 && encoded != null//
                 && signature != null && EdDSA.verify(encoded, signature) //
-                && block != null && block.validate();
+                && block != null;
     }
 
     public long getHeight() {

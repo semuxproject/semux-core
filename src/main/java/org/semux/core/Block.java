@@ -71,6 +71,17 @@ public class Block implements Comparable<Block> {
         }
     };
 
+    /**
+     * Create a new block. Be sure to call {@link #hash()} afterwards.
+     * 
+     * @param number
+     * @param coinbase
+     * @param prevHash
+     * @param timestamp
+     * @param merkleRoot
+     * @param data
+     * @param transactions
+     */
     public Block(long number, byte[] coinbase, byte[] prevHash, long timestamp, byte[] merkleRoot, byte[] data,
             List<Transaction> transactions) {
         this.number = number;
@@ -126,7 +137,7 @@ public class Block implements Comparable<Block> {
     }
 
     /**
-     * Sign this transaction.
+     * Sign this block.
      * 
      * @param key
      * @return
@@ -137,10 +148,11 @@ public class Block implements Comparable<Block> {
     }
 
     /**
-     * Validate block format and signature, along with transaction validation.
-     * 
+     * Validate block format and signature, and also validate the contained
+     * transactions by calling {@link Transaction#validate()}.
+     *
      * @param nThreads
-     * @return
+     * @return true if valid, otherwise false
      */
     public boolean validate(int nThreads) {
         if (hash != null && hash.length == 32 //

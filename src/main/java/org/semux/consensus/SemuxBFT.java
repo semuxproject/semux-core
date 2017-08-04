@@ -688,6 +688,12 @@ public class SemuxBFT implements Consensus {
      * @return
      */
     protected boolean validateBlock(Block block) {
+        // [1] check block integrity and signature
+        if (!block.validate()) {
+            return false;
+        }
+
+        // [2] check number and prevHash
         Block latest = chain.getLatestBlock();
         if (block.getNumber() != latest.getNumber() + 1 || !Arrays.equals(block.getPrevHash(), latest.getHash())) {
             return false;
@@ -697,6 +703,7 @@ public class SemuxBFT implements Consensus {
         DelegateState ds = delegateState.track();
         TransactionExecutor exec = TransactionExecutor.getInstance();
 
+        // [3] check transactions
         List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, false);
         for (int i = 0; i < results.size(); i++) {
             if (!results.get(i).isValid()) {
