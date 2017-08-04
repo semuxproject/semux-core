@@ -57,7 +57,10 @@ public class SemuxPerformance {
     }
 
     public static void main(String[] args) throws IOException {
-        wallet.unlock(SystemUtil.readPassword());
+        if (!wallet.unlock(SystemUtil.readPassword())) {
+            logger.error("Failed to unlock your wallet");
+            return;
+        }
 
         if (wallet.getAccounts().isEmpty()) {
             logger.error("No accounts in your wallet");
@@ -73,7 +76,7 @@ public class SemuxPerformance {
             System.out.print("# txs to send: ");
             System.out.flush();
 
-            int n = Integer.parseInt(SystemUtil.SCANNER.nextLine());
+            int n = Integer.parseInt(SystemUtil.SCANNER.nextLine().replaceAll("[^\\d]", ""));
             if (n > 0) {
                 testTransfer(key, n);
             } else {

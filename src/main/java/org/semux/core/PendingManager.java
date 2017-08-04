@@ -53,7 +53,6 @@ public class PendingManager implements Runnable, BlockchainListener {
         }
     };
 
-    private static int MAX_NONCE_JUMP = 5 * 1024;
     private static int CACHE_SIZE = 100 * 1024;
 
     private Blockchain chain;
@@ -254,11 +253,9 @@ public class PendingManager implements Runnable, BlockchainListener {
 
                         // break the main loop
                         return;
-                    } else if (tx.getNonce() > nonce && tx.getNonce() < nonce + MAX_NONCE_JUMP) {
+                    } else {
                         // key := <address, nonce>
                         cache.put(ByteArray.of(Bytes.merge(acc.getAddress(), Bytes.of(tx.getNonce()))), tx);
-                    } else {
-                        // drop transaction
                     }
                 }
             }
