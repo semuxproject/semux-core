@@ -223,7 +223,7 @@ public class Config {
     /**
      * Message broadcast redundancy.
      */
-    public static int NET_BROADCAST_REDUNDANCY = 8;
+    public static int NET_RELAY_REDUNDANCY = 8;
 
     /**
      * Privileged message types

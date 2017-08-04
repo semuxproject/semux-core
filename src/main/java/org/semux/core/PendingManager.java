@@ -217,7 +217,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                     transactions.put(key, tx);
 
                     List<Channel> channels = channelMgr.getActiveChannels();
-                    for (int i = 0; i < Config.NET_BROADCAST_REDUNDANCY && i < channels.size(); i++) {
+                    for (int i = 0; i < Config.NET_RELAY_REDUNDANCY && i < channels.size(); i++) {
                         if (channels.get(i).isActive()) {
                             TransactionMessage msg = new TransactionMessage(tx);
                             channels.get(i).getMessageQueue().sendMessage(msg);

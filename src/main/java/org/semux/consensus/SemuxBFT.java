@@ -816,7 +816,7 @@ public class SemuxBFT implements Consensus {
                             // thread-safe via volatile
                             List<Channel> channels = activeValidators;
                             if (channels != null) {
-                                for (int i = 0; i < Config.NET_BROADCAST_REDUNDANCY && i < channels.size(); i++) {
+                                for (int i = 0; i < Config.NET_RELAY_REDUNDANCY && i < channels.size(); i++) {
                                     if (channels.get(i).isActive()) {
                                         channels.get(i).getMessageQueue().sendMessage(msg);
                                     }
