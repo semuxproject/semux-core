@@ -188,7 +188,7 @@ public class Config {
     /**
      * Maximum message queue size.
      */
-    public static int NET_MAX_QUEUE_SIZE = 10 * 1024;
+    public static int NET_MAX_QUEUE_SIZE = 4096;
 
     /**
      * Maximum message queue sending rate.

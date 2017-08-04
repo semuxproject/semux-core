@@ -649,6 +649,7 @@ public class SemuxBFT implements Consensus {
             if (results.get(i).isValid()) {
                 txs.add(list.get(i));
             } else {
+                logger.warn("Invalid transaction bypassed the pending manager, tx = {}", list.get(i));
                 pendingMgr.removeTransaction(list.get(i));
             }
         }
@@ -670,7 +671,7 @@ public class SemuxBFT implements Consensus {
         block.sign(coinbase);
 
         long t2 = System.currentTimeMillis();
-        logger.trace("Block creation: # txs = {}, time = {} ms", txs.size(), t2 - t1);
+        logger.debug("Block creation: # txs = {}, time = {} ms", txs.size(), t2 - t1);
 
         return block;
     }
@@ -715,10 +716,19 @@ public class SemuxBFT implements Consensus {
 
         // [1] execute all transactions
         TransactionExecutor exec = TransactionExecutor.getInstance();
-        exec.execute(block.getTransactions(), as, ds, true);
+        List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, true);
+        for (int i = 0; i < results.size(); i++) {
+            if (!results.get(i).isValid()) {
+                logger.warn("Invalid transaction bypassed the consensus, tx = {}", block.getTransactions().get(i));
+                return;
+            }
+        }
 
-        // [2] apply block reward
+        // [2] apply block reward and tx fees
         long reward = Config.getBlockReward(block.getNumber());
+        for (Transaction tx : block.getTransactions()) {
+            reward += tx.getFee();
+        }
         if (reward > 0) {
             Account acc = chain.getAccountState().getAccount(block.getCoinbase());
             acc.setBalance(acc.getBalance() + reward);
@@ -727,7 +737,7 @@ public class SemuxBFT implements Consensus {
         // [3] add block to chain
         chain.addBlock(block);
 
-        // [4] flush state changes to disk
+        // [4] flush state updates to disk
         chain.getAccountState().commit();
         chain.getDeleteState().commit();
     }

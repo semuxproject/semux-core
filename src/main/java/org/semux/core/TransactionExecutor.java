@@ -46,7 +46,7 @@ public class TransactionExecutor {
     /**
      * Execute a list of transactions.
      * 
-     * NOTE: Assuming transaction format and signature are valid.
+     * NOTE: transaction format and signature are assumed to be valid.
      * 
      * @param as
      *            account state
@@ -76,22 +76,27 @@ public class TransactionExecutor {
             byte[] data = tx.getData();
 
             // check nonce and balance
-            if (nonce <= fromAcc.getNonce() || fee > fromAcc.getBalance()) {
+            if (nonce != fromAcc.getNonce() + 1 || fee > fromAcc.getBalance()) {
                 continue;
             } else {
+                // increase nonce
+                fromAcc.setNonce(nonce);
+
                 // charge transaction fee
                 fromAcc.setBalance(fromAcc.getBalance() - fee);
+
+                // set transaction to be valid
+                result.setValid(true);
             }
 
             switch (tx.getType()) {
             case TRANSFER: {
                 if (value <= fromAcc.getBalance()) {
-                    fromAcc.setNonce(nonce);
-
+                    // transfer balance
                     fromAcc.setBalance(fromAcc.getBalance() - value);
                     toAcc.setBalance(toAcc.getBalance() + value);
 
-                    result.setValid(true);
+                    result.setCode(0);
                 }
                 break;
             }
@@ -100,30 +105,31 @@ public class TransactionExecutor {
                         && value == Config.BFT_REGISTRATION_FEE //
                         && value <= fromAcc.getBalance() //
                         && data.length <= 16 && Bytes.toString(data).matches("[_a-z]{4,16}")) {
-                    fromAcc.setNonce(nonce);
-
+                    // register delegate
                     fromAcc.setBalance(fromAcc.getBalance() - value);
                     ds.register(to, data);
 
-                    result.setValid(true);
+                    result.setCode(0);
                 }
                 break;
             }
             case VOTE: {
                 if (value <= fromAcc.getBalance() && ds.vote(from, to, value)) {
+                    // lock balance
                     fromAcc.setBalance(fromAcc.getBalance() - value);
                     fromAcc.setLocked(fromAcc.getLocked() + value);
 
-                    result.setValid(true);
+                    result.setCode(0);
                 }
                 break;
             }
             case UNVOTE: {
                 if (value <= fromAcc.getLocked() && ds.unvote(from, to, value)) {
+                    // unlock balance
                     fromAcc.setBalance(fromAcc.getBalance() + value);
                     fromAcc.setLocked(fromAcc.getLocked() - value);
 
-                    result.setValid(true);
+                    result.setCode(0);
                 }
                 break;
             }
@@ -143,7 +149,7 @@ public class TransactionExecutor {
     /**
      * Execute one transaction.
      * 
-     * NOTE: Assuming transaction format and signature are valid.
+     * NOTE: transaction format and signature are assumed to be valid.
      * 
      * @param as
      *            account state

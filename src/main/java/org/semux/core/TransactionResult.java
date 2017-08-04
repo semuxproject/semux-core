@@ -22,7 +22,7 @@ public class TransactionResult {
     /**
      * Error indicator.
      */
-    protected int error;
+    protected int code;
 
     /**
      * Transaction output/return.
@@ -38,12 +38,12 @@ public class TransactionResult {
      * Create a default transaction result:
      * 
      * <pre>
-     * [valid = false, error = 0, output = empty, logs = empty]
+     * [valid = false, code = 1, output = empty, logs = empty]
      * </pre>
      */
     public TransactionResult() {
         this.valid = false;
-        this.error = 0;
+        this.code = 1;
         this.output = Bytes.EMPY_BYTES;
         this.logs = new ArrayList<>();
     }
@@ -56,12 +56,12 @@ public class TransactionResult {
         this.valid = valid;
     }
 
-    public int getError() {
-        return error;
+    public int getCode() {
+        return code;
     }
 
-    public void setError(int error) {
-        this.error = error;
+    public void setCode(int code) {
+        this.code = code;
     }
 
     public byte[] getOutput() {
@@ -86,7 +86,7 @@ public class TransactionResult {
 
     @Override
     public String toString() {
-        return "TransactionResult [valid=" + valid + ", error=" + error + ", output=" + Arrays.toString(output)
+        return "TransactionResult [valid=" + valid + ", error=" + code + ", output=" + Arrays.toString(output)
                 + ", logs=" + logs + "]";
     }
 }

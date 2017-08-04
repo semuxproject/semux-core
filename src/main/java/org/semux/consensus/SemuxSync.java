@@ -201,6 +201,7 @@ public class SemuxSync {
             Block block = blockMsg.getBlock();
             if (block != null) {
                 synchronized (lock) {
+                    toDownload.remove(block.getNumber());
                     toComplete.remove(block.getNumber());
                     toProcess.add(block);
                 }
@@ -260,7 +261,7 @@ public class SemuxSync {
             stop();
         }
 
-        Block nextBlock = null;
+        Block block = null;
         synchronized (lock) {
             Iterator<Block> iter = toProcess.iterator();
             while (iter.hasNext()) {
@@ -270,7 +271,7 @@ public class SemuxSync {
                     iter.remove();
                 } else if (b.getNumber() == latest + 1) {
                     iter.remove();
-                    nextBlock = b;
+                    block = b;
                     break;
                 } else {
                     toProcess.add(b);
@@ -279,24 +280,24 @@ public class SemuxSync {
             }
         }
 
-        if (nextBlock != null) {
-            logger.info(nextBlock.toString());
+        if (block != null) {
+            logger.info(block.toString());
 
-            if (validateAndCommit(nextBlock)) {
+            if (validateAndCommit(block)) {
                 // [7] add block to chain
-                chain.addBlock(nextBlock);
+                chain.addBlock(block);
 
                 // [8] flush state changes to disk
                 chain.getAccountState().commit();
                 chain.getDeleteState().commit();
 
                 synchronized (lock) {
-                    toDownload.remove(nextBlock.getNumber());
-                    toComplete.remove(nextBlock.getNumber());
+                    toDownload.remove(block.getNumber());
+                    toComplete.remove(block.getNumber());
                 }
             } else {
                 synchronized (lock) {
-                    toDownload.add(nextBlock.getNumber());
+                    toDownload.add(block.getNumber());
                 }
             }
         }
@@ -310,7 +311,7 @@ public class SemuxSync {
      */
     private boolean validateAndCommit(Block block) {
         try {
-            // [2] check block integrity and signature
+            // [1] check block integrity and signature
             if (!block.validate()) {
                 return false;
             }
