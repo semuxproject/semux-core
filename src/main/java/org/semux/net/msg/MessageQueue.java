@@ -71,7 +71,7 @@ public class MessageQueue {
      * 
      * @param ctx
      */
-    public void activate(ChannelHandlerContext ctx) {
+    public synchronized void activate(ChannelHandlerContext ctx) {
         if (!isRunning) {
             this.ctx = ctx;
             this.timerTask = timer.scheduleAtFixedRate(() -> {
@@ -87,22 +87,13 @@ public class MessageQueue {
     }
 
     /**
-     * Check if this message queue is running.
-     * 
-     * @return
-     */
-    public boolean isRunning() {
-        return isRunning;
-    }
-
-    /**
      * close this message queue.
      */
-    public void close() {
+    public synchronized void close() {
         if (isRunning) {
             this.timerTask.cancel(false);
 
-            isRunning = false;
+            this.isRunning = false;
         }
     }
 
@@ -130,8 +121,12 @@ public class MessageQueue {
     public void disconnect(ReasonCode code) {
         logger.debug("Disconnect: reason = {}", code);
 
+        // close message queue
+        close();
+
+        // close channel
         ctx.writeAndFlush(new DisconnectMessage(code));
-        ctx.close();
+        ctx.channel().close();
     }
 
     /**
@@ -143,6 +138,10 @@ public class MessageQueue {
      *         false
      */
     public boolean sendMessage(Message msg) {
+        if (!isRunning) {
+            return false;
+        }
+
         if (requests.size() >= maxQueueSize || responses.size() >= maxQueueSize
                 || prioritizedResponses.size() >= maxQueueSize) {
             logger.debug("Queue sizes: requests = {}, responses = {}, prioritized responses = {}", requests.size(),
