@@ -7,10 +7,10 @@
 package org.semux.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -21,13 +21,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.map.LRUMap;
 import org.semux.Config;
-import org.semux.core.state.AccountState;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.p2p.TransactionMessage;
 import org.semux.utils.ArrayUtil;
 import org.semux.utils.ByteArray;
-import org.semux.utils.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +41,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     private static final Logger logger = LoggerFactory.getLogger(PendingManager.class);
 
-    private static ThreadFactory factory = new ThreadFactory() {
+    private static final ThreadFactory factory = new ThreadFactory() {
 
         private AtomicInteger cnt = new AtomicInteger(0);
 
@@ -53,27 +51,20 @@ public class PendingManager implements Runnable, BlockchainListener {
         }
     };
 
-    private static int CACHE_SIZE = 100 * 1024;
+    private static final int CACHE_SIZE = 100 * 1024;
 
     private Blockchain chain;
     private ChannelManager channelMgr;
 
-    private AccountState accountState;
-
     /**
-     * Transactions to validate.
+     * Transaction queue.
      */
     private Queue<Transaction> queue = new LinkedBlockingQueue<>();
 
     /**
-     * Main transaction pool.
+     * Transaction pool.
      */
-    private Map<ByteArray, Transaction> pool = new ConcurrentHashMap<>();
-
-    /**
-     * Transaction cache for nonce dependencies.
-     */
-    private LRUMap<ByteArray, Transaction> cache = new LRUMap<>(CACHE_SIZE);
+    private Map<ByteArray, Transaction> pool = Collections.synchronizedMap(new LRUMap<>(CACHE_SIZE));
 
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> validateFuture;
@@ -107,15 +98,13 @@ public class PendingManager implements Runnable, BlockchainListener {
             this.chain = chain;
             this.channelMgr = channelMgr;
 
-            this.accountState = chain.getAccountState().track();
-
             /*
              * Use a rate smaller than the message queue sending rate to prevent message
              * queues from hitting the NET_MAX_QUEUE_SIZE, especially when the network load
              * is heavy.
              */
-            long rate = Config.NET_MAX_QUEUE_RATE * 1000 * 15 / 10;
-            this.validateFuture = exec.scheduleAtFixedRate(this, rate, rate, TimeUnit.MICROSECONDS);
+            long rate = Config.NET_MAX_QUEUE_RATE * 2;
+            this.validateFuture = exec.scheduleAtFixedRate(this, 0, rate, TimeUnit.MILLISECONDS);
 
             logger.debug("Pending manager started");
             this.isRunning = true;
@@ -225,42 +214,16 @@ public class PendingManager implements Runnable, BlockchainListener {
             ByteArray key = ByteArray.of(tx.getHash());
 
             if (!pool.containsKey(key) && chain.getTransaction(tx.getHash()) == null && tx.validate()) {
+                // add transaction to pool
+                pool.put(key, tx);
 
-                Account acc = accountState.getAccount(tx.getFrom());
-
-                if (tx.getFee() <= acc.getBalance()) {
-                    // next transaction nonce
-                    long nonce = acc.getNonce() + 1;
-
-                    if (tx.getNonce() == nonce) {
-                        do {
-                            // update state
-                            acc.setNonce(tx.getNonce());
-                            acc.setBalance(acc.getBalance() - tx.getFee());
-
-                            // add to pool
-                            pool.put(key, tx);
-
-                            // relay transaction
-                            List<Channel> channels = channelMgr.getActiveChannels();
-                            int[] indexes = ArrayUtil
-                                    .permutation(Math.min(Config.NET_RELAY_REDUNDANCY, channels.size()));
-                            for (int idx : indexes) {
-                                if (channels.get(idx).isActive()) {
-                                    TransactionMessage msg = new TransactionMessage(tx);
-                                    channels.get(idx).getMessageQueue().sendMessage(msg);
-                                }
-                            }
-
-                            nonce++;
-                            tx = cache.get(ByteArray.of(Bytes.merge(acc.getAddress(), Bytes.of(nonce))));
-                        } while (tx != null);
-
-                        // break the main loop
-                        return;
-                    } else {
-                        // key := <address, nonce>
-                        cache.put(ByteArray.of(Bytes.merge(acc.getAddress(), Bytes.of(tx.getNonce()))), tx);
+                // relay transaction
+                List<Channel> channels = channelMgr.getActiveChannels();
+                int[] indexes = ArrayUtil.permutation(Math.min(Config.NET_RELAY_REDUNDANCY, channels.size()));
+                for (int idx : indexes) {
+                    if (channels.get(idx).isActive()) {
+                        TransactionMessage msg = new TransactionMessage(tx);
+                        channels.get(idx).getMessageQueue().sendMessage(msg);
                     }
                 }
             }

@@ -649,10 +649,6 @@ public class SemuxBFT implements Consensus {
         for (int i = 0; i < results.size(); i++) {
             if (results.get(i).isValid()) {
                 txs.add(list.get(i));
-            } else {
-                logger.warn("Invalid transaction bypassed the pending manager, tx = {}",
-                        Hex.encode(list.get(i).getHash()));
-                pendingMgr.removeTransaction(list.get(i));
             }
         }
 
@@ -728,8 +724,8 @@ public class SemuxBFT implements Consensus {
         List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, true);
         for (int i = 0; i < results.size(); i++) {
             if (!results.get(i).isValid()) {
-                logger.warn("Invalid transaction bypassed the consensus, tx = {}",
-                        Hex.encode(block.getTransactions().get(i).getHash()));
+                byte[] hash = block.getTransactions().get(i).getHash();
+                logger.warn("Invalid transaction bypassed the consensus, tx = {}", Hex.encode(hash));
                 return;
             }
         }
