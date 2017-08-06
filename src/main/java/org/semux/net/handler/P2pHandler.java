@@ -116,9 +116,11 @@ public class P2pHandler extends SimpleChannelInboundHandler<Message> {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.info("Exception in P2P handler, cid = {}", channel.getId(), cause);
 
-        ctx.close();
-
         stopTimers();
+
+        if (ctx.channel().isOpen()) {
+            ctx.channel().close();
+        }
     }
 
     @Override

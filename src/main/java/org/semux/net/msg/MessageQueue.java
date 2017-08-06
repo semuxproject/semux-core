@@ -125,8 +125,10 @@ public class MessageQueue {
         close();
 
         // close channel
-        ctx.writeAndFlush(new DisconnectMessage(code));
-        ctx.channel().close();
+        if (ctx.channel().isOpen()) {
+            ctx.writeAndFlush(new DisconnectMessage(code));
+            ctx.channel().close();
+        }
     }
 
     /**
@@ -144,8 +146,6 @@ public class MessageQueue {
 
         if (requests.size() >= maxQueueSize || responses.size() >= maxQueueSize
                 || prioritizedResponses.size() >= maxQueueSize) {
-            logger.debug("Queue sizes: requests = {}, responses = {}, prioritized responses = {}", requests.size(),
-                    responses.size(), prioritizedResponses.size());
             disconnect(ReasonCode.SLOW_PEER);
             return false;
         }

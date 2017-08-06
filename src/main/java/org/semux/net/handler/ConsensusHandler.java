@@ -58,7 +58,10 @@ public class ConsensusHandler extends SimpleChannelInboundHandler<Message> {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.info("Exception in consensus handler, cid = {}", channel.getId(), cause);
 
-        ctx.close();
+        // close channel
+        if (ctx.channel().isOpen()) {
+            ctx.channel().close();
+        }
     }
 
     @Override
