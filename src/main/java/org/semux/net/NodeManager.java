@@ -44,6 +44,16 @@ public class NodeManager {
 
     private static final Logger logger = LoggerFactory.getLogger(NodeManager.class);
 
+    private static final ThreadFactory factory = new ThreadFactory() {
+
+        private AtomicInteger cnt = new AtomicInteger(0);
+
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "node-mgr-" + cnt.getAndIncrement());
+        }
+    };
+
     private static String SEED_DNS_HOST = "seed-%d.semux.org";
 
     private static String PEERS_DIR = "p2p";
@@ -65,16 +75,6 @@ public class NodeManager {
     private ScheduledFuture<?> persistFuture;
 
     private boolean isRunning;
-
-    private static ThreadFactory factory = new ThreadFactory() {
-
-        private AtomicInteger cnt = new AtomicInteger(0);
-
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(r, "node-mgr-" + cnt.getAndIncrement());
-        }
-    };
 
     /**
      * Create a node manager instance.

@@ -6,6 +6,9 @@
  */
 package org.semux.api;
 
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +33,15 @@ public class SemuxAPI {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxAPI.class);
 
+    private static final ThreadFactory factory = new ThreadFactory() {
+        AtomicInteger cnt = new AtomicInteger(0);
+
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "api-server-" + cnt.getAndIncrement());
+        }
+    };
+
     private APIHandler handler;
 
     private EventLoopGroup bossGroup;
@@ -43,8 +55,8 @@ public class SemuxAPI {
     }
 
     public void start(String ip, int port) {
-        bossGroup = new NioEventLoopGroup(1);
-        workerGroup = new NioEventLoopGroup();
+        bossGroup = new NioEventLoopGroup(1, factory);
+        workerGroup = new NioEventLoopGroup(0, factory);
         try {
             ServerBootstrap b = new ServerBootstrap();
             ChannelInitializer<SocketChannel> initializer = new ChannelInitializer<SocketChannel>() {
@@ -53,7 +65,7 @@ public class SemuxAPI {
                     ChannelPipeline p = ch.pipeline();
                     p.addLast(new HttpRequestDecoder());
                     p.addLast(new HttpResponseEncoder());
-                    p.addLast(new HttpHandler(handler));
+                    p.addLast(new SemuxHttpHandler(handler));
                 }
             };
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)

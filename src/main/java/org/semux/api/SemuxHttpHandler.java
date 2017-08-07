@@ -41,9 +41,9 @@ import io.netty.util.CharsetUtil;
  * HTTP handler for Semux API.
  * 
  */
-public class HttpHandler extends SimpleChannelInboundHandler<Object> {
+public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
 
-    private static final Logger logger = LoggerFactory.getLogger(HttpHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(SemuxHttpHandler.class);
 
     private static final int MAX_BODY_SIZE = 512 * 1024; // 512KB
     private static final Charset CHARSET = CharsetUtil.UTF_8;
@@ -58,7 +58,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
     private String error = null;
 
-    public HttpHandler(APIHandler handler) {
+    public SemuxHttpHandler(APIHandler handler) {
         this.handler = handler;
     }
 

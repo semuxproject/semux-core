@@ -29,7 +29,7 @@ public class PeerServer {
 
     private static final Logger logger = LoggerFactory.getLogger(PeerServer.class);
 
-    private static ThreadFactory factory = new ThreadFactory() {
+    private static final ThreadFactory factory = new ThreadFactory() {
         AtomicInteger cnt = new AtomicInteger(0);
 
         @Override

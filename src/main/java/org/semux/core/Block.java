@@ -32,6 +32,15 @@ import org.semux.utils.SimpleEncoder;
  */
 public class Block implements Comparable<Block> {
 
+    private static final ThreadFactory factory = new ThreadFactory() {
+        AtomicInteger cnt = new AtomicInteger(0);
+
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "block-validator-" + cnt.getAndIncrement());
+        }
+    };
+
     /**
      * The block header.
      */
@@ -61,15 +70,6 @@ public class Block implements Comparable<Block> {
     protected int txIndexOffset = 36 + 4 + 4;
     protected List<Pair<Integer, Integer>> txIndex = new ArrayList<>();
     protected boolean isGensis = false;
-
-    private static ThreadFactory factory = new ThreadFactory() {
-        AtomicInteger cnt = new AtomicInteger(0);
-
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(r, "block-validator-" + cnt.getAndIncrement());
-        }
-    };
 
     /**
      * Create a new block. Be sure to call {@link #hash()} afterwards.

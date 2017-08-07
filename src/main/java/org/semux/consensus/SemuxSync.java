@@ -48,6 +48,15 @@ public class SemuxSync implements Sync {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxSync.class);
 
+    private static final ThreadFactory factory = new ThreadFactory() {
+        private AtomicInteger cnt = new AtomicInteger(0);
+
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "sync-mgr-" + cnt.getAndIncrement());
+        }
+    };
+
     private static final int MAX_UNFINISHED_JOBS = 16;
 
     private static final long MAX_DOWNLOAD_TIME = 2 * 60 * 1000;
@@ -72,15 +81,6 @@ public class SemuxSync implements Sync {
     private Object done = new Object();
 
     private static SemuxSync instance;
-
-    private static ThreadFactory factory = new ThreadFactory() {
-        private AtomicInteger cnt = new AtomicInteger(0);
-
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(r, "sync-mgr-" + cnt.getAndIncrement());
-        }
-    };
 
     /**
      * Get the singleton instance.
