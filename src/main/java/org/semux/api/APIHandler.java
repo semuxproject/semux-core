@@ -50,12 +50,12 @@ public class APIHandler {
      * Create an API handler.
      * 
      * @param chain
-     * @param channelMgr
      * @param pendingMgr
+     * @param channelMgr
      * @param nodeMgr
      * @param client
      */
-    public APIHandler(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, NodeManager nodeMgr,
+    public APIHandler(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr, NodeManager nodeMgr,
             PeerClient client) {
         this.chain = chain;
         this.channelMgr = channelMgr;

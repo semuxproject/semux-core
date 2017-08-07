@@ -11,6 +11,7 @@ import java.util.List;
 import org.semux.api.APIHandler;
 import org.semux.api.SemuxAPI;
 import org.semux.consensus.SemuxBFT;
+import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
@@ -185,24 +186,25 @@ public class CLI {
             logger.info("Latest block number = {}", height);
         }
 
-        // ====================================
-        // start channel/node/pending manager
-        // ====================================
-        ChannelManager channelMgr = new ChannelManager();
-
         PeerClient client = new PeerClient(SystemUtil.getIp(), Config.P2P_LISTEN_PORT, coinbase);
-        NodeManager nodeMgr = new NodeManager(chain, channelMgr, client);
-        nodeMgr.start();
 
-        PendingManager pendingMgr = PendingManager.getInstance();
+        // ====================================
+        // start pending/channel/node manager
+        // ====================================
+        PendingManager pendingMgr = new PendingManager();
+        ChannelManager channelMgr = new ChannelManager();
+        NodeManager nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
+
         pendingMgr.start(chain, channelMgr);
-
         chain.addListener(pendingMgr);
+
+        nodeMgr.start();
 
         // ====================================
         // start p2p module
         // ====================================
-        PeerServer p2p = new PeerServer(new SemuxChannelInitializer(chain, channelMgr, nodeMgr, client, null));
+        SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, nodeMgr, client, null);
+        PeerServer p2p = new PeerServer(ci);
 
         new Thread(() -> {
             p2p.start(Config.P2P_LISTEN_IP, Config.P2P_LISTEN_PORT);
@@ -211,17 +213,20 @@ public class CLI {
         // ====================================
         // start API module
         // ====================================
-        SemuxAPI api = new SemuxAPI(new APIHandler(chain, channelMgr, pendingMgr, nodeMgr, client));
+        SemuxAPI api = new SemuxAPI(new APIHandler(chain, pendingMgr, channelMgr, nodeMgr, client));
 
         new Thread(() -> {
             api.start(Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
         }, "api").start();
 
         // ====================================
-        // start consensus
+        // start sync/consensus
         // ====================================
+        SemuxSync sync = SemuxSync.getInstance();
+        sync.init(chain, channelMgr);
+
         SemuxBFT consensus = SemuxBFT.getInstance();
-        consensus.init(chain, channelMgr, pendingMgr, coinbase);
+        consensus.init(chain, pendingMgr, channelMgr, coinbase);
 
         new Thread(() -> {
             consensus.start();

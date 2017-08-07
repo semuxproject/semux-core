@@ -35,14 +35,11 @@ public class Wallet {
     private static final String WALLET_FILE = "wallet.data";
     private static final int VERSION = 1;
 
-    private static Wallet instance;
-
     private List<EdDSA> accounts = Collections.synchronizedList(new ArrayList<>());
     private boolean isLocked = true;
     private String password = null;
 
-    private Wallet() {
-    }
+    private static Wallet instance;
 
     /**
      * Get the singleton instance of wallet.
@@ -54,6 +51,9 @@ public class Wallet {
             instance = new Wallet();
         }
         return instance;
+    }
+
+    private Wallet() {
     }
 
     /**

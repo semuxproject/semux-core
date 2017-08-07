@@ -27,19 +27,19 @@ import org.slf4j.LoggerFactory;
 public class MessageFactory {
     private static final Logger logger = LoggerFactory.getLogger(MessageFactory.class);
 
-    private static MessageFactory instance;
-
-    private MessageFactory() {
+    /**
+     * Create a Message factory.
+     */
+    public MessageFactory() {
     }
 
-    public synchronized static MessageFactory getInstance() {
-        if (instance == null) {
-            instance = new MessageFactory();
-        }
-
-        return instance;
-    }
-
+    /**
+     * Decode a raw message.
+     * 
+     * @param code
+     * @param encoded
+     * @return
+     */
     public Message create(byte code, byte[] encoded) {
         try {
             MessageCode c = MessageCode.of(code);

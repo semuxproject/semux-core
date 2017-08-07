@@ -71,23 +71,11 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     private boolean isRunning;
 
-    private static PendingManager instance;
-
-    private PendingManager() {
-        this.exec = Executors.newSingleThreadScheduledExecutor(factory);
-    }
-
     /**
-     * Get the singleton instance.
-     * 
-     * @return
+     * Create a pending manager.
      */
-    public static synchronized PendingManager getInstance() {
-        if (instance == null) {
-            instance = new PendingManager();
-        }
-
-        return instance;
+    public PendingManager() {
+        this.exec = Executors.newSingleThreadScheduledExecutor(factory);
     }
 
     /**

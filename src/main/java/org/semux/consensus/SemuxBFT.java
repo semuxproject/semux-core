@@ -97,7 +97,7 @@ public class SemuxBFT implements Consensus {
     }
 
     @Override
-    public void init(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, EdDSA coinbase) {
+    public void init(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr, EdDSA coinbase) {
         this.chain = chain;
         this.channelMgr = channelMgr;
         this.pendingMgr = pendingMgr;
@@ -107,7 +107,6 @@ public class SemuxBFT implements Consensus {
         this.delegateState = chain.getDeleteState();
 
         this.sync = SemuxSync.getInstance();
-        this.sync.init(chain, channelMgr);
         this.timer = new Timer();
         this.broadcaster = new Broadcaster();
         this.events = new LinkedBlockingQueue<>();

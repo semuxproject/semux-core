@@ -29,11 +29,11 @@ public class Genesis extends Block {
     private static final String GENESIS_DIR = "config";
     private static final String GENESIS_FILE = "genesis.json";
 
-    private static Genesis instance = null;
-
     private Map<ByteArray, Long> premine;
     private Map<String, byte[]> delegates;
     private Map<String, Object> config;
+
+    private static Genesis instance = null;
 
     /**
      * Get the singleton instance of the genesis block.
@@ -87,10 +87,9 @@ public class Genesis extends Block {
         return instance;
     }
 
-    public Genesis(long number, byte[] coinbase, byte[] prevHash, long timestamp, byte[] merkleRoot, byte[] data,
+    private Genesis(long number, byte[] coinbase, byte[] prevHash, long timestamp, byte[] merkleRoot, byte[] data,
             List<Transaction> transactions, //
-            Map<ByteArray, Long> alloc, Map<String, byte[]> delegates, Map<String, Object> config //
-    ) {
+            Map<ByteArray, Long> alloc, Map<String, byte[]> delegates, Map<String, Object> config) {
         super(number, coinbase, prevHash, timestamp, merkleRoot, data, transactions);
 
         this.premine = alloc;

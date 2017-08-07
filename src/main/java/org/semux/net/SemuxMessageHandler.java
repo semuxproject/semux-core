@@ -40,7 +40,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
 
     public SemuxMessageHandler(Channel channel) {
         this.channel = channel;
-        this.messageFactory = MessageFactory.getInstance();
+        this.messageFactory = new MessageFactory();
         this.count = new AtomicInteger(0);
     }
 
