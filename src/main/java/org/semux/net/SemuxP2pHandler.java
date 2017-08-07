@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.semux.Config;
+import org.semux.consensus.SemuxBFT;
+import org.semux.consensus.SemuxSync;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -59,13 +61,12 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private ChannelManager channelMgr;
     private NodeManager nodeMgr;
 
-    private Sync sync;
-    private Consensus consenus;
-
     private MessageQueue msgQueue;
     private PeerClient client;
 
-    private boolean handshakeDone;
+    private boolean isHandshakeDone;
+    private Sync sync;
+    private Consensus consenus;
 
     private static ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
         private AtomicInteger cnt = new AtomicInteger(0);
@@ -94,6 +95,10 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
         this.msgQueue = channel.getMessageQueue();
         this.client = channel.getClient();
+
+        this.isHandshakeDone = false;
+        this.sync = SemuxSync.getInstance();
+        this.consenus = SemuxBFT.getInstance();
     }
 
     @Override
@@ -215,7 +220,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
         /* sync */
         case GET_BLOCK: {
-            if (handshakeDone) {
+            if (isHandshakeDone) {
                 GetBlockMessage m = (GetBlockMessage) msg;
                 Block block = chain.getBlock(m.getNumber());
                 channel.getMessageQueue().sendMessage(new BlockMessage(block));
@@ -223,13 +228,13 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             break;
         }
         case BLOCK: {
-            if (handshakeDone) {
+            if (isHandshakeDone) {
                 sync.onMessage(channel, msg);
             }
             break;
         }
         case GET_BLOCK_HEADER: {
-            if (handshakeDone) {
+            if (isHandshakeDone) {
                 GetBlockHeaderMessage m = (GetBlockHeaderMessage) msg;
                 BlockHeader header = chain.getBlockHeader(m.getNumber());
                 channel.getMessageQueue().sendMessage(new BlockHeaderMessage(header));
@@ -237,7 +242,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             break;
         }
         case BLOCK_HEADER: {
-            if (handshakeDone) {
+            if (isHandshakeDone) {
                 sync.onMessage(channel, msg);
             }
             break;
@@ -247,7 +252,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         case BFT_NEW_HEIGHT:
         case BFT_PROPOSAL:
         case BFT_VOTE: {
-            if (handshakeDone) {
+            if (isHandshakeDone) {
                 consenus.onMessage(channel, msg);
             }
             break;
@@ -265,7 +270,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      * 
      */
     private void onHandshakeDone() {
-        if (!handshakeDone) {
+        if (!isHandshakeDone) {
             // start peers exchange
             getNodes = exec.scheduleAtFixedRate(() -> {
                 msgQueue.sendMessage(new GetNodesMessage());
@@ -277,7 +282,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             }, channel.isInbound() ? 2 : 1, 2, TimeUnit.MINUTES);
 
             // set indicator
-            handshakeDone = true;
+            isHandshakeDone = true;
         }
     }
 

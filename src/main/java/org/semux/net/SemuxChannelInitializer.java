@@ -66,9 +66,9 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
     @Override
     public void initChannel(NioSocketChannel ch) throws Exception {
         try {
-            logger.debug("New {} channel: {}", isInbound() ? "inbound" : "outbound", ch);
-
             InetSocketAddress address = isInbound() ? ch.remoteAddress() : remoteAddress;
+            logger.debug("New {} channel: id = {}, address = {}", isInbound() ? "inbound" : "outbound", ch.id(),
+                    address);
 
             if (isInbound() && channelMgr.isBlocked(address)) {
                 // avoid too frequent connection attempts
