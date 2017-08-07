@@ -7,13 +7,11 @@
 package org.semux.net.msg.p2p;
 
 import java.net.InetSocketAddress;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
-import org.semux.utils.SimpleDecoder;
-import org.semux.utils.SimpleEncoder;
+import org.semux.utils.Bytes;
 
 public class GetNodesMessage extends Message {
 
@@ -24,18 +22,10 @@ public class GetNodesMessage extends Message {
      * 
      * @param nodes
      */
-    public GetNodesMessage(Set<InetSocketAddress> nodes) {
+    public GetNodesMessage() {
         super(MessageCode.GET_NODES, NodesMessage.class);
 
-        this.nodes = nodes;
-
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeInt(nodes.size());
-        for (InetSocketAddress addr : nodes) {
-            enc.writeString(addr.getAddress().getHostAddress());
-            enc.writeInt(addr.getPort());
-        }
-        this.encoded = enc.toBytes();
+        this.encoded = Bytes.EMPY_BYTES;
     }
 
     /**
@@ -47,15 +37,6 @@ public class GetNodesMessage extends Message {
         super(MessageCode.GET_NODES, NodesMessage.class);
 
         this.encoded = encoded;
-
-        nodes = new HashSet<>();
-        SimpleDecoder dec = new SimpleDecoder(encoded);
-        int n = dec.readInt();
-        for (int i = 0; i < n; i++) {
-            String host = dec.readString();
-            int port = dec.readInt();
-            nodes.add(new InetSocketAddress(host, port));
-        }
     }
 
     public Set<InetSocketAddress> getNodes() {
@@ -64,6 +45,6 @@ public class GetNodesMessage extends Message {
 
     @Override
     public String toString() {
-        return "GetNodesMessage [# nodes =" + nodes.size() + "]";
+        return "GetNodesMessage";
     }
 }

@@ -187,9 +187,6 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             break;
         }
         case GET_NODES: {
-            GetNodesMessage getNodesMsg = (GetNodesMessage) msg;
-            nodeMgr.addNodes(getNodesMsg.getNodes());
-
             NodesMessage nodesMsg = new NodesMessage(channelMgr.getActiveAddresses());
             msgQueue.sendMessage(nodesMsg);
             break;
