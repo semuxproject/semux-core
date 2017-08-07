@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.semux.Config;
 import org.semux.core.Blockchain;
-import org.semux.net.handler.P2pHandler;
+import org.semux.core.PendingManager;
 import org.semux.net.msg.MessageQueue;
 
 import io.netty.channel.ChannelPipeline;
@@ -29,6 +29,7 @@ public class Channel {
     private boolean isDiscoveryMode;
 
     private Blockchain chain;
+    private PendingManager pendingMgr;
     private ChannelManager channelMgr;
     private NodeManager nodeMgr;
 
@@ -39,19 +40,21 @@ public class Channel {
     private ReadTimeoutHandler timeoutHandler;
     private SemuxFrameHandler frameHandler;
     private SemuxMessageHandler messageHandler;
-    private P2pHandler p2pHandler;
+    private SemuxP2pHandler p2pHandler;
 
     /**
      * Create a new channel instance.
      * 
      * @param chain
+     * @param pendingMgr
      * @param channelMgr
      * @param nodeMgr
      */
-    public Channel(Blockchain chain, ChannelManager channelMgr, NodeManager nodeMgr) {
+    public Channel(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr, NodeManager nodeMgr) {
         this.id = cnt.getAndIncrement();
 
         this.chain = chain;
+        this.pendingMgr = pendingMgr;
         this.channelMgr = channelMgr;
         this.nodeMgr = nodeMgr;
     }
@@ -79,7 +82,7 @@ public class Channel {
         this.timeoutHandler = new ReadTimeoutHandler(Config.NET_TIMEOUT_IDLE, TimeUnit.MILLISECONDS);
         this.frameHandler = new SemuxFrameHandler(this);
         this.messageHandler = new SemuxMessageHandler(this);
-        this.p2pHandler = new P2pHandler(this, client);
+        this.p2pHandler = new SemuxP2pHandler(this, client);
 
         // register channel handlers
         pipe.addLast("readTimeoutHandler", timeoutHandler);
@@ -104,6 +107,15 @@ public class Channel {
      */
     public Blockchain getBlockchain() {
         return chain;
+    }
+
+    /**
+     * Get the pending manager.
+     * 
+     * @return
+     */
+    public PendingManager getPendingManager() {
+        return pendingMgr;
     }
 
     /**

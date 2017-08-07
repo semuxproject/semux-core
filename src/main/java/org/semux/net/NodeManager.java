@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.collections4.map.LRUMap;
 import org.semux.Config;
 import org.semux.core.Blockchain;
+import org.semux.core.PendingManager;
 import org.semux.utils.IOUtil;
 import org.semux.utils.SimpleDecoder;
 import org.semux.utils.SimpleEncoder;
@@ -52,6 +53,7 @@ public class NodeManager {
     private static long RECONNECT_WAIT = 2 * 60 * 1000;
 
     private Blockchain chain;
+    private PendingManager pendingMgr;
     private ChannelManager channelMgr;
     private PeerClient client;
 
@@ -78,11 +80,13 @@ public class NodeManager {
      * Create a node manager instance.
      * 
      * @param chain
+     * @param pendingMgr
      * @param channelMgr
      * @param client
      */
-    public NodeManager(Blockchain chain, ChannelManager channelMgr, PeerClient client) {
+    public NodeManager(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr, PeerClient client) {
         this.chain = chain;
+        this.pendingMgr = pendingMgr;
         this.channelMgr = channelMgr;
         this.client = client;
 
@@ -273,7 +277,8 @@ public class NodeManager {
                     && !activeAddresses.contains(addr) //
                     && (l == null || l + RECONNECT_WAIT < now)) {
 
-                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, this, client, addr);
+                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, this, client,
+                        addr);
                 client.connectAsync(addr, ci);
                 lastConnect.put(addr, now);
                 break;

@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 
 import org.semux.Config;
 import org.semux.core.Blockchain;
+import org.semux.core.PendingManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +26,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
     private static final Logger logger = LoggerFactory.getLogger(SemuxChannelInitializer.class);
 
     private Blockchain chain;
+    private PendingManager pendingMgr;
     private ChannelManager channelMgr;
     private NodeManager nodeMgr;
     private PeerClient client;
@@ -38,6 +40,8 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
      * 
      * @param chain
      *            the blockchain instance
+     * @param pendingMgr
+     *            the pending manager
      * @param channelMgr
      *            the channel manager
      * @param nodeMgr
@@ -47,9 +51,10 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
      * @param remoteAddress
      *            the peer to connect, or null if in server mode
      */
-    public SemuxChannelInitializer(Blockchain chain, ChannelManager channelMgr, NodeManager nodeMgr, PeerClient client,
-            InetSocketAddress remoteAddress) {
+    public SemuxChannelInitializer(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr,
+            NodeManager nodeMgr, PeerClient client, InetSocketAddress remoteAddress) {
         this.chain = chain;
+        this.pendingMgr = pendingMgr;
         this.channelMgr = channelMgr;
         this.nodeMgr = nodeMgr;
         this.client = client;
@@ -70,7 +75,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
                 return;
             }
 
-            Channel channel = new Channel(chain, channelMgr, nodeMgr);
+            Channel channel = new Channel(chain, pendingMgr, channelMgr, nodeMgr);
             channel.init(ch.pipeline(), isInbound(), isDiscoveryMode, client, address);
 
             if (!isDiscoveryMode) {
