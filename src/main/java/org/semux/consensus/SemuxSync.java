@@ -27,6 +27,7 @@ import org.semux.core.Account;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.Delegate;
+import org.semux.core.Sync;
 import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
 import org.semux.core.state.AccountState;
@@ -43,7 +44,7 @@ import org.semux.utils.ByteArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SemuxSync {
+public class SemuxSync implements Sync {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxSync.class);
 
@@ -97,12 +98,7 @@ public class SemuxSync {
     private SemuxSync() {
     }
 
-    /**
-     * Initialize the sync manager.
-     * 
-     * @param chain
-     * @param channelMgr
-     */
+    @Override
     public void init(Blockchain chain, ChannelManager channelMgr) {
         this.chain = chain;
         this.channelMgr = channelMgr;
@@ -110,12 +106,7 @@ public class SemuxSync {
         this.exec = Executors.newSingleThreadScheduledExecutor(factory);
     }
 
-    /**
-     * Start sync manager, and sync blocks in [height, targetHeight).
-     * 
-     * @param targetHeight
-     *            the target height, exclusive
-     */
+    @Override
     public void start(long targetHeight) {
         if (!isRunning()) {
             // [1] set up queues
@@ -159,9 +150,7 @@ public class SemuxSync {
         }
     }
 
-    /**
-     * Stop sync manager.
-     */
+    @Override
     public void stop() {
         if (isRunning()) {
             synchronized (done) {
@@ -170,26 +159,12 @@ public class SemuxSync {
         }
     }
 
-    /**
-     * Check if the sync manager is running.
-     * 
-     * @return
-     */
+    @Override
     public boolean isRunning() {
         return isRunning;
     }
 
-    /**
-     * Callback for receiving messages.
-     * 
-     * @param channel
-     * 
-     * @param channel
-     *            the channel where the message comes from
-     * @param msg
-     *            the message
-     * @return true if the message is processed, otherwise false
-     */
+    @Override
     public boolean onMessage(Channel channel, Message msg) {
         if (!isRunning()) {
             return false;
@@ -206,15 +181,13 @@ public class SemuxSync {
                     toProcess.add(block);
                 }
             }
-            break;
+            return true;
         case BLOCK_HEADER:
             // TODO implement block header
-            break;
+            return true;
         default:
             return false;
         }
-
-        return true;
     }
 
     private void download() {

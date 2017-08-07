@@ -6,36 +6,34 @@
  */
 package org.semux.core;
 
-import org.semux.crypto.EdDSA;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
 
-public interface Consensus {
+public interface Sync {
     /**
-     * Initialize this consensus manager. Be sure to call this method before
-     * starting consensus.
+     * Initialize the sync manager.
      * 
      * @param chain
      * @param channelMgr
-     * @param pendingMgr
-     * @param coinbase
      */
-    void init(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, EdDSA coinbase);
+    public void init(Blockchain chain, ChannelManager channelMgr);
 
     /**
-     * Start consensus.
+     * Start sync manager, and sync blocks in [height, targetHeight).
      * 
+     * @param targetHeight
+     *            the target height, exclusive
      */
-    public void start();
+    public void start(long targetHeight);
 
     /**
-     * Stop consensus.
+     * Stop sync manager.
      */
     public void stop();
 
     /**
-     * check if this consenus is running.
+     * check if this sync manager is running.
      * 
      * @return
      */

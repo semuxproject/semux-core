@@ -18,11 +18,11 @@ import org.semux.consensus.Proposal.Proof;
 import org.semux.consensus.SemuxBFT.Event.Type;
 import org.semux.core.Account;
 import org.semux.core.Block;
-import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.Consensus;
 import org.semux.core.Delegate;
 import org.semux.core.PendingManager;
+import org.semux.core.Sync;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
@@ -39,10 +39,6 @@ import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BFTNewHeightMessage;
 import org.semux.net.msg.consensus.BFTProposalMessage;
 import org.semux.net.msg.consensus.BFTVoteMessage;
-import org.semux.net.msg.consensus.BlockHeaderMessage;
-import org.semux.net.msg.consensus.BlockMessage;
-import org.semux.net.msg.consensus.GetBlockHeaderMessage;
-import org.semux.net.msg.consensus.GetBlockMessage;
 import org.semux.utils.ArrayUtil;
 import org.semux.utils.Bytes;
 import org.semux.utils.MerkleTree;
@@ -55,13 +51,13 @@ public class SemuxBFT implements Consensus {
     private Blockchain chain;
     private ChannelManager channelMgr;
     private PendingManager pendingMgr;
+    private Sync sync;
+
+    private EdDSA coinbase;
 
     private AccountState accountState;
     private DelegateState delegateState;
 
-    private EdDSA coinbase;
-
-    private SemuxSync sync;
     private Timer timer;
     private Broadcaster broadcaster;
     private BlockingQueue<Event> events;
@@ -212,8 +208,8 @@ public class SemuxBFT implements Consensus {
     }
 
     @Override
-    public Status getStatus() {
-        return status;
+    public boolean isRunning() {
+        return status == Status.RUNNING;
     }
 
     /**
@@ -471,28 +467,11 @@ public class SemuxBFT implements Consensus {
 
     @Override
     public boolean onMessage(Channel channel, Message msg) {
-        switch (msg.getCode()) {
-        case GET_BLOCK: {
-            GetBlockMessage m = (GetBlockMessage) msg;
-            Block block = chain.getBlock(m.getNumber());
-            channel.getMessageQueue().sendMessage(new BlockMessage(block));
-            break;
-        }
-        case BLOCK: {
-            sync.onMessage(channel, msg);
-            break;
-        }
-        case GET_BLOCK_HEADER: {
-            GetBlockHeaderMessage m = (GetBlockHeaderMessage) msg;
-            BlockHeader header = chain.getBlockHeader(m.getNumber());
-            channel.getMessageQueue().sendMessage(new BlockHeaderMessage(header));
-            break;
-        }
-        case BLOCK_HEADER: {
-            sync.onMessage(channel, msg);
-            break;
+        if (!isRunning()) {
+            return false;
         }
 
+        switch (msg.getCode()) {
         case BFT_NEW_HEIGHT: {
             BFTNewHeightMessage m = (BFTNewHeightMessage) msg;
 
@@ -500,7 +479,7 @@ public class SemuxBFT implements Consensus {
             channel.getRemotePeer().setLatestBlockNumber(m.getHeight() - 1);
 
             events.add(new Event(Event.Type.NEW_HEIGHT, m.getHeight()));
-            break;
+            return true;
         }
         case BFT_PROPOSAL: {
             BFTProposalMessage m = (BFTProposalMessage) msg;
@@ -514,7 +493,7 @@ public class SemuxBFT implements Consensus {
                     channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
                 }
             }
-            break;
+            return true;
         }
         case BFT_VOTE: {
             BFTVoteMessage m = (BFTVoteMessage) msg;
@@ -528,13 +507,11 @@ public class SemuxBFT implements Consensus {
                     channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
                 }
             }
-            break;
+            return true;
         }
         default:
             return false;
         }
-
-        return true;
     }
 
     /**
@@ -633,7 +610,7 @@ public class SemuxBFT implements Consensus {
     /**
      * Create a block for BFT proposal.
      * 
-     * @return
+     * @return the proposed block
      */
     protected Block proposeBlock() {
         long t1 = System.currentTimeMillis();
@@ -909,5 +886,9 @@ public class SemuxBFT implements Consensus {
         public String toString() {
             return "Event [type=" + type + ", data=" + data + "]";
         }
+    }
+
+    public enum Status {
+        STOPPED, RUNNING, SYNCING
     }
 }
