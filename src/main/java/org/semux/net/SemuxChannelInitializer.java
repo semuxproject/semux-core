@@ -10,9 +10,7 @@ import java.net.InetSocketAddress;
 
 import org.semux.Config;
 import org.semux.core.Blockchain;
-import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
-import org.semux.core.Sync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +30,6 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
     private ChannelManager channelMgr;
     private NodeManager nodeMgr;
 
-    private Sync sync;
-    private Consensus consensus;
-
     private PeerClient client;
     private InetSocketAddress remoteAddress;
 
@@ -52,24 +47,17 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
      *            the channel manager
      * @param nodeMgr
      *            the node manager
-     * @param sync
-     *            the sync manager
-     * @param consensus
-     *            consensus manager
      * @param client
      *            the peer client
      * @param remoteAddress
      *            the peer to connect, or null if in server mode
      */
     public SemuxChannelInitializer(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr,
-            NodeManager nodeMgr, Sync sync, Consensus consensus, PeerClient client, InetSocketAddress remoteAddress) {
+            NodeManager nodeMgr, PeerClient client, InetSocketAddress remoteAddress) {
         this.chain = chain;
         this.pendingMgr = pendingMgr;
         this.channelMgr = channelMgr;
         this.nodeMgr = nodeMgr;
-
-        this.sync = sync;
-        this.consensus = consensus;
 
         this.client = client;
         this.remoteAddress = remoteAddress;
@@ -89,7 +77,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
                 return;
             }
 
-            Channel channel = new Channel(chain, pendingMgr, channelMgr, nodeMgr, sync, consensus);
+            Channel channel = new Channel(chain, pendingMgr, channelMgr, nodeMgr);
             channel.init(ch.pipeline(), isInbound(), isDiscoveryMode, client, address);
 
             if (!isDiscoveryMode) {

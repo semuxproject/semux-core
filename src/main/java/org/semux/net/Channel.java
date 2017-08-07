@@ -12,9 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.semux.Config;
 import org.semux.core.Blockchain;
-import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
-import org.semux.core.Sync;
 import org.semux.net.msg.MessageQueue;
 
 import io.netty.channel.ChannelPipeline;
@@ -35,9 +33,6 @@ public class Channel {
     private ChannelManager channelMgr;
     private NodeManager nodeMgr;
 
-    private Sync sync;
-    private Consensus consensus;
-
     private PeerClient client;
     private InetSocketAddress remoteAddress;
     private Peer remotePeer;
@@ -55,18 +50,13 @@ public class Channel {
      * @param channelMgr
      * @param nodeMgr
      */
-    public Channel(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr, NodeManager nodeMgr,
-            Sync sync, Consensus consensus) {
+    public Channel(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr, NodeManager nodeMgr) {
         this.id = cnt.getAndIncrement();
 
         this.chain = chain;
         this.pendingMgr = pendingMgr;
         this.channelMgr = channelMgr;
         this.nodeMgr = nodeMgr;
-
-        /* only for p2p handler */
-        this.sync = sync;
-        this.consensus = consensus;
     }
 
     /**
@@ -94,7 +84,7 @@ public class Channel {
         this.timeoutHandler = new ReadTimeoutHandler(Config.NET_TIMEOUT_IDLE, TimeUnit.MILLISECONDS);
         this.frameHandler = new SemuxFrameHandler(this);
         this.messageHandler = new SemuxMessageHandler(this);
-        this.p2pHandler = new SemuxP2pHandler(this, sync, consensus);
+        this.p2pHandler = new SemuxP2pHandler(this);
 
         // register channel handlers
         pipe.addLast("readTimeoutHandler", timeoutHandler);
