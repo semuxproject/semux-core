@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.semux.Config;
+import org.semux.core.Block;
+import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
@@ -23,6 +25,10 @@ import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageQueue;
 import org.semux.net.msg.MessageRoundtrip;
 import org.semux.net.msg.ReasonCode;
+import org.semux.net.msg.consensus.BlockHeaderMessage;
+import org.semux.net.msg.consensus.BlockMessage;
+import org.semux.net.msg.consensus.GetBlockHeaderMessage;
+import org.semux.net.msg.consensus.GetBlockMessage;
 import org.semux.net.msg.p2p.GetNodesMessage;
 import org.semux.net.msg.p2p.HelloMessage;
 import org.semux.net.msg.p2p.NodesMessage;
@@ -47,17 +53,17 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private final static short[] SUPPORTED_VERSIONS = { 1 };
 
     private Channel channel;
-    private PeerClient client;
 
     private Blockchain chain;
     private PendingManager pendingMgr;
     private ChannelManager channelMgr;
     private NodeManager nodeMgr;
 
-    private MessageQueue msgQueue;
-
     private Sync sync;
     private Consensus consenus;
+
+    private MessageQueue msgQueue;
+    private PeerClient client;
 
     private boolean handshakeDone;
 
@@ -73,17 +79,26 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private ScheduledFuture<?> getNodes = null;
     private ScheduledFuture<?> pingPong = null;
 
-    public SemuxP2pHandler(Channel channel, PeerClient client) {
+    /**
+     * Create a new P2P handler.
+     * 
+     * @param channel
+     * @param sync
+     * @param consensus
+     */
+    public SemuxP2pHandler(Channel channel, Sync sync, Consensus consensus) {
         this.channel = channel;
-        this.client = client;
 
         this.chain = channel.getBlockchain();
         this.pendingMgr = channel.getPendingManager();
         this.channelMgr = channel.getChannelManager();
         this.nodeMgr = channel.getNodeManager();
 
-        this.msgQueue = channel.getMessageQueue();
+        this.sync = sync;
+        this.consenus = consensus;
 
+        this.msgQueue = channel.getMessageQueue();
+        this.client = channel.getClient();
     }
 
     @Override
@@ -130,6 +145,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         MessageRoundtrip mr = msgQueue.receivedMessage(msg);
 
         switch (msg.getCode()) {
+        /* p2p */
         case DISCONNECT: {
             msgQueue.disconnect();
             break;
@@ -203,24 +219,38 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         }
 
         /* sync */
-        case GET_BLOCK:
-        case BLOCK:
-        case GET_BLOCK_HEADER:
-        case BLOCK_HEADER: {
-            if (handshakeDone) {
-                sync.onMessage(channel, msg);
-            }
+        case GET_BLOCK: {
+            GetBlockMessage m = (GetBlockMessage) msg;
+            Block block = chain.getBlock(m.getNumber());
+            channel.getMessageQueue().sendMessage(new BlockMessage(block));
             break;
         }
+        case BLOCK: {
+            sync.onMessage(channel, msg);
+            break;
+        }
+        case GET_BLOCK_HEADER: {
+            GetBlockHeaderMessage m = (GetBlockHeaderMessage) msg;
+            BlockHeader header = chain.getBlockHeader(m.getNumber());
+            channel.getMessageQueue().sendMessage(new BlockHeaderMessage(header));
+            break;
+        }
+        case BLOCK_HEADER: {
+            sync.onMessage(channel, msg);
+            break;
+        }
+
         /* consensus */
         case BFT_NEW_HEIGHT:
         case BFT_PROPOSAL:
         case BFT_VOTE: {
+            // push message only when handshake has been done
             if (handshakeDone) {
                 consenus.onMessage(channel, msg);
             }
             break;
         }
+
         default: {
             ctx.fireChannelRead(msg);
             break;

@@ -27,7 +27,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.collections4.map.LRUMap;
 import org.semux.Config;
 import org.semux.core.Blockchain;
+import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
+import org.semux.core.Sync;
 import org.semux.utils.IOUtil;
 import org.semux.utils.SimpleDecoder;
 import org.semux.utils.SimpleEncoder;
@@ -55,6 +57,8 @@ public class NodeManager {
     private Blockchain chain;
     private PendingManager pendingMgr;
     private ChannelManager channelMgr;
+    private Sync sync;
+    private Consensus consensus;
     private PeerClient client;
 
     private Queue<InetSocketAddress> queue;
@@ -82,12 +86,17 @@ public class NodeManager {
      * @param chain
      * @param pendingMgr
      * @param channelMgr
+     * @param sync
+     * @param consensus
      * @param client
      */
-    public NodeManager(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr, PeerClient client) {
+    public NodeManager(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr, Sync sync,
+            Consensus consensus, PeerClient client) {
         this.chain = chain;
         this.pendingMgr = pendingMgr;
         this.channelMgr = channelMgr;
+        this.sync = sync;
+        this.consensus = consensus;
         this.client = client;
 
         this.queue = new ConcurrentLinkedQueue<>();
@@ -277,8 +286,8 @@ public class NodeManager {
                     && !activeAddresses.contains(addr) //
                     && (l == null || l + RECONNECT_WAIT < now)) {
 
-                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, this, client,
-                        addr);
+                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, this, sync,
+                        consensus, client, addr);
                 client.connectAsync(addr, ci);
                 lastConnect.put(addr, now);
                 break;
