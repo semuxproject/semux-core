@@ -71,7 +71,7 @@ public class MessageQueue {
      * 
      * @param ctx
      */
-    public synchronized void activate(ChannelHandlerContext ctx) {
+    public void activate(ChannelHandlerContext ctx) {
         if (!isRunning) {
             this.ctx = ctx;
             this.timerTask = timer.scheduleAtFixedRate(() -> {
@@ -89,7 +89,7 @@ public class MessageQueue {
     /**
      * close this message queue.
      */
-    public synchronized void close() {
+    public void close() {
         if (isRunning) {
             this.timerTask.cancel(false);
 
@@ -121,13 +121,17 @@ public class MessageQueue {
     public void disconnect(ReasonCode code) {
         logger.debug("Disconnect: reason = {}", code);
 
-        // close message queue
+        // Turn off message queue, and stop sending/receiving messages imediately.
         close();
 
-        // close channel
-        if (ctx.channel().isOpen()) {
-            ctx.writeAndFlush(new DisconnectMessage(code));
-            ctx.channel().close();
+        // Send reason code and flush all enqueued message (to avoid
+        // ClosedChannelException)
+        try {
+            ctx.writeAndFlush(new DisconnectMessage(code)).await();
+        } catch (InterruptedException e) {
+            // do nothing
+        } finally {
+            ctx.close();
         }
     }
 
