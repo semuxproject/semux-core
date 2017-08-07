@@ -37,11 +37,11 @@ public class APIServerMock {
 
                 chain = new BlockchainImpl(MemoryDB.FACTORY);
                 channelMgr = new ChannelManager();
-                pendingMgr = PendingManager.getInstance();
+                pendingMgr = new PendingManager();
                 client = new PeerClient("127.0.0.1", 5161, coinbase);
-                nodeMgr = new NodeManager(chain, channelMgr, client);
+                nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
 
-                server = new SemuxAPI(new APIHandler(chain, channelMgr, pendingMgr, nodeMgr, client));
+                server = new SemuxAPI(new APIHandler(chain, pendingMgr, channelMgr, nodeMgr, client));
                 server.start(ip, port);
             }, "api").start();
 

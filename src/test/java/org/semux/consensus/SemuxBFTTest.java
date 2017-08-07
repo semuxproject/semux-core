@@ -18,7 +18,6 @@ import org.junit.Test;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
-import org.semux.core.Consensus.Status;
 import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
@@ -36,14 +35,13 @@ public class SemuxBFTTest {
     @BeforeClass
     public static void setup() throws InterruptedException {
         Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
-
+        PendingManager pendingMgr = new PendingManager();
         ChannelManager channelMgr = new ChannelManager();
 
-        PendingManager pendingMgr = PendingManager.getInstance();
         pendingMgr.start(chain, channelMgr);
 
         bft = SemuxBFT.getInstance();
-        bft.init(chain, channelMgr, pendingMgr, new EdDSA());
+        bft.init(chain, pendingMgr, channelMgr, new EdDSA());
 
         new Thread(() -> {
             bft.start();
@@ -54,7 +52,7 @@ public class SemuxBFTTest {
 
     @Test
     public void testStart() {
-        Assert.assertEquals(Status.RUNNING, bft.getStatus());
+        Assert.assertTrue(bft.isRunning());
     }
 
     @Test

@@ -15,6 +15,7 @@ import java.net.InetSocketAddress;
 import org.junit.Test;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.PendingManager;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
 
@@ -35,10 +36,12 @@ public class PeerClientTest {
             PeerClient client = new PeerClient("127.0.0.1", 5162, key2);
 
             Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
+            PendingManager pendingMgr = new PendingManager();
             ChannelManager channelMgr = new ChannelManager();
-            NodeManager nodeMgr = new NodeManager(chain, channelMgr, client);
+            NodeManager nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
 
-            SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, nodeMgr, client, remoteAddress);
+            SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, nodeMgr, client,
+                    remoteAddress);
             client.connectAsync(remoteAddress, ci).sync();
 
             // waiting for the HELLO message to be sent

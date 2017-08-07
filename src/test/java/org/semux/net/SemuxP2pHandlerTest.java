@@ -1,4 +1,4 @@
-package org.semux.net.handler;
+package org.semux.net;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,15 +10,15 @@ import org.junit.Test;
 import org.semux.Config;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.PendingManager;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
-import org.semux.net.PeerServerMock;
 import org.semux.net.SemuxChannelInitializer;
 
-public class P2pHandlerTest {
+public class SemuxP2pHandlerTest {
 
     private static PeerClient remoteClient;
     private static InetSocketAddress remoteAddress;
@@ -46,10 +46,11 @@ public class P2pHandlerTest {
                 PeerClient client = new PeerClient("127.0.0.1", 5162, key);
 
                 Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
+                PendingManager pendingMgr = new PendingManager();
                 ChannelManager channelMgr = new ChannelManager();
-                NodeManager nodeMgr = new NodeManager(chain, channelMgr, client);
+                NodeManager nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
 
-                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, nodeMgr, client,
+                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, nodeMgr, client,
                         remoteAddress);
                 client.connectAsync(remoteAddress, ci).sync();
 

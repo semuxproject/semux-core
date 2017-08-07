@@ -21,7 +21,7 @@ public class PendingManagerTest {
 
     private static Blockchain chain;
     private static ChannelManager channelMgr;
-    private static PendingManager pm;
+    private static PendingManager pendingMgr;
 
     private static TransactionType type = TransactionType.TRANSFER;
     private static byte[] from = new EdDSA().toAddress();
@@ -34,28 +34,28 @@ public class PendingManagerTest {
     @BeforeClass
     public static void setup() {
         chain = new BlockchainImpl(MemoryDB.FACTORY);
+        pendingMgr = new PendingManager();
         channelMgr = new ChannelManager();
 
-        pm = PendingManager.getInstance();
-        pm.start(chain, channelMgr);
+        pendingMgr.start(chain, channelMgr);
     }
 
     @Before
     public void clear() {
-        pm.removeTransactions(pm.getTransactions());
+        pendingMgr.removeTransactions(pendingMgr.getTransactions());
         chain.getAccountState().getAccount(from).setBalance(2 * Unit.SEM);
     }
 
     @Test
     public void testGetTransaction() throws InterruptedException {
         long now = System.currentTimeMillis();
-        assertEquals(0, pm.getTransactions().size());
+        assertEquals(0, pendingMgr.getTransactions().size());
 
         Transaction tx = new Transaction(type, from, to, value, fee, 1, now, new byte[32]).sign(key);
-        pm.addTransaction(tx);
+        pendingMgr.addTransaction(tx);
         Thread.sleep(100);
 
-        assertEquals(1, pm.getTransactions().size());
+        assertEquals(1, pendingMgr.getTransactions().size());
     }
 
     @Test
@@ -63,12 +63,12 @@ public class PendingManagerTest {
         long now = System.currentTimeMillis();
 
         Transaction tx = new Transaction(type, from, to, value, fee, 1, now, new byte[32]).sign(key);
-        pm.addTransaction(tx);
+        pendingMgr.addTransaction(tx);
         Transaction tx2 = new Transaction(type, from, to, value, fee, 1, now, new byte[5 * 1024]).sign(key);
-        pm.addTransaction(tx2);
+        pendingMgr.addTransaction(tx2);
         Thread.sleep(100);
 
-        assertEquals(1, pm.getTransactions().size());
+        assertEquals(1, pendingMgr.getTransactions().size());
     }
 
     @Test
@@ -76,16 +76,16 @@ public class PendingManagerTest {
         long now = System.currentTimeMillis();
 
         Transaction tx = new Transaction(type, from, to, value, fee, 1, now + 1, new byte[32]).sign(key);
-        pm.addTransaction(tx);
+        pendingMgr.addTransaction(tx);
         Thread.sleep(100);
 
-        assertEquals(1, pm.getTransactions().size());
-        pm.removeTransaction(tx);
-        assertEquals(0, pm.getTransactions().size());
+        assertEquals(1, pendingMgr.getTransactions().size());
+        pendingMgr.removeTransaction(tx);
+        assertEquals(0, pendingMgr.getTransactions().size());
     }
 
     @AfterClass
     public static void teardown() {
-        pm.stop();
+        pendingMgr.stop();
     }
 }

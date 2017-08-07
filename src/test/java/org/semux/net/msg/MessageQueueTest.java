@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.semux.Config;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.PendingManager;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
 import org.semux.net.Channel;
@@ -44,10 +45,12 @@ public class MessageQueueTest {
         PeerClient client = new PeerClient("127.0.0.1", 5162, key);
 
         Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
+        PendingManager pendingMgr = new PendingManager();
         ChannelManager channelMgr = new ChannelManager();
-        NodeManager nodeMgr = new NodeManager(chain, channelMgr, client);
+        NodeManager nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
 
-        SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, nodeMgr, client, remoteAddress);
+        SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, nodeMgr, client,
+                remoteAddress);
         client.connectAsync(remoteAddress, ci).sync();
 
         Thread.sleep(1000);

@@ -9,6 +9,7 @@ package org.semux.net;
 import org.junit.Assert;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.PendingManager;
 import org.semux.db.MemoryDB;
 
 public class PeerServerMock {
@@ -23,10 +24,11 @@ public class PeerServerMock {
 
             new Thread(() -> {
                 Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
-
+                PendingManager pendingMgr = new PendingManager();
                 ChannelManager channelMgr = new ChannelManager();
-                NodeManager nodeMgr = new NodeManager(chain, channelMgr, client);
-                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, nodeMgr, client, null);
+                NodeManager nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
+                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, nodeMgr, client,
+                        null);
 
                 ci.setDiscoveryMode(isDiscoveryMode);
 

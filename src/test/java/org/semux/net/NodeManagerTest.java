@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.semux.Config;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.PendingManager;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
 
@@ -61,8 +62,9 @@ public class NodeManagerTest {
             PeerClient client = new PeerClient("127.0.0.1", 5162, new EdDSA());
 
             Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
+            PendingManager pendingMgr = new PendingManager();
             ChannelManager channelMgr = new ChannelManager();
-            NodeManager nodeMgr = new NodeManager(chain, channelMgr, client);
+            NodeManager nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
             nodeMgr.start();
 
             nodeMgr.addNode(new InetSocketAddress(remoteClient.getIp(), remoteClient.getPort()));
