@@ -193,7 +193,7 @@ public class APIHandler {
                     List<EdDSA> accounts = wallet.getAccounts();
                     JSONArray arr = new JSONArray();
                     for (EdDSA acc : accounts) {
-                        arr.put(acc.toAddressString());
+                        arr.put(HEX + acc.toAddressString());
                     }
                     return success(arr);
                 } else {
