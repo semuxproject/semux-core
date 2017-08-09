@@ -623,8 +623,13 @@ public class SemuxBFT implements Consensus {
         List<Transaction> list = pendingMgr.getTransactions(Config.MAX_BLOCK_SIZE);
         List<TransactionResult> results = exec.execute(list, as, ds, false);
         for (int i = 0; i < results.size(); i++) {
+            Transaction tx = list.get(i);
+
             if (results.get(i).isValid()) {
-                txs.add(list.get(i));
+                txs.add(tx);
+            } else {
+                logger.info("Transaction bypassed pending manager, tx = {}", Hex.encode(tx.getHash()));
+                pendingMgr.removeTransaction(tx);
             }
         }
 

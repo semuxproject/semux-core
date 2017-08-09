@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.map.LRUMap;
 import org.semux.Config;
+import org.semux.core.state.AccountState;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.p2p.TransactionMessage;
@@ -55,6 +56,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     private Blockchain chain;
     private ChannelManager channelMgr;
+    private AccountState accountState;
 
     /**
      * Transaction queue.
@@ -85,6 +87,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         if (!isRunning) {
             this.chain = chain;
             this.channelMgr = channelMgr;
+            this.accountState = chain.getAccountState().track();
 
             /*
              * Use a rate smaller than the message queue sending rate to prevent message
@@ -194,6 +197,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     @Override
     public void onBlockAdded(Block block) {
         removeTransactions(block.getTransactions());
+        this.accountState = chain.getAccountState().track();
     }
 
     @Override
@@ -202,17 +206,30 @@ public class PendingManager implements Runnable, BlockchainListener {
             ByteArray key = ByteArray.of(tx.getHash());
 
             if (!pool.containsKey(key) && chain.getTransaction(tx.getHash()) == null && tx.validate()) {
-                // add transaction to pool
-                pool.put(key, tx);
+                Account acc = accountState.getAccount(tx.getFrom());
 
-                // relay transaction
-                List<Channel> channels = channelMgr.getActiveChannels();
-                int[] indexes = ArrayUtil.permutation(Math.min(Config.NET_RELAY_REDUNDANCY, channels.size()));
-                for (int idx : indexes) {
-                    if (channels.get(idx).isActive()) {
-                        TransactionMessage msg = new TransactionMessage(tx);
-                        channels.get(idx).getMessageQueue().sendMessage(msg);
+                /*
+                 * Nonce check may be too strict here.
+                 */
+                if (tx.getValue() <= acc.getBalance() && tx.getNonce() == acc.getNonce() + 1) {
+                    // increase nonce
+                    acc.setNonce(tx.getNonce());
+
+                    // add transaction to pool
+                    pool.put(key, tx);
+
+                    // relay transaction
+                    List<Channel> channels = channelMgr.getActiveChannels();
+                    int[] indexes = ArrayUtil.permutation(Math.min(Config.NET_RELAY_REDUNDANCY, channels.size()));
+                    for (int idx : indexes) {
+                        if (channels.get(idx).isActive()) {
+                            TransactionMessage msg = new TransactionMessage(tx);
+                            channels.get(idx).getMessageQueue().sendMessage(msg);
+                        }
                     }
+
+                    // break after one transaction
+                    return;
                 }
             }
         }
