@@ -7,10 +7,10 @@
 package org.semux.core;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,6 +27,7 @@ import org.semux.net.ChannelManager;
 import org.semux.net.msg.p2p.TransactionMessage;
 import org.semux.utils.ArrayUtil;
 import org.semux.utils.ByteArray;
+import org.semux.utils.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     };
 
     private static final int CACHE_SIZE = 100 * 1024;
+    private static final int MAX_NONCE_JUMP = 1024;
 
     private Blockchain chain;
     private ChannelManager channelMgr;
@@ -66,7 +68,12 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Transaction pool.
      */
-    private Map<ByteArray, Transaction> pool = Collections.synchronizedMap(new LRUMap<>(CACHE_SIZE));
+    private Map<ByteArray, Transaction> pool = new ConcurrentHashMap<>();
+
+    /**
+     * Transaction cache.
+     */
+    private Map<ByteArray, Transaction> cache = new LRUMap<>(CACHE_SIZE);
 
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> validateFuture;
@@ -181,7 +188,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      */
     public void removeTransactions(List<Transaction> txs) {
         for (Transaction tx : txs) {
-            pool.remove(ByteArray.of(tx.getHash()));
+            pool.remove(createKey(tx));
         }
     }
 
@@ -191,7 +198,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @param tx
      */
     public void removeTransaction(Transaction tx) {
-        pool.remove(ByteArray.of(tx.getHash()));
+        pool.remove(createKey(tx));
     }
 
     @Override
@@ -203,20 +210,24 @@ public class PendingManager implements Runnable, BlockchainListener {
     @Override
     public void run() {
         for (Transaction tx; (tx = queue.poll()) != null;) {
-            ByteArray key = ByteArray.of(tx.getHash());
-
-            if (!pool.containsKey(key) && chain.getTransaction(tx.getHash()) == null && tx.validate()) {
+            if (!pool.containsKey(createKey(tx)) // not in pool
+                    && chain.getTransaction(tx.getHash()) == null // not in chain
+                    && tx.validate()) { // valid
                 Account acc = accountState.getAccount(tx.getFrom());
 
-                /*
-                 * Nonce check may be too strict here.
-                 */
-                if (tx.getValue() <= acc.getBalance() && tx.getNonce() == acc.getNonce() + 1) {
+                // check balance
+                if (tx.getValue() > acc.getBalance()) {
+                    continue;
+                }
+
+                // check nonce
+                long nonce = acc.getNonce() + 1;
+                while (tx != null && tx.getNonce() == nonce) {
                     // increase nonce
-                    acc.setNonce(tx.getNonce());
+                    acc.setNonce(nonce);
 
                     // add transaction to pool
-                    pool.put(key, tx);
+                    pool.put(createKey(tx), tx);
 
                     // relay transaction
                     List<Channel> channels = channelMgr.getActiveChannels();
@@ -228,10 +239,26 @@ public class PendingManager implements Runnable, BlockchainListener {
                         }
                     }
 
-                    // break after one transaction
-                    return;
+                    nonce++;
+                    tx = cache.get(createKey(acc.getAddress(), nonce));
                 }
+
+                // add to cache
+                if (tx != null && tx.getNonce() > nonce && tx.getNonce() < nonce + MAX_NONCE_JUMP) {
+                    cache.put(createKey(tx), tx);
+                }
+
+                // break after one transaction
+                return;
             }
         }
+    }
+
+    private ByteArray createKey(Transaction tx) {
+        return ByteArray.of(Bytes.merge(tx.getFrom(), Bytes.of(tx.getNonce())));
+    }
+
+    private ByteArray createKey(byte[] acc, long nonce) {
+        return ByteArray.of(Bytes.merge(acc, Bytes.of(nonce)));
     }
 }

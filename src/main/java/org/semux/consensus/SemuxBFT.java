@@ -628,7 +628,7 @@ public class SemuxBFT implements Consensus {
             if (results.get(i).isValid()) {
                 txs.add(tx);
             } else {
-                logger.info("Transaction bypassed pending manager, tx = {}", Hex.encode(tx.getHash()));
+                logger.trace("Transaction bypassed pending manager, tx = {}", Hex.encode(tx.getHash()));
                 pendingMgr.removeTransaction(tx);
             }
         }
