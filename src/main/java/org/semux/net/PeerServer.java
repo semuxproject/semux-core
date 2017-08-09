@@ -67,7 +67,7 @@ public class PeerServer {
             b.handler(new LoggingHandler());
             b.childHandler(channelHandler);
 
-            logger.info("Starting peer server: [{}:{}]", ip, port);
+            logger.info("Starting peer server: address = {}:{}", ip, port);
             channelFuture = b.bind(ip, port).sync();
             logger.debug("Binding was sucessfully");
 

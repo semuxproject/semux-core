@@ -155,6 +155,14 @@ public class APIHandler {
                     return failure("Invalid parameter: number = " + number + ", hash = " + hash);
                 }
             }
+            case GET_PENDING_TRANSACTIONS: {
+                List<Transaction> txs = pendingMgr.getTransactions();
+                JSONArray arr = new JSONArray();
+                for (Transaction tx : txs) {
+                    arr.put(transactionToJson(tx));
+                }
+                return success(arr);
+            }
             case GET_TRANSACTION: {
                 String hash = params.get("hash");
                 if (hash != null) {

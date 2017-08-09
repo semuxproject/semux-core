@@ -184,6 +184,26 @@ public class APIHandlerTest {
     }
 
     @Test
+    public void testGetPendingTransactions() throws IOException {
+        Transaction tx = createTransaction();
+        Block block = createBlock(api.chain, Collections.singletonList(tx));
+        api.chain.addBlock(block);
+
+        try {
+            String uri = "/get_pending_transactions";
+            JSONObject response = request(uri);
+            assertTrue(response.getBoolean("success"));
+
+            JSONArray arr = response.getJSONArray("result");
+            assertNotNull(arr);
+        } finally {
+            // Reset the API server
+            teardown();
+            setup();
+        }
+    }
+
+    @Test
     public void testGetTransaction() throws IOException {
         Transaction tx = createTransaction();
         Block block = createBlock(api.chain, Collections.singletonList(tx));

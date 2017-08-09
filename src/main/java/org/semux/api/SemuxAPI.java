@@ -71,7 +71,7 @@ public class SemuxAPI {
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO)).childHandler(initializer);
 
-            logger.info("Starting API server: [{}:{}]", ip, port);
+            logger.info("Starting API server: address = {}:{}", ip, port);
             channelFuture = b.bind(ip, port).sync();
 
             listening = true;
