@@ -218,8 +218,7 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
         }
 
         long t3 = System.currentTimeMillis();
-        logger.debug("Transaction pool evaluation: # txs = {} / {}, time = {} + {} ms", total, txs.size(), t2 - t1,
-                t3 - t2);
+        logger.debug("Pending tx evaluation: # txs = {} / {},  time = {} + {} ms", total, txs.size(), t2 - t1, t3 - t2);
     }
 
     @Override

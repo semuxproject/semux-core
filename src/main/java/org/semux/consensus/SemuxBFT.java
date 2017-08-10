@@ -319,13 +319,24 @@ public class SemuxBFT implements Consensus {
         Vote vote = null;
         if (proposal != null && proposalVotes.isApproved()) {
             vote = Vote.newApprove(VoteType.PRECOMMIT, height, view, proposal.getBlock().getHash());
-        } else {
+
+        } else if (proposalVotes.isRejected() || proposal == null) {
+            // vote REJECT if no proposal has been received
             vote = Vote.newReject(VoteType.PRECOMMIT, height, view);
+
+        } else {
+            // TODO more battle test
+
+            // do not vote if proposal is ready but not enough votes have been collected.
+            // This happens when the validation takes too long.
+
+            return;
         }
         vote.sign(coinbase);
 
         precommitVotes.addVote(vote);
         broadcaster.broadcast(new BFTVoteMessage(vote));
+
     }
 
     /**
