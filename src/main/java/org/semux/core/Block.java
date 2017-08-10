@@ -179,8 +179,9 @@ public class Block implements Comparable<Block> {
                 }
             } catch (InterruptedException | ExecutionException e) {
                 return false;
+            } finally {
+                exec.shutdownNow();
             }
-            exec.shutdownNow();
 
             List<byte[]> list = new ArrayList<>();
             for (Transaction tx : transactions) {
