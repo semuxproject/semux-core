@@ -123,10 +123,10 @@ public class PendingManagerTest {
         Transaction tx1 = new Transaction(type, from, to, value, fee, nonce + 1, now, Bytes.EMPY_BYTES).sign(key);
         pendingMgr.addTransaction(tx1);
         Transaction tx2 = new Transaction(type, from, to, value, fee, nonce + 2, now, Bytes.EMPY_BYTES).sign(key);
-        pendingMgr.addTransaction(tx2);
+        // pendingMgr.addTransaction(tx2);
 
         Thread.sleep(100);
-        assertEquals(2, pendingMgr.getTransactions().size());
+        assertEquals(1, pendingMgr.getTransactions().size());
 
         long number = 1;
         byte[] coinbase = Bytes.random(20);
@@ -136,13 +136,14 @@ public class PendingManagerTest {
         byte[] data = {};
         List<Transaction> transactions = Arrays.asList(tx1, tx2);
         Block block = new Block(number, coinbase, prevHash, timestamp, merkleRoot, data, transactions);
+        chain.getAccountState().getAccount(from).setNonce(nonce + 2);
         pendingMgr.onBlockAdded(block);
 
-        Transaction tx3 = new Transaction(type, from, to, value, fee, nonce + 1, now, Bytes.of("BAD")).sign(key);
+        Transaction tx3 = new Transaction(type, from, to, value, fee, nonce + 3, now, Bytes.EMPY_BYTES).sign(key);
         pendingMgr.addTransaction(tx3);
 
         Thread.sleep(100);
-        assertArrayEquals(Bytes.of("BAD"), pendingMgr.getTransactions().get(0).getData());
+        assertArrayEquals(tx3.getHash(), pendingMgr.getTransactions().get(0).getHash());
     }
 
     @After
