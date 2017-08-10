@@ -67,7 +67,7 @@ public enum Command {
      * Get pending transactions.
      */
     GET_PENDING_TRANSACTIONS,
-    
+
     /**
      * Get transaction by its hash.
      */

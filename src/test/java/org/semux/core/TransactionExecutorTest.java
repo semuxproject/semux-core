@@ -33,7 +33,7 @@ public class TransactionExecutorTest {
         chain = new BlockchainImpl(MemoryDB.FACTORY);
         as = chain.getAccountState();
         ds = chain.getDeleteState();
-        exec = TransactionExecutor.getInstance();
+        exec = new TransactionExecutor();
     }
 
     @Test

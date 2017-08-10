@@ -299,7 +299,7 @@ public class SemuxSync implements Sync {
             DelegateState ds = chain.getDeleteState().track();
 
             // [3] check transactions
-            TransactionExecutor exec = TransactionExecutor.getInstance();
+            TransactionExecutor exec = new TransactionExecutor();
             List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, false);
             for (int i = 0; i < results.size(); i++) {
                 if (!results.get(i).isValid()) {

@@ -617,7 +617,7 @@ public class SemuxBFT implements Consensus {
 
         AccountState as = accountState.track();
         DelegateState ds = delegateState.track();
-        TransactionExecutor exec = TransactionExecutor.getInstance();
+        TransactionExecutor exec = new TransactionExecutor();
 
         // validate transactions
         List<Transaction> list = pendingMgr.getTransactions(Config.MAX_BLOCK_SIZE);
@@ -628,7 +628,7 @@ public class SemuxBFT implements Consensus {
             if (results.get(i).isValid()) {
                 txs.add(tx);
             } else {
-                logger.trace("Transaction bypassed pending manager, tx = {}", Hex.encode(tx.getHash()));
+                logger.warn("Transaction bypassed pending manager: {}", tx);
                 pendingMgr.removeTransaction(tx);
             }
         }
@@ -665,6 +665,7 @@ public class SemuxBFT implements Consensus {
      * @return
      */
     protected boolean validateBlock(Block block) {
+        long t1 = System.currentTimeMillis();
         // [1] check block integrity and signature
         if (!block.validate()) {
             return false;
@@ -678,15 +679,19 @@ public class SemuxBFT implements Consensus {
 
         AccountState as = accountState.track();
         DelegateState ds = delegateState.track();
-        TransactionExecutor exec = TransactionExecutor.getInstance();
+        TransactionExecutor exec = new TransactionExecutor();
 
         // [3] check transactions
-        List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, false);
+        List<Transaction> txs = block.getTransactions();
+        List<TransactionResult> results = exec.execute(txs, as, ds, false);
         for (int i = 0; i < results.size(); i++) {
             if (!results.get(i).isValid()) {
                 return false;
             }
         }
+
+        long t2 = System.currentTimeMillis();
+        logger.debug("Block validation: # txs = {}, time = {} ms", txs.size(), t2 - t1);
 
         return true;
     }
@@ -701,7 +706,7 @@ public class SemuxBFT implements Consensus {
         DelegateState ds = chain.getDeleteState().track();
 
         // [1] execute all transactions
-        TransactionExecutor exec = TransactionExecutor.getInstance();
+        TransactionExecutor exec = new TransactionExecutor();
         List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, true);
         for (int i = 0; i < results.size(); i++) {
             if (!results.get(i).isValid()) {

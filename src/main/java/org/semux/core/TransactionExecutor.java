@@ -25,22 +25,10 @@ public class TransactionExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionExecutor.class);
 
-    private static TransactionExecutor instance;
-
     /**
-     * Get the singleton instance of transaction executor.
-     * 
-     * @return
+     * Create a new transaction executor.
      */
-    public static synchronized TransactionExecutor getInstance() {
-        if (instance == null) {
-            instance = new TransactionExecutor();
-        }
-
-        return instance;
-    }
-
-    private TransactionExecutor() {
+    public TransactionExecutor() {
     }
 
     /**
@@ -58,8 +46,7 @@ public class TransactionExecutor {
      *            whether to commit the updates
      * @return
      */
-    public synchronized List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds,
-            boolean commit) {
+    public List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds, boolean commit) {
         List<TransactionResult> results = new ArrayList<>();
 
         for (Transaction tx : txs) {

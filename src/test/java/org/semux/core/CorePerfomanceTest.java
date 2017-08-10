@@ -71,7 +71,7 @@ public class CorePerfomanceTest {
         logger.info("Perf_transaction_1: {} μs/tx", (t2 - t1) / 1_000 / repeat);
 
         Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
-        TransactionExecutor exec = TransactionExecutor.getInstance();
+        TransactionExecutor exec = new TransactionExecutor();
 
         t1 = System.nanoTime();
         exec.execute(txs, chain.getAccountState().track(), chain.getDeleteState().track(), true);

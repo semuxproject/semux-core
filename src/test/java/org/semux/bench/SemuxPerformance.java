@@ -2,6 +2,7 @@ package org.semux.bench;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Date;
 import java.util.Scanner;
 
 import org.json.JSONObject;
@@ -38,7 +39,9 @@ public class SemuxPerformance {
     public static void testTransfer(EdDSA key, int n) throws IOException {
 
         JSONObject obj = request("/get_nonce?address=" + key.toAddressString());
-        long startingNonce = obj.getLong("result") + 1;
+        long startNonce = obj.getLong("result") + 1;
+        System.out.println("Time: " + new Date());
+        System.out.println("Nonce: " + startNonce);
 
         for (int i = 0; i < n; i++) {
             TransactionType type = TransactionType.TRANSFER;
@@ -46,7 +49,7 @@ public class SemuxPerformance {
             byte[] to = Bytes.random(20);
             long value = 1;
             long fee = Config.MIN_TRANSACTION_FEE;
-            long nonce = startingNonce + i;
+            long nonce = startNonce + i;
             long timestamp = System.currentTimeMillis();
             byte[] data = {};
             Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
@@ -73,7 +76,7 @@ public class SemuxPerformance {
         System.out.println("Balance: " + obj.getLong("result") / Unit.SEM + " SEM");
 
         while (true) {
-            System.out.print("# txs to send: ");
+            System.out.print("# transactions to send: ");
             System.out.flush();
 
             int n = Integer.parseInt(SystemUtil.SCANNER.nextLine().replaceAll("[^\\d]", ""));
