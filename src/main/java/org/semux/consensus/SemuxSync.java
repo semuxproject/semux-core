@@ -22,6 +22,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.bouncycastle.util.encoders.Hex;
 import org.semux.Config;
 import org.semux.core.Account;
 import org.semux.core.Block;
@@ -269,6 +270,7 @@ public class SemuxSync implements Sync {
                     toComplete.remove(block.getNumber());
                 }
             } else {
+                logger.info("Invalid block: hash = {}", Hex.encode(block.getHash()));
                 synchronized (lock) {
                     toDownload.add(block.getNumber());
                 }

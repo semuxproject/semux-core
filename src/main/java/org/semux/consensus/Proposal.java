@@ -160,7 +160,8 @@ public class Proposal {
 
     @Override
     public String toString() {
-        return "Proposal [height=" + height + ", view=" + view + ", block=" + Hex.encode(block.getHash()) + ", # txs = "
-                + block.getTransactions().size() + ", proof=" + proof + "]";
+        return "Proposal [height=" + height + ", view=" + view + ", block hash = "
+                + Hex.encode(block.getHash()).substring(0, 16) + ", # txs = " + block.getTransactions().size()
+                + ", proof=" + proof + "]";
     }
 }
