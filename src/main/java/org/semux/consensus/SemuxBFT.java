@@ -295,12 +295,17 @@ public class SemuxBFT implements Consensus {
         timer.addTimeout(Config.BFT_VALIDATE_TIMEOUT);
         logger.debug("Entered validate: proposal ready = {}", proposal != null);
 
-        Vote vote = null;
-        if (proposal != null && validateBlock(proposal.getBlock())) {
-            vote = Vote.newApprove(VoteType.VALIDATE, height, view, proposal.getBlock().getHash());
-        } else {
-            vote = Vote.newReject(VoteType.VALIDATE, height, view);
+        boolean valid = false;
+        if (proposal != null) {
+            if (proposal.isBlockValid() != null) {
+                valid = proposal.isBlockValid();
+            } else {
+                valid = validateBlock(proposal.getBlock());
+                proposal.setBlockValid(valid);
+            }
         }
+        Vote vote = valid ? Vote.newApprove(VoteType.VALIDATE, height, view, proposal.getBlock().getHash())
+                : Vote.newReject(VoteType.VALIDATE, height, view);
         vote.sign(coinbase);
 
         // Always broadcast instead of relying on event handler to broadcast.

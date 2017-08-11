@@ -47,6 +47,8 @@ public class Proposal {
     private byte[] encoded;
     private Signature signature;
 
+    private Boolean isBlockValid = null;
+
     public Proposal(long height, int view, Block block, Proof proof) {
         this.height = height;
         this.view = view;
@@ -130,6 +132,14 @@ public class Proposal {
 
     public Signature getSignature() {
         return signature;
+    }
+
+    public Boolean isBlockValid() {
+        return isBlockValid;
+    }
+
+    public void setBlockValid(Boolean isBlockValid) {
+        this.isBlockValid = isBlockValid;
     }
 
     public byte[] toBytes() {
