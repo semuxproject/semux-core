@@ -151,6 +151,7 @@ public class SemuxBFT implements Consensus {
                 switch (ev.getType()) {
                 case STOP:
                     logger.debug("Received STOP event");
+                    status = Status.STOPPED;
                     return;
                 case TIMEOUT:
                     onTimeout();
@@ -198,7 +199,6 @@ public class SemuxBFT implements Consensus {
                 sync.stop();
             }
 
-            status = Status.STOPPED;
             timer.stop();
             broadcaster.stop();
 

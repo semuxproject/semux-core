@@ -200,28 +200,31 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
 
     @Override
     public synchronized void onBlockAdded(Block block) {
-        long t1 = System.currentTimeMillis();
+        if (isRunning) {
+            long t1 = System.currentTimeMillis();
 
-        // [1] remove included transaction
-        removeTransactions(block.getTransactions());
+            // [1] remove included transaction
+            removeTransactions(block.getTransactions());
 
-        // [2] reset state
-        accountState = chain.getAccountState().track();
+            // [2] reset state
+            accountState = chain.getAccountState().track();
 
-        // [3] clear transaction pool
-        List<Transaction> txs = new ArrayList<>(pool.values());
-        txs.sort(this);
-        pool.clear();
-        long t2 = System.currentTimeMillis();
+            // [3] clear transaction pool
+            List<Transaction> txs = new ArrayList<>(pool.values());
+            txs.sort(this);
+            pool.clear();
+            long t2 = System.currentTimeMillis();
 
-        // [4] update state
-        long total = 0;
-        for (Transaction tx : txs) {
-            total += processTransaction(tx, false);
+            // [4] update state
+            long total = 0;
+            for (Transaction tx : txs) {
+                total += processTransaction(tx, false);
+            }
+
+            long t3 = System.currentTimeMillis();
+            logger.debug("Pending tx evaluation: # txs = {} / {},  time = {} + {} ms", total, txs.size(), t2 - t1,
+                    t3 - t2);
         }
-
-        long t3 = System.currentTimeMillis();
-        logger.debug("Pending tx evaluation: # txs = {} / {},  time = {} + {} ms", total, txs.size(), t2 - t1, t3 - t2);
     }
 
     @Override

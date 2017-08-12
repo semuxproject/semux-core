@@ -206,18 +206,20 @@ public class CLI {
         SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, nodeMgr, client, null);
         PeerServer p2p = new PeerServer(ci);
 
-        new Thread(() -> {
+        Thread p2pThread = new Thread(() -> {
             p2p.start(Config.P2P_LISTEN_IP, Config.P2P_LISTEN_PORT);
-        }, "p2p").start();
+        }, "p2p");
+        p2pThread.start();
 
         // ====================================
         // start API module
         // ====================================
         SemuxAPI api = new SemuxAPI(new APIHandler(chain, pendingMgr, channelMgr, nodeMgr, client));
 
-        new Thread(() -> {
+        Thread apiThread = new Thread(() -> {
             api.start(Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
-        }, "api").start();
+        }, "api");
+        apiThread.start();
 
         // ====================================
         // start sync/consensus
@@ -225,18 +227,29 @@ public class CLI {
         SemuxSync sync = SemuxSync.getInstance();
         sync.init(chain, channelMgr);
 
-        SemuxBFT consensus = SemuxBFT.getInstance();
-        consensus.init(chain, pendingMgr, channelMgr, coinbase);
+        SemuxBFT cons = SemuxBFT.getInstance();
+        cons.init(chain, pendingMgr, channelMgr, coinbase);
 
-        new Thread(() -> {
-            consensus.start();
-        }, "cons").start();
+        Thread consThread = new Thread(() -> {
+            cons.start();
+        }, "cons");
+        consThread.start();
 
         // ====================================
         // register shutdown hook
         // ====================================
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            consensus.stop();
+            pendingMgr.stop();
+            nodeMgr.stop();
+
+            try {
+                sync.stop();
+                cons.stop();
+                consThread.join();
+            } catch (InterruptedException e) {
+                logger.error("Failed to stop sync/consensus properly");
+            }
+
             api.stop();
             p2p.stop();
         }, "shutdown-hook"));
