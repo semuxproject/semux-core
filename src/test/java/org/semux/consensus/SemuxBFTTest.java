@@ -16,6 +16,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semux.core.Block;
+import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis;
@@ -69,8 +70,8 @@ public class SemuxBFTTest {
         List<Transaction> transactions = new ArrayList<>();
         int view = 1;
 
-        Block block = new Block(number, coinbase, prevHash, timestamp, merkleRoot, data, transactions);
-        block.sign(key1);
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data);
+        Block block = new Block(header.sign(key1), transactions);
 
         List<Signature> votes = new ArrayList<>();
         Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getHash(), block.getNumber(), view)

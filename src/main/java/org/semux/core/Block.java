@@ -17,10 +17,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.semux.Config;
-import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
-import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.utils.MerkleTree;
 import org.semux.utils.SimpleDecoder;
@@ -44,107 +41,79 @@ public class Block implements Comparable<Block> {
     /**
      * The block header.
      */
-    private byte[] hash;
-    private long number;
-    private byte[] coinbase;
-    private byte[] prevHash;
-    private long timestamp;
-    private byte[] merkleRoot;
-    private byte[] data;
+    private BlockHeader header;
 
     /**
-     * A list of transactions.
+     * The transactions.
      */
     private List<Transaction> transactions;
 
-    private byte[] encoded;
-    private Signature signature;
+    /**
+     * The BFT view and votes.
+     */
+    private int view;
+    private List<Signature> votes;
+
+    // =========================
+    // Auxiliary data
+    // =========================
+    /**
+     * Encoding of header and transactions.
+     */
+    protected byte[] encodedWithoutBFT;
 
     /**
-     * BFT-related info.
+     * Transaction indexes
      */
-    private int view = 0;
-    private List<Signature> votes = new ArrayList<>();
+    protected List<Pair<Integer, Integer>> indexes = new ArrayList<>();
 
-    /* 4 + 32: block hash, 4 : encoded, 4: transaction size */
-    protected int txIndexOffset = 36 + 4 + 4;
-    protected List<Pair<Integer, Integer>> txIndex = new ArrayList<>();
+    /**
+     * Indicate whether this is the Genesis block
+     */
     protected boolean isGensis = false;
 
     /**
-     * Create a new block. Be sure to call {@link #hash()} afterwards.
+     * Create a new block, with no BFT information.
      * 
-     * @param number
-     * @param coinbase
-     * @param prevHash
-     * @param timestamp
-     * @param merkleRoot
-     * @param data
+     * @param header
+     *            a signed block header
      * @param transactions
+     *            list of transactions
      */
-    public Block(long number, byte[] coinbase, byte[] prevHash, long timestamp, byte[] merkleRoot, byte[] data,
-            List<Transaction> transactions) {
-        this.number = number;
-        this.coinbase = coinbase;
-        this.prevHash = prevHash;
-        this.timestamp = timestamp;
-        this.merkleRoot = merkleRoot;
-        this.data = data;
-        this.transactions = transactions;
-
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeLong(number);
-        enc.writeBytes(coinbase);
-        enc.writeBytes(prevHash);
-        enc.writeLong(timestamp);
-        enc.writeBytes(merkleRoot);
-        enc.writeBytes(data);
-        enc.writeInt(transactions.size());
-        for (Transaction t : transactions) {
-            int idx = enc.getWriteIndex() + txIndexOffset;
-
-            byte[] bytes = t.toBytes();
-            enc.writeBytes(bytes);
-            txIndex.add(Pair.of(idx, idx + bytes.length));
-        }
-        this.encoded = enc.toBytes();
-        this.hash = Hash.h256(encoded);
-    }
-
-    public Block(byte[] hash, byte[] encoded, byte[] signature) {
-        this.hash = hash;
-
-        SimpleDecoder dec = new SimpleDecoder(encoded);
-        this.number = dec.readLong();
-        this.coinbase = dec.readBytes();
-        this.prevHash = dec.readBytes();
-        this.timestamp = dec.readLong();
-        this.merkleRoot = dec.readBytes();
-        this.data = dec.readBytes();
-
-        transactions = new ArrayList<>();
-        int n = dec.readInt();
-        for (int i = 0; i < n; i++) {
-            int idx = dec.getReadIndex() + txIndexOffset;
-            byte[] bytes = dec.readBytes();
-
-            transactions.add(Transaction.fromBytes(bytes));
-            txIndex.add(Pair.of(idx, idx + bytes.length));
-        }
-
-        this.encoded = encoded;
-        this.signature = Signature.fromBytes(signature);
+    public Block(BlockHeader header, List<Transaction> transactions) {
+        this(header, transactions, 0, new ArrayList<>());
     }
 
     /**
-     * Sign this block.
+     * Create a new block.
      * 
-     * @param key
-     * @return
+     * @param header
+     *            a signed block header
+     * @param transactions
+     *            list of transaction
+     * @param view
+     *            BFT view
+     * @param votes
+     *            BFT validator votes
      */
-    public Block sign(EdDSA key) {
-        this.signature = key.sign(getHash());
-        return this;
+    public Block(BlockHeader header, List<Transaction> transactions, int view, List<Signature> votes) {
+        this.header = header;
+
+        this.transactions = transactions;
+
+        this.view = view;
+        this.votes = votes;
+
+        SimpleEncoder enc = new SimpleEncoder();
+        enc.writeBytes(header.toBytes());
+        enc.writeInt(transactions.size());
+        for (Transaction t : transactions) {
+            int idx = enc.getWriteIndex() + 4 /* length code */;
+            byte[] bytes = t.toBytes();
+            enc.writeBytes(bytes);
+            indexes.add(Pair.of(idx, idx + bytes.length));
+        }
+        this.encodedWithoutBFT = enc.toBytes();
     }
 
     /**
@@ -155,20 +124,8 @@ public class Block implements Comparable<Block> {
      * @return true if valid, otherwise false
      */
     public boolean validate(int nThreads) {
-        if (hash != null && hash.length == 32 //
-                && number >= 0 //
-                && coinbase != null && coinbase.length == 20 //
-                && prevHash != null && prevHash.length == 32 //
-                && timestamp >= 0 //
-                && merkleRoot != null //
-                && data != null && data.length < 1024 //
-                && transactions != null && transactions.size() <= Config.MAX_BLOCK_SIZE //
-                && encoded != null //
-                && (number == 0 || signature != null) //
-
-                && Arrays.equals(Hash.h256(encoded), hash) //
-                && (number == 0 || EdDSA.verify(hash, signature))) {
-
+        if (header != null && header.validate()) {
+            // validate transactions
             ExecutorService exec = Executors.newFixedThreadPool(nThreads, factory);
             try {
                 List<Future<Boolean>> list = exec.invokeAll(transactions);
@@ -183,11 +140,12 @@ public class Block implements Comparable<Block> {
                 exec.shutdownNow();
             }
 
+            // validate merkle root
             List<byte[]> list = new ArrayList<>();
             for (Transaction tx : transactions) {
                 list.add(tx.getHash());
             }
-            return Arrays.equals(new MerkleTree(list).getRootHash(), merkleRoot);
+            return Arrays.equals(new MerkleTree(list).getRootHash(), header.getMerkleRoot());
         }
 
         return false;
@@ -195,7 +153,7 @@ public class Block implements Comparable<Block> {
 
     /**
      * Validate block format and signature, along with transaction validation, using
-     * half the available core.
+     * half the available CPU cores.
      * 
      * @return
      */
@@ -210,7 +168,7 @@ public class Block implements Comparable<Block> {
      * @return
      */
     public BlockHeader getHeader() {
-        return new BlockHeader(hash, number, coinbase, prevHash, timestamp, merkleRoot, data);
+        return header;
     }
 
     /**
@@ -264,7 +222,7 @@ public class Block implements Comparable<Block> {
      * @return
      */
     public List<Pair<Integer, Integer>> getTransacitonIndexes() {
-        return new ArrayList<>(txIndex);
+        return new ArrayList<>(indexes);
     }
 
     /**
@@ -277,43 +235,39 @@ public class Block implements Comparable<Block> {
     }
 
     public byte[] getHash() {
-        return hash;
+        return header.getHash();
     }
 
     public long getNumber() {
-        return number;
+        return header.getNumber();
     }
 
     public byte[] getCoinbase() {
-        return coinbase;
+        return header.getCoinbase();
     }
 
     public byte[] getPrevHash() {
-        return prevHash;
+        return header.getPrevHash();
     }
 
     public long getTimestamp() {
-        return timestamp;
+        return header.getTimestamp();
     }
 
     public byte[] getMerkleRoot() {
-        return merkleRoot;
+        return header.getMerkleRoot();
     }
 
     public byte[] getData() {
-        return data;
+        return header.getData();
     }
 
     public Signature getSignature() {
-        return signature;
+        return header.getSignature();
     }
 
     public byte[] toBytes() {
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBytes(hash);
-        enc.writeBytes(encoded);
-        enc.writeBytes(signature.toBytes());
-
+        SimpleEncoder enc = new SimpleEncoder(encodedWithoutBFT);
         enc.writeInt(view);
         enc.writeInt(votes.size());
         for (Signature vote : votes) {
@@ -325,22 +279,22 @@ public class Block implements Comparable<Block> {
 
     public static Block fromBytes(byte[] bytes) {
         SimpleDecoder dec = new SimpleDecoder(bytes);
-        byte[] hash = dec.readBytes();
-        byte[] encoded = dec.readBytes();
-        byte[] signature = dec.readBytes();
+        BlockHeader header = BlockHeader.fromBytes(dec.readBytes());
+
+        int n = dec.readInt();
+        List<Transaction> transactions = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            transactions.add(Transaction.fromBytes(dec.readBytes()));
+        }
 
         int view = dec.readInt();
-        int n = dec.readInt();
+        n = dec.readInt();
         List<Signature> votes = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             votes.add(Signature.fromBytes(dec.readBytes()));
         }
 
-        Block block = new Block(hash, encoded, signature);
-        block.setView(view);
-        block.setVotes(votes);
-
-        return block;
+        return new Block(header, transactions, view, votes);
     }
 
     @Override
@@ -350,7 +304,7 @@ public class Block implements Comparable<Block> {
 
     @Override
     public String toString() {
-        return "Block [number = " + getNumber() + ", view = " + getView() + ", hash = " + Hex.encode(hash)
+        return "Block [number = " + getNumber() + ", view = " + getView() + ", hash = " + Hex.encode(getHash())
                 + ", # txs = " + transactions.size() + ", # votes = " + votes.size() + "]";
     }
 }

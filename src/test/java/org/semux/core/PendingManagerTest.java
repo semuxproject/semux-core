@@ -135,7 +135,8 @@ public class PendingManagerTest {
         byte[] merkleRoot = Bytes.random(32);
         byte[] data = {};
         List<Transaction> transactions = Arrays.asList(tx1, tx2);
-        Block block = new Block(number, coinbase, prevHash, timestamp, merkleRoot, data, transactions);
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data);
+        Block block = new Block(header.sign(new EdDSA()), transactions);
         chain.getAccountState().getAccount(from).setNonce(nonce + 2);
         pendingMgr.onBlockAdded(block);
 

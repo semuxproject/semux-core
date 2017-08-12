@@ -22,6 +22,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semux.Config;
 import org.semux.core.Block;
+import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.Genesis;
 import org.semux.core.Transaction;
@@ -159,10 +160,8 @@ public class APIHandlerTest {
         }
         merkleRoot = new MerkleTree(hashes).getRootHash();
 
-        Block block = new Block(number, coinbase, prevHash, timestamp, merkleRoot, data, transactions);
-        block.sign(key);
-
-        return block;
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data);
+        return new Block(header.sign(key), transactions);
     }
 
     private Transaction createTransaction() {

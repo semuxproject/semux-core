@@ -115,6 +115,7 @@ public class BlockchainImplTest {
         List<Transaction> transactions = new ArrayList<>();
         transactions.add(tx);
 
-        return new Block(number, coinbase, prevHash, timestamp, merkleRoot, data, transactions).sign(new EdDSA());
+        return new Block(new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data).sign(new EdDSA()),
+                transactions);
     }
 }

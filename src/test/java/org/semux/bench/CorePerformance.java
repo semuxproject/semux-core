@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.semux.Config;
 import org.semux.core.Block;
+import org.semux.core.BlockHeader;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.EdDSA;
@@ -47,8 +48,8 @@ public class CorePerformance {
         }
         byte[] merkleRoot = new MerkleTree(list).getRootHash();
         byte[] data = {};
-        Block block = new Block(number, coinbase, prevHash, timestamp, merkleRoot, data, txs);
-        block.sign(key);
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data);
+        Block block = new Block(header.sign(key), txs);
 
         long t2 = System.nanoTime();
         logger.info("block size: {} KB", block.toBytes().length / 1024);

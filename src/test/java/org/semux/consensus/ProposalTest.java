@@ -20,7 +20,6 @@ public class ProposalTest {
         long height = Long.MAX_VALUE;
         int view = Integer.MAX_VALUE;
         Block block = Genesis.getInstance();
-        block.sign(new EdDSA());
         Vote vote = Vote.newApprove(VoteType.COMMIT, height, view, block.getHash());
         vote.sign(new EdDSA());
 

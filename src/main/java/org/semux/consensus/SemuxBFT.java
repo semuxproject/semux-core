@@ -18,6 +18,7 @@ import org.semux.consensus.Proposal.Proof;
 import org.semux.consensus.SemuxBFT.Event.Type;
 import org.semux.core.Account;
 import org.semux.core.Block;
+import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.Consensus;
 import org.semux.core.Delegate;
@@ -662,8 +663,8 @@ public class SemuxBFT implements Consensus {
         long timestamp = System.currentTimeMillis();
         byte[] merkleRoot = merkle.getRootHash();
         byte[] data = {};
-        Block block = new Block(number, coinbase.toAddress(), prevHash, timestamp, merkleRoot, data, txs);
-        block.sign(coinbase);
+        BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, merkleRoot, data);
+        Block block = new Block(header.sign(coinbase), txs);
 
         long t2 = System.currentTimeMillis();
         logger.debug("Block creation: # txs = {}, time = {} ms", txs.size(), t2 - t1);

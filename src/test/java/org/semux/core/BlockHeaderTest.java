@@ -10,11 +10,11 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.semux.crypto.EdDSA;
 import org.semux.utils.Bytes;
 
 public class BlockHeaderTest {
 
-    private byte[] hash = Bytes.random(32);
     private long number = 1;
     private byte[] coinbase = Bytes.random(20);
     private byte[] prevHash = Bytes.random(32);
@@ -22,16 +22,24 @@ public class BlockHeaderTest {
     private byte[] merkleRoot = Bytes.random(32);
     private byte[] data = Bytes.of("data");
 
+    private EdDSA key = new EdDSA();
+    private byte[] hash;
+    private byte[] signature;
+
     @Test
     public void testNew() {
-        BlockHeader header = new BlockHeader(hash, number, coinbase, prevHash, timestamp, merkleRoot, data);
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data).sign(key);
+        hash = header.getHash();
+        signature = header.getSignature().toBytes();
 
         testFields(header);
     }
 
     @Test
     public void testSerilization() {
-        BlockHeader header = new BlockHeader(hash, number, coinbase, prevHash, timestamp, merkleRoot, data);
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data).sign(key);
+        hash = header.getHash();
+        signature = header.getSignature().toBytes();
 
         testFields(BlockHeader.fromBytes(header.toBytes()));
     }
@@ -44,6 +52,6 @@ public class BlockHeaderTest {
         assertEquals(timestamp, header.getTimestamp());
         assertArrayEquals(merkleRoot, header.getMerkleRoot());
         assertArrayEquals(data, header.getData());
-        assertArrayEquals(hash, header.getHash());
+        assertArrayEquals(signature, header.getSignature().toBytes());
     }
 }
