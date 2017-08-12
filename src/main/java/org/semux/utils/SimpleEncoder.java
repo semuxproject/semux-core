@@ -16,6 +16,15 @@ public class SimpleEncoder {
         this.out = new ByteArrayOutputStream();
     }
 
+    public SimpleEncoder(byte[] toAppend) {
+        this();
+        try {
+            out.write(toAppend);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void writeBoolean(boolean b) {
         out.write(b ? 1 : 0);
     }

@@ -20,6 +20,10 @@ public class SimpleDecoder {
         this(in, 0, in.length);
     }
 
+    public SimpleDecoder(byte[] in, int from) {
+        this(in, from, in.length);
+    }
+
     public SimpleDecoder(byte[] in, int from, int to) {
         this.in = in;
         this.from = from;
