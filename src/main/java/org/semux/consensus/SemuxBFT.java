@@ -239,7 +239,7 @@ public class SemuxBFT implements Consensus {
         proposal = null;
         resetVotes();
 
-        logger.debug("Entered new_height: height = {}, validators = {}", height, validators.size());
+        logger.info("Entered new_height: height = {}, validators = {}", height, validators.size());
         if (isValidator()) {
             timer.addTimeout(fromSync ? 0 : Config.BFT_NEW_HEIGHT_TIMEOUT);
         }
@@ -273,7 +273,7 @@ public class SemuxBFT implements Consensus {
             resetVotes();
         }
 
-        logger.debug("Entered propose: height = {}, view = {}, primary = {}, # active peers = {}", height, view,
+        logger.info("Entered propose: height = {}, view = {}, primary = {}, # active peers = {}", height, view,
                 isPrimary(), activeValidators.size());
 
         if (isPrimary()) {
@@ -294,7 +294,7 @@ public class SemuxBFT implements Consensus {
     protected void enterValidate() {
         state = State.VALIDATE;
         timer.addTimeout(Config.BFT_VALIDATE_TIMEOUT);
-        logger.debug("Entered validate: proposal ready = {}", proposal != null);
+        logger.info("Entered validate: proposal ready = {}", proposal != null);
 
         boolean valid = false;
         if (proposal != null) {
@@ -320,7 +320,7 @@ public class SemuxBFT implements Consensus {
     protected void enterPreCommit() {
         state = State.PRE_COMMIT;
         timer.addTimeout(Config.BFT_PRE_COMMIT_TIMEOUT);
-        logger.debug("Entered pre_commit: proposal votes = {}, pre_commit votes = {}", proposalVotes, precommitVotes);
+        logger.info("Entered pre_commit: proposal votes = {}, pre_commit votes = {}", proposalVotes, precommitVotes);
 
         Vote vote = null;
         if (proposal != null && proposalVotes.isApproved()) {
@@ -350,7 +350,7 @@ public class SemuxBFT implements Consensus {
      */
     protected void enterCommit() {
         state = State.COMMIT;
-        logger.debug("Enter commit: pre-commit votes = {}, commit votes = {}", precommitVotes, commitVotes);
+        logger.info("Enter commit: pre-commit votes = {}, commit votes = {}", precommitVotes, commitVotes);
 
         if (proposal != null) {
             // [1] create a block
