@@ -134,19 +134,22 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public BlockHeader getBlockHeader(long number) {
+        if (genesis.getNumber() == number) {
+            return genesis.getHeader();
+        }
 
-        // TODO get block header without parsing
-
-        Block block = getBlock(number);
-
-        return block == null ? null : block.getHeader();
+        byte[] bytes = indexDB.get(Bytes.of(number));
+        return bytes == null ? null : getBlockHeader(bytes);
     }
 
     @Override
     public BlockHeader getBlockHeader(byte[] hash) {
-        Block block = getBlock(hash);
+        if (Arrays.equals(genesis.getHash(), hash)) {
+            return genesis.getHeader();
+        }
 
-        return block == null ? null : block.getHeader();
+        byte[] bytes = blockDB.get(hash);
+        return bytes == null ? null : BlockHeader.fromBytes(new SimpleDecoder(bytes).readBytes());
     }
 
     @Override

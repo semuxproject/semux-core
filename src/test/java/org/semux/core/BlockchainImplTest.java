@@ -77,6 +77,20 @@ public class BlockchainImplTest {
     }
 
     @Test
+    public void testGetBlockHeader() {
+        Blockchain chain = createBlockchain();
+
+        assertArrayEquals(Genesis.getInstance().getHash(), chain.getBlockHeader(0).getHash());
+
+        long number = 1;
+        Block newBlock = createBlock(number);
+        chain.addBlock(newBlock);
+
+        assertArrayEquals(newBlock.getHash(), chain.getBlockHeader(1).getHash());
+        assertEquals(newBlock.getNumber(), chain.getBlockHeader(newBlock.getHash()).getNumber());
+    }
+
+    @Test
     public void testGetTransaction() {
         Blockchain chain = createBlockchain();
 
