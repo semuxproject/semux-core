@@ -677,8 +677,8 @@ public class SemuxBFT implements Consensus {
     /**
      * Check if a block is valid.
      * 
-     * NOTOE: this method will NOT check the block data integrity and signature
-     * validity. Use {@link Block#validate()} at that purpose.
+     * NOTOE: this method assume the block data and signature is valid. If not, use
+     * {@link Block#validate()} to check.
      * 
      * @param block
      * @return
@@ -687,12 +687,14 @@ public class SemuxBFT implements Consensus {
         long t1 = System.currentTimeMillis();
         // [1] check block integrity and signature
         if (!block.validate()) {
+            logger.debug("Invalid block/transaction format");
             return false;
         }
 
         // [2] check number and prevHash
         Block latest = chain.getLatestBlock();
         if (block.getNumber() != latest.getNumber() + 1 || !Arrays.equals(block.getPrevHash(), latest.getHash())) {
+            logger.debug("Invalid block number or prevHash");
             return false;
         }
 
@@ -705,6 +707,7 @@ public class SemuxBFT implements Consensus {
         List<TransactionResult> results = exec.execute(txs, as, ds, false);
         for (int i = 0; i < results.size(); i++) {
             if (!results.get(i).isValid()) {
+                logger.debug("Invalid transaction #{}", i);
                 return false;
             }
         }

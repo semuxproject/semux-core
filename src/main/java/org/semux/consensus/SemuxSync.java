@@ -36,7 +36,6 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hash;
-import org.semux.crypto.Hex;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
@@ -240,6 +239,7 @@ public class SemuxSync implements Sync {
         long latest = chain.getLatestBlockNumber();
         if (latest + 1 == target) {
             stop();
+            return; // This is important because stop() only notify
         }
 
         Block block = null;
@@ -277,7 +277,6 @@ public class SemuxSync implements Sync {
                     toComplete.remove(block.getNumber());
                 }
             } else {
-                logger.info("Invalid block: hash = {}", Hex.encode(block.getHash()));
                 synchronized (lock) {
                     toDownload.add(block.getNumber());
                 }
@@ -295,12 +294,14 @@ public class SemuxSync implements Sync {
         try {
             // [1] check block integrity and signature
             if (!block.validate()) {
+                logger.debug("Invalid block/transaction format");
                 return false;
             }
 
             // [2] check number and prevHash
             Block latest = chain.getLatestBlock();
             if (block.getNumber() != latest.getNumber() + 1 || !Arrays.equals(block.getPrevHash(), latest.getHash())) {
+                logger.debug("Invalid block number or prevHash");
                 return false;
             }
 
@@ -312,6 +313,7 @@ public class SemuxSync implements Sync {
             List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, false);
             for (int i = 0; i < results.size(); i++) {
                 if (!results.get(i).isValid()) {
+                    logger.debug("Invalid transaction #{}", i);
                     return false;
                 }
             }
@@ -320,6 +322,7 @@ public class SemuxSync implements Sync {
             List<Delegate> validators = ds.getValidators();
             int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
             if (block.getVotes().size() < twoThirds) {
+                logger.debug("Invalid BFT votes: {} < {}", block.getVotes().size(), twoThirds);
                 return false;
             }
 
@@ -334,6 +337,7 @@ public class SemuxSync implements Sync {
                 ByteArray addr = ByteArray.of(Hash.h160(sig.getPublicKey()));
 
                 if (!set.contains(addr) || !EdDSA.verify(encoded, sig)) {
+                    logger.debug("Invalid BFT vote: signer = {}", addr);
                     return false;
                 }
             }
