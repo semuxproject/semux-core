@@ -112,8 +112,7 @@ public class SemuxSync implements Sync {
     public void start(long targetHeight) {
         if (!isRunning()) {
             isRunning = true;
-            logger.info("Sync manager started, target blocks = [{}, {})", chain.getLatestBlockNumber() + 1,
-                    targetHeight);
+            logger.info("Sync manager started, blocks = [{}, {})", chain.getLatestBlockNumber() + 1, targetHeight);
 
             // [1] set up queues
             synchronized (lock) {
@@ -223,6 +222,11 @@ public class SemuxSync implements Sync {
                 }
 
                 Long task = toDownload.first();
+                if (c.getRemotePeer().getLatestBlockNumber() < task) {
+                    // skip this peer if it is at a lower height
+                    continue;
+                }
+
                 logger.debug("Request block #{} from cid = {}", task, c.getId());
                 c.getMessageQueue().sendMessage(new GetBlockMessage(task));
 
