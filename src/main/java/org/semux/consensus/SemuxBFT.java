@@ -36,6 +36,7 @@ import org.semux.crypto.Hex;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
+import org.semux.net.msg.MessageCode;
 import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BFTNewHeightMessage;
 import org.semux.net.msg.consensus.BFTProposalMessage;
@@ -483,7 +484,8 @@ public class SemuxBFT implements Consensus {
 
     @Override
     public boolean onMessage(Channel channel, Message msg) {
-        if (!isRunning()) {
+        // only process BFT_NEW_HEIGHT message when not running
+        if (!isRunning() && msg.getCode() != MessageCode.BFT_NEW_HEIGHT) {
             return false;
         }
 
