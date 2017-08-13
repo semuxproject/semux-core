@@ -80,7 +80,6 @@ public class SemuxFrameHandler extends ByteToMessageCodec<Frame> {
             if (size < 0 || type < 0 || packetId < 0 || packetSize < 0) {
                 logger.debug("Invalid frame from peer, frame: {}, peer: {}", frame, channel.getRemotePeer());
             } else {
-                logger.trace("Decoded frame: {}", frame);
                 out.add(frame);
             }
         }

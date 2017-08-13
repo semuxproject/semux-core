@@ -7,6 +7,7 @@
 package org.semux.consensus;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -60,7 +61,7 @@ public class SemuxSync implements Sync {
 
     private static final int MAX_UNFINISHED_JOBS = 16;
 
-    private static final long MAX_DOWNLOAD_TIME = 2 * 60 * 1000;
+    private static final long MAX_DOWNLOAD_TIME = 10 * 1000;
 
     private static final int MAX_PENDING_BLOCKS = 256;
 
@@ -110,6 +111,10 @@ public class SemuxSync implements Sync {
     @Override
     public void start(long targetHeight) {
         if (!isRunning()) {
+            isRunning = true;
+            logger.info("Sync manager started, target blocks = [{}, {})", chain.getLatestBlockNumber() + 1,
+                    targetHeight);
+
             // [1] set up queues
             synchronized (lock) {
                 toDownload.clear();
@@ -129,10 +134,6 @@ public class SemuxSync implements Sync {
             process = exec.scheduleAtFixedRate(() -> {
                 process();
             }, 0, 10, TimeUnit.MILLISECONDS);
-
-            isRunning = true;
-            logger.info("Sync manager started");
-            logger.info("Height: current = {}, target = {}", chain.getLatestBlockNumber(), target);
 
             // [3] wait until the sync is done
             synchronized (done) {
@@ -193,6 +194,7 @@ public class SemuxSync implements Sync {
 
     private void download() {
         List<Channel> channels = channelMgr.getIdleChannels();
+        Collections.shuffle(channels);
         logger.trace("Idle peers = {}", channels.size());
 
         synchronized (lock) {
@@ -203,8 +205,9 @@ public class SemuxSync implements Sync {
                 Entry<Long, Long> entry = itr.next();
 
                 if (entry.getValue() + MAX_DOWNLOAD_TIME < now) {
-                    itr.remove();
+                    logger.debug("Downloading of block #{} has expired", entry.getKey());
                     toDownload.add(entry.getKey());
+                    itr.remove();
                 }
             }
 
@@ -220,7 +223,7 @@ public class SemuxSync implements Sync {
                 }
 
                 Long task = toDownload.first();
-                logger.debug("Requesting for block #{}", task);
+                logger.debug("Request block #{} from cid = {}", task, c.getId());
                 c.getMessageQueue().sendMessage(new GetBlockMessage(task));
 
                 toDownload.remove(task);
@@ -255,7 +258,7 @@ public class SemuxSync implements Sync {
         }
 
         if (block != null) {
-            logger.info(block.toString());
+            logger.info("Processing {}", block.toString());
 
             if (validateAndCommit(block)) {
                 // [7] add block to chain
