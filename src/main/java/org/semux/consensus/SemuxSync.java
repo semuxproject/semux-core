@@ -61,7 +61,7 @@ public class SemuxSync implements Sync {
 
     private static final int MAX_UNFINISHED_JOBS = 16;
 
-    private static final long MAX_DOWNLOAD_TIME = 10 * 1000;
+    private static final long MAX_DOWNLOAD_TIME = 30 * 1000;
 
     private static final int MAX_PENDING_BLOCKS = 256;
 
