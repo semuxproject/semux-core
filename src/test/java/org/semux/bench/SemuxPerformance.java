@@ -1,18 +1,15 @@
 package org.semux.bench;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.Date;
-import java.util.Scanner;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONObject;
 import org.semux.Config;
-import org.semux.core.Transaction;
-import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
-import org.semux.crypto.Hex;
+import org.semux.utils.ApiUtil;
 import org.semux.utils.Bytes;
 import org.semux.utils.SystemUtil;
 import org.slf4j.Logger;
@@ -23,39 +20,22 @@ public class SemuxPerformance {
 
     private static Wallet wallet = Wallet.getInstance();
 
-    private static JSONObject request(String uri) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        URL url = new URL("http://localhost:5171" + uri);
-
-        Scanner s = new Scanner(url.openStream());
-        while (s.hasNextLine()) {
-            sb.append(s.nextLine());
-        }
-        s.close();
-
-        return new JSONObject(sb.toString());
-    }
-
     public static void testTransfer(EdDSA key, int n) throws IOException {
-
-        JSONObject obj = request("/get_nonce?address=" + key.toAddressString());
-        long startNonce = obj.getLong("result") + 1;
-        System.out.println("Time: " + new Date());
-        System.out.println("Nonce: " + startNonce);
+        String cmd = "transfer";
 
         for (int i = 0; i < n; i++) {
-            TransactionType type = TransactionType.TRANSFER;
-            byte[] from = key.toAddress();
-            byte[] to = Bytes.random(20);
-            long value = 1;
-            long fee = Config.MIN_TRANSACTION_FEE;
-            long nonce = startNonce + i;
-            long timestamp = System.currentTimeMillis();
-            byte[] data = {};
-            Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
-            tx.sign(key);
+            Map<String, Object> params = new HashMap<>();
+            params.put("from", key.toAddress());
+            params.put("to", Bytes.random(20));
+            params.put("value", 1 * Unit.MILLI_SEM);
+            params.put("fee", Config.MIN_TRANSACTION_FEE);
+            params.put("data", Bytes.EMPY_BYTES);
 
-            request("/send_transaction?raw=" + Hex.encode(tx.toBytes()));
+            JSONObject response = ApiUtil.request(cmd, params);
+            if (!response.getBoolean("success")) {
+                System.out.println(response);
+                return;
+            }
         }
     }
 
@@ -71,7 +51,7 @@ public class SemuxPerformance {
         }
 
         EdDSA key = wallet.getAccounts().get(0);
-        JSONObject obj = request("/get_balance?address=" + key.toAddressString());
+        JSONObject obj = ApiUtil.request("get_balance", "address", key.toAddressString());
         System.out.println("Address: " + key.toAddressString());
         System.out.println("Balance: " + obj.getLong("result") / Unit.SEM + " SEM");
 

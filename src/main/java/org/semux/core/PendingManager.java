@@ -198,6 +198,16 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
         pool.remove(createKey(tx));
     }
 
+    /**
+     * Get the nonce of an account.
+     * 
+     * @param address
+     * @return
+     */
+    public synchronized long getAccountNonce(byte[] address) {
+        return accountState.getAccount(address).getNonce();
+    }
+
     @Override
     public synchronized void onBlockAdded(Block block) {
         if (isRunning) {

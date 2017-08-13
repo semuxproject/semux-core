@@ -322,8 +322,7 @@ public class APIHandler {
             long fee = Long.parseLong(pFee);
 
             // nonce, timestamp and data
-            Account acc = chain.getAccountState().getAccount(from.toAddress());
-            long nonce = acc.getNonce() + 1;
+            long nonce = pendingMgr.getAccountNonce(from.toAddress()) + 1;
             long timestamp = System.currentTimeMillis();
             byte[] data = (pData == null) ? Bytes.EMPY_BYTES : Hex.parse(pData);
 
