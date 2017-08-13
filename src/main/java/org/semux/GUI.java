@@ -13,9 +13,7 @@ import java.awt.Toolkit;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import org.semux.gui.MenuBar;
-import org.semux.gui.SemuxPannel;
-import org.semux.gui.ToolBar;
+import org.semux.gui.SemuxPanel;
 
 /**
  * Graphic user interface.
@@ -37,13 +35,7 @@ public class GUI {
         double y = (d.getHeight() - HEIGHT) / 2;
         frame.setLocation((int) x, (int) y);
 
-        MenuBar menuBar = new MenuBar();
-        ToolBar toolBar = new ToolBar();
-
-        frame.setJMenuBar(menuBar.createMenuBar(frame));
-        frame.add(toolBar.createToolbar(), BorderLayout.NORTH);
-        frame.add(new SemuxPannel(), BorderLayout.CENTER);
-
+        frame.add(new SemuxPanel(frame), BorderLayout.CENTER);
         frame.setVisible(true);
     }
 
