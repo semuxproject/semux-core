@@ -78,7 +78,7 @@ public class SemuxSync implements Sync {
     private long target;
     private Object lock = new Object();
 
-    private boolean isRunning;
+    private volatile boolean isRunning;
     private Object done = new Object();
 
     private static SemuxSync instance;
@@ -136,7 +136,9 @@ public class SemuxSync implements Sync {
             // [3] wait until the sync is done
             synchronized (done) {
                 try {
-                    done.wait();
+                    while (isRunning) {
+                        done.wait();
+                    }
                 } catch (InterruptedException e) {
                     logger.info("Sync manager got interrupted");
                 }
@@ -145,7 +147,6 @@ public class SemuxSync implements Sync {
             // [4] cancel tasks
             download.cancel(true);
             process.cancel(false);
-            isRunning = false;
             logger.info("Sync manager stopped");
         }
     }
@@ -153,6 +154,7 @@ public class SemuxSync implements Sync {
     @Override
     public void stop() {
         if (isRunning()) {
+            isRunning = false;
             synchronized (done) {
                 done.notifyAll();
             }

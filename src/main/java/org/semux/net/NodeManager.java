@@ -74,7 +74,7 @@ public class NodeManager {
     private ScheduledFuture<?> connectFuture;
     private ScheduledFuture<?> persistFuture;
 
-    private boolean isRunning;
+    private volatile boolean isRunning;
 
     /**
      * Create a node manager instance.

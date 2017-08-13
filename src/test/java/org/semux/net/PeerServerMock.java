@@ -16,7 +16,7 @@ public class PeerServerMock {
 
     private PeerServer server;
 
-    private boolean isRunning;
+    private volatile boolean isRunning;
 
     public synchronized void start(PeerClient client, boolean isDiscoveryMode) {
         if (!isRunning) {

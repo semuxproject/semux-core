@@ -64,8 +64,8 @@ public class SemuxBFT implements Consensus {
     private Broadcaster broadcaster;
     private BlockingQueue<Event> events;
 
-    private Status status;
-    private State state;
+    private volatile Status status;
+    private volatile State state;
 
     private Block prevBlock;
 

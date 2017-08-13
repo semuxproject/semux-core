@@ -78,7 +78,7 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> validateFuture;
 
-    private boolean isRunning;
+    private volatile boolean isRunning;
 
     /**
      * Create a pending manager.

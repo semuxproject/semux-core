@@ -47,7 +47,7 @@ public class MessageQueue {
     private int maxQueueSize;
 
     private ScheduledFuture<?> timerTask;
-    private boolean isRunning;
+    private volatile boolean isRunning;
 
     /**
      * Create a message queue, with the default maximum queue size.

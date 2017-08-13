@@ -20,7 +20,7 @@ public class APIServerMock {
 
     private SemuxAPI server;
 
-    private boolean isRunning;
+    private volatile boolean isRunning;
 
     public Blockchain chain;
     public ChannelManager channelMgr;
