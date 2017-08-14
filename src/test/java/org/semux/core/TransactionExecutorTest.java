@@ -86,7 +86,7 @@ public class TransactionExecutorTest {
         TransactionType type = TransactionType.DELEGATE;
         byte[] from = delegate.toAddress();
         byte[] to = Bytes.random(20);
-        long value = Config.BFT_REGISTRATION_FEE;
+        long value = Config.MIN_DELEGATE_FEE;
         long fee = Config.MIN_TRANSACTION_FEE;
         long nonce = as.getAccount(from).getNonce() + 1;
         long timestamp = System.currentTimeMillis();
@@ -112,7 +112,7 @@ public class TransactionExecutorTest {
         assertEquals(0, result.getCode());
 
         // check state afterwards
-        assertEquals(balance - Config.BFT_REGISTRATION_FEE - fee, as.getAccount(delegate.toAddress()).getBalance());
+        assertEquals(balance - Config.MIN_DELEGATE_FEE - fee, as.getAccount(delegate.toAddress()).getBalance());
         assertArrayEquals(delegate.toAddress(), ds.getDelegateByName(data).getAddress());
         assertArrayEquals(data, ds.getDelegateByAddress(delegate.toAddress()).getName());
     }

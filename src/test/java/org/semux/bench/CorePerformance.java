@@ -28,7 +28,7 @@ public class CorePerformance {
             byte[] from = key.toAddress();
             byte[] to = Bytes.random(20);
             long value = 1;
-            long fee = Config.BFT_REGISTRATION_FEE;
+            long fee = Config.MIN_DELEGATE_FEE;
             long nonce = 1 + i;
             long timestamp = System.currentTimeMillis();
             byte[] data = {};

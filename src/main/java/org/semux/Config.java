@@ -119,6 +119,11 @@ public class Config {
      */
     public static long MIN_TRANSACTION_FEE = 5 * Unit.MILLI_SEM;
 
+    /**
+     * Minimum delegate fee.
+     */
+    public static long MIN_DELEGATE_FEE = 1000 * Unit.SEM;
+
     // =========================
     // Client
     // =========================
@@ -272,11 +277,6 @@ public class Config {
      * The duration of PRE_PRE_COMMIT state.
      */
     public static int BFT_PRE_COMMIT_TIMEOUT = 4000;
-
-    /**
-     * Registration fee.
-     */
-    public static long BFT_REGISTRATION_FEE = 1000 * Unit.SEM;
 
     /**
      * Maximum number of validators.

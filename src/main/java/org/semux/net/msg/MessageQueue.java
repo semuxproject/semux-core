@@ -107,7 +107,7 @@ public class MessageQueue {
     }
 
     /**
-     * Disconnect as the other peer requests.
+     * Disconnect as the othssh er peer requests.
      */
     public void disconnect() {
         disconnect(ReasonCode.REQUESTED);
@@ -127,7 +127,7 @@ public class MessageQueue {
         // Send reason code and flush all enqueued message (to avoid
         // ClosedChannelException)
         try {
-            ctx.writeAndFlush(new DisconnectMessage(code)).await();
+            ctx.writeAndFlush(new DisconnectMessage(code)).await(10);
         } catch (InterruptedException e) {
             // do nothing
         } finally {

@@ -351,7 +351,7 @@ public class APIHandlerTest {
         Wallet.getInstance().unlock("12345678");
 
         EdDSA key = Wallet.getInstance().getAccounts().get(0);
-        String uri = "/delegate?from=0&to=" + key.toAddressString() + "&value=" + Config.BFT_REGISTRATION_FEE
+        String uri = "/delegate?from=0&to=" + key.toAddressString() + "&value=" + Config.MIN_DELEGATE_FEE
                 + "&fee=5000000&data=test";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
