@@ -246,7 +246,9 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
                     && tx.validate()) { // valid
 
                 // process transaction
-                processTransaction(tx, true);
+                if (processTransaction(tx, true) != 1) {
+                    logger.debug("Transaction dropped: {}", tx);
+                }
 
                 // break after one transaction
                 return;

@@ -6,42 +6,21 @@
  */
 package org.semux;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.awt.EventQueue;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
-import org.semux.gui.SemuxPanel;
+import org.semux.gui.MainFrame;
 
 /**
  * Graphic user interface.
- *
  */
 public class GUI {
 
-    private static String TITLE = "Semux Wallet";
-    private static int WIDTH = 800;
-    private static int HEIGHT = 600;
-
-    private static void show() {
-        JFrame frame = new JFrame(TITLE);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(WIDTH, HEIGHT);
-
-        Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-        double x = (d.getWidth() - WIDTH) / 2;
-        double y = (d.getHeight() - HEIGHT) / 2;
-        frame.setLocation((int) x, (int) y);
-
-        frame.add(new SemuxPanel(frame), BorderLayout.CENTER);
-        frame.setVisible(true);
-    }
-
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            show();
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                MainFrame frame = new MainFrame();
+                frame.setVisible(true);
+            }
         });
     }
 }

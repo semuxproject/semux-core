@@ -7,62 +7,47 @@
 package org.semux.gui;
 
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
-public class ToolBar {
-    public JPanel createToolbar() {
-        int fontSize = 16;
-        JButton sendButton;
-        JButton receiveButton;
-        JButton delegatesButton;
+public class ToolBar extends JToolBar implements ActionListener {
 
-        JToolBar toolBar = new JToolBar();
+    private static final long serialVersionUID = 1L;
 
-        toolBar.setFloatable(false);
+    public ToolBar(boolean floatable) {
+        this.setFloatable(floatable);
 
-        // the space between buttons
-        Dimension dimension = new Dimension(10, 0);
+        JButton btnSend = new JButton("Send");
+        btnSend.addActionListener(this);
+        btnSend.setIcon(SwingUtil.loadImage("send", 32, 32));
+        this.add(btnSend);
+        this.add(Box.createRigidArea(new Dimension(10, 0)));
 
-        // add send button
-        sendButton = new JButton("Send");
-        sendButton.setVerticalTextPosition(AbstractButton.CENTER);
-        sendButton.setActionCommand("send");
-        sendButton.setIcon(ResourceLoader.createIcon("send", 48, 48));
-        sendButton.setMargin(new Insets(0, 0, 0, 10));
-        sendButton.setFont(new Font(null, 0, fontSize));
-        toolBar.add(sendButton);
-        toolBar.add(Box.createRigidArea(dimension));
+        JButton btnReceive = new JButton("Receive");
+        btnReceive.addActionListener(this);
+        btnReceive.setIcon(SwingUtil.loadImage("receive", 32, 32));
+        this.add(btnReceive);
+        this.add(Box.createRigidArea(new Dimension(10, 0)));
 
-        // add receive button
-        receiveButton = new JButton("Receive");
-        receiveButton.setVerticalTextPosition(AbstractButton.CENTER);
-        receiveButton.setActionCommand("receive");
-        receiveButton.setIcon(ResourceLoader.createIcon("receive", 48, 48));
-        receiveButton.setMargin(new Insets(0, 0, 0, 10));
-        receiveButton.setFont(new Font(null, 0, fontSize));
-        toolBar.add(receiveButton);
-        toolBar.add(Box.createRigidArea(dimension));
+        JButton btnTransactions = new JButton("Transactions");
+        btnTransactions.addActionListener(this);
+        btnTransactions.setIcon(SwingUtil.loadImage("receive", 32, 32));
+        this.add(btnTransactions);
+        this.add(Box.createRigidArea(new Dimension(10, 0)));
 
-        // add delegates button
-        delegatesButton = new JButton("Delegates");
-        delegatesButton.setVerticalTextPosition(AbstractButton.CENTER);
-        delegatesButton.setActionCommand("delegates");
-        delegatesButton.setIcon(ResourceLoader.createIcon("delegates", 48, 48));
-        delegatesButton.setMargin(new Insets(0, 0, 0, 10));
-        delegatesButton.setFont(new Font(null, 0, fontSize));
-        toolBar.add(delegatesButton);
+        JButton btnDelegates = new JButton("Delegates");
+        btnDelegates.addActionListener(this);
+        btnDelegates.setIcon(SwingUtil.loadImage("delegates", 32, 32));
+        this.add(btnDelegates);
+    }
 
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.add(toolBar);
-        return panel;
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        System.out.println(e.getActionCommand());
     }
 
 }
