@@ -278,6 +278,7 @@ public class APIHandler {
         String pTo = params.get("to");
         String pValue = params.get("value");
         String pFee = params.get("fee");
+        String pNonce = params.get("nonce");
         String pData = params.get("data");
 
         // [1] check if wallet is unlocked
@@ -322,7 +323,7 @@ public class APIHandler {
             long fee = Long.parseLong(pFee);
 
             // nonce, timestamp and data
-            long nonce = pendingMgr.getAccountNonce(from.toAddress()) + 1;
+            long nonce = Long.parseLong(pNonce);
             long timestamp = System.currentTimeMillis();
             byte[] data = (pData == null) ? Bytes.EMPY_BYTES : Hex.parse(pData);
 

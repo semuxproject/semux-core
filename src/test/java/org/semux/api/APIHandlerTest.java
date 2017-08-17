@@ -333,7 +333,9 @@ public class APIHandlerTest {
         Wallet.getInstance().unlock("12345678");
 
         EdDSA key = new EdDSA();
-        String uri = "/transfer?from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test";
+        long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
+        String uri = "/transfer?from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test&nonce="
+                + nonce;
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -351,8 +353,9 @@ public class APIHandlerTest {
         Wallet.getInstance().unlock("12345678");
 
         EdDSA key = Wallet.getInstance().getAccounts().get(0);
+        long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
         String uri = "/delegate?from=0&to=" + key.toAddressString() + "&value=" + Config.MIN_DELEGATE_FEE
-                + "&fee=5000000&data=test";
+                + "&fee=5000000&data=test&nonce=" + nonce;
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -370,7 +373,9 @@ public class APIHandlerTest {
         Wallet.getInstance().unlock("12345678");
 
         EdDSA key = new EdDSA();
-        String uri = "/vote?from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test";
+        long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
+        String uri = "/vote?from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test&nonce="
+                + nonce;
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -388,7 +393,9 @@ public class APIHandlerTest {
         Wallet.getInstance().unlock("12345678");
 
         EdDSA key = new EdDSA();
-        String uri = "/unvote?from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test";
+        long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
+        String uri = "/unvote?from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test&nonce="
+                + nonce;
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));

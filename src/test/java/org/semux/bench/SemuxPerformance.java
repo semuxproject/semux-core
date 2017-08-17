@@ -20,7 +20,20 @@ public class SemuxPerformance {
 
     private static Wallet wallet = Wallet.getInstance();
 
+    public static long getNonce(EdDSA key) throws IOException {
+        String cmd = "get_nonce";
+
+        JSONObject response = ApiUtil.request(cmd, "address", key.toAddress());
+        if (response.getBoolean("success")) {
+            return response.getLong("result");
+        } else {
+            throw new IOException(response.toString());
+        }
+    }
+
     public static void testTransfer(EdDSA key, int n) throws IOException {
+        long startNonce = getNonce(key) + 1;
+
         String cmd = "transfer";
 
         for (int i = 0; i < n; i++) {
@@ -29,6 +42,7 @@ public class SemuxPerformance {
             params.put("to", Bytes.random(20));
             params.put("value", 1 * Unit.MILLI_SEM);
             params.put("fee", Config.MIN_TRANSACTION_FEE);
+            params.put("nonce", startNonce + i);
             params.put("data", Bytes.EMPY_BYTES);
 
             JSONObject response = ApiUtil.request(cmd, params);
