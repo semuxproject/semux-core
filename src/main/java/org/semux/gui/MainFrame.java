@@ -21,6 +21,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.JTabbedPane;
 
 public class MainFrame extends JFrame {
 
@@ -84,6 +85,8 @@ public class MainFrame extends JFrame {
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(10, 10, 10, 10)),
                 "Transactions", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
 
+        JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this.getContentPane());
         groupLayout.setHorizontalGroup(
@@ -92,24 +95,43 @@ public class MainFrame extends JFrame {
                     .addContainerGap()
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addGroup(groupLayout.createSequentialGroup()
-                            .addGap(4)
-                            .addComponent(panelOverview, GroupLayout.PREFERRED_SIZE, 240, GroupLayout.PREFERRED_SIZE)
-                            .addGap(15)
-                            .addComponent(panelTransactions, GroupLayout.DEFAULT_SIZE, 599, Short.MAX_VALUE))
-                        .addComponent(toolBar, GroupLayout.DEFAULT_SIZE, 858, Short.MAX_VALUE))
-                    .addGap(14))
+                            .addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 866, Short.MAX_VALUE)
+                            .addContainerGap())
+                        .addGroup(groupLayout.createSequentialGroup()
+                            .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+                                .addGroup(Alignment.LEADING, groupLayout.createSequentialGroup()
+                                    .addGap(4)
+                                    .addComponent(panelOverview, GroupLayout.PREFERRED_SIZE, 240, GroupLayout.PREFERRED_SIZE)
+                                    .addGap(15)
+                                    .addComponent(panelTransactions, GroupLayout.DEFAULT_SIZE, 599, Short.MAX_VALUE))
+                                .addComponent(toolBar, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 858, Short.MAX_VALUE))
+                            .addGap(14))))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGap(12)
                     .addComponent(toolBar, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(ComponentPlacement.UNRELATED)
+                    .addPreferredGap(ComponentPlacement.RELATED)
+                    .addComponent(tabbedPane, GroupLayout.PREFERRED_SIZE, 193, GroupLayout.PREFERRED_SIZE)
+                    .addPreferredGap(ComponentPlacement.RELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(panelTransactions, GroupLayout.DEFAULT_SIZE, 461, Short.MAX_VALUE)
+                        .addComponent(panelTransactions, GroupLayout.DEFAULT_SIZE, 268, Short.MAX_VALUE)
                         .addComponent(panelOverview, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE))
                     .addGap(18))
         );
+        
+        JPanel panel = new JPanel();
+        tabbedPane.addTab("New tab", null, panel, null);
+        
+        JPanel panel_1 = new JPanel();
+        tabbedPane.addTab("New tab", null, panel_1, null);
+        
+        JPanel panel_2 = new JPanel();
+        tabbedPane.addTab("New tab", null, panel_2, null);
+        
+        JPanel panel_3 = new JPanel();
+        tabbedPane.addTab("New tab", null, panel_3, null);
         // @formatter:on
 
         this.getContentPane().setLayout(groupLayout);

@@ -35,7 +35,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
     private static final String OPTION_IMPORT = "Import acounts from backup file";
 
     public WelcomeFrame() {
-        // setup frame properties 
+        // setup frame properties
         this.setTitle(TITLE);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         SwingUtil.centerizeFrame(this, 600, 400);
