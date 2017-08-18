@@ -8,10 +8,13 @@ package org.semux;
 
 import java.awt.EventQueue;
 
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.semux.core.Wallet;
 import org.semux.gui.MainFrame;
+import org.semux.gui.WelcomeFrame;
 
 /**
  * Graphic user interface.
@@ -32,11 +35,36 @@ public class GUI {
     public static void main(String[] args) {
         setupLookAndFeel();
 
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                MainFrame frame = new MainFrame();
-                frame.setVisible(true);
+        Wallet wallet = Wallet.getInstance();
+
+        if (!wallet.exists()) {
+            // start welcome frame
+            EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    WelcomeFrame frame = new WelcomeFrame();
+                    frame.setVisible(true);
+                }
+            });
+        } else {
+            for (int i = 0; i < 10; i++) {
+                String msg = (i == 0) ? "Please enter your password" : "Wrong password, please try again";
+                String pwd = JOptionPane.showInputDialog(msg);
+
+                if (wallet.unlock(pwd)) {
+                    break;
+                }
             }
-        });
+
+            // start main frame
+            EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    MainFrame frame = new MainFrame();
+                    frame.setVisible(true);
+                }
+            });
+
+            // start kernel
+            CLI.main(args);
+        }
     }
 }

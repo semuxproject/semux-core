@@ -126,14 +126,17 @@ public class CLI {
         // ====================================
         // unlock wallet
         // ====================================
-        if (password == null) {
-            password = SystemUtil.readPassword();
-        }
-
         Wallet wallet = Wallet.getInstance();
-        if (!wallet.unlock(password)) {
-            logger.error("Failed to unlock wallet");
-            System.exit(-1);
+
+        if (wallet.isLocked()) {
+            if (password == null) {
+                password = SystemUtil.readPassword();
+            }
+
+            if (!wallet.unlock(password)) {
+                logger.error("Failed to unlock wallet");
+                System.exit(-1);
+            }
         }
 
         List<EdDSA> accounts = wallet.getAccounts();

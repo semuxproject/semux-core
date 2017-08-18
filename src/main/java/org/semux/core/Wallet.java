@@ -99,6 +99,17 @@ public class Wallet {
     }
 
     /**
+     * Check whether the wallet file exists.
+     * 
+     * @return
+     */
+    public boolean exists() {
+        File f = new File(Config.DATA_DIR, WALLET_FILE);
+
+        return f.isFile();
+    }
+
+    /**
      * Lock the wallet.
      */
     public void lock() {
