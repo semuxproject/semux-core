@@ -41,6 +41,7 @@ public class CLI {
     private static String password = null;
     private static int coinbaseIndex = 0;
     private static String dataDir = ".";
+    private static boolean enableApi = false;
 
     private static void printUsage() {
         System.out.println("===============================================================");
@@ -56,6 +57,7 @@ public class CLI {
         System.out.println("                  list    List all accounts and exit");
         System.out.println("  -c, --coinbase  index   Specify which account to be used as coinbase");
         System.out.println("  -p, --password  pwd     Password of the wallet");
+        System.out.println("  --enable-api            Enable RESTful API");
         System.out.println();
     }
 
@@ -100,6 +102,9 @@ public class CLI {
                 case "-d":
                 case "--datadir":
                     dataDir = args[++i];
+                    break;
+                case "--enable-api":
+                    enableApi = true;
                     break;
                 default:
                     printUsage();
@@ -216,10 +221,12 @@ public class CLI {
         // ====================================
         SemuxAPI api = new SemuxAPI(new APIHandler(chain, pendingMgr, channelMgr, nodeMgr, client));
 
-        Thread apiThread = new Thread(() -> {
-            api.start(Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
-        }, "api");
-        apiThread.start();
+        if (enableApi) {
+            Thread apiThread = new Thread(() -> {
+                api.start(Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
+            }, "api");
+            apiThread.start();
+        }
 
         // ====================================
         // start sync/consensus
