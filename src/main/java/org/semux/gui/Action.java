@@ -9,5 +9,17 @@ public enum Action {
 
     TAB_TRANSACTIONS,
 
-    TAB_DELEGATES
+    TAB_DELEGATES,
+
+    BTN_SEND,
+
+    BTN_CLEAR,
+
+    BTN_COPY_ADDRESS,
+
+    BTN_VOTE,
+
+    BTN_UNVOTE,
+
+    BTN_REFRESH
 }

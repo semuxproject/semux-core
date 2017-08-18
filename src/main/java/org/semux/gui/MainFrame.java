@@ -51,7 +51,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
         // setup tool bar
         JToolBar toolBar = new JToolBar();
-        toolBar.setBorder(new EmptyBorder(12, 12, 12, 12));
+        toolBar.setBorder(new EmptyBorder(15, 15, 15, 15));
         toolBar.setFloatable(false);
 
         JButton btnHome = new JButton("Home");
@@ -90,7 +90,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
         // setup tabs
         tabs = new JPanel();
-        tabs.setBorder(new EmptyBorder(4, 12, 12, 12));
+        tabs.setBorder(new EmptyBorder(0, 15, 15, 15));
         tabs.setLayout(new BorderLayout(0, 0));
 
         getContentPane().add(toolBar, BorderLayout.NORTH);

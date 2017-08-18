@@ -10,11 +10,12 @@ import javax.swing.JTable;
 public class TransactionsPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
+
     private JTable table;
-
     private String[] columnNames = { "Hash", "Type", "From", "To", "Value", "Time" };
-
-    private Object[][] data = { { "0x11223344", "TRANSFER", "0x11223344", "0x11223344", new Integer(1), new Date() } };
+    private Object[][] data = { { "0x1122334455667788112233445566778811223344556677881122334455667788", "TRANSFER",
+            "0x1122334455667788112233445566778811223344", "0x1122334455667788112233445566778811223344", new Integer(1),
+            new Date() } };
 
     public TransactionsPanel() {
         setLayout(new BorderLayout(0, 0));
