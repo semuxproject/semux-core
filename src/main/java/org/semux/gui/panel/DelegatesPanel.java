@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -26,6 +27,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private JTextField textVote;
     private JTextField textUnvote;
+    private JTextField textName;
 
     public DelegatesPanel() {
         JScrollPane scrollPane = new JScrollPane();
@@ -37,22 +39,30 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         JPanel panel = new JPanel();
         panel.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
+        JPanel panel2 = new JPanel();
+        panel2.setBorder(new LineBorder(Color.LIGHT_GRAY));
+
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
         groupLayout.setHorizontalGroup(
-            groupLayout.createParallelGroup(Alignment.LEADING)
-                .addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
-                    .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE)
+            groupLayout.createParallelGroup(Alignment.TRAILING)
+                .addGroup(groupLayout.createSequentialGroup()
+                    .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 232, Short.MAX_VALUE)
                     .addGap(18)
-                    .addComponent(panel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE))
+                    .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+                        .addComponent(panel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(panel2, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE)))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addComponent(panel, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(160, Short.MAX_VALUE))
+                    .addComponent(panel, GroupLayout.PREFERRED_SIZE, 130, GroupLayout.PREFERRED_SIZE)
+                    .addGap(18)
+                    .addComponent(panel2, GroupLayout.PREFERRED_SIZE, 138, GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(14, Short.MAX_VALUE))
                 .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
         );
+        setLayout(groupLayout);
         // @formatter:on
 
         textVote = new JTextField();
@@ -107,7 +117,42 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     .addContainerGap(15, Short.MAX_VALUE))
         );
         panel.setLayout(groupLayout2);
-        setLayout(groupLayout);
+        // @formatter:on
+
+        JButton btnRegister = new JButton("Register as delegate");
+        btnRegister.addActionListener(this);
+        btnRegister.setActionCommand(Action.BTN_REGISTER.name());
+
+        textName = new JTextField();
+        textName.setToolTipText("Name");
+        textName.setColumns(10);
+
+        JComboBox<String> comboBox = new JComboBox<>();
+
+        // @formatter:off
+        GroupLayout groupLayout3 = new GroupLayout(panel2);
+        groupLayout3.setHorizontalGroup(
+            groupLayout3.createParallelGroup(Alignment.LEADING)
+                .addGroup(Alignment.TRAILING, groupLayout3.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(groupLayout3.createParallelGroup(Alignment.TRAILING)
+                        .addComponent(btnRegister, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
+                        .addComponent(textName, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
+                        .addComponent(comboBox, 0, 180, Short.MAX_VALUE))
+                    .addGap(12))
+        );
+        groupLayout3.setVerticalGroup(
+            groupLayout3.createParallelGroup(Alignment.LEADING)
+                .addGroup(groupLayout3.createSequentialGroup()
+                    .addGap(12)
+                    .addComponent(comboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addGap(18)
+                    .addComponent(textName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addGap(18)
+                    .addComponent(btnRegister)
+                    .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        panel2.setLayout(groupLayout3);
         // @formatter:on
     }
 

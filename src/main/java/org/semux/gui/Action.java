@@ -21,5 +21,7 @@ public enum Action {
 
     BTN_UNVOTE,
 
-    BTN_REFRESH
+    BTN_REFRESH,
+
+    BTN_REGISTER
 }
