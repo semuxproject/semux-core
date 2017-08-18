@@ -30,7 +30,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     public DelegatesPanel() {
         JScrollPane scrollPane = new JScrollPane();
         table = new JTable(data, columnNames);
-        table.getColumnModel().getColumn(0).setMaxWidth(32);
+        table.getColumnModel().getColumn(0).setMaxWidth(96);
         table.getColumnModel().getColumn(2).setMaxWidth(64);
         scrollPane.setViewportView(table);
 
@@ -44,7 +44,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 .addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
                     .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE)
                     .addGap(18)
-                    .addComponent(panel, GroupLayout.PREFERRED_SIZE, 210, GroupLayout.PREFERRED_SIZE))
+                    .addComponent(panel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
@@ -80,16 +80,16 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 .addGroup(groupLayout2.createSequentialGroup()
                     .addContainerGap()
                     .addGroup(groupLayout2.createParallelGroup(Alignment.TRAILING, false)
-                        .addComponent(btnRefresh, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnRefresh, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(Alignment.LEADING, groupLayout2.createSequentialGroup()
-                            .addGroup(groupLayout2.createParallelGroup(Alignment.LEADING, false)
+                            .addGroup(groupLayout2.createParallelGroup(Alignment.TRAILING, false)
                                 .addComponent(textUnvote, 0, 0, Short.MAX_VALUE)
-                                .addComponent(textVote, GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE))
+                                .addComponent(textVote, GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE))
                             .addPreferredGap(ComponentPlacement.RELATED)
                             .addGroup(groupLayout2.createParallelGroup(Alignment.LEADING)
                                 .addComponent(btnVote)
                                 .addComponent(btnUnvote, GroupLayout.PREFERRED_SIZE, 75, GroupLayout.PREFERRED_SIZE))))
-                    .addGap(154))
+                    .addGap(179))
         );
         groupLayout2.setVerticalGroup(
             groupLayout2.createParallelGroup(Alignment.LEADING)

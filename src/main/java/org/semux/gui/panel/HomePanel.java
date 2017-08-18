@@ -3,15 +3,19 @@ package org.semux.gui.panel;
 import java.awt.Color;
 import java.awt.GridLayout;
 
+import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.SwingConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+
+import org.semux.gui.SwingUtil;
 
 public class HomePanel extends JPanel {
 
@@ -67,17 +71,33 @@ public class HomePanel extends JPanel {
                 .addGroup(groupLayout.createSequentialGroup()
                     .addComponent(overview, GroupLayout.PREFERRED_SIZE, 252, GroupLayout.PREFERRED_SIZE)
                     .addPreferredGap(ComponentPlacement.UNRELATED)
-                    .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE))
+                    .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
-            groupLayout.createParallelGroup(Alignment.LEADING)
+            groupLayout.createParallelGroup(Alignment.TRAILING)
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(overview, GroupLayout.PREFERRED_SIZE, 171, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE))
+                        .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 567, Short.MAX_VALUE)
+                        .addComponent(overview, GroupLayout.PREFERRED_SIZE, 171, GroupLayout.PREFERRED_SIZE))
                     .addGap(0))
         );
+        transactions.setLayout(new BoxLayout(transactions, BoxLayout.Y_AXIS));
         // @formatter:on
+
+        JPanel panel_1 = new TransactionPanel();
+        transactions.add(panel_1);
+
+        JPanel panel_2 = new TransactionPanel();
+        transactions.add(panel_2);
+
+        JPanel panel_3 = new TransactionPanel();
+        transactions.add(panel_3);
+
+        JPanel panel_4 = new TransactionPanel();
+        transactions.add(panel_4);
+
+        JPanel panel_5 = new TransactionPanel();
+        transactions.add(panel_5);
         setLayout(groupLayout);
     }
 
@@ -111,5 +131,58 @@ public class HomePanel extends JPanel {
 
     public void setLocked(String locked) {
         this.locked = locked;
+    }
+
+    public static class TransactionPanel extends JPanel {
+
+        private static final long serialVersionUID = 1L;
+
+        public TransactionPanel() {
+            this.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+            JLabel lblType = new JLabel("");
+            lblType.setIcon(SwingUtil.loadImage("send", 48, 48));
+
+            JLabel lblAmount = new JLabel("+12.3456 SEM");
+            lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
+
+            JLabel lblTime = new JLabel("2017-01-02 12:00 PM");
+
+            JLabel lblFrom = new JLabel("0x1122334455667788112233445566778811223344");
+            lblFrom.setForeground(Color.GRAY);
+
+            // @formatter:off
+            GroupLayout groupLayout = new GroupLayout(this);
+            groupLayout.setHorizontalGroup(
+                groupLayout.createParallelGroup(Alignment.LEADING)
+                    .addGroup(groupLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(lblType)
+                        .addGap(18)
+                        .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                            .addGroup(groupLayout.createSequentialGroup()
+                                .addComponent(lblTime, GroupLayout.PREFERRED_SIZE, 169, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED, 87, Short.MAX_VALUE)
+                                .addComponent(lblAmount, GroupLayout.PREFERRED_SIZE, 128, GroupLayout.PREFERRED_SIZE))
+                            .addGroup(groupLayout.createSequentialGroup()
+                                .addComponent(lblFrom, GroupLayout.DEFAULT_SIZE, 384, Short.MAX_VALUE)
+                                .addContainerGap())))
+            );
+            groupLayout.setVerticalGroup(
+                groupLayout.createParallelGroup(Alignment.LEADING)
+                    .addGroup(groupLayout.createSequentialGroup()
+                        .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
+                            .addGroup(groupLayout.createSequentialGroup()
+                                .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                                    .addComponent(lblTime, GroupLayout.PREFERRED_SIZE, 19, GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(lblAmount, GroupLayout.PREFERRED_SIZE, 19, GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(lblFrom))
+                            .addComponent(lblType, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 48, GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap())
+            );
+            this.setLayout(groupLayout);
+            // @formatter:on
+        }
     }
 }

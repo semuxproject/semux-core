@@ -15,6 +15,7 @@ import javax.swing.JTable;
 
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
+import javax.swing.LayoutStyle.ComponentPlacement;
 
 public class ReceivePanel extends JPanel implements ActionListener {
 
@@ -36,7 +37,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         btnCopyAddress.setActionCommand(Action.BTN_COPY_ADDRESS.name());
 
         JLabel qt = new JLabel("");
-        qt.setIcon(SwingUtil.loadImage("send", 192, 192));
+        qt.setIcon(SwingUtil.loadImage("send", 200, 200));
         qt.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         // @formatter:off
@@ -44,20 +45,19 @@ public class ReceivePanel extends JPanel implements ActionListener {
         groupLayout.setHorizontalGroup(
             groupLayout.createParallelGroup(Alignment.TRAILING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                    .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                        .addComponent(qt)
-                        .addComponent(btnCopyAddress))
-                    .addGap(20))
+                        .addComponent(btnCopyAddress)
+                        .addComponent(qt)))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
                     .addComponent(qt)
-                    .addGap(18)
+                    .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addComponent(btnCopyAddress)
-                    .addContainerGap(61, Short.MAX_VALUE))
+                    .addContainerGap(18, Short.MAX_VALUE))
                 .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
         );
         setLayout(groupLayout);
