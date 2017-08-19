@@ -119,9 +119,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         panel.setLayout(groupLayout2);
         // @formatter:on
 
-        JButton btnRegister = new JButton("Register as delegate");
-        btnRegister.addActionListener(this);
-        btnRegister.setActionCommand(Action.BTN_REGISTER.name());
+        JButton btnDelegate = new JButton("Register as delegate");
+        btnDelegate.addActionListener(this);
+        btnDelegate.setActionCommand(Action.BTN_DELEGATE.name());
 
         textName = new JTextField();
         textName.setToolTipText("Name");
@@ -136,7 +136,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 .addGroup(Alignment.TRAILING, groupLayout3.createSequentialGroup()
                     .addContainerGap()
                     .addGroup(groupLayout3.createParallelGroup(Alignment.TRAILING)
-                        .addComponent(btnRegister, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
+                        .addComponent(btnDelegate, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
                         .addComponent(textName, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
                         .addComponent(comboBox, 0, 180, Short.MAX_VALUE))
                     .addGap(12))
@@ -149,7 +149,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addComponent(textName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
-                    .addComponent(btnRegister)
+                    .addComponent(btnDelegate)
                     .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         panel2.setLayout(groupLayout3);

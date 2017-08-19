@@ -46,7 +46,7 @@ public class GUI {
                 }
             });
         } else {
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0;; i++) {
                 String msg = (i == 0) ? "Please enter your password" : "Wrong password, please try again";
                 String pwd = JOptionPane.showInputDialog(msg);
 

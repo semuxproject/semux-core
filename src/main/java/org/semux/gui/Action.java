@@ -23,5 +23,9 @@ public enum Action {
 
     BTN_REFRESH,
 
-    BTN_REGISTER
+    BTN_DELEGATE,
+
+    BTN_OK,
+
+    BTN_CANCEL
 }
