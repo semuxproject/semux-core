@@ -8,12 +8,12 @@ package org.semux;
 
 import java.awt.EventQueue;
 
-import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import org.semux.core.Wallet;
 import org.semux.gui.MainFrame;
+import org.semux.gui.PasswordFrame;
 import org.semux.gui.WelcomeFrame;
 
 /**
@@ -47,10 +47,13 @@ public class GUI {
             });
         } else {
             for (int i = 0;; i++) {
-                String msg = (i == 0) ? "Please enter your password" : "Wrong password, please try again";
-                String pwd = JOptionPane.showInputDialog(msg);
+                PasswordFrame frame = new PasswordFrame(i == 0 ? null : "Wrong password, please try again");
+                frame.setVisible(true);
+                String pw = frame.getPassword();
 
-                if (wallet.unlock(pwd)) {
+                if (pw == null) {
+                    System.exit(-1);
+                } else if (wallet.unlock(pw)) {
                     break;
                 }
             }

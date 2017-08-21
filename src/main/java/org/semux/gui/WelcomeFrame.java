@@ -28,7 +28,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
     private static final String TITLE = "Semux Wallet";
     private static final String DESCRIPTION = "<html>" + //
             "<h1>Welcome to semux!</h1>" + //
-            "<p>This wizard will help you set up your wallet.<p>" + //
+            "<p>Looks like this is your first time running this wallet.<p>" + //
             "<p>Do you want to create a new account, or import accounts from backup files?</p>" + //
             "</html>";
     private static final String OPTION_CREATE = "Create new account";

@@ -12,6 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
+import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.semux.utils.UnreachableException;
 
@@ -23,14 +24,14 @@ public class PasswordFrame extends JFrame implements ActionListener {
     private AtomicBoolean done = new AtomicBoolean(false);
 
     public PasswordFrame() {
-        this("Please enter your password:");
+        this(null);
     }
 
     public PasswordFrame(String message) {
         JLabel labelLogo = new JLabel("");
         labelLogo.setIcon(SwingUtil.loadImage("send", 96, 96));
 
-        JLabel lblMessage = new JLabel(message);
+        JLabel lblMessage = new JLabel(message == null ? "Please enter your password:" : message);
         textPassword = new JPasswordField();
 
         JButton btnOk = new JButton("OK");
@@ -55,7 +56,7 @@ public class PasswordFrame extends JFrame implements ActionListener {
                         .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
                             .addGroup(groupLayout.createSequentialGroup()
                                 .addComponent(btnCancel, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
-                                .addGap(18)
+                                .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(btnOk, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE))
                             .addComponent(textPassword, GroupLayout.PREFERRED_SIZE, 313, GroupLayout.PREFERRED_SIZE)))
                     .addGap(17))
@@ -93,10 +94,14 @@ public class PasswordFrame extends JFrame implements ActionListener {
         SwingUtil.centerizeFrame(this, this.getWidth(), this.getHeight());
     }
 
-    public String getPassword() throws InterruptedException {
+    public String getPassword() {
         synchronized (done) {
             while (!done.get()) {
-                done.wait();
+                try {
+                    done.wait();
+                } catch (InterruptedException e) {
+                    return null;
+                }
             }
 
             return password;
