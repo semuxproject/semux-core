@@ -33,6 +33,7 @@ public class PasswordFrame extends JFrame implements ActionListener {
 
         JLabel lblMessage = new JLabel(message == null ? "Please enter your password:" : message);
         textPassword = new JPasswordField();
+        textPassword.setActionCommand(Action.BTN_OK.name());
 
         JButton btnOk = new JButton("OK");
         btnOk.setSelected(true);
