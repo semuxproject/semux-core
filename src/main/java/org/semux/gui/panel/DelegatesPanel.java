@@ -7,7 +7,7 @@ import java.awt.event.ActionListener;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -42,30 +42,38 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         JPanel panel2 = new JPanel();
         panel2.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
+        JLabel label = new JLabel(
+                "<html>NOTE: A minimum transaction fee (5 mSEM) will apply when you vote/unvote/register a delegate.</p></html>");
+        label.setForeground(Color.DARK_GRAY);
+
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
         groupLayout.setHorizontalGroup(
             groupLayout.createParallelGroup(Alignment.TRAILING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 232, Short.MAX_VALUE)
+                    .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 495, Short.MAX_VALUE)
                     .addGap(18)
-                    .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                        .addComponent(panel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(panel2, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
+                        .addComponent(label, 0, 0, Short.MAX_VALUE)
+                        .addComponent(panel2, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(panel, Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, 200, Short.MAX_VALUE)))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
                     .addComponent(panel, GroupLayout.PREFERRED_SIZE, 130, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
-                    .addComponent(panel2, GroupLayout.PREFERRED_SIZE, 138, GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(14, Short.MAX_VALUE))
-                .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                    .addComponent(panel2, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE)
+                    .addGap(18)
+                    .addComponent(label)
+                    .addContainerGap(109, Short.MAX_VALUE))
+                .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE)
         );
         setLayout(groupLayout);
         // @formatter:on
 
         textVote = new JTextField();
+        textVote.setToolTipText("# of votes");
         textVote.setColumns(10);
 
         JButton btnVote = new JButton("Vote");
@@ -73,6 +81,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         btnVote.addActionListener(this);
 
         textUnvote = new JTextField();
+        textUnvote.setToolTipText("# of votes");
         textUnvote.setColumns(10);
 
         JButton btnUnvote = new JButton("Unvote");
@@ -127,30 +136,25 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textName.setToolTipText("Name");
         textName.setColumns(10);
 
-        JComboBox<String> comboBox = new JComboBox<>();
-
         // @formatter:off
         GroupLayout groupLayout3 = new GroupLayout(panel2);
         groupLayout3.setHorizontalGroup(
-            groupLayout3.createParallelGroup(Alignment.LEADING)
-                .addGroup(Alignment.TRAILING, groupLayout3.createSequentialGroup()
+            groupLayout3.createParallelGroup(Alignment.TRAILING)
+                .addGroup(groupLayout3.createSequentialGroup()
                     .addContainerGap()
-                    .addGroup(groupLayout3.createParallelGroup(Alignment.TRAILING)
-                        .addComponent(btnDelegate, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
-                        .addComponent(textName, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
-                        .addComponent(comboBox, 0, 180, Short.MAX_VALUE))
+                    .addGroup(groupLayout3.createParallelGroup(Alignment.LEADING)
+                        .addComponent(textName, GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
+                        .addComponent(btnDelegate, GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE))
                     .addGap(12))
         );
         groupLayout3.setVerticalGroup(
             groupLayout3.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout3.createSequentialGroup()
-                    .addGap(12)
-                    .addComponent(comboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                    .addGap(18)
+                    .addContainerGap()
                     .addComponent(textName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
                     .addComponent(btnDelegate)
-                    .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addContainerGap(57, Short.MAX_VALUE))
         );
         panel2.setLayout(groupLayout3);
         // @formatter:on
