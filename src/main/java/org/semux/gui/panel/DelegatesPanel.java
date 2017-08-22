@@ -77,7 +77,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textVote.setColumns(10);
 
         JButton btnVote = new JButton("Vote");
-        btnVote.setActionCommand(Action.BTN_VOTE.name());
+        btnVote.setActionCommand(Action.VOTE.name());
         btnVote.addActionListener(this);
 
         textUnvote = new JTextField();
@@ -85,11 +85,11 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textUnvote.setColumns(10);
 
         JButton btnUnvote = new JButton("Unvote");
-        btnUnvote.setActionCommand(Action.BTN_UNVOTE.name());
+        btnUnvote.setActionCommand(Action.UNVOTE.name());
         btnUnvote.addActionListener(this);
 
         JButton btnRefresh = new JButton("Refresh");
-        btnRefresh.setActionCommand(Action.BTN_REFRESH.name());
+        btnRefresh.setActionCommand(Action.REFRESH.name());
         btnRefresh.addActionListener(this);
 
         // @formatter:off
@@ -130,7 +130,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         JButton btnDelegate = new JButton("Register as delegate");
         btnDelegate.addActionListener(this);
-        btnDelegate.setActionCommand(Action.BTN_DELEGATE.name());
+        btnDelegate.setActionCommand(Action.DELEGATE.name());
 
         textName = new JTextField();
         textName.setToolTipText("Name");

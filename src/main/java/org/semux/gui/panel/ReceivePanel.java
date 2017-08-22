@@ -34,7 +34,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
         JButton btnCopyAddress = new JButton("Copy Address");
         btnCopyAddress.addActionListener(this);
-        btnCopyAddress.setActionCommand(Action.BTN_COPY_ADDRESS.name());
+        btnCopyAddress.setActionCommand(Action.COPY_ADDRESS.name());
 
         JLabel qt = new JLabel("");
         qt.setIcon(SwingUtil.loadImage("send", 200, 200));

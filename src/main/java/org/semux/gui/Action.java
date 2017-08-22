@@ -1,31 +1,35 @@
 package org.semux.gui;
 
 public enum Action {
-    TAB_HOME,
+    CREATE_ACCOUNT,
 
-    TAB_SEND,
+    IMPORT_ACCOUNTS,
 
-    TAB_RECEIVE,
+    OK,
 
-    TAB_TRANSACTIONS,
+    CANCEL,
 
-    TAB_DELEGATES,
+    SHOW_HOME,
 
-    BTN_SEND,
+    SHOW_SEND,
 
-    BTN_CLEAR,
+    SHOW_RECEIVE,
 
-    BTN_COPY_ADDRESS,
+    SHOW_TRANSACTIONS,
 
-    BTN_VOTE,
+    SHOW_DELEGATES,
 
-    BTN_UNVOTE,
+    SEND,
 
-    BTN_REFRESH,
+    CLEAR,
 
-    BTN_DELEGATE,
+    COPY_ADDRESS,
 
-    BTN_OK,
+    VOTE,
 
-    BTN_CANCEL
+    UNVOTE,
+
+    DELEGATE,
+
+    REFRESH
 }

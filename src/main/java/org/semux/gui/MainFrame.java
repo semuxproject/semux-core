@@ -55,35 +55,35 @@ public class MainFrame extends JFrame implements ActionListener {
         toolBar.setFloatable(false);
 
         JButton btnHome = new JButton("Home");
-        btnHome.setActionCommand(Action.TAB_HOME.name());
+        btnHome.setActionCommand(Action.SHOW_HOME.name());
         btnHome.addActionListener(this);
         btnHome.setIcon(SwingUtil.loadImage("send", 32, 32));
         toolBar.add(btnHome);
         toolBar.add(Box.createRigidArea(new Dimension(10, 0)));
 
         JButton btnSend = new JButton("Send");
-        btnSend.setActionCommand(Action.TAB_SEND.name());
+        btnSend.setActionCommand(Action.SHOW_SEND.name());
         btnSend.addActionListener(this);
         btnSend.setIcon(SwingUtil.loadImage("send", 32, 32));
         toolBar.add(btnSend);
         toolBar.add(Box.createRigidArea(new Dimension(10, 0)));
 
         JButton btnReceive = new JButton("Receive");
-        btnReceive.setActionCommand(Action.TAB_RECEIVE.name());
+        btnReceive.setActionCommand(Action.SHOW_RECEIVE.name());
         btnReceive.addActionListener(this);
         btnReceive.setIcon(SwingUtil.loadImage("receive", 32, 32));
         toolBar.add(btnReceive);
         toolBar.add(Box.createRigidArea(new Dimension(10, 0)));
 
         JButton btnTransactions = new JButton("Transactions");
-        btnTransactions.setActionCommand(Action.TAB_TRANSACTIONS.name());
+        btnTransactions.setActionCommand(Action.SHOW_TRANSACTIONS.name());
         btnTransactions.addActionListener(this);
         btnTransactions.setIcon(SwingUtil.loadImage("receive", 32, 32));
         toolBar.add(btnTransactions);
         toolBar.add(Box.createRigidArea(new Dimension(10, 0)));
 
         JButton btnDelegates = new JButton("Delegates");
-        btnDelegates.setActionCommand(Action.TAB_DELEGATES.name());
+        btnDelegates.setActionCommand(Action.SHOW_DELEGATES.name());
         btnDelegates.addActionListener(this);
         btnDelegates.setIcon(SwingUtil.loadImage("delegates", 32, 32));
         toolBar.add(btnDelegates);
@@ -106,19 +106,19 @@ public class MainFrame extends JFrame implements ActionListener {
 
         JPanel tab = null;
         switch (action) {
-        case TAB_HOME:
+        case SHOW_HOME:
             tab = panelHome;
             break;
-        case TAB_SEND:
+        case SHOW_SEND:
             tab = panelSend;
             break;
-        case TAB_RECEIVE:
+        case SHOW_RECEIVE:
             tab = panelReceive;
             break;
-        case TAB_TRANSACTIONS:
+        case SHOW_TRANSACTIONS:
             tab = panelTransactions;
             break;
-        case TAB_DELEGATES:
+        case SHOW_DELEGATES:
             tab = panelDelegates;
             break;
         default:

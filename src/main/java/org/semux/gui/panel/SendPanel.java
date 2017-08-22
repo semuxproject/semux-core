@@ -57,12 +57,12 @@ public class SendPanel extends JPanel implements ActionListener {
 
         JButton paySend = new JButton("Send");
         paySend.addActionListener(this);
-        paySend.setActionCommand(Action.BTN_SEND.name());
+        paySend.setActionCommand(Action.SEND.name());
         paySend.setSelected(true);
 
         JButton payClear = new JButton("Clear");
         payClear.addActionListener(this);
-        payClear.setActionCommand(Action.BTN_CLEAR.name());
+        payClear.setActionCommand(Action.CLEAR.name());
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);

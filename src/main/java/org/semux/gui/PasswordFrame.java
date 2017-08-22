@@ -33,16 +33,16 @@ public class PasswordFrame extends JFrame implements ActionListener {
 
         JLabel lblMessage = new JLabel(message == null ? "Please enter your password:" : message);
         textPassword = new JPasswordField();
-        textPassword.setActionCommand(Action.BTN_OK.name());
+        textPassword.setActionCommand(Action.OK.name());
         textPassword.addActionListener(this);
 
         JButton btnOk = new JButton("OK");
         btnOk.setSelected(true);
-        btnOk.setActionCommand(Action.BTN_OK.name());
+        btnOk.setActionCommand(Action.OK.name());
         btnOk.addActionListener(this);
 
         JButton btnCancel = new JButton("Cancel");
-        btnCancel.setActionCommand(Action.BTN_CANCEL.name());
+        btnCancel.setActionCommand(Action.CANCEL.name());
         btnCancel.addActionListener(this);
 
         // @formatter:off
@@ -115,11 +115,11 @@ public class PasswordFrame extends JFrame implements ActionListener {
         Action action = Action.valueOf(e.getActionCommand());
 
         switch (action) {
-        case BTN_OK:
+        case OK:
             password = new String(textPassword.getPassword());
             notifyDone();
             break;
-        case BTN_CANCEL:
+        case CANCEL:
             password = null;
             notifyDone();
             break;
