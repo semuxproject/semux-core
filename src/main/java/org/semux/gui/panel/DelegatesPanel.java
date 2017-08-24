@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -46,6 +47,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 "<html>NOTE: A minimum transaction fee (5 mSEM) will apply when you vote/unvote/register a delegate.</p></html>");
         label.setForeground(Color.DARK_GRAY);
 
+        JComboBox<String> comboBox = new JComboBox<>();
+
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
         groupLayout.setHorizontalGroup(
@@ -53,7 +56,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 .addGroup(groupLayout.createSequentialGroup()
                     .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 495, Short.MAX_VALUE)
                     .addGap(18)
-                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                        .addComponent(comboBox, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(label, 0, 0, Short.MAX_VALUE)
                         .addComponent(panel2, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(panel, Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, 200, Short.MAX_VALUE)))
@@ -61,12 +65,15 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
+                    .addGap(5)
+                    .addComponent(comboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addGap(18)
                     .addComponent(panel, GroupLayout.PREFERRED_SIZE, 130, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
                     .addComponent(panel2, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
                     .addComponent(label)
-                    .addContainerGap(109, Short.MAX_VALUE))
+                    .addContainerGap(75, Short.MAX_VALUE))
                 .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE)
         );
         setLayout(groupLayout);

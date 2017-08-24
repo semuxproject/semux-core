@@ -17,11 +17,14 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EmptyBorder;
+
+import org.semux.core.Wallet;
 
 public class WelcomeFrame extends JFrame implements ActionListener {
 
@@ -137,6 +140,31 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        Action action = Action.valueOf(e.getActionCommand());
+
+        switch (action) {
+        case OK:
+            String password = new String(passwordField.getPassword());
+            Action option = Action.valueOf(buttonGroup.getSelection().getActionCommand());
+
+            Wallet w = Wallet.getInstance();
+            if (!w.unlock(password)) {
+                JOptionPane.showMessageDialog(this, "Wrong password!");
+            }
+
+            if (Action.CREATE_ACCOUNT.equals(option)) {
+
+            } else if (Action.IMPORT_ACCOUNTS.equals(option)) {
+
+            }
+            break;
+        case CANCEL:
+            System.exit(0);
+            break;
+        default:
+            break;
+        }
+
         System.out.println(e.getActionCommand());
     }
 }

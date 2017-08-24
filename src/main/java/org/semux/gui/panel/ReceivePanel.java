@@ -36,9 +36,9 @@ public class ReceivePanel extends JPanel implements ActionListener {
         btnCopyAddress.addActionListener(this);
         btnCopyAddress.setActionCommand(Action.COPY_ADDRESS.name());
 
-        JLabel qt = new JLabel("");
-        qt.setIcon(SwingUtil.loadImage("send", 200, 200));
-        qt.setBorder(new LineBorder(Color.LIGHT_GRAY));
+        JLabel qr = new JLabel("");
+        qr.setIcon(SwingUtil.loadImage("send", 200, 200));
+        qr.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -49,12 +49,12 @@ public class ReceivePanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addComponent(btnCopyAddress)
-                        .addComponent(qt)))
+                        .addComponent(qr)))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addComponent(qt)
+                    .addComponent(qr)
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addComponent(btnCopyAddress)
                     .addContainerGap(18, Short.MAX_VALUE))
