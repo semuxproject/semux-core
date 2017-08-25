@@ -7,6 +7,7 @@
 package org.semux;
 
 import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.semux.api.APIHandler;
 import org.semux.api.SemuxAPI;
@@ -279,7 +280,9 @@ public class CLI {
             }
 
             // make sure no thread is updating state
-            Config.STATE_LOCK.writeLock().unlock();
+            WriteLock lock = Config.STATE_LOCK.writeLock();
+            lock.lock();
+            lock.unlock();
 
             api.stop();
             p2p.stop();

@@ -268,10 +268,9 @@ public class SemuxSync implements Sync {
             logger.info("Processing {}", block.toString());
 
             if (validateAndCommit(block)) {
-                WriteLock lock = null;
+                WriteLock lock = Config.STATE_LOCK.writeLock();
+                lock.lock();
                 try {
-                    lock = Config.STATE_LOCK.writeLock();
-
                     // [7] add block to chain
                     chain.addBlock(block);
 
@@ -279,9 +278,7 @@ public class SemuxSync implements Sync {
                     chain.getAccountState().commit();
                     chain.getDeleteState().commit();
                 } finally {
-                    if (lock != null) {
-                        lock.unlock();
-                    }
+                    lock.unlock();
                 }
 
                 synchronized (lock) {

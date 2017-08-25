@@ -742,10 +742,9 @@ public class SemuxBFT implements Consensus {
             acc.setBalance(acc.getBalance() + reward);
         }
 
-        WriteLock lock = null;
+        WriteLock lock = Config.STATE_LOCK.writeLock();
+        lock.lock();
         try {
-            lock = Config.STATE_LOCK.writeLock();
-
             // [3] add block to chain
             chain.addBlock(block);
 
@@ -753,9 +752,7 @@ public class SemuxBFT implements Consensus {
             chain.getAccountState().commit();
             chain.getDeleteState().commit();
         } finally {
-            if (lock != null) {
-                lock.unlock();
-            }
+            lock.unlock();
         }
     }
 
