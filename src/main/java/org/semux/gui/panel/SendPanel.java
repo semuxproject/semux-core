@@ -3,6 +3,8 @@ package org.semux.gui.panel;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -16,7 +18,10 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
+import org.semux.Config;
 import org.semux.core.Unit;
+import org.semux.core.Wallet;
+import org.semux.crypto.EdDSA;
 import org.semux.gui.Action;
 
 public class SendPanel extends JPanel implements ActionListener {
@@ -137,13 +142,15 @@ public class SendPanel extends JPanel implements ActionListener {
         );
         setLayout(groupLayout);
         // @formatter:on
+
+        refresh();
     }
 
     public String getFrom() {
         return (String) payFrom.getSelectedItem();
     }
 
-    public void setFromItems(String[] items) {
+    public void setFromItems(List<String> items) {
         payFrom.removeAllItems();
         for (String item : items) {
             payFrom.addItem(item);
@@ -154,12 +161,24 @@ public class SendPanel extends JPanel implements ActionListener {
         return payTo.getText().trim();
     }
 
+    public void setTo(String to) {
+        payTo.setText(to);
+    }
+
     public long getAmount() {
-        return (long) (Unit.SEM * Double.parseDouble(payTo.getText().trim()));
+        return (long) (Unit.SEM * Double.parseDouble(payAmount.getText().trim()));
+    }
+
+    public void setAmount(double amountSEM) {
+        payAmount.setText(String.format("%.3f", amountSEM));
     }
 
     public long getFee() {
-        return (long) (Unit.SEM * Double.parseDouble(payTo.getText().trim()));
+        return (long) (Unit.SEM * Double.parseDouble(payFee.getText().trim()));
+    }
+
+    public void setFee(double feeSEM) {
+        payFee.setText(String.format("%.3f", feeSEM));
     }
 
     @Override
@@ -168,9 +187,29 @@ public class SendPanel extends JPanel implements ActionListener {
 
         switch (action) {
         case REFRESH:
+            refresh();
+            break;
+        case SEND:
+            break;
+        case CLEAR:
             break;
         default:
             break;
         }
+    }
+
+    private void refresh() {
+        List<String> addresses = new ArrayList<>();
+        Wallet w = Wallet.getInstance();
+        for (EdDSA key : w.getAccounts()) {
+            addresses.add(key.toString());
+        }
+        setFromItems(addresses);
+
+        setTo("");
+
+        setAmount(0);
+
+        setFee(Config.MIN_TRANSACTION_FEE / (double) Unit.SEM);
     }
 }

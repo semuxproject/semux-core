@@ -17,6 +17,14 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import org.semux.CLI;
+import org.semux.core.Account;
+import org.semux.core.Delegate;
+import org.semux.core.Unit;
+import org.semux.core.Wallet;
+import org.semux.core.state.AccountState;
+import org.semux.core.state.DelegateState;
+import org.semux.crypto.EdDSA;
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
 
@@ -72,9 +80,9 @@ public class HomePanel extends JPanel implements ActionListener {
         groupLayout.setHorizontalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addComponent(overview, GroupLayout.PREFERRED_SIZE, 252, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(overview, GroupLayout.PREFERRED_SIZE, 294, GroupLayout.PREFERRED_SIZE)
                     .addPreferredGap(ComponentPlacement.UNRELATED)
-                    .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE))
+                    .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 478, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.TRAILING)
@@ -87,21 +95,9 @@ public class HomePanel extends JPanel implements ActionListener {
         transactions.setLayout(new BoxLayout(transactions, BoxLayout.Y_AXIS));
         // @formatter:on
 
-        JPanel panel_1 = new TransactionPanel();
-        transactions.add(panel_1);
-
-        JPanel panel_2 = new TransactionPanel();
-        transactions.add(panel_2);
-
-        JPanel panel_3 = new TransactionPanel();
-        transactions.add(panel_3);
-
-        JPanel panel_4 = new TransactionPanel();
-        transactions.add(panel_4);
-
-        JPanel panel_5 = new TransactionPanel();
-        transactions.add(panel_5);
         setLayout(groupLayout);
+
+        refresh();
     }
 
     public static class TransactionPanel extends JPanel {
@@ -163,9 +159,33 @@ public class HomePanel extends JPanel implements ActionListener {
 
         switch (action) {
         case REFRESH:
+            refresh();
             break;
         default:
             break;
         }
+    }
+
+    private void refresh() {
+        // update block number
+        blockNum.setText(Long.toString(CLI.chain.getLatestBlockNumber()));
+
+        // update status
+        Wallet w = Wallet.getInstance();
+        DelegateState ds = CLI.chain.getDeleteState();
+        Delegate d = ds.getDelegateByAddress(CLI.coinbase.toAddress());
+        status.setText(d == null ? "Normal" : "Delegate");
+
+        // update balance
+        AccountState as = CLI.chain.getAccountState();
+        long balanceSEM = 0;
+        long lockedSEM = 0;
+        for (EdDSA key : w.getAccounts()) {
+            Account a = as.getAccount(key.toAddress());
+            balanceSEM += a.getBalance();
+            lockedSEM += a.getLocked();
+        }
+        this.balance.setText(String.format("%.3f SEM", balanceSEM / (double) Unit.SEM));
+        this.locked.setText(String.format("%.3f SEM", lockedSEM / (double) Unit.SEM));
     }
 }

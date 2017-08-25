@@ -106,8 +106,8 @@ public class MainFrame extends JFrame implements ActionListener {
             EventQueue.invokeLater(() -> {
                 ActionEvent ev = new ActionEvent(MainFrame.this, 0, Action.REFRESH.name());
                 panelHome.actionPerformed(ev);
-                panelSend.actionPerformed(ev);
-                panelReceive.actionPerformed(ev);
+                // panelSend.actionPerformed(ev);
+                // panelReceive.actionPerformed(ev);
                 panelTransactions.actionPerformed(ev);
                 panelDelegates.actionPerformed(ev);
             });
