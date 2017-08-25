@@ -184,6 +184,7 @@ public class SemuxBFT implements Consensus {
             eventLoop();
 
             logger.info("Consensus stopped");
+            events.offer(new Event(Event.Type.STOP));
         }
     }
 
@@ -866,6 +867,11 @@ public class SemuxBFT implements Consensus {
 
     public static class Event {
         public enum Type {
+            /**
+             * Stop signal
+             */
+            STOP,
+
             /**
              * Received a timeout signal.
              */
