@@ -76,7 +76,8 @@
                                     <fileset dir="${project.basedir}">
                                         <include name="config/**" />
                                         <include name="LICENSE" />
-                                        <include name="run.sh" />
+                                        <include name="start.sh" />
+                                        <include name="start-gui.sh" />
                                     </fileset>
                                 </copy>
 
