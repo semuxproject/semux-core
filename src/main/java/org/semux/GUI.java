@@ -21,7 +21,13 @@ import org.semux.gui.WelcomeFrame;
  */
 public class GUI {
 
-    public static void setupLookAndFeel() {
+    private String[] args;
+
+    public GUI(String[] args) {
+        this.args = args;
+    }
+
+    public void setupLookAndFeel() {
         try {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Semux");
@@ -32,19 +38,36 @@ public class GUI {
         }
     }
 
+    public void showWelcome() {
+        // start welcome frame
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                WelcomeFrame frame = new WelcomeFrame(GUI.this);
+                frame.setVisible(true);
+            }
+        });
+    }
+
+    public void showMain() {
+        // start kernel
+        CLI.main(args);
+
+        // start main frame
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                MainFrame frame = new MainFrame();
+                frame.setVisible(true);
+            }
+        });
+    }
+
     public static void main(String[] args) {
-        setupLookAndFeel();
+        GUI gui = new GUI(args);
+        gui.setupLookAndFeel();
 
         Wallet wallet = Wallet.getInstance();
-
         if (!wallet.exists()) {
-            // start welcome frame
-            EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    WelcomeFrame frame = new WelcomeFrame(args);
-                    frame.setVisible(true);
-                }
-            });
+            gui.showWelcome();
         } else {
             for (int i = 0;; i++) {
                 PasswordFrame frame = new PasswordFrame(i == 0 ? null : "Wrong password, please try again");
@@ -57,17 +80,7 @@ public class GUI {
                     break;
                 }
             }
-
-            // start main frame
-            EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    MainFrame frame = new MainFrame();
-                    frame.setVisible(true);
-                }
-            });
-
-            // start kernel
-            CLI.main(args);
+            gui.showMain();
         }
     }
 }

@@ -9,6 +9,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import org.semux.gui.Action;
+
 public class TransactionsPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
@@ -31,6 +33,13 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        Action action = Action.valueOf(e.getActionCommand());
 
+        switch (action) {
+        case REFRESH:
+            break;
+        default:
+            break;
+        }
     }
 }

@@ -164,6 +164,13 @@ public class SendPanel extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.out.println(e.getActionCommand());
+        Action action = Action.valueOf(e.getActionCommand());
+
+        switch (action) {
+        case REFRESH:
+            break;
+        default:
+            break;
+        }
     }
 }

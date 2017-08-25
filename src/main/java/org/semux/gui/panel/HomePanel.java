@@ -17,16 +17,17 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
 
 public class HomePanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private String blockNumber = "1";
-    private String status = "Normal";
-    private String balance = "0 SEM";
-    private String locked = "0 SEM";
+    private JLabel blockNum;
+    private JLabel status;
+    private JLabel balance;
+    private JLabel locked;
 
     public HomePanel() {
         // setup overview panel
@@ -39,26 +40,26 @@ public class HomePanel extends JPanel implements ActionListener {
         JLabel labelBlockNum = new JLabel("Block #:");
         overview.add(labelBlockNum);
 
-        JLabel valueBlockNum = new JLabel(blockNumber);
-        overview.add(valueBlockNum);
+        blockNum = new JLabel("");
+        overview.add(blockNum);
 
         JLabel labelStatus = new JLabel("Status:");
         overview.add(labelStatus);
 
-        JLabel valueStatus = new JLabel(status);
-        overview.add(valueStatus);
+        status = new JLabel("");
+        overview.add(status);
 
         JLabel labelBalance = new JLabel("Balance:");
         overview.add(labelBalance);
 
-        JLabel valueBalance = new JLabel(balance);
-        overview.add(valueBalance);
+        balance = new JLabel("");
+        overview.add(balance);
 
         JLabel labelLocked = new JLabel("Locked:");
         overview.add(labelLocked);
 
-        JLabel valueLocked = new JLabel(locked);
-        overview.add(valueLocked);
+        locked = new JLabel("");
+        overview.add(locked);
 
         // setup transactions panel
         JPanel transactions = new JPanel();
@@ -101,38 +102,6 @@ public class HomePanel extends JPanel implements ActionListener {
         JPanel panel_5 = new TransactionPanel();
         transactions.add(panel_5);
         setLayout(groupLayout);
-    }
-
-    public String getBlockNumber() {
-        return blockNumber;
-    }
-
-    public void setBlockNumber(String blockNumber) {
-        this.blockNumber = blockNumber;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getBalance() {
-        return balance;
-    }
-
-    public void setBalance(String balance) {
-        this.balance = balance;
-    }
-
-    public String getLocked() {
-        return locked;
-    }
-
-    public void setLocked(String locked) {
-        this.locked = locked;
     }
 
     public static class TransactionPanel extends JPanel {
@@ -190,6 +159,13 @@ public class HomePanel extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        Action action = Action.valueOf(e.getActionCommand());
 
+        switch (action) {
+        case REFRESH:
+            break;
+        default:
+            break;
+        }
     }
 }

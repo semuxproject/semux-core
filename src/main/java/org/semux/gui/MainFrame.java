@@ -8,6 +8,7 @@ package org.semux.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -19,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
 
+import org.semux.CLI;
 import org.semux.gui.panel.DelegatesPanel;
 import org.semux.gui.panel.HomePanel;
 import org.semux.gui.panel.ReceivePanel;
@@ -31,11 +33,11 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private static final String TITLE = "Semux Wallet";
 
-    private JPanel panelHome = new HomePanel();
-    private JPanel panelSend = new SendPanel();
-    private JPanel panelReceive = new ReceivePanel();
-    private JPanel panelTransactions = new TransactionsPanel();
-    private JPanel panelDelegates = new DelegatesPanel();
+    private HomePanel panelHome = new HomePanel();
+    private SendPanel panelSend = new SendPanel();
+    private ReceivePanel panelReceive = new ReceivePanel();
+    private TransactionsPanel panelTransactions = new TransactionsPanel();
+    private DelegatesPanel panelDelegates = new DelegatesPanel();
 
     private JPanel tabs;
 
@@ -97,7 +99,19 @@ public class MainFrame extends JFrame implements ActionListener {
         getContentPane().add(tabs, BorderLayout.CENTER);
 
         // show the first tab
-        actionPerformed(new ActionEvent(this, 0, Action.SHOW_HOME.name()));
+        tabs.add(panelHome);
+
+        // register block listener
+        CLI.chain.addListener((block) -> {
+            EventQueue.invokeLater(() -> {
+                ActionEvent ev = new ActionEvent(MainFrame.this, 0, Action.REFRESH.name());
+                panelHome.actionPerformed(ev);
+                panelSend.actionPerformed(ev);
+                panelReceive.actionPerformed(ev);
+                panelTransactions.actionPerformed(ev);
+                panelDelegates.actionPerformed(ev);
+            });
+        });
     }
 
     @Override
@@ -131,9 +145,6 @@ public class MainFrame extends JFrame implements ActionListener {
 
             tabs.revalidate();
             tabs.repaint();
-
-            ActionListener t = (ActionListener) tab;
-            t.actionPerformed(new ActionEvent(this, 0, Action.REFRESH.name()));
         }
     }
 }

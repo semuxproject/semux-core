@@ -118,6 +118,20 @@ public class CLI {
         }
     }
 
+    /*
+     * Expose the following instances for GUI
+     */
+
+    public static Blockchain chain;
+    public static PeerClient client;
+
+    public static PendingManager pendingMgr;
+    public static ChannelManager channelMgr;
+    public static NodeManager nodeMgr;
+
+    public static SemuxSync sync;
+    public static SemuxBFT cons;
+
     public static void main(String[] args) {
         parseArguments(args);
         Config.DATA_DIR = dataDir;
@@ -160,7 +174,7 @@ public class CLI {
         logger.info("Client: {}", Config.CLIENT_FULL_NAME);
         logger.info("System booting up: network = {}, coinbase = {}", Config.NETWORK_ID, coinbase);
 
-        Blockchain chain = new BlockchainImpl(new DBFactory() {
+        chain = new BlockchainImpl(new DBFactory() {
             private final KVDB indexDB = new LevelDB(DBName.INDEX);
             private final KVDB blockDB = new LevelDB(DBName.BLOCK);
             private final KVDB accountDB = new LevelDB(DBName.ACCOUNT);
@@ -194,14 +208,14 @@ public class CLI {
             logger.info("Latest block number = {}", height);
         }
 
-        PeerClient client = new PeerClient(SystemUtil.getIp(), Config.P2P_LISTEN_PORT, coinbase);
+        client = new PeerClient(SystemUtil.getIp(), Config.P2P_LISTEN_PORT, coinbase);
 
         // ====================================
         // start pending/channel/node manager
         // ====================================
-        PendingManager pendingMgr = new PendingManager();
-        ChannelManager channelMgr = new ChannelManager();
-        NodeManager nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
+        pendingMgr = new PendingManager();
+        channelMgr = new ChannelManager();
+        nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
 
         pendingMgr.start(chain, channelMgr);
         chain.addListener(pendingMgr);
@@ -234,10 +248,10 @@ public class CLI {
         // ====================================
         // start sync/consensus
         // ====================================
-        SemuxSync sync = SemuxSync.getInstance();
+        sync = SemuxSync.getInstance();
         sync.init(chain, channelMgr);
 
-        SemuxBFT cons = SemuxBFT.getInstance();
+        cons = SemuxBFT.getInstance();
         cons.init(chain, pendingMgr, channelMgr, coinbase);
 
         Thread consThread = new Thread(() -> {

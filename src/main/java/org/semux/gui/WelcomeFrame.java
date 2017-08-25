@@ -7,7 +7,6 @@
 package org.semux.gui;
 
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -28,7 +27,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.semux.CLI;
+import org.semux.GUI;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 
@@ -50,10 +49,10 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
     private File backupFile = null;
 
-    private String[] args;
+    private GUI gui;
 
-    public WelcomeFrame(String[] args) {
-        this.args = args;
+    public WelcomeFrame(GUI gui) {
+        this.gui = gui;
 
         // setup frame properties
         this.setTitle(TITLE);
@@ -210,15 +209,6 @@ public class WelcomeFrame extends JFrame implements ActionListener {
     private void goMainFrame() {
         this.dispose();
 
-        // start main frame
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                MainFrame frame = new MainFrame();
-                frame.setVisible(true);
-            }
-        });
-
-        // start kernel
-        CLI.main(args);
+        this.gui.showMain();
     }
 }
