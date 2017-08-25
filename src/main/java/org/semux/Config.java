@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.semux.core.Unit;
 import org.semux.net.msg.MessageCode;
@@ -123,6 +124,11 @@ public class Config {
      * Minimum delegate fee.
      */
     public static long MIN_DELEGATE_FEE = 1000 * Unit.SEM;
+
+    /**
+     * State lock to prevent state inconsistency.
+     */
+    public static ReentrantReadWriteLock STATE_LOCK = new ReentrantReadWriteLock();
 
     // =========================
     // Client

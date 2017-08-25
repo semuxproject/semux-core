@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.semux.Config;
 import org.semux.consensus.Proposal.Proof;
@@ -120,29 +121,27 @@ public class SemuxBFT implements Consensus {
     /**
      * Pause the consensus, and do synchronization.
      * 
-     * @return true if sync finished normally; false if consensus is not in running
-     *         status or stop was requested when synchronizing.
      */
-    private boolean sync(long target) {
+    private void sync(long target) {
         if (status == Status.RUNNING) {
+            // change status
             status = Status.SYNCING;
 
+            // start syncing
             sync.start(target);
 
+            // restore status if not stopped
             if (status != Status.STOPPED) {
                 status = Status.RUNNING;
-                return true;
             }
         }
-
-        return false;
     }
 
     /**
      * Main loop that processes all the BFT events.
      */
     private void eventLoop() {
-        while (!Thread.currentThread().isInterrupted()) {
+        while (!Thread.currentThread().isInterrupted() && status != Status.STOPPED) {
             try {
                 Event ev = events.take();
                 if (status != Status.RUNNING) {
@@ -150,10 +149,6 @@ public class SemuxBFT implements Consensus {
                 }
 
                 switch (ev.getType()) {
-                case STOP:
-                    logger.debug("Received STOP event");
-                    status = Status.STOPPED;
-                    return;
                 case TIMEOUT:
                     onTimeout();
                     break;
@@ -203,8 +198,7 @@ public class SemuxBFT implements Consensus {
             timer.stop();
             broadcaster.stop();
 
-            // kill the event handler
-            events.add(new Event(Type.STOP, null));
+            status = Status.STOPPED;
         }
     }
 
@@ -748,12 +742,21 @@ public class SemuxBFT implements Consensus {
             acc.setBalance(acc.getBalance() + reward);
         }
 
-        // [3] add block to chain
-        chain.addBlock(block);
+        WriteLock lock = null;
+        try {
+            lock = Config.STATE_LOCK.writeLock();
 
-        // [4] flush state updates to disk
-        chain.getAccountState().commit();
-        chain.getDeleteState().commit();
+            // [3] add block to chain
+            chain.addBlock(block);
+
+            // [4] flush state updates to disk
+            chain.getAccountState().commit();
+            chain.getDeleteState().commit();
+        } finally {
+            if (lock != null) {
+                lock.unlock();
+            }
+        }
     }
 
     public enum State {
@@ -870,11 +873,6 @@ public class SemuxBFT implements Consensus {
              * Received a timeout signal.
              */
             TIMEOUT,
-
-            /**
-             * Received a stop signal.
-             */
-            STOP,
 
             /**
              * Received a new height message.

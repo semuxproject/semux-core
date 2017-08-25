@@ -122,6 +122,8 @@ public class CLI {
      * Expose the following instances for GUI
      */
 
+    public static EdDSA coinbase;
+
     public static Blockchain chain;
     public static PeerClient client;
 
@@ -166,7 +168,7 @@ public class CLI {
             logger.error("Coinbase does not exist");
             System.exit(-1);
         }
-        EdDSA coinbase = accounts.get(coinbaseIndex);
+        coinbase = accounts.get(coinbaseIndex);
 
         // ====================================
         // initialization
@@ -269,10 +271,15 @@ public class CLI {
             try {
                 sync.stop();
                 cons.stop();
+
+                // make sure consensus thread is fully stopped
                 consThread.join();
             } catch (InterruptedException e) {
                 logger.error("Failed to stop sync/consensus properly");
             }
+
+            // make sure no thread is updating state
+            Config.STATE_LOCK.writeLock().unlock();
 
             api.stop();
             p2p.stop();

@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.semux.Config;
 import org.semux.core.Account;
@@ -267,12 +268,21 @@ public class SemuxSync implements Sync {
             logger.info("Processing {}", block.toString());
 
             if (validateAndCommit(block)) {
-                // [7] add block to chain
-                chain.addBlock(block);
+                WriteLock lock = null;
+                try {
+                    lock = Config.STATE_LOCK.writeLock();
 
-                // [8] flush state changes to disk
-                chain.getAccountState().commit();
-                chain.getDeleteState().commit();
+                    // [7] add block to chain
+                    chain.addBlock(block);
+
+                    // [8] flush state changes to disk
+                    chain.getAccountState().commit();
+                    chain.getDeleteState().commit();
+                } finally {
+                    if (lock != null) {
+                        lock.unlock();
+                    }
+                }
 
                 synchronized (lock) {
                     toDownload.remove(block.getNumber());
