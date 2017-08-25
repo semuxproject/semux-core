@@ -70,24 +70,13 @@ public class Wallet {
 
         try {
             File f = new File(Config.DATA_DIR, WALLET_FILE);
-            byte[] key = Hash.h256(Bytes.of(password));
-
-            if (f.exists()) {
-                SimpleDecoder dec = new SimpleDecoder(IOUtil.readFile(f));
-                dec.readInt(); // version
-                int total = dec.readInt();
-
-                for (int i = 0; i < total; i++) {
-                    byte[] iv = dec.readBytes();
-                    byte[] publicKey = dec.readBytes();
-                    byte[] privateKey = AES.decrypt(dec.readBytes(), key, iv);
-
-                    accounts.add(new EdDSA(publicKey, privateKey));
-                }
-            }
+            List<EdDSA> keys = read(f, password);
 
             this.isLocked = false;
             this.password = password;
+
+            accounts.addAll(keys);
+
             return true;
         } catch (CryptoException | InvalidKeySpecException e) {
             logger.error("Failed to decrypt the wallet data");
@@ -130,6 +119,15 @@ public class Wallet {
     }
 
     /**
+     * Get the number of accounts in the wallet.
+     * 
+     * @return
+     */
+    public int size() {
+        return accounts.size();
+    }
+
+    /**
      * Get the list of accounts inside this wallet.
      * 
      * @return a list of accounts
@@ -151,7 +149,8 @@ public class Wallet {
     public void setAccounts(List<EdDSA> accounts) throws WalletLockedException {
         requireUnlocked();
 
-        this.accounts = new ArrayList<>(accounts);
+        this.accounts.clear();
+        this.accounts.addAll(accounts);
     }
 
     /**
@@ -206,7 +205,54 @@ public class Wallet {
     public void addAccount(EdDSA newKey) throws WalletLockedException {
         requireUnlocked();
 
+        // TODO: optimize duplicates check later
+        for (EdDSA key : accounts) {
+            if (Arrays.equals(key.getPublicKey(), newKey.getPublicKey())) {
+                return;
+            }
+        }
+
         accounts.add(newKey);
+    }
+
+    /**
+     * Add a list of accounts to the wallet.
+     * 
+     * NOTE: you need to call {@link #flush()} to update the wallet on disk.
+     * 
+     * @param newKey
+     *            a new account
+     * @throws WalletLockedException
+     * 
+     */
+    public void addAccounts(List<EdDSA> accounts) throws WalletLockedException {
+        for (EdDSA acc : accounts) {
+            addAccount(acc);
+        }
+    }
+
+    /**
+     * Import accounts from a backup file.
+     * 
+     * NOTE: you need to call {@link #flush()} to update the wallet on disk.
+     * 
+     * @param file
+     *            backup file
+     * @return true if the import is successful, false otherwise
+     * 
+     * @throws WalletLockedException
+     */
+    public boolean importAccounts(File file, String password) throws WalletLockedException {
+        requireUnlocked();
+
+        try {
+            addAccounts(read(file, password));
+            return true;
+        } catch (InvalidKeySpecException | IOException | CryptoException e) {
+            logger.warn("Failed to import accounts: file = {}", file, e);
+        }
+
+        return false;
     }
 
     /**
@@ -268,6 +314,29 @@ public class Wallet {
         }
     }
 
+    public static synchronized List<EdDSA> read(File file, String password)
+            throws IOException, CryptoException, InvalidKeySpecException {
+        List<EdDSA> list = new ArrayList<>();
+
+        byte[] key = Hash.h256(Bytes.of(password));
+
+        if (file.exists()) {
+            SimpleDecoder dec = new SimpleDecoder(IOUtil.readFile(file));
+            dec.readInt(); // version
+            int total = dec.readInt();
+
+            for (int i = 0; i < total; i++) {
+                byte[] iv = dec.readBytes();
+                byte[] publicKey = dec.readBytes();
+                byte[] privateKey = AES.decrypt(dec.readBytes(), key, iv);
+
+                list.add(new EdDSA(publicKey, privateKey));
+            }
+        }
+
+        return list;
+    }
+
     private static String createLine(int width) {
         char[] buf = new char[width];
         Arrays.fill(buf, '-');
@@ -310,11 +379,15 @@ public class Wallet {
 
         List<EdDSA> accounts = wallet.getAccounts();
 
-        String line = String.format("+-%-3s-+-%-45s-+", createLine(3), createLine(45));
-        System.out.println(line);
-        for (int i = 0; i < accounts.size(); i++) {
-            System.out.println(String.format("| %-3d | %-45s |", i, accounts.get(i).toString()));
+        if (accounts.isEmpty()) {
+            System.out.println("No account!");
+        } else {
+            String line = String.format("+-%-3s-+-%-45s-+", createLine(3), createLine(45));
             System.out.println(line);
+            for (int i = 0; i < accounts.size(); i++) {
+                System.out.println(String.format("| %-3d | %-45s |", i, accounts.get(i).toString()));
+                System.out.println(line);
+            }
         }
     }
 }

@@ -41,7 +41,7 @@ public class GUI {
             // start welcome frame
             EventQueue.invokeLater(new Runnable() {
                 public void run() {
-                    WelcomeFrame frame = new WelcomeFrame();
+                    WelcomeFrame frame = new WelcomeFrame(args);
                     frame.setVisible(true);
                 }
             });
