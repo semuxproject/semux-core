@@ -61,6 +61,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblSem2 = new JLabel("SEM");
 
         JButton paySend = new JButton("Send");
+        paySend.setSelected(true);
         paySend.addActionListener(this);
         paySend.setActionCommand(Action.SEND.name());
 
@@ -99,11 +100,11 @@ public class SendPanel extends JPanel implements ActionListener {
                             .addComponent(separator, GroupLayout.DEFAULT_SIZE, 453, Short.MAX_VALUE)
                             .addGap(21))))
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addGap(133)
-                    .addComponent(paySend, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(ComponentPlacement.RELATED)
+                    .addGap(138)
                     .addComponent(payClear, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(192, Short.MAX_VALUE))
+                    .addPreferredGap(ComponentPlacement.UNRELATED)
+                    .addComponent(paySend, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(181, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
@@ -129,10 +130,10 @@ public class SendPanel extends JPanel implements ActionListener {
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addComponent(separator, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addPreferredGap(ComponentPlacement.UNRELATED)
-                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(payClear)
                         .addComponent(paySend))
-                    .addContainerGap(139, Short.MAX_VALUE))
+                    .addContainerGap(133, Short.MAX_VALUE))
         );
         setLayout(groupLayout);
         // @formatter:on
