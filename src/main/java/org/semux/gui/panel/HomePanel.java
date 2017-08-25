@@ -26,6 +26,7 @@ import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.gui.Action;
+import org.semux.gui.Model;
 import org.semux.gui.SwingUtil;
 
 public class HomePanel extends JPanel implements ActionListener {
@@ -37,7 +38,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private JLabel balance;
     private JLabel locked;
 
-    public HomePanel() {
+    public HomePanel(Model model) {
         // setup overview panel
         JPanel overview = new JPanel();
         overview.setBorder(new TitledBorder(

@@ -207,8 +207,8 @@ public class WelcomeFrame extends JFrame implements ActionListener {
     }
 
     private void goMainFrame() {
-        this.dispose();
+        dispose();
 
-        this.gui.showMain();
+        gui.showMain();
     }
 }

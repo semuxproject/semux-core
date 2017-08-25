@@ -10,6 +10,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 import org.semux.gui.Action;
+import org.semux.gui.Model;
 
 public class TransactionsPanel extends JPanel implements ActionListener {
 
@@ -21,7 +22,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             "0x1122334455667788112233445566778811223344", "0x1122334455667788112233445566778811223344", new Integer(1),
             new Date() } };
 
-    public TransactionsPanel() {
+    public TransactionsPanel(Model model) {
         setLayout(new BorderLayout(0, 0));
 
         JScrollPane scrollPane = new JScrollPane();

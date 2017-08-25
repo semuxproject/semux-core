@@ -8,7 +8,6 @@ package org.semux.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -20,7 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
 
-import org.semux.CLI;
+import org.semux.GUI;
 import org.semux.gui.panel.DelegatesPanel;
 import org.semux.gui.panel.HomePanel;
 import org.semux.gui.panel.ReceivePanel;
@@ -33,15 +32,21 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private static final String TITLE = "Semux Wallet";
 
-    private HomePanel panelHome = new HomePanel();
-    private SendPanel panelSend = new SendPanel();
-    private ReceivePanel panelReceive = new ReceivePanel();
-    private TransactionsPanel panelTransactions = new TransactionsPanel();
-    private DelegatesPanel panelDelegates = new DelegatesPanel();
+    private HomePanel panelHome;
+    private SendPanel panelSend;
+    private ReceivePanel panelReceive;
+    private TransactionsPanel panelTransactions;
+    private DelegatesPanel panelDelegates;
 
     private JPanel tabs;
 
-    public MainFrame() {
+    public MainFrame(GUI gui) {
+        panelHome = new HomePanel(gui.getModel());
+        panelSend = new SendPanel(gui.getModel());
+        panelReceive = new ReceivePanel(gui.getModel());
+        panelTransactions = new TransactionsPanel(gui.getModel());
+        panelDelegates = new DelegatesPanel(gui.getModel());
+
         // setup frame properties
         this.setTitle(TITLE);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -100,18 +105,6 @@ public class MainFrame extends JFrame implements ActionListener {
 
         // show the first tab
         tabs.add(panelHome);
-
-        // register block listener
-        CLI.chain.addListener((block) -> {
-            EventQueue.invokeLater(() -> {
-                ActionEvent ev = new ActionEvent(MainFrame.this, 0, Action.REFRESH.name());
-                panelHome.actionPerformed(ev);
-                // panelSend.actionPerformed(ev);
-                // panelReceive.actionPerformed(ev);
-                panelTransactions.actionPerformed(ev);
-                panelDelegates.actionPerformed(ev);
-            });
-        });
     }
 
     @Override

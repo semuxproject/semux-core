@@ -17,6 +17,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.LineBorder;
 
 import org.semux.gui.Action;
+import org.semux.gui.Model;
 
 public class DelegatesPanel extends JPanel implements ActionListener {
 
@@ -30,7 +31,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private JTextField textUnvote;
     private JTextField textName;
 
-    public DelegatesPanel() {
+    public DelegatesPanel(Model model) {
         JScrollPane scrollPane = new JScrollPane();
         table = new JTable(data, columnNames);
         table.getColumnModel().getColumn(0).setMaxWidth(96);

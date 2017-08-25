@@ -23,6 +23,7 @@ import org.semux.core.Unit;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.gui.Action;
+import org.semux.gui.Model;
 
 public class SendPanel extends JPanel implements ActionListener {
 
@@ -33,7 +34,7 @@ public class SendPanel extends JPanel implements ActionListener {
     private JTextField payAmount;
     private JTextField payFee;
 
-    public SendPanel() {
+    public SendPanel(Model model) {
         setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         JLabel lblFrom = new JLabel("From:");

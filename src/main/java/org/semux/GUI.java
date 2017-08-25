@@ -13,6 +13,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import org.semux.core.Wallet;
 import org.semux.gui.MainFrame;
+import org.semux.gui.Model;
 import org.semux.gui.PasswordFrame;
 import org.semux.gui.WelcomeFrame;
 
@@ -22,9 +23,15 @@ import org.semux.gui.WelcomeFrame;
 public class GUI {
 
     private String[] args;
+    private Model model;
 
     public GUI(String[] args) {
         this.args = args;
+        this.model = new Model();
+    }
+
+    public Model getModel() {
+        return model;
     }
 
     public void setupLookAndFeel() {
@@ -52,10 +59,15 @@ public class GUI {
         // start kernel
         CLI.main(args);
 
+        // register block listener
+        CLI.chain.addListener((block) -> {
+            // TODO: update all the data
+        });
+
         // start main frame
         EventQueue.invokeLater(new Runnable() {
             public void run() {
-                MainFrame frame = new MainFrame();
+                MainFrame frame = new MainFrame(GUI.this);
                 frame.setVisible(true);
             }
         });
