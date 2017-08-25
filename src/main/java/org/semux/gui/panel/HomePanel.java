@@ -2,6 +2,8 @@ package org.semux.gui.panel;
 
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
@@ -17,7 +19,7 @@ import javax.swing.border.TitledBorder;
 
 import org.semux.gui.SwingUtil;
 
-public class HomePanel extends JPanel {
+public class HomePanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -184,5 +186,10 @@ public class HomePanel extends JPanel {
             this.setLayout(groupLayout);
             // @formatter:on
         }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
     }
 }

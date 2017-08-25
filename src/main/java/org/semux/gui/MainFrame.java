@@ -97,7 +97,7 @@ public class MainFrame extends JFrame implements ActionListener {
         getContentPane().add(tabs, BorderLayout.CENTER);
 
         // show the first tab
-        tabs.add(panelHome);
+        actionPerformed(new ActionEvent(this, 0, Action.SHOW_HOME.name()));
     }
 
     @Override
@@ -131,6 +131,9 @@ public class MainFrame extends JFrame implements ActionListener {
 
             tabs.revalidate();
             tabs.repaint();
+
+            ActionListener t = (ActionListener) tab;
+            t.actionPerformed(new ActionEvent(this, 0, Action.REFRESH.name()));
         }
     }
 }

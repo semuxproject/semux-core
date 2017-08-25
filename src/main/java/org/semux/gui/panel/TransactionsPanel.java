@@ -1,13 +1,15 @@
 package org.semux.gui.panel;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Date;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-public class TransactionsPanel extends JPanel {
+public class TransactionsPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -25,5 +27,10 @@ public class TransactionsPanel extends JPanel {
 
         table = new JTable(data, columnNames);
         scrollPane.setViewportView(table);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
     }
 }
