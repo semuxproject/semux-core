@@ -1,36 +1,47 @@
 package org.semux.gui.panel;
 
 import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.LineBorder;
+import javax.swing.table.AbstractTableModel;
 
+import org.semux.core.Unit;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
+import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
 
 public class ReceivePanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
+    private Model model;
     private JTable table;
-    private String[] columnNames = { "#", "Address", "Balance" };
-    private Object[][] data = { { new Integer(0), "0x1122334455667788112233445566778811223344", new Integer(12) } };
+    private ReceiveTableModel tableModel;
 
     public ReceivePanel(Model model) {
+        this.model = model;
+
         JScrollPane scrollPane = new JScrollPane();
-        table = new JTable(data, columnNames);
+        tableModel = new ReceiveTableModel();
+        table = new JTable(tableModel);
         table.getColumnModel().getColumn(0).setMaxWidth(32);
-        table.getColumnModel().getColumn(2).setMaxWidth(64);
         scrollPane.setViewportView(table);
 
         JButton btnCopyAddress = new JButton("Copy Address");
@@ -63,6 +74,58 @@ public class ReceivePanel extends JPanel implements ActionListener {
         );
         setLayout(groupLayout);
         // @formatter:on
+
+        refresh();
+    }
+
+    class ReceiveTableModel extends AbstractTableModel {
+
+        private static final long serialVersionUID = 1L;
+
+        private String[] columnNames = { "#", "Address", "Balance", "Locked" };
+        private List<Account> data;
+
+        public ReceiveTableModel() {
+            this.data = Collections.emptyList();
+        }
+
+        public void setData(List<Account> data) {
+            this.data = data;
+            this.fireTableDataChanged();
+        }
+
+        @Override
+        public int getRowCount() {
+            return data.size();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        @Override
+        public String getColumnName(int column) {
+            return columnNames[column];
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            Account acc = data.get(rowIndex);
+
+            switch (columnIndex) {
+            case 0:
+                return rowIndex;
+            case 1:
+                return acc.getAddress().toAddressString();
+            case 2:
+                return String.format("%.3f SEM", acc.getBalance() / (double) Unit.SEM);
+            case 3:
+                return String.format("%.3f SEM", acc.getLocked() / (double) Unit.SEM);
+            default:
+                return null;
+            }
+        }
     }
 
     @Override
@@ -74,7 +137,14 @@ public class ReceivePanel extends JPanel implements ActionListener {
             refresh();
             break;
         case COPY_ADDRESS:
+            int row = Math.max(table.getSelectedRow(), 0);
+            Account acc = model.getAccounts().get(row);
 
+            StringSelection stringSelection = new StringSelection(acc.toString());
+            Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clpbrd.setContents(stringSelection, null);
+
+            JOptionPane.showConfirmDialog(this, "Address copied: " + acc);
             break;
         default:
             break;
@@ -82,6 +152,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
     }
 
     private void refresh() {
-
+        List<Account> list = model.getAccounts();
+        tableModel.setData(list);
     }
 }

@@ -3,6 +3,9 @@ package org.semux.gui.panel;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -15,27 +18,37 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.LineBorder;
+import javax.swing.table.AbstractTableModel;
 
+import org.semux.core.Delegate;
+import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
+import org.semux.gui.Model.Account;
+import org.semux.utils.Bytes;
 
 public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
+    private Model model;
     private JTable table;
-    private String[] columnNames = { "Name", "Address", "Votes" };
-    private Object[][] data = { { "test", "0x1122334455667788112233445566778811223344", new Integer(12) } };
+    private DelegatesTableModel tableModel;
+
+    JComboBox<String> from;
 
     private JTextField textVote;
     private JTextField textUnvote;
     private JTextField textName;
 
     public DelegatesPanel(Model model) {
+        this.model = model;
+
         JScrollPane scrollPane = new JScrollPane();
-        table = new JTable(data, columnNames);
-        table.getColumnModel().getColumn(0).setMaxWidth(96);
-        table.getColumnModel().getColumn(2).setMaxWidth(64);
+        tableModel = new DelegatesTableModel();
+        table = new JTable(tableModel);
+        table.getColumnModel().getColumn(0).setMaxWidth(128);
+        table.getColumnModel().getColumn(2).setMaxWidth(128);
         scrollPane.setViewportView(table);
 
         JPanel panel = new JPanel();
@@ -48,7 +61,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 "<html>NOTE: A minimum transaction fee (5 mSEM) will apply when you vote/unvote/register a delegate.</p></html>");
         label.setForeground(Color.DARK_GRAY);
 
-        JComboBox<String> comboBox = new JComboBox<>();
+        from = new JComboBox<>();
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -58,7 +71,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
-                        .addComponent(comboBox, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(from, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(panel, 0, 200, Short.MAX_VALUE)
                         .addComponent(panel2, GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE)
                         .addComponent(label, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)))
@@ -67,7 +80,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGap(5)
-                    .addComponent(comboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(from, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
                     .addComponent(panel, GroupLayout.PREFERRED_SIZE, 93, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
@@ -77,7 +90,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     .addContainerGap(88, Short.MAX_VALUE))
                 .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE)
         );
-        setLayout(groupLayout);
+        setLayout(groupLayout); 
         // @formatter:on
 
         textVote = new JTextField();
@@ -156,6 +169,71 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         );
         panel2.setLayout(groupLayout3);
         // @formatter:on
+
+        refresh();
+    }
+
+    class DelegatesTableModel extends AbstractTableModel {
+
+        private static final long serialVersionUID = 1L;
+
+        private String[] columnNames = { "Name", "Address", "Votes" };
+        private List<Delegate> data;
+
+        public DelegatesTableModel() {
+            this.data = Collections.emptyList();
+        }
+
+        public void setData(List<Delegate> data) {
+            this.data = data;
+            this.fireTableDataChanged();
+        }
+
+        @Override
+        public int getRowCount() {
+            return data.size();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        @Override
+        public String getColumnName(int column) {
+            return columnNames[column];
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            Delegate d = data.get(rowIndex);
+
+            switch (columnIndex) {
+            case 0:
+                return Bytes.toString(d.getName());
+            case 1:
+                return Hex.encode(d.getAddress());
+            case 2:
+                return d.getVote();
+            default:
+                return null;
+            }
+        }
+    }
+
+    public int getFrom() {
+        return from.getSelectedIndex();
+    }
+
+    public void setFromItems(List<? extends Object> items) {
+        int n = from.getSelectedIndex();
+
+        from.removeAllItems();
+        for (Object item : items) {
+            from.addItem(item.toString());
+        }
+
+        from.setSelectedIndex(n >= 0 && n < items.size() ? n : 0);
     }
 
     @Override
@@ -164,9 +242,24 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         switch (action) {
         case REFRESH:
+            refresh();
             break;
         default:
             break;
         }
+    }
+
+    private void refresh() {
+        List<String> accounts = new ArrayList<>();
+        for (Account acc : model.getAccounts()) {
+            accounts.add(acc.toString().substring(0, 16) + "...");
+        }
+        setFromItems(accounts);
+
+        List<Delegate> list = model.getDelegates();
+        list.sort((d1, d2) -> {
+            return Long.compare(d2.getVote(), d1.getVote());
+        });
+        tableModel.setData(list);
     }
 }

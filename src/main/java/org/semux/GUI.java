@@ -94,6 +94,8 @@ public class GUI implements BlockchainListener {
             ma.setLocked(a.getLocked());
         }
 
+        model.setDelegates(ds.getDelegates());
+
         model.fireUpdateEvent();
     }
 

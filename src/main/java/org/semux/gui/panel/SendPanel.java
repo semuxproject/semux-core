@@ -148,15 +148,19 @@ public class SendPanel extends JPanel implements ActionListener {
         refresh();
     }
 
-    public String getFrom() {
-        return (String) from.getSelectedItem();
+    public int getFrom() {
+        return from.getSelectedIndex();
     }
 
     public void setFromItems(List<? extends Object> items) {
+        int n = from.getSelectedIndex();
+
         from.removeAllItems();
         for (Object item : items) {
             from.addItem(item.toString());
         }
+
+        from.setSelectedIndex(n >= 0 && n < items.size() ? n : 0);
     }
 
     public String getTo() {
