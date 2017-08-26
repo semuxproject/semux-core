@@ -37,6 +37,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
     public ReceivePanel(Model model) {
         this.model = model;
+        this.model.addListener(this);
 
         JScrollPane scrollPane = new JScrollPane();
         tableModel = new ReceiveTableModel();

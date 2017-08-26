@@ -29,6 +29,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
     public TransactionsPanel(Model model) {
         this.model = model;
+        this.model.addListener(this);
 
         setLayout(new BorderLayout(0, 0));
 

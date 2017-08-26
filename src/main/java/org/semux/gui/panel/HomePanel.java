@@ -35,6 +35,7 @@ public class HomePanel extends JPanel implements ActionListener {
 
     public HomePanel(Model model) {
         this.model = model;
+        this.model.addListener(this);
 
         // setup overview panel
         JPanel overview = new JPanel();

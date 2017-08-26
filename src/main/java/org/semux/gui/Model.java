@@ -1,5 +1,7 @@
 package org.semux.gui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +14,7 @@ import org.semux.crypto.EdDSA;
  */
 public class Model {
 
-    private List<ModelListener> listeners = new ArrayList<>();
+    private List<ActionListener> listeners = new ArrayList<>();
 
     private long latestBlockNumber;
     private boolean isDelegate;
@@ -30,7 +32,7 @@ public class Model {
      * 
      * @param listener
      */
-    public void addListener(ModelListener listener) {
+    public void addListener(ActionListener listener) {
         listeners.add(listener);
     }
 
@@ -38,8 +40,8 @@ public class Model {
      * Fire an update event to all listeners.
      */
     public void fireUpdateEvent() {
-        for (ModelListener listener : listeners) {
-            listener.onUpdate();
+        for (ActionListener listener : listeners) {
+            listener.actionPerformed(new ActionEvent(this, 0, Action.REFRESH.name()));
         }
     }
 
@@ -131,10 +133,6 @@ public class Model {
 
     public void setDelegates(List<Delegate> delegates) {
         this.delegates = delegates;
-    }
-
-    public interface ModelListener {
-        public void onUpdate();
     }
 
     public static class Account {

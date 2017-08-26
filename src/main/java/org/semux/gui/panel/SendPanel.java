@@ -35,6 +35,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
     public SendPanel(Model model) {
         this.model = model;
+        this.model.addListener(this);
 
         setBorder(new LineBorder(Color.LIGHT_GRAY));
 

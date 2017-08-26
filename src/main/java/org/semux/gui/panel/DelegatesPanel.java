@@ -43,6 +43,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     public DelegatesPanel(Model model) {
         this.model = model;
+        this.model.addListener(this);
 
         JScrollPane scrollPane = new JScrollPane();
         tableModel = new DelegatesTableModel();
