@@ -12,13 +12,35 @@ import org.semux.crypto.EdDSA;
  */
 public class Model {
 
+    private List<ModelListener> listeners = new ArrayList<>();
+
+    private long latestBlockNumber;
+    private boolean isDelegate;
     private List<Account> accounts = new ArrayList<>();
+    private List<Delegate> delegates = new ArrayList<>();
 
     /**
      * Construct a new model.
      */
     public Model() {
+    }
 
+    /**
+     * Add a listener.
+     * 
+     * @param listener
+     */
+    public void addListener(ModelListener listener) {
+        listeners.add(listener);
+    }
+
+    /**
+     * Fire an update event to all listeners.
+     */
+    public void fireUpdateEvent() {
+        for (ModelListener listener : listeners) {
+            listener.onUpdate();
+        }
     }
 
     /**
@@ -27,28 +49,46 @@ public class Model {
      * @param keys
      */
     public void init(List<EdDSA> keys) {
+        accounts.clear();
         for (EdDSA key : keys) {
             accounts.add(new Account(key));
         }
     }
 
     /**
-     * Get all accounts.
+     * Get the latested block number.
      * 
      * @return
      */
-    public List<Account> getAccounts() {
-        return accounts;
+    public long getLatestBlockNumber() {
+        return latestBlockNumber;
     }
 
     /**
-     * Get the i-th account.
+     * Set the latest block number.
      * 
-     * @param idx
+     * @param latestBlockNumber
+     */
+    public void setLatestBlockNumber(long latestBlockNumber) {
+        this.latestBlockNumber = latestBlockNumber;
+    }
+
+    /**
+     * Check if the coinbase account is a delegate.
+     * 
      * @return
      */
-    public Account getAccount(int idx) {
-        return accounts.get(idx);
+    public boolean isDelegate() {
+        return isDelegate;
+    }
+
+    /**
+     * Set whether the coinbase account is a delegate.
+     * 
+     * @param isDelegate
+     */
+    public void setDelegate(boolean isDelegate) {
+        this.isDelegate = isDelegate;
     }
 
     /**
@@ -77,16 +117,29 @@ public class Model {
         return sum;
     }
 
+    public List<Account> getAccounts() {
+        return accounts;
+    }
+
+    public void setAccounts(List<Account> accounts) {
+        this.accounts = accounts;
+    }
+
+    public List<Delegate> getDelegates() {
+        return delegates;
+    }
+
+    public void setDelegates(List<Delegate> delegates) {
+        this.delegates = delegates;
+    }
+
     public interface ModelListener {
-        /**
-         * Notify the listener when model updates.
-         */
         public void onUpdate();
     }
 
     public static class Account {
         private EdDSA address;
-        private Delegate delegate;
+        private long nonce;
         private long balance;
         private long locked;
         private List<Transaction> incomingTxs = new ArrayList<>();
@@ -104,12 +157,12 @@ public class Model {
             this.address = address;
         }
 
-        public Delegate getDelegate() {
-            return delegate;
+        public long getNonce() {
+            return nonce;
         }
 
-        public void setDelegate(Delegate delegate) {
-            this.delegate = delegate;
+        public void setNonce(long nonce) {
+            this.nonce = nonce;
         }
 
         public long getBalance() {
@@ -128,20 +181,25 @@ public class Model {
             this.locked = locked;
         }
 
-        public List<Transaction> getIncomingTxs() {
+        public List<Transaction> getIncomingTransactions() {
             return incomingTxs;
         }
 
-        public void setIncomingTxs(List<Transaction> incomingTxs) {
+        public void setIncomingTransactions(List<Transaction> incomingTxs) {
             this.incomingTxs = incomingTxs;
         }
 
-        public List<Transaction> getOutgoingTxs() {
+        public List<Transaction> getOutgoingTransactions() {
             return outgoingTxs;
         }
 
-        public void setOutgoingTxs(List<Transaction> outgoingTxs) {
+        public void setOutgoingTransactions(List<Transaction> outgoingTxs) {
             this.outgoingTxs = outgoingTxs;
+        }
+
+        @Override
+        public String toString() {
+            return address.toAddressString();
         }
     }
 }

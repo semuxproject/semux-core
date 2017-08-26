@@ -11,7 +11,12 @@ import java.awt.EventQueue;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.semux.core.Account;
+import org.semux.core.Block;
+import org.semux.core.BlockchainListener;
 import org.semux.core.Wallet;
+import org.semux.core.state.AccountState;
+import org.semux.core.state.DelegateState;
 import org.semux.gui.MainFrame;
 import org.semux.gui.Model;
 import org.semux.gui.PasswordFrame;
@@ -20,7 +25,7 @@ import org.semux.gui.WelcomeFrame;
 /**
  * Graphic user interface.
  */
-public class GUI {
+public class GUI implements BlockchainListener {
 
     private String[] args;
     private Model model;
@@ -60,9 +65,8 @@ public class GUI {
         CLI.main(args);
 
         // register block listener
-        CLI.chain.addListener((block) -> {
-            // TODO: update all the data
-        });
+        onBlockAdded(CLI.chain.getLatestBlock());
+        CLI.chain.addListener(this);
 
         // start main frame
         EventQueue.invokeLater(new Runnable() {
@@ -71,6 +75,26 @@ public class GUI {
                 frame.setVisible(true);
             }
         });
+    }
+
+    @Override
+    public void onBlockAdded(Block block) {
+        AccountState as = CLI.chain.getAccountState();
+        DelegateState ds = CLI.chain.getDeleteState();
+
+        // reset the model.
+        model.init(Wallet.getInstance().getAccounts());
+        model.setLatestBlockNumber(block.getNumber());
+        model.setDelegate(ds.getDelegateByAddress(CLI.coinbase.toAddress()) != null);
+
+        for (Model.Account ma : model.getAccounts()) {
+            Account a = as.getAccount(ma.getAddress().toAddress());
+            ma.setNonce(a.getNonce());
+            ma.setBalance(a.getBalance());
+            ma.setLocked(a.getLocked());
+        }
+
+        model.fireUpdateEvent();
     }
 
     public static void main(String[] args) {

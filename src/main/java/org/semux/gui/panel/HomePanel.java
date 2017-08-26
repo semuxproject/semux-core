@@ -17,14 +17,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-import org.semux.CLI;
-import org.semux.core.Account;
-import org.semux.core.Delegate;
 import org.semux.core.Unit;
-import org.semux.core.Wallet;
-import org.semux.core.state.AccountState;
-import org.semux.core.state.DelegateState;
-import org.semux.crypto.EdDSA;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.SwingUtil;
@@ -33,12 +26,16 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
+    private Model model;
+
     private JLabel blockNum;
     private JLabel status;
     private JLabel balance;
     private JLabel locked;
 
     public HomePanel(Model model) {
+        this.model = model;
+
         // setup overview panel
         JPanel overview = new JPanel();
         overview.setBorder(new TitledBorder(
@@ -168,25 +165,11 @@ public class HomePanel extends JPanel implements ActionListener {
     }
 
     private void refresh() {
-        // update block number
-        blockNum.setText(Long.toString(CLI.chain.getLatestBlockNumber()));
+        this.blockNum.setText(Long.toString(model.getLatestBlockNumber()));
 
-        // update status
-        Wallet w = Wallet.getInstance();
-        DelegateState ds = CLI.chain.getDeleteState();
-        Delegate d = ds.getDelegateByAddress(CLI.coinbase.toAddress());
-        status.setText(d == null ? "Normal" : "Delegate");
+        this.status.setText(model.isDelegate() ? "Normal" : "Delegate");
 
-        // update balance
-        AccountState as = CLI.chain.getAccountState();
-        long balanceSEM = 0;
-        long lockedSEM = 0;
-        for (EdDSA key : w.getAccounts()) {
-            Account a = as.getAccount(key.toAddress());
-            balanceSEM += a.getBalance();
-            lockedSEM += a.getLocked();
-        }
-        this.balance.setText(String.format("%.3f SEM", balanceSEM / (double) Unit.SEM));
-        this.locked.setText(String.format("%.3f SEM", lockedSEM / (double) Unit.SEM));
+        this.balance.setText(String.format("%.3f SEM", model.getTotalBalance() / (double) Unit.SEM));
+        this.locked.setText(String.format("%.3f SEM", model.getTotalLocked() / (double) Unit.SEM));
     }
 }

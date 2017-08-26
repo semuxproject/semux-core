@@ -3,7 +3,6 @@ package org.semux.gui.panel;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.GroupLayout;
@@ -20,8 +19,6 @@ import javax.swing.border.LineBorder;
 
 import org.semux.Config;
 import org.semux.core.Unit;
-import org.semux.core.Wallet;
-import org.semux.crypto.EdDSA;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 
@@ -29,12 +26,16 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private JComboBox<String> payFrom;
-    private JTextField payTo;
-    private JTextField payAmount;
-    private JTextField payFee;
+    private Model model;
+
+    private JComboBox<String> from;
+    private JTextField to;
+    private JTextField amount;
+    private JTextField fee;
 
     public SendPanel(Model model) {
+        this.model = model;
+
         setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         JLabel lblFrom = new JLabel("From:");
@@ -43,22 +44,22 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblTo = new JLabel("To:");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        payTo = new JTextField();
-        payTo.setColumns(24);
+        to = new JTextField();
+        to.setColumns(24);
 
         JLabel lblAmount = new JLabel("Amount:");
         lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        payAmount = new JTextField();
-        payAmount.setColumns(10);
+        amount = new JTextField();
+        amount.setColumns(10);
 
         JLabel lblFee = new JLabel("Fee:");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        payFrom = new JComboBox<>();
+        from = new JComboBox<>();
 
-        payFee = new JTextField();
-        payFee.setColumns(10);
+        fee = new JTextField();
+        fee.setColumns(10);
 
         JSeparator separator = new JSeparator();
 
@@ -91,12 +92,12 @@ public class SendPanel extends JPanel implements ActionListener {
                                 .addComponent(lblFee))
                             .addGap(18)
                             .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                                .addComponent(payTo, GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
-                                .addComponent(payFrom, 0, 305, Short.MAX_VALUE)
+                                .addComponent(to, GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
+                                .addComponent(from, 0, 305, Short.MAX_VALUE)
                                 .addGroup(groupLayout.createSequentialGroup()
                                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
-                                        .addComponent(payFee)
-                                        .addComponent(payAmount, GroupLayout.DEFAULT_SIZE, 231, Short.MAX_VALUE))
+                                        .addComponent(fee)
+                                        .addComponent(amount, GroupLayout.DEFAULT_SIZE, 231, Short.MAX_VALUE))
                                     .addPreferredGap(ComponentPlacement.RELATED)
                                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
                                         .addComponent(lblSem1)
@@ -118,20 +119,20 @@ public class SendPanel extends JPanel implements ActionListener {
                     .addGap(10)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblFrom)
-                        .addComponent(payFrom, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(from, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblTo)
-                        .addComponent(payTo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(to, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblAmount)
-                        .addComponent(payAmount, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(amount, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblSem1))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblFee)
-                        .addComponent(payFee, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(fee, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblSem2))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addComponent(separator, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -148,38 +149,38 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     public String getFrom() {
-        return (String) payFrom.getSelectedItem();
+        return (String) from.getSelectedItem();
     }
 
-    public void setFromItems(List<String> items) {
-        payFrom.removeAllItems();
-        for (String item : items) {
-            payFrom.addItem(item);
+    public void setFromItems(List<? extends Object> items) {
+        from.removeAllItems();
+        for (Object item : items) {
+            from.addItem(item.toString());
         }
     }
 
     public String getTo() {
-        return payTo.getText().trim();
+        return to.getText().trim();
     }
 
-    public void setTo(String to) {
-        payTo.setText(to);
+    public void setTo(String addr) {
+        to.setText(addr);
     }
 
     public long getAmount() {
-        return (long) (Unit.SEM * Double.parseDouble(payAmount.getText().trim()));
+        return (long) (Unit.SEM * Double.parseDouble(amount.getText().trim()));
     }
 
     public void setAmount(double amountSEM) {
-        payAmount.setText(String.format("%.3f", amountSEM));
+        amount.setText(String.format("%.3f", amountSEM));
     }
 
     public long getFee() {
-        return (long) (Unit.SEM * Double.parseDouble(payFee.getText().trim()));
+        return (long) (Unit.SEM * Double.parseDouble(fee.getText().trim()));
     }
 
     public void setFee(double feeSEM) {
-        payFee.setText(String.format("%.3f", feeSEM));
+        fee.setText(String.format("%.3f", feeSEM));
     }
 
     @Override
@@ -200,12 +201,7 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     private void refresh() {
-        List<String> addresses = new ArrayList<>();
-        Wallet w = Wallet.getInstance();
-        for (EdDSA key : w.getAccounts()) {
-            addresses.add(key.toString());
-        }
-        setFromItems(addresses);
+        setFromItems(model.getAccounts());
 
         setTo("");
 
