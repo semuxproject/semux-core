@@ -122,6 +122,10 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             return Long.compare(tx1.getTimestamp(), tx2.getTimestamp());
         });
 
+        int row = table.getSelectedRow();
         tableModel.setData(list);
+        if (row != -1 && row < list.size()) {
+            table.setRowSelectionInterval(row, row);
+        }
     }
 }

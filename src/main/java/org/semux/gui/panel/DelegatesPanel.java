@@ -234,7 +234,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             from.addItem(item.toString());
         }
 
-        from.setSelectedIndex(n >= 0 && n < items.size() ? n : 0);
+        if (!items.isEmpty()) {
+            from.setSelectedIndex(n >= 0 && n < items.size() ? n : 0);
+        }
     }
 
     @Override
@@ -251,16 +253,23 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     }
 
     private void refresh() {
-        List<String> accounts = new ArrayList<>();
-        for (Account acc : model.getAccounts()) {
-            accounts.add(acc.toString().substring(0, 16) + "...");
+        List<String> list1 = new ArrayList<>();
+        List<Account> accounts = model.getAccounts();
+        for (int i = 0; i < accounts.size(); i++) {
+            list1.add("Account #" + i);
         }
-        setFromItems(accounts);
+        setFromItems(list1);
 
-        List<Delegate> list = model.getDelegates();
-        list.sort((d1, d2) -> {
-            return Long.compare(d2.getVote(), d1.getVote());
+        List<Delegate> list2 = model.getDelegates();
+        list2.sort((d1, d2) -> {
+            int c = Long.compare(d2.getVote(), d1.getVote());
+            return c != 0 ? c : new String(d1.getName()).compareTo(new String(d2.getName()));
         });
-        tableModel.setData(list);
+
+        int row = table.getSelectedRow();
+        tableModel.setData(list2);
+        if (row != -1 && row < list2.size()) {
+            table.setRowSelectionInterval(row, row);
+        }
     }
 }

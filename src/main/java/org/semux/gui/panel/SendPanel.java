@@ -10,6 +10,7 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
@@ -17,10 +18,15 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
+import org.semux.CLI;
 import org.semux.Config;
+import org.semux.core.Transaction;
+import org.semux.core.TransactionType;
 import org.semux.core.Unit;
+import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
+import org.semux.gui.Model.Account;
 
 public class SendPanel extends JPanel implements ActionListener {
 
@@ -147,6 +153,7 @@ public class SendPanel extends JPanel implements ActionListener {
         // @formatter:on
 
         refresh();
+        clear();
     }
 
     public int getFrom() {
@@ -161,7 +168,9 @@ public class SendPanel extends JPanel implements ActionListener {
             from.addItem(item.toString());
         }
 
-        from.setSelectedIndex(n >= 0 && n < items.size() ? n : 0);
+        if (!items.isEmpty()) {
+            from.setSelectedIndex(n >= 0 && n < items.size() ? n : 0);
+        }
     }
 
     public String getTo() {
@@ -197,8 +206,34 @@ public class SendPanel extends JPanel implements ActionListener {
             refresh();
             break;
         case SEND:
+            Account acc = model.getAccounts().get(getFrom());
+            long value = getAmount();
+            long fee = getFee();
+            byte[] to = Hex.parse(getTo());
+
+            if (fee < Config.MIN_TRANSACTION_FEE) {
+                JOptionPane.showMessageDialog(this, "Transaction fee is too low!");
+            } else if (value + fee > acc.getBalance()) {
+                JOptionPane.showMessageDialog(this, "Insufficient funds!");
+            } else if (to.length != 20) {
+                JOptionPane.showMessageDialog(this, "Invalid receiving address!");
+            } else {
+                TransactionType type = TransactionType.TRANSFER;
+                byte[] from = acc.getAddress().toAddress();
+                long nonce = acc.getNonce() + 1;
+                long timestamp = System.currentTimeMillis();
+                byte[] data = {};
+                Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+                tx.sign(acc.getAddress());
+
+                CLI.pendingMgr.addTransaction(tx);
+
+                JOptionPane.showMessageDialog(this, "Transaction sent!");
+                clear();
+            }
             break;
         case CLEAR:
+            clear();
             break;
         default:
             break;
@@ -207,11 +242,11 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private void refresh() {
         setFromItems(model.getAccounts());
+    }
 
+    private void clear() {
         setTo("");
-
         setAmount(0);
-
         setFee(Config.MIN_TRANSACTION_FEE / (double) Unit.SEM);
     }
 }

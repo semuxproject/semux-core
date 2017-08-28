@@ -168,7 +168,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private void refresh() {
         this.blockNum.setText(Long.toString(model.getLatestBlockNumber()));
 
-        this.status.setText(model.isDelegate() ? "Normal" : "Delegate");
+        this.status.setText(model.isDelegate() ? "Delegate" : "Normal");
 
         this.balance.setText(String.format("%.3f SEM", model.getTotalBalance() / (double) Unit.SEM));
         this.locked.setText(String.format("%.3f SEM", model.getTotalLocked() / (double) Unit.SEM));

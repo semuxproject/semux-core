@@ -57,7 +57,7 @@ public class NodeManager {
     private static String SEED_DNS_HOST = "seed-%d.semux.org";
 
     private static String PEERS_DIR = "p2p";
-    private static String PEERS_FILE = "peers-%d.data";
+    private static String PEERS_FILE = "peers.data";
 
     private static int LRU_CACHE_SIZE = 1024;
     private static long RECONNECT_WAIT = 2 * 60 * 1000;
@@ -259,7 +259,7 @@ public class NodeManager {
      * @return
      */
     private static File getFile(short networkId) {
-        File f = new File(Config.DATA_DIR, PEERS_DIR + File.separator + String.format(PEERS_FILE, networkId));
+        File f = new File(Config.DATA_DIR, PEERS_DIR + File.separator + PEERS_FILE);
         f.getParentFile().mkdirs();
 
         return f;

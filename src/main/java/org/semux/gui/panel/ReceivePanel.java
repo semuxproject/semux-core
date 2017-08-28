@@ -20,6 +20,7 @@ import javax.swing.JTable;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import org.semux.core.Unit;
 import org.semux.gui.Action;
@@ -39,10 +40,15 @@ public class ReceivePanel extends JPanel implements ActionListener {
         this.model = model;
         this.model.addListener(this);
 
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
+
         JScrollPane scrollPane = new JScrollPane();
         tableModel = new ReceiveTableModel();
         table = new JTable(tableModel);
         table.getColumnModel().getColumn(0).setMaxWidth(32);
+        table.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
+        table.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
         scrollPane.setViewportView(table);
 
         JButton btnCopyAddress = new JButton("Copy Address");
@@ -138,14 +144,18 @@ public class ReceivePanel extends JPanel implements ActionListener {
             refresh();
             break;
         case COPY_ADDRESS:
-            int row = Math.max(table.getSelectedRow(), 0);
-            Account acc = model.getAccounts().get(row);
+            int row = table.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Please select an account");
+            } else {
+                Account acc = model.getAccounts().get(row);
 
-            StringSelection stringSelection = new StringSelection(acc.toString());
-            Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-            clpbrd.setContents(stringSelection, null);
+                StringSelection stringSelection = new StringSelection(acc.toString());
+                Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clpbrd.setContents(stringSelection, null);
 
-            JOptionPane.showConfirmDialog(this, "Address copied: " + acc);
+                JOptionPane.showMessageDialog(this, "Address copied: " + acc);
+            }
             break;
         default:
             break;
@@ -154,6 +164,11 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
     private void refresh() {
         List<Account> list = model.getAccounts();
+
+        int row = table.getSelectedRow();
         tableModel.setData(list);
+        if (row != -1 && row < list.size()) {
+            table.setRowSelectionInterval(row, row);
+        }
     }
 }
