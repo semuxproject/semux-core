@@ -93,9 +93,21 @@ public interface Blockchain {
      * Get all inbound transactions from/to an address.
      * 
      * @param address
+     *            account address
      * @return
      */
     public List<Transaction> getTransactions(byte[] address);
+
+    /**
+     * Get a limited number of transactions from/to an address.
+     * 
+     * @param address
+     *            account address
+     * @param limit
+     *            number of transactions, or -1 if no limit
+     * @return
+     */
+    public List<Transaction> getTransactions(byte[] address, int limit);
 
     /**
      * Add a block to the chain.

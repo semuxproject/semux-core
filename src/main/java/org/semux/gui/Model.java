@@ -140,8 +140,7 @@ public class Model {
         private long nonce;
         private long balance;
         private long locked;
-        private List<Transaction> incomingTxs = new ArrayList<>();
-        private List<Transaction> outgoingTxs = new ArrayList<>();
+        private List<Transaction> transactions = new ArrayList<>();
 
         public Account(EdDSA address) {
             this.address = address;
@@ -179,20 +178,12 @@ public class Model {
             this.locked = locked;
         }
 
-        public List<Transaction> getIncomingTransactions() {
-            return incomingTxs;
+        public List<Transaction> getTransactions() {
+            return transactions;
         }
 
-        public void setIncomingTransactions(List<Transaction> incomingTxs) {
-            this.incomingTxs = incomingTxs;
-        }
-
-        public List<Transaction> getOutgoingTransactions() {
-            return outgoingTxs;
-        }
-
-        public void setOutgoingTransactions(List<Transaction> outgoingTxs) {
-            this.outgoingTxs = outgoingTxs;
+        public void setITransactions(List<Transaction> transactions) {
+            this.transactions = transactions;
         }
 
         @Override

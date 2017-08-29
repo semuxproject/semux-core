@@ -262,12 +262,16 @@ public class BlockchainImpl implements Blockchain {
         listeners.add(listener);
     }
 
-    @Override
     public List<Transaction> getTransactions(byte[] address) {
+        return getTransactions(address, -1);
+    }
+
+    @Override
+    public List<Transaction> getTransactions(byte[] address, int limit) {
         List<Transaction> list = new ArrayList<>();
 
         int total = getTotalTransactions(address);
-        for (int i = 0; i < total; i++) {
+        for (int i = total - 1; i >= 0 && (limit == -1 || list.size() < limit); i--) {
             byte[] key = getNthTransactionIndexKey(address, i);
             byte[] value = indexDB.get(key);
 
