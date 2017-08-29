@@ -4,6 +4,12 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
@@ -17,10 +23,15 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import org.semux.core.Transaction;
+import org.semux.core.TransactionType;
 import org.semux.core.Unit;
+import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
+import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
+import org.semux.utils.ByteArray;
 
 public class HomePanel extends JPanel implements ActionListener {
 
@@ -32,6 +43,8 @@ public class HomePanel extends JPanel implements ActionListener {
     private JLabel status;
     private JLabel balance;
     private JLabel locked;
+
+    private JPanel transactions;
 
     public HomePanel(Model model) {
         this.model = model;
@@ -69,7 +82,7 @@ public class HomePanel extends JPanel implements ActionListener {
         overview.add(locked);
 
         // setup transactions panel
-        JPanel transactions = new JPanel();
+        transactions = new JPanel();
         transactions.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(10, 10, 10, 10)),
                 "Transactions", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
@@ -103,18 +116,20 @@ public class HomePanel extends JPanel implements ActionListener {
 
         private static final long serialVersionUID = 1L;
 
-        public TransactionPanel() {
+        public TransactionPanel(Transaction tx, boolean isInbound) {
             this.setBorder(new EmptyBorder(10, 10, 10, 10));
 
             JLabel lblType = new JLabel("");
             lblType.setIcon(SwingUtil.loadImage("send", 48, 48));
 
-            JLabel lblAmount = new JLabel("+12.3456 SEM");
+            JLabel lblAmount = new JLabel(
+                    String.format("%s%.3f SEM", isInbound ? "+" : "-", tx.getValue() / (double) Unit.SEM));
             lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
-            JLabel lblTime = new JLabel("2017-01-02 12:00 PM");
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            JLabel lblTime = new JLabel(df.format(new Date(tx.getTimestamp())));
 
-            JLabel lblFrom = new JLabel("0x1122334455667788112233445566778811223344");
+            JLabel lblFrom = new JLabel("0x" + Hex.encode(isInbound ? tx.getFrom() : tx.getTo()));
             lblFrom.setForeground(Color.GRAY);
 
             // @formatter:off
@@ -167,10 +182,32 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private void refresh() {
         this.blockNum.setText(Long.toString(model.getLatestBlockNumber()));
-
         this.status.setText(model.isDelegate() ? "Delegate" : "Normal");
-
         this.balance.setText(String.format("%.3f SEM", model.getTotalBalance() / (double) Unit.SEM));
         this.locked.setText(String.format("%.3f SEM", model.getTotalLocked() / (double) Unit.SEM));
+
+        List<Transaction> list = new ArrayList<>();
+        for (Account acc : model.getAccounts()) {
+            for (Transaction tx : acc.getTransactions()) {
+                if (TransactionType.TRANSFER.equals(tx.getType())) {
+                    list.add(tx);
+                }
+            }
+        }
+        list.sort((tx1, tx2) -> {
+            return Long.compare(tx1.getTimestamp(), tx2.getTimestamp());
+        });
+        list = list.size() > 6 ? list.subList(0, 6) : list;
+
+        Set<ByteArray> set = new HashSet<>();
+        for (Account a : model.getAccounts()) {
+            set.add(ByteArray.of(a.getAddress().toAddress()));
+        }
+
+        transactions.removeAll();
+        for (Transaction tx : list) {
+            transactions.add(new TransactionPanel(tx, set.contains(ByteArray.of(tx.getTo()))));
+        }
+        transactions.revalidate();
     }
 }

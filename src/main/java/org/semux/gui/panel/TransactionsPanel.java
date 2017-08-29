@@ -3,6 +3,7 @@ package org.semux.gui.panel;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -81,17 +82,18 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
             switch (columnIndex) {
             case 0:
-                return Hex.encode(tx.getHash());
+                return "0x" + Hex.encode(tx.getHash());
             case 1:
                 return tx.getType().name();
             case 2:
-                return Hex.encode(tx.getFrom());
+                return "0x" + Hex.encode(tx.getFrom());
             case 3:
-                return Hex.encode(tx.getTo());
+                return "0x" + Hex.encode(tx.getTo());
             case 4:
                 return String.format("%.3f SEM", tx.getValue() / (double) Unit.SEM);
             case 5:
-                return new Date(tx.getTimestamp());
+                SimpleDateFormat df = new SimpleDateFormat("yyy-MM-dd HH:mm:ss");
+                return df.format(new Date(tx.getTimestamp()));
             default:
                 return null;
             }

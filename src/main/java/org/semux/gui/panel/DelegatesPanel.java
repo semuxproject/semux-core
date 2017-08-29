@@ -213,7 +213,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             case 0:
                 return Bytes.toString(d.getName());
             case 1:
-                return Hex.encode(d.getAddress());
+                return "0x" + Hex.encode(d.getAddress());
             case 2:
                 return d.getVote();
             default:

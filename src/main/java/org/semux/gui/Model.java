@@ -186,9 +186,14 @@ public class Model {
             this.transactions = transactions;
         }
 
+        /**
+         * Get the hex representation of the account address, with 0x prefix.
+         * 
+         * @return
+         */
         @Override
         public String toString() {
-            return address.toAddressString();
+            return "0x" + address.toAddressString();
         }
     }
 }

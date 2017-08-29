@@ -124,7 +124,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             case 0:
                 return rowIndex;
             case 1:
-                return acc.getAddress().toAddressString();
+                return "0x" + acc.getAddress().toAddressString();
             case 2:
                 return String.format("%.3f SEM", acc.getBalance() / (double) Unit.SEM);
             case 3:
