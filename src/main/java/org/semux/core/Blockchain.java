@@ -6,6 +6,8 @@
  */
 package org.semux.core;
 
+import java.util.List;
+
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 
@@ -86,6 +88,14 @@ public interface Blockchain {
      * @return
      */
     public Transaction getTransaction(byte[] hash);
+
+    /**
+     * Get all inbound transactions from/to an address.
+     * 
+     * @param address
+     * @return
+     */
+    public List<Transaction> getTransactions(byte[] address);
 
     /**
      * Add a block to the chain.

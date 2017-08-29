@@ -171,43 +171,85 @@ public class BlockchainImpl implements Blockchain {
     @Override
     public synchronized void addBlock(Block block) {
 
-        long number = block.getNumber();
-        byte[] hash = block.getHash();
+        long blockNumber = block.getNumber();
+        byte[] blockHash = block.getHash();
 
-        byte[] idx = Bytes.of(number);
+        byte[] idx = Bytes.of(blockNumber);
         if (indexDB.get(idx) != null) {
-            logger.error("Block #{} already exists", number);
+            logger.error("Block #{} already exists", blockNumber);
             return;
         } else {
             List<Pair<Integer, Integer>> txIndices = block.getTransacitonIndexes();
             byte[] bytes = block.toBytes();
 
             // [1] update block
-            blockDB.put(hash, bytes);
-            indexDB.put(idx, hash);
+            blockDB.put(blockHash, bytes);
+            indexDB.put(idx, blockHash);
 
             // [2] update transaction indices
             List<Transaction> txs = block.getTransactions();
             for (int i = 0; i < txs.size(); i++) {
+                Transaction tx = txs.get(i);
+
                 SimpleEncoder enc = new SimpleEncoder();
-                enc.writeBytes(hash);
+                enc.writeBytes(blockHash);
                 enc.writeInt(txIndices.get(i).getLeft());
                 enc.writeInt(txIndices.get(i).getRight());
 
-                indexDB.put(txs.get(i).getHash(), enc.toBytes());
+                indexDB.put(tx.getHash(), enc.toBytes());
+
+                // [3] update transaction_by_account indices
+                int totalFrom = getTotalTransactions(tx.getFrom());
+                int totalTo = getTotalTransactions(tx.getTo());
+                indexDB.put(getNthTransactionIndexKey(tx.getFrom(), totalFrom), tx.getHash());
+                indexDB.put(getNthTransactionIndexKey(tx.getTo(), totalTo), tx.getHash());
+                setTotalTransactions(tx.getFrom(), totalFrom + 1);
+                setTotalTransactions(tx.getTo(), totalTo + 1);
             }
 
-            if (number > latestBlock.getNumber()) {
+            if (blockNumber > latestBlock.getNumber()) {
                 latestBlock = block;
 
-                // [3] update latest_block
-                indexDB.put(KEY_LATEST_BLOCK_HASH, hash);
+                // [4] update latest_block
+                indexDB.put(KEY_LATEST_BLOCK_HASH, blockHash);
             }
         }
 
         for (BlockchainListener listener : listeners) {
             listener.onBlockAdded(block);
         }
+    }
+
+    /**
+     * Get the number of transactions from/to an address.
+     * 
+     * @param address
+     * @return
+     */
+    private int getTotalTransactions(byte[] address) {
+        byte[] cnt = indexDB.get(address);
+        return (cnt == null) ? 0 : Bytes.toInt(cnt);
+    }
+
+    /**
+     * Set the total number of transaction of an account.
+     * 
+     * @param address
+     * @param total
+     */
+    private void setTotalTransactions(byte[] address, int total) {
+        indexDB.put(address, Bytes.of(total));
+    }
+
+    /**
+     * Get the N-th transaction index key of an account.
+     * 
+     * @param address
+     * @param n
+     * @return
+     */
+    private byte[] getNthTransactionIndexKey(byte[] address, int n) {
+        return Bytes.merge(address, Bytes.of(n));
     }
 
     @Override
@@ -218,5 +260,20 @@ public class BlockchainImpl implements Blockchain {
     @Override
     public void addListener(BlockchainListener listener) {
         listeners.add(listener);
+    }
+
+    @Override
+    public List<Transaction> getTransactions(byte[] address) {
+        List<Transaction> list = new ArrayList<>();
+
+        int total = getTotalTransactions(address);
+        for (int i = 0; i < total; i++) {
+            byte[] key = getNthTransactionIndexKey(address, i);
+            byte[] value = indexDB.get(key);
+
+            list.add(getTransaction(value));
+        }
+
+        return list;
     }
 }

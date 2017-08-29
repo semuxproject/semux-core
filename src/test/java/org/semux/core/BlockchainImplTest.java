@@ -13,8 +13,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -38,10 +38,6 @@ public class BlockchainImplTest {
     private Transaction tx = new Transaction(TransactionType.TRANSFER, from, to, value, fee, nonce, timestamp, data);
     {
         tx.sign(new EdDSA());
-    }
-
-    private Blockchain createBlockchain() {
-        return new BlockchainImpl(MemoryDB.FACTORY);
     }
 
     @Test
@@ -123,11 +119,32 @@ public class BlockchainImplTest {
         assertEquals(block1.getTransactions().size(), block2.getTransactions().size());
     }
 
+    @Test
+    public void testGetTransactions() {
+        Block block = createBlock(1);
+        Blockchain chain = createBlockchain();
+        chain.addBlock(block);
+
+        List<Transaction> list = chain.getTransactions(from);
+        assertEquals(1, list.size());
+        assertArrayEquals(tx.getHash(), list.get(0).getHash());
+
+        list = chain.getTransactions(to);
+        assertEquals(1, list.size());
+        assertArrayEquals(tx.getHash(), list.get(0).getHash());
+    }
+
+    private Blockchain createBlockchain() {
+        return new BlockchainImpl(MemoryDB.FACTORY);
+    }
+
     private Block createBlock(long number) {
+        return createBlock(number, Collections.singletonList(tx));
+    }
+
+    private Block createBlock(long number, List<Transaction> transactions) {
         byte[] data = Bytes.of("test");
         long timestamp = System.currentTimeMillis();
-        List<Transaction> transactions = new ArrayList<>();
-        transactions.add(tx);
 
         return new Block(new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data).sign(new EdDSA()),
                 transactions);
