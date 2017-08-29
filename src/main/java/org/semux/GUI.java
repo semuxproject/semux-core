@@ -27,6 +27,8 @@ import org.semux.gui.WelcomeFrame;
  */
 public class GUI implements BlockchainListener {
 
+    private static final int TRANSACTION_LIMIT = 1024;
+
     private String[] args;
     private Model model;
 
@@ -92,6 +94,7 @@ public class GUI implements BlockchainListener {
             ma.setNonce(a.getNonce());
             ma.setBalance(a.getBalance());
             ma.setLocked(a.getLocked());
+            ma.setITransactions(CLI.chain.getTransactions(ma.getAddress().toAddress(), TRANSACTION_LIMIT));
         }
 
         model.setDelegates(ds.getDelegates());

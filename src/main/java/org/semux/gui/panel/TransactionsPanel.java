@@ -13,8 +13,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
-import org.bouncycastle.util.encoders.Hex;
 import org.semux.core.Transaction;
+import org.semux.core.Unit;
+import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
@@ -88,7 +89,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             case 3:
                 return Hex.encode(tx.getTo());
             case 4:
-                return tx.getValue();
+                return String.format("%.3f SEM", tx.getValue() / (double) Unit.SEM);
             case 5:
                 return new Date(tx.getTimestamp());
             default:
@@ -114,8 +115,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         List<Transaction> list = new ArrayList<>();
 
         for (Account acc : model.getAccounts()) {
-            list.addAll(acc.getIncomingTransactions());
-            list.addAll(acc.getOutgoingTransactions());
+            list.addAll(acc.getTransactions());
         }
 
         list.sort((tx1, tx2) -> {
