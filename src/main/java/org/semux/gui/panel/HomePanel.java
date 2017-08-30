@@ -126,7 +126,7 @@ public class HomePanel extends JPanel implements ActionListener {
                     String.format("%s%.3f SEM", isInbound ? "+" : "-", tx.getValue() / (double) Unit.SEM));
             lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
-            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
             JLabel lblTime = new JLabel(df.format(new Date(tx.getTimestamp())));
 
             JLabel lblFrom = new JLabel("0x" + Hex.encode(isInbound ? tx.getFrom() : tx.getTo()));

@@ -25,11 +25,14 @@ import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
+import org.semux.gui.SwingUtil;
 import org.semux.utils.Bytes;
 
 public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
+
+    private static String[] columnNames = { "Name", "Address", "Votes" };
 
     private Model model;
     private JTable table;
@@ -48,8 +51,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         JScrollPane scrollPane = new JScrollPane();
         tableModel = new DelegatesTableModel();
         table = new JTable(tableModel);
-        table.getColumnModel().getColumn(0).setMaxWidth(128);
-        table.getColumnModel().getColumn(2).setMaxWidth(128);
+        SwingUtil.setColumnWidths(table, 500, 0.2, 0.6, 0.2);
+        SwingUtil.setColumnAlignments(table, false, false, true);
         scrollPane.setViewportView(table);
 
         JPanel panel = new JPanel();
@@ -178,7 +181,6 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         private static final long serialVersionUID = 1L;
 
-        private String[] columnNames = { "Name", "Address", "Votes" };
         private List<Delegate> data;
 
         public DelegatesTableModel() {

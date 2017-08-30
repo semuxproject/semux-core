@@ -20,7 +20,6 @@ import javax.swing.JTable;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
 
 import org.semux.core.Unit;
 import org.semux.gui.Action;
@@ -32,6 +31,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
+    private static String[] columnNames = { "#", "Address", "Balance", "Locked" };
+
     private Model model;
     private JTable table;
     private ReceiveTableModel tableModel;
@@ -40,15 +41,11 @@ public class ReceivePanel extends JPanel implements ActionListener {
         this.model = model;
         this.model.addListener(this);
 
-        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
-        rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
-
         JScrollPane scrollPane = new JScrollPane();
         tableModel = new ReceiveTableModel();
         table = new JTable(tableModel);
-        table.getColumnModel().getColumn(0).setMaxWidth(32);
-        table.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
-        table.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
+        SwingUtil.setColumnWidths(table, 500, 0.1, 0.6, 0.2, 0.2);
+        SwingUtil.setColumnAlignments(table, false, false, true, true);
         scrollPane.setViewportView(table);
 
         JButton btnCopyAddress = new JButton("Copy Address");
@@ -89,7 +86,6 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
         private static final long serialVersionUID = 1L;
 
-        private String[] columnNames = { "#", "Address", "Balance", "Locked" };
         private List<Account> data;
 
         public ReceiveTableModel() {

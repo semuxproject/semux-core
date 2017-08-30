@@ -13,6 +13,10 @@ import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableColumnModel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +59,38 @@ public class SwingUtil {
             Image img = icon.getImage();
             Image img2 = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
             return new ImageIcon(img2);
+        }
+    }
+
+    /**
+     * Set the preferred width of table columns.
+     * 
+     * @param table
+     * @param total
+     * @param widths
+     */
+    public static void setColumnWidths(JTable table, int total, double... widths) {
+        TableColumnModel model = table.getColumnModel();
+        for (int i = 0; i < widths.length; i++) {
+            model.getColumn(i).setPreferredWidth((int) (total * widths[i]));
+        }
+    }
+
+    /**
+     * Set the alignments of table columns.
+     * 
+     * @param table
+     * @param right
+     */
+    public static void setColumnAlignments(JTable table, boolean... right) {
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
+
+        TableColumnModel model = table.getColumnModel();
+        for (int i = 0; i < right.length; i++) {
+            if (right[i]) {
+                model.getColumn(i).setCellRenderer(rightRenderer);
+            }
         }
     }
 }

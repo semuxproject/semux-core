@@ -20,10 +20,13 @@ import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
+import org.semux.gui.SwingUtil;
 
 public class TransactionsPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
+
+    private static String[] columnNames = { "Hash", "Type", "From", "To", "Value", "Time" };
 
     private Model model;
     private JTable table;
@@ -40,6 +43,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         tableModel = new TransactionsTableModel();
         table = new JTable(tableModel);
+        SwingUtil.setColumnWidths(table, 600, 0.2, 0.1, 0.2, 0.2, 0.1, 0.2);
+        SwingUtil.setColumnAlignments(table, false, false, false, false, true, true);
         scrollPane.setViewportView(table);
 
         refresh();
@@ -49,7 +54,6 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         private static final long serialVersionUID = 1L;
 
-        private String[] columnNames = { "Hash", "Type", "From", "To", "Value", "Time" };
         private List<Transaction> data;
 
         public TransactionsTableModel() {
@@ -84,7 +88,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             case 0:
                 return "0x" + Hex.encode(tx.getHash());
             case 1:
-                return tx.getType().name();
+                return tx.getType().name().toLowerCase();
             case 2:
                 return "0x" + Hex.encode(tx.getFrom());
             case 3:
@@ -92,7 +96,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             case 4:
                 return String.format("%.3f SEM", tx.getValue() / (double) Unit.SEM);
             case 5:
-                SimpleDateFormat df = new SimpleDateFormat("yyy-MM-dd HH:mm:ss");
+                SimpleDateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
                 return df.format(new Date(tx.getTimestamp()));
             default:
                 return null;
