@@ -14,6 +14,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.semux.core.Account;
 import org.semux.core.Block;
 import org.semux.core.BlockchainListener;
+import org.semux.core.Transaction;
 import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -39,6 +40,10 @@ public class GUI implements BlockchainListener {
 
     public Model getModel() {
         return model;
+    }
+
+    public void sendTransaction(Transaction tx) {
+        CLI.pendingMgr.addTransaction(tx);
     }
 
     public void setupLookAndFeel() {
@@ -94,7 +99,7 @@ public class GUI implements BlockchainListener {
             ma.setNonce(a.getNonce());
             ma.setBalance(a.getBalance());
             ma.setLocked(a.getLocked());
-            ma.setITransactions(CLI.chain.getTransactions(ma.getAddress().toAddress(), TRANSACTION_LIMIT));
+            ma.setTransactions(CLI.chain.getTransactions(ma.getAddress().toAddress(), TRANSACTION_LIMIT));
         }
 
         model.setDelegates(ds.getDelegates());

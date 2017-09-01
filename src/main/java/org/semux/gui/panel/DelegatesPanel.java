@@ -20,6 +20,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 
+import org.semux.GUI;
 import org.semux.core.Delegate;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
@@ -35,6 +36,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private static String[] columnNames = { "Name", "Address", "Votes" };
 
     private Model model;
+
     private JTable table;
     private DelegatesTableModel tableModel;
 
@@ -44,14 +46,14 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private JTextField textUnvote;
     private JTextField textName;
 
-    public DelegatesPanel(Model model) {
-        this.model = model;
+    public DelegatesPanel(GUI gui) {
+        this.model = gui.getModel();
         this.model.addListener(this);
 
         JScrollPane scrollPane = new JScrollPane();
         tableModel = new DelegatesTableModel();
         table = new JTable(tableModel);
-        SwingUtil.setColumnWidths(table, 500, 0.2, 0.6, 0.2);
+        SwingUtil.setColumnWidths(table, 500, 0.2, 0.65, 0.15);
         SwingUtil.setColumnAlignments(table, false, false, true);
         scrollPane.setViewportView(table);
 
@@ -192,6 +194,14 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             this.fireTableDataChanged();
         }
 
+        public Delegate getRow(int row) {
+            if (row >= 0 && row < data.size()) {
+                return data.get(row);
+            }
+
+            return null;
+        }
+
         @Override
         public int getRowCount() {
             return data.size();
@@ -248,6 +258,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         switch (action) {
         case REFRESH:
             refresh();
+            break;
+        case VOTE:
+            break;
+        case UNVOTE:
+            break;
+        case DELEGATE:
             break;
         default:
             break;

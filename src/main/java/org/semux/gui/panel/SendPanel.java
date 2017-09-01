@@ -18,8 +18,8 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
-import org.semux.CLI;
 import org.semux.Config;
+import org.semux.GUI;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
@@ -32,6 +32,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
+    private GUI gui;
     private Model model;
 
     private JComboBox<String> from;
@@ -39,8 +40,9 @@ public class SendPanel extends JPanel implements ActionListener {
     private JTextField amount;
     private JTextField fee;
 
-    public SendPanel(Model model) {
-        this.model = model;
+    public SendPanel(GUI gui) {
+        this.gui = gui;
+        this.model = gui.getModel();
         this.model.addListener(this);
 
         setBorder(new LineBorder(Color.LIGHT_GRAY));
@@ -226,7 +228,7 @@ public class SendPanel extends JPanel implements ActionListener {
                 Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
                 tx.sign(acc.getAddress());
 
-                CLI.pendingMgr.addTransaction(tx);
+                gui.sendTransaction(tx);
 
                 JOptionPane.showMessageDialog(this, "Transaction sent!");
                 clear();

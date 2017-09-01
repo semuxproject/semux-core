@@ -182,7 +182,7 @@ public class Model {
             return transactions;
         }
 
-        public void setITransactions(List<Transaction> transactions) {
+        public void setTransactions(List<Transaction> transactions) {
             this.transactions = transactions;
         }
 

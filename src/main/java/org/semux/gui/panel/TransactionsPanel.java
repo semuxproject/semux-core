@@ -14,6 +14,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import org.semux.GUI;
 import org.semux.core.Transaction;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
@@ -21,6 +22,7 @@ import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
+import org.semux.utils.StringUtil;
 
 public class TransactionsPanel extends JPanel implements ActionListener {
 
@@ -32,8 +34,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     private JTable table;
     private TransactionsTableModel tableModel;
 
-    public TransactionsPanel(Model model) {
-        this.model = model;
+    public TransactionsPanel(GUI gui) {
+        this.model = gui.getModel();
         this.model.addListener(this);
 
         setLayout(new BorderLayout(0, 0));
@@ -43,7 +45,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         tableModel = new TransactionsTableModel();
         table = new JTable(tableModel);
-        SwingUtil.setColumnWidths(table, 600, 0.2, 0.1, 0.2, 0.2, 0.1, 0.2);
+        SwingUtil.setColumnWidths(table, 600, 0.25, 0.08, 0.2, 0.2, 0.12, 0.15);
         SwingUtil.setColumnAlignments(table, false, false, false, false, true, true);
         scrollPane.setViewportView(table);
 
@@ -88,7 +90,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             case 0:
                 return "0x" + Hex.encode(tx.getHash());
             case 1:
-                return tx.getType().name().toLowerCase();
+                return StringUtil.toLowercaseExceptFirst(tx.getType().name());
             case 2:
                 return "0x" + Hex.encode(tx.getFrom());
             case 3:

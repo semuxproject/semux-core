@@ -41,11 +41,11 @@ public class MainFrame extends JFrame implements ActionListener {
     private JPanel tabs;
 
     public MainFrame(GUI gui) {
-        panelHome = new HomePanel(gui.getModel());
-        panelSend = new SendPanel(gui.getModel());
-        panelReceive = new ReceivePanel(gui.getModel());
-        panelTransactions = new TransactionsPanel(gui.getModel());
-        panelDelegates = new DelegatesPanel(gui.getModel());
+        panelHome = new HomePanel(gui);
+        panelSend = new SendPanel(gui);
+        panelReceive = new ReceivePanel(gui);
+        panelTransactions = new TransactionsPanel(gui);
+        panelDelegates = new DelegatesPanel(gui);
 
         // setup frame properties
         this.setTitle(TITLE);
