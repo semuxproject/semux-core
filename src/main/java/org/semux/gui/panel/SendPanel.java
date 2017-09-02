@@ -229,7 +229,6 @@ public class SendPanel extends JPanel implements ActionListener {
                 tx.sign(acc.getAddress());
 
                 gui.sendTransaction(tx);
-
                 JOptionPane.showMessageDialog(this, "Transaction sent!");
                 clear();
             }

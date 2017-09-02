@@ -12,6 +12,7 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -20,8 +21,11 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 
+import org.semux.Config;
 import org.semux.GUI;
 import org.semux.core.Delegate;
+import org.semux.core.Transaction;
+import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
@@ -35,6 +39,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static String[] columnNames = { "Name", "Address", "Votes" };
 
+    private GUI gui;
     private Model model;
 
     private JTable table;
@@ -47,6 +52,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private JTextField textName;
 
     public DelegatesPanel(GUI gui) {
+        this.gui = gui;
         this.model = gui.getModel();
         this.model.addListener(this);
 
@@ -260,14 +266,70 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             refresh();
             break;
         case VOTE:
+        case UNVOTE: {
+            Account a = getSelectedAccount();
+            Delegate d = getSelectedDelegate();
+            String v = action.equals(Action.VOTE) ? textVote.getText() : textUnvote.getText();
+            if (a == null) {
+                JOptionPane.showMessageDialog(this, "Please select an account!");
+            } else if (d == null) {
+                JOptionPane.showMessageDialog(this, "Please select a delegate");
+            } else if (!v.matches("[\\d]+")) {
+                JOptionPane.showMessageDialog(this, "Please enter the number of votes");
+            } else {
+                TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
+                byte[] from = a.getAddress().toAddress();
+                byte[] to = d.getAddress();
+                long value = Long.parseLong(v);
+                long fee = Config.MIN_TRANSACTION_FEE;
+                long nonce = a.getNonce() + 1;
+                long timestamp = System.currentTimeMillis();
+                byte[] data = {};
+                Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+                tx.sign(a.getAddress());
+
+                gui.sendTransaction(tx);
+                JOptionPane.showMessageDialog(this, "Transaction sent!");
+                clear();
+            }
             break;
-        case UNVOTE:
+        }
+        case DELEGATE: {
+            Account a = getSelectedAccount();
+            String name = textName.getText();
+            if (a == null) {
+                JOptionPane.showMessageDialog(this, "Please select an account!");
+            } else if (!name.matches("[_a-z0-8]{4,16}")) {
+                JOptionPane.showMessageDialog(this, "Please enter a correct delegate name");
+            } else {
+                TransactionType type = TransactionType.DELEGATE;
+                byte[] from = a.getAddress().toAddress();
+                byte[] to = from;
+                long value = Config.MIN_DELEGATE_FEE;
+                long fee = Config.MIN_TRANSACTION_FEE;
+                long nonce = a.getNonce() + 1;
+                long timestamp = System.currentTimeMillis();
+                byte[] data = Bytes.of(name);
+                Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+                tx.sign(a.getAddress());
+
+                gui.sendTransaction(tx);
+                JOptionPane.showMessageDialog(this, "Transaction sent!");
+                clear();
+            }
             break;
-        case DELEGATE:
-            break;
+        }
         default:
             break;
         }
+    }
+
+    private Account getSelectedAccount() {
+        return model.getAccounts().get(from.getSelectedIndex());
+    }
+
+    private Delegate getSelectedDelegate() {
+        return tableModel.getRow(table.getSelectedRow());
     }
 
     private void refresh() {
@@ -289,5 +351,11 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         if (row != -1 && row < list2.size()) {
             table.setRowSelectionInterval(row, row);
         }
+    }
+
+    private void clear() {
+        textVote.setText("");
+        textUnvote.setText("");
+        textName.setText("");
     }
 }
