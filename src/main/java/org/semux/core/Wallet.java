@@ -32,28 +32,29 @@ public class Wallet {
 
     private static final Logger logger = LoggerFactory.getLogger(Wallet.class);
 
-    private static final String WALLET_FILE = "wallet.data";
-    private static final int VERSION = 1;
+    private static final String DEFAULT_FILE = "wallet.data";
+    private static final int DEFAULT_VERSION = 1;
+
+    private File file;
+    private String password;
 
     private List<EdDSA> accounts = Collections.synchronizedList(new ArrayList<>());
-    private boolean isLocked = true;
-    private String password = null;
-
-    private static Wallet instance;
 
     /**
-     * Get the singleton instance of wallet.
+     * Create a new wallet instance.
      * 
-     * @return
+     * @param file
+     *            the wallet file
      */
-    public synchronized static Wallet getInstance() {
-        if (instance == null) {
-            instance = new Wallet();
-        }
-        return instance;
+    public Wallet(File file) {
+        this.file = file;
     }
 
-    private Wallet() {
+    /**
+     * Create a new wallet instance with default path.
+     */
+    public Wallet() {
+        this(new File(Config.DATA_DIR, DEFAULT_FILE));
     }
 
     /**
@@ -62,21 +63,35 @@ public class Wallet {
      * @param password
      *            the wallet password
      * @return true if the wallet is successfully unlocked, otherwise false
+     * 
+     * @throws IllegalArgumentException
      */
-    public synchronized boolean unlock(String password) {
-        if (!isLocked()) {
+    public boolean unlock(String password) throws IllegalArgumentException {
+        if (password == null) {
+            throw new IllegalArgumentException("Password can not be null");
+        }
+
+        if (unlocked()) {
             return true;
         }
 
         try {
-            File f = new File(Config.DATA_DIR, WALLET_FILE);
-            List<EdDSA> keys = read(f, password);
+            byte[] key = Hash.h256(Bytes.of(password));
 
-            this.isLocked = false;
+            if (file.exists()) {
+                SimpleDecoder dec = new SimpleDecoder(IOUtil.readFile(file));
+                dec.readInt(); // version
+                int total = dec.readInt();
+
+                for (int i = 0; i < total; i++) {
+                    byte[] iv = dec.readBytes();
+                    byte[] publicKey = dec.readBytes();
+                    byte[] privateKey = AES.decrypt(dec.readBytes(), key, iv);
+
+                    accounts.add(new EdDSA(publicKey, privateKey));
+                }
+            }
             this.password = password;
-
-            accounts.addAll(keys);
-
             return true;
         } catch (CryptoException | InvalidKeySpecException e) {
             logger.error("Failed to decrypt the wallet data");
@@ -88,34 +103,31 @@ public class Wallet {
     }
 
     /**
+     * Lock the wallet.
+     */
+    public void lock() {
+        accounts.clear();
+        password = null;
+    }
+
+    /**
      * Check whether the wallet file exists.
      * 
      * @return
      */
     public boolean exists() {
-        File f = new File(Config.DATA_DIR, WALLET_FILE);
+        File f = new File(Config.DATA_DIR, DEFAULT_FILE);
 
         return f.isFile();
     }
 
     /**
-     * Lock the wallet.
-     */
-    public void lock() {
-        if (!isLocked()) {
-            accounts.clear();
-            isLocked = true;
-            password = null;
-        }
-    }
-
-    /**
-     * Check if this wallet is locked.
+     * Check if this wallet is unlocked.
      * 
      * @return true if the wallet is locked, otherwise false
      */
-    public boolean isLocked() {
-        return isLocked;
+    public boolean unlocked() {
+        return password != null;
     }
 
     /**
@@ -128,7 +140,7 @@ public class Wallet {
     }
 
     /**
-     * Get the list of accounts inside this wallet.
+     * Get a copy of the accounts inside this wallet.
      * 
      * @return a list of accounts
      * @throws WalletLockedException
@@ -136,7 +148,9 @@ public class Wallet {
     public List<EdDSA> getAccounts() throws WalletLockedException {
         requireUnlocked();
 
-        return new ArrayList<>(accounts);
+        synchronized (accounts) {
+            return new ArrayList<>(accounts);
+        }
     }
 
     /**
@@ -144,31 +158,29 @@ public class Wallet {
      * 
      * DANGER: this method will remove all accounts in this wallet.
      * 
-     * @param accounts
+     * @param list
      */
-    public void setAccounts(List<EdDSA> accounts) throws WalletLockedException {
+    public void setAccounts(List<EdDSA> list) throws WalletLockedException {
         requireUnlocked();
 
-        this.accounts.clear();
-        this.accounts.addAll(accounts);
+        synchronized (list) {
+            accounts.clear();
+            accounts.addAll(list);
+        }
     }
 
     /**
      * Get account by index.
      * 
      * @param idx
-     *            index, starting from 0
+     *            account index, starting from 0
      * @return
      * @throws WalletLockedException
      */
     public EdDSA getAccount(int idx) throws WalletLockedException {
         requireUnlocked();
 
-        if (idx >= 0 && idx < accounts.size()) {
-            return accounts.get(idx);
-        } else {
-            return null;
-        }
+        return accounts.get(idx);
     }
 
     /**
@@ -181,6 +193,7 @@ public class Wallet {
     public EdDSA getAccount(byte[] address) throws WalletLockedException {
         requireUnlocked();
 
+        // TODO: optimize account query
         synchronized (accounts) {
             for (EdDSA key : accounts) {
                 if (Arrays.equals(key.toAddress(), address)) {
@@ -205,14 +218,16 @@ public class Wallet {
     public void addAccount(EdDSA newKey) throws WalletLockedException {
         requireUnlocked();
 
-        // TODO: optimize duplicates check later
-        for (EdDSA key : accounts) {
-            if (Arrays.equals(key.getPublicKey(), newKey.getPublicKey())) {
-                return;
+        // TODO: optimize duplicates check
+        synchronized (accounts) {
+            for (EdDSA key : accounts) {
+                if (Arrays.equals(key.getPublicKey(), newKey.getPublicKey())) {
+                    return;
+                }
             }
-        }
 
-        accounts.add(newKey);
+            accounts.add(newKey);
+        }
     }
 
     /**
@@ -232,30 +247,6 @@ public class Wallet {
     }
 
     /**
-     * Import accounts from a backup file.
-     * 
-     * NOTE: you need to call {@link #flush()} to update the wallet on disk.
-     * 
-     * @param file
-     *            backup file
-     * @return true if the import is successful, false otherwise
-     * 
-     * @throws WalletLockedException
-     */
-    public boolean importAccounts(File file, String password) throws WalletLockedException {
-        requireUnlocked();
-
-        try {
-            addAccounts(read(file, password));
-            return true;
-        } catch (InvalidKeySpecException | IOException | CryptoException e) {
-            logger.warn("Failed to import accounts: file = {}", file, e);
-        }
-
-        return false;
-    }
-
-    /**
      * Change the password of the wallet.
      * 
      * NOTE: you need to call {@link #flush()} to update the wallet on disk.
@@ -266,6 +257,10 @@ public class Wallet {
      */
     public void changePassword(String newPassword) throws WalletLockedException {
         requireUnlocked();
+
+        if (newPassword == null) {
+            new IllegalArgumentException("Password can not be null");
+        }
 
         this.password = newPassword;
     }
@@ -278,26 +273,27 @@ public class Wallet {
      *         false
      * @throws WalletLockedException
      */
-    public synchronized boolean flush() throws WalletLockedException {
+    public boolean flush() throws WalletLockedException {
         requireUnlocked();
 
-        try {
-            File f = new File(Config.DATA_DIR, WALLET_FILE);
+        try { 
             byte[] key = Hash.h256(Bytes.of(password));
 
             SimpleEncoder enc = new SimpleEncoder();
-            enc.writeInt(VERSION);
+            enc.writeInt(DEFAULT_VERSION);
             enc.writeInt(accounts.size());
 
-            for (EdDSA a : accounts) {
-                byte[] iv = Bytes.random(16);
+            synchronized (accounts) {
+                for (EdDSA a : accounts) {
+                    byte[] iv = Bytes.random(16);
 
-                enc.writeBytes(iv);
-                enc.writeBytes(a.getPublicKey());
-                enc.writeBytes(AES.encrypt(a.getPrivateKey(), key, iv));
+                    enc.writeBytes(iv);
+                    enc.writeBytes(a.getPublicKey());
+                    enc.writeBytes(AES.encrypt(a.getPrivateKey(), key, iv));
+                }
             }
 
-            IOUtil.writeToFile(enc.toBytes(), f);
+            IOUtil.writeToFile(enc.toBytes(), file);
             return true;
         } catch (CryptoException e) {
             logger.error("Failed to encrypt the  wallet");
@@ -309,32 +305,9 @@ public class Wallet {
     }
 
     private void requireUnlocked() throws WalletLockedException {
-        if (isLocked()) {
+        if (!unlocked()) {
             throw new WalletLockedException();
         }
-    }
-
-    public static synchronized List<EdDSA> read(File file, String password)
-            throws IOException, CryptoException, InvalidKeySpecException {
-        List<EdDSA> list = new ArrayList<>();
-
-        byte[] key = Hash.h256(Bytes.of(password));
-
-        if (file.exists()) {
-            SimpleDecoder dec = new SimpleDecoder(IOUtil.readFile(file));
-            dec.readInt(); // version
-            int total = dec.readInt();
-
-            for (int i = 0; i < total; i++) {
-                byte[] iv = dec.readBytes();
-                byte[] publicKey = dec.readBytes();
-                byte[] privateKey = AES.decrypt(dec.readBytes(), key, iv);
-
-                list.add(new EdDSA(publicKey, privateKey));
-            }
-        }
-
-        return list;
     }
 
     private static String createLine(int width) {
@@ -348,7 +321,7 @@ public class Wallet {
             password = SystemUtil.readPassword();
         }
 
-        Wallet wallet = Wallet.getInstance();
+        Wallet wallet = new Wallet();
         if (!wallet.unlock(password)) {
             System.exit(-1);
         }
@@ -372,7 +345,7 @@ public class Wallet {
             password = SystemUtil.readPassword();
         }
 
-        Wallet wallet = Wallet.getInstance();
+        Wallet wallet = new Wallet();
         if (!wallet.unlock(password)) {
             System.exit(-1);
         }
