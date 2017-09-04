@@ -52,12 +52,12 @@ public class APIHandler {
      * 
      * @param wallet
      * @param chain
-     * @param pendingMgr
      * @param channelMgr
+     * @param pendingMgr
      * @param nodeMgr
      * @param client
      */
-    public APIHandler(Wallet wallet, Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr,
+    public APIHandler(Wallet wallet, Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr,
             NodeManager nodeMgr, PeerClient client) {
         this.wallet = wallet;
         this.chain = chain;
@@ -285,7 +285,6 @@ public class APIHandler {
         String pTo = params.get("to");
         String pValue = params.get("value");
         String pFee = params.get("fee");
-        String pNonce = params.get("nonce");
         String pData = params.get("data");
 
         // [1] check if wallet is unlocked
@@ -329,7 +328,7 @@ public class APIHandler {
             long fee = Long.parseLong(pFee);
 
             // nonce, timestamp and data
-            long nonce = Long.parseLong(pNonce);
+            long nonce = pendingMgr.getNonce(from.toAddress());
             long timestamp = System.currentTimeMillis();
             byte[] data = (pData == null) ? Bytes.EMPY_BYTES : Hex.parse(pData);
 
@@ -337,9 +336,11 @@ public class APIHandler {
             Transaction tx = new Transaction(type, from.toAddress(), to, value, fee, nonce, timestamp, data);
             tx.sign(from);
 
-            pendingMgr.addTransaction(tx);
-
-            return success(HEX + Hex.encode(tx.getHash()));
+            if (pendingMgr.addTransactionSync(tx)) {
+                return success(HEX + Hex.encode(tx.getHash()));
+            } else {
+                return failure("Failed to add transaction to the pool");
+            }
         } else {
             return failure("Invalid parameters");
         }

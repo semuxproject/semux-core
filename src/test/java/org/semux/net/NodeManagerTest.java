@@ -62,9 +62,9 @@ public class NodeManagerTest {
             PeerClient client = new PeerClient("127.0.0.1", 5162, new EdDSA());
 
             Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
-            PendingManager pendingMgr = new PendingManager();
             ChannelManager channelMgr = new ChannelManager();
-            NodeManager nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
+            PendingManager pendingMgr = new PendingManager(chain, channelMgr);
+            NodeManager nodeMgr = new NodeManager(chain, channelMgr, pendingMgr, client);
             nodeMgr.start();
 
             nodeMgr.addNode(new InetSocketAddress(remoteClient.getIp(), remoteClient.getPort()));

@@ -63,8 +63,8 @@ public class NodeManager {
     private static long RECONNECT_WAIT = 2 * 60 * 1000;
 
     private Blockchain chain;
-    private PendingManager pendingMgr;
     private ChannelManager channelMgr;
+    private PendingManager pendingMgr;
     private PeerClient client;
 
     private Queue<InetSocketAddress> queue;
@@ -80,11 +80,11 @@ public class NodeManager {
      * Create a node manager instance.
      * 
      * @param chain
-     * @param pendingMgr
      * @param channelMgr
+     * @param pendingMgr
      * @param client
      */
-    public NodeManager(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr, PeerClient client) {
+    public NodeManager(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, PeerClient client) {
         this.chain = chain;
         this.pendingMgr = pendingMgr;
         this.channelMgr = channelMgr;
@@ -277,7 +277,7 @@ public class NodeManager {
                     && !activeAddresses.contains(addr) //
                     && (l == null || l + RECONNECT_WAIT < now)) {
 
-                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, this, client,
+                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, pendingMgr, this, client,
                         addr);
                 client.connectAsync(addr, ci);
                 lastConnect.put(addr, now);

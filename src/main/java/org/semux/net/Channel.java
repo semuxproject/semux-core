@@ -29,8 +29,8 @@ public class Channel {
     private boolean isDiscoveryMode;
 
     private Blockchain chain;
-    private PendingManager pendingMgr;
     private ChannelManager channelMgr;
+    private PendingManager pendingMgr;
     private NodeManager nodeMgr;
 
     private PeerClient client;
@@ -46,11 +46,11 @@ public class Channel {
      * Create a new channel instance.
      * 
      * @param chain
-     * @param pendingMgr
      * @param channelMgr
+     * @param pendingMgr
      * @param nodeMgr
      */
-    public Channel(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr, NodeManager nodeMgr) {
+    public Channel(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, NodeManager nodeMgr) {
         this.id = cnt.getAndIncrement();
 
         this.chain = chain;

@@ -63,11 +63,11 @@ public class TransactionExecutor {
             byte[] data = tx.getData();
 
             // check nonce and balance
-            if (nonce != fromAcc.getNonce() + 1 || fee > fromAcc.getBalance()) {
+            if (nonce != fromAcc.getNonce() || fee > fromAcc.getBalance()) {
                 continue;
             } else {
                 // increase nonce
-                fromAcc.setNonce(nonce);
+                fromAcc.setNonce(nonce + 1);
 
                 // charge transaction fee
                 fromAcc.setBalance(fromAcc.getBalance() - fee);

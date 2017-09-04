@@ -100,7 +100,7 @@ public class SemuxBFT implements Consensus {
     }
 
     @Override
-    public void init(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr, EdDSA coinbase) {
+    public void init(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, EdDSA coinbase) {
         this.chain = chain;
         this.channelMgr = channelMgr;
         this.pendingMgr = pendingMgr;

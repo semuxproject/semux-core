@@ -122,7 +122,7 @@ public class Transaction implements Callable<Boolean> {
                 && to != null && to.length == 20 //
                 && value >= 0 //
                 && fee >= Config.MIN_TRANSACTION_FEE //
-                && nonce > 0 //
+                && nonce >= 0 //
                 && timestamp > 0 //
                 && data != null && data.length < 1024 //
                 && encoded != null //

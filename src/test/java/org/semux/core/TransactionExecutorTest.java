@@ -45,7 +45,7 @@ public class TransactionExecutorTest {
         byte[] to = Bytes.random(20);
         long value = 5;
         long fee = Config.MIN_TRANSACTION_FEE;
-        long nonce = as.getAccount(from).getNonce() + 1;
+        long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
 
@@ -88,7 +88,7 @@ public class TransactionExecutorTest {
         byte[] to = Bytes.random(20);
         long value = Config.MIN_DELEGATE_FEE;
         long fee = Config.MIN_TRANSACTION_FEE;
-        long nonce = as.getAccount(from).getNonce() + 1;
+        long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
 
@@ -131,7 +131,7 @@ public class TransactionExecutorTest {
         byte[] to = delegate.toAddress();
         long value = balance / 3;
         long fee = Config.MIN_TRANSACTION_FEE;
-        long nonce = as.getAccount(from).getNonce() + 1;
+        long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
 
@@ -170,7 +170,7 @@ public class TransactionExecutorTest {
         byte[] to = delegate.toAddress();
         long value = balance / 3;
         long fee = Config.MIN_TRANSACTION_FEE;
-        long nonce = as.getAccount(from).getNonce() + 1;
+        long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
 

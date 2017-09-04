@@ -134,21 +134,19 @@ public class Kernel {
         client = new PeerClient(SystemUtil.getIp(), Config.P2P_LISTEN_PORT, coinbase);
 
         // ====================================
-        // start pending/channel/node manager
+        // start channel/pending/node manager
         // ====================================
-        pendingMgr = new PendingManager();
         channelMgr = new ChannelManager();
-        nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
+        pendingMgr = new PendingManager(chain, channelMgr);
+        nodeMgr = new NodeManager(chain, channelMgr, pendingMgr, client);
 
-        pendingMgr.start(chain, channelMgr);
-        chain.addListener(pendingMgr);
-
+        pendingMgr.start();
         nodeMgr.start();
 
         // ====================================
         // start p2p module
         // ====================================
-        SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, nodeMgr, client, null);
+        SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, pendingMgr, nodeMgr, client, null);
         PeerServer p2p = new PeerServer(ci);
 
         Thread p2pThread = new Thread(() -> {
@@ -159,7 +157,7 @@ public class Kernel {
         // ====================================
         // start API module
         // ====================================
-        SemuxAPI api = new SemuxAPI(new APIHandler(wallet, chain, pendingMgr, channelMgr, nodeMgr, client));
+        SemuxAPI api = new SemuxAPI(new APIHandler(wallet, chain, channelMgr, pendingMgr, nodeMgr, client));
 
         if (Config.API_ENABLED) {
             Thread apiThread = new Thread(() -> {
@@ -175,7 +173,7 @@ public class Kernel {
         sync.init(chain, channelMgr);
 
         cons = SemuxBFT.getInstance();
-        cons.init(chain, pendingMgr, channelMgr, coinbase);
+        cons.init(chain, channelMgr, pendingMgr, coinbase);
 
         Thread consThread = new Thread(() -> {
             cons.start();

@@ -36,13 +36,13 @@ public class SemuxBFTTest {
     @BeforeClass
     public static void setup() throws InterruptedException {
         Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
-        PendingManager pendingMgr = new PendingManager();
         ChannelManager channelMgr = new ChannelManager();
+        PendingManager pendingMgr = new PendingManager(chain, channelMgr);
 
-        pendingMgr.start(chain, channelMgr);
+        pendingMgr.start();
 
         bft = SemuxBFT.getInstance();
-        bft.init(chain, pendingMgr, channelMgr, new EdDSA());
+        bft.init(chain, channelMgr, pendingMgr, new EdDSA());
 
         new Thread(() -> {
             bft.start();

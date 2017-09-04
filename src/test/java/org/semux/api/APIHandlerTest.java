@@ -297,16 +297,15 @@ public class APIHandlerTest {
     @Test
     public void testTransfer() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
-        long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
         String uri = "/transfer?password=" + password + "&from=0&to=" + key.toAddressString()
-                + "&value=1000000000&fee=5000000&data=test&nonce=" + nonce;
+                + "&value=1000000000&fee=5000000&data=test";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
 
         Thread.sleep(200);
 
-        List<Transaction> list = api.pendingMgr.getQueue();
+        List<Transaction> list = api.pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.getString("result")));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.TRANSFER);
@@ -315,16 +314,15 @@ public class APIHandlerTest {
     @Test
     public void testDelegate() throws IOException, InterruptedException {
         EdDSA key = wallet.getAccounts().get(0);
-        long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
         String uri = "/delegate?password=" + password + "&from=0&to=" + key.toAddressString() + "&value="
-                + Config.MIN_DELEGATE_FEE + "&fee=5000000&data=test&nonce=" + nonce;
+                + Config.MIN_DELEGATE_FEE + "&fee=5000000&data=test";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
 
         Thread.sleep(200);
 
-        List<Transaction> list = api.pendingMgr.getQueue();
+        List<Transaction> list = api.pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.getString("result")));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.DELEGATE);
@@ -333,16 +331,15 @@ public class APIHandlerTest {
     @Test
     public void testVote() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
-        long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
         String uri = "/vote?password=" + password + "&from=0&to=" + key.toAddressString()
-                + "&value=1000000000&fee=5000000&data=test&nonce=" + nonce;
+                + "&value=1000000000&fee=5000000&data=test";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
 
         Thread.sleep(200);
 
-        List<Transaction> list = api.pendingMgr.getQueue();
+        List<Transaction> list = api.pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(0).getHash(), Hex.parse(response.getString("result")));
         assertEquals(list.get(0).getType(), TransactionType.VOTE);
@@ -351,16 +348,15 @@ public class APIHandlerTest {
     @Test
     public void testUnvote() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
-        long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
         String uri = "/unvote?password=" + password + "&from=0&to=" + key.toAddressString()
-                + "&value=1000000000&fee=5000000&data=test&nonce=" + nonce;
+                + "&value=1000000000&fee=5000000&data=test";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
 
         Thread.sleep(200);
 
-        List<Transaction> list = api.pendingMgr.getQueue();
+        List<Transaction> list = api.pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.getString("result")));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.UNVOTE);

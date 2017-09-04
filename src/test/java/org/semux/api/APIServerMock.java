@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
+import org.semux.core.Unit;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
@@ -37,12 +38,14 @@ public class APIServerMock {
                 EdDSA coinbase = new EdDSA();
 
                 chain = new BlockchainImpl(MemoryDB.FACTORY);
-                channelMgr = new ChannelManager();
-                pendingMgr = new PendingManager();
-                client = new PeerClient("127.0.0.1", 5161, coinbase);
-                nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
+                chain.getAccountState().getAccount(wallet.getAccount(0).toAddress()).setBalance(5000 * Unit.SEM);
 
-                server = new SemuxAPI(new APIHandler(wallet, chain, pendingMgr, channelMgr, nodeMgr, client));
+                channelMgr = new ChannelManager();
+                pendingMgr = new PendingManager(chain, channelMgr);
+                client = new PeerClient("127.0.0.1", 5161, coinbase);
+                nodeMgr = new NodeManager(chain, channelMgr, pendingMgr, client);
+
+                server = new SemuxAPI(new APIHandler(wallet, chain, channelMgr, pendingMgr, nodeMgr, client));
                 server.start(ip, port);
             }, "api").start();
 

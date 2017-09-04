@@ -26,8 +26,8 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
     private static final Logger logger = LoggerFactory.getLogger(SemuxChannelInitializer.class);
 
     private Blockchain chain;
-    private PendingManager pendingMgr;
     private ChannelManager channelMgr;
+    private PendingManager pendingMgr;
     private NodeManager nodeMgr;
 
     private PeerClient client;
@@ -41,10 +41,10 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
      * 
      * @param chain
      *            the blockchain instance
-     * @param pendingMgr
-     *            the pending manager
      * @param channelMgr
      *            the channel manager
+     * @param pendingMgr
+     *            the pending manager
      * @param nodeMgr
      *            the node manager
      * @param client
@@ -52,7 +52,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
      * @param remoteAddress
      *            the peer to connect, or null if in server mode
      */
-    public SemuxChannelInitializer(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr,
+    public SemuxChannelInitializer(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr,
             NodeManager nodeMgr, PeerClient client, InetSocketAddress remoteAddress) {
         this.chain = chain;
         this.pendingMgr = pendingMgr;
@@ -77,7 +77,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
                 return;
             }
 
-            Channel channel = new Channel(chain, pendingMgr, channelMgr, nodeMgr);
+            Channel channel = new Channel(chain, channelMgr, pendingMgr, nodeMgr);
             channel.init(ch.pipeline(), isInbound(), isDiscoveryMode, client, address);
 
             if (!isDiscoveryMode) {

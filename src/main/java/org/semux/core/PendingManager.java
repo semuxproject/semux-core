@@ -32,11 +32,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Pending transaction manager that organizes all the received transactions.
+ * Pending manager maintains all unconfirmed transactions, either from kernel or
+ * network. It also pre-evaluate transactions and broadcast them, if valid, to
+ * its peers.
  * 
  * TODO: prevent transaction bombard
  * 
- * TODO: sort the pending transactions by fee, and other metric
+ * TODO: sort transactions by fee, and other metric
  *
  */
 public class PendingManager implements Runnable, BlockchainListener, Comparator<Transaction> {
@@ -83,19 +85,19 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
     /**
      * Create a pending manager.
      */
-    public PendingManager() {
+    public PendingManager(Blockchain chain, ChannelManager channelMgr) {
+        this.chain = chain;
+        this.channelMgr = channelMgr;
+        this.accountState = chain.getAccountState().track();
+
         this.exec = Executors.newSingleThreadScheduledExecutor(factory);
     }
 
     /**
      * Start this pending manager.
      */
-    public synchronized void start(Blockchain chain, ChannelManager channelMgr) {
+    public synchronized void start() {
         if (!isRunning) {
-            this.chain = chain;
-            this.channelMgr = channelMgr;
-            this.accountState = chain.getAccountState().track();
-
             /*
              * Use a rate smaller than the message queue sending rate to prevent message
              * queues from hitting the NET_MAX_QUEUE_SIZE, especially when the network load
@@ -103,6 +105,8 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
              */
             long rate = Config.NET_MAX_QUEUE_RATE * 2;
             this.validateFuture = exec.scheduleAtFixedRate(this, 0, rate, TimeUnit.MILLISECONDS);
+
+            this.chain.addListener(this);
 
             logger.debug("Pending manager started");
             this.isRunning = true;
@@ -147,6 +151,27 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
      */
     public synchronized void addTransaction(Transaction tx) {
         queue.add(tx);
+    }
+
+    /**
+     * Add a transaction to the pool.
+     * 
+     * @param tx
+     * @return true if the transaction is successfully added to the pool, otherwise
+     *         false
+     */
+    public synchronized boolean addTransactionSync(Transaction tx) {
+        return processTransaction(tx, true) >= 1;
+    }
+
+    /**
+     * Get the nonce of an account from the pending state.
+     * 
+     * @param address
+     * @return
+     */
+    public synchronized long getNonce(byte[] address) {
+        return accountState.getAccount(address).getNonce();
     }
 
     /**
@@ -262,7 +287,7 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
         }
 
         // [2] check nonce
-        long nonce = acc.getNonce() + 1;
+        long nonce = acc.getNonce();
         int cnt = 0;
         while (tx != null && tx.getNonce() == nonce) {
             // [3] increase nonce

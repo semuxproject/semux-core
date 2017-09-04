@@ -45,11 +45,11 @@ public class MessageQueueTest {
         PeerClient client = new PeerClient("127.0.0.1", 5162, key);
 
         Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
-        PendingManager pendingMgr = new PendingManager();
         ChannelManager channelMgr = new ChannelManager();
-        NodeManager nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
+        PendingManager pendingMgr = new PendingManager(chain, channelMgr);
+        NodeManager nodeMgr = new NodeManager(chain, channelMgr, pendingMgr, client);
 
-        SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, nodeMgr, client,
+        SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, pendingMgr, nodeMgr, client,
                 remoteAddress);
         client.connectAsync(remoteAddress, ci).sync();
 

@@ -43,8 +43,8 @@ public class Genesis extends Block {
     public static synchronized Genesis getInstance() {
         if (instance == null) {
             try {
-                String str = IOUtil
-                        .readFileAsString(new File(Config.DATA_DIR, GENESIS_DIR + File.separator + GENESIS_FILE));
+                File file = new File(Config.DATA_DIR, GENESIS_DIR + File.separator + GENESIS_FILE);
+                String str = IOUtil.readFileAsString(file);
                 JSONObject json = new JSONObject(str);
 
                 // block information
@@ -89,7 +89,9 @@ public class Genesis extends Block {
 
     private Genesis(long number, byte[] coinbase, byte[] prevHash, long timestamp, byte[] merkleRoot, byte[] data,
             List<Transaction> transactions, //
-            Map<ByteArray, Long> alloc, Map<String, byte[]> delegates, Map<String, Object> config) {
+            Map<ByteArray, Long> alloc, //
+            Map<String, byte[]> delegates, //
+            Map<String, Object> config) {
         super(new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data), transactions);
 
         this.premine = alloc;

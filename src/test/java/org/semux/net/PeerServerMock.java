@@ -24,10 +24,10 @@ public class PeerServerMock {
 
             new Thread(() -> {
                 Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
-                PendingManager pendingMgr = new PendingManager();
                 ChannelManager channelMgr = new ChannelManager();
-                NodeManager nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
-                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, nodeMgr, client,
+                PendingManager pendingMgr = new PendingManager(chain, channelMgr);
+                NodeManager nodeMgr = new NodeManager(chain, channelMgr, pendingMgr, client);
+                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, pendingMgr, nodeMgr, client,
                         null);
 
                 ci.setDiscoveryMode(isDiscoveryMode);

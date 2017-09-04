@@ -50,8 +50,8 @@ public class PendingManagerTest {
 
     @Before
     public void start() {
-        pendingMgr = new PendingManager();
-        pendingMgr.start(chain, channelMgr);
+        pendingMgr = new PendingManager(chain, channelMgr);
+        pendingMgr.start();
     }
 
     @Test
@@ -59,8 +59,8 @@ public class PendingManagerTest {
         long now = System.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
-        Transaction tx1 = new Transaction(type, from, to, value, fee, nonce + 1, now, Bytes.EMPY_BYTES).sign(key);
-        pendingMgr.addTransaction(tx1);
+        Transaction tx = new Transaction(type, from, to, value, fee, nonce, now, Bytes.EMPY_BYTES).sign(key);
+        pendingMgr.addTransaction(tx);
 
         Thread.sleep(100);
         assertEquals(1, pendingMgr.getTransactions().size());
@@ -71,10 +71,10 @@ public class PendingManagerTest {
         long now = System.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
-        Transaction tx1 = new Transaction(type, from, to, value, fee, nonce + 1, now, Bytes.EMPY_BYTES).sign(key);
-        pendingMgr.addTransaction(tx1);
-        Transaction tx128 = new Transaction(type, from, to, value, fee, nonce + 128, now, Bytes.EMPY_BYTES).sign(key);
-        pendingMgr.addTransaction(tx128);
+        Transaction tx = new Transaction(type, from, to, value, fee, nonce, now, Bytes.EMPY_BYTES).sign(key);
+        pendingMgr.addTransaction(tx);
+        Transaction tx2 = new Transaction(type, from, to, value, fee, nonce + 128, now, Bytes.EMPY_BYTES).sign(key);
+        pendingMgr.addTransaction(tx2);
 
         Thread.sleep(100);
         assertEquals(1, pendingMgr.getTransactions().size());
@@ -85,13 +85,13 @@ public class PendingManagerTest {
         long now = System.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
-        Transaction tx1 = new Transaction(type, from, to, value, fee, nonce + 1, now, Bytes.EMPY_BYTES).sign(key);
-        pendingMgr.addTransaction(tx1);
+        Transaction tx = new Transaction(type, from, to, value, fee, nonce, now, Bytes.EMPY_BYTES).sign(key);
+        pendingMgr.addTransaction(tx);
 
         Thread.sleep(100);
         assertEquals(1, pendingMgr.getTransactions().size());
 
-        pendingMgr.removeTransaction(tx1);
+        pendingMgr.removeTransaction(tx);
         assertEquals(0, pendingMgr.getTransactions().size());
     }
 
@@ -100,16 +100,16 @@ public class PendingManagerTest {
         long now = System.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
-        Transaction tx3 = new Transaction(type, from, to, value, fee, nonce + 3, now, Bytes.EMPY_BYTES).sign(key);
+        Transaction tx3 = new Transaction(type, from, to, value, fee, nonce + 2, now, Bytes.EMPY_BYTES).sign(key);
         pendingMgr.addTransaction(tx3);
-        Transaction tx2 = new Transaction(type, from, to, value, fee, nonce + 2, now, Bytes.EMPY_BYTES).sign(key);
+        Transaction tx2 = new Transaction(type, from, to, value, fee, nonce + 1, now, Bytes.EMPY_BYTES).sign(key);
         pendingMgr.addTransaction(tx2);
 
         Thread.sleep(100);
         assertEquals(0, pendingMgr.getTransactions().size());
 
-        Transaction tx1 = new Transaction(type, from, to, value, fee, nonce + 1, now, Bytes.EMPY_BYTES).sign(key);
-        pendingMgr.addTransaction(tx1);
+        Transaction tx = new Transaction(type, from, to, value, fee, nonce, now, Bytes.EMPY_BYTES).sign(key);
+        pendingMgr.addTransaction(tx);
 
         Thread.sleep(100);
         assertEquals(3, pendingMgr.getTransactions().size());
@@ -120,10 +120,10 @@ public class PendingManagerTest {
         long now = System.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
-        Transaction tx1 = new Transaction(type, from, to, value, fee, nonce + 1, now, Bytes.EMPY_BYTES).sign(key);
-        pendingMgr.addTransaction(tx1);
-        Transaction tx2 = new Transaction(type, from, to, value, fee, nonce + 2, now, Bytes.EMPY_BYTES).sign(key);
-        // pendingMgr.addTransaction(tx2);
+        Transaction tx = new Transaction(type, from, to, value, fee, nonce, now, Bytes.EMPY_BYTES).sign(key);
+        pendingMgr.addTransaction(tx);
+        Transaction tx2 = new Transaction(type, from, to, value, fee, nonce + 1, now, Bytes.EMPY_BYTES).sign(key);
+        // pendingMgr.addTransaction(tx3);
 
         Thread.sleep(100);
         assertEquals(1, pendingMgr.getTransactions().size());
@@ -134,13 +134,13 @@ public class PendingManagerTest {
         long timestamp = System.currentTimeMillis();
         byte[] merkleRoot = Bytes.random(32);
         byte[] data = {};
-        List<Transaction> transactions = Arrays.asList(tx1, tx2);
+        List<Transaction> transactions = Arrays.asList(tx, tx2);
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data);
         Block block = new Block(header.sign(new EdDSA()), transactions);
         chain.getAccountState().getAccount(from).setNonce(nonce + 2);
         pendingMgr.onBlockAdded(block);
 
-        Transaction tx3 = new Transaction(type, from, to, value, fee, nonce + 3, now, Bytes.EMPY_BYTES).sign(key);
+        Transaction tx3 = new Transaction(type, from, to, value, fee, nonce + 2, now, Bytes.EMPY_BYTES).sign(key);
         pendingMgr.addTransaction(tx3);
 
         Thread.sleep(100);
