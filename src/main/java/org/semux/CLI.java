@@ -6,27 +6,13 @@
  */
 package org.semux;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-import org.semux.api.APIHandler;
-import org.semux.api.SemuxAPI;
-import org.semux.consensus.SemuxBFT;
-import org.semux.consensus.SemuxSync;
-import org.semux.core.Blockchain;
-import org.semux.core.BlockchainImpl;
-import org.semux.core.PendingManager;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
-import org.semux.db.DBFactory;
-import org.semux.db.DBName;
-import org.semux.db.KVDB;
-import org.semux.db.LevelDB;
-import org.semux.net.ChannelManager;
-import org.semux.net.NodeManager;
-import org.semux.net.PeerClient;
-import org.semux.net.PeerServer;
-import org.semux.net.SemuxChannelInitializer;
+import org.semux.crypto.Hex;
 import org.semux.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,30 +22,29 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class CLI {
-
     private static final Logger logger = LoggerFactory.getLogger(CLI.class);
 
-    private static String password = null;
-    private static int coinbaseIndex = 0;
     private static String dataDir = ".";
-    private static boolean enableApi = false;
+    private static int coinbase = 0;
+    private static String password = null;
 
-    private static void printUsage() {
-        System.out.println("===============================================================");
-        System.out.println(Config.CLIENT_FULL_NAME);
-        System.out.println("===============================================================\n");
-        System.out.println("Usage:");
-        System.out.println("  ./run.sh [options] or run.bat [options]\n");
-        System.out.println("Options:");
-        System.out.println("  -h, --help              Print help info and exit");
-        System.out.println("  -v, --version           Show the version of this client");
-        System.out.println("  -d, --datadir   path    Specify the data directory");
-        System.out.println("  -a, --account   create  Create an new account and exit");
-        System.out.println("                  list    List all accounts and exit");
-        System.out.println("  -c, --coinbase  index   Specify which account to be used as coinbase");
-        System.out.println("  -p, --password  pwd     Password of the wallet");
-        System.out.println("  --enable-api            Enable RESTful API");
-        System.out.println();
+    private static Action action = Action.START_KERNEL;
+
+    public static void main(String[] args) {
+        parseArguments(args);
+        Wallet wallet = new Wallet(new File(dataDir, "wallet.data"));
+
+        switch (action) {
+        case START_KERNEL:
+            startKernel(wallet);
+            break;
+        case CREATE_ACCOUNT:
+            createAccount(wallet);
+            break;
+        case LIST_ACCOUNTS:
+            listAccounts(wallet);
+            break;
+        }
     }
 
     private static void parseArguments(String[] args) {
@@ -76,214 +61,141 @@ public class CLI {
                     System.out.println(Config.CLIENT_VERSION);
                     System.exit(0);
                     break;
-                case "-p":
-                case "--password":
-                    password = args[++i];
-                    break;
-                case "-c":
-                case "--coinbase":
-                    coinbaseIndex = Integer.parseInt(args[++i]);
+                case "-d":
+                case "--datadir":
+                    dataDir = args[++i];
                     break;
                 case "-a":
                 case "--account":
                     String type = args[++i];
                     switch (type) {
                     case "create":
-                        Wallet.doCreate(password);
+                        action = Action.CREATE_ACCOUNT;
                         break;
                     case "list":
-                        Wallet.doList(password);
+                        action = Action.LIST_ACCOUNTS;
                         break;
                     default:
-                        printUsage();
-                        break;
+                        printUsageAndExit(-1);
                     }
-                    System.exit(0);
                     break;
-                case "-d":
-                case "--datadir":
-                    dataDir = args[++i];
+                case "-c":
+                case "--coinbase":
+                    coinbase = Integer.parseInt(args[++i]);
                     break;
-                case "--enable-api":
-                    enableApi = true;
+                case "-p":
+                case "--password":
+                    password = args[++i];
                     break;
                 default:
-                    printUsage();
-                    System.exit(-1);
-                    break;
+                    printUsageAndExit(-1);
                 }
             }
         } catch (Exception e) {
-            printUsage();
-            System.exit(-1);
+            printUsageAndExit(-1);
         }
     }
 
-    // ====================================
-    // instances exposed to gui
-    // ====================================
-    public static EdDSA coinbase;
+    private static void printUsage() {
+        System.out.println("===============================================================");
+        System.out.println(Config.CLIENT_FULL_NAME);
+        System.out.println("===============================================================\n");
+        System.out.println("Usage:");
+        System.out.println("  ./run.sh [options] or run.bat [options]\n");
+        System.out.println("Options:");
+        System.out.println("  -h, --help              Print help info and exit");
+        System.out.println("  -v, --version           Show the version of this client");
+        System.out.println("  -d, --datadir   path    Specify the data directory");
+        System.out.println("  -a, --account   create  Create an new account and exit");
+        System.out.println("                  list    List all accounts and exit");
+        System.out.println("  -c, --coinbase  index   Specify which account to be used as coinbase");
+        System.out.println("  -p, --password  " + "pwd     Password of the wallet");
+        System.out.println();
+    }
 
-    public static Blockchain chain;
-    public static PeerClient client;
+    private static void printUsageAndExit(int code) {
+        printUsage();
+        System.exit(code);
+    }
 
-    public static PendingManager pendingMgr;
-    public static ChannelManager channelMgr;
-    public static NodeManager nodeMgr;
-
-    public static SemuxSync sync;
-    public static SemuxBFT cons;
-
-    public static void main(String[] args) {
-        parseArguments(args);
-        Config.DATA_DIR = dataDir;
-        Config.init();
-
-        // ====================================
-        // unlock wallet
-        // ====================================
-        if (coinbase == null) {
-            Wallet wallet = new Wallet();
-            if (password == null) {
-                password = SystemUtil.readPassword();
-            }
-            if (!wallet.unlock(password)) {
-                logger.error("Failed to unlock wallet");
-                System.exit(-1);
-            }
-
-            List<EdDSA> accounts = wallet.getAccounts();
-            if (accounts.isEmpty()) {
-                EdDSA key = new EdDSA();
-                wallet.addAccount(key);
-                wallet.flush();
-                accounts = wallet.getAccounts();
-                logger.info("A new account has been created for you: address = {}", key.toAddressString());
-            }
-
-            if (coinbaseIndex < 0 || coinbaseIndex >= accounts.size()) {
-                logger.error("Coinbase does not exist");
-                System.exit(-1);
-            }
-            coinbase = accounts.get(coinbaseIndex);
+    private static void startKernel(Wallet wallet) {
+        if (password == null) {
+            password = SystemUtil.readPassword();
+        }
+        if (!wallet.unlock(password)) {
+            System.exit(-1);
         }
 
-        // ====================================
-        // initialization
-        // ====================================
-        logger.info("Client: {}", Config.CLIENT_FULL_NAME);
-        logger.info("System booting up: network = {}, coinbase = {}", Config.NETWORK_ID, coinbase);
+        List<EdDSA> accounts = wallet.getAccounts();
+        if (accounts.isEmpty()) {
+            EdDSA key = new EdDSA();
+            wallet.addAccount(key);
+            wallet.flush();
+            accounts = wallet.getAccounts();
+            logger.info("A new account has been created for you: address = {}", key.toAddressString());
+        }
 
-        chain = new BlockchainImpl(new DBFactory() {
-            private final KVDB indexDB = new LevelDB(DBName.INDEX);
-            private final KVDB blockDB = new LevelDB(DBName.BLOCK);
-            private final KVDB accountDB = new LevelDB(DBName.ACCOUNT);
-            private final KVDB delegateDB = new LevelDB(DBName.DELEGATE);
-            private final KVDB voteDB = new LevelDB(DBName.VOTE);
-
-            @Override
-            public KVDB getDB(DBName name) {
-                switch (name) {
-                case INDEX:
-                    return indexDB;
-                case BLOCK:
-                    return blockDB;
-                case ACCOUNT:
-                    return accountDB;
-                case DELEGATE:
-                    return delegateDB;
-                case VOTE:
-                    return voteDB;
-                default:
-                    throw new RuntimeException("Unexpected database: " + name);
-                }
-            }
-        });
-        long height = chain.getLatestBlockNumber();
-        String nextFork = chain.getGenesis().getConfig().get("nextUpgrade").toString();
-        if (height >= Long.parseLong(nextFork)) {
-            logger.error("Please upgrade your client");
+        if (coinbase < 0 || coinbase >= accounts.size()) {
+            logger.error("Coinbase does not exist");
             System.exit(-1);
+        }
+
+        // start kernel
+        Kernel kernel = Kernel.getInstance();
+        kernel.init(dataDir, wallet, coinbase);
+    }
+
+    private static void createAccount(Wallet wallet) {
+        if (password == null) {
+            password = SystemUtil.readPassword();
+        }
+        if (!wallet.unlock(password)) {
+            System.exit(-1);
+        }
+
+        EdDSA key = new EdDSA();
+        wallet.addAccount(key);
+
+        System.out.println(createLine(80));
+        System.out.println("Address     : " + key.toString());
+        System.out.println("Public key  : " + Hex.encode(key.getPublicKey()));
+        System.out.println("Private key : " + Hex.encode(key.getPrivateKey()));
+        System.out.println(createLine(80));
+
+        if (wallet.flush()) {
+            System.out.println("The created account has been stored in your wallet.");
+        }
+    }
+
+    private static void listAccounts(Wallet wallet) {
+        if (password == null) {
+            password = SystemUtil.readPassword();
+        }
+        if (!wallet.unlock(password)) {
+            System.exit(-1);
+        }
+
+        List<EdDSA> accounts = wallet.getAccounts();
+
+        if (accounts.isEmpty()) {
+            System.out.println("No account in your wallet!");
         } else {
-            logger.info("Latest block number = {}", height);
-        }
-
-        client = new PeerClient(SystemUtil.getIp(), Config.P2P_LISTEN_PORT, coinbase);
-
-        // ====================================
-        // start pending/channel/node manager
-        // ====================================
-        pendingMgr = new PendingManager();
-        channelMgr = new ChannelManager();
-        nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
-
-        pendingMgr.start(chain, channelMgr);
-        chain.addListener(pendingMgr);
-
-        nodeMgr.start();
-
-        // ====================================
-        // start p2p module
-        // ====================================
-        SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, pendingMgr, channelMgr, nodeMgr, client, null);
-        PeerServer p2p = new PeerServer(ci);
-
-        Thread p2pThread = new Thread(() -> {
-            p2p.start(Config.P2P_LISTEN_IP, Config.P2P_LISTEN_PORT);
-        }, "p2p");
-        p2pThread.start();
-
-        // ====================================
-        // start API module
-        // ====================================
-        SemuxAPI api = new SemuxAPI(new APIHandler(chain, pendingMgr, channelMgr, nodeMgr, client));
-
-        if (enableApi) {
-            Thread apiThread = new Thread(() -> {
-                api.start(Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
-            }, "api");
-            apiThread.start();
-        }
-
-        // ====================================
-        // start sync/consensus
-        // ====================================
-        sync = SemuxSync.getInstance();
-        sync.init(chain, channelMgr);
-
-        cons = SemuxBFT.getInstance();
-        cons.init(chain, pendingMgr, channelMgr, coinbase);
-
-        Thread consThread = new Thread(() -> {
-            cons.start();
-        }, "cons");
-        consThread.start();
-
-        // ====================================
-        // register shutdown hook
-        // ====================================
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            pendingMgr.stop();
-            nodeMgr.stop();
-
-            try {
-                sync.stop();
-                cons.stop();
-
-                // make sure consensus thread is fully stopped
-                consThread.join();
-            } catch (InterruptedException e) {
-                logger.error("Failed to stop sync/consensus properly");
+            String line = String.format("+-%-3s-+-%-45s-+", createLine(3), createLine(45));
+            System.out.println(line);
+            for (int i = 0; i < accounts.size(); i++) {
+                System.out.println(String.format("| %-3d | %-45s |", i, accounts.get(i).toString()));
+                System.out.println(line);
             }
-
-            // make sure no thread is updating state
-            WriteLock lock = Config.STATE_LOCK.writeLock();
-            lock.lock();
-            lock.unlock();
-
-            api.stop();
-            p2p.stop();
-        }, "shutdown-hook"));
+        }
     }
 
+    private static String createLine(int width) {
+        char[] buf = new char[width];
+        Arrays.fill(buf, '-');
+        return new String(buf);
+    }
+
+    private enum Action {
+        START_KERNEL, CREATE_ACCOUNT, LIST_ACCOUNTS
+    }
 }

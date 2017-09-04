@@ -7,14 +7,15 @@
 package org.semux;
 
 import java.awt.EventQueue;
+import java.io.File;
 
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import org.semux.core.Account;
 import org.semux.core.Block;
+import org.semux.core.Blockchain;
 import org.semux.core.BlockchainListener;
-import org.semux.core.Transaction;
 import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -26,27 +27,41 @@ import org.semux.gui.WelcomeFrame;
 /**
  * Graphic user interface.
  */
-public class GUI implements BlockchainListener {
+public class GUI {
 
-    private static final int TRANSACTION_LIMIT = 1024;
+    private static String dataDir = ".";
+    private static int coinbase = 0;
 
-    private String[] args;
-    private Model model;
+    private static Wallet wallet;
+    private static Model model;
 
-    public GUI(String[] args) {
-        this.args = args;
-        this.model = new Model();
+    public static void main(String[] args) {
+        // TODO: parse parameters for GUI
+
+        setupLookAndFeel();
+
+        wallet = new Wallet(new File(dataDir, "wallet.data"));
+        model = new Model();
+
+        if (!wallet.exists()) {
+            showWelcome();
+        } else {
+            for (int i = 0;; i++) {
+                PasswordFrame frame = new PasswordFrame(i == 0 ? null : "Wrong password, please try again");
+                frame.setVisible(true);
+                String pwd = frame.getPassword();
+
+                if (pwd == null) {
+                    System.exit(-1);
+                } else if (wallet.unlock(pwd)) {
+                    break;
+                }
+            }
+            showMain();
+        }
     }
 
-    public Model getModel() {
-        return model;
-    }
-
-    public void sendTransaction(Transaction tx) {
-        CLI.pendingMgr.addTransaction(tx);
-    }
-
-    public void setupLookAndFeel() {
+    private static void setupLookAndFeel() {
         try {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Semux");
@@ -57,76 +72,59 @@ public class GUI implements BlockchainListener {
         }
     }
 
-    public void showWelcome() {
+    private static void showWelcome() {
         // start welcome frame
         EventQueue.invokeLater(new Runnable() {
             public void run() {
-                WelcomeFrame frame = new WelcomeFrame(GUI.this);
+                WelcomeFrame frame = new WelcomeFrame(model);
                 frame.setVisible(true);
             }
         });
     }
 
-    public void showMain() {
+    private static void showMain() {
         // start kernel
-        CLI.main(args);
+        Kernel kernel = Kernel.getInstance();
+        kernel.init(dataDir, wallet, coinbase);
 
         // register block listener
-        onBlockAdded(CLI.chain.getLatestBlock());
-        CLI.chain.addListener(this);
+        BlockchainListener listener = (block) -> {
+            onBlockAdded(block);
+        };
+        listener.onBlockAdded(kernel.getBlockchain().getLatestBlock());
+        kernel.getBlockchain().addListener(listener);
 
         // start main frame
         EventQueue.invokeLater(new Runnable() {
             public void run() {
-                MainFrame frame = new MainFrame(GUI.this);
+                MainFrame frame = new MainFrame(model);
                 frame.setVisible(true);
             }
         });
     }
 
-    @Override
-    public void onBlockAdded(Block block) {
-        AccountState as = CLI.chain.getAccountState();
-        DelegateState ds = CLI.chain.getDeleteState();
+    private static void onBlockAdded(Block block) {
+        Kernel kernel = Kernel.getInstance();
+
+        Blockchain chain = kernel.getBlockchain();
+        AccountState as = chain.getAccountState();
+        DelegateState ds = chain.getDeleteState();
 
         // reset the model.
-        model.init(Wallet.getInstance().getAccounts());
+        model.init(wallet.getAccounts());
         model.setLatestBlockNumber(block.getNumber());
-        model.setDelegate(ds.getDelegateByAddress(CLI.coinbase.toAddress()) != null);
+        model.setDelegate(ds.getDelegateByAddress(kernel.getCoinbase().toAddress()) != null);
 
         for (Model.Account ma : model.getAccounts()) {
             Account a = as.getAccount(ma.getAddress().toAddress());
             ma.setNonce(a.getNonce());
             ma.setBalance(a.getBalance());
             ma.setLocked(a.getLocked());
-            ma.setTransactions(CLI.chain.getTransactions(ma.getAddress().toAddress(), TRANSACTION_LIMIT));
+            ma.setTransactions(chain.getTransactions(ma.getAddress().toAddress()));
         }
 
         model.setDelegates(ds.getDelegates());
 
         model.fireUpdateEvent();
-    }
-
-    public static void main(String[] args) {
-        GUI gui = new GUI(args);
-        gui.setupLookAndFeel();
-
-        Wallet wallet = Wallet.getInstance();
-        if (!wallet.exists()) {
-            gui.showWelcome();
-        } else {
-            for (int i = 0;; i++) {
-                PasswordFrame frame = new PasswordFrame(i == 0 ? null : "Wrong password, please try again");
-                frame.setVisible(true);
-                String pw = frame.getPassword();
-
-                if (pw == null) {
-                    System.exit(-1);
-                } else if (wallet.unlock(pw)) {
-                    break;
-                }
-            }
-            gui.showMain();
-        }
     }
 }

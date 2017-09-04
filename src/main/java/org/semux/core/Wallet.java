@@ -14,17 +14,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.semux.Config;
 import org.semux.crypto.AES;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hash;
-import org.semux.crypto.Hex;
 import org.semux.utils.Bytes;
 import org.semux.utils.IOUtil;
 import org.semux.utils.SimpleDecoder;
 import org.semux.utils.SimpleEncoder;
-import org.semux.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +29,7 @@ public class Wallet {
 
     private static final Logger logger = LoggerFactory.getLogger(Wallet.class);
 
-    private static final String DEFAULT_FILE = "wallet.data";
-    private static final int DEFAULT_VERSION = 1;
+    private static final int VERSION = 1;
 
     private File file;
     private String password;
@@ -48,13 +44,6 @@ public class Wallet {
      */
     public Wallet(File file) {
         this.file = file;
-    }
-
-    /**
-     * Create a new wallet instance with default path.
-     */
-    public Wallet() {
-        this(new File(Config.DATA_DIR, DEFAULT_FILE));
     }
 
     /**
@@ -116,9 +105,7 @@ public class Wallet {
      * @return
      */
     public boolean exists() {
-        File f = new File(Config.DATA_DIR, DEFAULT_FILE);
-
-        return f.isFile();
+        return file.isFile();
     }
 
     /**
@@ -280,7 +267,7 @@ public class Wallet {
             byte[] key = Hash.h256(Bytes.of(password));
 
             SimpleEncoder enc = new SimpleEncoder();
-            enc.writeInt(DEFAULT_VERSION);
+            enc.writeInt(VERSION);
             enc.writeInt(accounts.size());
 
             synchronized (accounts) {
@@ -307,60 +294,6 @@ public class Wallet {
     private void requireUnlocked() throws WalletLockedException {
         if (!unlocked()) {
             throw new WalletLockedException();
-        }
-    }
-
-    private static String createLine(int width) {
-        char[] buf = new char[width];
-        Arrays.fill(buf, '-');
-        return new String(buf);
-    }
-
-    public static void doCreate(String password) {
-        if (password == null) {
-            password = SystemUtil.readPassword();
-        }
-
-        Wallet wallet = new Wallet();
-        if (!wallet.unlock(password)) {
-            System.exit(-1);
-        }
-
-        EdDSA key = new EdDSA();
-        wallet.addAccount(key);
-
-        System.out.println(createLine(80));
-        System.out.println("Address     : " + key.toString());
-        System.out.println("Public key  : " + Hex.encode(key.getPublicKey()));
-        System.out.println("Private key : " + Hex.encode(key.getPrivateKey()));
-        System.out.println(createLine(80));
-
-        if (wallet.flush()) {
-            System.out.println("The created account has been stored in your wallet.");
-        }
-    }
-
-    public static void doList(String password) {
-        if (password == null) {
-            password = SystemUtil.readPassword();
-        }
-
-        Wallet wallet = new Wallet();
-        if (!wallet.unlock(password)) {
-            System.exit(-1);
-        }
-
-        List<EdDSA> accounts = wallet.getAccounts();
-
-        if (accounts.isEmpty()) {
-            System.out.println("No account!");
-        } else {
-            String line = String.format("+-%-3s-+-%-45s-+", createLine(3), createLine(45));
-            System.out.println(line);
-            for (int i = 0; i < accounts.size(); i++) {
-                System.out.println(String.format("| %-3d | %-45s |", i, accounts.get(i).toString()));
-                System.out.println(line);
-            }
         }
     }
 }
