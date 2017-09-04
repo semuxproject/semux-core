@@ -113,24 +113,25 @@ public class HomePanel extends JPanel implements ActionListener {
     }
 
     public static class TransactionPanel extends JPanel {
-
         private static final long serialVersionUID = 1L;
 
-        public TransactionPanel(Transaction tx, boolean isInbound) {
+        public TransactionPanel(Transaction tx, boolean inBound, boolean outBound) {
             this.setBorder(new EmptyBorder(10, 10, 10, 10));
 
             JLabel lblType = new JLabel("");
-            lblType.setIcon(SwingUtil.loadImage(isInbound ? "inbound" : "outbound", 48, 48));
+            String name = (inBound && outBound) ? "cycle" : (inBound ? "inbound" : "outbound");
+            lblType.setIcon(SwingUtil.loadImage(name, 48, 48));
 
-            JLabel lblAmount = new JLabel(
-                    String.format("%s%.3f SEM", isInbound ? "+" : "-", tx.getValue() / (double) Unit.SEM));
+            String prefix = (inBound && outBound) ? "" : (inBound ? "+" : "-");
+            JLabel lblAmount = new JLabel(String.format("%s%.3f SEM", prefix, tx.getValue() / (double) Unit.SEM));
             lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
             SimpleDateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
             JLabel lblTime = new JLabel(df.format(new Date(tx.getTimestamp())));
 
-            JLabel lblFrom = new JLabel("0x" + Hex.encode(isInbound ? tx.getFrom() : tx.getTo()));
-            lblFrom.setForeground(Color.GRAY);
+            JLabel labelAddress = new JLabel((inBound && outBound) ? "Internal transfer"
+                    : "0x" + Hex.encode(inBound ? tx.getFrom() : tx.getTo()));
+            labelAddress.setForeground(Color.GRAY);
 
             // @formatter:off
             GroupLayout groupLayout = new GroupLayout(this);
@@ -146,7 +147,7 @@ public class HomePanel extends JPanel implements ActionListener {
                                 .addPreferredGap(ComponentPlacement.RELATED, 87, Short.MAX_VALUE)
                                 .addComponent(lblAmount, GroupLayout.PREFERRED_SIZE, 128, GroupLayout.PREFERRED_SIZE))
                             .addGroup(groupLayout.createSequentialGroup()
-                                .addComponent(lblFrom, GroupLayout.DEFAULT_SIZE, 384, Short.MAX_VALUE)
+                                .addComponent(labelAddress, GroupLayout.DEFAULT_SIZE, 384, Short.MAX_VALUE)
                                 .addContainerGap())))
             );
             groupLayout.setVerticalGroup(
@@ -158,7 +159,7 @@ public class HomePanel extends JPanel implements ActionListener {
                                     .addComponent(lblTime, GroupLayout.PREFERRED_SIZE, 19, GroupLayout.PREFERRED_SIZE)
                                     .addComponent(lblAmount, GroupLayout.PREFERRED_SIZE, 19, GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(lblFrom))
+                                .addComponent(labelAddress))
                             .addComponent(lblType, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 48, GroupLayout.PREFERRED_SIZE))
                         .addContainerGap())
             );
@@ -186,11 +187,15 @@ public class HomePanel extends JPanel implements ActionListener {
         this.balance.setText(String.format("%.3f SEM", model.getTotalBalance() / (double) Unit.SEM));
         this.locked.setText(String.format("%.3f SEM", model.getTotalLocked() / (double) Unit.SEM));
 
+        // federate all transactions
+        Set<ByteArray> hashes = new HashSet<>();
         List<Transaction> list = new ArrayList<>();
         for (Account acc : model.getAccounts()) {
             for (Transaction tx : acc.getTransactions()) {
-                if (TransactionType.TRANSFER.equals(tx.getType())) {
+                ByteArray key = ByteArray.of(tx.getHash());
+                if (TransactionType.TRANSFER.equals(tx.getType()) && !hashes.contains(key)) {
                     list.add(tx);
+                    hashes.add(key);
                 }
             }
         }
@@ -199,6 +204,7 @@ public class HomePanel extends JPanel implements ActionListener {
         });
         list = list.size() > 6 ? list.subList(0, 6) : list;
 
+        // divide transactions into: inbound, outbound, cycle
         Set<ByteArray> set = new HashSet<>();
         for (Account a : model.getAccounts()) {
             set.add(ByteArray.of(a.getAddress().toAddress()));
@@ -206,7 +212,9 @@ public class HomePanel extends JPanel implements ActionListener {
 
         transactions.removeAll();
         for (Transaction tx : list) {
-            transactions.add(new TransactionPanel(tx, set.contains(ByteArray.of(tx.getTo()))));
+            boolean inBound = set.contains(ByteArray.of(tx.getTo()));
+            boolean outBound = set.contains(ByteArray.of(tx.getFrom()));
+            transactions.add(new TransactionPanel(tx, inBound, outBound));
         }
         transactions.revalidate();
     }
