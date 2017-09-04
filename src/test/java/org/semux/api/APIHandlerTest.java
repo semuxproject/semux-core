@@ -21,6 +21,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semux.Config;
+import org.semux.core.Account;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -28,12 +29,17 @@ import org.semux.core.Genesis;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Wallet;
+import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.utils.ByteArray;
+import org.semux.utils.Bytes;
 import org.semux.utils.MerkleTree;
 
 public class APIHandlerTest {
+
+    private static File file = new File("wallet_test.data");
+    private static String password = "password";
 
     private static Wallet wallet;
     private static APIServerMock api;
@@ -42,8 +48,8 @@ public class APIHandlerTest {
     public static void setup() {
         Config.init();
 
-        wallet = new Wallet(new File("wallet_test.data"));
-        wallet.unlock("passw0rd");
+        wallet = new Wallet(file);
+        wallet.unlock(password);
         wallet.addAccount(new EdDSA());
 
         api = new APIServerMock();
@@ -211,7 +217,14 @@ public class APIHandlerTest {
 
     @Test
     public void testGetLocked() throws IOException {
+        EdDSA key = new EdDSA();
+        Account acc = api.chain.getAccountState().getAccount(key.toAddress());
+        acc.setLocked(100L);
 
+        String uri = "/get_locked?address=" + key.toAddressString();
+        JSONObject response = request(uri);
+        assertTrue(response.getBoolean("success"));
+        assertEquals(100L, response.getLong("result"));
     }
 
     @Test
@@ -251,12 +264,21 @@ public class APIHandlerTest {
 
     @Test
     public void testGetVote() throws IOException {
+        EdDSA key = new EdDSA();
+        EdDSA key2 = new EdDSA();
+        DelegateState ds = api.chain.getDeleteState();
+        ds.register(key2.toAddress(), Bytes.of("test"));
+        ds.vote(key.toAddress(), key2.toAddress(), 200L);
 
+        String uri = "/get_vote?voter=" + key.toAddressString() + "&delegate=" + key2.toAddressString();
+        JSONObject response = request(uri);
+        assertTrue(response.getBoolean("success"));
+        assertEquals(200L, response.getLong("result"));
     }
 
     @Test
     public void testGetAccounts() throws IOException {
-        String uri = "/get_accounts";
+        String uri = "/get_accounts?password=" + password;
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getJSONArray("result"));
@@ -266,7 +288,7 @@ public class APIHandlerTest {
     public void testNewAccount() throws IOException {
         int size = wallet.getAccounts().size();
 
-        String uri = "/new_account";
+        String uri = "/new_account?password=" + password;
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertEquals(size + 1, wallet.getAccounts().size());
@@ -276,8 +298,8 @@ public class APIHandlerTest {
     public void testTransfer() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
         long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
-        String uri = "/transfer?from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test&nonce="
-                + nonce;
+        String uri = "/transfer?password=" + password + "&from=0&to=" + key.toAddressString()
+                + "&value=1000000000&fee=5000000&data=test&nonce=" + nonce;
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -294,8 +316,8 @@ public class APIHandlerTest {
     public void testDelegate() throws IOException, InterruptedException {
         EdDSA key = wallet.getAccounts().get(0);
         long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
-        String uri = "/delegate?from=0&to=" + key.toAddressString() + "&value=" + Config.MIN_DELEGATE_FEE
-                + "&fee=5000000&data=test&nonce=" + nonce;
+        String uri = "/delegate?password=" + password + "&from=0&to=" + key.toAddressString() + "&value="
+                + Config.MIN_DELEGATE_FEE + "&fee=5000000&data=test&nonce=" + nonce;
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -312,8 +334,8 @@ public class APIHandlerTest {
     public void testVote() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
         long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
-        String uri = "/vote?from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test&nonce="
-                + nonce;
+        String uri = "/vote?password=" + password + "&from=0&to=" + key.toAddressString()
+                + "&value=1000000000&fee=5000000&data=test&nonce=" + nonce;
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -330,8 +352,8 @@ public class APIHandlerTest {
     public void testUnvote() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
         long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
-        String uri = "/unvote?from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test&nonce="
-                + nonce;
+        String uri = "/unvote?password=" + password + "&from=0&to=" + key.toAddressString()
+                + "&value=1000000000&fee=5000000&data=test&nonce=" + nonce;
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));

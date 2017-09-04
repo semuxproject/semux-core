@@ -239,32 +239,39 @@ public class APIHandler {
             }
 
             case GET_ACCOUNTS: {
-                if (wallet.unlocked()) {
+                String result;
+                if ((result = checkPassword(params)) != null) {
+                    return result;
+                } else {
                     List<EdDSA> accounts = wallet.getAccounts();
                     JSONArray arr = new JSONArray();
                     for (EdDSA acc : accounts) {
                         arr.put(HEX + acc.toAddressString());
                     }
                     return success(arr);
-                } else {
-                    return failure("Wallet is locked");
                 }
             }
             case NEW_ACCOUNT: {
-                if (wallet.unlocked()) {
+                String result;
+                if ((result = checkPassword(params)) != null) {
+                    return result;
+                } else {
                     EdDSA key = new EdDSA();
                     wallet.addAccount(key);
                     wallet.flush();
                     return success(HEX + key.toAddressString());
-                } else {
-                    return failure("Wallet is locked");
                 }
             }
             case TRANSFER:
             case DELEGATE:
             case VOTE:
             case UNVOTE:
-                return doTransaction(cmd, params);
+                String result;
+                if ((result = checkPassword(params)) != null) {
+                    return result;
+                } else {
+                    return doTransaction(cmd, params);
+                }
             }
         } catch (Exception e) {
             return failure("Internal error: " + e.getMessage());
@@ -439,5 +446,15 @@ public class APIHandler {
             obj.put("message", msg);
         }
         return obj.toString();
+    }
+
+    private String checkPassword(Map<String, String> params) {
+        if (!wallet.unlocked()) {
+            return failure("Wallet is locked");
+        } else if (!wallet.getPassword().equals(params.get("password"))) {
+            return failure("Invalid password");
+        }
+
+        return null;
     }
 }

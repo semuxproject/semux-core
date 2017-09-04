@@ -134,6 +134,18 @@ public class Wallet {
     }
 
     /**
+     * Get the password.
+     * 
+     * @return
+     * @throws WalletLockedException
+     */
+    public String getPassword() throws WalletLockedException {
+        requireUnlocked();
+
+        return password;
+    }
+
+    /**
      * Get a copy of the accounts inside this wallet.
      * 
      * @return a list of accounts
