@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class SemuxPerformance {
     private static Logger logger = LoggerFactory.getLogger(SemuxPerformance.class);
 
-    private static Wallet wallet = Wallet.getInstance();
+    private static Wallet wallet = new Wallet();
 
     public static long getNonce(EdDSA key) throws IOException {
         String cmd = "get_nonce";

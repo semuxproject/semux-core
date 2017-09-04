@@ -276,7 +276,7 @@ public class Wallet {
     public boolean flush() throws WalletLockedException {
         requireUnlocked();
 
-        try { 
+        try {
             byte[] key = Hash.h256(Bytes.of(password));
 
             SimpleEncoder enc = new SimpleEncoder();

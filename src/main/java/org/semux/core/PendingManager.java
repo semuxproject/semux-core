@@ -198,16 +198,6 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
         pool.remove(createKey(tx));
     }
 
-    /**
-     * Get the nonce of an account.
-     * 
-     * @param address
-     * @return
-     */
-    public synchronized long getAccountNonce(byte[] address) {
-        return accountState.getAccount(address).getNonce();
-    }
-
     @Override
     public synchronized void onBlockAdded(Block block) {
         if (isRunning) {
@@ -246,7 +236,7 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
                     && tx.validate()) { // valid
 
                 // process transaction
-                if (processTransaction(tx, true) != 1) {
+                if (processTransaction(tx, true) < 1) {
                     logger.debug("Transaction dropped: {}", tx);
                 }
 
@@ -258,6 +248,13 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
 
     private int processTransaction(Transaction tx, boolean relay) {
         Account acc = accountState.getAccount(tx.getFrom());
+
+        // [0] check timestamp
+        long now = System.currentTimeMillis();
+        long twoHours = TimeUnit.HOURS.toMillis(2);
+        if (tx.getTimestamp() < now - twoHours || tx.getTimestamp() > now + twoHours) {
+            return 0;
+        }
 
         // [1] check balance
         if (tx.getValue() > acc.getBalance()) {

@@ -119,10 +119,9 @@ public class CLI {
         }
     }
 
-    /*
-     * Expose the following instances for GUI
-     */
-
+    // ====================================
+    // instances exposed to gui
+    // ====================================
     public static EdDSA coinbase;
 
     public static Blockchain chain;
@@ -143,33 +142,31 @@ public class CLI {
         // ====================================
         // unlock wallet
         // ====================================
-        Wallet wallet = Wallet.getInstance();
-
-        if (wallet.isLocked()) {
+        if (coinbase == null) {
+            Wallet wallet = new Wallet();
             if (password == null) {
                 password = SystemUtil.readPassword();
             }
-
             if (!wallet.unlock(password)) {
                 logger.error("Failed to unlock wallet");
                 System.exit(-1);
             }
-        }
 
-        List<EdDSA> accounts = wallet.getAccounts();
-        if (accounts.isEmpty()) {
-            EdDSA key = new EdDSA();
-            wallet.addAccount(key);
-            wallet.flush();
-            accounts = wallet.getAccounts();
-            logger.info("A new account has been created for you: address = {}", key.toAddressString());
-        }
+            List<EdDSA> accounts = wallet.getAccounts();
+            if (accounts.isEmpty()) {
+                EdDSA key = new EdDSA();
+                wallet.addAccount(key);
+                wallet.flush();
+                accounts = wallet.getAccounts();
+                logger.info("A new account has been created for you: address = {}", key.toAddressString());
+            }
 
-        if (coinbaseIndex < 0 || coinbaseIndex >= accounts.size()) {
-            logger.error("Coinbase does not exist");
-            System.exit(-1);
+            if (coinbaseIndex < 0 || coinbaseIndex >= accounts.size()) {
+                logger.error("Coinbase does not exist");
+                System.exit(-1);
+            }
+            coinbase = accounts.get(coinbaseIndex);
         }
-        coinbase = accounts.get(coinbaseIndex);
 
         // ====================================
         // initialization
