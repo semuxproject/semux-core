@@ -28,6 +28,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.semux.GUI;
+import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 
@@ -49,11 +50,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
     private File backupFile = null;
 
-    private GUI gui;
-
-    public WelcomeFrame(GUI gui) {
-        this.gui = gui;
-
+    public WelcomeFrame(Model model) {
         // setup frame properties
         this.setTitle(TITLE);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -175,25 +172,29 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         case OK:
             String password = new String(passwordField.getPassword());
 
-            Wallet w = Wallet.getInstance();
-            if (!w.unlock(password)) {
+            Kernel kernel = Kernel.getInstance();
+            Wallet wallet = kernel.getWallet();
+            if (!wallet.unlock(password)) {
                 JOptionPane.showMessageDialog(this, "Failed to unlock the wallet, wrong password?");
                 break;
             }
 
             if (backupFile == null) {
                 EdDSA key = new EdDSA();
-                w.addAccount(key);
-                w.flush();
+                wallet.addAccount(key);
+                wallet.flush();
 
                 goMainFrame();
             } else {
-                if (!w.importAccounts(backupFile, password)) {
-                    JOptionPane.showMessageDialog(this, "Failed to import accounts from backup file, wrong password?");
+                Wallet w = new Wallet(backupFile);
+
+                if (!w.unlock(password)) {
+                    JOptionPane.showMessageDialog(this, "Failed to unlock the backup file.");
                 } else if (w.size() == 0) {
-                    JOptionPane.showMessageDialog(this, "No account found in the backup file");
+                    JOptionPane.showMessageDialog(this, "No account found!");
                 } else {
-                    w.flush();
+                    wallet.addAccounts(w.getAccounts());
+                    wallet.flush();
                     goMainFrame();
                 }
             }
@@ -209,6 +210,6 @@ public class WelcomeFrame extends JFrame implements ActionListener {
     private void goMainFrame() {
         dispose();
 
-        gui.showMain();
+        GUI.showMain();
     }
 }

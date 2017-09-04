@@ -22,7 +22,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 
 import org.semux.Config;
-import org.semux.GUI;
+import org.semux.Kernel;
 import org.semux.core.Delegate;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
@@ -39,7 +39,6 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static String[] columnNames = { "Name", "Address", "Votes" };
 
-    private GUI gui;
     private Model model;
 
     private JTable table;
@@ -51,9 +50,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private JTextField textUnvote;
     private JTextField textName;
 
-    public DelegatesPanel(GUI gui) {
-        this.gui = gui;
-        this.model = gui.getModel();
+    public DelegatesPanel(Model model) {
+        this.model = model;
         this.model.addListener(this);
 
         JScrollPane scrollPane = new JScrollPane();
@@ -288,7 +286,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
                 tx.sign(a.getAddress());
 
-                gui.sendTransaction(tx);
+                Kernel kernel = Kernel.getInstance();
+                kernel.getPendingManager().addTransaction(tx);
                 JOptionPane.showMessageDialog(this, "Transaction sent!");
                 clear();
             }
@@ -313,7 +312,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
                 tx.sign(a.getAddress());
 
-                gui.sendTransaction(tx);
+                Kernel kernel = Kernel.getInstance();
+                kernel.getPendingManager().addTransaction(tx);
                 JOptionPane.showMessageDialog(this, "Transaction sent!");
                 clear();
             }

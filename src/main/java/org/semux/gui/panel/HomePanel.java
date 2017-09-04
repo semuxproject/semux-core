@@ -23,7 +23,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-import org.semux.GUI;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
@@ -47,8 +46,8 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private JPanel transactions;
 
-    public HomePanel(GUI gui) {
-        this.model = gui.getModel();
+    public HomePanel(Model model) {
+        this.model = model;
         this.model.addListener(this);
 
         // setup overview panel

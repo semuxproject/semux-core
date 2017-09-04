@@ -21,7 +21,6 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 
-import org.semux.GUI;
 import org.semux.core.Unit;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
@@ -38,8 +37,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
     private JTable table;
     private ReceiveTableModel tableModel;
 
-    public ReceivePanel(GUI gui) {
-        this.model = gui.getModel();
+    public ReceivePanel(Model model) {
+        this.model = model;
         this.model.addListener(this);
 
         JScrollPane scrollPane = new JScrollPane();

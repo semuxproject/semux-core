@@ -14,7 +14,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
-import org.semux.GUI;
 import org.semux.core.Transaction;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
@@ -31,11 +30,12 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     private static String[] columnNames = { "Hash", "Type", "From", "To", "Value", "Time" };
 
     private Model model;
+
     private JTable table;
     private TransactionsTableModel tableModel;
 
-    public TransactionsPanel(GUI gui) {
-        this.model = gui.getModel();
+    public TransactionsPanel(Model model) {
+        this.model = model;
         this.model.addListener(this);
 
         setLayout(new BorderLayout(0, 0));

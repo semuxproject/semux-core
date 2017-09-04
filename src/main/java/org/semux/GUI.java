@@ -61,7 +61,7 @@ public class GUI {
         }
     }
 
-    private static void setupLookAndFeel() {
+    public static void setupLookAndFeel() {
         try {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Semux");
@@ -72,7 +72,7 @@ public class GUI {
         }
     }
 
-    private static void showWelcome() {
+    public static void showWelcome() {
         // start welcome frame
         EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -82,7 +82,7 @@ public class GUI {
         });
     }
 
-    private static void showMain() {
+    public static void showMain() {
         // start kernel
         Kernel kernel = Kernel.getInstance();
         kernel.init(dataDir, wallet, coinbase);

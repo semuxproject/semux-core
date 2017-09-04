@@ -19,7 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
 
-import org.semux.GUI;
 import org.semux.gui.panel.DelegatesPanel;
 import org.semux.gui.panel.HomePanel;
 import org.semux.gui.panel.ReceivePanel;
@@ -40,12 +39,12 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private JPanel tabs;
 
-    public MainFrame(GUI gui) {
-        panelHome = new HomePanel(gui);
-        panelSend = new SendPanel(gui);
-        panelReceive = new ReceivePanel(gui);
-        panelTransactions = new TransactionsPanel(gui);
-        panelDelegates = new DelegatesPanel(gui);
+    public MainFrame(Model model) {
+        panelHome = new HomePanel(model);
+        panelSend = new SendPanel(model);
+        panelReceive = new ReceivePanel(model);
+        panelTransactions = new TransactionsPanel(model);
+        panelDelegates = new DelegatesPanel(model);
 
         // setup frame properties
         this.setTitle(TITLE);
