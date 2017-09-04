@@ -77,6 +77,9 @@ public class Config {
                     NET_MAX_QUEUE_RATE = Integer.parseInt(props.getProperty(name));
                     break;
 
+                case "api.enabled":
+                    API_ENABLED = Boolean.parseBoolean(props.getProperty(name));
+                    break;
                 case "api.ip":
                     API_LISTEN_IP = props.getProperty(name);
                     break;
@@ -249,6 +252,11 @@ public class Config {
     // =========================
     // API
     // =========================
+
+    /**
+     * API enabled.
+     */
+    public static boolean API_ENABLED = false;
 
     /**
      * API listening address.
