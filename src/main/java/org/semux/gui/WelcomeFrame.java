@@ -28,7 +28,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.semux.GUI;
-import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 
@@ -48,9 +47,13 @@ public class WelcomeFrame extends JFrame implements ActionListener {
     private JRadioButton btnCreate;
     private JRadioButton btnImport;
 
+    private Wallet wallet;
+
     private File backupFile = null;
 
-    public WelcomeFrame(Model model) {
+    public WelcomeFrame(Wallet wallet, Model model) {
+        this.wallet = wallet;
+
         // setup frame properties
         this.setTitle(TITLE);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -172,8 +175,6 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         case OK:
             String password = new String(passwordField.getPassword());
 
-            Kernel kernel = Kernel.getInstance();
-            Wallet wallet = kernel.getWallet();
             if (!wallet.unlock(password)) {
                 JOptionPane.showMessageDialog(this, "Failed to unlock the wallet, wrong password?");
                 break;

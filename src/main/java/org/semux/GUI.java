@@ -76,7 +76,7 @@ public class GUI {
         // start welcome frame
         EventQueue.invokeLater(new Runnable() {
             public void run() {
-                WelcomeFrame frame = new WelcomeFrame(model);
+                WelcomeFrame frame = new WelcomeFrame(wallet, model);
                 frame.setVisible(true);
             }
         });
@@ -86,6 +86,7 @@ public class GUI {
         // start kernel
         Kernel kernel = Kernel.getInstance();
         kernel.init(dataDir, wallet, coinbase);
+        kernel.start();
 
         // register block listener
         BlockchainListener listener = (block) -> {

@@ -6,11 +6,13 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.List;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -34,8 +36,10 @@ public class ReceivePanel extends JPanel implements ActionListener {
     private static String[] columnNames = { "#", "Address", "Balance", "Locked" };
 
     private Model model;
+
     private JTable table;
     private ReceiveTableModel tableModel;
+    private JLabel qr;
 
     public ReceivePanel(Model model) {
         this.model = model;
@@ -48,12 +52,16 @@ public class ReceivePanel extends JPanel implements ActionListener {
         SwingUtil.setColumnAlignments(table, false, false, true, true);
         scrollPane.setViewportView(table);
 
+        table.getSelectionModel().addListSelectionListener((ev) -> {
+            actionPerformed(new ActionEvent(ReceivePanel.this, 0, Action.SELECT.name()));
+        });
+
         JButton btnCopyAddress = new JButton("Copy Address");
         btnCopyAddress.addActionListener(this);
         btnCopyAddress.setActionCommand(Action.COPY_ADDRESS.name());
 
-        JLabel qr = new JLabel("");
-        qr.setIcon(SwingUtil.loadImage("send", 200, 200));
+        qr = new JLabel("");
+        qr.setIcon(SwingUtil.emptyImage(200, 200));
         qr.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         // @formatter:off
@@ -136,10 +144,18 @@ public class ReceivePanel extends JPanel implements ActionListener {
         Action action = Action.valueOf(e.getActionCommand());
 
         switch (action) {
-        case REFRESH:
+        case REFRESH: {
             refresh();
             break;
-        case COPY_ADDRESS:
+        }
+        case SELECT: {
+            int row = table.getSelectedRow();
+            Account acc = model.getAccounts().get(row);
+            BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getAddress().toAddressString(), 200);
+            qr.setIcon(new ImageIcon(bi));
+            break;
+        }
+        case COPY_ADDRESS: {
             int row = table.getSelectedRow();
             if (row == -1) {
                 JOptionPane.showMessageDialog(this, "Please select an account");
@@ -153,6 +169,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Address copied: " + acc);
             }
             break;
+        }
         default:
             break;
         }

@@ -31,5 +31,7 @@ public enum Action {
 
     DELEGATE,
 
-    REFRESH
+    REFRESH,
+
+    SELECT
 }

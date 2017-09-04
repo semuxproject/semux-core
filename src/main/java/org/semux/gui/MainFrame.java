@@ -24,6 +24,7 @@ import org.semux.gui.panel.HomePanel;
 import org.semux.gui.panel.ReceivePanel;
 import org.semux.gui.panel.SendPanel;
 import org.semux.gui.panel.TransactionsPanel;
+import java.awt.Font;
 
 public class MainFrame extends JFrame implements ActionListener {
 
@@ -60,38 +61,45 @@ public class MainFrame extends JFrame implements ActionListener {
         toolBar.setBorder(new EmptyBorder(15, 15, 15, 15));
         toolBar.setFloatable(false);
 
+        Dimension gap = new Dimension(15, 0);
+
         JButton btnHome = new JButton("Home");
+        btnHome.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
         btnHome.setActionCommand(Action.SHOW_HOME.name());
         btnHome.addActionListener(this);
-        btnHome.setIcon(SwingUtil.loadImage("send", 32, 32));
+        btnHome.setIcon(SwingUtil.loadImage("home", 36, 36));
         toolBar.add(btnHome);
-        toolBar.add(Box.createRigidArea(new Dimension(10, 0)));
+        toolBar.add(Box.createRigidArea(gap));
 
         JButton btnSend = new JButton("Send");
+        btnSend.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
         btnSend.setActionCommand(Action.SHOW_SEND.name());
         btnSend.addActionListener(this);
-        btnSend.setIcon(SwingUtil.loadImage("send", 32, 32));
+        btnSend.setIcon(SwingUtil.loadImage("send", 36, 36));
         toolBar.add(btnSend);
-        toolBar.add(Box.createRigidArea(new Dimension(10, 0)));
+        toolBar.add(Box.createRigidArea(gap));
 
         JButton btnReceive = new JButton("Receive");
+        btnReceive.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
         btnReceive.setActionCommand(Action.SHOW_RECEIVE.name());
         btnReceive.addActionListener(this);
-        btnReceive.setIcon(SwingUtil.loadImage("receive", 32, 32));
+        btnReceive.setIcon(SwingUtil.loadImage("receive", 36, 36));
         toolBar.add(btnReceive);
-        toolBar.add(Box.createRigidArea(new Dimension(10, 0)));
+        toolBar.add(Box.createRigidArea(gap));
 
         JButton btnTransactions = new JButton("Transactions");
+        btnTransactions.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
         btnTransactions.setActionCommand(Action.SHOW_TRANSACTIONS.name());
         btnTransactions.addActionListener(this);
-        btnTransactions.setIcon(SwingUtil.loadImage("receive", 32, 32));
+        btnTransactions.setIcon(SwingUtil.loadImage("transactions", 36, 36));
         toolBar.add(btnTransactions);
-        toolBar.add(Box.createRigidArea(new Dimension(10, 0)));
+        toolBar.add(Box.createRigidArea(gap));
 
         JButton btnDelegates = new JButton("Delegates");
+        btnDelegates.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
         btnDelegates.setActionCommand(Action.SHOW_DELEGATES.name());
         btnDelegates.addActionListener(this);
-        btnDelegates.setIcon(SwingUtil.loadImage("delegates", 32, 32));
+        btnDelegates.setIcon(SwingUtil.loadImage("delegates", 36, 36));
         toolBar.add(btnDelegates);
 
         // setup tabs

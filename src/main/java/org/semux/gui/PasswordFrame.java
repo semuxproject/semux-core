@@ -29,7 +29,7 @@ public class PasswordFrame extends JFrame implements ActionListener {
 
     public PasswordFrame(String message) {
         JLabel labelLogo = new JLabel("");
-        labelLogo.setIcon(SwingUtil.loadImage("send", 96, 96));
+        labelLogo.setIcon(SwingUtil.loadImage("logo", 96, 96));
 
         JLabel lblMessage = new JLabel(message == null ? "Please enter your password:" : message);
         textPassword = new JPasswordField();
