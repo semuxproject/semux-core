@@ -143,6 +143,7 @@ public class CLI {
         // start kernel
         Kernel kernel = Kernel.getInstance();
         kernel.init(dataDir, wallet, coinbase);
+        kernel.start();
     }
 
     private static void createAccount(Wallet wallet) {
