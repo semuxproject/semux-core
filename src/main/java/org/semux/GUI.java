@@ -74,11 +74,9 @@ public class GUI {
 
     public static void showWelcome() {
         // start welcome frame
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                WelcomeFrame frame = new WelcomeFrame(wallet, model);
-                frame.setVisible(true);
-            }
+        EventQueue.invokeLater(() -> {
+            WelcomeFrame frame = new WelcomeFrame(wallet, model);
+            frame.setVisible(true);
         });
     }
 
@@ -96,11 +94,9 @@ public class GUI {
         kernel.getBlockchain().addListener(listener);
 
         // start main frame
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                MainFrame frame = new MainFrame(model);
-                frame.setVisible(true);
-            }
+        EventQueue.invokeLater(() -> {
+            MainFrame frame = new MainFrame(model);
+            frame.setVisible(true);
         });
     }
 

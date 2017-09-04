@@ -150,9 +150,11 @@ public class ReceivePanel extends JPanel implements ActionListener {
         }
         case SELECT: {
             int row = table.getSelectedRow();
-            Account acc = model.getAccounts().get(row);
-            BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getAddress().toAddressString(), 200);
-            qr.setIcon(new ImageIcon(bi));
+            if (row != -1) {
+                Account acc = model.getAccounts().get(row);
+                BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getAddress().toAddressString(), 200);
+                qr.setIcon(new ImageIcon(bi));
+            }
             break;
         }
         case COPY_ADDRESS: {

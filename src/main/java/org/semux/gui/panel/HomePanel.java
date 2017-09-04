@@ -120,7 +120,7 @@ public class HomePanel extends JPanel implements ActionListener {
             this.setBorder(new EmptyBorder(10, 10, 10, 10));
 
             JLabel lblType = new JLabel("");
-            lblType.setIcon(SwingUtil.loadImage("send", 48, 48));
+            lblType.setIcon(SwingUtil.loadImage(isInbound ? "inbound" : "outbound", 48, 48));
 
             JLabel lblAmount = new JLabel(
                     String.format("%s%.3f SEM", isInbound ? "+" : "-", tx.getValue() / (double) Unit.SEM));
@@ -195,7 +195,7 @@ public class HomePanel extends JPanel implements ActionListener {
             }
         }
         list.sort((tx1, tx2) -> {
-            return Long.compare(tx1.getTimestamp(), tx2.getTimestamp());
+            return Long.compare(tx2.getTimestamp(), tx1.getTimestamp());
         });
         list = list.size() > 6 ? list.subList(0, 6) : list;
 

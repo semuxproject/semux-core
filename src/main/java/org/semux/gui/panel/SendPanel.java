@@ -20,6 +20,7 @@ import javax.swing.border.LineBorder;
 
 import org.semux.Config;
 import org.semux.Kernel;
+import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
@@ -48,25 +49,31 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblFrom = new JLabel("From:");
         lblFrom.setHorizontalAlignment(SwingConstants.RIGHT);
 
+        from = new JComboBox<>();
+
         JLabel lblTo = new JLabel("To:");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
 
         to = new JTextField();
         to.setColumns(24);
+        to.setActionCommand(Action.SEND.name());
+        to.addActionListener(this);
 
         JLabel lblAmount = new JLabel("Amount:");
         lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
         amount = new JTextField();
         amount.setColumns(10);
+        amount.setActionCommand(Action.SEND.name());
+        amount.addActionListener(this);
 
         JLabel lblFee = new JLabel("Fee:");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        from = new JComboBox<>();
-
         fee = new JTextField();
         fee.setColumns(10);
+        fee.setActionCommand(Action.SEND.name());
+        fee.addActionListener(this);
 
         JSeparator separator = new JSeparator();
 
@@ -218,16 +225,18 @@ public class SendPanel extends JPanel implements ActionListener {
             } else if (to.length != 20) {
                 JOptionPane.showMessageDialog(this, "Invalid receiving address!");
             } else {
+                Kernel kernel = Kernel.getInstance();
+                PendingManager pendingMgr = kernel.getPendingManager();
+
                 TransactionType type = TransactionType.TRANSFER;
                 byte[] from = acc.getAddress().toAddress();
-                long nonce = acc.getNonce() + 1;
+                long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = {};
                 Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
                 tx.sign(acc.getAddress());
 
-                Kernel kernel = Kernel.getInstance();
-                kernel.getPendingManager().addTransaction(tx);
+                pendingMgr.addTransaction(tx);
                 JOptionPane.showMessageDialog(this, "Transaction sent!");
                 clear();
             }

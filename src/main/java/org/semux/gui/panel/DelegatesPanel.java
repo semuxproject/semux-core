@@ -24,8 +24,10 @@ import javax.swing.table.AbstractTableModel;
 import org.semux.Config;
 import org.semux.Kernel;
 import org.semux.core.Delegate;
+import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
+import org.semux.core.Unit;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
@@ -106,6 +108,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textVote = new JTextField();
         textVote.setToolTipText("# of votes");
         textVote.setColumns(10);
+        textVote.setActionCommand(Action.VOTE.name());
+        textVote.addActionListener(this);
 
         JButton btnVote = new JButton("Vote");
         btnVote.setActionCommand(Action.VOTE.name());
@@ -114,6 +118,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textUnvote = new JTextField();
         textUnvote.setToolTipText("# of votes");
         textUnvote.setColumns(10);
+        textUnvote.setActionCommand(Action.VOTE.name());
+        textUnvote.addActionListener(this);
 
         JButton btnUnvote = new JButton("Unvote");
         btnUnvote.setActionCommand(Action.UNVOTE.name());
@@ -231,7 +237,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             case 1:
                 return "0x" + Hex.encode(d.getAddress());
             case 2:
-                return d.getVote();
+                return d.getVote() / Unit.SEM;
             default:
                 return null;
             }
@@ -275,19 +281,21 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             } else if (!v.matches("[\\d]+")) {
                 JOptionPane.showMessageDialog(this, "Please enter the number of votes");
             } else {
+                Kernel kernel = Kernel.getInstance();
+                PendingManager pendingMgr = kernel.getPendingManager();
+
                 TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
                 byte[] from = a.getAddress().toAddress();
                 byte[] to = d.getAddress();
-                long value = Long.parseLong(v);
+                long value = Long.parseLong(v) * Unit.SEM;
                 long fee = Config.MIN_TRANSACTION_FEE;
-                long nonce = a.getNonce() + 1;
+                long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = {};
                 Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
                 tx.sign(a.getAddress());
 
-                Kernel kernel = Kernel.getInstance();
-                kernel.getPendingManager().addTransaction(tx);
+                pendingMgr.addTransaction(tx);
                 JOptionPane.showMessageDialog(this, "Transaction sent!");
                 clear();
             }
@@ -301,19 +309,21 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             } else if (!name.matches("[_a-z0-8]{4,16}")) {
                 JOptionPane.showMessageDialog(this, "Please enter a correct delegate name");
             } else {
+                Kernel kernel = Kernel.getInstance();
+                PendingManager pendingMgr = kernel.getPendingManager();
+
                 TransactionType type = TransactionType.DELEGATE;
                 byte[] from = a.getAddress().toAddress();
                 byte[] to = from;
                 long value = Config.MIN_DELEGATE_FEE;
                 long fee = Config.MIN_TRANSACTION_FEE;
-                long nonce = a.getNonce() + 1;
+                long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = Bytes.of(name);
                 Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
                 tx.sign(a.getAddress());
 
-                Kernel kernel = Kernel.getInstance();
-                kernel.getPendingManager().addTransaction(tx);
+                pendingMgr.addTransaction(tx);
                 JOptionPane.showMessageDialog(this, "Transaction sent!");
                 clear();
             }

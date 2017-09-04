@@ -127,7 +127,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         }
 
         list.sort((tx1, tx2) -> {
-            return Long.compare(tx1.getTimestamp(), tx2.getTimestamp());
+            return Long.compare(tx2.getTimestamp(), tx1.getTimestamp());
         });
 
         int row = table.getSelectedRow();

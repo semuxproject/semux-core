@@ -1,5 +1,6 @@
 package org.semux.gui;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -41,7 +42,9 @@ public class Model {
      */
     public void fireUpdateEvent() {
         for (ActionListener listener : listeners) {
-            listener.actionPerformed(new ActionEvent(this, 0, Action.REFRESH.name()));
+            EventQueue.invokeLater(() -> {
+                listener.actionPerformed(new ActionEvent(this, 0, Action.REFRESH.name()));
+            });
         }
     }
 
