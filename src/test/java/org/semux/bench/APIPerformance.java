@@ -1,11 +1,14 @@
 package org.semux.bench;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Scanner;
 
 import org.semux.Config;
 import org.semux.api.APIServerMock;
+import org.semux.core.Wallet;
+import org.semux.crypto.EdDSA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +18,12 @@ public class APIPerformance {
     private static int REPEAT = 1000;
 
     public static void testBasic() throws IOException {
+        Wallet wallet = new Wallet(new File("wallet_test.data"));
+        wallet.unlock("passw0rd");
+        wallet.addAccount(new EdDSA());
+
         APIServerMock api = new APIServerMock();
-        api.start(Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
+        api.start(wallet, Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
 
         try {
             long t1 = System.nanoTime();

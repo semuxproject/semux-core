@@ -19,11 +19,6 @@ public enum Command {
      */
     GET_INFO,
 
-    /**
-     * Stop the client.
-     */
-    STOP,
-
     // =======================
     // network
     // =======================
@@ -79,35 +74,17 @@ public enum Command {
     SEND_TRANSACTION,
 
     // =======================
-    // wallet
-    // =======================
-    /**
-     * Unlock the wallet.
-     */
-    UNLOCK_WALLET,
-
-    /**
-     * Lock the wallet.
-     */
-    LOCK_WALLET,
-
-    /**
-     * List accounts in the wallet.
-     */
-    GET_ACCOUNTS,
-
-    /**
-     * Create a new account.
-     */
-    NEW_ACCOUNT,
-
-    // =======================
-    // others
+    // state query
     // =======================
     /**
      * Get the balance of an account.
      */
     GET_BALANCE,
+
+    /**
+     * Get the locked balance of an account.
+     */
+    GET_LOCKED,
 
     /**
      * Get the nonce of an account.
@@ -123,6 +100,24 @@ public enum Command {
      * Get delegate by address or name.
      */
     GET_DELEGATE,
+
+    /**
+     * Get the number of votes one has bonded to a delegate.
+     */
+    GET_VOTE,
+
+    // =======================
+    // wallet (auth required)
+    // =======================
+    /**
+     * List accounts in the wallet.
+     */
+    GET_ACCOUNTS,
+
+    /**
+     * Create a new account.
+     */
+    NEW_ACCOUNT,
 
     /**
      * Balance transfer.

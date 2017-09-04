@@ -1,5 +1,6 @@
 package org.semux.bench;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class SemuxPerformance {
     private static Logger logger = LoggerFactory.getLogger(SemuxPerformance.class);
 
-    private static Wallet wallet = new Wallet();
+    private static Wallet wallet = new Wallet(new File("wallet.data"));
 
     public static long getNonce(EdDSA key) throws IOException {
         String cmd = "get_nonce";

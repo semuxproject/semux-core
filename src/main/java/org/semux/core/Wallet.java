@@ -109,6 +109,13 @@ public class Wallet {
     }
 
     /**
+     * Delete the wallet file.
+     */
+    public void delete() {
+        file.delete();
+    }
+
+    /**
      * Check if this wallet is unlocked.
      * 
      * @return true if the wallet is locked, otherwise false

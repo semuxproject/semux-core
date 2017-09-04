@@ -40,6 +40,7 @@ public class APIHandler {
 
     private static final String HEX = "0x";
 
+    private Wallet wallet;
     private Blockchain chain;
     private ChannelManager channelMgr;
     private PendingManager pendingMgr;
@@ -49,14 +50,16 @@ public class APIHandler {
     /**
      * Create an API handler.
      * 
+     * @param wallet
      * @param chain
      * @param pendingMgr
      * @param channelMgr
      * @param nodeMgr
      * @param client
      */
-    public APIHandler(Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr, NodeManager nodeMgr,
-            PeerClient client) {
+    public APIHandler(Wallet wallet, Blockchain chain, PendingManager pendingMgr, ChannelManager channelMgr,
+            NodeManager nodeMgr, PeerClient client) {
+        this.wallet = wallet;
         this.chain = chain;
         this.channelMgr = channelMgr;
         this.pendingMgr = pendingMgr;
@@ -97,17 +100,7 @@ public class APIHandler {
 
                 return success(obj);
             }
-            case STOP: {
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(1000);
-                        System.exit(0);
-                    } catch (InterruptedException e) {
-                    }
-                }).start();
 
-                return success(null);
-            }
             case GET_ACTIVE_NODES: {
                 JSONArray arr = new JSONArray();
                 for (Peer peer : channelMgr.getActivePeers()) {
@@ -135,6 +128,7 @@ public class APIHandler {
                     return failure("Invalid parameter: ip = " + ip);
                 }
             }
+
             case GET_LATEST_BLOCK_NUMBER: {
                 long num = chain.getLatestBlockNumber();
                 return success(num);
@@ -155,6 +149,7 @@ public class APIHandler {
                     return failure("Invalid parameter: number = " + number + ", hash = " + hash);
                 }
             }
+
             case GET_PENDING_TRANSACTIONS: {
                 List<Transaction> txs = pendingMgr.getTransactions();
                 JSONArray arr = new JSONArray();
@@ -181,50 +176,21 @@ public class APIHandler {
                     return failure("Invalid parameter: raw = " + raw);
                 }
             }
-            case UNLOCK_WALLET: {
-                String pwd = params.get("password");
-                if (pwd != null) {
-                    Wallet wallet = Wallet.getInstance();
-                    return success(wallet.unlock(pwd));
-                } else {
-                    return failure("Invalid parameter: raw = " + pwd);
-                }
-            }
-            case LOCK_WALLET: {
-                Wallet.getInstance().lock();
-                return success(null);
-            }
-            case GET_ACCOUNTS: {
-                Wallet wallet = Wallet.getInstance();
 
-                if (!wallet.isLocked()) {
-                    List<EdDSA> accounts = wallet.getAccounts();
-                    JSONArray arr = new JSONArray();
-                    for (EdDSA acc : accounts) {
-                        arr.put(HEX + acc.toAddressString());
-                    }
-                    return success(arr);
-                } else {
-                    return failure("Wallet is locked");
-                }
-            }
-            case NEW_ACCOUNT: {
-                Wallet wallet = Wallet.getInstance();
-
-                if (!wallet.isLocked()) {
-                    EdDSA key = new EdDSA();
-                    wallet.addAccount(key);
-                    wallet.flush();
-                    return success(HEX + key.toAddressString());
-                } else {
-                    return failure("Wallet is locked");
-                }
-            }
             case GET_BALANCE: {
                 String addr = params.get("address");
                 if (addr != null) {
                     Account acc = chain.getAccountState().getAccount(Hex.parse(addr));
                     return success(acc.getBalance());
+                } else {
+                    return failure("Invalid parameter: address = " + addr);
+                }
+            }
+            case GET_LOCKED: {
+                String addr = params.get("address");
+                if (addr != null) {
+                    Account acc = chain.getAccountState().getAccount(Hex.parse(addr));
+                    return success(acc.getLocked());
                 } else {
                     return failure("Invalid parameter: address = " + addr);
                 }
@@ -260,6 +226,40 @@ public class APIHandler {
                     return failure("Invalid parameter: name = " + name + ", address = " + address);
                 }
             }
+            case GET_VOTE: {
+                String voter = params.get("voter");
+                String delegate = params.get("delegate");
+
+                if (voter != null && delegate != null) {
+                    long vote = chain.getDeleteState().getVote(Hex.decode(voter), Hex.decode(delegate));
+                    return success(vote);
+                } else {
+                    return failure("Invalid parameter: voter = " + voter + ", delegate = " + delegate);
+                }
+            }
+
+            case GET_ACCOUNTS: {
+                if (wallet.unlocked()) {
+                    List<EdDSA> accounts = wallet.getAccounts();
+                    JSONArray arr = new JSONArray();
+                    for (EdDSA acc : accounts) {
+                        arr.put(HEX + acc.toAddressString());
+                    }
+                    return success(arr);
+                } else {
+                    return failure("Wallet is locked");
+                }
+            }
+            case NEW_ACCOUNT: {
+                if (wallet.unlocked()) {
+                    EdDSA key = new EdDSA();
+                    wallet.addAccount(key);
+                    wallet.flush();
+                    return success(HEX + key.toAddressString());
+                } else {
+                    return failure("Wallet is locked");
+                }
+            }
             case TRANSFER:
             case DELEGATE:
             case VOTE:
@@ -282,8 +282,7 @@ public class APIHandler {
         String pData = params.get("data");
 
         // [1] check if wallet is unlocked
-        Wallet w = Wallet.getInstance();
-        if (w.isLocked()) {
+        if (!wallet.unlocked()) {
             return failure("Wallet is locked");
         }
 
@@ -309,8 +308,8 @@ public class APIHandler {
         // [3] parse parameters
         if (pFrom != null && pTo != null && (type == TransactionType.DELEGATE || pValue != null) && pFee != null) {
             // from address
-            EdDSA from = (pFrom.length() >= 20) ? w.getAccount(Hex.parse(pFrom))
-                    : w.getAccount(Integer.parseInt(pFrom));
+            EdDSA from = (pFrom.length() >= 20) ? wallet.getAccount(Hex.parse(pFrom))
+                    : wallet.getAccount(Integer.parseInt(pFrom));
             if (from == null) {
                 return failure("Invalid parameter: from = " + pFrom);
             }

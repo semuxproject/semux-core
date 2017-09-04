@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ import java.util.Scanner;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semux.Config;
@@ -35,19 +35,19 @@ import org.semux.utils.MerkleTree;
 
 public class APIHandlerTest {
 
+    private static Wallet wallet;
     private static APIServerMock api;
 
     @BeforeClass
     public static void setup() {
         Config.init();
 
-        api = new APIServerMock();
-        api.start(Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
-    }
+        wallet = new Wallet(new File("wallet_test.data"));
+        wallet.unlock("passw0rd");
+        wallet.addAccount(new EdDSA());
 
-    @Before
-    public void lockWallet() {
-        Wallet.getInstance().lock();
+        api = new APIServerMock();
+        api.start(wallet, Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
     }
 
     private static JSONObject request(String uri) throws IOException {
@@ -144,44 +144,6 @@ public class APIHandlerTest {
         assertArrayEquals(gen.getHash(), Hex.parse(response.getJSONObject("result").getString("hash")));
     }
 
-    private Block createBlock(Blockchain chain, List<Transaction> transactions) {
-        EdDSA key = new EdDSA();
-
-        long number = chain.getLatestBlockNumber() + 1;
-        byte[] coinbase = key.toAddress();
-        byte[] prevHash = chain.getLatestBlockHash();
-        long timestamp = System.currentTimeMillis();
-        byte[] merkleRoot = {};
-        byte[] data = {};
-
-        List<byte[]> hashes = new ArrayList<>();
-        for (Transaction tx : transactions) {
-            hashes.add(tx.getHash());
-        }
-        merkleRoot = new MerkleTree(hashes).getRootHash();
-
-        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data);
-        return new Block(header.sign(key), transactions);
-    }
-
-    private Transaction createTransaction() {
-        EdDSA key = new EdDSA();
-
-        TransactionType type = TransactionType.TRANSFER;
-        byte[] from = key.toAddress();
-        byte[] to = key.toAddress();
-        long value = 0;
-        long fee = 0;
-        long nonce = 1;
-        long timestamp = System.currentTimeMillis();
-        byte[] data = {};
-
-        Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
-        tx.sign(key);
-
-        return tx;
-    }
-
     @Test
     public void testGetPendingTransactions() throws IOException {
         Transaction tx = createTransaction();
@@ -237,52 +199,6 @@ public class APIHandlerTest {
     }
 
     @Test
-    public void testUnlockWallet() throws IOException {
-        String uri = "/unlock_wallet?password=12345678";
-        JSONObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertTrue(response.getBoolean("result"));
-
-        assertFalse(Wallet.getInstance().isLocked());
-        Wallet.getInstance().lock();
-    }
-
-    @Test
-    public void testLockWallet() throws IOException {
-        assertTrue(Wallet.getInstance().unlock("12345678"));
-
-        String uri = "/lock_wallet";
-        JSONObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-
-        assertTrue(Wallet.getInstance().isLocked());
-    }
-
-    @Test
-    public void testGetAccounts() throws IOException {
-        String uri = "/get_accounts";
-        JSONObject response = request(uri);
-        assertFalse(response.getBoolean("success"));
-
-        Wallet.getInstance().unlock("12345678");
-        response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertNotNull(response.getJSONArray("result"));
-    }
-
-    @Test
-    public void testNewAccount() throws IOException {
-        Wallet w = Wallet.getInstance();
-        w.unlock("12345678");
-        int size = w.getAccounts().size();
-
-        String uri = "/new_account";
-        JSONObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertEquals(size + 1, w.getAccounts().size());
-    }
-
-    @Test
     public void testGetBalance() throws IOException {
         Genesis gen = Genesis.getInstance();
         Entry<ByteArray, Long> entry = gen.getPremine().entrySet().iterator().next();
@@ -291,6 +207,11 @@ public class APIHandlerTest {
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertEquals((long) entry.getValue(), response.getLong("result"));
+    }
+
+    @Test
+    public void testGetLocked() throws IOException {
+
     }
 
     @Test
@@ -329,9 +250,30 @@ public class APIHandlerTest {
     }
 
     @Test
-    public void testTransfer() throws IOException, InterruptedException {
-        Wallet.getInstance().unlock("12345678");
+    public void testGetVote() throws IOException {
 
+    }
+
+    @Test
+    public void testGetAccounts() throws IOException {
+        String uri = "/get_accounts";
+        JSONObject response = request(uri);
+        assertTrue(response.getBoolean("success"));
+        assertNotNull(response.getJSONArray("result"));
+    }
+
+    @Test
+    public void testNewAccount() throws IOException {
+        int size = wallet.getAccounts().size();
+
+        String uri = "/new_account";
+        JSONObject response = request(uri);
+        assertTrue(response.getBoolean("success"));
+        assertEquals(size + 1, wallet.getAccounts().size());
+    }
+
+    @Test
+    public void testTransfer() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
         long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
         String uri = "/transfer?from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test&nonce="
@@ -350,9 +292,7 @@ public class APIHandlerTest {
 
     @Test
     public void testDelegate() throws IOException, InterruptedException {
-        Wallet.getInstance().unlock("12345678");
-
-        EdDSA key = Wallet.getInstance().getAccounts().get(0);
+        EdDSA key = wallet.getAccounts().get(0);
         long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
         String uri = "/delegate?from=0&to=" + key.toAddressString() + "&value=" + Config.MIN_DELEGATE_FEE
                 + "&fee=5000000&data=test&nonce=" + nonce;
@@ -370,8 +310,6 @@ public class APIHandlerTest {
 
     @Test
     public void testVote() throws IOException, InterruptedException {
-        Wallet.getInstance().unlock("12345678");
-
         EdDSA key = new EdDSA();
         long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
         String uri = "/vote?from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test&nonce="
@@ -390,8 +328,6 @@ public class APIHandlerTest {
 
     @Test
     public void testUnvote() throws IOException, InterruptedException {
-        Wallet.getInstance().unlock("12345678");
-
         EdDSA key = new EdDSA();
         long nonce = api.chain.getAccountState().getAccount(key.toAddress()).getNonce() + 1;
         String uri = "/unvote?from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test&nonce="
@@ -411,5 +347,44 @@ public class APIHandlerTest {
     @AfterClass
     public static void teardown() {
         api.stop();
+        wallet.delete();
+    }
+
+    private Block createBlock(Blockchain chain, List<Transaction> transactions) {
+        EdDSA key = new EdDSA();
+
+        long number = chain.getLatestBlockNumber() + 1;
+        byte[] coinbase = key.toAddress();
+        byte[] prevHash = chain.getLatestBlockHash();
+        long timestamp = System.currentTimeMillis();
+        byte[] merkleRoot = {};
+        byte[] data = {};
+
+        List<byte[]> hashes = new ArrayList<>();
+        for (Transaction tx : transactions) {
+            hashes.add(tx.getHash());
+        }
+        merkleRoot = new MerkleTree(hashes).getRootHash();
+
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data);
+        return new Block(header.sign(key), transactions);
+    }
+
+    private Transaction createTransaction() {
+        EdDSA key = new EdDSA();
+
+        TransactionType type = TransactionType.TRANSFER;
+        byte[] from = key.toAddress();
+        byte[] to = key.toAddress();
+        long value = 0;
+        long fee = 0;
+        long nonce = 1;
+        long timestamp = System.currentTimeMillis();
+        byte[] data = {};
+
+        Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+        tx.sign(key);
+
+        return tx;
     }
 }

@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
+import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
 import org.semux.net.ChannelManager;
@@ -28,7 +29,7 @@ public class APIServerMock {
     public PeerClient client;
     public NodeManager nodeMgr;
 
-    public synchronized void start(String ip, int port) {
+    public synchronized void start(Wallet wallet, String ip, int port) {
         if (!isRunning) {
             isRunning = true;
 
@@ -41,7 +42,7 @@ public class APIServerMock {
                 client = new PeerClient("127.0.0.1", 5161, coinbase);
                 nodeMgr = new NodeManager(chain, pendingMgr, channelMgr, client);
 
-                server = new SemuxAPI(new APIHandler(chain, pendingMgr, channelMgr, nodeMgr, client));
+                server = new SemuxAPI(new APIHandler(wallet, chain, pendingMgr, channelMgr, nodeMgr, client));
                 server.start(ip, port);
             }, "api").start();
 
