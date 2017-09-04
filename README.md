@@ -7,7 +7,7 @@ https://www.semux.org
 Semux is an experimental high-performance blockchain platform that powers decentralized application.
 
 Specifications:
-* Total supply: 1,000,000,000 sem
+* Total supply: 1,000,000,000 SEM
 * Block time: 20 seconds
 * Consensus algorithm: Delegated BFT
 * Symbol: SEM
