@@ -7,7 +7,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -21,6 +23,7 @@ import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
+import org.semux.utils.ByteArray;
 import org.semux.utils.StringUtil;
 
 public class TransactionsPanel extends JPanel implements ActionListener {
@@ -120,12 +123,17 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     }
 
     private void refresh() {
+        Set<ByteArray> hashes = new HashSet<>();
         List<Transaction> list = new ArrayList<>();
-
         for (Account acc : model.getAccounts()) {
-            list.addAll(acc.getTransactions());
+            for (Transaction tx : acc.getTransactions()) {
+                ByteArray key = ByteArray.of(tx.getHash());
+                if (!hashes.contains(key)) {
+                    list.add(tx);
+                    hashes.add(key);
+                }
+            }
         }
-
         list.sort((tx1, tx2) -> {
             return Long.compare(tx2.getTimestamp(), tx1.getTimestamp());
         });
