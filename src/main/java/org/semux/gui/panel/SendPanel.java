@@ -82,7 +82,6 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblSem2 = new JLabel("SEM");
 
         JButton paySend = new JButton("Send");
-        paySend.setSelected(true);
         paySend.addActionListener(this);
         paySend.setActionCommand(Action.SEND.name());
 
