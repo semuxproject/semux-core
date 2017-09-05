@@ -29,6 +29,8 @@ import org.semux.gui.WelcomeFrame;
  */
 public class GUI {
 
+    private static final int TRANSACTION_LIMIT = 1000; // per account
+
     private static String dataDir = ".";
     private static int coinbase = 0;
 
@@ -117,7 +119,7 @@ public class GUI {
             ma.setNonce(a.getNonce());
             ma.setBalance(a.getBalance());
             ma.setLocked(a.getLocked());
-            ma.setTransactions(chain.getTransactions(ma.getAddress().toAddress()));
+            ma.setTransactions(chain.getTransactions(ma.getAddress().toAddress(), TRANSACTION_LIMIT));
         }
 
         model.setDelegates(ds.getDelegates());

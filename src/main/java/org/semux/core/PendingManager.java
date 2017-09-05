@@ -291,7 +291,7 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
         int cnt = 0;
         while (tx != null && tx.getNonce() == nonce) {
             // [3] increase nonce
-            acc.setNonce(nonce);
+            acc.setNonce(nonce + 1);
 
             // [4] add transaction to pool
             pool.put(createKey(tx), tx);

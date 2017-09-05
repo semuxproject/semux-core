@@ -11,7 +11,8 @@ import org.semux.core.Transaction;
 import org.semux.crypto.EdDSA;
 
 /**
- * A Model stores all the data that GUI needs.
+ * A Model stores all the data that GUI needs. The thread-safety of this class
+ * is achieved by swapping pointers instead of synchronization.
  */
 public class Model {
 
@@ -19,8 +20,8 @@ public class Model {
 
     private long latestBlockNumber;
     private boolean isDelegate;
-    private List<Account> accounts = new ArrayList<>();
-    private List<Delegate> delegates = new ArrayList<>();
+    private volatile List<Account> accounts = new ArrayList<>();
+    private volatile List<Delegate> delegates = new ArrayList<>();
 
     /**
      * Construct a new model.
@@ -54,10 +55,11 @@ public class Model {
      * @param keys
      */
     public void init(List<EdDSA> keys) {
-        accounts.clear();
+        List<Account> list = new ArrayList<>();
         for (EdDSA key : keys) {
-            accounts.add(new Account(key));
+            list.add(new Account(key));
         }
+        accounts = list;
     }
 
     /**

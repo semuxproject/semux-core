@@ -2,6 +2,8 @@ package org.semux.bench;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,42 +22,41 @@ public class SemuxPerformance {
     private static Logger logger = LoggerFactory.getLogger(SemuxPerformance.class);
 
     private static Wallet wallet = new Wallet(new File("wallet.data"));
+    private static String password;
 
-    public static long getNonce(EdDSA key) throws IOException {
-        String cmd = "get_nonce";
-
-        JSONObject response = ApiUtil.request(cmd, "address", key.toAddress());
-        if (response.getBoolean("success")) {
-            return response.getLong("result");
-        } else {
-            throw new IOException(response.toString());
-        }
-    }
-
-    public static void testTransfer(EdDSA key, int n) throws IOException {
-        long startNonce = getNonce(key) + 1;
-
+    public static void testTransfer(EdDSA key, int n) throws IOException, InterruptedException {
         String cmd = "transfer";
+        long tps = 500;
 
-        for (int i = 0; i < n; i++) {
+        long t1 = System.currentTimeMillis();
+        for (int i = 1; i <= n; i++) {
             Map<String, Object> params = new HashMap<>();
             params.put("from", key.toAddress());
             params.put("to", Bytes.random(20));
             params.put("value", 1 * Unit.MILLI_SEM);
             params.put("fee", Config.MIN_TRANSACTION_FEE);
-            params.put("nonce", startNonce + i);
             params.put("data", Bytes.EMPY_BYTES);
+            params.put("password", password);
 
             JSONObject response = ApiUtil.request(cmd, params);
             if (!response.getBoolean("success")) {
                 System.out.println(response);
                 return;
             }
+
+            if (i % tps == 0) {
+                System.out.println(new SimpleDateFormat("[HH:mm:ss]").format(new Date()) + " " + i);
+                long t2 = System.currentTimeMillis();
+                Thread.sleep(Math.max(0, 1000 - (t2 - t1)));
+                t1 = t2;
+            }
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        if (!wallet.unlock(SystemUtil.readPassword())) {
+    public static void main(String[] args) throws Exception {
+        password = SystemUtil.readPassword();
+
+        if (!wallet.unlock(password)) {
             logger.error("Failed to unlock your wallet");
             return;
         }
