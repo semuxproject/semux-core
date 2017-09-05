@@ -140,7 +140,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public synchronized void actionPerformed(ActionEvent e) {
         Action action = Action.valueOf(e.getActionCommand());
 
         switch (action) {
@@ -180,6 +180,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
     private void refresh() {
         List<Account> list = model.getAccounts();
 
+        // NOTE: This operation is safe as the order of accounts does not change.
+        // However, this may change in the future
         int row = table.getSelectedRow();
         tableModel.setData(list);
         if (row != -1 && row < list.size()) {

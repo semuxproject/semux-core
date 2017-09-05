@@ -48,7 +48,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         tableModel = new TransactionsTableModel();
         table = new JTable(tableModel);
-        SwingUtil.setColumnWidths(table, 600, 0.25, 0.08, 0.2, 0.2, 0.12, 0.15);
+        SwingUtil.setColumnWidths(table, 600, 0.15, 0.08, 0.25, 0.25, 0.12, 0.15);
         SwingUtil.setColumnAlignments(table, false, false, false, false, true, true);
         scrollPane.setViewportView(table);
 
@@ -123,25 +123,20 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     }
 
     private void refresh() {
+        List<Transaction> transactions = new ArrayList<>();
         Set<ByteArray> hashes = new HashSet<>();
-        List<Transaction> list = new ArrayList<>();
         for (Account acc : model.getAccounts()) {
             for (Transaction tx : acc.getTransactions()) {
                 ByteArray key = ByteArray.of(tx.getHash());
                 if (!hashes.contains(key)) {
-                    list.add(tx);
+                    transactions.add(tx);
                     hashes.add(key);
                 }
             }
         }
-        list.sort((tx1, tx2) -> {
+        transactions.sort((tx1, tx2) -> {
             return Long.compare(tx2.getTimestamp(), tx1.getTimestamp());
         });
-
-        int row = table.getSelectedRow();
-        tableModel.setData(list);
-        if (row != -1 && row < list.size()) {
-            table.setRowSelectionInterval(row, row);
-        }
+        tableModel.setData(transactions);
     }
 }

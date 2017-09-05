@@ -262,7 +262,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public synchronized void actionPerformed(ActionEvent e) {
         Action action = Action.valueOf(e.getActionCommand());
 
         switch (action) {
@@ -343,24 +343,19 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     }
 
     private void refresh() {
-        List<String> list1 = new ArrayList<>();
-        List<Account> accounts = model.getAccounts();
-        for (int i = 0; i < accounts.size(); i++) {
-            list1.add("Account #" + i);
+        List<String> accounts = new ArrayList<>();
+        List<Account> list = model.getAccounts();
+        for (int i = 0; i < list.size(); i++) {
+            accounts.add("Account #" + i);
         }
-        setFromItems(list1);
+        setFromItems(accounts);
 
-        List<Delegate> list2 = model.getDelegates();
-        list2.sort((d1, d2) -> {
+        List<Delegate> delegates = model.getDelegates();
+        delegates.sort((d1, d2) -> {
             int c = Long.compare(d2.getVote(), d1.getVote());
             return c != 0 ? c : new String(d1.getName()).compareTo(new String(d2.getName()));
         });
-
-        int row = table.getSelectedRow();
-        tableModel.setData(list2);
-        if (row != -1 && row < list2.size()) {
-            table.setRowSelectionInterval(row, row);
-        }
+        tableModel.setData(delegates);
     }
 
     private void clear() {

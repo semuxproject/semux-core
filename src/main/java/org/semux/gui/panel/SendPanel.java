@@ -28,6 +28,7 @@ import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
+import org.semux.utils.Bytes;
 
 public class SendPanel extends JPanel implements ActionListener {
 
@@ -183,28 +184,28 @@ public class SendPanel extends JPanel implements ActionListener {
         return to.getText().trim();
     }
 
-    public void setTo(String addr) {
-        to.setText(addr);
+    public void setTo(byte[] addr) {
+        to.setText(Hex.encode(addr));
     }
 
     public long getAmount() {
         return (long) (Unit.SEM * Double.parseDouble(amount.getText().trim()));
     }
 
-    public void setAmount(double amountSEM) {
-        amount.setText(String.format("%.3f", amountSEM));
+    public void setAmount(long a) {
+        amount.setText(a == 0 ? "" : String.format("%.3f", a / (double) Unit.SEM));
     }
 
     public long getFee() {
         return (long) (Unit.SEM * Double.parseDouble(fee.getText().trim()));
     }
 
-    public void setFee(double feeSEM) {
-        fee.setText(String.format("%.3f", feeSEM));
+    public void setFee(long f) {
+        fee.setText(f == 0 ? "" : String.format("%.3f", f / (double) Unit.SEM));
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public synchronized void actionPerformed(ActionEvent e) {
         Action action = Action.valueOf(e.getActionCommand());
 
         switch (action) {
@@ -253,8 +254,8 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     private void clear() {
-        setTo("");
+        setTo(Bytes.EMPY_BYTES);
         setAmount(0);
-        setFee(Config.MIN_TRANSACTION_FEE / (double) Unit.SEM);
+        setFee(Config.MIN_TRANSACTION_FEE);
     }
 }
