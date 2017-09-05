@@ -13,6 +13,8 @@ import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semux.Config;
 import org.semux.core.Blockchain;
@@ -22,6 +24,14 @@ import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
 
 public class NodeManagerTest {
+
+    private static byte network;
+
+    @BeforeClass
+    public static void setup() {
+        network = Config.NETWORK_ID;
+        Config.NETWORK_ID = 2;
+    }
 
     @Test
     public void testGetSeedNodes() {
@@ -74,5 +84,10 @@ public class NodeManagerTest {
         } finally {
             ps.stop();
         }
+    }
+
+    @AfterClass
+    public static void teardown() {
+        Config.NETWORK_ID = network;
     }
 }
