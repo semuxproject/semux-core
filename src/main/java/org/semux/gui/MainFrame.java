@@ -135,9 +135,10 @@ public class MainFrame extends JFrame implements ActionListener {
         }
     }
 
-    private static Border BORDER_NORMAL = new EmptyBorder(1, 5, 1, 10);
+    private static Border BORDER_NORMAL = new CompoundBorder(new LineBorder(new Color(180, 180, 180)),
+            new EmptyBorder(0, 5, 0, 10));
     private static Border BORDER_FOCUS = new CompoundBorder(new LineBorder(new Color(51, 153, 255)),
-            new EmptyBorder(0, 4, 0, 9));
+            new EmptyBorder(0, 5, 0, 10));
 
     private void select(JPanel panel, JButton button) {
         if (activeButton != null) {
@@ -161,6 +162,7 @@ public class MainFrame extends JFrame implements ActionListener {
         btn.setIcon(SwingUtil.loadImage(icon, 36, 36));
         btn.setFocusPainted(false);
         btn.setBorder(BORDER_NORMAL);
+        btn.setContentAreaFilled(false);
 
         return btn;
     }

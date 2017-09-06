@@ -16,7 +16,6 @@ import java.util.Set;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JViewport;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 
@@ -53,21 +52,12 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         table.setFillsViewportHeight(true);
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(24);
+        table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
         SwingUtil.setColumnWidths(table, 600, 0.15, 0.08, 0.25, 0.25, 0.12, 0.15);
         SwingUtil.setColumnAlignments(table, false, false, false, false, true, true);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
-        scrollPane.setColumnHeader(new JViewport() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Dimension getPreferredSize() {
-                Dimension d = super.getPreferredSize();
-                d.height = 24;
-                return d;
-            }
-        });
 
         add(scrollPane);
 

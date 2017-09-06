@@ -13,7 +13,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
@@ -100,23 +99,24 @@ public class SendPanel extends JPanel implements ActionListener {
                         .addComponent(lblFee))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                        .addComponent(to, GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
-                        .addComponent(from, 0, 305, Short.MAX_VALUE)
                         .addGroup(groupLayout.createSequentialGroup()
-                            .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
-                                .addComponent(fee)
-                                .addComponent(amount, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE))
-                            .addGap(12)
-                            .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                                .addComponent(lblSem1)
-                                .addComponent(lblSem2))))
-                    .addGap(59))
-                .addGroup(groupLayout.createSequentialGroup()
-                    .addGap(132)
-                    .addComponent(paySend, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(ComponentPlacement.UNRELATED)
-                    .addComponent(payClear, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(187, Short.MAX_VALUE))
+                            .addComponent(paySend, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE)
+                            .addGap(28)
+                            .addComponent(payClear, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
+                            .addContainerGap())
+                        .addGroup(groupLayout.createSequentialGroup()
+                            .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                .addComponent(to, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                                .addComponent(from, 0, 306, Short.MAX_VALUE)
+                                .addGroup(groupLayout.createSequentialGroup()
+                                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
+                                        .addComponent(fee)
+                                        .addComponent(amount, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE))
+                                    .addGap(12)
+                                    .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+                                        .addComponent(lblSem1)
+                                        .addComponent(lblSem2))))
+                            .addGap(59))))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
@@ -139,11 +139,11 @@ public class SendPanel extends JPanel implements ActionListener {
                         .addComponent(lblFee)
                         .addComponent(fee, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblSem2))
-                    .addGap(18)
+                    .addGap(27)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(paySend)
                         .addComponent(payClear))
-                    .addContainerGap(157, Short.MAX_VALUE))
+                    .addContainerGap(158, Short.MAX_VALUE))
         );
         setLayout(groupLayout);
         // @formatter:on

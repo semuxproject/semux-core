@@ -18,7 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JViewport;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
@@ -64,21 +63,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table.setFillsViewportHeight(true);
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(24);
+        table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
         SwingUtil.setColumnWidths(table, 500, 0.2, 0.65, 0.15);
         SwingUtil.setColumnAlignments(table, false, false, true);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
-        scrollPane.setColumnHeader(new JViewport() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Dimension getPreferredSize() {
-                Dimension d = super.getPreferredSize();
-                d.height = 24;
-                return d;
-            }
-        });
 
         JPanel panel = new JPanel();
         panel.setBorder(new LineBorder(Color.LIGHT_GRAY));
