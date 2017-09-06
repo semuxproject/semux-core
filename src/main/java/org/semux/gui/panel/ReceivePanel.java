@@ -50,6 +50,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         table = new JTable(tableModel);
         SwingUtil.setColumnWidths(table, 500, 0.1, 0.6, 0.2, 0.2);
         SwingUtil.setColumnAlignments(table, false, false, true, true);
+        scrollPane.setBackground(Color.WHITE);
         scrollPane.setViewportView(table);
 
         table.getSelectionModel().addListSelectionListener((ev) -> {

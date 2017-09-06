@@ -1,6 +1,7 @@
 package org.semux.gui.panel;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
@@ -44,6 +45,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         setLayout(new BorderLayout(0, 0));
 
         JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setBackground(Color.WHITE);
         add(scrollPane);
 
         tableModel = new TransactionsTableModel();

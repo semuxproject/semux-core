@@ -61,6 +61,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table = new JTable(tableModel);
         SwingUtil.setColumnWidths(table, 500, 0.2, 0.65, 0.15);
         SwingUtil.setColumnAlignments(table, false, false, true);
+        scrollPane.setBackground(Color.WHITE);
         scrollPane.setViewportView(table);
 
         JPanel panel = new JPanel();
