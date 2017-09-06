@@ -12,7 +12,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
@@ -76,8 +75,6 @@ public class SendPanel extends JPanel implements ActionListener {
         fee.setActionCommand(Action.SEND.name());
         fee.addActionListener(this);
 
-        JSeparator separator = new JSeparator();
-
         JLabel lblSem1 = new JLabel("SEM");
 
         JLabel lblSem2 = new JLabel("SEM");
@@ -95,31 +92,25 @@ public class SendPanel extends JPanel implements ActionListener {
         groupLayout.setHorizontalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addGap(24)
+                    .addGap(62)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+                        .addComponent(lblTo)
+                        .addComponent(lblFrom)
+                        .addComponent(lblAmount)
+                        .addComponent(lblFee))
+                    .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                        .addComponent(to, GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
+                        .addComponent(from, 0, 305, Short.MAX_VALUE)
                         .addGroup(groupLayout.createSequentialGroup()
-                            .addGap(38)
+                            .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
+                                .addComponent(fee)
+                                .addComponent(amount, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE))
+                            .addGap(12)
                             .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                                .addComponent(lblTo)
-                                .addComponent(lblFrom)
-                                .addComponent(lblAmount)
-                                .addComponent(lblFee))
-                            .addGap(18)
-                            .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                                .addComponent(to, GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
-                                .addComponent(from, 0, 305, Short.MAX_VALUE)
-                                .addGroup(groupLayout.createSequentialGroup()
-                                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
-                                        .addComponent(fee)
-                                        .addComponent(amount, GroupLayout.DEFAULT_SIZE, 231, Short.MAX_VALUE))
-                                    .addPreferredGap(ComponentPlacement.RELATED)
-                                    .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                                        .addComponent(lblSem1)
-                                        .addComponent(lblSem2))))
-                            .addGap(59))
-                        .addGroup(groupLayout.createSequentialGroup()
-                            .addComponent(separator, GroupLayout.DEFAULT_SIZE, 453, Short.MAX_VALUE)
-                            .addGap(21))))
+                                .addComponent(lblSem1)
+                                .addComponent(lblSem2))))
+                    .addGap(59))
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGap(132)
                     .addComponent(paySend, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE)
@@ -137,24 +128,22 @@ public class SendPanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblTo)
-                        .addComponent(to, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(to, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblAmount)
-                        .addComponent(amount, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(amount, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblSem1))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblFee)
-                        .addComponent(fee, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(fee, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblSem2))
-                    .addPreferredGap(ComponentPlacement.UNRELATED)
-                    .addComponent(separator, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(ComponentPlacement.UNRELATED)
+                    .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(paySend)
                         .addComponent(payClear))
-                    .addContainerGap(139, Short.MAX_VALUE))
+                    .addContainerGap(157, Short.MAX_VALUE))
         );
         setLayout(groupLayout);
         // @formatter:on

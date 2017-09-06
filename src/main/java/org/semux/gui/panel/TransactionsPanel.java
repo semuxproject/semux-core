@@ -2,6 +2,7 @@ package org.semux.gui.panel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
@@ -15,6 +16,8 @@ import java.util.Set;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JViewport;
+import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 
 import org.semux.core.Transaction;
@@ -44,15 +47,29 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         setLayout(new BorderLayout(0, 0));
 
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBackground(Color.WHITE);
-        add(scrollPane);
-
         tableModel = new TransactionsTableModel();
         table = new JTable(tableModel);
+        table.setBackground(Color.WHITE);
+        table.setFillsViewportHeight(true);
+        table.setGridColor(Color.LIGHT_GRAY);
+        table.setRowHeight(24);
         SwingUtil.setColumnWidths(table, 600, 0.15, 0.08, 0.25, 0.25, 0.12, 0.15);
         SwingUtil.setColumnAlignments(table, false, false, false, false, true, true);
-        scrollPane.setViewportView(table);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
+        scrollPane.setColumnHeader(new JViewport() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                d.height = 24;
+                return d;
+            }
+        });
+
+        add(scrollPane);
 
         refresh();
     }

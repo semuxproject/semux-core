@@ -1,6 +1,7 @@
 package org.semux.gui.panel;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -19,7 +20,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.JViewport;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 
@@ -45,13 +46,27 @@ public class ReceivePanel extends JPanel implements ActionListener {
         this.model = model;
         this.model.addListener(this);
 
-        JScrollPane scrollPane = new JScrollPane();
         tableModel = new ReceiveTableModel();
         table = new JTable(tableModel);
+        table.setBackground(Color.WHITE);
+        table.setFillsViewportHeight(true);
+        table.setGridColor(Color.LIGHT_GRAY);
+        table.setRowHeight(24);
         SwingUtil.setColumnWidths(table, 500, 0.1, 0.6, 0.2, 0.2);
         SwingUtil.setColumnAlignments(table, false, false, true, true);
-        scrollPane.setBackground(Color.WHITE);
-        scrollPane.setViewportView(table);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
+        scrollPane.setColumnHeader(new JViewport() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                d.height = 24;
+                return d;
+            }
+        });
 
         table.getSelectionModel().addListSelectionListener((ev) -> {
             actionPerformed(new ActionEvent(ReceivePanel.this, 0, Action.SELECT.name()));
@@ -70,7 +85,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         groupLayout.setHorizontalGroup(
             groupLayout.createParallelGroup(Alignment.TRAILING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
+                    .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 505, Short.MAX_VALUE)
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addComponent(btnCopyAddress)
@@ -80,10 +95,10 @@ public class ReceivePanel extends JPanel implements ActionListener {
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
                     .addComponent(qr)
-                    .addPreferredGap(ComponentPlacement.UNRELATED)
+                    .addGap(18)
                     .addComponent(btnCopyAddress)
-                    .addContainerGap(18, Short.MAX_VALUE))
-                .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                    .addContainerGap(292, Short.MAX_VALUE))
+                .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE)
         );
         setLayout(groupLayout);
         // @formatter:on

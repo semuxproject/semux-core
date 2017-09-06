@@ -7,7 +7,10 @@
 package org.semux.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -16,15 +19,16 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
-import javax.swing.JToolBar;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 import org.semux.gui.panel.DelegatesPanel;
 import org.semux.gui.panel.HomePanel;
 import org.semux.gui.panel.ReceivePanel;
 import org.semux.gui.panel.SendPanel;
 import org.semux.gui.panel.TransactionsPanel;
-import java.awt.Font;
 
 public class MainFrame extends JFrame implements ActionListener {
 
@@ -38,7 +42,14 @@ public class MainFrame extends JFrame implements ActionListener {
     private TransactionsPanel panelTransactions;
     private DelegatesPanel panelDelegates;
 
-    private JPanel tabs;
+    private JButton btnHome;
+    private JButton btnSend;
+    private JButton btnReceive;
+    private JButton btnTransactions;
+    private JButton btnDelegates;
+
+    private JPanel activePanel;
+    private JButton activeButton;
 
     public MainFrame(Model model) {
         panelHome = new HomePanel(model);
@@ -57,94 +68,100 @@ public class MainFrame extends JFrame implements ActionListener {
         this.setJMenuBar(menuBar);
 
         // setup tool bar
-        JToolBar toolBar = new JToolBar();
+        JPanel toolBar = new JPanel();
+        FlowLayout layout = new FlowLayout();
+        layout.setVgap(0);
+        layout.setHgap(0);
+        layout.setAlignment(FlowLayout.LEFT);
+        toolBar.setLayout(layout);
         toolBar.setBorder(new EmptyBorder(15, 15, 15, 15));
-        toolBar.setFloatable(false);
 
         Dimension gap = new Dimension(15, 0);
 
-        JButton btnHome = new JButton("Home");
-        btnHome.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
-        btnHome.setActionCommand(Action.SHOW_HOME.name());
-        btnHome.addActionListener(this);
-        btnHome.setIcon(SwingUtil.loadImage("home", 36, 36));
+        btnHome = createButton("Home", "home", Action.SHOW_HOME);
         toolBar.add(btnHome);
         toolBar.add(Box.createRigidArea(gap));
 
-        JButton btnSend = new JButton("Send");
-        btnSend.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
-        btnSend.setActionCommand(Action.SHOW_SEND.name());
-        btnSend.addActionListener(this);
-        btnSend.setIcon(SwingUtil.loadImage("send", 36, 36));
+        btnSend = createButton("Send", "send", Action.SHOW_SEND);
         toolBar.add(btnSend);
         toolBar.add(Box.createRigidArea(gap));
 
-        JButton btnReceive = new JButton("Receive");
-        btnReceive.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
-        btnReceive.setActionCommand(Action.SHOW_RECEIVE.name());
-        btnReceive.addActionListener(this);
-        btnReceive.setIcon(SwingUtil.loadImage("receive", 36, 36));
+        btnReceive = createButton("Receive", "receive", Action.SHOW_RECEIVE);
         toolBar.add(btnReceive);
         toolBar.add(Box.createRigidArea(gap));
 
-        JButton btnTransactions = new JButton("Transactions");
-        btnTransactions.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
-        btnTransactions.setActionCommand(Action.SHOW_TRANSACTIONS.name());
-        btnTransactions.addActionListener(this);
-        btnTransactions.setIcon(SwingUtil.loadImage("transactions", 36, 36));
+        btnTransactions = createButton("Transactions", "transactions", Action.SHOW_TRANSACTIONS);
         toolBar.add(btnTransactions);
         toolBar.add(Box.createRigidArea(gap));
 
-        JButton btnDelegates = new JButton("Delegates");
-        btnDelegates.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
-        btnDelegates.setActionCommand(Action.SHOW_DELEGATES.name());
-        btnDelegates.addActionListener(this);
-        btnDelegates.setIcon(SwingUtil.loadImage("delegates", 36, 36));
+        btnDelegates = createButton("Delegates", "delegates", Action.SHOW_DELEGATES);
         toolBar.add(btnDelegates);
 
         // setup tabs
-        tabs = new JPanel();
-        tabs.setBorder(new EmptyBorder(0, 15, 15, 15));
-        tabs.setLayout(new BorderLayout(0, 0));
+        activePanel = new JPanel();
+        activePanel.setBorder(new EmptyBorder(0, 15, 15, 15));
+        activePanel.setLayout(new BorderLayout(0, 0));
 
         getContentPane().add(toolBar, BorderLayout.NORTH);
-        getContentPane().add(tabs, BorderLayout.CENTER);
+        getContentPane().add(activePanel, BorderLayout.CENTER);
 
         // show the first tab
-        tabs.add(panelHome);
+        activePanel.add(panelHome);
+        select(panelHome, btnHome);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         Action action = Action.valueOf(e.getActionCommand());
 
-        JPanel tab = null;
         switch (action) {
         case SHOW_HOME:
-            tab = panelHome;
+            select(panelHome, btnHome);
             break;
         case SHOW_SEND:
-            tab = panelSend;
+            select(panelSend, btnSend);
             break;
         case SHOW_RECEIVE:
-            tab = panelReceive;
+            select(panelReceive, btnReceive);
             break;
         case SHOW_TRANSACTIONS:
-            tab = panelTransactions;
+            select(panelTransactions, btnTransactions);
             break;
         case SHOW_DELEGATES:
-            tab = panelDelegates;
+            select(panelDelegates, btnDelegates);
             break;
         default:
             break;
         }
+    }
 
-        if (tab != null) {
-            tabs.removeAll();
-            tabs.add(tab);
+    private static Border BORDER_NORMAL = new EmptyBorder(1, 5, 1, 10);
+    private static Border BORDER_FOCUS = new CompoundBorder(new LineBorder(new Color(51, 153, 255)),
+            new EmptyBorder(0, 4, 0, 9));
 
-            tabs.revalidate();
-            tabs.repaint();
+    private void select(JPanel panel, JButton button) {
+        if (activeButton != null) {
+            activeButton.setBorder(BORDER_NORMAL);
         }
+        activeButton = button;
+        activeButton.setBorder(BORDER_FOCUS);
+
+        activePanel.removeAll();
+        activePanel.add(panel);
+
+        activePanel.revalidate();
+        activePanel.repaint();
+    }
+
+    private JButton createButton(String name, String icon, Action action) {
+        JButton btn = new JButton(name);
+        btn.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
+        btn.setActionCommand(action.name());
+        btn.addActionListener(this);
+        btn.setIcon(SwingUtil.loadImage(icon, 36, 36));
+        btn.setFocusPainted(false);
+        btn.setBorder(BORDER_NORMAL);
+
+        return btn;
     }
 }

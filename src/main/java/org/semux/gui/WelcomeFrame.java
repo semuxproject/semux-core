@@ -68,20 +68,23 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         JLabel description = new JLabel(DESCRIPTION);
 
         // create select button group
+        Color color = new Color(220, 220, 220);
         JPanel panel = new JPanel();
         panel.setBorder(new EmptyBorder(8, 3, 8, 3));
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(new Color(211, 211, 211));
+        panel.setBackground(color);
         ButtonGroup buttonGroup = new ButtonGroup();
 
         btnCreate = new JRadioButton(LABEL_CREATE);
         btnCreate.setSelected(true);
+        btnCreate.setBackground(color);
         btnCreate.setActionCommand(Action.CREATE_ACCOUNT.name());
         btnCreate.addActionListener(this);
         buttonGroup.add(btnCreate);
         panel.add(btnCreate);
 
         btnImport = new JRadioButton(LABEL_IMPORT);
+        btnImport.setBackground(color);
         btnImport.setActionCommand(Action.IMPORT_ACCOUNTS.name());
         btnImport.addActionListener(this);
         buttonGroup.add(btnImport);
@@ -112,17 +115,18 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                         .addGroup(groupLayout.createSequentialGroup()
                             .addContainerGap()
                             .addComponent(btnCancel, GroupLayout.PREFERRED_SIZE, 92, GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(ComponentPlacement.RELATED)
+                            .addGap(18)
                             .addComponent(btnNext, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE))
                         .addGroup(groupLayout.createSequentialGroup()
                             .addGap(21)
                             .addComponent(banner, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE)
                             .addGap(18)
                             .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                                .addComponent(panel, GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
                                 .addComponent(passwordField, GroupLayout.PREFERRED_SIZE, 269, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(lblPassword)
-                                .addComponent(description, GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE))))
+                                .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                    .addComponent(panel, GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
+                                    .addComponent(lblPassword)
+                                    .addComponent(description, GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)))))
                     .addGap(32))
         );
         groupLayout.setVerticalGroup(
@@ -137,11 +141,11 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                             .addGap(18)
                             .addComponent(lblPassword)
                             .addPreferredGap(ComponentPlacement.RELATED)
-                            .addComponent(passwordField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                            .addComponent(passwordField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
                         .addGroup(groupLayout.createSequentialGroup()
                             .addGap(36)
                             .addComponent(banner, GroupLayout.PREFERRED_SIZE, 293, GroupLayout.PREFERRED_SIZE)))
-                    .addPreferredGap(ComponentPlacement.RELATED, 54, Short.MAX_VALUE)
+                    .addPreferredGap(ComponentPlacement.RELATED, 58, Short.MAX_VALUE)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(btnNext)
                         .addComponent(btnCancel))
