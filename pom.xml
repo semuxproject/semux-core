@@ -78,8 +78,8 @@
                                         <include name="LICENSE" />
                                     </fileset>
                                     <fileset dir="${project.basedir}/scripts">
-                                        <include name="run.sh" />
-                                        <include name="run-gui.sh" />
+                                        <include name="semux.sh" />
+                                        <include name="semux.bat" />
                                     </fileset>
                                 </copy>
 
