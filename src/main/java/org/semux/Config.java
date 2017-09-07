@@ -232,7 +232,7 @@ public class Config {
     /**
      * Expire time of the handshake message.
      */
-    public static int NET_HANDSHAKE_EXPIRE = 5 * 1000; // 5 seconds
+    public static int NET_HANDSHAKE_EXPIRE = 60 * 1000; // 1 minutes
 
     /**
      * Message broadcast redundancy.

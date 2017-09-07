@@ -24,9 +24,9 @@ public enum ReasonCode {
     TOO_MANY_PEERS(0x02),
 
     /**
-     * [0x03] Bad peerId.
+     * [0x03] Invalid handshake message.
      */
-    BAD_PEER_ID(0x03),
+    INVALID_HANDSHAKE(0x03),
 
     /**
      * [0x04] Duplicate peerId.

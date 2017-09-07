@@ -192,6 +192,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
         tableModel.setData(list);
         if (row != -1 && row < list.size()) {
             table.setRowSelectionInterval(row, row);
+        } else if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
         }
     }
 }

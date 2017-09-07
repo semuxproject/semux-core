@@ -31,6 +31,7 @@ import org.semux.net.msg.consensus.BlockHeaderMessage;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.GetBlockHeaderMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
+import org.semux.net.msg.p2p.DisconnectMessage;
 import org.semux.net.msg.p2p.GetNodesMessage;
 import org.semux.net.msg.p2p.HelloMessage;
 import org.semux.net.msg.p2p.NodesMessage;
@@ -147,6 +148,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         switch (msg.getCode()) {
         /* p2p */
         case DISCONNECT: {
+            logger.debug("Received DISCONNECT msg, reason = {}", ((DisconnectMessage) msg).getReason());
             msgQueue.disconnect();
             break;
         }
@@ -160,7 +162,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             } else if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isConnected(peer.getPeerId())) {
                 error = ReasonCode.DUPLICATE_PEER_ID;
             } else if (!helloMsg.isValid()) {
-                error = ReasonCode.BAD_PEER_ID;
+                error = ReasonCode.INVALID_HANDSHAKE;
             }
 
             if (error == null) {
