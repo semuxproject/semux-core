@@ -1,8 +1,10 @@
 package org.semux.gui.panel;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.GroupLayout;
@@ -49,6 +51,7 @@ public class SendPanel extends JPanel implements ActionListener {
         lblFrom.setHorizontalAlignment(SwingConstants.RIGHT);
 
         from = new JComboBox<>();
+        from.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
 
         JLabel lblTo = new JLabel("To:");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -239,7 +242,13 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     private void refresh() {
-        setFromItems(model.getAccounts());
+        List<String> accounts = new ArrayList<>();
+        List<Account> list = model.getAccounts();
+        for (int i = 0; i < list.size(); i++) {
+            accounts.add("0x" + list.get(i).getAddress().toAddressString() + ", #" + i + ", "
+                    + list.get(i).getBalance() / Unit.SEM + " SEM");
+        }
+        setFromItems(accounts);
     }
 
     private void clear() {

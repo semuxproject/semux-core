@@ -190,15 +190,5 @@ public class Model {
         public void setTransactions(List<Transaction> transactions) {
             this.transactions = transactions;
         }
-
-        /**
-         * Get the hex representation of the account address, with 0x prefix.
-         * 
-         * @return
-         */
-        @Override
-        public String toString() {
-            return "0x" + address.toAddressString();
-        }
     }
 }
