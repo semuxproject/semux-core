@@ -15,4 +15,4 @@ if [ $version -lt "8" ]; then
 fi
 
 # start kernel
-java -cp "./config:./lib/*" org.semux.GUI $@
+java -cp "./config:./lib/*" org.semux.Semux $@
