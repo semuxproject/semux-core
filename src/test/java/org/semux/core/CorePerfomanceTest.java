@@ -36,7 +36,7 @@ public class CorePerfomanceTest {
         }
 
         long t1 = System.nanoTime();
-        list.sort((d1, d2) -> Long.compare(d2.getVote(), d1.getVote()));
+        list.sort((d1, d2) -> Long.compare(d2.getVotes(), d1.getVotes()));
         long t2 = System.nanoTime();
         logger.info("Perf_delegate_sort: {} μs", (t2 - t1) / 1_000);
     }

@@ -29,6 +29,7 @@ import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
+import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
@@ -40,7 +41,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "Name", "Address", "Votes" };
+    private static String[] columnNames = { "Name", "Address", "Votes", "Votes from Me" };
 
     private Model model;
 
@@ -64,8 +65,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(24);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 500, 0.2, 0.65, 0.15);
-        SwingUtil.setColumnAlignments(table, false, false, true);
+        SwingUtil.setColumnWidths(table, 500, 0.2, 0.5, 0.15, 0.15);
+        SwingUtil.setColumnAlignments(table, false, false, true, true);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
@@ -81,6 +82,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         label.setForeground(Color.DARK_GRAY);
 
         from = new JComboBox<>();
+        from.setActionCommand(Action.SELECT_ACCOUNT.name());
+        from.addActionListener(this);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -193,27 +196,32 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         panel2.setLayout(groupLayout3);
         // @formatter:on
 
-        refresh();
+        refreshAccounts();
     }
 
     class DelegatesTableModel extends AbstractTableModel {
 
         private static final long serialVersionUID = 1L;
 
-        private List<Delegate> data;
+        private List<Delegate> delegates;
+        private List<Long> votesFromMe;
 
         public DelegatesTableModel() {
-            this.data = Collections.emptyList();
+            this.delegates = Collections.emptyList();
+            this.votesFromMe = Collections.emptyList();
         }
 
-        public void setData(List<Delegate> data) {
-            this.data = data;
+        public void setData(List<Delegate> delegates, List<Long> votesFromMe) {
+            assert (delegates.size() == votesFromMe.size());
+
+            this.delegates = delegates;
+            this.votesFromMe = votesFromMe;
             this.fireTableDataChanged();
         }
 
         public Delegate getRow(int row) {
-            if (row >= 0 && row < data.size()) {
-                return data.get(row);
+            if (row >= 0 && row < delegates.size()) {
+                return delegates.get(row);
             }
 
             return null;
@@ -221,7 +229,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         @Override
         public int getRowCount() {
-            return data.size();
+            return delegates.size();
         }
 
         @Override
@@ -235,16 +243,18 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         }
 
         @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            Delegate d = data.get(rowIndex);
+        public Object getValueAt(int row, int column) {
+            Delegate d = delegates.get(row);
 
-            switch (columnIndex) {
+            switch (column) {
             case 0:
                 return Bytes.toString(d.getName());
             case 1:
                 return "0x" + Hex.encode(d.getAddress());
             case 2:
-                return d.getVote() / Unit.SEM;
+                return d.getVotes() / Unit.SEM;
+            case 3:
+                return votesFromMe.get(row) / Unit.SEM;
             default:
                 return null;
             }
@@ -273,9 +283,15 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         Action action = Action.valueOf(e.getActionCommand());
 
         switch (action) {
-        case REFRESH:
-            refresh();
+        case REFRESH: {
+            refreshAccounts();
+            refreshDelegates();
             break;
+        }
+        case SELECT_ACCOUNT: {
+            refreshDelegates();
+            break;
+        }
         case VOTE:
         case UNVOTE: {
             Account a = getSelectedAccount();
@@ -292,7 +308,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 PendingManager pendingMgr = kernel.getPendingManager();
 
                 TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
-                byte[] from = a.getAddress().toAddress();
+                byte[] from = a.getKey().toAddress();
                 byte[] to = d.getAddress();
                 long value = Long.parseLong(v) * Unit.SEM;
                 long fee = Config.MIN_TRANSACTION_FEE;
@@ -300,7 +316,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 long timestamp = System.currentTimeMillis();
                 byte[] data = {};
                 Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
-                tx.sign(a.getAddress());
+                tx.sign(a.getKey());
 
                 pendingMgr.addTransaction(tx);
                 JOptionPane.showMessageDialog(this, "Transaction sent!");
@@ -320,7 +336,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 PendingManager pendingMgr = kernel.getPendingManager();
 
                 TransactionType type = TransactionType.DELEGATE;
-                byte[] from = a.getAddress().toAddress();
+                byte[] from = a.getKey().toAddress();
                 byte[] to = from;
                 long value = Config.MIN_DELEGATE_FEE;
                 long fee = Config.MIN_TRANSACTION_FEE;
@@ -328,7 +344,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 long timestamp = System.currentTimeMillis();
                 byte[] data = Bytes.of(name);
                 Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
-                tx.sign(a.getAddress());
+                tx.sign(a.getKey());
 
                 pendingMgr.addTransaction(tx);
                 JOptionPane.showMessageDialog(this, "Transaction sent!");
@@ -349,20 +365,31 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         return tableModel.getRow(table.getSelectedRow());
     }
 
-    private void refresh() {
+    private void refreshAccounts() {
         List<String> accounts = new ArrayList<>();
         List<Account> list = model.getAccounts();
         for (int i = 0; i < list.size(); i++) {
             accounts.add("Account #" + i);
         }
         setFromItems(accounts);
+    }
 
+    private void refreshDelegates() {
         List<Delegate> delegates = model.getDelegates();
         delegates.sort((d1, d2) -> {
-            int c = Long.compare(d2.getVote(), d1.getVote());
+            int c = Long.compare(d2.getVotes(), d1.getVotes());
             return c != 0 ? c : new String(d1.getName()).compareTo(new String(d2.getName()));
         });
-        tableModel.setData(delegates);
+
+        List<Long> votesFromMe = new ArrayList<>();
+        byte[] a = getSelectedAccount().getKey().toAddress();
+        DelegateState ds = Kernel.getInstance().getBlockchain().getDeleteState();
+        for (Delegate d : delegates) {
+            long vote = ds.getVote(a, d.getAddress());
+            votesFromMe.add(vote);
+        }
+
+        tableModel.setData(delegates, votesFromMe);
     }
 
     private void clear() {

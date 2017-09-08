@@ -151,7 +151,7 @@ public class TransactionExecutorTest {
         // check state afterwards
         assertEquals(balance - value - fee, voterAcc.getBalance());
         assertEquals(value, voterAcc.getLocked());
-        assertEquals(value, ds.getDelegateByAddress(delegate.toAddress()).getVote());
+        assertEquals(value, ds.getDelegateByAddress(delegate.toAddress()).getVotes());
     }
 
     @Test
@@ -197,6 +197,6 @@ public class TransactionExecutorTest {
         // check state afterwards
         assertEquals(balance + value - fee, voterAcc.getBalance());
         assertEquals(0, voterAcc.getLocked());
-        assertEquals(0, ds.getDelegateByAddress(delegate.toAddress()).getVote());
+        assertEquals(0, ds.getDelegateByAddress(delegate.toAddress()).getVotes());
     }
 }

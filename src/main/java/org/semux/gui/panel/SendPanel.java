@@ -221,12 +221,12 @@ public class SendPanel extends JPanel implements ActionListener {
                 PendingManager pendingMgr = kernel.getPendingManager();
 
                 TransactionType type = TransactionType.TRANSFER;
-                byte[] from = acc.getAddress().toAddress();
+                byte[] from = acc.getKey().toAddress();
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = {};
                 Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
-                tx.sign(acc.getAddress());
+                tx.sign(acc.getKey());
 
                 pendingMgr.addTransaction(tx);
                 JOptionPane.showMessageDialog(this, "Transaction sent!");
@@ -245,7 +245,7 @@ public class SendPanel extends JPanel implements ActionListener {
         List<String> accounts = new ArrayList<>();
         List<Account> list = model.getAccounts();
         for (int i = 0; i < list.size(); i++) {
-            accounts.add("0x" + list.get(i).getAddress().toAddressString() + ", #" + i + ", "
+            accounts.add("0x" + list.get(i).getKey().toAddressString() + ", #" + i + ", "
                     + list.get(i).getBalance() / Unit.SEM + " SEM");
         }
         setFromItems(accounts);

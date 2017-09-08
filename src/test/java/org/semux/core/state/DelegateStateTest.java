@@ -47,7 +47,7 @@ public class DelegateStateTest {
             assertNotNull(d);
             assertArrayEquals(delegates.get(k), d.getAddress());
             assertArrayEquals(Bytes.of(k), d.getName());
-            assertEquals(0, d.getVote());
+            assertEquals(0, d.getVotes());
         }
 
         assertEquals(delegates.size(), ds.getDelegates().size());
@@ -79,7 +79,7 @@ public class DelegateStateTest {
 
         assertArrayEquals(delegate, list.get(0).getAddress());
         assertArrayEquals(delegateName, list.get(0).getName());
-        assertEquals(1000 * 1000, list.get(0).getVote());
+        assertEquals(1000 * 1000, list.get(0).getVotes());
     }
 
     @Test
@@ -102,7 +102,7 @@ public class DelegateStateTest {
 
         assertArrayEquals(delegate, list.get(0).getAddress());
         assertArrayEquals(delegateName, list.get(0).getName());
-        assertEquals(200 - 1, list.get(0).getVote());
+        assertEquals(200 - 1, list.get(0).getVotes());
     }
 
     @Test

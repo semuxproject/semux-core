@@ -59,7 +59,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         table.getSelectionModel().addListSelectionListener((ev) -> {
-            actionPerformed(new ActionEvent(ReceivePanel.this, 0, Action.SELECT.name()));
+            actionPerformed(new ActionEvent(ReceivePanel.this, 0, Action.SELECT_ACCOUNT.name()));
         });
 
         JButton btnCopyAddress = new JButton("Copy Address");
@@ -127,14 +127,14 @@ public class ReceivePanel extends JPanel implements ActionListener {
         }
 
         @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            Account acc = data.get(rowIndex);
+        public Object getValueAt(int row, int column) {
+            Account acc = data.get(row);
 
-            switch (columnIndex) {
+            switch (column) {
             case 0:
-                return rowIndex;
+                return row;
             case 1:
-                return "0x" + acc.getAddress().toAddressString();
+                return "0x" + acc.getKey().toAddressString();
             case 2:
                 return String.format("%.3f SEM", acc.getBalance() / (double) Unit.SEM);
             case 3:
@@ -154,11 +154,11 @@ public class ReceivePanel extends JPanel implements ActionListener {
             refresh();
             break;
         }
-        case SELECT: {
+        case SELECT_ACCOUNT: {
             int row = table.getSelectedRow();
             if (row != -1) {
                 Account acc = model.getAccounts().get(row);
-                BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getAddress().toAddressString(), 200);
+                BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getKey().toAddressString(), 200);
                 qr.setIcon(new ImageIcon(bi));
             }
             break;
@@ -170,7 +170,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             } else {
                 Account acc = model.getAccounts().get(row);
 
-                String address = "0x" + acc.getAddress().toAddressString();
+                String address = "0x" + acc.getKey().toAddressString();
                 StringSelection stringSelection = new StringSelection(address);
                 Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
                 clpbrd.setContents(stringSelection, null);

@@ -207,7 +207,7 @@ public class HomePanel extends JPanel implements ActionListener {
         // divide transactions into: inbound, outbound, cycle
         Set<ByteArray> set = new HashSet<>();
         for (Account a : model.getAccounts()) {
-            set.add(ByteArray.of(a.getAddress().toAddress()));
+            set.add(ByteArray.of(a.getKey().toAddress()));
         }
 
         transactions.removeAll();

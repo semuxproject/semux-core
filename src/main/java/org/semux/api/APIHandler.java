@@ -414,7 +414,7 @@ public class APIHandler {
         JSONObject obj = new JSONObject();
         obj.put("address", HEX + Hex.encode(delegate.getAddress()));
         obj.put("name", new String(delegate.getName()));
-        obj.put("vote", delegate.getVote());
+        obj.put("vote", delegate.getVotes());
 
         return obj;
     }

@@ -12,12 +12,12 @@ import org.semux.utils.Bytes;
 public class Delegate {
     protected byte[] addr;
     protected byte[] name;
-    protected long vote;
+    protected long votes;
 
     public Delegate(byte[] addr, byte[] name, long vote) {
         this.addr = addr;
         this.name = name;
-        this.vote = vote;
+        this.votes = vote;
     }
 
     public byte[] getAddress() {
@@ -32,8 +32,8 @@ public class Delegate {
         return Bytes.toString(name);
     }
 
-    public long getVote() {
-        return vote;
+    public long getVotes() {
+        return votes;
     }
 
     public String toPeerId() {

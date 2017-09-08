@@ -115,11 +115,11 @@ public class GUI {
         model.setDelegate(ds.getDelegateByAddress(kernel.getCoinbase().toAddress()) != null);
 
         for (Model.Account ma : model.getAccounts()) {
-            Account a = as.getAccount(ma.getAddress().toAddress());
+            Account a = as.getAccount(ma.getKey().toAddress());
             ma.setNonce(a.getNonce());
             ma.setBalance(a.getBalance());
             ma.setLocked(a.getLocked());
-            ma.setTransactions(chain.getTransactions(ma.getAddress().toAddress(), TRANSACTION_LIMIT));
+            ma.setTransactions(chain.getTransactions(ma.getKey().toAddress(), TRANSACTION_LIMIT));
         }
 
         model.setDelegates(ds.getDelegates());

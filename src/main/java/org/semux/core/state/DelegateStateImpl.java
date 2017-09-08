@@ -88,7 +88,7 @@ public class DelegateStateImpl implements DelegateState {
             Delegate d = new Delegate(addr, name, 0);
 
             delegateUpdates.put(ByteArray.of(name), addr);
-            delegateUpdates.put(ByteArray.of(addr), Bytes.merge(Bytes.of(d.getVote()), name));
+            delegateUpdates.put(ByteArray.of(addr), Bytes.merge(Bytes.of(d.getVotes()), name));
 
             return true;
         }
@@ -104,7 +104,7 @@ public class DelegateStateImpl implements DelegateState {
             return false;
         } else {
             voteUpdates.put(key, Bytes.of(value + v));
-            delegateUpdates.put(ByteArray.of(delegate), Bytes.merge(Bytes.of(d.getVote() + v), d.getName()));
+            delegateUpdates.put(ByteArray.of(delegate), Bytes.merge(Bytes.of(d.getVotes() + v), d.getName()));
             return true;
         }
     }
@@ -120,7 +120,7 @@ public class DelegateStateImpl implements DelegateState {
             voteUpdates.put(key, Bytes.of(value - v));
 
             Delegate d = getDelegateByAddress(delegate);
-            delegateUpdates.put(ByteArray.of(delegate), Bytes.merge(Bytes.of(d.getVote() - v), d.getName()));
+            delegateUpdates.put(ByteArray.of(delegate), Bytes.merge(Bytes.of(d.getVotes() - v), d.getName()));
 
             return true;
         }
@@ -171,7 +171,7 @@ public class DelegateStateImpl implements DelegateState {
 
         // sort the results
         List<Delegate> list = new ArrayList<>(map.values());
-        list.sort((d1, d2) -> Long.compare(d2.getVote(), d1.getVote()));
+        list.sort((d1, d2) -> Long.compare(d2.getVotes(), d1.getVotes()));
 
         long t2 = System.nanoTime();
         logger.trace("Get delegates duration: {} μs", (t2 - t1) / 1000L);

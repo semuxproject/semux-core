@@ -95,10 +95,10 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         }
 
         @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            Transaction tx = data.get(rowIndex);
+        public Object getValueAt(int row, int column) {
+            Transaction tx = data.get(row);
 
-            switch (columnIndex) {
+            switch (column) {
             case 0:
                 return "0x" + Hex.encode(tx.getHash());
             case 1:
@@ -119,7 +119,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public synchronized void actionPerformed(ActionEvent e) {
         Action action = Action.valueOf(e.getActionCommand());
 
         switch (action) {

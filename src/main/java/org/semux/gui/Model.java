@@ -141,22 +141,22 @@ public class Model {
     }
 
     public static class Account {
-        private EdDSA address;
+        private EdDSA key;
         private long nonce;
         private long balance;
         private long locked;
         private List<Transaction> transactions = new ArrayList<>();
 
-        public Account(EdDSA address) {
-            this.address = address;
+        public Account(EdDSA key) {
+            this.key = key;
         }
 
-        public EdDSA getAddress() {
-            return address;
+        public EdDSA getKey() {
+            return key;
         }
 
-        public void setAddress(EdDSA address) {
-            this.address = address;
+        public void setKey(EdDSA key) {
+            this.key = key;
         }
 
         public long getNonce() {
@@ -189,6 +189,11 @@ public class Model {
 
         public void setTransactions(List<Transaction> transactions) {
             this.transactions = transactions;
+        }
+
+        @Override
+        public String toString() {
+            return key.toString();
         }
     }
 }

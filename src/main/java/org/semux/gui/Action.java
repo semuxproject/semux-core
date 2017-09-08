@@ -33,7 +33,9 @@ public enum Action {
 
     REFRESH,
 
-    SELECT,
+    SELECT_ACCOUNT,
+
+    SELECT_DELEGATE,
 
     BACKUP_WALLET,
 
