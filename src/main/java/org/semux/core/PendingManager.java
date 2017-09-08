@@ -299,11 +299,11 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
             // [5] relay transaction
             if (relay) {
                 List<Channel> channels = channelMgr.getActiveChannels();
-                int[] indexes = ArrayUtil.permutation(Math.min(Config.NET_RELAY_REDUNDANCY, channels.size()));
-                for (int idx : indexes) {
-                    if (channels.get(idx).isActive()) {
+                int[] indexes = ArrayUtil.permutation(channels.size());
+                for (int i = 0; i < indexes.length && i < Config.NET_RELAY_REDUNDANCY; i++) {
+                    if (channels.get(indexes[i]).isActive()) {
                         TransactionMessage msg = new TransactionMessage(tx);
-                        channels.get(idx).getMessageQueue().sendMessage(msg);
+                        channels.get(indexes[i]).getMessageQueue().sendMessage(msg);
                     }
                 }
             }
