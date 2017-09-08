@@ -14,10 +14,10 @@ Specifications:
 
 ## Get started
 
-1. Download [Java SE Runtime Environment 8](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html) and install;
-2. Download the [Latest Release](https://github.com/semuxproject/semux/releases) and unarchive it to a desired directory;
+1. Download and install [Java SE Runtime Environment 8](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html);
+2. Download the [Latest Release](https://github.com/semuxproject/semux/releases) and unpack it to a desired directory;
 3. Run ``semux.bat`` if you're on Windows; or run ``./semux.sh`` if you're on Linux or macOS.
-4. *You may also need to download Microsoft Visual C++ 2010 Redistributable Package.*
+4. *(Windows user) You may also need to download Microsoft Visual C++ 2010 Redistributable Package.*
     - [32-bit](http://www.microsoft.com/en-us/download/details.aspx?id=5555)
     - [64-bit](https://www.microsoft.com/en-us/download/details.aspx?id=14632)
 
