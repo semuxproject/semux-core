@@ -3,6 +3,10 @@
 *.log
 *.data
 
+# release binaries
+*.zip
+*.tar.gz
+
 # data folders
 /database/
 /keystore/
