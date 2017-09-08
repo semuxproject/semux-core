@@ -64,7 +64,7 @@ public class MainFrame extends JFrame implements ActionListener {
         SwingUtil.centerizeFrame(this, 800, 600);
 
         // setup menu bar
-        JMenuBar menuBar = new MenuBar();
+        JMenuBar menuBar = new MenuBar(this);
         this.setJMenuBar(menuBar);
 
         // setup tool bar

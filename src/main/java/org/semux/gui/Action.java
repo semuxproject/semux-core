@@ -33,5 +33,11 @@ public enum Action {
 
     REFRESH,
 
-    SELECT
+    SELECT,
+
+    BACKUP_WALLET,
+
+    EXIT,
+
+    ABOUT
 }

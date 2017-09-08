@@ -134,6 +134,15 @@ public class Wallet {
     }
 
     /**
+     * Returns the file where the wallet is persisted.
+     * 
+     * @return
+     */
+    public File getFile() {
+        return file;
+    }
+
+    /**
      * Get the password.
      * 
      * @return

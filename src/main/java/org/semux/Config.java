@@ -150,7 +150,7 @@ public class Config {
     /***
      * Full name of this client.
      */
-    public static String CLIENT_FULL_NAME = "Semux v1.0 alpha";
+    public static String CLIENT_FULL_NAME = "Semux v1.0 Alpha";
 
     // =========================
     // Crypto

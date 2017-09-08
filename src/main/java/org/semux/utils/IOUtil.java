@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,5 +126,16 @@ public class IOUtil {
             }
             return lines;
         }
+    }
+
+    /**
+     * Copy a file to a new location.
+     * 
+     * @param src
+     * @param dst
+     * @throws IOException
+     */
+    public static void copyFile(File src, File dst) throws IOException {
+        Files.copy(src.toPath(), dst.toPath());
     }
 }
