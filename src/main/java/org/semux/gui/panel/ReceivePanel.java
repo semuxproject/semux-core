@@ -170,11 +170,12 @@ public class ReceivePanel extends JPanel implements ActionListener {
             } else {
                 Account acc = model.getAccounts().get(row);
 
-                StringSelection stringSelection = new StringSelection(acc.toString());
+                String address = "0x" + acc.getAddress().toAddressString();
+                StringSelection stringSelection = new StringSelection(address);
                 Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
                 clpbrd.setContents(stringSelection, null);
 
-                JOptionPane.showMessageDialog(this, "Address copied: " + acc);
+                JOptionPane.showMessageDialog(this, "Address copied: " + address);
             }
             break;
         }
