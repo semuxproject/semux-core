@@ -237,7 +237,7 @@ public class SemuxBFT implements Consensus {
         proposal = null;
         resetVotes();
 
-        logger.info("Entered new_height: height = {}, validators = {}", height, validators.size());
+        logger.info("Entered new_height: height = {}, # validators = {}", height, validators.size());
         if (isValidator()) {
             timer.addTimeout(fromSync ? 0 : Config.BFT_NEW_HEIGHT_TIMEOUT);
         }
