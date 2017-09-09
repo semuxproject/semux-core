@@ -358,11 +358,13 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     }
 
     private Account getSelectedAccount() {
-        return model.getAccounts().get(from.getSelectedIndex());
+        int idx = from.getSelectedIndex();
+        return (idx == -1) ? null : model.getAccounts().get(idx);
     }
 
     private Delegate getSelectedDelegate() {
-        return tableModel.getRow(table.getSelectedRow());
+        int idx = table.getSelectedRow();
+        return (idx == -1) ? null : tableModel.getRow(idx);
     }
 
     private void refreshAccounts() {
@@ -382,11 +384,18 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         });
 
         List<Long> votesFromMe = new ArrayList<>();
-        byte[] a = getSelectedAccount().getKey().toAddress();
-        DelegateState ds = Kernel.getInstance().getBlockchain().getDeleteState();
-        for (Delegate d : delegates) {
-            long vote = ds.getVote(a, d.getAddress());
-            votesFromMe.add(vote);
+        Account acc = getSelectedAccount();
+        if (acc == null) {
+            for (int i = 0; i < delegates.size(); i++) {
+                votesFromMe.add(0L);
+            }
+        } else {
+            byte[] a = acc.getKey().toAddress();
+            DelegateState ds = Kernel.getInstance().getBlockchain().getDeleteState();
+            for (Delegate d : delegates) {
+                long vote = ds.getVote(a, d.getAddress());
+                votesFromMe.add(vote);
+            }
         }
 
         tableModel.setData(delegates, votesFromMe);
