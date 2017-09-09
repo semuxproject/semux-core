@@ -271,8 +271,8 @@ public class SemuxBFT implements Consensus {
             resetVotes();
         }
 
-        logger.info("Entered propose: height = {}, view = {}, primary = {}, # active peers = {}", height, view,
-                isPrimary(), activeValidators.size());
+        logger.info("Entered propose: height = {}, view = {}, primary = {}, # active validators = {}", height, view,
+                isPrimary(), activeValidators.size() + 1);
 
         if (isPrimary()) {
             if (proposal == null) {

@@ -96,4 +96,31 @@ public class SystemUtil {
 
         return new String(console.readPassword("Please enter you password: "));
     }
+
+    /**
+     * Compare two version strings.
+     * 
+     * @param v1
+     * @param v2
+     * @return
+     */
+    public static int versionCompare(String v1, String v2) {
+        String[] parts1 = v1.split("\\.");
+        String[] parts2 = v2.split("\\.");
+
+        // Set index to first non-equal ordinal or length of shortest version string
+        int i = 0;
+        while (i < parts1.length && i < parts2.length && parts1[i].equals(parts2[i])) {
+            i++;
+        }
+
+        // Compare first non-equal ordinal number
+        if (i < parts1.length && i < parts2.length) {
+            int diff = Integer.valueOf(parts1[i]).compareTo(Integer.valueOf(parts2[i]));
+            return Integer.signum(diff);
+        }
+
+        // The strings are equal or one string is a substring of the other
+        return Integer.signum(parts1.length - parts2.length);
+    }
 }
