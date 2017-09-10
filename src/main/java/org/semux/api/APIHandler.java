@@ -101,10 +101,10 @@ public class APIHandler {
                 return success(obj);
             }
 
-            case GET_ACTIVE_NODES: {
+            case GET_PEERS: {
                 JSONArray arr = new JSONArray();
                 for (Peer peer : channelMgr.getActivePeers()) {
-                    arr.put(peer.toString());
+                    arr.put(peerToJson(peer));
                 }
 
                 return success(arr);
@@ -251,7 +251,7 @@ public class APIHandler {
                     return success(arr);
                 }
             }
-            case NEW_ACCOUNT: {
+            case CREATE_ACCOUNT: {
                 String result;
                 if ((result = checkPassword(params)) != null) {
                     return result;
@@ -415,6 +415,23 @@ public class APIHandler {
         obj.put("address", HEX + Hex.encode(delegate.getAddress()));
         obj.put("name", new String(delegate.getName()));
         obj.put("vote", delegate.getVotes());
+
+        return obj;
+    }
+
+    protected Object peerToJson(Peer peer) {
+        if (peer == null) {
+            return JSONObject.NULL;
+        }
+
+        JSONObject obj = new JSONObject();
+        obj.put("ip", peer.getIp());
+        obj.put("port", peer.getPort());
+        obj.put("p2pVersion", peer.getP2pVersion());
+        obj.put("clientId", peer.getClientId());
+        obj.put("peerId", peer.getPeerId());
+        obj.put("latestBlockNumber", peer.getLatestBlockNumber());
+        obj.put("latency", peer.getLatency());
 
         return obj;
     }

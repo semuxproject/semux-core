@@ -25,7 +25,7 @@ public enum Command {
     /**
      * Get active peer list.
      */
-    GET_ACTIVE_NODES,
+    GET_PEERS,
 
     /**
      * Add a new node to connect.
@@ -117,7 +117,7 @@ public enum Command {
     /**
      * Create a new account.
      */
-    NEW_ACCOUNT,
+    CREATE_ACCOUNT,
 
     /**
      * Balance transfer.

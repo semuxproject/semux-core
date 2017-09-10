@@ -82,8 +82,8 @@ public class APIHandlerTest {
     }
 
     @Test
-    public void testGetActiveNodes() throws IOException {
-        String uri = "/get_active_nodes";
+    public void testGetPeers() throws IOException {
+        String uri = "/get_peers";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         JSONArray result = response.getJSONArray("result");
@@ -191,7 +191,7 @@ public class APIHandlerTest {
     }
 
     @Test
-    public void testNewTransaction() throws IOException, InterruptedException {
+    public void testSendTransaction() throws IOException, InterruptedException {
         Transaction tx = createTransaction();
 
         String uri = "/send_transaction?raw=" + Hex.encode(tx.toBytes());
@@ -285,10 +285,10 @@ public class APIHandlerTest {
     }
 
     @Test
-    public void testNewAccount() throws IOException {
+    public void testCreateAccount() throws IOException {
         int size = wallet.getAccounts().size();
 
-        String uri = "/new_account?password=" + password;
+        String uri = "/create_account?password=" + password;
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertEquals(size + 1, wallet.getAccounts().size());
