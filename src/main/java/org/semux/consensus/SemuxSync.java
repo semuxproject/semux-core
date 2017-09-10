@@ -30,6 +30,7 @@ import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.Delegate;
 import org.semux.core.Sync;
+import org.semux.core.Transaction;
 import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
 import org.semux.core.state.AccountState;
@@ -351,8 +352,11 @@ public class SemuxSync implements Sync {
                 }
             }
 
-            // [5] apply block reward
+            // [5] apply block reward and tx fees
             long reward = Config.getBlockReward(block.getNumber());
+            for (Transaction tx : block.getTransactions()) {
+                reward += tx.getFee();
+            }
             if (reward > 0) {
                 Account acc = as.getAccount(block.getCoinbase());
                 acc.setBalance(acc.getBalance() + reward);
