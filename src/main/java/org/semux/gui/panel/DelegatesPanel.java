@@ -172,6 +172,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textName = new JTextField();
         textName.setToolTipText("Name");
         textName.setColumns(10);
+        textName.setActionCommand(Action.DELEGATE.name());
+        textName.addActionListener(this);
 
         // @formatter:off
         GroupLayout groupLayout3 = new GroupLayout(panel2);
@@ -319,7 +321,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 tx.sign(a.getKey());
 
                 pendingMgr.addTransaction(tx);
-                JOptionPane.showMessageDialog(this, "Transaction sent!");
+                JOptionPane.showMessageDialog(this, "Transaction sent. It takes at least 20s to get processed!");
                 clear();
             }
             break;
@@ -330,8 +332,18 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             if (a == null) {
                 JOptionPane.showMessageDialog(this, "Please select an account!");
             } else if (!name.matches("[_a-z0-8]{4,16}")) {
-                JOptionPane.showMessageDialog(this, "Please enter a correct delegate name");
+                JOptionPane.showMessageDialog(this, "Please enter a valid delegate name!");
+            } else if (a.getBalance() < Config.MIN_DELEGATE_FEE + Config.MIN_TRANSACTION_FEE) {
+                JOptionPane.showMessageDialog(this, "Insufficient funds! Delegate registration fee = "
+                        + Config.MIN_DELEGATE_FEE / Unit.SEM + " SEM");
             } else {
+                int ret = JOptionPane.showConfirmDialog(this,
+                        "Delegate registration will cost you " + Config.MIN_DELEGATE_FEE / Unit.SEM + " SEM, continue?",
+                        "Confirm delegate registration", JOptionPane.YES_NO_OPTION);
+                if (ret != JOptionPane.YES_OPTION) {
+                    break;
+                }
+
                 Kernel kernel = Kernel.getInstance();
                 PendingManager pendingMgr = kernel.getPendingManager();
 
@@ -347,7 +359,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 tx.sign(a.getKey());
 
                 pendingMgr.addTransaction(tx);
-                JOptionPane.showMessageDialog(this, "Transaction sent!");
+                JOptionPane.showMessageDialog(this, "Transaction sent. It takes at least 20s to get processed!");
                 clear();
             }
             break;

@@ -228,7 +228,7 @@ public class SendPanel extends JPanel implements ActionListener {
                 tx.sign(acc.getKey());
 
                 pendingMgr.addTransaction(tx);
-                JOptionPane.showMessageDialog(this, "Transaction sent!");
+                JOptionPane.showMessageDialog(this, "Transaction sent. It takes at least 20s to get processed!");
                 clear();
             }
             break;
