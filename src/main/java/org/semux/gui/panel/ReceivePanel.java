@@ -23,7 +23,10 @@ import javax.swing.JTable;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 
+import org.semux.Kernel;
 import org.semux.core.Unit;
+import org.semux.core.Wallet;
+import org.semux.crypto.EdDSA;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
@@ -70,6 +73,10 @@ public class ReceivePanel extends JPanel implements ActionListener {
         qr.setIcon(SwingUtil.emptyImage(200, 200));
         qr.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
+        JButton buttonNewAccount = new JButton("New Account");
+        buttonNewAccount.addActionListener(this);
+        buttonNewAccount.setActionCommand(Action.NEW_ACCOUNT.name());
+
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
         groupLayout.setHorizontalGroup(
@@ -78,6 +85,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
                     .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 505, Short.MAX_VALUE)
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                        .addComponent(buttonNewAccount, GroupLayout.PREFERRED_SIZE, 121, GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnCopyAddress)
                         .addComponent(qr)))
         );
@@ -87,7 +95,9 @@ public class ReceivePanel extends JPanel implements ActionListener {
                     .addComponent(qr)
                     .addGap(18)
                     .addComponent(btnCopyAddress)
-                    .addContainerGap(292, Short.MAX_VALUE))
+                    .addGap(18)
+                    .addComponent(buttonNewAccount)
+                    .addContainerGap(249, Short.MAX_VALUE))
                 .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE)
         );
         setLayout(groupLayout);
@@ -177,6 +187,19 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
                 JOptionPane.showMessageDialog(this, "Address copied: " + address);
             }
+            break;
+        }
+        case NEW_ACCOUNT: {
+            EdDSA key = new EdDSA();
+
+            Wallet wallet = Kernel.getInstance().getWallet();
+            wallet.addAccount(key);
+            wallet.flush();
+
+            model.getAccounts().add(new Account(key));
+            model.fireUpdateEvent();
+
+            JOptionPane.showMessageDialog(this, "Account created");
             break;
         }
         default:

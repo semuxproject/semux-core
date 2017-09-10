@@ -25,6 +25,8 @@ public enum Action {
 
     COPY_ADDRESS,
 
+    NEW_ACCOUNT,
+
     VOTE,
 
     UNVOTE,

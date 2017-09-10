@@ -2,6 +2,8 @@ package org.semux.gui.dialog;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
@@ -48,6 +50,14 @@ public class SelectDialog extends JFrame implements ActionListener {
         for (Object opt : options) {
             comboBox.addItem(opt);
         }
+        comboBox.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    actionPerformed(new ActionEvent(SelectDialog.this, 0, Action.OK.name()));
+                }
+            }
+        });
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());
