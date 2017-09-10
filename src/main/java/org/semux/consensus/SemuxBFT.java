@@ -142,11 +142,13 @@ public class SemuxBFT implements Consensus {
     private void eventLoop() {
         while (!Thread.currentThread().isInterrupted() && status != Status.STOPPED) {
             try {
-                Event ev = events.take();
+                // Postpone event processing when in SYNCING
                 if (status != Status.RUNNING) {
+                    Thread.sleep(100);
                     continue;
                 }
 
+                Event ev = events.take();
                 switch (ev.getType()) {
                 case STOP:
                     return;
@@ -168,7 +170,7 @@ public class SemuxBFT implements Consensus {
             } catch (InterruptedException e) {
                 break;
             } catch (Exception e) {
-                logger.warn("Exception when processing consensus events", e);
+                logger.warn("Unexpected exception in event loop", e);
             }
         }
     }
