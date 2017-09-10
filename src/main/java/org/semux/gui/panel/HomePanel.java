@@ -40,6 +40,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private Model model;
 
     private JLabel blockNum;
+    private JLabel coinbase;
     private JLabel status;
     private JLabel balance;
     private JLabel locked;
@@ -55,13 +56,19 @@ public class HomePanel extends JPanel implements ActionListener {
         overview.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(10, 10, 10, 10)),
                 "Overview", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        overview.setLayout(new GridLayout(4, 2, 0, 0));
+        overview.setLayout(new GridLayout(5, 2, 0, 0));
 
         JLabel labelBlockNum = new JLabel("Block #:");
         overview.add(labelBlockNum);
 
         blockNum = new JLabel("");
         overview.add(blockNum);
+
+        JLabel labelCoinbase = new JLabel("Coinbase:");
+        overview.add(labelCoinbase);
+
+        coinbase = new JLabel("");
+        overview.add(coinbase);
 
         JLabel labelStatus = new JLabel("Status:");
         overview.add(labelStatus);
@@ -183,6 +190,7 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private void refresh() {
         this.blockNum.setText(Long.toString(model.getLatestBlockNumber()));
+        this.coinbase.setText("#" + model.getCoinbase());
         this.status.setText(model.isDelegate() ? "Delegate" : "Normal");
         this.balance.setText(String.format("%.3f SEM", model.getTotalBalance() / (double) Unit.SEM));
         this.locked.setText(String.format("%.3f SEM", model.getTotalLocked() / (double) Unit.SEM));

@@ -97,12 +97,13 @@ public class Kernel {
         logger.info("Client: {}", Config.CLIENT_FULL_NAME);
         logger.info("System booting up: network = {}, coinbase = {}", Config.NETWORK_ID, coinbase);
 
-        chain = new BlockchainImpl(new DBFactory() {
+        DBFactory dbFactory = new DBFactory() {
             private final KVDB indexDB = new LevelDB(DBName.INDEX);
             private final KVDB blockDB = new LevelDB(DBName.BLOCK);
             private final KVDB accountDB = new LevelDB(DBName.ACCOUNT);
             private final KVDB delegateDB = new LevelDB(DBName.DELEGATE);
             private final KVDB voteDB = new LevelDB(DBName.VOTE);
+            private final KVDB testDB = new LevelDB(DBName.TEST);
 
             @Override
             public KVDB getDB(DBName name) {
@@ -117,11 +118,15 @@ public class Kernel {
                     return delegateDB;
                 case VOTE:
                     return voteDB;
+                case TEST:
+                    return testDB;
                 default:
                     throw new RuntimeException("Unexpected database: " + name);
                 }
             }
-        });
+        };
+        chain = new BlockchainImpl(dbFactory);
+
         long height = chain.getLatestBlockNumber();
         String nextUpgrade = chain.getGenesis().getConfig().get("nextUpgrade").toString();
         if (height >= Long.parseLong(nextUpgrade)) {
@@ -200,6 +205,9 @@ public class Kernel {
             // make sure no thread is updating state
             WriteLock lock = Config.STATE_LOCK.writeLock();
             lock.lock();
+            for (DBName name : DBName.values()) {
+                dbFactory.getDB(name).close();
+            }
             lock.unlock();
 
             api.stop();
