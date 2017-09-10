@@ -66,6 +66,10 @@ public class SystemUtil {
             String ip = reader.readLine();
             reader.close();
 
+            if (!ip.matches("(\\d{1,3}\\.){3}\\d{1,3}")) {
+                throw new RuntimeException("Unable to parse IP address");
+            }
+
             return ip;
         } catch (Exception e) {
             logger.debug("Failed to retrieve public IP address");

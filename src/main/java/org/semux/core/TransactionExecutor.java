@@ -90,7 +90,7 @@ public class TransactionExecutor {
             case DELEGATE: {
                 if (Arrays.equals(from, to) //
                         && value >= Config.MIN_DELEGATE_FEE //
-                        && data.length <= 16 && Bytes.toString(data).matches("[_a-z0-8]{4,16}")) {
+                        && data.length <= 16 && Bytes.toString(data).matches("[_a-z0-9]{4,16}")) {
                     // register delegate
                     fromAcc.setBalance(fromAcc.getBalance() - value);
                     ds.register(to, data);

@@ -128,7 +128,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textUnvote = new JTextField();
         textUnvote.setToolTipText("# of votes");
         textUnvote.setColumns(10);
-        textUnvote.setActionCommand(Action.VOTE.name());
+        textUnvote.setActionCommand(Action.UNVOTE.name());
         textUnvote.addActionListener(this);
 
         JButton btnUnvote = new JButton("Unvote");
@@ -331,7 +331,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             String name = textName.getText();
             if (a == null) {
                 JOptionPane.showMessageDialog(this, "Please select an account!");
-            } else if (!name.matches("[_a-z0-8]{4,16}")) {
+            } else if (!name.matches("[_a-z0-9]{4,16}")) {
                 JOptionPane.showMessageDialog(this, "Please enter a valid delegate name!");
             } else if (a.getBalance() < Config.MIN_DELEGATE_FEE + Config.MIN_TRANSACTION_FEE) {
                 JOptionPane.showMessageDialog(this, "Insufficient funds! Delegate registration fee = "
