@@ -37,7 +37,6 @@ import org.semux.crypto.Hex;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
-import org.semux.net.msg.MessageCode;
 import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BFTNewHeightMessage;
 import org.semux.net.msg.consensus.BFTProposalMessage;
@@ -63,7 +62,8 @@ public class SemuxBFT implements Consensus {
 
     private Timer timer;
     private Broadcaster broadcaster;
-    private BlockingQueue<Event> events;
+
+    private BlockingQueue<Event> events = new LinkedBlockingQueue<>();
 
     private volatile Status status;
     private volatile State state;
@@ -112,7 +112,6 @@ public class SemuxBFT implements Consensus {
         this.sync = SemuxSync.getInstance();
         this.timer = new Timer();
         this.broadcaster = new Broadcaster();
-        this.events = new LinkedBlockingQueue<>();
 
         this.status = Status.STOPPED;
         this.state = State.NEW_HEIGHT;
@@ -481,11 +480,6 @@ public class SemuxBFT implements Consensus {
 
     @Override
     public boolean onMessage(Channel channel, Message msg) {
-        // only process BFT_NEW_HEIGHT message when not running
-        if (!isRunning() && msg.getCode() != MessageCode.BFT_NEW_HEIGHT) {
-            return false;
-        }
-
         switch (msg.getCode()) {
         case BFT_NEW_HEIGHT: {
             BFTNewHeightMessage m = (BFTNewHeightMessage) msg;
@@ -500,13 +494,11 @@ public class SemuxBFT implements Consensus {
             BFTProposalMessage m = (BFTProposalMessage) msg;
             Proposal proposal = m.getProposal();
 
-            if (proposal.getHeight() == height) {
-                if (proposal.validate()) {
-                    events.add(new Event(Event.Type.PROPOSAL, m.getProposal()));
-                } else {
-                    logger.debug("Invalid proposal from {}", channel.getRemotePeer().getPeerId());
-                    channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
-                }
+            if (proposal.validate()) {
+                events.add(new Event(Event.Type.PROPOSAL, m.getProposal()));
+            } else {
+                logger.debug("Invalid proposal from {}", channel.getRemotePeer().getPeerId());
+                channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
             }
             return true;
         }
@@ -514,13 +506,11 @@ public class SemuxBFT implements Consensus {
             BFTVoteMessage m = (BFTVoteMessage) msg;
             Vote vote = m.getVote();
 
-            if (vote.getHeight() == height) {
-                if (vote.validate()) {
-                    events.add(new Event(Event.Type.VOTE, vote));
-                } else {
-                    logger.debug("Invalid vote from {}", channel.getRemotePeer().getPeerId());
-                    channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
-                }
+            if (vote.validate()) {
+                events.add(new Event(Event.Type.VOTE, vote));
+            } else {
+                logger.debug("Invalid vote from {}", channel.getRemotePeer().getPeerId());
+                channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
             }
             return true;
         }
