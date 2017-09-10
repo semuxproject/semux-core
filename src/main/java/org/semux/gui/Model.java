@@ -19,7 +19,10 @@ public class Model {
     private List<ActionListener> listeners = new ArrayList<>();
 
     private long latestBlockNumber;
+
+    private int coinbase;
     private boolean isDelegate;
+
     private volatile List<Account> accounts = new ArrayList<>();
     private volatile List<Delegate> delegates = new ArrayList<>();
 
@@ -78,6 +81,24 @@ public class Model {
      */
     public void setLatestBlockNumber(long latestBlockNumber) {
         this.latestBlockNumber = latestBlockNumber;
+    }
+
+    /**
+     * Get the coinbase.
+     * 
+     * @return
+     */
+    public int getCoinbase() {
+        return coinbase;
+    }
+
+    /**
+     * Set the coinbase.
+     * 
+     * @param coinbase
+     */
+    public void setCoinbase(int coinbase) {
+        this.coinbase = coinbase;
     }
 
     /**

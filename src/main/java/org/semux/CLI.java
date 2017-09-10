@@ -104,7 +104,7 @@ public class CLI {
         System.out.println(Config.CLIENT_FULL_NAME);
         System.out.println("===============================================================\n");
         System.out.println("Usage:");
-        System.out.println("  ./run.sh [options] or run.bat [options]\n");
+        System.out.println("  ./semux.sh --cli [options] or semux.bat [options]\n");
         System.out.println("Options:");
         System.out.println("  -h, --help              Print help info and exit");
         System.out.println("  -v, --version           Show the version of this client");

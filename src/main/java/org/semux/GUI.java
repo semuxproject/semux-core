@@ -8,6 +8,8 @@ package org.semux;
 
 import java.awt.EventQueue;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -19,10 +21,12 @@ import org.semux.core.BlockchainListener;
 import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
+import org.semux.crypto.EdDSA;
 import org.semux.gui.MainFrame;
 import org.semux.gui.Model;
-import org.semux.gui.PasswordFrame;
 import org.semux.gui.WelcomeFrame;
+import org.semux.gui.dialog.InputDialog;
+import org.semux.gui.dialog.SelectDialog;
 
 /**
  * Graphic user interface.
@@ -32,14 +36,11 @@ public class GUI {
     private static final int TRANSACTION_LIMIT = 1000; // per account
 
     private static String dataDir = ".";
-    private static int coinbase = 0;
 
     private static Wallet wallet;
     private static Model model;
 
     public static void main(String[] args) {
-        // TODO: parse parameters for GUI
-
         setupLookAndFeel();
 
         wallet = new Wallet(new File(dataDir, "wallet.data"));
@@ -49,9 +50,9 @@ public class GUI {
             showWelcome();
         } else {
             for (int i = 0;; i++) {
-                PasswordFrame frame = new PasswordFrame(i == 0 ? null : "Wrong password, please try again");
-                frame.setVisible(true);
-                String pwd = frame.getPassword();
+                InputDialog frame = new InputDialog(
+                        i == 0 ? "Please enter your password:" : "Wrong password, please try again:", true);
+                String pwd = frame.getInput();
 
                 if (pwd == null) {
                     System.exit(-1);
@@ -83,9 +84,29 @@ public class GUI {
     }
 
     public static void showMain() {
+        if (wallet.size() > 0) {
+            String message = "Which account would you like to use?";
+            List<Object> options = new ArrayList<>();
+            List<EdDSA> list = wallet.getAccounts();
+            for (int i = 0; i < list.size(); i++) {
+                options.add("0x" + list.get(i).toAddressString() + ", #" + i);
+            }
+
+            SelectDialog dialog = new SelectDialog(message, options);
+            int selected = dialog.getSelectedIndex();
+            if (selected == -1) {
+                System.exit(0);
+            } else {
+                model.setCoinbase(selected);
+            }
+        } else if (wallet.size() == 0) {
+            wallet.addAccount(new EdDSA());
+            wallet.flush();
+        }
+
         // start kernel
         Kernel kernel = Kernel.getInstance();
-        kernel.init(dataDir, wallet, coinbase);
+        kernel.init(dataDir, wallet, model.getCoinbase());
         kernel.start();
 
         // register block listener
