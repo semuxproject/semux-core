@@ -292,11 +292,6 @@ public class Config {
      */
     public static int BFT_PRE_COMMIT_TIMEOUT = 4000;
 
-    /**
-     * Maximum number of validators.
-     */
-    public static int BFT_MAX_VALIDATORS = 100;
-
     // =========================
     // Virtual machine
     // =========================
@@ -342,6 +337,21 @@ public class Config {
             return 25 * Unit.SEM;
         } else {
             return 0;
+        }
+    }
+
+    /**
+     * Get the number of validators.
+     * 
+     * @param number
+     * @return
+     */
+    public static int getNumberOfValidators(long number) {
+        if (number < 300_000) {
+            // every week, increase by 10
+            return (int) (10 + number / 30_000 * 10);
+        } else {
+            return 100;
         }
     }
 }

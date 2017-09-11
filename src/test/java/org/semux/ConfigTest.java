@@ -18,4 +18,15 @@ public class ConfigTest {
         assertTrue(Config.init());
         assertEquals(1, Config.NETWORK_ID);
     }
+
+    @Test
+    public void testNumberOfValidators() {
+        assertEquals(10, Config.getNumberOfValidators(0));
+        assertEquals(10, Config.getNumberOfValidators(1));
+        assertEquals(20, Config.getNumberOfValidators(30_000));
+        assertEquals(30, Config.getNumberOfValidators(60_000));
+        assertEquals(100, Config.getNumberOfValidators(270_000));
+        assertEquals(100, Config.getNumberOfValidators(300_000));
+        assertEquals(100, Config.getNumberOfValidators(Long.MAX_VALUE));
+    }
 }

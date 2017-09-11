@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.semux.Config;
+import org.semux.core.Blockchain;
 import org.semux.core.Delegate;
 import org.semux.db.KVDB;
 import org.semux.utils.ByteArray;
@@ -46,6 +47,7 @@ public class DelegateStateImpl implements DelegateState {
 
     private static final int ADDRESS_LEN = 20;
 
+    private Blockchain chain;
     private KVDB delegateDB;
     private KVDB voteDB;
     private DelegateStateImpl prev;
@@ -63,10 +65,12 @@ public class DelegateStateImpl implements DelegateState {
     /**
      * Create a DelegateState that work directly on a database.
      * 
+     * @param chain
      * @param delegateDB
      * @param voteDB
      */
-    public DelegateStateImpl(KVDB delegateDB, KVDB voteDB) {
+    public DelegateStateImpl(Blockchain chain, KVDB delegateDB, KVDB voteDB) {
+        this.chain = chain;
         this.delegateDB = delegateDB;
         this.voteDB = voteDB;
     }
@@ -77,6 +81,7 @@ public class DelegateStateImpl implements DelegateState {
      * @param prev
      */
     public DelegateStateImpl(DelegateStateImpl prev) {
+        this.chain = prev.chain;
         this.prev = prev;
     }
 
@@ -181,12 +186,9 @@ public class DelegateStateImpl implements DelegateState {
     @Override
     public List<Delegate> getValidators() {
         List<Delegate> list = getDelegates();
+        int max = Config.getNumberOfValidators(chain.getLatestBlockNumber());
 
-        if (list.size() > Config.BFT_MAX_VALIDATORS) {
-            list = list.subList(0, Config.BFT_MAX_VALIDATORS);
-        }
-
-        return list;
+        return list.size() > max ? list.subList(0, max) : list;
     }
 
     @Override

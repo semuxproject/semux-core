@@ -53,7 +53,7 @@ public class BlockchainImpl implements Blockchain {
         this.blockDB = factory.getDB(DBName.BLOCK);
 
         this.accountState = new AccountStateImpl(factory.getDB(DBName.ACCOUNT));
-        this.delegateState = new DelegateStateImpl(factory.getDB(DBName.DELEGATE), factory.getDB(DBName.VOTE));
+        this.delegateState = new DelegateStateImpl(this, factory.getDB(DBName.DELEGATE), factory.getDB(DBName.VOTE));
 
         this.genesis = Genesis.getInstance();
 

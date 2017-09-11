@@ -98,7 +98,7 @@ public class DelegateStateTest {
 
         List<Delegate> list = ds.getDelegates();
         assertEquals(delegates.size() + 200, list.size());
-        assertEquals(Config.BFT_MAX_VALIDATORS, ds.getValidators().size());
+        assertEquals(Config.getNumberOfValidators(0), ds.getValidators().size());
 
         assertArrayEquals(delegate, list.get(0).getAddress());
         assertArrayEquals(delegateName, list.get(0).getName());
