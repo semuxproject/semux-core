@@ -1,5 +1,6 @@
 package org.semux.gui.dialog;
 
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -47,6 +48,7 @@ public class SelectDialog extends JFrame implements ActionListener {
         btnCancel.addActionListener(this);
 
         comboBox = new JComboBox<Object>();
+        comboBox.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         for (Object opt : options) {
             comboBox.addItem(opt);
         }

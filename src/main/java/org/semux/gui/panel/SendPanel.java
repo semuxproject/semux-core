@@ -1,6 +1,7 @@
 package org.semux.gui.panel;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class SendPanel extends JPanel implements ActionListener {
         lblFrom.setHorizontalAlignment(SwingConstants.RIGHT);
 
         from = new JComboBox<>();
-        // from.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        from.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
 
         JLabel lblTo = new JLabel("To:");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);

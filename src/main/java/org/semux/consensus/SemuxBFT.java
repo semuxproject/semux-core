@@ -243,7 +243,7 @@ public class SemuxBFT implements Consensus {
             timer.addTimeout(fromSync ? 0 : Config.BFT_NEW_HEIGHT_TIMEOUT);
         }
 
-        // Broadcast NEW_HEIGHT messages to all peers, whether or not validator.
+        // Broadcast NEW_HEIGHT messages to all peers.
         for (Channel c : channelMgr.getActiveChannels()) {
             BFTNewHeightMessage msg = new BFTNewHeightMessage(height);
             c.getMessageQueue().sendMessage(msg);
