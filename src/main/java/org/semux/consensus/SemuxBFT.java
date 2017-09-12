@@ -763,98 +763,103 @@ public class SemuxBFT implements Consensus {
         NEW_HEIGHT, PROPOSE, VALIDATE, PRE_COMMIT, COMMIT
     }
 
-    public class Timer {
-        private volatile long timeout;
+    public class Timer implements Runnable {
+        private long timeout;
 
         private Thread t;
 
-        public void start() {
-            if (t == null) {
-                t = new Thread(() -> {
-                    while (true) {
-                        long now = System.currentTimeMillis();
-                        if (timeout != 0 && now > timeout) {
-                            timeout = 0;
-                            events.add(new Event(Type.TIMEOUT));
-                        } else {
-                            try {
-                                Thread.sleep(10);
-                            } catch (InterruptedException e) {
-                                break;
-                            }
-                        }
+        @Override
+        public void run() {
+            while (true) {
+                synchronized (this) {
+                    if (timeout != 0 && timeout < System.currentTimeMillis()) {
+                        events.add(new Event(Type.TIMEOUT));
+                        timeout = 0;
+                        continue;
                     }
-                }, "cons-timer");
+                }
+
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    return;
+                }
+            }
+        }
+
+        public synchronized void start() {
+            if (t == null) {
+                t = new Thread(this, "cons-timer");
                 t.start();
             }
         }
 
-        public void stop() {
+        public synchronized void stop() {
             if (t != null) {
                 try {
                     t.interrupt();
                     t.join(10000);
                 } catch (InterruptedException e) {
-                    logger.warn("Got interrupted when stopping consenus timer");
-                }
-
-                if (t.isAlive()) {
-                    logger.error("Failed to stop consensus timer");
+                    logger.warn("Failed to stop consensus timer");
                 }
                 t = null;
             }
         }
 
-        public void timeout(long miliseconds) {
+        public synchronized void timeout(long miliseconds) {
             if (miliseconds < 0) {
                 throw new IllegalArgumentException("Timeout can not be negative");
             }
             timeout = System.currentTimeMillis() + miliseconds;
         }
 
-        public void reset() {
+        public synchronized void reset() {
             timeout = 0;
         }
     }
 
-    public class Broadcaster {
+    public class Broadcaster implements Runnable {
         private BlockingQueue<Message> queue = new LinkedBlockingQueue<>();
 
         private Thread t;
 
-        public void start() {
-            if (t == null) {
-                t = new Thread(() -> {
-                    while (true) {
-                        try {
-                            Message msg = queue.take();
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    Message msg = queue.take();
 
-                            // thread-safe via volatile
-                            List<Channel> channels = activeValidators;
-                            if (channels != null) {
-                                int[] indexes = ArrayUtil.permutation(channels.size());
-                                for (int i = 0; i < indexes.length && i < Config.NET_RELAY_REDUNDANCY; i++) {
-                                    if (channels.get(indexes[i]).isActive()) {
-                                        channels.get(indexes[i]).getMessageQueue().sendMessage(msg);
-                                    }
-                                }
+                    // thread-safety via volatile
+                    List<Channel> channels = activeValidators;
+                    if (channels != null) {
+                        int[] indexes = ArrayUtil.permutation(channels.size());
+                        for (int i = 0; i < indexes.length && i < Config.NET_RELAY_REDUNDANCY; i++) {
+                            Channel c = channels.get(indexes[i]);
+                            if (c.isActive()) {
+                                c.getMessageQueue().sendMessage(msg);
                             }
-                        } catch (InterruptedException e) {
-                            break;
                         }
                     }
-                }, "cons-broadcaster");
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        }
+
+        public synchronized void start() {
+            if (t == null) {
+                t = new Thread(this, "cons-broadcaster");
                 t.start();
             }
         }
 
-        public void stop() {
+        public synchronized void stop() {
             if (t != null) {
                 try {
                     t.interrupt();
                     t.join();
                 } catch (InterruptedException e) {
-                    logger.error("Failed to stop consensus broadcaster, interrupted");
+                    logger.error("Failed to stop consensus broadcaster");
                 }
                 t = null;
             }
