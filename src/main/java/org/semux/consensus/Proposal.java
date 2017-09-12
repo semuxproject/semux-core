@@ -6,77 +6,37 @@
  */
 package org.semux.consensus;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.semux.core.Block;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
-import org.semux.crypto.Hex;
 import org.semux.utils.SimpleDecoder;
 import org.semux.utils.SimpleEncoder;
 
 public class Proposal {
 
-    public static class Proof {
-        public static final Proof NO_PROOF = new Proof(Collections.emptyList());
-
-        private List<Vote> votes;
-
-        public Proof(List<Vote> votes) {
-            super();
-            this.votes = votes;
-        }
-
-        public List<Vote> getVotes() {
-            return votes;
-        }
-
-        @Override
-        public String toString() {
-            return votes.isEmpty() ? "Empty" : "Proof [# of votes=" + votes.size() + "]";
-        }
-    }
-
-    private long height;
-    private int view;
-    private Block block;
     private Proof proof;
+    private Block block;
 
     private byte[] encoded;
     private Signature signature;
 
+    // block validation result cache
     private Boolean isBlockValid = null;
 
-    public Proposal(long height, int view, Block block, Proof proof) {
-        this.height = height;
-        this.view = view;
-        this.block = block;
+    public Proposal(Proof proof, Block block) {
         this.proof = proof;
+        this.block = block;
 
         SimpleEncoder enc = new SimpleEncoder();
-        enc.writeLong(height);
-        enc.writeInt(view);
+        enc.writeBytes(proof.toBytes());
         enc.writeBytes(block.toBytes());
-        enc.writeInt(proof.getVotes().size());
-        for (Vote v : proof.getVotes()) {
-            enc.writeBytes(v.toBytes());
-        }
         this.encoded = enc.toBytes();
     }
 
     public Proposal(byte[] encoded, byte[] signature) {
         SimpleDecoder dec = new SimpleDecoder(encoded);
-        this.height = dec.readLong();
-        this.view = dec.readInt();
+        this.proof = Proof.fromBytes(dec.readBytes());
         this.block = Block.fromBytes(dec.readBytes());
-        List<Vote> votes = new ArrayList<>();
-        int n = dec.readInt();
-        for (int i = 0; i < n; i++) {
-            votes.add(Vote.fromBytes(dec.readBytes()));
-        }
-        this.proof = new Proof(votes);
 
         this.encoded = encoded;
         this.signature = Signature.fromBytes(signature);
@@ -99,35 +59,36 @@ public class Proposal {
      * </p>
      *
      * <p>
-     * NOTOE: this method will NOT validate the proposed block, nor the transactions
-     * inside the block. Use {@link Block#validate()} for that purpose.
+     * NOTOE: this method will NOT validate the proposed block, nor the proof, nor
+     * the transactions inside the block. Use {@link Block#validate()} for that
+     * purpose.
      * </p>
      * 
      * @return true if valid, otherwise false
      */
     public boolean validate() {
-        return height > 0 //
-                && view >= 0 //
+        return getHeight() > 0//
+                && getView() >= 0 //
                 && proof != null //
                 && encoded != null//
                 && signature != null && EdDSA.verify(encoded, signature) //
                 && block != null;
     }
 
+    public Proof getProof() {
+        return proof;
+    }
+
     public long getHeight() {
-        return height;
+        return proof.getHeight();
     }
 
     public int getView() {
-        return view;
+        return proof.getView();
     }
 
     public Block getBlock() {
         return block;
-    }
-
-    public Proof getProof() {
-        return proof;
     }
 
     public Signature getSignature() {
@@ -160,8 +121,6 @@ public class Proposal {
 
     @Override
     public String toString() {
-        return "Proposal [height=" + height + ", view=" + view + ", block hash = "
-                + Hex.encode(block.getHash()).substring(0, 16) + ", # txs = " + block.getTransactions().size()
-                + ", proof=" + proof + "]";
+        return "Proposal [proof=" + proof + ", # txs = " + block.getTransactions().size() + "]";
     }
 }

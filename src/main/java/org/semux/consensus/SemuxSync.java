@@ -266,7 +266,7 @@ public class SemuxSync implements Sync {
         }
 
         if (block != null) {
-            logger.info("Processing {}", block.toString());
+            logger.info("{}", block);
 
             if (validateAndCommit(block)) {
                 WriteLock lock = Config.STATE_LOCK.writeLock();
@@ -287,6 +287,7 @@ public class SemuxSync implements Sync {
                     toComplete.remove(block.getNumber());
                 }
             } else {
+                logger.info("block invalid");
                 synchronized (lock) {
                     toDownload.add(block.getNumber());
                 }

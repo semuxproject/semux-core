@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 
 import org.junit.Test;
-import org.semux.consensus.Proposal.Proof;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
 import org.semux.crypto.EdDSA;
@@ -23,7 +22,7 @@ public class ProposalTest {
         Vote vote = Vote.newApprove(VoteType.COMMIT, height, view, block.getHash());
         vote.sign(new EdDSA());
 
-        Proposal p = new Proposal(height, view, block, new Proof(Collections.singletonList(vote)));
+        Proposal p = new Proposal(new Proof(height, view, Collections.singletonList(vote)), block);
         assertFalse(p.validate());
         p.sign(new EdDSA());
         assertTrue(p.validate());

@@ -7,6 +7,7 @@
 package org.semux.net.msg;
 
 import org.semux.net.msg.consensus.BFTNewHeightMessage;
+import org.semux.net.msg.consensus.BFTNewViewMessage;
 import org.semux.net.msg.consensus.BFTProposalMessage;
 import org.semux.net.msg.consensus.BFTVoteMessage;
 import org.semux.net.msg.consensus.BlockHeaderMessage;
@@ -73,6 +74,8 @@ public class MessageFactory {
 
             case BFT_NEW_HEIGHT:
                 return new BFTNewHeightMessage(encoded);
+            case BFT_NEW_VIEW:
+                return new BFTNewViewMessage(encoded);
             case BFT_PROPOSAL:
                 return new BFTProposalMessage(encoded);
             case BFT_VOTE:
