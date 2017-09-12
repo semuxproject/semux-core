@@ -1,6 +1,6 @@
 #!/bin/sh
 
-name=semux-1.0.2
+name=semux-1.0.3
 
 # change work directory
 cd "$(dirname "$0")/../"
