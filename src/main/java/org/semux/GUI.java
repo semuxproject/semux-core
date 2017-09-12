@@ -93,6 +93,7 @@ public class GUI {
         WelcomeFrame frame = new WelcomeFrame(wallet, model);
         frame.setVisible(true);
         frame.join();
+        frame.dispose();
 
         showMain();
     }
