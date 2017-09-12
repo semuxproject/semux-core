@@ -36,9 +36,9 @@ import org.semux.crypto.Hex;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
+import org.semux.net.msg.MessageCode;
 import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BFTNewHeightMessage;
-import org.semux.net.msg.consensus.BFTNewViewMessage;
 import org.semux.net.msg.consensus.BFTProposalMessage;
 import org.semux.net.msg.consensus.BFTVoteMessage;
 import org.semux.utils.ArrayUtil;
@@ -62,8 +62,7 @@ public class SemuxBFT implements Consensus {
 
     private Timer timer;
     private Broadcaster broadcaster;
-
-    private BlockingQueue<Event> events = new LinkedBlockingQueue<>();
+    private BlockingQueue<Event> events;
 
     private volatile Status status;
     private volatile State state;
@@ -114,6 +113,7 @@ public class SemuxBFT implements Consensus {
         this.sync = SemuxSync.getInstance();
         this.timer = new Timer();
         this.broadcaster = new Broadcaster();
+        this.events = new LinkedBlockingQueue<>();
 
         this.status = Status.STOPPED;
         this.state = State.NEW_HEIGHT;
@@ -125,9 +125,6 @@ public class SemuxBFT implements Consensus {
      */
     private void sync(long target) {
         if (status == Status.RUNNING) {
-            // reset events
-            resetEvents();
-
             // change status
             status = Status.SYNCING;
 
@@ -137,9 +134,6 @@ public class SemuxBFT implements Consensus {
             // restore status if not stopped
             if (status != Status.STOPPED) {
                 status = Status.RUNNING;
-
-                // enter new height
-                enterNewHeight(true);
             }
         }
     }
@@ -150,13 +144,11 @@ public class SemuxBFT implements Consensus {
     private void eventLoop() {
         while (!Thread.currentThread().isInterrupted() && status != Status.STOPPED) {
             try {
-                // Postpone event processing when in SYNCING
+                Event ev = events.take();
                 if (status != Status.RUNNING) {
-                    Thread.sleep(100);
                     continue;
                 }
 
-                Event ev = events.take();
                 switch (ev.getType()) {
                 case STOP:
                     return;
@@ -165,9 +157,6 @@ public class SemuxBFT implements Consensus {
                     break;
                 case NEW_HEIGHT:
                     onNewHeight(ev.getData());
-                    break;
-                case NEW_VIEW:
-                    onNewView(ev.getData());
                     break;
                 case PROPOSAL:
                     onProposal(ev.getData());
@@ -275,14 +264,12 @@ public class SemuxBFT implements Consensus {
         if (newView) {
             assert (precommitVotes.isRejected());
 
-            // update height, view, proof
+            // height the same
             view++;
             proof = new Proof(height, view, precommitVotes.getRejections());
 
-            // reset proposal
             proposal = null;
 
-            // reset vote collectors
             resetVotes();
         }
 
@@ -299,9 +286,6 @@ public class SemuxBFT implements Consensus {
             logger.debug("Proposing: {}", proposal);
             broadcaster.broadcast(new BFTProposalMessage(proposal));
         }
-
-        // broadcast new view
-        broadcaster.broadcast(new BFTNewViewMessage(proof));
     }
 
     /**
@@ -414,26 +398,11 @@ public class SemuxBFT implements Consensus {
                 }
 
                 if (count >= (int) Math.ceil(activeValidators.size() * 2.0 / 3.0)) {
+                    resetEvents();
                     sync(h);
+                    enterNewHeight(true);
                 }
             }
-        }
-    }
-
-    protected void onNewView(Proof p) {
-        logger.trace("On new_view: {}", p.getView());
-
-        if (p.getHeight() == height && p.getView() > view) {
-
-            VoteSet vs = new VoteSet(p.getHeight(), p.getView() - 1, validators);
-            vs.addVotes(p.getVotes());
-            if (!vs.isRejected()) {
-                return;
-            }
-
-            view = p.getView();
-            proof = p;
-            enterPropose(false);
         }
     }
 
@@ -497,8 +466,8 @@ public class SemuxBFT implements Consensus {
                 if (commitVotes.isApproved()) {
                     if (committed) {
                         enterNewHeight(false);
-                    } else {
-                        sync(height + 1);
+                    } else if (precommitVotes.isApproved()) {
+                        enterCommit();
                     }
                 }
                 break;
@@ -513,6 +482,11 @@ public class SemuxBFT implements Consensus {
 
     @Override
     public boolean onMessage(Channel channel, Message msg) {
+        // only process BFT_NEW_HEIGHT message when not running
+        if (!isRunning() && msg.getCode() != MessageCode.BFT_NEW_HEIGHT) {
+            return false;
+        }
+
         switch (msg.getCode()) {
         case BFT_NEW_HEIGHT: {
             BFTNewHeightMessage m = (BFTNewHeightMessage) msg;
@@ -520,38 +494,20 @@ public class SemuxBFT implements Consensus {
             // update peer height state
             channel.getRemotePeer().setLatestBlockNumber(m.getHeight() - 1);
 
-            // notify consensus peer's height
-            if (m.getHeight() > height) {
-                events.add(new Event(Event.Type.NEW_HEIGHT, m.getHeight()));
-            }
-            return true;
-        }
-        case BFT_NEW_VIEW: {
-            BFTNewViewMessage m = (BFTNewViewMessage) msg;
-
-            // update peer height state
-            channel.getRemotePeer().setLatestBlockNumber(m.getHeight() - 1);
-
-            // notify consensus peer's height
-            if (m.getHeight() > height) {
-                events.add(new Event(Event.Type.NEW_HEIGHT, m.getHeight()));
-            }
-
-            // notify consensus peer's view
-            if (m.getHeight() == height && m.getView() > view) {
-                events.add(new Event(Event.Type.NEW_VIEW, m.getProof()));
-            }
+            events.add(new Event(Event.Type.NEW_HEIGHT, m.getHeight()));
             return true;
         }
         case BFT_PROPOSAL: {
             BFTProposalMessage m = (BFTProposalMessage) msg;
             Proposal proposal = m.getProposal();
 
-            if (proposal.validate()) {
-                events.add(new Event(Event.Type.PROPOSAL, m.getProposal()));
-            } else {
-                logger.debug("Invalid proposal from {}", channel.getRemotePeer().getPeerId());
-                channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
+            if (proposal.getHeight() == height) {
+                if (proposal.validate()) {
+                    events.add(new Event(Event.Type.PROPOSAL, m.getProposal()));
+                } else {
+                    logger.debug("Invalid proposal from {}", channel.getRemotePeer().getPeerId());
+                    channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
+                }
             }
             return true;
         }
@@ -559,11 +515,13 @@ public class SemuxBFT implements Consensus {
             BFTVoteMessage m = (BFTVoteMessage) msg;
             Vote vote = m.getVote();
 
-            if (vote.validate()) {
-                events.add(new Event(Event.Type.VOTE, vote));
-            } else {
-                logger.debug("Invalid vote from {}", channel.getRemotePeer().getPeerId());
-                channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
+            if (vote.getHeight() == height) {
+                if (vote.validate()) {
+                    events.add(new Event(Event.Type.VOTE, vote));
+                } else {
+                    logger.debug("Invalid vote from {}", channel.getRemotePeer().getPeerId());
+                    channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
+                }
             }
             return true;
         }
@@ -925,11 +883,6 @@ public class SemuxBFT implements Consensus {
              * Received a new height message.
              */
             NEW_HEIGHT,
-
-            /**
-             * Received a new view message.
-             */
-            NEW_VIEW,
 
             /**
              * Received a proposal message.
