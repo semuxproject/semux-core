@@ -121,6 +121,7 @@ public class Proposal {
 
     @Override
     public String toString() {
-        return "Proposal [proof=" + proof + ", # txs = " + block.getTransactions().size() + "]";
+        return "Proposal [height=" + getHeight() + ", view = " + getView() + ", # proof votes = "
+                + proof.getVotes().size() + ", # txs = " + block.getTransactions().size() + "]";
     }
 }

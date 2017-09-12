@@ -125,6 +125,9 @@ public class SemuxBFT implements Consensus {
      */
     private void sync(long target) {
         if (status == Status.RUNNING) {
+            // reset events
+            resetEvents();
+
             // change status
             status = Status.SYNCING;
 
@@ -134,6 +137,9 @@ public class SemuxBFT implements Consensus {
             // restore status if not stopped
             if (status != Status.STOPPED) {
                 status = Status.RUNNING;
+
+                // enter new height
+                enterNewHeight(true);
             }
         }
     }
@@ -219,7 +225,7 @@ public class SemuxBFT implements Consensus {
     /**
      * Enter the NEW_HEIGHT state
      */
-    protected void enterNewHeight(boolean fromSync) {
+    protected void enterNewHeight(boolean skipTimeout) {
         state = State.NEW_HEIGHT;
 
         // update previous block
@@ -246,7 +252,7 @@ public class SemuxBFT implements Consensus {
 
         logger.info("Entered new_height: height = {}, # validators = {}", height, validators.size());
         if (isValidator()) {
-            timer.addTimeout(fromSync ? 0 : Config.BFT_NEW_HEIGHT_TIMEOUT);
+            timer.addTimeout(skipTimeout ? 0 : Config.BFT_NEW_HEIGHT_TIMEOUT);
         }
 
         // Broadcast NEW_HEIGHT messages to all peers.
@@ -266,7 +272,6 @@ public class SemuxBFT implements Consensus {
         // update active peers
         activeValidators = channelMgr.getActiveChannels(validators);
 
-        // proof of lock
         if (newView) {
             assert (precommitVotes.isRejected());
 
@@ -295,7 +300,7 @@ public class SemuxBFT implements Consensus {
             broadcaster.broadcast(new BFTProposalMessage(proposal));
         }
 
-        // broad cast new view
+        // broadcast new view
         broadcaster.broadcast(new BFTNewViewMessage(proof));
     }
 
@@ -353,7 +358,6 @@ public class SemuxBFT implements Consensus {
 
         precommitVotes.addVote(vote);
         broadcaster.broadcast(new BFTVoteMessage(vote));
-
     }
 
     /**
@@ -410,9 +414,7 @@ public class SemuxBFT implements Consensus {
                 }
 
                 if (count >= (int) Math.ceil(activeValidators.size() * 2.0 / 3.0)) {
-                    resetEvents();
                     sync(h);
-                    enterNewHeight(true);
                 }
             }
         }
@@ -495,8 +497,8 @@ public class SemuxBFT implements Consensus {
                 if (commitVotes.isApproved()) {
                     if (committed) {
                         enterNewHeight(false);
-                    } else if (precommitVotes.isApproved()) {
-                        enterCommit();
+                    } else {
+                        sync(height + 1);
                     }
                 }
                 break;
@@ -539,6 +541,7 @@ public class SemuxBFT implements Consensus {
             if (m.getHeight() == height && m.getView() > view) {
                 events.add(new Event(Event.Type.NEW_VIEW, m.getProof()));
             }
+            return true;
         }
         case BFT_PROPOSAL: {
             BFTProposalMessage m = (BFTProposalMessage) msg;

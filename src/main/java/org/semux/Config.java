@@ -245,6 +245,7 @@ public class Config {
     public static Set<MessageCode> PRIORITIZED_MESSAGES = new HashSet<>();
     static {
         PRIORITIZED_MESSAGES.add(MessageCode.BFT_NEW_HEIGHT);
+        PRIORITIZED_MESSAGES.add(MessageCode.BFT_NEW_VIEW);
         PRIORITIZED_MESSAGES.add(MessageCode.BFT_PROPOSAL);
         PRIORITIZED_MESSAGES.add(MessageCode.BFT_VOTE);
     }
@@ -288,7 +289,7 @@ public class Config {
     public static int BFT_VALIDATE_TIMEOUT = 6000;
 
     /**
-     * The duration of PRE_PRE_COMMIT state.
+     * The duration of PRE_COMMIT state.
      */
     public static int BFT_PRE_COMMIT_TIMEOUT = 4000;
 
