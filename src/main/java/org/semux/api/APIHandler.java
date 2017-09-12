@@ -204,6 +204,14 @@ public class APIHandler {
                     return failure("Invalid parameter: address = " + addr);
                 }
             }
+            case GET_VALIDATORS: {
+                List<Delegate> delegates = chain.getDeleteState().getValidators();
+                JSONArray arr = new JSONArray();
+                for (Delegate d : delegates) {
+                    arr.put(delegateToJson(d));
+                }
+                return success(arr);
+            }
             case GET_DELEGATES: {
                 List<Delegate> delegates = chain.getDeleteState().getDelegates();
                 JSONArray arr = new JSONArray();

@@ -90,6 +90,11 @@ public enum Command {
      * Get the nonce of an account.
      */
     GET_NONCE,
+    
+    /**
+     * Get all validators.
+     */
+    GET_VALIDATORS,
 
     /**
      * Get all delegates.
