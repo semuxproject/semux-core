@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.semux.Config;
@@ -241,7 +240,7 @@ public class SemuxBFT implements Consensus {
 
         logger.info("Entered new_height: height = {}, # validators = {}", height, validators.size());
         if (isValidator()) {
-            timer.addTimeout(skipTimeout ? 0 : Config.BFT_NEW_HEIGHT_TIMEOUT);
+            timer.timeout(skipTimeout ? 0 : Config.BFT_NEW_HEIGHT_TIMEOUT);
         }
 
         // Broadcast NEW_HEIGHT messages to all peers.
@@ -256,7 +255,7 @@ public class SemuxBFT implements Consensus {
      */
     protected void enterPropose(boolean newView) {
         state = State.PROPOSE;
-        timer.addTimeout(Config.BFT_PROPOSE_TIMEOUT);
+        timer.timeout(Config.BFT_PROPOSE_TIMEOUT);
 
         // update active peers
         activeValidators = channelMgr.getActiveChannels(validators);
@@ -293,7 +292,7 @@ public class SemuxBFT implements Consensus {
      */
     protected void enterValidate() {
         state = State.VALIDATE;
-        timer.addTimeout(Config.BFT_VALIDATE_TIMEOUT);
+        timer.timeout(Config.BFT_VALIDATE_TIMEOUT);
         logger.info("Entered validate: proposal ready = {}", proposal != null);
 
         boolean valid = false;
@@ -319,7 +318,7 @@ public class SemuxBFT implements Consensus {
      */
     protected void enterPreCommit() {
         state = State.PRE_COMMIT;
-        timer.addTimeout(Config.BFT_PRE_COMMIT_TIMEOUT);
+        timer.timeout(Config.BFT_PRE_COMMIT_TIMEOUT);
         logger.info("Entered pre_commit: proposal votes = {}, pre_commit votes = {}", proposalVotes, precommitVotes);
 
         Vote vote = null;
@@ -619,7 +618,7 @@ public class SemuxBFT implements Consensus {
      * Clear all timer and internal events.
      */
     protected void resetEvents() {
-        timer.clear();
+        timer.reset();
         events.clear();
     }
 
@@ -765,7 +764,7 @@ public class SemuxBFT implements Consensus {
     }
 
     public class Timer {
-        private PriorityBlockingQueue<Long> pq = new PriorityBlockingQueue<>();
+        private volatile long timeout;
 
         private Thread t;
 
@@ -773,17 +772,16 @@ public class SemuxBFT implements Consensus {
             if (t == null) {
                 t = new Thread(() -> {
                     while (true) {
-                        try {
-                            Long t = pq.take();
-
-                            if (System.currentTimeMillis() > t) {
-                                events.add(new Event(Type.TIMEOUT));
-                            } else {
-                                pq.add(t);
+                        long now = System.currentTimeMillis();
+                        if (timeout != 0 && now > timeout) {
+                            timeout = 0;
+                            events.add(new Event(Type.TIMEOUT));
+                        } else {
+                            try {
                                 Thread.sleep(10);
+                            } catch (InterruptedException e) {
+                                break;
                             }
-                        } catch (InterruptedException e) {
-                            break;
                         }
                     }
                 }, "cons-timer");
@@ -807,15 +805,15 @@ public class SemuxBFT implements Consensus {
             }
         }
 
-        public void addTimeout(long miliseconds) {
+        public void timeout(long miliseconds) {
             if (miliseconds < 0) {
                 throw new IllegalArgumentException("Timeout can not be negative");
             }
-            pq.add(System.currentTimeMillis() + miliseconds);
+            timeout = System.currentTimeMillis() + miliseconds;
         }
 
-        public void clear() {
-            pq.clear();
+        public void reset() {
+            timeout = 0;
         }
     }
 
