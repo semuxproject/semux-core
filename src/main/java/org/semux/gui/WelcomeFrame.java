@@ -27,7 +27,6 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.semux.GUI;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 
@@ -50,6 +49,8 @@ public class WelcomeFrame extends JFrame implements ActionListener {
     private Wallet wallet;
 
     private File backupFile = null;
+
+    private Object done = new Object();
 
     public WelcomeFrame(Wallet wallet, Model model) {
         this.wallet = wallet;
@@ -189,7 +190,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                 wallet.addAccount(key);
                 wallet.flush();
 
-                goMainFrame();
+                done();
             } else {
                 Wallet w = new Wallet(backupFile);
 
@@ -200,7 +201,8 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                 } else {
                     wallet.addAccounts(w.getAccounts());
                     wallet.flush();
-                    goMainFrame();
+
+                    done();
                 }
             }
             break;
@@ -212,9 +214,19 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         }
     }
 
-    private void goMainFrame() {
-        dispose();
+    public void join() {
+        synchronized (done) {
+            try {
+                done.wait();
+            } catch (InterruptedException e) {
+                System.exit(0);
+            }
+        }
+    }
 
-        GUI.showMain();
+    public void done() {
+        synchronized (done) {
+            done.notifyAll();
+        }
     }
 }

@@ -135,8 +135,8 @@ public class InputDialog extends JFrame implements ActionListener {
 
     private void notifyDone() {
         synchronized (done) {
-            done.notifyAll();
             done.set(true);
+            done.notifyAll();
         }
     }
 

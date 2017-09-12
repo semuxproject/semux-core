@@ -90,14 +90,15 @@ public class GUI {
 
     public static void showWelcome() {
         // start welcome frame
-        EventQueue.invokeLater(() -> {
-            WelcomeFrame frame = new WelcomeFrame(wallet, model);
-            frame.setVisible(true);
-        });
+        WelcomeFrame frame = new WelcomeFrame(wallet, model);
+        frame.setVisible(true);
+        frame.join();
+
+        showMain();
     }
 
     public static void showMain() {
-        if (wallet.size() > 0) {
+        if (wallet.size() > 1) {
             String message = "Which account would you like to use?";
             List<Object> options = new ArrayList<>();
             List<EdDSA> list = wallet.getAccounts();
