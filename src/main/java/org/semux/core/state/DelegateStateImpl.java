@@ -176,7 +176,10 @@ public class DelegateStateImpl implements DelegateState {
 
         // sort the results
         List<Delegate> list = new ArrayList<>(map.values());
-        list.sort((d1, d2) -> Long.compare(d2.getVotes(), d1.getVotes()));
+        list.sort((d1, d2) -> {
+            int cmp = Long.compare(d2.getVotes(), d1.getVotes());
+            return (cmp != 0) ? cmp : d1.getNameStr().compareTo(d2.getNameStr());
+        });
 
         long t2 = System.nanoTime();
         logger.trace("Get delegates duration: {} μs", (t2 - t1) / 1000L);
