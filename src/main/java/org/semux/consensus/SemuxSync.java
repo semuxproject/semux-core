@@ -138,9 +138,7 @@ public class SemuxSync implements Sync {
             // [3] wait until the sync is done
             synchronized (done) {
                 try {
-                    while (isRunning) {
-                        done.wait();
-                    }
+                    done.wait();
                 } catch (InterruptedException e) {
                     logger.info("Sync manager got interrupted");
                 }
@@ -155,11 +153,9 @@ public class SemuxSync implements Sync {
 
     @Override
     public void stop() {
-        if (isRunning()) {
-            isRunning = false;
-            synchronized (done) {
-                done.notifyAll();
-            }
+        isRunning = false;
+        synchronized (done) {
+            done.notifyAll();
         }
     }
 
