@@ -319,17 +319,7 @@ public class SemuxSync implements Sync {
             AccountState as = chain.getAccountState().track();
             DelegateState ds = chain.getDeleteState().track();
 
-            // [3] check transactions
-            TransactionExecutor exec = new TransactionExecutor();
-            List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, false);
-            for (int i = 0; i < results.size(); i++) {
-                if (!results.get(i).isValid()) {
-                    logger.debug("Invalid transaction #{}", i);
-                    return false;
-                }
-            }
-
-            // [4] check votes
+            // [3] check votes
             List<Delegate> validators = ds.getValidators();
             int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
             if (block.getVotes().size() < twoThirds) {
@@ -349,6 +339,16 @@ public class SemuxSync implements Sync {
 
                 if (!set.contains(addr) || !EdDSA.verify(encoded, sig)) {
                     logger.debug("Invalid BFT vote: signer = {}", addr);
+                    return false;
+                }
+            }
+
+            // [4] check transactions
+            TransactionExecutor exec = new TransactionExecutor();
+            List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, false);
+            for (int i = 0; i < results.size(); i++) {
+                if (!results.get(i).isValid()) {
+                    logger.debug("Invalid transaction #{}", i);
                     return false;
                 }
             }

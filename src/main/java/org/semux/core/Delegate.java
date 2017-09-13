@@ -39,4 +39,9 @@ public class Delegate {
     public String toPeerId() {
         return Hex.encode(addr);
     }
+
+    @Override
+    public String toString() {
+        return getNameStr() + "=" + toPeerId();
+    }
 }
