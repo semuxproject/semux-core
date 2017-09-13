@@ -41,7 +41,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "Name", "Address", "Votes", "Votes from Me" };
+    private static String[] columnNames = { "Status", "Name", "Address", "Votes", "Votes from Me" };
 
     private Model model;
 
@@ -65,8 +65,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(24);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 500, 0.2, 0.5, 0.15, 0.15);
-        SwingUtil.setColumnAlignments(table, false, false, true, true);
+        SwingUtil.setColumnWidths(table, 500, 0.08, 0.2, 0.42, 0.15, 0.15);
+        SwingUtil.setColumnAlignments(table, false, false, false, true, true);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
@@ -250,12 +250,14 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
             switch (column) {
             case 0:
-                return Bytes.toString(d.getName());
+                return row >= Config.getNumberOfValidators(model.getLatestBlockNumber()) ? "S" : "V";
             case 1:
-                return "0x" + Hex.encode(d.getAddress());
+                return Bytes.toString(d.getName());
             case 2:
-                return d.getVotes() / Unit.SEM;
+                return "0x" + Hex.encode(d.getAddress());
             case 3:
+                return d.getVotes() / Unit.SEM;
+            case 4:
                 return votesFromMe.get(row) / Unit.SEM;
             default:
                 return null;
