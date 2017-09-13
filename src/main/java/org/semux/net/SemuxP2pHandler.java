@@ -27,6 +27,7 @@ import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageQueue;
 import org.semux.net.msg.MessageRoundtrip;
 import org.semux.net.msg.ReasonCode;
+import org.semux.net.msg.consensus.BFTNewHeightMessage;
 import org.semux.net.msg.consensus.BlockHeaderMessage;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.GetBlockHeaderMessage;
@@ -274,6 +275,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      */
     private void onHandshakeDone(Peer peer) {
         if (!isHandshakeDone) {
+            // notify consensus about peer height
+            consenus.onMessage(channel, new BFTNewHeightMessage(peer.getLatestBlockNumber() + 1));
+
             // start peers exchange
             getNodes = exec.scheduleAtFixedRate(() -> {
                 msgQueue.sendMessage(new GetNodesMessage());

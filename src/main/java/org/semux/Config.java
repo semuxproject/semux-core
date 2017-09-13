@@ -274,11 +274,6 @@ public class Config {
     // =========================
 
     /**
-     * The duration of NEW_HEIGHT state.
-     */
-    public static int BFT_NEW_HEIGHT_TIMEOUT = 4000;
-
-    /**
      * The duration of PREPROSE state.
      */
     public static int BFT_PROPOSE_TIMEOUT = 6000;
@@ -292,6 +287,16 @@ public class Config {
      * The duration of PRE_COMMIT state.
      */
     public static int BFT_PRE_COMMIT_TIMEOUT = 4000;
+
+    /**
+     * The duration of COMMIT state. This may be skipped after 2/3 commit votes.
+     */
+    public static int BFT_COMMIT_TIMEOUT = 4000;
+
+    /**
+     * The duration of POST_COMMIT state.
+     */
+    public static int BFT_POST_COMMIT_TIMEOUT = 4000;
 
     // =========================
     // Virtual machine
