@@ -253,7 +253,6 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
         /* consensus */
         case BFT_NEW_HEIGHT:
-        case BFT_NEW_VIEW:
         case BFT_PROPOSAL:
         case BFT_VOTE: {
             if (isHandshakeDone) {

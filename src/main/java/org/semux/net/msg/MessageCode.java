@@ -86,19 +86,14 @@ public enum MessageCode {
     BFT_NEW_HEIGHT(0x40),
 
     /**
-     * [0x41] BFT new view message.
+     * [0x41] BFT proposal message.
      */
-    BFT_NEW_VIEW(0x41),
+    BFT_PROPOSAL(0x41),
 
     /**
-     * [0x42] BFT proposal message.
+     * [0x42] A BFT vote (for proposal/commit) message.
      */
-    BFT_PROPOSAL(0x42),
-
-    /**
-     * [0x43] A BFT vote (for proposal/commit) message.
-     */
-    BFT_VOTE(0x43);
+    BFT_VOTE(0x42);
 
     private static final MessageCode[] map = new MessageCode[256];
     static {
