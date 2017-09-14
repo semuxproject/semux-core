@@ -168,7 +168,7 @@ public class Config {
     /**
      * P2P protocol version.
      */
-    public static short P2P_VERSION = 5;
+    public static short P2P_VERSION = 7;
 
     /**
      * P2P listening address.
@@ -357,9 +357,10 @@ public class Config {
      * @return
      */
     public static int getNumberOfValidators(long number) {
-        if (number < 300_000) {
-            // every week, increase by 10
-            return (int) (10 + number / 30_000 * 10);
+        long oneDay = 3 * 60 * 60 * 24;
+
+        if (number < 90 * oneDay) {
+            return (int) (10 + number / oneDay);
         } else {
             return 100;
         }

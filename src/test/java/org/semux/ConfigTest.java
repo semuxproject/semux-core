@@ -21,12 +21,16 @@ public class ConfigTest {
 
     @Test
     public void testNumberOfValidators() {
+        long oneDay = 3 * 60 * 60 * 24;
+
         assertEquals(10, Config.getNumberOfValidators(0));
         assertEquals(10, Config.getNumberOfValidators(1));
-        assertEquals(20, Config.getNumberOfValidators(30_000));
-        assertEquals(30, Config.getNumberOfValidators(60_000));
-        assertEquals(100, Config.getNumberOfValidators(270_000));
-        assertEquals(100, Config.getNumberOfValidators(300_000));
+        assertEquals(11, Config.getNumberOfValidators(oneDay));
+        assertEquals(12, Config.getNumberOfValidators(2 * oneDay));
+        assertEquals(60, Config.getNumberOfValidators(50 * oneDay));
+        assertEquals(99, Config.getNumberOfValidators(90 * oneDay - 1));
+        assertEquals(100, Config.getNumberOfValidators(90 * oneDay));
+        assertEquals(100, Config.getNumberOfValidators(100 * oneDay));
         assertEquals(100, Config.getNumberOfValidators(Long.MAX_VALUE));
     }
 }
