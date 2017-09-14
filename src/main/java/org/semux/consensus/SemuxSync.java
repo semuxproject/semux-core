@@ -268,12 +268,12 @@ public class SemuxSync implements Sync {
                 WriteLock lock = Config.STATE_LOCK.writeLock();
                 lock.lock();
                 try {
-                    // [7] add block to chain
-                    chain.addBlock(block);
-
-                    // [8] flush state changes to disk
+                    // [7] flush state changes to disk
                     chain.getAccountState().commit();
                     chain.getDeleteState().commit();
+
+                    // [8] add block to chain
+                    chain.addBlock(block);
                 } finally {
                     lock.unlock();
                 }

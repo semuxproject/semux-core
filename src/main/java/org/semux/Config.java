@@ -168,7 +168,7 @@ public class Config {
     /**
      * P2P protocol version.
      */
-    public static short P2P_VERSION = 3;
+    public static short P2P_VERSION = 5;
 
     /**
      * P2P listening address.
@@ -245,6 +245,7 @@ public class Config {
     public static Set<MessageCode> PRIORITIZED_MESSAGES = new HashSet<>();
     static {
         PRIORITIZED_MESSAGES.add(MessageCode.BFT_NEW_HEIGHT);
+        PRIORITIZED_MESSAGES.add(MessageCode.BFT_NEW_VIEW);
         PRIORITIZED_MESSAGES.add(MessageCode.BFT_PROPOSAL);
         PRIORITIZED_MESSAGES.add(MessageCode.BFT_VOTE);
     }

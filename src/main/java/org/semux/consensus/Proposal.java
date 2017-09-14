@@ -24,6 +24,12 @@ public class Proposal {
     private Boolean isBlockValid = null;
 
     public Proposal(Proof proof, Block block) {
+        // NOTE: the view of proposed block is always zero before being added to
+        // blockchain, so do not check version match here.
+        if (proof.getHeight() != block.getNumber()) {
+            throw new RuntimeException("Proof-of-unlock and proposed block does not match");
+        }
+
         this.proof = proof;
         this.block = block;
 
