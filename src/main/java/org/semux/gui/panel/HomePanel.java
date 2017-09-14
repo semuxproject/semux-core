@@ -46,6 +46,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private JLabel locked;
 
     private JPanel transactions;
+    private JLabel peers;
 
     public HomePanel(Model model) {
         this.model = model;
@@ -94,12 +95,22 @@ public class HomePanel extends JPanel implements ActionListener {
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(10, 10, 10, 10)),
                 "Transactions", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
 
+        JLabel lblPeers = new JLabel("Peers:");
+
+        peers = new JLabel("");
+
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
         groupLayout.setHorizontalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addComponent(overview, GroupLayout.PREFERRED_SIZE, 294, GroupLayout.PREFERRED_SIZE)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                        .addComponent(overview, GroupLayout.PREFERRED_SIZE, 294, GroupLayout.PREFERRED_SIZE)
+                        .addGroup(groupLayout.createSequentialGroup()
+                            .addContainerGap()
+                            .addComponent(lblPeers)
+                            .addPreferredGap(ComponentPlacement.UNRELATED)
+                            .addComponent(peers)))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 478, Short.MAX_VALUE))
         );
@@ -108,7 +119,13 @@ public class HomePanel extends JPanel implements ActionListener {
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 567, Short.MAX_VALUE)
-                        .addComponent(overview, GroupLayout.PREFERRED_SIZE, 171, GroupLayout.PREFERRED_SIZE))
+                        .addGroup(groupLayout.createSequentialGroup()
+                            .addComponent(overview, GroupLayout.PREFERRED_SIZE, 171, GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(ComponentPlacement.RELATED, 369, Short.MAX_VALUE)
+                            .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                                .addComponent(lblPeers)
+                                .addComponent(peers))
+                            .addPreferredGap(ComponentPlacement.RELATED)))
                     .addGap(0))
         );
         transactions.setLayout(new BoxLayout(transactions, BoxLayout.Y_AXIS));
@@ -194,6 +211,7 @@ public class HomePanel extends JPanel implements ActionListener {
         this.status.setText(model.isDelegate() ? "Delegate" : "Normal");
         this.balance.setText(String.format("%.3f SEM", model.getTotalBalance() / (double) Unit.SEM));
         this.locked.setText(String.format("%.3f SEM", model.getTotalLocked() / (double) Unit.SEM));
+        this.peers.setText(Integer.toString(model.getNumberOfPeers()));
 
         // federate all transactions
         Set<ByteArray> hashes = new HashSet<>();

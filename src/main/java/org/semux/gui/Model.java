@@ -26,6 +26,8 @@ public class Model {
     private volatile List<Account> accounts = new ArrayList<>();
     private volatile List<Delegate> delegates = new ArrayList<>();
 
+    private int numberOfPeers;
+
     /**
      * Construct a new model.
      */
@@ -159,6 +161,14 @@ public class Model {
 
     public void setDelegates(List<Delegate> delegates) {
         this.delegates = delegates;
+    }
+
+    public int getNumberOfPeers() {
+        return numberOfPeers;
+    }
+
+    public void setNumberOfPeers(int numberOfPeers) {
+        this.numberOfPeers = numberOfPeers;
     }
 
     public static class Account {

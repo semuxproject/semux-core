@@ -176,7 +176,6 @@ public class GUI {
         model.init(wallet.getAccounts());
         model.setLatestBlockNumber(block.getNumber());
         model.setDelegate(ds.getDelegateByAddress(kernel.getCoinbase().toAddress()) != null);
-
         for (Model.Account ma : model.getAccounts()) {
             Account a = as.getAccount(ma.getKey().toAddress());
             ma.setNonce(a.getNonce());
@@ -184,8 +183,8 @@ public class GUI {
             ma.setLocked(a.getLocked());
             ma.setTransactions(chain.getTransactions(ma.getKey().toAddress(), TRANSACTION_LIMIT));
         }
-
         model.setDelegates(ds.getDelegates());
+        model.setNumberOfPeers(kernel.getChannelManager().getActivePeers().size());
 
         model.fireUpdateEvent();
     }
