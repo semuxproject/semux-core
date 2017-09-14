@@ -72,11 +72,12 @@ public class SemuxBFT implements Consensus {
     private long height;
     private int view;
     private Proof proof;
+    private Proposal proposal;
+    private boolean finalized;
 
     private volatile List<String> validators;
     private volatile List<Channel> activeValidators;
 
-    private Proposal proposal;
     private VoteSet validateVotes;
     private VoteSet precommitVotes;
     private VoteSet commitVotes;
@@ -229,6 +230,8 @@ public class SemuxBFT implements Consensus {
         height = prevBlock.getNumber() + 1;
         view = 0;
         proof = new Proof(height, view);
+        proposal = null;
+        finalized = false;
 
         // update validators
         List<Delegate> list = delegateState.getValidators();
@@ -239,14 +242,13 @@ public class SemuxBFT implements Consensus {
         validators = peerIds;
         activeValidators = channelMgr.getActiveChannels(validators);
 
-        // reset proposal and votes
-        proposal = null;
+        // reset votes and events
         resetVotes();
         resetTimerAndEvents();
 
         logger.info("Entered new_height: height = {}, # validators = {}", height, validators.size());
         if (isValidator()) {
-            enterPropose();
+            timer.timeout(Config.BFT_NEW_HEIGHT_TIMEOUT);
         }
 
         // Broadcast NEW_HEIGHT messages to all peers.
@@ -360,14 +362,7 @@ public class SemuxBFT implements Consensus {
         }
     }
 
-    /**
-     * Enter the POST_COMMIT state
-     */
-    protected void enterPostCommit() {
-        state = State.POST_COMMIT;
-        timer.timeout(Config.BFT_POST_COMMIT_TIMEOUT);
-        logger.info("Entered post_commit: commit votes = {}", precommitVotes);
-
+    protected void finalizeBlock() {
         if (proposal != null && precommitVotes.isApproved()) {
             // [1] create a block
             Block block = proposal.getBlock();
@@ -385,7 +380,6 @@ public class SemuxBFT implements Consensus {
             applyBlock(block);
         } else {
             sync(height + 1);
-            enterNewHeight();
         }
     }
 
@@ -493,14 +487,10 @@ public class SemuxBFT implements Consensus {
             case COMMIT:
                 added = commitVotes.addVote(v);
                 if (commitVotes.isApproved()) {
-                    if (state == State.COMMIT) {
-                        // skip commit state time out if the network is healthy
-                        enterPostCommit();
-                    } else if (state == State.POST_COMMIT) {
-                        // do nothing, post_commit state will timeout
-                    } else {
-                        // jump into post_commit state
-                        enterPostCommit();
+                    // skip COMMIT state time out if +2/3 commit votes
+                    if (!finalized) {
+                        finalizeBlock();
+                        enterNewHeight();
                     }
                 }
                 break;
@@ -519,7 +509,8 @@ public class SemuxBFT implements Consensus {
     protected void onTimeout() {
         switch (state) {
         case NEW_HEIGHT:
-            throw new RuntimeException("Invalid consensus state");
+            enterPropose();
+            break;
         case PROPOSE:
             enterValidate();
             break;
@@ -534,14 +525,8 @@ public class SemuxBFT implements Consensus {
             }
             break;
         case COMMIT:
-            if (commitVotes.isApproved()) {
-                enterPostCommit();
-            } else {
-                sync(height + 1);
-                enterNewHeight();
-            }
-            break;
-        case POST_COMMIT:
+            // TODO: more tests about this condition
+            sync(height + 1);
             enterNewHeight();
             break;
         }
@@ -774,6 +759,10 @@ public class SemuxBFT implements Consensus {
      * @param block
      */
     protected void applyBlock(Block block) {
+        if (block.getNumber() != chain.getLatestBlockNumber() + 1) {
+            throw new RuntimeException("Applying wrong block: number = " + block.getNumber());
+        }
+
         AccountState as = chain.getAccountState().track();
         DelegateState ds = chain.getDeleteState().track();
 
@@ -813,7 +802,7 @@ public class SemuxBFT implements Consensus {
     }
 
     public enum State {
-        NEW_HEIGHT, PROPOSE, VALIDATE, PRE_COMMIT, COMMIT, POST_COMMIT
+        NEW_HEIGHT, PROPOSE, VALIDATE, PRE_COMMIT, COMMIT
     }
 
     public class Timer implements Runnable {
