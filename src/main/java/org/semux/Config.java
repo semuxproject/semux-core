@@ -273,19 +273,19 @@ public class Config {
     // BFT consensus
     // =========================
     /**
-     * The duration of NEW_HEIGHT state.
+     * The duration of NEW_HEIGHT state. This allow peers to catch up.
      */
-    public static int BFT_NEW_HEIGHT_TIMEOUT = 4000;
+    public static int BFT_NEW_HEIGHT_TIMEOUT = 3000;
 
     /**
      * The duration of PREPROSE state.
      */
-    public static int BFT_PROPOSE_TIMEOUT = 6000;
+    public static int BFT_PROPOSE_TIMEOUT = 5000;
 
     /**
      * The duration of VALIDATE state.
      */
-    public static int BFT_VALIDATE_TIMEOUT = 6000;
+    public static int BFT_VALIDATE_TIMEOUT = 5000;
 
     /**
      * The duration of PRE_COMMIT state.
@@ -296,6 +296,11 @@ public class Config {
      * The duration of COMMIT state. May be skipped if +2/3 commit votes
      */
     public static int BFT_COMMIT_TIMEOUT = 4000;
+
+    /**
+     * The duration of FINALIZE state. This allow slow peers to persist block
+     */
+    public static int BFT_FINALIZE_TIMEOUT = 3000;
 
     // =========================
     // Virtual machine

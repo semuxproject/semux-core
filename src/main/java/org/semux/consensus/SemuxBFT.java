@@ -137,6 +137,9 @@ public class SemuxBFT implements Consensus {
             // restore status if not stopped
             if (status != Status.STOPPED) {
                 status = Status.RUNNING;
+
+                // enter new height
+                enterNewHeight();
             }
         }
     }
@@ -362,7 +365,17 @@ public class SemuxBFT implements Consensus {
         }
     }
 
-    protected void finalizeBlock() {
+    /**
+     * Enter the FINALIZE state
+     */
+    protected void enterFinalize() {
+        state = State.FINALIZE;
+        timer.timeout(Config.BFT_FINALIZE_TIMEOUT);
+        logger.info("Entered finalize: pre_commit votes = {}, commit votes = {}, block ready = {}", precommitVotes,
+                commitVotes, proposal != null);
+
+        finalized = true;
+
         if (proposal != null && precommitVotes.isApproved()) {
             // [1] create a block
             Block block = proposal.getBlock();
@@ -398,7 +411,6 @@ public class SemuxBFT implements Consensus {
 
             if (count >= (int) Math.ceil(activeValidators.size() * 2.0 / 3.0)) {
                 sync(h);
-                enterNewHeight();
             }
         }
     }
@@ -489,8 +501,7 @@ public class SemuxBFT implements Consensus {
                 if (commitVotes.isApproved()) {
                     // skip COMMIT state time out if +2/3 commit votes
                     if (!finalized) {
-                        finalizeBlock();
-                        enterNewHeight();
+                        enterFinalize();
                     }
                 }
                 break;
@@ -525,8 +536,11 @@ public class SemuxBFT implements Consensus {
             }
             break;
         case COMMIT:
-            // TODO: more tests about this condition
-            sync(height + 1);
+            if (!finalized) {
+                enterFinalize();
+            }
+            break;
+        case FINALIZE:
             enterNewHeight();
             break;
         }
@@ -802,7 +816,7 @@ public class SemuxBFT implements Consensus {
     }
 
     public enum State {
-        NEW_HEIGHT, PROPOSE, VALIDATE, PRE_COMMIT, COMMIT
+        NEW_HEIGHT, PROPOSE, VALIDATE, PRE_COMMIT, COMMIT, FINALIZE
     }
 
     public class Timer implements Runnable {
