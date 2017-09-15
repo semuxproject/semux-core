@@ -258,14 +258,17 @@ public class NodeManager {
      * @param networkId
      * @return
      */
-    private static File getFile(short networkId) {
+    protected static File getFile(short networkId) {
         File f = new File(Config.DATA_DIR, PEERS_DIR + File.separator + PEERS_FILE);
         f.getParentFile().mkdirs();
 
         return f;
     }
 
-    private void doConnect() {
+    /**
+     * Connect to a node
+     */
+    protected void doConnect() {
         Set<InetSocketAddress> activeAddresses = channelMgr.getActiveAddresses();
         InetSocketAddress addr;
 
@@ -286,7 +289,10 @@ public class NodeManager {
         }
     }
 
-    private void doPersist() {
+    /**
+     * Persist all active nodes
+     */
+    protected void doPersist() {
         List<InetSocketAddress> list = new ArrayList<>(channelMgr.getActiveAddresses());
         setPersistedNodes(Config.NETWORK_ID, list);
 

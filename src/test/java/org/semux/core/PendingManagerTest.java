@@ -81,21 +81,6 @@ public class PendingManagerTest {
     }
 
     @Test
-    public void testRemoveTransactions() throws InterruptedException {
-        long now = System.currentTimeMillis();
-        long nonce = accountState.getAccount(from).getNonce();
-
-        Transaction tx = new Transaction(type, from, to, value, fee, nonce, now, Bytes.EMPY_BYTES).sign(key);
-        pendingMgr.addTransaction(tx);
-
-        Thread.sleep(100);
-        assertEquals(1, pendingMgr.getTransactions().size());
-
-        pendingMgr.removeTransaction(tx);
-        assertEquals(0, pendingMgr.getTransactions().size());
-    }
-
-    @Test
     public void testNonceJump() throws InterruptedException {
         long now = System.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();

@@ -7,7 +7,6 @@
 package org.semux.core;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.collections4.map.LRUMap;
 import org.semux.Config;
 import org.semux.core.state.AccountState;
+import org.semux.core.state.DelegateState;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.p2p.TransactionMessage;
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * TODO: sort transactions by fee, and other metric
  *
  */
-public class PendingManager implements Runnable, BlockchainListener, Comparator<Transaction> {
+public class PendingManager implements Runnable, BlockchainListener {
 
     private static final Logger logger = LoggerFactory.getLogger(PendingManager.class);
 
@@ -60,7 +60,8 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
 
     private Blockchain chain;
     private ChannelManager channelMgr;
-    private AccountState accountState;
+    private AccountState pendingAS;
+    private DelegateState pendingDS;
 
     /**
      * Transaction queue.
@@ -70,7 +71,9 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
     /**
      * Transaction pool.
      */
-    private Map<ByteArray, Transaction> pool = new HashMap<>();
+    private Map<ByteArray, Transaction> poolMap = new HashMap<>();
+    private List<Transaction> poolList = new ArrayList<>();
+    private Object poolLock = new Object();
 
     /**
      * Transaction cache.
@@ -88,7 +91,8 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
     public PendingManager(Blockchain chain, ChannelManager channelMgr) {
         this.chain = chain;
         this.channelMgr = channelMgr;
-        this.accountState = chain.getAccountState().track();
+        this.pendingAS = chain.getAccountState().track();
+        this.pendingDS = chain.getDeleteState().track();
 
         this.exec = Executors.newSingleThreadScheduledExecutor(factory);
     }
@@ -171,7 +175,7 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
      * @return
      */
     public synchronized long getNonce(byte[] address) {
-        return accountState.getAccount(address).getNonce();
+        return pendingAS.getAccount(address).getNonce();
     }
 
     /**
@@ -182,14 +186,12 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
      */
     public synchronized List<Transaction> getTransactions(int limit) {
         List<Transaction> list = new ArrayList<>();
-        synchronized (pool) {
-            list.addAll(pool.values());
-        }
-
-        list.sort(this);
-
-        if (limit >= 0) {
-            return list.size() > limit ? list.subList(0, limit) : list;
+        synchronized (poolLock) {
+            if (poolList.size() > limit) {
+                list.addAll(poolList.subList(0, limit));
+            } else {
+                list.addAll(poolList);
+            }
         }
         return list;
     }
@@ -200,27 +202,9 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
      * @return
      */
     public synchronized List<Transaction> getTransactions() {
-        return getTransactions(-1);
-    }
-
-    /**
-     * Remove transactions from the pool.
-     * 
-     * @param txs
-     */
-    public synchronized void removeTransactions(List<Transaction> txs) {
-        for (Transaction tx : txs) {
-            pool.remove(createKey(tx));
+        synchronized (poolLock) {
+            return new ArrayList<>(poolList);
         }
-    }
-
-    /**
-     * Remove a transaction from the pool.
-     * 
-     * @param tx
-     */
-    public synchronized void removeTransaction(Transaction tx) {
-        pool.remove(createKey(tx));
     }
 
     @Override
@@ -228,84 +212,94 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
         if (isRunning) {
             long t1 = System.currentTimeMillis();
 
-            // [1] remove included transaction
-            removeTransactions(block.getTransactions());
+            // [1] reset state
+            pendingAS = chain.getAccountState().track();
+            pendingDS = chain.getDeleteState().track();
 
-            // [2] reset state
-            accountState = chain.getAccountState().track();
+            synchronized (poolLock) {
+                // [2] clear transaction pool
+                List<Transaction> txs = new ArrayList<>(poolList);
+                poolMap.clear();
+                poolList.clear();
 
-            // [3] clear transaction pool
-            List<Transaction> txs = new ArrayList<>(pool.values());
-            txs.sort(this);
-            pool.clear();
-            long t2 = System.currentTimeMillis();
+                // [3] update pending state
+                long accepted = 0;
+                for (Transaction tx : txs) {
+                    accepted += processTransaction(tx, false);
+                }
 
-            // [4] update state
-            long total = 0;
-            for (Transaction tx : txs) {
-                total += processTransaction(tx, false);
+                long t2 = System.currentTimeMillis();
+                logger.debug("Pending tx evaluation: # txs = {} / {},  time =  {} ms", accepted, txs.size(), t2 - t1);
             }
-
-            long t3 = System.currentTimeMillis();
-            logger.debug("Pending tx evaluation: # txs = {} / {},  time = {} + {} ms", total, txs.size(), t2 - t1,
-                    t3 - t2);
         }
     }
 
     @Override
     public synchronized void run() {
-        for (Transaction tx; (tx = queue.poll()) != null;) {
+        Transaction tx;
 
-            if (!pool.containsKey(createKey(tx)) // not in pool
-                    && chain.getTransaction(tx.getHash()) == null // not in chain
-                    && tx.validate()) { // valid
-
-                // process transaction
-                if (processTransaction(tx, true) < 1) {
-                    logger.debug("Transaction dropped: {}", tx);
-                }
-
+        while ((tx = queue.poll()) != null) {
+            if (tx.validate() && processTransaction(tx, true) >= 1) {
                 // break after one transaction
                 return;
             }
         }
     }
 
-    private int processTransaction(Transaction tx, boolean relay) {
-        Account acc = accountState.getAccount(tx.getFrom());
+    /**
+     * Validate the given transaction. Add it to the pool if valid.
+     * 
+     * @param tx
+     *            transaction
+     * @param relay
+     *            whether to relay the transaction if valid
+     * @return the number of valid transactions processed
+     */
+    protected int processTransaction(Transaction tx, boolean relay) {
 
-        // [0] check timestamp
+        // check timestamp. this is not part of validation protocol
         long now = System.currentTimeMillis();
         long twoHours = TimeUnit.HOURS.toMillis(2);
         if (tx.getTimestamp() < now - twoHours || tx.getTimestamp() > now + twoHours) {
             return 0;
         }
 
-        // [1] check balance
-        if (tx.getValue() > acc.getBalance()) {
-            return 0;
-        }
+        AccountState as = pendingAS.track();
+        DelegateState ds = pendingDS.track();
+        TransactionExecutor exec = new TransactionExecutor();
 
-        // [2] check nonce
+        Account acc = as.getAccount(tx.getFrom());
         long nonce = acc.getNonce();
         int cnt = 0;
         while (tx != null && tx.getNonce() == nonce) {
-            // [3] increase nonce
-            acc.setNonce(nonce + 1);
+            // execute transactions
+            TransactionResult result = exec.execute(tx, as, ds, false);
 
-            // [4] add transaction to pool
-            pool.put(createKey(tx), tx);
+            if (result.isValid()) {
+                // commit state updates
+                as.commit();
+                ds.commit();
 
-            // [5] relay transaction
-            if (relay) {
-                List<Channel> channels = channelMgr.getActiveChannels();
-                int[] indexes = ArrayUtil.permutation(channels.size());
-                for (int i = 0; i < indexes.length && i < Config.NET_RELAY_REDUNDANCY; i++) {
-                    if (channels.get(indexes[i]).isActive()) {
-                        TransactionMessage msg = new TransactionMessage(tx);
-                        channels.get(indexes[i]).getMessageQueue().sendMessage(msg);
+                // add transaction to pool
+                synchronized (poolLock) {
+                    poolMap.put(createKey(tx), tx);
+                    poolList.add(tx);
+                }
+
+                // relay transaction
+                if (relay) {
+                    List<Channel> channels = channelMgr.getActiveChannels();
+                    int[] indexes = ArrayUtil.permutation(channels.size());
+                    for (int i = 0; i < indexes.length && i < Config.NET_RELAY_REDUNDANCY; i++) {
+                        if (channels.get(indexes[i]).isActive()) {
+                            TransactionMessage msg = new TransactionMessage(tx);
+                            channels.get(indexes[i]).getMessageQueue().sendMessage(msg);
+                        }
                     }
                 }
+            } else {
+                // exit immediately if invalid
+                return cnt;
             }
 
             nonce++;
@@ -327,11 +321,5 @@ public class PendingManager implements Runnable, BlockchainListener, Comparator<
 
     private ByteArray createKey(byte[] acc, long nonce) {
         return ByteArray.of(Bytes.merge(acc, Bytes.of(nonce)));
-    }
-
-    @Override
-    public int compare(Transaction tx1, Transaction tx2) {
-        int c = Long.compare(tx1.getTimestamp(), tx2.getTimestamp());
-        return (c != 0) ? c : Long.compare(tx1.getNonce(), tx2.getNonce());
     }
 }

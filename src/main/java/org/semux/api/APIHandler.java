@@ -362,7 +362,7 @@ public class APIHandler {
             if (pendingMgr.addTransactionSync(tx)) {
                 return success(HEX + Hex.encode(tx.getHash()));
             } else {
-                return failure("Failed to add transaction to pool");
+                return failure("Transaciton rejected by pending manager");
             }
         } else {
             return failure("Invalid parameters");

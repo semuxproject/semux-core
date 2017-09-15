@@ -681,25 +681,9 @@ public class SemuxBFT implements Consensus {
      */
     protected Block proposeBlock() {
         long t1 = System.currentTimeMillis();
-        List<Transaction> txs = new ArrayList<>();
 
-        AccountState as = accountState.track();
-        DelegateState ds = delegateState.track();
-        TransactionExecutor exec = new TransactionExecutor();
-
-        // validate transactions
-        List<Transaction> list = pendingMgr.getTransactions(Config.MAX_BLOCK_SIZE);
-        List<TransactionResult> results = exec.execute(list, as, ds, false);
-        for (int i = 0; i < results.size(); i++) {
-            Transaction tx = list.get(i);
-
-            if (results.get(i).isValid()) {
-                txs.add(tx);
-            } else {
-                logger.warn("Transaction bypassed pending manager: {}", tx);
-                pendingMgr.removeTransaction(tx);
-            }
-        }
+        // fetch pending transactions
+        List<Transaction> txs = pendingMgr.getTransactions(Config.MAX_BLOCK_SIZE);
 
         // build merkle tree
         List<byte[]> hashes = new ArrayList<>();

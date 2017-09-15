@@ -60,7 +60,7 @@ public class NodeManagerTest {
     }
 
     @Test
-    public void testConnAndSync() throws InterruptedException {
+    public void testConnect() throws InterruptedException {
         EdDSA key = new EdDSA();
         PeerClient remoteClient = new PeerClient("127.0.0.1", 5161, key);
 
@@ -78,8 +78,9 @@ public class NodeManagerTest {
             nodeMgr.start();
 
             nodeMgr.addNode(new InetSocketAddress(remoteClient.getIp(), remoteClient.getPort()));
+            nodeMgr.doConnect();
 
-            Thread.sleep(1000);
+            Thread.sleep(500);
             assertFalse(channelMgr.getActivePeers().isEmpty());
         } finally {
             ps.stop();
