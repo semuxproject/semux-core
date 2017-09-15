@@ -211,7 +211,7 @@ public class HomePanel extends JPanel implements ActionListener {
         this.status.setText(model.isDelegate() ? "Delegate" : "Normal");
         this.balance.setText(String.format("%.3f SEM", model.getTotalBalance() / (double) Unit.SEM));
         this.locked.setText(String.format("%.3f SEM", model.getTotalLocked() / (double) Unit.SEM));
-        this.peers.setText(Integer.toString(model.getNumberOfPeers()));
+        this.peers.setText(Integer.toString(model.getActivePeers().size()));
 
         // federate all transactions
         Set<ByteArray> hashes = new HashSet<>();

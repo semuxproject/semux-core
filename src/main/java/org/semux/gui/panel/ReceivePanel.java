@@ -55,7 +55,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(24);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 500, 0.1, 0.6, 0.2, 0.2);
+        SwingUtil.setColumnWidths(table, 600, 0.1, 0.6, 0.2, 0.2);
         SwingUtil.setColumnAlignments(table, false, false, true, true);
 
         JScrollPane scrollPane = new JScrollPane(table);

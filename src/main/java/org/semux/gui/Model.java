@@ -5,10 +5,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.semux.core.Delegate;
 import org.semux.core.Transaction;
 import org.semux.crypto.EdDSA;
+import org.semux.net.Peer;
 
 /**
  * A Model stores all the data that GUI needs. The thread-safety of this class
@@ -26,7 +28,7 @@ public class Model {
     private volatile List<Account> accounts = new ArrayList<>();
     private volatile List<Delegate> delegates = new ArrayList<>();
 
-    private int numberOfPeers;
+    private Map<String, Peer> activePeers;
 
     /**
      * Construct a new model.
@@ -163,12 +165,12 @@ public class Model {
         this.delegates = delegates;
     }
 
-    public int getNumberOfPeers() {
-        return numberOfPeers;
+    public Map<String, Peer> getActivePeers() {
+        return activePeers;
     }
 
-    public void setNumberOfPeers(int numberOfPeers) {
-        this.numberOfPeers = numberOfPeers;
+    public void setActivePeers(Map<String, Peer> activePeers) {
+        this.activePeers = activePeers;
     }
 
     public static class Account {

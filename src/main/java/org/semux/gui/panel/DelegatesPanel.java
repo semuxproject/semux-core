@@ -41,7 +41,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "Status", "Name", "Address", "Votes", "Votes from Me" };
+    private static String[] columnNames = { "Status", "Name", "Address", "Votes", "Connected" };
 
     private Model model;
 
@@ -65,7 +65,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(24);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 500, 0.08, 0.2, 0.42, 0.15, 0.15);
+        SwingUtil.setColumnWidths(table, 600, 0.1, 0.2, 0.4, 0.2, 0.1);
         SwingUtil.setColumnAlignments(table, false, false, false, true, true);
 
         JScrollPane scrollPane = new JScrollPane(table);
@@ -256,9 +256,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             case 2:
                 return "0x" + Hex.encode(d.getAddress());
             case 3:
-                return d.getVotes() / Unit.SEM;
+                return votesFromMe.get(row) / Unit.SEM + " / " + (d.getVotes() / Unit.SEM);
             case 4:
-                return votesFromMe.get(row) / Unit.SEM;
+                return model.getActivePeers().containsKey(Hex.encode(d.getAddress())) ? "Yes" : "No";
             default:
                 return null;
             }

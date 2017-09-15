@@ -53,7 +53,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(24);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 600, 0.15, 0.08, 0.25, 0.25, 0.12, 0.15);
+        SwingUtil.setColumnWidths(table, 800, 0.15, 0.08, 0.25, 0.25, 0.12, 0.15);
         SwingUtil.setColumnAlignments(table, false, false, false, false, true, true);
 
         JScrollPane scrollPane = new JScrollPane(table);

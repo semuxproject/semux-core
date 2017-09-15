@@ -10,7 +10,9 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -29,6 +31,7 @@ import org.semux.gui.Model;
 import org.semux.gui.WelcomeFrame;
 import org.semux.gui.dialog.InputDialog;
 import org.semux.gui.dialog.SelectDialog;
+import org.semux.net.Peer;
 import org.semux.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -184,7 +187,11 @@ public class GUI {
             ma.setTransactions(chain.getTransactions(ma.getKey().toAddress(), TRANSACTION_LIMIT));
         }
         model.setDelegates(ds.getDelegates());
-        model.setNumberOfPeers(kernel.getChannelManager().getActivePeers().size());
+        Map<String, Peer> activePeers = new HashMap<>();
+        for (Peer peer : kernel.getChannelManager().getActivePeers()) {
+            activePeers.put(peer.getPeerId(), peer);
+        }
+        model.setActivePeers(activePeers);
 
         model.fireUpdateEvent();
     }
