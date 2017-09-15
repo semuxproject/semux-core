@@ -228,9 +228,7 @@ public class SendPanel extends JPanel implements ActionListener {
                 Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
                 tx.sign(acc.getKey());
 
-                pendingMgr.addTransaction(tx);
-                JOptionPane.showMessageDialog(this, "Transaction sent. It takes at least 20s to get processed!");
-                clear();
+                sendTransaction(pendingMgr, tx);
             }
             break;
         case CLEAR:
@@ -238,6 +236,15 @@ public class SendPanel extends JPanel implements ActionListener {
             break;
         default:
             break;
+        }
+    }
+
+    private void sendTransaction(PendingManager pendingMgr, Transaction tx) {
+        if (pendingMgr.addTransactionSync(tx)) {
+            JOptionPane.showMessageDialog(this, "Transaction sent. It takes at least 20s to get processed!");
+            clear();
+        } else {
+            JOptionPane.showMessageDialog(this, "Transaction failed!");
         }
     }
 

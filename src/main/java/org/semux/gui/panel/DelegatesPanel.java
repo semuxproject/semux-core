@@ -41,7 +41,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "Status", "Name", "Address", "Votes", "Connected" };
+    private static String[] columnNames = { "Status", "Name", "Address", "Votes", "From Me", "Connected" };
 
     private Model model;
 
@@ -65,8 +65,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(24);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 600, 0.1, 0.2, 0.4, 0.2, 0.1);
-        SwingUtil.setColumnAlignments(table, false, false, false, true, true);
+        SwingUtil.setColumnWidths(table, 600, 0.06, 0.2, 0.4, 0.14, 0.1, 0.1);
+        SwingUtil.setColumnAlignments(table, false, false, false, true, true, true);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
@@ -256,8 +256,10 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             case 2:
                 return "0x" + Hex.encode(d.getAddress());
             case 3:
-                return votesFromMe.get(row) / Unit.SEM + " / " + (d.getVotes() / Unit.SEM);
+                return d.getVotes() / Unit.SEM;
             case 4:
+                return votesFromMe.get(row) / Unit.SEM;
+            case 5:
                 return model.getActivePeers().containsKey(Hex.encode(d.getAddress())) ? "Yes" : "No";
             default:
                 return null;
@@ -322,9 +324,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
                 tx.sign(a.getKey());
 
-                pendingMgr.addTransaction(tx);
-                JOptionPane.showMessageDialog(this, "Transaction sent. It takes at least 20s to get processed!");
-                clear();
+                sendTransaction(pendingMgr, tx);
             }
             break;
         }
@@ -334,7 +334,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             if (a == null) {
                 JOptionPane.showMessageDialog(this, "Please select an account!");
             } else if (!name.matches("[_a-z0-9]{4,16}")) {
-                JOptionPane.showMessageDialog(this, "Please enter a valid delegate name!");
+                JOptionPane.showMessageDialog(this, "Only 4-16 lowercase letters, numbers and underscore are allowed");
             } else if (a.getBalance() < Config.MIN_DELEGATE_FEE + Config.MIN_TRANSACTION_FEE) {
                 JOptionPane.showMessageDialog(this, "Insufficient funds! Delegate registration fee = "
                         + Config.MIN_DELEGATE_FEE / Unit.SEM + " SEM");
@@ -360,14 +360,21 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
                 tx.sign(a.getKey());
 
-                pendingMgr.addTransaction(tx);
-                JOptionPane.showMessageDialog(this, "Transaction sent. It takes at least 20s to get processed!");
-                clear();
+                sendTransaction(pendingMgr, tx);
             }
             break;
         }
         default:
             break;
+        }
+    }
+
+    private void sendTransaction(PendingManager pendingMgr, Transaction tx) {
+        if (pendingMgr.addTransactionSync(tx)) {
+            JOptionPane.showMessageDialog(this, "Transaction sent. It takes at least 20s to get processed!");
+            clear();
+        } else {
+            JOptionPane.showMessageDialog(this, "Transaction failed!");
         }
     }
 
