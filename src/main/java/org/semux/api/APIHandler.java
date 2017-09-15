@@ -149,7 +149,6 @@ public class APIHandler {
                     return failure("Invalid parameter: number = " + number + ", hash = " + hash);
                 }
             }
-
             case GET_PENDING_TRANSACTIONS: {
                 List<Transaction> txs = pendingMgr.getTransactions();
                 JSONArray arr = new JSONArray();
@@ -157,6 +156,19 @@ public class APIHandler {
                     arr.put(transactionToJson(tx));
                 }
                 return success(arr);
+            }
+            case GET_ACCOUNT_TRANSACTIONS: {
+                String addr = params.get("address");
+                if (addr != null) {
+                    List<Transaction> txs = chain.getTransactions(Hex.parse(addr));
+                    JSONArray arr = new JSONArray();
+                    for (Transaction tx : txs) {
+                        arr.put(transactionToJson(tx));
+                    }
+                    return success(arr);
+                } else {
+                    return failure("Invalid parameter: address = " + addr);
+                }
             }
             case GET_TRANSACTION: {
                 String hash = params.get("hash");
@@ -235,14 +247,14 @@ public class APIHandler {
                 }
             }
             case GET_VOTE: {
-                String voter = params.get("voter");
-                String delegate = params.get("delegate");
+                String from = params.get("from");
+                String to = params.get("to");
 
-                if (voter != null && delegate != null) {
-                    long vote = chain.getDeleteState().getVote(Hex.decode(voter), Hex.decode(delegate));
+                if (from != null && to != null) {
+                    long vote = chain.getDeleteState().getVote(Hex.decode(from), Hex.decode(to));
                     return success(vote);
                 } else {
-                    return failure("Invalid parameter: voter = " + voter + ", delegate = " + delegate);
+                    return failure("Invalid parameter: voter = " + from + ", delegate = " + to);
                 }
             }
 
@@ -329,7 +341,10 @@ public class APIHandler {
             }
 
             // to address
-            byte[] to = (type == TransactionType.DELEGATE) ? from.toAddress() : Hex.parse(pTo);
+            byte[] to = (pTo.length() >= 20) ? Hex.parse(pTo) : wallet.getAccount(Integer.parseInt(pTo)).getPublicKey();
+            if (to == null) {
+                return failure("Invalid parameter: to = " + pTo);
+            }
 
             // value and fee
             long value = Long.parseLong(pValue);
@@ -397,8 +412,8 @@ public class APIHandler {
         JSONObject obj = new JSONObject();
         obj.put("hash", HEX + Hex.encode(tx.getHash()));
         obj.put("type", tx.getType().toString());
-        obj.put("from", Hex.encode(tx.getFrom()));
-        obj.put("to", Hex.encode(tx.getTo()));
+        obj.put("from", HEX + Hex.encode(tx.getFrom()));
+        obj.put("to", HEX + Hex.encode(tx.getTo()));
         obj.put("value", tx.getValue());
         obj.put("fee", tx.getFee());
         obj.put("nonce", tx.getNonce());
@@ -437,7 +452,7 @@ public class APIHandler {
         obj.put("port", peer.getPort());
         obj.put("p2pVersion", peer.getP2pVersion());
         obj.put("clientId", peer.getClientId());
-        obj.put("peerId", peer.getPeerId());
+        obj.put("peerId", HEX + peer.getPeerId());
         obj.put("latestBlockNumber", peer.getLatestBlockNumber());
         obj.put("latency", peer.getLatency());
 

@@ -171,6 +171,26 @@ public class APIHandlerTest {
     }
 
     @Test
+    public void testGetAccountTransactions() throws IOException {
+        Transaction tx = createTransaction();
+        Block block = createBlock(api.chain, Collections.singletonList(tx));
+        api.chain.addBlock(block);
+
+        try {
+            String uri = "/get_account_transactions?address=" + Hex.encode(tx.getFrom());
+            JSONObject response = request(uri);
+            assertTrue(response.getBoolean("success"));
+
+            JSONArray arr = response.getJSONArray("result");
+            assertNotNull(arr);
+        } finally {
+            // Reset the API server
+            teardown();
+            setup();
+        }
+    }
+
+    @Test
     public void testGetTransaction() throws IOException {
         Transaction tx = createTransaction();
         Block block = createBlock(api.chain, Collections.singletonList(tx));
@@ -239,6 +259,14 @@ public class APIHandlerTest {
     }
 
     @Test
+    public void testGetValidators() throws IOException {
+        String uri = "/get_validators";
+        JSONObject response = request(uri);
+        assertTrue(response.getBoolean("success"));
+        assertTrue(response.getJSONArray("result").length() > 0);
+    }
+
+    @Test
     public void testGetDelegates() throws IOException {
         String uri = "/get_delegates";
         JSONObject response = request(uri);
@@ -270,7 +298,7 @@ public class APIHandlerTest {
         ds.register(key2.toAddress(), Bytes.of("test"));
         ds.vote(key.toAddress(), key2.toAddress(), 200L);
 
-        String uri = "/get_vote?voter=" + key.toAddressString() + "&delegate=" + key2.toAddressString();
+        String uri = "/get_vote?from=" + key.toAddressString() + "&to=" + key2.toAddressString();
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertEquals(200L, response.getLong("result"));
