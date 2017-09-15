@@ -71,9 +71,6 @@ public class TransactionExecutor {
 
                 // charge transaction fee
                 fromAcc.setBalance(fromAcc.getBalance() - fee);
-
-                // set transaction to be valid
-                result.setValid(true);
             }
 
             switch (tx.getType()) {
@@ -83,7 +80,7 @@ public class TransactionExecutor {
                     fromAcc.setBalance(fromAcc.getBalance() - value);
                     toAcc.setBalance(toAcc.getBalance() + value);
 
-                    result.setCode(0);
+                    result.setValid(true);
                 }
                 break;
             }
@@ -95,7 +92,7 @@ public class TransactionExecutor {
                     fromAcc.setBalance(fromAcc.getBalance() - value);
                     ds.register(to, data);
 
-                    result.setCode(0);
+                    result.setValid(true);
                 }
                 break;
             }
@@ -105,7 +102,7 @@ public class TransactionExecutor {
                     fromAcc.setBalance(fromAcc.getBalance() - value);
                     fromAcc.setLocked(fromAcc.getLocked() + value);
 
-                    result.setCode(0);
+                    result.setValid(true);
                 }
                 break;
             }
@@ -115,7 +112,7 @@ public class TransactionExecutor {
                     fromAcc.setBalance(fromAcc.getBalance() + value);
                     fromAcc.setLocked(fromAcc.getLocked() - value);
 
-                    result.setCode(0);
+                    result.setValid(true);
                 }
                 break;
             }

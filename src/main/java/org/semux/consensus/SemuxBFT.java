@@ -770,7 +770,7 @@ public class SemuxBFT implements Consensus {
         for (int i = 0; i < results.size(); i++) {
             if (!results.get(i).isValid()) {
                 byte[] hash = block.getTransactions().get(i).getHash();
-                logger.warn("Invalid transaction bypassed the consensus, tx = {}", Hex.encode(hash));
+                logger.error("Invalid transaction: hash = {}", Hex.encode(hash));
                 return;
             }
         }

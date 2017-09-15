@@ -11,21 +11,18 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.semux.utils.Bytes;
+import org.semux.utils.SimpleDecoder;
+import org.semux.utils.SimpleEncoder;
 
 public class TransactionResult {
 
     /**
-     * Indicate whether this transaction is valid or not.
+     * Indicates whether this transaction is valid or not.
      */
     protected boolean valid;
 
     /**
-     * Error indicator.
-     */
-    protected int code;
-
-    /**
-     * Transaction output/return.
+     * Transaction output.
      */
     protected byte[] output;
 
@@ -35,17 +32,28 @@ public class TransactionResult {
     protected List<byte[]> logs;
 
     /**
-     * Create a default transaction result:
+     * Create a transaction result.
+     * 
+     * @param valid
+     * @param output
+     * @param logs
+     */
+    public TransactionResult(boolean valid, byte[] output, List<byte[]> logs) {
+        super();
+        this.valid = valid;
+        this.output = output;
+        this.logs = logs;
+    }
+
+    /**
+     * Create a transaction result with defaults:
      * 
      * <pre>
-     * [valid = false, code = 1, output = empty, logs = empty]
+     * [valid = false, output = empty, logs = empty]
      * </pre>
      */
     public TransactionResult() {
-        this.valid = false;
-        this.code = 1;
-        this.output = Bytes.EMPY_BYTES;
-        this.logs = new ArrayList<>();
+        this(false, Bytes.EMPY_BYTES, new ArrayList<>());
     }
 
     public boolean isValid() {
@@ -54,14 +62,6 @@ public class TransactionResult {
 
     public void setValid(boolean valid) {
         this.valid = valid;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
     }
 
     public byte[] getOutput() {
@@ -84,9 +84,34 @@ public class TransactionResult {
         this.logs.add(log);
     }
 
+    public byte[] toBytes() {
+        SimpleEncoder enc = new SimpleEncoder();
+        enc.writeBoolean(valid);
+        enc.writeBytes(output);
+        enc.writeInt(logs.size());
+        for (byte[] log : logs) {
+            enc.writeBytes(log);
+        }
+
+        return enc.toBytes();
+    }
+
+    public static TransactionResult fromBytes(byte[] bytes) {
+        SimpleDecoder dec = new SimpleDecoder(bytes);
+        boolean valid = dec.readBoolean();
+        byte[] output = dec.readBytes();
+        List<byte[]> logs = new ArrayList<>();
+        int n = dec.readInt();
+        for (int i = 0; i < n; i++) {
+            logs.add(dec.readBytes());
+        }
+
+        return new TransactionResult(valid, output, logs);
+    }
+
     @Override
     public String toString() {
-        return "TransactionResult [valid=" + valid + ", error=" + code + ", output=" + Arrays.toString(output)
-                + ", logs=" + logs + "]";
+        return "TransactionResult [valid=" + valid + ", output=" + Arrays.toString(output) + ", # logs=" + logs.size()
+                + "]";
     }
 }

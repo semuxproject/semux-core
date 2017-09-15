@@ -9,7 +9,6 @@ package org.semux.core;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
@@ -56,7 +55,6 @@ public class TransactionExecutorTest {
         // insufficient balance
         TransactionResult result = exec.execute(tx, as.track(), ds.track(), false);
         assertFalse(result.isValid());
-        assertNotEquals(0, result.getCode());
 
         long balance = 1000 * Unit.SEM;
         as.getAccount(key.toAddress()).setBalance(balance);
@@ -64,14 +62,12 @@ public class TransactionExecutorTest {
         // execute but not commit
         result = exec.execute(tx, as.track(), ds.track(), false);
         assertTrue(result.isValid());
-        assertEquals(0, result.getCode());
         assertEquals(balance, as.getAccount(key.toAddress()).getBalance());
         assertEquals(0, as.getAccount(to).getBalance());
 
         // execute and commit
         result = exec.execute(tx, as.track(), ds.track(), true);
         assertTrue(result.isValid());
-        assertEquals(0, result.getCode());
         assertEquals(balance - value - fee, as.getAccount(key.toAddress()).getBalance());
         assertEquals(value, as.getAccount(to).getBalance());
     }
@@ -95,21 +91,18 @@ public class TransactionExecutorTest {
         // register delegate (from != to, random name)
         Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
         TransactionResult result = exec.execute(tx, as.track(), ds.track(), false);
-        assertTrue(result.isValid());
-        assertNotEquals(0, result.getCode());
+        assertFalse(result.isValid());
 
         // register delegate (from == to, random name)
         tx = new Transaction(type, from, from, value, fee, nonce, timestamp, data);
         result = exec.execute(tx, as.track(), ds.track(), false);
-        assertTrue(result.isValid());
-        assertNotEquals(0, result.getCode());
+        assertFalse(result.isValid());
 
         // register delegate (from == to, normal name) and commit
         data = Bytes.of("test");
         tx = new Transaction(type, from, from, value, fee, nonce, timestamp, data);
         result = exec.execute(tx, as.track(), ds.track(), true);
         assertTrue(result.isValid());
-        assertEquals(0, result.getCode());
 
         // check state afterwards
         assertEquals(balance - Config.MIN_DELEGATE_FEE - fee, as.getAccount(delegate.toAddress()).getBalance());
@@ -138,15 +131,13 @@ public class TransactionExecutorTest {
         // vote for non-existing delegate
         Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
         TransactionResult result = exec.execute(tx, as.track(), ds.track(), false);
-        assertTrue(result.isValid());
-        assertNotEquals(0, result.getCode());
+        assertFalse(result.isValid());
 
         ds.register(delegate.toAddress(), Bytes.of("delegate"));
 
         // vote for delegate
         result = exec.execute(tx, as.track(), ds.track(), true);
         assertTrue(result.isValid());
-        assertEquals(0, result.getCode());
 
         // check state afterwards
         assertEquals(balance - value - fee, voterAcc.getBalance());
@@ -177,22 +168,19 @@ public class TransactionExecutorTest {
         // unvote (never voted before)
         Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
         TransactionResult result = exec.execute(tx, as.track(), ds.track(), false);
-        assertTrue(result.isValid());
-        assertNotEquals(0, result.getCode());
+        assertFalse(result.isValid());
 
         ds.vote(voter.toAddress(), delegate.toAddress(), value);
 
         // unvote (locked = 0)
         result = exec.execute(tx, as.track(), ds.track(), false);
-        assertTrue(result.isValid());
-        assertNotEquals(0, result.getCode());
+        assertFalse(result.isValid());
 
         voterAcc.setLocked(value);
 
         // normal unvote
         result = exec.execute(tx, as.track(), ds.track(), true);
         assertTrue(result.isValid());
-        assertEquals(0, result.getCode());
 
         // check state afterwards
         assertEquals(balance + value - fee, voterAcc.getBalance());
