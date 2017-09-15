@@ -21,7 +21,7 @@ public class ConfigTest {
 
     @Test
     public void testNumberOfValidators() {
-        long oneDay = 3 * 60 * 60 * 24;
+        long oneDay = 3 * 60 * 24;
 
         assertEquals(10, Config.getNumberOfValidators(0));
         assertEquals(10, Config.getNumberOfValidators(1));
