@@ -126,17 +126,10 @@ public class Kernel {
             }
         };
         chain = new BlockchainImpl(dbFactory);
+        client = new PeerClient(SystemUtil.getIp(), Config.P2P_LISTEN_PORT, coinbase);
 
         long height = chain.getLatestBlockNumber();
-        String nextUpgrade = chain.getGenesis().getConfig().get("nextUpgrade").toString();
-        if (height >= Long.parseLong(nextUpgrade)) {
-            logger.error("Please upgrade your client");
-            System.exit(-1);
-        } else {
-            logger.info("Latest block number = {}", height);
-        }
-
-        client = new PeerClient(SystemUtil.getIp(), Config.P2P_LISTEN_PORT, coinbase);
+        logger.info("Latest block number = {}", height);
 
         // ====================================
         // start channel/pending/node manager

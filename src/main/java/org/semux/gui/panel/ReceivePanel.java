@@ -176,7 +176,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         case COPY_ADDRESS: {
             int row = table.getSelectedRow();
             if (row == -1) {
-                JOptionPane.showMessageDialog(this, "Please select an account");
+                JOptionPane.showMessageDialog(this, "Please select an account!");
             } else {
                 Account acc = model.getAccounts().get(row);
 
@@ -199,7 +199,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             model.getAccounts().add(new Account(key));
             model.fireUpdateEvent();
 
-            JOptionPane.showMessageDialog(this, "Account created");
+            JOptionPane.showMessageDialog(this, "New account created!");
             break;
         }
         default:

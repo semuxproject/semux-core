@@ -271,7 +271,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         return from.getSelectedIndex();
     }
 
-    public void setFromItems(List<? extends Object> items) {
+    public void setFromItems(List<? extends Object> items, int defaultIndex) {
         int n = from.getSelectedIndex();
 
         from.removeAllItems();
@@ -280,7 +280,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         }
 
         if (!items.isEmpty()) {
-            from.setSelectedIndex(n >= 0 && n < items.size() ? n : 0);
+            from.setSelectedIndex(n >= 0 && n < items.size() ? n : defaultIndex);
         }
     }
 
@@ -306,9 +306,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             if (a == null) {
                 JOptionPane.showMessageDialog(this, "Please select an account!");
             } else if (d == null) {
-                JOptionPane.showMessageDialog(this, "Please select a delegate");
+                JOptionPane.showMessageDialog(this, "Please select a delegate!");
             } else if (!v.matches("[\\d]+")) {
-                JOptionPane.showMessageDialog(this, "Please enter the number of votes");
+                JOptionPane.showMessageDialog(this, "Please enter the number of votes!");
             } else {
                 Kernel kernel = Kernel.getInstance();
                 PendingManager pendingMgr = kernel.getPendingManager();
@@ -334,7 +334,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             if (a == null) {
                 JOptionPane.showMessageDialog(this, "Please select an account!");
             } else if (!name.matches("[_a-z0-9]{4,16}")) {
-                JOptionPane.showMessageDialog(this, "Only 4-16 lowercase letters, numbers and underscore are allowed");
+                JOptionPane.showMessageDialog(this, "Only 4-16 lowercase letters, numbers and underscore are allowed!");
             } else if (a.getBalance() < Config.MIN_DELEGATE_FEE + Config.MIN_TRANSACTION_FEE) {
                 JOptionPane.showMessageDialog(this, "Insufficient funds! Delegate registration fee = "
                         + Config.MIN_DELEGATE_FEE / Unit.SEM + " SEM");
@@ -392,9 +392,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         List<String> accounts = new ArrayList<>();
         List<Account> list = model.getAccounts();
         for (int i = 0; i < list.size(); i++) {
-            accounts.add("Account #" + i);
+            accounts.add("Acc #" + i + ", " + list.get(i).getBalance() / Unit.SEM + " SEM");
         }
-        setFromItems(accounts);
+        setFromItems(accounts, model.getCoinbase());
     }
 
     private void refreshDelegates() {

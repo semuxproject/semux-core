@@ -41,6 +41,8 @@ public enum Action {
 
     BACKUP_WALLET,
 
+    CHANGE_PASSWORD,
+
     EXIT,
 
     ABOUT

@@ -159,7 +159,7 @@ public class SendPanel extends JPanel implements ActionListener {
         return from.getSelectedIndex();
     }
 
-    public void setFromItems(List<? extends Object> items) {
+    public void setFromItems(List<? extends Object> items, int defaultIndex) {
         int n = from.getSelectedIndex();
 
         from.removeAllItems();
@@ -168,7 +168,7 @@ public class SendPanel extends JPanel implements ActionListener {
         }
 
         if (!items.isEmpty()) {
-            from.setSelectedIndex(n >= 0 && n < items.size() ? n : 0);
+            from.setSelectedIndex(n >= 0 && n < items.size() ? n : defaultIndex);
         }
     }
 
@@ -255,7 +255,7 @@ public class SendPanel extends JPanel implements ActionListener {
             accounts.add("0x" + list.get(i).getKey().toAddressString() + ", #" + i + ", "
                     + list.get(i).getBalance() / Unit.SEM + " SEM");
         }
-        setFromItems(accounts);
+        setFromItems(accounts, model.getCoinbase());
     }
 
     private void clear() {

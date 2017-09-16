@@ -167,7 +167,7 @@ public class Peer {
     }
 
     /**
-     * Return the string representation, ip:port@peerId
+     * Return the string representation
      */
     @Override
     public String toString() {

@@ -20,6 +20,7 @@ import javax.swing.JOptionPane;
 
 import org.semux.Config;
 import org.semux.Kernel;
+import org.semux.core.Wallet;
 import org.semux.utils.IOUtil;
 
 public class MenuBar extends JMenuBar implements ActionListener {
@@ -34,15 +35,23 @@ public class MenuBar extends JMenuBar implements ActionListener {
         JMenu menuFile = new JMenu("File");
         this.add(menuFile);
 
-        JMenuItem itemBackup = new JMenuItem("Backup wallet");
-        itemBackup.setActionCommand(Action.BACKUP_WALLET.name());
-        itemBackup.addActionListener(this);
-        menuFile.add(itemBackup);
-
         JMenuItem itemExit = new JMenuItem("Exit");
         itemExit.setActionCommand(Action.EXIT.name());
         itemExit.addActionListener(this);
         menuFile.add(itemExit);
+
+        JMenu menuWallet = new JMenu("Wallet");
+        this.add(menuWallet);
+
+        JMenuItem itemBackup = new JMenuItem("Backup wallet");
+        itemBackup.setActionCommand(Action.BACKUP_WALLET.name());
+        itemBackup.addActionListener(this);
+        menuWallet.add(itemBackup);
+
+        JMenuItem itemChangePwd = new JMenuItem("Change password");
+        itemChangePwd.setActionCommand(Action.CHANGE_PASSWORD.name());
+        itemChangePwd.addActionListener(this);
+        menuWallet.add(itemChangePwd);
 
         JMenu menuHelp = new JMenu("Help");
         this.add(menuHelp);
@@ -73,6 +82,16 @@ public class MenuBar extends JMenuBar implements ActionListener {
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(frame, "Failed to save backup file");
                 }
+            }
+            break;
+        }
+        case CHANGE_PASSWORD: {
+            String pwd = JOptionPane.showInputDialog(this, "Please enter a new password:");
+            if (pwd != null) {
+                Wallet wallet = Kernel.getInstance().getWallet();
+                wallet.changePassword(pwd);
+                wallet.flush();
+                JOptionPane.showMessageDialog(this, "Password changed!");
             }
             break;
         }
