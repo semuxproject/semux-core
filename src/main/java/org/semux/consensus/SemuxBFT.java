@@ -13,6 +13,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Config;
 import org.semux.consensus.SemuxBFT.Event.Type;
 import org.semux.core.Account;
@@ -43,7 +44,7 @@ import org.semux.net.msg.consensus.BFTProposalMessage;
 import org.semux.net.msg.consensus.BFTVoteMessage;
 import org.semux.utils.ArrayUtil;
 import org.semux.utils.Bytes;
-import org.semux.utils.MerkleTree;
+import org.semux.utils.MerkleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,19 +83,30 @@ public class SemuxBFT implements Consensus {
     private VoteSet precommitVotes;
     private VoteSet commitVotes;
 
+    private static SemuxBFT instance;
+
     /**
-     * Create a consensus instance.
+     * Get the singleton instance of consensus.
+     * 
+     * @return
      */
-    public SemuxBFT() {
+    public static synchronized SemuxBFT getInstance() {
+        if (instance == null) {
+            instance = new SemuxBFT();
+        }
+
+        return instance;
+    }
+
+    private SemuxBFT() {
     }
 
     @Override
-    public void init(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, Sync sync,
-            EdDSA coinbase) {
+    public void init(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, EdDSA coinbase) {
         this.chain = chain;
         this.channelMgr = channelMgr;
         this.pendingMgr = pendingMgr;
-        this.sync = sync;
+        this.sync = SemuxSync.getInstance();
         this.coinbase = coinbase;
 
         this.accountState = chain.getAccountState();
@@ -672,26 +684,25 @@ public class SemuxBFT implements Consensus {
         long t1 = System.currentTimeMillis();
 
         // fetch pending transactions
-        List<Transaction> txs = pendingMgr.getTransactions(Config.MAX_BLOCK_SIZE);
+        Pair<List<Transaction>, List<TransactionResult>> pending = pendingMgr
+                .getTransactionsAndResults(Config.MAX_BLOCK_SIZE);
 
-        // build merkle tree
-        List<byte[]> hashes = new ArrayList<>();
-        for (Transaction tx : txs) {
-            hashes.add(tx.getHash());
-        }
-        MerkleTree merkle = new MerkleTree(hashes);
+        // compute roots
+        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(pending.getLeft());
+        byte[] resultsRoot = MerkleUtil.computeResultsRoot(pending.getRight());
+        byte[] stateRoot = Hash.EMPTY_H256;
 
         // construct block
         long number = height;
         byte[] prevHash = chain.getBlockHash(height - 1);
         long timestamp = System.currentTimeMillis();
-        byte[] merkleRoot = merkle.getRootHash();
         byte[] data = {};
-        BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, merkleRoot, data);
-        Block block = new Block(header.sign(coinbase), txs);
+        BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,
+                resultsRoot, stateRoot, data);
+        Block block = new Block(header.sign(coinbase), pending.getLeft(), pending.getRight());
 
         long t2 = System.currentTimeMillis();
-        logger.debug("Block creation: # txs = {}, time = {} ms", txs.size(), t2 - t1);
+        logger.debug("Block creation: # txs = {}, time = {} ms", pending.getLeft().size(), t2 - t1);
 
         return block;
     }

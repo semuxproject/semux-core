@@ -8,9 +8,7 @@ import org.semux.consensus.SemuxBFT;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
-import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
-import org.semux.core.Sync;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.db.DBFactory;
@@ -44,9 +42,6 @@ public class Kernel {
     private PendingManager pendingMgr;
     private ChannelManager channelMgr;
     private NodeManager nodeMgr;
-
-    private SemuxSync sync;
-    private SemuxBFT cons;
 
     private static Kernel instance;
 
@@ -167,11 +162,11 @@ public class Kernel {
         // ====================================
         // start sync/consensus
         // ====================================
-        sync = new SemuxSync();
+        SemuxSync sync = SemuxSync.getInstance();
         sync.init(chain, channelMgr);
 
-        cons = new SemuxBFT();
-        cons.init(chain, channelMgr, pendingMgr, sync, coinbase);
+        SemuxBFT cons = SemuxBFT.getInstance();
+        cons.init(chain, channelMgr, pendingMgr, coinbase);
 
         Thread consThread = new Thread(() -> {
             cons.start();
@@ -269,23 +264,5 @@ public class Kernel {
      */
     public NodeManager getNodeManager() {
         return nodeMgr;
-    }
-
-    /**
-     * Returns the consensus manager.
-     * 
-     * @return
-     */
-    public Consensus getConsenus() {
-        return cons;
-    }
-
-    /**
-     * Return the sync manager.
-     * 
-     * @return
-     */
-    public Sync getSync() {
-        return sync;
     }
 }

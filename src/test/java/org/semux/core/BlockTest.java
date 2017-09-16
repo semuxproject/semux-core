@@ -21,12 +21,16 @@ public class BlockTest {
     private byte[] coinbase = Bytes.random(20);
     private byte[] prevHash = Bytes.random(32);
     private long timestamp = System.currentTimeMillis();
-    private byte[] merkleRoot = Bytes.random(32);
+    private byte[] transactionsRoot = Bytes.random(32);
+    private byte[] resultsRoot = Bytes.random(32);
+    private byte[] stateRoot = Bytes.random(32);
     private byte[] data = Bytes.of("data");
 
     private Transaction tx = new Transaction(TransactionType.TRANSFER, Bytes.random(20), Bytes.random(20), 0,
             Config.MIN_TRANSACTION_FEE, 1, System.currentTimeMillis(), Bytes.EMPY_BYTES).sign(new EdDSA());
+    private TransactionResult res = new TransactionResult(true);
     private List<Transaction> transactions = Collections.singletonList(tx);
+    private List<TransactionResult> results = Collections.singletonList(res);
     private int view = 1;
     private List<Signature> votes = new ArrayList<>();
 
@@ -36,8 +40,9 @@ public class BlockTest {
 
     @Test
     public void testNew() {
-        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data).sign(key);
-        Block block = new Block(header, transactions, view, votes);
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
+                stateRoot, data).sign(key);
+        Block block = new Block(header, transactions, results, view, votes);
         hash = block.getHash();
         signature = block.getSignature().toBytes();
 
@@ -46,8 +51,9 @@ public class BlockTest {
 
     @Test
     public void testSerilization() {
-        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data).sign(key);
-        Block block = new Block(header, transactions, view, votes);
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
+                stateRoot, data).sign(key);
+        Block block = new Block(header, transactions, results, view, votes);
         hash = block.getHash();
         signature = block.getSignature().toBytes();
 
@@ -60,7 +66,9 @@ public class BlockTest {
         assertArrayEquals(coinbase, block.getCoinbase());
         assertArrayEquals(prevHash, block.getPrevHash());
         assertEquals(timestamp, block.getTimestamp());
-        assertArrayEquals(merkleRoot, block.getMerkleRoot());
+        assertArrayEquals(transactionsRoot, block.getTransactionsRoot());
+        assertArrayEquals(resultsRoot, block.getResultsRoot());
+        assertArrayEquals(stateRoot, block.getStateRoot());
         assertArrayEquals(data, block.getData());
         assertArrayEquals(signature, block.getSignature().toBytes());
         assertEquals(view, block.getView());
@@ -69,8 +77,9 @@ public class BlockTest {
 
     @Test
     public void testTransactionIndexes() {
-        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data).sign(key);
-        Block block = new Block(header, transactions, view, votes);
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
+                stateRoot, data).sign(key);
+        Block block = new Block(header, transactions, results, view, votes);
 
         List<Pair<Integer, Integer>> indexes = block.getTransacitonIndexes();
         assertEquals(1, indexes.size());

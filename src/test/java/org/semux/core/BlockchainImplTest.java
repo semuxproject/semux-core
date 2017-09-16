@@ -19,8 +19,10 @@ import java.util.List;
 
 import org.junit.Test;
 import org.semux.crypto.EdDSA;
+import org.semux.crypto.Hash;
 import org.semux.db.MemoryDB;
 import org.semux.utils.Bytes;
+import org.semux.utils.MerkleUtil;
 
 public class BlockchainImplTest {
 
@@ -32,10 +34,10 @@ public class BlockchainImplTest {
     private long value = 20;
     private long fee = 1;
     private long nonce = 12345;
-    private byte[] merkleRoot = Bytes.random(32);
     private byte[] data = Bytes.of("test");
     private long timestamp = System.currentTimeMillis() - 60 * 1000;
     private Transaction tx = new Transaction(TransactionType.TRANSFER, from, to, value, fee, nonce, timestamp, data);
+    private TransactionResult res = new TransactionResult(true);
     {
         tx.sign(new EdDSA());
     }
@@ -139,14 +141,18 @@ public class BlockchainImplTest {
     }
 
     private Block createBlock(long number) {
-        return createBlock(number, Collections.singletonList(tx));
+        return createBlock(number, Collections.singletonList(tx), Collections.singletonList(res));
     }
 
-    private Block createBlock(long number, List<Transaction> transactions) {
+    private Block createBlock(long number, List<Transaction> transactions, List<TransactionResult> results) {
+        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
+        byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
+        byte[] stateRoot = Hash.EMPTY_H256;
         byte[] data = Bytes.of("test");
         long timestamp = System.currentTimeMillis();
 
-        return new Block(new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data).sign(new EdDSA()),
-                transactions);
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
+                stateRoot, data);
+        return new Block(header.sign(new EdDSA()), transactions, results);
     }
 }

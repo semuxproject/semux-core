@@ -28,7 +28,11 @@ public class BlockHeader {
 
     private long timestamp;
 
-    private byte[] merkleRoot;
+    private byte[] transactionsRoot;
+
+    private byte[] resultsRoot;
+
+    private byte[] stateRoot;
 
     private byte[] data;
 
@@ -42,15 +46,19 @@ public class BlockHeader {
      * @param coinbase
      * @param prevHash
      * @param timestamp
-     * @param merkleRoot
+     * @param transactionsRoot
+     * @param resultsRoot
      * @param data
      */
-    public BlockHeader(long number, byte[] coinbase, byte[] prevHash, long timestamp, byte[] merkleRoot, byte[] data) {
+    public BlockHeader(long number, byte[] coinbase, byte[] prevHash, long timestamp, byte[] transactionsRoot,
+            byte[] resultsRoot, byte[] stateRoot, byte[] data) {
         this.number = number;
         this.coinbase = coinbase;
         this.prevHash = prevHash;
         this.timestamp = timestamp;
-        this.merkleRoot = merkleRoot;
+        this.transactionsRoot = transactionsRoot;
+        this.resultsRoot = resultsRoot;
+        this.stateRoot = stateRoot;
         this.data = data;
 
         SimpleEncoder enc = new SimpleEncoder();
@@ -58,7 +66,9 @@ public class BlockHeader {
         enc.writeBytes(coinbase);
         enc.writeBytes(prevHash);
         enc.writeLong(timestamp);
-        enc.writeBytes(merkleRoot);
+        enc.writeBytes(transactionsRoot);
+        enc.writeBytes(resultsRoot);
+        enc.writeBytes(stateRoot);
         enc.writeBytes(data);
         this.encoded = enc.toBytes();
         this.hash = Hash.h256(encoded);
@@ -79,7 +89,9 @@ public class BlockHeader {
         this.coinbase = dec.readBytes();
         this.prevHash = dec.readBytes();
         this.timestamp = dec.readLong();
-        this.merkleRoot = dec.readBytes();
+        this.transactionsRoot = dec.readBytes();
+        this.resultsRoot = dec.readBytes();
+        this.stateRoot = dec.readBytes();
         this.data = dec.readBytes();
 
         this.encoded = encoded;
@@ -109,8 +121,10 @@ public class BlockHeader {
                 && coinbase != null && coinbase.length == 20 //
                 && prevHash != null && prevHash.length == 32 //
                 && timestamp >= 0 //
-                && merkleRoot != null //
-                && data != null && data.length < 1024 //
+                && transactionsRoot != null && transactionsRoot.length == 32 //
+                && resultsRoot != null && resultsRoot.length == 32 //
+                && stateRoot != null && stateRoot.length == 32 //
+                && data != null && data.length < 512 //
                 && encoded != null //
                 && (number == 0 || signature != null) //
                 && Arrays.equals(Hash.h256(encoded), hash) //
@@ -137,8 +151,16 @@ public class BlockHeader {
         return timestamp;
     }
 
-    public byte[] getMerkleRoot() {
-        return merkleRoot;
+    public byte[] getTransactionsRoot() {
+        return transactionsRoot;
+    }
+
+    public byte[] getResultsRoot() {
+        return resultsRoot;
+    }
+
+    public byte[] getStateRoot() {
+        return stateRoot;
     }
 
     public byte[] getData() {

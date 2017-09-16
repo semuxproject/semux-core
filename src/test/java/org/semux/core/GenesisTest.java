@@ -69,6 +69,6 @@ public class GenesisTest {
     public void testConfig() {
         Genesis genesis = Genesis.getInstance();
 
-        assertFalse(genesis.getConfig().isEmpty());
+        assertTrue(genesis.getConfig().isEmpty());
     }
 }

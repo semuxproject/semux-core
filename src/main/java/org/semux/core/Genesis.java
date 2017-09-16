@@ -8,13 +8,13 @@ package org.semux.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
 import org.semux.Config;
+import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.utils.ByteArray;
 import org.semux.utils.Bytes;
@@ -52,9 +52,7 @@ public class Genesis extends Block {
                 byte[] coinbase = Hex.parse(json.getString("coinbase"));
                 byte[] prevHash = Hex.parse(json.getString("parentHash"));
                 long timestamp = json.getLong("timestamp");
-                byte[] merkelRoot = Hex.parse(json.getString("merkleRoot"));
                 byte[] data = Bytes.of(json.getString("data"));
-                List<Transaction> transactions = new ArrayList<>();
 
                 // premine
                 Map<ByteArray, Long> premine = new HashMap<>();
@@ -76,8 +74,7 @@ public class Genesis extends Block {
                 // configurations
                 Map<String, Object> config = json.getJSONObject("config").toMap();
 
-                instance = new Genesis(number, coinbase, prevHash, timestamp, merkelRoot, data, transactions, premine,
-                        delegates, config);
+                instance = new Genesis(number, coinbase, prevHash, timestamp, data, premine, delegates, config);
             } catch (IOException e) {
                 logger.error("Failed to load genesis file", e);
                 System.exit(-1);
@@ -87,12 +84,12 @@ public class Genesis extends Block {
         return instance;
     }
 
-    private Genesis(long number, byte[] coinbase, byte[] prevHash, long timestamp, byte[] merkleRoot, byte[] data,
-            List<Transaction> transactions, //
+    private Genesis(long number, byte[] coinbase, byte[] prevHash, long timestamp, byte[] data,
             Map<ByteArray, Long> alloc, //
             Map<String, byte[]> delegates, //
             Map<String, Object> config) {
-        super(new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data), transactions);
+        super(new BlockHeader(number, coinbase, prevHash, timestamp, Hash.EMPTY_H256, Hash.EMPTY_H256, Hash.EMPTY_H256,
+                data), Collections.emptyList(), Collections.emptyList());
 
         this.premine = alloc;
         this.delegates = delegates;

@@ -22,17 +22,18 @@ import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
+import org.semux.core.TransactionResult;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hash;
 import org.semux.db.MemoryDB;
 import org.semux.net.ChannelManager;
 import org.semux.utils.ByteArray;
+import org.semux.utils.MerkleUtil;
 
 public class SemuxBFTTest {
 
     private static SemuxBFT bft;
-    private static SemuxSync sync;
     private static EdDSA coinbase;
 
     @BeforeClass
@@ -43,10 +44,9 @@ public class SemuxBFTTest {
 
         pendingMgr.start();
 
-        bft = new SemuxBFT();
-        sync = new SemuxSync();
+        bft = SemuxBFT.getInstance();
         coinbase = new EdDSA();
-        bft.init(chain, channelMgr, pendingMgr, sync, coinbase);
+        bft.init(chain, channelMgr, pendingMgr, coinbase);
 
         new Thread(() -> {
             bft.start();
@@ -65,17 +65,22 @@ public class SemuxBFTTest {
         EdDSA key1 = new EdDSA();
         EdDSA key2 = new EdDSA();
 
+        List<Transaction> transactions = new ArrayList<>();
+        List<TransactionResult> results = new ArrayList<>();
+
         long number = 1;
         byte[] coinbase = key1.toAddress();
         byte[] prevHash = Genesis.getInstance().getHash();
         long timestamp = System.currentTimeMillis();
-        byte[] merkleRoot = new byte[32];
+        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
+        byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
+        byte[] stateRoot = Hash.EMPTY_H256;
         byte[] data = {};
-        List<Transaction> transactions = new ArrayList<>();
         int view = 1;
 
-        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data);
-        Block block = new Block(header.sign(key1), transactions);
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
+                stateRoot, data);
+        Block block = new Block(header.sign(key1), transactions, results);
 
         List<Signature> votes = new ArrayList<>();
         Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getHash(), block.getNumber(), view)

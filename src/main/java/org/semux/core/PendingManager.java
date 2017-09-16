@@ -7,6 +7,7 @@
 package org.semux.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.map.LRUMap;
+import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Config;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -71,14 +73,15 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Transaction pool.
      */
-    private Map<ByteArray, Transaction> poolMap = new HashMap<>();
-    private List<Transaction> poolList = new ArrayList<>();
     private Object poolLock = new Object();
+    private Map<ByteArray, Transaction> poolMap = new HashMap<>();
+    private List<Transaction> transactions = new ArrayList<>();
+    private List<TransactionResult> results = new ArrayList<>();
 
     /**
      * Transaction cache.
      */
-    private Map<ByteArray, Transaction> cache = new LRUMap<>(CACHE_SIZE);
+    private Map<ByteArray, Transaction> cache = Collections.synchronizedMap(new LRUMap<>(CACHE_SIZE));
 
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> validateFuture;
@@ -100,7 +103,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Start this pending manager.
      */
-    public synchronized void start() {
+    public void start() {
         if (!isRunning) {
             /*
              * Use a rate smaller than the message queue sending rate to prevent message
@@ -120,7 +123,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Shut down this pending manager.
      */
-    public synchronized void stop() {
+    public void stop() {
         if (isRunning) {
             validateFuture.cancel(true);
 
@@ -134,7 +137,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * 
      * @return
      */
-    public synchronized boolean isRunning() {
+    public boolean isRunning() {
         return isRunning;
     }
 
@@ -143,8 +146,10 @@ public class PendingManager implements Runnable, BlockchainListener {
      * 
      * @return
      */
-    public synchronized List<Transaction> getQueue() {
-        return new ArrayList<>(queue);
+    public List<Transaction> getQueue() {
+        synchronized (queue) {
+            return new ArrayList<>(queue);
+        }
     }
 
     /**
@@ -153,7 +158,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * 
      * @param tx
      */
-    public synchronized void addTransaction(Transaction tx) {
+    public void addTransaction(Transaction tx) {
         queue.add(tx);
     }
 
@@ -164,7 +169,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @return true if the transaction is successfully added to the pool, otherwise
      *         false
      */
-    public synchronized boolean addTransactionSync(Transaction tx) {
+    public boolean addTransactionSync(Transaction tx) {
         return processTransaction(tx, true) >= 1;
     }
 
@@ -174,8 +179,31 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @param address
      * @return
      */
-    public synchronized long getNonce(byte[] address) {
+    public long getNonce(byte[] address) {
         return pendingAS.getAccount(address).getNonce();
+    }
+
+    /**
+     * Get pending transactions and corresponding results.
+     * 
+     * @param limit
+     * @return
+     */
+    public Pair<List<Transaction>, List<TransactionResult>> getTransactionsAndResults(int limit) {
+        List<Transaction> txs = new ArrayList<>();
+        List<TransactionResult> res = new ArrayList<>();
+
+        synchronized (poolLock) {
+            if (transactions.size() > limit && limit != -1) {
+                txs.addAll(transactions.subList(0, limit));
+                res.addAll(results.subList(0, limit));
+            } else {
+                txs.addAll(transactions);
+                res.addAll(results);
+            }
+        }
+
+        return Pair.of(txs, res);
     }
 
     /**
@@ -184,16 +212,8 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @param limit
      * @return
      */
-    public synchronized List<Transaction> getTransactions(int limit) {
-        List<Transaction> list = new ArrayList<>();
-        synchronized (poolLock) {
-            if (poolList.size() > limit) {
-                list.addAll(poolList.subList(0, limit));
-            } else {
-                list.addAll(poolList);
-            }
-        }
-        return list;
+    public List<Transaction> getTransactions(int limit) {
+        return getTransactionsAndResults(limit).getLeft();
     }
 
     /**
@@ -201,14 +221,12 @@ public class PendingManager implements Runnable, BlockchainListener {
      * 
      * @return
      */
-    public synchronized List<Transaction> getTransactions() {
-        synchronized (poolLock) {
-            return new ArrayList<>(poolList);
-        }
+    public List<Transaction> getTransactions() {
+        return getTransactionsAndResults(-1).getLeft();
     }
 
     @Override
-    public synchronized void onBlockAdded(Block block) {
+    public void onBlockAdded(Block block) {
         if (isRunning) {
             long t1 = System.currentTimeMillis();
 
@@ -218,9 +236,10 @@ public class PendingManager implements Runnable, BlockchainListener {
 
             synchronized (poolLock) {
                 // [2] clear transaction pool
-                List<Transaction> txs = new ArrayList<>(poolList);
+                List<Transaction> txs = new ArrayList<>(transactions);
                 poolMap.clear();
-                poolList.clear();
+                transactions.clear();
+                results.clear();
 
                 // [3] update pending state
                 long accepted = 0;
@@ -235,7 +254,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     @Override
-    public synchronized void run() {
+    public void run() {
         Transaction tx;
 
         while ((tx = queue.poll()) != null) {
@@ -283,7 +302,8 @@ public class PendingManager implements Runnable, BlockchainListener {
                 // add transaction to pool
                 synchronized (poolLock) {
                     poolMap.put(createKey(tx), tx);
-                    poolList.add(tx);
+                    transactions.add(tx);
+                    results.add(result);
                 }
 
                 // relay transaction

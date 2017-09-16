@@ -9,7 +9,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -27,15 +26,17 @@ import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.Genesis;
 import org.semux.core.Transaction;
+import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
+import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.utils.ByteArray;
 import org.semux.utils.Bytes;
-import org.semux.utils.MerkleTree;
+import org.semux.utils.MerkleUtil;
 
 public class APIHandlerTest {
 
@@ -138,7 +139,7 @@ public class APIHandlerTest {
         assertArrayEquals(gen.getCoinbase(), Hex.parse(block.getString("coinbase")));
         assertArrayEquals(gen.getPrevHash(), Hex.parse(block.getString("prevHash")));
         assertEquals(gen.getTimestamp(), block.getLong("timestamp"));
-        assertArrayEquals(gen.getMerkleRoot(), Hex.parse(block.getString("merkleRoot")));
+        assertArrayEquals(gen.getTransactionsRoot(), Hex.parse(block.getString("transactionsRoot")));
         assertArrayEquals(gen.getData(), Hex.parse(block.getString("data")));
     }
 
@@ -160,7 +161,8 @@ public class APIHandlerTest {
     @Test
     public void testGetPendingTransactions() throws IOException {
         Transaction tx = createTransaction();
-        Block block = createBlock(api.chain, Collections.singletonList(tx));
+        TransactionResult res = new TransactionResult(true);
+        Block block = createBlock(api.chain, Collections.singletonList(tx), Collections.singletonList(res));
         api.chain.addBlock(block);
 
         try {
@@ -180,7 +182,8 @@ public class APIHandlerTest {
     @Test
     public void testGetAccountTransactions() throws IOException {
         Transaction tx = createTransaction();
-        Block block = createBlock(api.chain, Collections.singletonList(tx));
+        TransactionResult res = new TransactionResult(true);
+        Block block = createBlock(api.chain, Collections.singletonList(tx), Collections.singletonList(res));
         api.chain.addBlock(block);
 
         try {
@@ -200,7 +203,8 @@ public class APIHandlerTest {
     @Test
     public void testGetTransaction() throws IOException {
         Transaction tx = createTransaction();
-        Block block = createBlock(api.chain, Collections.singletonList(tx));
+        TransactionResult res = new TransactionResult(true);
+        Block block = createBlock(api.chain, Collections.singletonList(tx), Collections.singletonList(res));
         api.chain.addBlock(block);
 
         try {
@@ -412,24 +416,21 @@ public class APIHandlerTest {
         wallet.delete();
     }
 
-    private Block createBlock(Blockchain chain, List<Transaction> transactions) {
+    private Block createBlock(Blockchain chain, List<Transaction> transactions, List<TransactionResult> results) {
         EdDSA key = new EdDSA();
 
         long number = chain.getLatestBlockNumber() + 1;
         byte[] coinbase = key.toAddress();
         byte[] prevHash = chain.getLatestBlockHash();
         long timestamp = System.currentTimeMillis();
-        byte[] merkleRoot = {};
+        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
+        byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
+        byte[] stateRoot = Hash.EMPTY_H256;
         byte[] data = {};
 
-        List<byte[]> hashes = new ArrayList<>();
-        for (Transaction tx : transactions) {
-            hashes.add(tx.getHash());
-        }
-        merkleRoot = new MerkleTree(hashes).getRootHash();
-
-        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data);
-        return new Block(header.sign(key), transactions);
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
+                stateRoot, data);
+        return new Block(header.sign(key), transactions, results);
     }
 
     private Transaction createTransaction() {

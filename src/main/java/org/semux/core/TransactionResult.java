@@ -46,14 +46,19 @@ public class TransactionResult {
     }
 
     /**
-     * Create a transaction result with defaults:
+     * Create a transaction result.
      * 
-     * <pre>
-     * [valid = false, output = empty, logs = empty]
-     * </pre>
+     * @param valid
+     */
+    public TransactionResult(boolean valid) {
+        this(valid, Bytes.EMPY_BYTES, new ArrayList<>());
+    }
+
+    /**
+     * Create a transaction result.
      */
     public TransactionResult() {
-        this(false, Bytes.EMPY_BYTES, new ArrayList<>());
+        this(false);
     }
 
     public boolean isValid() {

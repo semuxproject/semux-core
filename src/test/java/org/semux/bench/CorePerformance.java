@@ -7,10 +7,12 @@ import org.semux.Config;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Transaction;
+import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.crypto.EdDSA;
+import org.semux.crypto.Hash;
 import org.semux.utils.Bytes;
-import org.semux.utils.MerkleTree;
+import org.semux.utils.MerkleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +25,8 @@ public class CorePerformance {
         long t1 = System.nanoTime();
 
         List<Transaction> txs = new ArrayList<>();
+        List<TransactionResult> res = new ArrayList<>();
+
         for (int i = 0; i < Config.MAX_BLOCK_SIZE; i++) {
             TransactionType type = TransactionType.TRANSFER;
             byte[] from = key.toAddress();
@@ -36,20 +40,21 @@ public class CorePerformance {
             tx.sign(key);
 
             txs.add(tx);
+            res.add(new TransactionResult(true));
         }
 
         long number = 1;
         byte[] coinbase = key.toAddress();
         byte[] prevHash = Bytes.random(32);
         long timestamp = System.currentTimeMillis();
-        List<byte[]> list = new ArrayList<>();
-        for (Transaction tx : txs) {
-            list.add(tx.getHash());
-        }
-        byte[] merkleRoot = new MerkleTree(list).getRootHash();
+        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(txs);
+        byte[] resultsRoot = MerkleUtil.computeResultsRoot(res);
+        byte[] stateRoot = Hash.EMPTY_H256;
         byte[] data = {};
-        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data);
-        Block block = new Block(header.sign(key), txs);
+
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
+                stateRoot, data);
+        Block block = new Block(header.sign(key), txs, res);
 
         long t2 = System.nanoTime();
         logger.info("block size: {} KB", block.toBytes().length / 1024);

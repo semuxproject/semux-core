@@ -18,8 +18,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.crypto.EdDSA.Signature;
+import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
-import org.semux.utils.MerkleTree;
+import org.semux.utils.MerkleUtil;
 import org.semux.utils.SimpleDecoder;
 import org.semux.utils.SimpleEncoder;
 
@@ -47,6 +48,11 @@ public class Block implements Comparable<Block> {
      * The transactions.
      */
     private List<Transaction> transactions;
+
+    /**
+     * The transaction results.
+     */
+    private List<TransactionResult> results;
 
     /**
      * The BFT view and votes.
@@ -79,9 +85,11 @@ public class Block implements Comparable<Block> {
      *            a signed block header
      * @param transactions
      *            list of transactions
+     * @param results
+     *            list of transaction results
      */
-    public Block(BlockHeader header, List<Transaction> transactions) {
-        this(header, transactions, 0, new ArrayList<>());
+    public Block(BlockHeader header, List<Transaction> transactions, List<TransactionResult> results) {
+        this(header, transactions, results, 0, new ArrayList<>());
     }
 
     /**
@@ -91,15 +99,19 @@ public class Block implements Comparable<Block> {
      *            a signed block header
      * @param transactions
      *            list of transaction
+     * @param results
+     *            list of transaction results
      * @param view
      *            BFT view
      * @param votes
      *            BFT validator votes
      */
-    public Block(BlockHeader header, List<Transaction> transactions, int view, List<Signature> votes) {
+    public Block(BlockHeader header, List<Transaction> transactions, List<TransactionResult> results, int view,
+            List<Signature> votes) {
         this.header = header;
 
         this.transactions = transactions;
+        this.results = results;
 
         this.view = view;
         this.votes = votes;
@@ -112,6 +124,10 @@ public class Block implements Comparable<Block> {
             byte[] bytes = t.toBytes();
             enc.writeBytes(bytes);
             indexes.add(Pair.of(idx, idx + bytes.length));
+        }
+        enc.writeInt(results.size());
+        for (TransactionResult r : results) {
+            enc.writeBytes(r.toBytes());
         }
         this.encodedWithoutBFT = enc.toBytes();
     }
@@ -140,12 +156,20 @@ public class Block implements Comparable<Block> {
                 exec.shutdownNow();
             }
 
-            // validate merkle root
-            List<byte[]> list = new ArrayList<>();
-            for (Transaction tx : transactions) {
-                list.add(tx.getHash());
+            // validate transactions root
+            byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
+            if (!Arrays.equals(transactionsRoot, header.getTransactionsRoot())) {
+                return false;
             }
-            return Arrays.equals(new MerkleTree(list).getRootHash(), header.getMerkleRoot());
+
+            // validate results root
+            byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
+            if (!Arrays.equals(resultsRoot, header.getResultsRoot())) {
+                return false;
+            }
+
+            // validate state root
+            return Arrays.equals(Hash.EMPTY_H256, header.getStateRoot());
         }
 
         return false;
@@ -178,6 +202,15 @@ public class Block implements Comparable<Block> {
      */
     public List<Transaction> getTransactions() {
         return new ArrayList<>(transactions);
+    }
+
+    /**
+     * Get a shallow copy of the transactions results.
+     * 
+     * @return
+     */
+    public List<TransactionResult> getResults() {
+        return new ArrayList<>(results);
     }
 
     /**
@@ -254,8 +287,16 @@ public class Block implements Comparable<Block> {
         return header.getTimestamp();
     }
 
-    public byte[] getMerkleRoot() {
-        return header.getMerkleRoot();
+    public byte[] getTransactionsRoot() {
+        return header.getTransactionsRoot();
+    }
+
+    public byte[] getResultsRoot() {
+        return header.getResultsRoot();
+    }
+
+    public byte[] getStateRoot() {
+        return header.getStateRoot();
     }
 
     public byte[] getData() {
@@ -281,20 +322,26 @@ public class Block implements Comparable<Block> {
         SimpleDecoder dec = new SimpleDecoder(bytes);
         BlockHeader header = BlockHeader.fromBytes(dec.readBytes());
 
-        int n = dec.readInt();
         List<Transaction> transactions = new ArrayList<>();
+        int n = dec.readInt();
         for (int i = 0; i < n; i++) {
             transactions.add(Transaction.fromBytes(dec.readBytes()));
         }
 
-        int view = dec.readInt();
+        List<TransactionResult> results = new ArrayList<>();
         n = dec.readInt();
+        for (int i = 0; i < n; i++) {
+            results.add(TransactionResult.fromBytes(dec.readBytes()));
+        }
+
+        int view = dec.readInt();
         List<Signature> votes = new ArrayList<>();
+        n = dec.readInt();
         for (int i = 0; i < n; i++) {
             votes.add(Signature.fromBytes(dec.readBytes()));
         }
 
-        return new Block(header, transactions, view, votes);
+        return new Block(header, transactions, results, view, votes);
     }
 
     @Override

@@ -387,7 +387,9 @@ public class APIHandler {
         obj.put("coinbase", HEX + Hex.encode(block.getCoinbase()));
         obj.put("prevHash", HEX + Hex.encode(block.getPrevHash()));
         obj.put("timestamp", block.getTimestamp());
-        obj.put("merkleRoot", HEX + Hex.encode(block.getMerkleRoot()));
+        obj.put("transactionsRoot", HEX + Hex.encode(block.getTransactionsRoot()));
+        obj.put("resultsRoot", HEX + Hex.encode(block.getResultsRoot()));
+        obj.put("stateRoot", HEX + Hex.encode(block.getStateRoot()));
         obj.put("data", HEX + Hex.encode(block.getData()));
         JSONArray arr = new JSONArray();
         for (Transaction tx : block.getTransactions()) {

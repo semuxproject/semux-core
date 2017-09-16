@@ -19,7 +19,9 @@ public class BlockHeaderTest {
     private byte[] coinbase = Bytes.random(20);
     private byte[] prevHash = Bytes.random(32);
     private long timestamp = System.currentTimeMillis();
-    private byte[] merkleRoot = Bytes.random(32);
+    private byte[] transactionsRoot = Bytes.random(32);
+    private byte[] resultsRoot = Bytes.random(32);
+    private byte[] stateRoot = Bytes.random(32);
     private byte[] data = Bytes.of("data");
 
     private EdDSA key = new EdDSA();
@@ -28,7 +30,8 @@ public class BlockHeaderTest {
 
     @Test
     public void testNew() {
-        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data).sign(key);
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
+                stateRoot, data).sign(key);
         hash = header.getHash();
         signature = header.getSignature().toBytes();
 
@@ -37,7 +40,8 @@ public class BlockHeaderTest {
 
     @Test
     public void testSerilization() {
-        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data).sign(key);
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
+                stateRoot, data).sign(key);
         hash = header.getHash();
         signature = header.getSignature().toBytes();
 
@@ -50,7 +54,9 @@ public class BlockHeaderTest {
         assertArrayEquals(coinbase, header.getCoinbase());
         assertArrayEquals(prevHash, header.getPrevHash());
         assertEquals(timestamp, header.getTimestamp());
-        assertArrayEquals(merkleRoot, header.getMerkleRoot());
+        assertArrayEquals(transactionsRoot, header.getTransactionsRoot());
+        assertArrayEquals(resultsRoot, header.getResultsRoot());
+        assertArrayEquals(stateRoot, header.getStateRoot());
         assertArrayEquals(data, header.getData());
         assertArrayEquals(signature, header.getSignature().toBytes());
     }

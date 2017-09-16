@@ -6,12 +6,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Test;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
+import org.semux.core.Transaction;
+import org.semux.core.TransactionResult;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hash;
+import org.semux.utils.MerkleUtil;
 
 public class ProposalTest {
 
@@ -39,15 +43,20 @@ public class ProposalTest {
     }
 
     private Block createBlock(long number) {
+        List<Transaction> txs = Collections.emptyList();
+        List<TransactionResult> res = Collections.emptyList();
+
         EdDSA key = new EdDSA();
         byte[] coinbase = key.toAddress();
         byte[] prevHash = Hash.EMPTY_H256;
         long timestamp = System.currentTimeMillis();
-        byte[] merkleRoot = {};
+        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(txs);
+        byte[] resultsRoot = MerkleUtil.computeResultsRoot(res);
+        byte[] stateRoot = Hash.EMPTY_H256;
         byte[] data = {};
-        merkleRoot = Hash.EMPTY_H256;
 
-        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, merkleRoot, data);
-        return new Block(header.sign(key), Collections.emptyList());
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
+                stateRoot, data);
+        return new Block(header.sign(key), txs, res);
     }
 }
