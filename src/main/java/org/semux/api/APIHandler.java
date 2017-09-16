@@ -454,7 +454,7 @@ public class APIHandler {
         obj.put("port", peer.getPort());
         obj.put("p2pVersion", peer.getP2pVersion());
         obj.put("clientId", peer.getClientId());
-        obj.put("peerId", HEX + peer.getPeerId());
+        obj.put("peerId", peer.getPeerId());
         obj.put("latestBlockNumber", peer.getLatestBlockNumber());
         obj.put("latency", peer.getLatency());
 

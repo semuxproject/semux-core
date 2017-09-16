@@ -357,10 +357,13 @@ public class Config {
      * @return
      */
     public static int getNumberOfValidators(long number) {
-        long oneDay = 3 * 60 * 24;
+        /*
+         * Add one validator every 8 hours
+         */
+        long step = 3 * 60 * 8;
 
-        if (number < 90 * oneDay) {
-            return (int) (10 + number / oneDay);
+        if (number < 90 * step) {
+            return (int) (10 + number / step);
         } else {
             return 100;
         }

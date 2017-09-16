@@ -71,14 +71,14 @@ public class MenuBar extends JMenuBar implements ActionListener {
             JFileChooser chooser = new JFileChooser();
             chooser.setDialogTitle("Please select a folder");
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            int ret = chooser.showOpenDialog(this);
+            int ret = chooser.showOpenDialog(frame);
 
             if (ret == JFileChooser.APPROVE_OPTION) {
                 File dst = new File(chooser.getSelectedFile(), "wallet.data");
                 File src = Kernel.getInstance().getWallet().getFile();
                 try {
                     IOUtil.copyFile(src, dst);
-                    JOptionPane.showMessageDialog(frame, "Backup file is saved at " + dst.getAbsolutePath());
+                    JOptionPane.showMessageDialog(frame, "Your wallet has been saved at " + dst.getAbsolutePath());
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(frame, "Failed to save backup file");
                 }
@@ -86,12 +86,12 @@ public class MenuBar extends JMenuBar implements ActionListener {
             break;
         }
         case CHANGE_PASSWORD: {
-            String pwd = JOptionPane.showInputDialog(this, "Please enter a new password:");
+            String pwd = JOptionPane.showInputDialog(frame, "Please enter a new password:");
             if (pwd != null) {
                 Wallet wallet = Kernel.getInstance().getWallet();
                 wallet.changePassword(pwd);
                 wallet.flush();
-                JOptionPane.showMessageDialog(this, "Password changed!");
+                JOptionPane.showMessageDialog(frame, "Password changed!");
             }
             break;
         }
