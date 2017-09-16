@@ -19,9 +19,10 @@ public interface Consensus {
      * @param chain
      * @param channelMgr
      * @param pendingMgr
+     * @param sync
      * @param coinbase
      */
-    void init(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, EdDSA coinbase);
+    void init(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, Sync sync, EdDSA coinbase);
 
     /**
      * Start consensus.

@@ -31,7 +31,9 @@ import org.semux.utils.ByteArray;
 
 public class SemuxBFTTest {
 
-    private static SemuxBFT bft = null;
+    private static SemuxBFT bft;
+    private static SemuxSync sync;
+    private static EdDSA coinbase;
 
     @BeforeClass
     public static void setup() throws InterruptedException {
@@ -41,8 +43,10 @@ public class SemuxBFTTest {
 
         pendingMgr.start();
 
-        bft = SemuxBFT.getInstance();
-        bft.init(chain, channelMgr, pendingMgr, new EdDSA());
+        bft = new SemuxBFT();
+        sync = new SemuxSync();
+        coinbase = new EdDSA();
+        bft.init(chain, channelMgr, pendingMgr, sync, coinbase);
 
         new Thread(() -> {
             bft.start();

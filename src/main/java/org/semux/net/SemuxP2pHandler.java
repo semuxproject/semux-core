@@ -16,8 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.semux.Config;
-import org.semux.consensus.SemuxBFT;
-import org.semux.consensus.SemuxSync;
+import org.semux.Kernel;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -100,8 +99,8 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         this.client = channel.getClient();
 
         this.isHandshakeDone = false;
-        this.sync = SemuxSync.getInstance();
-        this.consenus = SemuxBFT.getInstance();
+        this.sync = Kernel.getInstance().getSync();
+        this.consenus = Kernel.getInstance().getConsenus();
     }
 
     @Override

@@ -83,22 +83,10 @@ public class SemuxSync implements Sync {
     private volatile boolean isRunning;
     private Object done = new Object();
 
-    private static SemuxSync instance;
-
     /**
-     * Get the singleton instance.
-     * 
-     * @return
+     * Create a sync instance.
      */
-    public static synchronized SemuxSync getInstance() {
-        if (instance == null) {
-            instance = new SemuxSync();
-        }
-
-        return instance;
-    }
-
-    private SemuxSync() {
+    public SemuxSync() {
     }
 
     @Override

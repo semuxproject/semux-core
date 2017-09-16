@@ -82,35 +82,24 @@ public class SemuxBFT implements Consensus {
     private VoteSet precommitVotes;
     private VoteSet commitVotes;
 
-    private static SemuxBFT instance;
-
     /**
-     * Get the singleton instance of consensus.
-     * 
-     * @return
+     * Create a consensus instance.
      */
-    public static synchronized SemuxBFT getInstance() {
-        if (instance == null) {
-            instance = new SemuxBFT();
-        }
-
-        return instance;
-    }
-
-    private SemuxBFT() {
+    public SemuxBFT() {
     }
 
     @Override
-    public void init(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, EdDSA coinbase) {
+    public void init(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, Sync sync,
+            EdDSA coinbase) {
         this.chain = chain;
         this.channelMgr = channelMgr;
         this.pendingMgr = pendingMgr;
+        this.sync = sync;
         this.coinbase = coinbase;
 
         this.accountState = chain.getAccountState();
         this.delegateState = chain.getDeleteState();
 
-        this.sync = SemuxSync.getInstance();
         this.timer = new Timer();
         this.broadcaster = new Broadcaster();
 

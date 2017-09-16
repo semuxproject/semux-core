@@ -167,11 +167,11 @@ public class Kernel {
         // ====================================
         // start sync/consensus
         // ====================================
-        sync = SemuxSync.getInstance();
+        sync = new SemuxSync();
         sync.init(chain, channelMgr);
 
-        cons = SemuxBFT.getInstance();
-        cons.init(chain, channelMgr, pendingMgr, coinbase);
+        cons = new SemuxBFT();
+        cons.init(chain, channelMgr, pendingMgr, sync, coinbase);
 
         Thread consThread = new Thread(() -> {
             cons.start();
