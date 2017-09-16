@@ -6,17 +6,14 @@
     "merkleRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "data": "semux",
     "premine": {
-        "0x0de90f89e9b338f7ae23900af4768d2b33182675": {
-            "balance": 100000000
+        "0xc7b0d7a7f78730c873de4271d7557722af9810df": {
+            "balance": 10000000
         },
-        "0x7073f25e0023f2b3fa25d3fe99e4e9af7b8ae781": {
-            "balance": 100000000
+        "0x9e8741bde30be23dca416b76683390b2cb6775ab": {
+            "balance": 10000000
         },
-        "0xa9bf44eb367c859634e82d5f3470280f261f67c0": {
-            "balance": 100000000
-        },
-        "0x484a2cce01d7b7f6795c8c2b26ebbfaa438040c8": {
-            "balance": 100000000
+        "0x49f1696dda5910a28eca708b36f9f87a74e24cea": {
+            "balance": 10000000
         }
     },
     "delegates": {
@@ -26,6 +23,5 @@
         "semux_4": "0x5656779afec2314abd4c51666e28bc64f758c621"
     },
     "config": {
-        "nextUpgrade": 388800
     }
 }

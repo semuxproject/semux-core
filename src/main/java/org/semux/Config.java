@@ -340,11 +340,11 @@ public class Config {
      */
     public static long getBlockReward(long number) {
         if (number <= 1_000_000) {
-            return 100 * Unit.SEM;
+            return 20 * Unit.SEM;
         } else if (number <= 3_000_000) {
-            return 50 * Unit.SEM;
-        } else if (number <= 7_000_000) {
-            return 25 * Unit.SEM;
+            return 10 * Unit.SEM;
+        } else if (number <= 9_000_000) {
+            return 5 * Unit.SEM;
         } else {
             return 0;
         }
