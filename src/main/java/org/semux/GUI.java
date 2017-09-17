@@ -21,7 +21,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.semux.core.Account;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
-import org.semux.core.BlockchainListener;
 import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -127,18 +126,23 @@ public class GUI {
         kernel.init(dataDir, wallet, model.getCoinbase());
         kernel.start();
 
-        // register block listener
-        BlockchainListener listener = (block) -> {
-            onBlockAdded(block);
-        };
-        listener.onBlockAdded(kernel.getBlockchain().getLatestBlock());
-        kernel.getBlockchain().addListener(listener);
-
         // start main frame
         EventQueue.invokeLater(() -> {
             MainFrame frame = new MainFrame(model);
             frame.setVisible(true);
         });
+
+        // start data refresh
+        new Thread(() -> {
+            while (true) {
+                onBlockAdded(kernel.getBlockchain().getLatestBlock());
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    logger.info("GUI data refresh thread stopped");
+                }
+            }
+        }, "gui-data").start();
 
         // start version check
         new Thread(() -> {
@@ -165,7 +169,7 @@ public class GUI {
             } catch (TextParseException | UnknownHostException e) {
                 logger.debug("Failed to get min client version");
             }
-        }).start();
+        }, "gui-version").start();
     }
 
     private static void onBlockAdded(Block block) {

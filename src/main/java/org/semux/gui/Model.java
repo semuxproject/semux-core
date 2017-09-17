@@ -4,6 +4,7 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class Model {
     private volatile List<Account> accounts = new ArrayList<>();
     private volatile List<Delegate> delegates = new ArrayList<>();
 
-    private Map<String, Peer> activePeers;
+    private Map<String, Peer> activePeers = new HashMap<>();
 
     /**
      * Construct a new model.
