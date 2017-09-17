@@ -752,7 +752,7 @@ public class SemuxBFT implements Consensus {
     }
 
     /**
-     * Apply a block to the blockchain.
+     * Apply a block to the chain.
      * 
      * @param block
      */
@@ -769,8 +769,8 @@ public class SemuxBFT implements Consensus {
         List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds);
         for (int i = 0; i < results.size(); i++) {
             if (!results.get(i).isValid()) {
-                byte[] hash = block.getTransactions().get(i).getHash();
-                logger.error("Invalid transaction: hash = {}", Hex.encode(hash));
+                Transaction tx = block.getTransactions().get(i);
+                logger.debug("Invalid transaction: type = {}, hash = {}", tx.getType(), Hex.encode(tx.getHash()));
                 return;
             }
         }

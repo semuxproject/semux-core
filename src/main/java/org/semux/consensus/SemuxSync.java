@@ -38,6 +38,7 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hash;
+import org.semux.crypto.Hex;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
@@ -264,20 +265,7 @@ public class SemuxSync implements Sync {
         if (block != null) {
             logger.info("{}", block);
 
-            if (validateAndCommit(block)) {
-                WriteLock lock = Config.STATE_LOCK.writeLock();
-                lock.lock();
-                try {
-                    // [7] flush state changes to disk
-                    chain.getAccountState().commit();
-                    chain.getDeleteState().commit();
-
-                    // [8] add block to chain
-                    chain.addBlock(block);
-                } finally {
-                    lock.unlock();
-                }
-
+            if (validateApplyBlock(block)) {
                 synchronized (lock) {
                     toDownload.remove(block.getNumber());
                     toComplete.remove(block.getNumber());
@@ -292,12 +280,12 @@ public class SemuxSync implements Sync {
     }
 
     /**
-     * Validate a block, and commit state change if valid.
+     * Check if a block is valid, and apply to the chain if yes.
      * 
      * @param block
      * @return
      */
-    private boolean validateAndCommit(Block block) {
+    private boolean validateApplyBlock(Block block) {
         try {
             // [1] check block integrity and signature
             if (!block.validate()) {
@@ -344,7 +332,8 @@ public class SemuxSync implements Sync {
             List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds);
             for (int i = 0; i < results.size(); i++) {
                 if (!results.get(i).isValid()) {
-                    logger.debug("Invalid transaction #{}", i);
+                    Transaction tx = block.getTransactions().get(i);
+                    logger.debug("Invalid transaction: type = {}, hash = {}", tx.getType(), Hex.encode(tx.getHash()));
                     return false;
                 }
             }
@@ -362,6 +351,19 @@ public class SemuxSync implements Sync {
             // [6] commit the updates
             as.commit();
             ds.commit();
+
+            WriteLock lock = Config.STATE_LOCK.writeLock();
+            lock.lock();
+            try {
+                // [7] flush state to disk
+                chain.getAccountState().commit();
+                chain.getDeleteState().commit();
+
+                // [8] add block to chain
+                chain.addBlock(block);
+            } finally {
+                lock.unlock();
+            }
         } catch (Exception e) {
             logger.info("Exception in sync block validation", e);
             return false;

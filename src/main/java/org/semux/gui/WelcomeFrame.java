@@ -58,7 +58,6 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         // setup frame properties
         this.setTitle(TITLE);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setResizable(false);
         SwingUtil.centerizeFrame(this, 600, 400);
 
         // create banner
