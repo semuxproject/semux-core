@@ -737,7 +737,7 @@ public class SemuxBFT implements Consensus {
 
         // [3] check transactions
         List<Transaction> txs = block.getTransactions();
-        List<TransactionResult> results = exec.execute(txs, as, ds, false);
+        List<TransactionResult> results = exec.execute(txs, as, ds);
         for (int i = 0; i < results.size(); i++) {
             if (!results.get(i).isValid()) {
                 logger.debug("Invalid transaction #{}", i);
@@ -766,7 +766,7 @@ public class SemuxBFT implements Consensus {
 
         // [1] execute all transactions
         TransactionExecutor exec = new TransactionExecutor();
-        List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, true);
+        List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds);
         for (int i = 0; i < results.size(); i++) {
             if (!results.get(i).isValid()) {
                 byte[] hash = block.getTransactions().get(i).getHash();
@@ -781,18 +781,22 @@ public class SemuxBFT implements Consensus {
             reward += tx.getFee();
         }
         if (reward > 0) {
-            Account acc = chain.getAccountState().getAccount(block.getCoinbase());
+            Account acc = as.getAccount(block.getCoinbase());
             acc.setBalance(acc.getBalance() + reward);
         }
+
+        // [3] commit state change
+        as.commit();
+        ds.commit();
 
         WriteLock lock = Config.STATE_LOCK.writeLock();
         lock.lock();
         try {
-            // [3] flush state updates to disk
+            // [4] flush state to disk
             chain.getAccountState().commit();
             chain.getDeleteState().commit();
 
-            // [4] add block to chain
+            // [5] add block to chain
             chain.addBlock(block);
         } finally {
             lock.unlock();

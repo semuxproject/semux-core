@@ -341,7 +341,7 @@ public class SemuxSync implements Sync {
 
             // [4] check transactions
             TransactionExecutor exec = new TransactionExecutor();
-            List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds, false);
+            List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds);
             for (int i = 0; i < results.size(); i++) {
                 if (!results.get(i).isValid()) {
                     logger.debug("Invalid transaction #{}", i);

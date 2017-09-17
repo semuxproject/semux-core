@@ -292,7 +292,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         int cnt = 0;
         while (tx != null && tx.getNonce() == nonce) {
             // execute transactions
-            TransactionResult result = exec.execute(tx, as, ds, false);
+            TransactionResult result = exec.execute(tx, as, ds);
 
             if (result.isValid()) {
                 // commit state updates

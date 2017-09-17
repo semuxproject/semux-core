@@ -42,11 +42,9 @@ public class TransactionExecutor {
      *            delegate state
      * @param txs
      *            transactions
-     * @param commit
-     *            whether to commit the updates
      * @return
      */
-    public List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds, boolean commit) {
+    public List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds) {
         List<TransactionResult> results = new ArrayList<>();
 
         for (Transaction tx : txs) {
@@ -62,22 +60,17 @@ public class TransactionExecutor {
             long fee = tx.getFee();
             byte[] data = tx.getData();
 
-            // check nonce and balance
-            if (nonce != fromAcc.getNonce() || fee > fromAcc.getBalance()) {
+            // check nonce
+            if (nonce != fromAcc.getNonce()) {
                 continue;
-            } else {
-                // increase nonce
-                fromAcc.setNonce(nonce + 1);
-
-                // charge transaction fee
-                fromAcc.setBalance(fromAcc.getBalance() - fee);
             }
 
+            long balance = fromAcc.getBalance();
             switch (tx.getType()) {
             case TRANSFER: {
-                if (value <= fromAcc.getBalance()) {
+                if (fee <= balance && value <= balance && value + fee <= balance) {
                     // transfer balance
-                    fromAcc.setBalance(fromAcc.getBalance() - value);
+                    fromAcc.setBalance(fromAcc.getBalance() - value - fee);
                     toAcc.setBalance(toAcc.getBalance() + value);
 
                     result.setValid(true);
@@ -85,21 +78,23 @@ public class TransactionExecutor {
                 break;
             }
             case DELEGATE: {
-                if (Arrays.equals(from, to) //
+                if (fee <= balance && value <= balance && value + fee <= balance //
+                        && Arrays.equals(from, to) //
                         && value >= Config.MIN_DELEGATE_FEE //
-                        && data.length <= 16 && Bytes.toString(data).matches("[_a-z0-9]{4,16}")) {
+                        && data.length <= 16 && Bytes.toString(data).matches("[_a-z0-9]{4,16}") //
+                        && ds.register(to, data)) {
                     // register delegate
-                    fromAcc.setBalance(fromAcc.getBalance() - value);
-                    ds.register(to, data);
+                    fromAcc.setBalance(fromAcc.getBalance() - value - fee);
 
                     result.setValid(true);
                 }
                 break;
             }
             case VOTE: {
-                if (value <= fromAcc.getBalance() && ds.vote(from, to, value)) {
+                if (fee <= balance && value <= balance && value + fee <= balance //
+                        && ds.vote(from, to, value)) {
                     // lock balance
-                    fromAcc.setBalance(fromAcc.getBalance() - value);
+                    fromAcc.setBalance(fromAcc.getBalance() - value - fee);
                     fromAcc.setLocked(fromAcc.getLocked() + value);
 
                     result.setValid(true);
@@ -107,9 +102,11 @@ public class TransactionExecutor {
                 break;
             }
             case UNVOTE: {
-                if (value <= fromAcc.getLocked() && ds.unvote(from, to, value)) {
+                if (fee <= balance //
+                        && value <= fromAcc.getLocked() //
+                        && ds.unvote(from, to, value)) {
                     // unlock balance
-                    fromAcc.setBalance(fromAcc.getBalance() + value);
+                    fromAcc.setBalance(fromAcc.getBalance() + value - fee);
                     fromAcc.setLocked(fromAcc.getLocked() - value);
 
                     result.setValid(true);
@@ -120,12 +117,13 @@ public class TransactionExecutor {
                 logger.debug("Unsupported transaction type: {}", tx.getType());
                 break;
             }
+
+            // increase nonce if valid
+            if (result.isValid()) {
+                fromAcc.setNonce(nonce + 1);
+            }
         }
 
-        if (commit) {
-            as.commit();
-            ds.commit();
-        }
         return results;
     }
 
@@ -140,11 +138,9 @@ public class TransactionExecutor {
      *            delegate state
      * @param txs
      *            transactions
-     * @param commit
-     *            whether to commit the updates
      * @return
      */
-    public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds, boolean commit) {
-        return execute(Collections.singletonList(tx), as, ds, commit).get(0);
+    public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds) {
+        return execute(Collections.singletonList(tx), as, ds).get(0);
     }
 }
