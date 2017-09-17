@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -260,7 +261,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             case 4:
                 return votesFromMe.get(row) / Unit.SEM;
             case 5:
-                return model.getActivePeers().containsKey(Hex.encode(d.getAddress())) ? "Yes" : "No";
+                byte[] coinbase = model.getAccounts().get(model.getCoinbase()).getKey().toAddress();
+                return Arrays.equals(coinbase, d.getAddress())
+                        || model.getActivePeers().containsKey(Hex.encode(d.getAddress())) ? "Yes" : "No";
             default:
                 return null;
             }
@@ -419,7 +422,19 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             }
         }
 
-        tableModel.setData(delegates, votesFromMe);
+        int row = table.getSelectedRow();
+        if (row != -1) {
+            Delegate selected = tableModel.getRow(row);
+            tableModel.setData(delegates, votesFromMe);
+            for (int i = 0; i < delegates.size(); i++) {
+                if (Arrays.equals(selected.getAddress(), delegates.get(i).getAddress())) {
+                    table.setRowSelectionInterval(i, i);
+                    break;
+                }
+            }
+        } else {
+            tableModel.setData(delegates, votesFromMe);
+        }
     }
 
     private void clear() {

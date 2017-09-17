@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -79,6 +80,14 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             this.fireTableDataChanged();
         }
 
+        public Transaction getRow(int row) {
+            if (row >= 0 && row < data.size()) {
+                return data.get(row);
+            }
+
+            return null;
+        }
+
         @Override
         public int getRowCount() {
             return data.size();
@@ -146,6 +155,19 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         transactions.sort((tx1, tx2) -> {
             return Long.compare(tx2.getTimestamp(), tx1.getTimestamp());
         });
-        tableModel.setData(transactions);
+
+        int row = table.getSelectedRow();
+        if (row != -1) {
+            Transaction tx = tableModel.getRow(row);
+            tableModel.setData(transactions);
+            for (int i = 0; i < transactions.size(); i++) {
+                if (Arrays.equals(tx.getHash(), transactions.get(i).getHash())) {
+                    table.setRowSelectionInterval(i, i);
+                    break;
+                }
+            }
+        } else {
+            tableModel.setData(transactions);
+        }
     }
 }
