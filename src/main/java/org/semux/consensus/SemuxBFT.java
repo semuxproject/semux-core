@@ -298,6 +298,11 @@ public class SemuxBFT implements Consensus {
 
             logger.debug("Proposing: {}", proposal);
             broadcaster.broadcast(new BFTProposalMessage(proposal));
+        } else {
+            // locked to a proposal, broadcast to help recover from extreme condition
+            if (proposal != null) {
+                broadcaster.broadcast(new BFTProposalMessage(proposal));
+            }
         }
     }
 
