@@ -21,7 +21,7 @@ public class ConfigTest {
 
     @Test
     public void testNumberOfValidators() {
-        long step = 3 * 60 * 8;
+        long step = 3 * 60 * 12;
 
         assertEquals(10, Config.getNumberOfValidators(0));
         assertEquals(10, Config.getNumberOfValidators(1));
