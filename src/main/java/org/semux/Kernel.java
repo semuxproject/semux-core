@@ -1,7 +1,14 @@
 package org.semux;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.bitlet.weupnp.GatewayDevice;
+import org.bitlet.weupnp.GatewayDiscover;
 import org.semux.api.APIHandler;
 import org.semux.api.SemuxAPI;
 import org.semux.consensus.SemuxBFT;
@@ -23,6 +30,7 @@ import org.semux.net.SemuxChannelInitializer;
 import org.semux.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 /**
  * Kernel maintains global instances of different kernel modules. It contains
@@ -172,6 +180,25 @@ public class Kernel {
             cons.start();
         }, "cons");
         consThread.start();
+
+        // ====================================
+        // add port forwarding
+        // ====================================
+        try {
+            GatewayDiscover discover = new GatewayDiscover();
+            Map<InetAddress, GatewayDevice> devices = discover.discover();
+            for (InetAddress k : devices.keySet()) {
+                GatewayDevice gw = devices.get(k);
+                logger.info("Found a gateway device: local address = {}, external address = {}",
+                        gw.getLocalAddress().getHostAddress(), gw.getExternalIPAddress());
+
+                gw.deletePortMapping(Config.P2P_LISTEN_PORT, "TCP");
+                gw.addPortMapping(Config.P2P_LISTEN_PORT, Config.P2P_LISTEN_PORT, gw.getLocalAddress().getHostAddress(),
+                        "TCP", "Semux P2P network");
+            }
+        } catch (IOException | SAXException | ParserConfigurationException e) {
+            logger.info("Failed to add port mapping", e);
+        }
 
         // ====================================
         // register shutdown hook

@@ -177,5 +177,12 @@
             <artifactId>core</artifactId>
             <version>3.3.0</version>
         </dependency>
+        
+        <!-- weupnp -->
+        <dependency>
+            <groupId>org.bitlet</groupId>
+            <artifactId>weupnp</artifactId>
+            <version>0.1.4</version>
+        </dependency>
     </dependencies>
 </project>
