@@ -145,7 +145,7 @@ public class Config {
     /**
      * Version of this client.
      */
-    public static String CLIENT_VERSION = "1.0.8";
+    public static String CLIENT_VERSION = "1.0.9";
 
     /***
      * Full name of this client.
@@ -168,7 +168,7 @@ public class Config {
     /**
      * P2P protocol version.
      */
-    public static short P2P_VERSION = 8;
+    public static short P2P_VERSION = 9;
 
     /**
      * P2P listening address.
