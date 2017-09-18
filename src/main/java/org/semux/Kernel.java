@@ -184,21 +184,23 @@ public class Kernel {
         // ====================================
         // add port forwarding
         // ====================================
-        try {
-            GatewayDiscover discover = new GatewayDiscover();
-            Map<InetAddress, GatewayDevice> devices = discover.discover();
-            for (InetAddress k : devices.keySet()) {
-                GatewayDevice gw = devices.get(k);
-                logger.info("Found a gateway device: local address = {}, external address = {}",
-                        gw.getLocalAddress().getHostAddress(), gw.getExternalIPAddress());
+        new Thread(() -> {
+            try {
+                GatewayDiscover discover = new GatewayDiscover();
+                Map<InetAddress, GatewayDevice> devices = discover.discover();
+                for (InetAddress k : devices.keySet()) {
+                    GatewayDevice gw = devices.get(k);
+                    logger.info("Found a gateway device: local address = {}, external address = {}",
+                            gw.getLocalAddress().getHostAddress(), gw.getExternalIPAddress());
 
-                gw.deletePortMapping(Config.P2P_LISTEN_PORT, "TCP");
-                gw.addPortMapping(Config.P2P_LISTEN_PORT, Config.P2P_LISTEN_PORT, gw.getLocalAddress().getHostAddress(),
-                        "TCP", "Semux P2P network");
+                    gw.deletePortMapping(Config.P2P_LISTEN_PORT, "TCP");
+                    gw.addPortMapping(Config.P2P_LISTEN_PORT, Config.P2P_LISTEN_PORT,
+                            gw.getLocalAddress().getHostAddress(), "TCP", "Semux P2P network");
+                }
+            } catch (IOException | SAXException | ParserConfigurationException e) {
+                logger.info("Failed to add port mapping", e);
             }
-        } catch (IOException | SAXException | ParserConfigurationException e) {
-            logger.info("Failed to add port mapping", e);
-        }
+        }, "uPnP").start();
 
         // ====================================
         // register shutdown hook

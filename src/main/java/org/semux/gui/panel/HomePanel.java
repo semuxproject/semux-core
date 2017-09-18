@@ -154,7 +154,8 @@ public class HomePanel extends JPanel implements ActionListener {
             JLabel lblTime = new JLabel(df.format(new Date(tx.getTimestamp())));
 
             JLabel labelAddress = new JLabel((inBound && outBound) ? "Internal transfer"
-                    : "0x" + Hex.encode(inBound ? tx.getFrom() : tx.getTo()));
+                    : (tx.getType() == TransactionType.COINBASE ? "From mining block #" + tx.getNonce()
+                            : "0x" + Hex.encode(inBound ? tx.getFrom() : tx.getTo())));
             labelAddress.setForeground(Color.GRAY);
 
             // @formatter:off
@@ -219,7 +220,8 @@ public class HomePanel extends JPanel implements ActionListener {
         for (Account acc : model.getAccounts()) {
             for (Transaction tx : acc.getTransactions()) {
                 ByteArray key = ByteArray.of(tx.getHash());
-                if (TransactionType.TRANSFER.equals(tx.getType()) && !hashes.contains(key)) {
+                if ((tx.getType() == TransactionType.COINBASE || tx.getType() == TransactionType.TRANSFER)
+                        && !hashes.contains(key)) {
                     list.add(tx);
                     hashes.add(key);
                 }

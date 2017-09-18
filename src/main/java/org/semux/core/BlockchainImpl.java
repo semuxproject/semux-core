@@ -12,10 +12,12 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.semux.Config;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.AccountStateImpl;
 import org.semux.core.state.DelegateState;
 import org.semux.core.state.DelegateStateImpl;
+import org.semux.crypto.EdDSA;
 import org.semux.db.DBFactory;
 import org.semux.db.DBName;
 import org.semux.db.KVDB;
@@ -156,6 +158,11 @@ public class BlockchainImpl implements Blockchain {
     public Transaction getTransaction(byte[] hash) {
         byte[] bytes = indexDB.get(hash);
         if (bytes != null) {
+            // coinbase transaction
+            if (bytes.length > 64) {
+                return Transaction.fromBytes(bytes);
+            }
+
             SimpleDecoder dec = new SimpleDecoder(bytes);
             byte[] blockHash = dec.readBytes();
             int from = dec.readInt();
@@ -170,54 +177,60 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public synchronized void addBlock(Block block) {
+        long number = block.getNumber();
+        byte[] hash = block.getHash();
 
-        long blockNumber = block.getNumber();
-        byte[] blockHash = block.getHash();
-
-        byte[] idx = Bytes.of(blockNumber);
-        if (indexDB.get(idx) != null) {
-            logger.error("Block #{} already exists", blockNumber);
-            return;
-        } else {
-            List<Pair<Integer, Integer>> txIndices = block.getTransacitonIndexes();
-            byte[] bytes = block.toBytes();
-
-            // [1] update block
-            blockDB.put(blockHash, bytes);
-            indexDB.put(idx, blockHash);
-
-            // [2] update transaction indices
-            List<Transaction> txs = block.getTransactions();
-            for (int i = 0; i < txs.size(); i++) {
-                Transaction tx = txs.get(i);
-
-                SimpleEncoder enc = new SimpleEncoder();
-                enc.writeBytes(blockHash);
-                enc.writeInt(txIndices.get(i).getLeft());
-                enc.writeInt(txIndices.get(i).getRight());
-
-                indexDB.put(tx.getHash(), enc.toBytes());
-
-                // [3] update transaction_by_account indices
-                int totalFrom = getTotalTransactions(tx.getFrom());
-                int totalTo = getTotalTransactions(tx.getTo());
-                indexDB.put(getNthTransactionIndexKey(tx.getFrom(), totalFrom), tx.getHash());
-                indexDB.put(getNthTransactionIndexKey(tx.getTo(), totalTo), tx.getHash());
-                setTotalTransactions(tx.getFrom(), totalFrom + 1);
-                setTotalTransactions(tx.getTo(), totalTo + 1);
-            }
-
-            if (blockNumber > latestBlock.getNumber()) {
-                latestBlock = block;
-
-                // [4] update latest_block
-                indexDB.put(KEY_LATEST_BLOCK_HASH, blockHash);
-            }
+        if (number != latestBlock.getNumber() + 1) {
+            logger.error("Adding wrong block: number = {}, expected = {}", number, latestBlock.getNumber() + 1);
+            throw new RuntimeException("Blocks can only be added sequentially");
         }
+
+        List<Pair<Integer, Integer>> txIndices = block.getTransacitonIndexes();
+        byte[] bytes = block.toBytes();
+
+        // [1] update block
+        blockDB.put(hash, bytes);
+        indexDB.put(Bytes.of(number), hash);
+
+        // [2] update transaction indices
+        List<Transaction> txs = block.getTransactions();
+        long reward = Config.getBlockReward(number);
+        for (int i = 0; i < txs.size(); i++) {
+            Transaction tx = txs.get(i);
+            reward += tx.getFee();
+
+            SimpleEncoder enc = new SimpleEncoder();
+            enc.writeBytes(hash);
+            enc.writeInt(txIndices.get(i).getLeft());
+            enc.writeInt(txIndices.get(i).getRight());
+
+            indexDB.put(tx.getHash(), enc.toBytes());
+
+            // [3] update transaction_by_account index
+            addTransactionToAccount(tx, tx.getFrom());
+            addTransactionToAccount(tx, tx.getTo());
+        }
+
+        // [4] coinbase transaction
+        Transaction tx = new Transaction(TransactionType.COINBASE, Bytes.EMPTY_ADDRESS, block.getCoinbase(), reward,
+                Config.MIN_TRANSACTION_FEE, block.getNumber(), block.getTimestamp(), Bytes.EMPY_BYTES);
+        tx.sign(new EdDSA()); // signed by random account
+        indexDB.put(tx.getHash(), tx.toBytes());
+        addTransactionToAccount(tx, block.getCoinbase());
+
+        // [5] update latest_block
+        latestBlock = block;
+        indexDB.put(KEY_LATEST_BLOCK_HASH, hash);
 
         for (BlockchainListener listener : listeners) {
             listener.onBlockAdded(block);
         }
+    }
+
+    private void addTransactionToAccount(Transaction tx, byte[] address) {
+        int total = getTotalTransactions(address);
+        indexDB.put(getNthTransactionIndexKey(address, total), tx.getHash());
+        setTotalTransactions(address, total + 1);
     }
 
     /**
@@ -274,7 +287,6 @@ public class BlockchainImpl implements Blockchain {
         for (int i = total - 1; i >= 0 && (limit == -1 || list.size() < limit); i--) {
             byte[] key = getNthTransactionIndexKey(address, i);
             byte[] value = indexDB.get(key);
-
             list.add(getTransaction(value));
         }
 

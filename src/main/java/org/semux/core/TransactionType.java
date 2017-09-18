@@ -9,34 +9,39 @@ package org.semux.core;
 public enum TransactionType {
 
     /**
-     * (0x00) Balance transfer.
+     * (0x00) Coinbase transaction
      */
-    TRANSFER(0x00),
+    COINBASE(0x00),
 
     /**
-     * (0x01) Register as a delegate.
+     * (0x01) Balance transfer.
      */
-    DELEGATE(0x01),
+    TRANSFER(0x01),
 
     /**
-     * (0x02) Vote for delegate.
+     * (0x02) Register as a delegate.
      */
-    VOTE(0x02),
+    DELEGATE(0x02),
 
     /**
-     * (0x03) Revoke a previous vote for a delegate.
+     * (0x03) Vote for delegate.
      */
-    UNVOTE(0x03),
+    VOTE(0x03),
 
     /**
-     * (0x04) Create a contract.
+     * (0x04) Revoke a previous vote for a delegate.
      */
-    CREATE(0x04),
+    UNVOTE(0x04),
 
     /**
-     * (0x05) Call a contract.
+     * (0x05) Create a contract.
      */
-    CALL(0x05);
+    CREATE(0x05),
+
+    /**
+     * (0x06) Call a contract.
+     */
+    CALL(0x06);
 
     private static final TransactionType[] map = new TransactionType[256];
     static {
