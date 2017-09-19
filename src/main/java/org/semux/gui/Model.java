@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.semux.core.Delegate;
 import org.semux.core.Transaction;
@@ -19,7 +20,7 @@ import org.semux.net.Peer;
  */
 public class Model {
 
-    private List<ActionListener> listeners = new ArrayList<>();
+    private List<ActionListener> listeners = new CopyOnWriteArrayList<>();
 
     private long latestBlockNumber;
 

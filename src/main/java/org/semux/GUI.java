@@ -136,9 +136,8 @@ public class GUI {
         new Thread(() -> {
             while (true) {
                 try {
-                    Thread.sleep(1000);
-
                     onBlockAdded(kernel.getBlockchain().getLatestBlock());
+                    Thread.sleep(4000);
                 } catch (InterruptedException e) {
                     logger.info("GUI data refresh interrupted, exiting");
                     break;
