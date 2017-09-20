@@ -249,16 +249,18 @@ public class BlockchainImpl implements Blockchain {
         listeners.add(listener);
     }
 
-    public List<Transaction> getTransactions(byte[] address) {
-        return getTransactions(address, -1);
+    @Override
+    public int getTotalTransactions(byte[] address) {
+        byte[] cnt = indexDB.get(address);
+        return (cnt == null) ? 0 : Bytes.toInt(cnt);
     }
 
     @Override
-    public List<Transaction> getTransactions(byte[] address, int limit) {
+    public List<Transaction> getTransactions(byte[] address, int from, int to) {
         List<Transaction> list = new ArrayList<>();
 
         int total = getTotalTransactions(address);
-        for (int i = total - 1; i >= 0 && (limit == -1 || list.size() < limit); i--) {
+        for (int i = from; i < total && i < to; i++) {
             byte[] key = getNthTransactionIndexKey(address, i);
             byte[] value = indexDB.get(key);
             list.add(getTransaction(value));
@@ -316,17 +318,6 @@ public class BlockchainImpl implements Blockchain {
         int total = getTotalTransactions(address);
         indexDB.put(getNthTransactionIndexKey(address, total), tx.getHash());
         setTotalTransactions(address, total + 1);
-    }
-
-    /**
-     * Get the number of transactions from/to an address.
-     * 
-     * @param address
-     * @return
-     */
-    protected int getTotalTransactions(byte[] address) {
-        byte[] cnt = indexDB.get(address);
-        return (cnt == null) ? 0 : Bytes.toInt(cnt);
     }
 
     /**

@@ -127,11 +127,11 @@ public class BlockchainImplTest {
         Blockchain chain = createBlockchain();
         chain.addBlock(block);
 
-        List<Transaction> list = chain.getTransactions(from);
+        List<Transaction> list = chain.getTransactions(from, 0, 1024);
         assertEquals(1, list.size());
         assertArrayEquals(tx.getHash(), list.get(0).getHash());
 
-        list = chain.getTransactions(to);
+        list = chain.getTransactions(to, 0, 1024);
         assertEquals(1, list.size());
         assertArrayEquals(tx.getHash(), list.get(0).getHash());
     }

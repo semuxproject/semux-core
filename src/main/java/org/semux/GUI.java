@@ -10,6 +10,7 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.semux.core.Account;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
+import org.semux.core.Transaction;
 import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -48,7 +50,7 @@ public class GUI {
 
     private static Logger logger = LoggerFactory.getLogger(GUI.class);
 
-    private static final int TRANSACTION_LIMIT = 1000; // per account
+    private static final int TRANSACTION_LIMIT = 1024; // per account
 
     private static String dataDir = ".";
 
@@ -137,7 +139,8 @@ public class GUI {
             while (true) {
                 try {
                     onBlockAdded(kernel.getBlockchain().getLatestBlock());
-                    Thread.sleep(4000);
+
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     logger.info("GUI data refresh interrupted, exiting");
                     break;
@@ -191,7 +194,13 @@ public class GUI {
             ma.setNonce(a.getNonce());
             ma.setBalance(a.getBalance());
             ma.setLocked(a.getLocked());
-            ma.setTransactions(chain.getTransactions(ma.getKey().toAddress(), TRANSACTION_LIMIT));
+
+            // most recent transactions of this account
+            byte[] address = ma.getKey().toAddress();
+            int total = chain.getTotalTransactions(address);
+            List<Transaction> list = chain.getTransactions(address, Math.max(0, total - TRANSACTION_LIMIT), total);
+            Collections.reverse(list);
+            ma.setTransactions(list);
         }
         model.setDelegates(ds.getDelegates());
         Map<String, Peer> activePeers = new HashMap<>();

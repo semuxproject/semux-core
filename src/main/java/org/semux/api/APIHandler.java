@@ -159,15 +159,18 @@ public class APIHandler {
             }
             case GET_ACCOUNT_TRANSACTIONS: {
                 String addr = params.get("address");
-                if (addr != null) {
-                    List<Transaction> txs = chain.getTransactions(Hex.parse(addr));
+                String from = params.get("from");
+                String to = params.get("to");
+                if (addr != null && from != null && to != null) {
+                    List<Transaction> txs = chain.getTransactions(Hex.parse(addr), Integer.parseInt(from),
+                            Integer.parseInt(to));
                     JSONArray arr = new JSONArray();
                     for (Transaction tx : txs) {
                         arr.put(transactionToJson(tx));
                     }
                     return success(arr);
                 } else {
-                    return failure("Invalid parameter: address = " + addr);
+                    return failure("Invalid parameter: address = " + addr + ", from = " + from + ", to = " + to);
                 }
             }
             case GET_TRANSACTION: {

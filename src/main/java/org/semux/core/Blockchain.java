@@ -90,24 +90,26 @@ public interface Blockchain {
     public Transaction getTransaction(byte[] hash);
 
     /**
-     * Get all inbound transactions from/to an address.
+     * Returns the total number of transactions from/to the given address.
      * 
      * @param address
      *            account address
      * @return
      */
-    public List<Transaction> getTransactions(byte[] address);
+    public int getTotalTransactions(byte[] address);
 
     /**
-     * Get a limited number of transactions from/to an address.
+     * Returns transactions from/to an address.
      * 
      * @param address
      *            account address
-     * @param limit
-     *            number of transactions, or -1 if no limit
+     * @param from
+     *            transaction index from
+     * @param tio
+     *            transaction index to
      * @return
      */
-    public List<Transaction> getTransactions(byte[] address, int limit);
+    public List<Transaction> getTransactions(byte[] address, int from, int to);
 
     /**
      * Add a block to the chain.

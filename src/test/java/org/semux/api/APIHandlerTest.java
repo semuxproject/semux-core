@@ -187,7 +187,7 @@ public class APIHandlerTest {
         api.chain.addBlock(block);
 
         try {
-            String uri = "/get_account_transactions?address=" + Hex.encode(tx.getFrom());
+            String uri = "/get_account_transactions?address=" + Hex.encode(tx.getFrom()) + "&from=0&to=1024";
             JSONObject response = request(uri);
             assertTrue(response.getBoolean("success"));
 
