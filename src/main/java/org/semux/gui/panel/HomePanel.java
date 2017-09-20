@@ -154,7 +154,7 @@ public class HomePanel extends JPanel implements ActionListener {
             JLabel lblTime = new JLabel(df.format(new Date(tx.getTimestamp())));
 
             JLabel labelAddress = new JLabel((inBound && outBound) ? "Internal transfer"
-                    : (tx.getType() == TransactionType.COINBASE ? "From mining block #" + tx.getNonce()
+                    : (tx.getType() == TransactionType.COINBASE ? "From block reward, #" + tx.getNonce()
                             : "0x" + Hex.encode(inBound ? tx.getFrom() : tx.getTo())));
             labelAddress.setForeground(Color.GRAY);
 

@@ -265,9 +265,9 @@ public class SemuxBFT implements Consensus {
         // update active peers
         activeValidators = channelMgr.getActiveChannels(validators);
 
-        if (validateVotes.isRejected()) {
+        if (precommitVotes.isRejected()) {
             view++;
-            proof = new Proof(height, view, validateVotes.getRejections());
+            proof = new Proof(height, view, precommitVotes.getRejections());
 
             proposal = null;
             resetVotes();
@@ -331,18 +331,19 @@ public class SemuxBFT implements Consensus {
     protected void enterPreCommit() {
         state = State.PRE_COMMIT;
         timer.timeout(Config.BFT_PRE_COMMIT_TIMEOUT);
-        logger.info("Entered pre_commit: validate votes = {}", validateVotes);
+        logger.info("Entered pre_commit: validate votes = {}, pre-commit votes = {}", validateVotes, precommitVotes);
 
         Vote vote = null;
         if (proposal != null && validateVotes.isApproved()) {
-            // vote APPROVE if everything ok
             vote = Vote.newApprove(VoteType.PRECOMMIT, height, view, proposal.getBlock().getHash());
-            vote.sign(coinbase);
-
-            // always broadcast vote directly.
-            precommitVotes.addVote(vote);
-            broadcaster.broadcast(new BFTVoteMessage(vote));
+        } else {
+            vote = Vote.newReject(VoteType.PRECOMMIT, height, view);
         }
+        vote.sign(coinbase);
+
+        // always broadcast vote directly.
+        precommitVotes.addVote(vote);
+        broadcaster.broadcast(new BFTVoteMessage(vote));
     }
 
     /**
@@ -420,7 +421,7 @@ public class SemuxBFT implements Consensus {
         if (p.getHeight() == height && p.getView() > view) {
 
             // check proof-of-unlock
-            VoteSet vs = new VoteSet(p.getHeight(), p.getView() - 1, validators);
+            VoteSet vs = new VoteSet(VoteType.PRECOMMIT, p.getHeight(), p.getView() - 1, validators);
             vs.addVotes(p.getVotes());
             if (!vs.isRejected()) {
                 return;
@@ -448,7 +449,7 @@ public class SemuxBFT implements Consensus {
 
             // check proof-of-unlock
             if (p.getView() != 0) {
-                VoteSet vs = new VoteSet(p.getHeight(), p.getView() - 1, validators);
+                VoteSet vs = new VoteSet(VoteType.PRECOMMIT, p.getHeight(), p.getView() - 1, validators);
                 vs.addVotes(p.getProof().getVotes());
                 if (!vs.isRejected()) {
                     return;
@@ -659,9 +660,9 @@ public class SemuxBFT implements Consensus {
      * Reset all vote sets. This should be invoked whenever height or view changes.
      */
     protected void resetVotes() {
-        validateVotes = new VoteSet(height, view, validators);
-        precommitVotes = new VoteSet(height, view, validators);
-        commitVotes = new VoteSet(height, view, validators);
+        validateVotes = new VoteSet(VoteType.VALIDATE, height, view, validators);
+        precommitVotes = new VoteSet(VoteType.PRECOMMIT, height, view, validators);
+        commitVotes = new VoteSet(VoteType.COMMIT, height, view, validators);
     }
 
     /**

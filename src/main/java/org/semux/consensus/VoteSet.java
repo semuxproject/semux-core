@@ -7,36 +7,31 @@
 package org.semux.consensus;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
+import org.semux.utils.ByteArray;
 
 /**
  * <p>
  * A <code>VoteSet</code> contains all the votes for a specific height and view.
- * </p>
- * 
- * <p>
- * It's assumed that the votes have the same <code>blockHash</code>. In case
- * where the primary validator sends out two different block proposal, either or
- * neither should be approved by consensus.
+ * All <code>APPROVE</code> votes are grouped by block hash; <code>REJECT</code>
+ * votes are not. This class is not thread-safe.
  * </p>
  *
  */
 public class VoteSet {
 
-    private byte[] blockHash;
-
-    private Map<String, Vote> approvals;
+    private Map<ByteArray, Map<String, Vote>> approvals;
     private Map<String, Vote> rejections;
+    private VoteType type;
     private long height;
     private int view;
 
@@ -50,9 +45,10 @@ public class VoteSet {
      * @param view
      * @param validators
      */
-    public VoteSet(long height, int view, List<String> validators) {
-        this.approvals = new ConcurrentHashMap<>();
-        this.rejections = new ConcurrentHashMap<>();
+    public VoteSet(VoteType type, long height, int view, List<String> validators) {
+        this.approvals = new HashMap<>();
+        this.rejections = new HashMap<>();
+        this.type = type;
         this.height = height;
         this.view = view;
 
@@ -72,22 +68,21 @@ public class VoteSet {
         Signature sig = vote.getSignature();
         String peerId;
 
-        if (vote.getHeight() == height //
+        if (vote.getType() == type && //
+                vote.getHeight() == height //
                 && vote.getView() == view //
                 && vote.getBlockHash() != null //
                 && vote.validate() //
                 && (peerId = Hex.encode(Hash.h160(sig.getPublicKey()))) != null //
                 && validators.contains(peerId)) {
             if (vote.getValue() == Vote.VALUE_APPROVE) {
-                /*
-                 * Only allow voting for one blockHash.
-                 */
-                if (blockHash == null || Arrays.equals(blockHash, vote.getBlockHash())) {
-                    blockHash = vote.getBlockHash();
-                    return approvals.put(peerId, vote) == null;
-                } else {
-                    return false;
+                ByteArray key = ByteArray.of(vote.getBlockHash());
+                Map<String, Vote> map = approvals.get(key);
+                if (map == null) {
+                    map = new HashMap<>();
+                    approvals.put(key, map);
                 }
+                return map.put(peerId, vote) == null;
             } else {
                 return rejections.put(peerId, vote) == null;
             }
@@ -122,7 +117,13 @@ public class VoteSet {
      * @return
      */
     public boolean isApproved() {
-        return approvals.size() >= twoThirds;
+        for (Map<String, Vote> map : approvals.values()) {
+            if (map.size() >= twoThirds) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -148,7 +149,13 @@ public class VoteSet {
      * @return
      */
     public List<Vote> getApprovals() {
-        return new ArrayList<>(approvals.values());
+        for (Map<String, Vote> map : approvals.values()) {
+            if (map.size() >= twoThirds) {
+                return new ArrayList<>(map.values());
+            }
+        }
+
+        throw new RuntimeException("Voteset is not approved!");
     }
 
     /**

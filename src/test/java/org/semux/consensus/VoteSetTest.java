@@ -31,7 +31,7 @@ public class VoteSetTest {
         list.add(v3.toAddressString());
         list.add(v4.toAddressString());
 
-        vs = new VoteSet(height, view, list);
+        vs = new VoteSet(VoteType.VALIDATE, height, view, list);
     }
 
     @Test
