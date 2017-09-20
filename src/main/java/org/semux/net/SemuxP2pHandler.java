@@ -281,12 +281,12 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             // start peers exchange
             getNodes = exec.scheduleAtFixedRate(() -> {
                 msgQueue.sendMessage(new GetNodesMessage());
-            }, channel.isInbound() ? 8 : 4, 8, TimeUnit.MINUTES);
+            }, channel.isInbound() ? 2 : 0, 2, TimeUnit.MINUTES);
 
             // start ping pong
             pingPong = exec.scheduleAtFixedRate(() -> {
                 msgQueue.sendMessage(new PingMessage());
-            }, channel.isInbound() ? 2 : 1, 2, TimeUnit.MINUTES);
+            }, channel.isInbound() ? 1 : 0, 1, TimeUnit.MINUTES);
 
             // set indicator
             isHandshakeDone = true;

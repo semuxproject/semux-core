@@ -54,7 +54,8 @@ public class NodeManager {
         }
     };
 
-    private static String SEED_DNS_HOST = "seed-%d.semux.org";
+    private static String DNS_SEED_MAINNET = "mainnet.semux.org";
+    private static String DNS_SEED_TESTNET = "testnet.semux.org";
 
     private static String PEERS_DIR = "p2p";
     private static String PEERS_FILE = "peers.data";
@@ -166,15 +167,23 @@ public class NodeManager {
     /**
      * Get seed nodes from DNS records.
      * 
-     * @param networkId
+     * @param network
      * @return
      */
-    public static Set<InetSocketAddress> getSeedNodes(short networkId) {
+    public static Set<InetSocketAddress> getSeedNodes(short network) {
         Set<InetSocketAddress> nodes = new HashSet<>();
 
         try {
-            String domain = String.format(SEED_DNS_HOST, networkId);
-            Lookup lookup = new Lookup(domain, Type.TXT);
+            String name = null;
+            if (network == 0) {
+                name = DNS_SEED_MAINNET;
+            } else if (network == 1) {
+                name = DNS_SEED_TESTNET;
+            } else {
+                return nodes;
+            }
+
+            Lookup lookup = new Lookup(name, Type.TXT);
             lookup.setResolver(new SimpleResolver());
             lookup.setCache(null);
             Record[] records = lookup.run();
@@ -255,10 +264,10 @@ public class NodeManager {
     /**
      * Get the file that stores node list.
      * 
-     * @param networkId
+     * @param network
      * @return
      */
-    protected static File getFile(short networkId) {
+    protected static File getFile(short network) {
         File f = new File(Config.DATA_DIR, PEERS_DIR + File.separator + PEERS_FILE);
         f.getParentFile().mkdirs();
 
