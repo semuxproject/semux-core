@@ -129,6 +129,11 @@ public class Config {
     public static long MIN_DELEGATE_FEE = 1000 * Unit.SEM;
 
     /**
+     * The length of validator term.
+     */
+    public static long VALIDATOR_TERM = 100;
+
+    /**
      * State lock to prevent state inconsistency.
      */
     public static ReentrantReadWriteLock STATE_LOCK = new ReentrantReadWriteLock();
@@ -320,6 +325,10 @@ public class Config {
      * Maximum size of process heap.
      */
     public static int VM_HEAP_SIZE_LIMIT = 4 * 1024 * 1024;
+
+    // =========================
+    // Extra
+    // =========================
 
     /**
      * Get the client id.

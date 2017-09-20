@@ -131,6 +131,13 @@ public interface Blockchain {
     public DelegateState getDeleteState();
 
     /**
+     * Get the validator set based on current state.
+     * 
+     * @return the peerIds of validators
+     */
+    public List<String> getValidators();
+
+    /**
      * Register a blockchain listener.
      * 
      * @param listener

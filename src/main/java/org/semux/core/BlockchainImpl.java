@@ -18,6 +18,7 @@ import org.semux.core.state.AccountStateImpl;
 import org.semux.core.state.DelegateState;
 import org.semux.core.state.DelegateStateImpl;
 import org.semux.crypto.EdDSA;
+import org.semux.crypto.Hex;
 import org.semux.db.DBFactory;
 import org.semux.db.DBName;
 import org.semux.db.KVDB;
@@ -33,6 +34,7 @@ public class BlockchainImpl implements Blockchain {
     private static final Logger logger = LoggerFactory.getLogger(BlockchainImpl.class);
 
     private static byte[] KEY_LATEST_BLOCK_HASH = Bytes.of("latest_block_hash");
+    private static byte[] KEY_VALIDATORS = Bytes.of("validators");
 
     private KVDB indexDB;
     private KVDB blockDB;
@@ -71,8 +73,11 @@ public class BlockchainImpl implements Blockchain {
             for (Entry<String, byte[]> e : genesis.getDelegates().entrySet()) {
                 delegateState.register(e.getValue(), Bytes.of(e.getKey()));
             }
+
             accountState.commit();
             delegateState.commit();
+
+            updateValidators(genesis.getNumber());
 
             latestBlock = genesis;
         } else {
@@ -220,51 +225,18 @@ public class BlockchainImpl implements Blockchain {
         indexDB.put(tx.getHash(), tx.toBytes());
         addTransactionToAccount(tx, block.getCoinbase());
 
-        // [5] update latest_block
+        // [5] update validator set
+        if (number % Config.VALIDATOR_TERM == 0) {
+            updateValidators(block.getNumber());
+        }
+
+        // [6] update latest_block
         latestBlock = block;
         indexDB.put(KEY_LATEST_BLOCK_HASH, hash);
 
         for (BlockchainListener listener : listeners) {
             listener.onBlockAdded(block);
         }
-    }
-
-    private void addTransactionToAccount(Transaction tx, byte[] address) {
-        int total = getTotalTransactions(address);
-        indexDB.put(getNthTransactionIndexKey(address, total), tx.getHash());
-        setTotalTransactions(address, total + 1);
-    }
-
-    /**
-     * Get the number of transactions from/to an address.
-     * 
-     * @param address
-     * @return
-     */
-    private int getTotalTransactions(byte[] address) {
-        byte[] cnt = indexDB.get(address);
-        return (cnt == null) ? 0 : Bytes.toInt(cnt);
-    }
-
-    /**
-     * Set the total number of transaction of an account.
-     * 
-     * @param address
-     * @param total
-     */
-    private void setTotalTransactions(byte[] address, int total) {
-        indexDB.put(address, Bytes.of(total));
-    }
-
-    /**
-     * Get the N-th transaction index key of an account.
-     * 
-     * @param address
-     * @param n
-     * @return
-     */
-    private byte[] getNthTransactionIndexKey(byte[] address, int n) {
-        return Bytes.merge(address, Bytes.of(n));
     }
 
     @Override
@@ -293,5 +265,88 @@ public class BlockchainImpl implements Blockchain {
         }
 
         return list;
+    }
+
+    @Override
+    public List<String> getValidators() {
+        List<String> validators = new ArrayList<>();
+
+        byte[] v = indexDB.get(KEY_VALIDATORS);
+        if (v != null) {
+            SimpleDecoder dec = new SimpleDecoder(v);
+            int n = dec.readInt();
+            for (int i = 0; i < n; i++) {
+                validators.add(dec.readString());
+            }
+        }
+
+        return validators;
+    }
+
+    /**
+     * Updates the validator set.
+     * 
+     * @param number
+     */
+    protected void updateValidators(long number) {
+        List<String> validators = new ArrayList<>();
+
+        List<Delegate> delegates = delegateState.getDelegates();
+        int max = Math.min(delegates.size(), Config.getNumberOfValidators(number));
+        for (int i = 0; i < max; i++) {
+            Delegate d = delegates.get(i);
+            validators.add(Hex.encode(d.getAddress()));
+        }
+
+        SimpleEncoder enc = new SimpleEncoder();
+        enc.writeInt(validators.size());
+        for (String v : validators) {
+            enc.writeString(v);
+        }
+        indexDB.put(KEY_VALIDATORS, enc.toBytes());
+    }
+
+    /**
+     * Adds a transaction to an account.
+     * 
+     * @param tx
+     * @param address
+     */
+    protected void addTransactionToAccount(Transaction tx, byte[] address) {
+        int total = getTotalTransactions(address);
+        indexDB.put(getNthTransactionIndexKey(address, total), tx.getHash());
+        setTotalTransactions(address, total + 1);
+    }
+
+    /**
+     * Get the number of transactions from/to an address.
+     * 
+     * @param address
+     * @return
+     */
+    protected int getTotalTransactions(byte[] address) {
+        byte[] cnt = indexDB.get(address);
+        return (cnt == null) ? 0 : Bytes.toInt(cnt);
+    }
+
+    /**
+     * Set the total number of transaction of an account.
+     * 
+     * @param address
+     * @param total
+     */
+    protected void setTotalTransactions(byte[] address, int total) {
+        indexDB.put(address, Bytes.of(total));
+    }
+
+    /**
+     * Get the N-th transaction index key of an account.
+     * 
+     * @param address
+     * @param n
+     * @return
+     */
+    protected byte[] getNthTransactionIndexKey(byte[] address, int n) {
+        return Bytes.merge(address, Bytes.of(n));
     }
 }

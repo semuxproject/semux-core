@@ -18,7 +18,6 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semux.Config;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Delegate;
@@ -51,7 +50,7 @@ public class DelegateStateTest {
         }
 
         assertEquals(delegates.size(), ds.getDelegates().size());
-        assertEquals(delegates.size(), ds.getValidators().size());
+        assertEquals(delegates.size(), chain.getValidators().size());
     }
 
     @Test
@@ -98,7 +97,6 @@ public class DelegateStateTest {
 
         List<Delegate> list = ds.getDelegates();
         assertEquals(delegates.size() + 200, list.size());
-        assertEquals(Config.getNumberOfValidators(0), ds.getValidators().size());
 
         assertArrayEquals(delegate, list.get(0).getAddress());
         assertArrayEquals(delegateName, list.get(0).getName());

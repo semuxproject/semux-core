@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.semux.Config;
 import org.semux.core.Blockchain;
 import org.semux.core.Delegate;
 import org.semux.db.KVDB;
@@ -178,20 +177,12 @@ public class DelegateStateImpl implements DelegateState {
         List<Delegate> list = new ArrayList<>(map.values());
         list.sort((d1, d2) -> {
             int cmp = Long.compare(d2.getVotes(), d1.getVotes());
-            return (cmp != 0) ? cmp : d1.getNameStr().compareTo(d2.getNameStr());
+            return (cmp != 0) ? cmp : d1.getNameString().compareTo(d2.getNameString());
         });
 
         long t2 = System.nanoTime();
         logger.trace("Get delegates duration: {} μs", (t2 - t1) / 1000L);
         return list;
-    }
-
-    @Override
-    public List<Delegate> getValidators() {
-        List<Delegate> list = getDelegates();
-        int max = Config.getNumberOfValidators(chain.getLatestBlockNumber());
-
-        return list.size() > max ? list.subList(0, max) : list;
     }
 
     @Override

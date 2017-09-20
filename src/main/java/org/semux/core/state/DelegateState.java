@@ -75,13 +75,6 @@ public interface DelegateState {
     public List<Delegate> getDelegates();
 
     /**
-     * Get the validator set based on current state, sorted by votes.
-     * 
-     * @return
-     */
-    public List<Delegate> getValidators();
-
-    /**
      * Make a snapshot and start tracking updates.
      */
     public DelegateState track();

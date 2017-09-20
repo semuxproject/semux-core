@@ -28,7 +28,7 @@ public class Delegate {
         return name;
     }
 
-    public String getNameStr() {
+    public String getNameString() {
         return Bytes.toString(name);
     }
 
@@ -42,6 +42,6 @@ public class Delegate {
 
     @Override
     public String toString() {
-        return getNameStr() + "=" + toPeerId();
+        return getNameString() + "=" + toPeerId();
     }
 }

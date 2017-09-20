@@ -28,7 +28,6 @@ import org.semux.Config;
 import org.semux.core.Account;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
-import org.semux.core.Delegate;
 import org.semux.core.Sync;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionExecutor;
@@ -44,7 +43,6 @@ import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
-import org.semux.utils.ByteArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -304,22 +302,19 @@ public class SemuxSync implements Sync {
             DelegateState ds = chain.getDeleteState().track();
 
             // [3] check votes
-            List<Delegate> validators = ds.getValidators();
+            List<String> validators = chain.getValidators();
             int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
             if (block.getVotes().size() < twoThirds) {
                 logger.debug("Invalid BFT votes: {} < {}", block.getVotes().size(), twoThirds);
                 return false;
             }
 
-            Set<ByteArray> set = new HashSet<>();
-            for (Delegate d : validators) {
-                set.add(ByteArray.of(d.getAddress()));
-            }
+            Set<String> set = new HashSet<>(validators);
             Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getHash(), block.getNumber(),
                     block.getView());
             byte[] encoded = vote.getEncoded();
             for (Signature sig : block.getVotes()) {
-                ByteArray addr = ByteArray.of(Hash.h160(sig.getPublicKey()));
+                String addr = Hex.encode(Hash.h160(sig.getPublicKey()));
 
                 if (!set.contains(addr) || !EdDSA.verify(encoded, sig)) {
                     logger.debug("Invalid BFT vote: signer = {}", addr);

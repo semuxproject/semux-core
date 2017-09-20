@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.GroupLayout;
@@ -250,7 +251,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
             switch (column) {
             case 0:
-                return row >= Config.getNumberOfValidators(model.getLatestBlockNumber()) ? "S" : "V";
+                List<String> validators = Kernel.getInstance().getBlockchain().getValidators();
+                return new HashSet<>(validators).contains(Hex.encode(d.getAddress())) ? "V" : "S";
             case 1:
                 return Bytes.toString(d.getName());
             case 2:
@@ -338,8 +340,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             } else if (!name.matches("[_a-z0-9]{4,16}")) {
                 JOptionPane.showMessageDialog(this, "Only 4-16 lowercase letters, numbers and underscore are allowed!");
             } else if (a.getBalance() < Config.MIN_DELEGATE_FEE + Config.MIN_TRANSACTION_FEE) {
-                JOptionPane.showMessageDialog(this, "Insufficient funds! Delegate registration fee = "
-                        + Config.MIN_DELEGATE_FEE / Unit.SEM + " SEM");
+                JOptionPane.showMessageDialog(this, "Insufficient funds!");
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
                         "Delegate registration will cost you " + Config.MIN_DELEGATE_FEE / Unit.SEM + " SEM, continue?",

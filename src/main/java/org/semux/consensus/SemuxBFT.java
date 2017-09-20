@@ -21,7 +21,6 @@ import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.Consensus;
-import org.semux.core.Delegate;
 import org.semux.core.PendingManager;
 import org.semux.core.Sync;
 import org.semux.core.Transaction;
@@ -43,7 +42,6 @@ import org.semux.net.msg.consensus.BFTNewViewMessage;
 import org.semux.net.msg.consensus.BFTProposalMessage;
 import org.semux.net.msg.consensus.BFTVoteMessage;
 import org.semux.utils.ArrayUtil;
-import org.semux.utils.Bytes;
 import org.semux.utils.MerkleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -238,12 +236,7 @@ public class SemuxBFT implements Consensus {
         finalized = false;
 
         // update validators
-        List<Delegate> list = delegateState.getValidators();
-        List<String> peerIds = new ArrayList<>();
-        list.forEach(d -> {
-            peerIds.add(Hex.encode(d.getAddress()));
-        });
-        validators = peerIds;
+        validators = chain.getValidators();
         activeValidators = channelMgr.getActiveChannels(validators);
 
         // reset votes and events
@@ -638,6 +631,7 @@ public class SemuxBFT implements Consensus {
     /**
      * Check if a node is the primary for the specified view.
      * 
+     * 
      * @param view
      *            a specific view
      * @param pubKey
@@ -646,12 +640,9 @@ public class SemuxBFT implements Consensus {
      */
     protected boolean isPrimary(int view, byte[] pubKey) {
         String peerId = Hex.encode(Hash.h160(pubKey));
+        int n = (int) ((height - 1 + view) % validators.size());
 
-        int p = Bytes.toInt(prevBlock.getHash()) + view;
-        p = p % validators.size();
-        p = (p >= 0) ? p : p + validators.size();
-
-        return validators.get(p).equals(peerId);
+        return validators.get(n).equals(peerId);
     }
 
     /**

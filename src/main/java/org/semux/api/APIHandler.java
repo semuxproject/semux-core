@@ -217,10 +217,10 @@ public class APIHandler {
                 }
             }
             case GET_VALIDATORS: {
-                List<Delegate> delegates = chain.getDeleteState().getValidators();
+                List<String> validators = chain.getValidators();
                 JSONArray arr = new JSONArray();
-                for (Delegate d : delegates) {
-                    arr.put(delegateToJson(d));
+                for (String v : validators) {
+                    arr.put(HEX + v);
                 }
                 return success(arr);
             }
@@ -454,7 +454,7 @@ public class APIHandler {
         obj.put("port", peer.getPort());
         obj.put("p2pVersion", peer.getP2pVersion());
         obj.put("clientId", peer.getClientId());
-        obj.put("peerId", peer.getPeerId());
+        obj.put("peerId", HEX + peer.getPeerId());
         obj.put("latestBlockNumber", peer.getLatestBlockNumber());
         obj.put("latency", peer.getLatency());
 
