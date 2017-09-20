@@ -273,6 +273,14 @@ public class SemuxSync implements Sync {
                 synchronized (lock) {
                     toDownload.add(block.getNumber());
                 }
+
+                // sleep a while if you received an invalid block, to avoid consuming to much
+                // resources.
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    // do nothing
+                }
             }
         }
     }

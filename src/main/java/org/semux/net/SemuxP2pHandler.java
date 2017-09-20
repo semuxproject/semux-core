@@ -6,7 +6,6 @@
  */
 package org.semux.net;
 
-import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -135,11 +134,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if (cause instanceof IOException) {
-            logger.debug("Exception in P2P handler, cid = {}", channel.getId(), cause);
-        } else {
-            logger.info("Exception in P2P handler, cid = {}", channel.getId(), cause);
-        }
+        logger.debug("Exception in P2P handler, cid = {}", channel.getId(), cause);
 
         stopTimers();
 
