@@ -66,6 +66,6 @@ public class VoteSetTest {
         vote.sign(v3);
         assertTrue(vs.addVote(vote));
         assertTrue(vs.isFinalized());
-        assertTrue(vs.isApproved());
+        assertTrue(vs.isApproved(Hash.EMPTY_H256));
     }
 }

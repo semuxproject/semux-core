@@ -272,7 +272,7 @@ public class SemuxBFT implements Consensus {
             proposal = null;
             resetVotes();
 
-            // Broadcast NEW_VIEW messages to all active validators.
+            // broadcast NEW_VIEW messages to all active validators.
             BFTNewViewMessage msg = new BFTNewViewMessage(proof);
             for (Channel c : activeValidators) {
                 c.getMessageQueue().sendMessage(msg);
@@ -292,7 +292,7 @@ public class SemuxBFT implements Consensus {
             logger.debug("Proposing: {}", proposal);
             broadcaster.broadcast(new BFTProposalMessage(proposal));
         } else {
-            // locked to a proposal, broadcast to help recover from extreme condition
+            // re-broadcast to help recover from extreme condition
             if (proposal != null) {
                 broadcaster.broadcast(new BFTProposalMessage(proposal));
             }
@@ -333,12 +333,10 @@ public class SemuxBFT implements Consensus {
         timer.timeout(Config.BFT_PRE_COMMIT_TIMEOUT);
         logger.info("Entered pre_commit: validate votes = {}, pre-commit votes = {}", validateVotes, precommitVotes);
 
-        Vote vote = null;
-        if (proposal != null && validateVotes.isApproved()) {
-            vote = Vote.newApprove(VoteType.PRECOMMIT, height, view, proposal.getBlock().getHash());
-        } else {
-            vote = Vote.newReject(VoteType.PRECOMMIT, height, view);
-        }
+        // vote YES as long as +2/3 validators received a valid block proposal
+        byte[] blockHash = validateVotes.isAnyApproved();
+        Vote vote = (blockHash != null) ? Vote.newApprove(VoteType.PRECOMMIT, height, view, blockHash)
+                : Vote.newReject(VoteType.PRECOMMIT, height, view);
         vote.sign(coinbase);
 
         // always broadcast vote directly.
@@ -354,9 +352,12 @@ public class SemuxBFT implements Consensus {
         timer.timeout(Config.BFT_COMMIT_TIMEOUT);
         logger.info("Entered commit: pre_commit votes = {}", precommitVotes);
 
-        if (proposal != null) {
+        byte[] blockHash = precommitVotes.isAnyApproved();
+        if (blockHash == null) {
+            throw new RuntimeException("Entered COMMIT state without +2/3 pre-commit votes");
+        } else {
             // create a COMMIT vote
-            Vote vote = Vote.newApprove(VoteType.COMMIT, height, view, proposal.getBlock().getHash());
+            Vote vote = Vote.newApprove(VoteType.COMMIT, height, view, blockHash);
             vote.sign(coinbase);
 
             // always broadcast vote directly.
@@ -376,7 +377,8 @@ public class SemuxBFT implements Consensus {
 
         finalized = true;
 
-        if (proposal != null && precommitVotes.isApproved()) {
+        byte[] blockHash = precommitVotes.isAnyApproved();
+        if (blockHash != null && proposal != null && Arrays.equals(blockHash, proposal.getBlock().getHash())) {
             // [1] create a block
             Block block = proposal.getBlock();
 
@@ -498,7 +500,7 @@ public class SemuxBFT implements Consensus {
                 break;
             case COMMIT:
                 added = commitVotes.addVote(v);
-                if (commitVotes.isApproved()) {
+                if (commitVotes.isAnyApproved() != null) {
                     // skip COMMIT state time out if +2/3 commit votes
                     if (!finalized) {
                         enterFinalize();
@@ -529,7 +531,7 @@ public class SemuxBFT implements Consensus {
             enterPreCommit();
             break;
         case PRE_COMMIT:
-            if (precommitVotes.isApproved()) {
+            if (precommitVotes.isAnyApproved() != null) {
                 enterCommit();
             } else {
                 enterPropose();

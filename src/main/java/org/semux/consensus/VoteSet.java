@@ -108,26 +108,38 @@ public class VoteSet {
      * @return
      */
     public boolean isFinalized() {
-        return isApproved() || isRejected();
+        return isAnyApproved() != null || isRejected();
     }
 
     /**
-     * Whether the underlying block proposal is approved.
+     * Returns the blockHash which has been approved by +2/3 validators, if exists.
      * 
      * @return
      */
-    public boolean isApproved() {
-        for (Map<String, Vote> map : approvals.values()) {
-            if (map.size() >= twoThirds) {
-                return true;
+    public byte[] isAnyApproved() {
+        for (ByteArray k : approvals.keySet()) {
+            Map<String, Vote> v = approvals.get(k);
+            if (v.size() >= twoThirds) {
+                return k.getData();
             }
         }
 
-        return false;
+        return null;
     }
 
     /**
-     * Whether the underlying block proposal is rejected.
+     * Returns whether the given block hash has been approved by +2/3 validators.
+     * 
+     * @param blockHash
+     * @return
+     */
+    public boolean isApproved(byte[] blockHash) {
+        Map<String, Vote> v = approvals.get(ByteArray.of(blockHash));
+        return v != null && v.size() >= twoThirds;
+    }
+
+    /**
+     * Returns whether this view is rejected.
      * 
      * @return
      */

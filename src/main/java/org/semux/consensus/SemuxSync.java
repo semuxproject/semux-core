@@ -318,8 +318,8 @@ public class SemuxSync implements Sync {
             }
 
             Set<String> set = new HashSet<>(validators);
-            Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getHash(), block.getNumber(),
-                    block.getView());
+            Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
+                    block.getHash());
             byte[] encoded = vote.getEncoded();
             for (Signature sig : block.getVotes()) {
                 String addr = Hex.encode(Hash.h160(sig.getPublicKey()));

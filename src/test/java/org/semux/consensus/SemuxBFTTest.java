@@ -83,10 +83,10 @@ public class SemuxBFTTest {
         Block block = new Block(header.sign(key1), transactions, results);
 
         List<Signature> votes = new ArrayList<>();
-        Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getHash(), block.getNumber(), view)
+        Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), view, block.getHash())
                 .sign(key1);
         votes.add(vote.getSignature());
-        vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getHash(), block.getNumber(), view).sign(key2);
+        vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), view, block.getHash()).sign(key2);
         votes.add(vote.getSignature());
 
         block.setView(view);

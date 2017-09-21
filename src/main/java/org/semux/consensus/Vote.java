@@ -13,11 +13,11 @@ import org.semux.utils.SimpleDecoder;
 import org.semux.utils.SimpleEncoder;
 
 public class Vote {
-    public static final byte VALUE_APPROVE = 0;
-    public static final byte VALUE_REJECT = 1;
+    public static final boolean VALUE_APPROVE = true;
+    public static final boolean VALUE_REJECT = false;
 
     private VoteType type;
-    private byte value;
+    private boolean value;
 
     private long height;
     private int view;
@@ -26,7 +26,7 @@ public class Vote {
     private byte[] encoded;
     private Signature signature;
 
-    public Vote(VoteType type, byte value, byte[] blockHash, long height, int view) {
+    public Vote(VoteType type, boolean value, long height, int view, byte[] blockHash) {
         this.type = type;
         this.value = value;
         this.height = height;
@@ -35,7 +35,7 @@ public class Vote {
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeByte(type.toByte());
-        enc.writeByte(value);
+        enc.writeBoolean(value);
         enc.writeLong(height);
         enc.writeInt(view);
         enc.writeBytes(blockHash);
@@ -47,7 +47,7 @@ public class Vote {
 
         SimpleDecoder dec = new SimpleDecoder(encoded);
         this.type = VoteType.of(dec.readByte());
-        this.value = dec.readByte();
+        this.value = dec.readBoolean();
         this.height = dec.readLong();
         this.view = dec.readInt();
         this.blockHash = dec.readBytes();
@@ -56,11 +56,11 @@ public class Vote {
     }
 
     public static Vote newApprove(VoteType type, long height, int view, byte[] blockHash) {
-        return new Vote(type, VALUE_APPROVE, blockHash, height, view);
+        return new Vote(type, VALUE_APPROVE, height, view, blockHash);
     }
 
     public static Vote newReject(VoteType type, long height, int view) {
-        return new Vote(type, VALUE_REJECT, Hash.EMPTY_H256, height, view);
+        return new Vote(type, VALUE_REJECT, height, view, Hash.EMPTY_H256);
     }
 
     /**
@@ -93,7 +93,7 @@ public class Vote {
         return type;
     }
 
-    public byte getValue() {
+    public boolean getValue() {
         return value;
     }
 
@@ -135,7 +135,6 @@ public class Vote {
 
     @Override
     public String toString() {
-        return "Vote [" + type + ", " + (value == 0 ? "approve" : "reject") + ", height=" + height + ", view=" + view
-                + "]";
+        return "Vote [" + type + ", " + (value ? "approve" : "reject") + ", height=" + height + ", view=" + view + "]";
     }
 }
