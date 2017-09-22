@@ -366,10 +366,7 @@ public class Config {
      * @return
      */
     public static int getNumberOfValidators(long number) {
-        /*
-         * Add one validator every 12 hours
-         */
-        long step = 3 * 60 * 12;
+        long step = 3 * 60 * 8; // every 8 hours
 
         if (number < 90 * step) {
             return (int) (10 + number / step);
