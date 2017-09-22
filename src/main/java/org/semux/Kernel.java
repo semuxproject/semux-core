@@ -106,7 +106,6 @@ public class Kernel {
             private final KVDB accountDB = new LevelDB(DBName.ACCOUNT);
             private final KVDB delegateDB = new LevelDB(DBName.DELEGATE);
             private final KVDB voteDB = new LevelDB(DBName.VOTE);
-            private final KVDB testDB = new LevelDB(DBName.TEST);
 
             @Override
             public KVDB getDB(DBName name) {
@@ -121,8 +120,6 @@ public class Kernel {
                     return delegateDB;
                 case VOTE:
                     return voteDB;
-                case TEST:
-                    return testDB;
                 default:
                     throw new RuntimeException("Unexpected database: " + name);
                 }
@@ -131,8 +128,13 @@ public class Kernel {
         chain = new BlockchainImpl(dbFactory);
         client = new PeerClient(SystemUtil.getIp(), Config.P2P_LISTEN_PORT, coinbase);
 
-        long height = chain.getLatestBlockNumber();
-        logger.info("Latest block number = {}", height);
+        long number = chain.getLatestBlockNumber();
+        if (number >= Config.MANDATORY_UPGRADE) {
+            logger.error("This client needs to be upgraded");
+            System.exit(-1);
+        } else {
+            logger.info("Latest block number = {}", number);
+        }
 
         // ====================================
         // start channel/pending/node manager
@@ -223,7 +225,9 @@ public class Kernel {
             WriteLock lock = Config.STATE_LOCK.writeLock();
             lock.lock();
             for (DBName name : DBName.values()) {
-                dbFactory.getDB(name).close();
+                if (name != DBName.TEST) {
+                    dbFactory.getDB(name).close();
+                }
             }
             lock.unlock();
 

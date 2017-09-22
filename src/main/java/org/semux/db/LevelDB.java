@@ -42,7 +42,7 @@ public class LevelDB implements KVDB {
         options.compressionType(CompressionType.NONE);
 
         try {
-            File f = getPath(name);
+            File f = getFile(name);
             f.getParentFile().mkdirs();
 
             db = JniDBFactory.factory.open(f, options);
@@ -100,11 +100,7 @@ public class LevelDB implements KVDB {
     @Override
     public void destory() {
         close();
-        FileUtil.recursiveDelete(getPath(name));
-    }
-
-    private File getPath(DBName name) {
-        return new File(Config.DATA_DIR, DATABASE_DIR + File.separator + name.toString().toLowerCase());
+        FileUtil.recursiveDelete(getFile(name));
     }
 
     @Override
@@ -135,5 +131,9 @@ public class LevelDB implements KVDB {
                 }
             }
         };
+    }
+
+    private File getFile(DBName name) {
+        return new File(Config.DATA_DIR, DATABASE_DIR + File.separator + name.toString().toLowerCase());
     }
 }

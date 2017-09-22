@@ -129,9 +129,14 @@ public class Config {
     public static long MIN_DELEGATE_FEE = 1000 * Unit.SEM;
 
     /**
-     * The length of validator term.
+     * Length of validator term.
      */
     public static long VALIDATOR_TERM = 100;
+
+    /**
+     * Deadline of the next mandatory upgrade.
+     */
+    public static long MANDATORY_UPGRADE = 3 * 60 * 24 * 365;
 
     /**
      * State lock to prevent state inconsistency.

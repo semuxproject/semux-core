@@ -7,6 +7,8 @@
 package org.semux.api;
 
 import java.net.InetSocketAddress;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -383,6 +385,7 @@ public class APIHandler {
             return JSONObject.NULL;
         }
 
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         JSONObject obj = new JSONObject();
         obj.put("hash", HEX + Hex.encode(block.getHash()));
         obj.put("number", block.getNumber());
@@ -390,6 +393,7 @@ public class APIHandler {
         obj.put("coinbase", HEX + Hex.encode(block.getCoinbase()));
         obj.put("prevHash", HEX + Hex.encode(block.getPrevHash()));
         obj.put("timestamp", block.getTimestamp());
+        obj.put("date", df.format(new Date(block.getTimestamp())));
         obj.put("transactionsRoot", HEX + Hex.encode(block.getTransactionsRoot()));
         obj.put("resultsRoot", HEX + Hex.encode(block.getResultsRoot()));
         obj.put("stateRoot", HEX + Hex.encode(block.getStateRoot()));
@@ -414,6 +418,7 @@ public class APIHandler {
             return JSONObject.NULL;
         }
 
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         JSONObject obj = new JSONObject();
         obj.put("hash", HEX + Hex.encode(tx.getHash()));
         obj.put("type", tx.getType().toString());
@@ -423,6 +428,7 @@ public class APIHandler {
         obj.put("fee", tx.getFee());
         obj.put("nonce", tx.getNonce());
         obj.put("timestamp", tx.getTimestamp());
+        obj.put("date", df.format(new Date(tx.getTimestamp())));
         obj.put("data", HEX + Hex.encode(tx.getData()));
 
         return obj;

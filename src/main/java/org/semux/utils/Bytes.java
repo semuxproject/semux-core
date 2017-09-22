@@ -9,8 +9,6 @@ package org.semux.utils;
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 
-import org.semux.crypto.Hash;
-
 public class Bytes {
 
     private static SecureRandom secureRandom = new SecureRandom();
@@ -33,7 +31,7 @@ public class Bytes {
     /**
      * Empty 256-bit hash.
      */
-    public static final byte[] EMPTY_HASH = Hash.EMPTY_H256;
+    public static final byte[] EMPTY_HASH = new byte[32];
 
     /**
      * Generate a random byte array of required length.
