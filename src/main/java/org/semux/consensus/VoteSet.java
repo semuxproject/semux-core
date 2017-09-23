@@ -199,6 +199,10 @@ public class VoteSet {
 
     @Override
     public String toString() {
-        return "[yes=" + approvals.size() + ", no=" + rejections.size() + "]";
+        int count = 0;
+        for (Map<String, Vote> map : approvals.values()) {
+            count = Math.max(count, map.size());
+        }
+        return "[yes=" + count + ", no=" + rejections.size() + "]";
     }
 }

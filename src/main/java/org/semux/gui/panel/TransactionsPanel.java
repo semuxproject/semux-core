@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JPanel;
@@ -21,6 +23,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 
 import org.semux.core.Transaction;
+import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
@@ -69,20 +72,23 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         private static final long serialVersionUID = 1L;
 
-        private List<Transaction> data;
+        private List<Transaction> transactions;
+        private Map<String, Integer> accounts;
 
         public TransactionsTableModel() {
-            this.data = Collections.emptyList();
+            this.transactions = Collections.emptyList();
+            this.accounts = Collections.emptyMap();
         }
 
-        public void setData(List<Transaction> data) {
-            this.data = data;
+        public void setData(List<Transaction> transactions, Map<String, Integer> accounts) {
+            this.transactions = transactions;
+            this.accounts = accounts;
             this.fireTableDataChanged();
         }
 
         public Transaction getRow(int row) {
-            if (row >= 0 && row < data.size()) {
-                return data.get(row);
+            if (row >= 0 && row < transactions.size()) {
+                return transactions.get(row);
             }
 
             return null;
@@ -90,7 +96,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         @Override
         public int getRowCount() {
-            return data.size();
+            return transactions.size();
         }
 
         @Override
@@ -105,7 +111,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         @Override
         public Object getValueAt(int row, int column) {
-            Transaction tx = data.get(row);
+            Transaction tx = transactions.get(row);
 
             switch (column) {
             case 0:
@@ -113,9 +119,15 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             case 1:
                 return StringUtil.toLowercaseExceptFirst(tx.getType().name());
             case 2:
-                return "0x" + Hex.encode(tx.getFrom());
+                if (tx.getType() == TransactionType.COINBASE) {
+                    return "From block reward";
+                } else {
+                    String from = Hex.encode(tx.getFrom());
+                    return accounts.containsKey(from) ? "Account #" + accounts.get(from) : "0x" + from;
+                }
             case 3:
-                return "0x" + Hex.encode(tx.getTo());
+                String to = Hex.encode(tx.getTo());
+                return accounts.containsKey(to) ? "Account #" + accounts.get(to) : "0x" + to;
             case 4:
                 return String.format("%.3f SEM", tx.getValue() / (double) Unit.SEM);
             case 5:
@@ -156,10 +168,16 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             return Long.compare(tx2.getTimestamp(), tx1.getTimestamp());
         });
 
+        Map<String, Integer> accounts = new HashMap<>();
+        int n = 0;
+        for (Account a : model.getAccounts()) {
+            accounts.put(Hex.encode(a.getKey().toAddress()), n++);
+        }
+
         int row = table.getSelectedRow();
         if (row != -1) {
             Transaction tx = tableModel.getRow(row);
-            tableModel.setData(transactions);
+            tableModel.setData(transactions, accounts);
             for (int i = 0; i < transactions.size(); i++) {
                 if (Arrays.equals(tx.getHash(), transactions.get(i).getHash())) {
                     table.setRowSelectionInterval(i, i);
@@ -167,7 +185,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 }
             }
         } else {
-            tableModel.setData(transactions);
+            tableModel.setData(transactions, accounts);
         }
     }
 }
