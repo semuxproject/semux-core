@@ -22,9 +22,9 @@ public class TransactionResult {
     protected boolean valid;
 
     /**
-     * Transaction output.
+     * Transaction returns.
      */
-    protected byte[] output;
+    protected byte[] returns;
 
     /**
      * Transaction logs.
@@ -41,7 +41,7 @@ public class TransactionResult {
     public TransactionResult(boolean valid, byte[] output, List<byte[]> logs) {
         super();
         this.valid = valid;
-        this.output = output;
+        this.returns = output;
         this.logs = logs;
     }
 
@@ -69,12 +69,12 @@ public class TransactionResult {
         this.valid = valid;
     }
 
-    public byte[] getOutput() {
-        return output;
+    public byte[] getReturns() {
+        return returns;
     }
 
-    public void setOutput(byte[] output) {
-        this.output = output;
+    public void setReturns(byte[] returns) {
+        this.returns = returns;
     }
 
     public List<byte[]> getLogs() {
@@ -92,7 +92,7 @@ public class TransactionResult {
     public byte[] toBytes() {
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeBoolean(valid);
-        enc.writeBytes(output);
+        enc.writeBytes(returns);
         enc.writeInt(logs.size());
         for (byte[] log : logs) {
             enc.writeBytes(log);
@@ -104,19 +104,19 @@ public class TransactionResult {
     public static TransactionResult fromBytes(byte[] bytes) {
         SimpleDecoder dec = new SimpleDecoder(bytes);
         boolean valid = dec.readBoolean();
-        byte[] output = dec.readBytes();
+        byte[] returns = dec.readBytes();
         List<byte[]> logs = new ArrayList<>();
         int n = dec.readInt();
         for (int i = 0; i < n; i++) {
             logs.add(dec.readBytes());
         }
 
-        return new TransactionResult(valid, output, logs);
+        return new TransactionResult(valid, returns, logs);
     }
 
     @Override
     public String toString() {
-        return "TransactionResult [valid=" + valid + ", output=" + Arrays.toString(output) + ", # logs=" + logs.size()
+        return "TransactionResult [valid=" + valid + ", output=" + Arrays.toString(returns) + ", # logs=" + logs.size()
                 + "]";
     }
 }
