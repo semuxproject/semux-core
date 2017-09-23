@@ -17,6 +17,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.semux.Config;
 import org.semux.Kernel;
@@ -69,12 +70,13 @@ public class MenuBar extends JMenuBar implements ActionListener {
         switch (action) {
         case BACKUP_WALLET: {
             JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Please select a folder");
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            int ret = chooser.showOpenDialog(frame);
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            chooser.setSelectedFile(new File("wallet.data"));
+            chooser.setFileFilter(new FileNameExtensionFilter("Wallet binary format", "data"));
+            int ret = chooser.showSaveDialog(frame);
 
             if (ret == JFileChooser.APPROVE_OPTION) {
-                File dst = new File(chooser.getSelectedFile(), "wallet.data");
+                File dst = chooser.getSelectedFile();
                 File src = Kernel.getInstance().getWallet().getFile();
                 try {
                     IOUtil.copyFile(src, dst);

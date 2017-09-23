@@ -166,8 +166,8 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             break;
         case IMPORT_ACCOUNTS:
             JFileChooser chooser = new JFileChooser();
-            FileNameExtensionFilter filter = new FileNameExtensionFilter("Wallet backup file", "data");
-            chooser.setFileFilter(filter);
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            chooser.setFileFilter(new FileNameExtensionFilter("Wallet binary format", "data"));
             int ret = chooser.showOpenDialog(this);
 
             if (ret == JFileChooser.APPROVE_OPTION) {
