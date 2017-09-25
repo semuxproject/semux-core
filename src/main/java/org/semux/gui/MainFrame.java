@@ -196,7 +196,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
         public LockGlassPane() {
             this.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
+                public void mousePressed(MouseEvent e) {
                     InputDialog dialog = new InputDialog(MainFrame.this, "Please enter your password:", true);
                     String pwd = dialog.getInput();
 
