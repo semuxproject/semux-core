@@ -6,6 +6,7 @@
  */
 package org.semux.net;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.semux.Config;
@@ -55,6 +56,10 @@ public class SemuxFrameHandler extends ByteToMessageCodec<Frame> {
         int index = in.readerIndex();
         int size = in.readInt();
         in.readerIndex(index);
+
+        if (size < 0 || size > Config.NET_MAX_FRAME_SIZE) {
+            throw new IOException("Invalid frame size: " + size);
+        }
 
         if (in.readableBytes() >= Frame.HEADER_SIZE + size) {
             size = in.readInt();
