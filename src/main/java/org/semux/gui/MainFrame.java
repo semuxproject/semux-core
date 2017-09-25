@@ -11,19 +11,26 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
+import org.semux.Kernel;
+import org.semux.core.Wallet;
+import org.semux.gui.dialog.InputDialog;
 import org.semux.gui.panel.DelegatesPanel;
 import org.semux.gui.panel.HomePanel;
 import org.semux.gui.panel.ReceivePanel;
@@ -37,6 +44,8 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private static final String TITLE = "Semux Wallet";
 
+    private LockGlassPane lockGlassPane;
+
     private HomePanel panelHome;
     private SendPanel panelSend;
     private ReceivePanel panelReceive;
@@ -48,11 +57,16 @@ public class MainFrame extends JFrame implements ActionListener {
     private JButton btnReceive;
     private JButton btnTransactions;
     private JButton btnDelegates;
+    private JButton btnLock;
 
     private JPanel activePanel;
     private JButton activeButton;
 
     public MainFrame(Model model) {
+        lockGlassPane = new LockGlassPane();
+        lockGlassPane.setOpaque(false);
+        this.setGlassPane(lockGlassPane);
+
         panelHome = new HomePanel(model);
         panelSend = new SendPanel(model);
         panelReceive = new ReceivePanel(model);
@@ -100,8 +114,8 @@ public class MainFrame extends JFrame implements ActionListener {
         toolBar.add(btnDelegates);
         toolBar.add(Box.createRigidArea(gap));
 
-        btnDelegates = createButton("Lock", "lock", Action.LOCK);
-        toolBar.add(btnDelegates);
+        btnLock = createButton("Lock", "lock", Action.LOCK);
+        toolBar.add(btnLock);
 
         // setup tabs
         activePanel = new JPanel();
@@ -137,7 +151,7 @@ public class MainFrame extends JFrame implements ActionListener {
             select(panelDelegates, btnDelegates);
             break;
         case LOCK:
-
+            lockGlassPane.setVisible(true);
             break;
         default:
             throw new UnreachableException();
@@ -174,5 +188,33 @@ public class MainFrame extends JFrame implements ActionListener {
         btn.setContentAreaFilled(false);
 
         return btn;
+    }
+
+    private class LockGlassPane extends JPanel {
+
+        private static final long serialVersionUID = 1L;
+
+        public LockGlassPane() {
+            this.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    InputDialog dialog = new InputDialog(MainFrame.this, "Please enter your password:", true);
+                    String pwd = dialog.getInput();
+
+                    if (pwd != null) {
+                        Wallet w = Kernel.getInstance().getWallet();
+                        if (w.getPassword().equals(pwd)) {
+                            lockGlassPane.setVisible(false);
+                        } else {
+                            JOptionPane.showMessageDialog(MainFrame.this, "Incorrect password!");
+                        }
+                    }
+                }
+            });
+        }
+
+        public void paintComponent(Graphics g) {
+            g.setColor(new Color(0, 0, 0, 96));
+            g.fillRect(0, 0, this.getWidth(), this.getHeight());
+        }
     }
 }

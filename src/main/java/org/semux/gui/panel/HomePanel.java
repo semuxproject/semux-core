@@ -56,7 +56,7 @@ public class HomePanel extends JPanel implements ActionListener {
         // setup overview panel
         JPanel overview = new JPanel();
         overview.setBorder(new TitledBorder(
-                new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(10, 10, 10, 10)),
+                new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
                 "Overview", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
         overview.setLayout(new GridLayout(5, 2, 0, 0));
 
@@ -90,15 +90,14 @@ public class HomePanel extends JPanel implements ActionListener {
         locked = new JLabel("");
         overview.add(locked);
 
+        JLabel lblPeers = new JLabel("Peers:");
+        peers = new JLabel("");
+
         // setup transactions panel
         transactions = new JPanel();
         transactions.setBorder(new TitledBorder(
-                new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(10, 10, 10, 10)),
+                new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
                 "Transactions", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-
-        JLabel lblPeers = new JLabel("Peers:");
-
-        peers = new JLabel("");
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -130,9 +129,8 @@ public class HomePanel extends JPanel implements ActionListener {
                     .addGap(0))
         );
         transactions.setLayout(new BoxLayout(transactions, BoxLayout.Y_AXIS));
-        // @formatter:on
-
         setLayout(groupLayout);
+        // @formatter:on
 
         refresh();
     }
@@ -233,16 +231,14 @@ public class HomePanel extends JPanel implements ActionListener {
         });
         list = list.size() > 6 ? list.subList(0, 6) : list;
 
-        // divide transactions into: inbound, outbound, cycle
-        Set<ByteArray> set = new HashSet<>();
+        Set<ByteArray> accounts = new HashSet<>();
         for (Account a : model.getAccounts()) {
-            set.add(ByteArray.of(a.getKey().toAddress()));
+            accounts.add(ByteArray.of(a.getKey().toAddress()));
         }
-
         transactions.removeAll();
         for (Transaction tx : list) {
-            boolean inBound = set.contains(ByteArray.of(tx.getTo()));
-            boolean outBound = set.contains(ByteArray.of(tx.getFrom()));
+            boolean inBound = accounts.contains(ByteArray.of(tx.getTo()));
+            boolean outBound = accounts.contains(ByteArray.of(tx.getFrom()));
             transactions.add(new TransactionPanel(tx, inBound, outBound));
         }
         transactions.revalidate();

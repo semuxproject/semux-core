@@ -56,7 +56,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         table.setBackground(Color.WHITE);
         table.setFillsViewportHeight(true);
         table.setGridColor(Color.LIGHT_GRAY);
-        table.setRowHeight(24);
+        table.setRowHeight(25);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
         SwingUtil.setColumnWidths(table, 800, 0.1, 0.55, 0.2, 0.15);
         SwingUtil.setColumnAlignments(table, false, false, true, true);
