@@ -21,7 +21,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.semux.Config;
 import org.semux.Kernel;
+import org.semux.core.Wallet;
 import org.semux.gui.dialog.ChangePasswordDialog;
+import org.semux.gui.dialog.InputDialog;
 import org.semux.utils.IOUtil;
 
 public class MenuBar extends JMenuBar implements ActionListener {
@@ -74,6 +76,29 @@ public class MenuBar extends JMenuBar implements ActionListener {
 
         switch (action) {
         case IMPORT_ACCOUNTS: {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            chooser.setFileFilter(new FileNameExtensionFilter("Wallet binary format", "data"));
+
+            int ret = chooser.showOpenDialog(frame);
+            if (ret == JFileChooser.APPROVE_OPTION) {
+                File file = chooser.getSelectedFile();
+                String password = new InputDialog(frame, "Please enter the password", true).getInput();
+
+                if (password != null) {
+                    Wallet w = new Wallet(file);
+                    if (!w.unlock(password)) {
+                        JOptionPane.showMessageDialog(frame, "Failed to unlock the wallet file!");
+                        break;
+                    }
+
+                    Wallet wallet = Kernel.getInstance().getWallet();
+                    int n = wallet.addAccounts(w.getAccounts());
+                    wallet.flush();
+                    JOptionPane.showMessageDialog(frame, "Success! " + n + " accounts were imported.");
+                }
+            }
+
             break;
         }
         case BACKUP_WALLET: {
@@ -81,8 +106,8 @@ public class MenuBar extends JMenuBar implements ActionListener {
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setSelectedFile(new File("wallet.data"));
             chooser.setFileFilter(new FileNameExtensionFilter("Wallet binary format", "data"));
-            int ret = chooser.showSaveDialog(frame);
 
+            int ret = chooser.showSaveDialog(frame);
             if (ret == JFileChooser.APPROVE_OPTION) {
                 File dst = chooser.getSelectedFile();
                 File src = Kernel.getInstance().getWallet().getFile();

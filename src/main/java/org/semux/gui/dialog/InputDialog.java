@@ -2,13 +2,11 @@ package org.semux.gui.dialog;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
@@ -19,16 +17,18 @@ import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.UnreachableException;
 
-public class InputDialog extends JFrame implements ActionListener {
+public class InputDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
     private JTextField textField;
     private String text;
 
-    private AtomicBoolean done = new AtomicBoolean(false);
+    public InputDialog(JFrame parent, String message, boolean isPassword) {
+        super(parent, "Input");
+        this.setModal(true);
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-    public InputDialog(String message, boolean isPassword) {
         JLabel labelLogo = new JLabel("");
         labelLogo.setIcon(SwingUtil.loadImage("logo", 96, 96));
 
@@ -87,30 +87,7 @@ public class InputDialog extends JFrame implements ActionListener {
 
         this.pack();
         this.setResizable(false);
-        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        this.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent windowEvent) {
-                notifyDone();
-            }
-        });
-        SwingUtil.centerizeFrame(this, this.getWidth(), this.getHeight());
-    }
-
-    public String getInput() {
-        this.setVisible(true);
-
-        synchronized (done) {
-            while (!done.get()) {
-                try {
-                    done.wait();
-                } catch (InterruptedException e) {
-                    return null;
-                }
-            }
-
-            return text;
-        }
+        this.setLocationRelativeTo(parent);
     }
 
     @Override
@@ -120,11 +97,9 @@ public class InputDialog extends JFrame implements ActionListener {
         switch (action) {
         case OK:
             text = new String(textField.getText());
-            notifyDone();
             break;
         case CANCEL:
             text = null;
-            notifyDone();
             break;
         default:
             throw new UnreachableException();
@@ -133,15 +108,13 @@ public class InputDialog extends JFrame implements ActionListener {
         this.dispose();
     }
 
-    private void notifyDone() {
-        synchronized (done) {
-            done.set(true);
-            done.notifyAll();
-        }
+    public String getInput() {
+        this.setVisible(true);
+        return text;
     }
 
     public static void main(String[] args) throws InterruptedException {
-        InputDialog pwd = new InputDialog("Please enter your password", true);
+        InputDialog pwd = new InputDialog(null, "Please enter your password", true);
         String password = pwd.getInput();
         System.out.println("Password: " + password);
     }

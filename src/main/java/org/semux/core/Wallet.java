@@ -227,21 +227,23 @@ public class Wallet {
      * 
      * @param newKey
      *            a new account
+     * @return true if the new account was successfully added, false otherwise
      * @throws WalletLockedException
      * 
      */
-    public void addAccount(EdDSA newKey) throws WalletLockedException {
+    public boolean addAccount(EdDSA newKey) throws WalletLockedException {
         requireUnlocked();
 
         // TODO: optimize duplicates check
         synchronized (accounts) {
             for (EdDSA key : accounts) {
                 if (Arrays.equals(key.getPublicKey(), newKey.getPublicKey())) {
-                    return;
+                    return false;
                 }
             }
 
             accounts.add(newKey);
+            return true;
         }
     }
 
@@ -252,13 +254,16 @@ public class Wallet {
      * 
      * @param newKey
      *            a new account
+     * @return the number accounts added
      * @throws WalletLockedException
      * 
      */
-    public void addAccounts(List<EdDSA> accounts) throws WalletLockedException {
+    public int addAccounts(List<EdDSA> accounts) throws WalletLockedException {
+        int n = 0;
         for (EdDSA acc : accounts) {
-            addAccount(acc);
+            n += addAccount(acc) ? 1 : 0;
         }
+        return n;
     }
 
     /**

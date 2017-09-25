@@ -5,16 +5,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -23,16 +21,18 @@ import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.UnreachableException;
 
-public class SelectDialog extends JFrame implements ActionListener {
+public class SelectDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
     private JComboBox<Object> comboBox;
     private int selected = -1;
 
-    private AtomicBoolean done = new AtomicBoolean(false);
+    public SelectDialog(JFrame parent, String message, List<? extends Object> options) {
+        super(parent, "Select");
+        this.setModal(true);
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-    public SelectDialog(String message, List<? extends Object> options) {
         JLabel labelLogo = new JLabel("");
         labelLogo.setIcon(SwingUtil.loadImage("logo", 96, 96));
 
@@ -102,30 +102,7 @@ public class SelectDialog extends JFrame implements ActionListener {
 
         this.pack();
         this.setResizable(false);
-        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        this.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent windowEvent) {
-                notifyDone();
-            }
-        });
-        SwingUtil.centerizeFrame(this, this.getWidth(), this.getHeight());
-    }
-
-    public int getSelectedIndex() {
-        this.setVisible(true);
-
-        synchronized (done) {
-            while (!done.get()) {
-                try {
-                    done.wait();
-                } catch (InterruptedException e) {
-                    return -1;
-                }
-            }
-
-            return selected;
-        }
+        this.setLocationRelativeTo(parent);
     }
 
     @Override
@@ -135,11 +112,9 @@ public class SelectDialog extends JFrame implements ActionListener {
         switch (action) {
         case OK:
             selected = comboBox.getSelectedIndex();
-            notifyDone();
             break;
         case CANCEL:
             selected = -1;
-            notifyDone();
             break;
         default:
             throw new UnreachableException();
@@ -148,11 +123,9 @@ public class SelectDialog extends JFrame implements ActionListener {
         this.dispose();
     }
 
-    private void notifyDone() {
-        synchronized (done) {
-            done.set(true);
-            done.notifyAll();
-        }
+    public int getSelectedIndex() {
+        this.setVisible(true);
+        return selected;
     }
 
     public static void main(String[] args) throws InterruptedException {
@@ -160,7 +133,7 @@ public class SelectDialog extends JFrame implements ActionListener {
         List<String> options = Arrays.asList("0x1122334455667788112233445566778811223344, #0",
                 "0x1122334455667788112233445566778811223344, #1");
 
-        SelectDialog select = new SelectDialog(msg, options);
+        SelectDialog select = new SelectDialog(null, msg, options);
         int idx = select.getSelectedIndex();
         System.out.println("Selected: " + idx);
     }

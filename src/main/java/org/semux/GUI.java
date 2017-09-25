@@ -67,9 +67,9 @@ public class GUI {
             showWelcome();
         } else {
             for (int i = 0;; i++) {
-                InputDialog frame = new InputDialog(
+                InputDialog dialog = new InputDialog(null,
                         i == 0 ? "Please enter your password:" : "Wrong password, please try again:", true);
-                String pwd = frame.getInput();
+                String pwd = dialog.getInput();
 
                 if (pwd == null) {
                     System.exit(-1);
@@ -111,7 +111,7 @@ public class GUI {
                 options.add("0x" + list.get(i).toAddressString() + ", #" + i);
             }
 
-            SelectDialog dialog = new SelectDialog(message, options);
+            SelectDialog dialog = new SelectDialog(null, message, options);
             int selected = dialog.getSelectedIndex();
             if (selected == -1) {
                 System.exit(0);
