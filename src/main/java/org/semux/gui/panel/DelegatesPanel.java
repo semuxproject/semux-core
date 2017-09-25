@@ -38,6 +38,7 @@ import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.Bytes;
+import org.semux.utils.UnreachableException;
 
 public class DelegatesPanel extends JPanel implements ActionListener {
 
@@ -368,7 +369,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             break;
         }
         default:
-            break;
+            throw new UnreachableException();
         }
     }
 

@@ -32,6 +32,7 @@ import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.ByteArray;
 import org.semux.utils.StringUtil;
+import org.semux.utils.UnreachableException;
 
 public class TransactionsPanel extends JPanel implements ActionListener {
 
@@ -145,7 +146,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             refresh();
             break;
         default:
-            break;
+            throw new UnreachableException();
         }
     }
 

@@ -29,6 +29,7 @@ import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
 import org.semux.utils.Bytes;
+import org.semux.utils.UnreachableException;
 
 public class SendPanel extends JPanel implements ActionListener {
 
@@ -235,7 +236,7 @@ public class SendPanel extends JPanel implements ActionListener {
             clear();
             break;
         default:
-            break;
+            throw new UnreachableException();
         }
     }
 

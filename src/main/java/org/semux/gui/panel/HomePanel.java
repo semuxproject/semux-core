@@ -32,6 +32,7 @@ import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.ByteArray;
+import org.semux.utils.UnreachableException;
 
 public class HomePanel extends JPanel implements ActionListener {
 
@@ -202,7 +203,7 @@ public class HomePanel extends JPanel implements ActionListener {
             refresh();
             break;
         default:
-            break;
+            throw new UnreachableException();
         }
     }
 

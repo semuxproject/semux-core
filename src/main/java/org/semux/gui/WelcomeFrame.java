@@ -30,6 +30,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
+import org.semux.utils.UnreachableException;
 
 public class WelcomeFrame extends JFrame implements ActionListener {
 
@@ -229,7 +230,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             System.exit(0);
             break;
         default:
-            break;
+            throw new UnreachableException();
         }
     }
 

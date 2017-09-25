@@ -19,6 +19,8 @@ public enum Action {
 
     SHOW_DELEGATES,
 
+    LOCK,
+
     SEND,
 
     CLEAR,

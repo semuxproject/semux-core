@@ -30,6 +30,7 @@ import org.semux.crypto.EdDSA;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
+import org.semux.utils.UnreachableException;
 import org.semux.gui.SwingUtil;
 
 public class ReceivePanel extends JPanel implements ActionListener {
@@ -203,7 +204,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             break;
         }
         default:
-            break;
+            throw new UnreachableException();
         }
     }
 

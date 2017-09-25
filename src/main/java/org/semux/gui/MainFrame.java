@@ -29,6 +29,7 @@ import org.semux.gui.panel.HomePanel;
 import org.semux.gui.panel.ReceivePanel;
 import org.semux.gui.panel.SendPanel;
 import org.semux.gui.panel.TransactionsPanel;
+import org.semux.utils.UnreachableException;
 
 public class MainFrame extends JFrame implements ActionListener {
 
@@ -97,6 +98,10 @@ public class MainFrame extends JFrame implements ActionListener {
 
         btnDelegates = createButton("Delegates", "delegates", Action.SHOW_DELEGATES);
         toolBar.add(btnDelegates);
+        toolBar.add(Box.createRigidArea(gap));
+
+        btnDelegates = createButton("Lock", "lock", Action.LOCK);
+        toolBar.add(btnDelegates);
 
         // setup tabs
         activePanel = new JPanel();
@@ -131,8 +136,11 @@ public class MainFrame extends JFrame implements ActionListener {
         case SHOW_DELEGATES:
             select(panelDelegates, btnDelegates);
             break;
-        default:
+        case LOCK:
+
             break;
+        default:
+            throw new UnreachableException();
         }
     }
 

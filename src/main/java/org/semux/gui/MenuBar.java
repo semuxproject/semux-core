@@ -46,15 +46,15 @@ public class MenuBar extends JMenuBar implements ActionListener {
         JMenu menuWallet = new JMenu("Wallet");
         this.add(menuWallet);
 
-        JMenuItem itemBackup = new JMenuItem("Backup wallet");
-        itemBackup.setActionCommand(Action.BACKUP_WALLET.name());
-        itemBackup.addActionListener(this);
-        menuWallet.add(itemBackup);
-
         JMenuItem itemImport = new JMenuItem("Import accounts from file");
         itemImport.setActionCommand(Action.IMPORT_ACCOUNTS.name());
         itemImport.addActionListener(this);
         menuWallet.add(itemImport);
+
+        JMenuItem itemBackup = new JMenuItem("Backup wallet");
+        itemBackup.setActionCommand(Action.BACKUP_WALLET.name());
+        itemBackup.addActionListener(this);
+        menuWallet.add(itemBackup);
 
         JMenuItem itemChangePwd = new JMenuItem("Change password");
         itemChangePwd.setActionCommand(Action.CHANGE_PASSWORD.name());
