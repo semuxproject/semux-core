@@ -37,7 +37,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "Hash", "Type", "From", "To", "Value", "Time" };
+    private static String[] columnNames = { "Type", "From/To", "Value", "Time" };
 
     private Model model;
 
@@ -57,8 +57,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(24);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 800, 0.15, 0.08, 0.25, 0.25, 0.12, 0.15);
-        SwingUtil.setColumnAlignments(table, false, false, false, false, true, true);
+        SwingUtil.setColumnWidths(table, 800, 0.1, 0.55, 0.2, 0.15);
+        SwingUtil.setColumnAlignments(table, false, false, true, true);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
@@ -115,22 +115,19 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
             switch (column) {
             case 0:
-                return "0x" + Hex.encode(tx.getHash());
-            case 1:
                 return StringUtil.toLowercaseExceptFirst(tx.getType().name());
-            case 2:
-                if (tx.getType() == TransactionType.COINBASE) {
-                    return "From block reward";
-                } else {
-                    String from = Hex.encode(tx.getFrom());
-                    return accounts.containsKey(from) ? "Account #" + accounts.get(from) : "0x" + from;
+            case 1:
+                String from = "Block reward";
+                if (tx.getType() != TransactionType.COINBASE) {
+                    from = Hex.encode(tx.getFrom());
+                    from = accounts.containsKey(from) ? "Account #" + accounts.get(from) : "0x" + from;
                 }
-            case 3:
                 String to = Hex.encode(tx.getTo());
-                return accounts.containsKey(to) ? "Account #" + accounts.get(to) : "0x" + to;
-            case 4:
+                to = accounts.containsKey(to) ? "Account #" + accounts.get(to) : "0x" + to;
+                return from + " => " + to;
+            case 2:
                 return String.format("%.3f SEM", tx.getValue() / (double) Unit.SEM);
-            case 5:
+            case 3:
                 SimpleDateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
                 return df.format(new Date(tx.getTimestamp()));
             default:
