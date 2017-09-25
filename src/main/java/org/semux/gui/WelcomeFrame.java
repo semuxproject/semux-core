@@ -7,6 +7,7 @@
 package org.semux.gui;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -58,6 +59,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         // setup frame properties
         this.setTitle(TITLE);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setMinimumSize(new Dimension(600, 400));
         SwingUtil.centerizeFrame(this, 600, 400);
 
         // create banner

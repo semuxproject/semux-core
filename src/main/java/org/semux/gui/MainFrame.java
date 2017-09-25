@@ -61,6 +61,7 @@ public class MainFrame extends JFrame implements ActionListener {
         // setup frame properties
         this.setTitle(TITLE);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setMinimumSize(new Dimension(900, 650));
         SwingUtil.centerizeFrame(this, 900, 650);
 
         // setup menu bar
