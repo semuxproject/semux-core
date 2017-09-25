@@ -44,6 +44,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
     private static final String LABEL_IMPORT = "Import acounts from backup file";
 
     private JPasswordField passwordField;
+    private JPasswordField repeatField;
     private JRadioButton btnCreate;
     private JRadioButton btnImport;
 
@@ -102,11 +103,15 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         btnNext.addActionListener(this);
         btnNext.setActionCommand(Action.OK.name());
 
+        JLabel lblPassword = new JLabel("Password:");
         passwordField = new JPasswordField();
         passwordField.setActionCommand(Action.OK.name());
         passwordField.addActionListener(this);
 
-        JLabel lblPassword = new JLabel("Password:");
+        JLabel lblRepeat = new JLabel("Repeat Password:");
+        repeatField = new JPasswordField();
+        repeatField.setActionCommand(Action.OK.name());
+        repeatField.addActionListener(this);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this.getContentPane());
@@ -124,28 +129,36 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                             .addComponent(banner, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE)
                             .addGap(18)
                             .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                                .addComponent(passwordField, GroupLayout.PREFERRED_SIZE, 269, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(lblRepeat)
                                 .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                                    .addComponent(panel, GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
-                                    .addComponent(lblPassword)
-                                    .addComponent(description, GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)))))
+                                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                        .addComponent(panel, GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
+                                        .addComponent(lblPassword)
+                                        .addComponent(description, GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE))
+                                    .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
+                                        .addComponent(repeatField, Alignment.LEADING)
+                                        .addComponent(passwordField, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 269, Short.MAX_VALUE))))))
                     .addGap(32))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
                         .addGroup(groupLayout.createSequentialGroup()
-                            .addGap(52)
+                            .addGap(20)
                             .addComponent(description)
-                            .addGap(18)
+                            .addGap(20)
                             .addComponent(panel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                            .addGap(18)
+                            .addPreferredGap(ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
                             .addComponent(lblPassword)
                             .addPreferredGap(ComponentPlacement.RELATED)
-                            .addComponent(passwordField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                            .addComponent(passwordField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(ComponentPlacement.UNRELATED)
+                            .addComponent(lblRepeat)
+                            .addPreferredGap(ComponentPlacement.RELATED)
+                            .addComponent(repeatField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
                         .addGroup(groupLayout.createSequentialGroup()
-                            .addGap(36)
+                            .addGap(10)
                             .addComponent(banner, GroupLayout.PREFERRED_SIZE, 293, GroupLayout.PREFERRED_SIZE)))
                     .addPreferredGap(ComponentPlacement.RELATED, 58, Short.MAX_VALUE)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
@@ -180,7 +193,12 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             break;
         case OK:
             String password = new String(passwordField.getPassword());
+            String repeat = new String(repeatField.getPassword());
 
+            if (!password.equals(repeat)) {
+                JOptionPane.showMessageDialog(this, "Repeat password does not match!");
+                break;
+            }
             if (!wallet.unlock(password)) {
                 JOptionPane.showMessageDialog(this, "Failed to unlock the wallet, wrong password?");
                 break;

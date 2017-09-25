@@ -21,7 +21,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.semux.Config;
 import org.semux.Kernel;
-import org.semux.core.Wallet;
+import org.semux.gui.dialog.ChangePasswordDialog;
 import org.semux.utils.IOUtil;
 
 public class MenuBar extends JMenuBar implements ActionListener {
@@ -49,6 +49,11 @@ public class MenuBar extends JMenuBar implements ActionListener {
         itemBackup.addActionListener(this);
         menuWallet.add(itemBackup);
 
+        JMenuItem itemImport = new JMenuItem("Import accounts from file");
+        itemImport.setActionCommand(Action.IMPORT_ACCOUNTS.name());
+        itemImport.addActionListener(this);
+        menuWallet.add(itemImport);
+
         JMenuItem itemChangePwd = new JMenuItem("Change password");
         itemChangePwd.setActionCommand(Action.CHANGE_PASSWORD.name());
         itemChangePwd.addActionListener(this);
@@ -68,6 +73,9 @@ public class MenuBar extends JMenuBar implements ActionListener {
         Action action = Action.valueOf(e.getActionCommand());
 
         switch (action) {
+        case IMPORT_ACCOUNTS: {
+            break;
+        }
         case BACKUP_WALLET: {
             JFileChooser chooser = new JFileChooser();
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -88,13 +96,8 @@ public class MenuBar extends JMenuBar implements ActionListener {
             break;
         }
         case CHANGE_PASSWORD: {
-            String pwd = JOptionPane.showInputDialog(frame, "Please enter a new password:");
-            if (pwd != null) {
-                Wallet wallet = Kernel.getInstance().getWallet();
-                wallet.changePassword(pwd);
-                wallet.flush();
-                JOptionPane.showMessageDialog(frame, "Password changed!");
-            }
+            ChangePasswordDialog d = new ChangePasswordDialog(frame);
+            d.setVisible(true);
             break;
         }
         case EXIT: {
