@@ -6,7 +6,8 @@ https://www.semux.org
 
 Semux is an experimental high-performance blockchain platform that powers decentralized application.
 
-Specifications:
+## Specifications
+
 * Total supply: 100,000,000 SEM
 * Block time: 20 seconds
 * Consensus algorithm: Delegated BFT
@@ -16,8 +17,8 @@ Specifications:
 
 1. Download and install [Java SE Runtime Environment 8](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html);
 2. Download the [Latest Release](https://github.com/semuxproject/semux/releases) and unpack it to a desired directory;
-3. Run ``semux.bat`` if you're on Windows; or run ``./semux.sh`` if you're on Linux or macOS. Be sure that your computer time is properly synchronized.
-4. *(Windows user) You may also need to download Microsoft Visual C++ 2010 Redistributable Package.*
+3. Run ``semux.bat`` if you're on Windows; or run ``./semux.sh`` if you're on Linux or macOS. Be sure that your system date and time is properly synchronized.
+4. *(Windows user) You may also need to install Microsoft Visual C++ 2010 Redistributable Package.*
     - [32-bit](http://www.microsoft.com/en-us/download/details.aspx?id=5555)
     - [64-bit](https://www.microsoft.com/en-us/download/details.aspx?id=14632)
 
@@ -25,7 +26,7 @@ Specifications:
 
 This project is under active development and is NOT production ready.
 
-Pull requests, and contributions are welcomed. Please see [Development Guideline](https://github.com/semuxproject/semux/wiki/Development-Guideline) for instructions.
+Pull requests, and contributions are welcome. Please see [Development Guideline](https://github.com/semuxproject/semux/wiki/Development-Guideline) for instructions.
 
 ## License
 
