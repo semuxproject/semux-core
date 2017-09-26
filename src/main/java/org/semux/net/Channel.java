@@ -43,7 +43,7 @@ public class Channel {
     private SemuxP2pHandler p2pHandler;
 
     /**
-     * Create a new channel instance.
+     * Creates a new channel instance.
      * 
      * @param chain
      * @param channelMgr
@@ -60,7 +60,7 @@ public class Channel {
     }
 
     /**
-     * Initialize this channel.
+     * Initializes this channel.
      * 
      * @param pipe
      * @param isInbound
@@ -94,7 +94,7 @@ public class Channel {
     }
 
     /**
-     * Get the channel id.
+     * Returns the channel id.
      * 
      * @return
      */
@@ -103,7 +103,7 @@ public class Channel {
     }
 
     /**
-     * Get the blockchain instance.
+     * Returns the blockchain instance.
      * 
      * @return
      */
@@ -112,7 +112,7 @@ public class Channel {
     }
 
     /**
-     * Get the pending manager.
+     * Returns the pending manager.
      * 
      * @return
      */
@@ -121,7 +121,7 @@ public class Channel {
     }
 
     /**
-     * Get the channel manager.
+     * Returns the channel manager.
      * 
      * @return
      */
@@ -130,7 +130,7 @@ public class Channel {
     }
 
     /**
-     * Get the node manager.
+     * Returns the node manager.
      * 
      * @return
      */
@@ -139,7 +139,7 @@ public class Channel {
     }
 
     /**
-     * Get the message sending queue.
+     * Returns the message queue.
      * 
      * @return
      */
@@ -148,7 +148,7 @@ public class Channel {
     }
 
     /**
-     * Check if this is an inbound channel.
+     * Returns whether this is an inbound channel.
      * 
      * @return
      */
@@ -157,7 +157,7 @@ public class Channel {
     }
 
     /**
-     * Check if this channel is in discovery mode.
+     * Returns whether this channel is in discovery mode.
      * 
      * @return
      */
@@ -166,7 +166,7 @@ public class Channel {
     }
 
     /**
-     * Get the client.
+     * Returns the peer client.
      * 
      * @return
      */
@@ -175,7 +175,7 @@ public class Channel {
     }
 
     /**
-     * Get the remote peer.
+     * Returns the remote peer.
      * 
      * @return
      */
@@ -184,20 +184,34 @@ public class Channel {
     }
 
     /**
-     * Set the remote peer.
+     * Returns whether this channel is active.
      * 
-     * @param remotePeer
+     * @return
      */
-    public void setRemotePeer(Peer remotePeer) {
-        this.remotePeer = remotePeer;
-
-        if (remotePeer != null) {
-            channelMgr.active(this); // notify channel manager
-        }
+    public boolean isActive() {
+        return remotePeer != null;
     }
 
     /**
-     * Get the remote address.
+     * When peer connection become active.
+     * 
+     * @param remotePeer
+     */
+    public void onActive(Peer remotePeer) {
+        this.remotePeer = remotePeer;
+
+        channelMgr.onChannelActive(this); // notify channel manager
+    }
+
+    /**
+     * When peer disconnects.
+     */
+    public void onDisconnect() {
+        this.remotePeer = null;
+    }
+
+    /**
+     * Returns the remote address.
      * 
      * @return
      */
@@ -206,7 +220,7 @@ public class Channel {
     }
 
     /**
-     * Get remote IP address.
+     * Returns remote IP address.
      * 
      * @return
      */
@@ -215,21 +229,12 @@ public class Channel {
     }
 
     /**
-     * Get remote port.
+     * Returns remote port.
      * 
      * @return
      */
     public int getRemotePort() {
         return remoteAddress.getPort();
-    }
-
-    /**
-     * Is this channel active.
-     * 
-     * @return
-     */
-    public boolean isActive() {
-        return remotePeer != null;
     }
 
     @Override

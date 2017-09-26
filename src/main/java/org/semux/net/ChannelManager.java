@@ -35,13 +35,13 @@ public class ChannelManager {
     private LRUMap<String, Long> blacklist = new LRUMap<>(5 * 1024);
 
     /**
-     * Create a new channel manager.
+     * Creates a channel manager instance.
      */
     public ChannelManager() {
     }
 
     /**
-     * Check if an address is in the blacklist.
+     * Returns whether an address is in the blacklist.
      * 
      * @param address
      * @return
@@ -58,7 +58,7 @@ public class ChannelManager {
     }
 
     /**
-     * Check if a Socket address is connected.
+     * Returns whether a socket address is connected.
      * 
      * @param addr
      * @return
@@ -68,7 +68,7 @@ public class ChannelManager {
     }
 
     /**
-     * Check if the specified peer is connected.
+     * Returns whether the specified peer is connected.
      * 
      * @param peerId
      * @return
@@ -78,7 +78,7 @@ public class ChannelManager {
     }
 
     /**
-     * Get the number of channels.
+     * Returns the number of channels.
      * 
      * @return
      */
@@ -87,7 +87,7 @@ public class ChannelManager {
     }
 
     /**
-     * Notify this manager of a new channel.
+     * Adds a new channel to this manager.
      * 
      * @param ch
      *            channel instance
@@ -102,7 +102,7 @@ public class ChannelManager {
     }
 
     /**
-     * Notify this manager of a disconnected channel.
+     * Removes a disconnected channel from this manager.
      * 
      * @param ch
      *            channel instance
@@ -113,21 +113,21 @@ public class ChannelManager {
         channels.remove(ch.getRemoteAddress());
         if (ch.isActive()) {
             activeChannels.remove(ch.getRemotePeer().getPeerId());
-            ch.setRemotePeer(null);
+            ch.onDisconnect();
         }
     }
 
     /**
-     * Notify this manager of an active channel.
+     * When a channel becomes active.
      * 
      * @param channel
      */
-    public synchronized void active(Channel channel) {
+    public synchronized void onChannelActive(Channel channel) {
         activeChannels.put(channel.getRemotePeer().getPeerId(), channel);
     }
 
     /**
-     * Get the active peers.
+     * Returns a copy of the active peers.
      * 
      * @return
      */
@@ -141,7 +141,7 @@ public class ChannelManager {
     }
 
     /**
-     * Get the listening IP addresses of active peers.
+     * Returns the listening IP addresses of active peers.
      * 
      * @return
      */
@@ -157,7 +157,7 @@ public class ChannelManager {
     }
 
     /**
-     * Get the active channels.
+     * Returns the active channels.
      * 
      * @return
      */
@@ -169,7 +169,7 @@ public class ChannelManager {
     }
 
     /**
-     * Get the active channels, with the given filter.
+     * Returns the active channels, filtered by peerId.
      * 
      * @param peerIds
      *            peerId filter
@@ -187,7 +187,7 @@ public class ChannelManager {
     }
 
     /**
-     * Get the active channels, whose message queue is idle.
+     * Returns the active channels, whose message queue is idle.
      * 
      * @return
      */

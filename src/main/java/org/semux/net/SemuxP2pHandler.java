@@ -47,8 +47,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 /**
- * Process P2P messages
- * 
+ * Semux P2P message handler
  */
 public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
@@ -83,7 +82,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private ScheduledFuture<?> pingPong = null;
 
     /**
-     * Create a new P2P handler.
+     * Creates a new P2P handler.
      * 
      * @param channel
      */
@@ -169,7 +168,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
             if (error == null) {
                 // update peer state
-                channel.setRemotePeer(peer);
+                channel.onActive(peer);
 
                 // reply with a WORLD message
                 peer = new Peer(client.getIp(), client.getPort(), Config.P2P_VERSION, Config.getClientId(),
@@ -188,7 +187,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             // update peer state
             WorldMessage worldMsg = (WorldMessage) msg;
             Peer peer = worldMsg.getPeer();
-            channel.setRemotePeer(peer);
+            channel.onActive(peer);
 
             // handshake done
             onHandshakeDone(peer);
@@ -271,8 +270,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     }
 
     /**
-     * Procedure after a successful handshake.
+     * When handshake is done.
      * 
+     * @param peer
      */
     private void onHandshakeDone(Peer peer) {
         if (!isHandshakeDone) {
@@ -295,7 +295,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     }
 
     /**
-     * Check if the p2p version is supported.
+     * Returns whether the p2p version is supported.
      * 
      * @param version
      * @return
@@ -305,7 +305,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     }
 
     /**
-     * Stop all scheduled timers, including the message queue.
+     * Stops all scheduled timers and the message queue.
      */
     private void stopTimers() {
         if (getNodes != null) {
