@@ -35,12 +35,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Pending manager maintains all unconfirmed transactions, either from kernel or
- * network. It also pre-evaluate transactions and broadcast them, if valid, to
- * its peers.
+ * network. All transactions are evaluated and propagated to peers if valid.
  * 
- * TODO: prevent transaction bombard
- * 
- * TODO: sort transactions by fee, and other metric
+ * TODO: sort transaction queue by fee, and other metrics
  *
  */
 public class PendingManager implements Runnable, BlockchainListener {
@@ -88,7 +85,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     private volatile boolean isRunning;
 
     /**
-     * Create a pending manager.
+     * Creates a pending manager.
      */
     public PendingManager(Blockchain chain, ChannelManager channelMgr) {
         this.chain = chain;
@@ -100,7 +97,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Start this pending manager.
+     * Starts this pending manager.
      */
     public synchronized void start() {
         if (!isRunning) {
@@ -120,7 +117,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Shut down this pending manager.
+     * Shuts down this pending manager.
      */
     public synchronized void stop() {
         if (isRunning) {
@@ -132,7 +129,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Check if the pending manager is running or not.
+     * Returns whether the pending manager is running or not.
      * 
      * @return
      */
@@ -141,7 +138,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Get a copy of the queue, for test purpose only.
+     * Returns a copy of the queue, for test purpose only.
      * 
      * @return
      */
@@ -152,8 +149,8 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Add a transaction to the queue, which will be validated by a background
-     * worker.
+     * Adds a transaction to the queue, which will be validated later by the
+     * background worker.
      * 
      * @param tx
      */
@@ -162,7 +159,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Add a transaction to the pool.
+     * Adds a transaction to the pool.
      * 
      * @param tx
      * @return true if the transaction is successfully added to the pool, otherwise
@@ -173,7 +170,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Get the nonce of an account from the pending state.
+     * Returns the nonce of an account based on the pending state.
      * 
      * @param address
      * @return
@@ -183,7 +180,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Get pending transactions and corresponding results.
+     * Returns pending transactions and corresponding results.
      * 
      * @param limit
      * @return
@@ -204,7 +201,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Get a limited number of transactions in the pool.
+     * Returns a limited number of transactions in the pool.
      * 
      * @param limit
      * @return
@@ -214,7 +211,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Get all transactions in the pool.
+     * Returns all transactions in the pool.
      * 
      * @return
      */
@@ -252,16 +249,16 @@ public class PendingManager implements Runnable, BlockchainListener {
     public synchronized void run() {
         Transaction tx;
 
-        while ((tx = queue.poll()) != null) {
+        while (poolMap.size() < 2 * Config.MAX_BLOCK_SIZE && (tx = queue.poll()) != null) {
             if (tx.validate() && processTransaction(tx, true) >= 1) {
-                // break after one transaction
+                // exit after one valid transaction
                 return;
             }
         }
     }
 
     /**
-     * Validate the given transaction. Add it to the pool if valid.
+     * Validates the given transaction and add to pool if valid.
      * 
      * @param tx
      *            transaction
