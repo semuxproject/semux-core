@@ -271,12 +271,6 @@ public class SemuxBFT implements Consensus {
 
             proposal = null;
             resetVotes();
-
-            // broadcast NEW_VIEW messages to all active validators.
-            BFTNewViewMessage msg = new BFTNewViewMessage(proof);
-            for (Channel c : activeValidators) {
-                c.getMessageQueue().sendMessage(msg);
-            }
         }
 
         logger.info("Entered propose: height = {}, view = {}, primary = {}, # connected validators = 1 + {}", height,
@@ -291,10 +285,13 @@ public class SemuxBFT implements Consensus {
 
             logger.debug("Proposing: {}", proposal);
             broadcaster.broadcast(new BFTProposalMessage(proposal));
-        } else {
-            // re-broadcast to help recover from extreme condition
-            if (proposal != null) {
-                broadcaster.broadcast(new BFTProposalMessage(proposal));
+        }
+
+        // broadcast NEW_VIEW messages.
+        if (view > 0) {
+            BFTNewViewMessage msg = new BFTNewViewMessage(proof);
+            for (Channel c : activeValidators) {
+                c.getMessageQueue().sendMessage(msg);
             }
         }
     }
