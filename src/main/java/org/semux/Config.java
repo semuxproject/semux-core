@@ -295,17 +295,17 @@ public class Config {
     /**
      * The duration of VALIDATE state.
      */
-    public static int BFT_VALIDATE_TIMEOUT = 5000;
+    public static int BFT_VALIDATE_TIMEOUT = 6000;
 
     /**
      * The duration of PRE_COMMIT state.
      */
-    public static int BFT_PRE_COMMIT_TIMEOUT = 4000;
+    public static int BFT_PRE_COMMIT_TIMEOUT = 3000;
 
     /**
      * The duration of COMMIT state. May be skipped if +2/3 commit votes
      */
-    public static int BFT_COMMIT_TIMEOUT = 4000;
+    public static int BFT_COMMIT_TIMEOUT = 3000;
 
     /**
      * The duration of FINALIZE state. This allow slow peers to persist block
