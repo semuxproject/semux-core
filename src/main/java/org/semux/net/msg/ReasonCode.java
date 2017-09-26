@@ -9,9 +9,9 @@ package org.semux.net.msg;
 public enum ReasonCode {
 
     /**
-     * [0x00] Requested by the other peer.
+     * [0x00] Reserved code.
      */
-    REQUESTED(0x00),
+    RESERVED(0x00),
 
     /**
      * [0x01] Incompatible protocol.

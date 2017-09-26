@@ -2,6 +2,7 @@ package org.semux.bench;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,10 +25,11 @@ public class SemuxPerformance {
     private static Wallet wallet = new Wallet(new File("wallet.data"));
     private static String password;
 
-    public static void testTransfer(EdDSA key, int n) throws IOException, InterruptedException {
-        String cmd = "transfer";
-        long tps = 500;
+    private static InetSocketAddress server = new InetSocketAddress("127.0.0.1", 5170);
+    private static int coinbase = 1;
+    private static int tps = 500;
 
+    public static void testTransfer(EdDSA key, int n) throws IOException, InterruptedException {
         long t1 = System.currentTimeMillis();
         for (int i = 1; i <= n; i++) {
             Map<String, Object> params = new HashMap<>();
@@ -38,7 +40,7 @@ public class SemuxPerformance {
             params.put("data", Bytes.EMPY_BYTES);
             params.put("password", password);
 
-            JSONObject response = ApiUtil.request(cmd, params);
+            JSONObject response = ApiUtil.request(server, "transfer", params);
             if (!response.getBoolean("success")) {
                 System.out.println(response);
                 return;
@@ -66,8 +68,8 @@ public class SemuxPerformance {
             return;
         }
 
-        EdDSA key = wallet.getAccounts().get(0);
-        JSONObject obj = ApiUtil.request("get_balance", "address", key.toAddressString());
+        EdDSA key = wallet.getAccounts().get(coinbase);
+        JSONObject obj = ApiUtil.request(server, "get_balance", "address", key.toAddressString());
         System.out.println("Address: " + key.toAddressString());
         System.out.println("Balance: " + obj.getLong("result") / Unit.SEM + " SEM");
 

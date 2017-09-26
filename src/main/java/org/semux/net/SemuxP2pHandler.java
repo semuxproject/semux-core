@@ -150,7 +150,8 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         /* p2p */
         case DISCONNECT: {
             logger.debug("Received DISCONNECT msg, reason = {}", ((DisconnectMessage) msg).getReason());
-            msgQueue.disconnect();
+            stopTimers();
+            ctx.close();
             break;
         }
         case HELLO: {

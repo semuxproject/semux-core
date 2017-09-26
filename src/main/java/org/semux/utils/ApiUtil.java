@@ -70,17 +70,30 @@ public class ApiUtil {
     /**
      * Send an API request.
      * 
+     * @param server
+     * @param cmd
+     * @param params
+     * @return
+     * @throws IOException
+     */
+    public static JSONObject request(InetSocketAddress server, String cmd, Object... params) throws IOException {
+        Map<String, Object> map = new HashMap<>();
+        for (int i = 0; i + 1 < params.length; i += 2) {
+            map.put(params[i].toString(), params[i + 1]);
+        }
+
+        return request(server, cmd, map);
+    }
+
+    /**
+     * Send an API request.
+     * 
      * @param cmd
      * @param params
      * @return
      * @throws IOException
      */
     public static JSONObject request(String cmd, Object... params) throws IOException {
-        Map<String, Object> map = new HashMap<>();
-        for (int i = 0; i + 1 < params.length; i += 2) {
-            map.put(params[i].toString(), params[i + 1]);
-        }
-
-        return request(DEFAULT_SERVER, cmd, map);
+        return request(DEFAULT_SERVER, cmd, params);
     }
 }

@@ -12,7 +12,7 @@ public enum MessageCode {
     // =======================================
 
     /**
-     * [0x00] Inform peer of a disconnection.
+     * [0x00] Inform peer of disconnecting.
      */
     DISCONNECT(0x00),
 

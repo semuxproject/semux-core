@@ -73,7 +73,6 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Transaction pool.
      */
-    private Object poolLock = new Object();
     private Map<ByteArray, Transaction> poolMap = new HashMap<>();
     private List<Transaction> transactions = new ArrayList<>();
     private List<TransactionResult> results = new ArrayList<>();
@@ -103,7 +102,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Start this pending manager.
      */
-    public void start() {
+    public synchronized void start() {
         if (!isRunning) {
             /*
              * Use a rate smaller than the message queue sending rate to prevent message
@@ -123,7 +122,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Shut down this pending manager.
      */
-    public void stop() {
+    public synchronized void stop() {
         if (isRunning) {
             validateFuture.cancel(true);
 
@@ -137,7 +136,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * 
      * @return
      */
-    public boolean isRunning() {
+    public synchronized boolean isRunning() {
         return isRunning;
     }
 
@@ -146,7 +145,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * 
      * @return
      */
-    public List<Transaction> getQueue() {
+    public synchronized List<Transaction> getQueue() {
         synchronized (queue) {
             return new ArrayList<>(queue);
         }
@@ -158,7 +157,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * 
      * @param tx
      */
-    public void addTransaction(Transaction tx) {
+    public synchronized void addTransaction(Transaction tx) {
         queue.add(tx);
     }
 
@@ -169,7 +168,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @return true if the transaction is successfully added to the pool, otherwise
      *         false
      */
-    public boolean addTransactionSync(Transaction tx) {
+    public synchronized boolean addTransactionSync(Transaction tx) {
         return processTransaction(tx, true) >= 1;
     }
 
@@ -179,7 +178,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @param address
      * @return
      */
-    public long getNonce(byte[] address) {
+    public synchronized long getNonce(byte[] address) {
         return pendingAS.getAccount(address).getNonce();
     }
 
@@ -189,18 +188,16 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @param limit
      * @return
      */
-    public Pair<List<Transaction>, List<TransactionResult>> getTransactionsAndResults(int limit) {
+    public synchronized Pair<List<Transaction>, List<TransactionResult>> getTransactionsAndResults(int limit) {
         List<Transaction> txs = new ArrayList<>();
         List<TransactionResult> res = new ArrayList<>();
 
-        synchronized (poolLock) {
-            if (transactions.size() > limit && limit != -1) {
-                txs.addAll(transactions.subList(0, limit));
-                res.addAll(results.subList(0, limit));
-            } else {
-                txs.addAll(transactions);
-                res.addAll(results);
-            }
+        if (transactions.size() > limit && limit != -1) {
+            txs.addAll(transactions.subList(0, limit));
+            res.addAll(results.subList(0, limit));
+        } else {
+            txs.addAll(transactions);
+            res.addAll(results);
         }
 
         return Pair.of(txs, res);
@@ -212,7 +209,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @param limit
      * @return
      */
-    public List<Transaction> getTransactions(int limit) {
+    public synchronized List<Transaction> getTransactions(int limit) {
         return getTransactionsAndResults(limit).getLeft();
     }
 
@@ -221,12 +218,12 @@ public class PendingManager implements Runnable, BlockchainListener {
      * 
      * @return
      */
-    public List<Transaction> getTransactions() {
+    public synchronized List<Transaction> getTransactions() {
         return getTransactionsAndResults(-1).getLeft();
     }
 
     @Override
-    public void onBlockAdded(Block block) {
+    public synchronized void onBlockAdded(Block block) {
         if (isRunning) {
             long t1 = System.currentTimeMillis();
 
@@ -234,27 +231,25 @@ public class PendingManager implements Runnable, BlockchainListener {
             pendingAS = chain.getAccountState().track();
             pendingDS = chain.getDeleteState().track();
 
-            synchronized (poolLock) {
-                // [2] clear transaction pool
-                List<Transaction> txs = new ArrayList<>(transactions);
-                poolMap.clear();
-                transactions.clear();
-                results.clear();
+            // [2] clear transaction pool
+            List<Transaction> txs = new ArrayList<>(transactions);
+            poolMap.clear();
+            transactions.clear();
+            results.clear();
 
-                // [3] update pending state
-                long accepted = 0;
-                for (Transaction tx : txs) {
-                    accepted += processTransaction(tx, false);
-                }
-
-                long t2 = System.currentTimeMillis();
-                logger.debug("Pending tx evaluation: # txs = {} / {},  time =  {} ms", accepted, txs.size(), t2 - t1);
+            // [3] update pending state
+            long accepted = 0;
+            for (Transaction tx : txs) {
+                accepted += processTransaction(tx, false);
             }
+
+            long t2 = System.currentTimeMillis();
+            logger.debug("Pending tx evaluation: # txs = {} / {},  time =  {} ms", accepted, txs.size(), t2 - t1);
         }
     }
 
     @Override
-    public void run() {
+    public synchronized void run() {
         Transaction tx;
 
         while ((tx = queue.poll()) != null) {
@@ -300,20 +295,19 @@ public class PendingManager implements Runnable, BlockchainListener {
                 ds.commit();
 
                 // add transaction to pool
-                synchronized (poolLock) {
-                    poolMap.put(createKey(tx), tx);
-                    transactions.add(tx);
-                    results.add(result);
-                }
+                poolMap.put(createKey(tx), tx);
+                transactions.add(tx);
+                results.add(result);
 
                 // relay transaction
                 if (relay) {
                     List<Channel> channels = channelMgr.getActiveChannels();
-                    int[] indexes = ArrayUtil.permutation(channels.size());
-                    for (int i = 0; i < indexes.length && i < Config.NET_RELAY_REDUNDANCY; i++) {
-                        if (channels.get(indexes[i]).isActive()) {
-                            TransactionMessage msg = new TransactionMessage(tx);
-                            channels.get(indexes[i]).getMessageQueue().sendMessage(msg);
+                    TransactionMessage msg = new TransactionMessage(tx);
+                    int[] indices = ArrayUtil.permutation(channels.size());
+                    for (int i = 0; i < indices.length && i < Config.NET_RELAY_REDUNDANCY; i++) {
+                        Channel c = channels.get(indices[i]);
+                        if (c.isActive()) {
+                            c.getMessageQueue().sendMessage(msg);
                         }
                     }
                 }
