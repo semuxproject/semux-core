@@ -25,7 +25,7 @@ public class SemuxPerformance {
     private static Wallet wallet = new Wallet(new File("wallet.data"));
     private static String password;
 
-    private static InetSocketAddress server = new InetSocketAddress("127.0.0.1", 5170);
+    private static InetSocketAddress server = new InetSocketAddress("127.0.0.1", 5171);
     private static int coinbase = 1;
     private static int tps = 500;
 

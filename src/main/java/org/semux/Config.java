@@ -285,12 +285,12 @@ public class Config {
     /**
      * The duration of NEW_HEIGHT state. This allow peers to catch up.
      */
-    public static int BFT_NEW_HEIGHT_TIMEOUT = 3000;
+    public static int BFT_NEW_HEIGHT_TIMEOUT = 2000;
 
     /**
      * The duration of PREPROSE state.
      */
-    public static int BFT_PROPOSE_TIMEOUT = 5000;
+    public static int BFT_PROPOSE_TIMEOUT = 6000;
 
     /**
      * The duration of VALIDATE state.
