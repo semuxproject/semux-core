@@ -90,6 +90,14 @@ public interface Blockchain {
     public Transaction getTransaction(byte[] hash);
 
     /**
+     * Get the block number of the given transaction.
+     * 
+     * @param hash
+     * @return
+     */
+    public long getTransactionBlockNumber(byte[] hash);
+
+    /**
      * Returns the total number of transactions from/to the given address.
      * 
      * @param address

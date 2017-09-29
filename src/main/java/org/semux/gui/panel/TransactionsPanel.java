@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +32,7 @@ import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
+import org.semux.gui.dialog.TransactionDialog;
 import org.semux.utils.ByteArray;
 import org.semux.utils.StringUtil;
 import org.semux.utils.UnreachableException;
@@ -60,6 +63,19 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
         SwingUtil.setColumnWidths(table, 800, 0.1, 0.55, 0.2, 0.15);
         SwingUtil.setColumnAlignments(table, false, false, true, true);
+
+        table.addMouseListener(new MouseAdapter() {
+            long lastClick;
+
+            public void mouseClicked(MouseEvent e) {
+                long now = System.currentTimeMillis();
+                if (now - lastClick < 500) {
+                    ActionEvent ev = new ActionEvent(TransactionsPanel.this, 0, Action.SELECT_TRANSACTION.name());
+                    TransactionsPanel.this.actionPerformed(ev);
+                }
+                lastClick = now;
+            }
+        });
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
@@ -144,6 +160,11 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         switch (action) {
         case REFRESH:
             refresh();
+            break;
+        case SELECT_TRANSACTION:
+            Transaction tx = tableModel.getRow(table.getSelectedRow());
+            TransactionDialog dialog = new TransactionDialog(this, tx);
+            dialog.setVisible(true);
             break;
         default:
             throw new UnreachableException();

@@ -169,15 +169,27 @@ public class BlockchainImpl implements Blockchain {
             }
 
             SimpleDecoder dec = new SimpleDecoder(bytes);
-            byte[] blockHash = dec.readBytes();
+            long blockNumber = dec.readLong();
             int from = dec.readInt();
             int to = dec.readInt();
 
-            byte[] block = blockDB.get(blockHash);
+            // number => block_hash => block_data
+            byte[] block = blockDB.get(blockDB.get(Bytes.of(blockNumber)));
             return Transaction.fromBytes(Arrays.copyOfRange(block, from, to));
         }
 
         return null;
+    }
+
+    @Override
+    public long getTransactionBlockNumber(byte[] hash) {
+        byte[] bytes = indexDB.get(hash);
+        if (bytes != null) {
+            SimpleDecoder dec = new SimpleDecoder(bytes);
+            return dec.readLong();
+        }
+
+        return -1;
     }
 
     @Override
@@ -210,7 +222,7 @@ public class BlockchainImpl implements Blockchain {
             reward += tx.getFee();
 
             SimpleEncoder enc = new SimpleEncoder();
-            enc.writeBytes(hash);
+            enc.writeLong(number);
             enc.writeInt(txIndices.get(i).getLeft());
             enc.writeInt(txIndices.get(i).getRight());
 

@@ -266,7 +266,7 @@ public class SemuxBFT implements Consensus {
     protected void enterPropose() {
         state = State.PROPOSE;
         timer.timeout(Config.BFT_PROPOSE_TIMEOUT);
-        
+
         updateValidators();
 
         if (precommitVotes.isRejected()) {
