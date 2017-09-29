@@ -76,6 +76,7 @@ public class SemuxBFT implements Consensus {
 
     private volatile List<String> validators;
     private volatile List<Channel> activeValidators;
+    private volatile long lastUpdate;
 
     private VoteSet validateVotes;
     private VoteSet precommitVotes;
@@ -152,6 +153,11 @@ public class SemuxBFT implements Consensus {
                 Event ev = events.take();
                 if (status != Status.RUNNING) {
                     continue;
+                }
+
+                // in case we get stuck at one height for too long
+                if (lastUpdate + 2 * 60 * 1000L < System.currentTimeMillis()) {
+                    updateValidators();
                 }
 
                 switch (ev.getType()) {
@@ -236,8 +242,7 @@ public class SemuxBFT implements Consensus {
         finalized = false;
 
         // update validators
-        validators = chain.getValidators();
-        activeValidators = channelMgr.getActiveChannels(validators);
+        updateValidators();
 
         // reset votes and events
         resetVotes();
@@ -261,9 +266,8 @@ public class SemuxBFT implements Consensus {
     protected void enterPropose() {
         state = State.PROPOSE;
         timer.timeout(Config.BFT_PROPOSE_TIMEOUT);
-
-        // update active peers
-        activeValidators = channelMgr.getActiveChannels(validators);
+        
+        updateValidators();
 
         if (precommitVotes.isRejected()) {
             view++;
@@ -608,6 +612,15 @@ public class SemuxBFT implements Consensus {
         default:
             return false;
         }
+    }
+
+    /**
+     * Update the validator sets.
+     */
+    protected void updateValidators() {
+        validators = chain.getValidators();
+        activeValidators = channelMgr.getActiveChannels(validators);
+        lastUpdate = System.currentTimeMillis();
     }
 
     /**
