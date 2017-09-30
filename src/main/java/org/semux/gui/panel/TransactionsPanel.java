@@ -3,6 +3,7 @@ package org.semux.gui.panel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -65,15 +66,17 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         SwingUtil.setColumnAlignments(table, false, false, true, true);
 
         table.addMouseListener(new MouseAdapter() {
-            long lastClick;
-
-            public void mouseClicked(MouseEvent e) {
-                long now = System.currentTimeMillis();
-                if (now - lastClick < 500) {
-                    ActionEvent ev = new ActionEvent(TransactionsPanel.this, 0, Action.SELECT_TRANSACTION.name());
-                    TransactionsPanel.this.actionPerformed(ev);
+            public void mousePressed(MouseEvent me) {
+                JTable table = (JTable) me.getSource();
+                Point p = me.getPoint();
+                int row = table.rowAtPoint(p);
+                if (me.getClickCount() == 2) {
+                    Transaction tx = tableModel.getRow(row);
+                    if (tx != null) {
+                        TransactionDialog dialog = new TransactionDialog(TransactionsPanel.this, tx);
+                        dialog.setVisible(true);
+                    }
                 }
-                lastClick = now;
             }
         });
 
@@ -160,11 +163,6 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         switch (action) {
         case REFRESH:
             refresh();
-            break;
-        case SELECT_TRANSACTION:
-            Transaction tx = tableModel.getRow(table.getSelectedRow());
-            TransactionDialog dialog = new TransactionDialog(this, tx);
-            dialog.setVisible(true);
             break;
         default:
             throw new UnreachableException();

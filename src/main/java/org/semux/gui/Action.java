@@ -41,8 +41,6 @@ public enum Action {
 
     SELECT_DELEGATE,
 
-    SELECT_TRANSACTION,
-
     BACKUP_WALLET,
 
     CHANGE_PASSWORD,
