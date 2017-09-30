@@ -63,7 +63,7 @@ public class SemuxSync implements Sync {
 
     private static final long MAX_DOWNLOAD_TIME = 30 * 1000;
 
-    private static final int MAX_PENDING_BLOCKS = 256;
+    private static final int MAX_PENDING_BLOCKS = 1024;
 
     private Blockchain chain;
     private ChannelManager channelMgr;
@@ -269,7 +269,7 @@ public class SemuxSync implements Sync {
                     toComplete.remove(block.getNumber());
                 }
             } else {
-                logger.info("block invalid");
+                logger.info("Invalid block");
                 synchronized (lock) {
                     toDownload.add(block.getNumber());
                 }
