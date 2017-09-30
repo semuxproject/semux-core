@@ -160,7 +160,7 @@ public class Config {
     /***
      * Full name of this client.
      */
-    public static String CLIENT_FULL_NAME = "Semux v" + CLIENT_VERSION + " Alpha";
+    public static String CLIENT_FULL_NAME = "Semux v" + CLIENT_VERSION + " Beta";
 
     // =========================
     // Crypto
@@ -178,7 +178,7 @@ public class Config {
     /**
      * P2P protocol version.
      */
-    public static short P2P_VERSION = 11;
+    public static short P2P_VERSION = 0;
 
     /**
      * P2P listening address.
