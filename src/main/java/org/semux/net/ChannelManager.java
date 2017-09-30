@@ -27,7 +27,7 @@ public class ChannelManager {
 
     private static final Logger logger = LoggerFactory.getLogger(ChannelManager.class);
 
-    private static final long BLACK_LIST_EXPIRE = 1 * 60 * 1000; // 1 minutes
+    private static final long BLACK_LIST_EXPIRE = 10 * 1000; // 10 seconds
 
     private Map<InetSocketAddress, Channel> channels = new HashMap<>();
     private Map<String, Channel> activeChannels = new HashMap<>();
@@ -47,7 +47,7 @@ public class ChannelManager {
      * @return
      */
     public synchronized boolean isBlocked(InetSocketAddress address) {
-        if (Config.NETWORK_ID != 0) {
+        if (Config.NETWORK_ID == 0) {
             return false;
         }
 
