@@ -136,18 +136,19 @@ public class GUI {
 
         // start data refresh
         new Thread(() -> {
-            while (true) {
+            while (kernel.isRunning) {
                 try {
                     onBlockAdded(kernel.getBlockchain().getLatestBlock());
-
-                    Thread.sleep(5000);
+                    Thread.sleep(4000);
                 } catch (InterruptedException e) {
-                    logger.info("GUI data refresh interrupted, exiting");
+                    logger.info("GUI  refresh interrupted, exiting");
                     break;
                 } catch (Exception e) {
                     logger.info("GUI data refresh exception", e);
                 }
             }
+
+            logger.info("GUI data refresh thread stopped");
         }, "gui-data").start();
 
         // start version check

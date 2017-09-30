@@ -39,7 +39,7 @@ import org.xml.sax.SAXException;
 public class Kernel {
     private static Logger logger = LoggerFactory.getLogger(Config.class);
 
-    private boolean isRunning;
+    public volatile boolean isRunning;
 
     private Wallet wallet;
     private EdDSA coinbase;
@@ -93,6 +93,7 @@ public class Kernel {
         if (isRunning) {
             return;
         }
+        isRunning = true;
 
         // ====================================
         // initialization
@@ -208,6 +209,8 @@ public class Kernel {
         // register shutdown hook
         // ====================================
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            isRunning = false;
+
             pendingMgr.stop();
             nodeMgr.stop();
 
