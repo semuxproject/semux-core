@@ -16,10 +16,10 @@
         }
     },
     "delegates": {
-        "semux_1": "0x1e8237f8f64b2bd626980875b501f01713d99f7f",
-        "semux_2": "0x47f94a46ae01a48f890a1b088bf5e2ff2dbb3b73",
-        "semux_3": "0xe05a5e60fb26ec466620354feff67d1f5239f8c8",
-        "semux_4": "0x5656779afec2314abd4c51666e28bc64f758c621"
+        "semux1": "0x1e8237f8f64b2bd626980875b501f01713d99f7f",
+        "semux2": "0x47f94a46ae01a48f890a1b088bf5e2ff2dbb3b73",
+        "semux3": "0xe05a5e60fb26ec466620354feff67d1f5239f8c8",
+        "semux4": "0x5656779afec2314abd4c51666e28bc64f758c621"
     },
     "config": {
     }
