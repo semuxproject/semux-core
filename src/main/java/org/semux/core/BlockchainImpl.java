@@ -174,7 +174,7 @@ public class BlockchainImpl implements Blockchain {
             int to = dec.readInt();
 
             // number => block_hash => block_data
-            byte[] block = blockDB.get(blockDB.get(Bytes.of(blockNumber)));
+            byte[] block = blockDB.get(indexDB.get(Bytes.of(blockNumber)));
             return Transaction.fromBytes(Arrays.copyOfRange(block, from, to));
         }
 

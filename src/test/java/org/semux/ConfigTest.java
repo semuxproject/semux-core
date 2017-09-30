@@ -16,7 +16,6 @@ public class ConfigTest {
     @Test
     public void testLoad() {
         assertTrue(Config.init());
-        assertEquals(1, Config.NETWORK_ID);
     }
 
     @Test
