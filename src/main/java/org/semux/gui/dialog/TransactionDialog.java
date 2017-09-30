@@ -22,7 +22,7 @@ public class TransactionDialog extends JDialog {
     private JTextArea selectableText(String txt) {
         JTextArea hash = new JTextArea(txt);
         hash.setBackground(null);
-        hash.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        hash.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
 
         return hash;
     }
