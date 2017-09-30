@@ -353,11 +353,9 @@ public class Config {
      * @return the block reward
      */
     public static long getBlockReward(long number) {
-        if (number <= 1_000_000) {
-            return 20 * Unit.SEM;
-        } else if (number <= 3_000_000) {
+        if (number <= 4_000_000) {
             return 10 * Unit.SEM;
-        } else if (number <= 9_000_000) {
+        } else if (number <= 10_000_000) {
             return 5 * Unit.SEM;
         } else {
             return 0;
