@@ -1,5 +1,6 @@
 package org.semux.gui.dialog;
 
+import java.awt.Font;
 import java.util.Date;
 
 import javax.swing.GroupLayout;
@@ -18,6 +19,14 @@ public class TransactionDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
+    private JTextArea selectableText(String txt) {
+        JTextArea hash = new JTextArea(txt);
+        hash.setBackground(null);
+        hash.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+
+        return hash;
+    }
+
     public TransactionDialog(JComponent parent, Transaction tx) {
         JLabel lblHash = new JLabel("Hash:");
         JLabel lblType = new JLabel("Type:");
@@ -29,10 +38,10 @@ public class TransactionDialog extends JDialog {
         JLabel lblTimestamp = new JLabel("Timestamp:");
         JLabel lblData = new JLabel("data:");
 
-        JLabel hash = new JLabel("0x" + Hex.encode(tx.getHash())); 
+        JTextArea hash = selectableText("0x" + Hex.encode(tx.getHash()));
         JLabel type = new JLabel(tx.getType().name());
-        JLabel from = new JLabel("0x" + Hex.encode(tx.getFrom()));
-        JLabel to = new JLabel("0x" + Hex.encode(tx.getTo()));
+        JTextArea from = selectableText("0x" + Hex.encode(tx.getFrom()));
+        JTextArea to = selectableText("0x" + Hex.encode(tx.getTo()));
         JLabel value = new JLabel(tx.getValue() / Unit.SEM + " SEM");
         JLabel fee = new JLabel(tx.getFee() / Unit.SEM + " SEM");
         JLabel nonce = new JLabel(Long.toString(tx.getNonce()));
@@ -116,5 +125,6 @@ public class TransactionDialog extends JDialog {
         this.setTitle("Transaction");
         this.pack();
         this.setLocationRelativeTo(parent);
+        this.setResizable(false);
     }
 }
