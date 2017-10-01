@@ -70,9 +70,32 @@ public class CorePerformance {
         logger.info("Perf_block_validation: {} ms", (t2 - t1) / 1_000_000);
     }
 
+    public static void testTransactionValidation() {
+        EdDSA key = new EdDSA();
+
+        TransactionType type = TransactionType.TRANSFER;
+        byte[] from = key.toAddress();
+        byte[] to = Bytes.random(20);
+        long value = 1;
+        long fee = Config.MIN_DELEGATE_FEE;
+        long nonce = 1;
+        long timestamp = System.currentTimeMillis();
+        byte[] data = {};
+        Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+        tx.sign(key);
+
+        int repeat = 1000;
+        long t1 = System.nanoTime();
+        for (int i = 0; i < repeat; i++) {
+            tx.validate();
+        }
+        long t2 = System.nanoTime();
+        logger.info("Perf_transaction_validation: {} μs/time", (t2 - t1) / repeat / 1_000);
+    }
+
     public static void main(String[] args) throws Exception {
         Block block = testBlockCreation();
         testBlockValidation(block);
+        testTransactionValidation();
     }
-
 }

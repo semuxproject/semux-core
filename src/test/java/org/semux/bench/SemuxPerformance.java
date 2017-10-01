@@ -26,7 +26,7 @@ public class SemuxPerformance {
     private static String password;
 
     private static InetSocketAddress server = new InetSocketAddress("127.0.0.1", 5171);
-    private static int coinbase = 1;
+    private static int coinbase = 0;
     private static int tps = 500;
 
     public static void testTransfer(EdDSA key, int n) throws IOException, InterruptedException {
@@ -34,7 +34,7 @@ public class SemuxPerformance {
         for (int i = 1; i <= n; i++) {
             Map<String, Object> params = new HashMap<>();
             params.put("from", key.toAddress());
-            params.put("to", Bytes.random(20));
+            params.put("to", key.toAddress());
             params.put("value", 1 * Unit.MILLI_SEM);
             params.put("fee", Config.MIN_TRANSACTION_FEE);
             params.put("data", Bytes.EMPY_BYTES);
