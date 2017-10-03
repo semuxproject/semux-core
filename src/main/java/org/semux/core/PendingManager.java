@@ -7,7 +7,6 @@
 package org.semux.core;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,9 +74,10 @@ public class PendingManager implements Runnable, BlockchainListener {
     private List<TransactionResult> results = new ArrayList<>();
 
     /**
-     * Transaction cache.
+     * Transaction cache. NOTE: make sure access to the LRUMap<> are synchronized.
      */
-    private Map<ByteArray, Transaction> cache = Collections.synchronizedMap(new LRUMap<>(CACHE_SIZE));
+    private Map<ByteArray, Transaction> cache = new LRUMap<>(CACHE_SIZE);
+    private Map<ByteArray, Object> processedTxs = new LRUMap<>(CACHE_SIZE);
 
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> validateFuture;
@@ -143,9 +143,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @return
      */
     public synchronized List<Transaction> getQueue() {
-        synchronized (queue) {
-            return new ArrayList<>(queue);
-        }
+        return new ArrayList<>(queue);
     }
 
     /**
@@ -251,11 +249,17 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         while (poolMap.size() < 2 * Config.MAX_BLOCK_SIZE && (tx = queue.poll()) != null) {
             // filter by cache
+            ByteArray key = ByteArray.of(tx.getHash());
+            if (processedTxs.containsKey(key)) {
+                continue;
+            }
 
             if (tx.validate() && processTransaction(tx, true) >= 1) {
                 // exit after one valid transaction
                 return;
             }
+
+            processedTxs.put(key, null);
         }
     }
 
