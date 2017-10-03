@@ -371,12 +371,16 @@ public class SemuxBFT implements Consensus {
      * Enter the FINALIZE state
      */
     protected void enterFinalize() {
+        // make sure we only enter FINALIZE state once per height
+        if (finalized) {
+            return;
+        }
+        finalized = true;
+
         state = State.FINALIZE;
         timer.timeout(Config.BFT_FINALIZE_TIMEOUT);
         logger.info("Entered finalize: pre_commit votes = {}, commit votes = {}, block ready = {}", precommitVotes,
                 commitVotes, proposal != null);
-
-        finalized = true;
 
         byte[] blockHash = precommitVotes.isAnyApproved();
         if (blockHash != null && proposal != null && Arrays.equals(blockHash, proposal.getBlock().getHash())) {
@@ -503,9 +507,7 @@ public class SemuxBFT implements Consensus {
                 added = commitVotes.addVote(v);
                 if (commitVotes.isAnyApproved() != null) {
                     // skip COMMIT state time out if +2/3 commit votes
-                    if (!finalized) {
-                        enterFinalize();
-                    }
+                    enterFinalize();
                 }
                 break;
             }
@@ -539,9 +541,7 @@ public class SemuxBFT implements Consensus {
             }
             break;
         case COMMIT:
-            if (!finalized) {
-                enterFinalize();
-            }
+            enterFinalize();
             break;
         case FINALIZE:
             enterNewHeight();
