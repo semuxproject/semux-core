@@ -35,7 +35,7 @@ public class CorePerformance {
             long fee = Config.MIN_DELEGATE_FEE;
             long nonce = 1 + i;
             long timestamp = System.currentTimeMillis();
-            byte[] data = {};
+            byte[] data = Bytes.random(128);
             Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
             tx.sign(key);
 

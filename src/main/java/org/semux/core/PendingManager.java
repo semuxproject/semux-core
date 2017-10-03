@@ -54,7 +54,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         }
     };
 
-    private static final int CACHE_SIZE = 100 * 1024;
+    private static final int CACHE_SIZE = 64 * 1024;
     private static final int MAX_NONCE_JUMP = 1024;
 
     private Blockchain chain;
@@ -250,6 +250,8 @@ public class PendingManager implements Runnable, BlockchainListener {
         Transaction tx;
 
         while (poolMap.size() < 2 * Config.MAX_BLOCK_SIZE && (tx = queue.poll()) != null) {
+            // filter by cache
+
             if (tx.validate() && processTransaction(tx, true) >= 1) {
                 // exit after one valid transaction
                 return;
