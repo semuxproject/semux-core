@@ -155,7 +155,7 @@ public class Config {
     /**
      * Version of this client.
      */
-    public static String CLIENT_VERSION = "1.0.12";
+    public static String CLIENT_VERSION = "1.0.13";
 
     /***
      * Full name of this client.
