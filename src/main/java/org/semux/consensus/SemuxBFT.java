@@ -124,12 +124,12 @@ public class SemuxBFT implements Consensus {
      */
     private void sync(long target) {
         if (status == Status.RUNNING) {
+            // change status
+            status = Status.SYNCING;
+            
             // reset votes, timer, and events
             resetVotes();
             resetTimerAndEvents();
-
-            // change status
-            status = Status.SYNCING;
 
             // start syncing
             sync.start(target);
@@ -682,6 +682,7 @@ public class SemuxBFT implements Consensus {
      */
     protected void resetTimerAndEvents() {
         timer.reset();
+        events.clear();
     }
 
     /**
