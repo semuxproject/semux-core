@@ -126,7 +126,7 @@ public class SemuxBFT implements Consensus {
         if (status == Status.RUNNING) {
             // change status
             status = Status.SYNCING;
-            
+
             // reset votes, timer, and events
             resetVotes();
             resetTimerAndEvents();
@@ -264,6 +264,11 @@ public class SemuxBFT implements Consensus {
      * Enter the PROPOSE state
      */
     protected void enterPropose() {
+        if (finalized) {
+            logger.error("Entering propose state after being finalized", new RuntimeException());
+            enterNewHeight();
+        }
+
         state = State.PROPOSE;
         timer.timeout(Config.BFT_PROPOSE_TIMEOUT);
 
