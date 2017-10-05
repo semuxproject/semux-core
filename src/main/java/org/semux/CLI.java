@@ -101,7 +101,7 @@ public class CLI {
 
     private static void printUsage() {
         System.out.println("===============================================================");
-        System.out.println(Config.CLIENT_FULL_NAME);
+        System.out.println(Config.getClientId(true));
         System.out.println("===============================================================\n");
         System.out.println("Usage:");
         System.out.println("  ./semux.sh --cli [options] or semux.bat [options]\n");

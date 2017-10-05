@@ -130,7 +130,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
             break;
         }
         case ABOUT: {
-            JOptionPane.showMessageDialog(frame, Config.CLIENT_FULL_NAME);
+            JOptionPane.showMessageDialog(frame, Config.getClientId(true));
             break;
         }
         default:

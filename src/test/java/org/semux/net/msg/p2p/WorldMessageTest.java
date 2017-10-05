@@ -13,7 +13,8 @@ public class WorldMessageTest {
     @Test
     public void TestIsValid() {
         EdDSA key = new EdDSA();
-        Peer peer = new Peer("127.0.0.1", 5161, Config.P2P_VERSION, Config.getClientId(), key.toAddressString(), 2);
+        Peer peer = new Peer("127.0.0.1", 5161, Config.P2P_VERSION, Config.getClientId(false), key.toAddressString(),
+                2);
 
         WorldMessage msg = new WorldMessage(peer, key);
         assertTrue(msg.isValid());

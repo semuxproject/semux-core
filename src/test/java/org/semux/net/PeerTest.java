@@ -19,7 +19,7 @@ public class PeerTest {
         String ip = "127.0.0.1";
         int port = 1234;
         short p2pVersion = 2;
-        String clientId = Config.getClientId();
+        String clientId = Config.getClientId(false);
         String peerId = new EdDSA().toAddressString();
         long latestBlockNumber = 1;
 

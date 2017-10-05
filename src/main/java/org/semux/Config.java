@@ -155,12 +155,7 @@ public class Config {
     /**
      * Version of this client.
      */
-    public static String CLIENT_VERSION = "1.0.13";
-
-    /***
-     * Full name of this client.
-     */
-    public static String CLIENT_FULL_NAME = "Semux v" + CLIENT_VERSION + " Beta";
+    public static String CLIENT_VERSION = "1.0.0-beta";
 
     // =========================
     // Crypto
@@ -340,9 +335,13 @@ public class Config {
      * 
      * @return
      */
-    public static String getClientId() {
-        return String.format("%s/v%s/%s/%s", CLIENT_NAME, CLIENT_VERSION, SystemUtil.getOSName(),
-                SystemUtil.getOSArch());
+    public static String getClientId(boolean humanReadable) {
+        if (humanReadable) {
+            return String.format("%s v%s", CLIENT_NAME, CLIENT_VERSION);
+        } else {
+            return String.format("%s/v%s/%s/%s", CLIENT_NAME, CLIENT_VERSION, SystemUtil.getOSName(),
+                    SystemUtil.getOSArch());
+        }
     }
 
     /**

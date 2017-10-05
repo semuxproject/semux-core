@@ -98,7 +98,7 @@ public class Kernel {
         // ====================================
         // initialization
         // ====================================
-        logger.info("Client: {}", Config.CLIENT_FULL_NAME);
+        logger.info(Config.getClientId(true));
         logger.info("System booting up: network = {}, coinbase = {}", Config.NETWORK_ID, coinbase);
 
         DBFactory dbFactory = new DBFactory() {

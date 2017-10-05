@@ -93,7 +93,7 @@ public class APIHandler {
             switch (cmd) {
             case GET_INFO: {
                 JSONObject obj = new JSONObject();
-                obj.put("clientId", Config.getClientId());
+                obj.put("clientId", Config.getClientId(false));
                 obj.put("coinbase", HEX + client.getCoinbase());
                 obj.put("latestBlockNumber", chain.getLatestBlockNumber());
                 obj.put("latestBlockHash", HEX + Hex.encode(chain.getLatestBlockHash()));

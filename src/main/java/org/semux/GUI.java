@@ -166,7 +166,7 @@ public class GUI {
                         for (Object str : txt.getStrings()) {
                             String version = str.toString();
 
-                            if (SystemUtil.versionCompare(Config.CLIENT_VERSION, version) < 0) {
+                            if (SystemUtil.compareVersion(Config.CLIENT_VERSION, version) < 0) {
                                 JOptionPane.showMessageDialog(null, "Your wallet need to be upgraded!");
                                 System.exit(-1);
                             }
