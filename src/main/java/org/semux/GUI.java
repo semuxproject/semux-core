@@ -153,28 +153,34 @@ public class GUI {
 
         // start version check
         new Thread(() -> {
-            try {
-                String domain = "version.semux.org";
-                Lookup lookup = new Lookup(domain, Type.TXT);
-                lookup.setResolver(new SimpleResolver());
-                lookup.setCache(null);
-                Record[] records = lookup.run();
+            while (true) {
+                try {
+                    Thread.sleep(5 * 60 * 1000);
 
-                if (lookup.getResult() == Lookup.SUCCESSFUL) {
-                    for (Record record : records) {
-                        TXTRecord txt = (TXTRecord) record;
-                        for (Object str : txt.getStrings()) {
-                            String version = str.toString();
+                    String domain = "version.semux.org";
+                    Lookup lookup = new Lookup(domain, Type.TXT);
+                    lookup.setResolver(new SimpleResolver());
+                    lookup.setCache(null);
+                    Record[] records = lookup.run();
 
-                            if (SystemUtil.compareVersion(Config.CLIENT_VERSION, version) < 0) {
-                                JOptionPane.showMessageDialog(null, "Your wallet need to be upgraded!");
-                                System.exit(-1);
+                    if (lookup.getResult() == Lookup.SUCCESSFUL) {
+                        for (Record record : records) {
+                            TXTRecord txt = (TXTRecord) record;
+                            for (Object str : txt.getStrings()) {
+                                String version = str.toString();
+
+                                if (SystemUtil.compareVersion(Config.CLIENT_VERSION, version) < 0) {
+                                    JOptionPane.showMessageDialog(null, "Your wallet need to be upgraded!");
+                                    System.exit(-1);
+                                }
                             }
                         }
                     }
+                } catch (TextParseException | UnknownHostException e) {
+                    logger.debug("Failed to get min client version");
+                } catch (InterruptedException e) {
+                    break;
                 }
-            } catch (TextParseException | UnknownHostException e) {
-                logger.debug("Failed to get min client version");
             }
         }, "gui-version").start();
     }
