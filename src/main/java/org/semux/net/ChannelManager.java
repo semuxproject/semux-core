@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections4.map.LRUMap;
 import org.semux.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +26,8 @@ public class ChannelManager {
 
     private static final Logger logger = LoggerFactory.getLogger(ChannelManager.class);
 
-    private static final long BLACK_LIST_EXPIRE = 10 * 1000; // 10 seconds
-
     private Map<InetSocketAddress, Channel> channels = new HashMap<>();
     private Map<String, Channel> activeChannels = new HashMap<>();
-
-    private LRUMap<String, Long> blacklist = new LRUMap<>(5 * 1024);
 
     /**
      * Creates a channel manager instance.
@@ -47,14 +42,7 @@ public class ChannelManager {
      * @return
      */
     public synchronized boolean isBlocked(InetSocketAddress address) {
-        if (Config.NETWORK_ID == 0) {
-            return false;
-        }
-
-        String k = address.getAddress().getHostAddress();
-        Long v = blacklist.get(k);
-
-        return v != null && v + BLACK_LIST_EXPIRE < System.currentTimeMillis();
+        return Config.NET_BLACKLIST.contains(address.getAddress().getHostAddress());
     }
 
     /**
@@ -96,9 +84,6 @@ public class ChannelManager {
         logger.debug("Channel added: remoteAddress = {}:{}", ch.getRemoteIp(), ch.getRemotePort());
 
         channels.put(ch.getRemoteAddress(), ch);
-
-        // TODO: is one connection per IP reasonable?
-        blacklist.put(ch.getRemoteIp(), System.currentTimeMillis());
     }
 
     /**
