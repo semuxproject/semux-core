@@ -61,7 +61,7 @@ public class SemuxSync implements Sync {
 
     private static final int MAX_UNFINISHED_JOBS = 16;
 
-    private static final long MAX_DOWNLOAD_TIME = 30 * 1000;
+    private static final long MAX_DOWNLOAD_TIME = 60 * 1000; // 1 minute
 
     private static final int MAX_PENDING_BLOCKS = 256;
 
@@ -196,6 +196,7 @@ public class SemuxSync implements Sync {
 
         synchronized (lock) {
             // filter all expired tasks
+            boolean hasExpired = false;
             long now = System.currentTimeMillis();
             Iterator<Entry<Long, Long>> itr = toComplete.entrySet().iterator();
             while (itr.hasNext()) {
@@ -205,11 +206,12 @@ public class SemuxSync implements Sync {
                     logger.debug("Downloading of block #{} has expired", entry.getKey());
                     toDownload.add(entry.getKey());
                     itr.remove();
+                    hasExpired = true;
                 }
             }
 
             // quit if too many unprocessed blocks
-            if (toProcess.size() > MAX_PENDING_BLOCKS) {
+            if (!hasExpired && toProcess.size() > MAX_PENDING_BLOCKS) {
                 return;
             }
 
