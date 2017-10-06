@@ -155,7 +155,7 @@ public class Config {
     /**
      * Version of this client.
      */
-    public static String CLIENT_VERSION = "1.0.0-beta";
+    public static String CLIENT_VERSION = "1.0.0-beta.1";
 
     // =========================
     // Crypto
