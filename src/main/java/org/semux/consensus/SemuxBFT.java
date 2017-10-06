@@ -264,11 +264,6 @@ public class SemuxBFT implements Consensus {
      * Enter the PROPOSE state
      */
     protected void enterPropose() {
-        if (finalized) {
-            logger.error("Entering propose state after being finalized", new RuntimeException());
-            enterNewHeight();
-        }
-
         state = State.PROPOSE;
         timer.timeout(Config.BFT_PROPOSE_TIMEOUT);
 
@@ -311,7 +306,8 @@ public class SemuxBFT implements Consensus {
     protected void enterValidate() {
         state = State.VALIDATE;
         timer.timeout(Config.BFT_VALIDATE_TIMEOUT);
-        logger.info("Entered validate: proposal ready = {}", proposal != null);
+        logger.info("Entered validate: votes = {} {} {}, proposal = {}", validateVotes, precommitVotes, commitVotes,
+                proposal != null);
 
         boolean valid = false;
         if (proposal != null) {
@@ -337,7 +333,8 @@ public class SemuxBFT implements Consensus {
     protected void enterPreCommit() {
         state = State.PRE_COMMIT;
         timer.timeout(Config.BFT_PRE_COMMIT_TIMEOUT);
-        logger.info("Entered pre_commit: validate votes = {}, pre-commit votes = {}", validateVotes, precommitVotes);
+        logger.info("Entered pre_commit: votes = {} {} {}, proposal = {}", validateVotes, precommitVotes, commitVotes,
+                proposal != null);
 
         // vote YES as long as +2/3 validators received a valid block proposal
         byte[] blockHash = validateVotes.isAnyApproved();
@@ -356,7 +353,8 @@ public class SemuxBFT implements Consensus {
     protected void enterCommit() {
         state = State.COMMIT;
         timer.timeout(Config.BFT_COMMIT_TIMEOUT);
-        logger.info("Entered commit: pre_commit votes = {}", precommitVotes);
+        logger.info("Entered commit: votes = {} {} {}, proposal = {}", validateVotes, precommitVotes, commitVotes,
+                proposal != null);
 
         byte[] blockHash = precommitVotes.isAnyApproved();
         if (blockHash == null) {
@@ -384,8 +382,8 @@ public class SemuxBFT implements Consensus {
 
         state = State.FINALIZE;
         timer.timeout(Config.BFT_FINALIZE_TIMEOUT);
-        logger.info("Entered finalize: pre_commit votes = {}, commit votes = {}, block ready = {}", precommitVotes,
-                commitVotes, proposal != null);
+        logger.info("Entered finalize: votes = {} {} {}, proposal = {}", validateVotes, precommitVotes, commitVotes,
+                proposal != null);
 
         byte[] blockHash = precommitVotes.isAnyApproved();
         if (blockHash != null && proposal != null && Arrays.equals(blockHash, proposal.getBlock().getHash())) {
@@ -430,7 +428,8 @@ public class SemuxBFT implements Consensus {
     protected void onNewView(Proof p) {
         logger.trace("On new_view: {}", p);
 
-        if (p.getHeight() == height && p.getView() > view) {
+        if (p.getHeight() == height && p.getView() > view // larger view
+                && state != State.COMMIT && state != State.FINALIZE) {// not in commit state
 
             // check proof-of-unlock
             VoteSet vs = new VoteSet(VoteType.PRECOMMIT, p.getHeight(), p.getView() - 1, validators);

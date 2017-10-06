@@ -203,6 +203,6 @@ public class VoteSet {
         for (Map<String, Vote> map : approvals.values()) {
             count = Math.max(count, map.size());
         }
-        return "[yes=" + count + ", no=" + rejections.size() + "]";
+        return "[" + count + ", " + rejections.size() + "]";
     }
 }
