@@ -63,7 +63,7 @@ public class SemuxSync implements Sync {
 
     private static final long MAX_DOWNLOAD_TIME = 30 * 1000;
 
-    private static final int MAX_PENDING_BLOCKS = 1024;
+    private static final int MAX_PENDING_BLOCKS = 256;
 
     private Blockchain chain;
     private ChannelManager channelMgr;
