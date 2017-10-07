@@ -62,7 +62,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(25);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 800, 0.1, 0.55, 0.2, 0.15);
+        SwingUtil.setColumnWidths(table, 800, 0.1, 0.55, 0.15, 0.2);
         SwingUtil.setColumnAlignments(table, false, false, true, true);
 
         table.addMouseListener(new MouseAdapter() {
@@ -148,7 +148,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             case 2:
                 return String.format("%.3f SEM", tx.getValue() / (double) Unit.SEM);
             case 3:
-                SimpleDateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
+                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 return df.format(new Date(tx.getTimestamp()));
             default:
                 return null;

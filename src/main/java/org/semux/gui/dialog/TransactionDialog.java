@@ -1,6 +1,7 @@
 package org.semux.gui.dialog;
 
 import java.awt.Font;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.swing.GroupLayout;
@@ -45,7 +46,8 @@ public class TransactionDialog extends JDialog {
         JLabel value = new JLabel(tx.getValue() / Unit.SEM + " SEM");
         JLabel fee = new JLabel(tx.getFee() / Unit.SEM + " SEM");
         JLabel nonce = new JLabel(Long.toString(tx.getNonce()));
-        JLabel timestamp = new JLabel(new Date(tx.getTimestamp()).toString());
+        JLabel timestamp = new JLabel(
+                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(tx.getTimestamp()).toString()));
         JTextArea data = new JTextArea("0x" + Hex.encode(tx.getData()));
         data.setEditable(false);
 
