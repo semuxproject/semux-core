@@ -59,11 +59,11 @@ public class SemuxSync implements Sync {
         }
     };
 
-    private static final int MAX_UNFINISHED_JOBS = 16;
+    private static final int MAX_UNFINISHED_JOBS = 24;
 
     private static final long MAX_DOWNLOAD_TIME = 60 * 1000; // 1 minute
 
-    private static final int MAX_PENDING_BLOCKS = 256;
+    private static final int MAX_PENDING_BLOCKS = 512;
 
     private Blockchain chain;
     private ChannelManager channelMgr;
@@ -104,8 +104,6 @@ public class SemuxSync implements Sync {
     public void init(Blockchain chain, ChannelManager channelMgr) {
         this.chain = chain;
         this.channelMgr = channelMgr;
-
-        this.exec = Executors.newSingleThreadScheduledExecutor(factory);
     }
 
     @Override
@@ -127,6 +125,7 @@ public class SemuxSync implements Sync {
             }
 
             // [2] start tasks
+            exec = Executors.newSingleThreadScheduledExecutor(factory);
             download = exec.scheduleAtFixedRate(() -> {
                 download();
             }, 0, 50, TimeUnit.MILLISECONDS);
@@ -146,15 +145,26 @@ public class SemuxSync implements Sync {
             // [4] cancel tasks
             download.cancel(true);
             process.cancel(false);
-            logger.info("Sync manager stopped");
+
+            // [5] shutdown executor
+            exec.shutdown();
+            try {
+                exec.awaitTermination(1, TimeUnit.MINUTES);
+                logger.info("Sync manager stopped");
+
+            } catch (InterruptedException e) {
+                logger.error("Executors were not properly shut down");
+            }
         }
     }
 
     @Override
     public void stop() {
-        isRunning = false;
-        synchronized (done) {
-            done.notifyAll();
+        if (isRunning()) {
+            isRunning = false;
+            synchronized (done) {
+                done.notifyAll();
+            }
         }
     }
 
@@ -210,25 +220,26 @@ public class SemuxSync implements Sync {
                 }
             }
 
-            // quit if too many unprocessed blocks
+            // quit if too many pending blocks
             if (!hasExpired && toProcess.size() > MAX_PENDING_BLOCKS) {
                 return;
             }
 
-            for (Channel c : channels) {
+            int redundancy = 2;
+            for (int i = 0; i + redundancy <= channels.size(); i += redundancy) {
                 // quit if no more tasks or two many unfinished jobs
                 if (toDownload.isEmpty() || toComplete.size() > MAX_UNFINISHED_JOBS) {
                     break;
                 }
 
                 Long task = toDownload.first();
-                if (c.getRemotePeer().getLatestBlockNumber() < task) {
-                    // skip this peer if it is at a lower height
-                    continue;
+                for (int j = 0; j < redundancy; j++) {
+                    Channel c = channels.get(i + j);
+                    if (c.getRemotePeer().getLatestBlockNumber() >= task) {
+                        logger.debug("Request block #{} from cid = {}", task, c.getId());
+                        c.getMessageQueue().sendMessage(new GetBlockMessage(task));
+                    }
                 }
-
-                logger.debug("Request block #{} from cid = {}", task, c.getId());
-                c.getMessageQueue().sendMessage(new GetBlockMessage(task));
 
                 toDownload.remove(task);
                 toComplete.put(task, System.currentTimeMillis());
@@ -370,7 +381,7 @@ public class SemuxSync implements Sync {
                 lock.unlock();
             }
         } catch (Exception e) {
-            logger.info("Exception in sync block validation", e);
+            logger.info("Exception in block validation", e);
             return false;
         }
 
