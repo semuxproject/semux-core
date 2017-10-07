@@ -72,7 +72,6 @@ public class SemuxBFT implements Consensus {
     private int view;
     private Proof proof;
     private Proposal proposal;
-    private boolean finalized;
 
     private volatile List<String> validators;
     private volatile List<Channel> activeValidators;
@@ -239,7 +238,6 @@ public class SemuxBFT implements Consensus {
         view = 0;
         proof = new Proof(height, view);
         proposal = null;
-        finalized = false;
 
         // update validators
         updateValidators();
@@ -253,7 +251,7 @@ public class SemuxBFT implements Consensus {
             timer.timeout(Config.BFT_NEW_HEIGHT_TIMEOUT);
         }
 
-        // Broadcast NEW_HEIGHT messages to all peers.
+        // Broadcast NEW_HEIGHT messages to ALL peers.
         BFTNewHeightMessage msg = new BFTNewHeightMessage(height);
         for (Channel c : channelMgr.getActiveChannels()) {
             c.getMessageQueue().sendMessage(msg);
@@ -292,11 +290,9 @@ public class SemuxBFT implements Consensus {
         }
 
         // broadcast NEW_VIEW messages.
-        if (view > 0) {
-            BFTNewViewMessage msg = new BFTNewViewMessage(proof);
-            for (Channel c : activeValidators) {
-                c.getMessageQueue().sendMessage(msg);
-            }
+        BFTNewViewMessage msg = new BFTNewViewMessage(proof);
+        for (Channel c : activeValidators) {
+            c.getMessageQueue().sendMessage(msg);
         }
     }
 
@@ -306,8 +302,8 @@ public class SemuxBFT implements Consensus {
     protected void enterValidate() {
         state = State.VALIDATE;
         timer.timeout(Config.BFT_VALIDATE_TIMEOUT);
-        logger.info("Entered validate: votes = {} {} {}, proposal = {}", validateVotes, precommitVotes, commitVotes,
-                proposal != null);
+        logger.info("Entered validate: proposal = {}, votes = {} {} {}", proposal != null, validateVotes,
+                precommitVotes, commitVotes);
 
         boolean valid = false;
         if (proposal != null) {
@@ -333,8 +329,8 @@ public class SemuxBFT implements Consensus {
     protected void enterPreCommit() {
         state = State.PRE_COMMIT;
         timer.timeout(Config.BFT_PRE_COMMIT_TIMEOUT);
-        logger.info("Entered pre_commit: votes = {} {} {}, proposal = {}", validateVotes, precommitVotes, commitVotes,
-                proposal != null);
+        logger.info("Entered pre_commit: proposal = {}, votes = {} {} {}", proposal != null, validateVotes,
+                precommitVotes, commitVotes);
 
         // vote YES as long as +2/3 validators received a valid block proposal
         byte[] blockHash = validateVotes.isAnyApproved();
@@ -353,8 +349,8 @@ public class SemuxBFT implements Consensus {
     protected void enterCommit() {
         state = State.COMMIT;
         timer.timeout(Config.BFT_COMMIT_TIMEOUT);
-        logger.info("Entered commit: votes = {} {} {}, proposal = {}", validateVotes, precommitVotes, commitVotes,
-                proposal != null);
+        logger.info("Entered commit: proposal = {}, votes = {} {} {}", proposal != null, validateVotes, precommitVotes,
+                commitVotes);
 
         byte[] blockHash = precommitVotes.isAnyApproved();
         if (blockHash == null) {
@@ -375,15 +371,14 @@ public class SemuxBFT implements Consensus {
      */
     protected void enterFinalize() {
         // make sure we only enter FINALIZE state once per height
-        if (finalized) {
+        if (state == State.FINALIZE) {
             return;
         }
-        finalized = true;
 
         state = State.FINALIZE;
         timer.timeout(Config.BFT_FINALIZE_TIMEOUT);
-        logger.info("Entered finalize: votes = {} {} {}, proposal = {}", validateVotes, precommitVotes, commitVotes,
-                proposal != null);
+        logger.info("Entered finalize: proposal = {}, votes = {} {} {}", proposal != null, validateVotes,
+                precommitVotes, commitVotes);
 
         byte[] blockHash = precommitVotes.isAnyApproved();
         if (blockHash != null && proposal != null && Arrays.equals(blockHash, proposal.getBlock().getHash())) {
@@ -404,6 +399,17 @@ public class SemuxBFT implements Consensus {
         } else {
             sync(height + 1);
         }
+    }
+
+    protected void jumpToView(int view, Proof proof) {
+        this.view = view;
+        this.proof = proof;
+        this.proposal = null;
+        resetVotes();
+        resetTimerAndEvents();
+
+        // enter PROPOSE state
+        enterPropose();
     }
 
     protected void onNewHeight(long h) {
@@ -428,8 +434,8 @@ public class SemuxBFT implements Consensus {
     protected void onNewView(Proof p) {
         logger.trace("On new_view: {}", p);
 
-        if (p.getHeight() == height && p.getView() > view // larger view
-                && state != State.COMMIT && state != State.FINALIZE) {// not in commit state
+        if (p.getHeight() == height // at same height
+                && p.getView() > view && state != State.COMMIT && state != State.FINALIZE) {// larger view
 
             // check proof-of-unlock
             VoteSet vs = new VoteSet(VoteType.PRECOMMIT, p.getHeight(), p.getView() - 1, validators);
@@ -439,24 +445,19 @@ public class SemuxBFT implements Consensus {
             }
 
             // switch view
-            view = p.getView();
-            proof = p;
-            proposal = null;
-            resetVotes();
-            resetTimerAndEvents();
-
-            // jump into propose
-            enterPropose();
+            logger.debug("Switching view because of NEW_VIEW message");
+            jumpToView(p.getView(), p);
         }
     }
 
     protected void onProposal(Proposal p) {
         logger.trace("On proposal: {}", p);
 
-        if (p.getHeight() == height //
-                && (p.getView() > view || p.getView() == view && proposal == null) //
+        if (p.getHeight() == height // at the same height
+                && (p.getView() == view && proposal == null && state == State.PROPOSE // expecting a proposal
+                        || p.getView() > view && state != State.COMMIT && state != State.FINALIZE) // larger view
                 && isFromValidator(p.getSignature()) //
-                && isPrimary(p.getView(), p.getSignature().getPublicKey())) {
+                && isPrimary(p.getView(), p.getSignature().getPublicKey())) {//
 
             // check proof-of-unlock
             if (p.getView() != 0) {
@@ -474,19 +475,12 @@ public class SemuxBFT implements Consensus {
             BFTProposalMessage msg = new BFTProposalMessage(p);
             broadcaster.broadcast(msg);
 
-            if (view == p.getView() && state == State.PROPOSE) {
+            if (view == p.getView()) {
                 proposal = p;
             } else {
-                // change height and view
-                height = p.getHeight();
-                view = p.getView();
-                proof = p.getProof();
-                proposal = p;
-                resetVotes();
-                resetTimerAndEvents();
-
-                // jump into propose
-                enterPropose();
+                // switch view
+                logger.debug("Switching view because of PROPOSE message");
+                jumpToView(p.getView(), p.getProof());
             }
         }
     }
