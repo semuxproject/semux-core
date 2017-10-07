@@ -23,6 +23,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import org.semux.core.Block;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
@@ -41,6 +42,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private Model model;
 
     private JLabel blockNum;
+    private JLabel blockTime;
     private JLabel coinbase;
     private JLabel status;
     private JLabel balance;
@@ -58,13 +60,19 @@ public class HomePanel extends JPanel implements ActionListener {
         overview.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
                 "Overview", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        overview.setLayout(new GridLayout(5, 2, 0, 0));
+        overview.setLayout(new GridLayout(6, 2, 0, 0));
 
         JLabel labelBlockNum = new JLabel("Block #:");
         overview.add(labelBlockNum);
 
         blockNum = new JLabel("");
         overview.add(blockNum);
+
+        JLabel lblBlockTime = new JLabel("Block Time:");
+        overview.add(lblBlockTime);
+
+        blockTime = new JLabel("");
+        overview.add(blockTime);
 
         JLabel labelCoinbase = new JLabel("Coinbase:");
         overview.add(labelCoinbase);
@@ -110,9 +118,9 @@ public class HomePanel extends JPanel implements ActionListener {
                             .addComponent(lblPeers)
                             .addPreferredGap(ComponentPlacement.UNRELATED)
                             .addComponent(peers))
-                        .addComponent(overview, GroupLayout.PREFERRED_SIZE, 294, GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(ComponentPlacement.UNRELATED)
-                    .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 478, Short.MAX_VALUE))
+                        .addComponent(overview, GroupLayout.PREFERRED_SIZE, 324, GroupLayout.PREFERRED_SIZE))
+                    .addGap(18)
+                    .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.TRAILING)
@@ -206,7 +214,9 @@ public class HomePanel extends JPanel implements ActionListener {
     }
 
     private void refresh() {
-        this.blockNum.setText(Long.toString(model.getLatestBlockNumber()));
+        Block block = model.getLatestBlock();
+        this.blockNum.setText(Long.toString(block.getNumber()));
+        this.blockTime.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(block.getTimestamp())));
         this.coinbase.setText("Account #" + model.getCoinbase());
         this.status.setText(model.isDelegate() ? "Delegate" : "Normal");
         this.balance.setText(String.format("%.3f SEM", model.getTotalBalance() / (double) Unit.SEM));

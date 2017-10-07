@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.semux.core.Block;
 import org.semux.core.Delegate;
 import org.semux.core.Transaction;
 import org.semux.crypto.EdDSA;
@@ -22,7 +23,7 @@ public class Model {
 
     private List<ActionListener> listeners = new CopyOnWriteArrayList<>();
 
-    private long latestBlockNumber;
+    private Block latestBlock;
 
     private int coinbase;
     private boolean isDelegate;
@@ -72,21 +73,21 @@ public class Model {
     }
 
     /**
-     * Get the latested block number.
+     * Get the latest block.
      * 
      * @return
      */
-    public long getLatestBlockNumber() {
-        return latestBlockNumber;
+    public Block getLatestBlock() {
+        return latestBlock;
     }
 
     /**
-     * Set the latest block number.
+     * Set the latest block.
      * 
-     * @param latestBlockNumber
+     * @param latestBlock
      */
-    public void setLatestBlockNumber(long latestBlockNumber) {
-        this.latestBlockNumber = latestBlockNumber;
+    public void setLatestBlock(Block latestBlock) {
+        this.latestBlock = latestBlock;
     }
 
     /**

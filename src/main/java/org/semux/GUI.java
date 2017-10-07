@@ -194,7 +194,7 @@ public class GUI {
 
         // reset the model.
         model.init(wallet.getAccounts());
-        model.setLatestBlockNumber(block.getNumber());
+        model.setLatestBlock(block);
         model.setDelegate(ds.getDelegateByAddress(kernel.getCoinbase().toAddress()) != null);
         for (Model.Account ma : model.getAccounts()) {
             Account a = as.getAccount(ma.getKey().toAddress());
