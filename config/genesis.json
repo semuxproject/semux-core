@@ -5,13 +5,13 @@
     "timestamp": 0,
     "data": "semux",
     "premine": {
-        "0xc7b0d7a7f78730c873de4271d7557722af9810df": {
-            "balance": 10000000
-        },
         "0x9e8741bde30be23dca416b76683390b2cb6775ab": {
             "balance": 10000000
         },
         "0x49f1696dda5910a28eca708b36f9f87a74e24cea": {
+            "balance": 10000000
+        },
+        "0xc7b0d7a7f78730c873de4271d7557722af9810df": {
             "balance": 10000000
         }
     },
