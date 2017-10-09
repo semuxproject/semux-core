@@ -7,7 +7,6 @@
 package org.semux.net;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -227,7 +226,7 @@ public class NodeManager {
                     int port = dec.readInt();
                     nodes.add(new InetSocketAddress(host, port));
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.debug("Failed to parse peer list from {}" + f, e);
             }
         }
@@ -254,7 +253,7 @@ public class NodeManager {
 
             IOUtil.writeToFile(enc.toBytes(), f);
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.debug("Failed to write peer list into disk", e);
         }
 
