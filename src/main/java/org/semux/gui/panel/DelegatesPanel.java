@@ -44,7 +44,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "Status", "Name", "Address", "Votes", "From Me", "Connected" };
+    private static String[] columnNames = { "Status", "Name", "Address", "Total Votes", "Votes From Me" };
 
     private Model model;
 
@@ -68,8 +68,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(25);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 600, 0.06, 0.2, 0.4, 0.14, 0.1, 0.1);
-        SwingUtil.setColumnAlignments(table, false, false, false, true, true, true);
+        SwingUtil.setColumnWidths(table, 600, 0.1, 0.2, 0.35, 0.2, 0.15);
+        SwingUtil.setColumnAlignments(table, false, false, false, true, true);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
@@ -93,14 +93,13 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         groupLayout.setHorizontalGroup(
             groupLayout.createParallelGroup(Alignment.TRAILING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 660, Short.MAX_VALUE)
+                    .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 657, Short.MAX_VALUE)
                     .addGap(18)
-                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                        .addComponent(panel, Alignment.TRAILING, 0, 200, Short.MAX_VALUE)
-                        .addGroup(Alignment.TRAILING, groupLayout.createParallelGroup(Alignment.TRAILING, false)
-                            .addComponent(from, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(label, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE))
-                        .addComponent(panel2, GroupLayout.DEFAULT_SIZE, 202, Short.MAX_VALUE)))
+                    .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
+                        .addComponent(panel, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                        .addComponent(from, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(label, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                        .addComponent(panel2, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
@@ -112,7 +111,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     .addComponent(panel2, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
                     .addComponent(label)
-                    .addContainerGap(180, Short.MAX_VALUE))
+                    .addContainerGap(174, Short.MAX_VALUE))
                 .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 512, Short.MAX_VALUE)
         );
         setLayout(groupLayout); 
@@ -262,10 +261,6 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 return d.getVotes() / Unit.SEM;
             case 4:
                 return votesFromMe.get(row) / Unit.SEM;
-            case 5:
-                byte[] coinbase = model.getAccounts().get(model.getCoinbase()).getKey().toAddress();
-                return Arrays.equals(coinbase, d.getAddress())
-                        || model.getActivePeers().containsKey(Hex.encode(d.getAddress())) ? "Yes" : "No";
             default:
                 return null;
             }
