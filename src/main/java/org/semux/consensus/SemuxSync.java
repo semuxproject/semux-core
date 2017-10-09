@@ -59,9 +59,11 @@ public class SemuxSync implements Sync {
         }
     };
 
-    private static final int MAX_UNFINISHED_JOBS = 24;
+    private static final int BLOCK_REQUEST_REDUNDANCY = 1;
 
-    private static final long MAX_DOWNLOAD_TIME = 60 * 1000; // 1 minute
+    private static final int MAX_UNFINISHED_JOBS = 16;
+
+    private static final long MAX_DOWNLOAD_TIME = 30 * 1000; // 30 seconds
 
     private static final int MAX_PENDING_BLOCKS = 512;
 
@@ -202,7 +204,7 @@ public class SemuxSync implements Sync {
     private void download() {
         List<Channel> channels = channelMgr.getIdleChannels();
         Collections.shuffle(channels);
-        logger.trace("Idle peers = {}", channels.size());
+        logger.debug("Idle peers = {}", channels.size());
 
         synchronized (lock) {
             // filter all expired tasks
@@ -225,24 +227,27 @@ public class SemuxSync implements Sync {
                 return;
             }
 
-            int redundancy = 2;
-            for (int i = 0; i + redundancy <= channels.size(); i += redundancy) {
+            for (int i = 0; i + BLOCK_REQUEST_REDUNDANCY <= channels.size(); i += BLOCK_REQUEST_REDUNDANCY) {
                 // quit if no more tasks or two many unfinished jobs
                 if (toDownload.isEmpty() || toComplete.size() > MAX_UNFINISHED_JOBS) {
                     break;
                 }
 
                 Long task = toDownload.first();
-                for (int j = 0; j < redundancy; j++) {
+                boolean requested = false;
+                for (int j = 0; j < BLOCK_REQUEST_REDUNDANCY; j++) {
                     Channel c = channels.get(i + j);
                     if (c.getRemotePeer().getLatestBlockNumber() >= task) {
                         logger.debug("Request block #{} from cid = {}", task, c.getId());
                         c.getMessageQueue().sendMessage(new GetBlockMessage(task));
+                        requested = true;
                     }
                 }
 
-                toDownload.remove(task);
-                toComplete.put(task, System.currentTimeMillis());
+                if (requested) {
+                    toDownload.remove(task);
+                    toComplete.put(task, System.currentTimeMillis());
+                }
             }
         }
     }
