@@ -21,11 +21,12 @@ public class TransactionDialog extends JDialog {
     private static final long serialVersionUID = 1L;
 
     private JTextArea selectableText(String txt) {
-        JTextArea hash = new JTextArea(txt);
-        hash.setBackground(null);
-        hash.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        JTextArea c = new JTextArea(txt);
+        c.setBackground(null);
+        c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        c.setEditable(false);
 
-        return hash;
+        return c;
     }
 
     public TransactionDialog(JComponent parent, Transaction tx) {
@@ -39,16 +40,15 @@ public class TransactionDialog extends JDialog {
         JLabel lblTimestamp = new JLabel("Timestamp:");
         JLabel lblData = new JLabel("data:");
 
-        JTextArea hash = selectableText("0x" + Hex.encode(tx.getHash()));
+        JTextArea hash = selectableText(Hex.PREF + Hex.encode(tx.getHash()));
         JLabel type = new JLabel(tx.getType().name());
-        JTextArea from = selectableText("0x" + Hex.encode(tx.getFrom()));
-        JTextArea to = selectableText("0x" + Hex.encode(tx.getTo()));
+        JTextArea from = selectableText(Hex.PREF + Hex.encode(tx.getFrom()));
+        JTextArea to = selectableText(Hex.PREF + Hex.encode(tx.getTo()));
         JLabel value = new JLabel(tx.getValue() / Unit.SEM + " SEM");
         JLabel fee = new JLabel(tx.getFee() / Unit.SEM + " SEM");
         JLabel nonce = new JLabel(Long.toString(tx.getNonce()));
-        JLabel timestamp = new JLabel(
-                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(tx.getTimestamp()).toString()));
-        JTextArea data = new JTextArea("0x" + Hex.encode(tx.getData()));
+        JLabel timestamp = new JLabel(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(tx.getTimestamp())));
+        JTextArea data = new JTextArea(Hex.PREF + Hex.encode(tx.getData()));
         data.setEditable(false);
 
         // @formatter:off
@@ -77,7 +77,7 @@ public class TransactionDialog extends JDialog {
                         .addComponent(fee)
                         .addComponent(nonce)
                         .addComponent(timestamp)
-                        .addComponent(data, GroupLayout.PREFERRED_SIZE, 447, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(data, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap(19, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(

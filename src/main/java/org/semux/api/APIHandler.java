@@ -40,8 +40,6 @@ import io.netty.handler.codec.http.HttpHeaders;
  */
 public class APIHandler {
 
-    private static final String HEX = "0x";
-
     private Wallet wallet;
     private Blockchain chain;
     private ChannelManager channelMgr;
@@ -94,9 +92,9 @@ public class APIHandler {
             case GET_INFO: {
                 JSONObject obj = new JSONObject();
                 obj.put("clientId", Config.getClientId(false));
-                obj.put("coinbase", HEX + client.getCoinbase());
+                obj.put("coinbase", Hex.PREF + client.getCoinbase());
                 obj.put("latestBlockNumber", chain.getLatestBlockNumber());
-                obj.put("latestBlockHash", HEX + Hex.encode(chain.getLatestBlockHash()));
+                obj.put("latestBlockHash", Hex.PREF + Hex.encode(chain.getLatestBlockHash()));
                 obj.put("activePeers", channelMgr.getActivePeers().size());
                 obj.put("pendingTransactions", pendingMgr.getTransactions().size());
 
@@ -225,7 +223,7 @@ public class APIHandler {
                 List<String> validators = chain.getValidators();
                 JSONArray arr = new JSONArray();
                 for (String v : validators) {
-                    arr.put(HEX + v);
+                    arr.put(Hex.PREF + v);
                 }
                 return success(arr);
             }
@@ -271,7 +269,7 @@ public class APIHandler {
                     List<EdDSA> accounts = wallet.getAccounts();
                     JSONArray arr = new JSONArray();
                     for (EdDSA acc : accounts) {
-                        arr.put(HEX + acc.toAddressString());
+                        arr.put(Hex.PREF + acc.toAddressString());
                     }
                     return success(arr);
                 }
@@ -284,7 +282,7 @@ public class APIHandler {
                     EdDSA key = new EdDSA();
                     wallet.addAccount(key);
                     wallet.flush();
-                    return success(HEX + key.toAddressString());
+                    return success(Hex.PREF + key.toAddressString());
                 }
             }
             case TRANSFER:
@@ -365,7 +363,7 @@ public class APIHandler {
             tx.sign(from);
 
             if (pendingMgr.addTransactionSync(tx)) {
-                return success(HEX + Hex.encode(tx.getHash()));
+                return success(Hex.PREF + Hex.encode(tx.getHash()));
             } else {
                 return failure("Transaciton rejected by pending manager");
             }
@@ -387,17 +385,17 @@ public class APIHandler {
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         JSONObject obj = new JSONObject();
-        obj.put("hash", HEX + Hex.encode(block.getHash()));
+        obj.put("hash", Hex.PREF + Hex.encode(block.getHash()));
         obj.put("number", block.getNumber());
         obj.put("view", block.getView());
-        obj.put("coinbase", HEX + Hex.encode(block.getCoinbase()));
-        obj.put("prevHash", HEX + Hex.encode(block.getPrevHash()));
+        obj.put("coinbase", Hex.PREF + Hex.encode(block.getCoinbase()));
+        obj.put("prevHash", Hex.PREF + Hex.encode(block.getPrevHash()));
         obj.put("timestamp", block.getTimestamp());
         obj.put("date", df.format(new Date(block.getTimestamp())));
-        obj.put("transactionsRoot", HEX + Hex.encode(block.getTransactionsRoot()));
-        obj.put("resultsRoot", HEX + Hex.encode(block.getResultsRoot()));
-        obj.put("stateRoot", HEX + Hex.encode(block.getStateRoot()));
-        obj.put("data", HEX + Hex.encode(block.getData()));
+        obj.put("transactionsRoot", Hex.PREF + Hex.encode(block.getTransactionsRoot()));
+        obj.put("resultsRoot", Hex.PREF + Hex.encode(block.getResultsRoot()));
+        obj.put("stateRoot", Hex.PREF + Hex.encode(block.getStateRoot()));
+        obj.put("data", Hex.PREF + Hex.encode(block.getData()));
         JSONArray arr = new JSONArray();
         for (Transaction tx : block.getTransactions()) {
             arr.put(transactionToJson(tx));
@@ -420,16 +418,16 @@ public class APIHandler {
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         JSONObject obj = new JSONObject();
-        obj.put("hash", HEX + Hex.encode(tx.getHash()));
+        obj.put("hash", Hex.PREF + Hex.encode(tx.getHash()));
         obj.put("type", tx.getType().toString());
-        obj.put("from", HEX + Hex.encode(tx.getFrom()));
-        obj.put("to", HEX + Hex.encode(tx.getTo()));
+        obj.put("from", Hex.PREF + Hex.encode(tx.getFrom()));
+        obj.put("to", Hex.PREF + Hex.encode(tx.getTo()));
         obj.put("value", tx.getValue());
         obj.put("fee", tx.getFee());
         obj.put("nonce", tx.getNonce());
         obj.put("timestamp", tx.getTimestamp());
         obj.put("date", df.format(new Date(tx.getTimestamp())));
-        obj.put("data", HEX + Hex.encode(tx.getData()));
+        obj.put("data", Hex.PREF + Hex.encode(tx.getData()));
 
         return obj;
     }
@@ -446,7 +444,7 @@ public class APIHandler {
         }
 
         JSONObject obj = new JSONObject();
-        obj.put("address", HEX + Hex.encode(delegate.getAddress()));
+        obj.put("address", Hex.PREF + Hex.encode(delegate.getAddress()));
         obj.put("name", new String(delegate.getName()));
         obj.put("vote", delegate.getVotes());
 
@@ -463,7 +461,7 @@ public class APIHandler {
         obj.put("port", peer.getPort());
         obj.put("p2pVersion", peer.getP2pVersion());
         obj.put("clientId", peer.getClientId());
-        obj.put("peerId", HEX + peer.getPeerId());
+        obj.put("peerId", Hex.PREF + peer.getPeerId());
         obj.put("latestBlockNumber", peer.getLatestBlockNumber());
         obj.put("latency", peer.getLatency());
 

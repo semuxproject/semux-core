@@ -2,8 +2,11 @@ package org.semux.gui.panel;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,6 +40,7 @@ import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
+import org.semux.gui.dialog.DelegateDialog;
 import org.semux.utils.Bytes;
 import org.semux.utils.UnreachableException;
 
@@ -44,7 +48,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "Status", "Name", "Address", "Total Votes", "Votes From Me" };
+    private static String[] columnNames = { "Status", "Name", "Address", "Total Votes", "Votes from Me" };
 
     private Model model;
 
@@ -70,6 +74,21 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
         SwingUtil.setColumnWidths(table, 600, 0.1, 0.2, 0.35, 0.2, 0.15);
         SwingUtil.setColumnAlignments(table, false, false, false, true, true);
+
+        table.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent me) {
+                JTable table = (JTable) me.getSource();
+                Point p = me.getPoint();
+                int row = table.rowAtPoint(p);
+                if (me.getClickCount() == 2) {
+                    Delegate d = tableModel.getRow(row);
+                    if (d != null) {
+                        DelegateDialog dialog = new DelegateDialog(DelegatesPanel.this, d);
+                        dialog.setVisible(true);
+                    }
+                }
+            }
+        });
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));

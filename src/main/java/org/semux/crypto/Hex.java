@@ -11,6 +11,8 @@ package org.semux.crypto;
  */
 public class Hex {
 
+    public static final String PREF = "0x";
+
     private static final char[] intToHex = "0123456789abcdef".toCharArray();
     private static final int[] hexToInt = new int[128];
     static {
