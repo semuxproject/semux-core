@@ -27,7 +27,7 @@ public class DelegateDialog extends JDialog {
         return c;
     }
 
-    public DelegateDialog(JComponent parent, Delegate d) {
+    public DelegateDialog(JComponent parent, Delegate d, long v) {
 
         JLabel lblName = new JLabel("Name:");
         JLabel lblAddress = new JLabel("Address:");
@@ -41,7 +41,7 @@ public class DelegateDialog extends JDialog {
         JTextArea name = selectableText(d.getNameString());
         JTextArea address = selectableText(Hex.PREF + Hex.encode(d.getAddress()));
         JLabel totalVotes = new JLabel(Long.toString(d.getVotes() / Unit.SEM));
-        JLabel votesFromMe = new JLabel("0");
+        JLabel votesFromMe = new JLabel(Long.toString(v / Unit.SEM));
         JLabel registeredAt = new JLabel("Unavailable");
         JLabel numOfBlocksForged = new JLabel("Unavailable");
         JLabel numOfBlocksMissed = new JLabel("Unavailable");

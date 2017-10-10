@@ -29,6 +29,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Config;
 import org.semux.Kernel;
 import org.semux.core.Delegate;
@@ -83,9 +84,10 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 Point p = me.getPoint();
                 int row = table.rowAtPoint(p);
                 if (me.getClickCount() == 2) {
-                    Delegate d = tableModel.getRow(table.convertRowIndexToModel(row));
-                    if (d != null) {
-                        DelegateDialog dialog = new DelegateDialog(DelegatesPanel.this, d);
+                    Pair<Delegate, Long> pair = tableModel.getRow(table.convertRowIndexToModel(row));
+                    if (pair != null) {
+                        DelegateDialog dialog = new DelegateDialog(DelegatesPanel.this, pair.getLeft(),
+                                pair.getRight());
                         dialog.setVisible(true);
                     }
                 }
@@ -249,9 +251,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             this.fireTableDataChanged();
         }
 
-        public Delegate getRow(int row) {
+        public Pair<Delegate, Long> getRow(int row) {
             if (row >= 0 && row < delegates.size()) {
-                return delegates.get(row);
+                return Pair.of(delegates.get(row), votesFromMe.get(row));
             }
 
             return null;
@@ -394,7 +396,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private Delegate getSelectedDelegate() {
         int row = table.getSelectedRow();
-        return (row == -1) ? null : tableModel.getRow(table.convertRowIndexToModel(row));
+        return (row == -1) ? null : tableModel.getRow(table.convertRowIndexToModel(row)).getLeft();
     }
 
     private void refreshAccounts() {
