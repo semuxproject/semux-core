@@ -136,7 +136,22 @@ public class BlockchainImplTest {
         assertArrayEquals(tx.getHash(), list.get(0).getHash());
     }
 
-    private Blockchain createBlockchain() {
+    @Test
+    public void testValidatorStates() {
+        BlockchainImpl chain = createBlockchain();
+        byte[] address = Bytes.random(20);
+
+        assertEquals(0, chain.getNumberOfBlocksForged(address));
+        assertEquals(0, chain.getNumberOfBlocksMissed(address));
+        chain.updateValidatorStats(address, true);
+        assertEquals(1, chain.getNumberOfBlocksForged(address));
+        chain.updateValidatorStats(address, false);
+        assertEquals(1, chain.getNumberOfBlocksMissed(address));
+        chain.updateValidatorStats(address, true);
+        assertEquals(2, chain.getNumberOfBlocksForged(address));
+    }
+
+    private BlockchainImpl createBlockchain() {
         return new BlockchainImpl(MemoryDB.FACTORY);
     }
 

@@ -148,6 +148,23 @@ public interface Blockchain {
     public List<String> getValidators();
 
     /**
+     * Returns the number of blocks forged by the given delegate
+     * 
+     * @param address
+     *            delegate address
+     * @return
+     */
+    public long getNumberOfBlocksForged(byte[] address);
+
+    /**
+     * Returns the number of blocks missed by the given delegate.
+     * 
+     * @param address
+     * @return
+     */
+    public long getNumberOfBlocksMissed(byte[] address);
+
+    /**
      * Register a blockchain listener.
      * 
      * @param listener

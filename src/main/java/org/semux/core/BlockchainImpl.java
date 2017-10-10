@@ -242,12 +242,17 @@ public class BlockchainImpl implements Blockchain {
         indexDB.put(tx.getHash(), tx.toBytes());
         addTransactionToAccount(tx, block.getCoinbase());
 
-        // [5] update validator set
+        // [5] update validator statistics
+        List<String> validators = getValidators();
+        String primary = validators.get((int) ((number - 1) % validators.size()));
+        updateValidatorStats(block.getCoinbase(), primary.equals(Hex.encode(block.getCoinbase())));
+
+        // [6] update validator set
         if (number % Config.VALIDATOR_TERM == 0) {
             updateValidators(block.getNumber());
         }
 
-        // [6] update latest_block
+        // [7] update latest_block
         latestBlock = block;
         indexDB.put(KEY_LATEST_BLOCK_HASH, hash);
 
@@ -326,6 +331,36 @@ public class BlockchainImpl implements Blockchain {
     }
 
     /**
+     * Updates validator statistics.
+     * 
+     * @param address
+     *            validator address
+     * @param on
+     *            whether it's on
+     */
+    protected void updateValidatorStats(byte[] address, boolean on) {
+        byte[] key = Bytes.merge(address, Bytes.of(on ? 0 : 1));
+        byte[] value = indexDB.get(key);
+        value = (value == null) ? Bytes.of(1L) : Bytes.of(1L + Bytes.toLong(value));
+
+        indexDB.put(key, value);
+    }
+
+    @Override
+    public long getNumberOfBlocksForged(byte[] address) {
+        byte[] key = Bytes.merge(address, Bytes.of(0));
+        byte[] value = indexDB.get(key);
+        return (value == null) ? 0 : Bytes.toLong(value);
+    }
+
+    @Override
+    public long getNumberOfBlocksMissed(byte[] address) {
+        byte[] key = Bytes.merge(address, Bytes.of(1));
+        byte[] value = indexDB.get(key);
+        return value != null ? Bytes.toLong(value) : 0;
+    }
+
+    /**
      * Adds a transaction to an account.
      * 
      * @param tx
@@ -357,4 +392,5 @@ public class BlockchainImpl implements Blockchain {
     protected byte[] getNthTransactionIndexKey(byte[] address, int n) {
         return Bytes.merge(address, Bytes.of(n));
     }
+
 }
