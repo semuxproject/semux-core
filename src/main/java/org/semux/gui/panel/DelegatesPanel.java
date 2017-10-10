@@ -81,7 +81,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 Point p = me.getPoint();
                 int row = table.rowAtPoint(p);
                 if (me.getClickCount() == 2) {
-                    Delegate d = tableModel.getRow(row);
+                    Delegate d = tableModel.getRow(table.convertRowIndexToModel(row));
                     if (d != null) {
                         DelegateDialog dialog = new DelegateDialog(DelegatesPanel.this, d);
                         dialog.setVisible(true);
@@ -89,6 +89,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 }
             }
         });
+        table.setAutoCreateRowSorter(true);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
@@ -286,23 +287,6 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         }
     }
 
-    public int getFrom() {
-        return from.getSelectedIndex();
-    }
-
-    public void setFromItems(List<? extends Object> items, int defaultIndex) {
-        int n = from.getSelectedIndex();
-
-        from.removeAllItems();
-        for (Object item : items) {
-            from.addItem(item.toString());
-        }
-
-        if (!items.isEmpty()) {
-            from.setSelectedIndex(n >= 0 && n < items.size() ? n : defaultIndex);
-        }
-    }
-
     @Override
     public synchronized void actionPerformed(ActionEvent e) {
         Action action = Action.valueOf(e.getActionCommand());
@@ -402,8 +386,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     }
 
     private Delegate getSelectedDelegate() {
-        int idx = table.getSelectedRow();
-        return (idx == -1) ? null : tableModel.getRow(idx);
+        int row = table.getSelectedRow();
+        return (row == -1) ? null : tableModel.getRow(table.convertRowIndexToModel(row));
     }
 
     private void refreshAccounts() {
@@ -412,7 +396,17 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         for (int i = 0; i < list.size(); i++) {
             accounts.add("Acc #" + i + ", " + list.get(i).getBalance() / Unit.SEM + " SEM");
         }
-        setFromItems(accounts, model.getCoinbase());
+
+        /*
+         * update account list. NOTE: assuming account index will never change
+         */
+        int idx = from.getSelectedIndex();
+
+        from.removeAllItems();
+        for (String item : accounts) {
+            from.addItem(item);
+        }
+        from.setSelectedIndex(idx >= 0 && idx < accounts.size() ? idx : 0);
     }
 
     private void refreshDelegates() {
@@ -437,18 +431,19 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             }
         }
 
-        int row = table.getSelectedRow();
-        if (row != -1) {
-            Delegate selected = tableModel.getRow(row);
-            tableModel.setData(delegates, votesFromMe);
+        /*
+         * update table model
+         */
+        Delegate d = getSelectedDelegate();
+        tableModel.setData(delegates, votesFromMe);
+
+        if (d != null) {
             for (int i = 0; i < delegates.size(); i++) {
-                if (Arrays.equals(selected.getAddress(), delegates.get(i).getAddress())) {
-                    table.setRowSelectionInterval(i, i);
+                if (Arrays.equals(d.getAddress(), delegates.get(i).getAddress())) {
+                    table.setRowSelectionInterval(table.convertRowIndexToView(i), table.convertRowIndexToView(i));
                     break;
                 }
             }
-        } else {
-            tableModel.setData(delegates, votesFromMe);
         }
     }
 

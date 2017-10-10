@@ -8,6 +8,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,8 +31,8 @@ import org.semux.crypto.EdDSA;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
-import org.semux.utils.UnreachableException;
 import org.semux.gui.SwingUtil;
+import org.semux.utils.UnreachableException;
 
 public class ReceivePanel extends JPanel implements ActionListener {
 
@@ -65,6 +66,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         table.getSelectionModel().addListSelectionListener((ev) -> {
             actionPerformed(new ActionEvent(ReceivePanel.this, 0, Action.SELECT_ACCOUNT.name()));
         });
+        table.setAutoCreateRowSorter(true);
 
         JButton btnCopyAddress = new JButton("Copy Address");
         btnCopyAddress.addActionListener(this);
@@ -122,6 +124,14 @@ public class ReceivePanel extends JPanel implements ActionListener {
             this.fireTableDataChanged();
         }
 
+        public Account getRow(int row) {
+            if (row >= 0 && row < data.size()) {
+                return data.get(row);
+            }
+
+            return null;
+        }
+
         @Override
         public int getRowCount() {
             return data.size();
@@ -166,21 +176,18 @@ public class ReceivePanel extends JPanel implements ActionListener {
             break;
         }
         case SELECT_ACCOUNT: {
-            int row = table.getSelectedRow();
-            if (row != -1) {
-                Account acc = model.getAccounts().get(row);
+            Account acc = getSelectedAccount();
+            if (acc != null) {
                 BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getKey().toAddressString(), 200);
                 qr.setIcon(new ImageIcon(bi));
             }
             break;
         }
         case COPY_ADDRESS: {
-            int row = table.getSelectedRow();
-            if (row == -1) {
+            Account acc = getSelectedAccount();
+            if (acc == null) {
                 JOptionPane.showMessageDialog(this, "Please select an account!");
             } else {
-                Account acc = model.getAccounts().get(row);
-
                 String address = "0x" + acc.getKey().toAddressString();
                 StringSelection stringSelection = new StringSelection(address);
                 Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -208,16 +215,28 @@ public class ReceivePanel extends JPanel implements ActionListener {
         }
     }
 
-    private void refresh() {
-        List<Account> list = model.getAccounts();
-
-        // NOTE: This operation is safe as the order of accounts does not change.
-        // However, this may change in the future
+    private Account getSelectedAccount() {
         int row = table.getSelectedRow();
-        tableModel.setData(list);
-        if (row != -1 && row < list.size()) {
-            table.setRowSelectionInterval(row, row);
-        } else if (!list.isEmpty()) {
+        return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
+    }
+
+    private void refresh() {
+        List<Account> accounts = model.getAccounts();
+
+        /*
+         * update table model
+         */
+        Account acc = getSelectedAccount();
+        tableModel.setData(accounts);
+
+        if (acc != null) {
+            for (int i = 0; i < accounts.size(); i++) {
+                if (Arrays.equals(accounts.get(i).getKey().toAddress(), acc.getKey().toAddress())) {
+                    table.setRowSelectionInterval(table.convertRowIndexToView(i), table.convertRowIndexToView(i));
+                    break;
+                }
+            }
+        } else if (!accounts.isEmpty()) {
             table.setRowSelectionInterval(0, 0);
         }
     }

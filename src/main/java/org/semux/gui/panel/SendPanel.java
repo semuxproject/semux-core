@@ -156,23 +156,6 @@ public class SendPanel extends JPanel implements ActionListener {
         clear();
     }
 
-    public int getFrom() {
-        return from.getSelectedIndex();
-    }
-
-    public void setFromItems(List<? extends Object> items, int defaultIndex) {
-        int n = from.getSelectedIndex();
-
-        from.removeAllItems();
-        for (Object item : items) {
-            from.addItem(item.toString());
-        }
-
-        if (!items.isEmpty()) {
-            from.setSelectedIndex(n >= 0 && n < items.size() ? n : defaultIndex);
-        }
-    }
-
     public String getTo() {
         return to.getText().trim();
     }
@@ -206,12 +189,14 @@ public class SendPanel extends JPanel implements ActionListener {
             refresh();
             break;
         case SEND:
-            Account acc = model.getAccounts().get(getFrom());
+            Account acc = getSelectedAccount();
             long value = getAmount();
             long fee = getFee();
             byte[] to = Hex.parse(getTo());
 
-            if (fee < Config.MIN_TRANSACTION_FEE) {
+            if (acc == null) {
+                JOptionPane.showMessageDialog(this, "Please select an account!");
+            } else if (fee < Config.MIN_TRANSACTION_FEE) {
                 JOptionPane.showMessageDialog(this, "Transaction fee is too low!");
             } else if (value + fee > acc.getBalance()) {
                 JOptionPane.showMessageDialog(this, "Insufficient funds!");
@@ -249,6 +234,11 @@ public class SendPanel extends JPanel implements ActionListener {
         }
     }
 
+    private Account getSelectedAccount() {
+        int idx = from.getSelectedIndex();
+        return (idx == -1) ? null : model.getAccounts().get(idx);
+    }
+
     private void refresh() {
         List<String> accounts = new ArrayList<>();
         List<Account> list = model.getAccounts();
@@ -256,7 +246,17 @@ public class SendPanel extends JPanel implements ActionListener {
             accounts.add("0x" + list.get(i).getKey().toAddressString() + ", #" + i + ", "
                     + list.get(i).getBalance() / Unit.SEM + " SEM");
         }
-        setFromItems(accounts, model.getCoinbase());
+
+        /*
+         * update account list. NOTE: assuming account index will never change
+         */
+        int idx = from.getSelectedIndex();
+
+        from.removeAllItems();
+        for (String item : accounts) {
+            from.addItem(item);
+        }
+        from.setSelectedIndex(idx >= 0 && idx < accounts.size() ? idx : 0);
     }
 
     private void clear() {

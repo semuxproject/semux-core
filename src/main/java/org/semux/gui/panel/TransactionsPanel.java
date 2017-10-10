@@ -71,7 +71,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 Point p = me.getPoint();
                 int row = table.rowAtPoint(p);
                 if (me.getClickCount() == 2) {
-                    Transaction tx = tableModel.getRow(row);
+                    Transaction tx = tableModel.getRow(table.convertRowIndexToModel(row));
                     if (tx != null) {
                         TransactionDialog dialog = new TransactionDialog(TransactionsPanel.this, tx);
                         dialog.setVisible(true);
@@ -79,6 +79,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 }
             }
         });
+        table.setAutoCreateRowSorter(true);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
@@ -169,8 +170,14 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         }
     }
 
+    private Transaction getSelectedTransaction() {
+        int row = table.getSelectedRow();
+        return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
+    }
+
     private void refresh() {
         List<Transaction> transactions = new ArrayList<>();
+
         Set<ByteArray> hashes = new HashSet<>();
         for (Account acc : model.getAccounts()) {
             for (Transaction tx : acc.getTransactions()) {
@@ -191,18 +198,19 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             accounts.put(Hex.encode(a.getKey().toAddress()), n++);
         }
 
-        int row = table.getSelectedRow();
-        if (row != -1) {
-            Transaction tx = tableModel.getRow(row);
-            tableModel.setData(transactions, accounts);
+        /*
+         * update table model
+         */
+        Transaction tx = getSelectedTransaction();
+        tableModel.setData(transactions, accounts);
+
+        if (tx != null) {
             for (int i = 0; i < transactions.size(); i++) {
                 if (Arrays.equals(tx.getHash(), transactions.get(i).getHash())) {
-                    table.setRowSelectionInterval(i, i);
+                    table.setRowSelectionInterval(table.convertRowIndexToView(i), table.convertRowIndexToView(i));
                     break;
                 }
             }
-        } else {
-            tableModel.setData(transactions, accounts);
         }
     }
 }
