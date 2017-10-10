@@ -13,6 +13,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -161,4 +162,34 @@ public class SwingUtil {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * Integer number comparator.
+     */
+    public static final Comparator<Integer> INTEGER_COMPARATOR = (o1, o2) -> {
+        return Integer.compare(o1, o2);
+    };
+
+    /**
+     * Long number comparator.
+     */
+    public static final Comparator<Long> LONG_COMPARATOR = (o1, o2) -> {
+        return Long.compare(o1, o2);
+    };
+
+    /**
+     * Number string comparator based on its value.
+     */
+    public static final Comparator<String> NUMBER_COMPARATOR = (o1, o2) -> {
+        return Double.compare(Double.parseDouble(o1), Double.parseDouble(o2));
+    };
+
+    /**
+     * Balance string comparator based on its value.
+     */
+    public static final Comparator<String> BALANCE_COMPARATOR = (o1, o2) -> {
+        return Double.compare(Double.parseDouble(o1.substring(0, o1.length() - 4)),
+                Double.parseDouble(o2.substring(0, o2.length() - 4)));
+    };
+
 }

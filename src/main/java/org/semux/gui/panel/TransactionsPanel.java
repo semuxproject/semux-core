@@ -24,6 +24,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
@@ -79,7 +81,11 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 }
             }
         });
-        table.setAutoCreateRowSorter(true);
+
+        // customized table sorter
+        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
+        sorter.setComparator(2, SwingUtil.BALANCE_COMPARATOR);
+        table.setRowSorter(sorter);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));

@@ -23,6 +23,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import org.semux.Kernel;
 import org.semux.core.Unit;
@@ -60,17 +62,23 @@ public class ReceivePanel extends JPanel implements ActionListener {
         SwingUtil.setColumnWidths(table, 600, 0.05, 0.55, 0.2, 0.2);
         SwingUtil.setColumnAlignments(table, false, false, true, true);
 
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
-
         table.getSelectionModel().addListSelectionListener((ev) -> {
             actionPerformed(new ActionEvent(ReceivePanel.this, 0, Action.SELECT_ACCOUNT.name()));
         });
-        table.setAutoCreateRowSorter(true);
+
+        // customized table sorter
+        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
+        sorter.setComparator(0, SwingUtil.INTEGER_COMPARATOR);
+        sorter.setComparator(2, SwingUtil.BALANCE_COMPARATOR);
+        sorter.setComparator(3, SwingUtil.BALANCE_COMPARATOR);
+        table.setRowSorter(sorter);
 
         JButton btnCopyAddress = new JButton("Copy Address");
         btnCopyAddress.addActionListener(this);
         btnCopyAddress.setActionCommand(Action.COPY_ADDRESS.name());
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         qr = new JLabel("");
         qr.setIcon(SwingUtil.emptyImage(200, 200));

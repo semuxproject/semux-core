@@ -26,6 +26,8 @@ import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import org.semux.Config;
 import org.semux.Kernel;
@@ -89,7 +91,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 }
             }
         });
-        table.setAutoCreateRowSorter(true);
+
+        // customized table sorter
+        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
+        sorter.setComparator(3, SwingUtil.LONG_COMPARATOR);
+        sorter.setComparator(4, SwingUtil.LONG_COMPARATOR);
+        table.setRowSorter(sorter);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
