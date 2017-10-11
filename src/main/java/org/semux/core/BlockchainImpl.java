@@ -29,12 +29,37 @@ import org.semux.utils.SimpleEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Blockchain implementation.
+ * 
+ * <pre>
+ * index DB structure:
+ * 
+ * ["latest_block_hash"] => [block_hash]
+ * ["validators"] => [encode(validator_list)]
+ * ["forged", address] => [number_of_blocks_forged]
+ * ["missed", address] => [number_of_blocks_missed]
+ * 
+ * [block_number] => [block_hash]
+ * [transaciton_hash] => [block_number, from, to]
+ * [address, n] => [transaction] OR [transaction_hash]
+ * </pre>
+ *
+ * <pre>
+ * block DB structure:
+ * 
+ * [block_hash] => [block]
+ * </pre>
+ * 
+ */
 public class BlockchainImpl implements Blockchain {
 
     private static final Logger logger = LoggerFactory.getLogger(BlockchainImpl.class);
 
     private static byte[] KEY_LATEST_BLOCK_HASH = Bytes.of("latest_block_hash");
     private static byte[] KEY_VALIDATORS = Bytes.of("validators");
+    private static byte[] FORGED = Bytes.of("forged");
+    private static byte[] MISSED = Bytes.of("missed");
 
     private KVDB indexDB;
     private KVDB blockDB;
@@ -330,34 +355,35 @@ public class BlockchainImpl implements Blockchain {
         indexDB.put(KEY_VALIDATORS, enc.toBytes());
     }
 
-    /**
-     * Updates validator statistics.
-     * 
-     * @param address
-     *            validator address
-     * @param on
-     *            whether it's on
-     */
-    protected void updateValidatorStats(byte[] address, boolean on) {
-        byte[] key = Bytes.merge(address, Bytes.of(on ? 0 : 1));
-        byte[] value = indexDB.get(key);
-        value = (value == null) ? Bytes.of(1L) : Bytes.of(1L + Bytes.toLong(value));
-
-        indexDB.put(key, value);
-    }
-
     @Override
     public long getNumberOfBlocksForged(byte[] address) {
-        byte[] key = Bytes.merge(address, Bytes.of(0));
+        byte[] key = Bytes.merge(FORGED, address);
         byte[] value = indexDB.get(key);
+
         return (value == null) ? 0 : Bytes.toLong(value);
     }
 
     @Override
     public long getNumberOfBlocksMissed(byte[] address) {
-        byte[] key = Bytes.merge(address, Bytes.of(1));
+        byte[] key = Bytes.merge(MISSED, address);
         byte[] value = indexDB.get(key);
+
         return value != null ? Bytes.toLong(value) : 0;
+    }
+
+    /**
+     * Updates validator statistics.
+     * 
+     * @param address
+     *            validator address
+     * @param forged
+     *            forged or missed a block
+     */
+    protected void updateValidatorStats(byte[] address, boolean forged) {
+        byte[] key = Bytes.merge(forged ? FORGED : MISSED, address);
+        byte[] value = indexDB.get(key);
+
+        indexDB.put(key, (value == null) ? Bytes.of(1L) : Bytes.of(1L + Bytes.toLong(value)));
     }
 
     /**
@@ -373,7 +399,7 @@ public class BlockchainImpl implements Blockchain {
     }
 
     /**
-     * Set the total number of transaction of an account.
+     * Sets the total number of transaction of an account.
      * 
      * @param address
      * @param total
@@ -383,7 +409,7 @@ public class BlockchainImpl implements Blockchain {
     }
 
     /**
-     * Get the N-th transaction index key of an account.
+     * Returns the N-th transaction index key of an account.
      * 
      * @param address
      * @param n

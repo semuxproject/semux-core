@@ -12,7 +12,7 @@ import org.semux.core.Delegate;
 
 public interface DelegateState {
     /**
-     * Register delegate.
+     * Registers a delegate.
      * 
      * @param delegate
      * @param name
@@ -21,7 +21,7 @@ public interface DelegateState {
     public boolean register(byte[] delegate, byte[] name);
 
     /**
-     * Vote for a delegate.
+     * Adds vote to a delegate.
      * 
      * @param voter
      * @param delegate
@@ -32,7 +32,7 @@ public interface DelegateState {
     public boolean vote(byte[] voter, byte[] delegate, long value);
 
     /**
-     * Revoke a previous vote for a delegate.
+     * Removes vote of a delegate.
      * 
      * @param voter
      * @param delegate
@@ -43,7 +43,7 @@ public interface DelegateState {
     public boolean unvote(byte[] voter, byte[] delegate, long value);
 
     /**
-     * Get the vote that one voter has given to the specified delegate.
+     * Returns vote that one voter has given to the specified delegate.
      * 
      * @param voter
      * @param delegate
@@ -52,7 +52,7 @@ public interface DelegateState {
     public long getVote(byte[] voter, byte[] delegate);
 
     /**
-     * Get delegate by its name.
+     * Retrieves delegate by its name.
      * 
      * @param name
      * @return
@@ -60,7 +60,7 @@ public interface DelegateState {
     public Delegate getDelegateByName(byte[] name);
 
     /**
-     * Get delegate by its address.
+     * Retrieves delegate by its address.
      * 
      * @param addr
      * @return
@@ -68,24 +68,24 @@ public interface DelegateState {
     public Delegate getDelegateByAddress(byte[] addr);
 
     /**
-     * Get the validator set based on current state, sorted by votes.
+     * Returns all delegates.
      * 
      * @return
      */
     public List<Delegate> getDelegates();
 
     /**
-     * Make a snapshot and start tracking updates.
+     * Returns a snapshot and starts tracking updates.
      */
     public DelegateState track();
 
     /**
-     * Commit all updates since last snapshot.
+     * Commits all updates since last snapshot.
      */
     public void commit();
 
     /**
-     * Revert all updates since last snapshot.
+     * Reverts all updates since last snapshot.
      */
     public void rollback();
 }

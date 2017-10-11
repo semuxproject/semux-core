@@ -29,7 +29,6 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Config;
 import org.semux.Kernel;
 import org.semux.core.Delegate;
@@ -51,7 +50,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "Status", "Name", "Address", "Total Votes", "Votes from Me" };
+    private static String[] columnNames = { "Status", "Name", "Address", "Votes", "Votes from Me" };
 
     private Model model;
 
@@ -84,10 +83,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 Point p = me.getPoint();
                 int row = table.rowAtPoint(p);
                 if (me.getClickCount() == 2) {
-                    Pair<Delegate, Long> pair = tableModel.getRow(table.convertRowIndexToModel(row));
-                    if (pair != null) {
-                        DelegateDialog dialog = new DelegateDialog(DelegatesPanel.this, pair.getLeft(),
-                                pair.getRight());
+                    Delegate d = tableModel.getRow(table.convertRowIndexToModel(row));
+                    if (d != null) {
+                        DelegateDialog dialog = new DelegateDialog(DelegatesPanel.this, d);
                         dialog.setVisible(true);
                     }
                 }
@@ -236,24 +234,19 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         private static final long serialVersionUID = 1L;
 
         private List<Delegate> delegates;
-        private List<Long> votesFromMe;
 
         public DelegatesTableModel() {
             this.delegates = Collections.emptyList();
-            this.votesFromMe = Collections.emptyList();
         }
 
-        public void setData(List<Delegate> delegates, List<Long> votesFromMe) {
-            assert (delegates.size() == votesFromMe.size());
-
+        public void setData(List<Delegate> delegates) {
             this.delegates = delegates;
-            this.votesFromMe = votesFromMe;
             this.fireTableDataChanged();
         }
 
-        public Pair<Delegate, Long> getRow(int row) {
+        public Delegate getRow(int row) {
             if (row >= 0 && row < delegates.size()) {
-                return Pair.of(delegates.get(row), votesFromMe.get(row));
+                return delegates.get(row);
             }
 
             return null;
@@ -289,7 +282,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             case 3:
                 return d.getVotes() / Unit.SEM;
             case 4:
-                return votesFromMe.get(row) / Unit.SEM;
+                return d.getVotesFromMe() / Unit.SEM;
             default:
                 return null;
             }
@@ -396,7 +389,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private Delegate getSelectedDelegate() {
         int row = table.getSelectedRow();
-        return (row == -1) ? null : tableModel.getRow(table.convertRowIndexToModel(row)).getLeft();
+        return (row == -1) ? null : tableModel.getRow(table.convertRowIndexToModel(row));
     }
 
     private void refreshAccounts() {
@@ -425,18 +418,13 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             return c != 0 ? c : new String(d1.getName()).compareTo(new String(d2.getName()));
         });
 
-        List<Long> votesFromMe = new ArrayList<>();
         Account acc = getSelectedAccount();
-        if (acc == null) {
-            for (int i = 0; i < delegates.size(); i++) {
-                votesFromMe.add(0L);
-            }
-        } else {
-            byte[] a = acc.getKey().toAddress();
+        if (acc != null) {
+            byte[] voter = acc.getKey().toAddress();
             DelegateState ds = Kernel.getInstance().getBlockchain().getDeleteState();
             for (Delegate d : delegates) {
-                long vote = ds.getVote(a, d.getAddress());
-                votesFromMe.add(vote);
+                long vote = ds.getVote(voter, d.getAddress());
+                d.setVotesFromMe(vote);
             }
         }
 
@@ -444,7 +432,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
          * update table model
          */
         Delegate d = getSelectedDelegate();
-        tableModel.setData(delegates, votesFromMe);
+        tableModel.setData(delegates);
 
         if (d != null) {
             for (int i = 0; i < delegates.size(); i++) {

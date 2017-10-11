@@ -6,18 +6,25 @@
  */
 package org.semux.core;
 
-import org.semux.crypto.Hex;
+import java.util.Arrays;
+
 import org.semux.utils.Bytes;
 
 public class Delegate {
     protected byte[] addr;
     protected byte[] name;
+    protected long registeredAt;
     protected long votes;
 
-    public Delegate(byte[] addr, byte[] name, long vote) {
+    /*
+     * Variables below are not persisted
+     */
+    protected long votesFromMe;
+
+    public Delegate(byte[] addr, byte[] name, long votes) {
         this.addr = addr;
         this.name = name;
-        this.votes = vote;
+        this.votes = votes;
     }
 
     public byte[] getAddress() {
@@ -36,12 +43,21 @@ public class Delegate {
         return votes;
     }
 
-    public String toPeerId() {
-        return Hex.encode(addr);
+    public long getRegisteredAt() {
+        return registeredAt;
+    }
+
+    public long getVotesFromMe() {
+        return votesFromMe;
+    }
+
+    public void setVotesFromMe(long votesFromMe) {
+        this.votesFromMe = votesFromMe;
     }
 
     @Override
     public String toString() {
-        return getNameString() + "=" + toPeerId();
+        return "Delegate [addr=" + Arrays.toString(addr) + ", name=" + Arrays.toString(name) + ", votes=" + votes
+                + ", votesFromMe=" + votesFromMe + "]";
     }
 }

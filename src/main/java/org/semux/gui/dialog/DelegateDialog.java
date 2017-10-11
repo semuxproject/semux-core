@@ -1,6 +1,8 @@
 package org.semux.gui.dialog;
 
 import java.awt.Font;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -10,6 +12,8 @@ import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
+import org.semux.Kernel;
+import org.semux.core.Blockchain;
 import org.semux.core.Delegate;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
@@ -27,25 +31,30 @@ public class DelegateDialog extends JDialog {
         return c;
     }
 
-    public DelegateDialog(JComponent parent, Delegate d, long v) {
+    public DelegateDialog(JComponent parent, Delegate d) {
+        Blockchain chain = Kernel.getInstance().getBlockchain();
+        long forged = chain.getNumberOfBlocksForged(d.getAddress());
+        long missed = chain.getNumberOfBlocksMissed(d.getAddress());
+        long total = forged + missed;
 
         JLabel lblName = new JLabel("Name:");
         JLabel lblAddress = new JLabel("Address:");
-        JLabel lblTotalVotes = new JLabel("Total Votes:");
-        JLabel lblVotesFromMe = new JLabel("Votes from Me:");
         JLabel lblRegisteredAt = new JLabel("Registered At:");
+        JLabel lblVotes = new JLabel("Votes:");
+        JLabel lblVotesFromMe = new JLabel("Votes from Me:");
         JLabel lblNumOfBlocksForged = new JLabel("# of Blocks Forged:");
         JLabel lblNumOfBlocksMissed = new JLabel("# of Blocks Missed:");
         JLabel lblRate = new JLabel("Rate:");
 
         JTextArea name = selectableText(d.getNameString());
         JTextArea address = selectableText(Hex.PREF + Hex.encode(d.getAddress()));
-        JLabel totalVotes = new JLabel(Long.toString(d.getVotes() / Unit.SEM));
-        JLabel votesFromMe = new JLabel(Long.toString(v / Unit.SEM));
-        JLabel registeredAt = new JLabel("Unavailable");
-        JLabel numOfBlocksForged = new JLabel("Unavailable");
-        JLabel numOfBlocksMissed = new JLabel("Unavailable");
-        JLabel rate = new JLabel("Unavailable");
+        JLabel registeredAt = new JLabel(
+                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(d.getRegisteredAt())));
+        JLabel votes = new JLabel(Long.toString(d.getVotes() / Unit.SEM));
+        JLabel votesFromMe = new JLabel(Long.toString(d.getVotesFromMe() / Unit.SEM));
+        JLabel numOfBlocksForged = new JLabel(Long.toString(forged));
+        JLabel numOfBlocksMissed = new JLabel(Long.toString(missed));
+        JLabel rate = new JLabel(total == 0 ? "N/A" : String.format("%.2f%%", forged * 100.0 / total));
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());
@@ -55,18 +64,18 @@ public class DelegateDialog extends JDialog {
                     .addGap(30)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
                         .addComponent(lblRate)
-                        .addComponent(lblAddress)
-                        .addComponent(lblName)
-                        .addComponent(lblTotalVotes)
-                        .addComponent(lblRegisteredAt)
-                        .addComponent(lblVotesFromMe)
                         .addComponent(lblNumOfBlocksMissed)
-                        .addComponent(lblNumOfBlocksForged))
+                        .addComponent(lblNumOfBlocksForged)
+                        .addComponent(lblVotesFromMe)
+                        .addComponent(lblVotes)
+                        .addComponent(lblRegisteredAt)
+                        .addComponent(lblAddress)
+                        .addComponent(lblName))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addComponent(name)
                         .addComponent(address)
-                        .addComponent(totalVotes)
+                        .addComponent(votes)
                         .addComponent(votesFromMe)
                         .addComponent(registeredAt)
                         .addComponent(numOfBlocksForged)
@@ -85,19 +94,19 @@ public class DelegateDialog extends JDialog {
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblAddress)
                         .addComponent(address, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                    .addGap(12)
+                    .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(lblTotalVotes)
-                        .addComponent(totalVotes))
+                        .addComponent(lblRegisteredAt)
+                        .addComponent(registeredAt))
+                    .addPreferredGap(ComponentPlacement.UNRELATED)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                        .addComponent(lblVotes)
+                        .addComponent(votes))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblVotesFromMe)
                         .addComponent(votesFromMe))
-                    .addGap(12)
-                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(lblRegisteredAt)
-                        .addComponent(registeredAt))
-                    .addGap(12)
+                    .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblNumOfBlocksForged)
                         .addComponent(numOfBlocksForged))

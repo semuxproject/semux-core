@@ -26,7 +26,7 @@ public class Peer {
     private long latestBlockNumber;
 
     /*
-     * Below are volatile variables
+     * Variables below are not persisted
      */
     private long latency;
 
