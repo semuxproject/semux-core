@@ -6,13 +6,11 @@
  */
 package org.semux.net;
 
-import java.io.File;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -27,17 +25,8 @@ import org.apache.commons.collections4.map.LRUMap;
 import org.semux.Config;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
-import org.semux.utils.IOUtil;
-import org.semux.utils.SimpleDecoder;
-import org.semux.utils.SimpleEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xbill.DNS.Lookup;
-import org.xbill.DNS.Record;
-import org.xbill.DNS.SimpleResolver;
-import org.xbill.DNS.TXTRecord;
-import org.xbill.DNS.TextParseException;
-import org.xbill.DNS.Type;
 
 public class NodeManager {
 
@@ -56,8 +45,7 @@ public class NodeManager {
     private static String DNS_SEED_MAINNET = "mainnet.semux.org";
     private static String DNS_SEED_TESTNET = "testnet.semux.org";
 
-    private static String PEERS_DIR = "p2p";
-    private static String PEERS_FILE = "peers.data";
+    private static int DEFAULT_PORT = 5161;
 
     private static int LRU_CACHE_SIZE = 1024;
     private static long RECONNECT_WAIT = 2 * 60 * 1000;
@@ -77,7 +65,7 @@ public class NodeManager {
     private volatile boolean isRunning;
 
     /**
-     * Create a node manager instance.
+     * Creates a node manager instance.
      * 
      * @param chain
      * @param channelMgr
@@ -97,7 +85,7 @@ public class NodeManager {
     }
 
     /**
-     * Start the node manager
+     * Starts the node manager
      */
     public synchronized void start() {
         if (!isRunning) {
@@ -107,7 +95,6 @@ public class NodeManager {
             Set<InetSocketAddress> peers = new HashSet<>();
             peers.addAll(Config.P2P_SEED_NODES);
             peers.addAll(getSeedNodes(Config.NETWORK_ID));
-            peers.addAll(getPersistedNodes(Config.NETWORK_ID));
             queue.addAll(peers);
 
             connectFuture = exec.scheduleAtFixedRate(() -> {
@@ -115,7 +102,7 @@ public class NodeManager {
             }, 100, 500, TimeUnit.MILLISECONDS);
 
             persistFuture = exec.scheduleAtFixedRate(() -> {
-                doPersist();
+                doFetch();
             }, 2, 4, TimeUnit.MINUTES);
 
             isRunning = true;
@@ -124,7 +111,7 @@ public class NodeManager {
     }
 
     /**
-     * Stop this node manager.
+     * Stops this node manager.
      */
     public synchronized void stop() {
         if (isRunning) {
@@ -182,95 +169,14 @@ public class NodeManager {
                 return nodes;
             }
 
-            Lookup lookup = new Lookup(name, Type.TXT);
-            lookup.setResolver(new SimpleResolver());
-            lookup.setCache(null);
-            Record[] records = lookup.run();
-
-            if (lookup.getResult() == Lookup.SUCCESSFUL) {
-                for (Record record : records) {
-                    TXTRecord txt = (TXTRecord) record;
-                    for (Object str : txt.getStrings()) {
-                        String[] urls = str.toString().split(",");
-                        for (String url : urls) {
-                            String[] tokens = url.trim().split(":");
-                            nodes.add(new InetSocketAddress(tokens[0], Integer.parseInt(tokens[1])));
-                        }
-                    }
-                }
+            for (InetAddress addr : InetAddress.getAllByName(name)) {
+                nodes.add(new InetSocketAddress(addr, DEFAULT_PORT));
             }
-        } catch (TextParseException | UnknownHostException e) {
+        } catch (UnknownHostException e) {
             logger.debug("Failed to get bootstrapping nodes by dns");
         }
 
         return nodes;
-    }
-
-    /**
-     * Get persisted nodes from disk.
-     * 
-     * @param network
-     * @return
-     */
-    public static Set<InetSocketAddress> getPersistedNodes(byte network) {
-        Set<InetSocketAddress> nodes = new HashSet<>();
-
-        File f = getFile(network);
-        if (f.exists()) {
-            try {
-                byte[] bytes = IOUtil.readFile(f);
-                SimpleDecoder dec = new SimpleDecoder(bytes);
-                int n = dec.readInt();
-                for (int i = 0; i < n; i++) {
-                    String host = dec.readString();
-                    int port = dec.readInt();
-                    nodes.add(new InetSocketAddress(host, port));
-                }
-            } catch (Exception e) {
-                logger.debug("Failed to parse peer list from {}" + f, e);
-            }
-        }
-
-        return nodes;
-    }
-
-    /**
-     * Write peer list to disk.
-     * 
-     * @param network
-     * @param nodes
-     * @return
-     */
-    public static boolean setPersistedNodes(byte network, Collection<InetSocketAddress> nodes) {
-        File f = getFile(network);
-        try {
-            SimpleEncoder enc = new SimpleEncoder();
-            enc.writeInt(nodes.size());
-            for (InetSocketAddress node : nodes) {
-                enc.writeString(node.getAddress().getHostAddress());
-                enc.writeInt(node.getPort());
-            }
-
-            IOUtil.writeToFile(enc.toBytes(), f);
-            return true;
-        } catch (Exception e) {
-            logger.debug("Failed to write peer list into disk", e);
-        }
-
-        return false;
-    }
-
-    /**
-     * Get the file that stores node list.
-     * 
-     * @param network
-     * @return
-     */
-    protected static File getFile(short network) {
-        File f = new File(Config.DATA_DIR, PEERS_DIR + File.separator + PEERS_FILE);
-        f.getParentFile().mkdirs();
-
-        return f;
     }
 
     /**
@@ -298,12 +204,9 @@ public class NodeManager {
     }
 
     /**
-     * Persist all active nodes
+     * Fetch seed nodes from DNS records.
      */
-    protected void doPersist() {
-        List<InetSocketAddress> list = new ArrayList<>(channelMgr.getActiveAddresses());
-        setPersistedNodes(Config.NETWORK_ID, list);
-
+    protected void doFetch() {
         addNodes(getSeedNodes(Config.NETWORK_ID));
     }
 }

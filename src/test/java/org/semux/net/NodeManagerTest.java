@@ -10,7 +10,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.net.InetSocketAddress;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.AfterClass;
@@ -46,17 +45,6 @@ public class NodeManagerTest {
         // Seed nodes for dev net
         peers = NodeManager.getSeedNodes((short) 2);
         assertTrue(peers.isEmpty());
-    }
-
-    @Test
-    public void testGetPersistedNodes() {
-        Set<InetSocketAddress> nodes = new HashSet<>();
-        NodeManager.setPersistedNodes(Config.NETWORK_ID, nodes);
-        assertTrue(NodeManager.getPersistedNodes(Config.NETWORK_ID).isEmpty());
-
-        nodes.add(new InetSocketAddress("127.0.0.1", 1234));
-        NodeManager.setPersistedNodes(Config.NETWORK_ID, nodes);
-        assertFalse(NodeManager.getPersistedNodes(Config.NETWORK_ID).isEmpty());
     }
 
     @Test
