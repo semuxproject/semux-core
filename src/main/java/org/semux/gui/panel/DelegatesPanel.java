@@ -31,6 +31,7 @@ import javax.swing.table.TableRowSorter;
 
 import org.semux.Config;
 import org.semux.Kernel;
+import org.semux.core.Blockchain;
 import org.semux.core.Delegate;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
@@ -50,7 +51,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "Status", "Name", "Address", "Votes", "Votes from Me" };
+    private static String[] columnNames = { "#", "Name", "Address", "Votes", "Votes from Me", "Status", "Rate" };
 
     private Model model;
 
@@ -74,8 +75,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(25);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 600, 0.1, 0.2, 0.35, 0.2, 0.15);
-        SwingUtil.setColumnAlignments(table, false, false, false, true, true);
+        SwingUtil.setColumnWidths(table, 600, 0.05, 0.2, 0.25, 0.15, 0.15, 0.1, 0.1);
+        SwingUtil.setColumnAlignments(table, false, false, false, true, true, true, true);
 
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent me) {
@@ -94,8 +95,10 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         // customized table sorter
         TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
+        sorter.setComparator(0, SwingUtil.INTEGER_COMPARATOR);
         sorter.setComparator(3, SwingUtil.LONG_COMPARATOR);
         sorter.setComparator(4, SwingUtil.LONG_COMPARATOR);
+        sorter.setComparator(6, SwingUtil.PERCENTAGE_COMPARATOR);
         table.setRowSorter(sorter);
 
         JScrollPane scrollPane = new JScrollPane(table);
@@ -273,8 +276,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
             switch (column) {
             case 0:
-                List<String> validators = Kernel.getInstance().getBlockchain().getValidators();
-                return new HashSet<>(validators).contains(Hex.encode(d.getAddress())) ? "V" : "S";
+                return row;
             case 1:
                 return Bytes.toString(d.getName());
             case 2:
@@ -283,6 +285,11 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 return d.getVotes() / Unit.SEM;
             case 4:
                 return d.getVotesFromMe() / Unit.SEM;
+            case 5:
+                List<String> validators = Kernel.getInstance().getBlockchain().getValidators();
+                return new HashSet<>(validators).contains(Hex.encode(d.getAddress())) ? "V" : "S";
+            case 6:
+                return String.format("%.1f %%", d.getRate());
             default:
                 return null;
             }
@@ -421,10 +428,13 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         Account acc = getSelectedAccount();
         if (acc != null) {
             byte[] voter = acc.getKey().toAddress();
-            DelegateState ds = Kernel.getInstance().getBlockchain().getDeleteState();
+            Blockchain chain = Kernel.getInstance().getBlockchain();
+            DelegateState ds = chain.getDeleteState();
             for (Delegate d : delegates) {
                 long vote = ds.getVote(voter, d.getAddress());
                 d.setVotesFromMe(vote);
+                d.setNumberOfBlocksForged(chain.getNumberOfBlocksForged(d.getAddress()));
+                d.setNumberOfBlocksMissed(chain.getNumberOfBlocksMissed(d.getAddress()));
             }
         }
 

@@ -192,4 +192,11 @@ public class SwingUtil {
                 Double.parseDouble(o2.substring(0, o2.length() - 4)));
     };
 
+    /**
+     * Balance string comparator based on its value.
+     */
+    public static final Comparator<String> PERCENTAGE_COMPARATOR = (o1, o2) -> {
+        return Double.compare(Double.parseDouble(o1.substring(0, o1.length() - 2)),
+                Double.parseDouble(o2.substring(0, o2.length() - 2)));
+    };
 }

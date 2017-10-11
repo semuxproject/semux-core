@@ -13,7 +13,7 @@ import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.semux.Kernel;
-import org.semux.core.Blockchain;
+import org.semux.core.Block;
 import org.semux.core.Delegate;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
@@ -32,11 +32,7 @@ public class DelegateDialog extends JDialog {
     }
 
     public DelegateDialog(JComponent parent, Delegate d) {
-        Blockchain chain = Kernel.getInstance().getBlockchain();
-        long forged = chain.getNumberOfBlocksForged(d.getAddress());
-        long missed = chain.getNumberOfBlocksMissed(d.getAddress());
-        long total = forged + missed;
-        Date date = new Date(chain.getBlock(d.getRegisteredAt()).getTimestamp());
+        Block block = Kernel.getInstance().getBlockchain().getBlock(d.getRegisteredAt());
 
         JLabel lblName = new JLabel("Name:");
         JLabel lblAddress = new JLabel("Address:");
@@ -49,12 +45,13 @@ public class DelegateDialog extends JDialog {
 
         JTextArea name = selectableText(d.getNameString());
         JTextArea address = selectableText(Hex.PREF + Hex.encode(d.getAddress()));
-        JLabel registeredAt = new JLabel(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+        JLabel registeredAt = new JLabel(
+                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(block.getTimestamp())));
         JLabel votes = new JLabel(Long.toString(d.getVotes() / Unit.SEM));
         JLabel votesFromMe = new JLabel(Long.toString(d.getVotesFromMe() / Unit.SEM));
-        JLabel numOfBlocksForged = new JLabel(Long.toString(forged));
-        JLabel numOfBlocksMissed = new JLabel(Long.toString(missed));
-        JLabel rate = new JLabel(total == 0 ? "N/A" : String.format("%.2f%%", forged * 100.0 / total));
+        JLabel numOfBlocksForged = new JLabel(Long.toString(d.getNumberOfBlocksForged()));
+        JLabel numOfBlocksMissed = new JLabel(Long.toString(d.getNumberOfBlocksMissed()));
+        JLabel rate = new JLabel(String.format("%.2f %%", d.getRate()));
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());

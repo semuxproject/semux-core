@@ -20,6 +20,8 @@ public class Delegate {
      * Variables below are not persisted
      */
     protected long votesFromMe;
+    protected long numberOfBlocksForged;
+    protected long numberOfBlocksMissed;
 
     public Delegate(byte[] addr, byte[] name, long registeredAt, long votes) {
         this.addr = addr;
@@ -58,6 +60,27 @@ public class Delegate {
 
     public void setVotesFromMe(long votesFromMe) {
         this.votesFromMe = votesFromMe;
+    }
+
+    public long getNumberOfBlocksForged() {
+        return numberOfBlocksForged;
+    }
+
+    public void setNumberOfBlocksForged(long numberOfBlocksForged) {
+        this.numberOfBlocksForged = numberOfBlocksForged;
+    }
+
+    public long getNumberOfBlocksMissed() {
+        return numberOfBlocksMissed;
+    }
+
+    public void setNumberOfBlocksMissed(long numberOfBlocksMissed) {
+        this.numberOfBlocksMissed = numberOfBlocksMissed;
+    }
+
+    public double getRate() {
+        long total = numberOfBlocksForged + numberOfBlocksMissed;
+        return total == 0 ? 0 : numberOfBlocksForged * 100.0 / total;
     }
 
     @Override
