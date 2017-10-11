@@ -204,7 +204,7 @@ public class SemuxSync implements Sync {
     private void download() {
         List<Channel> channels = channelMgr.getIdleChannels();
         Collections.shuffle(channels);
-        logger.debug("Idle peers = {}", channels.size());
+        logger.trace("Idle peers = {}", channels.size());
 
         synchronized (lock) {
             // filter all expired tasks

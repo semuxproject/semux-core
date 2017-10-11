@@ -14,11 +14,21 @@ public interface DelegateState {
     /**
      * Registers a delegate.
      * 
-     * @param delegate
+     * @param addres
+     * @param name
+     * @param registeredAt
+     * @return
+     */
+    public boolean register(byte[] addres, byte[] name, long registeredAt);
+
+    /**
+     * Registers a delegate.
+     * 
+     * @param address
      * @param name
      * @return
      */
-    public boolean register(byte[] delegate, byte[] name);
+    public boolean register(byte[] address, byte[] name);
 
     /**
      * Adds vote to a delegate.
@@ -62,10 +72,10 @@ public interface DelegateState {
     /**
      * Retrieves delegate by its address.
      * 
-     * @param addr
+     * @param address
      * @return
      */
-    public Delegate getDelegateByAddress(byte[] addr);
+    public Delegate getDelegateByAddress(byte[] address);
 
     /**
      * Returns all delegates.

@@ -21,9 +21,10 @@ public class Delegate {
      */
     protected long votesFromMe;
 
-    public Delegate(byte[] addr, byte[] name, long votes) {
+    public Delegate(byte[] addr, byte[] name, long registeredAt, long votes) {
         this.addr = addr;
         this.name = name;
+        this.registeredAt = registeredAt;
         this.votes = votes;
     }
 
@@ -39,12 +40,16 @@ public class Delegate {
         return Bytes.toString(name);
     }
 
+    public long getRegisteredAt() {
+        return registeredAt;
+    }
+
     public long getVotes() {
         return votes;
     }
 
-    public long getRegisteredAt() {
-        return registeredAt;
+    public void setVotes(long votes) {
+        this.votes = votes;
     }
 
     public long getVotesFromMe() {

@@ -16,7 +16,26 @@ import org.semux.db.KVDB;
 import org.semux.utils.ByteArray;
 import org.semux.utils.Bytes;
 
+/**
+ * Account state implementation.
+ * 
+ * <pre>
+ * account DB structure:
+ * 
+ * [address, 0] => [balance]
+ * [address, 1] => [locked]
+ * [address, 2] => [nonce]
+ * [address, 3] => [code]
+ * [address, 4, storage_key] = [storage_value]
+ * </pre>
+ */
 public class AccountStateImpl implements AccountState {
+
+    private static byte BALANCE = 0;
+    private static byte LOCKED = 1;
+    private static byte NONCE = 2;
+    private static byte CODE = 3;
+    private static byte STORAGE = 4;
 
     private KVDB accountDB;
     private AccountStateImpl prev;
@@ -47,11 +66,10 @@ public class AccountStateImpl implements AccountState {
     @Override
     public Account getAccount(byte[] addr) {
         return new Account() {
-
-            private ByteArray keyBalance = ByteArray.of(makeKey(StateType.BALANCE, addr));
-            private ByteArray keyLocked = ByteArray.of(makeKey(StateType.LOCKED, addr));
-            private ByteArray keyNonce = ByteArray.of(makeKey(StateType.NONCE, addr));
-            private ByteArray keyCode = ByteArray.of(makeKey(StateType.CODE, addr));
+            private ByteArray keyBalance = getKey(addr, BALANCE);
+            private ByteArray keyLocked = getKey(addr, LOCKED);
+            private ByteArray keyNonce = getKey(addr, NONCE);
+            private ByteArray keyCode = getKey(addr, CODE);
 
             private Account acc = (prev == null) ? null : prev.getAccount(addr);
 
@@ -128,8 +146,8 @@ public class AccountStateImpl implements AccountState {
             }
 
             @Override
-            public byte[] getStorage(long key) {
-                ByteArray k = ByteArray.of(makeKeyForStorage(addr, key));
+            public byte[] getStorage(byte[] key) {
+                ByteArray k = getStorageKey(addr, key);
                 if (updates.containsKey(k)) {
                     return updates.get(k);
                 } else if (acc != null) {
@@ -140,14 +158,14 @@ public class AccountStateImpl implements AccountState {
             }
 
             @Override
-            public void putStorage(long key, byte[] value) {
-                ByteArray k = ByteArray.of(makeKeyForStorage(addr, key));
+            public void putStorage(byte[] key, byte[] value) {
+                ByteArray k = getStorageKey(addr, key);
                 updates.put(k, value);
             }
 
             @Override
-            public void removeStorage(long key) {
-                ByteArray k = ByteArray.of(makeKeyForStorage(addr, key));
+            public void removeStorage(byte[] key) {
+                ByteArray k = getStorageKey(addr, key);
                 updates.put(k, null);
             }
         };
@@ -185,30 +203,18 @@ public class AccountStateImpl implements AccountState {
         updates.clear();
     }
 
-    private byte[] makeKey(StateType type, byte[] addr) {
+    private ByteArray getKey(byte[] addr, byte type) {
         byte[] k = Arrays.copyOf(addr, addr.length + 1);
-        k[addr.length] = type.getCode();
-        return k;
+        k[addr.length] = type;
+
+        return ByteArray.of(k);
     }
 
-    private byte[] makeKeyForStorage(byte[] addr, long key) {
-        byte[] k = Arrays.copyOf(addr, addr.length + 1 + 8);
-        k[addr.length] = StateType.STORAGE.getCode();
-        System.arraycopy(Bytes.of(key), 0, k, addr.length + 1, 8);
-        return k;
-    }
+    private ByteArray getStorageKey(byte[] addr, byte[] key) {
+        byte[] k = Arrays.copyOf(addr, addr.length + 1 + key.length);
+        k[addr.length] = STORAGE;
+        System.arraycopy(key, 0, k, addr.length + 1, key.length);
 
-    private enum StateType {
-        BALANCE(0x00), LOCKED(0x01), NONCE(0x02), CODE(0x03), STORAGE(0x04);
-
-        private byte code;
-
-        StateType(int code) {
-            this.code = (byte) code;
-        }
-
-        public byte getCode() {
-            return code;
-        }
+        return ByteArray.of(k);
     }
 }

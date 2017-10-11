@@ -31,7 +31,7 @@ public class CorePerfomanceTest {
 
         Random r = new Random();
         for (int i = 0; i < nDelegates; i++) {
-            Delegate d = new Delegate(Bytes.random(20), Bytes.random(16), r.nextLong());
+            Delegate d = new Delegate(Bytes.random(20), Bytes.random(16), r.nextLong(), r.nextLong());
             list.add(d);
         }
 

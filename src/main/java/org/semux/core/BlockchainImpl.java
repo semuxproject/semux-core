@@ -96,7 +96,7 @@ public class BlockchainImpl implements Blockchain {
                 acc.setBalance(e.getValue());
             }
             for (Entry<String, byte[]> e : genesis.getDelegates().entrySet()) {
-                delegateState.register(e.getValue(), Bytes.of(e.getKey()));
+                delegateState.register(e.getValue(), Bytes.of(e.getKey()), 0);
             }
 
             accountState.commit();

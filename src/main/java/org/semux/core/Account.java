@@ -76,7 +76,7 @@ public interface Account {
      * @param key
      * @return the value if exists, otherwise null.
      */
-    public byte[] getStorage(long key);
+    public byte[] getStorage(byte[] key);
 
     /**
      * Associates the specified value with the specified key.
@@ -84,12 +84,12 @@ public interface Account {
      * @param key
      * @param value
      */
-    public void putStorage(long key, byte[] value);
+    public void putStorage(byte[] key, byte[] value);
 
     /**
      * Remove a key value pair from the storage if exists.
      * 
      * @param key
      */
-    public void removeStorage(long key);
+    public void removeStorage(byte[] key);
 }
