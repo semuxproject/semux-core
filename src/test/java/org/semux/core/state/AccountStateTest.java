@@ -6,6 +6,7 @@
  */
 package org.semux.core.state;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Map;
@@ -16,6 +17,7 @@ import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.db.MemoryDB;
 import org.semux.utils.ByteArray;
+import org.semux.utils.Bytes;
 
 public class AccountStateTest {
 
@@ -30,5 +32,27 @@ public class AccountStateTest {
             Account acc = state.getAccount(k.getData());
             assertEquals((long) premine.get(k), acc.getBalance());
         }
+    }
+
+    @Test
+    public void testAccount() {
+        Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
+        AccountState state = chain.getAccountState();
+
+        byte[] addr = Bytes.random(20);
+        Account acc = state.getAccount(addr);
+        acc.setBalance(1);
+        acc.setLocked(2);
+        acc.setNonce(3);
+        acc.setCode(Bytes.of("test"));
+        acc.putStorage(Bytes.of("key"), Bytes.of("value"));
+        state.commit();
+
+        Account acc2 = state.getAccount(addr);
+        assertEquals(1L, acc2.getBalance());
+        assertEquals(2L, acc2.getLocked());
+        assertEquals(3L, acc2.getNonce());
+        assertArrayEquals(Bytes.of("test"), acc2.getCode());
+        assertArrayEquals(Bytes.of("value"), acc2.getStorage(Bytes.of("key")));
     }
 }
