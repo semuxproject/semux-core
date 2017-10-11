@@ -36,6 +36,7 @@ public class DelegateDialog extends JDialog {
         long forged = chain.getNumberOfBlocksForged(d.getAddress());
         long missed = chain.getNumberOfBlocksMissed(d.getAddress());
         long total = forged + missed;
+        Date date = new Date(chain.getBlock(d.getRegisteredAt()).getTimestamp());
 
         JLabel lblName = new JLabel("Name:");
         JLabel lblAddress = new JLabel("Address:");
@@ -48,8 +49,7 @@ public class DelegateDialog extends JDialog {
 
         JTextArea name = selectableText(d.getNameString());
         JTextArea address = selectableText(Hex.PREF + Hex.encode(d.getAddress()));
-        JLabel registeredAt = new JLabel(
-                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(d.getRegisteredAt())));
+        JLabel registeredAt = new JLabel(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
         JLabel votes = new JLabel(Long.toString(d.getVotes() / Unit.SEM));
         JLabel votesFromMe = new JLabel(Long.toString(d.getVotesFromMe() / Unit.SEM));
         JLabel numOfBlocksForged = new JLabel(Long.toString(forged));
