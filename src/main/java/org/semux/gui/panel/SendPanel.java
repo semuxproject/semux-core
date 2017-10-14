@@ -203,6 +203,13 @@ public class SendPanel extends JPanel implements ActionListener {
             } else if (to.length != 20) {
                 JOptionPane.showMessageDialog(this, "Invalid receiving address!");
             } else {
+                int ret = JOptionPane.showConfirmDialog(this,
+                        "Are you sure you want to transfer " + value / Unit.SEM + " SEM to 0x" + Hex.encode(to) + "?",
+                        "Confirm transfer", JOptionPane.YES_NO_OPTION);
+                if (ret != JOptionPane.YES_OPTION) {
+                    break;
+                }
+
                 Kernel kernel = Kernel.getInstance();
                 PendingManager pendingMgr = kernel.getPendingManager();
 
