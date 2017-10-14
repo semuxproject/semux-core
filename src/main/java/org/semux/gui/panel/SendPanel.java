@@ -28,6 +28,7 @@ import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
+import org.semux.gui.SwingUtil;
 import org.semux.utils.Bytes;
 import org.semux.utils.UnreachableException;
 
@@ -57,7 +58,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblTo = new JLabel("To:");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        to = new JTextField();
+        to = SwingUtil.editableTextField();
         to.setColumns(24);
         to.setActionCommand(Action.SEND.name());
         to.addActionListener(this);
@@ -65,7 +66,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblAmount = new JLabel("Amount:");
         lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        amount = new JTextField();
+        amount = SwingUtil.editableTextField();
         amount.setColumns(10);
         amount.setActionCommand(Action.SEND.name());
         amount.addActionListener(this);
@@ -73,7 +74,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblFee = new JLabel("Fee:");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        fee = new JTextField();
+        fee = SwingUtil.editableTextField();
         fee.setColumns(10);
         fee.setActionCommand(Action.SEND.name());
         fee.addActionListener(this);

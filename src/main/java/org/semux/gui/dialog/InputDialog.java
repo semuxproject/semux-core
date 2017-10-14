@@ -33,7 +33,7 @@ public class InputDialog extends JDialog implements ActionListener {
         labelLogo.setIcon(SwingUtil.loadImage("logo", 96, 96));
 
         JLabel lblMessage = new JLabel(message);
-        textField = isPassword ? new JPasswordField() : new JTextField();
+        textField = isPassword ? new JPasswordField() : SwingUtil.editableTextField();
         textField.setActionCommand(Action.OK.name());
         textField.addActionListener(this);
 
