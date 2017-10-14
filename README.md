@@ -6,11 +6,13 @@ https://www.semux.org
 
 Semux is an experimental high-performance blockchain platform that powers decentralized application. It's written purely in Java and powered by delegated BFT consensus algorithm.
 
+More info can be found at our [Wiki page](https://github.com/semuxproject/semux/wiki).
+
 ## Specifications
 
 * Total supply: 100,000,000 SEM
 * Block time: 30 seconds
-* Consensus algorithm: Delegated BFT
+* Consensus algorithm: Semux BFT
 * Symbol: SEM
 
 ## Get started
