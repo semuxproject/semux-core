@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -136,9 +137,18 @@ public class GUI {
 
         // start data refresh
         new Thread(() -> {
-            while (kernel.isRunning) {
+            while (true) {
                 try {
-                    onBlockAdded(kernel.getBlockchain().getLatestBlock());
+                    ReadLock r = Config.STATE_LOCK.readLock();
+
+                    r.lock();
+                    if (kernel.isRunning) {
+                        onBlockAdded(kernel.getBlockchain().getLatestBlock());
+                    } else {
+                        break;
+                    }
+                    r.unlock();
+
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     logger.info("Data refresh interrupted, exiting");
