@@ -111,7 +111,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         panel2.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         JLabel label = new JLabel(
-                "<html>NOTE: A minimum transaction fee (5 mSEM) will apply when you vote, unvote, or register as a delegate.</p></html>");
+                "<html>NOTE: 1000 SEM will be burned when you register a delegate; 5 mSEM transaction fee will apply when register, vote or unvote a delegate.</html>");
         label.setForeground(Color.DARK_GRAY);
 
         from = new JComboBox<>();
@@ -123,13 +123,13 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         groupLayout.setHorizontalGroup(
             groupLayout.createParallelGroup(Alignment.TRAILING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 657, Short.MAX_VALUE)
+                    .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 640, Short.MAX_VALUE)
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
-                        .addComponent(panel, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
-                        .addComponent(from, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(label, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
-                        .addComponent(panel2, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(panel, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                        .addComponent(from, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                        .addComponent(label, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                        .addComponent(panel2, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
