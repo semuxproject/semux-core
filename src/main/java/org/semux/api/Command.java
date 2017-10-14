@@ -82,19 +82,9 @@ public enum Command {
     // state query
     // =======================
     /**
-     * Get the balance of an account.
+     * Get the info of an account.
      */
-    GET_BALANCE,
-
-    /**
-     * Get the locked balance of an account.
-     */
-    GET_LOCKED,
-
-    /**
-     * Get the nonce of an account.
-     */
-    GET_NONCE,
+    GET_ACCOUNT,
 
     /**
      * Get all validators.

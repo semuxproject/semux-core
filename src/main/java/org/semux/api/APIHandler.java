@@ -192,29 +192,11 @@ public class APIHandler {
                 }
             }
 
-            case GET_BALANCE: {
+            case GET_ACCOUNT: {
                 String addr = params.get("address");
                 if (addr != null) {
                     Account acc = chain.getAccountState().getAccount(Hex.parse(addr));
-                    return success(acc.getBalance());
-                } else {
-                    return failure("Invalid parameter: address = " + addr);
-                }
-            }
-            case GET_LOCKED: {
-                String addr = params.get("address");
-                if (addr != null) {
-                    Account acc = chain.getAccountState().getAccount(Hex.parse(addr));
-                    return success(acc.getLocked());
-                } else {
-                    return failure("Invalid parameter: address = " + addr);
-                }
-            }
-            case GET_NONCE: {
-                String addr = params.get("address");
-                if (addr != null) {
-                    Account acc = chain.getAccountState().getAccount(Hex.parse(addr));
-                    return success(acc.getNonce());
+                    return success(accountToJson(acc));
                 } else {
                     return failure("Invalid parameter: address = " + addr);
                 }
@@ -428,6 +410,26 @@ public class APIHandler {
         obj.put("timestamp", tx.getTimestamp());
         obj.put("date", df.format(new Date(tx.getTimestamp())));
         obj.put("data", Hex.PREF + Hex.encode(tx.getData()));
+
+        return obj;
+    }
+
+    /**
+     * Convert an account to JSON object.
+     * 
+     * @param acc
+     * @return
+     */
+    protected Object accountToJson(Account acc) {
+        if (acc == null) {
+            return JSONObject.NULL;
+        }
+
+        JSONObject obj = new JSONObject();
+        obj.put("address", Hex.PREF + Hex.encode(acc.getAddress()));
+        obj.put("balance", acc.getBalance());
+        obj.put("locked", acc.getLocked());
+        obj.put("registeredAt", acc.getNonce());
 
         return obj;
     }

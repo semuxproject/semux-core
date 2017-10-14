@@ -20,7 +20,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semux.Config;
-import org.semux.core.Account;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -236,37 +235,14 @@ public class APIHandlerTest {
     }
 
     @Test
-    public void testGetBalance() throws IOException {
+    public void testGetAccount() throws IOException {
         Genesis gen = Genesis.getInstance();
         Entry<ByteArray, Long> entry = gen.getPremine().entrySet().iterator().next();
 
-        String uri = "/get_balance?address=" + entry.getKey();
+        String uri = "/get_account?address=" + entry.getKey();
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        assertEquals((long) entry.getValue(), response.getLong("result"));
-    }
-
-    @Test
-    public void testGetLocked() throws IOException {
-        EdDSA key = new EdDSA();
-        Account acc = api.chain.getAccountState().getAccount(key.toAddress());
-        acc.setLocked(100L);
-
-        String uri = "/get_locked?address=" + key.toAddressString();
-        JSONObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertEquals(100L, response.getLong("result"));
-    }
-
-    @Test
-    public void testGetNonce() throws IOException {
-        Genesis gen = Genesis.getInstance();
-        Entry<ByteArray, Long> entry = gen.getPremine().entrySet().iterator().next();
-
-        String uri = "/get_nonce?address=" + entry.getKey();
-        JSONObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertNotNull(response.getLong("result"));
+        assertEquals((long) entry.getValue(), response.getJSONObject("result").getLong("balance"));
     }
 
     @Test
