@@ -17,12 +17,10 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
+import javax.swing.text.DefaultEditorKit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -161,6 +159,22 @@ public class SwingUtil {
         } catch (WriterException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static JTextField editableTextField() {
+        JTextField textfield = new JTextField();
+        JPopupMenu popup = new JPopupMenu();
+        JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
+        item.setText("Cut");
+        popup.add(item);
+        item = new JMenuItem(new DefaultEditorKit.CopyAction());
+        item.setText("Copy");
+        popup.add(item);
+        item = new JMenuItem(new DefaultEditorKit.PasteAction());
+        item.setText("Paste");
+        popup.add(item);
+        textfield.setComponentPopupMenu(popup);
+        return textfield;
     }
 
     /**
