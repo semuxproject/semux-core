@@ -6,6 +6,7 @@
  */
 package org.semux;
 
+import java.io.Console;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +44,9 @@ public class CLI {
             break;
         case LIST_ACCOUNTS:
             listAccounts(wallet);
+            break;
+        case CHANGE_PASSWORD:
+            changePassword(wallet);
             break;
         }
     }
@@ -90,6 +94,9 @@ public class CLI {
                 case "--password":
                     password = args[++i];
                     break;
+                case "--changepassword":
+                    action = Action.CHANGE_PASSWORD;
+                    break;
                 default:
                     printUsageAndExit(-1);
                 }
@@ -113,6 +120,8 @@ public class CLI {
         System.out.println("                  list    List all accounts and exit");
         System.out.println("  -c, --coinbase  index   Specify which account to be used as coinbase");
         System.out.println("  -p, --password  " + "pwd     Password of the wallet");
+        System.out.println("  -p, --password  " + "pwd     Password of the wallet");
+        System.out.println("  --changepassword        Change password of the wallet");
         System.out.println();
     }
 
@@ -193,6 +202,26 @@ public class CLI {
         }
     }
 
+    private static void changePassword(Wallet wallet) {
+        if (password == null) {
+            password = SystemUtil.readPassword();
+        }
+        if (!wallet.unlock(password)) {
+            System.exit(-1);
+        }
+
+        Console console = System.console();
+        String newPassword = new String(console.readPassword("Please enter the new password: "));
+
+        wallet.changePassword(newPassword);
+        Boolean isFlushed = wallet.flush();
+        if (!isFlushed) {
+            logger.error("Failed to save the new password");
+        } else {
+            logger.info("Password is successfully changed");
+        }
+    }
+
     private static String createLine(int width) {
         char[] buf = new char[width];
         Arrays.fill(buf, '-');
@@ -200,6 +229,6 @@ public class CLI {
     }
 
     private enum Action {
-        START_KERNEL, CREATE_ACCOUNT, LIST_ACCOUNTS
+        START_KERNEL, CREATE_ACCOUNT, LIST_ACCOUNTS, CHANGE_PASSWORD
     }
 }
