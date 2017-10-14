@@ -368,7 +368,7 @@ public class Config {
      * @return
      */
     public static int getNumberOfValidators(long number) {
-        long step = 3 * 60 * 6; // every 6 hours
+        long step = 2 * 60 * 9; // every 9 hours
 
         if (number < 80 * step) {
             return (int) (20 + number / step);
