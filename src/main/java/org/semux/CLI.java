@@ -6,12 +6,12 @@
  */
 package org.semux;
 
-import java.io.Console;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 import org.semux.core.Wallet;
+import org.semux.core.WalletLockedException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.utils.SystemUtil;
@@ -120,7 +120,6 @@ public class CLI {
         System.out.println("                  list    List all accounts and exit");
         System.out.println("  -c, --coinbase  index   Specify which account to be used as coinbase");
         System.out.println("  -p, --password  " + "pwd     Password of the wallet");
-        System.out.println("  -p, --password  " + "pwd     Password of the wallet");
         System.out.println("  --changepassword        Change password of the wallet");
         System.out.println();
     }
@@ -210,15 +209,17 @@ public class CLI {
             System.exit(-1);
         }
 
-        Console console = System.console();
-        String newPassword = new String(console.readPassword("Please enter the new password: "));
-
-        wallet.changePassword(newPassword);
-        Boolean isFlushed = wallet.flush();
-        if (!isFlushed) {
-            logger.error("Failed to save the new password");
-        } else {
-            logger.info("Password is successfully changed");
+        try {
+            String newPassword = SystemUtil.readPassword("Please enter the new password: ");
+            wallet.changePassword(newPassword);
+            Boolean isFlushed = wallet.flush();
+            if (!isFlushed) {
+                logger.error("Failed to save the new password");
+            } else {
+                logger.info("Password is successfully changed");
+            }
+        } catch (WalletLockedException exception) {
+            logger.error(exception.getMessage());
         }
     }
 

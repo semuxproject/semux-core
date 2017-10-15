@@ -86,21 +86,30 @@ public class SystemUtil {
     }
 
     /**
-     * Read a password from console.
+     * Read a password from console with a customized message.
      * 
      * @return
      */
-    public static String readPassword() {
+    public static String readPassword(String message) {
         Console console = System.console();
 
         if (console == null) {
-            System.out.print("Please enter your password: ");
+            System.out.print(message);
             System.out.flush();
 
             return SCANNER.nextLine();
         }
 
-        return new String(console.readPassword("Please enter you password: "));
+        return new String(console.readPassword(message));
+    }
+
+    /**
+     * Read a password from console.
+     *
+     * @return
+     */
+    public static String readPassword() {
+        return readPassword("Please enter your password: ");
     }
 
     /**
