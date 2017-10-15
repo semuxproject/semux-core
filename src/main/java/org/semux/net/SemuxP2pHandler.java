@@ -160,11 +160,10 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             ReasonCode error = null;
             if (!isSupported(peer.getP2pVersion())) {
                 error = ReasonCode.BAD_PROTOCOL;
-            } else if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isConnectedPeer(peer.getPeerId())) {
+            } else if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isActivePeer(peer.getPeerId())) {
                 error = ReasonCode.DUPLICATE_PEER_ID;
             } else if (chain.getValidators().contains(peer.getPeerId())
-                    && channelMgr.isConnectedIP(channel.getRemoteIp())) {
-                // for the security of the network, only allow one validator per IP address
+                    && channelMgr.isActiveIP(channel.getRemoteIp())) {
                 error = ReasonCode.SLOW_PEER;
             } else if (!helloMsg.isValid()) {
                 error = ReasonCode.INVALID_HANDSHAKE;

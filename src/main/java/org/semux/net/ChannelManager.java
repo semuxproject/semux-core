@@ -61,9 +61,9 @@ public class ChannelManager {
      * @param ip
      * @return
      */
-    public synchronized boolean isConnectedIP(String ip) {
-        for (InetSocketAddress addr : channels.keySet()) {
-            if (addr.getAddress().getHostAddress().equals(ip)) {
+    public synchronized boolean isActiveIP(String ip) {
+        for (Channel c : activeChannels.values()) {
+            if (c.getRemoteIp().equals(ip)) {
                 return true;
             }
         }
@@ -77,7 +77,7 @@ public class ChannelManager {
      * @param peerId
      * @return
      */
-    public synchronized boolean isConnectedPeer(String peerId) {
+    public synchronized boolean isActivePeer(String peerId) {
         return activeChannels.containsKey(peerId);
     }
 
