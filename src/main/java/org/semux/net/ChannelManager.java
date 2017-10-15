@@ -56,12 +56,28 @@ public class ChannelManager {
     }
 
     /**
+     * Returns whether the specified IP is connected.
+     * 
+     * @param ip
+     * @return
+     */
+    public synchronized boolean isConnectedIP(String ip) {
+        for (InetSocketAddress addr : channels.keySet()) {
+            if (addr.getAddress().getHostAddress().equals(ip)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Returns whether the specified peer is connected.
      * 
      * @param peerId
      * @return
      */
-    public synchronized boolean isConnected(String peerId) {
+    public synchronized boolean isConnectedPeer(String peerId) {
         return activeChannels.containsKey(peerId);
     }
 
