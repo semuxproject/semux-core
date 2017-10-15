@@ -246,22 +246,6 @@ public class APIHandlerTest {
     }
 
     @Test
-    public void testGetValidators() throws IOException {
-        String uri = "/get_validators";
-        JSONObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertTrue(response.getJSONArray("result").length() > 0);
-    }
-
-    @Test
-    public void testGetDelegates() throws IOException {
-        String uri = "/get_delegates";
-        JSONObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertTrue(response.getJSONArray("result").length() > 0);
-    }
-
-    @Test
     public void testGetDelegate() throws IOException {
         Genesis gen = Genesis.getInstance();
         Entry<String, byte[]> entry = gen.getDelegates().entrySet().iterator().next();
@@ -278,6 +262,22 @@ public class APIHandlerTest {
     }
 
     @Test
+    public void testGetDelegates() throws IOException {
+        String uri = "/get_delegates";
+        JSONObject response = request(uri);
+        assertTrue(response.getBoolean("success"));
+        assertTrue(response.getJSONArray("result").length() > 0);
+    }
+
+    @Test
+    public void testGetValidators() throws IOException {
+        String uri = "/get_validators";
+        JSONObject response = request(uri);
+        assertTrue(response.getBoolean("success"));
+        assertTrue(response.getJSONArray("result").length() > 0);
+    }
+
+    @Test
     public void testGetVote() throws IOException {
         EdDSA key = new EdDSA();
         EdDSA key2 = new EdDSA();
@@ -285,7 +285,7 @@ public class APIHandlerTest {
         ds.register(key2.toAddress(), Bytes.of("test"));
         ds.vote(key.toAddress(), key2.toAddress(), 200L);
 
-        String uri = "/get_vote?from=" + key.toAddressString() + "&to=" + key2.toAddressString();
+        String uri = "/get_vote?voter=" + key.toAddressString() + "&delegate=" + key2.toAddressString();
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertEquals(200L, response.getLong("result"));
@@ -293,7 +293,7 @@ public class APIHandlerTest {
 
     @Test
     public void testGetAccounts() throws IOException {
-        String uri = "/get_accounts?password=" + password;
+        String uri = "/list_accounts?password=" + password;
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getJSONArray("result"));
@@ -328,9 +328,8 @@ public class APIHandlerTest {
 
     @Test
     public void testDelegate() throws IOException, InterruptedException {
-        EdDSA key = wallet.getAccounts().get(0);
-        String uri = "/delegate?password=" + password + "&from=0&to=" + key.toAddressString() + "&value="
-                + Config.MIN_DELEGATE_FEE + "&fee=5000000&data=" + Hex.encode(Bytes.of("test_delegate"));
+        String uri = "/delegate?password=" + password + "&from=0&fee=5000000&data="
+                + Hex.encode(Bytes.of("test_delegate"));
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));

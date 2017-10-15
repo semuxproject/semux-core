@@ -201,6 +201,20 @@ public class APIHandler {
                     return failure("Invalid parameter: address = " + addr);
                 }
             }
+            case GET_DELEGATE: {
+                String name = params.get("name");
+                String address = params.get("address");
+
+                if (name != null) {
+                    Delegate d = chain.getDeleteState().getDelegateByName(Bytes.of(name));
+                    return success(delegateToJson(d));
+                } else if (address != null) {
+                    Delegate d = chain.getDeleteState().getDelegateByAddress(Hex.parse(address));
+                    return success(delegateToJson(d));
+                } else {
+                    return failure("Invalid parameter: name = " + name + ", address = " + address);
+                }
+            }
             case GET_VALIDATORS: {
                 List<String> validators = chain.getValidators();
                 JSONArray arr = new JSONArray();
@@ -217,23 +231,9 @@ public class APIHandler {
                 }
                 return success(arr);
             }
-            case GET_DELEGATE: {
-                String name = params.get("name");
-                String address = params.get("address");
-
-                if (name != null) {
-                    Delegate d = chain.getDeleteState().getDelegateByName(Bytes.of(name));
-                    return success(delegateToJson(d));
-                } else if (address != null) {
-                    Delegate d = chain.getDeleteState().getDelegateByAddress(Hex.parse(address));
-                    return success(delegateToJson(d));
-                } else {
-                    return failure("Invalid parameter: name = " + name + ", address = " + address);
-                }
-            }
             case GET_VOTE: {
-                String from = params.get("from");
-                String to = params.get("to");
+                String from = params.get("voter");
+                String to = params.get("delegate");
 
                 if (from != null && to != null) {
                     long vote = chain.getDeleteState().getVote(Hex.decode(from), Hex.decode(to));
@@ -243,7 +243,7 @@ public class APIHandler {
                 }
             }
 
-            case GET_ACCOUNTS: {
+            case LIST_ACCOUNTS: {
                 String result;
                 if ((result = checkPassword(params)) != null) {
                     return result;
@@ -317,7 +317,10 @@ public class APIHandler {
         }
 
         // [3] parse parameters
-        if (pFrom != null && pTo != null && (type == TransactionType.DELEGATE || pValue != null) && pFee != null) {
+        if (pFrom != null //
+                && (type == TransactionType.DELEGATE || pTo != null) //
+                && (type == TransactionType.DELEGATE || pValue != null) //
+                && pFee != null) {
             // from address
             EdDSA from = (pFrom.length() >= 20) ? wallet.getAccount(Hex.parse(pFrom))
                     : wallet.getAccount(Integer.parseInt(pFrom));
@@ -326,13 +329,14 @@ public class APIHandler {
             }
 
             // to address
-            byte[] to = (pTo.length() >= 20) ? Hex.parse(pTo) : wallet.getAccount(Integer.parseInt(pTo)).getPublicKey();
+            byte[] to = (type == TransactionType.DELEGATE) ? from.toAddress()
+                    : (pTo.length() >= 20) ? Hex.parse(pTo) : wallet.getAccount(Integer.parseInt(pTo)).getPublicKey();
             if (to == null) {
                 return failure("Invalid parameter: to = " + pTo);
             }
 
             // value and fee
-            long value = Long.parseLong(pValue);
+            long value = (type == TransactionType.DELEGATE) ? Config.MIN_DELEGATE_FEE : Long.parseLong(pValue);
             long fee = Long.parseLong(pFee);
 
             // nonce, timestamp and data

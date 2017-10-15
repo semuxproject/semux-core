@@ -87,6 +87,11 @@ public enum Command {
     GET_ACCOUNT,
 
     /**
+     * Get delegate by address or name.
+     */
+    GET_DELEGATE,
+
+    /**
      * Get all validators.
      */
     GET_VALIDATORS,
@@ -95,11 +100,6 @@ public enum Command {
      * Get all delegates.
      */
     GET_DELEGATES,
-
-    /**
-     * Get delegate by address or name.
-     */
-    GET_DELEGATE,
 
     /**
      * Get the number of votes one has bonded to a delegate.
@@ -112,7 +112,7 @@ public enum Command {
     /**
      * List accounts in the wallet.
      */
-    GET_ACCOUNTS,
+    LIST_ACCOUNTS,
 
     /**
      * Create a new account.
