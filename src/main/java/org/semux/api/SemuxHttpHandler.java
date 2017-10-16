@@ -89,8 +89,9 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
             HttpContent httpContent = (HttpContent) msg;
 
             ByteBuf content = httpContent.content();
-            if (content.isReadable()) {
-                content.readBytes(body);
+            int length = content.readableBytes();
+            if (length > 0) {
+                body.writeBytes(content, length);
             }
 
             if (msg instanceof LastHttpContent) {
@@ -99,6 +100,26 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
 
                 // trailing headers are ignored
 
+                // process uri
+                if (uri.contains("?")) {
+                    uri = uri.substring(0, uri.indexOf('?'));
+                }
+
+                // parse parameter from body
+                if ("application/x-www-form-urlencoded".equals(headers.get("Content-type"))
+                        && body.readableBytes() > 0) {
+                    QueryStringDecoder decoder = new QueryStringDecoder("?" + body.toString(CHARSET));
+                    Map<String, List<String>> map = decoder.parameters();
+                    for (String k : map.keySet()) {
+                        if (params.containsKey(k)) {
+                            params.get(k).addAll(map.get(k));
+                        } else {
+                            params.put(k, map.get(k));
+                        }
+                    }
+                }
+
+                // filter parameters
                 Map<String, String> map = new HashMap<>();
                 for (String k : params.keySet()) {
                     List<String> v = params.get(k);
@@ -107,7 +128,9 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
                         map.put(k, v.get(0));
                     }
                 }
-                String response = (error != null) ? error : handler.service(uri, map, headers, body);
+
+                // delegate requests
+                String response = (error != null) ? error : handler.service(uri, map, headers);
 
                 if (!writeResponse(ctx, response)) {
                     // if keep-alive is off, close the connection after flushing
@@ -129,7 +152,7 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
     private boolean writeResponse(ChannelHandlerContext ctx, String response) {
         // construct a HTTP response
         FullHttpResponse resp = new DefaultFullHttpResponse(HTTP_1_1, OK,
-                Unpooled.copiedBuffer(response.toString(), CHARSET));
+                Unpooled.copiedBuffer(response == null ? "" : response, CHARSET));
 
         // set response headers
         resp.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=UTF-8");

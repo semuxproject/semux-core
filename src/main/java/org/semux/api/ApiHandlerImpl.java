@@ -31,7 +31,6 @@ import org.semux.net.Peer;
 import org.semux.net.PeerClient;
 import org.semux.utils.Bytes;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
 
 /**
@@ -68,13 +67,12 @@ public class ApiHandlerImpl implements ApiHandler {
     }
 
     @Override
-    public String service(String uri, Map<String, String> params, HttpHeaders headers, ByteBuf body) {
+    public String service(String uri, Map<String, String> params, HttpHeaders headers) {
         if ("/".equals(uri)) {
             return success("Semux API works");
         }
 
-        int idx = uri.indexOf('?');
-        Command cmd = Command.of(idx != -1 ? uri.substring(1, idx) : uri.substring(1));
+        Command cmd = Command.of(uri.substring(1));
         if (cmd == null) {
             return failure("Invalid request: uri = " + uri);
         }

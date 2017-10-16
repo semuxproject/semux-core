@@ -8,7 +8,6 @@ package org.semux.api;
 
 import java.util.Map;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
 
 /**
@@ -23,8 +22,7 @@ public interface ApiHandler {
      * @param uri
      * @param params
      * @param headers
-     * @param body
      * @return
      */
-    public String service(String uri, Map<String, String> params, HttpHeaders headers, ByteBuf body);
+    public String service(String uri, Map<String, String> params, HttpHeaders headers);
 }
