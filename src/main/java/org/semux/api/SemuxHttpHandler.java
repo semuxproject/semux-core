@@ -48,7 +48,7 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
     private static final int MAX_BODY_SIZE = 512 * 1024; // 512KB
     private static final Charset CHARSET = CharsetUtil.UTF_8;
 
-    private APIHandler handler;
+    private ApiHandler handler;
 
     private boolean keepAlive;
     private String uri;
@@ -58,7 +58,7 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
 
     private String error = null;
 
-    public SemuxHttpHandler(APIHandler handler) {
+    public SemuxHttpHandler(ApiHandler handler) {
         this.handler = handler;
     }
 

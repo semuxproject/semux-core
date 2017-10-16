@@ -42,7 +42,7 @@ public class SemuxAPI {
         }
     };
 
-    private APIHandler handler;
+    private ApiHandler handler;
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
@@ -50,7 +50,7 @@ public class SemuxAPI {
 
     private boolean listening;
 
-    public SemuxAPI(APIHandler handler) {
+    public SemuxAPI(ApiHandler handler) {
         this.handler = handler;
     }
 

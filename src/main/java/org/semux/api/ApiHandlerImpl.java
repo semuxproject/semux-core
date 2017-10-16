@@ -35,10 +35,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
 
 /**
- * Semux RESTful API handler.
+ * Semux RESTful API handler implementation.
  *
  */
-public class APIHandler {
+public class ApiHandlerImpl implements ApiHandler {
 
     private Wallet wallet;
     private Blockchain chain;
@@ -57,7 +57,7 @@ public class APIHandler {
      * @param nodeMgr
      * @param client
      */
-    public APIHandler(Wallet wallet, Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr,
+    public ApiHandlerImpl(Wallet wallet, Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr,
             NodeManager nodeMgr, PeerClient client) {
         this.wallet = wallet;
         this.chain = chain;
@@ -67,15 +67,7 @@ public class APIHandler {
         this.client = client;
     }
 
-    /**
-     * Called by HTTP handler to process a request.
-     * 
-     * @param uri
-     * @param params
-     * @param headers
-     * @param body
-     * @return
-     */
+    @Override
     public String service(String uri, Map<String, String> params, HttpHeaders headers, ByteBuf body) {
         if ("/".equals(uri)) {
             return success("Semux API works");

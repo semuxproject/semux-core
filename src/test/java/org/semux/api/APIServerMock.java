@@ -45,7 +45,7 @@ public class APIServerMock {
                 client = new PeerClient("127.0.0.1", 5161, coinbase);
                 nodeMgr = new NodeManager(chain, channelMgr, pendingMgr, client);
 
-                server = new SemuxAPI(new APIHandler(wallet, chain, channelMgr, pendingMgr, nodeMgr, client));
+                server = new SemuxAPI(new ApiHandlerImpl(wallet, chain, channelMgr, pendingMgr, nodeMgr, client));
                 server.start(ip, port);
             }, "api").start();
 

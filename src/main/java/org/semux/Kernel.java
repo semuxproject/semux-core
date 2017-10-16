@@ -9,7 +9,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
-import org.semux.api.APIHandler;
+import org.semux.api.ApiHandlerImpl;
 import org.semux.api.SemuxAPI;
 import org.semux.consensus.SemuxBFT;
 import org.semux.consensus.SemuxSync;
@@ -161,7 +161,7 @@ public class Kernel {
         // ====================================
         // start API module
         // ====================================
-        SemuxAPI api = new SemuxAPI(new APIHandler(wallet, chain, channelMgr, pendingMgr, nodeMgr, client));
+        SemuxAPI api = new SemuxAPI(new ApiHandlerImpl(wallet, chain, channelMgr, pendingMgr, nodeMgr, client));
 
         if (Config.API_ENABLED) {
             Thread apiThread = new Thread(() -> {
