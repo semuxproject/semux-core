@@ -43,6 +43,7 @@ import org.semux.net.msg.consensus.BFTProposalMessage;
 import org.semux.net.msg.consensus.BFTVoteMessage;
 import org.semux.utils.ArrayUtil;
 import org.semux.utils.MerkleUtil;
+import org.semux.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +83,7 @@ public class SemuxBFT implements Consensus {
     private VoteSet commitVotes;
 
     private static SemuxBFT instance;
+    private static boolean qualified;
 
     /**
      * Get the singleton instance of consensus.
@@ -248,6 +250,13 @@ public class SemuxBFT implements Consensus {
 
         logger.info("Entered new_height: height = {}, # validators = {}", height, validators.size());
         if (isValidator()) {
+            if (!qualified) {
+                qualified = SystemUtil.bench();
+                if (!qualified) {
+                    logger.error("You need to upgrade your computer to join the BFT consensus");
+                    System.exit(-1);
+                }
+            }
             timer.timeout(Config.BFT_NEW_HEIGHT_TIMEOUT);
         }
 

@@ -141,7 +141,7 @@ public class Config {
     /**
      * Deadline of the next mandatory upgrade.
      */
-    public static long MANDATORY_UPGRADE = 3 * 60 * 24 * 365;
+    public static long MANDATORY_UPGRADE = 2 * 60 * 24 * 30;
 
     /**
      * State lock to prevent state inconsistency.

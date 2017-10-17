@@ -122,4 +122,13 @@ public class SystemUtil {
     public static int compareVersion(String v1, String v2) {
         return Version.valueOf(v1).compareTo(Version.valueOf(v2));
     }
+
+    /**
+     * System benchmark.
+     * 
+     * @return
+     */
+    public static boolean bench() {
+        return true;
+    }
 }
