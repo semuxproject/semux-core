@@ -19,7 +19,7 @@ public class Testnet {
         params.put("from", from);
         params.put("to", to);
         params.put("value", value);
-        params.put("fee", Config.MIN_TRANSACTION_FEE);
+        params.put("fee", Config.MIN_TRANSACTION_FEE_HARD);
         params.put("data", Bytes.EMPY_BYTES);
 
         JSONObject response = ApiUtil.request(cmd, params);
@@ -33,7 +33,7 @@ public class Testnet {
         params.put("from", address);
         params.put("to", address);
         params.put("value", Config.MIN_DELEGATE_FEE);
-        params.put("fee", Config.MIN_TRANSACTION_FEE);
+        params.put("fee", Config.MIN_TRANSACTION_FEE_HARD);
         params.put("data", name);
 
         JSONObject response = ApiUtil.request(cmd, params);

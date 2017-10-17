@@ -197,7 +197,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
             if (acc == null) {
                 JOptionPane.showMessageDialog(this, "Please select an account!");
-            } else if (fee < Config.MIN_TRANSACTION_FEE) {
+            } else if (fee < Config.MIN_TRANSACTION_FEE_SOFT) {
                 JOptionPane.showMessageDialog(this, "Transaction fee is too low!");
             } else if (value + fee > acc.getBalance()) {
                 JOptionPane.showMessageDialog(this, "Insufficient funds!");
@@ -270,6 +270,6 @@ public class SendPanel extends JPanel implements ActionListener {
     private void clear() {
         setTo(Bytes.EMPY_BYTES);
         setAmount(0);
-        setFee(Config.MIN_TRANSACTION_FEE);
+        setFee(Config.MIN_TRANSACTION_FEE_SOFT);
     }
 }

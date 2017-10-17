@@ -27,7 +27,7 @@ public class BlockTest {
     private byte[] data = Bytes.of("data");
 
     private Transaction tx = new Transaction(TransactionType.TRANSFER, Bytes.random(20), Bytes.random(20), 0,
-            Config.MIN_TRANSACTION_FEE, 1, System.currentTimeMillis(), Bytes.EMPY_BYTES).sign(new EdDSA());
+            Config.MIN_TRANSACTION_FEE_HARD, 1, System.currentTimeMillis(), Bytes.EMPY_BYTES).sign(new EdDSA());
     private TransactionResult res = new TransactionResult(true);
     private List<Transaction> transactions = Collections.singletonList(tx);
     private List<TransactionResult> results = Collections.singletonList(res);

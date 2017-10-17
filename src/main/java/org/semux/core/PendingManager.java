@@ -246,7 +246,9 @@ public class PendingManager implements Runnable, BlockchainListener {
     public synchronized void run() {
         Transaction tx;
 
-        while (poolMap.size() < 2 * Config.MAX_BLOCK_SIZE && (tx = queue.poll()) != null) {
+        while (poolMap.size() < 2 * Config.MAX_BLOCK_SIZE //
+                && (tx = queue.poll()) != null //
+                && tx.getFee() >= Config.MIN_TRANSACTION_FEE_SOFT) {
             // filter by cache
             ByteArray key = ByteArray.of(tx.getHash());
             if (processedTxs.containsKey(key)) {

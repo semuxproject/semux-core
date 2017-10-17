@@ -110,8 +110,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         JPanel panel2 = new JPanel();
         panel2.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        JLabel label = new JLabel(
-                "<html>NOTE: 1000 SEM will be burned when you register a delegate; 5 mSEM transaction fee will apply when register, vote or unvote a delegate.</html>");
+        JLabel label = new JLabel("<html>NOTE: 1000 SEM will be burned when you register a delegate; "
+                + Config.MIN_TRANSACTION_FEE_SOFT / Unit.MILLI_SEM
+                + " mSEM transaction fee will apply when register, vote or unvote a delegate.</html>");
         label.setForeground(Color.DARK_GRAY);
 
         from = new JComboBox<>();
@@ -329,7 +330,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 byte[] from = a.getKey().toAddress();
                 byte[] to = d.getAddress();
                 long value = Long.parseLong(v) * Unit.SEM;
-                long fee = Config.MIN_TRANSACTION_FEE;
+                long fee = Config.MIN_TRANSACTION_FEE_SOFT;
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = {};
@@ -347,8 +348,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Please select an account!");
             } else if (!name.matches("[_a-z0-9]{4,16}")) {
                 JOptionPane.showMessageDialog(this, "Only 4-16 lowercase letters, numbers and underscore are allowed!");
-            } else if (a.getBalance() < Config.MIN_DELEGATE_FEE + Config.MIN_TRANSACTION_FEE) {
-                JOptionPane.showMessageDialog(this, "Insufficient funds!");
+            } else if (a.getBalance() < Config.MIN_DELEGATE_FEE + Config.MIN_TRANSACTION_FEE_SOFT) {
+                JOptionPane.showMessageDialog(this, "Insufficient funds! You need 1000 SEM + transaction fee");
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
                         "Delegate registration will cost you " + Config.MIN_DELEGATE_FEE / Unit.SEM + " SEM, continue?",
@@ -364,7 +365,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 byte[] from = a.getKey().toAddress();
                 byte[] to = from;
                 long value = Config.MIN_DELEGATE_FEE;
-                long fee = Config.MIN_TRANSACTION_FEE;
+                long fee = Config.MIN_TRANSACTION_FEE_HARD;
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = Bytes.of(name);

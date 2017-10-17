@@ -121,7 +121,12 @@ public class Config {
     /**
      * Minimum transaction fee.
      */
-    public static long MIN_TRANSACTION_FEE = 5 * Unit.MILLI_SEM;
+    public static long MIN_TRANSACTION_FEE_HARD = 5 * Unit.MILLI_SEM;
+
+    /**
+     * Minimum transaction fee (soft as enforced by pending manager).
+     */
+    public static long MIN_TRANSACTION_FEE_SOFT = 100 * Unit.MILLI_SEM;
 
     /**
      * Minimum delegate fee.

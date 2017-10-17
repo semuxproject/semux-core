@@ -36,7 +36,7 @@ public class SemuxPerformance {
             params.put("from", key.toAddress());
             params.put("to", key.toAddress());
             params.put("value", 1 * Unit.MILLI_SEM);
-            params.put("fee", Config.MIN_TRANSACTION_FEE);
+            params.put("fee", Config.MIN_TRANSACTION_FEE_HARD);
             params.put("data", Bytes.EMPY_BYTES);
             params.put("password", password);
 

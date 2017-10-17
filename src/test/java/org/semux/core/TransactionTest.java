@@ -25,7 +25,7 @@ public class TransactionTest {
     private byte[] from = Bytes.random(20);
     private byte[] to = Bytes.random(20);
     private long value = 2;
-    private long fee = Config.MIN_TRANSACTION_FEE;
+    private long fee = Config.MIN_TRANSACTION_FEE_HARD;
     private long nonce = 1;
     private long timestamp = System.currentTimeMillis();
     private byte[] data = Bytes.of("data");
