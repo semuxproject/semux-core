@@ -69,9 +69,9 @@ public class SemuxPerformance {
         }
 
         EdDSA key = wallet.getAccounts().get(coinbase);
-        JSONObject obj = ApiUtil.request(server, "get_balance", "address", key.toAddressString());
+        JSONObject obj = ApiUtil.request(server, "get_account", "address", key.toAddressString());
         System.out.println("Address: " + key.toAddressString());
-        System.out.println("Balance: " + obj.getLong("result") / Unit.SEM + " SEM");
+        System.out.println("Balance: " + obj.getJSONObject("result").getLong("balance") / Unit.SEM + " SEM");
 
         while (true) {
             System.out.print("# transactions to send: ");
