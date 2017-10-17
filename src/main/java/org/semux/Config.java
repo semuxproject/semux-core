@@ -155,7 +155,7 @@ public class Config {
     /**
      * Version of this client.
      */
-    public static String CLIENT_VERSION = "1.0.0-beta.4";
+    public static String CLIENT_VERSION = "1.0.0-beta.5";
 
     // =========================
     // Crypto
@@ -202,7 +202,7 @@ public class Config {
     /**
      * Maximum number of connections.
      */
-    public static int NET_MAX_CONNECTIONS = 512;
+    public static int NET_MAX_CONNECTIONS = 256;
 
     /**
      * Maximum message queue size.
@@ -242,7 +242,7 @@ public class Config {
     /**
      * Message broadcast redundancy.
      */
-    public static int NET_RELAY_REDUNDANCY = 32;
+    public static int NET_RELAY_REDUNDANCY = 16;
 
     /**
      * Privileged message types
@@ -277,6 +277,7 @@ public class Config {
     // =========================
     // BFT consensus
     // =========================
+
     /**
      * The duration of NEW_HEIGHT state. This allows validators to catch up.
      */

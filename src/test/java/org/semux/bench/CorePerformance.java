@@ -90,6 +90,7 @@ public class CorePerformance {
             tx.validate();
         }
         long t2 = System.nanoTime();
+        logger.info("Perf_transaction_size: {} B", tx.toBytes().length);
         logger.info("Perf_transaction_validation: {} μs/time", (t2 - t1) / repeat / 1_000);
     }
 
