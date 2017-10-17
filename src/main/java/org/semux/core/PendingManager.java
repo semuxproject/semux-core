@@ -53,8 +53,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         }
     };
 
-    private static final int CACHE_SIZE = 64 * 1024;
-    private static final int MAX_NONCE_JUMP = 1024;
+    private static final int CACHE_SIZE = 128 * 1024;
 
     private Blockchain chain;
     private ChannelManager channelMgr;
@@ -106,7 +105,7 @@ public class PendingManager implements Runnable, BlockchainListener {
              * queues from hitting the NET_MAX_QUEUE_SIZE, especially when the network load
              * is heavy.
              */
-            long rate = Config.NET_MAX_QUEUE_RATE * 2;
+            long rate = Config.NET_MAX_QUEUE_RATE * 3 / 2;
             this.validateFuture = exec.scheduleAtFixedRate(this, 0, rate, TimeUnit.MILLISECONDS);
 
             this.chain.addListener(this);
@@ -325,7 +324,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         }
 
         // add to cache
-        if (tx != null && tx.getNonce() > nonce && tx.getNonce() < nonce + MAX_NONCE_JUMP) {
+        if (tx != null && tx.getNonce() > nonce) {
             cache.put(createKey(tx), tx);
         }
 
