@@ -36,7 +36,7 @@ public class PendingManagerTest {
     private static byte[] from = new EdDSA().toAddress();
     private static byte[] to = new EdDSA().toAddress();
     private static long value = 1 * Unit.MILLI_SEM;
-    private static long fee = Config.MIN_TRANSACTION_FEE_HARD;
+    private static long fee = Config.MIN_TRANSACTION_FEE_SOFT;
 
     private static EdDSA key = new EdDSA();
 
