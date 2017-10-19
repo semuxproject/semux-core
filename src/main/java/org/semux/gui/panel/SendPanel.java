@@ -171,28 +171,34 @@ public class SendPanel extends JPanel implements ActionListener {
         to.setText(Hex.encode(addr));
     }
 
+    /**
+     * @return the submitted amount of coins as long
+     * @exception IllegalArgumentException on ParseException
+     */
     public long getAmount() {
         try {
             return (long) (Unit.SEM * NumberFormat.getInstance().parse(amount.getText().trim()).doubleValue());
         } catch (ParseException e) {
-            logger.error("NumberFormatException", e);
+            logger.error("Parsing of submitted value of amount failed", e);
+            throw new IllegalArgumentException(e);
         }
-        // we should never come here -> work or exception
-        return 0;
     }
 
     public void setAmount(long a) {
         amount.setText(a == 0 ? "" : String.format("%.3f", a / (double) Unit.SEM));
     }
 
+    /**
+     * @return the submitted Fee as long 
+     * @exception IllegalArgumentException on ParseException
+     */
     public long getFee() {
         try {
             return (long) (Unit.SEM * NumberFormat.getInstance().parse(fee.getText().trim()).doubleValue());
         } catch (ParseException e) {
-            logger.error("NumberFormatException", e);
+            logger.error("Parsing of submitted value of fee failed", e);
+            throw new IllegalArgumentException(e);
         }
-        // we should never come here -> work or exception
-        return 0;
     }
 
     public void setFee(long f) {

@@ -194,7 +194,8 @@ public class SwingUtil {
     };
 
     /**
-     * Number string comparator based on its value.
+     * Number string comparator based on its value.<br />
+     * * @exception throws IllegalArgumentException on ParseException
      */
     public static final Comparator<String> NUMBER_COMPARATOR = (o1, o2) -> {
         try {
@@ -202,13 +203,14 @@ public class SwingUtil {
                     NumberFormat.getInstance().parse(o2).doubleValue());
         } catch (ParseException e) {
             logger.error("NumberFormatException", e);
+            throw new IllegalArgumentException(e);
         }
-        // we should never come here -> work or exception
-        return 0;
     };
 
     /**
-     * Balance string comparator based on its value.
+     * Balance string comparator based on its value.<br />
+     * 
+     * @exception throws IllegalArgumentException on ParseException
      */
     public static final Comparator<String> BALANCE_COMPARATOR = (o1, o2) -> {
 
@@ -217,13 +219,14 @@ public class SwingUtil {
                     NumberFormat.getInstance().parse(o2.substring(0, o2.length() - 4)).doubleValue());
         } catch (ParseException e) {
             logger.error("NumberFormatException", e);
+            throw new IllegalArgumentException(e);
         }
-        // we should never come here -> work or exception
-        return 0;
     };
 
     /**
-     * Balance string comparator based on its value.
+     * Balance string comparator based on its value.<br />
+     * 
+     * @exception throws IllegalArgumentException on ParseException
      */
     public static final Comparator<String> PERCENTAGE_COMPARATOR = (o1, o2) -> {
         try {
@@ -231,8 +234,7 @@ public class SwingUtil {
                     NumberFormat.getInstance().parse(o2.substring(0, o2.length() - 2)).doubleValue());
         } catch (ParseException e) {
             logger.error("NumberFormatException", e);
+            throw new IllegalArgumentException(e);
         }
-        // we should never come here -> work or exception
-        return 0;
     };
 }
