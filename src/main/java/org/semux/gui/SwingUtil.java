@@ -13,6 +13,8 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.net.URL;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
@@ -195,22 +197,42 @@ public class SwingUtil {
      * Number string comparator based on its value.
      */
     public static final Comparator<String> NUMBER_COMPARATOR = (o1, o2) -> {
-        return Double.compare(Double.parseDouble(o1), Double.parseDouble(o2));
+        try {
+            return Double.compare(NumberFormat.getInstance().parse(o1).doubleValue(),
+                    NumberFormat.getInstance().parse(o2).doubleValue());
+        } catch (ParseException e) {
+            logger.error("NumberFormatException", e);
+        }
+        // we should never come here -> work or exception
+        return 0;
     };
 
     /**
      * Balance string comparator based on its value.
      */
     public static final Comparator<String> BALANCE_COMPARATOR = (o1, o2) -> {
-        return Double.compare(Double.parseDouble(o1.substring(0, o1.length() - 4)),
-                Double.parseDouble(o2.substring(0, o2.length() - 4)));
+
+        try {
+            return Double.compare(NumberFormat.getInstance().parse(o1.substring(0, o1.length() - 4)).doubleValue(),
+                    NumberFormat.getInstance().parse(o2.substring(0, o2.length() - 4)).doubleValue());
+        } catch (ParseException e) {
+            logger.error("NumberFormatException", e);
+        }
+        // we should never come here -> work or exception
+        return 0;
     };
 
     /**
      * Balance string comparator based on its value.
      */
     public static final Comparator<String> PERCENTAGE_COMPARATOR = (o1, o2) -> {
-        return Double.compare(Double.parseDouble(o1.substring(0, o1.length() - 2)),
-                Double.parseDouble(o2.substring(0, o2.length() - 2)));
+        try {
+            return Double.compare(NumberFormat.getInstance().parse(o1.substring(0, o1.length() - 2)).doubleValue(),
+                    NumberFormat.getInstance().parse(o2.substring(0, o2.length() - 2)).doubleValue());
+        } catch (ParseException e) {
+            logger.error("NumberFormatException", e);
+        }
+        // we should never come here -> work or exception
+        return 0;
     };
 }

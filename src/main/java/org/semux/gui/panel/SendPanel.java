@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +33,12 @@ import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.Bytes;
 import org.semux.utils.UnreachableException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SendPanel extends JPanel implements ActionListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(SwingUtil.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -166,7 +172,13 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     public long getAmount() {
-        return (long) (Unit.SEM * Double.parseDouble(amount.getText().trim()));
+        try {
+            return (long) (Unit.SEM * NumberFormat.getInstance().parse(amount.getText().trim()).doubleValue());
+        } catch (ParseException e) {
+            logger.error("NumberFormatException", e);
+        }
+        // we should never come here -> work or exception
+        return 0;
     }
 
     public void setAmount(long a) {
@@ -174,7 +186,13 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     public long getFee() {
-        return (long) (Unit.SEM * Double.parseDouble(fee.getText().trim()));
+        try {
+            return (long) (Unit.SEM * NumberFormat.getInstance().parse(fee.getText().trim()).doubleValue());
+        } catch (ParseException e) {
+            logger.error("NumberFormatException", e);
+        }
+        // we should never come here -> work or exception
+        return 0;
     }
 
     public void setFee(long f) {
