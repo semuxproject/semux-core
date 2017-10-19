@@ -46,6 +46,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
     private JPasswordField passwordField;
     private JPasswordField repeatField;
+    private JLabel lblRepeat;
     private JRadioButton btnCreate;
     private JRadioButton btnImport;
 
@@ -109,7 +110,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         passwordField.setActionCommand(Action.OK.name());
         passwordField.addActionListener(this);
 
-        JLabel lblRepeat = new JLabel("Repeat Password:");
+        lblRepeat = new JLabel("Repeat Password:");
         repeatField = new JPasswordField();
         repeatField.setActionCommand(Action.OK.name());
         repeatField.addActionListener(this);
@@ -179,13 +180,16 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         switch (action) {
         case CREATE_ACCOUNT:
             backupFile = null;
+            repeatField.setVisible(true);
+            lblRepeat.setVisible(true);
             break;
         case IMPORT_ACCOUNTS:
             JFileChooser chooser = new JFileChooser();
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setFileFilter(new FileNameExtensionFilter("Wallet binary format", "data"));
             int ret = chooser.showOpenDialog(this);
-
+            repeatField.setVisible(false);
+            lblRepeat.setVisible(false);
             if (ret == JFileChooser.APPROVE_OPTION) {
                 backupFile = chooser.getSelectedFile();
             } else {
@@ -195,10 +199,11 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         case OK:
             String password = new String(passwordField.getPassword());
             String repeat = new String(repeatField.getPassword());
-
-            if (!password.equals(repeat)) {
-                JOptionPane.showMessageDialog(this, "Repeat password does not match!");
-                break;
+            if (repeatField.isVisible()) {
+                if (!password.equals(repeat)) {
+                    JOptionPane.showMessageDialog(this, "Repeat password does not match!");
+                    break;
+                }
             }
             if (!wallet.unlock(password)) {
                 JOptionPane.showMessageDialog(this, "Failed to unlock the wallet, wrong password?");
