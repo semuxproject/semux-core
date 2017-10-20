@@ -42,6 +42,9 @@ public class Config {
                 case "network":
                     NETWORK_ID = Byte.parseByte(props.getProperty(name));
                     break;
+                case "minTransactionFee":
+                    MIN_TRANSACTION_FEE_SOFT = Integer.parseInt(props.getProperty(name));
+                    break;
 
                 case "p2p.ip":
                     P2P_LISTEN_IP = props.getProperty(name);
