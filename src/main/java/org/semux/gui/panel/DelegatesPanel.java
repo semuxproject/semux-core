@@ -404,7 +404,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         List<String> accounts = new ArrayList<>();
         List<Account> list = model.getAccounts();
         for (int i = 0; i < list.size(); i++) {
-            accounts.add(String.format("Acc #%d, %s SEM",i, SwingUtil.formatDouble(list.get(i).getBalance() / Unit.SEM, "0.000")));
+            accounts.add(String.format("Acc #%d, %s SEM",i, SwingUtil.formatDouble(list.get(i).getBalance() / Unit.SEM, "0")));
         }
 
         /*

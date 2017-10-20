@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
@@ -23,6 +24,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.NumberFormatter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,15 +180,26 @@ public class SwingUtil {
         textfield.setComponentPopupMenu(popup);
         return textfield;
     }
-
-    public static String formatDouble(double value, String format) {
-        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-        dfs.setDecimalSeparator('.');
-        DecimalFormat decimalFormat = new DecimalFormat(format, dfs);
-        decimalFormat.setGroupingUsed(false);
-        return decimalFormat.format(value);
+    /**
+     * Generates a JFormattedTextfield which only allows long as entry 
+     * @return 
+     */
+    public static JFormattedTextField longFormattedTextField() {
+        NumberFormat format = NumberFormat.getInstance();
+        NumberFormatter formatter = new NumberFormatter(format);
+        formatter.setValueClass(Long.class);
+        formatter.setMinimum(0);
+        formatter.setMaximum(Long.MAX_VALUE);
+        formatter.setAllowsInvalid(false);
+        formatter.setCommitsOnValidEdit(true);
+        JFormattedTextField field = new JFormattedTextField(formatter);
+        return field;
     }
-    
+
+    /**
+     * Generates a JFormattedTextfield which only allows DoubleValues as entry 
+     * @return 
+     */
     public static JFormattedTextField doubleFormattedTextField() {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
@@ -208,6 +221,21 @@ public class SwingUtil {
     }
 
     /**
+     * Formats a given double value correctly to String with given format
+     * 
+     * @param value 
+     * @param format
+     * @return
+     */
+    public static String formatDouble(double value, String format) {
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        dfs.setDecimalSeparator('.');
+        DecimalFormat decimalFormat = new DecimalFormat(format, dfs);
+        decimalFormat.setGroupingUsed(false);
+        return decimalFormat.format(value);
+    }
+
+    /**
      * Integer number comparator.
      */
     public static final Comparator<Integer> INTEGER_COMPARATOR = (o1, o2) -> {
@@ -224,8 +252,7 @@ public class SwingUtil {
     /**
      * Number string comparator based on its value.<br />
      * 
-     * @exception throws
-     *                NumberFormatException
+     * @exception 
      */
     public static final Comparator<String> NUMBER_COMPARATOR = (o1, o2) -> {
         try {
@@ -239,8 +266,7 @@ public class SwingUtil {
     /**
      * Balance string comparator based on its value.<br />
      * 
-     * @exception throws
-     *                NumberFormatException
+     * @exception 
      */
     public static final Comparator<String> BALANCE_COMPARATOR = (o1, o2) -> {
         try {
@@ -255,8 +281,7 @@ public class SwingUtil {
     /**
      * Balance string comparator based on its value.<br />
      * 
-     * @exception throws
-     *                NumberFormatException
+     * @exception
      */
     public static final Comparator<String> PERCENTAGE_COMPARATOR = (o1, o2) -> {
         try {
