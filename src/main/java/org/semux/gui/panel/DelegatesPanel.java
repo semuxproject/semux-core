@@ -148,7 +148,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         setLayout(groupLayout); 
         // @formatter:on
 
-        textVote = SwingUtil.editableTextField();
+        textVote = SwingUtil.integerFormattedTextField();
         textVote.setToolTipText("# of votes");
         textVote.setColumns(10);
         textVote.setActionCommand(Action.VOTE.name());
@@ -158,7 +158,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         btnVote.setActionCommand(Action.VOTE.name());
         btnVote.addActionListener(this);
 
-        textUnvote = SwingUtil.editableTextField();
+        textUnvote = SwingUtil.integerFormattedTextField();
         textUnvote.setToolTipText("# of votes");
         textUnvote.setColumns(10);
         textUnvote.setActionCommand(Action.UNVOTE.name());

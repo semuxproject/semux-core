@@ -181,15 +181,15 @@ public class SwingUtil {
         return textfield;
     }
     /**
-     * Generates a JFormattedTextfield which only allows long as entry 
+     * Generates a JFormattedTextfield which only allows integer as entry 
      * @return 
      */
-    public static JFormattedTextField longFormattedTextField() {
+    public static JFormattedTextField integerFormattedTextField() {
         NumberFormat format = NumberFormat.getInstance();
         NumberFormatter formatter = new NumberFormatter(format);
-        formatter.setValueClass(Long.class);
+        formatter.setValueClass(Integer.class);
         formatter.setMinimum(0);
-        formatter.setMaximum(Long.MAX_VALUE);
+        formatter.setMaximum(Integer.MAX_VALUE);
         formatter.setAllowsInvalid(false);
         formatter.setCommitsOnValidEdit(true);
         JFormattedTextField field = new JFormattedTextField(formatter);
