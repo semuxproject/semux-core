@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * ["latest_block_hash"] => [block_hash]
  * ["validators"] => [encode(validator_list)]
  * ["forged", address] => [number_of_blocks_forged]
- * ["hit", address] => [number_of_turns_missed]
+ * ["hit", address] => [number_of_turns_hit]
  * ["missed", address] => [number_of_turns_missed]
  * 
  * [block_number] => [block_hash]
