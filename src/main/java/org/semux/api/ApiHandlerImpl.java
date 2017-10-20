@@ -445,7 +445,8 @@ public class ApiHandlerImpl implements ApiHandler {
         obj.put("votes", delegate.getVotes());
         obj.put("registeredAt", delegate.getRegisteredAt());
         obj.put("numberOfBlocksForged", chain.getNumberOfBlocksForged(delegate.getAddress()));
-        obj.put("numberOfBlocksMissed", chain.getNumberOfBlocksMissed(delegate.getAddress()));
+        obj.put("numberOfTurnsHit", chain.getNumberOfTurnsHit(delegate.getAddress()));
+        obj.put("numberOfTurnsMissed", chain.getNumberOfTurnsMissed(delegate.getAddress()));
 
         return obj;
     }

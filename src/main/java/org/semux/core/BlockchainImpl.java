@@ -38,7 +38,8 @@ import org.slf4j.LoggerFactory;
  * ["latest_block_hash"] => [block_hash]
  * ["validators"] => [encode(validator_list)]
  * ["forged", address] => [number_of_blocks_forged]
- * ["missed", address] => [number_of_blocks_missed]
+ * ["hit", address] => [number_of_turns_missed]
+ * ["missed", address] => [number_of_turns_missed]
  * 
  * [block_number] => [block_hash]
  * [transaciton_hash] => [block_number, from, to]
@@ -59,6 +60,7 @@ public class BlockchainImpl implements Blockchain {
     private static byte[] KEY_LATEST_BLOCK_HASH = Bytes.of("latest_block_hash");
     private static byte[] KEY_VALIDATORS = Bytes.of("validators");
     private static byte[] FORGED = Bytes.of("forged");
+    private static byte[] HIT = Bytes.of("hit");
     private static byte[] MISSED = Bytes.of("missed");
 
     private KVDB indexDB;
@@ -270,7 +272,12 @@ public class BlockchainImpl implements Blockchain {
         // [5] update validator statistics
         List<String> validators = getValidators();
         String primary = validators.get((int) ((number - 1) % validators.size()));
-        updateValidatorStats(block.getCoinbase(), primary.equals(Hex.encode(block.getCoinbase())));
+        updateValidatorStats(block.getCoinbase(), FORGED, 1);
+        if (primary.equals(Hex.encode(block.getCoinbase()))) {
+            updateValidatorStats(Hex.decode(primary), HIT, 1);
+        } else {
+            updateValidatorStats(Hex.decode(primary), MISSED, 1);
+        }
 
         // [6] update validator set
         if (number % Config.VALIDATOR_TERM == 0) {
@@ -364,7 +371,15 @@ public class BlockchainImpl implements Blockchain {
     }
 
     @Override
-    public long getNumberOfBlocksMissed(byte[] address) {
+    public long getNumberOfTurnsHit(byte[] address) {
+        byte[] key = Bytes.merge(HIT, address);
+        byte[] value = indexDB.get(key);
+
+        return value != null ? Bytes.toLong(value) : 0;
+    }
+
+    @Override
+    public long getNumberOfTurnsMissed(byte[] address) {
         byte[] key = Bytes.merge(MISSED, address);
         byte[] value = indexDB.get(key);
 
@@ -375,15 +390,15 @@ public class BlockchainImpl implements Blockchain {
      * Updates validator statistics.
      * 
      * @param address
-     *            validator address
+     *            stats type
      * @param forged
      *            forged or missed a block
      */
-    protected void updateValidatorStats(byte[] address, boolean forged) {
-        byte[] key = Bytes.merge(forged ? FORGED : MISSED, address);
+    protected void updateValidatorStats(byte[] address, byte[] type, long delta) {
+        byte[] key = Bytes.merge(type, address);
         byte[] value = indexDB.get(key);
 
-        indexDB.put(key, (value == null) ? Bytes.of(1L) : Bytes.of(1L + Bytes.toLong(value)));
+        indexDB.put(key, (value == null) ? Bytes.of(delta) : Bytes.of(Bytes.toLong(value) + delta));
     }
 
     /**

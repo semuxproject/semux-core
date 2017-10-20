@@ -21,7 +21,8 @@ public class Delegate {
      */
     protected long votesFromMe;
     protected long numberOfBlocksForged;
-    protected long numberOfBlocksMissed;
+    protected long numberOfTurnsHit;
+    protected long numberOfTurnsMissed;
 
     public Delegate(byte[] addr, byte[] name, long registeredAt, long votes) {
         this.addr = addr;
@@ -70,22 +71,32 @@ public class Delegate {
         this.numberOfBlocksForged = numberOfBlocksForged;
     }
 
-    public long getNumberOfBlocksMissed() {
-        return numberOfBlocksMissed;
+    public long getNumberOfTurnsHit() {
+        return numberOfTurnsHit;
     }
 
-    public void setNumberOfBlocksMissed(long numberOfBlocksMissed) {
-        this.numberOfBlocksMissed = numberOfBlocksMissed;
+    public void setNumberOfTurnsHit(long numberOfTurnsHit) {
+        this.numberOfTurnsHit = numberOfTurnsHit;
+    }
+
+    public long getNumberOfTurnsMissed() {
+        return numberOfTurnsMissed;
+    }
+
+    public void setNumberOfTurnsMissed(long numberOfTurnsMissed) {
+        this.numberOfTurnsMissed = numberOfTurnsMissed;
     }
 
     public double getRate() {
-        long total = numberOfBlocksForged + numberOfBlocksMissed;
-        return total == 0 ? 0 : numberOfBlocksForged * 100.0 / total;
+        long total = numberOfTurnsHit + numberOfTurnsMissed;
+        return total == 0 ? 0 : numberOfTurnsHit * 100.0 / total;
     }
 
     @Override
     public String toString() {
-        return "Delegate [addr=" + Arrays.toString(addr) + ", name=" + Arrays.toString(name) + ", votes=" + votes
-                + ", votesFromMe=" + votesFromMe + "]";
+        return "Delegate [addr=" + Arrays.toString(addr) + ", name=" + Arrays.toString(name) + ", registeredAt="
+                + registeredAt + ", votes=" + votes + ", votesFromMe=" + votesFromMe + ", numberOfBlocksForged="
+                + numberOfBlocksForged + ", numberOfTurnsHit=" + numberOfTurnsHit + ", numberOfTurnsMissed="
+                + numberOfTurnsMissed + "]";
     }
 }

@@ -436,7 +436,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 long vote = ds.getVote(voter, d.getAddress());
                 d.setVotesFromMe(vote);
                 d.setNumberOfBlocksForged(chain.getNumberOfBlocksForged(d.getAddress()));
-                d.setNumberOfBlocksMissed(chain.getNumberOfBlocksMissed(d.getAddress()));
+                d.setNumberOfTurnsHit(chain.getNumberOfTurnsHit(d.getAddress()));
+                d.setNumberOfTurnsMissed(chain.getNumberOfTurnsMissed(d.getAddress()));
             }
         }
 

@@ -40,7 +40,8 @@ public class DelegateDialog extends JDialog {
         JLabel lblVotes = new JLabel("Votes:");
         JLabel lblVotesFromMe = new JLabel("Votes from Me:");
         JLabel lblNumOfBlocksForged = new JLabel("# of Blocks Forged:");
-        JLabel lblNumOfBlocksMissed = new JLabel("# of Blocks Missed:");
+        JLabel lblNumOfTurnsHit = new JLabel("# of Turns Hit:");
+        JLabel lblNumOfTurnsMissed = new JLabel("# of Turns Missed:");
         JLabel lblRate = new JLabel("Rate:");
 
         JTextArea name = selectableText(d.getNameString());
@@ -50,7 +51,8 @@ public class DelegateDialog extends JDialog {
         JLabel votes = new JLabel(Long.toString(d.getVotes() / Unit.SEM));
         JLabel votesFromMe = new JLabel(Long.toString(d.getVotesFromMe() / Unit.SEM));
         JLabel numOfBlocksForged = new JLabel(Long.toString(d.getNumberOfBlocksForged()));
-        JLabel numOfBlocksMissed = new JLabel(Long.toString(d.getNumberOfBlocksMissed()));
+        JLabel numOfTurnsHit = new JLabel(Long.toString(d.getNumberOfTurnsHit()));
+        JLabel numOfTurnsMissed = new JLabel(Long.toString(d.getNumberOfTurnsMissed()));
         JLabel rate = new JLabel(String.format("%.2f %%", d.getRate()));
 
         // @formatter:off
@@ -61,7 +63,8 @@ public class DelegateDialog extends JDialog {
                     .addGap(30)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
                         .addComponent(lblRate)
-                        .addComponent(lblNumOfBlocksMissed)
+                        .addComponent(lblNumOfTurnsMissed)
+                        .addComponent(lblNumOfTurnsHit)
                         .addComponent(lblNumOfBlocksForged)
                         .addComponent(lblVotesFromMe)
                         .addComponent(lblVotes)
@@ -76,7 +79,8 @@ public class DelegateDialog extends JDialog {
                         .addComponent(votesFromMe)
                         .addComponent(registeredAt)
                         .addComponent(numOfBlocksForged)
-                        .addComponent(numOfBlocksMissed)
+                        .addComponent(numOfTurnsHit)
+                        .addComponent(numOfTurnsMissed)
                         .addComponent(rate))
                     .addContainerGap(30, Short.MAX_VALUE))
         );
@@ -109,9 +113,13 @@ public class DelegateDialog extends JDialog {
                         .addComponent(numOfBlocksForged))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(lblNumOfBlocksMissed)
-                        .addComponent(numOfBlocksMissed))
+                        .addComponent(lblNumOfTurnsHit)
+                        .addComponent(numOfTurnsHit))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                        .addComponent(lblNumOfTurnsMissed)
+                        .addComponent(numOfTurnsMissed))
+                        .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblRate)
                         .addComponent(rate))

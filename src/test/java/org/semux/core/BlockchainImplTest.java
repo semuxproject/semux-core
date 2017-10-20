@@ -142,13 +142,16 @@ public class BlockchainImplTest {
         byte[] address = Bytes.random(20);
 
         assertEquals(0, chain.getNumberOfBlocksForged(address));
-        assertEquals(0, chain.getNumberOfBlocksMissed(address));
-        chain.updateValidatorStats(address, true);
+        assertEquals(0, chain.getNumberOfTurnsHit(address));
+        assertEquals(0, chain.getNumberOfTurnsMissed(address));
+        chain.updateValidatorStats(address, Bytes.of("forged"), 1);
         assertEquals(1, chain.getNumberOfBlocksForged(address));
-        chain.updateValidatorStats(address, false);
-        assertEquals(1, chain.getNumberOfBlocksMissed(address));
-        chain.updateValidatorStats(address, true);
-        assertEquals(2, chain.getNumberOfBlocksForged(address));
+        chain.updateValidatorStats(address, Bytes.of("hit"), 1);
+        assertEquals(1, chain.getNumberOfTurnsHit(address));
+        chain.updateValidatorStats(address, Bytes.of("missed"), 1);
+        assertEquals(1, chain.getNumberOfTurnsMissed(address));
+        chain.updateValidatorStats(address, Bytes.of("missed"), 1);
+        assertEquals(2, chain.getNumberOfTurnsMissed(address));
     }
 
     private BlockchainImpl createBlockchain() {

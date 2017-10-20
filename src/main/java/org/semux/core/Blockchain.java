@@ -157,12 +157,20 @@ public interface Blockchain {
     public long getNumberOfBlocksForged(byte[] address);
 
     /**
-     * Returns the number of blocks missed by the given delegate.
+     * Returns the number of turns missed by the given delegate.
      * 
      * @param address
      * @return
      */
-    public long getNumberOfBlocksMissed(byte[] address);
+    public long getNumberOfTurnsMissed(byte[] address);
+
+    /**
+     * Returns the number of turns missed by the given delegate.
+     * 
+     * @param address
+     * @return
+     */
+    public long getNumberOfTurnsHit(byte[] address);
 
     /**
      * Register a blockchain listener.
