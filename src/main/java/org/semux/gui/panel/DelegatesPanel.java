@@ -352,7 +352,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Insufficient funds! You need 1000 SEM + transaction fee");
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
-                        "Delegate registration will cost you " + Config.MIN_DELEGATE_FEE / Unit.SEM + " SEM, continue?",
+                        "Delegate registration will burn " + Config.MIN_DELEGATE_FEE / Unit.SEM
+                                + " SEM from your balance, and this process is irreversible, continue?",
                         "Confirm delegate registration", JOptionPane.YES_NO_OPTION);
                 if (ret != JOptionPane.YES_OPTION) {
                     break;
