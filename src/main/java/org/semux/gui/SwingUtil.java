@@ -13,8 +13,8 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.net.URL;
-import java.text.NumberFormat;
-import java.text.ParseException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
@@ -179,6 +179,34 @@ public class SwingUtil {
         return textfield;
     }
 
+    public static String formatDouble(double value, String format) {
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        dfs.setDecimalSeparator('.');
+        DecimalFormat decimalFormat = new DecimalFormat(format, dfs);
+        decimalFormat.setGroupingUsed(false);
+        return decimalFormat.format(value);
+    }
+    
+    public static JFormattedTextField doubleFormattedTextField() {
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        dfs.setDecimalSeparator('.');
+        DecimalFormat decimalFormat = new DecimalFormat("0.000", dfs);
+        decimalFormat.setGroupingUsed(false);
+        JFormattedTextField numberFormattedTextfield = new JFormattedTextField(decimalFormat);
+        JPopupMenu popup = new JPopupMenu();
+        JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
+        item.setText("Cut");
+        popup.add(item);
+        item = new JMenuItem(new DefaultEditorKit.CopyAction());
+        item.setText("Copy");
+        popup.add(item);
+        item = new JMenuItem(new DefaultEditorKit.PasteAction());
+        item.setText("Paste");
+        popup.add(item);
+        numberFormattedTextfield.setComponentPopupMenu(popup);
+        return numberFormattedTextfield;
+    }
+
     /**
      * Integer number comparator.
      */
@@ -195,29 +223,30 @@ public class SwingUtil {
 
     /**
      * Number string comparator based on its value.<br />
-     * @exception throws NumberFormatException on ParseException
+     * 
+     * @exception throws
+     *                NumberFormatException
      */
     public static final Comparator<String> NUMBER_COMPARATOR = (o1, o2) -> {
         try {
-            return Double.compare(NumberFormat.getInstance().parse(o1).doubleValue(),
-                    NumberFormat.getInstance().parse(o2).doubleValue());
-        } catch (ParseException e) {
+            return Double.compare(Double.parseDouble(o1), Double.parseDouble(o2));
+        } catch (NumberFormatException e) {
             logger.error("Wrong format or value for parsing to Double", e);
-            throw new NumberFormatException(e.getLocalizedMessage());
+            throw e;
         }
     };
 
     /**
      * Balance string comparator based on its value.<br />
      * 
-     * @exception throws NumberFormatException on ParseException
+     * @exception throws
+     *                NumberFormatException
      */
     public static final Comparator<String> BALANCE_COMPARATOR = (o1, o2) -> {
-
         try {
-            return Double.compare(NumberFormat.getInstance().parse(o1.substring(0, o1.length() - 4)).doubleValue(),
-                    NumberFormat.getInstance().parse(o2.substring(0, o2.length() - 4)).doubleValue());
-        } catch (ParseException e) {
+            return Double.compare(Double.parseDouble(o1.substring(0, o1.length() - 4).replaceAll(",", ".")),
+                    Double.parseDouble(o2.substring(0, o2.length() - 4).replaceAll(",", ".")));
+        } catch (NumberFormatException e) {
             logger.error("Wrong format or value for parsing to Double", e);
             throw new NumberFormatException(e.getLocalizedMessage());
         }
@@ -226,13 +255,14 @@ public class SwingUtil {
     /**
      * Balance string comparator based on its value.<br />
      * 
-     * @exception throws NumberFormatException on ParseException
+     * @exception throws
+     *                NumberFormatException
      */
     public static final Comparator<String> PERCENTAGE_COMPARATOR = (o1, o2) -> {
         try {
-            return Double.compare(NumberFormat.getInstance().parse(o1.substring(0, o1.length() - 2)).doubleValue(),
-                    NumberFormat.getInstance().parse(o2.substring(0, o2.length() - 2)).doubleValue());
-        } catch (ParseException e) {
+            return Double.compare(Double.parseDouble(o1.substring(0, o1.length() - 2).replaceAll(",", ".")),
+                    Double.parseDouble(o2.substring(0, o2.length() - 2).replaceAll(",", ".")));
+        } catch (NumberFormatException e) {
             logger.error("Wrong format or value for parsing to Double", e);
             throw new NumberFormatException(e.getLocalizedMessage());
         }

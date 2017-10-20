@@ -219,8 +219,8 @@ public class HomePanel extends JPanel implements ActionListener {
         this.blockTime.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(block.getTimestamp())));
         this.coinbase.setText("Account #" + model.getCoinbase());
         this.status.setText(model.isDelegate() ? "Delegate" : "Normal");
-        this.balance.setText(String.format("%.3f SEM", model.getTotalBalance() / (double) Unit.SEM));
-        this.locked.setText(String.format("%.3f SEM", model.getTotalLocked() / (double) Unit.SEM));
+        this.balance.setText(String.format("%s SEM", SwingUtil.formatDouble(model.getTotalBalance() / (double) Unit.SEM, "0.000")));
+        this.locked.setText(String.format("%s SEM", SwingUtil.formatDouble(model.getTotalLocked() / (double) Unit.SEM,"0.000")));
         this.peers.setText(Integer.toString(model.getActivePeers().size()));
 
         // federate all transactions
