@@ -173,14 +173,15 @@ public class SendPanel extends JPanel implements ActionListener {
 
     /**
      * @return the submitted amount of coins as long
-     * @exception IllegalArgumentException on ParseException
+     * @exception NumberFormatException on ParseException
      */
     public long getAmount() {
         try {
             return (long) (Unit.SEM * NumberFormat.getInstance().parse(amount.getText().trim()).doubleValue());
         } catch (ParseException e) {
             logger.error("Parsing of submitted value of amount failed", e);
-            throw new IllegalArgumentException(e);
+            JOptionPane.showMessageDialog(this, "Submitted fee is invalid!");
+            throw new NumberFormatException(e.getLocalizedMessage());
         }
     }
 
@@ -190,14 +191,15 @@ public class SendPanel extends JPanel implements ActionListener {
 
     /**
      * @return the submitted Fee as long 
-     * @exception IllegalArgumentException on ParseException
+     * @exception NumberFormatException on ParseException
      */
     public long getFee() {
         try {
             return (long) (Unit.SEM * NumberFormat.getInstance().parse(fee.getText().trim()).doubleValue());
         } catch (ParseException e) {
             logger.error("Parsing of submitted value of fee failed", e);
-            throw new IllegalArgumentException(e);
+            JOptionPane.showMessageDialog(this, "Submitted fee is invalid!");
+            throw new NumberFormatException(e.getLocalizedMessage());
         }
     }
 

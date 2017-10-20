@@ -195,22 +195,22 @@ public class SwingUtil {
 
     /**
      * Number string comparator based on its value.<br />
-     * * @exception throws IllegalArgumentException on ParseException
+     * @exception throws NumberFormatException on ParseException
      */
     public static final Comparator<String> NUMBER_COMPARATOR = (o1, o2) -> {
         try {
             return Double.compare(NumberFormat.getInstance().parse(o1).doubleValue(),
                     NumberFormat.getInstance().parse(o2).doubleValue());
         } catch (ParseException e) {
-            logger.error("NumberFormatException", e);
-            throw new IllegalArgumentException(e);
+            logger.error("Wrong format or value for parsing to Double", e);
+            throw new NumberFormatException(e.getLocalizedMessage());
         }
     };
 
     /**
      * Balance string comparator based on its value.<br />
      * 
-     * @exception throws IllegalArgumentException on ParseException
+     * @exception throws NumberFormatException on ParseException
      */
     public static final Comparator<String> BALANCE_COMPARATOR = (o1, o2) -> {
 
@@ -218,23 +218,23 @@ public class SwingUtil {
             return Double.compare(NumberFormat.getInstance().parse(o1.substring(0, o1.length() - 4)).doubleValue(),
                     NumberFormat.getInstance().parse(o2.substring(0, o2.length() - 4)).doubleValue());
         } catch (ParseException e) {
-            logger.error("NumberFormatException", e);
-            throw new IllegalArgumentException(e);
+            logger.error("Wrong format or value for parsing to Double", e);
+            throw new NumberFormatException(e.getLocalizedMessage());
         }
     };
 
     /**
      * Balance string comparator based on its value.<br />
      * 
-     * @exception throws IllegalArgumentException on ParseException
+     * @exception throws NumberFormatException on ParseException
      */
     public static final Comparator<String> PERCENTAGE_COMPARATOR = (o1, o2) -> {
         try {
             return Double.compare(NumberFormat.getInstance().parse(o1.substring(0, o1.length() - 2)).doubleValue(),
                     NumberFormat.getInstance().parse(o2.substring(0, o2.length() - 2)).doubleValue());
         } catch (ParseException e) {
-            logger.error("NumberFormatException", e);
-            throw new IllegalArgumentException(e);
+            logger.error("Wrong format or value for parsing to Double", e);
+            throw new NumberFormatException(e.getLocalizedMessage());
         }
     };
 }
