@@ -186,7 +186,7 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     public void setAmount(long a) {
-        amount.setText(a == 0 ? "" : String.format("%.3f", a / (double) Unit.SEM));
+        amount.setText(a == 0 ? "" :SwingUtil.formatDouble( a / (double) Unit.SEM,"0.000"));
     }
 
     /**
