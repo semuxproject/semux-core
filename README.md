@@ -30,7 +30,7 @@ This project is under active development and is NOT production ready.
 
 Pull requests, and contributions are welcome. Please see [Development Guideline](https://github.com/semuxproject/semux/wiki/Development-Guideline) for instructions.
 
-# Wallet GUI Localization
+## Wallet GUI Localization
 
 [![Crowdin](https://d322cqt584bo4o.cloudfront.net/semux/localized.svg)](https://crowdin.com/project/semux)
 
