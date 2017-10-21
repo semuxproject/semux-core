@@ -155,7 +155,7 @@ public class HomePanel extends JPanel implements ActionListener {
 
             String prefix = (inBound && outBound) ? "" : (inBound ? "+" : "-");
             JLabel lblAmount = new JLabel(String.format("%s%s SEM", prefix,
-                    SwingUtil.formatDouble((tx.getValue() / (double) Unit.SEM), "0.000")));
+                    SwingUtil.formatDouble((tx.getValue() / (double) Unit.SEM), SwingUtil.DEFAULT_DOUBLE_FORMAT)));
             lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
             SimpleDateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
