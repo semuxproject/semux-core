@@ -1,0 +1,4 @@
+files:
+  - source: /src/main/resources/org/semux/gui/messages.properties
+    translation: >-
+      /src/main/resources/org/semux/gui/messages_%locale_with_underscore%.properties
