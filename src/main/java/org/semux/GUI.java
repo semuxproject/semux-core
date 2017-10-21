@@ -28,6 +28,7 @@ import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.MainFrame;
 import org.semux.gui.Model;
 import org.semux.gui.WelcomeFrame;
@@ -69,7 +70,8 @@ public class GUI {
         } else {
             for (int i = 0;; i++) {
                 InputDialog dialog = new InputDialog(null,
-                        i == 0 ? "Please enter your password:" : "Wrong password, please try again:", true);
+                    i == 0 ? MessagesUtil.get("EnterPassword") + ":"
+                    : MessagesUtil.get("WrongPasswordPleaseTryAgain") + ":", true);
                 String pwd = dialog.getInput();
 
                 if (pwd == null) {
@@ -105,7 +107,7 @@ public class GUI {
 
     public static void showMain() {
         if (wallet.size() > 1) {
-            String message = "Which account would you like to use?";
+            String message = MessagesUtil.get("AccountSelection");
             List<Object> options = new ArrayList<>();
             List<EdDSA> list = wallet.getAccounts();
             for (int i = 0; i < list.size(); i++) {
@@ -180,7 +182,7 @@ public class GUI {
                                 String version = str.toString();
 
                                 if (SystemUtil.compareVersion(Config.CLIENT_VERSION, version) < 0) {
-                                    JOptionPane.showMessageDialog(null, "Your wallet need to be upgraded!");
+                                    JOptionPane.showMessageDialog(null, MessagesUtil.get("WalletNeedToBeUpgraded"));
                                     System.exit(-1);
                                 }
                             }
