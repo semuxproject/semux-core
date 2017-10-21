@@ -40,6 +40,8 @@ public class SwingUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SwingUtil.class);
 
+    public static final String DEFAULT_DOUBLE_FORMAT = "0.000";
+
     /**
      * Put a JFrame in the center of screen.
      * 
@@ -180,9 +182,11 @@ public class SwingUtil {
         textfield.setComponentPopupMenu(popup);
         return textfield;
     }
+
     /**
-     * Generates a JFormattedTextfield which only allows integer as entry 
-     * @return 
+     * Generates a JFormattedTextfield which only allows integer as entry
+     * 
+     * @return
      */
     public static JFormattedTextField integerFormattedTextField() {
         NumberFormat format = NumberFormat.getInstance();
@@ -197,13 +201,14 @@ public class SwingUtil {
     }
 
     /**
-     * Generates a JFormattedTextfield which only allows DoubleValues as entry 
-     * @return 
+     * Generates a JFormattedTextfield which only allows DoubleValues as entry
+     * 
+     * @return
      */
     public static JFormattedTextField doubleFormattedTextField() {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
-        DecimalFormat decimalFormat = new DecimalFormat("0.000", dfs);
+        DecimalFormat decimalFormat = new DecimalFormat(SwingUtil.DEFAULT_DOUBLE_FORMAT, dfs);
         decimalFormat.setGroupingUsed(false);
         JFormattedTextField numberFormattedTextfield = new JFormattedTextField(decimalFormat);
         JPopupMenu popup = new JPopupMenu();
@@ -223,7 +228,7 @@ public class SwingUtil {
     /**
      * Formats a given double value correctly to String with given format
      * 
-     * @param value 
+     * @param value
      * @param format
      * @return
      */
@@ -252,7 +257,7 @@ public class SwingUtil {
     /**
      * Number string comparator based on its value.<br />
      * 
-     * @exception 
+     * @exception
      */
     public static final Comparator<String> NUMBER_COMPARATOR = (o1, o2) -> {
         try {
@@ -266,7 +271,7 @@ public class SwingUtil {
     /**
      * Balance string comparator based on its value.<br />
      * 
-     * @exception 
+     * @exception
      */
     public static final Comparator<String> BALANCE_COMPARATOR = (o1, o2) -> {
         try {
@@ -292,4 +297,5 @@ public class SwingUtil {
             throw new NumberFormatException(e.getLocalizedMessage());
         }
     };
+
 }

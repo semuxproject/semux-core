@@ -154,7 +154,8 @@ public class HomePanel extends JPanel implements ActionListener {
             lblType.setIcon(SwingUtil.loadImage(name, 48, 48));
 
             String prefix = (inBound && outBound) ? "" : (inBound ? "+" : "-");
-            JLabel lblAmount = new JLabel(String.format("%s%.3f SEM", prefix, tx.getValue() / (double) Unit.SEM));
+            JLabel lblAmount = new JLabel(String.format("%s%s SEM", prefix,
+                    SwingUtil.formatDouble((tx.getValue() / (double) Unit.SEM), "0.000")));
             lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
             SimpleDateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
@@ -219,8 +220,10 @@ public class HomePanel extends JPanel implements ActionListener {
         this.blockTime.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(block.getTimestamp())));
         this.coinbase.setText("Account #" + model.getCoinbase());
         this.status.setText(model.isDelegate() ? "Delegate" : "Normal");
-        this.balance.setText(String.format("%s SEM", SwingUtil.formatDouble(model.getTotalBalance() / (double) Unit.SEM, "0.000")));
-        this.locked.setText(String.format("%s SEM", SwingUtil.formatDouble(model.getTotalLocked() / (double) Unit.SEM,"0.000")));
+        this.balance.setText(String.format("%s SEM",
+                SwingUtil.formatDouble(model.getTotalBalance() / (double) Unit.SEM, SwingUtil.DEFAULT_DOUBLE_FORMAT)));
+        this.locked.setText(String.format("%s SEM",
+                SwingUtil.formatDouble(model.getTotalLocked() / (double) Unit.SEM, SwingUtil.DEFAULT_DOUBLE_FORMAT)));
         this.peers.setText(Integer.toString(model.getActivePeers().size()));
 
         // federate all transactions

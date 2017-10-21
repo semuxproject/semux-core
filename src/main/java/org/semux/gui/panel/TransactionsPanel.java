@@ -153,7 +153,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 to = accounts.containsKey(to) ? "Account #" + accounts.get(to) : "0x" + to;
                 return from + " => " + to;
             case 2:
-                return String.format("%.3f SEM", tx.getValue() / (double) Unit.SEM);
+                return String.format("%s SEM",SwingUtil.formatDouble( tx.getValue() / (double) Unit.SEM, SwingUtil.DEFAULT_DOUBLE_FORMAT));
             case 3:
                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 return df.format(new Date(tx.getTimestamp()));

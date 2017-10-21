@@ -186,7 +186,7 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     public void setAmount(long a) {
-        amount.setText(a == 0 ? "" :SwingUtil.formatDouble( a / (double) Unit.SEM,"0.000"));
+        amount.setText(a == 0 ? "" : SwingUtil.formatDouble(a / (double) Unit.SEM, SwingUtil.DEFAULT_DOUBLE_FORMAT));
     }
 
     /**
@@ -205,7 +205,7 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     public void setFee(long f) {
-        fee.setText(f == 0 ? "" : SwingUtil.formatDouble( f / (double) Unit.SEM,"0.000"));
+        fee.setText(f == 0 ? "" : SwingUtil.formatDouble(f / (double) Unit.SEM, SwingUtil.DEFAULT_DOUBLE_FORMAT));
     }
 
     @Override
@@ -232,7 +232,9 @@ public class SendPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Invalid receiving address!");
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
-                        "Are you sure you want to transfer " + SwingUtil.formatDouble(value / Unit.SEM,"0.000") + " SEM to 0x" + Hex.encode(to) + "?",
+                        "Are you sure you want to transfer "
+                                + SwingUtil.formatDouble(value / Unit.SEM, SwingUtil.DEFAULT_DOUBLE_FORMAT)
+                                + " SEM to 0x" + Hex.encode(to) + "?",
                         "Confirm transfer", JOptionPane.YES_NO_OPTION);
                 if (ret != JOptionPane.YES_OPTION) {
                     break;
