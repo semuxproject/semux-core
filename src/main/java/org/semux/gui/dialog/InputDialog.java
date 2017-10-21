@@ -13,6 +13,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.UnreachableException;
@@ -25,7 +26,7 @@ public class InputDialog extends JDialog implements ActionListener {
     private String text;
 
     public InputDialog(JFrame parent, String message, boolean isPassword) {
-        super(parent, "Input");
+        super(parent, MessagesUtil.get("Input"));
         this.setModal(true);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -37,12 +38,12 @@ public class InputDialog extends JDialog implements ActionListener {
         textField.setActionCommand(Action.OK.name());
         textField.addActionListener(this);
 
-        JButton btnOk = new JButton("OK");
+        JButton btnOk = new JButton(MessagesUtil.get("OK"));
         btnOk.setSelected(true);
         btnOk.setActionCommand(Action.OK.name());
         btnOk.addActionListener(this);
 
-        JButton btnCancel = new JButton("Cancel");
+        JButton btnCancel = new JButton(MessagesUtil.get("Cancel"));
         btnCancel.setActionCommand(Action.CANCEL.name());
         btnCancel.addActionListener(this);
 

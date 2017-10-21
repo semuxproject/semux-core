@@ -15,6 +15,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import org.semux.core.Transaction;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
+import org.semux.gui.MessagesUtil;
 
 public class TransactionDialog extends JDialog {
 
@@ -30,15 +31,15 @@ public class TransactionDialog extends JDialog {
     }
 
     public TransactionDialog(JComponent parent, Transaction tx) {
-        JLabel lblHash = new JLabel("Hash:");
-        JLabel lblType = new JLabel("Type:");
-        JLabel lblFrom = new JLabel("From:");
-        JLabel lblTo = new JLabel("To:");
-        JLabel lblValue = new JLabel("Value:");
-        JLabel lblFee = new JLabel("Fee:");
-        JLabel lblNonce = new JLabel("Nonce:");
-        JLabel lblTimestamp = new JLabel("Timestamp:");
-        JLabel lblData = new JLabel("data:");
+        JLabel lblHash = new JLabel(MessagesUtil.get("Hash") + ":");
+        JLabel lblType = new JLabel(MessagesUtil.get("Type") + ":");
+        JLabel lblFrom = new JLabel(MessagesUtil.get("From") + ":");
+        JLabel lblTo = new JLabel(MessagesUtil.get("To") + ":");
+        JLabel lblValue = new JLabel(MessagesUtil.get("Value") + ":");
+        JLabel lblFee = new JLabel(MessagesUtil.get("Fee") + ":");
+        JLabel lblNonce = new JLabel(MessagesUtil.get("Nonce") + ":");
+        JLabel lblTimestamp = new JLabel(MessagesUtil.get("Timestamp") + ":");
+        JLabel lblData = new JLabel(MessagesUtil.get("Data") + ":");
 
         JTextArea hash = selectableText(Hex.PREF + Hex.encode(tx.getHash()));
         JLabel type = new JLabel(tx.getType().name());
@@ -124,7 +125,7 @@ public class TransactionDialog extends JDialog {
         getContentPane().setLayout(groupLayout);
         // @formatter:on
 
-        this.setTitle("Transaction");
+        this.setTitle(MessagesUtil.get("Transaction"));
         this.pack();
         this.setLocationRelativeTo(parent);
         this.setResizable(false);

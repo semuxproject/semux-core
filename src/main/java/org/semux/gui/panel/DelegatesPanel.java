@@ -39,6 +39,7 @@ import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
@@ -51,7 +52,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "#", "Name", "Address", "Votes", "Votes from Me", "Status", "Rate" };
+    private static String[] columnNames = { MessagesUtil.get("Num"), MessagesUtil.get("Name"),
+        MessagesUtil.get("Address"), MessagesUtil.get("Votes"), MessagesUtil.get("VotesFromMe"),
+        MessagesUtil.get("Status"), MessagesUtil.get("Rate") };
 
     private Model model;
 
@@ -110,9 +113,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         JPanel panel2 = new JPanel();
         panel2.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        JLabel label = new JLabel("<html>NOTE: 1000 SEM will be burned when you register a delegate; "
-                + Config.MIN_TRANSACTION_FEE_SOFT / Unit.MILLI_SEM
-                + " mSEM transaction fee will apply when register, vote or unvote a delegate.</html>");
+        JLabel label = new JLabel(MessagesUtil.get("DelegateRegistrationNoteHtml",
+            Config.MIN_TRANSACTION_FEE_SOFT / Unit.MILLI_SEM));
         label.setForeground(Color.DARK_GRAY);
 
         from = new JComboBox<>();
@@ -149,22 +151,22 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         // @formatter:on
 
         textVote = SwingUtil.editableTextField();
-        textVote.setToolTipText("# of votes");
+        textVote.setToolTipText(MessagesUtil.get("NumVotes"));
         textVote.setColumns(10);
         textVote.setActionCommand(Action.VOTE.name());
         textVote.addActionListener(this);
 
-        JButton btnVote = new JButton("Vote");
+        JButton btnVote = new JButton(MessagesUtil.get("Vote"));
         btnVote.setActionCommand(Action.VOTE.name());
         btnVote.addActionListener(this);
 
         textUnvote = SwingUtil.editableTextField();
-        textUnvote.setToolTipText("# of votes");
+        textUnvote.setToolTipText(MessagesUtil.get("NumVotes"));
         textUnvote.setColumns(10);
         textUnvote.setActionCommand(Action.UNVOTE.name());
         textUnvote.addActionListener(this);
 
-        JButton btnUnvote = new JButton("Unvote");
+        JButton btnUnvote = new JButton(MessagesUtil.get("Unvote"));
         btnUnvote.setActionCommand(Action.UNVOTE.name());
         btnUnvote.addActionListener(this);
 
@@ -198,12 +200,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         panel.setLayout(groupLayout2);
         // @formatter:on
 
-        JButton btnDelegate = new JButton("Register as delegate");
+        JButton btnDelegate = new JButton(MessagesUtil.get("RegisterAsDelegate"));
         btnDelegate.addActionListener(this);
         btnDelegate.setActionCommand(Action.DELEGATE.name());
 
         textName = SwingUtil.editableTextField();
-        textName.setToolTipText("Name");
+        textName.setToolTipText(MessagesUtil.get("Name"));
         textName.setColumns(10);
         textName.setActionCommand(Action.DELEGATE.name());
         textName.addActionListener(this);
@@ -317,11 +319,11 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             Delegate d = getSelectedDelegate();
             String v = action.equals(Action.VOTE) ? textVote.getText() : textUnvote.getText();
             if (a == null) {
-                JOptionPane.showMessageDialog(this, "Please select an account!");
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else if (d == null) {
-                JOptionPane.showMessageDialog(this, "Please select a delegate!");
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectDelegate"));
             } else if (!v.matches("[\\d]{1,8}")) {
-                JOptionPane.showMessageDialog(this, "Please enter a valid number of votes!");
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("EnterValidNumberOfvotes"));
             } else {
                 Kernel kernel = Kernel.getInstance();
                 PendingManager pendingMgr = kernel.getPendingManager();
@@ -345,16 +347,15 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             Account a = getSelectedAccount();
             String name = textName.getText();
             if (a == null) {
-                JOptionPane.showMessageDialog(this, "Please select an account!");
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else if (!name.matches("[_a-z0-9]{4,16}")) {
-                JOptionPane.showMessageDialog(this, "Only 4-16 lowercase letters, numbers and underscore are allowed!");
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("AccountNameError"));
             } else if (a.getBalance() < Config.MIN_DELEGATE_FEE + Config.MIN_TRANSACTION_FEE_SOFT) {
-                JOptionPane.showMessageDialog(this, "Insufficient funds! You need 1000 SEM + transaction fee");
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("InsufficientFunds"));
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
-                        "Delegate registration will burn " + Config.MIN_DELEGATE_FEE / Unit.SEM
-                                + " SEM from your balance, and this process is irreversible, continue?",
-                        "Confirm delegate registration", JOptionPane.YES_NO_OPTION);
+                    MessagesUtil.get("DelegateRegistrationInfo", Config.MIN_DELEGATE_FEE / Unit.SEM),
+                    MessagesUtil.get("ConfirmDelegateRegistration"), JOptionPane.YES_NO_OPTION);
                 if (ret != JOptionPane.YES_OPTION) {
                     break;
                 }
@@ -384,10 +385,10 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private void sendTransaction(PendingManager pendingMgr, Transaction tx) {
         if (pendingMgr.addTransactionSync(tx)) {
-            JOptionPane.showMessageDialog(this, "Transaction sent. It takes at least 20s to get processed!");
+            JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionSent"));
             clear();
         } else {
-            JOptionPane.showMessageDialog(this, "Transaction failed!");
+            JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFailed"));
         }
     }
 
@@ -405,7 +406,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         List<String> accounts = new ArrayList<>();
         List<Account> list = model.getAccounts();
         for (int i = 0; i < list.size(); i++) {
-            accounts.add("Acc #" + i + ", " + list.get(i).getBalance() / Unit.SEM + " SEM");
+            accounts.add(MessagesUtil.get("AccountNumShort") + i + ", " + list.get(i).getBalance() / Unit.SEM + " SEM");
         }
 
         /*

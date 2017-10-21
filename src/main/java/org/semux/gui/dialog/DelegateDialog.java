@@ -17,6 +17,7 @@ import org.semux.core.Block;
 import org.semux.core.Delegate;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
+import org.semux.gui.MessagesUtil;
 
 public class DelegateDialog extends JDialog {
 
@@ -34,15 +35,15 @@ public class DelegateDialog extends JDialog {
     public DelegateDialog(JComponent parent, Delegate d) {
         Block block = Kernel.getInstance().getBlockchain().getBlock(d.getRegisteredAt());
 
-        JLabel lblName = new JLabel("Name:");
-        JLabel lblAddress = new JLabel("Address:");
-        JLabel lblRegisteredAt = new JLabel("Registered At:");
-        JLabel lblVotes = new JLabel("Votes:");
-        JLabel lblVotesFromMe = new JLabel("Votes from Me:");
-        JLabel lblNumOfBlocksForged = new JLabel("# of Blocks Forged:");
-        JLabel lblNumOfTurnsHit = new JLabel("# of Turns Hit:");
-        JLabel lblNumOfTurnsMissed = new JLabel("# of Turns Missed:");
-        JLabel lblRate = new JLabel("Rate:");
+        JLabel lblName = new JLabel(MessagesUtil.get("Name") + ":");
+        JLabel lblAddress = new JLabel(MessagesUtil.get("Address") + ":");
+        JLabel lblRegisteredAt = new JLabel(MessagesUtil.get("RegisteredAt") + ":");
+        JLabel lblVotes = new JLabel(MessagesUtil.get("Votes") + ":");
+        JLabel lblVotesFromMe = new JLabel(MessagesUtil.get("VotesFromMe") + ":");
+        JLabel lblNumOfBlocksForged = new JLabel(MessagesUtil.get("NumBlocksForged") + ":");
+        JLabel lblNumOfTurnsHit = new JLabel(MessagesUtil.get("NumTurnsHit") + ":");
+        JLabel lblNumOfTurnsMissed = new JLabel(MessagesUtil.get("NumTurnsMissed") + ":");
+        JLabel lblRate = new JLabel(MessagesUtil.get("Rate") + ":");
 
         JTextArea name = selectableText(d.getNameString());
         JTextArea address = selectableText(Hex.PREF + Hex.encode(d.getAddress()));
@@ -128,7 +129,7 @@ public class DelegateDialog extends JDialog {
         getContentPane().setLayout(groupLayout);
         // @formatter:on
 
-        this.setTitle("Delegate");
+        this.setTitle(MessagesUtil.get("Delegate"));
         this.pack();
         this.setLocationRelativeTo(parent);
         this.setResizable(false);

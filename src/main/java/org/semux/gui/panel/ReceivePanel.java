@@ -30,6 +30,7 @@ import org.semux.Kernel;
 import org.semux.core.Unit;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
@@ -40,7 +41,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "#", "Address", "Balance", "Locked" };
+    private static String[] columnNames = { MessagesUtil.get("Num"), MessagesUtil.get("Address"),
+        MessagesUtil.get("Balance"), MessagesUtil.get("Locked") };
 
     private Model model;
 
@@ -73,7 +75,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         sorter.setComparator(3, SwingUtil.BALANCE_COMPARATOR);
         table.setRowSorter(sorter);
 
-        JButton btnCopyAddress = new JButton("Copy Address");
+        JButton btnCopyAddress = new JButton(MessagesUtil.get("CopyAddress"));
         btnCopyAddress.addActionListener(this);
         btnCopyAddress.setActionCommand(Action.COPY_ADDRESS.name());
 
@@ -84,7 +86,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         qr.setIcon(SwingUtil.emptyImage(200, 200));
         qr.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        JButton buttonNewAccount = new JButton("New Account");
+        JButton buttonNewAccount = new JButton(MessagesUtil.get("NewAccount"));
         buttonNewAccount.addActionListener(this);
         buttonNewAccount.setActionCommand(Action.NEW_ACCOUNT.name());
 
@@ -194,14 +196,14 @@ public class ReceivePanel extends JPanel implements ActionListener {
         case COPY_ADDRESS: {
             Account acc = getSelectedAccount();
             if (acc == null) {
-                JOptionPane.showMessageDialog(this, "Please select an account!");
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else {
                 String address = "0x" + acc.getKey().toAddressString();
                 StringSelection stringSelection = new StringSelection(address);
                 Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
                 clpbrd.setContents(stringSelection, null);
 
-                JOptionPane.showMessageDialog(this, "Address copied: " + address);
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("AddressCopied", address));
             }
             break;
         }
@@ -215,7 +217,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             model.getAccounts().add(new Account(key));
             model.fireUpdateEvent();
 
-            JOptionPane.showMessageDialog(this, "New account created!");
+            JOptionPane.showMessageDialog(this, MessagesUtil.get("NewAccountCreated"));
             break;
         }
         default:

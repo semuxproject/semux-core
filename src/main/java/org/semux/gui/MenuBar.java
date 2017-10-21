@@ -35,36 +35,36 @@ public class MenuBar extends JMenuBar implements ActionListener {
     public MenuBar(JFrame frame) {
         this.frame = frame;
 
-        JMenu menuFile = new JMenu("File");
+        JMenu menuFile = new JMenu(MessagesUtil.get("File"));
         this.add(menuFile);
 
-        JMenuItem itemExit = new JMenuItem("Exit");
+        JMenuItem itemExit = new JMenuItem(MessagesUtil.get("Exit"));
         itemExit.setActionCommand(Action.EXIT.name());
         itemExit.addActionListener(this);
         menuFile.add(itemExit);
 
-        JMenu menuWallet = new JMenu("Wallet");
+        JMenu menuWallet = new JMenu(MessagesUtil.get("Wallet"));
         this.add(menuWallet);
 
-        JMenuItem itemImport = new JMenuItem("Import accounts from file");
+        JMenuItem itemImport = new JMenuItem(MessagesUtil.get("ImportAccountsFromFile"));
         itemImport.setActionCommand(Action.IMPORT_ACCOUNTS.name());
         itemImport.addActionListener(this);
         menuWallet.add(itemImport);
 
-        JMenuItem itemBackup = new JMenuItem("Backup wallet");
+        JMenuItem itemBackup = new JMenuItem(MessagesUtil.get("BackupWallet"));
         itemBackup.setActionCommand(Action.BACKUP_WALLET.name());
         itemBackup.addActionListener(this);
         menuWallet.add(itemBackup);
 
-        JMenuItem itemChangePwd = new JMenuItem("Change password");
+        JMenuItem itemChangePwd = new JMenuItem(MessagesUtil.get("ChangePassword"));
         itemChangePwd.setActionCommand(Action.CHANGE_PASSWORD.name());
         itemChangePwd.addActionListener(this);
         menuWallet.add(itemChangePwd);
 
-        JMenu menuHelp = new JMenu("Help");
+        JMenu menuHelp = new JMenu(MessagesUtil.get("Help"));
         this.add(menuHelp);
 
-        JMenuItem itemAbout = new JMenuItem("About");
+        JMenuItem itemAbout = new JMenuItem(MessagesUtil.get("About"));
         itemAbout.setActionCommand(Action.ABOUT.name());
         itemAbout.addActionListener(this);
         menuHelp.add(itemAbout);
@@ -78,24 +78,24 @@ public class MenuBar extends JMenuBar implements ActionListener {
         case IMPORT_ACCOUNTS: {
             JFileChooser chooser = new JFileChooser();
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            chooser.setFileFilter(new FileNameExtensionFilter("Wallet binary format", "data"));
+            chooser.setFileFilter(new FileNameExtensionFilter(MessagesUtil.get("WalletBinaryFormat"), "data"));
 
             int ret = chooser.showOpenDialog(frame);
             if (ret == JFileChooser.APPROVE_OPTION) {
                 File file = chooser.getSelectedFile();
-                String password = new InputDialog(frame, "Please enter the password", true).getInput();
+                String password = new InputDialog(frame, MessagesUtil.get("EnterPassword"), true).getInput();
 
                 if (password != null) {
                     Wallet w = new Wallet(file);
                     if (!w.unlock(password)) {
-                        JOptionPane.showMessageDialog(frame, "Failed to unlock the wallet file!");
+                        JOptionPane.showMessageDialog(frame, MessagesUtil.get("UnlockFailed"));
                         break;
                     }
 
                     Wallet wallet = Kernel.getInstance().getWallet();
                     int n = wallet.addAccounts(w.getAccounts());
                     wallet.flush();
-                    JOptionPane.showMessageDialog(frame, "Success! " + n + " accounts were imported.");
+                    JOptionPane.showMessageDialog(frame, MessagesUtil.get("ImportSuccess", n));
                 }
             }
 
@@ -105,7 +105,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
             JFileChooser chooser = new JFileChooser();
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setSelectedFile(new File("wallet.data"));
-            chooser.setFileFilter(new FileNameExtensionFilter("Wallet binary format", "data"));
+            chooser.setFileFilter(new FileNameExtensionFilter(MessagesUtil.get("WalletBinaryFormat"), "data"));
 
             int ret = chooser.showSaveDialog(frame);
             if (ret == JFileChooser.APPROVE_OPTION) {
@@ -113,9 +113,9 @@ public class MenuBar extends JMenuBar implements ActionListener {
                 File src = Kernel.getInstance().getWallet().getFile();
                 try {
                     IOUtil.copyFile(src, dst);
-                    JOptionPane.showMessageDialog(frame, "Your wallet has been saved at " + dst.getAbsolutePath());
+                    JOptionPane.showMessageDialog(frame, MessagesUtil.get("WalletSavedAt", dst.getAbsolutePath()));
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(frame, "Failed to save backup file");
+                    JOptionPane.showMessageDialog(frame, MessagesUtil.get("SaveBackupFailed"));
                 }
             }
             break;
