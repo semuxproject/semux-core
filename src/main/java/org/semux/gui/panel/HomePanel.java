@@ -28,8 +28,8 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
-import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
@@ -151,8 +151,7 @@ public class HomePanel extends JPanel implements ActionListener {
             this.setBorder(new EmptyBorder(10, 10, 10, 10));
 
             JLabel lblType = new JLabel("");
-            String name = (inBound && outBound) ? MessagesUtil.get("cycle")
-                    : (inBound ? MessagesUtil.get("inbound") : MessagesUtil.get("outbound"));
+            String name = (inBound && outBound) ? "cycle" : (inBound ? "inbound" : "outbound");
             lblType.setIcon(SwingUtil.loadImage(name, 48, 48));
 
             String prefix = (inBound && outBound) ? "" : (inBound ? "+" : "-");
