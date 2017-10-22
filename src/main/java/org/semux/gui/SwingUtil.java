@@ -346,7 +346,7 @@ public class SwingUtil {
         try {
             return Double.compare(parseNumber(o1).doubleValue(), parseNumber(o2).doubleValue());
         } catch (ParseException e) {
-            throw new NumberFormatException("Invalie number strings: " + o1 + ", " + o2);
+            throw new NumberFormatException("Invalid number strings: " + o1 + ", " + o2);
         }
     };
 
@@ -359,7 +359,7 @@ public class SwingUtil {
         try {
             return Double.compare(parseValue(o1), parseValue(o2));
         } catch (ParseException e) {
-            throw new NumberFormatException("Invalie number strings: " + o1 + ", " + o2);
+            throw new NumberFormatException("Invalid number strings: " + o1 + ", " + o2);
         }
     };
 
@@ -372,7 +372,7 @@ public class SwingUtil {
         try {
             return Double.compare(parsePercentage(o1), parsePercentage(o2));
         } catch (ParseException e) {
-            throw new NumberFormatException("Invalie number strings: " + o1 + ", " + o2);
+            throw new NumberFormatException("Invalid number strings: " + o1 + ", " + o2);
         }
     };
 
@@ -385,7 +385,7 @@ public class SwingUtil {
         try {
             return Long.compare(parseTimestamp(o1), parseTimestamp(o2));
         } catch (ParseException e) {
-            throw new NumberFormatException("Invalie number strings: " + o1 + ", " + o2);
+            throw new NumberFormatException("Invalid number strings: " + o1 + ", " + o2);
         }
     };
 }
