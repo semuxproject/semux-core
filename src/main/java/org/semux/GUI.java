@@ -128,6 +128,7 @@ public class GUI {
         Kernel kernel = Kernel.getInstance();
         kernel.init(dataDir, wallet, model.getCoinbase());
         kernel.start();
+        onBlockAdded(kernel.getBlockchain().getLatestBlock());
 
         // start main frame
         EventQueue.invokeLater(() -> {
