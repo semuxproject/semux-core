@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,11 +37,10 @@ import org.semux.core.Delegate;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
-import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
@@ -98,9 +98,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         // customized table sorter
         TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
-        sorter.setComparator(0, SwingUtil.INTEGER_COMPARATOR);
-        sorter.setComparator(3, SwingUtil.LONG_COMPARATOR);
-        sorter.setComparator(4, SwingUtil.LONG_COMPARATOR);
+        sorter.setComparator(0, SwingUtil.NUMBER_COMPARATOR);
+        sorter.setComparator(3, SwingUtil.NUMBER_COMPARATOR);
+        sorter.setComparator(4, SwingUtil.NUMBER_COMPARATOR);
         sorter.setComparator(6, SwingUtil.PERCENTAGE_COMPARATOR);
         table.setRowSorter(sorter);
 
@@ -113,8 +113,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         JPanel panel2 = new JPanel();
         panel2.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        JLabel label = new JLabel(
-                MessagesUtil.get("DelegateRegistrationNoteHtml", Config.MIN_TRANSACTION_FEE_SOFT / Unit.MILLI_SEM));
+        JLabel label = new JLabel(MessagesUtil.get("DelegateRegistrationNoteHtml",
+                SwingUtil.formatValue(Config.MIN_TRANSACTION_FEE_SOFT)));
         label.setForeground(Color.DARK_GRAY);
 
         from = new JComboBox<>();
@@ -150,7 +150,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         setLayout(groupLayout); 
         // @formatter:on
 
-        textVote = SwingUtil.integerFormattedTextField();
+        textVote = SwingUtil.textFieldWithPopup();
         textVote.setToolTipText(MessagesUtil.get("NumVotes"));
         textVote.setColumns(10);
         textVote.setActionCommand(Action.VOTE.name());
@@ -160,7 +160,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         btnVote.setActionCommand(Action.VOTE.name());
         btnVote.addActionListener(this);
 
-        textUnvote = SwingUtil.integerFormattedTextField();
+        textUnvote = SwingUtil.textFieldWithPopup();
         textUnvote.setToolTipText(MessagesUtil.get("NumVotes"));
         textUnvote.setColumns(10);
         textUnvote.setActionCommand(Action.UNVOTE.name());
@@ -204,7 +204,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         btnDelegate.addActionListener(this);
         btnDelegate.setActionCommand(Action.DELEGATE.name());
 
-        textName = SwingUtil.editableTextField();
+        textName = SwingUtil.textFieldWithPopup();
         textName.setToolTipText(MessagesUtil.get("Name"));
         textName.setColumns(10);
         textName.setActionCommand(Action.DELEGATE.name());
@@ -279,20 +279,20 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
             switch (column) {
             case 0:
-                return row;
+                return SwingUtil.formatNumber(row, 0);
             case 1:
                 return Bytes.toString(d.getName());
             case 2:
-                return "0x" + Hex.encode(d.getAddress());
+                return Hex.PREF + Hex.encode(d.getAddress());
             case 3:
-                return d.getVotes() / Unit.SEM;
+                return SwingUtil.formatVote(d.getVotes());
             case 4:
-                return d.getVotesFromMe() / Unit.SEM;
+                return SwingUtil.formatVote(d.getVotesFromMe());
             case 5:
                 List<String> validators = Kernel.getInstance().getBlockchain().getValidators();
                 return new HashSet<>(validators).contains(Hex.encode(d.getAddress())) ? "V" : "S";
             case 6:
-                return SwingUtil.formatDouble(d.getRate(), SwingUtil.DEFAULT_PERCENTAGE_FORMAT) + " %";
+                return SwingUtil.formatPercentage(d.getRate());
             default:
                 return null;
             }
@@ -318,12 +318,18 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             Account a = getSelectedAccount();
             Delegate d = getSelectedDelegate();
             String v = action.equals(Action.VOTE) ? textVote.getText() : textUnvote.getText();
+            long value = 0;
+            try {
+                value = SwingUtil.parseValue(v);
+            } catch (ParseException ex) {
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("EnterValidNumberOfvotes"));
+                break;
+            }
+
             if (a == null) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else if (d == null) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectDelegate"));
-            } else if (!v.matches("[\\d]{1,8}")) {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("EnterValidNumberOfvotes"));
             } else {
                 Kernel kernel = Kernel.getInstance();
                 PendingManager pendingMgr = kernel.getPendingManager();
@@ -331,7 +337,6 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
                 byte[] from = a.getKey().toAddress();
                 byte[] to = d.getAddress();
-                long value = Long.parseLong(v) * Unit.SEM;
                 long fee = Config.MIN_TRANSACTION_FEE_SOFT;
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
@@ -350,11 +355,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else if (!name.matches("[_a-z0-9]{4,16}")) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("AccountNameError"));
-            } else if (a.getBalance() < Config.MIN_DELEGATE_FEE + Config.MIN_TRANSACTION_FEE_SOFT) {
+            } else if (a.getBalance() < Config.DELEGATE_BURN_AMOUNT + Config.MIN_TRANSACTION_FEE_SOFT) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("InsufficientFunds"));
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
-                        MessagesUtil.get("DelegateRegistrationInfo", Config.MIN_DELEGATE_FEE / Unit.SEM),
+                        MessagesUtil.get("DelegateRegistrationInfo",
+                                SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT)),
                         MessagesUtil.get("ConfirmDelegateRegistration"), JOptionPane.YES_NO_OPTION);
                 if (ret != JOptionPane.YES_OPTION) {
                     break;
@@ -366,7 +372,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 TransactionType type = TransactionType.DELEGATE;
                 byte[] from = a.getKey().toAddress();
                 byte[] to = from;
-                long value = Config.MIN_DELEGATE_FEE;
+                long value = Config.DELEGATE_BURN_AMOUNT;
                 long fee = Config.MIN_TRANSACTION_FEE_HARD;
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
@@ -406,8 +412,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         List<String> accounts = new ArrayList<>();
         List<Account> list = model.getAccounts();
         for (int i = 0; i < list.size(); i++) {
-            accounts.add(MessagesUtil.get("AccountNumShort") + i + ", "
-                    + SwingUtil.formatDouble(list.get(i).getBalance() / (double) Unit.SEM) + " SEM");
+            accounts.add(
+                    MessagesUtil.get("AccountNumShort") + i + ", " + SwingUtil.formatValue(list.get(i).getBalance()));
         }
 
         /*

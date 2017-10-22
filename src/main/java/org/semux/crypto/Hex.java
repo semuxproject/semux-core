@@ -72,7 +72,7 @@ public class Hex {
      * @return
      */
     public static byte[] parse(String hex) {
-        if (hex.startsWith("0x")) {
+        if (hex.startsWith(Hex.PREF)) {
             return decode(hex.substring(2));
         } else {
             return decode(hex);

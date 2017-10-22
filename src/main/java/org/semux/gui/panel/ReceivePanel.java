@@ -27,11 +27,11 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.semux.Kernel;
-import org.semux.core.Unit;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
-import org.semux.gui.MessagesUtil;
+import org.semux.crypto.Hex;
 import org.semux.gui.Action;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
@@ -70,9 +70,9 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
         // customized table sorter
         TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
-        sorter.setComparator(0, SwingUtil.INTEGER_COMPARATOR);
-        sorter.setComparator(2, SwingUtil.BALANCE_COMPARATOR);
-        sorter.setComparator(3, SwingUtil.BALANCE_COMPARATOR);
+        sorter.setComparator(0, SwingUtil.NUMBER_COMPARATOR);
+        sorter.setComparator(2, SwingUtil.VALUE_COMPARATOR);
+        sorter.setComparator(3, SwingUtil.VALUE_COMPARATOR);
         table.setRowSorter(sorter);
 
         JButton btnCopyAddress = new JButton(MessagesUtil.get("CopyAddress"));
@@ -163,13 +163,13 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
             switch (column) {
             case 0:
-                return row;
+                return SwingUtil.formatNumber(row, 0);
             case 1:
-                return "0x" + acc.getKey().toAddressString();
+                return Hex.PREF + acc.getKey().toAddressString();
             case 2:
-                return SwingUtil.formatDouble((acc.getBalance() / (double) Unit.SEM)) + " SEM";
+                return SwingUtil.formatValue(acc.getBalance());
             case 3:
-                return SwingUtil.formatDouble((acc.getLocked() / (double) Unit.SEM)) + " SEM";
+                return SwingUtil.formatValue(acc.getLocked());
             default:
                 return null;
             }
@@ -198,7 +198,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             if (acc == null) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else {
-                String address = "0x" + acc.getKey().toAddressString();
+                String address = Hex.PREF + acc.getKey().toAddressString();
                 StringSelection stringSelection = new StringSelection(address);
                 Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
                 clpbrd.setContents(stringSelection, null);

@@ -13,16 +13,17 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.net.URL;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -32,8 +33,8 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.DefaultEditorKit;
-import javax.swing.text.NumberFormatter;
 
+import org.semux.core.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,10 +48,6 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 public class SwingUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SwingUtil.class);
-
-    public static final char DEFAULT_DOUBLE_SEPARATOR = '.';
-    public static final String DEFAULT_DOUBLE_FORMAT = "0.000";
-    public static final String DEFAULT_PERCENTAGE_FORMAT = "0.0";
 
     /**
      * Put a JFrame in the center of screen.
@@ -197,87 +194,135 @@ public class SwingUtil {
     }
 
     /**
-     * Generates an editable text field.
+     * Generates an text field with popup menu.
      * 
      * @return
      */
-    public static JTextField editableTextField() {
+    public static JTextField textFieldWithPopup() {
         JTextField textfield = new JTextField();
         addCopyPastePopup(textfield);
         return textfield;
     }
 
     /**
-     * Generates a JFormattedTextfield which only allows integer as entry
+     * Parses a number from a localized string.
      * 
+     * @param str
      * @return
+     * @throws ParseException
      */
-    public static JFormattedTextField integerFormattedTextField() {
+    public static Number parseNumber(String str) throws ParseException {
         NumberFormat format = NumberFormat.getInstance();
-        NumberFormatter formatter = new NumberFormatter(format);
-        formatter.setValueClass(Integer.class);
-        formatter.setMinimum(0);
-        formatter.setMaximum(Integer.MAX_VALUE);
-        formatter.setAllowsInvalid(false);
-        formatter.setCommitsOnValidEdit(true);
-        JFormattedTextField textField = new JFormattedTextField(formatter);
-        addCopyPastePopup(textField);
-        return textField;
+        ParsePosition position = new ParsePosition(0);
+        Number number = format.parse(str, position);
+        if (position.getIndex() != str.length()) {
+            throw new ParseException("Failed to parse number: " + str, position.getIndex());
+        }
+        return number;
     }
 
     /**
-     * Generates a JFormattedTextfield which only allows DoubleValues as entry
+     * Formats a number as a localized string.
      * 
+     * @param number
+     * @param decimals
      * @return
      */
-    public static JFormattedTextField doubleFormattedTextField() {
-        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-        dfs.setDecimalSeparator(DEFAULT_DOUBLE_SEPARATOR);
-        DecimalFormat decimalFormat = new DecimalFormat(SwingUtil.DEFAULT_DOUBLE_FORMAT, dfs);
-        decimalFormat.setGroupingUsed(false);
-        JFormattedTextField textField = new JFormattedTextField(decimalFormat);
-        addCopyPastePopup(textField);
-        return textField;
+    public static String formatNumber(Number number, int decimals) {
+        NumberFormat format = NumberFormat.getInstance();
+        format.setMinimumFractionDigits(decimals);
+        format.setMaximumFractionDigits(decimals);
+
+        return format.format(number);
     }
 
     /**
-     * Formats a given double value correctly to String with given format
+     * Format a number with zero decimals.
      * 
-     * @param value
-     * @param format
+     * @param number
      * @return
      */
-    public static String formatDouble(double value, String format) {
-        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-        dfs.setDecimalSeparator(DEFAULT_DOUBLE_SEPARATOR);
-        DecimalFormat decimalFormat = new DecimalFormat(format, dfs);
-        decimalFormat.setGroupingUsed(false);
-        return decimalFormat.format(value);
+    public static String formatNumber(Number number) {
+        return formatNumber(number, 0);
     }
 
     /**
-     * Formats a given double value correctly to String with given format
+     * Formats a Semux balance.
      * 
-     * @param value
+     * @param nano
+     * @param withUnit
      * @return
      */
-    public static String formatDouble(double value) {
-        return formatDouble(value, DEFAULT_DOUBLE_FORMAT);
+    public static String formatValue(long nano, boolean withUnit) {
+        return formatNumber(nano / (double) Unit.SEM, 3) + (withUnit ? " SEM" : "");
     }
 
     /**
-     * Integer number comparator.
+     * Formats a Semux balance.
+     * 
+     * @param nano
+     * @return
      */
-    public static final Comparator<Integer> INTEGER_COMPARATOR = (o1, o2) -> {
-        return Integer.compare(o1, o2);
-    };
+    public static String formatValue(long nano) {
+        return formatValue(nano, true);
+    }
 
     /**
-     * Long number comparator.
+     * Parses a Semux value.
+     * 
+     * @param str
+     * @return
+     * @throws ParseException
      */
-    public static final Comparator<Long> LONG_COMPARATOR = (o1, o2) -> {
-        return Long.compare(o1, o2);
-    };
+    public static long parseValue(String str) throws ParseException {
+        if (str.endsWith(" SEM")) {
+            str = str.substring(0, str.length() - 4);
+        }
+        return (long) (parseNumber(str).doubleValue() * Unit.SEM);
+    }
+
+    /**
+     * Formats a percentage
+     * 
+     * @param percentage
+     * @return
+     */
+    public static String formatPercentage(double percentage) {
+        return formatNumber(percentage, 1) + " %";
+    }
+
+    /**
+     * Formats a vote
+     * 
+     * @param percentage
+     * @return
+     */
+    public static String formatVote(long nano) {
+        return formatNumber(nano / (double) Unit.SEM, 0);
+    }
+
+    /**
+     * Format a timestamp into date string.
+     * 
+     * @param timestamp
+     * @return
+     */
+    public static String formatTimestamp(long timestamp) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        return format.format(new Date(timestamp));
+    }
+
+    /**
+     * Parses a percentage.
+     * 
+     * @param str
+     * @return
+     * @throws ParseException
+     */
+    public static double parsePercentage(String str) throws ParseException {
+        return parseNumber(str.substring(0, str.length() - 2)).doubleValue();
+    }
 
     /**
      * Number string comparator based on its value.
@@ -286,10 +331,9 @@ public class SwingUtil {
      */
     public static final Comparator<String> NUMBER_COMPARATOR = (o1, o2) -> {
         try {
-            return Double.compare(Double.parseDouble(o1), Double.parseDouble(o2));
-        } catch (NumberFormatException e) {
-            logger.error("Wrong format or value for parsing to Double", e);
-            throw e;
+            return Double.compare(parseNumber(o1).doubleValue(), parseNumber(o2).doubleValue());
+        } catch (ParseException e) {
+            throw new NumberFormatException("Invalie number strings: " + o1 + ", " + o2);
         }
     };
 
@@ -298,13 +342,11 @@ public class SwingUtil {
      * 
      * @exception
      */
-    public static final Comparator<String> BALANCE_COMPARATOR = (o1, o2) -> {
+    public static final Comparator<String> VALUE_COMPARATOR = (o1, o2) -> {
         try {
-            return Double.compare(Double.parseDouble(o1.substring(0, o1.length() - 4).replaceAll(",", ".")),
-                    Double.parseDouble(o2.substring(0, o2.length() - 4).replaceAll(",", ".")));
-        } catch (NumberFormatException e) {
-            logger.error("Wrong format or value for parsing to Double", e);
-            throw new NumberFormatException(e.getLocalizedMessage());
+            return Double.compare(parseValue(o1), parseValue(o2));
+        } catch (ParseException e) {
+            throw new NumberFormatException("Invalie number strings: " + o1 + ", " + o2);
         }
     };
 
@@ -315,11 +357,9 @@ public class SwingUtil {
      */
     public static final Comparator<String> PERCENTAGE_COMPARATOR = (o1, o2) -> {
         try {
-            return Double.compare(Double.parseDouble(o1.substring(0, o1.length() - 2).replaceAll(",", ".")),
-                    Double.parseDouble(o2.substring(0, o2.length() - 2).replaceAll(",", ".")));
-        } catch (NumberFormatException e) {
-            logger.error("Wrong format or value for parsing to Double", e);
-            throw new NumberFormatException(e.getLocalizedMessage());
+            return Double.compare(parsePercentage(o1), parsePercentage(o2));
+        } catch (ParseException e) {
+            throw new NumberFormatException("Invalie number strings: " + o1 + ", " + o2);
         }
     };
 

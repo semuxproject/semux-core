@@ -1,8 +1,6 @@
 package org.semux.gui.dialog;
 
 import java.awt.Font;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -15,7 +13,6 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import org.semux.Kernel;
 import org.semux.core.Block;
 import org.semux.core.Delegate;
-import org.semux.core.Unit;
 import org.semux.crypto.Hex;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
@@ -48,14 +45,13 @@ public class DelegateDialog extends JDialog {
 
         JTextArea name = selectableText(d.getNameString());
         JTextArea address = selectableText(Hex.PREF + Hex.encode(d.getAddress()));
-        JLabel registeredAt = new JLabel(
-                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(block.getTimestamp())));
-        JLabel votes = new JLabel(Long.toString(d.getVotes() / Unit.SEM));
-        JLabel votesFromMe = new JLabel(Long.toString(d.getVotesFromMe() / Unit.SEM));
-        JLabel numOfBlocksForged = new JLabel(Long.toString(d.getNumberOfBlocksForged()));
-        JLabel numOfTurnsHit = new JLabel(Long.toString(d.getNumberOfTurnsHit()));
-        JLabel numOfTurnsMissed = new JLabel(Long.toString(d.getNumberOfTurnsMissed()));
-        JLabel rate = new JLabel(SwingUtil.formatDouble(d.getRate(), SwingUtil.DEFAULT_PERCENTAGE_FORMAT) + " %");
+        JLabel registeredAt = new JLabel(SwingUtil.formatTimestamp(block.getTimestamp()));
+        JLabel votes = new JLabel(SwingUtil.formatVote(d.getVotes()));
+        JLabel votesFromMe = new JLabel(SwingUtil.formatVote(d.getVotesFromMe()));
+        JLabel numOfBlocksForged = new JLabel(SwingUtil.formatNumber(d.getNumberOfBlocksForged()));
+        JLabel numOfTurnsHit = new JLabel(SwingUtil.formatNumber(d.getNumberOfTurnsHit()));
+        JLabel numOfTurnsMissed = new JLabel(SwingUtil.formatNumber(d.getNumberOfTurnsMissed()));
+        JLabel rate = new JLabel(SwingUtil.formatPercentage(d.getRate()));
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());

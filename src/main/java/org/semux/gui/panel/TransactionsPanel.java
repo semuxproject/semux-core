@@ -8,11 +8,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,10 +27,9 @@ import javax.swing.table.TableRowSorter;
 
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.crypto.Hex;
-import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
@@ -86,7 +83,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         // customized table sorter
         TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
-        sorter.setComparator(2, SwingUtil.BALANCE_COMPARATOR);
+        sorter.setComparator(2, SwingUtil.VALUE_COMPARATOR);
         table.setRowSorter(sorter);
 
         JScrollPane scrollPane = new JScrollPane(table);
@@ -150,16 +147,16 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 if (tx.getType() != TransactionType.COINBASE) {
                     from = Hex.encode(tx.getFrom());
                     from = accounts.containsKey(from) ? MessagesUtil.get("AccountNum") + accounts.get(from)
-                            : "0x" + from;
+                            : Hex.PREF + from;
                 }
                 String to = Hex.encode(tx.getTo());
-                to = accounts.containsKey(to) ? MessagesUtil.get("AccountNum") + accounts.get(to) : "0x" + to;
+                to = accounts.containsKey(to) ? MessagesUtil.get("AccountNum") + " #" + accounts.get(to)
+                        : Hex.PREF + to;
                 return from + " => " + to;
             case 2:
-                return SwingUtil.formatDouble(tx.getValue() / (double) Unit.SEM) + " SEM";
+                return SwingUtil.formatValue(tx.getValue());
             case 3:
-                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                return df.format(new Date(tx.getTimestamp()));
+                return SwingUtil.formatTimestamp(tx.getTimestamp());
             default:
                 return null;
             }

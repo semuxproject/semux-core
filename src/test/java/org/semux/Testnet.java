@@ -32,7 +32,7 @@ public class Testnet {
         Map<String, Object> params = new HashMap<>();
         params.put("from", address);
         params.put("to", address);
-        params.put("value", Config.MIN_DELEGATE_FEE);
+        params.put("value", Config.DELEGATE_BURN_AMOUNT);
         params.put("fee", Config.MIN_TRANSACTION_FEE_HARD);
         params.put("data", name);
 

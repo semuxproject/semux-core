@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,6 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -24,7 +24,6 @@ import org.semux.Kernel;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
@@ -33,12 +32,8 @@ import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.Bytes;
 import org.semux.utils.UnreachableException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SendPanel extends JPanel implements ActionListener {
-
-    private static final Logger logger = LoggerFactory.getLogger(SwingUtil.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -46,8 +41,8 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private JComboBox<String> from;
     private JTextField to;
-    private JFormattedTextField amount;
-    private JFormattedTextField fee;
+    private JTextField amount;
+    private JTextField fee;
 
     public SendPanel(Model model) {
         this.model = model;
@@ -64,7 +59,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblTo = new JLabel(MessagesUtil.get("To") + ":");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        to = SwingUtil.editableTextField();
+        to = SwingUtil.textFieldWithPopup();
         to.setColumns(24);
         to.setActionCommand(Action.SEND.name());
         to.addActionListener(this);
@@ -72,7 +67,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblAmount = new JLabel(MessagesUtil.get("Amount") + ":");
         lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        amount = SwingUtil.doubleFormattedTextField();
+        amount = SwingUtil.textFieldWithPopup();
         amount.setColumns(10);
         amount.setActionCommand(Action.SEND.name());
         amount.addActionListener(this);
@@ -80,7 +75,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblFee = new JLabel(MessagesUtil.get("Fee") + ":");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        fee = SwingUtil.doubleFormattedTextField();
+        fee = SwingUtil.textFieldWithPopup();
         fee.setColumns(10);
         fee.setActionCommand(Action.SEND.name());
         fee.addActionListener(this);
@@ -171,42 +166,20 @@ public class SendPanel extends JPanel implements ActionListener {
         to.setText(Hex.encode(addr));
     }
 
-    /**
-     * @return the submitted amount of coins as long
-     * @exception NumberFormatException
-     *                if Double.parseDouble() fails
-     */
-    public long getAmount() {
-        try {
-            return (long) (Unit.SEM * Double.parseDouble(amount.getText().trim().replaceAll(",", ".")));
-        } catch (NumberFormatException e) {
-            logger.error("Parsing of submitted value of amount failed", e);
-            JOptionPane.showMessageDialog(this, "Submitted amount is invalid!");
-            throw e;
-        }
+    public long getAmount() throws ParseException {
+        return SwingUtil.parseValue(amount.getText().trim());
     }
 
     public void setAmount(long a) {
-        amount.setText(a == 0 ? "" : SwingUtil.formatDouble(a / (double) Unit.SEM));
+        amount.setText(SwingUtil.formatValue(a, false));
     }
 
-    /**
-     * @return the submitted Fee as long
-     * @exception NumberFormatException
-     *                if Double.parseDouble() fails
-     */
-    public long getFee() {
-        try {
-            return (long) (Unit.SEM * Double.parseDouble(fee.getText().trim().replaceAll(",", ".")));
-        } catch (NumberFormatException e) {
-            logger.error("Parsing of submitted value of fee failed", e);
-            JOptionPane.showMessageDialog(this, "Submitted fee is invalid!");
-            throw e;
-        }
+    public long getFee() throws ParseException {
+        return SwingUtil.parseValue(fee.getText().trim());
     }
 
     public void setFee(long f) {
-        fee.setText(f == 0 ? "" : SwingUtil.formatDouble(f / (double) Unit.SEM));
+        fee.setText(SwingUtil.formatValue(f, false));
     }
 
     @Override
@@ -218,41 +191,43 @@ public class SendPanel extends JPanel implements ActionListener {
             refresh();
             break;
         case SEND:
-            Account acc = getSelectedAccount();
-            long value = getAmount();
-            long fee = getFee();
-            byte[] to = Hex.parse(getTo());
+            try {
+                Account acc = getSelectedAccount();
+                long value = getAmount();
+                long fee = getFee();
+                byte[] to = Hex.parse(getTo());
 
-            if (acc == null) {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
-            } else if (fee < Config.MIN_TRANSACTION_FEE_SOFT) {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFeeTooLow"));
-            } else if (value + fee > acc.getBalance()) {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("InsufficientFunds"));
-            } else if (to.length != 20) {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("InvalidReceivingAddress"));
-            } else {
-                int ret = JOptionPane
-                        .showConfirmDialog(this,
-                                MessagesUtil.get("TransferInfo", SwingUtil.formatDouble(value / (double) Unit.SEM),
-                                        Hex.encode(to)),
-                                MessagesUtil.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
-                if (ret != JOptionPane.YES_OPTION) {
-                    break;
+                if (acc == null) {
+                    JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
+                } else if (fee < Config.MIN_TRANSACTION_FEE_SOFT) {
+                    JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFeeTooLow"));
+                } else if (value + fee > acc.getBalance()) {
+                    JOptionPane.showMessageDialog(this, MessagesUtil.get("InsufficientFunds"));
+                } else if (to.length != 20) {
+                    JOptionPane.showMessageDialog(this, MessagesUtil.get("InvalidReceivingAddress"));
+                } else {
+                    int ret = JOptionPane.showConfirmDialog(this,
+                            MessagesUtil.get("TransferInfo", SwingUtil.formatValue(value), Hex.PREF + Hex.encode(to)),
+                            MessagesUtil.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
+                    if (ret != JOptionPane.YES_OPTION) {
+                        break;
+                    }
+
+                    Kernel kernel = Kernel.getInstance();
+                    PendingManager pendingMgr = kernel.getPendingManager();
+
+                    TransactionType type = TransactionType.TRANSFER;
+                    byte[] from = acc.getKey().toAddress();
+                    long nonce = pendingMgr.getNonce(from);
+                    long timestamp = System.currentTimeMillis();
+                    byte[] data = {};
+                    Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+                    tx.sign(acc.getKey());
+
+                    sendTransaction(pendingMgr, tx);
                 }
-
-                Kernel kernel = Kernel.getInstance();
-                PendingManager pendingMgr = kernel.getPendingManager();
-
-                TransactionType type = TransactionType.TRANSFER;
-                byte[] from = acc.getKey().toAddress();
-                long nonce = pendingMgr.getNonce(from);
-                long timestamp = System.currentTimeMillis();
-                byte[] data = {};
-                Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
-                tx.sign(acc.getKey());
-
-                sendTransaction(pendingMgr, tx);
+            } catch (ParseException ex) {
+                JOptionPane.showMessageDialog(this, "Exception: " + ex.getMessage());
             }
             break;
         case CLEAR:
@@ -281,8 +256,8 @@ public class SendPanel extends JPanel implements ActionListener {
         List<String> accounts = new ArrayList<>();
         List<Account> list = model.getAccounts();
         for (int i = 0; i < list.size(); i++) {
-            accounts.add("0x" + list.get(i).getKey().toAddressString() + ", #" + i + ", "
-                    + SwingUtil.formatDouble(list.get(i).getBalance() / (double) Unit.SEM) + " SEM");
+            accounts.add(Hex.PREF + list.get(i).getKey().toAddressString() + ", #" + i + ", "
+                    + SwingUtil.formatValue(list.get(i).getBalance()));
         }
 
         /*

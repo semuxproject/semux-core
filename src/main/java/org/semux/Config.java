@@ -134,7 +134,7 @@ public class Config {
     /**
      * Minimum delegate fee.
      */
-    public static long MIN_DELEGATE_FEE = 1000 * Unit.SEM;
+    public static long DELEGATE_BURN_AMOUNT = 1000 * Unit.SEM;
 
     /**
      * Length of validator term.

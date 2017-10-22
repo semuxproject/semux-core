@@ -1,8 +1,6 @@
 package org.semux.gui.dialog;
 
 import java.awt.Font;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -13,7 +11,6 @@ import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.semux.core.Transaction;
-import org.semux.core.Unit;
 import org.semux.crypto.Hex;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
@@ -46,10 +43,10 @@ public class TransactionDialog extends JDialog {
         JLabel type = new JLabel(tx.getType().name());
         JTextArea from = selectableText(Hex.PREF + Hex.encode(tx.getFrom()));
         JTextArea to = selectableText(Hex.PREF + Hex.encode(tx.getTo()));
-        JLabel value = new JLabel(SwingUtil.formatDouble((tx.getValue() / (double) Unit.SEM)) + " SEM");
-        JLabel fee = new JLabel(SwingUtil.formatDouble((tx.getFee() / (double) Unit.SEM)) + " SEM");
-        JLabel nonce = new JLabel(Long.toString(tx.getNonce()));
-        JLabel timestamp = new JLabel(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(tx.getTimestamp())));
+        JLabel value = new JLabel(SwingUtil.formatValue((tx.getValue())));
+        JLabel fee = new JLabel(SwingUtil.formatValue((tx.getFee())));
+        JLabel nonce = new JLabel(SwingUtil.formatNumber(tx.getNonce()));
+        JLabel timestamp = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
         JTextArea data = new JTextArea(Hex.PREF + Hex.encode(tx.getData()));
         data.setEditable(false);
 

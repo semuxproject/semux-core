@@ -32,7 +32,7 @@ public class CorePerformance {
             byte[] from = key.toAddress();
             byte[] to = Bytes.random(20);
             long value = 1;
-            long fee = Config.MIN_DELEGATE_FEE;
+            long fee = Config.DELEGATE_BURN_AMOUNT;
             long nonce = 1 + i;
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.random(128);
@@ -77,7 +77,7 @@ public class CorePerformance {
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
         long value = 1;
-        long fee = Config.MIN_DELEGATE_FEE;
+        long fee = Config.DELEGATE_BURN_AMOUNT;
         long nonce = 1;
         long timestamp = System.currentTimeMillis();
         byte[] data = {};

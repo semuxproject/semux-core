@@ -341,7 +341,7 @@ public class ApiHandlerImpl implements ApiHandler {
             }
 
             // value and fee
-            long value = (type == TransactionType.DELEGATE) ? Config.MIN_DELEGATE_FEE : Long.parseLong(pValue);
+            long value = (type == TransactionType.DELEGATE) ? Config.DELEGATE_BURN_AMOUNT : Long.parseLong(pValue);
             long fee = Long.parseLong(pFee);
 
             // nonce, timestamp and data

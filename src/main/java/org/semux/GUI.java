@@ -28,8 +28,9 @@ import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
-import org.semux.gui.MessagesUtil;
+import org.semux.crypto.Hex;
 import org.semux.gui.MainFrame;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.Model;
 import org.semux.gui.WelcomeFrame;
 import org.semux.gui.dialog.InputDialog;
@@ -110,7 +111,7 @@ public class GUI {
             List<Object> options = new ArrayList<>();
             List<EdDSA> list = wallet.getAccounts();
             for (int i = 0; i < list.size(); i++) {
-                options.add("0x" + list.get(i).toAddressString() + ", #" + i);
+                options.add(Hex.PREF + list.get(i).toAddressString() + ", #" + i);
             }
 
             SelectDialog dialog = new SelectDialog(null, message, options);

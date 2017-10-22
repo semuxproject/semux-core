@@ -80,7 +80,7 @@ public class TransactionExecutor {
             case DELEGATE: {
                 if (fee <= balance && value <= balance && value + fee <= balance //
                         && Arrays.equals(from, to) //
-                        && value >= Config.MIN_DELEGATE_FEE //
+                        && value >= Config.DELEGATE_BURN_AMOUNT //
                         && data.length <= 16 && Bytes.toString(data).matches("[_a-z0-9]{4,16}") //
                         && ds.register(to, data)) {
                     // register delegate

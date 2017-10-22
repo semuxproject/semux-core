@@ -4,9 +4,7 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +24,6 @@ import javax.swing.border.TitledBorder;
 import org.semux.core.Block;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
@@ -155,16 +152,14 @@ public class HomePanel extends JPanel implements ActionListener {
             lblType.setIcon(SwingUtil.loadImage(name, 48, 48));
 
             String prefix = (inBound && outBound) ? "" : (inBound ? "+" : "-");
-            JLabel lblAmount = new JLabel(
-                    prefix + SwingUtil.formatDouble((tx.getValue() / (double) Unit.SEM)) + " SEM");
+            JLabel lblAmount = new JLabel(prefix + SwingUtil.formatValue(tx.getValue()));
             lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
-            SimpleDateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
-            JLabel lblTime = new JLabel(df.format(new Date(tx.getTimestamp())));
+            JLabel lblTime = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
 
             JLabel labelAddress = new JLabel((inBound && outBound) ? MessagesUtil.get("InternalTransfer")
                     : (tx.getType() == TransactionType.COINBASE ? MessagesUtil.get("FromBlockRewardNum") + tx.getNonce()
-                            : "0x" + Hex.encode(inBound ? tx.getFrom() : tx.getTo())));
+                            : Hex.PREF + Hex.encode(inBound ? tx.getFrom() : tx.getTo())));
             labelAddress.setForeground(Color.GRAY);
 
             // @formatter:off
@@ -217,13 +212,13 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private void refresh() {
         Block block = model.getLatestBlock();
-        this.blockNum.setText(Long.toString(block.getNumber()));
-        this.blockTime.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(block.getTimestamp())));
+        this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
+        this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
         this.coinbase.setText("Account #" + model.getCoinbase());
         this.status.setText(model.isDelegate() ? MessagesUtil.get("Delegate") : MessagesUtil.get("Normal"));
-        this.balance.setText(SwingUtil.formatDouble(model.getTotalBalance() / (double) Unit.SEM) + " SEM");
-        this.locked.setText(SwingUtil.formatDouble(model.getTotalLocked() / (double) Unit.SEM) + " SEM");
-        this.peers.setText(Integer.toString(model.getActivePeers().size()));
+        this.balance.setText(SwingUtil.formatValue(model.getTotalBalance()));
+        this.locked.setText(SwingUtil.formatValue(model.getTotalLocked()));
+        this.peers.setText(SwingUtil.formatNumber(model.getActivePeers().size(), 0));
 
         // federate all transactions
         Set<ByteArray> hashes = new HashSet<>();
