@@ -214,7 +214,7 @@ public class HomePanel extends JPanel implements ActionListener {
         Block block = model.getLatestBlock();
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
-        this.coinbase.setText("Account #" + model.getCoinbase());
+        this.coinbase.setText(MessagesUtil.get("AccountNum") + model.getCoinbase());
         this.status.setText(model.isDelegate() ? MessagesUtil.get("Delegate") : MessagesUtil.get("Normal"));
         this.balance.setText(SwingUtil.formatValue(model.getTotalBalance()));
         this.locked.setText(SwingUtil.formatValue(model.getTotalLocked()));
