@@ -43,6 +43,7 @@ public class SendPanel extends JPanel implements ActionListener {
     private JTextField to;
     private JTextField amount;
     private JTextField fee;
+    private JTextField memo;
 
     public SendPanel(Model model) {
         this.model = model;
@@ -80,6 +81,14 @@ public class SendPanel extends JPanel implements ActionListener {
         fee.setActionCommand(Action.SEND.name());
         fee.addActionListener(this);
 
+        JLabel lblMemo = new JLabel(MessagesUtil.get("Memo") + ":");
+        lblMemo.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        memo = SwingUtil.textFieldWithPopup();
+        memo.setColumns(10);
+        memo.setActionCommand(Action.SEND.name());
+        memo.addActionListener(this);
+
         JLabel lblSem1 = new JLabel("SEM");
 
         JLabel lblSem2 = new JLabel("SEM");
@@ -102,7 +111,8 @@ public class SendPanel extends JPanel implements ActionListener {
                         .addComponent(lblTo)
                         .addComponent(lblFrom)
                         .addComponent(lblAmount)
-                        .addComponent(lblFee))
+                        .addComponent(lblFee)
+                        .addComponent(lblMemo))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addGroup(groupLayout.createSequentialGroup()
@@ -117,7 +127,8 @@ public class SendPanel extends JPanel implements ActionListener {
                                 .addGroup(groupLayout.createSequentialGroup()
                                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
                                         .addComponent(fee)
-                                        .addComponent(amount, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE))
+                                        .addComponent(amount, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
+                                        .addComponent(memo))
                                     .addGap(12)
                                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
                                         .addComponent(lblSem1)
@@ -145,6 +156,10 @@ public class SendPanel extends JPanel implements ActionListener {
                         .addComponent(lblFee)
                         .addComponent(fee, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblSem2))
+                    .addGap(18)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                        .addComponent(lblMemo)
+                        .addComponent(memo, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
                     .addGap(27)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(paySend)
@@ -182,6 +197,14 @@ public class SendPanel extends JPanel implements ActionListener {
         fee.setText(SwingUtil.formatValue(f, false));
     }
 
+    public String getMemo() {
+        return memo.getText().trim();
+    }
+
+    public void setMemo(String memo) {
+        to.setText(memo.trim());
+    }
+
     @Override
     public synchronized void actionPerformed(ActionEvent e) {
         Action action = Action.valueOf(e.getActionCommand());
@@ -195,6 +218,7 @@ public class SendPanel extends JPanel implements ActionListener {
                 Account acc = getSelectedAccount();
                 long value = getAmount();
                 long fee = getFee();
+                String memo = getMemo();
                 byte[] to = Hex.parse(getTo());
 
                 if (acc == null) {
@@ -202,7 +226,8 @@ public class SendPanel extends JPanel implements ActionListener {
                 } else if (fee < Config.MIN_TRANSACTION_FEE_SOFT) {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFeeTooLow"));
                 } else if (value + fee > acc.getBalance()) {
-                    JOptionPane.showMessageDialog(this, MessagesUtil.get("InsufficientFunds"));
+                    JOptionPane.showMessageDialog(this, MessagesUtil.get("InsufficientFunds",
+                        SwingUtil.formatValue(value + fee)));
                 } else if (to.length != 20) {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("InvalidReceivingAddress"));
                 } else {
@@ -220,7 +245,7 @@ public class SendPanel extends JPanel implements ActionListener {
                     byte[] from = acc.getKey().toAddress();
                     long nonce = pendingMgr.getNonce(from);
                     long timestamp = System.currentTimeMillis();
-                    byte[] data = {};
+                    byte[] data = Bytes.of(memo);
                     Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
                     tx.sign(acc.getKey());
 
@@ -276,5 +301,6 @@ public class SendPanel extends JPanel implements ActionListener {
         setTo(Bytes.EMPY_BYTES);
         setAmount(0);
         setFee(Config.MIN_TRANSACTION_FEE_SOFT);
+        setMemo("");
     }
 }
