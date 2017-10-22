@@ -13,6 +13,9 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
@@ -21,6 +24,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.NumberFormatter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +39,8 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 public class SwingUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SwingUtil.class);
+
+    public static final String DEFAULT_DOUBLE_FORMAT = "0.000";
 
     /**
      * Put a JFrame in the center of screen.
@@ -178,6 +184,63 @@ public class SwingUtil {
     }
 
     /**
+     * Generates a JFormattedTextfield which only allows integer as entry
+     * 
+     * @return
+     */
+    public static JFormattedTextField integerFormattedTextField() {
+        NumberFormat format = NumberFormat.getInstance();
+        NumberFormatter formatter = new NumberFormatter(format);
+        formatter.setValueClass(Integer.class);
+        formatter.setMinimum(0);
+        formatter.setMaximum(Integer.MAX_VALUE);
+        formatter.setAllowsInvalid(false);
+        formatter.setCommitsOnValidEdit(true);
+        JFormattedTextField field = new JFormattedTextField(formatter);
+        return field;
+    }
+
+    /**
+     * Generates a JFormattedTextfield which only allows DoubleValues as entry
+     * 
+     * @return
+     */
+    public static JFormattedTextField doubleFormattedTextField() {
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        dfs.setDecimalSeparator('.');
+        DecimalFormat decimalFormat = new DecimalFormat(SwingUtil.DEFAULT_DOUBLE_FORMAT, dfs);
+        decimalFormat.setGroupingUsed(false);
+        JFormattedTextField numberFormattedTextfield = new JFormattedTextField(decimalFormat);
+        JPopupMenu popup = new JPopupMenu();
+        JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
+        item.setText("Cut");
+        popup.add(item);
+        item = new JMenuItem(new DefaultEditorKit.CopyAction());
+        item.setText("Copy");
+        popup.add(item);
+        item = new JMenuItem(new DefaultEditorKit.PasteAction());
+        item.setText("Paste");
+        popup.add(item);
+        numberFormattedTextfield.setComponentPopupMenu(popup);
+        return numberFormattedTextfield;
+    }
+
+    /**
+     * Formats a given double value correctly to String with given format
+     * 
+     * @param value
+     * @param format
+     * @return
+     */
+    public static String formatDouble(double value, String format) {
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        dfs.setDecimalSeparator('.');
+        DecimalFormat decimalFormat = new DecimalFormat(format, dfs);
+        decimalFormat.setGroupingUsed(false);
+        return decimalFormat.format(value);
+    }
+
+    /**
      * Integer number comparator.
      */
     public static final Comparator<Integer> INTEGER_COMPARATOR = (o1, o2) -> {
@@ -192,25 +255,47 @@ public class SwingUtil {
     };
 
     /**
-     * Number string comparator based on its value.
+     * Number string comparator based on its value.<br />
+     * 
+     * @exception
      */
     public static final Comparator<String> NUMBER_COMPARATOR = (o1, o2) -> {
-        return Double.compare(Double.parseDouble(o1), Double.parseDouble(o2));
+        try {
+            return Double.compare(Double.parseDouble(o1), Double.parseDouble(o2));
+        } catch (NumberFormatException e) {
+            logger.error("Wrong format or value for parsing to Double", e);
+            throw e;
+        }
     };
 
     /**
-     * Balance string comparator based on its value.
+     * Balance string comparator based on its value.<br />
+     * 
+     * @exception
      */
     public static final Comparator<String> BALANCE_COMPARATOR = (o1, o2) -> {
-        return Double.compare(Double.parseDouble(o1.substring(0, o1.length() - 4)),
-                Double.parseDouble(o2.substring(0, o2.length() - 4)));
+        try {
+            return Double.compare(Double.parseDouble(o1.substring(0, o1.length() - 4).replaceAll(",", ".")),
+                    Double.parseDouble(o2.substring(0, o2.length() - 4).replaceAll(",", ".")));
+        } catch (NumberFormatException e) {
+            logger.error("Wrong format or value for parsing to Double", e);
+            throw new NumberFormatException(e.getLocalizedMessage());
+        }
     };
 
     /**
-     * Balance string comparator based on its value.
+     * Balance string comparator based on its value.<br />
+     * 
+     * @exception
      */
     public static final Comparator<String> PERCENTAGE_COMPARATOR = (o1, o2) -> {
-        return Double.compare(Double.parseDouble(o1.substring(0, o1.length() - 2)),
-                Double.parseDouble(o2.substring(0, o2.length() - 2)));
+        try {
+            return Double.compare(Double.parseDouble(o1.substring(0, o1.length() - 2).replaceAll(",", ".")),
+                    Double.parseDouble(o2.substring(0, o2.length() - 2).replaceAll(",", ".")));
+        } catch (NumberFormatException e) {
+            logger.error("Wrong format or value for parsing to Double", e);
+            throw new NumberFormatException(e.getLocalizedMessage());
+        }
     };
+
 }

@@ -148,7 +148,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         setLayout(groupLayout); 
         // @formatter:on
 
-        textVote = SwingUtil.editableTextField();
+        textVote = SwingUtil.integerFormattedTextField();
         textVote.setToolTipText("# of votes");
         textVote.setColumns(10);
         textVote.setActionCommand(Action.VOTE.name());
@@ -158,7 +158,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         btnVote.setActionCommand(Action.VOTE.name());
         btnVote.addActionListener(this);
 
-        textUnvote = SwingUtil.editableTextField();
+        textUnvote = SwingUtil.integerFormattedTextField();
         textUnvote.setToolTipText("# of votes");
         textUnvote.setColumns(10);
         textUnvote.setActionCommand(Action.UNVOTE.name());
@@ -290,7 +290,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 List<String> validators = Kernel.getInstance().getBlockchain().getValidators();
                 return new HashSet<>(validators).contains(Hex.encode(d.getAddress())) ? "V" : "S";
             case 6:
-                return String.format("%.1f %%", d.getRate());
+                return String.format("%s %%", SwingUtil.formatDouble(d.getRate(), "0.0"));
             default:
                 return null;
             }
@@ -405,7 +405,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         List<String> accounts = new ArrayList<>();
         List<Account> list = model.getAccounts();
         for (int i = 0; i < list.size(); i++) {
-            accounts.add("Acc #" + i + ", " + list.get(i).getBalance() / Unit.SEM + " SEM");
+            accounts.add(String.format("Acc #%d, %s SEM",i, SwingUtil.formatDouble(list.get(i).getBalance() / Unit.SEM, "0")));
         }
 
         /*

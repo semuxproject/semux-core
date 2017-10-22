@@ -11,6 +11,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -31,8 +32,12 @@ import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.Bytes;
 import org.semux.utils.UnreachableException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SendPanel extends JPanel implements ActionListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(SwingUtil.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -40,8 +45,8 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private JComboBox<String> from;
     private JTextField to;
-    private JTextField amount;
-    private JTextField fee;
+    private JFormattedTextField amount;
+    private JFormattedTextField fee;
 
     public SendPanel(Model model) {
         this.model = model;
@@ -66,7 +71,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblAmount = new JLabel("Amount:");
         lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        amount = SwingUtil.editableTextField();
+        amount = SwingUtil.doubleFormattedTextField();
         amount.setColumns(10);
         amount.setActionCommand(Action.SEND.name());
         amount.addActionListener(this);
@@ -74,7 +79,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblFee = new JLabel("Fee:");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        fee = SwingUtil.editableTextField();
+        fee = SwingUtil.doubleFormattedTextField();
         fee.setColumns(10);
         fee.setActionCommand(Action.SEND.name());
         fee.addActionListener(this);
@@ -165,20 +170,42 @@ public class SendPanel extends JPanel implements ActionListener {
         to.setText(Hex.encode(addr));
     }
 
+    /**
+     * @return the submitted amount of coins as long
+     * @exception NumberFormatException
+     *                if Double.parseDouble() fails
+     */
     public long getAmount() {
-        return (long) (Unit.SEM * Double.parseDouble(amount.getText().trim()));
+        try {
+            return (long) (Unit.SEM * Double.parseDouble(amount.getText().trim().replaceAll(",", ".")));
+        } catch (NumberFormatException e) {
+            logger.error("Parsing of submitted value of amount failed", e);
+            JOptionPane.showMessageDialog(this, "Submitted fee is invalid!");
+            throw e;
+        }
     }
 
     public void setAmount(long a) {
-        amount.setText(a == 0 ? "" : String.format("%.3f", a / (double) Unit.SEM));
+        amount.setText(a == 0 ? "" : SwingUtil.formatDouble(a / (double) Unit.SEM, SwingUtil.DEFAULT_DOUBLE_FORMAT));
     }
 
+    /**
+     * @return the submitted Fee as long
+     * @exception NumberFormatException
+     *                if Double.parseDouble() fails
+     */
     public long getFee() {
-        return (long) (Unit.SEM * Double.parseDouble(fee.getText().trim()));
+        try {
+            return (long) (Unit.SEM * Double.parseDouble(fee.getText().trim().replaceAll(",", ".")));
+        } catch (NumberFormatException e) {
+            logger.error("Parsing of submitted value of fee failed", e);
+            JOptionPane.showMessageDialog(this, "Submitted fee is invalid!");
+            throw e;
+        }
     }
 
     public void setFee(long f) {
-        fee.setText(f == 0 ? "" : String.format("%.3f", f / (double) Unit.SEM));
+        fee.setText(f == 0 ? "" : SwingUtil.formatDouble(f / (double) Unit.SEM, SwingUtil.DEFAULT_DOUBLE_FORMAT));
     }
 
     @Override
@@ -205,7 +232,9 @@ public class SendPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Invalid receiving address!");
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
-                        "Are you sure you want to transfer " + value / Unit.SEM + " SEM to 0x" + Hex.encode(to) + "?",
+                        "Are you sure you want to transfer "
+                                + SwingUtil.formatDouble(value / Unit.SEM, SwingUtil.DEFAULT_DOUBLE_FORMAT)
+                                + " SEM to 0x" + Hex.encode(to) + "?",
                         "Confirm transfer", JOptionPane.YES_NO_OPTION);
                 if (ret != JOptionPane.YES_OPTION) {
                     break;

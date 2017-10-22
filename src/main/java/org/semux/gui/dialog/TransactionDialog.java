@@ -15,6 +15,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import org.semux.core.Transaction;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
+import org.semux.gui.SwingUtil;
 
 public class TransactionDialog extends JDialog {
 
@@ -44,8 +45,10 @@ public class TransactionDialog extends JDialog {
         JLabel type = new JLabel(tx.getType().name());
         JTextArea from = selectableText(Hex.PREF + Hex.encode(tx.getFrom()));
         JTextArea to = selectableText(Hex.PREF + Hex.encode(tx.getTo()));
-        JLabel value = new JLabel(tx.getValue() / Unit.SEM + " SEM");
-        JLabel fee = new JLabel(tx.getFee() / Unit.SEM + " SEM");
+        JLabel value = new JLabel(
+                SwingUtil.formatDouble((tx.getValue() / Unit.SEM), SwingUtil.DEFAULT_DOUBLE_FORMAT + " SEM"));
+        JLabel fee = new JLabel(
+                SwingUtil.formatDouble((tx.getFee() / Unit.SEM), SwingUtil.DEFAULT_DOUBLE_FORMAT + " SEM"));
         JLabel nonce = new JLabel(Long.toString(tx.getNonce()));
         JLabel timestamp = new JLabel(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(tx.getTimestamp())));
         JTextArea data = new JTextArea(Hex.PREF + Hex.encode(tx.getData()));
