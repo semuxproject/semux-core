@@ -222,14 +222,14 @@ public class ApiHandlerImpl implements ApiHandler {
                 return success(arr);
             }
             case GET_VOTE: {
-                String from = params.get("voter");
-                String to = params.get("delegate");
+                String voter = params.get("voter");
+                String delegate = params.get("delegate");
 
-                if (from != null && to != null) {
-                    long vote = chain.getDeleteState().getVote(Hex.decode(from), Hex.decode(to));
+                if (voter != null && delegate != null) {
+                    long vote = chain.getDeleteState().getVote(Hex.parse(voter), Hex.parse(delegate));
                     return success(vote);
                 } else {
-                    return failure("Invalid parameter: voter = " + from + ", delegate = " + to);
+                    return failure("Invalid parameter: voter = " + voter + ", delegate = " + delegate);
                 }
             }
 

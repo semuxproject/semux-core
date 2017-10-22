@@ -50,18 +50,18 @@ public class Hex {
      * @return
      */
     public static byte[] decode(String hex) {
-        try {
-            byte[] raw = new byte[hex.length() / 2];
-
-            char[] chars = hex.toCharArray();
-            for (int i = 0; i < chars.length; i += 2) {
-                raw[i / 2] = (byte) ((hexToInt[chars[i]] << 4) + hexToInt[chars[i + 1]]);
-            }
-
-            return raw;
-        } catch (IndexOutOfBoundsException e) {
+        if (!hex.matches("([0-9a-zA-Z][0-9a-zA-Z])*")) {
             throw new RuntimeException("Invalid hex string");
         }
+
+        byte[] raw = new byte[hex.length() / 2];
+
+        char[] chars = hex.toCharArray();
+        for (int i = 0; i < chars.length; i += 2) {
+            raw[i / 2] = (byte) ((hexToInt[chars[i]] << 4) + hexToInt[chars[i + 1]]);
+        }
+
+        return raw;
     }
 
     /**

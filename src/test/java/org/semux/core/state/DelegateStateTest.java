@@ -109,10 +109,25 @@ public class DelegateStateTest {
         byte[] delegate = new EdDSA().toAddress();
         long value = 2 * Unit.SEM;
 
-        ds.register(delegate, Bytes.of("test123"));
+        ds.register(delegate, Bytes.of("test"));
         assertFalse(ds.unvote(voter, delegate, value));
         ds.vote(voter, delegate, value);
         assertTrue(ds.vote(voter, delegate, value));
+    }
+
+    @Test
+    public void testGetVote() {
+        byte[] voter = new EdDSA().toAddress();
+        byte[] delegate = new EdDSA().toAddress();
+        long value = 2 * Unit.SEM;
+
+        ds.register(delegate, Bytes.of("test"));
+        assertTrue(ds.vote(voter, delegate, value));
+        assertEquals(value, ds.getVote(voter, delegate));
+        assertTrue(ds.vote(voter, delegate, value));
+        assertEquals(value * 2, ds.getVote(voter, delegate));
+        ds.commit();
+        assertEquals(value * 2, ds.getVote(voter, delegate));
     }
 
     @After
