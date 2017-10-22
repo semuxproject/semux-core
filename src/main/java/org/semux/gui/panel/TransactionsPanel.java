@@ -31,6 +31,7 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
@@ -44,7 +45,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "Type", "From/To", "Value", "Time" };
+    private static String[] columnNames = { MessagesUtil.get("Type"), MessagesUtil.get("FromTo"),
+            MessagesUtil.get("Value"), MessagesUtil.get("Time") };
 
     private Model model;
 
@@ -144,13 +146,14 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             case 0:
                 return StringUtil.toLowercaseExceptFirst(tx.getType().name());
             case 1:
-                String from = "Block reward";
+                String from = MessagesUtil.get("BlockReward");
                 if (tx.getType() != TransactionType.COINBASE) {
                     from = Hex.encode(tx.getFrom());
-                    from = accounts.containsKey(from) ? "Account #" + accounts.get(from) : "0x" + from;
+                    from = accounts.containsKey(from) ? MessagesUtil.get("AccountNum") + accounts.get(from)
+                            : "0x" + from;
                 }
                 String to = Hex.encode(tx.getTo());
-                to = accounts.containsKey(to) ? "Account #" + accounts.get(to) : "0x" + to;
+                to = accounts.containsKey(to) ? MessagesUtil.get("AccountNum") + accounts.get(to) : "0x" + to;
                 return from + " => " + to;
             case 2:
                 return SwingUtil.formatDouble(tx.getValue() / (double) Unit.SEM) + " SEM";

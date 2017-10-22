@@ -26,6 +26,7 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
@@ -54,13 +55,13 @@ public class SendPanel extends JPanel implements ActionListener {
 
         setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        JLabel lblFrom = new JLabel("From:");
+        JLabel lblFrom = new JLabel(MessagesUtil.get("From") + ":");
         lblFrom.setHorizontalAlignment(SwingConstants.RIGHT);
 
         from = new JComboBox<>();
         from.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
 
-        JLabel lblTo = new JLabel("To:");
+        JLabel lblTo = new JLabel(MessagesUtil.get("To") + ":");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
 
         to = SwingUtil.editableTextField();
@@ -68,7 +69,7 @@ public class SendPanel extends JPanel implements ActionListener {
         to.setActionCommand(Action.SEND.name());
         to.addActionListener(this);
 
-        JLabel lblAmount = new JLabel("Amount:");
+        JLabel lblAmount = new JLabel(MessagesUtil.get("Amount") + ":");
         lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
         amount = SwingUtil.doubleFormattedTextField();
@@ -76,7 +77,7 @@ public class SendPanel extends JPanel implements ActionListener {
         amount.setActionCommand(Action.SEND.name());
         amount.addActionListener(this);
 
-        JLabel lblFee = new JLabel("Fee:");
+        JLabel lblFee = new JLabel(MessagesUtil.get("Fee") + ":");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
 
         fee = SwingUtil.doubleFormattedTextField();
@@ -88,11 +89,11 @@ public class SendPanel extends JPanel implements ActionListener {
 
         JLabel lblSem2 = new JLabel("SEM");
 
-        JButton paySend = new JButton("Send");
+        JButton paySend = new JButton(MessagesUtil.get("Send"));
         paySend.addActionListener(this);
         paySend.setActionCommand(Action.SEND.name());
 
-        JButton payClear = new JButton("Clear");
+        JButton payClear = new JButton(MessagesUtil.get("Clear"));
         payClear.addActionListener(this);
         payClear.setActionCommand(Action.CLEAR.name());
 
@@ -223,19 +224,17 @@ public class SendPanel extends JPanel implements ActionListener {
             byte[] to = Hex.parse(getTo());
 
             if (acc == null) {
-                JOptionPane.showMessageDialog(this, "Please select an account!");
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else if (fee < Config.MIN_TRANSACTION_FEE_SOFT) {
-                JOptionPane.showMessageDialog(this, "Transaction fee is too low!");
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFeeTooLow"));
             } else if (value + fee > acc.getBalance()) {
-                JOptionPane.showMessageDialog(this, "Insufficient funds!");
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("InsufficientFunds"));
             } else if (to.length != 20) {
-                JOptionPane.showMessageDialog(this, "Invalid receiving address!");
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("InvalidReceivingAddress"));
             } else {
-                int ret = JOptionPane
-                        .showConfirmDialog(this,
-                                "Are you sure you want to transfer " + SwingUtil.formatDouble(value / Unit.SEM)
-                                        + " SEM to 0x" + Hex.encode(to) + "?",
-                                "Confirm transfer", JOptionPane.YES_NO_OPTION);
+                int ret = JOptionPane.showConfirmDialog(this,
+                        MessagesUtil.get("TransferInfo", SwingUtil.formatDouble(value / Unit.SEM), Hex.encode(to)),
+                        MessagesUtil.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
                 if (ret != JOptionPane.YES_OPTION) {
                     break;
                 }
@@ -264,10 +263,10 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private void sendTransaction(PendingManager pendingMgr, Transaction tx) {
         if (pendingMgr.addTransactionSync(tx)) {
-            JOptionPane.showMessageDialog(this, "Transaction sent. It takes at least 20s to get processed!");
+            JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionSent"));
             clear();
         } else {
-            JOptionPane.showMessageDialog(this, "Transaction failed!");
+            JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFailed"));
         }
     }
 

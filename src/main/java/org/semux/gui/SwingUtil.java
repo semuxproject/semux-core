@@ -185,13 +185,13 @@ public class SwingUtil {
     private static void addCopyPastePopup(JComponent comp) {
         JPopupMenu popup = new JPopupMenu();
         JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
-        item.setText("Cut");
+        item.setText(MessagesUtil.get("Cut"));
         popup.add(item);
         item = new JMenuItem(new DefaultEditorKit.CopyAction());
-        item.setText("Copy");
+        item.setText(MessagesUtil.get("Copy"));
         popup.add(item);
         item = new JMenuItem(new DefaultEditorKit.PasteAction());
-        item.setText("Paste");
+        item.setText(MessagesUtil.get("Paste"));
         popup.add(item);
         comp.setComponentPopupMenu(popup);
     }

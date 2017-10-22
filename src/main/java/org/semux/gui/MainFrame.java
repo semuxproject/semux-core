@@ -42,8 +42,6 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String TITLE = "Semux Wallet";
-
     private LockGlassPane lockGlassPane;
 
     private HomePanel panelHome;
@@ -74,7 +72,7 @@ public class MainFrame extends JFrame implements ActionListener {
         panelDelegates = new DelegatesPanel(model);
 
         // setup frame properties
-        this.setTitle(TITLE);
+        this.setTitle(MessagesUtil.get("SemuxWallet"));
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setMinimumSize(new Dimension(900, 600));
         SwingUtil.centerizeFrame(this, 900, 600);
@@ -94,27 +92,27 @@ public class MainFrame extends JFrame implements ActionListener {
 
         Dimension gap = new Dimension(15, 0);
 
-        btnHome = createButton("Home", "home", Action.SHOW_HOME);
+        btnHome = createButton(MessagesUtil.get("Home"), "home", Action.SHOW_HOME);
         toolBar.add(btnHome);
         toolBar.add(Box.createRigidArea(gap));
 
-        btnSend = createButton("Send", "send", Action.SHOW_SEND);
+        btnSend = createButton(MessagesUtil.get("Send"), "send", Action.SHOW_SEND);
         toolBar.add(btnSend);
         toolBar.add(Box.createRigidArea(gap));
 
-        btnReceive = createButton("Receive", "receive", Action.SHOW_RECEIVE);
+        btnReceive = createButton(MessagesUtil.get("Receive"), "receive", Action.SHOW_RECEIVE);
         toolBar.add(btnReceive);
         toolBar.add(Box.createRigidArea(gap));
 
-        btnTransactions = createButton("Transactions", "transactions", Action.SHOW_TRANSACTIONS);
+        btnTransactions = createButton(MessagesUtil.get("Transactions"), "transactions", Action.SHOW_TRANSACTIONS);
         toolBar.add(btnTransactions);
         toolBar.add(Box.createRigidArea(gap));
 
-        btnDelegates = createButton("Delegates", "delegates", Action.SHOW_DELEGATES);
+        btnDelegates = createButton(MessagesUtil.get("Delegates"), "delegates", Action.SHOW_DELEGATES);
         toolBar.add(btnDelegates);
         toolBar.add(Box.createRigidArea(gap));
 
-        btnLock = createButton("Lock", "lock", Action.LOCK);
+        btnLock = createButton(MessagesUtil.get("Lock"), "lock", Action.LOCK);
         toolBar.add(btnLock);
 
         // setup tabs
@@ -197,7 +195,7 @@ public class MainFrame extends JFrame implements ActionListener {
         public LockGlassPane() {
             this.addMouseListener(new MouseAdapter() {
                 public void mousePressed(MouseEvent e) {
-                    InputDialog dialog = new InputDialog(MainFrame.this, "Please enter your password:", true);
+                    InputDialog dialog = new InputDialog(MainFrame.this, MessagesUtil.get("EnterPassword") + ":", true);
                     String pwd = dialog.getInput();
 
                     if (pwd != null) {
@@ -205,7 +203,7 @@ public class MainFrame extends JFrame implements ActionListener {
                         if (w.getPassword().equals(pwd)) {
                             lockGlassPane.setVisible(false);
                         } else {
-                            JOptionPane.showMessageDialog(MainFrame.this, "Incorrect password!");
+                            JOptionPane.showMessageDialog(MainFrame.this, MessagesUtil.get("IncorrectPassword"));
                         }
                     }
                 }

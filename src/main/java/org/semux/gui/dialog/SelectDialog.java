@@ -17,6 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.UnreachableException;
@@ -29,7 +30,7 @@ public class SelectDialog extends JDialog implements ActionListener {
     private int selected = -1;
 
     public SelectDialog(JFrame parent, String message, List<? extends Object> options) {
-        super(parent, "Select");
+        super(parent, MessagesUtil.get("Select"));
         this.setModal(true);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -38,12 +39,12 @@ public class SelectDialog extends JDialog implements ActionListener {
 
         JLabel lblMessage = new JLabel(message);
 
-        JButton btnOk = new JButton("OK");
+        JButton btnOk = new JButton(MessagesUtil.get("OK"));
         btnOk.setSelected(true);
         btnOk.setActionCommand(Action.OK.name());
         btnOk.addActionListener(this);
 
-        JButton btnCancel = new JButton("Cancel");
+        JButton btnCancel = new JButton(MessagesUtil.get("Cancel"));
         btnCancel.setActionCommand(Action.CANCEL.name());
         btnCancel.addActionListener(this);
 

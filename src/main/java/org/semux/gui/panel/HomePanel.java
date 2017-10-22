@@ -28,6 +28,7 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
@@ -59,53 +60,53 @@ public class HomePanel extends JPanel implements ActionListener {
         JPanel overview = new JPanel();
         overview.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
-                "Overview", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+                MessagesUtil.get("Overview"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
         overview.setLayout(new GridLayout(6, 2, 0, 0));
 
-        JLabel labelBlockNum = new JLabel("Block #:");
+        JLabel labelBlockNum = new JLabel(MessagesUtil.get("BlockNum") + ":");
         overview.add(labelBlockNum);
 
         blockNum = new JLabel("");
         overview.add(blockNum);
 
-        JLabel lblBlockTime = new JLabel("Block Time:");
+        JLabel lblBlockTime = new JLabel(MessagesUtil.get("BlockTime") + ":");
         overview.add(lblBlockTime);
 
         blockTime = new JLabel("");
         overview.add(blockTime);
 
-        JLabel labelCoinbase = new JLabel("Coinbase:");
+        JLabel labelCoinbase = new JLabel(MessagesUtil.get("Coinbase") + ":");
         overview.add(labelCoinbase);
 
         coinbase = new JLabel("");
         overview.add(coinbase);
 
-        JLabel labelStatus = new JLabel("Status:");
+        JLabel labelStatus = new JLabel(MessagesUtil.get("Status") + ":");
         overview.add(labelStatus);
 
         status = new JLabel("");
         overview.add(status);
 
-        JLabel labelBalance = new JLabel("Balance:");
+        JLabel labelBalance = new JLabel(MessagesUtil.get("Balance") + ":");
         overview.add(labelBalance);
 
         balance = new JLabel("");
         overview.add(balance);
 
-        JLabel labelLocked = new JLabel("Locked:");
+        JLabel labelLocked = new JLabel(MessagesUtil.get("Locked") + ":");
         overview.add(labelLocked);
 
         locked = new JLabel("");
         overview.add(locked);
 
-        JLabel lblPeers = new JLabel("Peers:");
+        JLabel lblPeers = new JLabel(MessagesUtil.get("Peers") + ":");
         peers = new JLabel("");
 
         // setup transactions panel
         transactions = new JPanel();
         transactions.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
-                "Transactions", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+                MessagesUtil.get("Transactions"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -150,7 +151,8 @@ public class HomePanel extends JPanel implements ActionListener {
             this.setBorder(new EmptyBorder(10, 10, 10, 10));
 
             JLabel lblType = new JLabel("");
-            String name = (inBound && outBound) ? "cycle" : (inBound ? "inbound" : "outbound");
+            String name = (inBound && outBound) ? MessagesUtil.get("cycle")
+                    : (inBound ? MessagesUtil.get("inbound") : MessagesUtil.get("outbound"));
             lblType.setIcon(SwingUtil.loadImage(name, 48, 48));
 
             String prefix = (inBound && outBound) ? "" : (inBound ? "+" : "-");
@@ -161,8 +163,8 @@ public class HomePanel extends JPanel implements ActionListener {
             SimpleDateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
             JLabel lblTime = new JLabel(df.format(new Date(tx.getTimestamp())));
 
-            JLabel labelAddress = new JLabel((inBound && outBound) ? "Internal transfer"
-                    : (tx.getType() == TransactionType.COINBASE ? "From block reward, #" + tx.getNonce()
+            JLabel labelAddress = new JLabel((inBound && outBound) ? MessagesUtil.get("InternalTransfer")
+                    : (tx.getType() == TransactionType.COINBASE ? MessagesUtil.get("FromBlockRewardNum") + tx.getNonce()
                             : "0x" + Hex.encode(inBound ? tx.getFrom() : tx.getTo())));
             labelAddress.setForeground(Color.GRAY);
 
@@ -219,7 +221,7 @@ public class HomePanel extends JPanel implements ActionListener {
         this.blockNum.setText(Long.toString(block.getNumber()));
         this.blockTime.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(block.getTimestamp())));
         this.coinbase.setText("Account #" + model.getCoinbase());
-        this.status.setText(model.isDelegate() ? "Delegate" : "Normal");
+        this.status.setText(model.isDelegate() ? MessagesUtil.get("Delegate") : MessagesUtil.get("Normal"));
         this.balance.setText(SwingUtil.formatDouble(model.getTotalBalance() / (double) Unit.SEM) + " SEM");
         this.locked.setText(SwingUtil.formatDouble(model.getTotalLocked() / (double) Unit.SEM) + " SEM");
         this.peers.setText(Integer.toString(model.getActivePeers().size()));
