@@ -93,6 +93,11 @@ public class MemoryDB implements KVDB {
     }
 
     @Override
+    public ClosableIterator<Entry<byte[], byte[]>> iterator(byte[] prefix) {
+        throw new UnsupportedOperationException("Key iterator with prefix is not supported");
+    }
+
+    @Override
     public void close() {
     }
 

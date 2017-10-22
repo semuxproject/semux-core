@@ -106,6 +106,11 @@ public enum Command {
      */
     GET_VOTE,
 
+    /**
+     * Get all votes of a delegate.
+     */
+    GET_VOTES,
+
     // =======================
     // wallet (auth required)
     // =======================

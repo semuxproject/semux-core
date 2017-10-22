@@ -105,11 +105,20 @@ public class LevelDB implements KVDB {
 
     @Override
     public ClosableIterator<Entry<byte[], byte[]>> iterator() {
+        return iterator(null);
+    }
+
+    @Override
+    public ClosableIterator<Entry<byte[], byte[]>> iterator(byte[] prefix) {
 
         return new ClosableIterator<Entry<byte[], byte[]>>() {
             DBIterator itr = db.iterator();
             {
-                itr.seekToFirst();
+                if (prefix != null) {
+                    itr.seek(prefix);
+                } else {
+                    itr.seekToFirst();
+                }
             }
 
             @Override

@@ -57,6 +57,13 @@ public interface KVDB {
     public ClosableIterator<Entry<byte[], byte[]>> iterator();
 
     /**
+     * Get all the keys. NOTE: be sure to close it after iteration.
+     * 
+     * @return
+     */
+    public ClosableIterator<Entry<byte[], byte[]>> iterator(byte[] prefix);
+
+    /**
      * Close the database.
      */
     public void close();

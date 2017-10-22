@@ -29,6 +29,7 @@ import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.Peer;
 import org.semux.net.PeerClient;
+import org.semux.utils.ByteArray;
 import org.semux.utils.Bytes;
 
 import io.netty.handler.codec.http.HttpHeaders;
@@ -230,6 +231,20 @@ public class ApiHandlerImpl implements ApiHandler {
                     return success(vote);
                 } else {
                     return failure("Invalid parameter: voter = " + voter + ", delegate = " + delegate);
+                }
+            }
+            case GET_VOTES: {
+                String delegate = params.get("delegate");
+
+                if (delegate != null) {
+                    Map<ByteArray, Long> votes = chain.getDeleteState().getVotes(Hex.parse(delegate));
+                    JSONObject obj = new JSONObject();
+                    for (ByteArray k : votes.keySet()) {
+                        obj.put(Hex.PREF + k.toString(), votes.get(k));
+                    }
+                    return success(obj);
+                } else {
+                    return failure("Invalid parameter: delegate = " + delegate);
                 }
             }
 

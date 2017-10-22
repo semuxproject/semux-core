@@ -7,6 +7,7 @@
 package org.semux.core.state;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -331,5 +332,26 @@ public class DelegateStateImpl implements DelegateState {
             byte[] bytes = voteDB.get(key.getData());
             return (bytes == null) ? 0 : Bytes.toLong(bytes);
         }
+    }
+
+    @Override
+    public Map<ByteArray, Long> getVotes(byte[] delegate) {
+        Map<ByteArray, Long> result = new HashMap<>();
+
+        ClosableIterator<Entry<byte[], byte[]>> itr = voteDB.iterator(delegate);
+        while (itr.hasNext()) {
+            Entry<byte[], byte[]> e = itr.next();
+            byte[] d = Arrays.copyOf(e.getKey(), 20);
+            byte[] v = Arrays.copyOfRange(e.getKey(), 20, 40);
+
+            if (!Arrays.equals(delegate, d)) {
+                break;
+            } else if (Bytes.toLong(e.getValue()) != 0) {
+                result.put(ByteArray.of(v), Bytes.toLong(e.getValue()));
+            }
+        }
+        itr.close();
+
+        return result;
     }
 }

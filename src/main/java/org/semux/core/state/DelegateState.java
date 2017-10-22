@@ -7,8 +7,10 @@
 package org.semux.core.state;
 
 import java.util.List;
+import java.util.Map;
 
 import org.semux.core.Delegate;
+import org.semux.utils.ByteArray;
 
 public interface DelegateState {
     /**
@@ -60,6 +62,15 @@ public interface DelegateState {
      * @return
      */
     public long getVote(byte[] voter, byte[] delegate);
+
+    /**
+     * Returns all the votes for one delegate.
+     * 
+     * @param voter
+     * @param delegate
+     * @return
+     */
+    public Map<ByteArray, Long> getVotes(byte[] delegate);
 
     /**
      * Retrieves delegate by its name.
