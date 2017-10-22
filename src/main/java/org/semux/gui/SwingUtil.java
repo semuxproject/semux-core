@@ -13,10 +13,10 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
@@ -292,25 +292,38 @@ public class SwingUtil {
     }
 
     /**
-     * Formats a vote
-     * 
-     * @param percentage
-     * @return
-     */
-    public static String formatVote(long nano) {
-        return formatNumber(nano / (double) Unit.SEM, 0);
-    }
-
-    /**
      * Format a timestamp into date string.
      * 
      * @param timestamp
      * @return
      */
     public static String formatTimestamp(long timestamp) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 
         return format.format(new Date(timestamp));
+    }
+
+    /**
+     * Parse timestamp from its string representation.
+     * 
+     * @param timestamp
+     * @return
+     * @throws ParseException
+     */
+    public static long parseTimestamp(String timestamp) throws ParseException {
+        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+
+        return format.parse(timestamp).getTime();
+    }
+
+    /**
+     * Formats a vote
+     * 
+     * @param percentage
+     * @return
+     */
+    public static String formatVote(long nano) {
+        return formatNumber(nano / (double) Unit.SEM);
     }
 
     /**
@@ -363,4 +376,16 @@ public class SwingUtil {
         }
     };
 
+    /**
+     * Balance string comparator based on its value.
+     * 
+     * @exception
+     */
+    public static final Comparator<String> TIMESTAMP_COMPARATOR = (o1, o2) -> {
+        try {
+            return Long.compare(parseTimestamp(o1), parseTimestamp(o2));
+        } catch (ParseException e) {
+            throw new NumberFormatException("Invalie number strings: " + o1 + ", " + o2);
+        }
+    };
 }

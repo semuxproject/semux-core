@@ -163,7 +163,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
             switch (column) {
             case 0:
-                return SwingUtil.formatNumber(row, 0);
+                return SwingUtil.formatNumber(row);
             case 1:
                 return Hex.PREF + acc.getKey().toAddressString();
             case 2:

@@ -113,8 +113,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         JPanel panel2 = new JPanel();
         panel2.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        JLabel label = new JLabel(MessagesUtil.get("DelegateRegistrationNoteHtml",
-                SwingUtil.formatValue(Config.MIN_TRANSACTION_FEE_SOFT)));
+        JLabel label = new JLabel(
+                MessagesUtil.get("DelegateRegistrationNoteHtml", SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT),
+                        SwingUtil.formatValue(Config.MIN_TRANSACTION_FEE_SOFT)));
         label.setForeground(Color.DARK_GRAY);
 
         from = new JComboBox<>();
@@ -279,7 +280,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
             switch (column) {
             case 0:
-                return SwingUtil.formatNumber(row, 0);
+                return SwingUtil.formatNumber(row);
             case 1:
                 return Bytes.toString(d.getName());
             case 2:
@@ -356,7 +357,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             } else if (!name.matches("[_a-z0-9]{4,16}")) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("AccountNameError"));
             } else if (a.getBalance() < Config.DELEGATE_BURN_AMOUNT + Config.MIN_TRANSACTION_FEE_SOFT) {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("InsufficientFunds"));
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("InsufficientFunds",
+                        SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT + Config.MIN_TRANSACTION_FEE_SOFT)));
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
                         MessagesUtil.get("DelegateRegistrationInfo",

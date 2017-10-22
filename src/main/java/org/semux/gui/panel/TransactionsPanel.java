@@ -84,6 +84,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         // customized table sorter
         TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
         sorter.setComparator(2, SwingUtil.VALUE_COMPARATOR);
+        sorter.setComparator(3, SwingUtil.TIMESTAMP_COMPARATOR);
         table.setRowSorter(sorter);
 
         JScrollPane scrollPane = new JScrollPane(table);
