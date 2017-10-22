@@ -26,8 +26,8 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
-import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.Model;
 import org.semux.gui.Model.Account;
 import org.semux.gui.SwingUtil;
@@ -232,9 +232,11 @@ public class SendPanel extends JPanel implements ActionListener {
             } else if (to.length != 20) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("InvalidReceivingAddress"));
             } else {
-                int ret = JOptionPane.showConfirmDialog(this,
-                        MessagesUtil.get("TransferInfo", SwingUtil.formatDouble(value / Unit.SEM), Hex.encode(to)),
-                        MessagesUtil.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
+                int ret = JOptionPane
+                        .showConfirmDialog(this,
+                                MessagesUtil.get("TransferInfo", SwingUtil.formatDouble(value / (double) Unit.SEM),
+                                        Hex.encode(to)),
+                                MessagesUtil.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
                 if (ret != JOptionPane.YES_OPTION) {
                     break;
                 }

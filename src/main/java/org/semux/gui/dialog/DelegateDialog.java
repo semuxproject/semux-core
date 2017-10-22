@@ -17,8 +17,8 @@ import org.semux.core.Block;
 import org.semux.core.Delegate;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
-import org.semux.gui.SwingUtil;
 import org.semux.gui.MessagesUtil;
+import org.semux.gui.SwingUtil;
 
 public class DelegateDialog extends JDialog {
 
