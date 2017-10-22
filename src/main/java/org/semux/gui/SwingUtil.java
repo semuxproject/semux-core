@@ -20,7 +20,15 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.DefaultEditorKit;
@@ -40,7 +48,9 @@ public class SwingUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SwingUtil.class);
 
+    public static final char DEFAULT_DOUBLE_SEPARATOR = '.';
     public static final String DEFAULT_DOUBLE_FORMAT = "0.000";
+    public static final String DEFAULT_PERCENTAGE_FORMAT = "0.0";
 
     /**
      * Put a JFrame in the center of screen.
@@ -167,8 +177,12 @@ public class SwingUtil {
         }
     }
 
-    public static JTextField editableTextField() {
-        JTextField textfield = new JTextField();
+    /**
+     * Adds a copy-paste-cut popup for a component.
+     * 
+     * @param comp
+     */
+    private static void addCopyPastePopup(JComponent comp) {
         JPopupMenu popup = new JPopupMenu();
         JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
         item.setText("Cut");
@@ -179,7 +193,17 @@ public class SwingUtil {
         item = new JMenuItem(new DefaultEditorKit.PasteAction());
         item.setText("Paste");
         popup.add(item);
-        textfield.setComponentPopupMenu(popup);
+        comp.setComponentPopupMenu(popup);
+    }
+
+    /**
+     * Generates an editable text field.
+     * 
+     * @return
+     */
+    public static JTextField editableTextField() {
+        JTextField textfield = new JTextField();
+        addCopyPastePopup(textfield);
         return textfield;
     }
 
@@ -196,8 +220,9 @@ public class SwingUtil {
         formatter.setMaximum(Integer.MAX_VALUE);
         formatter.setAllowsInvalid(false);
         formatter.setCommitsOnValidEdit(true);
-        JFormattedTextField field = new JFormattedTextField(formatter);
-        return field;
+        JFormattedTextField textField = new JFormattedTextField(formatter);
+        addCopyPastePopup(textField);
+        return textField;
     }
 
     /**
@@ -207,22 +232,12 @@ public class SwingUtil {
      */
     public static JFormattedTextField doubleFormattedTextField() {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-        dfs.setDecimalSeparator('.');
+        dfs.setDecimalSeparator(DEFAULT_DOUBLE_SEPARATOR);
         DecimalFormat decimalFormat = new DecimalFormat(SwingUtil.DEFAULT_DOUBLE_FORMAT, dfs);
         decimalFormat.setGroupingUsed(false);
-        JFormattedTextField numberFormattedTextfield = new JFormattedTextField(decimalFormat);
-        JPopupMenu popup = new JPopupMenu();
-        JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
-        item.setText("Cut");
-        popup.add(item);
-        item = new JMenuItem(new DefaultEditorKit.CopyAction());
-        item.setText("Copy");
-        popup.add(item);
-        item = new JMenuItem(new DefaultEditorKit.PasteAction());
-        item.setText("Paste");
-        popup.add(item);
-        numberFormattedTextfield.setComponentPopupMenu(popup);
-        return numberFormattedTextfield;
+        JFormattedTextField textField = new JFormattedTextField(decimalFormat);
+        addCopyPastePopup(textField);
+        return textField;
     }
 
     /**
@@ -234,10 +249,20 @@ public class SwingUtil {
      */
     public static String formatDouble(double value, String format) {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-        dfs.setDecimalSeparator('.');
+        dfs.setDecimalSeparator(DEFAULT_DOUBLE_SEPARATOR);
         DecimalFormat decimalFormat = new DecimalFormat(format, dfs);
         decimalFormat.setGroupingUsed(false);
         return decimalFormat.format(value);
+    }
+
+    /**
+     * Formats a given double value correctly to String with given format
+     * 
+     * @param value
+     * @return
+     */
+    public static String formatDouble(double value) {
+        return formatDouble(value, DEFAULT_DOUBLE_FORMAT);
     }
 
     /**
@@ -255,7 +280,7 @@ public class SwingUtil {
     };
 
     /**
-     * Number string comparator based on its value.<br />
+     * Number string comparator based on its value.
      * 
      * @exception
      */
@@ -269,7 +294,7 @@ public class SwingUtil {
     };
 
     /**
-     * Balance string comparator based on its value.<br />
+     * Balance string comparator based on its value.
      * 
      * @exception
      */
@@ -284,7 +309,7 @@ public class SwingUtil {
     };
 
     /**
-     * Balance string comparator based on its value.<br />
+     * Balance string comparator based on its value.
      * 
      * @exception
      */

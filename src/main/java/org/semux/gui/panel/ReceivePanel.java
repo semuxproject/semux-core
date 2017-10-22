@@ -165,11 +165,9 @@ public class ReceivePanel extends JPanel implements ActionListener {
             case 1:
                 return "0x" + acc.getKey().toAddressString();
             case 2:
-                return String.format("%s SEM", SwingUtil.formatDouble((acc.getBalance() / (double) Unit.SEM),
-                        SwingUtil.DEFAULT_DOUBLE_FORMAT));
+                return SwingUtil.formatDouble((acc.getBalance() / (double) Unit.SEM)) + " SEM";
             case 3:
-                return String.format("%s SEM",
-                        SwingUtil.formatDouble((acc.getLocked() / (double) Unit.SEM), SwingUtil.DEFAULT_DOUBLE_FORMAT));
+                return SwingUtil.formatDouble((acc.getLocked() / (double) Unit.SEM)) + " SEM";
             default:
                 return null;
             }

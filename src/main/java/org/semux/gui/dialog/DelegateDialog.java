@@ -17,6 +17,7 @@ import org.semux.core.Block;
 import org.semux.core.Delegate;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
+import org.semux.gui.SwingUtil;
 
 public class DelegateDialog extends JDialog {
 
@@ -53,7 +54,7 @@ public class DelegateDialog extends JDialog {
         JLabel numOfBlocksForged = new JLabel(Long.toString(d.getNumberOfBlocksForged()));
         JLabel numOfTurnsHit = new JLabel(Long.toString(d.getNumberOfTurnsHit()));
         JLabel numOfTurnsMissed = new JLabel(Long.toString(d.getNumberOfTurnsMissed()));
-        JLabel rate = new JLabel(String.format("%.2f %%", d.getRate()));
+        JLabel rate = new JLabel(SwingUtil.formatDouble(d.getRate(), SwingUtil.DEFAULT_PERCENTAGE_FORMAT) + " %");
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());

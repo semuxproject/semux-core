@@ -180,13 +180,13 @@ public class SendPanel extends JPanel implements ActionListener {
             return (long) (Unit.SEM * Double.parseDouble(amount.getText().trim().replaceAll(",", ".")));
         } catch (NumberFormatException e) {
             logger.error("Parsing of submitted value of amount failed", e);
-            JOptionPane.showMessageDialog(this, "Submitted fee is invalid!");
+            JOptionPane.showMessageDialog(this, "Submitted amount is invalid!");
             throw e;
         }
     }
 
     public void setAmount(long a) {
-        amount.setText(a == 0 ? "" : SwingUtil.formatDouble(a / (double) Unit.SEM, SwingUtil.DEFAULT_DOUBLE_FORMAT));
+        amount.setText(a == 0 ? "" : SwingUtil.formatDouble(a / (double) Unit.SEM));
     }
 
     /**
@@ -205,7 +205,7 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     public void setFee(long f) {
-        fee.setText(f == 0 ? "" : SwingUtil.formatDouble(f / (double) Unit.SEM, SwingUtil.DEFAULT_DOUBLE_FORMAT));
+        fee.setText(f == 0 ? "" : SwingUtil.formatDouble(f / (double) Unit.SEM));
     }
 
     @Override
@@ -231,11 +231,11 @@ public class SendPanel extends JPanel implements ActionListener {
             } else if (to.length != 20) {
                 JOptionPane.showMessageDialog(this, "Invalid receiving address!");
             } else {
-                int ret = JOptionPane.showConfirmDialog(this,
-                        "Are you sure you want to transfer "
-                                + SwingUtil.formatDouble(value / Unit.SEM, SwingUtil.DEFAULT_DOUBLE_FORMAT)
-                                + " SEM to 0x" + Hex.encode(to) + "?",
-                        "Confirm transfer", JOptionPane.YES_NO_OPTION);
+                int ret = JOptionPane
+                        .showConfirmDialog(this,
+                                "Are you sure you want to transfer " + SwingUtil.formatDouble(value / Unit.SEM)
+                                        + " SEM to 0x" + Hex.encode(to) + "?",
+                                "Confirm transfer", JOptionPane.YES_NO_OPTION);
                 if (ret != JOptionPane.YES_OPTION) {
                     break;
                 }
@@ -281,7 +281,7 @@ public class SendPanel extends JPanel implements ActionListener {
         List<Account> list = model.getAccounts();
         for (int i = 0; i < list.size(); i++) {
             accounts.add("0x" + list.get(i).getKey().toAddressString() + ", #" + i + ", "
-                    + list.get(i).getBalance() / Unit.SEM + " SEM");
+                    + SwingUtil.formatDouble(list.get(i).getBalance() / (double) Unit.SEM) + " SEM");
         }
 
         /*
