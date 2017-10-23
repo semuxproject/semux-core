@@ -254,7 +254,7 @@ public class SwingUtil {
      * @return
      */
     public static String formatValue(long nano, boolean withUnit) {
-        return formatNumber(nano / (double) Unit.SEM, 3) + (withUnit ? " SEM" : "");
+        return formatNumber(nano / (double) Unit.SEM, 2) + (withUnit ? " SEM" : "");
     }
 
     /**

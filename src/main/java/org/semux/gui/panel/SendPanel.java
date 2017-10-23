@@ -283,8 +283,8 @@ public class SendPanel extends JPanel implements ActionListener {
         List<String> accounts = new ArrayList<>();
         List<Account> list = model.getAccounts();
         for (int i = 0; i < list.size(); i++) {
-            accounts.add(Hex.PREF + list.get(i).getKey().toAddressString() + ", #" + i + ", "
-                    + SwingUtil.formatValue(list.get(i).getBalance()));
+            accounts.add(Hex.PREF + list.get(i).getKey().toAddressString() + ", " + MessagesUtil.get("AccountNumShort")
+                    + i + ", " + SwingUtil.formatValue(list.get(i).getBalance()));
         }
 
         /*

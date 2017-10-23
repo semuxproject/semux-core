@@ -151,8 +151,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                             : Hex.PREF + from;
                 }
                 String to = Hex.encode(tx.getTo());
-                to = accounts.containsKey(to) ? MessagesUtil.get("AccountNum") + " #" + accounts.get(to)
-                        : Hex.PREF + to;
+                to = accounts.containsKey(to) ? MessagesUtil.get("AccountNum") + accounts.get(to) : Hex.PREF + to;
                 return from + " => " + to;
             case 2:
                 return SwingUtil.formatValue(tx.getValue());
