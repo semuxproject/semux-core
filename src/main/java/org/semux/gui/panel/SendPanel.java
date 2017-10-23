@@ -232,6 +232,8 @@ public class SendPanel extends JPanel implements ActionListener {
                             MessagesUtil.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
                 } else if (to.length != 20) {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("InvalidReceivingAddress"));
+                } else if (Bytes.of(memo).length > 128) {
+                    JOptionPane.showMessageDialog(this, MessagesUtil.get("InvalidMemo", 128));
                 } else {
                     int ret = JOptionPane.showConfirmDialog(this,
                             MessagesUtil.get("TransferInfo", SwingUtil.formatValue(value), Hex.PREF + Hex.encode(to)),
