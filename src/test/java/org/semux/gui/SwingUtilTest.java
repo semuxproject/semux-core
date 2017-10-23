@@ -36,7 +36,7 @@ public class SwingUtilTest {
     @Test
     public void testFromatAndEncodeValue() throws ParseException {
         long x = 1_234_123_000_000L;
-        assertEquals("1,234.123 SEM", SwingUtil.formatValue(x));
+        assertEquals("1,234.12 SEM", SwingUtil.formatValue(x));
         assertEquals(x, SwingUtil.parseValue("1,234.123 SEM"));
     }
 

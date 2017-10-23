@@ -180,10 +180,10 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setFileFilter(new FileNameExtensionFilter(MessagesUtil.get("WalletBinaryFormat"), "data"));
             int ret = chooser.showOpenDialog(this);
-            repeatField.setVisible(false);
-            lblRepeat.setVisible(false);
             if (ret == JFileChooser.APPROVE_OPTION) {
                 backupFile = chooser.getSelectedFile();
+                repeatField.setVisible(false);
+                lblRepeat.setVisible(false);
             } else {
                 btnCreate.setSelected(true);
             }
