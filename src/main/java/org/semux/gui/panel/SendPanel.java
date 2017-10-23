@@ -75,6 +75,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
         JLabel lblFee = new JLabel(MessagesUtil.get("Fee") + ":");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblFee.setToolTipText(MessagesUtil.get("FeeTip", SwingUtil.formatValue(Config.MIN_TRANSACTION_FEE_SOFT)));
 
         fee = SwingUtil.textFieldWithPopup();
         fee.setColumns(10);
@@ -83,6 +84,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
         JLabel lblMemo = new JLabel(MessagesUtil.get("Memo") + ":");
         lblMemo.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblMemo.setToolTipText(MessagesUtil.get("MemoTip"));
 
         memo = SwingUtil.textFieldWithPopup();
         memo.setColumns(10);
@@ -226,8 +228,8 @@ public class SendPanel extends JPanel implements ActionListener {
                 } else if (fee < Config.MIN_TRANSACTION_FEE_SOFT) {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFeeTooLow"));
                 } else if (value + fee > acc.getBalance()) {
-                    JOptionPane.showMessageDialog(this, MessagesUtil.get("InsufficientFunds",
-                        SwingUtil.formatValue(value + fee)));
+                    JOptionPane.showMessageDialog(this,
+                            MessagesUtil.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
                 } else if (to.length != 20) {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("InvalidReceivingAddress"));
                 } else {
