@@ -5,7 +5,6 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.GroupLayout;
@@ -39,7 +38,23 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private Model model;
 
-    private JComboBox<String> from;
+    class Item {
+        Account account;
+        String name;
+
+        public Item(Account a, int idx) {
+            this.account = a;
+            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + MessagesUtil.get("AccountNumShort") + idx
+                    + ", " + SwingUtil.formatValue(account.getBalance());
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
+    }
+
+    private JComboBox<Item> from;
     private JTextField to;
     private JTextField amount;
     private JTextField fee;
@@ -282,24 +297,29 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     private void refresh() {
-        List<String> accounts = new ArrayList<>();
         List<Account> list = model.getAccounts();
-        for (int i = 0; i < list.size(); i++) {
-            accounts.add(Hex.PREF + list.get(i).getKey().toAddressString() + ", " + MessagesUtil.get("AccountNumShort")
-                    + i + ", " + SwingUtil.formatValue(list.get(i).getBalance()));
-        }
 
         /*
          * update account list.
          */
         Object selected = from.getSelectedItem();
+        String address = null;
+        if (selected != null && selected instanceof Item) {
+            address = ((Item) selected).account.getKey().toAddressString();
+        }
 
         from.removeAllItems();
-        for (String item : accounts) {
-            from.addItem(item);
+        for (int i = 0; i < list.size(); i++) {
+            from.addItem(new Item(list.get(i), i));
         }
-        for (int i = 0; i < accounts.size(); i++) {
-            if (accounts.get(i).equals(selected)) {
+
+        if (address == null) {
+            return;
+        }
+
+        for (int i = 0; i < list.size(); i++) {
+            String addr = list.get(i).getKey().toAddressString();
+            if (addr.equals(address)) {
                 from.setSelectedIndex(i);
                 break;
             }
