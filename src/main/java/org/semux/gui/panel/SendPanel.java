@@ -290,15 +290,20 @@ public class SendPanel extends JPanel implements ActionListener {
         }
 
         /*
-         * update account list. NOTE: assuming account index will never change
+         * update account list.
          */
-        int idx = from.getSelectedIndex();
+        Object selected = from.getSelectedItem();
 
         from.removeAllItems();
         for (String item : accounts) {
             from.addItem(item);
         }
-        from.setSelectedIndex(idx >= 0 && idx < accounts.size() ? idx : 0);
+        for (int i = 0; i < accounts.size(); i++) {
+            if (accounts.get(i).equals(selected)) {
+                from.setSelectedIndex(i);
+                break;
+            }
+        }
     }
 
     private void clear() {

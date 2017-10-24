@@ -75,10 +75,6 @@ public class ReceivePanel extends JPanel implements ActionListener {
         sorter.setComparator(3, SwingUtil.VALUE_COMPARATOR);
         table.setRowSorter(sorter);
 
-        JButton btnCopyAddress = new JButton(MessagesUtil.get("CopyAddress"));
-        btnCopyAddress.addActionListener(this);
-        btnCopyAddress.setActionCommand(Action.COPY_ADDRESS.name());
-
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
@@ -86,9 +82,17 @@ public class ReceivePanel extends JPanel implements ActionListener {
         qr.setIcon(SwingUtil.emptyImage(200, 200));
         qr.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
+        JButton btnCopyAddress = new JButton(MessagesUtil.get("CopyAddress"));
+        btnCopyAddress.addActionListener(this);
+        btnCopyAddress.setActionCommand(Action.COPY_ADDRESS.name());
+
         JButton buttonNewAccount = new JButton(MessagesUtil.get("NewAccount"));
         buttonNewAccount.addActionListener(this);
         buttonNewAccount.setActionCommand(Action.NEW_ACCOUNT.name());
+
+        JButton btnDeleteAddress = new JButton(MessagesUtil.get("DeleteAccount"));
+        btnDeleteAddress.addActionListener(this);
+        btnDeleteAddress.setActionCommand(Action.DELETE_ACCOUNT.name());
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -100,7 +104,9 @@ public class ReceivePanel extends JPanel implements ActionListener {
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addComponent(buttonNewAccount, GroupLayout.PREFERRED_SIZE, 121, GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnCopyAddress)
-                        .addComponent(qr)))
+                        .addComponent(qr)
+                        .addComponent(btnDeleteAddress)
+                        ))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
@@ -110,6 +116,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
                     .addComponent(btnCopyAddress)
                     .addGap(18)
                     .addComponent(buttonNewAccount)
+                    .addGap(18)
+                    .addComponent(btnDeleteAddress)
                     .addContainerGap(249, Short.MAX_VALUE))
                 .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE)
         );
@@ -214,10 +222,25 @@ public class ReceivePanel extends JPanel implements ActionListener {
             wallet.addAccount(key);
             wallet.flush();
 
-            model.getAccounts().add(new Account(key));
-            model.fireUpdateEvent();
-
             JOptionPane.showMessageDialog(this, MessagesUtil.get("NewAccountCreated"));
+            break;
+        }
+        case DELETE_ACCOUNT: {
+            Account acc = getSelectedAccount();
+            if (acc == null) {
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
+            } else {
+                int ret = JOptionPane.showConfirmDialog(this, MessagesUtil.get("ConfirmDeleteAccount"),
+                        MessagesUtil.get("DeleteAccount"), JOptionPane.YES_NO_OPTION);
+
+                if (ret == JOptionPane.OK_OPTION) {
+                    Wallet wallet = Kernel.getInstance().getWallet();
+                    wallet.deleteAccount(acc.getKey());
+                    wallet.flush();
+
+                    JOptionPane.showMessageDialog(this, MessagesUtil.get("AccountDeleted"));
+                }
+            }
             break;
         }
         default:
