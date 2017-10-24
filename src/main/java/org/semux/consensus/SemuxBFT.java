@@ -42,6 +42,7 @@ import org.semux.net.msg.consensus.BFTNewViewMessage;
 import org.semux.net.msg.consensus.BFTProposalMessage;
 import org.semux.net.msg.consensus.BFTVoteMessage;
 import org.semux.utils.ArrayUtil;
+import org.semux.utils.Bytes;
 import org.semux.utils.MerkleUtil;
 import org.semux.utils.SystemUtil;
 import org.slf4j.Logger;
@@ -466,7 +467,7 @@ public class SemuxBFT implements Consensus {
                 && (p.getView() == view && proposal == null && state == State.PROPOSE // expecting a proposal
                         || p.getView() > view && state != State.COMMIT && state != State.FINALIZE) // larger view
                 && isFromValidator(p.getSignature()) //
-                && isPrimary(p.getView(), p.getSignature().getPublicKey())) {//
+                && isPrimary(p.getHeight(), p.getView(), pubKeyToPeerId(p.getSignature().getPublicKey()))) {//
 
             // check proof-of-unlock
             if (p.getView() != 0) {
@@ -640,29 +641,41 @@ public class SemuxBFT implements Consensus {
     }
 
     /**
+     * Converts a public key to peer id.
+     * 
+     * @param pubKey
+     * @return
+     */
+    protected String pubKeyToPeerId(byte[] pubKey) {
+        return Hex.encode(Hash.h160(pubKey));
+    }
+
+    /**
      * Check if this node is the primary validator for this view.
      * 
      * @return
      */
     protected boolean isPrimary() {
-        return isPrimary(view, coinbase.getPublicKey());
+        return isPrimary(height, view, coinbase.toAddressString());
     }
 
     /**
      * Check if a node is the primary for the specified view.
      * 
      * 
+     * @param height
+     *            block number
      * @param view
      *            a specific view
      * @param pubKey
      *            public key
      * @return
      */
-    protected boolean isPrimary(int view, byte[] pubKey) {
-        String peerId = Hex.encode(Hash.h160(pubKey));
-        int n = (int) ((height - 1 + view) % validators.size());
+    protected boolean isPrimary(long height, int view, String peerId) {
+        byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
+        int primary = (Hash.h256(key)[0] & 0xff) % validators.size();
 
-        return validators.get(n).equals(peerId);
+        return validators.get(primary).equals(peerId);
     }
 
     /**
