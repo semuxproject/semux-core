@@ -1,7 +1,5 @@
 package org.semux.gui.dialog;
 
-import java.awt.Font;
-
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JComponent;
@@ -21,15 +19,6 @@ public class DelegateDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    private JTextArea selectableText(String txt) {
-        JTextArea c = new JTextArea(txt);
-        c.setBackground(null);
-        c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
-        c.setEditable(false);
-
-        return c;
-    }
-
     public DelegateDialog(JComponent parent, Delegate d) {
         Block block = Kernel.getInstance().getBlockchain().getBlock(d.getRegisteredAt());
 
@@ -43,8 +32,8 @@ public class DelegateDialog extends JDialog {
         JLabel lblNumOfTurnsMissed = new JLabel(MessagesUtil.get("NumTurnsMissed") + ":");
         JLabel lblRate = new JLabel(MessagesUtil.get("Rate") + ":");
 
-        JTextArea name = selectableText(d.getNameString());
-        JTextArea address = selectableText(Hex.PREF + Hex.encode(d.getAddress()));
+        JTextArea name = SwingUtil.selectableTextArea(d.getNameString());
+        JTextArea address = SwingUtil.selectableTextArea(Hex.PREF + Hex.encode(d.getAddress()));
         JLabel registeredAt = new JLabel(SwingUtil.formatTimestamp(block.getTimestamp()));
         JLabel votes = new JLabel(SwingUtil.formatVote(d.getVotes()));
         JLabel votesFromMe = new JLabel(SwingUtil.formatVote(d.getVotesFromMe()));

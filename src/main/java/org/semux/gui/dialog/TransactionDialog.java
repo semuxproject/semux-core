@@ -1,7 +1,5 @@
 package org.semux.gui.dialog;
 
-import java.awt.Font;
-
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JComponent;
@@ -19,15 +17,6 @@ public class TransactionDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    private JTextArea selectableText(String txt) {
-        JTextArea c = new JTextArea(txt);
-        c.setBackground(null);
-        c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
-        c.setEditable(false);
-
-        return c;
-    }
-
     public TransactionDialog(JComponent parent, Transaction tx) {
         JLabel lblHash = new JLabel(MessagesUtil.get("Hash") + ":");
         JLabel lblType = new JLabel(MessagesUtil.get("Type") + ":");
@@ -39,10 +28,10 @@ public class TransactionDialog extends JDialog {
         JLabel lblTimestamp = new JLabel(MessagesUtil.get("Timestamp") + ":");
         JLabel lblData = new JLabel(MessagesUtil.get("Data") + ":");
 
-        JTextArea hash = selectableText(Hex.PREF + Hex.encode(tx.getHash()));
+        JTextArea hash = SwingUtil.selectableTextArea(Hex.PREF + Hex.encode(tx.getHash()));
         JLabel type = new JLabel(tx.getType().name());
-        JTextArea from = selectableText(Hex.PREF + Hex.encode(tx.getFrom()));
-        JTextArea to = selectableText(Hex.PREF + Hex.encode(tx.getTo()));
+        JTextArea from = SwingUtil.selectableTextArea(Hex.PREF + Hex.encode(tx.getFrom()));
+        JTextArea to = SwingUtil.selectableTextArea(Hex.PREF + Hex.encode(tx.getTo()));
         JLabel value = new JLabel(SwingUtil.formatValue((tx.getValue())));
         JLabel fee = new JLabel(SwingUtil.formatValue((tx.getFee())));
         JLabel nonce = new JLabel(SwingUtil.formatNumber(tx.getNonce()));

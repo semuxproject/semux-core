@@ -8,6 +8,7 @@ package org.semux.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -29,6 +30,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
@@ -175,11 +177,11 @@ public class SwingUtil {
     }
 
     /**
-     * Adds a copy-paste-cut popup for a component.
+     * Adds a copy-paste-cut popup to the given component.
      * 
      * @param comp
      */
-    private static void addCopyPastePopup(JComponent comp) {
+    public static void addCopyPastePopup(JComponent comp) {
         JPopupMenu popup = new JPopupMenu();
         JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
         item.setText(MessagesUtil.get("Cut"));
@@ -194,7 +196,7 @@ public class SwingUtil {
     }
 
     /**
-     * Generates an text field with popup menu.
+     * Generates a text field with popup menu.
      * 
      * @return
      */
@@ -202,6 +204,22 @@ public class SwingUtil {
         JTextField textfield = new JTextField();
         addCopyPastePopup(textfield);
         return textfield;
+    }
+
+    /**
+     * Generates a selectable text area.
+     * 
+     * @param txt
+     * @return
+     */
+    public static JTextArea selectableTextArea(String txt) {
+        JTextArea c = new JTextArea(txt);
+        c.setBackground(null);
+        c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        c.setEditable(false);
+
+        addCopyPastePopup(c);
+        return c;
     }
 
     /**
