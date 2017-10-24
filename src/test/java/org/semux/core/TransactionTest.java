@@ -16,8 +16,12 @@ import org.junit.Test;
 import org.semux.Config;
 import org.semux.crypto.EdDSA;
 import org.semux.utils.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TransactionTest {
+
+    private static Logger logger = LoggerFactory.getLogger(TransactionTest.class);
 
     private EdDSA key = new EdDSA();
 
@@ -47,6 +51,15 @@ public class TransactionTest {
         tx.sign(key);
 
         testFields(Transaction.fromBytes(tx.toBytes()));
+    }
+
+    @Test
+    public void testTransactionSize() {
+        Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, Bytes.random(128)).sign(key);
+        byte[] bytes = tx.toBytes();
+
+        logger.info("tx size: {}", bytes.length);
+        logger.info("tx size (1M): {} GB", 1000000.0 * bytes.length / 1024 / 1024 / 1024);
     }
 
     private void testFields(Transaction tx) {

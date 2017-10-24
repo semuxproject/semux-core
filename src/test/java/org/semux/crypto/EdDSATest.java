@@ -15,8 +15,12 @@ import java.security.spec.InvalidKeySpecException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.semux.utils.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ECKeyTest {
+public class EdDSATest {
+
+    private static Logger logger = LoggerFactory.getLogger(EdDSATest.class);
 
     @Test
     public void testGenerateKeyPair() throws InvalidKeySpecException {
@@ -41,5 +45,17 @@ public class ECKeyTest {
 
         boolean isValid = EdDSA.verify(hash, sig);
         assertTrue(isValid);
+    }
+
+    @Test
+    public void testSignatureSize() {
+        EdDSA key = new EdDSA();
+        byte[] data = Bytes.of("test");
+
+        byte[] hash = Hash.h256(data);
+        byte[] sig = key.sign(hash).toBytes();
+
+        logger.info("signature size: {}", sig.length);
+        logger.info("Signature size (1y): {} GB", 100.0 * sig.length * 2 * 60 * 24 * 365 / 1024 / 1024 / 1024);
     }
 }

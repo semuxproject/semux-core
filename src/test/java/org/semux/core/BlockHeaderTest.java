@@ -12,8 +12,11 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.semux.crypto.EdDSA;
 import org.semux.utils.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BlockHeaderTest {
+    private static Logger logger = LoggerFactory.getLogger(BlockHeaderTest.class);
 
     private long number = 1;
     private byte[] coinbase = Bytes.random(20);
@@ -46,6 +49,16 @@ public class BlockHeaderTest {
         signature = header.getSignature().toBytes();
 
         testFields(BlockHeader.fromBytes(header.toBytes()));
+    }
+
+    @Test
+    public void testBlockHeaderSize() {
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
+                stateRoot, data).sign(key);
+        byte[] bytes = header.toBytes();
+
+        logger.info("block header size: {}", bytes.length);
+        logger.info("block header size (1y): {} GB", 1.0 * bytes.length * 2 * 60 * 24 * 365 / 1024 / 1024 / 1024);
     }
 
     private void testFields(BlockHeader header) {
