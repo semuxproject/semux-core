@@ -267,6 +267,33 @@ public class Wallet {
     }
 
     /**
+     * Delete an account in the wallet.
+     * 
+     * NOTE: you need to call {@link #flush()} to update the wallet on disk.
+     * 
+     * @param key
+     *            account to delete
+     * @return true if the account was successfully deleted, false otherwise
+     * @throws WalletLockedException
+     * 
+     */
+    public boolean deleteAccount(EdDSA key) throws WalletLockedException {
+        requireUnlocked();
+
+        // TODO: optimize duplicates check
+        synchronized (accounts) {
+            for (EdDSA k : accounts) {
+                if (Arrays.equals(k.getPublicKey(), key.getPublicKey())) {
+                    accounts.remove(key);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    /**
      * Change the password of the wallet.
      * 
      * NOTE: you need to call {@link #flush()} to update the wallet on disk.

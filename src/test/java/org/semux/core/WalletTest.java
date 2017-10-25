@@ -72,6 +72,54 @@ public class WalletTest {
         assertTrue(wallet.unlock(pwd2));
     }
 
+    @Test
+    public void testDeleteAccountNotExist() {
+        wallet.unlock(pwd);
+        // add n new accounts;
+        for (int i = 0; i < 10; i++) {
+            EdDSA key = new EdDSA();
+            wallet.addAccount(key);
+        }
+        wallet.flush();
+        EdDSA key = new EdDSA();
+        assertFalse(wallet.deleteAccount(key));
+    }
+
+    @Test
+    public void testDeleteAccountExist() {
+        wallet.unlock(pwd);
+        for (int i = 0; i < 3; i++) {
+            EdDSA k = new EdDSA();
+            wallet.addAccount(k);
+        }
+        EdDSA key = new EdDSA();
+        wallet.addAccount(key);
+        for (int i = 0; i < 7; i++) {
+            EdDSA k = new EdDSA();
+            wallet.addAccount(k);
+        }
+        wallet.flush();
+        assertTrue(wallet.deleteAccount(key));
+    }
+
+    @Test(expected = WalletLockedException.class)
+    public void testDeleteWalletNotUnlock() {
+        wallet.unlock(pwd);
+        for (int i = 0; i < 4; i++) {
+            EdDSA k = new EdDSA();
+            wallet.addAccount(k);
+        }
+        EdDSA key = new EdDSA();
+        wallet.addAccount(key);
+        for (int i = 0; i < 6; i++) {
+            EdDSA k = new EdDSA();
+            wallet.addAccount(k);
+        }
+        wallet.flush();
+        wallet.lock();
+        wallet.deleteAccount(key);
+    }
+
     @After
     public void teardown() {
         file.delete();

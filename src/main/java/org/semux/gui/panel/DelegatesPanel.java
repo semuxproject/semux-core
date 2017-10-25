@@ -8,7 +8,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -61,7 +60,22 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private JTable table;
     private DelegatesTableModel tableModel;
 
-    JComboBox<String> from;
+    class Item {
+        Account account;
+        String name;
+
+        public Item(Account a, int idx) {
+            this.account = a;
+            this.name = MessagesUtil.get("AccountNumShort") + idx + ", " + SwingUtil.formatValue(account.getBalance());
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
+    }
+
+    JComboBox<Item> from;
 
     private JTextField textVote;
     private JTextField textUnvote;
@@ -411,23 +425,33 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     }
 
     private void refreshAccounts() {
-        List<String> accounts = new ArrayList<>();
         List<Account> list = model.getAccounts();
-        for (int i = 0; i < list.size(); i++) {
-            accounts.add(
-                    MessagesUtil.get("AccountNumShort") + i + ", " + SwingUtil.formatValue(list.get(i).getBalance()));
-        }
 
         /*
-         * update account list. NOTE: assuming account index will never change
+         * update account list.
          */
-        int idx = from.getSelectedIndex();
+        Object selected = from.getSelectedItem();
+        String address = null;
+        if (selected != null && selected instanceof Item) {
+            address = ((Item) selected).account.getKey().toAddressString();
+        }
 
         from.removeAllItems();
-        for (String item : accounts) {
-            from.addItem(item);
+        for (int i = 0; i < list.size(); i++) {
+            from.addItem(new Item(list.get(i), i));
         }
-        from.setSelectedIndex(idx >= 0 && idx < accounts.size() ? idx : 0);
+
+        if (address == null) {
+            return;
+        }
+
+        for (int i = 0; i < list.size(); i++) {
+            String addr = list.get(i).getKey().toAddressString();
+            if (addr.equals(address)) {
+                from.setSelectedIndex(i);
+                break;
+            }
+        }
     }
 
     private void refreshDelegates() {
