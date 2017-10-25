@@ -26,6 +26,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import org.semux.GUI;
 import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
@@ -222,6 +223,9 @@ public class ReceivePanel extends JPanel implements ActionListener {
             wallet.addAccount(key);
             wallet.flush();
 
+            // fire update event
+            GUI.fireUpdateEvent();
+
             JOptionPane.showMessageDialog(this, MessagesUtil.get("NewAccountCreated"));
             break;
         }
@@ -237,6 +241,9 @@ public class ReceivePanel extends JPanel implements ActionListener {
                     Wallet wallet = Kernel.getInstance().getWallet();
                     wallet.deleteAccount(acc.getKey());
                     wallet.flush();
+
+                    // fire update event
+                    GUI.fireUpdateEvent();
 
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("AccountDeleted"));
                 }
