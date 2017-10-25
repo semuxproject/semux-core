@@ -60,7 +60,7 @@ public class APIHandlerTest {
         api.start(wallet, Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
 
         as = api.chain.getAccountState();
-        ds = api.chain.getDeleteState();
+        ds = api.chain.getDelegateState();
     }
 
     private static JSONObject request(String uri) throws IOException {
@@ -281,7 +281,7 @@ public class APIHandlerTest {
     public void testGetVote() throws IOException {
         EdDSA key = new EdDSA();
         EdDSA key2 = new EdDSA();
-        DelegateState ds = api.chain.getDeleteState();
+        DelegateState ds = api.chain.getDelegateState();
         ds.register(key2.toAddress(), Bytes.of("test"));
         ds.vote(key.toAddress(), key2.toAddress(), 200L);
 

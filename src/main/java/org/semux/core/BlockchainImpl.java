@@ -118,7 +118,7 @@ public class BlockchainImpl implements Blockchain {
     }
 
     @Override
-    public DelegateState getDeleteState() {
+    public DelegateState getDelegateState() {
         return delegateState;
     }
 
