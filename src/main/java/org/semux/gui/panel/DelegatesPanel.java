@@ -294,7 +294,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
             switch (column) {
             case 0:
-                return SwingUtil.formatNumber(row);
+                return SwingUtil.formatNumber(row + 1);
             case 1:
                 return Bytes.toString(d.getName());
             case 2:

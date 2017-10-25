@@ -152,7 +152,7 @@ public class SemuxSync implements Sync {
             exec.shutdown();
             try {
                 exec.awaitTermination(1, TimeUnit.MINUTES);
-                logger.info("Sync manager stopped");
+                logger.info("Sync finished");
 
             } catch (InterruptedException e) {
                 logger.error("Executors were not properly shut down");
