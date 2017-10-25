@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import javax.swing.JOptionPane;
@@ -60,6 +61,12 @@ public class GUI {
     private static Wallet wallet;
     private static Model model;
 
+    private static AtomicBoolean updateFlag = new AtomicBoolean(false);
+
+    public static void fireUpdateEvent() {
+        updateFlag.set(true);
+    }
+    
     public static void main(String[] args) {
         setupLookAndFeel();
 
@@ -152,7 +159,14 @@ public class GUI {
                     }
                     r.unlock();
 
-                    Thread.sleep(5000);
+                    for (int i = 0; i < 100; i++) {
+                        Thread.sleep(50);
+                        if (updateFlag.get()) {
+                            updateFlag.set(false);
+                            break;
+                        }
+                    }
+
                 } catch (InterruptedException e) {
                     logger.info("Data refresh interrupted, exiting");
                     break;

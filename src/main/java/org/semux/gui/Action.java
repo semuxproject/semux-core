@@ -29,6 +29,8 @@ public enum Action {
 
     NEW_ACCOUNT,
 
+    DELETE_ACCOUNT,
+
     VOTE,
 
     UNVOTE,
