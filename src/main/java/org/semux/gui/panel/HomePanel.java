@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.swing.BoxLayout;
@@ -21,7 +22,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import org.semux.Kernel;
 import org.semux.core.Block;
+import org.semux.core.Delegate;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
@@ -144,7 +147,7 @@ public class HomePanel extends JPanel implements ActionListener {
     public static class TransactionPanel extends JPanel {
         private static final long serialVersionUID = 1L;
 
-        public TransactionPanel(Transaction tx, boolean inBound, boolean outBound) {
+        public TransactionPanel(Transaction tx, boolean inBound, boolean outBound, Optional<Delegate> delegate) {
             this.setBorder(new EmptyBorder(10, 10, 10, 10));
 
             JLabel lblType = new JLabel("");
@@ -161,7 +164,9 @@ public class HomePanel extends JPanel implements ActionListener {
                     : (tx.getType() == TransactionType.COINBASE ? MessagesUtil.get("FromBlockRewardNum") + tx.getNonce()
                             : Hex.PREF + Hex.encode(inBound ? tx.getFrom() : tx.getTo())));
             labelAddress.setForeground(Color.GRAY);
-
+            JLabel lblDelegateName = new JLabel(delegate.isPresent()?delegate.get().getNameString() : "");
+            lblDelegateName.setVisible(delegate.isPresent());
+            
             // @formatter:off
             GroupLayout groupLayout = new GroupLayout(this);
             groupLayout.setHorizontalGroup(
@@ -174,6 +179,7 @@ public class HomePanel extends JPanel implements ActionListener {
                             .addGroup(groupLayout.createSequentialGroup()
                                 .addComponent(lblTime, GroupLayout.PREFERRED_SIZE, 169, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(ComponentPlacement.RELATED, 87, Short.MAX_VALUE)
+                                .addComponent(lblDelegateName, GroupLayout.PREFERRED_SIZE, 80, Short.MAX_VALUE)
                                 .addComponent(lblAmount, GroupLayout.PREFERRED_SIZE, 128, GroupLayout.PREFERRED_SIZE))
                             .addGroup(groupLayout.createSequentialGroup()
                                 .addComponent(labelAddress, GroupLayout.DEFAULT_SIZE, 384, Short.MAX_VALUE)
@@ -186,6 +192,7 @@ public class HomePanel extends JPanel implements ActionListener {
                             .addGroup(groupLayout.createSequentialGroup()
                                 .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                                     .addComponent(lblTime, GroupLayout.PREFERRED_SIZE, 19, GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(lblDelegateName, GroupLayout.PREFERRED_SIZE, 19, GroupLayout.PREFERRED_SIZE)
                                     .addComponent(lblAmount, GroupLayout.PREFERRED_SIZE, 19, GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(labelAddress))
@@ -210,6 +217,29 @@ public class HomePanel extends JPanel implements ActionListener {
         }
     }
 
+    /**
+     * Get a Delegate on vote / unvote Transactions
+     * 
+     * @param tx
+     * @return
+     */
+    protected Optional<Delegate> getDelegateForTransaction(Transaction tx) {
+        switch (tx.getType()) {
+        case VOTE:
+        case UNVOTE:
+            return Optional
+                    .ofNullable(Kernel.getInstance().getBlockchain().getDeleteState().getDelegateByAddress(tx.getTo()));
+        case TRANSFER:
+            Optional<Delegate> from = Optional.ofNullable(
+                    Kernel.getInstance().getBlockchain().getDeleteState().getDelegateByAddress(tx.getFrom()));
+            return from.isPresent() ? from
+                    : Optional.ofNullable(
+                            Kernel.getInstance().getBlockchain().getDeleteState().getDelegateByAddress(tx.getTo()));
+        default:
+            return Optional.empty();
+        }
+    }
+    
     private void refresh() {
         Block block = model.getLatestBlock();
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
@@ -246,7 +276,7 @@ public class HomePanel extends JPanel implements ActionListener {
         for (Transaction tx : list) {
             boolean inBound = accounts.contains(ByteArray.of(tx.getTo()));
             boolean outBound = accounts.contains(ByteArray.of(tx.getFrom()));
-            transactions.add(new TransactionPanel(tx, inBound, outBound));
+            transactions.add(new TransactionPanel(tx, inBound, outBound, getDelegateForTransaction(tx)));
         }
         transactions.revalidate();
     }

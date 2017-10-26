@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.swing.JPanel;
@@ -25,6 +26,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import org.semux.Kernel;
+import org.semux.core.Delegate;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
@@ -74,7 +77,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 if (me.getClickCount() == 2) {
                     Transaction tx = tableModel.getRow(table.convertRowIndexToModel(row));
                     if (tx != null) {
-                        TransactionDialog dialog = new TransactionDialog(TransactionsPanel.this, tx);
+                        TransactionDialog dialog = new TransactionDialog(TransactionsPanel.this, tx,
+                                getDelegateForTransaction(tx));
                         dialog.setVisible(true);
                     }
                 }
@@ -179,6 +183,29 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     private Transaction getSelectedTransaction() {
         int row = table.getSelectedRow();
         return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
+    }
+
+    /**
+     * Get a Delegate on vote / unvote Transactions
+     * 
+     * @param tx
+     * @return
+     */
+    protected Optional<Delegate> getDelegateForTransaction(Transaction tx) {
+        switch (tx.getType()) {
+        case VOTE:
+        case UNVOTE:
+            return Optional
+                    .ofNullable(Kernel.getInstance().getBlockchain().getDeleteState().getDelegateByAddress(tx.getTo()));
+        case TRANSFER:
+            Optional<Delegate> from = Optional.ofNullable(
+                    Kernel.getInstance().getBlockchain().getDeleteState().getDelegateByAddress(tx.getFrom()));
+            return from.isPresent() ? from
+                    : Optional.ofNullable(
+                            Kernel.getInstance().getBlockchain().getDeleteState().getDelegateByAddress(tx.getTo()));
+        default:
+            return Optional.empty();
+        }
     }
 
     private void refresh() {

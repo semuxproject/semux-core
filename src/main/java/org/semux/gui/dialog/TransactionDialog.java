@@ -1,5 +1,7 @@
 package org.semux.gui.dialog;
 
+import java.util.Optional;
+
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JComponent;
@@ -8,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
+import org.semux.core.Delegate;
 import org.semux.core.Transaction;
 import org.semux.crypto.Hex;
 import org.semux.gui.MessagesUtil;
@@ -17,7 +20,7 @@ public class TransactionDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    public TransactionDialog(JComponent parent, Transaction tx) {
+    public TransactionDialog(JComponent parent, Transaction tx, Optional<Delegate> delegate) {
         JLabel lblHash = new JLabel(MessagesUtil.get("Hash") + ":");
         JLabel lblType = new JLabel(MessagesUtil.get("Type") + ":");
         JLabel lblFrom = new JLabel(MessagesUtil.get("From") + ":");
@@ -27,7 +30,9 @@ public class TransactionDialog extends JDialog {
         JLabel lblNonce = new JLabel(MessagesUtil.get("Nonce") + ":");
         JLabel lblTimestamp = new JLabel(MessagesUtil.get("Timestamp") + ":");
         JLabel lblData = new JLabel(MessagesUtil.get("Data") + ":");
-
+        JLabel lblDelegatesName = new JLabel("Delegate:");
+        lblDelegatesName.setVisible(delegate.isPresent());
+        
         JTextArea hash = SwingUtil.selectableTextArea(Hex.PREF + Hex.encode(tx.getHash()));
         JLabel type = new JLabel(tx.getType().name());
         JTextArea from = SwingUtil.selectableTextArea(Hex.PREF + Hex.encode(tx.getFrom()));
@@ -37,6 +42,8 @@ public class TransactionDialog extends JDialog {
         JLabel nonce = new JLabel(SwingUtil.formatNumber(tx.getNonce()));
         JLabel timestamp = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
         JTextArea data = new JTextArea(Hex.PREF + Hex.encode(tx.getData()));
+        JLabel delegateName = new JLabel(delegate.isPresent() ? delegate.get().getNameString() : "");
+        delegateName.setVisible(delegate.isPresent());
         data.setEditable(false);
 
         // @formatter:off
@@ -52,6 +59,7 @@ public class TransactionDialog extends JDialog {
                         .addComponent(lblFee)
                         .addComponent(lblValue)
                         .addComponent(lblTo)
+                        .addComponent(lblDelegatesName)
                         .addComponent(lblFrom)
                         .addComponent(lblType)
                         .addComponent(lblHash))
@@ -60,6 +68,7 @@ public class TransactionDialog extends JDialog {
                         .addComponent(hash)
                         .addComponent(type)
                         .addComponent(from)
+                        .addComponent(delegateName)
                         .addComponent(to)
                         .addComponent(value)
                         .addComponent(fee)
@@ -83,6 +92,10 @@ public class TransactionDialog extends JDialog {
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblFrom)
                         .addComponent(from))
+                    .addPreferredGap(ComponentPlacement.UNRELATED)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                            .addComponent(lblDelegatesName)
+                            .addComponent(delegateName))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblTo)
