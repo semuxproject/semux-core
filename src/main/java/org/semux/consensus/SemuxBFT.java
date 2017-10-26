@@ -111,7 +111,7 @@ public class SemuxBFT implements Consensus {
         this.coinbase = coinbase;
 
         this.accountState = chain.getAccountState();
-        this.delegateState = chain.getDeleteState();
+        this.delegateState = chain.getDelegateState();
 
         this.timer = new Timer();
         this.broadcaster = new Broadcaster();
@@ -792,7 +792,7 @@ public class SemuxBFT implements Consensus {
         }
 
         AccountState as = chain.getAccountState().track();
-        DelegateState ds = chain.getDeleteState().track();
+        DelegateState ds = chain.getDelegateState().track();
 
         // [1] execute all transactions
         TransactionExecutor exec = new TransactionExecutor();
@@ -824,7 +824,7 @@ public class SemuxBFT implements Consensus {
         try {
             // [4] flush state to disk
             chain.getAccountState().commit();
-            chain.getDeleteState().commit();
+            chain.getDelegateState().commit();
 
             // [5] add block to chain
             chain.addBlock(block);

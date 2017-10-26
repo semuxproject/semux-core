@@ -138,7 +138,7 @@ public interface Blockchain {
      * 
      * @return
      */
-    public DelegateState getDeleteState();
+    public DelegateState getDelegateState();
 
     /**
      * Get the validator set based on current state.

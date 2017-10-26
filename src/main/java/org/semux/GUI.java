@@ -217,7 +217,7 @@ public class GUI {
 
         Blockchain chain = kernel.getBlockchain();
         AccountState as = chain.getAccountState();
-        DelegateState ds = chain.getDeleteState();
+        DelegateState ds = chain.getDelegateState();
 
         // reset the model.
         model.init(wallet.getAccounts());

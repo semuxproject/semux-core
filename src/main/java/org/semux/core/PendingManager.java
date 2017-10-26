@@ -90,7 +90,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         this.chain = chain;
         this.channelMgr = channelMgr;
         this.pendingAS = chain.getAccountState().track();
-        this.pendingDS = chain.getDeleteState().track();
+        this.pendingDS = chain.getDelegateState().track();
 
         this.exec = Executors.newSingleThreadScheduledExecutor(factory);
     }
@@ -223,7 +223,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
             // [1] reset state
             pendingAS = chain.getAccountState().track();
-            pendingDS = chain.getDeleteState().track();
+            pendingDS = chain.getDelegateState().track();
 
             // [2] clear transaction pool
             List<Transaction> txs = new ArrayList<>(transactions);

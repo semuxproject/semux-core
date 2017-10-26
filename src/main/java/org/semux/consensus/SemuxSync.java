@@ -325,7 +325,7 @@ public class SemuxSync implements Sync {
             }
 
             AccountState as = chain.getAccountState().track();
-            DelegateState ds = chain.getDeleteState().track();
+            DelegateState ds = chain.getDelegateState().track();
 
             // [3] check votes
             List<String> validators = chain.getValidators();
@@ -378,7 +378,7 @@ public class SemuxSync implements Sync {
             try {
                 // [7] flush state to disk
                 chain.getAccountState().commit();
-                chain.getDeleteState().commit();
+                chain.getDelegateState().commit();
 
                 // [8] add block to chain
                 chain.addBlock(block);

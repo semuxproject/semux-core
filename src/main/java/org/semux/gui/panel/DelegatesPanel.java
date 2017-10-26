@@ -465,7 +465,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         if (acc != null) {
             byte[] voter = acc.getKey().toAddress();
             Blockchain chain = Kernel.getInstance().getBlockchain();
-            DelegateState ds = chain.getDeleteState();
+            DelegateState ds = chain.getDelegateState();
             for (Delegate d : delegates) {
                 long vote = ds.getVote(voter, d.getAddress());
                 d.setVotesFromMe(vote);
