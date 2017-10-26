@@ -44,7 +44,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
         public Item(Account a, int idx) {
             this.account = a;
-            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + MessagesUtil.get("AccountNumShort") + idx
+            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + MessagesUtil.get("AccountNumShort", idx)
                     + ", " + SwingUtil.formatValue(account.getBalance());
         }
 

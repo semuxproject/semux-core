@@ -51,7 +51,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { MessagesUtil.get("Num"), MessagesUtil.get("Name"),
+    private static String[] columnNames = { MessagesUtil.get("Rank"), MessagesUtil.get("Name"),
             MessagesUtil.get("Address"), MessagesUtil.get("Votes"), MessagesUtil.get("VotesFromMe"),
             MessagesUtil.get("Status"), MessagesUtil.get("Rate") };
 
@@ -66,7 +66,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         public Item(Account a, int idx) {
             this.account = a;
-            this.name = MessagesUtil.get("AccountNumShort") + idx + ", " + SwingUtil.formatValue(account.getBalance());
+            this.name = MessagesUtil.get("AccountNumShort", idx) + ", " + SwingUtil.formatValue(account.getBalance());
         }
 
         @Override
@@ -92,7 +92,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(25);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 600, 0.05, 0.2, 0.25, 0.15, 0.15, 0.1, 0.1);
+        SwingUtil.setColumnWidths(table, 600, 0.07, 0.2, 0.25, 0.15, 0.15, 0.08, 0.1);
         SwingUtil.setColumnAlignments(table, false, false, false, true, true, true, true);
 
         table.addMouseListener(new MouseAdapter() {

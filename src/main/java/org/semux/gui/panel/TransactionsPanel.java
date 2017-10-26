@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.swing.JPanel;
@@ -26,10 +25,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
-import org.semux.Kernel;
-import org.semux.core.Delegate;
 import org.semux.core.Transaction;
-import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
@@ -77,8 +73,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 if (me.getClickCount() == 2) {
                     Transaction tx = tableModel.getRow(table.convertRowIndexToModel(row));
                     if (tx != null) {
-                        TransactionDialog dialog = new TransactionDialog(TransactionsPanel.this, tx,
-                                getDelegateForTransaction(tx));
+                        TransactionDialog dialog = new TransactionDialog(TransactionsPanel.this, tx);
                         dialog.setVisible(true);
                     }
                 }
@@ -104,16 +99,13 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         private static final long serialVersionUID = 1L;
 
         private List<Transaction> transactions;
-        private Map<String, Integer> accounts;
 
         public TransactionsTableModel() {
             this.transactions = Collections.emptyList();
-            this.accounts = Collections.emptyMap();
         }
 
         public void setData(List<Transaction> transactions, Map<String, Integer> accounts) {
             this.transactions = transactions;
-            this.accounts = accounts;
             this.fireTableDataChanged();
         }
 
@@ -148,15 +140,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             case 0:
                 return StringUtil.toLowercaseExceptFirst(tx.getType().name());
             case 1:
-                String from = MessagesUtil.get("BlockReward");
-                if (tx.getType() != TransactionType.COINBASE) {
-                    from = Hex.encode(tx.getFrom());
-                    from = accounts.containsKey(from) ? MessagesUtil.get("AccountNum") + accounts.get(from)
-                            : Hex.PREF + from;
-                }
-                String to = Hex.encode(tx.getTo());
-                to = accounts.containsKey(to) ? MessagesUtil.get("AccountNum") + accounts.get(to) : Hex.PREF + to;
-                return from + " => " + to;
+                return SwingUtil.getTransactionDescription(model, tx);
             case 2:
                 return SwingUtil.formatValue(tx.getValue());
             case 3:
@@ -183,29 +167,6 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     private Transaction getSelectedTransaction() {
         int row = table.getSelectedRow();
         return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
-    }
-
-    /**
-     * Get a Delegate on vote / unvote Transactions
-     * 
-     * @param tx
-     * @return
-     */
-    protected Optional<Delegate> getDelegateForTransaction(Transaction tx) {
-        switch (tx.getType()) {
-        case VOTE:
-        case UNVOTE:
-            return Optional
-                    .ofNullable(Kernel.getInstance().getBlockchain().getDeleteState().getDelegateByAddress(tx.getTo()));
-        case TRANSFER:
-            Optional<Delegate> from = Optional.ofNullable(
-                    Kernel.getInstance().getBlockchain().getDeleteState().getDelegateByAddress(tx.getFrom()));
-            return from.isPresent() ? from
-                    : Optional.ofNullable(
-                            Kernel.getInstance().getBlockchain().getDeleteState().getDelegateByAddress(tx.getTo()));
-        default:
-            return Optional.empty();
-        }
     }
 
     private void refresh() {

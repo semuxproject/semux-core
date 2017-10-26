@@ -118,7 +118,7 @@ public class GUI {
             List<Object> options = new ArrayList<>();
             List<EdDSA> list = wallet.getAccounts();
             for (int i = 0; i < list.size(); i++) {
-                options.add(Hex.PREF + list.get(i).toAddressString() + ", " + MessagesUtil.get("AccountNumShort") + i);
+                options.add(Hex.PREF + list.get(i).toAddressString() + ", " + MessagesUtil.get("AccountNumShort", i));
             }
 
             SelectDialog dialog = new SelectDialog(null, message, options);

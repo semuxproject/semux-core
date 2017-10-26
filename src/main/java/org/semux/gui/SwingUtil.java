@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -36,7 +37,12 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.DefaultEditorKit;
 
+import org.semux.Kernel;
+import org.semux.core.Delegate;
+import org.semux.core.Transaction;
 import org.semux.core.Unit;
+import org.semux.core.state.DelegateState;
+import org.semux.crypto.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +52,8 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+
+import io.netty.util.internal.StringUtil;
 
 public class SwingUtil {
 
@@ -406,4 +414,46 @@ public class SwingUtil {
             throw new NumberFormatException("Invalid number strings: " + o1 + ", " + o2);
         }
     };
+
+    /**
+     * Returns an description of an account.
+     * 
+     * @param tx
+     * @return
+     */
+    public static String getTransactionDescription(Model m, Transaction tx) {
+        switch (tx.getType()) {
+        case COINBASE:
+            return MessagesUtil.get("BlockReward") + " => " + getDelegateName(tx.getTo()).get();
+        case VOTE:
+        case UNVOTE:
+        case TRANSFER:
+            return getAddressName(m, tx.getFrom()) + " => " + getAddressName(m, tx.getTo());
+        default:
+            return StringUtil.EMPTY_STRING;
+        }
+    }
+
+    private static String getAddressName(Model m, byte[] address) {
+        Optional<String> o = getDelegateName(address);
+        if (o.isPresent()) {
+            return o.get();
+        }
+
+        int n = m.getAccountNumber(address);
+        return n == -1 ? Hex.PREF + Hex.encode(address) : MessagesUtil.get("AccountNum", n);
+    }
+
+    /**
+     * Returns the name of the delegate that corresponds to the given address.
+     * 
+     * @param address
+     * @return
+     */
+    public static Optional<String> getDelegateName(byte[] address) {
+        DelegateState ds = Kernel.getInstance().getBlockchain().getDelegateState();
+        Delegate d = ds.getDelegateByAddress(address);
+
+        return d == null ? Optional.empty() : Optional.of(d.getNameString());
+    }
 }
