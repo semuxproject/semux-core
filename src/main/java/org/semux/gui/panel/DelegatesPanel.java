@@ -322,14 +322,16 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         switch (action) {
         case REFRESH: {
-            refreshMaxVotes();
             refreshAccounts();
             refreshDelegates();
+            refreshMaxVotes();
+            refreshMaxUnvotes();
             break;
         }
         case SELECT_ACCOUNT: {
-            refreshMaxVotes();
             refreshDelegates();
+            refreshMaxVotes();
+            refreshMaxUnvotes();
             break;
         }
         case VOTE:
@@ -501,7 +503,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private void refreshMaxVotes() {
         if (null != getSelectedAccount()) {
             Long voteable = ((getSelectedAccount().getBalance() - Config.MIN_TRANSACTION_FEE_SOFT) / Unit.SEM);
-            textVote.setText(voteable > 1 ? String.valueOf(voteable) : "");
+            textVote.setText(voteable > 1 ? SwingUtil.formatVote(voteable) : "");
         }
     }
 
@@ -509,10 +511,10 @@ public class DelegatesPanel extends JPanel implements ActionListener {
      * updates textUnvote with the amount of votes already voted for this delegate
      */
     private void refreshMaxUnvotes() {
-        if (getSelectedDelegate() != null)
-            textUnvote.setText(getSelectedDelegate().getVotesFromMe() / Unit.SEM > 0
-                    ? String.valueOf(getSelectedDelegate().getVotesFromMe() / Unit.SEM)
-                    : "");
+        if (getSelectedDelegate() != null && getSelectedAccount() != null) {
+            Long votes = Kernel.getInstance().getBlockchain().getDelegateState().getVote(getSelectedAccount().getKey().toAddress(), getSelectedDelegate().getAddress());
+            textUnvote.setText(votes > 0 ? SwingUtil.formatVote(votes) : "");
+        }
     }
 
     private void clear() {
