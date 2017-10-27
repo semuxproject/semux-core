@@ -407,7 +407,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private void sendTransaction(PendingManager pendingMgr, Transaction tx) {
         if (pendingMgr.addTransactionSync(tx)) {
-            JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionSent"));
+            JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionSent", 30));
             clear();
         } else {
             JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFailed"));
