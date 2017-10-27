@@ -43,7 +43,7 @@ public class Config {
                     NETWORK_ID = Byte.parseByte(props.getProperty(name));
                     break;
                 case "minTransactionFee":
-                    MIN_TRANSACTION_FEE_SOFT = Integer.parseInt(props.getProperty(name));
+                    MIN_TRANSACTION_FEE_SOFT = Long.parseLong(props.getProperty(name));
                     break;
 
                 case "p2p.ip":
@@ -361,9 +361,14 @@ public class Config {
      * @return the block reward
      */
     public static long getBlockReward(long number) {
-        if (number <= 4_000_000) {
-            return 10 * Unit.SEM;
-        } else if (number <= 10_000_000) {
+        /*
+         * Disable block rewards for max decentralization.
+         */
+        long zero = 500_000L;
+
+        if (number <= zero) {
+            return 0;
+        } else if (number <= zero + 14_000_000) {
             return 5 * Unit.SEM;
         } else {
             return 0;
@@ -377,12 +382,12 @@ public class Config {
      * @return
      */
     public static int getNumberOfValidators(long number) {
-        long step = 2 * 60 * 9; // every 9 hours
+        long step = 2 * 60 * 2;
 
-        if (number < 80 * step) {
-            return (int) (20 + number / step);
+        if (number < 18 * step) {
+            return (int) (16 + number / step);
         } else {
-            return 100;
+            return 64;
         }
     }
 }

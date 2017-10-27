@@ -10,8 +10,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.semux.core.Unit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConfigTest {
+
+    private Logger logger = LoggerFactory.getLogger(ConfigTest.class);
 
     @Test
     public void testLoad() {
@@ -19,17 +24,32 @@ public class ConfigTest {
     }
 
     @Test
-    public void testNumberOfValidators() {
-        long step = 2 * 60 * 9;
+    public void testBlockReward() {
+        long day = 2 * 60 * 24; // 1 day
 
-        assertEquals(20, Config.getNumberOfValidators(0));
-        assertEquals(20, Config.getNumberOfValidators(1));
-        assertEquals(21, Config.getNumberOfValidators(step));
-        assertEquals(22, Config.getNumberOfValidators(2 * step));
-        assertEquals(70, Config.getNumberOfValidators(50 * step));
-        assertEquals(99, Config.getNumberOfValidators(80 * step - 1));
-        assertEquals(100, Config.getNumberOfValidators(80 * step));
-        assertEquals(100, Config.getNumberOfValidators(100 * step));
-        assertEquals(100, Config.getNumberOfValidators(Long.MAX_VALUE));
+        assertEquals(0, Config.getBlockReward(0));
+        assertEquals(0, Config.getBlockReward(day * 30));
+        assertEquals(0, Config.getBlockReward(day * 90));
+        assertEquals(5 * Unit.SEM, Config.getBlockReward(day * 180));
+        assertEquals(5 * Unit.SEM, Config.getBlockReward(day * 360));
+        assertEquals(5 * Unit.SEM, Config.getBlockReward(day * 720));
+        assertEquals(0, Config.getBlockReward(day * 365 * 15));
+    }
+
+    @Test
+    public void testNumberOfValidators() {
+        long day = 2 * 60 * 24; // 1 day
+
+        int last = 0;
+        for (int i = 0; i < 60 * day; i++) {
+            int n = Config.getNumberOfValidators(i);
+            if (n != last) {
+                assertTrue(n > last);
+                logger.info("block = {}, validators = {}", i, n);
+                last = n;
+            }
+        }
+
+        assertEquals(64, last);
     }
 }
