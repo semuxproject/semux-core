@@ -10,12 +10,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.semux.core.Unit;
+import org.semux.crypto.Hash;
 import org.semux.net.msg.MessageCode;
+import org.semux.utils.Bytes;
 import org.semux.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -421,5 +424,18 @@ public class Config {
      */
     public static boolean isDevNet() {
         return NETWORK_ID == 2;
+    }
+
+    /**
+     * Returns the primary validator for a specific [height, view].
+     * 
+     * @param validators
+     * @param height
+     * @param view
+     * @return
+     */
+    public static String getPrimaryValidator(List<String> validators, long height, int view) {
+        byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(0));
+        return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
     }
 }

@@ -293,7 +293,7 @@ public class BlockchainImpl implements Blockchain {
 
         // [5] update validator statistics
         List<String> validators = getValidators();
-        String primary = validators.get((int) ((number - 1) % validators.size()));
+        String primary = Config.getPrimaryValidator(validators, number, 0);
         updateValidatorStats(block.getCoinbase(), FORGED, 1);
         if (primary.equals(Hex.encode(block.getCoinbase()))) {
             updateValidatorStats(Hex.decode(primary), HIT, 1);

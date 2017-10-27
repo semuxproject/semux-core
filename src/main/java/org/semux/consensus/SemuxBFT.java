@@ -42,7 +42,6 @@ import org.semux.net.msg.consensus.BFTNewViewMessage;
 import org.semux.net.msg.consensus.BFTProposalMessage;
 import org.semux.net.msg.consensus.BFTVoteMessage;
 import org.semux.utils.ArrayUtil;
-import org.semux.utils.Bytes;
 import org.semux.utils.MerkleUtil;
 import org.semux.utils.SystemUtil;
 import org.slf4j.Logger;
@@ -672,10 +671,7 @@ public class SemuxBFT implements Consensus {
      * @return
      */
     protected boolean isPrimary(long height, int view, String peerId) {
-        byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
-        int primary = (Hash.h256(key)[0] & 0xff) % validators.size();
-
-        return validators.get(primary).equals(peerId);
+        return Config.getPrimaryValidator(validators, height, view).equals(peerId);
     }
 
     /**
