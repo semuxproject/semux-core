@@ -186,7 +186,7 @@ public class Config {
     /**
      * P2P protocol version.
      */
-    public static short P2P_VERSION = 0;
+    public static short P2P_VERSION = 1;
 
     /**
      * P2P listening address.
@@ -394,5 +394,32 @@ public class Config {
         } else {
             return 64;
         }
+    }
+
+    /**
+     * Returns whether this network is main net.
+     * 
+     * @return
+     */
+    public static boolean isMainNet() {
+        return NETWORK_ID == 0;
+    }
+
+    /**
+     * Returns whether this network is test net.
+     * 
+     * @return
+     */
+    public static boolean isTestNet() {
+        return NETWORK_ID == 1;
+    }
+
+    /**
+     * Returns whether this network is dev net.
+     * 
+     * @return
+     */
+    public static boolean isDevNet() {
+        return NETWORK_ID == 2;
     }
 }

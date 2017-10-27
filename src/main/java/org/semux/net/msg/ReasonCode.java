@@ -34,9 +34,9 @@ public enum ReasonCode {
     DUPLICATE_PEER_ID(0x04),
 
     /**
-     * [0x05] Slow peer.
+     * [0x05] Bad peer.
      */
-    SLOW_PEER(0x05),
+    BAD_PEER(0x05),
 
     /**
      * [0x06] Consensus error.
