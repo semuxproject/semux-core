@@ -263,9 +263,8 @@ public class BlockchainImpl implements Blockchain {
         }
 
         // [4] coinbase transaction
-        Transaction tx = new Transaction(TransactionType.COINBASE, Bytes.EMPTY_ADDRESS, block.getCoinbase(), reward,
-                Config.MIN_TRANSACTION_FEE_HARD, block.getNumber(), block.getTimestamp(), Bytes.EMPY_BYTES);
-        tx.sign(new EdDSA()); // signed by random account
+        Transaction tx = new Transaction(TransactionType.COINBASE, Bytes.EMPTY_ADDRESS, block.getCoinbase(), reward, 0,
+                block.getNumber(), block.getTimestamp(), Bytes.EMPY_BYTES).sign(new EdDSA());
         indexDB.put(tx.getHash(), tx.toBytes());
         addTransactionToAccount(tx, block.getCoinbase());
 
