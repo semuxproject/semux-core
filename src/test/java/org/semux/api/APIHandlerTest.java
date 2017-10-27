@@ -24,6 +24,7 @@ import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.Genesis;
+import org.semux.core.Genesis.Premine;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
@@ -237,12 +238,12 @@ public class APIHandlerTest {
     @Test
     public void testGetAccount() throws IOException {
         Genesis gen = Genesis.getInstance();
-        Entry<ByteArray, Long> entry = gen.getPremine().entrySet().iterator().next();
+        Entry<ByteArray, Premine> entry = gen.getPremines().entrySet().iterator().next();
 
         String uri = "/get_account?address=" + entry.getKey();
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        assertEquals((long) entry.getValue(), response.getJSONObject("result").getLong("balance"));
+        assertEquals(entry.getValue().getAmount(), response.getJSONObject("result").getLong("balance"));
     }
 
     @Test

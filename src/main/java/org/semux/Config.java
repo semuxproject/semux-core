@@ -142,9 +142,14 @@ public class Config {
     public static long VALIDATOR_TERM = 100;
 
     /**
+     * Number of blocks in one day.
+     */
+    public static long DAY = 2 * 60 * 24;
+
+    /**
      * Deadline of the next mandatory upgrade.
      */
-    public static long MANDATORY_UPGRADE = 2 * 60 * 24 * 30;
+    public static long MANDATORY_UPGRADE = 60 * DAY;
 
     /**
      * State lock to prevent state inconsistency.

@@ -2,25 +2,33 @@
     "number": 0,
     "coinbase": "0x0000000000000000000000000000000000000000",
     "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-    "timestamp": 0,
+    "timestamp": 1504742400000,
     "data": "semux",
-    "premine": {
-        "0x9e8741bde30be23dca416b76683390b2cb6775ab": {
-            "balance": 10000000
+    "premine": [
+        { 
+            "address": "0xd00e49d3c1624aa90d7c6587688a53818aeae649",
+            "amount": 2500000,
+            "note": "founders",
+            "periods": 4
         },
-        "0x49f1696dda5910a28eca708b36f9f87a74e24cea": {
-            "balance": 10000000
+        {
+            "address": "0x8e1ef4f810a84bea2fbf1e5f4afd8d0774ab0038",
+            "amount": 10000000,
+            "note": "development, marketing, promotion, events"
         },
-        "0xc7b0d7a7f78730c873de4271d7557722af9810df": {
-            "balance": 10000000
+        {
+            "address": "0xc2ed00c8e05a2296ab3be4a0accb89b648bc71df",
+            "amount": 10000000,
+            "note": "community distribution"
         }
-    },
+    ],
     "delegates": {
-        "semux1": "0x1e8237f8f64b2bd626980875b501f01713d99f7f",
-        "semux2": "0x47f94a46ae01a48f890a1b088bf5e2ff2dbb3b73",
-        "semux3": "0xe05a5e60fb26ec466620354feff67d1f5239f8c8",
-        "semux4": "0x5656779afec2314abd4c51666e28bc64f758c621"
+        "semux1": "0xc583b6ad1d1cccfc00ae9113db6408f022822b20",
+        "semux2": "0xc5f32c2231ff2b60cdfa9c0d3a9c2e71774de472",
+        "semux3": "0x4908d29be8cc537386cd888dc9336aa7808c6ccc",
+        "semux4": "0xa46caf85690c5d340e1256902317efb488da858d"
     },
     "config": {
+        
     }
 }

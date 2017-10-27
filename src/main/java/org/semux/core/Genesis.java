@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.semux.Config;
 import org.semux.crypto.Hash;
@@ -24,12 +25,37 @@ import org.slf4j.LoggerFactory;
 
 public class Genesis extends Block {
 
+    public static class Premine {
+        private byte[] address;
+        private long amount;
+        private int periods;
+
+        public Premine(byte[] address, long amount, int periods) {
+            super();
+            this.address = address;
+            this.amount = amount;
+            this.periods = periods;
+        }
+
+        public byte[] getAddress() {
+            return address;
+        }
+
+        public long getAmount() {
+            return amount;
+        }
+
+        public int getPeriods() {
+            return periods;
+        }
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(Genesis.class);
 
     private static final String GENESIS_DIR = "config";
     private static final String GENESIS_FILE = "genesis.json";
 
-    private Map<ByteArray, Long> premine;
+    private Map<ByteArray, Premine> premines;
     private Map<String, byte[]> delegates;
     private Map<String, Object> config;
 
@@ -55,17 +81,19 @@ public class Genesis extends Block {
                 byte[] data = Bytes.of(json.getString("data"));
 
                 // premine
-                Map<ByteArray, Long> premine = new HashMap<>();
-                JSONObject obj = json.getJSONObject("premine");
-                for (String k : obj.keySet()) {
-                    byte[] addr = Hex.parse(k);
-                    long balance = obj.getJSONObject(k).getLong("balance") * Unit.SEM;
-                    premine.put(ByteArray.of(addr), balance);
+                Map<ByteArray, Premine> premine = new HashMap<>();
+                JSONArray arr = json.getJSONArray("premine");
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    byte[] address = Hex.parse(obj.getString("address"));
+                    long amount = obj.getLong("amount") * Unit.SEM;
+                    int periods = obj.has("periods") ? obj.getInt("periods") : 1;
+                    premine.put(ByteArray.of(address), new Premine(address, amount, periods));
                 }
 
                 // delegates
                 Map<String, byte[]> delegates = new HashMap<>();
-                obj = json.getJSONObject("delegates");
+                JSONObject obj = json.getJSONObject("delegates");
                 for (String k : obj.keySet()) {
                     byte[] address = Hex.parse(obj.getString(k));
                     delegates.put(k, address);
@@ -85,13 +113,13 @@ public class Genesis extends Block {
     }
 
     private Genesis(long number, byte[] coinbase, byte[] prevHash, long timestamp, byte[] data,
-            Map<ByteArray, Long> alloc, //
+            Map<ByteArray, Premine> premine, //
             Map<String, byte[]> delegates, //
             Map<String, Object> config) {
         super(new BlockHeader(number, coinbase, prevHash, timestamp, Hash.EMPTY_H256, Hash.EMPTY_H256, Hash.EMPTY_H256,
                 data), Collections.emptyList(), Collections.emptyList());
 
-        this.premine = alloc;
+        this.premines = premine;
         this.delegates = delegates;
         this.config = config;
 
@@ -103,8 +131,8 @@ public class Genesis extends Block {
      * 
      * @return
      */
-    public Map<ByteArray, Long> getPremine() {
-        return premine;
+    public Map<ByteArray, Premine> getPremines() {
+        return premines;
     }
 
     /**

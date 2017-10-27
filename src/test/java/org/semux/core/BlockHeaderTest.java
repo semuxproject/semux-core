@@ -10,6 +10,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.semux.Config;
 import org.semux.crypto.EdDSA;
 import org.semux.utils.Bytes;
 import org.slf4j.Logger;
@@ -58,7 +59,7 @@ public class BlockHeaderTest {
         byte[] bytes = header.toBytes();
 
         logger.info("block header size: {}", bytes.length);
-        logger.info("block header size (1y): {} GB", 1.0 * bytes.length * 2 * 60 * 24 * 365 / 1024 / 1024 / 1024);
+        logger.info("block header size (1y): {} GB", 1.0 * bytes.length * Config.DAY * 365 / 1024 / 1024 / 1024);
     }
 
     private void testFields(BlockHeader header) {

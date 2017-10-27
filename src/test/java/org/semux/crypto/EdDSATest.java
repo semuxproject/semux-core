@@ -14,6 +14,7 @@ import java.security.spec.InvalidKeySpecException;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.semux.Config;
 import org.semux.utils.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,6 @@ public class EdDSATest {
         byte[] sig = key.sign(hash).toBytes();
 
         logger.info("signature size: {}", sig.length);
-        logger.info("Signature size (1y): {} GB", 100.0 * sig.length * 2 * 60 * 24 * 365 / 1024 / 1024 / 1024);
+        logger.info("Signature size (1y): {} GB", 64.0 * sig.length * Config.DAY * 365 / 1024 / 1024 / 1024);
     }
 }
