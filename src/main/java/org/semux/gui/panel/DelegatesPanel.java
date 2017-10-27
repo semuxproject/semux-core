@@ -389,7 +389,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 byte[] from = a.getKey().toAddress();
                 byte[] to = from;
                 long value = Config.DELEGATE_BURN_AMOUNT;
-                long fee = Config.MIN_TRANSACTION_FEE_HARD;
+                long fee = Config.MIN_TRANSACTION_FEE_SOFT;
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = Bytes.of(name);
