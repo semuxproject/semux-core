@@ -438,7 +438,7 @@ public class ApiHandlerImpl implements ApiHandler {
         obj.put("address", Hex.PREF + Hex.encode(acc.getAddress()));
         obj.put("balance", acc.getBalance());
         obj.put("locked", acc.getLocked());
-        obj.put("registeredAt", acc.getNonce());
+        obj.put("nonce", acc.getNonce());
 
         return obj;
     }
