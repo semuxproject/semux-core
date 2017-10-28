@@ -51,7 +51,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { MessagesUtil.get("Num"), MessagesUtil.get("Name"),
+    private static String[] columnNames = { MessagesUtil.get("Rank"), MessagesUtil.get("Name"),
             MessagesUtil.get("Address"), MessagesUtil.get("Votes"), MessagesUtil.get("VotesFromMe"),
             MessagesUtil.get("Status"), MessagesUtil.get("Rate") };
 
@@ -66,7 +66,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         public Item(Account a, int idx) {
             this.account = a;
-            this.name = MessagesUtil.get("AccountNumShort") + idx + ", " + SwingUtil.formatValue(account.getBalance());
+            this.name = MessagesUtil.get("AccountNumShort", idx) + ", " + SwingUtil.formatValue(account.getBalance());
         }
 
         @Override
@@ -92,7 +92,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(25);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 600, 0.05, 0.2, 0.25, 0.15, 0.15, 0.1, 0.1);
+        SwingUtil.setColumnWidths(table, 600, 0.07, 0.2, 0.25, 0.15, 0.15, 0.08, 0.1);
         SwingUtil.setColumnAlignments(table, false, false, false, true, true, true, true);
 
         table.addMouseListener(new MouseAdapter() {
@@ -294,7 +294,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
             switch (column) {
             case 0:
-                return SwingUtil.formatNumber(row);
+                return SwingUtil.formatNumber(row + 1);
             case 1:
                 return Bytes.toString(d.getName());
             case 2:
@@ -389,7 +389,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 byte[] from = a.getKey().toAddress();
                 byte[] to = from;
                 long value = Config.DELEGATE_BURN_AMOUNT;
-                long fee = Config.MIN_TRANSACTION_FEE_HARD;
+                long fee = Config.MIN_TRANSACTION_FEE_SOFT;
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = Bytes.of(name);
@@ -407,7 +407,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private void sendTransaction(PendingManager pendingMgr, Transaction tx) {
         if (pendingMgr.addTransactionSync(tx)) {
-            JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionSent"));
+            JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionSent", 30));
             clear();
         } else {
             JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFailed"));
@@ -465,7 +465,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         if (acc != null) {
             byte[] voter = acc.getKey().toAddress();
             Blockchain chain = Kernel.getInstance().getBlockchain();
-            DelegateState ds = chain.getDeleteState();
+            DelegateState ds = chain.getDelegateState();
             for (Delegate d : delegates) {
                 long vote = ds.getVote(voter, d.getAddress());
                 d.setVotesFromMe(vote);

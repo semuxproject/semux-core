@@ -66,7 +66,7 @@ public class GUI {
     public static void fireUpdateEvent() {
         updateFlag.set(true);
     }
-    
+
     public static void main(String[] args) {
         setupLookAndFeel();
 
@@ -118,7 +118,7 @@ public class GUI {
             List<Object> options = new ArrayList<>();
             List<EdDSA> list = wallet.getAccounts();
             for (int i = 0; i < list.size(); i++) {
-                options.add(Hex.PREF + list.get(i).toAddressString() + ", #" + i);
+                options.add(Hex.PREF + list.get(i).toAddressString() + ", " + MessagesUtil.get("AccountNumShort", i));
             }
 
             SelectDialog dialog = new SelectDialog(null, message, options);
@@ -217,7 +217,7 @@ public class GUI {
 
         Blockchain chain = kernel.getBlockchain();
         AccountState as = chain.getAccountState();
-        DelegateState ds = chain.getDeleteState();
+        DelegateState ds = chain.getDelegateState();
 
         // reset the model.
         model.init(wallet.getAccounts());

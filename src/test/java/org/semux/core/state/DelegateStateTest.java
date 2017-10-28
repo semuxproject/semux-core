@@ -35,7 +35,7 @@ public class DelegateStateTest {
     @Before
     public void init() {
         chain = new BlockchainImpl(MemoryDB.FACTORY);
-        ds = chain.getDeleteState();
+        ds = chain.getDelegateState();
         delegates = chain.getGenesis().getDelegates();
     }
 

@@ -14,6 +14,7 @@ import org.semux.core.Delegate;
 import org.semux.core.Transaction;
 import org.semux.crypto.EdDSA;
 import org.semux.net.Peer;
+import org.semux.utils.ByteArray;
 
 /**
  * A Model stores all the data that GUI needs. The thread-safety of this class
@@ -28,6 +29,7 @@ public class Model {
     private int coinbase;
     private boolean isDelegate;
 
+    private volatile Map<ByteArray, Integer> accountNo = new HashMap<>();
     private volatile List<Account> accounts = new ArrayList<>();
     private volatile List<Delegate> delegates = new ArrayList<>();
 
@@ -156,7 +158,17 @@ public class Model {
         return accounts;
     }
 
+    public int getAccountNumber(byte[] address) {
+        Integer n = accountNo.get(ByteArray.of(address));
+        return n == null ? -1 : n;
+    }
+
     public void setAccounts(List<Account> accounts) {
+        Map<ByteArray, Integer> map = new HashMap<>();
+        for (int i = 0; i < accounts.size(); i++) {
+            map.put(ByteArray.of(accounts.get(i).getKey().toAddress()), i);
+        }
+        this.accountNo = map;
         this.accounts = accounts;
     }
 

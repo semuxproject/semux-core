@@ -10,12 +10,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.semux.core.Unit;
+import org.semux.crypto.Hash;
 import org.semux.net.msg.MessageCode;
+import org.semux.utils.Bytes;
 import org.semux.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +46,7 @@ public class Config {
                     NETWORK_ID = Byte.parseByte(props.getProperty(name));
                     break;
                 case "minTransactionFee":
-                    MIN_TRANSACTION_FEE_SOFT = Integer.parseInt(props.getProperty(name));
+                    MIN_TRANSACTION_FEE_SOFT = Long.parseLong(props.getProperty(name));
                     break;
 
                 case "p2p.ip":
@@ -142,9 +145,14 @@ public class Config {
     public static long VALIDATOR_TERM = 100;
 
     /**
+     * Number of blocks in one day.
+     */
+    public static long DAY = 2 * 60 * 24;
+
+    /**
      * Deadline of the next mandatory upgrade.
      */
-    public static long MANDATORY_UPGRADE = 2 * 60 * 24 * 30;
+    public static long MANDATORY_UPGRADE = 60 * DAY;
 
     /**
      * State lock to prevent state inconsistency.
@@ -163,7 +171,7 @@ public class Config {
     /**
      * Version of this client.
      */
-    public static String CLIENT_VERSION = "1.0.0-beta.5";
+    public static String CLIENT_VERSION = "1.0.0-rc.1";
 
     // =========================
     // Crypto
@@ -181,7 +189,7 @@ public class Config {
     /**
      * P2P protocol version.
      */
-    public static short P2P_VERSION = 0;
+    public static short P2P_VERSION = 1;
 
     /**
      * P2P listening address.
@@ -361,9 +369,14 @@ public class Config {
      * @return the block reward
      */
     public static long getBlockReward(long number) {
-        if (number <= 4_000_000) {
-            return 10 * Unit.SEM;
-        } else if (number <= 10_000_000) {
+        /*
+         * Disable block rewards for max decentralization.
+         */
+        long zero = 500_000L;
+
+        if (number <= zero) {
+            return 0;
+        } else if (number <= zero + 14_000_000) {
             return 5 * Unit.SEM;
         } else {
             return 0;
@@ -377,12 +390,52 @@ public class Config {
      * @return
      */
     public static int getNumberOfValidators(long number) {
-        long step = 2 * 60 * 9; // every 9 hours
+        long step = 2 * 60 * 2;
 
-        if (number < 80 * step) {
-            return (int) (20 + number / step);
+        if (number < 18 * step) {
+            return (int) (16 + number / step);
         } else {
-            return 100;
+            return 64;
         }
+    }
+
+    /**
+     * Returns whether this network is main net.
+     * 
+     * @return
+     */
+    public static boolean isMainNet() {
+        return NETWORK_ID == 0;
+    }
+
+    /**
+     * Returns whether this network is test net.
+     * 
+     * @return
+     */
+    public static boolean isTestNet() {
+        return NETWORK_ID == 1;
+    }
+
+    /**
+     * Returns whether this network is dev net.
+     * 
+     * @return
+     */
+    public static boolean isDevNet() {
+        return NETWORK_ID == 2;
+    }
+
+    /**
+     * Returns the primary validator for a specific [height, view].
+     * 
+     * @param validators
+     * @param height
+     * @param view
+     * @return
+     */
+    public static String getPrimaryValidator(List<String> validators, long height, int view) {
+        byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(0));
+        return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
     }
 }

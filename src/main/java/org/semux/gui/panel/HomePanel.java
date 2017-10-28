@@ -24,7 +24,6 @@ import javax.swing.border.TitledBorder;
 import org.semux.core.Block;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.Model;
@@ -144,7 +143,7 @@ public class HomePanel extends JPanel implements ActionListener {
     public static class TransactionPanel extends JPanel {
         private static final long serialVersionUID = 1L;
 
-        public TransactionPanel(Transaction tx, boolean inBound, boolean outBound) {
+        public TransactionPanel(Transaction tx, boolean inBound, boolean outBound, String description) {
             this.setBorder(new EmptyBorder(10, 10, 10, 10));
 
             JLabel lblType = new JLabel("");
@@ -157,9 +156,7 @@ public class HomePanel extends JPanel implements ActionListener {
 
             JLabel lblTime = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
 
-            JLabel labelAddress = new JLabel((inBound && outBound) ? MessagesUtil.get("InternalTransfer")
-                    : (tx.getType() == TransactionType.COINBASE ? MessagesUtil.get("FromBlockRewardNum") + tx.getNonce()
-                            : Hex.PREF + Hex.encode(inBound ? tx.getFrom() : tx.getTo())));
+            JLabel labelAddress = new JLabel(description);
             labelAddress.setForeground(Color.GRAY);
 
             // @formatter:off
@@ -214,7 +211,7 @@ public class HomePanel extends JPanel implements ActionListener {
         Block block = model.getLatestBlock();
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
-        this.coinbase.setText(MessagesUtil.get("AccountNum") + model.getCoinbase());
+        this.coinbase.setText(MessagesUtil.get("AccountNum", model.getCoinbase()));
         this.status.setText(model.isDelegate() ? MessagesUtil.get("Delegate") : MessagesUtil.get("Normal"));
         this.balance.setText(SwingUtil.formatValue(model.getTotalBalance()));
         this.locked.setText(SwingUtil.formatValue(model.getTotalLocked()));
@@ -246,7 +243,8 @@ public class HomePanel extends JPanel implements ActionListener {
         for (Transaction tx : list) {
             boolean inBound = accounts.contains(ByteArray.of(tx.getTo()));
             boolean outBound = accounts.contains(ByteArray.of(tx.getFrom()));
-            transactions.add(new TransactionPanel(tx, inBound, outBound));
+            transactions
+                    .add(new TransactionPanel(tx, inBound, outBound, SwingUtil.getTransactionDescription(model, tx)));
         }
         transactions.revalidate();
     }

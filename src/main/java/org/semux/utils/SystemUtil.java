@@ -62,7 +62,7 @@ public class SystemUtil {
             URL url = new URL("http://checkip.amazonaws.com/");
             URLConnection con = url.openConnection();
             con.setConnectTimeout(5000);
-            con.setReadTimeout(5000);
+            con.setReadTimeout(3000);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String ip = reader.readLine();

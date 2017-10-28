@@ -26,7 +26,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.semux.core.Transaction;
-import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
@@ -100,16 +99,13 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         private static final long serialVersionUID = 1L;
 
         private List<Transaction> transactions;
-        private Map<String, Integer> accounts;
 
         public TransactionsTableModel() {
             this.transactions = Collections.emptyList();
-            this.accounts = Collections.emptyMap();
         }
 
         public void setData(List<Transaction> transactions, Map<String, Integer> accounts) {
             this.transactions = transactions;
-            this.accounts = accounts;
             this.fireTableDataChanged();
         }
 
@@ -144,15 +140,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             case 0:
                 return StringUtil.toLowercaseExceptFirst(tx.getType().name());
             case 1:
-                String from = MessagesUtil.get("BlockReward");
-                if (tx.getType() != TransactionType.COINBASE) {
-                    from = Hex.encode(tx.getFrom());
-                    from = accounts.containsKey(from) ? MessagesUtil.get("AccountNum") + accounts.get(from)
-                            : Hex.PREF + from;
-                }
-                String to = Hex.encode(tx.getTo());
-                to = accounts.containsKey(to) ? MessagesUtil.get("AccountNum") + accounts.get(to) : Hex.PREF + to;
-                return from + " => " + to;
+                return SwingUtil.getTransactionDescription(model, tx);
             case 2:
                 return SwingUtil.formatValue(tx.getValue());
             case 3:

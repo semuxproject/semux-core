@@ -143,7 +143,7 @@ public class MessageQueue {
 
         if (requests.size() >= maxQueueSize || responses.size() >= maxQueueSize
                 || prioritizedResponses.size() >= maxQueueSize) {
-            disconnect(ReasonCode.SLOW_PEER);
+            disconnect(ReasonCode.BAD_PEER);
             return false;
         }
 

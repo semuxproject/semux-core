@@ -197,10 +197,10 @@ public class ApiHandlerImpl implements ApiHandler {
                 String address = params.get("address");
 
                 if (name != null) {
-                    Delegate d = chain.getDeleteState().getDelegateByName(Bytes.of(name));
+                    Delegate d = chain.getDelegateState().getDelegateByName(Bytes.of(name));
                     return success(delegateToJson(d));
                 } else if (address != null) {
-                    Delegate d = chain.getDeleteState().getDelegateByAddress(Hex.parse(address));
+                    Delegate d = chain.getDelegateState().getDelegateByAddress(Hex.parse(address));
                     return success(delegateToJson(d));
                 } else {
                     return failure("Invalid parameter: name = " + name + ", address = " + address);
@@ -215,7 +215,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 return success(arr);
             }
             case GET_DELEGATES: {
-                List<Delegate> delegates = chain.getDeleteState().getDelegates();
+                List<Delegate> delegates = chain.getDelegateState().getDelegates();
                 JSONArray arr = new JSONArray();
                 for (Delegate d : delegates) {
                     arr.put(delegateToJson(d));
@@ -227,7 +227,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 String delegate = params.get("delegate");
 
                 if (voter != null && delegate != null) {
-                    long vote = chain.getDeleteState().getVote(Hex.parse(voter), Hex.parse(delegate));
+                    long vote = chain.getDelegateState().getVote(Hex.parse(voter), Hex.parse(delegate));
                     return success(vote);
                 } else {
                     return failure("Invalid parameter: voter = " + voter + ", delegate = " + delegate);
@@ -237,7 +237,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 String delegate = params.get("delegate");
 
                 if (delegate != null) {
-                    Map<ByteArray, Long> votes = chain.getDeleteState().getVotes(Hex.parse(delegate));
+                    Map<ByteArray, Long> votes = chain.getDelegateState().getVotes(Hex.parse(delegate));
                     JSONObject obj = new JSONObject();
                     for (ByteArray k : votes.keySet()) {
                         obj.put(Hex.PREF + k.toString(), votes.get(k));

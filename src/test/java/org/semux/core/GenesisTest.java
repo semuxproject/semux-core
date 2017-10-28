@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.junit.Test;
+import org.semux.core.Genesis.Premine;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.utils.ByteArray;
@@ -39,18 +40,18 @@ public class GenesisTest {
         assertTrue(genesis.getNumber() == 0);
         assertArrayEquals(ZERO_ADDRESS, genesis.getCoinbase());
         assertArrayEquals(ZERO_HASH, genesis.getPrevHash());
-        assertTrue(genesis.getTimestamp() == 0);
+        assertTrue(genesis.getTimestamp() > 0);
         assertFalse(Arrays.equals(ZERO_ADDRESS, genesis.getHash()));
     }
 
     @Test
-    public void testPremine() {
+    public void testPremines() {
         Genesis genesis = Genesis.getInstance();
-        Map<ByteArray, Long> premine = genesis.getPremine();
+        Map<ByteArray, Premine> premine = genesis.getPremines();
 
         assertFalse(premine.isEmpty());
-        for (Long balance : premine.values()) {
-            assertTrue(balance > 0);
+        for (Premine p : premine.values()) {
+            assertTrue(p.getAmount() > 0);
         }
     }
 

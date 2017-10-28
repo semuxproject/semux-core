@@ -8,11 +8,14 @@ package org.semux.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Config;
+import org.semux.core.Genesis.Premine;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.AccountStateImpl;
 import org.semux.core.state.DelegateState;
@@ -74,6 +77,8 @@ public class BlockchainImpl implements Blockchain {
 
     private List<BlockchainListener> listeners = new ArrayList<>();
 
+    private Map<Long, List<Premine>> periods = new HashMap<>();
+
     /**
      * Create a blockchain instance.
      * 
@@ -93,9 +98,18 @@ public class BlockchainImpl implements Blockchain {
             /*
              * Update account/delegate state for the genesis block
              */
-            for (Entry<ByteArray, Long> e : genesis.getPremine().entrySet()) {
-                Account acc = accountState.getAccount(e.getKey().getData());
-                acc.setBalance(e.getValue());
+            for (Entry<ByteArray, Premine> e : genesis.getPremines().entrySet()) {
+                Premine p = e.getValue();
+
+                Account acc = accountState.getAccount(p.getAddress());
+                acc.setBalance(p.getAmount());
+
+                for (int i = 1; i < p.getPeriods(); i++) {
+                    long blockNum = i * 365 * Config.DAY;
+                    periods.computeIfAbsent(blockNum, (k) -> {
+                        return new ArrayList<>();
+                    }).add(p);
+                }
             }
             for (Entry<String, byte[]> e : genesis.getDelegates().entrySet()) {
                 delegateState.register(e.getValue(), Bytes.of(e.getKey()), 0);
@@ -118,7 +132,7 @@ public class BlockchainImpl implements Blockchain {
     }
 
     @Override
-    public DelegateState getDeleteState() {
+    public DelegateState getDelegateState() {
         return delegateState;
     }
 
@@ -234,6 +248,15 @@ public class BlockchainImpl implements Blockchain {
             throw new RuntimeException("Blocks can only be added sequentially");
         }
 
+        if (periods.containsKey(number)) {
+            AccountState as = getAccountState();
+            for (Premine p : periods.get(number)) {
+                Account a = as.getAccount(p.getAddress());
+                a.setBalance(a.getBalance() + p.getAmount());
+            }
+            as.commit();
+        }
+
         List<Pair<Integer, Integer>> txIndices = block.getTransacitonIndexes();
         byte[] bytes = block.toBytes();
 
@@ -263,15 +286,14 @@ public class BlockchainImpl implements Blockchain {
         }
 
         // [4] coinbase transaction
-        Transaction tx = new Transaction(TransactionType.COINBASE, Bytes.EMPTY_ADDRESS, block.getCoinbase(), reward,
-                Config.MIN_TRANSACTION_FEE_HARD, block.getNumber(), block.getTimestamp(), Bytes.EMPY_BYTES);
-        tx.sign(new EdDSA()); // signed by random account
+        Transaction tx = new Transaction(TransactionType.COINBASE, Bytes.EMPTY_ADDRESS, block.getCoinbase(), reward, 0,
+                block.getNumber(), block.getTimestamp(), Bytes.EMPY_BYTES).sign(new EdDSA());
         indexDB.put(tx.getHash(), tx.toBytes());
         addTransactionToAccount(tx, block.getCoinbase());
 
         // [5] update validator statistics
         List<String> validators = getValidators();
-        String primary = validators.get((int) ((number - 1) % validators.size()));
+        String primary = Config.getPrimaryValidator(validators, number, 0);
         updateValidatorStats(block.getCoinbase(), FORGED, 1);
         if (primary.equals(Hex.encode(block.getCoinbase()))) {
             updateValidatorStats(Hex.decode(primary), HIT, 1);

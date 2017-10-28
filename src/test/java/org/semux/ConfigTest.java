@@ -10,8 +10,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.semux.core.Unit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConfigTest {
+
+    private Logger logger = LoggerFactory.getLogger(ConfigTest.class);
 
     @Test
     public void testLoad() {
@@ -19,17 +24,28 @@ public class ConfigTest {
     }
 
     @Test
-    public void testNumberOfValidators() {
-        long step = 2 * 60 * 9;
+    public void testBlockReward() {
+        assertEquals(0, Config.getBlockReward(0));
+        assertEquals(0, Config.getBlockReward(Config.DAY * 30));
+        assertEquals(0, Config.getBlockReward(Config.DAY * 90));
+        assertEquals(5 * Unit.SEM, Config.getBlockReward(Config.DAY * 180));
+        assertEquals(5 * Unit.SEM, Config.getBlockReward(Config.DAY * 360));
+        assertEquals(5 * Unit.SEM, Config.getBlockReward(Config.DAY * 720));
+        assertEquals(0, Config.getBlockReward(Config.DAY * 365 * 15));
+    }
 
-        assertEquals(20, Config.getNumberOfValidators(0));
-        assertEquals(20, Config.getNumberOfValidators(1));
-        assertEquals(21, Config.getNumberOfValidators(step));
-        assertEquals(22, Config.getNumberOfValidators(2 * step));
-        assertEquals(70, Config.getNumberOfValidators(50 * step));
-        assertEquals(99, Config.getNumberOfValidators(80 * step - 1));
-        assertEquals(100, Config.getNumberOfValidators(80 * step));
-        assertEquals(100, Config.getNumberOfValidators(100 * step));
-        assertEquals(100, Config.getNumberOfValidators(Long.MAX_VALUE));
+    @Test
+    public void testNumberOfValidators() {
+        int last = 0;
+        for (int i = 0; i < 60 * Config.DAY; i++) {
+            int n = Config.getNumberOfValidators(i);
+            if (n != last) {
+                assertTrue(n > last);
+                logger.info("block = {}, validators = {}", i, n);
+                last = n;
+            }
+        }
+
+        assertEquals(64, last);
     }
 }

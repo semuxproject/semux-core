@@ -44,7 +44,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
         public Item(Account a, int idx) {
             this.account = a;
-            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + MessagesUtil.get("AccountNumShort") + idx
+            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + MessagesUtil.get("AccountNumShort", idx)
                     + ", " + SwingUtil.formatValue(account.getBalance());
         }
 
@@ -284,7 +284,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private void sendTransaction(PendingManager pendingMgr, Transaction tx) {
         if (pendingMgr.addTransactionSync(tx)) {
-            JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionSent"));
+            JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionSent", 30));
             clear();
         } else {
             JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFailed"));

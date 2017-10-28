@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.semux.core.Account;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Genesis.Premine;
 import org.semux.db.MemoryDB;
 import org.semux.utils.ByteArray;
 import org.semux.utils.Bytes;
@@ -26,11 +27,11 @@ public class AccountStateTest {
         Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
         AccountState state = chain.getAccountState();
 
-        Map<ByteArray, Long> premine = chain.getGenesis().getPremine();
+        Map<ByteArray, Premine> premine = chain.getGenesis().getPremines();
 
         for (ByteArray k : premine.keySet()) {
             Account acc = state.getAccount(k.getData());
-            assertEquals((long) premine.get(k), acc.getBalance());
+            assertEquals((long) premine.get(k).getAmount(), acc.getBalance());
         }
     }
 

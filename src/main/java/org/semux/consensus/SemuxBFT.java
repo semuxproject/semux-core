@@ -110,7 +110,7 @@ public class SemuxBFT implements Consensus {
         this.coinbase = coinbase;
 
         this.accountState = chain.getAccountState();
-        this.delegateState = chain.getDeleteState();
+        this.delegateState = chain.getDelegateState();
 
         this.timer = new Timer();
         this.broadcaster = new Broadcaster();
@@ -466,7 +466,7 @@ public class SemuxBFT implements Consensus {
                 && (p.getView() == view && proposal == null && state == State.PROPOSE // expecting a proposal
                         || p.getView() > view && state != State.COMMIT && state != State.FINALIZE) // larger view
                 && isFromValidator(p.getSignature()) //
-                && isPrimary(p.getView(), p.getSignature().getPublicKey())) {//
+                && isPrimary(p.getHeight(), p.getView(), pubKeyToPeerId(p.getSignature().getPublicKey()))) {//
 
             // check proof-of-unlock
             if (p.getView() != 0) {
@@ -640,29 +640,38 @@ public class SemuxBFT implements Consensus {
     }
 
     /**
+     * Converts a public key to peer id.
+     * 
+     * @param pubKey
+     * @return
+     */
+    protected String pubKeyToPeerId(byte[] pubKey) {
+        return Hex.encode(Hash.h160(pubKey));
+    }
+
+    /**
      * Check if this node is the primary validator for this view.
      * 
      * @return
      */
     protected boolean isPrimary() {
-        return isPrimary(view, coinbase.getPublicKey());
+        return isPrimary(height, view, coinbase.toAddressString());
     }
 
     /**
      * Check if a node is the primary for the specified view.
      * 
      * 
+     * @param height
+     *            block number
      * @param view
      *            a specific view
      * @param pubKey
      *            public key
      * @return
      */
-    protected boolean isPrimary(int view, byte[] pubKey) {
-        String peerId = Hex.encode(Hash.h160(pubKey));
-        int n = (int) ((height - 1 + view) % validators.size());
-
-        return validators.get(n).equals(peerId);
+    protected boolean isPrimary(long height, int view, String peerId) {
+        return Config.getPrimaryValidator(validators, height, view).equals(peerId);
     }
 
     /**
@@ -779,7 +788,7 @@ public class SemuxBFT implements Consensus {
         }
 
         AccountState as = chain.getAccountState().track();
-        DelegateState ds = chain.getDeleteState().track();
+        DelegateState ds = chain.getDelegateState().track();
 
         // [1] execute all transactions
         TransactionExecutor exec = new TransactionExecutor();
@@ -811,7 +820,7 @@ public class SemuxBFT implements Consensus {
         try {
             // [4] flush state to disk
             chain.getAccountState().commit();
-            chain.getDeleteState().commit();
+            chain.getDelegateState().commit();
 
             // [5] add block to chain
             chain.addBlock(block);

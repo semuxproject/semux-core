@@ -6,10 +6,12 @@
  */
 package org.semux.consensus;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -30,15 +32,20 @@ import org.semux.db.MemoryDB;
 import org.semux.net.ChannelManager;
 import org.semux.utils.ByteArray;
 import org.semux.utils.MerkleUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SemuxBFTTest {
 
+    private static Logger logger = LoggerFactory.getLogger(SemuxBFTTest.class);
+
+    private static Blockchain chain;
     private static SemuxBFT bft;
     private static EdDSA coinbase;
 
     @BeforeClass
     public static void setup() throws InterruptedException {
-        Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
+        chain = new BlockchainImpl(MemoryDB.FACTORY);
         ChannelManager channelMgr = new ChannelManager();
         PendingManager pendingMgr = new PendingManager(chain, channelMgr);
 
@@ -100,6 +107,29 @@ public class SemuxBFTTest {
             assertTrue(addr.equals(ByteArray.of(key1.toAddress())) || addr.equals(ByteArray.of(key2.toAddress())));
             assertTrue(EdDSA.verify(vote.getEncoded(), sig));
         }
+    }
+
+    @Test
+    public void testIsPrimary() {
+        List<String> validators = chain.getValidators();
+        int blocks = 1000;
+        int repeat = 0;
+        int last = -1;
+
+        Random r = new Random(System.nanoTime());
+        for (int i = 0; i < blocks; i++) {
+            int view = r.nextInt(2);
+            for (int j = 0; j < validators.size(); j++) {
+                if (bft.isPrimary(i, view, validators.get(j))) {
+                    if (j == last) {
+                        repeat++;
+                    }
+                    last = j;
+                }
+            }
+        }
+        logger.info("consecutive validator probability: {}/{}", repeat, blocks);
+        assertEquals(1.0 / validators.size(), (double) repeat / blocks, 0.05);
     }
 
     @AfterClass
