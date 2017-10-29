@@ -297,12 +297,12 @@ public class Config {
     /**
      * The duration of NEW_HEIGHT state. This allows validators to catch up.
      */
-    public static int BFT_NEW_HEIGHT_TIMEOUT = 2000;
+    public static int BFT_NEW_HEIGHT_TIMEOUT = 3000;
 
     /**
      * The duration of PREPROSE state.
      */
-    public static int BFT_PROPOSE_TIMEOUT = 8000;
+    public static int BFT_PROPOSE_TIMEOUT = 9000;
 
     /**
      * The duration of VALIDATE state.
@@ -312,7 +312,7 @@ public class Config {
     /**
      * The duration of PRE_COMMIT state.
      */
-    public static int BFT_PRE_COMMIT_TIMEOUT = 8000;
+    public static int BFT_PRE_COMMIT_TIMEOUT = 6000;
 
     /**
      * The duration of COMMIT state. May be skipped after +2/3 commit votes.
@@ -376,8 +376,8 @@ public class Config {
 
         if (number <= zero) {
             return 0;
-        } else if (number <= zero + 14_000_000) {
-            return 5 * Unit.SEM;
+        } else if (number <= zero + 35_000_000) {
+            return 2 * Unit.SEM;
         } else {
             return 0;
         }

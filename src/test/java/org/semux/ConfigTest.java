@@ -28,10 +28,10 @@ public class ConfigTest {
         assertEquals(0, Config.getBlockReward(0));
         assertEquals(0, Config.getBlockReward(Config.DAY * 30));
         assertEquals(0, Config.getBlockReward(Config.DAY * 90));
-        assertEquals(5 * Unit.SEM, Config.getBlockReward(Config.DAY * 180));
-        assertEquals(5 * Unit.SEM, Config.getBlockReward(Config.DAY * 360));
-        assertEquals(5 * Unit.SEM, Config.getBlockReward(Config.DAY * 720));
-        assertEquals(0, Config.getBlockReward(Config.DAY * 365 * 15));
+        assertEquals(2 * Unit.SEM, Config.getBlockReward(Config.DAY * 180));
+        assertEquals(2 * Unit.SEM, Config.getBlockReward(Config.DAY * 360));
+        assertEquals(2 * Unit.SEM, Config.getBlockReward(Config.DAY * 720));
+        assertEquals(0, Config.getBlockReward(Config.DAY * 365 * 35));
     }
 
     @Test
