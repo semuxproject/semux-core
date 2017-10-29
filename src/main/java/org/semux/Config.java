@@ -92,6 +92,9 @@ public class Config {
                 case "api.port":
                     API_LISTEN_PORT = Integer.parseInt(props.getProperty(name));
                     break;
+                case "api.key":
+                    API_KEY = props.getProperty(name);
+                    break;
                 default:
                     logger.error("Unsupported option: {} = {}", name, props.getProperty(name));
                     break;
@@ -289,6 +292,11 @@ public class Config {
      * API listening port.
      */
     public static int API_LISTEN_PORT = 5171;
+
+    /**
+     * API access key.
+     */
+    public static String API_KEY = "";
 
     // =========================
     // BFT consensus
