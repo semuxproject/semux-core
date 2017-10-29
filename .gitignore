@@ -24,6 +24,10 @@ dist/
 .idea
 semux.iml
 
+# IDEA generated files
+.idea
+*.iml
+
 # OSX generated files
 .DS_Store
 
