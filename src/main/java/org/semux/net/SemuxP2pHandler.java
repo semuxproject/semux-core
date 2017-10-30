@@ -162,8 +162,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
                 error = ReasonCode.BAD_PROTOCOL;
             } else if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isActivePeer(peer.getPeerId())) {
                 error = ReasonCode.DUPLICATE_PEER_ID;
-            } else if (chain.getValidators().contains(peer.getPeerId()) // is validator
-                    && channelMgr.isActiveIP(channel.getRemoteIp()) // connected
+            } else if (channelMgr.isActiveIP(channel.getRemoteIp()) // connected
                     && Config.isMainNet()) { // main net
                 error = ReasonCode.BAD_PEER;
             } else if (!helloMsg.isValid()) {
