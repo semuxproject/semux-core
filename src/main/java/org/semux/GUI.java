@@ -8,7 +8,6 @@ package org.semux;
 
 import java.awt.EventQueue;
 import java.io.File;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,15 +36,10 @@ import org.semux.gui.WelcomeFrame;
 import org.semux.gui.dialog.InputDialog;
 import org.semux.gui.dialog.SelectDialog;
 import org.semux.net.Peer;
+import org.semux.utils.DnsUtil;
 import org.semux.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xbill.DNS.Lookup;
-import org.xbill.DNS.Record;
-import org.xbill.DNS.SimpleResolver;
-import org.xbill.DNS.TXTRecord;
-import org.xbill.DNS.TextParseException;
-import org.xbill.DNS.Type;
 
 /**
  * Graphic user interface.
@@ -184,27 +178,15 @@ public class GUI {
                 try {
                     Thread.sleep(5 * 60 * 1000);
 
-                    String domain = "version.semux.org";
-                    Lookup lookup = new Lookup(domain, Type.TXT);
-                    lookup.setResolver(new SimpleResolver());
-                    lookup.setCache(null);
-                    Record[] records = lookup.run();
+                    String hostname = "version.semux.org";
+                    List<String> version = DnsUtil.queryTxt(hostname);
 
-                    if (lookup.getResult() == Lookup.SUCCESSFUL) {
-                        for (Record record : records) {
-                            TXTRecord txt = (TXTRecord) record;
-                            for (Object str : txt.getStrings()) {
-                                String version = str.toString();
-
-                                if (SystemUtil.compareVersion(Config.CLIENT_VERSION, version) < 0) {
-                                    JOptionPane.showMessageDialog(null, MessagesUtil.get("WalletNeedToBeUpgraded"));
-                                    System.exit(-1);
-                                }
-                            }
+                    for (String v : version) {
+                        if (SystemUtil.compareVersion(Config.CLIENT_VERSION, v) < 0) {
+                            JOptionPane.showMessageDialog(null, MessagesUtil.get("WalletNeedToBeUpgraded"));
+                            System.exit(-1);
                         }
                     }
-                } catch (TextParseException | UnknownHostException e) {
-                    logger.debug("Failed to get min client version");
                 } catch (InterruptedException e) {
                     break;
                 }
