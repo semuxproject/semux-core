@@ -240,6 +240,8 @@ public class SendPanel extends JPanel implements ActionListener {
 
                 if (acc == null) {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
+                } else if (value == 0L) {
+                    JOptionPane.showMessageDialog(this, MessagesUtil.get("CantSendZero"));
                 } else if (fee < Config.MIN_TRANSACTION_FEE_SOFT) {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFeeTooLow"));
                 } else if (value + fee > acc.getBalance()) {
