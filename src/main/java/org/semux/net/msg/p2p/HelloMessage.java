@@ -7,7 +7,6 @@
 package org.semux.net.msg.p2p;
 
 import org.bouncycastle.util.Arrays;
-import org.semux.Config;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.net.Peer;
@@ -66,17 +65,27 @@ public class HelloMessage extends Message {
     }
 
     /**
-     * Check if this message is valid at the time when this method is called.
      * 
-     * @return
+     * Validates this HELLO message.
+     * 
+     * <p>
+     * NOTE: only data format and signature is checked here.
+     * </p>
+     * 
+     * @return true if valid, otherwise false
      */
-    public boolean isValid() {
-        return Math.abs(System.currentTimeMillis() - timestamp) <= Config.NET_HANDSHAKE_EXPIRE
+    public boolean validate() {
+        return peer != null //
+                && timestamp > 0//
                 && EdDSA.verify(dataToSign, signature);
     }
 
     public Peer getPeer() {
         return peer;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 
     @Override

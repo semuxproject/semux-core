@@ -165,7 +165,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             } else if (channelMgr.isActiveIP(channel.getRemoteIp()) // connected
                     && Config.isMainNet()) { // main net
                 error = ReasonCode.BAD_PEER;
-            } else if (!helloMsg.isValid()) {
+            } else if (!isValid(helloMsg)) {
                 error = ReasonCode.INVALID_HANDSHAKE;
             }
 
@@ -270,6 +270,19 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             break;
         }
         }
+    }
+
+    /**
+     * Checks if a HELLO message is valid.
+     * 
+     * @return
+     */
+    private boolean isValid(HelloMessage msg) {
+        long now = System.currentTimeMillis();
+
+        return msg.validate() //
+                && Math.abs(now - msg.getTimestamp()) <= Config.NET_HANDSHAKE_EXPIRE
+                && channel.getRemoteIp().equals(msg.getPeer().getIp());
     }
 
     /**

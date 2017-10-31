@@ -13,15 +13,15 @@ public class HelloMessageTest {
     @Test
     public void TestIsValid() {
         EdDSA key = new EdDSA();
-        Peer peer = new Peer("127.0.0.1", 5161, Config.P2P_VERSION, Config.getClientId(false), key.toAddressString(),
-                2);
+        String peerId = key.toAddressString();
+        Peer peer = new Peer("127.0.0.1", 5161, Config.P2P_VERSION, Config.getClientId(false), peerId, 2);
 
         HelloMessage msg = new HelloMessage(peer, key);
-        assertTrue(msg.isValid());
+        assertTrue(msg.validate());
         assertEquals(key.toAddressString(), msg.getPeer().getPeerId());
 
         msg = new HelloMessage(msg.getEncoded());
-        assertTrue(msg.isValid());
+        assertTrue(msg.validate());
         assertEquals(key.toAddressString(), msg.getPeer().getPeerId());
     }
 }
