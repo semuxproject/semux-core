@@ -281,8 +281,8 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         long now = System.currentTimeMillis();
 
         return msg.validate() //
-                && Math.abs(now - msg.getTimestamp()) <= Config.NET_HANDSHAKE_EXPIRE
-                && channel.getRemoteIp().equals(msg.getPeer().getIp());
+                && Math.abs(now - msg.getTimestamp()) <= Config.NET_HANDSHAKE_EXPIRE //
+                && (Config.isDevNet() || channel.getRemoteIp().equals(msg.getPeer().getIp()));
     }
 
     /**
