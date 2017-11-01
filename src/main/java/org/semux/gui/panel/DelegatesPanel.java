@@ -499,24 +499,26 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         }
     }
 
-    /*
+    /**
      * updates textVote with the highest possible amount of SEM for this account
      */
     private void refreshMaxVotes() {
-        if (null != getSelectedAccount()) {
-            Long voteable = ((getSelectedAccount().getBalance() - Config.MIN_TRANSACTION_FEE_SOFT) / Unit.SEM);
-            textVote.setText(voteable > 1 ? SwingUtil.formatVote(voteable) : "");
+        long voteable = 0L;
+        if (getSelectedDelegate() != null && getSelectedAccount() != null) {
+            voteable = getSelectedAccount().getBalance() - 2 * Config.MIN_TRANSACTION_FEE_SOFT;
         }
+        textVote.setText(voteable >= Unit.SEM ? SwingUtil.formatVote(voteable) : "");
     }
 
-    /*
+    /**
      * updates textUnvote with the amount of votes already voted for this delegate
      */
     private void refreshMaxUnvotes() {
+        long vote = 0L;
         if (getSelectedDelegate() != null && getSelectedAccount() != null) {
-            Long votes = Kernel.getInstance().getBlockchain().getDelegateState().getVote(getSelectedAccount().getKey().toAddress(), getSelectedDelegate().getAddress());
-            textUnvote.setText(votes > 0 ? SwingUtil.formatVote(votes) : "");
+            vote = Kernel.getInstance().getBlockchain().getDelegateState().getVote(getSelectedAccount().getKey().toAddress(), getSelectedDelegate().getAddress());
         }
+        textUnvote.setText(vote >= Unit.SEM ? SwingUtil.formatVote(vote) : "");
     }
 
     private void clear() {
