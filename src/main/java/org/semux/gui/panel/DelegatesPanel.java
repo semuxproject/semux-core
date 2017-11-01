@@ -36,6 +36,7 @@ import org.semux.core.Delegate;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
+import org.semux.core.Unit;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
@@ -100,6 +101,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 JTable table = (JTable) me.getSource();
                 Point p = me.getPoint();
                 int row = table.rowAtPoint(p);
+                refreshMaxUnvotes();
                 if (me.getClickCount() == 2) {
                     Delegate d = tableModel.getRow(table.convertRowIndexToModel(row));
                     if (d != null) {
@@ -322,10 +324,14 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         case REFRESH: {
             refreshAccounts();
             refreshDelegates();
+            refreshMaxVotes();
+            refreshMaxUnvotes();
             break;
         }
         case SELECT_ACCOUNT: {
             refreshDelegates();
+            refreshMaxVotes();
+            refreshMaxUnvotes();
             break;
         }
         case VOTE:
@@ -493,9 +499,30 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         }
     }
 
+    /*
+     * updates textVote with the highest possible amount of SEM for this account
+     */
+    private void refreshMaxVotes() {
+        if (null != getSelectedAccount()) {
+            Long voteable = ((getSelectedAccount().getBalance() - Config.MIN_TRANSACTION_FEE_SOFT) / Unit.SEM);
+            textVote.setText(voteable > 1 ? SwingUtil.formatVote(voteable) : "");
+        }
+    }
+
+    /*
+     * updates textUnvote with the amount of votes already voted for this delegate
+     */
+    private void refreshMaxUnvotes() {
+        if (getSelectedDelegate() != null && getSelectedAccount() != null) {
+            Long votes = Kernel.getInstance().getBlockchain().getDelegateState().getVote(getSelectedAccount().getKey().toAddress(), getSelectedDelegate().getAddress());
+            textUnvote.setText(votes > 0 ? SwingUtil.formatVote(votes) : "");
+        }
+    }
+
     private void clear() {
         textVote.setText("");
         textUnvote.setText("");
         textName.setText("");
     }
+
 }
