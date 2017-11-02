@@ -8,7 +8,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -66,7 +68,11 @@ public class APIHandlerTest {
 
     private static JSONObject request(String uri) throws IOException {
         URL u = new URL("http://127.0.0.1:" + Config.API_LISTEN_PORT + uri);
-        try (Scanner s = new Scanner(u.openStream())) {
+        HttpURLConnection con = (HttpURLConnection) u.openConnection();
+        con.setRequestProperty("Authorization", "Basic "
+                + Base64.getEncoder().encodeToString(Bytes.of(Config.API_USERNAME + ":" + Config.API_PASSWORD)));
+
+        try (Scanner s = new Scanner(con.getInputStream())) {
             return new JSONObject(s.nextLine());
         }
     }
@@ -313,8 +319,7 @@ public class APIHandlerTest {
     @Test
     public void testTransfer() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
-        String uri = "/transfer?password=" + password + "&from=0&to=" + key.toAddressString()
-                + "&value=1000000000&fee=5000000&data=test";
+        String uri = "/transfer?&from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -329,8 +334,7 @@ public class APIHandlerTest {
 
     @Test
     public void testDelegate() throws IOException, InterruptedException {
-        String uri = "/delegate?password=" + password + "&from=0&fee=5000000&data="
-                + Hex.encode(Bytes.of("test_delegate"));
+        String uri = "/delegate?&from=0&fee=5000000&data=" + Hex.encode(Bytes.of("test_delegate"));
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -348,8 +352,7 @@ public class APIHandlerTest {
         EdDSA key = new EdDSA();
         ds.register(key.toAddress(), Bytes.of("test_vote"));
 
-        String uri = "/vote?password=" + password + "&from=0&to=" + key.toAddressString()
-                + "&value=1000000000&fee=5000000";
+        String uri = "/vote?&from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -372,8 +375,7 @@ public class APIHandlerTest {
         as.getAccount(addr).setLocked(amount);
         ds.vote(wallet.getAccounts().get(0).toAddress(), key.toAddress(), amount);
 
-        String uri = "/unvote?password=" + password + "&from=0&to=" + key.toAddressString() + "&value=" + amount
-                + "&fee=5000000";
+        String uri = "/unvote?&from=0&to=" + key.toAddressString() + "&value=" + amount + "&fee=5000000";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));

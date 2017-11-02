@@ -11,10 +11,13 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.nio.charset.Charset;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.semux.Config;
+import org.semux.utils.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +35,7 @@ import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.QueryStringDecoder;
@@ -100,6 +104,14 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
 
                 // trailing headers are ignored
 
+                // basic authentication
+                if (!checkBaiscAuth(headers, Config.API_USERNAME, Config.API_PASSWORD)) {
+                    FullHttpResponse resp = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
+                    resp.headers().set(HttpHeaderNames.WWW_AUTHENTICATE, "BASIC realm=\"Semux RESTful API\"");
+                    ctx.write(resp);
+                    return;
+                }
+
                 // process uri
                 if (uri.contains("?")) {
                     uri = uri.substring(0, uri.indexOf('?'));
@@ -147,6 +159,20 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
         }
 
         error = "Bad request";
+    }
+
+    private boolean checkBaiscAuth(HttpHeaders headers, String username, String password) {
+        try {
+            String auth = headers.get("Authorization");
+            if (auth != null && auth.startsWith("Basic ")) {
+                String str = Bytes.toString(Base64.getDecoder().decode(auth.substring(6)));
+                int idx = str.indexOf(':');
+                return idx != -1 && str.substring(0, idx).equals(username) && str.substring(idx + 1).equals(password);
+            }
+        } catch (Exception e) {
+            // do nothing
+        }
+        return false;
     }
 
     private boolean writeResponse(ChannelHandlerContext ctx, String response) {

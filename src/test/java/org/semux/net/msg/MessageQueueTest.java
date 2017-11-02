@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.net.InetSocketAddress;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.semux.Config;
 import org.semux.core.Blockchain;
@@ -25,13 +25,13 @@ import org.semux.net.msg.p2p.PongMessage;
 
 public class MessageQueueTest {
 
-    private static PeerClient remoteClient;
-    private static InetSocketAddress remoteAddress;
+    private PeerClient remoteClient;
+    private InetSocketAddress remoteAddress;
 
-    private static PeerServerMock server;
+    private PeerServerMock server;
 
-    @BeforeClass
-    public static void setup() {
+    @Before
+    public void setup() {
         EdDSA key = new EdDSA();
         remoteClient = new PeerClient("127.0.0.1", 5161, key);
         remoteAddress = new InetSocketAddress(remoteClient.getIp(), remoteClient.getPort());
@@ -53,7 +53,9 @@ public class MessageQueueTest {
                 remoteAddress);
         client.connectAsync(remoteAddress, ci).sync();
 
-        Thread.sleep(1000);
+        while (channelMgr.getActiveChannels().isEmpty()) {
+            Thread.sleep(100);
+        }
         return channelMgr.getActiveChannels().get(0);
     }
 
@@ -96,8 +98,8 @@ public class MessageQueueTest {
         assertTrue(ch.isActive());
     }
 
-    @AfterClass
-    public static void teardown() {
+    @After
+    public void teardown() {
         server.stop();
     }
 }

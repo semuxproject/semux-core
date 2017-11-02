@@ -249,39 +249,24 @@ public class ApiHandlerImpl implements ApiHandler {
             }
 
             case LIST_ACCOUNTS: {
-                String result;
-                if ((result = checkPassword(params)) != null) {
-                    return result;
-                } else {
-                    List<EdDSA> accounts = wallet.getAccounts();
-                    JSONArray arr = new JSONArray();
-                    for (EdDSA acc : accounts) {
-                        arr.put(Hex.PREF + acc.toAddressString());
-                    }
-                    return success(arr);
+                List<EdDSA> accounts = wallet.getAccounts();
+                JSONArray arr = new JSONArray();
+                for (EdDSA acc : accounts) {
+                    arr.put(Hex.PREF + acc.toAddressString());
                 }
+                return success(arr);
             }
             case CREATE_ACCOUNT: {
-                String result;
-                if ((result = checkPassword(params)) != null) {
-                    return result;
-                } else {
-                    EdDSA key = new EdDSA();
-                    wallet.addAccount(key);
-                    wallet.flush();
-                    return success(Hex.PREF + key.toAddressString());
-                }
+                EdDSA key = new EdDSA();
+                wallet.addAccount(key);
+                wallet.flush();
+                return success(Hex.PREF + key.toAddressString());
             }
             case TRANSFER:
             case DELEGATE:
             case VOTE:
             case UNVOTE:
-                String result;
-                if ((result = checkPassword(params)) != null) {
-                    return result;
-                } else {
-                    return doTransaction(cmd, params);
-                }
+                return doTransaction(cmd, params);
             }
         } catch (Exception e) {
             return failure("Internal error: " + e.getMessage());
@@ -511,15 +496,5 @@ public class ApiHandlerImpl implements ApiHandler {
             obj.put("message", msg);
         }
         return obj.toString();
-    }
-
-    private String checkPassword(Map<String, String> params) {
-        if (!wallet.unlocked()) {
-            return failure("Wallet is locked");
-        } else if (!wallet.getPassword().equals(params.get("password"))) {
-            return failure("Invalid password");
-        }
-
-        return null;
     }
 }

@@ -92,8 +92,11 @@ public class Config {
                 case "api.port":
                     API_LISTEN_PORT = Integer.parseInt(props.getProperty(name));
                     break;
-                case "api.key":
-                    API_KEY = props.getProperty(name);
+                case "api.username":
+                    API_USERNAME = props.getProperty(name);
+                    break;
+                case "api.password":
+                    API_PASSWORD = props.getProperty(name);
                     break;
                 default:
                     logger.error("Unsupported option: {} = {}", name, props.getProperty(name));
@@ -294,9 +297,14 @@ public class Config {
     public static int API_LISTEN_PORT = 5171;
 
     /**
-     * API access key.
+     * API basic authentication username.
      */
-    public static String API_KEY = "";
+    public static String API_USERNAME = "";
+
+    /**
+     * API basic authentication password.
+     */
+    public static String API_PASSWORD = "";
 
     // =========================
     // BFT consensus

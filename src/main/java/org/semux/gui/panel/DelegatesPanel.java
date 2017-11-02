@@ -516,7 +516,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private void refreshMaxUnvotes() {
         long vote = 0L;
         if (getSelectedDelegate() != null && getSelectedAccount() != null) {
-            vote = Kernel.getInstance().getBlockchain().getDelegateState().getVote(getSelectedAccount().getKey().toAddress(), getSelectedDelegate().getAddress());
+            vote = Kernel.getInstance().getBlockchain().getDelegateState()
+                    .getVote(getSelectedAccount().getKey().toAddress(), getSelectedDelegate().getAddress());
         }
         textUnvote.setText(vote >= Unit.SEM ? SwingUtil.formatVote(vote) : "");
     }
