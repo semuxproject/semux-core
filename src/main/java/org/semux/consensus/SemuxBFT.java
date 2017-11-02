@@ -410,10 +410,10 @@ public class SemuxBFT implements Consensus {
         }
     }
 
-    protected void jumpToView(int view, Proof proof) {
+    protected void jumpToView(int view, Proof proof, Proposal proposal) {
         this.view = view;
         this.proof = proof;
-        this.proposal = null;
+        this.proposal = proposal;
         resetVotes();
         resetTimerAndEvents();
 
@@ -455,7 +455,7 @@ public class SemuxBFT implements Consensus {
 
             // switch view
             logger.debug("Switching view because of NEW_VIEW message");
-            jumpToView(p.getView(), p);
+            jumpToView(p.getView(), p, null);
         }
     }
 
@@ -463,7 +463,7 @@ public class SemuxBFT implements Consensus {
         logger.trace("On proposal: {}", p);
 
         if (p.getHeight() == height // at the same height
-                && (p.getView() == view && proposal == null && state == State.PROPOSE // expecting a proposal
+                && (p.getView() == view && proposal == null && (state == State.NEW_HEIGHT || state == State.PROPOSE) // expecting a proposal
                         || p.getView() > view && state != State.COMMIT && state != State.FINALIZE) // larger view
                 && isFromValidator(p.getSignature()) //
                 && isPrimary(p.getHeight(), p.getView(), pubKeyToPeerId(p.getSignature().getPublicKey()))) {//
@@ -489,7 +489,7 @@ public class SemuxBFT implements Consensus {
             } else {
                 // switch view
                 logger.debug("Switching view because of PROPOSE message");
-                jumpToView(p.getView(), p.getProof());
+                jumpToView(p.getView(), p.getProof(), p);
             }
         }
     }
