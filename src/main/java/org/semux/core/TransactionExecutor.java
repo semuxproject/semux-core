@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.semux.Config;
+import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.utils.Bytes;
@@ -52,62 +53,63 @@ public class TransactionExecutor {
             results.add(result);
 
             byte[] from = tx.getFrom();
-            Account fromAcc = as.getAccount(from);
             byte[] to = tx.getTo();
-            Account toAcc = as.getAccount(to);
             long value = tx.getValue();
             long nonce = tx.getNonce();
             long fee = tx.getFee();
             byte[] data = tx.getData();
 
+            Account acc = as.getAccount(from);
+            long available = acc.getAvailable();
+            long locked = acc.getLocked();
+
             // check nonce
-            if (nonce != fromAcc.getNonce()) {
+            if (nonce != acc.getNonce()) {
                 continue;
             }
 
-            long balance = fromAcc.getAvailable();
             switch (tx.getType()) {
             case TRANSFER: {
-                if (fee <= balance && value <= balance && value + fee <= balance) {
-                    // transfer balance
-                    fromAcc.setAvailable(fromAcc.getAvailable() - value - fee);
-                    toAcc.setAvailable(toAcc.getAvailable() + value);
+                if (fee <= available && value <= available && value + fee <= available) {
+
+                    as.adjustAvailable(from, -value - fee);
+                    as.adjustAvailable(to, value);
 
                     result.setValid(true);
                 }
                 break;
             }
             case DELEGATE: {
-                if (fee <= balance && value <= balance && value + fee <= balance //
+                if (fee <= available && value <= available && value + fee <= available //
                         && Arrays.equals(from, to) //
                         && value >= Config.DELEGATE_BURN_AMOUNT //
                         && data.length <= 16 && Bytes.toString(data).matches("[_a-z0-9]{4,16}") //
                         && ds.register(to, data)) {
-                    // register delegate
-                    fromAcc.setAvailable(fromAcc.getAvailable() - value - fee);
+
+                    as.adjustAvailable(from, -value - fee);
 
                     result.setValid(true);
                 }
                 break;
             }
             case VOTE: {
-                if (fee <= balance && value <= balance && value + fee <= balance //
+                if (fee <= available && value <= available && value + fee <= available //
                         && ds.vote(from, to, value)) {
-                    // lock balance
-                    fromAcc.setAvailable(fromAcc.getAvailable() - value - fee);
-                    fromAcc.setLocked(fromAcc.getLocked() + value);
+
+                    as.adjustAvailable(from, -value - fee);
+                    as.adjustLocked(from, value);
 
                     result.setValid(true);
                 }
                 break;
             }
             case UNVOTE: {
-                if (fee <= balance //
-                        && value <= fromAcc.getLocked() //
+                if (fee <= available //
+                        && value <= locked //
                         && ds.unvote(from, to, value)) {
-                    // unlock balance
-                    fromAcc.setAvailable(fromAcc.getAvailable() + value - fee);
-                    fromAcc.setLocked(fromAcc.getLocked() - value);
+
+                    as.adjustAvailable(from, value - fee);
+                    as.adjustLocked(from, -value);
 
                     result.setValid(true);
                 }
@@ -120,7 +122,7 @@ public class TransactionExecutor {
 
             // increase nonce if valid
             if (result.isValid()) {
-                fromAcc.setNonce(nonce + 1);
+                as.increaseNonce(from);
             }
         }
 

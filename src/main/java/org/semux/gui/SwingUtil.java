@@ -38,9 +38,9 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.text.DefaultEditorKit;
 
 import org.semux.Kernel;
-import org.semux.core.Delegate;
 import org.semux.core.Transaction;
 import org.semux.core.Unit;
+import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.slf4j.Logger;

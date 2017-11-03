@@ -11,10 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.semux.core.Account;
 import org.semux.db.KVDB;
 import org.semux.utils.ByteArray;
-import org.semux.utils.Bytes;
 
 /**
  * Account state implementation.
@@ -22,23 +20,19 @@ import org.semux.utils.Bytes;
  * <pre>
  * account DB structure:
  * 
- * [address, 0] => [balance]
- * [address, 1] => [locked]
- * [address, 2] => [nonce]
- * [address, 3] => [code]
- * [address, 4, storage_key] = [storage_value]
+ * [address, 0] => [account_object]
+ * [address, 1] => [code+]
+ * [address, 2, storage_key] = [storage_value]
  * </pre>
  */
 public class AccountStateImpl implements AccountState {
 
-    private static byte BALANCE = 0;
-    private static byte LOCKED = 1;
-    private static byte NONCE = 2;
-    private static byte CODE = 3;
-    private static byte STORAGE = 4;
+    protected static byte TYPE_ACCOUNT = 0;
+    protected static byte TYPE_CODE = 1;
+    protected static byte TYPE_STORAGE = 2;
 
-    private KVDB accountDB;
-    private AccountStateImpl prev;
+    protected KVDB accountDB;
+    protected AccountStateImpl prev;
 
     /**
      * All updates, or deletes if the value is null.
@@ -65,110 +59,69 @@ public class AccountStateImpl implements AccountState {
 
     @Override
     public Account getAccount(byte[] addr) {
-        return new Account() {
-            private ByteArray keyBalance = getKey(addr, BALANCE);
-            private ByteArray keyLocked = getKey(addr, LOCKED);
-            private ByteArray keyNonce = getKey(addr, NONCE);
-            private ByteArray keyCode = getKey(addr, CODE);
+        ByteArray k = getKey(addr, TYPE_ACCOUNT);
 
-            private Account acc = (prev == null) ? null : prev.getAccount(addr);
+        if (updates.containsKey(k)) {
+            byte[] v = updates.get(k);
+            return v == null ? new Account(addr, 0, 0, 0) : Account.fromBytes(addr, v);
+        } else if (prev != null) {
+            return prev.getAccount(addr);
+        } else {
+            byte[] v = accountDB.get(k.getData());
+            return v == null ? new Account(addr, 0, 0, 0) : Account.fromBytes(addr, v);
+        }
+    }
 
-            @Override
-            public byte[] getAddress() {
-                return addr;
-            }
+    @Override
+    public void increaseNonce(byte[] addr) {
+        ByteArray k = getKey(addr, TYPE_ACCOUNT);
 
-            @Override
-            public long getAvailable() {
-                if (updates.containsKey(keyBalance)) {
-                    return Bytes.toLong(updates.get(keyBalance));
-                } else if (acc != null) {
-                    return acc.getAvailable();
-                } else {
-                    byte[] bytes = accountDB.get(keyBalance.getData());
-                    return bytes == null ? 0 : Bytes.toLong(bytes);
-                }
-            }
+        Account acc = getAccount(addr);
+        acc.setNonce(acc.getNonce() + 1);
+        updates.put(k, acc.toBytes());
+    }
 
-            @Override
-            public void setAvailable(long balance) {
-                updates.put(keyBalance, Bytes.of(balance));
-            }
+    @Override
+    public void adjustAvailable(byte[] addr, long delta) {
+        ByteArray k = getKey(addr, TYPE_ACCOUNT);
 
-            @Override
-            public long getLocked() {
-                if (updates.containsKey(keyLocked)) {
-                    return Bytes.toLong(updates.get(keyLocked));
-                } else if (acc != null) {
-                    return acc.getLocked();
-                } else {
-                    byte[] bytes = accountDB.get(keyLocked.getData());
-                    return bytes == null ? 0 : Bytes.toLong(bytes);
-                }
-            }
+        Account acc = getAccount(addr);
+        acc.setAvailable(acc.getAvailable() + delta);
+        updates.put(k, acc.toBytes());
+    }
 
-            @Override
-            public void setLocked(long locked) {
-                updates.put(keyLocked, Bytes.of(locked));
-            }
+    @Override
+    public void adjustLocked(byte[] addr, long delta) {
+        ByteArray k = getKey(addr, TYPE_ACCOUNT);
 
-            @Override
-            public long getNonce() {
-                if (updates.containsKey(keyNonce)) {
-                    return Bytes.toLong(updates.get(keyNonce));
-                } else if (acc != null) {
-                    return acc.getNonce();
-                } else {
-                    byte[] bytes = accountDB.get(keyNonce.getData());
-                    return bytes == null ? 0 : Bytes.toLong(bytes);
-                }
-            }
+        Account acc = getAccount(addr);
+        acc.setLocked(acc.getLocked() + delta);
+        updates.put(k, acc.toBytes());
+    }
 
-            @Override
-            public void setNonce(long nonce) {
-                updates.put(keyNonce, Bytes.of(nonce));
-            }
+    @Override
+    public void getCode(byte[] addr) {
+        throw new UnsupportedOperationException("getCode() is not yet supported");
+    }
 
-            @Override
-            public byte[] getCode() {
-                if (updates.containsKey(keyCode)) {
-                    return updates.get(keyCode);
-                } else if (acc != null) {
-                    return acc.getCode();
-                } else {
-                    return accountDB.get(keyCode.getData());
-                }
-            }
+    @Override
+    public void setCode(byte[] addr, byte[] code) {
+        throw new UnsupportedOperationException("setCode() is not yet supported");
+    }
 
-            @Override
-            public void setCode(byte[] code) {
-                updates.put(keyCode, code);
-            }
+    @Override
+    public byte[] getStorage(byte[] addr, byte[] key) {
+        throw new UnsupportedOperationException("getStorage() is not yet supported");
+    }
 
-            @Override
-            public byte[] getStorage(byte[] key) {
-                ByteArray k = getStorageKey(addr, key);
-                if (updates.containsKey(k)) {
-                    return updates.get(k);
-                } else if (acc != null) {
-                    return acc.getStorage(key);
-                } else {
-                    return accountDB.get(k.getData());
-                }
-            }
+    @Override
+    public void putStorage(byte[] addr, byte[] key, byte[] value) {
+        throw new UnsupportedOperationException("putStorage() is not yet supported");
+    }
 
-            @Override
-            public void putStorage(byte[] key, byte[] value) {
-                ByteArray k = getStorageKey(addr, key);
-                updates.put(k, value);
-            }
-
-            @Override
-            public void removeStorage(byte[] key) {
-                ByteArray k = getStorageKey(addr, key);
-                updates.put(k, null);
-            }
-        };
+    @Override
+    public void removeStorage(byte[] addr, byte[] key) {
+        throw new UnsupportedOperationException("removeStorage() is not yet yetsupported");
     }
 
     @Override
@@ -203,16 +156,16 @@ public class AccountStateImpl implements AccountState {
         updates.clear();
     }
 
-    private ByteArray getKey(byte[] addr, byte type) {
+    protected ByteArray getKey(byte[] addr, byte type) {
         byte[] k = Arrays.copyOf(addr, addr.length + 1);
         k[addr.length] = type;
 
         return ByteArray.of(k);
     }
 
-    private ByteArray getStorageKey(byte[] addr, byte[] key) {
+    protected ByteArray getStorageKey(byte[] addr, byte[] key) {
         byte[] k = Arrays.copyOf(addr, addr.length + 1 + key.length);
-        k[addr.length] = STORAGE;
+        k[addr.length] = TYPE_STORAGE;
         System.arraycopy(key, 0, k, addr.length + 1, key.length);
 
         return ByteArray.of(k);

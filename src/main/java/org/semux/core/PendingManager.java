@@ -286,8 +286,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         DelegateState ds = pendingDS.track();
         TransactionExecutor exec = new TransactionExecutor();
 
-        Account acc = as.getAccount(tx.getFrom());
-        long nonce = acc.getNonce();
+        long nonce = as.getAccount(tx.getFrom()).getNonce();
         int cnt = 0;
         while (tx != null && tx.getNonce() == nonce) {
             // execute transactions

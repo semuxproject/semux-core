@@ -367,7 +367,7 @@ public class APIHandlerTest {
 
         long amount = 1000000000;
         byte[] addr = wallet.getAccounts().get(0).toAddress();
-        as.getAccount(addr).setLocked(amount);
+        as.adjustLocked(addr, amount);
         ds.vote(wallet.getAccounts().get(0).toAddress(), key.toAddress(), amount);
 
         String uri = "/unvote?&from=0&to=" + key.toAddressString() + "&value=" + amount + "&fee=5000000";

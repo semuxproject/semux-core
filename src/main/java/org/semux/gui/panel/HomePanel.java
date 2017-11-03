@@ -27,7 +27,7 @@ import org.semux.core.TransactionType;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.Model;
-import org.semux.gui.Model.Account;
+import org.semux.gui.Model.WalletAccount;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.ByteArray;
 import org.semux.utils.UnreachableException;
@@ -220,7 +220,7 @@ public class HomePanel extends JPanel implements ActionListener {
         // federate all transactions
         Set<ByteArray> hashes = new HashSet<>();
         List<Transaction> list = new ArrayList<>();
-        for (Account acc : model.getAccounts()) {
+        for (WalletAccount acc : model.getAccounts()) {
             for (Transaction tx : acc.getTransactions()) {
                 ByteArray key = ByteArray.of(tx.getHash());
                 if ((tx.getType() == TransactionType.COINBASE || tx.getType() == TransactionType.TRANSFER)
@@ -236,7 +236,7 @@ public class HomePanel extends JPanel implements ActionListener {
         list = list.size() > 6 ? list.subList(0, 6) : list;
 
         Set<ByteArray> accounts = new HashSet<>();
-        for (Account a : model.getAccounts()) {
+        for (WalletAccount a : model.getAccounts()) {
             accounts.add(ByteArray.of(a.getKey().toAddress()));
         }
         transactions.removeAll();

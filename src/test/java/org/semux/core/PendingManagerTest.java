@@ -46,7 +46,7 @@ public class PendingManagerTest {
         channelMgr = new ChannelManager();
 
         accountState = chain.getAccountState();
-        accountState.getAccount(from).setAvailable(10000 * Unit.SEM);
+        accountState.adjustAvailable(from, 10000 * Unit.SEM);
     }
 
     @Before
@@ -142,7 +142,8 @@ public class PendingManagerTest {
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
                 stateRoot, data);
         Block block = new Block(header.sign(new EdDSA()), transactions, results);
-        chain.getAccountState().getAccount(from).setNonce(nonce + 2);
+        chain.getAccountState().increaseNonce(from);
+        chain.getAccountState().increaseNonce(from);
         pendingMgr.onBlockAdded(block);
 
         Transaction tx3 = new Transaction(type, from, to, value, fee, nonce + 2, now, Bytes.EMPY_BYTES).sign(key);

@@ -27,7 +27,7 @@ import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.Model;
-import org.semux.gui.Model.Account;
+import org.semux.gui.Model.WalletAccount;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.Bytes;
 import org.semux.utils.UnreachableException;
@@ -39,13 +39,13 @@ public class SendPanel extends JPanel implements ActionListener {
     private Model model;
 
     class Item {
-        Account account;
+        WalletAccount account;
         String name;
 
-        public Item(Account a, int idx) {
+        public Item(WalletAccount a, int idx) {
             this.account = a;
             this.name = Hex.PREF + account.getKey().toAddressString() + ", " + MessagesUtil.get("AccountNumShort", idx)
-                    + ", " + SwingUtil.formatValue(account.getBalance());
+                    + ", " + SwingUtil.formatValue(account.getAvailable());
         }
 
         @Override
@@ -232,7 +232,7 @@ public class SendPanel extends JPanel implements ActionListener {
             break;
         case SEND:
             try {
-                Account acc = getSelectedAccount();
+                WalletAccount acc = getSelectedAccount();
                 long value = getAmount();
                 long fee = getFee();
                 String memo = getMemo();
@@ -244,7 +244,7 @@ public class SendPanel extends JPanel implements ActionListener {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("CantSendZero"));
                 } else if (fee < Config.MIN_TRANSACTION_FEE_SOFT) {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFeeTooLow"));
-                } else if (value + fee > acc.getBalance()) {
+                } else if (value + fee > acc.getAvailable()) {
                     JOptionPane.showMessageDialog(this,
                             MessagesUtil.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
                 } else if (to.length != 20) {
@@ -293,13 +293,13 @@ public class SendPanel extends JPanel implements ActionListener {
         }
     }
 
-    private Account getSelectedAccount() {
+    private WalletAccount getSelectedAccount() {
         int idx = from.getSelectedIndex();
         return (idx == -1) ? null : model.getAccounts().get(idx);
     }
 
     private void refresh() {
-        List<Account> list = model.getAccounts();
+        List<WalletAccount> list = model.getAccounts();
 
         /*
          * update account list.

@@ -32,17 +32,17 @@ import javax.swing.table.TableRowSorter;
 import org.semux.Config;
 import org.semux.Kernel;
 import org.semux.core.Blockchain;
-import org.semux.core.Delegate;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
+import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.Model;
-import org.semux.gui.Model.Account;
+import org.semux.gui.Model.WalletAccount;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.DelegateDialog;
 import org.semux.utils.Bytes;
@@ -62,12 +62,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private DelegatesTableModel tableModel;
 
     class Item {
-        Account account;
+        WalletAccount account;
         String name;
 
-        public Item(Account a, int idx) {
+        public Item(WalletAccount a, int idx) {
             this.account = a;
-            this.name = MessagesUtil.get("AccountNumShort", idx) + ", " + SwingUtil.formatValue(account.getBalance());
+            this.name = MessagesUtil.get("AccountNumShort", idx) + ", " + SwingUtil.formatValue(account.getAvailable());
         }
 
         @Override
@@ -336,7 +336,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         }
         case VOTE:
         case UNVOTE: {
-            Account a = getSelectedAccount();
+            WalletAccount a = getSelectedAccount();
             Delegate d = getSelectedDelegate();
             String v = action.equals(Action.VOTE) ? textVote.getText() : textUnvote.getText();
             long value = 0;
@@ -372,13 +372,13 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             break;
         }
         case DELEGATE: {
-            Account a = getSelectedAccount();
+            WalletAccount a = getSelectedAccount();
             String name = textName.getText();
             if (a == null) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else if (!name.matches("[_a-z0-9]{4,16}")) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("AccountNameError"));
-            } else if (a.getBalance() < Config.DELEGATE_BURN_AMOUNT + Config.MIN_TRANSACTION_FEE_SOFT) {
+            } else if (a.getAvailable() < Config.DELEGATE_BURN_AMOUNT + Config.MIN_TRANSACTION_FEE_SOFT) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("InsufficientFunds",
                         SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT + Config.MIN_TRANSACTION_FEE_SOFT)));
             } else {
@@ -422,7 +422,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         }
     }
 
-    private Account getSelectedAccount() {
+    private WalletAccount getSelectedAccount() {
         int idx = from.getSelectedIndex();
         return (idx == -1) ? null : model.getAccounts().get(idx);
     }
@@ -433,7 +433,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     }
 
     private void refreshAccounts() {
-        List<Account> list = model.getAccounts();
+        List<WalletAccount> list = model.getAccounts();
 
         /*
          * update account list.
@@ -469,7 +469,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             return c != 0 ? c : new String(d1.getName()).compareTo(new String(d2.getName()));
         });
 
-        Account acc = getSelectedAccount();
+        WalletAccount acc = getSelectedAccount();
         if (acc != null) {
             byte[] voter = acc.getKey().toAddress();
             Blockchain chain = Kernel.getInstance().getBlockchain();
@@ -505,7 +505,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private void refreshMaxVotes() {
         long voteable = 0L;
         if (getSelectedDelegate() != null && getSelectedAccount() != null) {
-            voteable = getSelectedAccount().getBalance() - 2 * Config.MIN_TRANSACTION_FEE_SOFT;
+            voteable = getSelectedAccount().getAvailable() - 2 * Config.MIN_TRANSACTION_FEE_SOFT;
         }
         textVote.setText(voteable >= Unit.SEM ? SwingUtil.formatVote(voteable) : "");
     }

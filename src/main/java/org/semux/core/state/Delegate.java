@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.core;
+package org.semux.core.state;
 
 import java.util.Arrays;
 
@@ -59,7 +59,7 @@ public class Delegate {
         return votes;
     }
 
-    public void setVotes(long votes) {
+    void setVotes(long votes) {
         this.votes = votes;
     }
 
@@ -70,7 +70,6 @@ public class Delegate {
      */
     public byte[] toBytes() {
         SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBytes(address);
         enc.writeBytes(name);
         enc.writeLong(registeredAt);
         enc.writeLong(votes);
@@ -81,12 +80,12 @@ public class Delegate {
     /**
      * Parses a delegate from a byte array.
      * 
+     * @param address
      * @param bytes
      * @return
      */
-    public static Delegate fromBytes(byte[] bytes) {
+    public static Delegate fromBytes(byte[] address, byte[] bytes) {
         SimpleDecoder dec = new SimpleDecoder(bytes);
-        byte[] address = dec.readBytes();
         byte[] name = dec.readBytes();
         long registeredAt = dec.readLong();
         long votes = dec.readLong();

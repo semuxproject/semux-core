@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.semux.core.Block;
-import org.semux.core.Delegate;
 import org.semux.core.Transaction;
+import org.semux.core.state.Delegate;
 import org.semux.crypto.EdDSA;
 import org.semux.net.Peer;
 import org.semux.utils.ByteArray;
@@ -30,7 +30,7 @@ public class Model {
     private boolean isDelegate;
 
     private volatile Map<ByteArray, Integer> accountNo = new HashMap<>();
-    private volatile List<Account> accounts = new ArrayList<>();
+    private volatile List<WalletAccount> accounts = new ArrayList<>();
     private volatile List<Delegate> delegates = new ArrayList<>();
 
     private Map<String, Peer> activePeers = new HashMap<>();
@@ -67,9 +67,9 @@ public class Model {
      * @param keys
      */
     public void init(List<EdDSA> keys) {
-        List<Account> list = new ArrayList<>();
+        List<WalletAccount> list = new ArrayList<>();
         for (EdDSA key : keys) {
-            list.add(new Account(key));
+            list.add(new WalletAccount(key));
         }
         accounts = list;
     }
@@ -135,8 +135,8 @@ public class Model {
      */
     public long getTotalBalance() {
         long sum = 0;
-        for (Account acc : accounts) {
-            sum += acc.getBalance();
+        for (WalletAccount acc : accounts) {
+            sum += acc.getAvailable();
         }
         return sum;
     }
@@ -148,13 +148,13 @@ public class Model {
      */
     public long getTotalLocked() {
         long sum = 0;
-        for (Account acc : accounts) {
+        for (WalletAccount acc : accounts) {
             sum += acc.getLocked();
         }
         return sum;
     }
 
-    public List<Account> getAccounts() {
+    public List<WalletAccount> getAccounts() {
         return accounts;
     }
 
@@ -163,7 +163,7 @@ public class Model {
         return n == null ? -1 : n;
     }
 
-    public void setAccounts(List<Account> accounts) {
+    public void setAccounts(List<WalletAccount> accounts) {
         Map<ByteArray, Integer> map = new HashMap<>();
         for (int i = 0; i < accounts.size(); i++) {
             map.put(ByteArray.of(accounts.get(i).getKey().toAddress()), i);
@@ -188,14 +188,14 @@ public class Model {
         this.activePeers = activePeers;
     }
 
-    public static class Account {
+    public static class WalletAccount {
         private EdDSA key;
         private long nonce;
-        private long balance;
+        private long available;
         private long locked;
         private List<Transaction> transactions = new ArrayList<>();
 
-        public Account(EdDSA key) {
+        public WalletAccount(EdDSA key) {
             this.key = key;
         }
 
@@ -215,12 +215,12 @@ public class Model {
             this.nonce = nonce;
         }
 
-        public long getBalance() {
-            return balance;
+        public long getAvailable() {
+            return available;
         }
 
         public void setBalance(long balance) {
-            this.balance = balance;
+            this.available = balance;
         }
 
         public long getLocked() {

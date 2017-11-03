@@ -10,7 +10,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.semux.Kernel;
 import org.semux.core.Block;
-import org.semux.core.Delegate;
+import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;

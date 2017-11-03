@@ -20,7 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
-import org.semux.core.Delegate;
 import org.semux.core.Unit;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;

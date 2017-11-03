@@ -30,7 +30,7 @@ import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.Model;
-import org.semux.gui.Model.Account;
+import org.semux.gui.Model.WalletAccount;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.TransactionDialog;
 import org.semux.utils.ByteArray;
@@ -173,7 +173,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         List<Transaction> transactions = new ArrayList<>();
 
         Set<ByteArray> hashes = new HashSet<>();
-        for (Account acc : model.getAccounts()) {
+        for (WalletAccount acc : model.getAccounts()) {
             for (Transaction tx : acc.getTransactions()) {
                 ByteArray key = ByteArray.of(tx.getHash());
                 if (!hashes.contains(key)) {
@@ -188,7 +188,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         Map<String, Integer> accounts = new HashMap<>();
         int n = 0;
-        for (Account a : model.getAccounts()) {
+        for (WalletAccount a : model.getAccounts()) {
             accounts.put(Hex.encode(a.getKey().toAddress()), n++);
         }
 

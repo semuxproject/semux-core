@@ -34,7 +34,7 @@ import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.Model;
-import org.semux.gui.Model.Account;
+import org.semux.gui.Model.WalletAccount;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.UnreachableException;
 
@@ -132,18 +132,18 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
         private static final long serialVersionUID = 1L;
 
-        private List<Account> data;
+        private List<WalletAccount> data;
 
         public ReceiveTableModel() {
             this.data = Collections.emptyList();
         }
 
-        public void setData(List<Account> data) {
+        public void setData(List<WalletAccount> data) {
             this.data = data;
             this.fireTableDataChanged();
         }
 
-        public Account getRow(int row) {
+        public WalletAccount getRow(int row) {
             if (row >= 0 && row < data.size()) {
                 return data.get(row);
             }
@@ -168,7 +168,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
         @Override
         public Object getValueAt(int row, int column) {
-            Account acc = data.get(row);
+            WalletAccount acc = data.get(row);
 
             switch (column) {
             case 0:
@@ -176,7 +176,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             case 1:
                 return Hex.PREF + acc.getKey().toAddressString();
             case 2:
-                return SwingUtil.formatValue(acc.getBalance());
+                return SwingUtil.formatValue(acc.getAvailable());
             case 3:
                 return SwingUtil.formatValue(acc.getLocked());
             default:
@@ -195,7 +195,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             break;
         }
         case SELECT_ACCOUNT: {
-            Account acc = getSelectedAccount();
+            WalletAccount acc = getSelectedAccount();
             if (acc != null) {
                 BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getKey().toAddressString(), 200);
                 qr.setIcon(new ImageIcon(bi));
@@ -203,7 +203,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             break;
         }
         case COPY_ADDRESS: {
-            Account acc = getSelectedAccount();
+            WalletAccount acc = getSelectedAccount();
             if (acc == null) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else {
@@ -230,7 +230,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             break;
         }
         case DELETE_ACCOUNT: {
-            Account acc = getSelectedAccount();
+            WalletAccount acc = getSelectedAccount();
             if (acc == null) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else {
@@ -255,18 +255,18 @@ public class ReceivePanel extends JPanel implements ActionListener {
         }
     }
 
-    private Account getSelectedAccount() {
+    private WalletAccount getSelectedAccount() {
         int row = table.getSelectedRow();
         return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
     }
 
     private void refresh() {
-        List<Account> accounts = model.getAccounts();
+        List<WalletAccount> accounts = model.getAccounts();
 
         /*
          * update table model
          */
-        Account acc = getSelectedAccount();
+        WalletAccount acc = getSelectedAccount();
         tableModel.setData(accounts);
 
         if (acc != null) {

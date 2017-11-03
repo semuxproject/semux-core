@@ -20,11 +20,11 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import org.semux.core.Account;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.Transaction;
 import org.semux.core.Wallet;
+import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
@@ -205,7 +205,7 @@ public class GUI {
         model.init(wallet.getAccounts());
         model.setLatestBlock(block);
         model.setDelegate(ds.getDelegateByAddress(kernel.getCoinbase().toAddress()) != null);
-        for (Model.Account ma : model.getAccounts()) {
+        for (Model.WalletAccount ma : model.getAccounts()) {
             Account a = as.getAccount(ma.getKey().toAddress());
             ma.setNonce(a.getNonce());
             ma.setBalance(a.getAvailable());

@@ -14,6 +14,7 @@ import java.util.Random;
 
 import org.junit.Test;
 import org.semux.Config;
+import org.semux.core.state.Delegate;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
 import org.semux.utils.Bytes;

@@ -16,7 +16,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Config;
 import org.semux.consensus.SemuxBFT.Event.Type;
-import org.semux.core.Account;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -817,8 +816,7 @@ public class SemuxBFT implements Consensus {
             reward += tx.getFee();
         }
         if (reward > 0) {
-            Account acc = as.getAccount(block.getCoinbase());
-            acc.setAvailable(acc.getAvailable() + reward);
+            as.adjustAvailable(block.getCoinbase(), reward);
         }
 
         // [3] commit state change

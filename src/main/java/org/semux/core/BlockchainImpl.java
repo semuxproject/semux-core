@@ -18,6 +18,7 @@ import org.semux.Config;
 import org.semux.core.Genesis.Premine;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.AccountStateImpl;
+import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.core.state.DelegateStateImpl;
 import org.semux.crypto.EdDSA;
@@ -100,9 +101,7 @@ public class BlockchainImpl implements Blockchain {
              */
             for (Entry<ByteArray, Premine> e : genesis.getPremines().entrySet()) {
                 Premine p = e.getValue();
-
-                Account acc = accountState.getAccount(p.getAddress());
-                acc.setAvailable(p.getAmount());
+                accountState.adjustAvailable(p.getAddress(), p.getAmount());
 
                 for (int i = 1; i < p.getPeriods(); i++) {
                     long blockNum = i * 365 * Config.DAY;
@@ -251,8 +250,7 @@ public class BlockchainImpl implements Blockchain {
         if (periods.containsKey(number)) {
             AccountState as = getAccountState();
             for (Premine p : periods.get(number)) {
-                Account a = as.getAccount(p.getAddress());
-                a.setAvailable(a.getAvailable() + p.getAmount());
+                accountState.adjustAvailable(p.getAddress(), p.getAmount());
             }
             as.commit();
         }

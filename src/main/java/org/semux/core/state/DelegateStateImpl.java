@@ -15,7 +15,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.semux.core.Blockchain;
-import org.semux.core.Delegate;
 import org.semux.db.KVDB;
 import org.semux.utils.ByteArray;
 import org.semux.utils.Bytes;
@@ -41,12 +40,12 @@ import org.slf4j.LoggerFactory;
  */
 public class DelegateStateImpl implements DelegateState {
 
-    private static final Logger logger = LoggerFactory.getLogger(DelegateStateImpl.class);
+    protected static final Logger logger = LoggerFactory.getLogger(DelegateStateImpl.class);
 
-    private Blockchain chain;
-    private KVDB delegateDB;
-    private KVDB voteDB;
-    private DelegateStateImpl prev;
+    protected Blockchain chain;
+    protected KVDB delegateDB;
+    protected KVDB voteDB;
+    protected DelegateStateImpl prev;
 
     /**
      * Delegate updates
@@ -157,12 +156,12 @@ public class DelegateStateImpl implements DelegateState {
 
         if (delegateUpdates.containsKey(k)) {
             byte[] v = delegateUpdates.get(k);
-            return v == null ? null : Delegate.fromBytes(v);
+            return v == null ? null : Delegate.fromBytes(k.getData(), v);
         } else if (prev != null) {
             return prev.getDelegateByAddress(addr);
         } else {
             byte[] v = delegateDB.get(k.getData());
-            return v == null ? null : Delegate.fromBytes(v);
+            return v == null ? null : Delegate.fromBytes(k.getData(), v);
         }
     }
 
@@ -243,7 +242,7 @@ public class DelegateStateImpl implements DelegateState {
      * 
      * @param map
      */
-    private void getDelegates(Map<ByteArray, Delegate> map) {
+    protected void getDelegates(Map<ByteArray, Delegate> map) {
         for (ByteArray k : delegateUpdates.keySet()) {
             /* filter address */
             if (!map.containsKey(k)) {
@@ -252,7 +251,7 @@ public class DelegateStateImpl implements DelegateState {
                 if (v == null) {
                     map.put(k, null);
                 } else {
-                    map.put(k, Delegate.fromBytes(v));
+                    map.put(k, Delegate.fromBytes(k.getData(), v));
                 }
             }
         }
@@ -267,7 +266,7 @@ public class DelegateStateImpl implements DelegateState {
                 byte[] v = entry.getValue();
 
                 if (!map.containsKey(k)) {
-                    map.put(k, Delegate.fromBytes(v));
+                    map.put(k, Delegate.fromBytes(k.getData(), v));
                 }
             }
             itr.close();
@@ -282,7 +281,7 @@ public class DelegateStateImpl implements DelegateState {
      * @param v
      * @return
      */
-    private long getVote(ByteArray key) {
+    protected long getVote(ByteArray key) {
         if (voteUpdates.containsKey(key)) {
             byte[] bytes = voteUpdates.get(key);
             return (bytes == null) ? 0 : Bytes.toLong(bytes);

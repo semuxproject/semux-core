@@ -6,13 +6,11 @@
  */
 package org.semux.core.state;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Map;
 
 import org.junit.Test;
-import org.semux.core.Account;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis.Premine;
@@ -45,15 +43,10 @@ public class AccountStateTest {
         acc.setAvailable(1);
         acc.setLocked(2);
         acc.setNonce(3);
-        acc.setCode(Bytes.of("test"));
-        acc.putStorage(Bytes.of("key"), Bytes.of("value"));
-        state.commit();
 
-        Account acc2 = state.getAccount(addr);
+        Account acc2 = Account.fromBytes(addr, acc.toBytes());
         assertEquals(1L, acc2.getAvailable());
         assertEquals(2L, acc2.getLocked());
         assertEquals(3L, acc2.getNonce());
-        assertArrayEquals(Bytes.of("test"), acc2.getCode());
-        assertArrayEquals(Bytes.of("value"), acc2.getStorage(Bytes.of("key")));
     }
 }

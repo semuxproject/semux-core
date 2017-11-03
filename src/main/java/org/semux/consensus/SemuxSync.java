@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.semux.Config;
-import org.semux.core.Account;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.Sync;
@@ -373,8 +372,7 @@ public class SemuxSync implements Sync {
                 reward += tx.getFee();
             }
             if (reward > 0) {
-                Account acc = as.getAccount(block.getCoinbase());
-                acc.setAvailable(acc.getAvailable() + reward);
+                as.adjustAvailable(block.getCoinbase(), reward);
             }
 
             // [6] commit the updates
