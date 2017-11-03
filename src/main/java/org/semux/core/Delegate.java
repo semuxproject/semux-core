@@ -9,30 +9,38 @@ package org.semux.core;
 import java.util.Arrays;
 
 import org.semux.utils.Bytes;
+import org.semux.utils.SimpleDecoder;
+import org.semux.utils.SimpleEncoder;
 
 public class Delegate {
-    protected byte[] addr;
+    protected byte[] address;
     protected byte[] name;
     protected long registeredAt;
     protected long votes;
 
-    /*
-     * Variables below are not persisted
-     */
-    protected long votesFromMe;
-    protected long numberOfBlocksForged;
-    protected long numberOfTurnsHit;
-    protected long numberOfTurnsMissed;
+    protected volatile long votesFromMe;
 
-    public Delegate(byte[] addr, byte[] name, long registeredAt, long votes) {
-        this.addr = addr;
+    protected volatile long numberOfBlocksForged;
+    protected volatile long numberOfTurnsHit;
+    protected volatile long numberOfTurnsMissed;
+
+    /**
+     * Create a delegate instance.
+     * 
+     * @param address
+     * @param name
+     * @param registeredAt
+     * @param votes
+     */
+    public Delegate(byte[] address, byte[] name, long registeredAt, long votes) {
+        this.address = address;
         this.name = name;
         this.registeredAt = registeredAt;
         this.votes = votes;
     }
 
     public byte[] getAddress() {
-        return addr;
+        return address;
     }
 
     public byte[] getName() {
@@ -53,6 +61,37 @@ public class Delegate {
 
     public void setVotes(long votes) {
         this.votes = votes;
+    }
+
+    /**
+     * Serializes this delegate object into byte array.
+     * 
+     * @return
+     */
+    public byte[] toBytes() {
+        SimpleEncoder enc = new SimpleEncoder();
+        enc.writeBytes(address);
+        enc.writeBytes(name);
+        enc.writeLong(registeredAt);
+        enc.writeLong(votes);
+
+        return enc.toBytes();
+    }
+
+    /**
+     * Parses a delegate from a byte array.
+     * 
+     * @param bytes
+     * @return
+     */
+    public static Delegate fromBytes(byte[] bytes) {
+        SimpleDecoder dec = new SimpleDecoder(bytes);
+        byte[] address = dec.readBytes();
+        byte[] name = dec.readBytes();
+        long registeredAt = dec.readLong();
+        long votes = dec.readLong();
+
+        return new Delegate(address, name, registeredAt, votes);
     }
 
     public long getVotesFromMe() {
@@ -94,7 +133,7 @@ public class Delegate {
 
     @Override
     public String toString() {
-        return "Delegate [addr=" + Arrays.toString(addr) + ", name=" + Arrays.toString(name) + ", registeredAt="
+        return "Delegate [addr=" + Arrays.toString(address) + ", name=" + Arrays.toString(name) + ", registeredAt="
                 + registeredAt + ", votes=" + votes + ", votesFromMe=" + votesFromMe + ", numberOfBlocksForged="
                 + numberOfBlocksForged + ", numberOfTurnsHit=" + numberOfTurnsHit + ", numberOfTurnsMissed="
                 + numberOfTurnsMissed + "]";
