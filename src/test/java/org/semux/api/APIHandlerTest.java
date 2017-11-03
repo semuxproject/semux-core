@@ -257,13 +257,8 @@ public class APIHandlerTest {
         Genesis gen = Genesis.getInstance();
         Entry<String, byte[]> entry = gen.getDelegates().entrySet().iterator().next();
 
-        String uri = "/get_delegate?name=" + entry.getKey();
+        String uri = "/get_delegate?address=" + Hex.encode(entry.getValue());
         JSONObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertEquals(entry.getKey(), response.getJSONObject("result").getString("name"));
-
-        uri = "/get_delegate?address=" + Hex.encode(entry.getValue());
-        response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertEquals(entry.getKey(), response.getJSONObject("result").getString("name"));
     }

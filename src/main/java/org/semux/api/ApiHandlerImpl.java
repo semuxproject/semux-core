@@ -193,17 +193,13 @@ public class ApiHandlerImpl implements ApiHandler {
                 }
             }
             case GET_DELEGATE: {
-                String name = params.get("name");
                 String address = params.get("address");
 
-                if (name != null) {
-                    Delegate d = chain.getDelegateState().getDelegateByName(Bytes.of(name));
-                    return success(delegateToJson(d));
-                } else if (address != null) {
+                if (address != null) {
                     Delegate d = chain.getDelegateState().getDelegateByAddress(Hex.parse(address));
                     return success(delegateToJson(d));
                 } else {
-                    return failure("Invalid parameter: name = " + name + ", address = " + address);
+                    return failure("Invalid parameter: address = " + address);
                 }
             }
             case GET_VALIDATORS: {
