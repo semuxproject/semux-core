@@ -752,10 +752,18 @@ public class SemuxBFT implements Consensus {
             return false;
         }
 
-        // [2] check number and prevHash
+        // [2] check number, prevHash and time stamp
         Block latest = chain.getLatestBlock();
-        if (block.getNumber() != latest.getNumber() + 1 || !Arrays.equals(block.getPrevHash(), latest.getHash())) {
-            logger.debug("Invalid block number or prevHash");
+        if (block.getNumber() != latest.getNumber() + 1) {
+            logger.debug("Invalid block number");
+            return false;
+        }
+        if (!Arrays.equals(block.getPrevHash(), latest.getHash())) {
+            logger.debug("Invalid block previous hash");
+            return false;
+        }
+        if (block.getTimestamp() <= latest.getTimestamp()) {
+            logger.debug("Invalid block timestamp");
             return false;
         }
 
