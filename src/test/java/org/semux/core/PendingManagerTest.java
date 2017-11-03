@@ -46,7 +46,7 @@ public class PendingManagerTest {
         channelMgr = new ChannelManager();
 
         accountState = chain.getAccountState();
-        accountState.getAccount(from).setBalance(10000 * Unit.SEM);
+        accountState.getAccount(from).setAvailable(10000 * Unit.SEM);
     }
 
     @Before

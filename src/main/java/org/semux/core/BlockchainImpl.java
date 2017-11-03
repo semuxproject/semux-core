@@ -102,7 +102,7 @@ public class BlockchainImpl implements Blockchain {
                 Premine p = e.getValue();
 
                 Account acc = accountState.getAccount(p.getAddress());
-                acc.setBalance(p.getAmount());
+                acc.setAvailable(p.getAmount());
 
                 for (int i = 1; i < p.getPeriods(); i++) {
                     long blockNum = i * 365 * Config.DAY;
@@ -252,7 +252,7 @@ public class BlockchainImpl implements Blockchain {
             AccountState as = getAccountState();
             for (Premine p : periods.get(number)) {
                 Account a = as.getAccount(p.getAddress());
-                a.setBalance(a.getBalance() + p.getAmount());
+                a.setAvailable(a.getAvailable() + p.getAmount());
             }
             as.commit();
         }

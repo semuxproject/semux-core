@@ -65,13 +65,13 @@ public class TransactionExecutor {
                 continue;
             }
 
-            long balance = fromAcc.getBalance();
+            long balance = fromAcc.getAvailable();
             switch (tx.getType()) {
             case TRANSFER: {
                 if (fee <= balance && value <= balance && value + fee <= balance) {
                     // transfer balance
-                    fromAcc.setBalance(fromAcc.getBalance() - value - fee);
-                    toAcc.setBalance(toAcc.getBalance() + value);
+                    fromAcc.setAvailable(fromAcc.getAvailable() - value - fee);
+                    toAcc.setAvailable(toAcc.getAvailable() + value);
 
                     result.setValid(true);
                 }
@@ -84,7 +84,7 @@ public class TransactionExecutor {
                         && data.length <= 16 && Bytes.toString(data).matches("[_a-z0-9]{4,16}") //
                         && ds.register(to, data)) {
                     // register delegate
-                    fromAcc.setBalance(fromAcc.getBalance() - value - fee);
+                    fromAcc.setAvailable(fromAcc.getAvailable() - value - fee);
 
                     result.setValid(true);
                 }
@@ -94,7 +94,7 @@ public class TransactionExecutor {
                 if (fee <= balance && value <= balance && value + fee <= balance //
                         && ds.vote(from, to, value)) {
                     // lock balance
-                    fromAcc.setBalance(fromAcc.getBalance() - value - fee);
+                    fromAcc.setAvailable(fromAcc.getAvailable() - value - fee);
                     fromAcc.setLocked(fromAcc.getLocked() + value);
 
                     result.setValid(true);
@@ -106,7 +106,7 @@ public class TransactionExecutor {
                         && value <= fromAcc.getLocked() //
                         && ds.unvote(from, to, value)) {
                     // unlock balance
-                    fromAcc.setBalance(fromAcc.getBalance() + value - fee);
+                    fromAcc.setAvailable(fromAcc.getAvailable() + value - fee);
                     fromAcc.setLocked(fromAcc.getLocked() - value);
 
                     result.setValid(true);

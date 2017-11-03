@@ -38,7 +38,7 @@ public class APIServerMock {
                 EdDSA coinbase = new EdDSA();
 
                 chain = new BlockchainImpl(MemoryDB.FACTORY);
-                chain.getAccountState().getAccount(wallet.getAccount(0).toAddress()).setBalance(5000 * Unit.SEM);
+                chain.getAccountState().getAccount(wallet.getAccount(0).toAddress()).setAvailable(5000 * Unit.SEM);
 
                 channelMgr = new ChannelManager();
                 pendingMgr = new PendingManager(chain, channelMgr);

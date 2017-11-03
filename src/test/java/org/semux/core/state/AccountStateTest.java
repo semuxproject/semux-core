@@ -31,7 +31,7 @@ public class AccountStateTest {
 
         for (ByteArray k : premine.keySet()) {
             Account acc = state.getAccount(k.getData());
-            assertEquals((long) premine.get(k).getAmount(), acc.getBalance());
+            assertEquals((long) premine.get(k).getAmount(), acc.getAvailable());
         }
     }
 
@@ -42,7 +42,7 @@ public class AccountStateTest {
 
         byte[] addr = Bytes.random(20);
         Account acc = state.getAccount(addr);
-        acc.setBalance(1);
+        acc.setAvailable(1);
         acc.setLocked(2);
         acc.setNonce(3);
         acc.setCode(Bytes.of("test"));
@@ -50,7 +50,7 @@ public class AccountStateTest {
         state.commit();
 
         Account acc2 = state.getAccount(addr);
-        assertEquals(1L, acc2.getBalance());
+        assertEquals(1L, acc2.getAvailable());
         assertEquals(2L, acc2.getLocked());
         assertEquals(3L, acc2.getNonce());
         assertArrayEquals(Bytes.of("test"), acc2.getCode());

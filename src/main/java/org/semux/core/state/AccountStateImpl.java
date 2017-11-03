@@ -79,11 +79,11 @@ public class AccountStateImpl implements AccountState {
             }
 
             @Override
-            public long getBalance() {
+            public long getAvailable() {
                 if (updates.containsKey(keyBalance)) {
                     return Bytes.toLong(updates.get(keyBalance));
                 } else if (acc != null) {
-                    return acc.getBalance();
+                    return acc.getAvailable();
                 } else {
                     byte[] bytes = accountDB.get(keyBalance.getData());
                     return bytes == null ? 0 : Bytes.toLong(bytes);
@@ -91,7 +91,7 @@ public class AccountStateImpl implements AccountState {
             }
 
             @Override
-            public void setBalance(long balance) {
+            public void setAvailable(long balance) {
                 updates.put(keyBalance, Bytes.of(balance));
             }
 

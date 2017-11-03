@@ -818,7 +818,7 @@ public class SemuxBFT implements Consensus {
         }
         if (reward > 0) {
             Account acc = as.getAccount(block.getCoinbase());
-            acc.setBalance(acc.getBalance() + reward);
+            acc.setAvailable(acc.getAvailable() + reward);
         }
 
         // [3] commit state change

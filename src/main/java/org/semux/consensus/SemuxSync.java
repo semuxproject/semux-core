@@ -374,7 +374,7 @@ public class SemuxSync implements Sync {
             }
             if (reward > 0) {
                 Account acc = as.getAccount(block.getCoinbase());
-                acc.setBalance(acc.getBalance() + reward);
+                acc.setAvailable(acc.getAvailable() + reward);
             }
 
             // [6] commit the updates

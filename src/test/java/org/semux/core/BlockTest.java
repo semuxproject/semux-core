@@ -37,7 +37,7 @@ public class BlockTest {
     private EdDSA key = new EdDSA();
     private byte[] hash;
     private byte[] signature;
-    
+
     @Test
     public void testGenesis() {
         Block block = Genesis.getInstance();
