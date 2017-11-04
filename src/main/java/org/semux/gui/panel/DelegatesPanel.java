@@ -35,7 +35,6 @@ import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
@@ -102,7 +101,6 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 JTable table = (JTable) me.getSource();
                 Point p = me.getPoint();
                 int row = table.rowAtPoint(p);
-                refreshMaxUnvotes();
                 if (me.getClickCount() == 2) {
                     WalletDelegate d = tableModel.getRow(table.convertRowIndexToModel(row));
                     if (d != null) {
@@ -325,14 +323,10 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         case REFRESH: {
             refreshAccounts();
             refreshDelegates();
-            refreshMaxVotes();
-            refreshMaxUnvotes();
             break;
         }
         case SELECT_ACCOUNT: {
             refreshDelegates();
-            refreshMaxVotes();
-            refreshMaxUnvotes();
             break;
         }
         case VOTE:
@@ -498,29 +492,6 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 }
             }
         }
-    }
-
-    /**
-     * updates textVote with the highest possible amount of SEM for this account
-     */
-    private void refreshMaxVotes() {
-        long voteable = 0L;
-        if (getSelectedDelegate() != null && getSelectedAccount() != null) {
-            voteable = getSelectedAccount().getAvailable() - 2 * Config.MIN_TRANSACTION_FEE_SOFT;
-        }
-        textVote.setText(voteable >= Unit.SEM ? SwingUtil.formatVote(voteable) : "");
-    }
-
-    /**
-     * updates textUnvote with the amount of votes already voted for this delegate
-     */
-    private void refreshMaxUnvotes() {
-        long vote = 0L;
-        if (getSelectedDelegate() != null && getSelectedAccount() != null) {
-            vote = Kernel.getInstance().getBlockchain().getDelegateState()
-                    .getVote(getSelectedAccount().getKey().toAddress(), getSelectedDelegate().getAddress());
-        }
-        textUnvote.setText(vote >= Unit.SEM ? SwingUtil.formatVote(vote) : "");
     }
 
     private void clear() {

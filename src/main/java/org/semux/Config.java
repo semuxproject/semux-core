@@ -451,7 +451,7 @@ public class Config {
      * @return
      */
     public static String getPrimaryValidator(List<String> validators, long height, int view) {
-        byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(0));
+        byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
         return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
     }
 }
