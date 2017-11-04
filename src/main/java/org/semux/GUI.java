@@ -208,7 +208,7 @@ public class GUI {
         for (Model.WalletAccount ma : model.getAccounts()) {
             Account a = as.getAccount(ma.getKey().toAddress());
             ma.setNonce(a.getNonce());
-            ma.setBalance(a.getAvailable());
+            ma.setAvailable(a.getAvailable());
             ma.setLocked(a.getLocked());
 
             // most recent transactions of this account

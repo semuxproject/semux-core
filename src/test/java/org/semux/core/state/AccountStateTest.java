@@ -6,10 +6,12 @@
  */
 package org.semux.core.state;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
@@ -20,11 +22,17 @@ import org.semux.utils.Bytes;
 
 public class AccountStateTest {
 
+    private Blockchain chain;
+    private AccountState state;
+
+    @Before
+    public void setup() {
+        chain = new BlockchainImpl(MemoryDB.FACTORY);
+        state = chain.getAccountState();
+    }
+
     @Test
     public void testAtGenesis() {
-        Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
-        AccountState state = chain.getAccountState();
-
         Map<ByteArray, Premine> premine = chain.getGenesis().getPremines();
 
         for (ByteArray k : premine.keySet()) {
@@ -35,9 +43,6 @@ public class AccountStateTest {
 
     @Test
     public void testAccount() {
-        Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
-        AccountState state = chain.getAccountState();
-
         byte[] addr = Bytes.random(20);
         Account acc = state.getAccount(addr);
         acc.setAvailable(1);
@@ -48,5 +53,21 @@ public class AccountStateTest {
         assertEquals(1L, acc2.getAvailable());
         assertEquals(2L, acc2.getLocked());
         assertEquals(3L, acc2.getNonce());
+    }
+
+    @Test
+    public void testNonExists() {
+        byte[] addr = Bytes.random(20);
+        Account acc = state.getAccount(addr);
+
+        assertArrayEquals(addr, acc.getAddress());
+        assertEquals(0, acc.getAvailable());
+        assertEquals(0, acc.getLocked());
+        assertEquals(0, acc.getNonce());
+    }
+
+    @Test
+    public void testAdjustAvailable() {
+
     }
 }

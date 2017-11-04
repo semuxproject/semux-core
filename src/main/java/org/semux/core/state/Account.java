@@ -83,7 +83,7 @@ public class Account {
     /**
      * Sets the available balance of this account.
      * 
-     * @param balance
+     * @param available
      */
     void setAvailable(long available) {
         this.available = available;

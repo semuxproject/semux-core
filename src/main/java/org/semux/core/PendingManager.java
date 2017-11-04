@@ -216,22 +216,34 @@ public class PendingManager implements Runnable, BlockchainListener {
         return getTransactionsAndResults(-1).getLeft();
     }
 
+    /**
+     * Clear all pending transactions
+     * 
+     * @return
+     */
+    public synchronized List<Transaction> clear() {
+        // reset state
+        pendingAS = chain.getAccountState().track();
+        pendingDS = chain.getDelegateState().track();
+
+        // clear transaction pool
+        List<Transaction> txs = new ArrayList<>(transactions);
+        poolMap.clear();
+        transactions.clear();
+        results.clear();
+
+        return txs;
+    }
+
     @Override
     public synchronized void onBlockAdded(Block block) {
         if (isRunning) {
             long t1 = System.currentTimeMillis();
 
-            // [1] reset state
-            pendingAS = chain.getAccountState().track();
-            pendingDS = chain.getDelegateState().track();
+            // clear transaction pool
+            List<Transaction> txs = clear();
 
-            // [2] clear transaction pool
-            List<Transaction> txs = new ArrayList<>(transactions);
-            poolMap.clear();
-            transactions.clear();
-            results.clear();
-
-            // [3] update pending state
+            // update pending state
             long accepted = 0;
             for (Transaction tx : txs) {
                 accepted += processTransaction(tx, false);

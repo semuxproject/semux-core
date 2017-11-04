@@ -10,7 +10,6 @@ import org.junit.Assert;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
-import org.semux.core.Unit;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
@@ -36,9 +35,7 @@ public class APIServerMock {
 
             new Thread(() -> {
                 EdDSA coinbase = new EdDSA();
-
                 chain = new BlockchainImpl(MemoryDB.FACTORY);
-                chain.getAccountState().adjustAvailable(wallet.getAccount(0).toAddress(), 5000 * Unit.SEM);
 
                 channelMgr = new ChannelManager();
                 pendingMgr = new PendingManager(chain, channelMgr);

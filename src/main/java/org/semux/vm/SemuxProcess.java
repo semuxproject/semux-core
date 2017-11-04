@@ -152,7 +152,7 @@ public class SemuxProcess implements Runnable {
                     gas++;
                     break;
                 }
-                case BALANCE: {
+                case AVAILABLE: {
                     gas++;
                     break;
                 }

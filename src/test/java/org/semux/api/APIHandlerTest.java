@@ -19,6 +19,7 @@ import java.util.Scanner;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semux.Config;
@@ -30,6 +31,7 @@ import org.semux.core.Genesis.Premine;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
+import org.semux.core.Unit;
 import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -64,6 +66,15 @@ public class APIHandlerTest {
 
         as = api.chain.getAccountState();
         ds = api.chain.getDelegateState();
+    }
+
+    @Before
+    public void rollbackState() {
+        as.rollback();
+        ds.rollback();
+        as.adjustAvailable(wallet.getAccount(0).toAddress(), 5000 * Unit.SEM);
+
+        api.pendingMgr.clear();
     }
 
     private static JSONObject request(String uri) throws IOException {
@@ -249,7 +260,7 @@ public class APIHandlerTest {
         String uri = "/get_account?address=" + entry.getKey();
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        assertEquals(entry.getValue().getAmount(), response.getJSONObject("result").getLong("balance"));
+        assertEquals(entry.getValue().getAmount(), response.getJSONObject("result").getLong("available"));
     }
 
     @Test
@@ -344,10 +355,10 @@ public class APIHandlerTest {
 
     @Test
     public void testVote() throws IOException, InterruptedException {
-        EdDSA key = new EdDSA();
-        ds.register(key.toAddress(), Bytes.of("test_vote"));
+        EdDSA delegate = new EdDSA();
+        ds.register(delegate.toAddress(), Bytes.of("test_vote"));
 
-        String uri = "/vote?&from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000";
+        String uri = "/vote?&from=0&to=" + delegate.toAddressString() + "&value=1000000000&fee=50000000";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -362,15 +373,15 @@ public class APIHandlerTest {
 
     @Test
     public void testUnvote() throws IOException, InterruptedException {
-        EdDSA key = new EdDSA();
-        ds.register(key.toAddress(), Bytes.of("test_unvote"));
+        EdDSA delegate = new EdDSA();
+        ds.register(delegate.toAddress(), Bytes.of("test_unvote"));
 
         long amount = 1000000000;
-        byte[] addr = wallet.getAccounts().get(0).toAddress();
-        as.adjustLocked(addr, amount);
-        ds.vote(wallet.getAccounts().get(0).toAddress(), key.toAddress(), amount);
+        byte[] voter = wallet.getAccounts().get(0).toAddress();
+        as.adjustLocked(voter, amount);
+        ds.vote(voter, delegate.toAddress(), amount);
 
-        String uri = "/unvote?&from=0&to=" + key.toAddressString() + "&value=" + amount + "&fee=5000000";
+        String uri = "/unvote?&from=0&to=" + delegate.toAddressString() + "&value=" + amount + "&fee=50000000";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));

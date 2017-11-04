@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * delegate DB structure:
  * 
+ * [name] => [address] // NOTE: assuming name_length != adress_length
  * [address] => [delegate_object]
  * </pre>
  *
@@ -41,6 +42,8 @@ import org.slf4j.LoggerFactory;
 public class DelegateStateImpl implements DelegateState {
 
     protected static final Logger logger = LoggerFactory.getLogger(DelegateStateImpl.class);
+
+    private static final int ADDRESS_LEN = 20;
 
     protected Blockchain chain;
     protected KVDB delegateDB;
@@ -85,6 +88,7 @@ public class DelegateStateImpl implements DelegateState {
             return false;
         } else {
             Delegate d = new Delegate(address, name, registeredAt, 0);
+            delegateUpdates.put(ByteArray.of(name), address);
             delegateUpdates.put(ByteArray.of(address), d.toBytes());
 
             return true;
@@ -245,7 +249,7 @@ public class DelegateStateImpl implements DelegateState {
     protected void getDelegates(Map<ByteArray, Delegate> map) {
         for (ByteArray k : delegateUpdates.keySet()) {
             /* filter address */
-            if (!map.containsKey(k)) {
+            if (k.length() == ADDRESS_LEN && !map.containsKey(k)) {
                 byte[] v = delegateUpdates.get(k);
 
                 if (v == null) {
@@ -265,7 +269,7 @@ public class DelegateStateImpl implements DelegateState {
                 ByteArray k = ByteArray.of(entry.getKey());
                 byte[] v = entry.getValue();
 
-                if (!map.containsKey(k)) {
+                if (k.length() == ADDRESS_LEN && !map.containsKey(k)) {
                     map.put(k, Delegate.fromBytes(k.getData(), v));
                 }
             }

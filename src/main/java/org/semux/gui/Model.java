@@ -129,11 +129,11 @@ public class Model {
     }
 
     /**
-     * Get the total balance.
+     * Get the total available.
      * 
      * @return
      */
-    public long getTotalBalance() {
+    public long getTotalAvailable() {
         long sum = 0;
         for (WalletAccount acc : accounts) {
             sum += acc.getAvailable();
@@ -219,8 +219,8 @@ public class Model {
             return available;
         }
 
-        public void setBalance(long balance) {
-            this.available = balance;
+        public void setAvailable(long available) {
+            this.available = available;
         }
 
         public long getLocked() {

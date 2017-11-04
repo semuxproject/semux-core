@@ -120,9 +120,9 @@ public enum Opcode {
     ADDRESS(0x30, 0, 3),
 
     /**
-     * (0x31) the balance of the account.
+     * (0x31) the available balance of the account.
      */
-    BALANCE(0x31, 0, 1),
+    AVAILABLE(0x31, 0, 1),
 
     /**
      * (0x32) the address of the caller.

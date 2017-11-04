@@ -273,7 +273,7 @@ public class SwingUtil {
     }
 
     /**
-     * Formats a Semux balance.
+     * Formats a Semux value.
      * 
      * @param nano
      * @param withUnit
@@ -284,7 +284,7 @@ public class SwingUtil {
     }
 
     /**
-     * Formats a Semux balance.
+     * Formats a Semux value.
      * 
      * @param nano
      * @return
@@ -377,7 +377,7 @@ public class SwingUtil {
     };
 
     /**
-     * Balance string comparator based on its value.
+     * Value string comparator based on its value.
      * 
      * @exception
      */
@@ -390,7 +390,7 @@ public class SwingUtil {
     };
 
     /**
-     * Balance string comparator based on its value.
+     * Percentage string comparator based on its value.
      * 
      * @exception
      */
@@ -403,7 +403,7 @@ public class SwingUtil {
     };
 
     /**
-     * Balance string comparator based on its value.
+     * Timestamp/date string comparator based on its value.
      * 
      * @exception
      */

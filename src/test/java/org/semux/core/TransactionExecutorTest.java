@@ -61,23 +61,23 @@ public class TransactionExecutorTest {
         tx.sign(key);
         assertTrue(tx.validate());
 
-        // insufficient balance
+        // insufficient available
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isValid());
 
-        long balance = 1000 * Unit.SEM;
-        as.adjustAvailable(key.toAddress(), balance);
+        long available = 1000 * Unit.SEM;
+        as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
         result = exec.execute(tx, as.track(), ds.track());
         assertTrue(result.isValid());
-        assertEquals(balance, as.getAccount(key.toAddress()).getAvailable());
+        assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(0, as.getAccount(to).getAvailable());
 
         // execute and commit
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isValid());
-        assertEquals(balance - value - fee, as.getAccount(key.toAddress()).getAvailable());
+        assertEquals(available - value - fee, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(value, as.getAccount(to).getAvailable());
     }
 
@@ -85,8 +85,8 @@ public class TransactionExecutorTest {
     public void testDelegate() {
         EdDSA delegate = new EdDSA();
 
-        long balance = 2000 * Unit.SEM;
-        as.adjustAvailable(delegate.toAddress(), balance);
+        long available = 2000 * Unit.SEM;
+        as.adjustAvailable(delegate.toAddress(), available);
 
         TransactionType type = TransactionType.DELEGATE;
         byte[] from = delegate.toAddress();
@@ -112,7 +112,7 @@ public class TransactionExecutorTest {
         tx = new Transaction(type, from, from, value, fee, nonce, timestamp, data);
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isValid());
-        assertEquals(balance - Config.DELEGATE_BURN_AMOUNT - fee, as.getAccount(delegate.toAddress()).getAvailable());
+        assertEquals(available - Config.DELEGATE_BURN_AMOUNT - fee, as.getAccount(delegate.toAddress()).getAvailable());
         assertArrayEquals(delegate.toAddress(), ds.getDelegateByName(data).getAddress());
         assertArrayEquals(data, ds.getDelegateByAddress(delegate.toAddress()).getName());
     }
@@ -122,13 +122,13 @@ public class TransactionExecutorTest {
         EdDSA voter = new EdDSA();
         EdDSA delegate = new EdDSA();
 
-        long balance = 100 * Unit.SEM;
-        as.adjustAvailable(voter.toAddress(), balance);
+        long available = 100 * Unit.SEM;
+        as.adjustAvailable(voter.toAddress(), available);
 
         TransactionType type = TransactionType.VOTE;
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
-        long value = balance / 3;
+        long value = available / 3;
         long fee = Config.MIN_TRANSACTION_FEE_HARD;
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
@@ -144,7 +144,7 @@ public class TransactionExecutorTest {
         // vote for delegate
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isValid());
-        assertEquals(balance - value - fee, as.getAccount(voter.toAddress()).getAvailable());
+        assertEquals(available - value - fee, as.getAccount(voter.toAddress()).getAvailable());
         assertEquals(value, as.getAccount(voter.toAddress()).getLocked());
         assertEquals(value, ds.getDelegateByAddress(delegate.toAddress()).getVotes());
     }
@@ -154,15 +154,15 @@ public class TransactionExecutorTest {
         EdDSA voter = new EdDSA();
         EdDSA delegate = new EdDSA();
 
-        long balance = 100 * Unit.SEM;
-        as.adjustAvailable(voter.toAddress(), balance);
+        long available = 100 * Unit.SEM;
+        as.adjustAvailable(voter.toAddress(), available);
 
         ds.register(delegate.toAddress(), Bytes.of("delegate"));
 
         TransactionType type = TransactionType.UNVOTE;
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
-        long value = balance / 3;
+        long value = available / 3;
         long fee = Config.MIN_TRANSACTION_FEE_HARD;
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
@@ -184,7 +184,7 @@ public class TransactionExecutorTest {
         // normal unvote
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isValid());
-        assertEquals(balance + value - fee, as.getAccount(voter.toAddress()).getAvailable());
+        assertEquals(available + value - fee, as.getAccount(voter.toAddress()).getAvailable());
         assertEquals(0, as.getAccount(voter.toAddress()).getLocked());
         assertEquals(0, ds.getDelegateByAddress(delegate.toAddress()).getVotes());
     }

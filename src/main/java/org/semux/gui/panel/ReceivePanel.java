@@ -43,7 +43,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
     private static final long serialVersionUID = 1L;
 
     private static String[] columnNames = { MessagesUtil.get("Num"), MessagesUtil.get("Address"),
-            MessagesUtil.get("Balance"), MessagesUtil.get("Locked") };
+            MessagesUtil.get("Available"), MessagesUtil.get("Locked") };
 
     private Model model;
 

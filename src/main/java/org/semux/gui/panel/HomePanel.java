@@ -42,7 +42,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private JLabel blockTime;
     private JLabel coinbase;
     private JLabel status;
-    private JLabel balance;
+    private JLabel available;
     private JLabel locked;
 
     private JPanel transactions;
@@ -83,11 +83,11 @@ public class HomePanel extends JPanel implements ActionListener {
         status = new JLabel("");
         overview.add(status);
 
-        JLabel labelBalance = new JLabel(MessagesUtil.get("Balance") + ":");
-        overview.add(labelBalance);
+        JLabel labelAvailable = new JLabel(MessagesUtil.get("Available") + ":");
+        overview.add(labelAvailable);
 
-        balance = new JLabel("");
-        overview.add(balance);
+        available = new JLabel("");
+        overview.add(available);
 
         JLabel labelLocked = new JLabel(MessagesUtil.get("Locked") + ":");
         overview.add(labelLocked);
@@ -213,7 +213,7 @@ public class HomePanel extends JPanel implements ActionListener {
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
         this.coinbase.setText(MessagesUtil.get("AccountNum", model.getCoinbase()));
         this.status.setText(model.isDelegate() ? MessagesUtil.get("Delegate") : MessagesUtil.get("Normal"));
-        this.balance.setText(SwingUtil.formatValue(model.getTotalBalance()));
+        this.available.setText(SwingUtil.formatValue(model.getTotalAvailable()));
         this.locked.setText(SwingUtil.formatValue(model.getTotalLocked()));
         this.peers.setText(SwingUtil.formatNumber(model.getActivePeers().size()));
 

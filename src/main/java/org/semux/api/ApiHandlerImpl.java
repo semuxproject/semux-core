@@ -417,7 +417,7 @@ public class ApiHandlerImpl implements ApiHandler {
 
         JSONObject obj = new JSONObject();
         obj.put("address", Hex.PREF + Hex.encode(acc.getAddress()));
-        obj.put("balance", acc.getAvailable());
+        obj.put("available", acc.getAvailable());
         obj.put("locked", acc.getLocked());
         obj.put("nonce", acc.getNonce());
 
