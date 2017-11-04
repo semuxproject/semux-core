@@ -430,6 +430,8 @@ public class SwingUtil {
         case UNVOTE:
         case TRANSFER:
             return getAddressName(m, tx.getFrom()) + " => " + getAddressName(m, tx.getTo());
+        case DELEGATE:
+            return MessagesUtil.get("DelegateRegistration");
         default:
             return StringUtil.EMPTY_STRING;
         }
