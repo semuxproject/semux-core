@@ -26,9 +26,9 @@ import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
-import org.semux.gui.Model;
-import org.semux.gui.Model.WalletAccount;
 import org.semux.gui.SwingUtil;
+import org.semux.gui.model.WalletModel;
+import org.semux.gui.model.WalletAccount;
 import org.semux.utils.Bytes;
 import org.semux.utils.UnreachableException;
 
@@ -36,7 +36,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private Model model;
+    private WalletModel model;
 
     class Item {
         WalletAccount account;
@@ -60,7 +60,7 @@ public class SendPanel extends JPanel implements ActionListener {
     private JTextField fee;
     private JTextField memo;
 
-    public SendPanel(Model model) {
+    public SendPanel(WalletModel model) {
         this.model = model;
         this.model.addListener(this);
 

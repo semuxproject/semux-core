@@ -29,10 +29,10 @@ import org.semux.core.Transaction;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
-import org.semux.gui.Model;
-import org.semux.gui.Model.WalletAccount;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.TransactionDialog;
+import org.semux.gui.model.WalletModel;
+import org.semux.gui.model.WalletAccount;
 import org.semux.utils.ByteArray;
 import org.semux.utils.StringUtil;
 import org.semux.utils.UnreachableException;
@@ -44,12 +44,12 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     private static String[] columnNames = { MessagesUtil.get("Type"), MessagesUtil.get("FromTo"),
             MessagesUtil.get("Value"), MessagesUtil.get("Time") };
 
-    private Model model;
+    private WalletModel model;
 
     private JTable table;
     private TransactionsTableModel tableModel;
 
-    public TransactionsPanel(Model model) {
+    public TransactionsPanel(WalletModel model) {
         this.model = model;
         this.model.addListener(this);
 

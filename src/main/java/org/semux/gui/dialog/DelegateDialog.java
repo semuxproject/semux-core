@@ -10,16 +10,16 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.semux.Kernel;
 import org.semux.core.Block;
-import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
+import org.semux.gui.model.WalletDelegate;
 
 public class DelegateDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    public DelegateDialog(JComponent parent, Delegate d) {
+    public DelegateDialog(JComponent parent, WalletDelegate d) {
         Block block = Kernel.getInstance().getBlockchain().getBlock(d.getRegisteredAt());
 
         JLabel lblName = new JLabel(MessagesUtil.get("Name") + ":");

@@ -1,4 +1,4 @@
-package org.semux.gui;
+package org.semux.gui.model;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -10,9 +10,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.semux.core.Block;
-import org.semux.core.Transaction;
-import org.semux.core.state.Delegate;
-import org.semux.crypto.EdDSA;
+import org.semux.gui.Action;
 import org.semux.net.Peer;
 import org.semux.utils.ByteArray;
 
@@ -20,7 +18,7 @@ import org.semux.utils.ByteArray;
  * A Model stores all the data that GUI needs. The thread-safety of this class
  * is achieved by swapping pointers instead of synchronization.
  */
-public class Model {
+public class WalletModel {
 
     private List<ActionListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -31,14 +29,14 @@ public class Model {
 
     private volatile Map<ByteArray, Integer> accountNo = new HashMap<>();
     private volatile List<WalletAccount> accounts = new ArrayList<>();
-    private volatile List<Delegate> delegates = new ArrayList<>();
+    private volatile List<WalletDelegate> delegates = new ArrayList<>();
 
     private Map<String, Peer> activePeers = new HashMap<>();
 
     /**
      * Construct a new model.
      */
-    public Model() {
+    public WalletModel() {
     }
 
     /**
@@ -59,19 +57,6 @@ public class Model {
                 listener.actionPerformed(new ActionEvent(this, 0, Action.REFRESH.name()));
             });
         }
-    }
-
-    /**
-     * Initialize model with the given list of accounts.
-     * 
-     * @param keys
-     */
-    public void init(List<EdDSA> keys) {
-        List<WalletAccount> list = new ArrayList<>();
-        for (EdDSA key : keys) {
-            list.add(new WalletAccount(key));
-        }
-        accounts = list;
     }
 
     /**
@@ -172,11 +157,11 @@ public class Model {
         this.accounts = accounts;
     }
 
-    public List<Delegate> getDelegates() {
+    public List<WalletDelegate> getDelegates() {
         return delegates;
     }
 
-    public void setDelegates(List<Delegate> delegates) {
+    public void setDelegates(List<WalletDelegate> delegates) {
         this.delegates = delegates;
     }
 
@@ -186,62 +171,5 @@ public class Model {
 
     public void setActivePeers(Map<String, Peer> activePeers) {
         this.activePeers = activePeers;
-    }
-
-    public static class WalletAccount {
-        private EdDSA key;
-        private long nonce;
-        private long available;
-        private long locked;
-        private List<Transaction> transactions = new ArrayList<>();
-
-        public WalletAccount(EdDSA key) {
-            this.key = key;
-        }
-
-        public EdDSA getKey() {
-            return key;
-        }
-
-        public void setKey(EdDSA key) {
-            this.key = key;
-        }
-
-        public long getNonce() {
-            return nonce;
-        }
-
-        public void setNonce(long nonce) {
-            this.nonce = nonce;
-        }
-
-        public long getAvailable() {
-            return available;
-        }
-
-        public void setAvailable(long available) {
-            this.available = available;
-        }
-
-        public long getLocked() {
-            return locked;
-        }
-
-        public void setLocked(long locked) {
-            this.locked = locked;
-        }
-
-        public List<Transaction> getTransactions() {
-            return transactions;
-        }
-
-        public void setTransactions(List<Transaction> transactions) {
-            this.transactions = transactions;
-        }
-
-        @Override
-        public String toString() {
-            return key.toString();
-        }
     }
 }

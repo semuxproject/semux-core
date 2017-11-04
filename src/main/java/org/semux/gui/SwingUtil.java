@@ -43,6 +43,7 @@ import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
+import org.semux.gui.model.WalletModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -421,7 +422,7 @@ public class SwingUtil {
      * @param tx
      * @return
      */
-    public static String getTransactionDescription(Model m, Transaction tx) {
+    public static String getTransactionDescription(WalletModel m, Transaction tx) {
         switch (tx.getType()) {
         case COINBASE:
             return MessagesUtil.get("BlockReward") + " => " + getDelegateName(tx.getTo()).get();
@@ -434,7 +435,7 @@ public class SwingUtil {
         }
     }
 
-    private static String getAddressName(Model m, byte[] address) {
+    private static String getAddressName(WalletModel m, byte[] address) {
         Optional<String> o = getDelegateName(address);
         if (o.isPresent()) {
             return o.get();

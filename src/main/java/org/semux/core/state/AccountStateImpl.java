@@ -21,7 +21,7 @@ import org.semux.utils.ByteArray;
  * account DB structure:
  * 
  * [address, 0] => [account_object]
- * [address, 1] => [code+]
+ * [address, 1] => [code]
  * [address, 2, storage_key] = [storage_value]
  * </pre>
  */

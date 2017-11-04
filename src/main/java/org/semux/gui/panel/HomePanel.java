@@ -26,9 +26,9 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
-import org.semux.gui.Model;
-import org.semux.gui.Model.WalletAccount;
 import org.semux.gui.SwingUtil;
+import org.semux.gui.model.WalletModel;
+import org.semux.gui.model.WalletAccount;
 import org.semux.utils.ByteArray;
 import org.semux.utils.UnreachableException;
 
@@ -36,7 +36,7 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private Model model;
+    private WalletModel model;
 
     private JLabel blockNum;
     private JLabel blockTime;
@@ -48,7 +48,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private JPanel transactions;
     private JLabel peers;
 
-    public HomePanel(Model model) {
+    public HomePanel(WalletModel model) {
         this.model = model;
         this.model.addListener(this);
 

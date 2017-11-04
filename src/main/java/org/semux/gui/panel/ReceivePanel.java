@@ -33,9 +33,9 @@ import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
-import org.semux.gui.Model;
-import org.semux.gui.Model.WalletAccount;
 import org.semux.gui.SwingUtil;
+import org.semux.gui.model.WalletModel;
+import org.semux.gui.model.WalletAccount;
 import org.semux.utils.UnreachableException;
 
 public class ReceivePanel extends JPanel implements ActionListener {
@@ -45,13 +45,13 @@ public class ReceivePanel extends JPanel implements ActionListener {
     private static String[] columnNames = { MessagesUtil.get("Num"), MessagesUtil.get("Address"),
             MessagesUtil.get("Available"), MessagesUtil.get("Locked") };
 
-    private Model model;
+    private WalletModel model;
 
     private JTable table;
     private ReceiveTableModel tableModel;
     private JLabel qr;
 
-    public ReceivePanel(Model model) {
+    public ReceivePanel(WalletModel model) {
         this.model = model;
         this.model.addListener(this);
 

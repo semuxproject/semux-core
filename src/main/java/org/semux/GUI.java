@@ -26,15 +26,18 @@ import org.semux.core.Transaction;
 import org.semux.core.Wallet;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
+import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.gui.MainFrame;
 import org.semux.gui.MessagesUtil;
-import org.semux.gui.Model;
 import org.semux.gui.WelcomeFrame;
 import org.semux.gui.dialog.InputDialog;
 import org.semux.gui.dialog.SelectDialog;
+import org.semux.gui.model.WalletAccount;
+import org.semux.gui.model.WalletDelegate;
+import org.semux.gui.model.WalletModel;
 import org.semux.net.Peer;
 import org.semux.utils.DnsUtil;
 import org.semux.utils.SystemUtil;
@@ -53,7 +56,7 @@ public class GUI {
     private static String dataDir = ".";
 
     private static Wallet wallet;
-    private static Model model;
+    private static WalletModel model;
 
     private static AtomicBoolean updateFlag = new AtomicBoolean(false);
 
@@ -65,7 +68,7 @@ public class GUI {
         setupLookAndFeel();
 
         wallet = new Wallet(new File(dataDir, "wallet.data"));
-        model = new Model();
+        model = new WalletModel();
 
         if (!wallet.exists()) {
             showWelcome();
@@ -201,24 +204,35 @@ public class GUI {
         AccountState as = chain.getAccountState();
         DelegateState ds = chain.getDelegateState();
 
-        // reset the model.
-        model.init(wallet.getAccounts());
+        // update latestBlock and isDelegate
         model.setLatestBlock(block);
         model.setDelegate(ds.getDelegateByAddress(kernel.getCoinbase().toAddress()) != null);
-        for (Model.WalletAccount ma : model.getAccounts()) {
-            Account a = as.getAccount(ma.getKey().toAddress());
-            ma.setNonce(a.getNonce());
-            ma.setAvailable(a.getAvailable());
-            ma.setLocked(a.getLocked());
+
+        // update accounts
+        List<WalletAccount> was = new ArrayList<>();
+        for (EdDSA key : wallet.getAccounts()) {
+            Account a = as.getAccount(key.toAddress());
+            WalletAccount wa = new WalletAccount(key, a);
+            was.add(wa);
 
             // most recent transactions of this account
-            byte[] address = ma.getKey().toAddress();
+            byte[] address = wa.getKey().toAddress();
             int total = chain.getTotalTransactions(address);
             List<Transaction> list = chain.getTransactions(address, Math.max(0, total - TRANSACTION_LIMIT), total);
             Collections.reverse(list);
-            ma.setTransactions(list);
+            wa.setTransactions(list);
         }
-        model.setDelegates(ds.getDelegates());
+        model.setAccounts(was);
+
+        // update delegates
+        List<WalletDelegate> wds = new ArrayList<>();
+        for (Delegate d : ds.getDelegates()) {
+            WalletDelegate wd = new WalletDelegate(d);
+            wds.add(wd);
+        }
+        model.setDelegates(wds);
+
+        // update active peers
         Map<String, Peer> activePeers = new HashMap<>();
         for (Peer peer : kernel.getChannelManager().getActivePeers()) {
             activePeers.put(peer.getPeerId(), peer);

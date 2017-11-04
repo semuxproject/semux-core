@@ -41,10 +41,11 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
-import org.semux.gui.Model;
-import org.semux.gui.Model.WalletAccount;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.DelegateDialog;
+import org.semux.gui.model.WalletAccount;
+import org.semux.gui.model.WalletDelegate;
+import org.semux.gui.model.WalletModel;
 import org.semux.utils.Bytes;
 import org.semux.utils.UnreachableException;
 
@@ -56,7 +57,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             MessagesUtil.get("Address"), MessagesUtil.get("Votes"), MessagesUtil.get("VotesFromMe"),
             MessagesUtil.get("Status"), MessagesUtil.get("Rate") };
 
-    private Model model;
+    private WalletModel model;
 
     private JTable table;
     private DelegatesTableModel tableModel;
@@ -82,7 +83,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private JTextField textUnvote;
     private JTextField textName;
 
-    public DelegatesPanel(Model model) {
+    public DelegatesPanel(WalletModel model) {
         this.model = model;
         this.model.addListener(this);
 
@@ -103,7 +104,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 int row = table.rowAtPoint(p);
                 refreshMaxUnvotes();
                 if (me.getClickCount() == 2) {
-                    Delegate d = tableModel.getRow(table.convertRowIndexToModel(row));
+                    WalletDelegate d = tableModel.getRow(table.convertRowIndexToModel(row));
                     if (d != null) {
                         DelegateDialog dialog = new DelegateDialog(DelegatesPanel.this, d);
                         dialog.setVisible(true);
@@ -256,18 +257,18 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         private static final long serialVersionUID = 1L;
 
-        private List<Delegate> delegates;
+        private List<WalletDelegate> delegates;
 
         public DelegatesTableModel() {
             this.delegates = Collections.emptyList();
         }
 
-        public void setData(List<Delegate> delegates) {
+        public void setData(List<WalletDelegate> delegates) {
             this.delegates = delegates;
             this.fireTableDataChanged();
         }
 
-        public Delegate getRow(int row) {
+        public WalletDelegate getRow(int row) {
             if (row >= 0 && row < delegates.size()) {
                 return delegates.get(row);
             }
@@ -292,7 +293,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         @Override
         public Object getValueAt(int row, int column) {
-            Delegate d = delegates.get(row);
+            WalletDelegate d = delegates.get(row);
 
             switch (column) {
             case 0:
@@ -337,7 +338,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         case VOTE:
         case UNVOTE: {
             WalletAccount a = getSelectedAccount();
-            Delegate d = getSelectedDelegate();
+            WalletDelegate d = getSelectedDelegate();
             String v = action.equals(Action.VOTE) ? textVote.getText() : textUnvote.getText();
             long value = 0;
             try {
@@ -427,7 +428,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         return (idx == -1) ? null : model.getAccounts().get(idx);
     }
 
-    private Delegate getSelectedDelegate() {
+    private WalletDelegate getSelectedDelegate() {
         int row = table.getSelectedRow();
         return (row == -1) ? null : tableModel.getRow(table.convertRowIndexToModel(row));
     }
@@ -463,7 +464,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     }
 
     private void refreshDelegates() {
-        List<Delegate> delegates = model.getDelegates();
+        List<WalletDelegate> delegates = model.getDelegates();
         delegates.sort((d1, d2) -> {
             int c = Long.compare(d2.getVotes(), d1.getVotes());
             return c != 0 ? c : new String(d1.getName()).compareTo(new String(d2.getName()));
@@ -474,12 +475,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             byte[] voter = acc.getKey().toAddress();
             Blockchain chain = Kernel.getInstance().getBlockchain();
             DelegateState ds = chain.getDelegateState();
-            for (Delegate d : delegates) {
-                long vote = ds.getVote(voter, d.getAddress());
-                d.setVotesFromMe(vote);
-                d.setNumberOfBlocksForged(chain.getNumberOfBlocksForged(d.getAddress()));
-                d.setNumberOfTurnsHit(chain.getNumberOfTurnsHit(d.getAddress()));
-                d.setNumberOfTurnsMissed(chain.getNumberOfTurnsMissed(d.getAddress()));
+            for (WalletDelegate wd : delegates) {
+                long vote = ds.getVote(voter, wd.getAddress());
+                wd.setVotesFromMe(vote);
+                wd.setNumberOfBlocksForged(chain.getNumberOfBlocksForged(wd.getAddress()));
+                wd.setNumberOfTurnsHit(chain.getNumberOfTurnsHit(wd.getAddress()));
+                wd.setNumberOfTurnsMissed(chain.getNumberOfTurnsMissed(wd.getAddress()));
             }
         }
 

@@ -8,6 +8,7 @@ package org.semux.core.state;
 
 import java.util.Arrays;
 
+import org.semux.crypto.Hex;
 import org.semux.utils.Bytes;
 import org.semux.utils.SimpleDecoder;
 import org.semux.utils.SimpleEncoder;
@@ -17,12 +18,6 @@ public class Delegate {
     protected byte[] name;
     protected long registeredAt;
     protected long votes;
-
-    protected volatile long votesFromMe;
-
-    protected volatile long numberOfBlocksForged;
-    protected volatile long numberOfTurnsHit;
-    protected volatile long numberOfTurnsMissed;
 
     /**
      * Create a delegate instance.
@@ -93,48 +88,10 @@ public class Delegate {
         return new Delegate(address, name, registeredAt, votes);
     }
 
-    public long getVotesFromMe() {
-        return votesFromMe;
-    }
-
-    public void setVotesFromMe(long votesFromMe) {
-        this.votesFromMe = votesFromMe;
-    }
-
-    public long getNumberOfBlocksForged() {
-        return numberOfBlocksForged;
-    }
-
-    public void setNumberOfBlocksForged(long numberOfBlocksForged) {
-        this.numberOfBlocksForged = numberOfBlocksForged;
-    }
-
-    public long getNumberOfTurnsHit() {
-        return numberOfTurnsHit;
-    }
-
-    public void setNumberOfTurnsHit(long numberOfTurnsHit) {
-        this.numberOfTurnsHit = numberOfTurnsHit;
-    }
-
-    public long getNumberOfTurnsMissed() {
-        return numberOfTurnsMissed;
-    }
-
-    public void setNumberOfTurnsMissed(long numberOfTurnsMissed) {
-        this.numberOfTurnsMissed = numberOfTurnsMissed;
-    }
-
-    public double getRate() {
-        long total = numberOfTurnsHit + numberOfTurnsMissed;
-        return total == 0 ? 0 : numberOfTurnsHit * 100.0 / total;
-    }
-
     @Override
     public String toString() {
-        return "Delegate [addr=" + Arrays.toString(address) + ", name=" + Arrays.toString(name) + ", registeredAt="
-                + registeredAt + ", votes=" + votes + ", votesFromMe=" + votesFromMe + ", numberOfBlocksForged="
-                + numberOfBlocksForged + ", numberOfTurnsHit=" + numberOfTurnsHit + ", numberOfTurnsMissed="
-                + numberOfTurnsMissed + "]";
+        return "Delegate [address=" + Hex.encode(address) + ", name=" + Arrays.toString(name) + ", registeredAt="
+                + registeredAt + ", votes=" + votes + "]";
     }
+
 }

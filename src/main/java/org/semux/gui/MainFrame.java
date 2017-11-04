@@ -31,6 +31,7 @@ import javax.swing.border.LineBorder;
 import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.gui.dialog.InputDialog;
+import org.semux.gui.model.WalletModel;
 import org.semux.gui.panel.DelegatesPanel;
 import org.semux.gui.panel.HomePanel;
 import org.semux.gui.panel.ReceivePanel;
@@ -60,7 +61,7 @@ public class MainFrame extends JFrame implements ActionListener {
     private JPanel activePanel;
     private JButton activeButton;
 
-    public MainFrame(Model model) {
+    public MainFrame(WalletModel model) {
         lockGlassPane = new LockGlassPane();
         lockGlassPane.setOpaque(false);
         this.setGlassPane(lockGlassPane);
