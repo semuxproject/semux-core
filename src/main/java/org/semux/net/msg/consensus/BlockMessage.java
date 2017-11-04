@@ -23,7 +23,10 @@ public class BlockMessage extends Message {
         this.block = block;
 
         SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBytes(block == null ? Bytes.EMPY_BYTES : block.toBytes());
+        enc.writeBytes(block == null ? Bytes.EMPY_BYTES : block.toBytesHeader());
+        enc.writeBytes(block == null ? Bytes.EMPY_BYTES : block.toBytesTransactions());
+        enc.writeBytes(block == null ? Bytes.EMPY_BYTES : block.toBytesResults());
+        enc.writeBytes(block == null ? Bytes.EMPY_BYTES : block.toBytesVotes());
         this.encoded = enc.toBytes();
     }
 
@@ -33,8 +36,14 @@ public class BlockMessage extends Message {
         this.encoded = encoded;
 
         SimpleDecoder dec = new SimpleDecoder(encoded);
-        byte[] bytes = dec.readBytes();
-        this.block = (bytes.length == 0) ? null : Block.fromBytes(bytes);
+        byte[] header = dec.readBytes();
+        byte[] transactions = dec.readBytes();
+        byte[] results = dec.readBytes();
+        byte[] votes = dec.readBytes();
+
+        if (header.length != 0) {
+            this.block = Block.fromBytes(header, transactions, results, votes);
+        }
     }
 
     public Block getBlock() {

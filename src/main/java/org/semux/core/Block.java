@@ -64,19 +64,16 @@ public class Block implements Comparable<Block> {
     // Auxiliary data
     // =========================
     /**
-     * Encoding of header and transactions.
+     * Encoding of transactions.
      */
-    protected byte[] encodedWithoutBFT;
+    protected byte[] encodedHeader;
+    protected byte[] encodedTransactions;
+    protected byte[] encodedResults;
 
     /**
      * Transaction indexes
      */
     protected List<Pair<Integer, Integer>> indexes = new ArrayList<>();
-
-    /**
-     * Indicate whether this is the Genesis block
-     */
-    protected boolean isGensis = false;
 
     /**
      * Create a new block, with no BFT information.
@@ -116,20 +113,20 @@ public class Block implements Comparable<Block> {
         this.view = view;
         this.votes = votes;
 
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBytes(header.toBytes());
-        enc.writeInt(transactions.size());
-        for (Transaction t : transactions) {
-            int idx = enc.getWriteIndex() + 4 /* length code */;
-            byte[] bytes = t.toBytes();
-            enc.writeBytes(bytes);
-            indexes.add(Pair.of(idx, idx + bytes.length));
+        this.encodedHeader = header.toBytes();
+        SimpleEncoder encTx = new SimpleEncoder();
+        SimpleEncoder encRe = new SimpleEncoder();
+        encTx.writeInt(transactions.size());
+        encRe.writeInt(results.size());
+        for (int i = 0; i < transactions.size(); i++) {
+            int idxTx = encTx.getWriteIndex();
+            int idxRe = encRe.getWriteIndex();
+            encTx.writeBytes(transactions.get(i).toBytes());
+            encRe.writeBytes(results.get(i).toBytes());
+            indexes.add(Pair.of(idxTx, idxRe));
         }
-        enc.writeInt(results.size());
-        for (TransactionResult r : results) {
-            enc.writeBytes(r.toBytes());
-        }
-        this.encodedWithoutBFT = enc.toBytes();
+        this.encodedTransactions = encTx.toBytes();
+        this.encodedResults = encRe.toBytes();
     }
 
     /**
@@ -258,15 +255,6 @@ public class Block implements Comparable<Block> {
         return new ArrayList<>(indexes);
     }
 
-    /**
-     * Check if this is the genesis block.
-     * 
-     * @return
-     */
-    public boolean isGensis() {
-        return isGensis;
-    }
-
     public byte[] getHash() {
         return header.getHash();
     }
@@ -307,8 +295,21 @@ public class Block implements Comparable<Block> {
         return header.getSignature();
     }
 
-    public byte[] toBytes() {
-        SimpleEncoder enc = new SimpleEncoder(encodedWithoutBFT);
+    public byte[] toBytesHeader() {
+        return encodedHeader;
+    }
+
+    public byte[] toBytesTransactions() {
+        return encodedTransactions;
+    }
+
+    public byte[] toBytesResults() {
+        return encodedResults;
+    }
+
+    public byte[] toBytesVotes() {
+        SimpleEncoder enc = new SimpleEncoder();
+
         enc.writeInt(view);
         enc.writeInt(votes.size());
         for (Signature vote : votes) {
@@ -318,30 +319,40 @@ public class Block implements Comparable<Block> {
         return enc.toBytes();
     }
 
-    public static Block fromBytes(byte[] bytes) {
-        SimpleDecoder dec = new SimpleDecoder(bytes);
-        BlockHeader header = BlockHeader.fromBytes(dec.readBytes());
+    public static Block fromBytes(byte[] h, byte[] t, byte[] r, byte[] v) {
+        BlockHeader header = BlockHeader.fromBytes(h);
 
+        SimpleDecoder dec = new SimpleDecoder(t);
         List<Transaction> transactions = new ArrayList<>();
         int n = dec.readInt();
         for (int i = 0; i < n; i++) {
             transactions.add(Transaction.fromBytes(dec.readBytes()));
         }
 
+        dec = new SimpleDecoder(r);
         List<TransactionResult> results = new ArrayList<>();
         n = dec.readInt();
         for (int i = 0; i < n; i++) {
             results.add(TransactionResult.fromBytes(dec.readBytes()));
         }
 
-        int view = dec.readInt();
+        int view = 0;
         List<Signature> votes = new ArrayList<>();
-        n = dec.readInt();
-        for (int i = 0; i < n; i++) {
-            votes.add(Signature.fromBytes(dec.readBytes()));
+
+        if (v != null) {
+            dec = new SimpleDecoder(v);
+            view = dec.readInt();
+            n = dec.readInt();
+            for (int i = 0; i < n; i++) {
+                votes.add(Signature.fromBytes(dec.readBytes()));
+            }
         }
 
         return new Block(header, transactions, results, view, votes);
+    }
+
+    public static Block fromBytes(byte[] h, byte[] t, byte[] r) {
+        return fromBytes(h, t, r, null);
     }
 
     @Override

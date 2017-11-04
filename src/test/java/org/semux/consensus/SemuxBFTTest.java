@@ -98,7 +98,8 @@ public class SemuxBFTTest {
 
         block.setView(view);
         block.setVotes(votes);
-        block = Block.fromBytes(block.toBytes());
+        block = Block.fromBytes(block.toBytesHeader(), block.toBytesTransactions(), block.toBytesResults(),
+                block.toBytesVotes());
 
         assertTrue(block.validate());
         for (Signature sig : block.getVotes()) {

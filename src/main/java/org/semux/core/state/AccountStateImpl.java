@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.semux.db.KVDB;
 import org.semux.utils.ByteArray;
+import org.semux.utils.Bytes;
 
 /**
  * Account state implementation.
@@ -157,10 +158,7 @@ public class AccountStateImpl implements AccountState {
     }
 
     protected ByteArray getKey(byte[] addr, byte type) {
-        byte[] k = Arrays.copyOf(addr, addr.length + 1);
-        k[addr.length] = type;
-
-        return ByteArray.of(k);
+        return ByteArray.of(Bytes.merge(addr, type));
     }
 
     protected ByteArray getStorageKey(byte[] addr, byte[] key) {

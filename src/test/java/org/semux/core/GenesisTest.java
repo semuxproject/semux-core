@@ -30,7 +30,7 @@ public class GenesisTest {
     public void testIsGenesis() {
         Genesis genesis = Genesis.getInstance();
 
-        assertTrue(genesis.isGensis());
+        assertTrue(genesis.getNumber() == 0);
     }
 
     @Test

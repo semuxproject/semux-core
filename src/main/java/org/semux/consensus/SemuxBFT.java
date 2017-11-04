@@ -721,7 +721,7 @@ public class SemuxBFT implements Consensus {
 
         // construct block
         long number = height;
-        byte[] prevHash = chain.getBlockHash(height - 1);
+        byte[] prevHash = chain.getBlockHeader(height - 1).getHash();
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
         BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,

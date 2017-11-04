@@ -8,7 +8,7 @@ package org.semux.core;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
+import org.semux.core.BlockchainImpl.StatsType;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hash;
 import org.semux.db.MemoryDB;
@@ -46,14 +47,14 @@ public class BlockchainImplTest {
     public void testGetLatest() {
         Blockchain chain = createBlockchain();
 
-        assertTrue(chain.getLatestBlockNumber() == 0);
+        assertEquals(0, chain.getLatestBlockNumber());
         assertNotNull(chain.getLatestBlockHash());
         assertNotNull(chain.getLatestBlock());
 
         Block newBlock = createBlock(1);
         chain.addBlock(newBlock);
 
-        assertFalse(chain.getLatestBlock().isGensis());
+        assertNotEquals(0, chain.getLatestBlockNumber());
         assertTrue(chain.getLatestBlock().getNumber() == newBlock.getNumber());
     }
 
@@ -61,15 +62,13 @@ public class BlockchainImplTest {
     public void testGetBlock() {
         Blockchain chain = createBlockchain();
 
-        assertTrue(chain.getBlock(0).isGensis());
-        assertTrue(chain.getBlock(0).getNumber() == 0);
+        assertEquals(0, chain.getBlock(0).getNumber());
         assertNull(chain.getBlock(1));
 
         long number = 1;
         Block newBlock = createBlock(number);
         chain.addBlock(newBlock);
 
-        assertFalse(chain.getBlock(number).isGensis());
         assertTrue(chain.getBlock(number).getNumber() == number);
         assertTrue(chain.getBlock(newBlock.getHash()).getNumber() == number);
     }
@@ -111,7 +110,8 @@ public class BlockchainImplTest {
     public void testSerialization() {
         Block block1 = createBlock(1);
 
-        Block block2 = Block.fromBytes(block1.toBytes());
+        Block block2 = Block.fromBytes(block1.toBytesHeader(), block1.toBytesTransactions(), block1.toBytesResults(),
+                block1.toBytesVotes());
         assertArrayEquals(block1.getHash(), block2.getHash());
         assertArrayEquals(block1.getCoinbase(), block2.getCoinbase());
         assertArrayEquals(block1.getPrevHash(), block2.getPrevHash());
@@ -144,13 +144,13 @@ public class BlockchainImplTest {
         assertEquals(0, chain.getNumberOfBlocksForged(address));
         assertEquals(0, chain.getNumberOfTurnsHit(address));
         assertEquals(0, chain.getNumberOfTurnsMissed(address));
-        chain.updateValidatorStats(address, Bytes.of("forged"), 1);
+        chain.adjustValidatorStats(address, StatsType.FORGED, 1);
         assertEquals(1, chain.getNumberOfBlocksForged(address));
-        chain.updateValidatorStats(address, Bytes.of("hit"), 1);
+        chain.adjustValidatorStats(address, StatsType.HIT, 1);
         assertEquals(1, chain.getNumberOfTurnsHit(address));
-        chain.updateValidatorStats(address, Bytes.of("missed"), 1);
+        chain.adjustValidatorStats(address, StatsType.MISSED, 1);
         assertEquals(1, chain.getNumberOfTurnsMissed(address));
-        chain.updateValidatorStats(address, Bytes.of("missed"), 1);
+        chain.adjustValidatorStats(address, StatsType.MISSED, 1);
         assertEquals(2, chain.getNumberOfTurnsMissed(address));
     }
 

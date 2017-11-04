@@ -122,8 +122,6 @@ public class Genesis extends Block {
         this.premines = premine;
         this.delegates = delegates;
         this.config = config;
-
-        this.isGensis = true;
     }
 
     /**

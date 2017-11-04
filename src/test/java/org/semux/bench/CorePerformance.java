@@ -57,7 +57,9 @@ public class CorePerformance {
         Block block = new Block(header.sign(key), txs, res);
 
         long t2 = System.nanoTime();
-        logger.info("block size: {} KB", block.toBytes().length / 1024);
+        int size = block.toBytesHeader().length + block.toBytesTransactions().length + block.toBytesResults().length
+                + block.toBytesVotes().length;
+        logger.info("block size: {} KB", size / 1024);
         logger.info("Perf_block_creation: {} ms", (t2 - t1) / 1_000_000);
         return block;
     }

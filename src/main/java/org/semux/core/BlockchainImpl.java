@@ -26,7 +26,6 @@ import org.semux.crypto.Hex;
 import org.semux.db.DBFactory;
 import org.semux.db.DBName;
 import org.semux.db.KVDB;
-import org.semux.utils.ByteArray;
 import org.semux.utils.Bytes;
 import org.semux.utils.SimpleDecoder;
 import org.semux.utils.SimpleEncoder;
@@ -39,21 +38,22 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * index DB structure:
  * 
- * ["latest_block_hash"] => [block_hash]
- * ["validators"] => [encode(validator_list)]
- * ["forged", address] => [number_of_blocks_forged]
- * ["hit", address] => [number_of_turns_hit]
- * ["missed", address] => [number_of_turns_missed]
+ * [0] => [block_hash_number]
+ * [1] => [validators]
+ * [2, address] => [number_of_blocks_forged, number_of_turns_hit, number_of_turns_missed]
  * 
- * [block_number] => [block_hash]
- * [transaciton_hash] => [block_number, from, to]
- * [address, n] => [transaction] OR [transaction_hash]
+ * [3, block_hash] => [block_number]
+ * [4, transaciton_hash] => [block_number, from, to]
+ * [5, address, n] => [transaction] OR [transaction_hash]
  * </pre>
  *
  * <pre>
  * block DB structure:
  * 
- * [block_hash] => [block]
+ * [block_number, 0] => [block_header]
+ * [block_number, 1] => [block_transactions]
+ * [block_number, 2] => [block_results]
+ * [block_number, 3] => [block_votes]
  * </pre>
  * 
  */
@@ -61,11 +61,21 @@ public class BlockchainImpl implements Blockchain {
 
     private static final Logger logger = LoggerFactory.getLogger(BlockchainImpl.class);
 
-    private static byte[] KEY_LATEST_BLOCK_HASH = Bytes.of("latest_block_hash");
-    private static byte[] KEY_VALIDATORS = Bytes.of("validators");
-    private static byte[] FORGED = Bytes.of("forged");
-    private static byte[] HIT = Bytes.of("hit");
-    private static byte[] MISSED = Bytes.of("missed");
+    protected static byte TYPE_LATEST_BLOCK_NUMBER = 0;
+    protected static byte TYPE_VALIDATORS = 1;
+    protected static byte TYPE_VALIDATOR_STATS = 2;
+    protected static byte TYPE_BLOCK_HASH = 3;
+    protected static byte TYPE_TRNSACTION_HASH = 4;
+    protected static byte TYPE_ACCOUNT_TRANSACTION = 5;
+
+    protected static byte TYPE_BLOCK_HEADER = 0;
+    protected static byte TYPE_BLOCK_TRANSACTIONS = 1;
+    protected static byte TYPE_BLOCK_RESULTS = 2;
+    protected static byte TYPE_BLOCK_VOTES = 3;
+
+    protected enum StatsType {
+        FORGED, HIT, MISSED
+    }
 
     private KVDB indexDB;
     private KVDB blockDB;
@@ -94,34 +104,30 @@ public class BlockchainImpl implements Blockchain {
 
         this.genesis = Genesis.getInstance();
 
-        byte[] hash = indexDB.get(KEY_LATEST_BLOCK_HASH);
-        if (hash == null) {
-            /*
-             * Update account/delegate state for the genesis block
-             */
-            for (Entry<ByteArray, Premine> e : genesis.getPremines().entrySet()) {
-                Premine p = e.getValue();
-                accountState.adjustAvailable(p.getAddress(), p.getAmount());
+        byte[] number = indexDB.get(Bytes.of(TYPE_LATEST_BLOCK_NUMBER));
+        if (number == null) {
+            logger.info("Initializing genesis block");
 
-                for (int i = 1; i < p.getPeriods(); i++) {
+            // pre-allocation
+            for (Premine p : genesis.getPremines().values()) {
+                for (int i = 0; i < p.getPeriods(); i++) {
                     long blockNum = i * 365 * Config.DAY;
                     periods.computeIfAbsent(blockNum, (k) -> {
                         return new ArrayList<>();
                     }).add(p);
                 }
             }
+
+            // delegates
             for (Entry<String, byte[]> e : genesis.getDelegates().entrySet()) {
                 delegateState.register(e.getValue(), Bytes.of(e.getKey()), 0);
             }
-
-            accountState.commit();
             delegateState.commit();
 
-            updateValidators(genesis.getNumber());
-
-            latestBlock = genesis;
+            // add block
+            addBlock(genesis);
         } else {
-            latestBlock = getBlock(hash);
+            latestBlock = getBlock(Bytes.toLong(number));
         }
     }
 
@@ -151,52 +157,37 @@ public class BlockchainImpl implements Blockchain {
     }
 
     @Override
-    public byte[] getBlockHash(long number) {
-        if (genesis.getNumber() == number) {
-            return genesis.getHash();
-        }
-
-        return indexDB.get(Bytes.of(number));
+    public long getBlockNumber(byte[] hash) {
+        byte[] number = indexDB.get(hash);
+        return (number == null) ? -1 : Bytes.toLong(number);
     }
 
     @Override
     public Block getBlock(long number) {
-        if (genesis.getNumber() == number) {
-            return genesis;
-        }
+        byte[] header = blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)));
+        byte[] transactions = blockDB.get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)));
+        byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)));
+        byte[] votes = blockDB.get(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)));
 
-        byte[] bytes = indexDB.get(Bytes.of(number));
-        return bytes == null ? null : getBlock(bytes);
+        return (header == null) ? null : Block.fromBytes(header, transactions, results, votes);
     }
 
     @Override
     public Block getBlock(byte[] hash) {
-        if (Arrays.equals(genesis.getHash(), hash)) {
-            return genesis;
-        }
-
-        byte[] bytes = blockDB.get(hash);
-        return bytes == null ? null : Block.fromBytes(bytes);
+        long number = getBlockNumber(hash);
+        return (number == -1) ? null : getBlock(number);
     }
 
     @Override
     public BlockHeader getBlockHeader(long number) {
-        if (genesis.getNumber() == number) {
-            return genesis.getHeader();
-        }
-
-        byte[] bytes = indexDB.get(Bytes.of(number));
-        return bytes == null ? null : getBlockHeader(bytes);
+        byte[] header = blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)));
+        return (header == null) ? null : BlockHeader.fromBytes(header);
     }
 
     @Override
     public BlockHeader getBlockHeader(byte[] hash) {
-        if (Arrays.equals(genesis.getHash(), hash)) {
-            return genesis.getHeader();
-        }
-
-        byte[] bytes = blockDB.get(hash);
-        return bytes == null ? null : BlockHeader.fromBytes(new SimpleDecoder(bytes).readBytes());
+        long number = getBlockNumber(hash);
+        return (number == -1) ? null : getBlockHeader(number);
     }
 
     @Override
@@ -209,13 +200,13 @@ public class BlockchainImpl implements Blockchain {
             }
 
             SimpleDecoder dec = new SimpleDecoder(bytes);
-            long blockNumber = dec.readLong();
-            int from = dec.readInt();
-            int to = dec.readInt();
+            long number = dec.readLong();
+            int start = dec.readInt();
+            dec.readInt();
 
-            // number => block_hash => block_data
-            byte[] block = blockDB.get(indexDB.get(Bytes.of(blockNumber)));
-            return Transaction.fromBytes(Arrays.copyOfRange(block, from, to));
+            byte[] transactions = blockDB.get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)));
+            dec = new SimpleDecoder(transactions, start);
+            return Transaction.fromBytes(dec.readBytes());
         }
 
         return null;
@@ -242,7 +233,7 @@ public class BlockchainImpl implements Blockchain {
             System.exit(-1);
         }
 
-        if (number != latestBlock.getNumber() + 1) {
+        if (number != genesis.getNumber() && number != latestBlock.getNumber() + 1) {
             logger.error("Adding wrong block: number = {}, expected = {}", number, latestBlock.getNumber() + 1);
             throw new RuntimeException("Blocks can only be added sequentially");
         }
@@ -255,16 +246,19 @@ public class BlockchainImpl implements Blockchain {
             as.commit();
         }
 
-        List<Pair<Integer, Integer>> txIndices = block.getTransacitonIndexes();
-        byte[] bytes = block.toBytes();
-
         // [1] update block
-        blockDB.put(hash, bytes);
-        indexDB.put(Bytes.of(number), hash);
+        blockDB.put(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)), block.toBytesHeader());
+        blockDB.put(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)), block.toBytesTransactions());
+        blockDB.put(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)), block.toBytesResults());
+        blockDB.put(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)), block.toBytesVotes());
+
+        indexDB.put(hash, Bytes.of(number));
 
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
+        List<Pair<Integer, Integer>> txIndices = block.getTransacitonIndexes();
         long reward = Config.getBlockReward(number);
+
         for (int i = 0; i < txs.size(); i++) {
             Transaction tx = txs.get(i);
             reward += tx.getFee();
@@ -283,20 +277,22 @@ public class BlockchainImpl implements Blockchain {
             }
         }
 
-        // [4] coinbase transaction
-        Transaction tx = new Transaction(TransactionType.COINBASE, Bytes.EMPTY_ADDRESS, block.getCoinbase(), reward, 0,
-                block.getNumber(), block.getTimestamp(), Bytes.EMPY_BYTES).sign(new EdDSA());
-        indexDB.put(tx.getHash(), tx.toBytes());
-        addTransactionToAccount(tx, block.getCoinbase());
+        if (number != genesis.getNumber()) {
+            // [4] coinbase transaction
+            Transaction tx = new Transaction(TransactionType.COINBASE, Bytes.EMPTY_ADDRESS, block.getCoinbase(), reward,
+                    0, block.getNumber(), block.getTimestamp(), Bytes.EMPY_BYTES).sign(new EdDSA());
+            indexDB.put(tx.getHash(), tx.toBytes());
+            addTransactionToAccount(tx, block.getCoinbase());
 
-        // [5] update validator statistics
-        List<String> validators = getValidators();
-        String primary = Config.getPrimaryValidator(validators, number, 0);
-        updateValidatorStats(block.getCoinbase(), FORGED, 1);
-        if (primary.equals(Hex.encode(block.getCoinbase()))) {
-            updateValidatorStats(Hex.decode(primary), HIT, 1);
-        } else {
-            updateValidatorStats(Hex.decode(primary), MISSED, 1);
+            // [5] update validator statistics
+            List<String> validators = getValidators();
+            String primary = Config.getPrimaryValidator(validators, number, 0);
+            adjustValidatorStats(block.getCoinbase(), StatsType.FORGED, 1);
+            if (primary.equals(Hex.encode(block.getCoinbase()))) {
+                adjustValidatorStats(Hex.decode(primary), StatsType.HIT, 1);
+            } else {
+                adjustValidatorStats(Hex.decode(primary), StatsType.MISSED, 1);
+            }
         }
 
         // [6] update validator set
@@ -306,7 +302,7 @@ public class BlockchainImpl implements Blockchain {
 
         // [7] update latest_block
         latestBlock = block;
-        indexDB.put(KEY_LATEST_BLOCK_HASH, hash);
+        indexDB.put(Bytes.of(TYPE_LATEST_BLOCK_NUMBER), Bytes.of(number));
 
         for (BlockchainListener listener : listeners) {
             listener.onBlockAdded(block);
@@ -347,7 +343,7 @@ public class BlockchainImpl implements Blockchain {
     public List<String> getValidators() {
         List<String> validators = new ArrayList<>();
 
-        byte[] v = indexDB.get(KEY_VALIDATORS);
+        byte[] v = indexDB.get(Bytes.of(TYPE_VALIDATORS));
         if (v != null) {
             SimpleDecoder dec = new SimpleDecoder(v);
             int n = dec.readInt();
@@ -379,46 +375,68 @@ public class BlockchainImpl implements Blockchain {
         for (String v : validators) {
             enc.writeString(v);
         }
-        indexDB.put(KEY_VALIDATORS, enc.toBytes());
+        indexDB.put(Bytes.of(TYPE_VALIDATORS), enc.toBytes());
     }
 
     @Override
     public long getNumberOfBlocksForged(byte[] address) {
-        byte[] key = Bytes.merge(FORGED, address);
-        byte[] value = indexDB.get(key);
-
-        return (value == null) ? 0 : Bytes.toLong(value);
+        return getValidatorStats(address).getForged();
     }
 
     @Override
     public long getNumberOfTurnsHit(byte[] address) {
-        byte[] key = Bytes.merge(HIT, address);
-        byte[] value = indexDB.get(key);
-
-        return value != null ? Bytes.toLong(value) : 0;
+        return getValidatorStats(address).getHit();
     }
 
     @Override
     public long getNumberOfTurnsMissed(byte[] address) {
-        byte[] key = Bytes.merge(MISSED, address);
-        byte[] value = indexDB.get(key);
-
-        return value != null ? Bytes.toLong(value) : 0;
+        return getValidatorStats(address).getMissed();
     }
 
     /**
-     * Updates validator statistics.
+     * Returns the statistics of a validator.
      * 
      * @param address
+     * @return
+     */
+    protected ValidatorStats getValidatorStats(byte[] address) {
+        byte[] key = Bytes.merge(TYPE_VALIDATOR_STATS, address);
+        byte[] value = indexDB.get(key);
+
+        return (value == null) ? new ValidatorStats(0, 0, 0) : ValidatorStats.fromBytes(value);
+    }
+
+    /**
+     * Adjusts validator statistics.
+     * 
+     * @param address
+     *            validator address
+     * @param type
      *            stats type
      * @param forged
      *            forged or missed a block
      */
-    protected void updateValidatorStats(byte[] address, byte[] type, long delta) {
-        byte[] key = Bytes.merge(type, address);
+    protected void adjustValidatorStats(byte[] address, StatsType type, long delta) {
+        byte[] key = Bytes.merge(TYPE_VALIDATOR_STATS, address);
         byte[] value = indexDB.get(key);
 
-        indexDB.put(key, (value == null) ? Bytes.of(delta) : Bytes.of(Bytes.toLong(value) + delta));
+        ValidatorStats stats = (value == null) ? new ValidatorStats(0, 0, 0) : ValidatorStats.fromBytes(value);
+
+        switch (type) {
+        case FORGED:
+            stats.setForged(stats.getForged() + delta);
+            break;
+        case HIT:
+            stats.setHit(stats.getHit() + delta);
+            break;
+        case MISSED:
+            stats.setMissed(stats.getMissed() + delta);
+            break;
+        default:
+            break;
+        }
+
+        indexDB.put(key, stats.toBytes());
     }
 
     /**
@@ -454,4 +472,55 @@ public class BlockchainImpl implements Blockchain {
         return Bytes.merge(address, Bytes.of(n));
     }
 
+    protected static class ValidatorStats {
+        private long forged;
+        private long hit;
+        private long missed;
+
+        public ValidatorStats(long forged, long hit, long missed) {
+            this.forged = forged;
+            this.hit = hit;
+            this.missed = missed;
+        }
+
+        public long getForged() {
+            return forged;
+        }
+
+        public void setForged(long forged) {
+            this.forged = forged;
+        }
+
+        public long getHit() {
+            return hit;
+        }
+
+        public void setHit(long hit) {
+            this.hit = hit;
+        }
+
+        public long getMissed() {
+            return missed;
+        }
+
+        public void setMissed(long missed) {
+            this.missed = missed;
+        }
+
+        public byte[] toBytes() {
+            SimpleEncoder enc = new SimpleEncoder();
+            enc.writeLong(forged);
+            enc.writeLong(hit);
+            enc.writeLong(missed);
+            return enc.toBytes();
+        }
+
+        public static ValidatorStats fromBytes(byte[] bytes) {
+            SimpleDecoder dec = new SimpleDecoder(bytes);
+            long forged = dec.readLong();
+            long hit = dec.readLong();
+            long missed = dec.readLong();
+            return new ValidatorStats(forged, hit, missed);
+        }
+    }
 }

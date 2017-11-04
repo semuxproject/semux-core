@@ -35,14 +35,19 @@ public class Proposal {
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeBytes(proof.toBytes());
-        enc.writeBytes(block.toBytes());
+        enc.writeBytes(block.toBytesHeader());
+        enc.writeBytes(block.toBytesTransactions());
+        enc.writeBytes(block.toBytesResults());
         this.encoded = enc.toBytes();
     }
 
     public Proposal(byte[] encoded, byte[] signature) {
         SimpleDecoder dec = new SimpleDecoder(encoded);
         this.proof = Proof.fromBytes(dec.readBytes());
-        this.block = Block.fromBytes(dec.readBytes());
+        byte[] header = dec.readBytes();
+        byte[] transactions = dec.readBytes();
+        byte[] results = dec.readBytes();
+        this.block = Block.fromBytes(header, transactions, results);
 
         this.encoded = encoded;
         this.signature = Signature.fromBytes(signature);

@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,6 +14,7 @@ import org.semux.Config;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.utils.Bytes;
+import org.semux.utils.SimpleDecoder;
 
 public class BlockTest {
     private long number = 1;
@@ -63,7 +63,8 @@ public class BlockTest {
         hash = block.getHash();
         signature = block.getSignature().toBytes();
 
-        testFields(Block.fromBytes(block.toBytes()));
+        testFields(Block.fromBytes(block.toBytesHeader(), block.toBytesTransactions(), block.toBytesResults(),
+                block.toBytesVotes()));
     }
 
     private void testFields(Block block) {
@@ -90,10 +91,9 @@ public class BlockTest {
         List<Pair<Integer, Integer>> indexes = block.getTransacitonIndexes();
         assertEquals(1, indexes.size());
 
-        byte[] bytes = block.toBytes();
         Pair<Integer, Integer> index = indexes.get(0);
-        Transaction tx2 = Transaction
-                .fromBytes(Arrays.copyOfRange(bytes, index.getLeft(), index.getLeft() + index.getRight()));
+        SimpleDecoder dec = new SimpleDecoder(block.toBytesTransactions(), index.getLeft());
+        Transaction tx2 = Transaction.fromBytes(dec.readBytes());
         assertArrayEquals(tx.getHash(), tx2.getHash());
     }
 }

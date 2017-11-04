@@ -62,6 +62,36 @@ public class Bytes {
     }
 
     /**
+     * Merge byte array and byte
+     * 
+     * @param b1
+     * @param b2
+     * @return
+     */
+    public static byte[] merge(byte[] b1, byte b2) {
+        byte[] res = new byte[b1.length + 1];
+        System.arraycopy(b1, 0, res, 0, b1.length);
+        res[b1.length] = b2;
+
+        return res;
+    }
+
+    /**
+     * Merge byte and byte array.
+     * 
+     * @param b1
+     * @param b2
+     * @return
+     */
+    public static byte[] merge(byte b1, byte[] b2) {
+        byte[] res = new byte[1 + b2.length];
+        res[0] = b1;
+        System.arraycopy(b2, 0, res, 1, b2.length);
+
+        return res;
+    }
+
+    /**
      * Merge three byte arrays into one.
      * 
      * @param b1

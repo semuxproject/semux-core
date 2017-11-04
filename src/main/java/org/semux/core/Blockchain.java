@@ -35,12 +35,12 @@ public interface Blockchain {
     public long getLatestBlockNumber();
 
     /**
-     * Get block hash by number.
+     * Get block number by hash.
      * 
-     * @param number
+     * @param hash
      * @return
      */
-    public byte[] getBlockHash(long number);
+    public long getBlockNumber(byte[] hash);
 
     /**
      * Get genesis block.
