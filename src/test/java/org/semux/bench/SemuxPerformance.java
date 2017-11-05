@@ -15,9 +15,10 @@ import org.semux.utils.Bytes;
 import org.semux.utils.SystemUtil;
 
 public class SemuxPerformance {
-    private static String password;
-
     private static InetSocketAddress server = new InetSocketAddress("localhost", 5171);
+    private static String username = "";
+    private static String password = "";
+
     private static int coinbase = 1;
     private static int tps = 500;
 
@@ -32,7 +33,8 @@ public class SemuxPerformance {
             params.put("data", Bytes.EMPY_BYTES);
             params.put("password", password);
 
-            JSONObject response = ApiUtil.request(server, "transfer", params);
+            ApiUtil api = new ApiUtil(server, username, password);
+            JSONObject response = api.request("transfer", params);
             if (!response.getBoolean("success")) {
                 System.out.println(response);
                 return;
@@ -48,6 +50,7 @@ public class SemuxPerformance {
     }
 
     public static void main(String[] args) throws Exception {
+        username = SystemUtil.readPassword("Please enter your username: ");
         password = SystemUtil.readPassword();
 
         while (true) {
