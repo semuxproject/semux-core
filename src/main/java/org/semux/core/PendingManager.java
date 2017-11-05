@@ -294,15 +294,12 @@ public class PendingManager implements Runnable, BlockchainListener {
             return 0;
         }
 
-        AccountState as = pendingAS.track();
-        DelegateState ds = pendingDS.track();
-        TransactionExecutor exec = new TransactionExecutor();
-
-        long nonce = as.getAccount(tx.getFrom()).getNonce();
         int cnt = 0;
-        while (tx != null && tx.getNonce() == nonce) {
+        while (tx != null && tx.getNonce() == getNonce(tx.getFrom())) {
             // execute transactions
-            TransactionResult result = exec.execute(tx, as, ds);
+            AccountState as = pendingAS.track();
+            DelegateState ds = pendingDS.track();
+            TransactionResult result = new TransactionExecutor().execute(tx, as, ds);
 
             if (result.isValid()) {
                 // commit state updates
@@ -313,6 +310,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                 poolMap.put(createKey(tx), tx);
                 transactions.add(tx);
                 results.add(result);
+                cnt++;
 
                 // relay transaction
                 if (relay) {
@@ -331,13 +329,11 @@ public class PendingManager implements Runnable, BlockchainListener {
                 return cnt;
             }
 
-            nonce++;
-            cnt++;
-            tx = cache.get(createKey(tx.getFrom(), nonce));
+            tx = cache.get(createKey(tx.getFrom(), getNonce(tx.getFrom())));
         }
 
         // add to cache
-        if (tx != null && tx.getNonce() > nonce) {
+        if (tx != null && tx.getNonce() > getNonce(tx.getFrom())) {
             cache.put(createKey(tx), tx);
         }
 
