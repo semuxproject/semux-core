@@ -40,7 +40,7 @@ public class ConfigTest {
         for (int i = 0; i < 60 * Config.BLOCKS_PER_DAY; i++) {
             int n = Config.getNumberOfValidators(i);
             if (n != last) {
-                assertTrue(n > last);
+                assertTrue(n > last && (n - last == 1 || last == 0));
                 logger.info("block = {}, validators = {}", i, n);
                 last = n;
             }

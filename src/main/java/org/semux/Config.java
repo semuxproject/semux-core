@@ -408,7 +408,7 @@ public class Config {
     public static int getNumberOfValidators(long number) {
         long step = 2 * 60 * 2;
 
-        if (number < 18 * step) {
+        if (number < 48 * step) {
             return (int) (16 + number / step);
         } else {
             return 64;
