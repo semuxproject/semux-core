@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import org.semux.Config;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
+import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
@@ -440,9 +441,10 @@ public class ApiHandlerImpl implements ApiHandler {
         obj.put("name", new String(delegate.getName()));
         obj.put("votes", delegate.getVotes());
         obj.put("registeredAt", delegate.getRegisteredAt());
-        obj.put("numberOfBlocksForged", chain.getNumberOfBlocksForged(delegate.getAddress()));
-        obj.put("numberOfTurnsHit", chain.getNumberOfTurnsHit(delegate.getAddress()));
-        obj.put("numberOfTurnsMissed", chain.getNumberOfTurnsMissed(delegate.getAddress()));
+        ValidatorStats s = chain.getValidatorStats(delegate.getAddress());
+        obj.put("blocksForged", s.getBlocksForged());
+        obj.put("turnsHit", s.getTurnsHit());
+        obj.put("turnsMissed", s.getTurnsMissed());
 
         return obj;
     }

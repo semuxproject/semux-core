@@ -107,6 +107,19 @@ public class BlockchainImplTest {
     }
 
     @Test
+    public void testGetTransactionResult() {
+        Blockchain chain = createBlockchain();
+
+        assertNull(chain.getTransaction(tx.getHash()));
+
+        Block newBlock = createBlock(1);
+        chain.addBlock(newBlock);
+
+        TransactionResult r = chain.getTransactionResult(tx.getHash());
+        assertArrayEquals(res.toBytes(), r.toBytes());
+    }
+
+    @Test
     public void testSerialization() {
         Block block1 = createBlock(1);
 
@@ -141,17 +154,20 @@ public class BlockchainImplTest {
         BlockchainImpl chain = createBlockchain();
         byte[] address = Bytes.random(20);
 
-        assertEquals(0, chain.getNumberOfBlocksForged(address));
-        assertEquals(0, chain.getNumberOfTurnsHit(address));
-        assertEquals(0, chain.getNumberOfTurnsMissed(address));
+        assertEquals(0, chain.getValidatorStats(address).getBlocksForged());
+        assertEquals(0, chain.getValidatorStats(address).getTurnsHit());
+        assertEquals(0, chain.getValidatorStats(address).getTurnsMissed());
+
         chain.adjustValidatorStats(address, StatsType.FORGED, 1);
-        assertEquals(1, chain.getNumberOfBlocksForged(address));
+        assertEquals(1, chain.getValidatorStats(address).getBlocksForged());
+
         chain.adjustValidatorStats(address, StatsType.HIT, 1);
-        assertEquals(1, chain.getNumberOfTurnsHit(address));
+        assertEquals(1, chain.getValidatorStats(address).getTurnsHit());
+
         chain.adjustValidatorStats(address, StatsType.MISSED, 1);
-        assertEquals(1, chain.getNumberOfTurnsMissed(address));
+        assertEquals(1, chain.getValidatorStats(address).getTurnsMissed());
         chain.adjustValidatorStats(address, StatsType.MISSED, 1);
-        assertEquals(2, chain.getNumberOfTurnsMissed(address));
+        assertEquals(2, chain.getValidatorStats(address).getTurnsMissed());
     }
 
     private BlockchainImpl createBlockchain() {

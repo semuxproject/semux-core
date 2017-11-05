@@ -217,7 +217,7 @@ public class GUI {
 
             // most recent transactions of this account
             byte[] address = wa.getKey().toAddress();
-            int total = chain.getTotalTransactions(address);
+            int total = chain.getTransactionCount(address);
             List<Transaction> list = chain.getTransactions(address, Math.max(0, total - TRANSACTION_LIMIT), total);
             Collections.reverse(list);
             wa.setTransactions(list);

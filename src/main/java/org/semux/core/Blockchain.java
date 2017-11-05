@@ -8,34 +8,35 @@ package org.semux.core;
 
 import java.util.List;
 
+import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 
 public interface Blockchain {
 
     /**
-     * Get the latest block.
+     * Returns the latest block.
      * 
      * @return
      */
     public Block getLatestBlock();
 
     /**
-     * Get the hash of the latest block.
+     * Returns the hash of the latest block.
      * 
      * @return
      */
     public byte[] getLatestBlockHash();
 
     /**
-     * Get the number of the latest block.
+     * Returns the number of the latest block.
      * 
      * @return
      */
     public long getLatestBlockNumber();
 
     /**
-     * Get block number by hash.
+     * Returns block number by hash.
      * 
      * @param hash
      * @return
@@ -43,14 +44,14 @@ public interface Blockchain {
     public long getBlockNumber(byte[] hash);
 
     /**
-     * Get genesis block.
+     * Returns genesis block.
      * 
      * @return
      */
     public Genesis getGenesis();
 
     /**
-     * Get block by number.
+     * Returns block by number.
      * 
      * @param number
      * @return
@@ -58,7 +59,7 @@ public interface Blockchain {
     public Block getBlock(long number);
 
     /**
-     * Get block by its hash.
+     * Returns block by its hash.
      * 
      * @param hash
      * @return
@@ -66,7 +67,7 @@ public interface Blockchain {
     public Block getBlock(byte[] hash);
 
     /**
-     * Get block header by block number.
+     * Returns block header by block number.
      * 
      * @param number
      * @return
@@ -74,7 +75,7 @@ public interface Blockchain {
     public BlockHeader getBlockHeader(long number);
 
     /**
-     * Get block header by block hash.
+     * Returns block header by block hash.
      * 
      * @param hash
      * @return
@@ -82,7 +83,7 @@ public interface Blockchain {
     public BlockHeader getBlockHeader(byte[] hash);
 
     /**
-     * Get transaction by its hash.
+     * Returns transaction by its hash.
      * 
      * @param hash
      * @return
@@ -90,7 +91,15 @@ public interface Blockchain {
     public Transaction getTransaction(byte[] hash);
 
     /**
-     * Get the block number of the given transaction.
+     * Returns transaction result.
+     * 
+     * @param hash
+     * @return
+     */
+    public TransactionResult getTransactionResult(byte[] hash);
+
+    /**
+     * Returns the block number of the given transaction.
      * 
      * @param hash
      * @return
@@ -104,7 +113,7 @@ public interface Blockchain {
      *            account address
      * @return
      */
-    public int getTotalTransactions(byte[] address);
+    public int getTransactionCount(byte[] address);
 
     /**
      * Returns transactions from/to an address.
@@ -127,50 +136,33 @@ public interface Blockchain {
     public void addBlock(Block block);
 
     /**
-     * Get the account state.
+     * Returns account state.
      * 
      * @return
      */
     public AccountState getAccountState();
 
     /**
-     * Get the delegate state.
+     * Returns delegate state.
      * 
      * @return
      */
     public DelegateState getDelegateState();
 
     /**
-     * Get the validator set based on current state.
+     * Returns the validator set based on current state.
      * 
      * @return the peerIds of validators
      */
     public List<String> getValidators();
 
     /**
-     * Returns the number of blocks forged by the given delegate
-     * 
-     * @param address
-     *            delegate address
-     * @return
-     */
-    public long getNumberOfBlocksForged(byte[] address);
-
-    /**
-     * Returns the number of turns missed by the given delegate.
+     * Returns the statistics of a validator.
      * 
      * @param address
      * @return
      */
-    public long getNumberOfTurnsMissed(byte[] address);
-
-    /**
-     * Returns the number of turns missed by the given delegate.
-     * 
-     * @param address
-     * @return
-     */
-    public long getNumberOfTurnsHit(byte[] address);
+    public ValidatorStats getValidatorStats(byte[] address);
 
     /**
      * Register a blockchain listener.

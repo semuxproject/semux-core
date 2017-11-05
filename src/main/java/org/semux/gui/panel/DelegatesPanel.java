@@ -32,6 +32,7 @@ import javax.swing.table.TableRowSorter;
 import org.semux.Config;
 import org.semux.Kernel;
 import org.semux.core.Blockchain;
+import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
@@ -472,9 +473,11 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             for (WalletDelegate wd : delegates) {
                 long vote = ds.getVote(voter, wd.getAddress());
                 wd.setVotesFromMe(vote);
-                wd.setNumberOfBlocksForged(chain.getNumberOfBlocksForged(wd.getAddress()));
-                wd.setNumberOfTurnsHit(chain.getNumberOfTurnsHit(wd.getAddress()));
-                wd.setNumberOfTurnsMissed(chain.getNumberOfTurnsMissed(wd.getAddress()));
+
+                ValidatorStats s = chain.getValidatorStats(wd.getAddress());
+                wd.setNumberOfBlocksForged(s.getBlocksForged());
+                wd.setNumberOfTurnsHit(s.getTurnsHit());
+                wd.setNumberOfTurnsMissed(s.getTurnsMissed());
             }
         }
 

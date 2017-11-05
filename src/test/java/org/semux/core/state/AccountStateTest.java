@@ -67,7 +67,44 @@ public class AccountStateTest {
     }
 
     @Test
-    public void testAdjustAvailable() {
+    public void testAvailable() {
+        byte[] addr = Bytes.random(20);
+        assertEquals(0, state.getAccount(addr).getAvailable());
+        state.adjustAvailable(addr, 20);
+        assertEquals(20, state.getAccount(addr).getAvailable());
 
+        AccountState state2 = state.track();
+        assertEquals(20, state2.getAccount(addr).getAvailable());
+
+        state.rollback();
+        assertEquals(0, state2.getAccount(addr).getAvailable());
+    }
+
+    @Test
+    public void testLocked() {
+        byte[] addr = Bytes.random(20);
+        assertEquals(0, state.getAccount(addr).getLocked());
+        state.adjustLocked(addr, 20);
+        assertEquals(20, state.getAccount(addr).getLocked());
+
+        AccountState state2 = state.track();
+        assertEquals(20, state2.getAccount(addr).getLocked());
+
+        state.rollback();
+        assertEquals(0, state2.getAccount(addr).getLocked());
+    }
+
+    @Test
+    public void testNonce() {
+        byte[] addr = Bytes.random(20);
+        assertEquals(0, state.getAccount(addr).getNonce());
+        state.increaseNonce(addr);
+        assertEquals(1, state.getAccount(addr).getNonce());
+
+        AccountState state2 = state.track();
+        assertEquals(1, state2.getAccount(addr).getNonce());
+
+        state.rollback();
+        assertEquals(0, state2.getAccount(addr).getNonce());
     }
 }

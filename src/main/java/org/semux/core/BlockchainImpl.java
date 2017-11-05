@@ -106,8 +106,6 @@ public class BlockchainImpl implements Blockchain {
 
         byte[] number = indexDB.get(Bytes.of(TYPE_LATEST_BLOCK_NUMBER));
         if (number == null) {
-            logger.info("Initializing genesis block");
-
             // pre-allocation
             for (Premine p : genesis.getPremines().values()) {
                 for (int i = 0; i < p.getPeriods(); i++) {
@@ -207,6 +205,28 @@ public class BlockchainImpl implements Blockchain {
             byte[] transactions = blockDB.get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)));
             dec = new SimpleDecoder(transactions, start);
             return Transaction.fromBytes(dec.readBytes());
+        }
+
+        return null;
+    }
+
+    @Override
+    public TransactionResult getTransactionResult(byte[] hash) {
+        byte[] bytes = indexDB.get(hash);
+        if (bytes != null) {
+            // coinbase transaction
+            if (bytes.length > 64) {
+                return new TransactionResult(true);
+            }
+
+            SimpleDecoder dec = new SimpleDecoder(bytes);
+            long number = dec.readLong();
+            dec.readInt();
+            int start = dec.readInt();
+
+            byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)));
+            dec = new SimpleDecoder(results, start);
+            return TransactionResult.fromBytes(dec.readBytes());
         }
 
         return null;
@@ -320,7 +340,7 @@ public class BlockchainImpl implements Blockchain {
     }
 
     @Override
-    public int getTotalTransactions(byte[] address) {
+    public int getTransactionCount(byte[] address) {
         byte[] cnt = indexDB.get(address);
         return (cnt == null) ? 0 : Bytes.toInt(cnt);
     }
@@ -329,7 +349,7 @@ public class BlockchainImpl implements Blockchain {
     public List<Transaction> getTransactions(byte[] address, int from, int to) {
         List<Transaction> list = new ArrayList<>();
 
-        int total = getTotalTransactions(address);
+        int total = getTransactionCount(address);
         for (int i = from; i < total && i < to; i++) {
             byte[] key = getNthTransactionIndexKey(address, i);
             byte[] value = indexDB.get(key);
@@ -355,6 +375,14 @@ public class BlockchainImpl implements Blockchain {
         return validators;
     }
 
+    @Override
+    public ValidatorStats getValidatorStats(byte[] address) {
+        byte[] key = Bytes.merge(TYPE_VALIDATOR_STATS, address);
+        byte[] value = indexDB.get(key);
+
+        return (value == null) ? new ValidatorStats(0, 0, 0) : ValidatorStats.fromBytes(value);
+    }
+
     /**
      * Updates the validator set.
      * 
@@ -378,34 +406,6 @@ public class BlockchainImpl implements Blockchain {
         indexDB.put(Bytes.of(TYPE_VALIDATORS), enc.toBytes());
     }
 
-    @Override
-    public long getNumberOfBlocksForged(byte[] address) {
-        return getValidatorStats(address).getForged();
-    }
-
-    @Override
-    public long getNumberOfTurnsHit(byte[] address) {
-        return getValidatorStats(address).getHit();
-    }
-
-    @Override
-    public long getNumberOfTurnsMissed(byte[] address) {
-        return getValidatorStats(address).getMissed();
-    }
-
-    /**
-     * Returns the statistics of a validator.
-     * 
-     * @param address
-     * @return
-     */
-    protected ValidatorStats getValidatorStats(byte[] address) {
-        byte[] key = Bytes.merge(TYPE_VALIDATOR_STATS, address);
-        byte[] value = indexDB.get(key);
-
-        return (value == null) ? new ValidatorStats(0, 0, 0) : ValidatorStats.fromBytes(value);
-    }
-
     /**
      * Adjusts validator statistics.
      * 
@@ -413,7 +413,7 @@ public class BlockchainImpl implements Blockchain {
      *            validator address
      * @param type
      *            stats type
-     * @param forged
+     * @param blocksForged
      *            forged or missed a block
      */
     protected void adjustValidatorStats(byte[] address, StatsType type, long delta) {
@@ -424,13 +424,13 @@ public class BlockchainImpl implements Blockchain {
 
         switch (type) {
         case FORGED:
-            stats.setForged(stats.getForged() + delta);
+            stats.setBlocksForged(stats.getBlocksForged() + delta);
             break;
         case HIT:
-            stats.setHit(stats.getHit() + delta);
+            stats.setTurnsHit(stats.getTurnsHit() + delta);
             break;
         case MISSED:
-            stats.setMissed(stats.getMissed() + delta);
+            stats.setTurnsMissed(stats.getTurnsMissed() + delta);
             break;
         default:
             break;
@@ -446,7 +446,7 @@ public class BlockchainImpl implements Blockchain {
      * @param address
      */
     protected void addTransactionToAccount(Transaction tx, byte[] address) {
-        int total = getTotalTransactions(address);
+        int total = getTransactionCount(address);
         indexDB.put(getNthTransactionIndexKey(address, total), tx.getHash());
         setTotalTransactions(address, total + 1);
     }
@@ -472,46 +472,50 @@ public class BlockchainImpl implements Blockchain {
         return Bytes.merge(address, Bytes.of(n));
     }
 
-    protected static class ValidatorStats {
-        private long forged;
-        private long hit;
-        private long missed;
+    /**
+     * Validator statistics.
+     *
+     */
+    public static class ValidatorStats {
+        private long blocksForged;
+        private long turnsHit;
+        private long turnsMissed;
 
         public ValidatorStats(long forged, long hit, long missed) {
-            this.forged = forged;
-            this.hit = hit;
-            this.missed = missed;
+            this.blocksForged = forged;
+            this.turnsHit = hit;
+            this.turnsMissed = missed;
         }
 
-        public long getForged() {
-            return forged;
+        public long getBlocksForged() {
+            return blocksForged;
         }
 
-        public void setForged(long forged) {
-            this.forged = forged;
+        void setBlocksForged(long forged) {
+            this.blocksForged = forged;
         }
 
-        public long getHit() {
-            return hit;
+        public long getTurnsHit() {
+            return turnsHit;
         }
 
-        public void setHit(long hit) {
-            this.hit = hit;
+        void setTurnsHit(long hit) {
+            this.turnsHit = hit;
         }
 
-        public long getMissed() {
-            return missed;
+        public long getTurnsMissed() {
+            return turnsMissed;
         }
 
-        public void setMissed(long missed) {
-            this.missed = missed;
+        void setTurnsMissed(long missed) {
+            this.turnsMissed = missed;
         }
 
         public byte[] toBytes() {
             SimpleEncoder enc = new SimpleEncoder();
-            enc.writeLong(forged);
-            enc.writeLong(hit);
-            enc.writeLong(missed);
+            enc.writeLong(blocksForged);
+            enc.writeLong(turnsHit);
+            enc.writeLong(turnsMissed);
             return enc.toBytes();
         }
 
