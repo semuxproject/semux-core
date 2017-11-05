@@ -25,13 +25,11 @@ public class ConfigTest {
 
     @Test
     public void testBlockReward() {
-        assertEquals(0, Config.getBlockReward(0));
-        assertEquals(0, Config.getBlockReward(Config.BLOCKS_PER_DAY * 30));
-        assertEquals(0, Config.getBlockReward(Config.BLOCKS_PER_DAY * 90));
-        assertEquals(2 * Unit.SEM, Config.getBlockReward(Config.BLOCKS_PER_DAY * 180));
-        assertEquals(2 * Unit.SEM, Config.getBlockReward(Config.BLOCKS_PER_DAY * 360));
-        assertEquals(2 * Unit.SEM, Config.getBlockReward(Config.BLOCKS_PER_DAY * 720));
-        assertEquals(0, Config.getBlockReward(Config.BLOCKS_PER_DAY * 365 * 35));
+        long total = 0;
+        for (int i = 1; i <= 100_000_000; i++) {
+            total += Config.getBlockReward(i);
+        }
+        assertEquals(70_000_000 * Unit.SEM, total);
     }
 
     @Test

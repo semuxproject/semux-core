@@ -364,7 +364,7 @@ public class Config {
     // =========================
 
     /**
-     * Get the client id.
+     * Returns the client id.
      * 
      * @return
      */
@@ -378,29 +378,26 @@ public class Config {
     }
 
     /**
-     * Get block reward for the given block.
+     * Returns block reward for the given block.
      * 
      * @param number
      *            block number
      * @return the block reward
      */
     public static long getBlockReward(long number) {
-        /*
-         * Disable block rewards for max decentralization.
-         */
-        long zero = 500_000L;
-
-        if (number <= zero) {
-            return 0;
-        } else if (number <= zero + 35_000_000) {
+        if (number <= 1_000_000L) {
+            return 1 * Unit.SEM;
+        } else if (number <= 10_000_000L) {
             return 2 * Unit.SEM;
+        } else if (number <= 27_000_000L) {
+            return 3 * Unit.SEM;
         } else {
             return 0;
         }
     }
 
     /**
-     * Get the number of validators.
+     * Returns the number of validators.
      * 
      * @param number
      * @return
