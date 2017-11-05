@@ -8,6 +8,7 @@ package org.semux.consensus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -128,8 +129,8 @@ public class SemuxBFT implements Consensus {
             status = Status.SYNCING;
 
             // reset votes, timer, and events
-            resetVotes();
-            resetTimerAndEvents();
+            clearVotes();
+            clearTimerAndEvents();
 
             // start syncing
             sync.start(target);
@@ -244,8 +245,8 @@ public class SemuxBFT implements Consensus {
         updateValidators();
 
         // reset votes and events
-        resetVotes();
-        resetTimerAndEvents();
+        clearVotes();
+        clearTimerAndEvents();
 
         logger.info("Entered new_height: height = {}, # validators = {}", height, validators.size());
         if (isValidator()) {
@@ -256,7 +257,7 @@ public class SemuxBFT implements Consensus {
                     System.exit(-1);
                 }
             }
-            timer.timeout(Config.BFT_NEW_HEIGHT_TIMEOUT);
+            resetTimeout(Config.BFT_NEW_HEIGHT_TIMEOUT);
         }
 
         // Broadcast NEW_HEIGHT messages to ALL peers.
@@ -271,7 +272,7 @@ public class SemuxBFT implements Consensus {
      */
     protected void enterPropose() {
         state = State.PROPOSE;
-        timer.timeout(Config.BFT_PROPOSE_TIMEOUT);
+        resetTimeout(Config.BFT_PROPOSE_TIMEOUT);
 
         updateValidators();
 
@@ -280,7 +281,7 @@ public class SemuxBFT implements Consensus {
             proof = new Proof(height, view, precommitVotes.getRejections());
 
             proposal = null;
-            resetVotes();
+            clearVotes();
         }
 
         logger.info("Entered propose: height = {}, view = {}, primary = {}, # connected validators = 1 + {}", height,
@@ -309,7 +310,7 @@ public class SemuxBFT implements Consensus {
      */
     protected void enterValidate() {
         state = State.VALIDATE;
-        timer.timeout(Config.BFT_VALIDATE_TIMEOUT);
+        resetTimeout(Config.BFT_VALIDATE_TIMEOUT);
         logger.info("Entered validate: proposal = {}, votes = {} {} {}", proposal != null, validateVotes,
                 precommitVotes, commitVotes);
 
@@ -336,7 +337,7 @@ public class SemuxBFT implements Consensus {
      */
     protected void enterPreCommit() {
         state = State.PRE_COMMIT;
-        timer.timeout(Config.BFT_PRE_COMMIT_TIMEOUT);
+        resetTimeout(Config.BFT_PRE_COMMIT_TIMEOUT);
         logger.info("Entered pre_commit: proposal = {}, votes = {} {} {}", proposal != null, validateVotes,
                 precommitVotes, commitVotes);
 
@@ -356,7 +357,7 @@ public class SemuxBFT implements Consensus {
      */
     protected void enterCommit() {
         state = State.COMMIT;
-        timer.timeout(Config.BFT_COMMIT_TIMEOUT);
+        resetTimeout(Config.BFT_COMMIT_TIMEOUT);
         logger.info("Entered commit: proposal = {}, votes = {} {} {}", proposal != null, validateVotes, precommitVotes,
                 commitVotes);
 
@@ -384,7 +385,7 @@ public class SemuxBFT implements Consensus {
         }
 
         state = State.FINALIZE;
-        timer.timeout(Config.BFT_FINALIZE_TIMEOUT);
+        resetTimeout(Config.BFT_FINALIZE_TIMEOUT);
         logger.info("Entered finalize: proposal = {}, votes = {} {} {}", proposal != null, validateVotes,
                 precommitVotes, commitVotes);
 
@@ -409,12 +410,24 @@ public class SemuxBFT implements Consensus {
         }
     }
 
+    protected void resetTimeout(long timeout) {
+        timer.timeout(timeout);
+
+        Iterator<Event> itr = events.iterator();
+        while (itr.hasNext()) {
+            Event e = itr.next();
+            if (e.type == Type.TIMEOUT) {
+                itr.remove();
+            }
+        }
+    }
+
     protected void jumpToView(int view, Proof proof, Proposal proposal) {
         this.view = view;
         this.proof = proof;
         this.proposal = proposal;
-        resetVotes();
-        resetTimerAndEvents();
+        clearVotes();
+        clearTimerAndEvents();
 
         // enter PROPOSE state
         enterPropose();
@@ -688,7 +701,7 @@ public class SemuxBFT implements Consensus {
     /**
      * Reset all vote sets. This should be invoked whenever height or view changes.
      */
-    protected void resetVotes() {
+    protected void clearVotes() {
         validateVotes = new VoteSet(VoteType.VALIDATE, height, view, validators);
         precommitVotes = new VoteSet(VoteType.PRECOMMIT, height, view, validators);
         commitVotes = new VoteSet(VoteType.COMMIT, height, view, validators);
@@ -697,8 +710,8 @@ public class SemuxBFT implements Consensus {
     /**
      * Reset timer and events.
      */
-    protected void resetTimerAndEvents() {
-        timer.reset();
+    protected void clearTimerAndEvents() {
+        timer.clear();
         events.clear();
     }
 
@@ -841,6 +854,13 @@ public class SemuxBFT implements Consensus {
         NEW_HEIGHT, PROPOSE, VALIDATE, PRE_COMMIT, COMMIT, FINALIZE
     }
 
+    /**
+     * Timer used by consensus. It's designed to be single timeout; previous timeout
+     * get cleared when new one being added.
+     * 
+     * NOTE: it's possible that a Timeout event has been emitted when setting a new
+     * timeout.
+     */
     public class Timer implements Runnable {
         private long timeout;
 
@@ -850,9 +870,9 @@ public class SemuxBFT implements Consensus {
         public void run() {
             while (true) {
                 synchronized (this) {
-                    if (timeout != 0 && timeout < System.currentTimeMillis()) {
+                    if (timeout != -1 && timeout < System.currentTimeMillis()) {
                         events.add(new Event(Type.TIMEOUT));
-                        timeout = 0;
+                        timeout = -1;
                         continue;
                     }
                 }
@@ -891,8 +911,8 @@ public class SemuxBFT implements Consensus {
             timeout = System.currentTimeMillis() + miliseconds;
         }
 
-        public synchronized void reset() {
-            timeout = 0;
+        public synchronized void clear() {
+            timeout = -1;
         }
     }
 

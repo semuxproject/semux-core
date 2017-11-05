@@ -109,7 +109,7 @@ public class BlockchainImpl implements Blockchain {
             // pre-allocation
             for (Premine p : genesis.getPremines().values()) {
                 for (int i = 0; i < p.getPeriods(); i++) {
-                    long blockNum = i * 365 * Config.DAY;
+                    long blockNum = i * 365 * Config.BLOCKS_PER_DAY;
                     periods.computeIfAbsent(blockNum, (k) -> {
                         return new ArrayList<>();
                     }).add(p);
@@ -316,7 +316,7 @@ public class BlockchainImpl implements Blockchain {
         }
 
         // [6] update validator set
-        if (number % Config.VALIDATOR_TERM == 0) {
+        if (number % Config.VALIDATOR_REFRESH_RATE == 0) {
             updateValidators(block.getNumber());
         }
 

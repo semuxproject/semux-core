@@ -57,6 +57,6 @@ public class EdDSATest {
         byte[] sig = key.sign(hash).toBytes();
 
         logger.info("signature size: {}", sig.length);
-        logger.info("Signature size (1y): {} GB", 64.0 * sig.length * Config.DAY * 365 / 1024 / 1024 / 1024);
+        logger.info("Signature size (1y): {} GB", 64.0 * sig.length * Config.BLOCKS_PER_DAY * 365 / 1024 / 1024 / 1024);
     }
 }

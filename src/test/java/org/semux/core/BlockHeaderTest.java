@@ -59,7 +59,8 @@ public class BlockHeaderTest {
         byte[] bytes = header.toBytes();
 
         logger.info("block header size: {}", bytes.length);
-        logger.info("block header size (1y): {} GB", 1.0 * bytes.length * Config.DAY * 365 / 1024 / 1024 / 1024);
+        logger.info("block header size (1y): {} GB",
+                1.0 * bytes.length * Config.BLOCKS_PER_DAY * 365 / 1024 / 1024 / 1024);
     }
 
     private void testFields(BlockHeader header) {

@@ -26,18 +26,18 @@ public class ConfigTest {
     @Test
     public void testBlockReward() {
         assertEquals(0, Config.getBlockReward(0));
-        assertEquals(0, Config.getBlockReward(Config.DAY * 30));
-        assertEquals(0, Config.getBlockReward(Config.DAY * 90));
-        assertEquals(2 * Unit.SEM, Config.getBlockReward(Config.DAY * 180));
-        assertEquals(2 * Unit.SEM, Config.getBlockReward(Config.DAY * 360));
-        assertEquals(2 * Unit.SEM, Config.getBlockReward(Config.DAY * 720));
-        assertEquals(0, Config.getBlockReward(Config.DAY * 365 * 35));
+        assertEquals(0, Config.getBlockReward(Config.BLOCKS_PER_DAY * 30));
+        assertEquals(0, Config.getBlockReward(Config.BLOCKS_PER_DAY * 90));
+        assertEquals(2 * Unit.SEM, Config.getBlockReward(Config.BLOCKS_PER_DAY * 180));
+        assertEquals(2 * Unit.SEM, Config.getBlockReward(Config.BLOCKS_PER_DAY * 360));
+        assertEquals(2 * Unit.SEM, Config.getBlockReward(Config.BLOCKS_PER_DAY * 720));
+        assertEquals(0, Config.getBlockReward(Config.BLOCKS_PER_DAY * 365 * 35));
     }
 
     @Test
     public void testNumberOfValidators() {
         int last = 0;
-        for (int i = 0; i < 60 * Config.DAY; i++) {
+        for (int i = 0; i < 60 * Config.BLOCKS_PER_DAY; i++) {
             int n = Config.getNumberOfValidators(i);
             if (n != last) {
                 assertTrue(n > last);

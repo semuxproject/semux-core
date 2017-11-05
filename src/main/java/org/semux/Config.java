@@ -146,19 +146,19 @@ public class Config {
     public static long DELEGATE_BURN_AMOUNT = 1000 * Unit.SEM;
 
     /**
-     * Length of validator term.
+     * Number of blocks before the next validator set refresh.
      */
-    public static long VALIDATOR_TERM = 100;
+    public static long VALIDATOR_REFRESH_RATE = 128;
 
     /**
      * Number of blocks in one day.
      */
-    public static long DAY = 2 * 60 * 24;
+    public static long BLOCKS_PER_DAY = 2 * 60 * 24;
 
     /**
      * Deadline of the next mandatory upgrade.
      */
-    public static long MANDATORY_UPGRADE = 60 * DAY;
+    public static long MANDATORY_UPGRADE = 60 * BLOCKS_PER_DAY;
 
     /**
      * State lock to prevent state inconsistency.
@@ -313,32 +313,32 @@ public class Config {
     /**
      * The duration of NEW_HEIGHT state. This allows validators to catch up.
      */
-    public static int BFT_NEW_HEIGHT_TIMEOUT = 3000;
+    public static long BFT_NEW_HEIGHT_TIMEOUT = 3000;
 
     /**
      * The duration of PREPROSE state.
      */
-    public static int BFT_PROPOSE_TIMEOUT = 9000;
+    public static long BFT_PROPOSE_TIMEOUT = 9000;
 
     /**
      * The duration of VALIDATE state.
      */
-    public static int BFT_VALIDATE_TIMEOUT = 8000;
+    public static long BFT_VALIDATE_TIMEOUT = 8000;
 
     /**
      * The duration of PRE_COMMIT state.
      */
-    public static int BFT_PRE_COMMIT_TIMEOUT = 6000;
+    public static long BFT_PRE_COMMIT_TIMEOUT = 6000;
 
     /**
      * The duration of COMMIT state. May be skipped after +2/3 commit votes.
      */
-    public static int BFT_COMMIT_TIMEOUT = 4000;
+    public static long BFT_COMMIT_TIMEOUT = 4000;
 
     /**
      * The duration of FINALIZE state. This allows validators to persist block.
      */
-    public static int BFT_FINALIZE_TIMEOUT = 4000;
+    public static long BFT_FINALIZE_TIMEOUT = 4000;
 
     // =========================
     // Virtual machine
@@ -416,6 +416,19 @@ public class Config {
     }
 
     /**
+     * Returns the primary validator for a specific [height, view].
+     * 
+     * @param validators
+     * @param height
+     * @param view
+     * @return
+     */
+    public static String getPrimaryValidator(List<String> validators, long height, int view) {
+        byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
+        return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
+    }
+
+    /**
      * Returns whether this network is main net.
      * 
      * @return
@@ -440,18 +453,5 @@ public class Config {
      */
     public static boolean isDevNet() {
         return NETWORK_ID == 2;
-    }
-
-    /**
-     * Returns the primary validator for a specific [height, view].
-     * 
-     * @param validators
-     * @param height
-     * @param view
-     * @return
-     */
-    public static String getPrimaryValidator(List<String> validators, long height, int view) {
-        byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
-        return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
     }
 }
