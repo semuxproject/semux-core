@@ -129,9 +129,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         JPanel panel2 = new JPanel();
         panel2.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        JLabel label = new JLabel(
-                MessagesUtil.get("DelegateRegistrationNoteHtml", SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT),
-                        SwingUtil.formatValue(Config.MIN_TRANSACTION_FEE_SOFT)));
+        JLabel label = new JLabel(MessagesUtil.get("DelegateRegistrationNoteHtml",
+                SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT), SwingUtil.formatValue(Config.MIN_TRANSACTION_FEE)));
         label.setForeground(Color.DARK_GRAY);
 
         from = new JComboBox<>();
@@ -356,7 +355,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
                 byte[] from = a.getKey().toAddress();
                 byte[] to = d.getAddress();
-                long fee = Config.MIN_TRANSACTION_FEE_SOFT;
+                long fee = Config.MIN_TRANSACTION_FEE;
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = {};
@@ -374,9 +373,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else if (!name.matches("[_a-z0-9]{4,16}")) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("AccountNameError"));
-            } else if (a.getAvailable() < Config.DELEGATE_BURN_AMOUNT + Config.MIN_TRANSACTION_FEE_SOFT) {
+            } else if (a.getAvailable() < Config.DELEGATE_BURN_AMOUNT + Config.MIN_TRANSACTION_FEE) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("InsufficientFunds",
-                        SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT + Config.MIN_TRANSACTION_FEE_SOFT)));
+                        SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT + Config.MIN_TRANSACTION_FEE)));
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
                         MessagesUtil.get("DelegateRegistrationInfo",
@@ -393,7 +392,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 byte[] from = a.getKey().toAddress();
                 byte[] to = from;
                 long value = Config.DELEGATE_BURN_AMOUNT;
-                long fee = Config.MIN_TRANSACTION_FEE_SOFT;
+                long fee = Config.MIN_TRANSACTION_FEE;
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = Bytes.of(name);

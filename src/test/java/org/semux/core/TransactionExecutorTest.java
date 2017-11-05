@@ -52,7 +52,7 @@ public class TransactionExecutorTest {
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
         long value = 5;
-        long fee = Config.MIN_TRANSACTION_FEE_HARD;
+        long fee = Config.MIN_TRANSACTION_FEE;
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
@@ -92,7 +92,7 @@ public class TransactionExecutorTest {
         byte[] from = delegate.toAddress();
         byte[] to = Bytes.random(20);
         long value = Config.DELEGATE_BURN_AMOUNT;
-        long fee = Config.MIN_TRANSACTION_FEE_HARD;
+        long fee = Config.MIN_TRANSACTION_FEE;
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
@@ -129,7 +129,7 @@ public class TransactionExecutorTest {
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
         long value = available / 3;
-        long fee = Config.MIN_TRANSACTION_FEE_HARD;
+        long fee = Config.MIN_TRANSACTION_FEE;
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
@@ -163,7 +163,7 @@ public class TransactionExecutorTest {
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
         long value = available / 3;
-        long fee = Config.MIN_TRANSACTION_FEE_HARD;
+        long fee = Config.MIN_TRANSACTION_FEE;
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);

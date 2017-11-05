@@ -90,7 +90,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
         JLabel lblFee = new JLabel(MessagesUtil.get("Fee") + ":");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblFee.setToolTipText(MessagesUtil.get("FeeTip", SwingUtil.formatValue(Config.MIN_TRANSACTION_FEE_SOFT)));
+        lblFee.setToolTipText(MessagesUtil.get("FeeTip", SwingUtil.formatValue(Config.MIN_TRANSACTION_FEE)));
 
         fee = SwingUtil.textFieldWithPopup();
         fee.setColumns(10);
@@ -242,7 +242,7 @@ public class SendPanel extends JPanel implements ActionListener {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
                 } else if (value == 0L) {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("CantSendZero"));
-                } else if (fee < Config.MIN_TRANSACTION_FEE_SOFT) {
+                } else if (fee < Config.MIN_TRANSACTION_FEE) {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFeeTooLow"));
                 } else if (value + fee > acc.getAvailable()) {
                     JOptionPane.showMessageDialog(this,
@@ -331,7 +331,7 @@ public class SendPanel extends JPanel implements ActionListener {
     private void clear() {
         setTo(Bytes.EMPY_BYTES);
         setAmount(0);
-        setFee(Config.MIN_TRANSACTION_FEE_SOFT);
+        setFee(Config.MIN_TRANSACTION_FEE);
         setMemo("");
     }
 }

@@ -54,7 +54,7 @@ public class CorePerfomanceTest {
             byte[] from = key.toAddress();
             byte[] to = Bytes.random(20);
             long value = 5;
-            long fee = Config.MIN_TRANSACTION_FEE_HARD;
+            long fee = Config.MIN_TRANSACTION_FEE;
             long nonce = 1;
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.random(16);

@@ -46,7 +46,7 @@ public class Config {
                     NETWORK_ID = Byte.parseByte(props.getProperty(name));
                     break;
                 case "minTransactionFee":
-                    MIN_TRANSACTION_FEE_SOFT = Long.parseLong(props.getProperty(name));
+                    MIN_TRANSACTION_FEE = Long.parseLong(props.getProperty(name));
                     break;
 
                 case "p2p.ip":
@@ -133,12 +133,7 @@ public class Config {
     /**
      * Minimum transaction fee.
      */
-    public static long MIN_TRANSACTION_FEE_HARD = 5 * Unit.MILLI_SEM;
-
-    /**
-     * Minimum transaction fee (soft as enforced by pending manager).
-     */
-    public static long MIN_TRANSACTION_FEE_SOFT = 50 * Unit.MILLI_SEM;
+    public static long MIN_TRANSACTION_FEE = 50 * Unit.MILLI_SEM;
 
     /**
      * Minimum delegate fee.
