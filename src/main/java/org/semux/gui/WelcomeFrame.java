@@ -55,6 +55,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         // setup frame properties
         this.setTitle(MessagesUtil.get("SemuxWallet"));
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.setMinimumSize(new Dimension(600, 400));
         SwingUtil.centerizeFrame(this, 600, 400);
 

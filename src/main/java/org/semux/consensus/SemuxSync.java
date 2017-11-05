@@ -111,7 +111,7 @@ public class SemuxSync implements Sync {
     public void start(long targetHeight) {
         if (!isRunning()) {
             isRunning = true;
-            logger.info("Sync manager started, best known block = {}", targetHeight - 1);
+            logger.info("Syncing started, best known block = {}", targetHeight - 1);
 
             // [1] set up queues
             synchronized (lock) {
@@ -151,7 +151,7 @@ public class SemuxSync implements Sync {
             exec.shutdown();
             try {
                 exec.awaitTermination(1, TimeUnit.MINUTES);
-                logger.info("Sync finished");
+                logger.info("Syncing finished");
 
             } catch (InterruptedException e) {
                 logger.error("Executors were not properly shut down");

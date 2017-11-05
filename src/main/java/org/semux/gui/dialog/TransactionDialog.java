@@ -18,6 +18,7 @@ public class TransactionDialog extends JDialog {
     private static final long serialVersionUID = 1L;
 
     public TransactionDialog(JComponent parent, Transaction tx) {
+
         JLabel lblHash = new JLabel(MessagesUtil.get("Hash") + ":");
         JLabel lblType = new JLabel(MessagesUtil.get("Type") + ":");
         JLabel lblFrom = new JLabel(MessagesUtil.get("From") + ":");
@@ -113,6 +114,8 @@ public class TransactionDialog extends JDialog {
         // @formatter:on
 
         this.setTitle(MessagesUtil.get("Transaction"));
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();
         this.setLocationRelativeTo(parent);
         this.setResizable(false);

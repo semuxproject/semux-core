@@ -116,6 +116,8 @@ public class DelegateDialog extends JDialog {
         // @formatter:on
 
         this.setTitle(MessagesUtil.get("Delegate"));
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();
         this.setLocationRelativeTo(parent);
         this.setResizable(false);

@@ -15,16 +15,14 @@ import javax.swing.JPasswordField;
 
 import org.semux.Kernel;
 import org.semux.core.Wallet;
-import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
+import org.semux.gui.MessagesUtil;
+import org.semux.gui.SwingUtil;
 
 public class ChangePasswordDialog extends JDialog implements ActionListener {
 
     public ChangePasswordDialog(Frame owner) {
-        super(owner);
-        this.setMinimumSize(new Dimension(400, 240));
-        this.setLocationRelativeTo(owner);
-        this.setTitle(MessagesUtil.get("ChangePassword"));
+        super(owner, MessagesUtil.get("ChangePassword"));
 
         JLabel lblOldPassword = new JLabel(MessagesUtil.get("OldPassword") + ":");
 
@@ -91,6 +89,12 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
         );
         getContentPane().setLayout(groupLayout);
         // @formatter:on
+
+        this.setModal(true);
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
+        this.setMinimumSize(new Dimension(400, 240));
+        this.setLocationRelativeTo(owner);
     }
 
     private static final long serialVersionUID = 1L;

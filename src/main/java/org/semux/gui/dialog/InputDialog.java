@@ -13,8 +13,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
-import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
 import org.semux.utils.UnreachableException;
 
@@ -27,8 +27,6 @@ public class InputDialog extends JDialog implements ActionListener {
 
     public InputDialog(JFrame parent, String message, boolean isPassword) {
         super(parent, MessagesUtil.get("Input"));
-        this.setModal(true);
-        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         JLabel labelLogo = new JLabel("");
         labelLogo.setIcon(SwingUtil.loadImage("logo", 96, 96));
@@ -86,6 +84,9 @@ public class InputDialog extends JDialog implements ActionListener {
         getContentPane().setLayout(groupLayout);
         // @formatter:on
 
+        this.setModal(true);
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();
         this.setResizable(false);
         this.setLocationRelativeTo(parent);
