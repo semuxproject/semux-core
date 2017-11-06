@@ -349,6 +349,16 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             } else if (value == 0L) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("VotesGreaterThanZero"));
             } else {
+                // Only a warning!
+                if (value < Config.MIN_TRANSACTION_FEE && value >= 0L) {
+                    int ret = JOptionPane.showConfirmDialog(this,
+                            MessagesUtil.get("NotEnoughBalanceToUnvote",
+                                    SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT)),
+                            MessagesUtil.get("ConfirmDelegateRegistration"), JOptionPane.OK_CANCEL_OPTION);
+                    if (ret != JOptionPane.OK_OPTION) {
+                        break;
+                    }
+                }
                 Kernel kernel = Kernel.getInstance();
                 PendingManager pendingMgr = kernel.getPendingManager();
 
