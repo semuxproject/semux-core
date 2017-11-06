@@ -248,11 +248,6 @@ public class BlockchainImpl implements Blockchain {
         long number = block.getNumber();
         byte[] hash = block.getHash();
 
-        if (number > Config.MANDATORY_UPGRADE) {
-            logger.error("This client needs to be upgraded");
-            System.exit(-1);
-        }
-
         if (number != genesis.getNumber() && number != latestBlock.getNumber() + 1) {
             logger.error("Adding wrong block: number = {}, expected = {}", number, latestBlock.getNumber() + 1);
             throw new RuntimeException("Blocks can only be added sequentially");
