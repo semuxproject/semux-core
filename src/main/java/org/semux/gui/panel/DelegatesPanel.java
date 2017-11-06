@@ -218,8 +218,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         JButton btnDelegate = new JButton(MessagesUtil.get("RegisterAsDelegate"));
         btnDelegate.addActionListener(this);
         btnDelegate.setActionCommand(Action.DELEGATE.name());
-        btnDelegate.setToolTipText(MessagesUtil.get("RegisterAsDelegateToolTip",
-                SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT), SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT)));
+        btnDelegate.setToolTipText(
+                MessagesUtil.get("RegisterAsDelegateToolTip", SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT),
+                        SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT)));
 
         textName = SwingUtil.textFieldWithPopup();
         textName.setToolTipText(MessagesUtil.get("Name"));
