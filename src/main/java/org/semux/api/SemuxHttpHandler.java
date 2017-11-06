@@ -107,7 +107,13 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
                 // basic authentication
                 if (!checkBaiscAuth(headers, Config.API_USERNAME, Config.API_PASSWORD)) {
                     FullHttpResponse resp = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
-                    resp.headers().set(HttpHeaderNames.WWW_AUTHENTICATE, "BASIC realm=\"Semux RESTful API\"");
+
+                    resp.headers().set(HttpHeaderNames.WWW_AUTHENTICATE, "Basic realm=\"Semux RESTful API\"");
+                    resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
+                    if (keepAlive) {
+                        resp.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+                    }
+
                     ctx.write(resp);
                     return;
                 }
@@ -163,7 +169,7 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
 
     private boolean checkBaiscAuth(HttpHeaders headers, String username, String password) {
         try {
-            String auth = headers.get("Authorization");
+            String auth = headers.get(HttpHeaderNames.AUTHORIZATION);
             if (auth != null && auth.startsWith("Basic ")) {
                 String str = Bytes.toString(Base64.getDecoder().decode(auth.substring(6)));
                 int idx = str.indexOf(':');
@@ -182,8 +188,8 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
 
         // set response headers
         resp.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=UTF-8");
+        resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
         if (keepAlive) {
-            resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
             resp.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
         }
 

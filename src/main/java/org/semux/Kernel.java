@@ -130,12 +130,7 @@ public class Kernel {
         client = new PeerClient(SystemUtil.getIp(), Config.P2P_LISTEN_PORT, coinbase);
 
         long number = chain.getLatestBlockNumber();
-        if (number >= Config.MANDATORY_UPGRADE) {
-            logger.error("This client needs to be upgraded");
-            System.exit(-1);
-        } else {
-            logger.info("Latest block number = {}", number);
-        }
+        logger.info("Latest block number = {}", number);
 
         // ====================================
         // start channel/pending/node manager

@@ -758,6 +758,7 @@ public class SemuxBFT implements Consensus {
      */
     protected boolean validateBlock(Block block) {
         long t1 = System.currentTimeMillis();
+
         // [1] check block integrity and signature
         if (!block.validate()) {
             logger.debug("Invalid block/transaction format");
@@ -805,7 +806,11 @@ public class SemuxBFT implements Consensus {
      * @param block
      */
     protected void applyBlock(Block block) {
-        if (block.getNumber() != chain.getLatestBlockNumber() + 1) {
+        long number = block.getNumber();
+
+        if (number > Config.MANDATORY_UPGRADE) {
+            throw new RuntimeException("This client needs to be upgraded");
+        } else if (number != chain.getLatestBlockNumber() + 1) {
             throw new RuntimeException("Applying wrong block: number = " + block.getNumber());
         }
 
@@ -824,7 +829,7 @@ public class SemuxBFT implements Consensus {
         }
 
         // [2] apply block reward and tx fees
-        long reward = Config.getBlockReward(block.getNumber());
+        long reward = Config.getBlockReward(number);
         for (Transaction tx : block.getTransactions()) {
             reward += tx.getFee();
         }
