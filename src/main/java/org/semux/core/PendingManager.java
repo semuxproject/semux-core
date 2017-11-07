@@ -321,10 +321,8 @@ public class PendingManager implements Runnable, BlockchainListener {
                         Channel c = channels.get(indices[i]);
                         if (c.isActive()) {
                             c.getMessageQueue().sendMessage(msg);
-                            System.out.print(indices[i] + " ");
                         }
                     }
-                    System.out.println();
                 }
             } else {
                 // exit immediately if invalid
