@@ -346,11 +346,13 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else if (d == null) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectDelegate"));
-            } else if (value == 0L) {
+            } else if (value <= 0L) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("VotesGreaterThanZero"));
             } else {
                 // Only a warning!
-                if (value < Config.MIN_TRANSACTION_FEE && value >= 0L) {
+                long fee = Config.MIN_TRANSACTION_FEE;
+                long transactionFunds = a.getAvailable() - fee - value;
+                if (transactionFunds < fee) {
                     int ret = JOptionPane.showConfirmDialog(this,
                             MessagesUtil.get("NotEnoughBalanceToUnvote",
                                     SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT)),
@@ -365,7 +367,6 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
                 byte[] from = a.getKey().toAddress();
                 byte[] to = d.getAddress();
-                long fee = Config.MIN_TRANSACTION_FEE;
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = {};
