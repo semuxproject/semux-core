@@ -163,7 +163,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      *         false
      */
     public synchronized boolean addTransactionSync(Transaction tx) {
-        return processTransaction(tx, true) >= 1;
+        return tx.validate() && processTransaction(tx, true) >= 1;
     }
 
     /**
@@ -321,8 +321,10 @@ public class PendingManager implements Runnable, BlockchainListener {
                         Channel c = channels.get(indices[i]);
                         if (c.isActive()) {
                             c.getMessageQueue().sendMessage(msg);
+                            System.out.print(indices[i] + " ");
                         }
                     }
+                    System.out.println();
                 }
             } else {
                 // exit immediately if invalid
