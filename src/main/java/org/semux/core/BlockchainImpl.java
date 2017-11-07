@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * 
  * [0] => [block_hash_number]
  * [1] => [validators]
- * [2, address] => [number_of_blocks_forged, number_of_turns_hit, number_of_turns_missed]
+ * [2, address] => [validator_stats]
  * 
  * [3, block_hash] => [block_number]
  * [4, transaciton_hash] => [block_number, from, to]
@@ -50,10 +50,10 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * block DB structure:
  * 
- * [block_number, 0] => [block_header]
- * [block_number, 1] => [block_transactions]
- * [block_number, 2] => [block_results]
- * [block_number, 3] => [block_votes]
+ * [0, block_number] => [block_header]
+ * [1, block_number] => [block_transactions]
+ * [2, block_number] => [block_results]
+ * [3, block_number] => [block_votes]
  * </pre>
  * 
  */

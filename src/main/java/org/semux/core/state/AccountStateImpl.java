@@ -6,7 +6,6 @@
  */
 package org.semux.core.state;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,9 +20,9 @@ import org.semux.utils.Bytes;
  * <pre>
  * account DB structure:
  * 
- * [address, 0] => [account_object]
- * [address, 1] => [code]
- * [address, 2, storage_key] = [storage_value]
+ * [0, address] => [account_object]
+ * [1, address] => [code]
+ * [2, address, storage_key] = [storage_value]
  * </pre>
  */
 public class AccountStateImpl implements AccountState {
@@ -60,7 +59,7 @@ public class AccountStateImpl implements AccountState {
 
     @Override
     public Account getAccount(byte[] addr) {
-        ByteArray k = getKey(addr, TYPE_ACCOUNT);
+        ByteArray k = getKey(TYPE_ACCOUNT, addr);
 
         if (updates.containsKey(k)) {
             byte[] v = updates.get(k);
@@ -75,7 +74,7 @@ public class AccountStateImpl implements AccountState {
 
     @Override
     public void increaseNonce(byte[] addr) {
-        ByteArray k = getKey(addr, TYPE_ACCOUNT);
+        ByteArray k = getKey(TYPE_ACCOUNT, addr);
 
         Account acc = getAccount(addr);
         acc.setNonce(acc.getNonce() + 1);
@@ -84,7 +83,7 @@ public class AccountStateImpl implements AccountState {
 
     @Override
     public void adjustAvailable(byte[] addr, long delta) {
-        ByteArray k = getKey(addr, TYPE_ACCOUNT);
+        ByteArray k = getKey(TYPE_ACCOUNT, addr);
 
         Account acc = getAccount(addr);
         acc.setAvailable(acc.getAvailable() + delta);
@@ -93,7 +92,7 @@ public class AccountStateImpl implements AccountState {
 
     @Override
     public void adjustLocked(byte[] addr, long delta) {
-        ByteArray k = getKey(addr, TYPE_ACCOUNT);
+        ByteArray k = getKey(TYPE_ACCOUNT, addr);
 
         Account acc = getAccount(addr);
         acc.setLocked(acc.getLocked() + delta);
@@ -157,15 +156,16 @@ public class AccountStateImpl implements AccountState {
         updates.clear();
     }
 
-    protected ByteArray getKey(byte[] addr, byte type) {
-        return ByteArray.of(Bytes.merge(addr, type));
+    protected ByteArray getKey(byte type, byte[] addr) {
+        return ByteArray.of(Bytes.merge(type, addr));
     }
 
     protected ByteArray getStorageKey(byte[] addr, byte[] key) {
-        byte[] k = Arrays.copyOf(addr, addr.length + 1 + key.length);
-        k[addr.length] = TYPE_STORAGE;
-        System.arraycopy(key, 0, k, addr.length + 1, key.length);
+        byte[] buf = new byte[1 + addr.length + key.length];
+        buf[0] = TYPE_STORAGE;
+        System.arraycopy(addr, 0, buf, 1, addr.length);
+        System.arraycopy(key, 0, buf, 1 + addr.length, key.length);
 
-        return ByteArray.of(k);
+        return ByteArray.of(buf);
     }
 }
