@@ -19,7 +19,7 @@ public class SemuxPerformance {
     private static String username = "";
     private static String password = "";
 
-    private static int coinbase = 1;
+    private static int coinbase = 0;
     private static int tps = 500;
 
     public static void testTransfer(int n) throws IOException, InterruptedException {

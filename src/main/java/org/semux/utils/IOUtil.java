@@ -11,13 +11,11 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,17 +60,15 @@ public class IOUtil {
      * @throws IOException
      */
     public static byte[] readFile(File file) throws IOException {
-        try (RandomAccessFile f = new RandomAccessFile(file, "r"); FileChannel ch = f.getChannel()) {
-            long sz = ch.size();
+        InputStream in = new BufferedInputStream(new FileInputStream(file));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-            ByteBuffer buffer = ByteBuffer.allocate((int) sz);
-            while (sz > 0) {
-                sz -= ch.read(buffer);
-            }
-            buffer.flip();
-
-            return buffer.array();
+        for (int c; (c = in.read()) != -1;) {
+            out.write(c);
         }
+        in.close();
+
+        return out.toByteArray();
     }
 
     /**
