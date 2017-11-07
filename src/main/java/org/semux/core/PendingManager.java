@@ -163,7 +163,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      *         false
      */
     public synchronized boolean addTransactionSync(Transaction tx) {
-        return processTransaction(tx, true) >= 1;
+        return tx.validate() && processTransaction(tx, true) >= 1;
     }
 
     /**

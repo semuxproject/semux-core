@@ -317,7 +317,7 @@ public class ApiHandlerImpl implements ApiHandler {
 
             // to address
             byte[] to = (type == TransactionType.DELEGATE) ? from.toAddress()
-                    : (pTo.length() >= 20) ? Hex.parse(pTo) : wallet.getAccount(Integer.parseInt(pTo)).getPublicKey();
+                    : (pTo.length() >= 20) ? Hex.parse(pTo) : wallet.getAccount(Integer.parseInt(pTo)).toAddress();
             if (to == null) {
                 return failure("Invalid parameter: to = " + pTo);
             }

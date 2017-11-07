@@ -127,10 +127,12 @@ public class Kernel {
             }
         };
         chain = new BlockchainImpl(dbFactory);
-        client = new PeerClient(SystemUtil.getIp(), Config.P2P_LISTEN_PORT, coinbase);
-
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
+
+        String ip = SystemUtil.getIp();
+        logger.info("Your IP address = {}", ip);
+        client = new PeerClient(ip, Config.P2P_LISTEN_PORT, coinbase);
 
         // ====================================
         // start channel/pending/node manager
