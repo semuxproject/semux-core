@@ -36,6 +36,7 @@ import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
+import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
@@ -346,8 +347,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else if (d == null) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectDelegate"));
-            } else if (value == 0L) {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("VotesGreaterThanZero"));
+            } else if (value < 1 * Unit.SEM) {
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("EnterValidNumberOfvotes"));
             } else {
                 Kernel kernel = Kernel.getInstance();
                 PendingManager pendingMgr = kernel.getPendingManager();

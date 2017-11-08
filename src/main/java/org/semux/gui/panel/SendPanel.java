@@ -27,8 +27,8 @@ import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
-import org.semux.gui.model.WalletModel;
 import org.semux.gui.model.WalletAccount;
+import org.semux.gui.model.WalletModel;
 import org.semux.utils.Bytes;
 import org.semux.utils.UnreachableException;
 
@@ -240,8 +240,8 @@ public class SendPanel extends JPanel implements ActionListener {
 
                 if (acc == null) {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
-                } else if (value == 0L) {
-                    JOptionPane.showMessageDialog(this, MessagesUtil.get("CantSendZero"));
+                } else if (value <= 0L) {
+                    JOptionPane.showMessageDialog(this, MessagesUtil.get("EnterValidValue"));
                 } else if (fee < Config.MIN_TRANSACTION_FEE) {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFeeTooLow"));
                 } else if (value + fee > acc.getAvailable()) {
