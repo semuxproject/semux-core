@@ -325,7 +325,8 @@ public class APIHandlerTest {
     @Test
     public void testTransfer() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
-        String uri = "/transfer?&from=0&to=" + key.toAddressString() + "&value=1000000000&fee=5000000&data=test";
+        String uri = "/transfer?&from=0&to=" + key.toAddressString() + "&value=1000000000&fee="
+                + Config.MIN_TRANSACTION_FEE + "&data=test";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -340,7 +341,8 @@ public class APIHandlerTest {
 
     @Test
     public void testDelegate() throws IOException, InterruptedException {
-        String uri = "/delegate?&from=0&fee=5000000&data=" + Hex.encode(Bytes.of("test_delegate"));
+        String uri = "/delegate?&from=0&fee=" + Config.MIN_TRANSACTION_FEE + "&data="
+                + Hex.encode(Bytes.of("test_delegate"));
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));

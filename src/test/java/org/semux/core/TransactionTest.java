@@ -58,8 +58,7 @@ public class TransactionTest {
         Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, Bytes.random(128)).sign(key);
         byte[] bytes = tx.toBytes();
 
-        logger.info("tx size: {}", bytes.length);
-        logger.info("tx size (1M): {} GB", 1000000.0 * bytes.length / 1024 / 1024 / 1024);
+        logger.info("tx size: {} B, {} GB per 1M txs", bytes.length, 1000000.0 * bytes.length / 1024 / 1024 / 1024);
     }
 
     private void testFields(Transaction tx) {
