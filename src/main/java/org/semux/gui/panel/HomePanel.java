@@ -27,8 +27,8 @@ import org.semux.core.TransactionType;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
-import org.semux.gui.model.WalletModel;
 import org.semux.gui.model.WalletAccount;
+import org.semux.gui.model.WalletModel;
 import org.semux.utils.ByteArray;
 import org.semux.utils.UnreachableException;
 
@@ -44,6 +44,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private JLabel status;
     private JLabel available;
     private JLabel locked;
+    private JLabel total;
 
     private JPanel transactions;
     private JLabel peers;
@@ -57,7 +58,7 @@ public class HomePanel extends JPanel implements ActionListener {
         overview.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
                 MessagesUtil.get("Overview"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        overview.setLayout(new GridLayout(6, 2, 0, 0));
+        overview.setLayout(new GridLayout(7, 2, 0, 0));
 
         JLabel labelBlockNum = new JLabel(MessagesUtil.get("BlockNum") + ":");
         overview.add(labelBlockNum);
@@ -94,6 +95,12 @@ public class HomePanel extends JPanel implements ActionListener {
 
         locked = new JLabel("");
         overview.add(locked);
+
+        JLabel labelTotal = new JLabel(MessagesUtil.get("TotalBalance") + ":");
+        overview.add(labelTotal);
+
+        total = new JLabel("");
+        overview.add(total);
 
         JLabel lblPeers = new JLabel(MessagesUtil.get("Peers") + ":");
         peers = new JLabel("");
@@ -216,6 +223,7 @@ public class HomePanel extends JPanel implements ActionListener {
         this.available.setText(SwingUtil.formatValue(model.getTotalAvailable()));
         this.locked.setText(SwingUtil.formatValue(model.getTotalLocked()));
         this.peers.setText(SwingUtil.formatNumber(model.getActivePeers().size()));
+        this.total.setText(SwingUtil.formatValue(model.getTotalAvailable() + model.getTotalLocked()));
 
         // federate all transactions
         Set<ByteArray> hashes = new HashSet<>();
