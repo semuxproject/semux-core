@@ -476,8 +476,6 @@ public class SemuxBFT implements Consensus {
 
         if (p.getHeight() == height // at the same height
                 && (p.getView() == view && proposal == null && (state == State.NEW_HEIGHT || state == State.PROPOSE) // expecting
-                                                                                                                     // a
-                                                                                                                     // proposal
                         || p.getView() > view && state != State.COMMIT && state != State.FINALIZE) // larger view
                 && isFromValidator(p.getSignature()) //
                 && isPrimary(p.getHeight(), p.getView(), pubKeyToPeerId(p.getSignature().getPublicKey()))) {//

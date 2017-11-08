@@ -59,13 +59,13 @@ public class SystemUtil {
      */
     public static String getIp() {
         try {
-            URL url = new URL("http://checkip.amazonaws.com/");
+            URL url = new URL("https://api.ipify.org/");
             URLConnection con = url.openConnection();
             con.setConnectTimeout(5000);
             con.setReadTimeout(3000);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String ip = reader.readLine();
+            String ip = reader.readLine().trim();
             reader.close();
 
             if (!ip.matches("(\\d{1,3}\\.){3}\\d{1,3}")) {
@@ -74,7 +74,7 @@ public class SystemUtil {
 
             return ip;
         } catch (Exception e) {
-            logger.debug("Failed to retrieve public IP address");
+            logger.info("Failed to retrieve public IP address", e);
         }
 
         try {
