@@ -36,7 +36,6 @@ import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
@@ -344,21 +343,41 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("EnterValidNumberOfvotes"));
                 break;
             }
+            long fee = Config.MIN_TRANSACTION_FEE;
 
             if (a == null) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
             } else if (d == null) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectDelegate"));
-            } else if (value < 1 * Unit.SEM) {
+            } else if (value <= 0) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("EnterValidNumberOfvotes"));
             } else {
+                if (action == Action.VOTE) {
+                    if (value + fee > a.getAvailable()) {
+                        JOptionPane.showMessageDialog(this,
+                                MessagesUtil.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
+                        break;
+                    }
+
+                    if (a.getAvailable() - fee - value < fee) {
+                        int ret = JOptionPane.showConfirmDialog(this, MessagesUtil.get("NotEnoughBalanceToUnvote"),
+                                MessagesUtil.get("ConfirmDelegateRegistration"), JOptionPane.YES_NO_OPTION);
+                        if (ret != JOptionPane.YES_OPTION) {
+                            break;
+                        }
+                    }
+                } else if (fee > a.getAvailable()) {
+                    JOptionPane.showMessageDialog(this,
+                            MessagesUtil.get("InsufficientFunds", SwingUtil.formatValue(fee)));
+                    break;
+                }
+
                 Kernel kernel = Kernel.getInstance();
                 PendingManager pendingMgr = kernel.getPendingManager();
 
                 TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
                 byte[] from = a.getKey().toAddress();
                 byte[] to = d.getAddress();
-                long fee = Config.MIN_TRANSACTION_FEE;
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = {};
