@@ -172,7 +172,7 @@ public class Config {
     /**
      * Version of this client.
      */
-    public static String CLIENT_VERSION = "1.0.0-rc.1";
+    public static String CLIENT_VERSION = "1.0.0";
 
     // =========================
     // Crypto
@@ -190,7 +190,7 @@ public class Config {
     /**
      * P2P protocol version.
      */
-    public static short P2P_VERSION = 1;
+    public static short P2P_VERSION = 0;
 
     /**
      * P2P listening address.
