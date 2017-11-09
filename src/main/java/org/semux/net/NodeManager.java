@@ -173,7 +173,7 @@ public class NodeManager {
                 nodes.add(new InetSocketAddress(addr, DEFAULT_PORT));
             }
         } catch (UnknownHostException e) {
-            logger.debug("Failed to get bootstrapping nodes by dns");
+            logger.info("Failed to get bootstrapping nodes by dns");
         }
 
         return nodes;
