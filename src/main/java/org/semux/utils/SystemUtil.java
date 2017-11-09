@@ -61,20 +61,18 @@ public class SystemUtil {
         try {
             URL url = new URL("https://api.ipify.org/");
             URLConnection con = url.openConnection();
-            con.setConnectTimeout(5000);
+            con.setConnectTimeout(3000);
             con.setReadTimeout(3000);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String ip = reader.readLine().trim();
             reader.close();
 
-            if (!ip.matches("(\\d{1,3}\\.){3}\\d{1,3}")) {
-                throw new RuntimeException("Unable to parse IP address");
+            if (ip.matches("(\\d{1,3}\\.){3}\\d{1,3}")) {
+                return ip;
             }
-
-            return ip;
         } catch (Exception e) {
-            logger.info("Failed to retrieve public IP address", e);
+            logger.error("Failed to retrieve your IP address");
         }
 
         try {
