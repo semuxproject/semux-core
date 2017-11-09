@@ -8,9 +8,7 @@ package org.semux.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -88,8 +86,6 @@ public class BlockchainImpl implements Blockchain {
 
     private List<BlockchainListener> listeners = new ArrayList<>();
 
-    private Map<Long, List<Premine>> periods = new HashMap<>();
-
     /**
      * Create a blockchain instance.
      * 
@@ -108,13 +104,9 @@ public class BlockchainImpl implements Blockchain {
         if (number == null) {
             // pre-allocation
             for (Premine p : genesis.getPremines().values()) {
-                for (int i = 0; i < p.getPeriods(); i++) {
-                    long blockNum = i * 365 * Config.BLOCKS_PER_DAY;
-                    periods.computeIfAbsent(blockNum, (k) -> {
-                        return new ArrayList<>();
-                    }).add(p);
-                }
+                accountState.adjustAvailable(p.getAddress(), p.getAmount());
             }
+            accountState.commit();
 
             // delegates
             for (Entry<String, byte[]> e : genesis.getDelegates().entrySet()) {
@@ -251,14 +243,6 @@ public class BlockchainImpl implements Blockchain {
         if (number != genesis.getNumber() && number != latestBlock.getNumber() + 1) {
             logger.error("Adding wrong block: number = {}, expected = {}", number, latestBlock.getNumber() + 1);
             throw new RuntimeException("Blocks can only be added sequentially");
-        }
-
-        if (periods.containsKey(number)) {
-            AccountState as = getAccountState();
-            for (Premine p : periods.get(number)) {
-                accountState.adjustAvailable(p.getAddress(), p.getAmount());
-            }
-            as.commit();
         }
 
         // [1] update block

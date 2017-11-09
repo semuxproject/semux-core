@@ -28,13 +28,11 @@ public class Genesis extends Block {
     public static class Premine {
         private byte[] address;
         private long amount;
-        private int periods;
 
-        public Premine(byte[] address, long amount, int periods) {
+        public Premine(byte[] address, long amount) {
             super();
             this.address = address;
             this.amount = amount;
-            this.periods = periods;
         }
 
         public byte[] getAddress() {
@@ -43,10 +41,6 @@ public class Genesis extends Block {
 
         public long getAmount() {
             return amount;
-        }
-
-        public int getPeriods() {
-            return periods;
         }
     }
 
@@ -87,8 +81,7 @@ public class Genesis extends Block {
                     JSONObject obj = arr.getJSONObject(i);
                     byte[] address = Hex.parse(obj.getString("address"));
                     long amount = obj.getLong("amount") * Unit.SEM;
-                    int periods = obj.has("periods") ? obj.getInt("periods") : 1;
-                    premine.put(ByteArray.of(address), new Premine(address, amount, periods));
+                    premine.put(ByteArray.of(address), new Premine(address, amount));
                 }
 
                 // delegates

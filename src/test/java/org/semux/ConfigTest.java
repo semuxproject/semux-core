@@ -29,7 +29,7 @@ public class ConfigTest {
         for (int i = 1; i <= 100_000_000; i++) {
             total += Config.getBlockReward(i);
         }
-        assertEquals(70_000_000 * Unit.SEM, total);
+        assertEquals(75_000_000 * Unit.SEM, total);
     }
 
     @Test
@@ -44,6 +44,6 @@ public class ConfigTest {
             }
         }
 
-        assertEquals(64, last);
+        assertEquals(100, last);
     }
 }

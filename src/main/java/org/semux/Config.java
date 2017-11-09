@@ -143,7 +143,7 @@ public class Config {
     /**
      * Number of blocks before the next validator set refresh.
      */
-    public static long VALIDATOR_REFRESH_RATE = 128;
+    public static long VALIDATOR_REFRESH_RATE = 100;
 
     /**
      * Number of blocks in one day.
@@ -153,7 +153,7 @@ public class Config {
     /**
      * Deadline of the next mandatory upgrade.
      */
-    public static long MANDATORY_UPGRADE = 60 * BLOCKS_PER_DAY;
+    public static long MANDATORY_UPGRADE = 365 * BLOCKS_PER_DAY;
 
     /**
      * State lock to prevent state inconsistency.
@@ -380,11 +380,7 @@ public class Config {
      * @return the block reward
      */
     public static long getBlockReward(long number) {
-        if (number <= 1_000_000L) {
-            return 1 * Unit.SEM;
-        } else if (number <= 10_000_000L) {
-            return 2 * Unit.SEM;
-        } else if (number <= 27_000_000L) {
+        if (number <= 25_000_000L) {
             return 3 * Unit.SEM;
         } else {
             return 0;
@@ -400,10 +396,10 @@ public class Config {
     public static int getNumberOfValidators(long number) {
         long step = 2 * 60 * 2;
 
-        if (number < 48 * step) {
-            return (int) (16 + number / step);
+        if (number < 80 * step) {
+            return (int) (20 + number / step);
         } else {
-            return 64;
+            return 100;
         }
     }
 
