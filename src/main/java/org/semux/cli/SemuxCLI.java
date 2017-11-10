@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2017 The Semux Developers
+ *
+ * Distributed under the MIT software license, see the accompanying file
+ * LICENSE or https://opensource.org/licenses/mit-license.php
+ */
 package org.semux.cli;
 
 import org.apache.commons.cli.*;
@@ -25,80 +31,40 @@ public class SemuxCLI {
 
     private Wallet wallet = null;
 
-    /**
-     * Values read from options
-     */
     private String dataDir = ".";
     private int coinbase = 0;
     private String password = null;
 
     public SemuxCLI() {
-        // FIXME: the option is redundant in order to avoid ParseException thrown from DefaultParser.parse
+        // FIXME: the option is redundant in order to avoid ParseException
         Option cli = Option.builder("cli").longOpt("cli").build();
         options.addOption(cli);
 
-        Option help = Option.builder("h")
-                .longOpt("help")
-                .desc("Print help info and exit")
-                .build();
+        Option help = Option.builder("h").longOpt("help").desc("Print help info and exit").build();
         options.addOption(help);
 
-        Option version = Option.builder("v")
-                .longOpt("version")
-                .desc("Show the version of this client")
-                .build();
+        Option version = Option.builder("v").longOpt("version").desc("Show the version of this client").build();
         options.addOption(version);
 
-        Option account = Option.builder("a")
-                .longOpt("account")
-                .desc("create\tCreate an new account and exit" +
-                        "\n" +
-                        "list\tList all accounts and exit")
-                .hasArg(true)
-                .numberOfArgs(1)
-                .optionalArg(false)
-                .argName("action")
-                .type(String.class)
-                .build();
+        Option account = Option.builder("a").longOpt("account")
+                .desc("create\tCreate an new account and exit" + "\n" + "list\tList all accounts and exit").hasArg(true)
+                .numberOfArgs(1).optionalArg(false).argName("action").type(String.class).build();
         options.addOption(account);
 
-        Option changepassword = Option.builder("cp")
-                .longOpt("changepassword")
-                .desc("Change password of the wallet")
+        Option changepassword = Option.builder("cp").longOpt("changepassword").desc("Change password of the wallet")
                 .build();
         options.addOption(changepassword);
 
-        Option datadir = Option.builder("d")
-                .longOpt("datadir")
-                .desc("Specify the data directory")
-                .hasArg(true)
-                .numberOfArgs(1)
-                .optionalArg(false)
-                .argName("path")
-                .type(String.class)
-                .build();
+        Option datadir = Option.builder("d").longOpt("datadir").desc("Specify the data directory").hasArg(true)
+                .numberOfArgs(1).optionalArg(false).argName("path").type(String.class).build();
         options.addOption(datadir);
 
-        Option coinbase = Option.builder("c")
-                .longOpt("coinbase")
-                .desc("Specify which account to be used as coinbase")
-                .hasArg(true)
-                .numberOfArgs(1)
-                .optionalArg(false)
-                .argName("index")
-                .type(Number.class)
-                .build();
+        Option coinbase = Option.builder("c").longOpt("coinbase").desc("Specify which account to be used as coinbase")
+                .hasArg(true).numberOfArgs(1).optionalArg(false).argName("index").type(Number.class).build();
         options.addOption(coinbase);
 
-        Option password = Option.builder("p")
-                .longOpt("password")
-                .desc("Password of the wallet")
-                .hasArg(true)
-                .numberOfArgs(1)
-                .optionalArg(false)
-                .argName("password")
-                .type(String.class)
-                .build();
+        Option password = Option.builder("p").longOpt("password").desc("Password of the wallet").hasArg(true)
+                .numberOfArgs(1).optionalArg(false).argName("password").type(String.class).build();
         options.addOption(password);
     }
 
