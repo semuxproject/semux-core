@@ -1,5 +1,3 @@
 @echo off
 
-java -cp "./config;./lib/*" org.semux.Semux %*
-
-pause
+start javaw -cp "./config;./lib/*" org.semux.Semux %* >> debug.log 2>&1 &
