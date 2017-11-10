@@ -21,6 +21,8 @@ dist/
 .project
 .classpath
 .settings/
+.idea
+semux.iml
 
 # OSX generated files
 .DS_Store
