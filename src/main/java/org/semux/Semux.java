@@ -1,5 +1,7 @@
 package org.semux;
 
+import org.semux.cli.SemuxCLI;
+
 public class Semux {
     public static void main(String[] args) {
         boolean cli = false;
@@ -10,7 +12,7 @@ public class Semux {
         }
 
         if (cli) {
-            CLI.main(args);
+            SemuxCLI.main(args);
         } else {
             GUI.main(args);
         }
