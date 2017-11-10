@@ -10,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -24,11 +26,13 @@ import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.gui.dialog.ChangePasswordDialog;
 import org.semux.gui.dialog.InputDialog;
-import org.semux.utils.IOUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MenuBar extends JMenuBar implements ActionListener {
 
     private static final long serialVersionUID = 1L;
+    private static final Logger logger = LoggerFactory.getLogger(MenuBar.class);
 
     private JFrame frame;
 
@@ -110,11 +114,18 @@ public class MenuBar extends JMenuBar implements ActionListener {
             int ret = chooser.showSaveDialog(frame);
             if (ret == JFileChooser.APPROVE_OPTION) {
                 File dst = chooser.getSelectedFile();
+                if (dst.exists()) {
+                    int answer = JOptionPane.showConfirmDialog(frame, MessagesUtil.get("BackupFileExists", dst.getName()));
+                    if (answer != JOptionPane.OK_OPTION) {
+                        return;
+                    }
+                }
                 File src = Kernel.getInstance().getWallet().getFile();
                 try {
-                    IOUtil.copyFile(src, dst);
+                    Files.copy(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     JOptionPane.showMessageDialog(frame, MessagesUtil.get("WalletSavedAt", dst.getAbsolutePath()));
                 } catch (IOException ex) {
+                    logger.warn("Failed to save backup file", ex);
                     JOptionPane.showMessageDialog(frame, MessagesUtil.get("SaveBackupFailed"));
                 }
             }
