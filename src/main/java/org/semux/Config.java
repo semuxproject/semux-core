@@ -313,12 +313,12 @@ public class Config {
     /**
      * The duration of PREPROSE state.
      */
-    public static long BFT_PROPOSE_TIMEOUT = 9000;
+    public static long BFT_PROPOSE_TIMEOUT = 12000;
 
     /**
      * The duration of VALIDATE state.
      */
-    public static long BFT_VALIDATE_TIMEOUT = 8000;
+    public static long BFT_VALIDATE_TIMEOUT = 6000;
 
     /**
      * The duration of PRE_COMMIT state.
@@ -328,12 +328,12 @@ public class Config {
     /**
      * The duration of COMMIT state. May be skipped after +2/3 commit votes.
      */
-    public static long BFT_COMMIT_TIMEOUT = 4000;
+    public static long BFT_COMMIT_TIMEOUT = 3000;
 
     /**
      * The duration of FINALIZE state. This allows validators to persist block.
      */
-    public static long BFT_FINALIZE_TIMEOUT = 4000;
+    public static long BFT_FINALIZE_TIMEOUT = 3000;
 
     // =========================
     // Virtual machine
