@@ -405,6 +405,7 @@ public class SemuxBFT implements Consensus {
             block.setVotes(votes);
 
             // [3] add the block to chain
+            logger.info(block.toString());
             applyBlock(block);
         } else {
             sync(height + 1);
