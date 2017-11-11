@@ -21,6 +21,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
@@ -122,6 +123,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
                     .addContainerGap(249, Short.MAX_VALUE))
                 .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE)
         );
+        groupLayout.linkSize(SwingConstants.HORIZONTAL, btnCopyAddress, buttonNewAccount, btnDeleteAddress);
         setLayout(groupLayout);
         // @formatter:on
 
