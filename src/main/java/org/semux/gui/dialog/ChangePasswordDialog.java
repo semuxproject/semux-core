@@ -57,9 +57,9 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addGroup(groupLayout.createSequentialGroup()
-                            .addComponent(btnOk, GroupLayout.PREFERRED_SIZE, 65, GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnCancel)
                             .addGap(18)
-                            .addComponent(btnCancel))
+                            .addComponent(btnOk))
                         .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                             .addComponent(repeatField, GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)
                             .addComponent(passwordField, GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)
@@ -83,8 +83,8 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
                         .addComponent(repeatField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(btnOk)
-                        .addComponent(btnCancel))
+                        .addComponent(btnCancel)
+                        .addComponent(btnOk))
                     .addContainerGap(77, Short.MAX_VALUE))
         );
         getContentPane().setLayout(groupLayout);
