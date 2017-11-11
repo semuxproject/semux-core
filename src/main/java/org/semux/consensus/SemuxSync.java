@@ -54,7 +54,7 @@ public class SemuxSync implements Sync {
 
         @Override
         public Thread newThread(Runnable r) {
-            return new Thread(r, "sync-mgr-" + cnt.getAndIncrement());
+            return new Thread(r, "sync-" + cnt.getAndIncrement());
         }
     };
 

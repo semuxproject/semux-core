@@ -36,7 +36,7 @@ public class PeerClient {
 
         @Override
         public Thread newThread(Runnable r) {
-            return new Thread(r, "p2p-client-" + cnt.getAndIncrement());
+            return new Thread(r, "client-" + cnt.getAndIncrement());
         }
     };
 

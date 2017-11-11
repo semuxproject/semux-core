@@ -34,7 +34,7 @@ public class Block implements Comparable<Block> {
 
         @Override
         public Thread newThread(Runnable r) {
-            return new Thread(r, "block-validator-" + cnt.getAndIncrement());
+            return new Thread(r, "block-" + cnt.getAndIncrement());
         }
     };
 
@@ -137,7 +137,7 @@ public class Block implements Comparable<Block> {
      */
     public static boolean validateHeader(Block previous, BlockHeader header) {
         return header != null && header.validate() //
-                && header.getNumber() != previous.getNumber() + 1 //
+                && header.getNumber() == previous.getNumber() + 1 //
                 && Arrays.equals(header.getPrevHash(), previous.getHash()) //
                 && header.getTimestamp() > previous.getTimestamp();
     }

@@ -34,7 +34,7 @@ public class PeerServer {
 
         @Override
         public Thread newThread(Runnable r) {
-            return new Thread(r, "p2p-server-" + cnt.getAndIncrement());
+            return new Thread(r, "server-" + cnt.getAndIncrement());
         }
     };
 

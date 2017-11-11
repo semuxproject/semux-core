@@ -74,7 +74,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
         @Override
         public Thread newThread(Runnable r) {
-            return new Thread(r, "p2p-handler-" + cnt.getAndIncrement());
+            return new Thread(r, "p2p-" + cnt.getAndIncrement());
         }
     });
 
