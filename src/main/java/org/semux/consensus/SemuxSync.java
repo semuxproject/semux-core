@@ -201,6 +201,10 @@ public class SemuxSync implements Sync {
     }
 
     private void download() {
+        if (!isRunning()) {
+            return;
+        }
+
         List<Channel> channels = channelMgr.getIdleChannels();
         Collections.shuffle(channels);
         logger.trace("Idle peers = {}", channels.size());
@@ -252,6 +256,10 @@ public class SemuxSync implements Sync {
     }
 
     private void process() {
+        if (!isRunning()) {
+            return;
+        }
+
         long latest = chain.getLatestBlockNumber();
         if (latest + 1 == target) {
             stop();
