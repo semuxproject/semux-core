@@ -41,7 +41,7 @@ public class BlockTest {
     @Test
     public void testGenesis() {
         Block block = Genesis.getInstance();
-        assertTrue(block.validate());
+        assertTrue(block.getHeader().validate());
     }
 
     @Test

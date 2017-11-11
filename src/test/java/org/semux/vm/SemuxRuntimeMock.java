@@ -41,7 +41,7 @@ public class SemuxRuntimeMock implements SemuxRuntime {
 
         Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
         this.accountState = chain.getAccountState();
-        this.result = new TransactionResult();
+        this.result = new TransactionResult(true);
     }
 
     @Override

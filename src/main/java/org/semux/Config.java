@@ -128,7 +128,7 @@ public class Config {
     /**
      * Maximum number of transactions per block.
      */
-    public static int MAX_BLOCK_SIZE = 10000;
+    public static int MAX_BLOCK_SIZE = 5000;
 
     /**
      * Minimum transaction fee.

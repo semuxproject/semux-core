@@ -7,13 +7,14 @@
 package org.semux.consensus;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
+import org.apache.commons.collections4.map.LRUMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Config;
 import org.semux.consensus.SemuxBFT.Event.Type;
@@ -42,6 +43,7 @@ import org.semux.net.msg.consensus.BFTNewViewMessage;
 import org.semux.net.msg.consensus.BFTProposalMessage;
 import org.semux.net.msg.consensus.BFTVoteMessage;
 import org.semux.utils.ArrayUtil;
+import org.semux.utils.ByteArray;
 import org.semux.utils.MerkleUtil;
 import org.semux.utils.SystemUtil;
 import org.slf4j.Logger;
@@ -73,6 +75,8 @@ public class SemuxBFT implements Consensus {
     private int view;
     private Proof proof;
     private Proposal proposal;
+
+    private Map<ByteArray, Block> validBlocks = new LRUMap<>(16);
 
     private volatile List<String> validators;
     private volatile List<Channel> activeValidators;
@@ -290,7 +294,7 @@ public class SemuxBFT implements Consensus {
         if (isPrimary()) {
             if (proposal == null) {
                 Block block = proposeBlock();
-                proposal = new Proposal(proof, block);
+                proposal = new Proposal(proof, block.getHeader(), block.getTransactions());
                 proposal.sign(coinbase);
             }
 
@@ -314,16 +318,14 @@ public class SemuxBFT implements Consensus {
         logger.info("Entered validate: proposal = {}, votes = {} {} {}", proposal != null, validateVotes,
                 precommitVotes, commitVotes);
 
-        boolean valid = false;
-        if (proposal != null) {
-            if (proposal.isBlockValid() != null) {
-                valid = proposal.isBlockValid();
-            } else {
-                valid = validateBlock(proposal.getBlock());
-                proposal.setBlockValid(valid);
-            }
+        boolean valid = (proposal == null) ? false
+                : validateBlock(proposal.getBlockHeader(), proposal.getTransactions());
+        if (valid) {
+
         }
-        Vote vote = valid ? Vote.newApprove(VoteType.VALIDATE, height, view, proposal.getBlock().getHash())
+
+        // construct vote
+        Vote vote = valid ? Vote.newApprove(VoteType.VALIDATE, height, view, proposal.getBlockHeader().getHash())
                 : Vote.newReject(VoteType.VALIDATE, height, view);
         vote.sign(coinbase);
 
@@ -390,9 +392,9 @@ public class SemuxBFT implements Consensus {
                 precommitVotes, commitVotes);
 
         byte[] blockHash = precommitVotes.isAnyApproved();
-        if (blockHash != null && proposal != null && Arrays.equals(blockHash, proposal.getBlock().getHash())) {
-            // [1] create a block
-            Block block = proposal.getBlock();
+        if (blockHash != null && validBlocks.containsKey(ByteArray.of(blockHash))) {
+            // [1] get the raw block
+            Block block = validBlocks.get(ByteArray.of(blockHash));
 
             // [2] update view and votes
             List<Signature> votes = new ArrayList<>();
@@ -403,7 +405,6 @@ public class SemuxBFT implements Consensus {
             block.setVotes(votes);
 
             // [3] add the block to chain
-            logger.info(block.toString());
             applyBlock(block);
         } else {
             sync(height + 1);
@@ -476,8 +477,6 @@ public class SemuxBFT implements Consensus {
 
         if (p.getHeight() == height // at the same height
                 && (p.getView() == view && proposal == null && (state == State.NEW_HEIGHT || state == State.PROPOSE) // expecting
-                                                                                                                     // a
-                                                                                                                     // proposal
                         || p.getView() > view && state != State.COMMIT && state != State.FINALIZE) // larger view
                 && isFromValidator(p.getSignature()) //
                 && isPrimary(p.getHeight(), p.getView(), pubKeyToPeerId(p.getSignature().getPublicKey()))) {//
@@ -748,35 +747,25 @@ public class SemuxBFT implements Consensus {
     }
 
     /**
-     * Check if a block is valid.
+     * Check if a block proposal is valid.
      * 
-     * NOTOE: this method assume the block data and signature is valid. If not, use
-     * {@link Block#validate()} to check.
-     * 
-     * @param block
+     * @param header
+     * @param txs
      * @return
      */
-    protected boolean validateBlock(Block block) {
+    protected boolean validateBlock(BlockHeader header, List<Transaction> transactions) {
         long t1 = System.currentTimeMillis();
 
-        // [1] check block integrity and signature
-        if (!block.validate()) {
-            logger.debug("Invalid block/transaction format");
+        // [1] check block header
+        Block latest = chain.getLatestBlock();
+        if (!Block.validateHeader(latest, header)) {
+            logger.debug("Invalid block header");
             return false;
         }
 
-        // [2] check number, prevHash and time stamp
-        Block latest = chain.getLatestBlock();
-        if (block.getNumber() != latest.getNumber() + 1) {
-            logger.debug("Invalid block number");
-            return false;
-        }
-        if (!Arrays.equals(block.getPrevHash(), latest.getHash())) {
-            logger.debug("Invalid block previous hash");
-            return false;
-        }
-        if (block.getTimestamp() <= latest.getTimestamp()) {
-            logger.debug("Invalid block timestamp");
+        // [2] check transactions and results (skipped)
+        if (!Block.validateTransactions(header, transactions)) {
+            logger.debug("Invalid block transactions");
             return false;
         }
 
@@ -784,19 +773,18 @@ public class SemuxBFT implements Consensus {
         DelegateState ds = delegateState.track();
         TransactionExecutor exec = new TransactionExecutor();
 
-        // [3] check transactions
-        List<Transaction> txs = block.getTransactions();
-        List<TransactionResult> results = exec.execute(txs, as, ds);
-        for (int i = 0; i < results.size(); i++) {
-            if (!results.get(i).isValid()) {
-                logger.debug("Invalid transaction #{}", i);
-                return false;
-            }
+        // [3] evaluate transactions
+        List<TransactionResult> results = exec.execute(transactions, as, ds);
+        if (!Block.validateResults(header, results)) {
+            logger.debug("Invalid transactions");
+            return false;
         }
 
         long t2 = System.currentTimeMillis();
-        logger.debug("Block validation: # txs = {}, time = {} ms", txs.size(), t2 - t1);
+        logger.debug("Block validation: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
 
+        Block block = new Block(header, transactions, results);
+        validBlocks.put(ByteArray.of(block.getHash()), block);
         return true;
     }
 
@@ -806,29 +794,34 @@ public class SemuxBFT implements Consensus {
      * @param block
      */
     protected void applyBlock(Block block) {
-        long number = block.getNumber();
+        BlockHeader header = block.getHeader();
+        List<Transaction> transactions = block.getTransactions();
+        long number = header.getNumber();
 
-        if (number > Config.MANDATORY_UPGRADE) {
+        if (header.getNumber() > Config.MANDATORY_UPGRADE) {
             throw new RuntimeException("This client needs to be upgraded");
-        } else if (number != chain.getLatestBlockNumber() + 1) {
-            throw new RuntimeException("Applying wrong block: number = " + block.getNumber());
+        } else if (header.getNumber() != chain.getLatestBlockNumber() + 1) {
+            throw new RuntimeException("Applying wrong block: number = " + header.getNumber());
         }
+
+        // [1] check block header, skipped
+
+        // [2] check transactions and results, skipped
 
         AccountState as = chain.getAccountState().track();
         DelegateState ds = chain.getDelegateState().track();
-
-        // [1] execute all transactions
         TransactionExecutor exec = new TransactionExecutor();
-        List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds);
-        for (int i = 0; i < results.size(); i++) {
-            if (!results.get(i).isValid()) {
-                Transaction tx = block.getTransactions().get(i);
-                logger.debug("Invalid transaction: type = {}, hash = {}", tx.getType(), Hex.encode(tx.getHash()));
-                return;
-            }
+
+        // [3] evaluate all transactions
+        List<TransactionResult> results = exec.execute(transactions, as, ds);
+        if (!Block.validateResults(header, results)) {
+            logger.debug("Invalid transactions");
+            return;
         }
 
-        // [2] apply block reward and tx fees
+        // [4] evaluate votes, skipped
+
+        // [5] apply block reward and tx fees
         long reward = Config.getBlockReward(number);
         for (Transaction tx : block.getTransactions()) {
             reward += tx.getFee();
@@ -837,18 +830,18 @@ public class SemuxBFT implements Consensus {
             as.adjustAvailable(block.getCoinbase(), reward);
         }
 
-        // [3] commit state change
+        // [6] commit the updates
         as.commit();
         ds.commit();
 
         WriteLock lock = Config.STATE_LOCK.writeLock();
         lock.lock();
         try {
-            // [4] flush state to disk
+            // [7] flush state to disk
             chain.getAccountState().commit();
             chain.getDelegateState().commit();
 
-            // [5] add block to chain
+            // [8] add block to chain
             chain.addBlock(block);
         } finally {
             lock.unlock();

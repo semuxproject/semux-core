@@ -28,7 +28,7 @@ public class ProposalTest {
         vote.sign(new EdDSA());
 
         Proof proof = new Proof(height, view, Collections.singletonList(vote));
-        Proposal p = new Proposal(proof, block);
+        Proposal p = new Proposal(proof, block.getHeader(), block.getTransactions());
         assertFalse(p.validate());
         p.sign(new EdDSA());
         assertTrue(p.validate());
@@ -37,7 +37,7 @@ public class ProposalTest {
 
         assertEquals(height, p2.getHeight());
         assertEquals(view, p2.getView());
-        assertArrayEquals(block.getHash(), p2.getBlock().getHash());
+        assertArrayEquals(block.getHash(), p2.getBlockHeader().getHash());
         assertEquals(1, p2.getProof().getVotes().size());
         assertArrayEquals(vote.getBlockHash(), p2.getProof().getVotes().get(0).getBlockHash());
     }

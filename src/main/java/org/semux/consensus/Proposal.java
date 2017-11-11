@@ -6,7 +6,12 @@
  */
 package org.semux.consensus;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.semux.core.Block;
+import org.semux.core.BlockHeader;
+import org.semux.core.Transaction;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.utils.SimpleDecoder;
@@ -15,39 +20,42 @@ import org.semux.utils.SimpleEncoder;
 public class Proposal {
 
     private Proof proof;
-    private Block block;
+    private BlockHeader blockHeader;
+    private List<Transaction> transactions;
 
     private byte[] encoded;
     private Signature signature;
 
-    // block validation result cache
-    private Boolean isBlockValid = null;
-
-    public Proposal(Proof proof, Block block) {
+    public Proposal(Proof proof, BlockHeader blockHeader, List<Transaction> transactions) {
         // NOTE: the view of proposed block is always zero before being added to
         // blockchain, so do not check version match here.
-        if (proof.getHeight() != block.getNumber()) {
+        if (proof.getHeight() != blockHeader.getNumber()) {
             throw new RuntimeException("Proof-of-unlock and proposed block does not match");
         }
 
         this.proof = proof;
-        this.block = block;
+        this.blockHeader = blockHeader;
+        this.transactions = transactions;
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeBytes(proof.toBytes());
-        enc.writeBytes(block.toBytesHeader());
-        enc.writeBytes(block.toBytesTransactions());
-        enc.writeBytes(block.toBytesResults());
+        enc.writeBytes(blockHeader.toBytes());
+        enc.writeInt(transactions.size());
+        for (Transaction tx : transactions) {
+            enc.writeBytes(tx.toBytes());
+        }
         this.encoded = enc.toBytes();
     }
 
     public Proposal(byte[] encoded, byte[] signature) {
         SimpleDecoder dec = new SimpleDecoder(encoded);
         this.proof = Proof.fromBytes(dec.readBytes());
-        byte[] header = dec.readBytes();
-        byte[] transactions = dec.readBytes();
-        byte[] results = dec.readBytes();
-        this.block = Block.fromBytes(header, transactions, results);
+        this.blockHeader = BlockHeader.fromBytes(dec.readBytes());
+        this.transactions = new ArrayList<>();
+        int n = dec.readInt();
+        for (int i = 0; i < n; i++) {
+            transactions.add(Transaction.fromBytes(dec.readBytes()));
+        }
 
         this.encoded = encoded;
         this.signature = Signature.fromBytes(signature);
@@ -83,7 +91,8 @@ public class Proposal {
                 && proof != null //
                 && encoded != null//
                 && signature != null && EdDSA.verify(encoded, signature) //
-                && block != null;
+                && blockHeader != null //
+                && transactions != null;
     }
 
     public Proof getProof() {
@@ -98,20 +107,16 @@ public class Proposal {
         return proof.getView();
     }
 
-    public Block getBlock() {
-        return block;
+    public BlockHeader getBlockHeader() {
+        return blockHeader;
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
     }
 
     public Signature getSignature() {
         return signature;
-    }
-
-    public Boolean isBlockValid() {
-        return isBlockValid;
-    }
-
-    public void setBlockValid(Boolean isBlockValid) {
-        this.isBlockValid = isBlockValid;
     }
 
     public byte[] toBytes() {
@@ -133,6 +138,6 @@ public class Proposal {
     @Override
     public String toString() {
         return "Proposal [height=" + getHeight() + ", view = " + getView() + ", # proof votes = "
-                + proof.getVotes().size() + ", # txs = " + block.getTransactions().size() + "]";
+                + proof.getVotes().size() + ", # txs = " + transactions.size() + "]";
     }
 }

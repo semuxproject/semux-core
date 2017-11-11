@@ -129,24 +129,17 @@ public class Block implements Comparable<Block> {
     }
 
     /**
-     * Validates block header, transactions and results.
+     * Validates block header.
      * 
-     * @return true if valid, otherwise false
+     * @param header
+     * @param previous
+     * @return
      */
-    public boolean validate() {
-        if (header != null && header.validate()) {
-            // validate transactions
-            if (!validateTransactions(header.getTransactionsRoot(), transactions)) {
-                return false;
-            }
-
-            // validate results
-            if (!validateResults(header.getResultsRoot(), results)) {
-                return false;
-            }
-        }
-
-        return false;
+    public static boolean validateHeader(Block previous, BlockHeader header) {
+        return header != null && header.validate() //
+                && header.getNumber() != previous.getNumber() + 1 //
+                && Arrays.equals(header.getPrevHash(), previous.getHash()) //
+                && header.getTimestamp() > previous.getTimestamp();
     }
 
     /**
@@ -156,7 +149,7 @@ public class Block implements Comparable<Block> {
      * @param transactions
      * @return
      */
-    public static boolean validateTransactions(byte[] transactionsRoot, List<Transaction> transactions) {
+    public static boolean validateTransactions(BlockHeader header, List<Transaction> transactions) {
         // validate transactions
         int cores = Runtime.getRuntime().availableProcessors();
         if (cores > 1) {
@@ -183,7 +176,7 @@ public class Block implements Comparable<Block> {
 
         // validate transactions root
         byte[] root = MerkleUtil.computeTransactionsRoot(transactions);
-        return Arrays.equals(root, transactionsRoot);
+        return Arrays.equals(root, header.getTransactionsRoot());
     }
 
     /**
@@ -193,7 +186,7 @@ public class Block implements Comparable<Block> {
      * @param results
      * @return
      */
-    public static boolean validateResults(byte[] resultsRoot, List<TransactionResult> results) {
+    public static boolean validateResults(BlockHeader header, List<TransactionResult> results) {
         // validate results
         for (TransactionResult result : results) {
             if (!result.validate()) {
@@ -203,7 +196,7 @@ public class Block implements Comparable<Block> {
 
         // validate results root
         byte[] root = MerkleUtil.computeResultsRoot(results);
-        return Arrays.equals(root, resultsRoot);
+        return Arrays.equals(root, header.getResultsRoot());
     }
 
     /**
