@@ -49,7 +49,7 @@ public class TransactionExecutor {
         List<TransactionResult> results = new ArrayList<>();
 
         for (Transaction tx : txs) {
-            TransactionResult result = new TransactionResult();
+            TransactionResult result = new TransactionResult(false);
             results.add(result);
 
             byte[] from = tx.getFrom();

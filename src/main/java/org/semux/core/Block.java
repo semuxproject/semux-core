@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.crypto.EdDSA.Signature;
-import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.utils.MerkleUtil;
 import org.semux.utils.SimpleDecoder;
@@ -130,16 +129,38 @@ public class Block implements Comparable<Block> {
     }
 
     /**
-     * Validate block format and signature, and also validate the contained
-     * transactions by calling {@link Transaction#validate()}.
-     *
-     * @param nThreads
+     * Validates block header, transactions and results.
+     * 
      * @return true if valid, otherwise false
      */
-    public boolean validate(int nThreads) {
+    public boolean validate() {
         if (header != null && header.validate()) {
             // validate transactions
-            ExecutorService exec = Executors.newFixedThreadPool(nThreads, factory);
+            if (!validateTransactions(header.getTransactionsRoot(), transactions)) {
+                return false;
+            }
+
+            // validate results
+            if (!validateResults(header.getResultsRoot(), results)) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Validates transactions in parallel.
+     * 
+     * @param transactionsRoot
+     * @param transactions
+     * @return
+     */
+    public static boolean validateTransactions(byte[] transactionsRoot, List<Transaction> transactions) {
+        // validate transactions
+        int cores = Runtime.getRuntime().availableProcessors();
+        if (cores > 1) {
+            ExecutorService exec = Executors.newFixedThreadPool(cores, factory);
             try {
                 List<Future<Boolean>> list = exec.invokeAll(transactions);
                 for (Future<Boolean> f : list) {
@@ -152,39 +173,41 @@ public class Block implements Comparable<Block> {
             } finally {
                 exec.shutdownNow();
             }
-
-            // validate transactions root
-            byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
-            if (!Arrays.equals(transactionsRoot, header.getTransactionsRoot())) {
-                return false;
+        } else {
+            for (Transaction tx : transactions) {
+                if (!tx.validate()) {
+                    return false;
+                }
             }
-
-            // validate results root
-            byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
-            if (!Arrays.equals(resultsRoot, header.getResultsRoot())) {
-                return false;
-            }
-
-            // validate state root
-            return Arrays.equals(Hash.EMPTY_H256, header.getStateRoot());
         }
 
-        return false;
+        // validate transactions root
+        byte[] root = MerkleUtil.computeTransactionsRoot(transactions);
+        return Arrays.equals(root, transactionsRoot);
     }
 
     /**
-     * Validate block format and signature, along with transaction validation, using
-     * half the available CPU cores.
+     * Validates results.
      * 
+     * @param resultsRoot
+     * @param results
      * @return
      */
-    public boolean validate() {
-        int cores = Runtime.getRuntime().availableProcessors();
-        return validate(cores > 2 ? cores / 2 : 1);
+    public static boolean validateResults(byte[] resultsRoot, List<TransactionResult> results) {
+        // validate results
+        for (TransactionResult result : results) {
+            if (!result.validate()) {
+                return false;
+            }
+        }
+
+        // validate results root
+        byte[] root = MerkleUtil.computeResultsRoot(results);
+        return Arrays.equals(root, resultsRoot);
     }
 
     /**
-     * Get a shallow copy of the block header.
+     * Returns a shallow copy of the block header.
      * 
      * @return
      */
@@ -193,7 +216,7 @@ public class Block implements Comparable<Block> {
     }
 
     /**
-     * Get a shallow copy of the transactions.
+     * Returns a shallow copy of the transactions.
      * 
      * @return
      */
@@ -202,7 +225,7 @@ public class Block implements Comparable<Block> {
     }
 
     /**
-     * Get a shallow copy of the transactions results.
+     * Returns a shallow copy of the transactions results.
      * 
      * @return
      */
@@ -211,7 +234,7 @@ public class Block implements Comparable<Block> {
     }
 
     /**
-     * Get the BFT view.
+     * Returns the BFT view.
      * 
      * @return
      */
@@ -220,7 +243,7 @@ public class Block implements Comparable<Block> {
     }
 
     /**
-     * Set the BFT view.
+     * Sets the BFT view.
      * 
      * @param view
      */
@@ -229,7 +252,7 @@ public class Block implements Comparable<Block> {
     }
 
     /**
-     * Get a shallow copy of the votes.
+     * Returns a shallow copy of the votes.
      * 
      * @return
      */
@@ -238,7 +261,7 @@ public class Block implements Comparable<Block> {
     }
 
     /**
-     * Set the votes for this block.
+     * Sets the votes for this block.
      * 
      * @param votes
      */
@@ -247,7 +270,7 @@ public class Block implements Comparable<Block> {
     }
 
     /**
-     * Get a shallow copy of the transaction indexes;
+     * Returns a shallow copy of the transaction indexes;
      * 
      * @return
      */
