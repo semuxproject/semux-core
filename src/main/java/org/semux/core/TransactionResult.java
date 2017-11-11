@@ -55,10 +55,14 @@ public class TransactionResult {
     }
 
     /**
-     * Create a transaction result.
+     * Validate transaction result.
+     * 
+     * @return
      */
-    public TransactionResult() {
-        this(false);
+    public boolean validate() {
+        return valid //
+                && returns != null //
+                && logs != null && logs.isEmpty(); // RESERVED FOR VM
     }
 
     public boolean isValid() {

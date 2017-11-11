@@ -6,7 +6,6 @@
  */
 package org.semux.consensus;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +25,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.semux.Config;
 import org.semux.core.Block;
+import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.Sync;
 import org.semux.core.Transaction;
@@ -54,7 +54,7 @@ public class SemuxSync implements Sync {
 
         @Override
         public Thread newThread(Runnable r) {
-            return new Thread(r, "sync-mgr-" + cnt.getAndIncrement());
+            return new Thread(r, "sync-" + cnt.getAndIncrement());
         }
     };
 
@@ -201,6 +201,10 @@ public class SemuxSync implements Sync {
     }
 
     private void download() {
+        if (!isRunning()) {
+            return;
+        }
+
         List<Channel> channels = channelMgr.getIdleChannels();
         Collections.shuffle(channels);
         logger.trace("Idle peers = {}", channels.size());
@@ -252,6 +256,10 @@ public class SemuxSync implements Sync {
     }
 
     private void process() {
+        if (!isRunning()) {
+            return;
+        }
+
         long latest = chain.getLatestBlockNumber();
         if (latest + 1 == target) {
             stop();
@@ -310,31 +318,39 @@ public class SemuxSync implements Sync {
      */
     private boolean validateApplyBlock(Block block) {
         try {
-            // [1] check block integrity and signature
-            if (!block.validate()) {
-                logger.debug("Invalid block/transaction format");
+            BlockHeader header = block.getHeader();
+            List<Transaction> transactions = block.getTransactions();
+            long number = header.getNumber();
+
+            // [1] check block header
+            Block latest = chain.getLatestBlock();
+            if (!Block.validateHeader(latest, header)) {
+                logger.debug("Invalid block header");
                 return false;
             }
 
-            // [2] check number, prevHash and time stamp
-            Block latest = chain.getLatestBlock();
-            if (block.getNumber() != latest.getNumber() + 1) {
-                logger.debug("Invalid block number");
+            // [2] check transactions and results
+            if (!Block.validateTransactions(header, block.getTransactions())) {
+                logger.debug("Invalid block transactions");
                 return false;
             }
-            if (!Arrays.equals(block.getPrevHash(), latest.getHash())) {
-                logger.debug("Invalid block previous hash");
-                return false;
-            }
-            if (block.getTimestamp() <= latest.getTimestamp()) {
-                logger.debug("Invalid block timestamp");
+            if (!Block.validateResults(header, block.getResults())) {
+                logger.debug("Results root does not match");
                 return false;
             }
 
             AccountState as = chain.getAccountState().track();
             DelegateState ds = chain.getDelegateState().track();
+            TransactionExecutor exec = new TransactionExecutor();
 
-            // [3] check votes
+            // [3] evaluate transactions
+            List<TransactionResult> results = exec.execute(transactions, as, ds);
+            if (!Block.validateResults(header, results)) {
+                logger.debug("Invalid transactions");
+                return false;
+            }
+
+            // [4] evaluate votes
             List<String> validators = chain.getValidators();
             int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
             if (block.getVotes().size() < twoThirds) {
@@ -343,8 +359,7 @@ public class SemuxSync implements Sync {
             }
 
             Set<String> set = new HashSet<>(validators);
-            Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
-                    block.getHash());
+            Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, number, block.getView(), block.getHash());
             byte[] encoded = vote.getEncoded();
             for (Signature sig : block.getVotes()) {
                 String addr = Hex.encode(Hash.h160(sig.getPublicKey()));
@@ -355,19 +370,8 @@ public class SemuxSync implements Sync {
                 }
             }
 
-            // [4] check transactions
-            TransactionExecutor exec = new TransactionExecutor();
-            List<TransactionResult> results = exec.execute(block.getTransactions(), as, ds);
-            for (int i = 0; i < results.size(); i++) {
-                if (!results.get(i).isValid()) {
-                    Transaction tx = block.getTransactions().get(i);
-                    logger.debug("Invalid transaction: type = {}, hash = {}", tx.getType(), Hex.encode(tx.getHash()));
-                    return false;
-                }
-            }
-
             // [5] apply block reward and tx fees
-            long reward = Config.getBlockReward(block.getNumber());
+            long reward = Config.getBlockReward(number);
             for (Transaction tx : block.getTransactions()) {
                 reward += tx.getFee();
             }

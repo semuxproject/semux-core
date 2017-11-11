@@ -44,6 +44,6 @@ public class ConfigTest {
             }
         }
 
-        assertEquals(100, last);
+        assertEquals(64, last);
     }
 }

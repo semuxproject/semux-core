@@ -10,6 +10,7 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.crypto.EdDSA;
+import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hash;
 import org.semux.utils.Bytes;
 import org.semux.utils.MerkleUtil;
@@ -56,17 +57,24 @@ public class CorePerformance {
                 stateRoot, data);
         Block block = new Block(header.sign(key), txs, res);
 
+        List<Signature> votes = new ArrayList<>();
+        for (int i = 0; i < Config.getNumberOfValidators(1000000L); i++) {
+            votes.add(new EdDSA().sign(Bytes.EMPY_BYTES));
+        }
+        block.setView(1);
+        block.setVotes(votes);
+
         long t2 = System.nanoTime();
-        int size = block.toBytesHeader().length + block.toBytesTransactions().length + block.toBytesResults().length
-                + block.toBytesVotes().length;
-        logger.info("block size: {} KB", size / 1024);
+        logger.info("block header size: {} KB", block.toBytesHeader().length / 1024);
+        logger.info("block transaction size: {} KB", block.toBytesTransactions().length / 1024);
+        logger.info("block results size: {} KB", block.toBytesResults().length / 1024);
+        logger.info("block votes size: {} KB", block.toBytesVotes().length / 1024);
         logger.info("Perf_block_creation: {} ms", (t2 - t1) / 1_000_000);
         return block;
     }
 
     public static void testBlockValidation(Block block) {
         long t1 = System.nanoTime();
-        logger.info("validity: {}", block.validate());
         // proof validation is not counted here
         long t2 = System.nanoTime();
         logger.info("Perf_block_validation: {} ms", (t2 - t1) / 1_000_000);

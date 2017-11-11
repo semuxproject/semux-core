@@ -101,7 +101,6 @@ public class SemuxBFTTest {
         block = Block.fromBytes(block.toBytesHeader(), block.toBytesTransactions(), block.toBytesResults(),
                 block.toBytesVotes());
 
-        assertTrue(block.validate());
         for (Signature sig : block.getVotes()) {
             ByteArray addr = ByteArray.of(Hash.h160(sig.getPublicKey()));
 

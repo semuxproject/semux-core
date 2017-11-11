@@ -40,7 +40,7 @@ public class BlockHeader {
     private Signature signature;
 
     /**
-     * Create an instance of block header.
+     * Creates an instance of block header.
      * 
      * @param number
      * @param coinbase
@@ -75,7 +75,7 @@ public class BlockHeader {
     }
 
     /**
-     * Parse block header from byte arrays.
+     * Parses block header from byte arrays.
      * 
      * @param hash
      * @param encoded
@@ -100,7 +100,7 @@ public class BlockHeader {
     }
 
     /**
-     * Sign this block header.
+     * Signs this block header.
      * 
      * @param key
      * @return
@@ -111,7 +111,7 @@ public class BlockHeader {
     }
 
     /**
-     * Validate block header format and signature.
+     * Validates block header format and signature.
      *
      * @return true if valid, otherwise false
      */
@@ -123,7 +123,7 @@ public class BlockHeader {
                 && timestamp >= 0 //
                 && transactionsRoot != null && transactionsRoot.length == 32 //
                 && resultsRoot != null && resultsRoot.length == 32 //
-                && stateRoot != null && stateRoot.length == 32 //
+                && stateRoot != null && Arrays.equals(Bytes.EMPTY_HASH, stateRoot) // RESERVED FOR VM
                 && data != null && data.length < 512 //
                 && encoded != null //
                 && (number == 0 || signature != null) //

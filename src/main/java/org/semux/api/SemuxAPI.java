@@ -38,7 +38,7 @@ public class SemuxAPI {
 
         @Override
         public Thread newThread(Runnable r) {
-            return new Thread(r, "api-server-" + cnt.getAndIncrement());
+            return new Thread(r, "api-" + cnt.getAndIncrement());
         }
     };
 

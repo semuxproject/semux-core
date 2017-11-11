@@ -128,7 +128,7 @@ public class Config {
     /**
      * Maximum number of transactions per block.
      */
-    public static int MAX_BLOCK_SIZE = 10000;
+    public static int MAX_BLOCK_SIZE = 5000;
 
     /**
      * Minimum transaction fee.
@@ -143,7 +143,7 @@ public class Config {
     /**
      * Number of blocks before the next validator set refresh.
      */
-    public static long VALIDATOR_REFRESH_RATE = 100;
+    public static long VALIDATOR_REFRESH_RATE = 128;
 
     /**
      * Number of blocks in one day.
@@ -153,7 +153,7 @@ public class Config {
     /**
      * Deadline of the next mandatory upgrade.
      */
-    public static long MANDATORY_UPGRADE = 365 * BLOCKS_PER_DAY;
+    public static long MANDATORY_UPGRADE = 60 * BLOCKS_PER_DAY;
 
     /**
      * State lock to prevent state inconsistency.
@@ -172,7 +172,7 @@ public class Config {
     /**
      * Version of this client.
      */
-    public static String CLIENT_VERSION = "1.0.0";
+    public static String CLIENT_VERSION = "1.0.0-rc.2";
 
     // =========================
     // Crypto
@@ -190,7 +190,7 @@ public class Config {
     /**
      * P2P protocol version.
      */
-    public static short P2P_VERSION = 0;
+    public static short P2P_VERSION = 2;
 
     /**
      * P2P listening address.
@@ -313,12 +313,12 @@ public class Config {
     /**
      * The duration of PREPROSE state.
      */
-    public static long BFT_PROPOSE_TIMEOUT = 9000;
+    public static long BFT_PROPOSE_TIMEOUT = 12000;
 
     /**
      * The duration of VALIDATE state.
      */
-    public static long BFT_VALIDATE_TIMEOUT = 8000;
+    public static long BFT_VALIDATE_TIMEOUT = 6000;
 
     /**
      * The duration of PRE_COMMIT state.
@@ -328,12 +328,12 @@ public class Config {
     /**
      * The duration of COMMIT state. May be skipped after +2/3 commit votes.
      */
-    public static long BFT_COMMIT_TIMEOUT = 4000;
+    public static long BFT_COMMIT_TIMEOUT = 3000;
 
     /**
      * The duration of FINALIZE state. This allows validators to persist block.
      */
-    public static long BFT_FINALIZE_TIMEOUT = 4000;
+    public static long BFT_FINALIZE_TIMEOUT = 3000;
 
     // =========================
     // Virtual machine
@@ -380,8 +380,8 @@ public class Config {
      * @return the block reward
      */
     public static long getBlockReward(long number) {
-        if (number <= 25_000_000L) {
-            return 3 * Unit.SEM;
+        if (number <= 75_000_000L) {
+            return 1 * Unit.SEM;
         } else {
             return 0;
         }
@@ -396,10 +396,10 @@ public class Config {
     public static int getNumberOfValidators(long number) {
         long step = 2 * 60 * 2;
 
-        if (number < 80 * step) {
-            return (int) (20 + number / step);
+        if (number < 48 * step) {
+            return (int) (16 + number / step);
         } else {
-            return 100;
+            return 64;
         }
     }
 
