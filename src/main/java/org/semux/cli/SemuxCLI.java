@@ -7,7 +7,6 @@
 package org.semux.cli;
 
 import org.apache.commons.cli.*;
-
 import org.semux.Config;
 import org.semux.Kernel;
 import org.semux.core.Wallet;
@@ -15,13 +14,12 @@ import org.semux.core.WalletLockedException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.utils.SystemUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SemuxCLI {
 
@@ -29,13 +27,13 @@ public class SemuxCLI {
 
     private Options options = new Options();
 
-    private Wallet wallet = null;
+    static final String DEFAULT_DATA_DIR = ".";
 
-    private String dataDir = ".";
+    private String dataDir = DEFAULT_DATA_DIR;
     private int coinbase = 0;
     private String password = null;
 
-    public SemuxCLI() {
+    SemuxCLI() {
         // FIXME: the option is redundant in order to avoid ParseException
         Option cli = Option.builder("cli").longOpt("cli").build();
         options.addOption(cli);
@@ -82,7 +80,7 @@ public class SemuxCLI {
         CommandLine commandLine = parser.parse(options, args);
 
         if (commandLine.hasOption("datadir")) {
-            dataDir = (String) commandLine.getParsedOptionValue("datadir");
+            dataDir = ((String) commandLine.getParsedOptionValue("datadir")).trim();
         }
 
         if (commandLine.hasOption("coinbase")) {
@@ -90,10 +88,8 @@ public class SemuxCLI {
         }
 
         if (commandLine.hasOption("password")) {
-            password = (String) commandLine.getParsedOptionValue("password");
+            password = ((String) commandLine.getParsedOptionValue("password")).trim();
         }
-
-        wallet = new Wallet(new File(dataDir, "wallet.data"));
 
         if (commandLine.hasOption("help")) {
             printHelp();
@@ -113,19 +109,21 @@ public class SemuxCLI {
         }
     }
 
-    private void printHelp() {
+    protected void printHelp() {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("./semux.sh --cli [options] or semux.bat [options]", options);
     }
 
-    private void printVersion() {
+    protected void printVersion() {
         System.out.println(Config.CLIENT_VERSION);
     }
 
-    private void startKernel() {
+    protected void startKernel() {
         if (password == null) {
             password = SystemUtil.readPassword();
         }
+
+        Wallet wallet = loadWallet();
         if (!wallet.unlock(password)) {
             System.exit(-1);
         }
@@ -150,10 +148,12 @@ public class SemuxCLI {
         kernel.start();
     }
 
-    private void createAccount() {
+    protected void createAccount() {
         if (password == null) {
             password = SystemUtil.readPassword();
         }
+
+        Wallet wallet = loadWallet();
         if (!wallet.unlock(password)) {
             System.exit(-1);
         }
@@ -172,10 +172,12 @@ public class SemuxCLI {
         }
     }
 
-    private void listAccounts() {
+    protected void listAccounts() {
         if (password == null) {
             password = SystemUtil.readPassword();
         }
+
+        Wallet wallet = loadWallet();
         if (!wallet.unlock(password)) {
             System.exit(-1);
         }
@@ -194,26 +196,36 @@ public class SemuxCLI {
         }
     }
 
-    private void changePassword() {
+    static final String MSG_ENTER_NEW_PASSWORD = "Please enter the new password: ";
+    static final String MSG_FAILED_TO_CHANGE_PASSWORD = "Failed to save the new password";
+    static final String MSG_PASSWORD_CHANGED = "Password is successfully changed";
+
+    protected void changePassword() {
         if (password == null) {
             password = SystemUtil.readPassword();
         }
+
+        Wallet wallet = loadWallet();
         if (!wallet.unlock(password)) {
             System.exit(-1);
         }
 
         try {
-            String newPassword = SystemUtil.readPassword("Please enter the new password: ");
+            String newPassword = SystemUtil.readPassword(MSG_ENTER_NEW_PASSWORD);
             wallet.changePassword(newPassword);
             Boolean isFlushed = wallet.flush();
             if (!isFlushed) {
-                logger.error("Failed to save the new password");
+                logger.error(MSG_FAILED_TO_CHANGE_PASSWORD);
             } else {
-                logger.info("Password is successfully changed");
+                logger.info(MSG_PASSWORD_CHANGED);
             }
         } catch (WalletLockedException exception) {
             logger.error(exception.getMessage());
         }
+    }
+
+    protected Wallet loadWallet() {
+        return new Wallet(new File(dataDir, "wallet.data"));
     }
 
     private static String createLine(int width) {
