@@ -19,8 +19,8 @@ import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.semux.Config;
-import org.semux.utils.ClosableIterator;
-import org.semux.utils.FileUtil;
+import org.semux.util.ClosableIterator;
+import org.semux.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

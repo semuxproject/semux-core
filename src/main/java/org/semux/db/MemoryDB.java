@@ -13,8 +13,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.semux.utils.ByteArray;
-import org.semux.utils.ClosableIterator;
+import org.semux.util.ByteArray;
+import org.semux.util.ClosableIterator;
 
 public class MemoryDB implements KVDB {
 

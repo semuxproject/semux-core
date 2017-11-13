@@ -11,9 +11,9 @@ import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
+import org.semux.util.Bytes;
+import org.semux.util.MerkleUtil;
 import org.semux.crypto.Hash;
-import org.semux.utils.Bytes;
-import org.semux.utils.MerkleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

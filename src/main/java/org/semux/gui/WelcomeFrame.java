@@ -31,7 +31,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.gui.model.WalletModel;
-import org.semux.utils.UnreachableException;
+import org.semux.util.UnreachableException;
 
 public class WelcomeFrame extends JFrame implements ActionListener {
 

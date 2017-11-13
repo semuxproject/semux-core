@@ -8,7 +8,7 @@ package org.semux.net.msg.consensus;
 
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 
 public class GetBlockMessage extends Message {
     private long number;

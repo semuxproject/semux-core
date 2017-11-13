@@ -27,7 +27,7 @@ import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
 import org.semux.net.PeerServer;
 import org.semux.net.SemuxChannelInitializer;
-import org.semux.utils.SystemUtil;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;

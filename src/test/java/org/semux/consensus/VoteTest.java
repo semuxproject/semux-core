@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hash;
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 
 public class VoteTest {
 

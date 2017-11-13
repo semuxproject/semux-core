@@ -23,7 +23,7 @@ import org.semux.core.BlockchainImpl;
 import org.semux.core.Unit;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 
 public class DelegateStateTest {
 

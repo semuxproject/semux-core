@@ -14,7 +14,7 @@ import org.semux.core.Wallet;
 import org.semux.core.WalletLockedException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
-import org.semux.utils.SystemUtil;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

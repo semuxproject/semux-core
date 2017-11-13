@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.utils;
+package org.semux.util;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
@@ -16,6 +16,7 @@ import java.util.List;
 import org.junit.Test;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
+import org.semux.util.MerkleTree;
 
 public class MerkleTreeTest {
 

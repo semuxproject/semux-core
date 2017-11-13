@@ -32,10 +32,10 @@ import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.TransactionDialog;
 import org.semux.gui.model.WalletModel;
+import org.semux.util.ByteArray;
+import org.semux.util.StringUtil;
+import org.semux.util.UnreachableException;
 import org.semux.gui.model.WalletAccount;
-import org.semux.utils.ByteArray;
-import org.semux.utils.StringUtil;
-import org.semux.utils.UnreachableException;
 
 public class TransactionsPanel extends JPanel implements ActionListener {
 

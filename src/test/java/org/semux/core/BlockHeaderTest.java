@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.semux.Config;
 import org.semux.crypto.EdDSA;
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

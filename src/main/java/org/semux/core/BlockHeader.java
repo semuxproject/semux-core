@@ -10,11 +10,11 @@ import java.util.Arrays;
 
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
+import org.semux.util.Bytes;
+import org.semux.util.SimpleDecoder;
+import org.semux.util.SimpleEncoder;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
-import org.semux.utils.Bytes;
-import org.semux.utils.SimpleDecoder;
-import org.semux.utils.SimpleEncoder;
 
 public class BlockHeader {
 

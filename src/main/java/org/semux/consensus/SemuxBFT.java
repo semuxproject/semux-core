@@ -42,10 +42,10 @@ import org.semux.net.msg.consensus.BFTNewHeightMessage;
 import org.semux.net.msg.consensus.BFTNewViewMessage;
 import org.semux.net.msg.consensus.BFTProposalMessage;
 import org.semux.net.msg.consensus.BFTVoteMessage;
-import org.semux.utils.ArrayUtil;
-import org.semux.utils.ByteArray;
-import org.semux.utils.MerkleUtil;
-import org.semux.utils.SystemUtil;
+import org.semux.util.ArrayUtil;
+import org.semux.util.ByteArray;
+import org.semux.util.MerkleUtil;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -38,8 +38,8 @@ import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
 import org.semux.net.Peer;
-import org.semux.utils.DnsUtil;
-import org.semux.utils.SystemUtil;
+import org.semux.util.DnsUtil;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

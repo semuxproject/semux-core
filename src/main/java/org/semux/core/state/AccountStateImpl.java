@@ -11,8 +11,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.semux.db.KVDB;
-import org.semux.utils.ByteArray;
-import org.semux.utils.Bytes;
+import org.semux.util.ByteArray;
+import org.semux.util.Bytes;
 
 /**
  * Account state implementation.

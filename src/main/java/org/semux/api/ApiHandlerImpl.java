@@ -30,8 +30,8 @@ import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.Peer;
 import org.semux.net.PeerClient;
-import org.semux.utils.ByteArray;
-import org.semux.utils.Bytes;
+import org.semux.util.ByteArray;
+import org.semux.util.Bytes;
 
 import io.netty.handler.codec.http.HttpHeaders;
 

@@ -12,8 +12,8 @@ import org.semux.crypto.EdDSA.Signature;
 import org.semux.net.Peer;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
-import org.semux.utils.SimpleDecoder;
-import org.semux.utils.SimpleEncoder;
+import org.semux.util.SimpleDecoder;
+import org.semux.util.SimpleEncoder;
 
 public class HelloMessage extends Message {
 

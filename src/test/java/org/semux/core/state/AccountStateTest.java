@@ -17,8 +17,8 @@ import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis.Premine;
 import org.semux.db.MemoryDB;
-import org.semux.utils.ByteArray;
-import org.semux.utils.Bytes;
+import org.semux.util.ByteArray;
+import org.semux.util.Bytes;
 
 public class AccountStateTest {
 

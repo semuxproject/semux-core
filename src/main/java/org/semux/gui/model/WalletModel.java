@@ -12,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.semux.core.Block;
 import org.semux.gui.Action;
 import org.semux.net.Peer;
-import org.semux.utils.ByteArray;
+import org.semux.util.ByteArray;
 
 /**
  * A Model stores all the data that GUI needs. The thread-safety of this class

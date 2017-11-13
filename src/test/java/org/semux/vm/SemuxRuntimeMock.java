@@ -11,7 +11,7 @@ import org.semux.core.BlockchainImpl;
 import org.semux.core.TransactionResult;
 import org.semux.core.state.AccountState;
 import org.semux.db.MemoryDB;
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 
 public class SemuxRuntimeMock implements SemuxRuntime {
 

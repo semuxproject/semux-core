@@ -13,8 +13,8 @@ import org.junit.Test;
 import org.semux.Config;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
-import org.semux.utils.Bytes;
-import org.semux.utils.SimpleDecoder;
+import org.semux.util.Bytes;
+import org.semux.util.SimpleDecoder;
 
 public class BlockTest {
     private long number = 1;

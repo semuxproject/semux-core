@@ -38,9 +38,9 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
-import org.semux.utils.ByteArray;
-import org.semux.utils.Bytes;
-import org.semux.utils.MerkleUtil;
+import org.semux.util.ByteArray;
+import org.semux.util.Bytes;
+import org.semux.util.MerkleUtil;
 
 public class APIHandlerTest {
 

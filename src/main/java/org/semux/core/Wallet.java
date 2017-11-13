@@ -18,10 +18,10 @@ import org.semux.crypto.AES;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hash;
-import org.semux.utils.Bytes;
-import org.semux.utils.IOUtil;
-import org.semux.utils.SimpleDecoder;
-import org.semux.utils.SimpleEncoder;
+import org.semux.util.Bytes;
+import org.semux.util.IOUtil;
+import org.semux.util.SimpleDecoder;
+import org.semux.util.SimpleEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package org.semux.utils;
+package org.semux.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.TreeSet;
 
 import org.junit.Test;
+import org.semux.util.ArrayUtil;
 
 public class ArrayUtilTest {
 

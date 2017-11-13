@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.semux.Config;
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

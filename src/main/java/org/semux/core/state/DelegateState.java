@@ -9,7 +9,7 @@ package org.semux.core.state;
 import java.util.List;
 import java.util.Map;
 
-import org.semux.utils.ByteArray;
+import org.semux.util.ByteArray;
 
 public interface DelegateState {
     /**

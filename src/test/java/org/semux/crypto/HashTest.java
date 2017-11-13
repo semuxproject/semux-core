@@ -9,7 +9,7 @@ package org.semux.crypto;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 
 public class HashTest {
 

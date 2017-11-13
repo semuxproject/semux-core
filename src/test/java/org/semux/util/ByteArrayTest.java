@@ -1,4 +1,4 @@
-package org.semux.utils;
+package org.semux.util;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import org.junit.Test;
+import org.semux.util.ByteArray;
+import org.semux.util.Bytes;
 
 public class ByteArrayTest {
 

@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 
 public class GetNodesMessage extends Message {
 

@@ -18,7 +18,7 @@ import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 
 public class TransactionExecutorTest {
 

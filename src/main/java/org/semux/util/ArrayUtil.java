@@ -1,4 +1,4 @@
-package org.semux.utils;
+package org.semux.util;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;

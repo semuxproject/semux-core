@@ -46,8 +46,8 @@ import org.semux.gui.dialog.DelegateDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
-import org.semux.utils.Bytes;
-import org.semux.utils.UnreachableException;
+import org.semux.util.Bytes;
+import org.semux.util.UnreachableException;
 
 public class DelegatesPanel extends JPanel implements ActionListener {
 

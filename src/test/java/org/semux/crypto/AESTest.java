@@ -11,7 +11,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 
 public class AESTest {
     private static byte[] raw = Bytes.of("test");

@@ -1,4 +1,4 @@
-package org.semux.utils;
+package org.semux.util;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;

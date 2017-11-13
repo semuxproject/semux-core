@@ -14,8 +14,8 @@ import org.semux.core.BlockHeader;
 import org.semux.core.Transaction;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
-import org.semux.utils.SimpleDecoder;
-import org.semux.utils.SimpleEncoder;
+import org.semux.util.SimpleDecoder;
+import org.semux.util.SimpleEncoder;
 
 public class Proposal {
 

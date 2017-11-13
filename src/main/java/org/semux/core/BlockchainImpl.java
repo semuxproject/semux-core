@@ -24,9 +24,9 @@ import org.semux.crypto.Hex;
 import org.semux.db.DBFactory;
 import org.semux.db.DBName;
 import org.semux.db.KVDB;
-import org.semux.utils.Bytes;
-import org.semux.utils.SimpleDecoder;
-import org.semux.utils.SimpleEncoder;
+import org.semux.util.Bytes;
+import org.semux.util.SimpleDecoder;
+import org.semux.util.SimpleEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

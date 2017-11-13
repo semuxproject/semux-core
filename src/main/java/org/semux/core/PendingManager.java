@@ -26,9 +26,9 @@ import org.semux.core.state.DelegateState;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.p2p.TransactionMessage;
-import org.semux.utils.ArrayUtil;
-import org.semux.utils.ByteArray;
-import org.semux.utils.Bytes;
+import org.semux.util.ArrayUtil;
+import org.semux.util.ByteArray;
+import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

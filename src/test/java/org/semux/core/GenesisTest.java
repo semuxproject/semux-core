@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.semux.core.Genesis.Premine;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
-import org.semux.utils.ByteArray;
+import org.semux.util.ByteArray;
 
 public class GenesisTest {
 

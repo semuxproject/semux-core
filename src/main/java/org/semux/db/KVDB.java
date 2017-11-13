@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.semux.utils.ClosableIterator;
+import org.semux.util.ClosableIterator;
 
 public interface KVDB {
 

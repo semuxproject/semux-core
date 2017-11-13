@@ -16,9 +16,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.semux.core.Blockchain;
 import org.semux.db.KVDB;
-import org.semux.utils.ByteArray;
-import org.semux.utils.Bytes;
-import org.semux.utils.ClosableIterator;
+import org.semux.util.ByteArray;
+import org.semux.util.Bytes;
+import org.semux.util.ClosableIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

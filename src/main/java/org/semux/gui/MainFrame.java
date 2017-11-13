@@ -37,7 +37,7 @@ import org.semux.gui.panel.HomePanel;
 import org.semux.gui.panel.ReceivePanel;
 import org.semux.gui.panel.SendPanel;
 import org.semux.gui.panel.TransactionsPanel;
-import org.semux.utils.UnreachableException;
+import org.semux.util.UnreachableException;
 
 public class MainFrame extends JFrame implements ActionListener {
 

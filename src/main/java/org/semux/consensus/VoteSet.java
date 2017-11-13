@@ -15,9 +15,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semux.crypto.EdDSA.Signature;
+import org.semux.util.ByteArray;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
-import org.semux.utils.ByteArray;
 
 /**
  * <p>

@@ -10,9 +10,9 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.semux.Config;
 import org.semux.core.Unit;
-import org.semux.utils.ApiUtil;
-import org.semux.utils.Bytes;
-import org.semux.utils.SystemUtil;
+import org.semux.util.ApiUtil;
+import org.semux.util.Bytes;
+import org.semux.util.SystemUtil;
 
 public class SemuxPerformance {
     private static InetSocketAddress server = new InetSocketAddress("localhost", 5171);

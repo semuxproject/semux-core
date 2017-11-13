@@ -15,7 +15,7 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hash;
-import org.semux.utils.MerkleUtil;
+import org.semux.util.MerkleUtil;
 
 public class ProposalTest {
 

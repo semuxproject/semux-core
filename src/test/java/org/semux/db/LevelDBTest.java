@@ -16,7 +16,7 @@ import java.util.Arrays;
 import org.iq80.leveldb.DBException;
 import org.junit.Test;
 import org.semux.Config;
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 
 public class LevelDBTest {
 

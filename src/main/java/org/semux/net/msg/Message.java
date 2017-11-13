@@ -7,7 +7,7 @@
 
 package org.semux.net.msg;
 
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 
 /**
  * Abstract message class for all messages on the Semux network

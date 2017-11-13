@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 import org.junit.Test;
 import org.semux.Config;
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 
 import io.netty.handler.codec.http.HttpHeaders;
 

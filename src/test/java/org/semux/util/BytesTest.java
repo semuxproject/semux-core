@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.utils;
+package org.semux.util;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -13,6 +13,7 @@ import static org.junit.Assert.assertFalse;
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.semux.util.Bytes;
 
 public class BytesTest {
 

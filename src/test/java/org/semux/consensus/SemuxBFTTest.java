@@ -30,8 +30,8 @@ import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hash;
 import org.semux.db.MemoryDB;
 import org.semux.net.ChannelManager;
-import org.semux.utils.ByteArray;
-import org.semux.utils.MerkleUtil;
+import org.semux.util.ByteArray;
+import org.semux.util.MerkleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

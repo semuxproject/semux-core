@@ -9,7 +9,7 @@ package org.semux.net.msg.p2p;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
 import org.semux.net.msg.ReasonCode;
-import org.semux.utils.Bytes;
+import org.semux.util.Bytes;
 
 public class DisconnectMessage extends Message {
 

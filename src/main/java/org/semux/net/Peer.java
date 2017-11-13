@@ -6,8 +6,8 @@
  */
 package org.semux.net;
 
-import org.semux.utils.SimpleDecoder;
-import org.semux.utils.SimpleEncoder;
+import org.semux.util.SimpleDecoder;
+import org.semux.util.SimpleEncoder;
 
 /**
  * Represents a Peer in the Semux network.

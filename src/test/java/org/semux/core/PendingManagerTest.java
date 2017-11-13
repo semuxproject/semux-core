@@ -21,8 +21,8 @@ import org.semux.core.state.AccountState;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
 import org.semux.net.ChannelManager;
-import org.semux.utils.ArrayUtil;
-import org.semux.utils.Bytes;
+import org.semux.util.ArrayUtil;
+import org.semux.util.Bytes;
 
 public class PendingManagerTest {
 

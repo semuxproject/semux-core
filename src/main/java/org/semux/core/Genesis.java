@@ -17,9 +17,9 @@ import org.json.JSONObject;
 import org.semux.Config;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
-import org.semux.utils.ByteArray;
-import org.semux.utils.Bytes;
-import org.semux.utils.IOUtil;
+import org.semux.util.ByteArray;
+import org.semux.util.Bytes;
+import org.semux.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

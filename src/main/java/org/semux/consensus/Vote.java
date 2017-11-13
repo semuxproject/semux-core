@@ -8,9 +8,9 @@ package org.semux.consensus;
 
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
+import org.semux.util.SimpleDecoder;
+import org.semux.util.SimpleEncoder;
 import org.semux.crypto.Hash;
-import org.semux.utils.SimpleDecoder;
-import org.semux.utils.SimpleEncoder;
 
 public class Vote {
     public static final boolean VALUE_APPROVE = true;

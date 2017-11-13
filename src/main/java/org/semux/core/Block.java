@@ -18,10 +18,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.crypto.EdDSA.Signature;
+import org.semux.util.MerkleUtil;
+import org.semux.util.SimpleDecoder;
+import org.semux.util.SimpleEncoder;
 import org.semux.crypto.Hex;
-import org.semux.utils.MerkleUtil;
-import org.semux.utils.SimpleDecoder;
-import org.semux.utils.SimpleEncoder;
 
 /**
  * Represents a block in the blockchain.
