@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux;
+package org.semux.gui;
 
 import java.awt.EventQueue;
 import java.io.File;
@@ -20,6 +20,8 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.semux.Config;
+import org.semux.Kernel;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.Transaction;
@@ -30,9 +32,6 @@ import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
-import org.semux.gui.MainFrame;
-import org.semux.gui.MessagesUtil;
-import org.semux.gui.WelcomeFrame;
 import org.semux.gui.dialog.InputDialog;
 import org.semux.gui.dialog.SelectDialog;
 import org.semux.gui.model.WalletAccount;
@@ -47,9 +46,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Graphic user interface.
  */
-public class GUI {
+public class SemuxGUI {
 
-    private static Logger logger = LoggerFactory.getLogger(GUI.class);
+    private static Logger logger = LoggerFactory.getLogger(SemuxGUI.class);
 
     private static final int TRANSACTION_LIMIT = 1024; // per account
 

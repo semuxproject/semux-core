@@ -115,7 +115,8 @@ public class MenuBar extends JMenuBar implements ActionListener {
             if (ret == JFileChooser.APPROVE_OPTION) {
                 File dst = chooser.getSelectedFile();
                 if (dst.exists()) {
-                    int answer = JOptionPane.showConfirmDialog(frame, MessagesUtil.get("BackupFileExists", dst.getName()));
+                    int answer = JOptionPane.showConfirmDialog(frame,
+                            MessagesUtil.get("BackupFileExists", dst.getName()));
                     if (answer != JOptionPane.OK_OPTION) {
                         return;
                     }
