@@ -121,13 +121,28 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <version>3.0</version>
                 <configuration>
-                    <header>./misc/license_header.txt</header>
+                    <header>misc/license_header.txt</header>
                     <strictCheck>false</strictCheck>
                     <encoding>UTF-8</encoding>
                     <includes>
                         <include>src/**/*.java</include>
                         <include>test/**/*.java</include>
                     </includes>
+                </configuration>
+            </plugin>
+
+            <!-- eclipse formatter/validator -->
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+                <version>2.7.0</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <configFile>${project.basedir}/misc/eclipse/formatter.xml</configFile>
+                    <directories>
+                        <directory>${project.build.sourceDirectory}</directory>
+                        <directory>${project.build.testSourceDirectory}</directory>
+                    </directories>
                 </configuration>
             </plugin>
 

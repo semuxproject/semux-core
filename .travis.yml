@@ -8,6 +8,8 @@ jdk:
   - oraclejdk8
   - openjdk8
 script:
-  - mvn license:check
+  - mvn licese:check
+  - mvn format:validate
+  - mvn test
 after_success:
   - mvn clean cobertura:cobertura coveralls:report
