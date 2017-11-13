@@ -38,6 +38,12 @@ public class SemuxCLI {
     static final String MSG_ADDRESS = "Address = {}";
     static final String MSG_PUBLIC_KEY = "Public Key = {}";
     static final String MSG_PRIVATE_KEY = "Private Key = {}";
+    static final String MSG_ACCOUNT = "Account #{} = {}";
+    static final String MSG_ACCOUNT_EMPTY = "There is no account in your wallet!";
+    static final String MSG_PARSING_FAILED = "Parsing failed. Reason: {}";
+    static final String MSG_NEW_ACCOUNT_CREATED = "A new account has been created and stored in your wallet.";
+    static final String MSG_START_KERNEL_NEW_ACCOUNT_CREATED = "A new account has been created for you: address = {}";
+    static final String MSG_COINBASE_NOT_EXISTED = "Coinbase does not exist";
 
     private String dataDir = DEFAULT_DATA_DIR;
     private int coinbase = 0;
@@ -92,7 +98,7 @@ public class SemuxCLI {
             SemuxCLI cli = new SemuxCLI();
             cli.start(args);
         } catch (ParseException exception) {
-            logger.error("Parsing failed. Reason: {}", exception.getMessage());
+            logger.error(MSG_PARSING_FAILED, exception.getMessage());
         }
     }
 
@@ -153,11 +159,11 @@ public class SemuxCLI {
             wallet.addAccount(key);
             wallet.flush();
             accounts = wallet.getAccounts();
-            logger.info("A new account has been created for you: address = {}", key.toAddressString());
+            logger.info(MSG_START_KERNEL_NEW_ACCOUNT_CREATED, key.toAddressString());
         }
 
         if (coinbase < 0 || coinbase >= accounts.size()) {
-            logger.error("Coinbase does not exist");
+            logger.error(MSG_COINBASE_NOT_EXISTED);
             System.exit(-1);
         }
 
@@ -174,7 +180,7 @@ public class SemuxCLI {
         wallet.addAccount(key);
 
         if (wallet.flush()) {
-            logger.info("A new account has been created and stored in your wallet.");
+            logger.info(MSG_NEW_ACCOUNT_CREATED);
             logger.info(MSG_ADDRESS, key.toString());
             logger.info(MSG_PUBLIC_KEY, Hex.encode(key.getPublicKey()));
             logger.info(MSG_PRIVATE_KEY, Hex.encode(key.getPrivateKey()));
@@ -187,10 +193,10 @@ public class SemuxCLI {
         List<EdDSA> accounts = wallet.getAccounts();
 
         if (accounts.isEmpty()) {
-            logger.info("There is no account in your wallet!");
+            logger.info(MSG_ACCOUNT_EMPTY);
         } else {
             for (int i = 0; i < accounts.size(); i++) {
-                logger.info("Account #{} = {}", i, accounts.get(i).toString());
+                logger.info(MSG_ACCOUNT, i, accounts.get(i).toString());
             }
         }
     }

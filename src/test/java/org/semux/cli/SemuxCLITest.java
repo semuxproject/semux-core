@@ -16,6 +16,7 @@ import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.Kernel;
@@ -87,7 +88,8 @@ public class SemuxCLITest {
     }
 
     @Test
-    public void testStartKernelWithEmptyWallet() {
+    public void testStartKernelWithEmptyWallet() throws Exception {
+        logger.setEnabledLevels(Level.INFO);
         SemuxCLI semuxCLI = spy(new SemuxCLI());
 
         // mock wallet
@@ -99,6 +101,10 @@ public class SemuxCLITest {
         when(wallet.addAccount(any(EdDSA.class))).thenReturn(true);
         when(wallet.flush()).thenReturn(true);
         when(semuxCLI.loadWallet()).thenReturn(wallet);
+
+        // mock new account
+        EdDSA newAccount = new EdDSA();
+        PowerMockito.whenNew(EdDSA.class).withAnyArguments().thenReturn(newAccount);
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
@@ -121,6 +127,10 @@ public class SemuxCLITest {
         // verifies that Kernel calls init and start
         verify(kernelMock).init(SemuxCLI.DEFAULT_DATA_DIR, wallet, 0);
         verify(kernelMock).start();
+
+        // assert outputs
+        ImmutableList<LoggingEvent> logs = logger.getLoggingEvents();
+        assertThat(logs, hasItem(info(SemuxCLI.MSG_START_KERNEL_NEW_ACCOUNT_CREATED, newAccount.toAddressString())));
     }
 
     @Test
@@ -141,6 +151,7 @@ public class SemuxCLITest {
 
     @Test
     public void testCreateAccount() throws Exception {
+        logger.setEnabledLevels(Level.INFO);
         SemuxCLI semuxCLI = spy(new SemuxCLI());
 
         // mock wallet
@@ -149,6 +160,10 @@ public class SemuxCLITest {
         when(wallet.addAccount(any(EdDSA.class))).thenReturn(true);
         when(wallet.flush()).thenReturn(true);
         when(semuxCLI.loadWallet()).thenReturn(wallet);
+
+        // mock account
+        EdDSA newAccount = new EdDSA();
+        PowerMockito.whenNew(EdDSA.class).withAnyArguments().thenReturn(newAccount);
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
@@ -160,15 +175,24 @@ public class SemuxCLITest {
         // verification
         verify(wallet).addAccount(any(EdDSA.class));
         verify(wallet).flush();
+
+        // assert outputs
+        ImmutableList<LoggingEvent> logs = logger.getLoggingEvents();
+        assertThat(logs, hasItem(info(SemuxCLI.MSG_NEW_ACCOUNT_CREATED)));
+        assertThat(logs, hasItem(info(SemuxCLI.MSG_ADDRESS, newAccount.toAddressString())));
+        assertThat(logs, hasItem(info(SemuxCLI.MSG_PUBLIC_KEY, Hex.encode(newAccount.getPublicKey()))));
+        assertThat(logs, hasItem(info(SemuxCLI.MSG_PRIVATE_KEY, Hex.encode(newAccount.getPrivateKey()))));
     }
 
     @Test
     public void testListAccounts() throws ParseException {
+        logger.setEnabledLevels(Level.INFO);;
         SemuxCLI semuxCLI = spy(new SemuxCLI());
 
         // mock accounts
         List<EdDSA> accounts = new ArrayList<>();
-        accounts.add(new EdDSA());
+        EdDSA account = new EdDSA();
+        accounts.add(account);
 
         // mock wallet
         Wallet wallet = mock(Wallet.class);
@@ -185,6 +209,10 @@ public class SemuxCLITest {
 
         // verification
         verify(wallet).getAccounts();
+
+        // assert outputs
+        ImmutableList<LoggingEvent> logs = logger.getLoggingEvents();
+        assertThat(logs, hasItem(info(SemuxCLI.MSG_ACCOUNT, 0, account.toAddressString())));
     }
 
     @Test
