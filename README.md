@@ -1,5 +1,8 @@
 # Welcome to Semux!
 
+[![Build Status](https://travis-ci.org/semuxproject/semux.svg?branch=develop)](https://travis-ci.org/semuxproject/semux)
+[![Coverage Status](https://coveralls.io/repos/github/semuxproject/semux/badge.svg?branch=develop)](https://coveralls.io/github/semuxproject/semux)
+
 https://www.semux.org
 
 ## What is Semux
