@@ -59,7 +59,7 @@ public class SystemUtil {
      */
     public static String getIp() {
         try {
-            URL url = new URL("https://api.ipify.org/");
+            URL url = new URL("http://api.ipify.org/");
             URLConnection con = url.openConnection();
             con.setConnectTimeout(3000);
             con.setReadTimeout(3000);
