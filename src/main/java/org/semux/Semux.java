@@ -1,5 +1,6 @@
 package org.semux;
 
+import org.semux.cli.SemuxCLI;
 import org.semux.gui.SemuxGUI;
 
 public class Semux {
@@ -12,7 +13,7 @@ public class Semux {
         }
 
         if (cli) {
-            CLI.main(args);
+            SemuxCLI.main(args);
         } else {
             SemuxGUI.main(args);
         }
