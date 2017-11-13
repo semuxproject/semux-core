@@ -11,7 +11,6 @@ import org.semux.Config;
 import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.core.WalletLockedException;
-import org.semux.crypto.CryptoException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.utils.SystemUtil;
@@ -46,7 +45,7 @@ public class SemuxCLI {
         options.addOption(version);
 
         Option account = Option.builder("a").longOpt("account")
-                .desc("create\tCreate an new account and exit" + "\n" + "list\tList all accounts and exit").hasArg(true)
+                .desc("action can be one of:" + "\n" + "create - Create an new account and exit" + "\n" + "list - List all accounts and exit").hasArg(true)
                 .numberOfArgs(1).optionalArg(false).argName("action").type(String.class).build();
         options.addOption(account);
 
@@ -119,7 +118,7 @@ public class SemuxCLI {
 
     protected void printHelp() {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.setWidth(100);
+        formatter.setWidth(200);
         formatter.printHelp("./semux.sh --cli [options] or semux.bat [options]", options);
     }
 
