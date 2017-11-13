@@ -6,21 +6,8 @@
  */
 package org.semux.cli;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.doReturn;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.spy;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.common.collect.ImmutableList;
+import net.i2p.crypto.eddsa.KeyPairGenerator;
 import org.apache.commons.cli.ParseException;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,6 +23,25 @@ import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.util.SystemUtil;
+import uk.org.lidalia.slf4jext.Level;
+import uk.org.lidalia.slf4jtest.LoggingEvent;
+import uk.org.lidalia.slf4jtest.TestLogger;
+import uk.org.lidalia.slf4jtest.TestLoggerFactory;
+import uk.org.lidalia.slf4jtest.TestLoggerFactoryResetRule;
+
+import java.security.KeyPair;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.*;
+import static uk.org.lidalia.slf4jtest.LoggingEvent.info;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ SystemUtil.class, Kernel.class, SemuxCLI.class })
@@ -49,6 +55,10 @@ public class SemuxCLITest {
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+
+    @Rule public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
+
+    TestLogger logger = TestLoggerFactory.getTestLogger(SemuxCLI.class);
 
     @Test
     public void testMain() throws Exception {
@@ -251,5 +261,87 @@ public class SemuxCLITest {
 
         // execution
         semuxCLI.dumpPrivateKey(address);
+    }
+
+    @Test
+    public void testImportPrivateKeyExisted() {
+        SemuxCLI semuxCLI = spy(new SemuxCLI());
+
+        // mock private key
+        KeyPairGenerator gen = new KeyPairGenerator();
+        KeyPair keypair = gen.generateKeyPair();
+        String key = Hex.encode(keypair.getPrivate().getEncoded());
+
+        // mock wallet
+        Wallet wallet = mock(Wallet.class);
+        when(wallet.unlock("oldpassword")).thenReturn(true);
+        when(semuxCLI.loadWallet()).thenReturn(wallet);
+        when(wallet.addAccount(any(EdDSA.class))).thenReturn(false);
+
+        // mock SystemUtil
+        mockStatic(SystemUtil.class);
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+
+        // expectation
+        exit.expectSystemExitWithStatus(1);
+
+        // execution
+        semuxCLI.importPrivateKey(key);
+    }
+
+    @Test
+    public void testImportPrivateKeyFailedToFlushWalletFile() {
+        SemuxCLI semuxCLI = spy(new SemuxCLI());
+
+        // mock private key
+        KeyPairGenerator gen = new KeyPairGenerator();
+        KeyPair keypair = gen.generateKeyPair();
+        String key = Hex.encode(keypair.getPrivate().getEncoded());
+
+        // mock wallet
+        Wallet wallet = mock(Wallet.class);
+        when(wallet.unlock("oldpassword")).thenReturn(true);
+        when(semuxCLI.loadWallet()).thenReturn(wallet);
+        when(wallet.addAccount(any(EdDSA.class))).thenReturn(true);
+        when(wallet.flush()).thenReturn(false);
+
+        // mock SystemUtil
+        mockStatic(SystemUtil.class);
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+
+        // expectation
+        exit.expectSystemExitWithStatus(2);
+
+        // execution
+        semuxCLI.importPrivateKey(key);
+    }
+
+    @Test
+    public void testImportPrivateKey() {
+        logger.setEnabledLevels(Level.INFO);
+        SemuxCLI semuxCLI = spy(new SemuxCLI());
+
+        // mock private key
+        final String key = "302e020100300506032b657004220420bd2f24b259aac4bfce3792c31d0f62a7f28b439c3e4feb97050efe5fe254f2af";
+
+        // mock wallet
+        Wallet wallet = mock(Wallet.class);
+        when(wallet.unlock("oldpassword")).thenReturn(true);
+        when(semuxCLI.loadWallet()).thenReturn(wallet);
+        when(wallet.addAccount(any(EdDSA.class))).thenReturn(true);
+        when(wallet.flush()).thenReturn(true);
+
+        // mock SystemUtil
+        mockStatic(SystemUtil.class);
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+
+        // execution
+        semuxCLI.importPrivateKey(key);
+
+        // assertions
+        ImmutableList<LoggingEvent> logs = logger.getLoggingEvents();
+        assertThat(logs, hasItem(info(SemuxCLI.MSG_PRIVATE_KEY_IMPORTED)));
+        assertThat(logs, hasItem(info(SemuxCLI.MSG_ADDRESS, "0680a919c78faa59b127014b6181979ae0a62dbd")));
+        assertThat(logs, hasItem(info(SemuxCLI.MSG_PRIVATE_KEY, key)));
     }
 }
