@@ -10,7 +10,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dist.phase>install</dist.phase>
         <dist.base>${project.basedir}/dist</dist.base>
-        <powermock.version>1.7.1</powermock.version>
     </properties>
 
     <build>
@@ -202,13 +201,13 @@
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
-            <version>${powermock.version}</version>
+            <version>1.7.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito2</artifactId>
-            <version>${powermock.version}</version>
+            <version>1.7.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>

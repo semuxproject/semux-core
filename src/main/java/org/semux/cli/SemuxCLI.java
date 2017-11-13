@@ -7,7 +7,6 @@
 package org.semux.cli;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -34,6 +33,10 @@ public class SemuxCLI {
     private Options options = new Options();
 
     static final String DEFAULT_DATA_DIR = ".";
+    static final String MSG_ADDRESS_NOT_IN_WALLET = "This address doesn't exist in the wallet";
+    static final String MSG_ENTER_NEW_PASSWORD = "Please enter the new password: ";
+    static final String MSG_FAILED_TO_CHANGE_PASSWORD = "Failed to save the new password";
+    static final String MSG_PASSWORD_CHANGED = "Password is successfully changed";
 
     private String dataDir = DEFAULT_DATA_DIR;
     private int coinbase = 0;
@@ -83,7 +86,7 @@ public class SemuxCLI {
             SemuxCLI cli = new SemuxCLI();
             cli.start(args);
         } catch (ParseException exception) {
-            logger.error("Parsing failed.  Reason: {}", exception.getMessage());
+            logger.error("Parsing failed. Reason: {}", exception.getMessage());
         }
     }
 
@@ -176,14 +179,11 @@ public class SemuxCLI {
         EdDSA key = new EdDSA();
         wallet.addAccount(key);
 
-        logger.info(createLine(80));
-        logger.info("Address     : " + key.toString());
-        logger.info("Public key  : " + Hex.encode(key.getPublicKey()));
-        logger.info("Private key : " + Hex.encode(key.getPrivateKey()));
-        logger.info(createLine(80));
-
         if (wallet.flush()) {
-            logger.info("The created account has been stored in your wallet.");
+            logger.info("A new account has been created and stored in your wallet.");
+            logger.info("Address = {}", key.toString());
+            logger.info("Public key = {}", Hex.encode(key.getPublicKey()));
+            logger.info("Private key = {}", Hex.encode(key.getPrivateKey()));
         }
     }
 
@@ -202,18 +202,11 @@ public class SemuxCLI {
         if (accounts.isEmpty()) {
             logger.info("There is no account in your wallet!");
         } else {
-            String line = String.format("+-%-3s-+-%-45s-+", createLine(3), createLine(45));
-            logger.info(line);
             for (int i = 0; i < accounts.size(); i++) {
-                logger.info(String.format("| %-3d | %-45s |", i, accounts.get(i).toString()));
-                logger.info(line);
+                logger.info(String.format("Account #{} = {}", i, accounts.get(i).toString()));
             }
         }
     }
-
-    static final String MSG_ENTER_NEW_PASSWORD = "Please enter the new password: ";
-    static final String MSG_FAILED_TO_CHANGE_PASSWORD = "Failed to save the new password";
-    static final String MSG_PASSWORD_CHANGED = "Password is successfully changed";
 
     protected void changePassword() {
         if (password == null) {
@@ -239,8 +232,6 @@ public class SemuxCLI {
         }
     }
 
-    final static String MSG_ADDRESS_NOT_IN_WALLET = "This address doesn't exist in the wallet";
-
     protected void dumpPrivateKey(String address) {
         if (password == null) {
             password = SystemUtil.readPassword();
@@ -264,11 +255,5 @@ public class SemuxCLI {
 
     protected Wallet loadWallet() {
         return new Wallet(new File(dataDir, "wallet.data"));
-    }
-
-    private static String createLine(int width) {
-        char[] buf = new char[width];
-        Arrays.fill(buf, '-');
-        return new String(buf);
     }
 }

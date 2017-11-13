@@ -18,6 +18,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.cli.ParseException;
@@ -83,11 +84,7 @@ public class SemuxCLITest {
         Wallet wallet = mock(Wallet.class);
         when(wallet.unlock("oldpassword")).thenReturn(true);
         doReturn(new ArrayList<EdDSA>(), // returns empty wallet
-                new ArrayList<EdDSA>() {
-                    {
-                        add(new EdDSA());
-                    }
-                } // returns wallet with a newly created account
+                Collections.singletonList(new EdDSA()) // returns wallet with a newly created account
         ).when(wallet).getAccounts();
         when(wallet.addAccount(any(EdDSA.class))).thenReturn(true);
         when(wallet.flush()).thenReturn(true);

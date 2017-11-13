@@ -21,8 +21,6 @@ dist/
 .project
 .classpath
 .settings/
-.idea
-semux.iml
 
 # IDEA generated files
 .idea
