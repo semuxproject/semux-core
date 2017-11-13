@@ -54,6 +54,7 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${dist.base}/lib</outputDirectory>
+                            <includeScope>runtime</includeScope>
                         </configuration>
                     </execution>
                 </executions>
