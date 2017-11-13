@@ -11,6 +11,7 @@ import org.semux.Config;
 import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.core.WalletLockedException;
+import org.semux.crypto.CryptoException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.utils.SystemUtil;
@@ -64,6 +65,11 @@ public class SemuxCLI {
         Option password = Option.builder("p").longOpt("password").desc("Password of the wallet").hasArg(true)
                 .numberOfArgs(1).optionalArg(false).argName("password").type(String.class).build();
         options.addOption(password);
+
+        Option dumpprivatekey = Option.builder("dpk").longOpt("dumpprivatekey")
+                .desc("Prints the hexadecimal private key of an address").hasArg(true).optionalArg(false)
+                .argName("address").type(String.class).build();
+        options.addOption(dumpprivatekey);
     }
 
     public static void main(String[] args) {
@@ -80,7 +86,7 @@ public class SemuxCLI {
         CommandLine commandLine = parser.parse(options, args);
 
         if (commandLine.hasOption("datadir")) {
-            dataDir = ((String) commandLine.getParsedOptionValue("datadir")).trim();
+            dataDir = commandLine.getOptionValue("datadir");
         }
 
         if (commandLine.hasOption("coinbase")) {
@@ -88,7 +94,7 @@ public class SemuxCLI {
         }
 
         if (commandLine.hasOption("password")) {
-            password = ((String) commandLine.getParsedOptionValue("password")).trim();
+            password = commandLine.getOptionValue("password");
         }
 
         if (commandLine.hasOption("help")) {
@@ -104,6 +110,8 @@ public class SemuxCLI {
             }
         } else if (commandLine.hasOption("changepassword")) {
             changePassword();
+        } else if (commandLine.hasOption("dumpprivatekey")) {
+            dumpPrivateKey(commandLine.getOptionValue("dumpprivatekey").trim());
         } else {
             startKernel();
         }
@@ -111,6 +119,7 @@ public class SemuxCLI {
 
     protected void printHelp() {
         HelpFormatter formatter = new HelpFormatter();
+        formatter.setWidth(100);
         formatter.printHelp("./semux.sh --cli [options] or semux.bat [options]", options);
     }
 
@@ -222,6 +231,29 @@ public class SemuxCLI {
         } catch (WalletLockedException exception) {
             logger.error(exception.getMessage());
         }
+    }
+
+    final static String MSG_ADDRESS_NOT_IN_WALLET = "This address doesn't exist in the wallet";
+
+    protected void dumpPrivateKey(String address) {
+        if (password == null) {
+            password = SystemUtil.readPassword();
+        }
+
+        Wallet wallet = loadWallet();
+        if (!wallet.unlock(password)) {
+            System.exit(-1);
+        }
+
+        byte[] addressBytes = Hex.parse(address);
+        EdDSA account = wallet.getAccount(addressBytes);
+        if (account == null) {
+            logger.error(MSG_ADDRESS_NOT_IN_WALLET);
+            System.exit(1);
+        }
+
+        String privateKey = Hex.encode(account.getPrivateKey());
+        System.out.println(privateKey);
     }
 
     protected Wallet loadWallet() {

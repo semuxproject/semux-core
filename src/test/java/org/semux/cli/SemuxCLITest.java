@@ -7,7 +7,11 @@
 package org.semux.cli;
 
 import org.apache.commons.cli.ParseException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.ExpectedSystemExit;
+import org.junit.contrib.java.lang.system.SystemErrRule;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -15,11 +19,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
+import org.semux.crypto.Hex;
 import org.semux.utils.SystemUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -28,6 +34,16 @@ import static org.powermock.api.mockito.PowerMockito.*;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({SystemUtil.class, Kernel.class, SemuxCLI.class})
 public class SemuxCLITest {
+
+    @Rule
+    public final ExpectedSystemExit exit = ExpectedSystemExit.none();
+
+    @Rule
+    public final SystemErrRule systemErrRule = new SystemErrRule().enableLog();
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+
 
     @Test
     public void testMain() throws Exception {
@@ -72,7 +88,7 @@ public class SemuxCLITest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        Mockito.when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
 
         // mock Kernel
         mockStatic(Kernel.class);
@@ -122,7 +138,7 @@ public class SemuxCLITest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        Mockito.when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
 
         // execution
         semuxCLI.createAccount();
@@ -169,7 +185,7 @@ public class SemuxCLITest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        Mockito.when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
         Mockito.when(SystemUtil.readPassword(SemuxCLI.MSG_ENTER_NEW_PASSWORD)).thenReturn("newpassword");
 
         // execution
@@ -178,5 +194,58 @@ public class SemuxCLITest {
         // verification
         verify(wallet).changePassword("newpassword");
         verify(wallet).flush();
+    }
+
+    @Test
+    public void testDumpPrivateKey() {
+        SemuxCLI semuxCLI = spy(new SemuxCLI());
+
+        // mock account
+        EdDSA account = spy(new EdDSA());
+        String address = account.toAddressString();
+        byte[] addressBytes = account.toAddress();
+
+        // mock wallet
+        Wallet wallet = mock(Wallet.class);
+        when(wallet.unlock("oldpassword")).thenReturn(true);
+        when(semuxCLI.loadWallet()).thenReturn(wallet);
+        when(wallet.getAccount(addressBytes)).thenReturn(account);
+
+        // mock SystemUtil
+        mockStatic(SystemUtil.class);
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+
+        // execution
+        semuxCLI.dumpPrivateKey(address);
+
+        // verification
+        verify(wallet).getAccount(addressBytes);
+        verify(account).getPrivateKey();
+        assertEquals(Hex.encode(account.getPrivateKey()), systemOutRule.getLog().trim());
+    }
+
+    @Test
+    public void testDumpPrivateKeyNotFound() {
+        SemuxCLI semuxCLI = spy(new SemuxCLI());
+
+        // mock address
+        String address = "c583b6ad1d1cccfc00ae9113db6408f022822b20";
+        byte[] addressBytes = Hex.decode(address);
+
+        // mock wallet
+        Wallet wallet = mock(Wallet.class);
+        when(wallet.unlock("oldpassword")).thenReturn(true);
+        when(semuxCLI.loadWallet()).thenReturn(wallet);
+        when(wallet.getAccount(addressBytes)).thenReturn(null);
+
+        // mock SystemUtil
+        mockStatic(SystemUtil.class);
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+
+        // expect System.exit(1)
+        exit.expectSystemExitWithStatus(1);
+
+        // execution
+        semuxCLI.dumpPrivateKey(address);
     }
 }
