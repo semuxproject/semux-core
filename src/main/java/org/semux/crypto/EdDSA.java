@@ -20,6 +20,7 @@ import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import net.i2p.crypto.eddsa.KeyPairGenerator;
+import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
 /**
  * Edwards-curve Digital Signature Algorithm (EdDSA), specifically ED25519.
@@ -51,6 +52,18 @@ public class EdDSA {
     public EdDSA(byte[] publicKey, byte[] privateKey) throws InvalidKeySpecException {
         this.pub = new EdDSAPublicKey(new X509EncodedKeySpec(publicKey));
         this.priv = new EdDSAPrivateKey(new PKCS8EncodedKeySpec(privateKey));
+    }
+
+    /**
+     * Create an ED25519 key pair with a specified private key
+     *
+     * @param privateKey
+     * @throws InvalidKeySpecException
+     */
+    public EdDSA(byte[] privateKey) throws InvalidKeySpecException {
+        EdDSAPrivateKey edDSAPrivateKey = new EdDSAPrivateKey(new PKCS8EncodedKeySpec(privateKey));
+        this.pub = new EdDSAPublicKey(new EdDSAPublicKeySpec(edDSAPrivateKey.getA(), edDSAPrivateKey.getParams()));
+        this.priv = edDSAPrivateKey;
     }
 
     /**
