@@ -93,6 +93,59 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- code coverage -->
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.3.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <format>xml</format>
+                    <maxmem>256m</maxmem>
+                    <aggregate>true</aggregate>
+                    <quiet>true</quiet>
+                    <instrumentation>
+                        <ignoreTrivial>true</ignoreTrivial>
+                    </instrumentation>
+                </configuration>
+            </plugin>
+
+            <!-- license header check -->
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <header>misc/license_header.txt</header>
+                    <strictCheck>false</strictCheck>
+                    <encoding>UTF-8</encoding>
+                    <includes>
+                        <include>src/**/*.java</include>
+                        <include>test/**/*.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <!-- eclipse formatter/validator -->
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+                <version>2.7.0</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <configFile>${project.basedir}/misc/eclipse/formatter.xml</configFile>
+                    <directories>
+                        <directory>${project.build.sourceDirectory}</directory>
+                        <directory>${project.build.testSourceDirectory}</directory>
+                    </directories>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
