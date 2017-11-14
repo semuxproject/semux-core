@@ -263,7 +263,7 @@ public class SemuxCLI {
             System.exit(-1);
         }
     }
-    
+
     protected Wallet loadAndUnlockWallet() {
         if (password == null) {
             password = SystemUtil.readPassword();

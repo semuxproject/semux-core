@@ -57,7 +57,8 @@ public class SemuxCLITest {
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
-    @Rule public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
+    @Rule
+    public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
 
     TestLogger logger = TestLoggerFactory.getTestLogger(SemuxCLI.class);
 
@@ -186,7 +187,7 @@ public class SemuxCLITest {
 
     @Test
     public void testListAccounts() throws ParseException {
-        logger.setEnabledLevels(Level.INFO);;
+        logger.setEnabledLevels(Level.INFO);
         SemuxCLI semuxCLI = spy(new SemuxCLI());
 
         // mock accounts
