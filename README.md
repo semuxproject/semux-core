@@ -39,7 +39,9 @@ cd dist
 
 ## Contribute
 
-Anyone is welcome to contribute to this open source project in the form of peer review, testing and patches. Please see the [contributing](./github/contributing.md) guide for more details.
+Anyone is welcome to contribute to this open source project in the form of peer review, testing and patches. Please see the [contributing](./.github/contributing.md) guide for more details.
+
+If you found a bug, please use this [issue template](./.github/issue_template.md)
 
 ## Wallet Localization
 
