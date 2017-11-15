@@ -9,8 +9,10 @@ package org.semux.crypto;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.security.KeyPair;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
+import net.i2p.crypto.eddsa.KeyPairGenerator;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -58,5 +60,21 @@ public class EdDSATest {
 
         logger.info("signature size: {} B, {} GB per year", sig.length,
                 64.0 * sig.length * Config.BLOCKS_PER_DAY * 365 / 1024 / 1024 / 1024);
+    }
+
+    @Test
+    public void testImportPrivateKeyDynamic() throws InvalidKeySpecException {
+        KeyPairGenerator gen = new KeyPairGenerator();
+        KeyPair keypair = gen.generateKeyPair();
+        EdDSA account = new EdDSA(keypair.getPrivate().getEncoded());
+        assertEquals(Hex.encode(keypair.getPublic().getEncoded()), Hex.encode(account.getPublicKey()));
+    }
+
+    @Test
+    public void testImportPrivateKeyStatic() throws InvalidKeySpecException {
+        EdDSA account = new EdDSA(Hex.decode(
+                "302e020100300506032b657004220420bd2f24b259aac4bfce3792c31d0f62a7f28b439c3e4feb97050efe5fe254f2af"));
+        assertEquals("302a300506032b6570032100b72dc8ebc9f53d21837dc96483da08765ea11f25c1bd4c3cb49318c944d67b9b",
+                Hex.encode(account.getPublicKey()));
     }
 }
