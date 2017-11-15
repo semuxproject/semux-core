@@ -122,7 +122,6 @@
                 <version>3.0</version>
                 <configuration>
                     <header>misc/license_header.txt</header>
-                    <strictCheck>false</strictCheck>
                     <encoding>UTF-8</encoding>
                     <includes>
                         <include>src/**/*.java</include>

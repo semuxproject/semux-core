@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2017 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
