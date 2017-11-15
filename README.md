@@ -24,11 +24,6 @@ More info can be found at our [Wiki page](https://github.com/semuxproject/semux/
 
 ## Build from source
 
-Prerequisites:
-* Java 8 or above
-* Maven 3.5+
-
-Build and run:
 ```
 git clone https://github.com/semuxproject/semux
 cd semux
