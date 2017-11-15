@@ -11,13 +11,6 @@ Semux is an experimental high-performance blockchain platform that powers decent
 
 More info can be found at our [Wiki page](https://github.com/semuxproject/semux/wiki).
 
-## Specifications
-
-* Total supply: 100,000,000 SEM
-* Block time: 30 seconds
-* Consensus algorithm: Semux BFT
-* Symbol: SEM
-
 ## Get started
 
 1. Download and install [Java SE Runtime Environment 8](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
@@ -27,13 +20,11 @@ More info can be found at our [Wiki page](https://github.com/semuxproject/semux/
     - [32-bit](http://www.microsoft.com/en-us/download/details.aspx?id=5555)
     - [64-bit](https://www.microsoft.com/en-us/download/details.aspx?id=14632)
 
-## Development
+## Contribute
 
-This project is under active development and is NOT production ready.
+TODO
 
-Pull requests, and contributions are welcome. Please see [Development Guideline](https://github.com/semuxproject/semux/wiki/Development-Guideline) for instructions.
-
-## Wallet GUI Localization
+## Wallet Localization
 
 [![Crowdin](https://d322cqt584bo4o.cloudfront.net/semux/localized.svg)](https://crowdin.com/project/semux)
 
