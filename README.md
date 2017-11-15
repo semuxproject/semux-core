@@ -4,13 +4,13 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/y0kgfqch4u79er1k?svg=true)](https://ci.appveyor.com/project/semux/semux)
 [![Coverage Status](https://coveralls.io/repos/github/semuxproject/semux/badge.svg?branch=develop)](https://coveralls.io/github/semuxproject/semux)
 
-https://www.semux.org
 
 ## What is Semux
 
 Semux is an experimental high-performance blockchain platform that powers decentralized application. It's written purely in Java and powered by Semux BFT consensus algorithm.
 
 More info can be found at our [Wiki page](https://github.com/semuxproject/semux/wiki).
+
 
 ## Get started
 
@@ -20,6 +20,7 @@ More info can be found at our [Wiki page](https://github.com/semuxproject/semux/
 4. *(Windows user) You may also need to install Microsoft Visual C++ 2010 Redistributable Package.*
     - [32-bit](http://www.microsoft.com/en-us/download/details.aspx?id=5555)
     - [64-bit](https://www.microsoft.com/en-us/download/details.aspx?id=14632)
+
 
 ## Build from source
 
@@ -37,11 +38,13 @@ cd dist
 ./semux.sh
 ```
 
+
 ## Contribute
 
 Anyone is welcome to contribute to this open source project in the form of peer review, testing and patches. Please see the [contributing](./.github/contributing.md) guide for more details.
 
-If you found a bug, please use this [issue template](./.github/issue_template.md)
+If you found a bug, please use this [issue template](./.github/issue_template.md) when submitting.
+
 
 ## Wallet Localization
 
@@ -49,6 +52,7 @@ If you found a bug, please use this [issue template](./.github/issue_template.md
 
 If you want to add new language, review/update existing translation or help to finish specific translations, you can join and do that by following link:
 https://crowdin.com/project/semux
+
 
 ## License
 
