@@ -69,7 +69,7 @@ At this stage one should expect comments and review from other contributors. You
 
 
 ## Squashing commits
----------------------------
+
 If your pull request is accepted for merging, you may be asked by a maintainer to squash and or [rebase](https://git-scm.com/docs/git-rebase) your commits before it will be merged. The basic squashing workflow is shown below.
 
 ```
