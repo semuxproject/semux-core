@@ -48,7 +48,7 @@ public class MerkleTreeTest {
 
     @Test
     public void testTwoElements() {
-        byte[] hash12 = Hash.mergeHash(hash1, hash2);
+        byte[] hash12 = Hash.h256(hash1, hash2);
 
         MerkleTree tree = new MerkleTree(Arrays.asList(hash1, hash2));
         assertTrue(tree.size() == 2);
@@ -62,9 +62,9 @@ public class MerkleTreeTest {
 
     @Test
     public void testThreeElements() {
-        byte[] hash12 = Hash.mergeHash(hash1, hash2);
-        byte[] hash33 = Hash.mergeHash(hash3, hash3);
-        byte[] hash1233 = Hash.mergeHash(hash12, hash33);
+        byte[] hash12 = Hash.h256(hash1, hash2);
+        byte[] hash33 = Hash.h256(hash3, hash3);
+        byte[] hash1233 = Hash.h256(hash12, hash33);
 
         MerkleTree tree = new MerkleTree(Arrays.asList(hash1, hash2, hash3));
         assertTrue(tree.size() == 3);
