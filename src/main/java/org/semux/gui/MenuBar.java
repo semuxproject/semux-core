@@ -100,6 +100,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
                     int n = wallet.addAccounts(w.getAccounts());
                     wallet.flush();
                     JOptionPane.showMessageDialog(frame, MessagesUtil.get("ImportSuccess", n));
+                    SemuxGUI.fireUpdateEvent();
                 }
             }
 
