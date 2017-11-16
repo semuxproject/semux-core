@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * index DB structure:
  * 
- * [0] => [block_hash_number]
+ * [0] => [latest_block_number]
  * [1] => [validators]
  * [2, address] => [validator_stats]
  * 
@@ -63,7 +63,7 @@ public class BlockchainImpl implements Blockchain {
     protected static byte TYPE_VALIDATORS = 1;
     protected static byte TYPE_VALIDATOR_STATS = 2;
     protected static byte TYPE_BLOCK_HASH = 3;
-    protected static byte TYPE_TRNSACTION_HASH = 4;
+    protected static byte TYPE_TRANSACTION_HASH = 4;
     protected static byte TYPE_ACCOUNT_TRANSACTION = 5;
 
     protected static byte TYPE_BLOCK_HEADER = 0;
@@ -148,7 +148,7 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public long getBlockNumber(byte[] hash) {
-        byte[] number = indexDB.get(hash);
+        byte[] number = indexDB.get(Bytes.merge(TYPE_BLOCK_HASH, hash));
         return (number == null) ? -1 : Bytes.toLong(number);
     }
 
@@ -182,7 +182,7 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public Transaction getTransaction(byte[] hash) {
-        byte[] bytes = indexDB.get(hash);
+        byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash));
         if (bytes != null) {
             // coinbase transaction
             if (bytes.length > 64) {
@@ -204,7 +204,7 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public TransactionResult getTransactionResult(byte[] hash) {
-        byte[] bytes = indexDB.get(hash);
+        byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash));
         if (bytes != null) {
             // coinbase transaction
             if (bytes.length > 64) {
@@ -226,7 +226,7 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public long getTransactionBlockNumber(byte[] hash) {
-        byte[] bytes = indexDB.get(hash);
+        byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash));
         if (bytes != null) {
             SimpleDecoder dec = new SimpleDecoder(bytes);
             return dec.readLong();
@@ -251,7 +251,7 @@ public class BlockchainImpl implements Blockchain {
         blockDB.put(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)), block.toBytesResults());
         blockDB.put(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)), block.toBytesVotes());
 
-        indexDB.put(hash, Bytes.of(number));
+        indexDB.put(Bytes.merge(TYPE_BLOCK_HASH, hash), Bytes.of(number));
 
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
@@ -267,7 +267,7 @@ public class BlockchainImpl implements Blockchain {
             enc.writeInt(txIndices.get(i).getLeft());
             enc.writeInt(txIndices.get(i).getRight());
 
-            indexDB.put(tx.getHash(), enc.toBytes());
+            indexDB.put(Bytes.merge(TYPE_TRANSACTION_HASH, tx.getHash()), enc.toBytes());
 
             // [3] update transaction_by_account index
             addTransactionToAccount(tx, tx.getFrom());
@@ -280,7 +280,7 @@ public class BlockchainImpl implements Blockchain {
             // [4] coinbase transaction
             Transaction tx = new Transaction(TransactionType.COINBASE, Bytes.EMPTY_ADDRESS, block.getCoinbase(), reward,
                     0, block.getNumber(), block.getTimestamp(), Bytes.EMPY_BYTES).sign(new EdDSA());
-            indexDB.put(tx.getHash(), tx.toBytes());
+            indexDB.put(Bytes.merge(TYPE_TRANSACTION_HASH, tx.getHash()), tx.toBytes());
             addTransactionToAccount(tx, block.getCoinbase());
 
             // [5] update validator statistics
@@ -320,7 +320,7 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public int getTransactionCount(byte[] address) {
-        byte[] cnt = indexDB.get(address);
+        byte[] cnt = indexDB.get(Bytes.merge(TYPE_ACCOUNT_TRANSACTION, address));
         return (cnt == null) ? 0 : Bytes.toInt(cnt);
     }
 
@@ -419,6 +419,16 @@ public class BlockchainImpl implements Blockchain {
     }
 
     /**
+     * Sets the total number of transaction of an account.
+     * 
+     * @param address
+     * @param total
+     */
+    protected void setTransactionCount(byte[] address, int total) {
+        indexDB.put(Bytes.merge(TYPE_ACCOUNT_TRANSACTION, address), Bytes.of(total));
+    }
+
+    /**
      * Adds a transaction to an account.
      * 
      * @param tx
@@ -427,17 +437,7 @@ public class BlockchainImpl implements Blockchain {
     protected void addTransactionToAccount(Transaction tx, byte[] address) {
         int total = getTransactionCount(address);
         indexDB.put(getNthTransactionIndexKey(address, total), tx.getHash());
-        setTotalTransactions(address, total + 1);
-    }
-
-    /**
-     * Sets the total number of transaction of an account.
-     * 
-     * @param address
-     * @param total
-     */
-    protected void setTotalTransactions(byte[] address, int total) {
-        indexDB.put(address, Bytes.of(total));
+        setTransactionCount(address, total + 1);
     }
 
     /**
@@ -448,7 +448,7 @@ public class BlockchainImpl implements Blockchain {
      * @return
      */
     protected byte[] getNthTransactionIndexKey(byte[] address, int n) {
-        return Bytes.merge(address, Bytes.of(n));
+        return Bytes.merge(Bytes.of(TYPE_ACCOUNT_TRANSACTION), address, Bytes.of(n));
     }
 
     /**

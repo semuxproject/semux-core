@@ -24,7 +24,7 @@ public class DBDump {
         options.cacheSize(128 * 1024 * 1024);
         options.compressionType(CompressionType.NONE);
 
-        File f = new File("database/account");
+        File f = new File("database/index");
         System.out.println(f.exists());
         DB db = JniDBFactory.factory.open(f, options);
 

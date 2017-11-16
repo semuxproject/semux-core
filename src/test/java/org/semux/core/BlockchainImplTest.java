@@ -120,6 +120,32 @@ public class BlockchainImplTest {
     }
 
     @Test
+    public void testTransactionCount() {
+        Blockchain chain = createBlockchain();
+
+        assertNull(chain.getTransaction(tx.getHash()));
+
+        Block newBlock = createBlock(1);
+        chain.addBlock(newBlock);
+
+        assertEquals(1, chain.getTransactionCount(tx.getFrom()));
+    }
+
+    @Test
+    public void testGetAccountTransactions() {
+        Blockchain chain = createBlockchain();
+
+        assertNull(chain.getTransaction(tx.getHash()));
+
+        Block newBlock = createBlock(1);
+        chain.addBlock(newBlock);
+
+        List<Transaction> txs = chain.getTransactions(tx.getFrom(), 0, 100);
+        assertEquals(1, txs.size());
+        assertArrayEquals(tx.toBytes(), txs.get(0).toBytes());
+    }
+
+    @Test
     public void testSerialization() {
         Block block1 = createBlock(1);
 
