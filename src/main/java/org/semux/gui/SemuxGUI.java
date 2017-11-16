@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -145,24 +144,18 @@ public class SemuxGUI {
         new Thread(() -> {
             while (true) {
                 try {
-                    ReadLock r = Config.STATE_LOCK.readLock();
-
-                    r.lock();
                     if (kernel.isRunning) {
                         onBlockAdded(kernel.getBlockchain().getLatestBlock());
                     } else {
                         break;
                     }
-                    r.unlock();
 
                     for (int i = 0; i < 100; i++) {
                         Thread.sleep(50);
-                        if (updateFlag.get()) {
-                            updateFlag.set(false);
+                        if (updateFlag.compareAndSet(true, false)) {
                             break;
                         }
                     }
-
                 } catch (InterruptedException e) {
                     logger.info("Data refresh interrupted, exiting");
                     break;
