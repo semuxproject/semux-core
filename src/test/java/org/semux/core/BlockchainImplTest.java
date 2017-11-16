@@ -44,7 +44,7 @@ public class BlockchainImplTest {
     }
 
     @Test
-    public void testGetLatest() {
+    public void testGetLatestBlock() {
         Blockchain chain = createBlockchain();
 
         assertEquals(0, chain.getLatestBlockNumber());
@@ -56,6 +56,17 @@ public class BlockchainImplTest {
 
         assertNotEquals(0, chain.getLatestBlockNumber());
         assertTrue(chain.getLatestBlock().getNumber() == newBlock.getNumber());
+    }
+
+    @Test
+    public void testGetLatestBlockHash() {
+        Blockchain chain = createBlockchain();
+
+        Block newBlock = createBlock(1);
+        chain.addBlock(newBlock);
+
+        assertEquals(newBlock.getNumber(), chain.getLatestBlockNumber());
+        assertArrayEquals(newBlock.getHash(), chain.getLatestBlockHash());
     }
 
     @Test
@@ -71,6 +82,24 @@ public class BlockchainImplTest {
 
         assertTrue(chain.getBlock(number).getNumber() == number);
         assertTrue(chain.getBlock(newBlock.getHash()).getNumber() == number);
+    }
+
+    @Test
+    public void testGetBlockNumber() {
+        Blockchain chain = createBlockchain();
+
+        long number = 1;
+        Block newBlock = createBlock(number);
+        chain.addBlock(newBlock);
+
+        assertEquals(number, chain.getBlockNumber(newBlock.getHash()));
+    }
+
+    @Test
+    public void testGetGenesis() {
+        Blockchain chain = createBlockchain();
+
+        assertArrayEquals(Genesis.getInstance().getHash(), chain.getGenesis().getHash());
     }
 
     @Test
@@ -117,6 +146,42 @@ public class BlockchainImplTest {
 
         TransactionResult r = chain.getTransactionResult(tx.getHash());
         assertArrayEquals(res.toBytes(), r.toBytes());
+    }
+
+    @Test
+    public void testGetTransactionBlockNumber() {
+        Blockchain chain = createBlockchain();
+
+        Block newBlock = createBlock(1);
+        chain.addBlock(newBlock);
+
+        assertEquals(newBlock.getNumber(), chain.getTransactionBlockNumber(tx.getHash()));
+    }
+
+    @Test
+    public void testGetTransactionCount() {
+        Blockchain chain = createBlockchain();
+
+        assertNull(chain.getTransaction(tx.getHash()));
+
+        Block newBlock = createBlock(1);
+        chain.addBlock(newBlock);
+
+        assertEquals(1, chain.getTransactionCount(tx.getFrom()));
+    }
+
+    @Test
+    public void testGetAccountTransactions() {
+        Blockchain chain = createBlockchain();
+
+        assertNull(chain.getTransaction(tx.getHash()));
+
+        Block newBlock = createBlock(1);
+        chain.addBlock(newBlock);
+
+        List<Transaction> txs = chain.getTransactions(tx.getFrom(), 0, 100);
+        assertEquals(1, txs.size());
+        assertArrayEquals(tx.toBytes(), txs.get(0).toBytes());
     }
 
     @Test
