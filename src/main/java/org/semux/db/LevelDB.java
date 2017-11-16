@@ -6,6 +6,8 @@
  */
 package org.semux.db;
 
+import static org.fusesource.leveldbjni.JniDBFactory.factory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -32,23 +34,42 @@ public class LevelDB implements KVDB {
 
     private DBName name;
     private DB db;
+    private boolean isOpened;
 
     public LevelDB(DBName name) {
         this.name = name;
 
         Options options = new Options();
         options.createIfMissing(true);
-        options.cacheSize(128 * 1024 * 1024);
         options.compressionType(CompressionType.NONE);
+        options.blockSize(4 * 1024 * 1024);
+        options.writeBufferSize(8 * 1024 * 1024);
+        options.cacheSize(64 * 1024 * 1024);
+        options.paranoidChecks(true);
+        options.verifyChecksums(true);
+        options.maxOpenFiles(128);
+
+        File f = getFile(name);
+        f.getParentFile().mkdirs();
 
         try {
-            File f = getFile(name);
-            f.getParentFile().mkdirs();
-
             db = JniDBFactory.factory.open(f, options);
+            isOpened = true;
         } catch (IOException e) {
-            logger.error("Failed to open database", e);
-            System.exit(-1);
+            if (e.getMessage().contains("Corruption:")) {
+                try {
+                    logger.info("Database is corrupted, trying to repair");
+                    factory.repair(f, options);
+                    logger.info("Repair done!");
+                    db = factory.open(f, options);
+                } catch (IOException ex) {
+                    logger.error("Failed to repair the database", ex);
+                    System.exit(-1);
+                }
+            } else {
+                logger.error("Failed to open database", e);
+                System.exit(-1);
+            }
         }
     }
 
@@ -91,7 +112,10 @@ public class LevelDB implements KVDB {
     @Override
     public void close() {
         try {
-            db.close();
+            if (isOpened) {
+                db.close();
+                isOpened = false;
+            }
         } catch (IOException e) {
             logger.error("Failed to close database: {}", name, e);
         }
