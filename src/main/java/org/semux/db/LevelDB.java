@@ -122,7 +122,7 @@ public class LevelDB implements KVDB {
     }
 
     @Override
-    public void destory() {
+    public void destroy() {
         close();
         FileUtil.recursiveDelete(getFile(name));
     }

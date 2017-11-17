@@ -72,5 +72,5 @@ public interface KVDB {
      * Destroy this DB.
      * 
      */
-    public void destory();
+    public void destroy();
 }

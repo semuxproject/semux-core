@@ -12,6 +12,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.text.DateFormat;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -37,6 +39,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.DefaultEditorKit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.semux.Kernel;
 import org.semux.core.Transaction;
 import org.semux.core.Unit;
@@ -205,13 +208,77 @@ public class SwingUtil {
     }
 
     /**
+     * Adds a copy-paste-cut popup to the given component. Enriched with
+     * Add-AddressbookEntry
+     * 
+     * @param comp
+     */
+    public static void addCopyPasteAddressbookFullPopup(JComponent comp) {
+        JPopupMenu popup = new JPopupMenu();
+        JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
+        item.setText(MessagesUtil.get("Cut"));
+        popup.add(item);
+        item = new JMenuItem(new DefaultEditorKit.CopyAction());
+        item.setText(MessagesUtil.get("Copy"));
+        popup.add(item);
+        item = new JMenuItem(new DefaultEditorKit.PasteAction());
+        item.setText(MessagesUtil.get("Paste"));
+        popup.add(item);
+
+        item = new JMenuItem(new AddressBookAction.AddToAddressBookAction(comp));
+        item.setText(MessagesUtil.get("ToAddressbook"));
+        popup.add(item);
+
+        item = new JMenuItem(new AddressBookAction.GetFromAddressBookAction(comp));
+        item.setText(MessagesUtil.get("FromAddressbook"));
+        popup.add(item);
+
+        comp.setComponentPopupMenu(popup);
+    }
+
+    /**
+     * Adds a copy-paste-cut popup to the given component. Enriched with
+     * Add-AddressbookEntry
+     * 
+     * @param comp
+     */
+    public static void addCopyPasteAddressbookToPopup(JComponent comp) {
+        JPopupMenu popup = new JPopupMenu();
+        JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
+        item.setText(MessagesUtil.get("Cut"));
+        popup.add(item);
+        item = new JMenuItem(new DefaultEditorKit.CopyAction());
+        item.setText(MessagesUtil.get("Copy"));
+        popup.add(item);
+        item = new JMenuItem(new DefaultEditorKit.PasteAction());
+        item.setText(MessagesUtil.get("Paste"));
+        popup.add(item);
+
+        item = new JMenuItem(new AddressBookAction.AddToAddressBookAction(comp));
+        item.setText(MessagesUtil.get("ToAddressbook"));
+        popup.add(item);
+        comp.setComponentPopupMenu(popup);
+    }
+
+    /**
      * Generates a text field with popup menu.
      * 
      * @return
      */
-    public static JTextField textFieldWithPopup() {
+    public static JTextField textFieldWithCopyPastePopup() {
         JTextField textfield = new JTextField();
         addCopyPastePopup(textfield);
+        return textfield;
+    }
+
+    /**
+     * Generates a text field with popup menu.
+     * 
+     * @return
+     */
+    public static JTextField textFieldWithCopyPasteAddressbookPopup() {
+        JTextField textfield = new JTextField();
+        addCopyPasteAddressbookFullPopup(textfield);
         return textfield;
     }
 
@@ -229,6 +296,53 @@ public class SwingUtil {
 
         addCopyPastePopup(c);
         return c;
+    }
+
+    /**
+     * Generates a selectable text area for Addresses
+     * 
+     * @param txt
+     * @return
+     */
+    public static JTextArea selectableTextAreaWithAddressFull(String txt) {
+        JTextArea c = new JTextArea(txt);
+        c.setBackground(null);
+        c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        c.setEditable(false);
+
+        addCopyPasteAddressbookFullPopup(c);
+        return c;
+    }
+
+    /**
+     * Generates a selectable text area for Addresses
+     * 
+     * @param txt
+     * @return
+     */
+    public static JTextArea selectableTextAreaWithAddressTo(String txt) {
+        JTextArea c = new JTextArea(txt);
+        c.setBackground(null);
+        c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        c.setEditable(false);
+
+        addCopyPasteAddressbookToPopup(c);
+        return c;
+    }
+
+    /**
+     * Convenience factory method for creating buttons
+     * 
+     * @param text
+     * @param listener
+     * @param action
+     * @return
+     */
+    public static JButton createDefaultButton(String text, ActionListener listener, Action action) {
+        JButton button = new JButton(text);
+        button.setActionCommand(action.name());
+        button.addActionListener(listener);
+        return button;
     }
 
     /**
@@ -416,6 +530,10 @@ public class SwingUtil {
         }
     };
 
+    public static final Comparator<?> STRING_COMPARATOR = (o1, o2) -> {
+        return StringUtils.compare((String) o1, (String) o2);
+    };
+
     /**
      * Returns an description of an account.
      * 
@@ -459,4 +577,5 @@ public class SwingUtil {
 
         return d == null ? Optional.empty() : Optional.of(d.getNameString());
     }
+
 }

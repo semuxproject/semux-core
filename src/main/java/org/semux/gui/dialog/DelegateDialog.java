@@ -39,7 +39,7 @@ public class DelegateDialog extends JDialog {
         JLabel lblRate = new JLabel(MessagesUtil.get("Rate") + ":");
 
         JTextArea name = SwingUtil.selectableTextArea(d.getNameString());
-        JTextArea address = SwingUtil.selectableTextArea(Hex.PREF + Hex.encode(d.getAddress()));
+        JTextArea address = SwingUtil.selectableTextAreaWithAddressTo(Hex.PREF + Hex.encode(d.getAddress()));
         JLabel registeredAt = new JLabel(SwingUtil.formatTimestamp(block.getTimestamp()));
         JLabel votes = new JLabel(SwingUtil.formatVote(d.getVotes()));
         JLabel votesFromMe = new JLabel(SwingUtil.formatVote(d.getVotesFromMe()));

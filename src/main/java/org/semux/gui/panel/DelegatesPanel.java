@@ -172,7 +172,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         setLayout(groupLayout); 
         // @formatter:on
 
-        textVote = SwingUtil.textFieldWithPopup();
+        textVote = SwingUtil.textFieldWithCopyPastePopup();
         textVote.setToolTipText(MessagesUtil.get("NumVotes"));
         textVote.setColumns(10);
         textVote.setActionCommand(Action.VOTE.name());
@@ -182,7 +182,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         btnVote.setActionCommand(Action.VOTE.name());
         btnVote.addActionListener(this);
 
-        textUnvote = SwingUtil.textFieldWithPopup();
+        textUnvote = SwingUtil.textFieldWithCopyPastePopup();
         textUnvote.setToolTipText(MessagesUtil.get("NumVotes"));
         textUnvote.setColumns(10);
         textUnvote.setActionCommand(Action.UNVOTE.name());
@@ -228,8 +228,10 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         btnDelegate.setToolTipText(
                 MessagesUtil.get("RegisterAsDelegateToolTip", SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT)));
 
-        textName = SwingUtil.textFieldWithPopup();
+        textName = SwingUtil.textFieldWithCopyPastePopup();
+
         textName.setToolTipText(MessagesUtil.get("DelegateName"));
+
         textName.setColumns(10);
         textName.setActionCommand(Action.DELEGATE.name());
         textName.addActionListener(this);

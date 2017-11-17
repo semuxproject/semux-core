@@ -55,5 +55,11 @@ public enum Action {
 
     EXIT,
 
-    ABOUT
+    ABOUT,
+
+    SHOW_ADDRESSBOOK,
+
+    ADD_TO_ADDRESSBOOK,
+
+    DELETE_FROM_ADDRESSBOOK
 }

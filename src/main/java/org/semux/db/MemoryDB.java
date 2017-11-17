@@ -102,6 +102,6 @@ public class MemoryDB implements KVDB {
     }
 
     @Override
-    public void destory() {
+    public void destroy() {
     }
 }

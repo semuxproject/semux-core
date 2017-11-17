@@ -31,3 +31,4 @@ dist/
 
 # JVM crash dumps
 hs_err_pid*
+/addressbook.txt

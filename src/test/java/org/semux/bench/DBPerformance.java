@@ -19,7 +19,7 @@ public class DBPerformance {
 
     public static void setup() {
         LevelDB db = new LevelDB(DBName.TEST);
-        db.destory();
+        db.destroy();
     }
 
     public static void testWrite() {

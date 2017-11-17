@@ -48,7 +48,7 @@ public class LevelDBTest {
     @Test
     public void testDestroy() {
         KVDB kvdb = new LevelDB(DBName.BLOCK);
-        kvdb.destory();
+        kvdb.destroy();
 
         File dir = new File(Config.DATA_DIR, "database");
         File f = new File(dir, DBName.BLOCK.toString().toLowerCase());

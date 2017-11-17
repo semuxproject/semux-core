@@ -6,52 +6,63 @@
  */
 package org.semux.gui.dialog;
 
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
+import org.semux.gui.model.AddressBook;
+import org.semux.gui.model.SemuxAddress;
 import org.semux.util.UnreachableException;
 
-public class InputDialog extends JDialog implements ActionListener {
-
+public class AddressBookSelectDialog extends JDialog implements ActionListener {
     private static final long serialVersionUID = 1L;
 
-    private JTextField textField;
-    private String text;
+    private String selected = "";
 
-    public InputDialog(JFrame parent, String message, boolean isPassword) {
-        super(parent, MessagesUtil.get("Input"));
+    private JComboBox<String> comboBox;
 
+    public AddressBookSelectDialog(JFrame parent) {
+        super(parent, MessagesUtil.get("Select"));
+        this.setMinimumSize(new Dimension(400, 240));
+        this.setModal(true);
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         JLabel labelLogo = new JLabel("");
         labelLogo.setIcon(SwingUtil.loadImage("logo", 96, 96));
 
-        JLabel lblMessage = new JLabel(message);
-        textField = isPassword ? new JPasswordField() : SwingUtil.textFieldWithCopyPastePopup();
-        textField.setActionCommand(Action.OK.name());
-        textField.addActionListener(this);
+        JButton btnOk = SwingUtil.createDefaultButton(MessagesUtil.get("OK"), this, Action.OK);
+        JButton btnCancel = SwingUtil.createDefaultButton(MessagesUtil.get("Canel"), this, Action.CANCEL);
 
-        JButton btnOk = new JButton(MessagesUtil.get("OK"));
-        btnOk.setSelected(true);
-        btnOk.setActionCommand(Action.OK.name());
-        btnOk.addActionListener(this);
+        JLabel lblMessage = new JLabel(MessagesUtil.get("FromAddressbook"));
+        comboBox = new JComboBox<>();
+        comboBox.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        for (SemuxAddress element : AddressBook.getAllAddresses()) {
+            comboBox.addItem(element.getName());
+        }
+        comboBox.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    actionPerformed(new ActionEvent(AddressBookSelectDialog.this, 0, Action.OK.name()));
+                }
+            }
+        });
 
-        JButton btnCancel = new JButton(MessagesUtil.get("Cancel"));
-        btnCancel.setActionCommand(Action.CANCEL.name());
-        btnCancel.addActionListener(this);
-
-        // @formatter:off
+     // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());
         groupLayout.setHorizontalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
@@ -61,12 +72,12 @@ public class InputDialog extends JDialog implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addComponent(lblMessage)
-                        .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                            .addComponent(textField, GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
-                            .addGroup(groupLayout.createSequentialGroup()
-                                .addComponent(btnCancel, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(ComponentPlacement.UNRELATED)
-                                .addComponent(btnOk, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE))))
+                        .addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+                            .addGap(101)
+                            .addComponent(btnCancel, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(ComponentPlacement.UNRELATED)
+                            .addComponent(btnOk, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(comboBox, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGap(17))
         );
         groupLayout.setVerticalGroup(
@@ -80,8 +91,8 @@ public class InputDialog extends JDialog implements ActionListener {
                             .addGap(21)
                             .addComponent(lblMessage)
                             .addGap(18)
-                            .addComponent(textField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                            .addGap(18)
+                            .addComponent(comboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                            .addGap(16)
                             .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                                 .addComponent(btnOk)
                                 .addComponent(btnCancel))))
@@ -90,12 +101,13 @@ public class InputDialog extends JDialog implements ActionListener {
         getContentPane().setLayout(groupLayout);
         // @formatter:on
 
-        this.setModal(true);
-        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();
         this.setResizable(false);
         this.setLocationRelativeTo(parent);
+    }
+
+    public String getSelected() {
+        return selected;
     }
 
     @Override
@@ -104,26 +116,15 @@ public class InputDialog extends JDialog implements ActionListener {
 
         switch (action) {
         case OK:
-            text = new String(textField.getText());
+            selected = (String) comboBox.getSelectedItem();
             break;
         case CANCEL:
-            text = null;
+            selected = "";
             break;
         default:
             throw new UnreachableException();
         }
 
         this.dispose();
-    }
-
-    public String getInput() {
-        this.setVisible(true);
-        return text;
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        InputDialog pwd = new InputDialog(null, "Please enter your password", true);
-        String password = pwd.getInput();
-        System.out.println("Password: " + password);
     }
 }

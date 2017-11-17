@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2017 The Semux Developers
+/** Copyright (c) 2017 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -33,6 +32,7 @@ import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
+import org.semux.gui.dialog.AddressBookDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
 import org.semux.util.Bytes;
@@ -69,7 +69,6 @@ public class SendPanel extends JPanel implements ActionListener {
     public SendPanel(WalletModel model) {
         this.model = model;
         this.model.addListener(this);
-
         setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         JLabel lblFrom = new JLabel(MessagesUtil.get("From") + ":");
@@ -81,7 +80,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblTo = new JLabel(MessagesUtil.get("To") + ":");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        to = SwingUtil.textFieldWithPopup();
+        to = SwingUtil.textFieldWithCopyPasteAddressbookPopup();
         to.setColumns(24);
         to.setActionCommand(Action.SEND.name());
         to.addActionListener(this);
@@ -89,7 +88,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblAmount = new JLabel(MessagesUtil.get("Amount") + ":");
         lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        amount = SwingUtil.textFieldWithPopup();
+        amount = SwingUtil.textFieldWithCopyPastePopup();
         amount.setColumns(10);
         amount.setActionCommand(Action.SEND.name());
         amount.addActionListener(this);
@@ -98,7 +97,7 @@ public class SendPanel extends JPanel implements ActionListener {
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
         lblFee.setToolTipText(MessagesUtil.get("FeeTip", SwingUtil.formatValue(Config.MIN_TRANSACTION_FEE)));
 
-        fee = SwingUtil.textFieldWithPopup();
+        fee = SwingUtil.textFieldWithCopyPastePopup();
         fee.setColumns(10);
         fee.setActionCommand(Action.SEND.name());
         fee.addActionListener(this);
@@ -107,7 +106,7 @@ public class SendPanel extends JPanel implements ActionListener {
         lblMemo.setHorizontalAlignment(SwingConstants.RIGHT);
         lblMemo.setToolTipText(MessagesUtil.get("MemoTip"));
 
-        memo = SwingUtil.textFieldWithPopup();
+        memo = SwingUtil.textFieldWithCopyPastePopup();
         memo.setColumns(10);
         memo.setActionCommand(Action.SEND.name());
         memo.addActionListener(this);
@@ -123,6 +122,10 @@ public class SendPanel extends JPanel implements ActionListener {
         JButton payClear = new JButton(MessagesUtil.get("Clear"));
         payClear.addActionListener(this);
         payClear.setActionCommand(Action.CLEAR.name());
+
+        JButton btnAddressBook = new JButton(MessagesUtil.get("AddressBook"));
+        btnAddressBook.addActionListener(this);
+        btnAddressBook.setActionCommand(Action.SHOW_ADDRESSBOOK.name());
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -143,6 +146,10 @@ public class SendPanel extends JPanel implements ActionListener {
                             .addGap(28)
                             .addComponent(payClear, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
                             .addContainerGap())
+                        .addGroup(groupLayout.createSequentialGroup()
+                                .addComponent(btnAddressBook, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE)
+                               
+                                )
                         .addGroup(groupLayout.createSequentialGroup()
                             .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                                 .addComponent(to, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
@@ -187,7 +194,12 @@ public class SendPanel extends JPanel implements ActionListener {
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(paySend)
                         .addComponent(payClear))
+                    .addGap(27)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                            .addComponent(btnAddressBook)
+                            )
                     .addContainerGap(158, Short.MAX_VALUE))
+                
         );
         setLayout(groupLayout);
         // @formatter:on
@@ -284,6 +296,10 @@ public class SendPanel extends JPanel implements ActionListener {
             break;
         case CLEAR:
             clear();
+            break;
+        case SHOW_ADDRESSBOOK:
+            AddressBookDialog dialog = new AddressBookDialog(this);
+            dialog.setVisible(true);
             break;
         default:
             throw new UnreachableException();
