@@ -44,7 +44,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private WalletModel model;
 
-    class Item {
+    private class Item {
         WalletAccount account;
         String name;
 
@@ -80,7 +80,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblTo = new JLabel(MessagesUtil.get("To") + ":");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        to = SwingUtil.textFieldWithCopyPasteAddressbookPopup();
+        to = SwingUtil.textFieldWithCopyPastePopup();
         to.setColumns(24);
         to.setActionCommand(Action.SEND.name());
         to.addActionListener(this);
@@ -192,12 +192,9 @@ public class SendPanel extends JPanel implements ActionListener {
                         .addComponent(memo, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
                     .addGap(27)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(paySend)
                         .addComponent(payClear))
+                        .addComponent(paySend)
                     .addGap(27)
-                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                            .addComponent(btnAddressBook)
-                            )
                     .addContainerGap(158, Short.MAX_VALUE))
                 
         );

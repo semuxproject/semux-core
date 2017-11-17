@@ -208,60 +208,7 @@ public class SwingUtil {
     }
 
     /**
-     * Adds a copy-paste-cut popup to the given component. Enriched with
-     * Add-AddressbookEntry
-     * 
-     * @param comp
-     */
-    public static void addCopyPasteAddressbookFullPopup(JComponent comp) {
-        JPopupMenu popup = new JPopupMenu();
-        JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
-        item.setText(MessagesUtil.get("Cut"));
-        popup.add(item);
-        item = new JMenuItem(new DefaultEditorKit.CopyAction());
-        item.setText(MessagesUtil.get("Copy"));
-        popup.add(item);
-        item = new JMenuItem(new DefaultEditorKit.PasteAction());
-        item.setText(MessagesUtil.get("Paste"));
-        popup.add(item);
-
-        item = new JMenuItem(new AddressBookAction.AddToAddressBookAction(comp));
-        item.setText(MessagesUtil.get("ToAddressbook"));
-        popup.add(item);
-
-        item = new JMenuItem(new AddressBookAction.GetFromAddressBookAction(comp));
-        item.setText(MessagesUtil.get("FromAddressbook"));
-        popup.add(item);
-
-        comp.setComponentPopupMenu(popup);
-    }
-
-    /**
-     * Adds a copy-paste-cut popup to the given component. Enriched with
-     * Add-AddressbookEntry
-     * 
-     * @param comp
-     */
-    public static void addCopyPasteAddressbookToPopup(JComponent comp) {
-        JPopupMenu popup = new JPopupMenu();
-        JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
-        item.setText(MessagesUtil.get("Cut"));
-        popup.add(item);
-        item = new JMenuItem(new DefaultEditorKit.CopyAction());
-        item.setText(MessagesUtil.get("Copy"));
-        popup.add(item);
-        item = new JMenuItem(new DefaultEditorKit.PasteAction());
-        item.setText(MessagesUtil.get("Paste"));
-        popup.add(item);
-
-        item = new JMenuItem(new AddressBookAction.AddToAddressBookAction(comp));
-        item.setText(MessagesUtil.get("ToAddressbook"));
-        popup.add(item);
-        comp.setComponentPopupMenu(popup);
-    }
-
-    /**
-     * Generates a text field with popup menu.
+     * Generates a text field with copy-paste-cut popup menu.
      * 
      * @return
      */
@@ -272,61 +219,18 @@ public class SwingUtil {
     }
 
     /**
-     * Generates a text field with popup menu.
-     * 
-     * @return
-     */
-    public static JTextField textFieldWithCopyPasteAddressbookPopup() {
-        JTextField textfield = new JTextField();
-        addCopyPasteAddressbookFullPopup(textfield);
-        return textfield;
-    }
-
-    /**
      * Generates a selectable text area.
      * 
      * @param txt
      * @return
      */
-    public static JTextArea selectableTextArea(String txt) {
+    public static JTextArea textAreaWithCopyPastePopup(String txt) {
         JTextArea c = new JTextArea(txt);
         c.setBackground(null);
         c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         c.setEditable(false);
 
         addCopyPastePopup(c);
-        return c;
-    }
-
-    /**
-     * Generates a selectable text area for Addresses
-     * 
-     * @param txt
-     * @return
-     */
-    public static JTextArea selectableTextAreaWithAddressFull(String txt) {
-        JTextArea c = new JTextArea(txt);
-        c.setBackground(null);
-        c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
-        c.setEditable(false);
-
-        addCopyPasteAddressbookFullPopup(c);
-        return c;
-    }
-
-    /**
-     * Generates a selectable text area for Addresses
-     * 
-     * @param txt
-     * @return
-     */
-    public static JTextArea selectableTextAreaWithAddressTo(String txt) {
-        JTextArea c = new JTextArea(txt);
-        c.setBackground(null);
-        c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
-        c.setEditable(false);
-
-        addCopyPasteAddressbookToPopup(c);
         return c;
     }
 
@@ -530,8 +434,11 @@ public class SwingUtil {
         }
     };
 
-    public static final Comparator<?> STRING_COMPARATOR = (o1, o2) -> {
-        return StringUtils.compare((String) o1, (String) o2);
+    /**
+     * String comparator.
+     */
+    public static final Comparator<String> STRING_COMPARATOR = (o1, o2) -> {
+        return StringUtils.compare(o1, o2);
     };
 
     /**
@@ -555,6 +462,13 @@ public class SwingUtil {
         }
     }
 
+    /**
+     * Returns the name of an address.
+     * 
+     * @param m
+     * @param address
+     * @return
+     */
     private static String getAddressName(WalletModel m, byte[] address) {
         Optional<String> o = getDelegateName(address);
         if (o.isPresent()) {
