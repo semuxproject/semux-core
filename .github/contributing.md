@@ -37,18 +37,19 @@ Please refer to the [Git manual](https://git-scm.com/doc) for more information a
 The title of the pull request should be prefixed by the component or area that
 the pull request affects. Valid areas as:
 
-  - **Core** for changes to the core data structures and algorithms
-  - **GUI** for changes to the wallet GUI code
+  - **API** for changes to the RESTful API code
   - **CLI** for changes to the wallet CLI code
-  - **API** for changes to the RESTful API
-  - **Docs** for changes to the documentation
-  - **Tests** for changes to the Semux unit tests or QA tests
   - **Consensus** for changes to the consensus code
-  - **P2P** or **NET** for changes to the peer-to-peer network code
+  - **Core** for changes to the core data structures and algorithms
+  - **Crypto** for changes to the crypto code
   - **DB** for changes to the database code
-  - **Libraries** for changes to the utils and libraries
-  - **Scripts** for changes to the scripts and tools
-  - **Trivial** should **only** be used for PRs that do not change generated executable code. Notably, refactors (change of function arguments and code reorganization) and changes in behavior should **not** be marked as trivial. Examples of trivial PRs are changes to:
+  - **GUI** for changes to the wallet GUI code
+  - **Net** for changes to the peer-to-peer network code
+  - **Util** for changes to the utils and libraries
+  - **VM** for changes to the database code
+  - **Docs** for changes to the docs
+  - **Tools** for changes to the scripts and tools
+  - **Trivial** should **only** be used for PRs that do not change generated executable code:
     - comments
     - whitespace
     - variable names
