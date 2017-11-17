@@ -6,119 +6,177 @@
  */
 package org.semux.gui.model;
 
-import java.io.FileWriter;
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
+import org.semux.Config;
+import org.semux.util.Bytes;
+import org.semux.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AddressBook {
 
-    private static final String ADDRESSBOOK_FILENAME = "addressbook.txt";
     private static Logger logger = LoggerFactory.getLogger(AddressBook.class);
-    private static Path ADDRESSBOOKFILE = Paths.get(".", ADDRESSBOOK_FILENAME);
+
+    private static final String FILENAME = "addressbook.json";
+
+    // NOTE: A better solution would be storing as a list of entries, with index on
+    // name and address.
+
+    private File file;
+    private JSONObject database;
 
     /**
-     * add or update a address
+     * Creates an address book instance.
+     */
+    public AddressBook() {
+        this.file = new File(Config.DATA_DIR, FILENAME);
+        this.database = load();
+    }
+
+    /**
+     * Adds or updates a address
      *
      * @param name
-     *            must not be null
      * @param address
-     *            must not be null
      */
-    public static void put(String name, String address) {
-        put(new SemuxAddress(name, address));
+    public void put(String name, String address) {
+        put(new Entry(name, address));
     }
 
     /**
-     * retrieve all addresses from the address book
-     *
-     * @return List of SemuxAddresses
-     */
-    public static List<SemuxAddress> getAllAddresses() {
-        List<SemuxAddress> adr = getDatabase().entrySet().stream().map(e -> new SemuxAddress(e.getKey(), e.getValue()))
-                .collect(Collectors.toList());
-        return adr;
-    }
-
-    /**
-     * delete the entry from the address book
-     *
-     * @param key
-     */
-    public static void delete(String key) {
-        if (getDatabase().containsKey(key)) {
-            Map<String, String> db = getDatabase();
-            db.remove(key);
-            persist(db);
-        }
-    }
-
-    /**
-     * insert or update an entry in the address book
+     * Adds or update an entry to the address book
      *
      * @param address
      * @throws IllegalAddressException
      */
-    public static void put(SemuxAddress address) {
-        Map<String, String> db = getDatabase();
-        db.put(address.getName(), address.getAddress());
-        persist(db);
-
+    public void put(Entry address) {
+        database.put(address.getName(), address.getAddress());
+        persist();
     }
 
     /**
-     * get {@link SemuxAddress} for name
+     * Returns all entries from the address book
      *
-     * @param selected
-     *            Name in address book
-     * @return {@link SemuxAddress}
+     * @return List of entries
      */
-    public static SemuxAddress getAddress(String selected) {
-        return getDatabase().get(selected) != null ? new SemuxAddress(selected, getDatabase().get(selected)) : null;
+    public List<Entry> list() {
+        List<Entry> list = new ArrayList<>();
+        for (String name : database.keySet()) {
+            list.add(new Entry(name, database.getString(name)));
+        }
+        return list;
     }
 
-    private static Map<String, String> getDatabase() {
+    /**
+     * Returns a {@link Entry} by name.
+     *
+     * @param name
+     * @return An {@link Entry} if exists, otherwise null
+     */
+    public Entry getByName(String name) {
+        return database.has(name) ? new Entry(name, database.getString(name)) : null;
+    }
+
+    /**
+     * Returns an {@link Entry} by address.
+     * 
+     * @param address
+     * @return An {@link Entry} if exists, otherwise null
+     */
+    public Entry getByAddress(String address) {
+        throw new UnsupportedOperationException("Query by address is not yet supported");
+    }
+
+    /**
+     * Removes an entry from the address book
+     *
+     * @param name
+     */
+    public void remove(String name) {
+        if (database.remove(name) != null) {
+            persist();
+        }
+    }
+
+    /**
+     * Clears all entries in the address book.
+     */
+    public void clear() {
+        database = new JSONObject();
+        persist();
+    }
+
+    /**
+     * Loads database from file.
+     * 
+     * @return
+     */
+    private JSONObject load() {
         try {
-            if (Files.notExists(ADDRESSBOOKFILE)) {
-                Files.createFile(ADDRESSBOOKFILE);
+            if (file.exists()) {
+                String json = IOUtil.readFileAsString(file);
+                return new JSONObject(json);
             }
-            List<String> lines = Files.readAllLines(ADDRESSBOOKFILE);
-            Map<String, String> addresses = new HashMap<>();
-            for (String string : lines) {
-                String[] addr = string.split(":");
-                if ((null != addr) && (addr.length == 2)) {
-                    addresses.put(addr[0], addr[1]);
-                }
-            }
-            return addresses;
         } catch (IOException e) {
             logger.error("Failed to retrieve or accesss address book", e);
         }
-        return Collections.emptyMap();
+        return new JSONObject();
     }
 
-    private static void persist(Map<String, String> db) {
+    /**
+     * Persists database to file
+     */
+    private void persist() {
         try {
-            FileWriter filew = new FileWriter(ADDRESSBOOKFILE.toFile());
-            db.forEach((k, v) -> {
-                try {
-                    filew.write((k + ":" + v + "\n"));
-                } catch (IOException e) {
-                    logger.error("Failed to retrieve or access address book", e);
-                }
-            });
-            filew.close();
+            IOUtil.writeToFile(Bytes.of(database.toString()), file);
         } catch (IOException e) {
             logger.error("Failed to retrieve or access address book", e);
+        }
+    }
+
+    /**
+     * An immutable address book entry.
+     */
+    public static class Entry implements Comparable<Entry> {
+        private String name;
+        private String address;
+
+        /**
+         * creates a new Entry
+         *
+         * @param name
+         *            must not be null
+         * @param address
+         *            must not be null
+         */
+        public Entry(String name, String address) {
+            if (StringUtils.isEmpty(name)) {
+                throw new IllegalArgumentException("Name can't be null or empty");
+            }
+            if (StringUtils.isEmpty(address)) {
+                throw new IllegalArgumentException("Address can't be null or empty");
+            }
+            this.name = name;
+            this.address = address;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        @Override
+        public int compareTo(Entry o) {
+            return name.compareTo(o.name);
         }
     }
 }

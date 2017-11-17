@@ -12,6 +12,7 @@
 /keystore/
 /p2p/
 /node*
+/addressbook.json
 
 # maven generated files
 target/
@@ -31,4 +32,3 @@ dist/
 
 # JVM crash dumps
 hs_err_pid*
-/addressbook.txt

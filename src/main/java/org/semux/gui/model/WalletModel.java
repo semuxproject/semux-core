@@ -39,6 +39,8 @@ public class WalletModel {
 
     private Map<String, Peer> activePeers = new HashMap<>();
 
+    private AddressBook addressBook = new AddressBook();
+
     /**
      * Construct a new model.
      */
@@ -143,6 +145,15 @@ public class WalletModel {
             sum += acc.getLocked();
         }
         return sum;
+    }
+
+    /**
+     * Returns the address book.
+     * 
+     * @return
+     */
+    public AddressBook getAddressBook() {
+        return addressBook;
     }
 
     public List<WalletAccount> getAccounts() {
