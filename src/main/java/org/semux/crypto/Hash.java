@@ -47,7 +47,7 @@ public class Hash {
      * @param two
      * @return
      */
-    public static byte[] mergeHash(byte[] one, byte[] two) {
+    public static byte[] h256(byte[] one, byte[] two) {
         byte[] all = new byte[one.length + two.length];
         System.arraycopy(one, 0, all, 0, one.length);
         System.arraycopy(two, 0, all, one.length, two.length);

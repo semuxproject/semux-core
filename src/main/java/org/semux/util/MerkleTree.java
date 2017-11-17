@@ -99,7 +99,7 @@ public class MerkleTree {
             for (int i = 0; i < nodes.size() - 1; i += 2) {
                 Node left = nodes.get(i);
                 Node right = nodes.get(i + 1);
-                list.add(new Node(Hash.mergeHash(left.value, right.value), left, right));
+                list.add(new Node(Hash.h256(left.value, right.value), left, right));
             }
 
             levels++;

@@ -6,8 +6,9 @@
  */
 package org.semux.crypto;
 
-@SuppressWarnings("serial")
-public class CryptoException extends Exception {
+ public class CryptoException extends Exception {
+
+    private static final long serialVersionUID = 1L;
 
     public CryptoException() {
     }
