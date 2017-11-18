@@ -31,6 +31,7 @@ import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.AddressBook;
 import org.semux.gui.model.AddressBook.Entry;
+import org.semux.gui.model.WalletModel;
 import org.semux.util.UnreachableException;
 
 public class AddressBookDialog extends JDialog implements ActionListener {
@@ -44,13 +45,8 @@ public class AddressBookDialog extends JDialog implements ActionListener {
     private JTable table;
     private AdressTableModel tableModel;
 
-    private static AddressBookDialog instance = new AddressBookDialog();
-
-    private AddressBookDialog() {
-
-        setLayout(new BorderLayout(0, 0));
-        this.setMinimumSize(new Dimension(900, 600));
-        // this.setLocationRelativeTo(parent);
+    public AddressBookDialog(JFrame parent, WalletModel model) {
+        this.addressBook = model.getAddressBook();
 
         tableModel = new AdressTableModel();
         table = new JTable(tableModel);
@@ -68,19 +64,13 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         JPanel panel = new JPanel();
         getContentPane().add(panel, BorderLayout.SOUTH);
 
-        JButton btnNew = new JButton(MessagesUtil.get("Add"));
-        btnNew.setActionCommand(Action.ADD_ADDRESS.name());
-        btnNew.addActionListener(this);
+        JButton btnNew = SwingUtil.createDefaultButton(MessagesUtil.get("Add"), this, Action.ADD_ADDRESS);
         panel.add(btnNew);
 
-        JButton btnCopy = new JButton(MessagesUtil.get("Copy"));
-        btnCopy.setActionCommand(Action.COPY_ADDRESS.name());
-        btnCopy.addActionListener(this);
+        JButton btnCopy = SwingUtil.createDefaultButton(MessagesUtil.get("Copy"), this, Action.COPY_ADDRESS);
         panel.add(btnCopy);
 
-        JButton btnDelete = new JButton(MessagesUtil.get("Delete"));
-        btnDelete.setActionCommand(Action.DELETE_ADDRESS.name());
-        btnDelete.addActionListener(this);
+        JButton btnDelete = SwingUtil.createDefaultButton(MessagesUtil.get("Delete"), this, Action.DELETE_ADDRESS);
         panel.add(btnDelete);
 
         JScrollPane scrollPane = new JScrollPane();
@@ -91,6 +81,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();
+        this.setLocationRelativeTo(parent);
         this.setResizable(false);
         this.setModal(false);
 
@@ -210,9 +201,5 @@ public class AddressBookDialog extends JDialog implements ActionListener {
                 }
             }
         }
-    }
-
-    public static void showAddressBook() {
-        instance.setVisible(true);
     }
 }
