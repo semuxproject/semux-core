@@ -8,8 +8,8 @@ package org.semux.gui.dialog;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -23,7 +23,7 @@ public class TransactionDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    public TransactionDialog(JComponent parent, Transaction tx) {
+    public TransactionDialog(JFrame parent, Transaction tx) {
 
         JLabel lblHash = new JLabel(MessagesUtil.get("Hash") + ":");
         JLabel lblType = new JLabel(MessagesUtil.get("Type") + ":");

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -37,11 +38,11 @@ import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.TransactionDialog;
+import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
 import org.semux.util.ByteArray;
 import org.semux.util.StringUtil;
 import org.semux.util.UnreachableException;
-import org.semux.gui.model.WalletAccount;
 
 public class TransactionsPanel extends JPanel implements ActionListener {
 
@@ -55,7 +56,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     private JTable table;
     private TransactionsTableModel tableModel;
 
-    public TransactionsPanel(WalletModel model) {
+    public TransactionsPanel(JFrame frame, WalletModel model) {
         this.model = model;
         this.model.addListener(this);
 
@@ -79,7 +80,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 if (me.getClickCount() == 2) {
                     Transaction tx = tableModel.getRow(table.convertRowIndexToModel(row));
                     if (tx != null) {
-                        TransactionDialog dialog = new TransactionDialog(TransactionsPanel.this, tx);
+                        TransactionDialog dialog = new TransactionDialog(frame, tx);
                         dialog.setVisible(true);
                     }
                 }

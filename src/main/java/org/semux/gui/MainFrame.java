@@ -66,11 +66,11 @@ public class MainFrame extends JFrame implements ActionListener {
         lockGlassPane.setOpaque(false);
         this.setGlassPane(lockGlassPane);
 
-        panelHome = new HomePanel(model);
-        panelSend = new SendPanel(model);
-        panelReceive = new ReceivePanel(model);
-        panelTransactions = new TransactionsPanel(model);
-        panelDelegates = new DelegatesPanel(model);
+        panelHome = new HomePanel(this, model);
+        panelSend = new SendPanel(this, model);
+        panelReceive = new ReceivePanel(this, model);
+        panelTransactions = new TransactionsPanel(this, model);
+        panelDelegates = new DelegatesPanel(this, model);
 
         // setup frame properties
         this.setTitle(MessagesUtil.get("SemuxWallet"));

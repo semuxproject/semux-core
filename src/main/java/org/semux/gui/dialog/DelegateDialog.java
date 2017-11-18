@@ -8,8 +8,8 @@ package org.semux.gui.dialog;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -25,7 +25,7 @@ public class DelegateDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    public DelegateDialog(JComponent parent, WalletDelegate d) {
+    public DelegateDialog(JFrame parent, WalletDelegate d) {
         Block block = Kernel.getInstance().getBlockchain().getBlock(d.getRegisteredAt());
 
         JLabel lblName = new JLabel(MessagesUtil.get("Name") + ":");

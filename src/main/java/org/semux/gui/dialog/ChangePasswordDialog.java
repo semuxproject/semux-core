@@ -7,7 +7,6 @@
 package org.semux.gui.dialog;
 
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -15,6 +14,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
@@ -27,19 +27,15 @@ import org.semux.gui.SwingUtil;
 
 public class ChangePasswordDialog extends JDialog implements ActionListener {
 
-    public ChangePasswordDialog(Frame owner) {
-        super(owner, MessagesUtil.get("ChangePassword"));
+    public ChangePasswordDialog(JFrame parent) {
+        super(parent, MessagesUtil.get("ChangePassword"));
 
         JLabel lblOldPassword = new JLabel(MessagesUtil.get("OldPassword") + ":");
-
         JLabel lblPassword = new JLabel(MessagesUtil.get("Password") + ":");
-
         JLabel lblRepeat = new JLabel(MessagesUtil.get("RepeatPassword") + ":");
 
         oldpasswordField = new JPasswordField();
-
         passwordField = new JPasswordField();
-
         repeatField = new JPasswordField();
 
         JButton btnOk = new JButton(MessagesUtil.get("OK"));
@@ -100,7 +96,7 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.setMinimumSize(new Dimension(400, 240));
-        this.setLocationRelativeTo(owner);
+        this.setLocationRelativeTo(parent);
     }
 
     private static final long serialVersionUID = 1L;

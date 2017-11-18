@@ -16,6 +16,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -42,6 +43,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
+    private JFrame frame;
     private WalletModel model;
 
     private class Item {
@@ -66,7 +68,8 @@ public class SendPanel extends JPanel implements ActionListener {
     private JTextField fee;
     private JTextField memo;
 
-    public SendPanel(WalletModel model) {
+    public SendPanel(JFrame frame, WalletModel model) {
+        this.frame = frame;
         this.model = model;
         this.model.addListener(this);
         setBorder(new LineBorder(Color.LIGHT_GRAY));
@@ -295,7 +298,7 @@ public class SendPanel extends JPanel implements ActionListener {
             clear();
             break;
         case SHOW_ADDRESSBOOK:
-            AddressBookDialog dialog = new AddressBookDialog(this);
+            AddressBookDialog dialog = new AddressBookDialog(frame, model.getAddressBook());
             dialog.setVisible(true);
             break;
         default:
