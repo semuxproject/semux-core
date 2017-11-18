@@ -7,10 +7,10 @@
 package org.semux.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
-import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,5 +31,6 @@ public class SystemUtilTest {
         String ip = SystemUtil.getIp();
         logger.info("IP address = {}", ip);
         assertNotNull(ip);
+        assertFalse(ip.equals("127.0.0.1"));
     }
 }

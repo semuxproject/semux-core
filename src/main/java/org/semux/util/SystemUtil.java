@@ -59,8 +59,9 @@ public class SystemUtil {
      */
     public static String getIp() {
         try {
-            URL url = new URL("http://api.ipify.org/");
+            URL url = new URL("https://api.semux.org/ip");
             URLConnection con = url.openConnection();
+            con.addRequestProperty("User-Agent", "Mozilla/4.0");
             con.setConnectTimeout(3000);
             con.setReadTimeout(3000);
 
@@ -72,7 +73,7 @@ public class SystemUtil {
                 return ip;
             }
         } catch (Exception e) {
-            logger.error("Failed to retrieve your IP address");
+            logger.error("Failed to retrieve your IP address", e);
         }
 
         try {
