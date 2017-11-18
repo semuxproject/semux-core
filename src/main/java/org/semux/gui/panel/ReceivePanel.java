@@ -22,6 +22,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -38,12 +39,12 @@ import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
-import org.semux.gui.SemuxGUI;
 import org.semux.gui.MessagesUtil;
+import org.semux.gui.SemuxGUI;
 import org.semux.gui.SwingUtil;
+import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
 import org.semux.util.UnreachableException;
-import org.semux.gui.model.WalletAccount;
 
 public class ReceivePanel extends JPanel implements ActionListener {
 
@@ -58,7 +59,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
     private ReceiveTableModel tableModel;
     private JLabel qr;
 
-    public ReceivePanel(WalletModel model) {
+    public ReceivePanel(JFrame frame, WalletModel model) {
         this.model = model;
         this.model.addListener(this);
 

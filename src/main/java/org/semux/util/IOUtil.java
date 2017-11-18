@@ -17,6 +17,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -129,9 +130,10 @@ public class IOUtil {
      * 
      * @param src
      * @param dst
+     * @param override
      * @throws IOException
      */
-    public static void copyFile(File src, File dst) throws IOException {
-        Files.copy(src.toPath(), dst.toPath());
+    public static void copyFile(File src, File dst, boolean override) throws IOException {
+        Files.copy(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 }

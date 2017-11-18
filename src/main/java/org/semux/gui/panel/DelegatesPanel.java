@@ -23,6 +23,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -89,7 +90,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private JTextField textUnvote;
     private JTextField textName;
 
-    public DelegatesPanel(WalletModel model) {
+    public DelegatesPanel(JFrame frame, WalletModel model) {
         this.model = model;
         this.model.addListener(this);
 
@@ -111,7 +112,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 if (me.getClickCount() == 2) {
                     WalletDelegate d = tableModel.getRow(table.convertRowIndexToModel(row));
                     if (d != null) {
-                        DelegateDialog dialog = new DelegateDialog(DelegatesPanel.this, d);
+                        DelegateDialog dialog = new DelegateDialog(frame, d);
                         dialog.setVisible(true);
                     }
                 }
