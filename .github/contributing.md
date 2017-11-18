@@ -4,7 +4,7 @@ Anyone is welcome to contribute towards development in the form of peer review, 
 
 ## Code conventions
 
-This project follows the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) with additional requirements. An [Eclipse Java formatter](https://raw.githubusercontent.com/semuxproject/semux/master/misc/eclipse/formatter.xml) is also provided.
+This project follows the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) with additional requirements.
 ```
 indent: no tab, 4 spaces instead
 line limit: 120 chars
@@ -14,6 +14,8 @@ To format your code, please run the following command:
 ```
 mvn formatter:format
 ```
+
+An [Eclipse Java formatter](https://raw.githubusercontent.com/semuxproject/semux/master/misc/eclipse/formatter.xml) is also provided.
 
 ## Contributor workflow
 
@@ -25,7 +27,7 @@ To contribute a patch, the workflow is as follows:
 
 In general [commits should be atomic](https://en.wikipedia.org/wiki/Atomic_commit#Atomic_commit_convention) and diffs should be easy to read. For this reason do not mix any formatting fixes or code moves with actual code changes.
 
-Commit messages should be verbose by default consisting of a short subject line (50 chars max), a blank line and detailed explanatory text as separate paragraph(s), unless the title alone is self-explanatory (like "Corrected typo in init.cpp") in which case a single title line is sufficient. Commit messages should be helpful to people reading your code in the future, so explain the reasoning for your decisions. Further explanation [here](http://chris.beams.io/posts/git-commit/).
+Commit messages should be verbose by default consisting of a short subject line (**imperative present tense, capitalized, max 50 characters**), a blank line and detailed explanatory text as separate paragraph(s), unless the title alone is self-explanatory in which case a single title line is sufficient. Commit messages should be helpful to people reading your code in the future, so explain the reasoning for your decisions. Further explanation [here](https://github.com/agis/git-style-guides).
 
 If a particular commit references another issue, please add the reference. For example: `refs #1234` or `fixes #4321`. Using the `fixes` or `closes` keywords will cause the corresponding issue to be closed when the pull request is merged.
 
@@ -48,6 +50,7 @@ the pull request affects. Valid areas as:
   - **Util** for changes to the utils and libraries
   - **VM** for changes to the database code
   - **Docs** for changes to the docs
+  - **Tests** for changes to the unit test and QA tests
   - **Tools** for changes to the scripts and tools
   - **Trivial** should **only** be used for PRs that do not change generated executable code:
     - comments
