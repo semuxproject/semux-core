@@ -9,35 +9,29 @@ package org.semux.gui.dialog;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Collections;
 import java.util.List;
 
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 
 import org.semux.gui.Action;
 import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.AddressBook;
-import org.semux.gui.model.SemuxAddress;
-import org.semux.gui.panel.AddressChangeDialog;
+import org.semux.gui.model.AddressBook.Entry;
+import org.semux.gui.model.WalletModel;
 import org.semux.util.UnreachableException;
 
 public class AddressBookDialog extends JDialog implements ActionListener {
@@ -46,15 +40,14 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
     private static String[] columnNames = { MessagesUtil.get("Name"), MessagesUtil.get("Address") };
 
+    private AddressBook addressBook;
+
     private JTable table;
     private AdressTableModel tableModel;
-    private JTextField nameField;
-    private JTextField addressField;
 
-    public AddressBookDialog(JPanel parent) {
-        setLayout(new BorderLayout(0, 0));
-        this.setMinimumSize(new Dimension(900, 600));
-        this.setLocationRelativeTo(parent);
+    public AddressBookDialog(JFrame parent, WalletModel model) {
+        this.addressBook = model.getAddressBook();
+
         tableModel = new AdressTableModel();
         table = new JTable(tableModel);
         table.setBackground(Color.WHITE);
@@ -65,127 +58,58 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         SwingUtil.setColumnWidths(table, 800, 0.25, 0.75);
         SwingUtil.setColumnAlignments(table, false, false);
 
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent me) {
-                JTable table = (JTable) me.getSource();
-                Point p = me.getPoint();
-                int row = table.rowAtPoint(p);
-                if (me.getClickCount() == 2) {
-                    SemuxAddress address = tableModel.getRow(table.convertRowIndexToModel(row));
-                    if (address != null) {
-                        AddressChangeDialog dialog = new AddressChangeDialog(AddressBookDialog.this, address);
-                        dialog.setVisible(true);
-                    }
-                }
-            }
-        });
+        // auto sort
+        table.setAutoCreateRowSorter(true);
 
-        // customized table sorter
-        TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
-        sorter.setComparator(0, SwingUtil.STRING_COMPARATOR);
-        sorter.setComparator(1, SwingUtil.STRING_COMPARATOR);
-        table.setRowSorter(sorter);
+        JPanel panel = new JPanel();
+        getContentPane().add(panel, BorderLayout.SOUTH);
 
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
+        JButton btnNew = new JButton(MessagesUtil.get("Add"));
+        btnNew.setActionCommand(Action.ADD_ADDRESS.name());
+        btnNew.addActionListener(this);
+        panel.add(btnNew);
 
-        add(scrollPane);
-        JButton addButton = SwingUtil.createDefaultButton(MessagesUtil.get("Add"), this, Action.ADD_TO_ADDRESSBOOK);
+        JButton btnCopy = new JButton(MessagesUtil.get("Copy"));
+        btnCopy.setActionCommand(Action.COPY_ADDRESS.name());
+        btnCopy.addActionListener(this);
+        panel.add(btnCopy);
 
-        nameField = SwingUtil.textFieldWithCopyPastePopup();
-        nameField.setColumns(20);
-        addressField = SwingUtil.textFieldWithCopyPastePopup();
-        addressField.setColumns(40);
+        JButton btnDelete = new JButton(MessagesUtil.get("Delete"));
+        btnDelete.setActionCommand(Action.DELETE_ADDRESS.name());
+        btnDelete.addActionListener(this);
+        panel.add(btnDelete);
 
-        JLabel nameLabel = new JLabel(MessagesUtil.get("Name"));
-        JLabel addressLabel = new JLabel(MessagesUtil.get("Address"));
+        JScrollPane scrollPane = new JScrollPane();
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
+        scrollPane.setViewportView(table);
 
-        JPanel addPanel = new JPanel();
-        addPanel.setBorder(new LineBorder(Color.LIGHT_GRAY));
+        this.setTitle(MessagesUtil.get("AddressBook"));
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
+        this.pack();
+        this.setLocationRelativeTo(parent);
+        this.setResizable(false);
+        this.setModal(false);
 
-        // @formatter:off
-        GroupLayout groupLayout = new GroupLayout(getContentPane());
-        groupLayout.setHorizontalGroup(
-            groupLayout.createParallelGroup(Alignment.TRAILING)
-                .addGroup(groupLayout.createSequentialGroup()
-                        .addContainerGap()
-                    .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
-                    .addGap(18)
-                    .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
-                        .addComponent(addPanel, GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE)
-                        .addGap(18)
-                        ).addContainerGap())
-        );
-        groupLayout.setVerticalGroup(
-            groupLayout.createParallelGroup(Alignment.LEADING)
-                .addGroup(groupLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(addPanel, GroupLayout.PREFERRED_SIZE, 220, GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap())
-                .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
-        );
-       this.getContentPane().setLayout(groupLayout);
-        // @formatter:on
-
-        // @formatter:off
-        GroupLayout addPanelLayout = new GroupLayout(addPanel);
-        addPanelLayout.setHorizontalGroup(
-                addPanelLayout.createParallelGroup(Alignment.TRAILING)
-                    .addGroup(addPanelLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(addPanelLayout.createParallelGroup(Alignment.LEADING)
-                            .addGap(16)
-                            .addComponent(nameLabel, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                            .addGap(4)
-                            .addComponent(nameField, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                            .addGap(16)
-                            .addComponent(addressLabel, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                            .addGap(4)
-                            .addComponent(addressField, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                            .addGap(16)
-                            .addComponent(addButton, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE)
-                            .addGap(16))
-                        .addContainerGap())
-             );
-            addPanelLayout.setVerticalGroup(
-                addPanelLayout.createParallelGroup(Alignment.LEADING)
-                    .addGroup(addPanelLayout.createSequentialGroup()
-                        .addGap(16)
-                        .addComponent(nameLabel, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                        .addGap(4)
-                        .addComponent(nameField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                        .addGap(16)
-                        .addComponent(addressLabel, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                        .addGap(4)
-                        .addComponent(addressField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                        .addGap(16)
-                        .addComponent(addButton, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
-            );
-        addPanel.setLayout(addPanelLayout);
-        // @formatter:on
-
+        // display data
         refresh();
-
     }
 
     class AdressTableModel extends AbstractTableModel {
-
         private static final long serialVersionUID = 1L;
 
-        private List<SemuxAddress> addresses;
+        private List<Entry> addresses;
 
         public AdressTableModel() {
             this.addresses = Collections.emptyList();
         }
 
-        public void setData(List<SemuxAddress> addresses) {
+        public void setData(List<Entry> addresses) {
             this.addresses = addresses;
             this.fireTableDataChanged();
         }
 
-        public SemuxAddress getRow(int row) {
+        public Entry getRow(int row) {
             if ((row >= 0) && (row < addresses.size())) {
                 return addresses.get(row);
             }
@@ -210,18 +134,22 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
         @Override
         public Object getValueAt(int row, int column) {
-            SemuxAddress adr = addresses.get(row);
+            Entry entry = addresses.get(row);
 
             switch (column) {
             case 0:
-                return adr.getName();
+                return entry.getName();
             case 1:
-                return adr.getAddress();
-
+                return entry.getAddress();
             default:
                 return null;
             }
         }
+    }
+
+    private Entry getSelectedEntry() {
+        int row = table.getSelectedRow();
+        return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
     }
 
     @Override
@@ -232,29 +160,52 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         case REFRESH:
             refresh();
             break;
-        case ADD_TO_ADDRESSBOOK:
-            AddressBook.put(nameField.getText(), addressField.getText());
-            nameField.setText("");
-            addressField.setText("");
-            JOptionPane.showMessageDialog(this, MessagesUtil.get("InvalidReceivingAddress"));
-            refresh();
+        case ADD_ADDRESS:
+            AddAddressDialog dialog = new AddAddressDialog(this);
+            dialog.setVisible(true);
+            break;
+        case COPY_ADDRESS:
+        case DELETE_ADDRESS:
+            Entry entry = getSelectedEntry();
+            if (entry != null) {
+                if (action == Action.COPY_ADDRESS) {
+                    Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    cb.setContents(new StringSelection(entry.getAddress()), null);
+
+                    JOptionPane.showMessageDialog(this, MessagesUtil.get("AddressCopied", entry.getAddress()));
+                } else {
+                    getAddressBook().remove(entry.getName());
+                    refresh();
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAddress"));
+            }
             break;
         default:
             throw new UnreachableException();
         }
     }
 
-    public void refresh() {
-        List<SemuxAddress> addresses = AddressBook.getAllAddresses();
+    protected AddressBook getAddressBook() {
+        return addressBook;
+    }
+
+    protected void refresh() {
+        List<Entry> list = addressBook.list();
 
         /*
          * update table model
          */
+        Entry e = getSelectedEntry();
+        tableModel.setData(list);
 
-        tableModel.setData(addresses);
-
-        for (int i = 0; i < addresses.size(); i++) {
-            table.setRowSelectionInterval(table.convertRowIndexToView(i), table.convertRowIndexToView(i));
+        if (e != null) {
+            for (int i = 0; i < list.size(); i++) {
+                if (e.getName().equals(list.get(i).getName())) {
+                    table.setRowSelectionInterval(table.convertRowIndexToView(i), table.convertRowIndexToView(i));
+                    break;
+                }
+            }
         }
     }
 }

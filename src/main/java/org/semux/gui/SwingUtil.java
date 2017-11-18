@@ -39,7 +39,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.DefaultEditorKit;
 
-import org.apache.commons.lang3.StringUtils;
 import org.semux.Kernel;
 import org.semux.core.Transaction;
 import org.semux.core.Unit;
@@ -432,13 +431,6 @@ public class SwingUtil {
         } catch (ParseException e) {
             throw new NumberFormatException("Invalid number strings: " + o1 + ", " + o2);
         }
-    };
-
-    /**
-     * String comparator.
-     */
-    public static final Comparator<String> STRING_COMPARATOR = (o1, o2) -> {
-        return StringUtils.compare(o1, o2);
     };
 
     /**

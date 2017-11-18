@@ -1,4 +1,5 @@
-/** Copyright (c) 2017 The Semux Developers
+/**
+ * Copyright (c) 2017 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -118,13 +119,13 @@ public class SendPanel extends JPanel implements ActionListener {
 
         JLabel lblSem2 = new JLabel("SEM");
 
-        JButton paySend = new JButton(MessagesUtil.get("Send"));
-        paySend.addActionListener(this);
-        paySend.setActionCommand(Action.SEND.name());
+        JButton btnSend = new JButton(MessagesUtil.get("Send"));
+        btnSend.addActionListener(this);
+        btnSend.setActionCommand(Action.SEND.name());
 
-        JButton payClear = new JButton(MessagesUtil.get("Clear"));
-        payClear.addActionListener(this);
-        payClear.setActionCommand(Action.CLEAR.name());
+        JButton btnClear = new JButton(MessagesUtil.get("Clear"));
+        btnClear.addActionListener(this);
+        btnClear.setActionCommand(Action.CLEAR.name());
 
         JButton btnAddressBook = new JButton(MessagesUtil.get("AddressBook"));
         btnAddressBook.addActionListener(this);
@@ -145,22 +146,20 @@ public class SendPanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addGroup(groupLayout.createSequentialGroup()
-                            .addComponent(paySend, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE)
-                            .addGap(28)
-                            .addComponent(payClear, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnClear)
+                            .addGap(10)
+                            .addComponent(btnSend)
+                            .addGap(10)
+                            .addComponent(btnAddressBook)
                             .addContainerGap())
-                        .addGroup(groupLayout.createSequentialGroup()
-                                .addComponent(btnAddressBook, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE)
-                               
-                                )
                         .addGroup(groupLayout.createSequentialGroup()
                             .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                                 .addComponent(to, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
                                 .addComponent(from, 0, 306, Short.MAX_VALUE)
                                 .addGroup(groupLayout.createSequentialGroup()
                                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
-                                        .addComponent(fee)
                                         .addComponent(amount, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
+                                        .addComponent(fee)
                                         .addComponent(memo))
                                     .addGap(12)
                                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
@@ -171,7 +170,7 @@ public class SendPanel extends JPanel implements ActionListener {
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addGap(10)
+                    .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblFrom)
                         .addComponent(from, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
@@ -193,11 +192,12 @@ public class SendPanel extends JPanel implements ActionListener {
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblMemo)
                         .addComponent(memo, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
-                    .addGap(27)
+                    .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(payClear))
-                        .addComponent(paySend)
-                    .addGap(27)
+                        .addComponent(btnAddressBook)
+                        .addComponent(btnSend)
+                        .addComponent(btnClear))
+                    .addGap(18)
                     .addContainerGap(158, Short.MAX_VALUE))
                 
         );
@@ -298,7 +298,7 @@ public class SendPanel extends JPanel implements ActionListener {
             clear();
             break;
         case SHOW_ADDRESSBOOK:
-            AddressBookDialog dialog = new AddressBookDialog(frame, model.getAddressBook());
+            AddressBookDialog dialog = new AddressBookDialog(frame, model);
             dialog.setVisible(true);
             break;
         default:

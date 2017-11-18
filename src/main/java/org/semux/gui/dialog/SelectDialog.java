@@ -23,8 +23,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
-import org.semux.gui.MessagesUtil;
 import org.semux.gui.Action;
+import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
 import org.semux.util.UnreachableException;
 
@@ -120,15 +120,15 @@ public class SelectDialog extends JDialog implements ActionListener {
         switch (action) {
         case OK:
             selected = comboBox.getSelectedIndex();
+            this.dispose();
             break;
         case CANCEL:
             selected = -1;
+            this.dispose();
             break;
         default:
             throw new UnreachableException();
         }
-
-        this.dispose();
     }
 
     public int getSelectedIndex() {

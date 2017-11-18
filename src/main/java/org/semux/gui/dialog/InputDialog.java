@@ -105,15 +105,15 @@ public class InputDialog extends JDialog implements ActionListener {
         switch (action) {
         case OK:
             text = new String(textField.getText());
+            this.dispose();
             break;
         case CANCEL:
             text = null;
+            this.dispose();
             break;
         default:
             throw new UnreachableException();
         }
-
-        this.dispose();
     }
 
     public String getInput() {
