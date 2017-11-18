@@ -31,7 +31,6 @@ import org.semux.gui.MessagesUtil;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.AddressBook;
 import org.semux.gui.model.AddressBook.Entry;
-import org.semux.gui.model.WalletModel;
 import org.semux.util.UnreachableException;
 
 public class AddressBookDialog extends JDialog implements ActionListener {
@@ -45,8 +44,13 @@ public class AddressBookDialog extends JDialog implements ActionListener {
     private JTable table;
     private AdressTableModel tableModel;
 
-    public AddressBookDialog(JFrame parent, WalletModel model) {
-        this.addressBook = model.getAddressBook();
+    private static AddressBookDialog instance = new AddressBookDialog();
+
+    private AddressBookDialog() {
+
+        setLayout(new BorderLayout(0, 0));
+        this.setMinimumSize(new Dimension(900, 600));
+        // this.setLocationRelativeTo(parent);
 
         tableModel = new AdressTableModel();
         table = new JTable(tableModel);
@@ -87,7 +91,6 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();
-        this.setLocationRelativeTo(parent);
         this.setResizable(false);
         this.setModal(false);
 
@@ -207,5 +210,9 @@ public class AddressBookDialog extends JDialog implements ActionListener {
                 }
             }
         }
+    }
+
+    public static void showAddressBook() {
+        instance.setVisible(true);
     }
 }

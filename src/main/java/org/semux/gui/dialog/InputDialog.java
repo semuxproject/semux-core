@@ -42,14 +42,10 @@ public class InputDialog extends JDialog implements ActionListener {
         textField.setActionCommand(Action.OK.name());
         textField.addActionListener(this);
 
-        JButton btnOk = new JButton(MessagesUtil.get("OK"));
+        JButton btnOk = SwingUtil.createDefaultButton(MessagesUtil.get("OK"), this, Action.OK);
         btnOk.setSelected(true);
-        btnOk.setActionCommand(Action.OK.name());
-        btnOk.addActionListener(this);
 
-        JButton btnCancel = new JButton(MessagesUtil.get("Cancel"));
-        btnCancel.setActionCommand(Action.CANCEL.name());
-        btnCancel.addActionListener(this);
+        JButton btnCancel = SwingUtil.createDefaultButton(MessagesUtil.get("Cancel"), this, Action.CANCEL);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());

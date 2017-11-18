@@ -43,14 +43,10 @@ public class SelectDialog extends JDialog implements ActionListener {
 
         JLabel lblMessage = new JLabel(message);
 
-        JButton btnOk = new JButton(MessagesUtil.get("OK"));
+        JButton btnOk = SwingUtil.createDefaultButton(MessagesUtil.get("OK"), this, Action.OK);
         btnOk.setSelected(true);
-        btnOk.setActionCommand(Action.OK.name());
-        btnOk.addActionListener(this);
 
-        JButton btnCancel = new JButton(MessagesUtil.get("Cancel"));
-        btnCancel.setActionCommand(Action.CANCEL.name());
-        btnCancel.addActionListener(this);
+        JButton btnCancel = SwingUtil.createDefaultButton(MessagesUtil.get("Cancel"), this, Action.CANCEL);
 
         comboBox = new JComboBox<Object>();
         comboBox.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));

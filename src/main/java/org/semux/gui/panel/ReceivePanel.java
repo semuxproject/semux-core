@@ -91,17 +91,14 @@ public class ReceivePanel extends JPanel implements ActionListener {
         qr.setIcon(SwingUtil.emptyImage(200, 200));
         qr.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        JButton btnCopyAddress = new JButton(MessagesUtil.get("CopyAddress"));
-        btnCopyAddress.addActionListener(this);
-        btnCopyAddress.setActionCommand(Action.COPY_ADDRESS.name());
+        JButton btnCopyAddress = SwingUtil.createDefaultButton(MessagesUtil.get("CopyAddress"), this,
+                Action.COPY_ADDRESS);
 
-        JButton buttonNewAccount = new JButton(MessagesUtil.get("NewAccount"));
-        buttonNewAccount.addActionListener(this);
-        buttonNewAccount.setActionCommand(Action.NEW_ACCOUNT.name());
+        JButton buttonNewAccount = SwingUtil.createDefaultButton(MessagesUtil.get("NewAccount"), this,
+                Action.NEW_ACCOUNT);
 
-        JButton btnDeleteAddress = new JButton(MessagesUtil.get("DeleteAccount"));
-        btnDeleteAddress.addActionListener(this);
-        btnDeleteAddress.setActionCommand(Action.DELETE_ACCOUNT.name());
+        JButton btnDeleteAddress = SwingUtil.createDefaultButton(MessagesUtil.get("DeleteAccount"), this,
+                Action.DELETE_ACCOUNT);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);

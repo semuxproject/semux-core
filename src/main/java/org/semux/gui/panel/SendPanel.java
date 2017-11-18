@@ -23,6 +23,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import org.semux.Config;
@@ -119,17 +121,11 @@ public class SendPanel extends JPanel implements ActionListener {
 
         JLabel lblSem2 = new JLabel("SEM");
 
-        JButton btnSend = new JButton(MessagesUtil.get("Send"));
-        btnSend.addActionListener(this);
-        btnSend.setActionCommand(Action.SEND.name());
+        JButton paySend = SwingUtil.createDefaultButton(MessagesUtil.get("Send"), this, Action.SEND);
 
-        JButton btnClear = new JButton(MessagesUtil.get("Clear"));
-        btnClear.addActionListener(this);
-        btnClear.setActionCommand(Action.CLEAR.name());
+        JButton payClear = SwingUtil.createDefaultButton(MessagesUtil.get("Clear"), this, Action.CLEAR);
 
-        JButton btnAddressBook = new JButton(MessagesUtil.get("AddressBook"));
-        btnAddressBook.addActionListener(this);
-        btnAddressBook.setActionCommand(Action.SHOW_ADDRESSBOOK.name());
+        JButton btnAddressBook = createButton(MessagesUtil.get("AddressBook"), "addressbook", Action.SHOW_ADDRESSBOOK);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -146,13 +142,14 @@ public class SendPanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addGroup(groupLayout.createSequentialGroup()
-                            .addComponent(btnClear)
-                            .addGap(10)
-                            .addComponent(btnSend)
-                            .addGap(10)
-                            .addComponent(btnAddressBook)
+                            .addComponent(paySend, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
+                            .addGap(28)
+                            .addComponent(payClear, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
                             .addContainerGap())
                         .addGroup(groupLayout.createSequentialGroup()
+                                .addComponent(btnAddressBook, GroupLayout.PREFERRED_SIZE, 196, GroupLayout.PREFERRED_SIZE)
+                               
+                                )
                             .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                                 .addComponent(to, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
                                 .addComponent(from, 0, 306, Short.MAX_VALUE)
@@ -165,7 +162,7 @@ public class SendPanel extends JPanel implements ActionListener {
                                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
                                         .addComponent(lblSem1)
                                         .addComponent(lblSem2))))
-                            .addGap(59))))
+                            .addGap(59)))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
@@ -195,8 +192,8 @@ public class SendPanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(btnAddressBook)
-                        .addComponent(btnSend)
-                        .addComponent(btnClear))
+                        .addComponent(paySend)
+                        .addComponent(payClear))
                     .addGap(18)
                     .addContainerGap(158, Short.MAX_VALUE))
                 
@@ -206,6 +203,19 @@ public class SendPanel extends JPanel implements ActionListener {
 
         refresh();
         clear();
+    }
+
+    private JButton createButton(String name, String icon, Action action) {
+        JButton btn = new JButton(name);
+        btn.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
+        btn.setActionCommand(action.name());
+        btn.addActionListener(this);
+        btn.setIcon(SwingUtil.loadImage(icon, 36, 36));
+        btn.setFocusPainted(false);
+        btn.setBorder(new CompoundBorder(new LineBorder(new Color(180, 180, 180)), new EmptyBorder(0, 5, 0, 10)));
+        btn.setContentAreaFilled(false);
+
+        return btn;
     }
 
     public String getTo() {
@@ -298,8 +308,8 @@ public class SendPanel extends JPanel implements ActionListener {
             clear();
             break;
         case SHOW_ADDRESSBOOK:
-            AddressBookDialog dialog = new AddressBookDialog(frame, model);
-            dialog.setVisible(true);
+            AddressBookDialog.showAddressBook();
+            // dialog.setVisible(true);
             break;
         default:
             throw new UnreachableException();

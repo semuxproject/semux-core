@@ -90,14 +90,10 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         panel.add(btnImport);
 
         // create buttons
-        JButton btnCancel = new JButton(MessagesUtil.get("Cancel"));
-        btnCancel.addActionListener(this);
-        btnCancel.setActionCommand(Action.CANCEL.name());
+        JButton btnCancel = SwingUtil.createDefaultButton(MessagesUtil.get("Cancel"), this, Action.CANCEL);
 
-        JButton btnNext = new JButton(MessagesUtil.get("Next"));
+        JButton btnNext = SwingUtil.createDefaultButton(MessagesUtil.get("Next"), this, Action.OK);
         btnNext.setSelected(true);
-        btnNext.addActionListener(this);
-        btnNext.setActionCommand(Action.OK.name());
 
         JLabel lblPassword = new JLabel(MessagesUtil.get("Password") + ":");
         passwordField = new JPasswordField();

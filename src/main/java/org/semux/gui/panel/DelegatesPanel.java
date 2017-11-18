@@ -179,9 +179,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textVote.setActionCommand(Action.VOTE.name());
         textVote.addActionListener(this);
 
-        JButton btnVote = new JButton(MessagesUtil.get("Vote"));
-        btnVote.setActionCommand(Action.VOTE.name());
-        btnVote.addActionListener(this);
+        JButton btnVote = SwingUtil.createDefaultButton(MessagesUtil.get("Vote"), this, Action.VOTE);
 
         textUnvote = SwingUtil.textFieldWithCopyPastePopup();
         textUnvote.setToolTipText(MessagesUtil.get("NumVotes"));
@@ -189,9 +187,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textUnvote.setActionCommand(Action.UNVOTE.name());
         textUnvote.addActionListener(this);
 
-        JButton btnUnvote = new JButton(MessagesUtil.get("Unvote"));
-        btnUnvote.setActionCommand(Action.UNVOTE.name());
-        btnUnvote.addActionListener(this);
+        JButton btnUnvote = SwingUtil.createDefaultButton(MessagesUtil.get("Unvote"), this, Action.UNVOTE);
 
         // @formatter:off
         GroupLayout groupLayout2 = new GroupLayout(votePanel);
@@ -223,9 +219,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         votePanel.setLayout(groupLayout2);
         // @formatter:on
 
-        JButton btnDelegate = new JButton(MessagesUtil.get("RegisterAsDelegate"));
-        btnDelegate.addActionListener(this);
-        btnDelegate.setActionCommand(Action.DELEGATE.name());
+        JButton btnDelegate = SwingUtil.createDefaultButton(MessagesUtil.get("RegisterAsDelegate"), this,
+                Action.DELEGATE);
         btnDelegate.setToolTipText(
                 MessagesUtil.get("RegisterAsDelegateToolTip", SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT)));
 

@@ -38,13 +38,9 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
         passwordField = new JPasswordField();
         repeatField = new JPasswordField();
 
-        JButton btnOk = new JButton(MessagesUtil.get("OK"));
-        btnOk.addActionListener(this);
-        btnOk.setActionCommand(Action.OK.name());
+        JButton btnOk = SwingUtil.createDefaultButton(MessagesUtil.get("OK"), this, Action.OK);
 
-        JButton btnCancel = new JButton(MessagesUtil.get("Cancel"));
-        btnCancel.addActionListener(this);
-        btnCancel.setActionCommand(Action.CANCEL.name());
+        JButton btnCancel = SwingUtil.createDefaultButton(MessagesUtil.get("Cancel"), this, Action.CANCEL);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());
