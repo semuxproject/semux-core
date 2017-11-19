@@ -40,13 +40,13 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
     private static String[] columnNames = { MessagesUtil.get("Name"), MessagesUtil.get("Address") };
 
-    private AddressBook addressBook;
+    private WalletModel model;
 
     private JTable table;
     private AdressTableModel tableModel;
 
     public AddressBookDialog(JFrame parent, WalletModel model) {
-        this.addressBook = model.getAddressBook();
+        this.model = model;
 
         tableModel = new AdressTableModel();
         table = new JTable(tableModel);
@@ -63,13 +63,10 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
         JPanel panel = new JPanel();
         getContentPane().add(panel, BorderLayout.SOUTH);
-
         JButton btnNew = SwingUtil.createDefaultButton(MessagesUtil.get("Add"), this, Action.ADD_ADDRESS);
         panel.add(btnNew);
-
         JButton btnCopy = SwingUtil.createDefaultButton(MessagesUtil.get("Copy"), this, Action.COPY_ADDRESS);
         panel.add(btnCopy);
-
         JButton btnDelete = SwingUtil.createDefaultButton(MessagesUtil.get("Delete"), this, Action.DELETE_ADDRESS);
         panel.add(btnDelete);
 
@@ -181,11 +178,11 @@ public class AddressBookDialog extends JDialog implements ActionListener {
     }
 
     protected AddressBook getAddressBook() {
-        return addressBook;
+        return model.getAddressBook();
     }
 
     protected void refresh() {
-        List<Entry> list = addressBook.list();
+        List<Entry> list = getAddressBook().list();
 
         /*
          * update table model

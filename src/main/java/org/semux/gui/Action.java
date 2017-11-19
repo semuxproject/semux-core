@@ -65,5 +65,5 @@ public enum Action {
 
     EXPORT_PRIVATE_KEY,
 
-    DUMP_PRIVATE_KEY
+    COPY_PRIVATE_KEY
 }

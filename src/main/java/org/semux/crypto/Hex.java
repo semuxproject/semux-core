@@ -44,6 +44,16 @@ public class Hex {
     }
 
     /**
+     * Encode an byte array as hex string.
+     * 
+     * @param raw
+     * @return the hex encoding with 0x prefix
+     */
+    public static String encodeWithPrefix(byte[] raw) {
+        return Hex.PREF + encode(raw);
+    }
+
+    /**
      * Convert a hex string into a byte array.
      * 
      * @param hex

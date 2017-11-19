@@ -26,7 +26,7 @@ import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.gui.dialog.ChangePasswordDialog;
 import org.semux.gui.dialog.InputDialog;
-import org.semux.gui.dialog.PrivateKeyDumpDialog;
+import org.semux.gui.dialog.ExportPrivateKeyDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,7 +140,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
             break;
         }
         case EXPORT_PRIVATE_KEY: {
-            PrivateKeyDumpDialog d = new PrivateKeyDumpDialog(frame, Kernel.getInstance().getWallet().getAccounts());
+            ExportPrivateKeyDialog d = new ExportPrivateKeyDialog(frame);
             d.setVisible(true);
             break;
         }
