@@ -61,5 +61,9 @@ public enum Action {
 
     ADD_ADDRESS,
 
-    DELETE_ADDRESS
+    DELETE_ADDRESS,
+
+    EXPORT_PRIVATE_KEY,
+
+    DUMP_PRIVATE_KEY
 }
