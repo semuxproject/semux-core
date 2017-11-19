@@ -26,6 +26,7 @@ import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.gui.dialog.ChangePasswordDialog;
 import org.semux.gui.dialog.InputDialog;
+import org.semux.gui.dialog.PrivateKeyDumpDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +65,11 @@ public class MenuBar extends JMenuBar implements ActionListener {
         itemChangePwd.setActionCommand(Action.CHANGE_PASSWORD.name());
         itemChangePwd.addActionListener(this);
         menuWallet.add(itemChangePwd);
+
+        JMenuItem itemExportPrivKey = new JMenuItem(MessagesUtil.get("ExportPrivateKey"));
+        itemExportPrivKey.setActionCommand(Action.EXPORT_PRIVATE_KEY.name());
+        itemExportPrivKey.addActionListener(this);
+        menuWallet.add(itemExportPrivKey);
 
         JMenu menuHelp = new JMenu(MessagesUtil.get("Help"));
         this.add(menuHelp);
@@ -131,6 +137,11 @@ public class MenuBar extends JMenuBar implements ActionListener {
                     JOptionPane.showMessageDialog(frame, MessagesUtil.get("SaveBackupFailed"));
                 }
             }
+            break;
+        }
+        case EXPORT_PRIVATE_KEY: {
+            PrivateKeyDumpDialog d = new PrivateKeyDumpDialog(frame, Kernel.getInstance().getWallet().getAccounts());
+            d.setVisible(true);
             break;
         }
         case CHANGE_PASSWORD: {
