@@ -76,7 +76,7 @@ public class SemuxBFT implements Consensus {
     private Proof proof;
     private Proposal proposal;
 
-    private Map<ByteArray, Block> validBlocks = new LRUMap<>(16);
+    private Map<ByteArray, Block> validBlocks = new LRUMap<>(8);
 
     private volatile List<String> validators;
     private volatile List<Channel> activeValidators;
