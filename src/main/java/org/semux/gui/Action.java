@@ -63,6 +63,8 @@ public enum Action {
 
     DELETE_ADDRESS,
 
+    IMPORT_PRIVATE_KEY,
+
     EXPORT_PRIVATE_KEY,
 
     COPY_PRIVATE_KEY

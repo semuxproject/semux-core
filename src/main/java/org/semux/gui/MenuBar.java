@@ -24,9 +24,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.semux.Config;
 import org.semux.Kernel;
 import org.semux.core.Wallet;
+import org.semux.crypto.EdDSA;
+import org.semux.crypto.Hex;
 import org.semux.gui.dialog.ChangePasswordDialog;
-import org.semux.gui.dialog.InputDialog;
 import org.semux.gui.dialog.ExportPrivateKeyDialog;
+import org.semux.gui.dialog.InputDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +72,11 @@ public class MenuBar extends JMenuBar implements ActionListener {
         itemExportPrivKey.setActionCommand(Action.EXPORT_PRIVATE_KEY.name());
         itemExportPrivKey.addActionListener(this);
         menuWallet.add(itemExportPrivKey);
+
+        JMenuItem itemImportPrivKey = new JMenuItem(MessagesUtil.get("ImportPrivateKey"));
+        itemImportPrivKey.setActionCommand(Action.IMPORT_PRIVATE_KEY.name());
+        itemImportPrivKey.addActionListener(this);
+        menuWallet.add(itemImportPrivKey);
 
         JMenu menuHelp = new JMenu(MessagesUtil.get("Help"));
         this.add(menuHelp);
@@ -142,6 +149,26 @@ public class MenuBar extends JMenuBar implements ActionListener {
         case EXPORT_PRIVATE_KEY: {
             ExportPrivateKeyDialog d = new ExportPrivateKeyDialog(frame);
             d.setVisible(true);
+            break;
+        }
+        case IMPORT_PRIVATE_KEY: {
+            InputDialog dialog = new InputDialog(frame, MessagesUtil.get("EnterPrivateKey"), false);
+            String pk = dialog.getInput();
+            if (pk != null) {
+                try {
+                    Wallet wallet = Kernel.getInstance().getWallet();
+                    EdDSA account = new EdDSA(Hex.parse(pk));
+                    if (wallet.addAccount(account)) {
+                        wallet.flush();
+                        JOptionPane.showMessageDialog(frame, MessagesUtil.get("PrivateKeyImportSuccess"));
+                        SemuxGUI.fireUpdateEvent();
+                    } else {
+                        JOptionPane.showMessageDialog(frame, MessagesUtil.get("PrivateKeyAlreadyExists"));
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(frame, MessagesUtil.get("PrivateKeyImportFailed"));
+                }
+            }
             break;
         }
         case CHANGE_PASSWORD: {
