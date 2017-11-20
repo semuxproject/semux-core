@@ -10,9 +10,9 @@ cd "$(dirname "$0")/../"
 mvn clean && mvn install -DskipTests || exit
 
 # archive
-mv dist ${name}
-tar -czvf ${name}.tar.gz ${name} || exit
-zip -r ${name}.zip ${name} || exit
+cd dist
+mv unix ${name}-unix
+tar -czvf ${name}-unix.tar.gz ${name}-unix || exit
+mv windows ${name}-windows
+zip -r ${name}-windows.zip ${name}-windows || exit
 
-# clean
-rm -fr ${name}
