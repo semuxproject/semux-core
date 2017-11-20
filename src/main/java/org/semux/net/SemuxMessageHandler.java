@@ -28,8 +28,8 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxMessageHandler.class);
 
-    protected Map<Integer, Pair<List<Frame>, AtomicInteger>> incompletePackets = Collections
-            .synchronizedMap(new LRUMap<>(Config.NET_MAX_PACKET_SIZE));
+    private static final int MAX_PACKETS = 16;
+    protected Map<Integer, Pair<List<Frame>, AtomicInteger>> incompletePackets = new LRUMap<>(MAX_PACKETS);
 
     @SuppressWarnings("unused")
     private Channel channel;
@@ -51,6 +51,11 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
         int packetSize = encoded.length;
         byte type = msg.getCode().toByte();
         byte network = Config.NETWORK_ID;
+
+        if (packetSize > Config.NET_MAX_PACKET_SIZE) {
+            logger.error("Invalid packet size, max = {}, actual = {}", Config.NET_MAX_PACKET_SIZE, packetSize);
+            return;
+        }
 
         int limit = Config.NET_MAX_FRAME_SIZE;
         int total = (encoded.length - 1) / limit + 1;
@@ -74,26 +79,37 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
                 out.add(msg);
             }
         } else {
-            int packetId = frame.getPacketId();
-            Pair<List<Frame>, AtomicInteger> pair = incompletePackets.get(packetId);
-            if (pair == null) {
-                pair = Pair.of(new ArrayList<>(), new AtomicInteger(frame.getPacketSize()));
-                incompletePackets.put(packetId, pair);
-            }
+            synchronized (incompletePackets) {
+                int packetId = frame.getPacketId();
+                Pair<List<Frame>, AtomicInteger> pair = incompletePackets.get(packetId);
+                if (pair == null) {
+                    int packetSize = frame.getPacketSize();
+                    if (packetSize > Config.NET_MAX_PACKET_SIZE) {
+                        // this will kill the connection
+                        throw new IOException("Invalid packet size: " + packetSize);
+                    }
 
-            pair.getLeft().add(frame);
-            int remaining = pair.getRight().addAndGet(-frame.getSize());
-            if (remaining == 0) {
-                Message msg = decodeMessage(ctx, pair.getLeft());
-
-                if (msg == null) {
-                    logger.debug("Failed to decode packets into message, 1st/{}: {}", pair.getLeft().size(), frame);
-                } else {
-                    out.add(msg);
+                    pair = Pair.of(new ArrayList<>(), new AtomicInteger(packetSize));
+                    incompletePackets.put(packetId, pair);
                 }
-            } else if (remaining < 0) {
-                logger.debug("Corrupted packet, packetId: {}", packetId);
-                incompletePackets.remove(packetId);
+
+                pair.getLeft().add(frame);
+                int remaining = pair.getRight().addAndGet(-frame.getSize());
+                if (remaining == 0) {
+                    Message msg = decodeMessage(ctx, pair.getLeft());
+
+                    if (msg == null) {
+                        logger.debug("Failed to decode packets into message, 1st/{}: {}", pair.getLeft().size(), frame);
+                    } else {
+                        out.add(msg);
+                    }
+
+                    // remove complete packets from cache
+                    incompletePackets.remove(packetId);
+                } else if (remaining < 0) {
+                    logger.debug("Corrupted packet, packetId: {}", packetId);
+                    incompletePackets.remove(packetId);
+                }
             }
         }
     }

@@ -237,9 +237,9 @@ public class Config {
     public static int NET_MAX_FRAME_SIZE = 128 * 1024;
 
     /**
-     * Maximum packet size, in unit of frame. (8 MB)
+     * Maximum packet size.
      */
-    public static int NET_MAX_PACKET_SIZE = 64;
+    public static int NET_MAX_PACKET_SIZE = 8 * 1024 * 1024;
 
     /**
      * Timeout for peer connection.
