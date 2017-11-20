@@ -53,7 +53,10 @@ public class PendingManager implements Runnable, BlockchainListener {
         }
     };
 
-    private static final int CACHE_SIZE = 128 * 1024;
+    private static final int QUEUE_MAX_SIZE = 16 * Config.MAX_BLOCK_SIZE;
+    private static final int POOL_MAX_SIZE = 2 * Config.MAX_BLOCK_SIZE;
+    private static final int DELAYED_MAX_SIZE = 4 * Config.MAX_BLOCK_SIZE;
+    private static final int PROCESSED_MAX_SIZE = 4 * Config.MAX_BLOCK_SIZE;
 
     private Blockchain chain;
     private ChannelManager channelMgr;
@@ -68,15 +71,13 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Transaction pool.
      */
-    private Map<ByteArray, Transaction> poolMap = new HashMap<>();
+    private Map<ByteArray, Transaction> pool = new HashMap<>();
     private List<Transaction> transactions = new ArrayList<>();
     private List<TransactionResult> results = new ArrayList<>();
 
-    /**
-     * Transaction cache. NOTE: make sure access to the LRUMap<> are synchronized.
-     */
-    private Map<ByteArray, Transaction> cache = new LRUMap<>(CACHE_SIZE);
-    private Map<ByteArray, Object> processedTxs = new LRUMap<>(CACHE_SIZE);
+    // NOTE: make sure access to the LRUMap<> are synchronized.
+    private Map<ByteArray, Transaction> delayed = new LRUMap<>(DELAYED_MAX_SIZE);
+    private Map<ByteArray, ?> processed = new LRUMap<>(PROCESSED_MAX_SIZE);
 
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> validateFuture;
@@ -152,7 +153,9 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @param tx
      */
     public synchronized void addTransaction(Transaction tx) {
-        queue.add(tx);
+        if (queue.size() < QUEUE_MAX_SIZE) {
+            queue.add(tx);
+        }
     }
 
     /**
@@ -228,7 +231,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         // clear transaction pool
         List<Transaction> txs = new ArrayList<>(transactions);
-        poolMap.clear();
+        pool.clear();
         transactions.clear();
         results.clear();
 
@@ -258,12 +261,12 @@ public class PendingManager implements Runnable, BlockchainListener {
     public synchronized void run() {
         Transaction tx;
 
-        while (poolMap.size() < 2 * Config.MAX_BLOCK_SIZE //
+        while (pool.size() < POOL_MAX_SIZE //
                 && (tx = queue.poll()) != null //
                 && tx.getFee() >= Config.MIN_TRANSACTION_FEE) {
             // filter by cache
             ByteArray key = ByteArray.of(tx.getHash());
-            if (processedTxs.containsKey(key)) {
+            if (processed.containsKey(key)) {
                 continue;
             }
 
@@ -272,7 +275,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                 return;
             }
 
-            processedTxs.put(key, null);
+            processed.put(key, null);
         }
     }
 
@@ -307,7 +310,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                 ds.commit();
 
                 // add transaction to pool
-                poolMap.put(createKey(tx), tx);
+                pool.put(createKey(tx), tx);
                 transactions.add(tx);
                 results.add(result);
                 cnt++;
@@ -329,12 +332,12 @@ public class PendingManager implements Runnable, BlockchainListener {
                 return cnt;
             }
 
-            tx = cache.get(createKey(tx.getFrom(), getNonce(tx.getFrom())));
+            tx = delayed.get(createKey(tx.getFrom(), getNonce(tx.getFrom())));
         }
 
         // add to cache
         if (tx != null && tx.getNonce() > getNonce(tx.getFrom())) {
-            cache.put(createKey(tx), tx);
+            delayed.put(createKey(tx), tx);
         }
 
         return cnt;
