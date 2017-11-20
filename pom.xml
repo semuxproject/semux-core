@@ -5,7 +5,7 @@
     <artifactId>semux</artifactId>
     <version>1.0.0-rc.3</version>
     <packaging>jar</packaging>
-    <description>Semux is an experimental high-performance blockchain platform that powers decentralized application. It's written purely in Java and powered by Semux BFT consensus algorithm.</description>
+    <description>Semux is an experimental high-performance blockchain platform that powers decentralized application.</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -106,7 +106,7 @@
                             </jre>
                             <versionInfo>
                                 <fileVersion>${dist.windowsExecutableVersion}</fileVersion>
-                                <fileDescription>${project.version}}</fileDescription>
+                                <fileDescription>${project.description}</fileDescription>
                                 <txtFileVersion>${project.version}</txtFileVersion>
                                 <copyright>MIT</copyright>
                                 <productVersion>${dist.windowsExecutableVersion}</productVersion>
@@ -142,7 +142,7 @@
                             </jre>
                             <versionInfo>
                                 <fileVersion>${dist.windowsExecutableVersion}</fileVersion>
-                                <fileDescription>${project.version}}</fileDescription>
+                                <fileDescription>${project.description}</fileDescription>
                                 <txtFileVersion>${project.version}</txtFileVersion>
                                 <copyright>MIT</copyright>
                                 <productVersion>${dist.windowsExecutableVersion}</productVersion>
