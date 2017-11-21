@@ -180,6 +180,10 @@
                                         <include name="semux-cli.exe"/>
                                     </fileset>
                                 </copy>
+                                <copy file="${project.basedir}/misc/launch4j/semux.l4j.ini" tofile="${dist.base}/windows/semux.l4j.ini" />
+                                <copy file="${project.basedir}/misc/launch4j/semux.l4j.ini" tofile="${dist.base}/windows/semux-cli.l4j.ini" />
+                                <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis" />
+                                <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis" />
 
                                 <!-- unix build (executable jar) -->
                                 <copy todir="${dist.base}/unix">
