@@ -33,4 +33,9 @@ public class SystemUtilTest {
         assertNotNull(ip);
         assertFalse(ip.equals("127.0.0.1"));
     }
+
+    @Test
+    public void testBench() {
+        logger.info("bench result = {}", SystemUtil.bench());
+    }
 }

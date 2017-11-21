@@ -23,6 +23,7 @@ import org.iq80.leveldb.WriteBatch;
 import org.semux.Config;
 import org.semux.util.ClosableIterator;
 import org.semux.util.FileUtil;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,11 +65,11 @@ public class LevelDB implements KVDB {
                     db = factory.open(f, options);
                 } catch (IOException ex) {
                     logger.error("Failed to repair the database", ex);
-                    System.exit(-1);
+                    SystemUtil.exit(-1);
                 }
             } else {
                 logger.error("Failed to open database", e);
-                System.exit(-1);
+                SystemUtil.exit(-1);
             }
         }
     }

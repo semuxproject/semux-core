@@ -29,6 +29,7 @@ import org.semux.crypto.Hex;
 import org.semux.gui.dialog.ChangePasswordDialog;
 import org.semux.gui.dialog.ExportPrivateKeyDialog;
 import org.semux.gui.dialog.InputDialog;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,7 +178,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
             break;
         }
         case EXIT: {
-            System.exit(0);
+            SystemUtil.exit(0);
             break;
         }
         case ABOUT: {

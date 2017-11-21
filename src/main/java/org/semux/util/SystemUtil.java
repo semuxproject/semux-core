@@ -123,11 +123,27 @@ public class SystemUtil {
     }
 
     /**
-     * System benchmark.
+     * Benchmarks the host system.
      * 
      * @return
      */
     public static boolean bench() {
+        Runtime rt = Runtime.getRuntime();
+        logger.debug("# cores = {}, max memory = {}", rt.availableProcessors(), rt.maxMemory());
+
+        if (rt.availableProcessors() < 2 || rt.maxMemory() < 0.8 * 4 * 1024 * 1024 * 1024) {
+            return false;
+        }
+
         return true;
+    }
+
+    /**
+     * Exits the program asynchronously.
+     */
+    public static void exit(int code) {
+        new Thread(() -> {
+            System.exit(code);
+        }).start();
     }
 }

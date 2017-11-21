@@ -6,7 +6,17 @@
  */
 package org.semux.cli;
 
-import org.apache.commons.cli.*;
+import java.io.File;
+import java.security.spec.InvalidKeySpecException;
+import java.util.List;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.semux.Config;
 import org.semux.Kernel;
 import org.semux.core.Wallet;
@@ -16,10 +26,6 @@ import org.semux.crypto.Hex;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.security.spec.InvalidKeySpecException;
-import java.util.List;
 
 public class SemuxCLI {
 
@@ -164,7 +170,7 @@ public class SemuxCLI {
 
         if (coinbase < 0 || coinbase >= accounts.size()) {
             logger.error(MSG_COINBASE_NOT_EXISTED);
-            System.exit(-1);
+            SystemUtil.exit(-1);
         }
 
         // start kernel
@@ -210,7 +216,7 @@ public class SemuxCLI {
             Boolean isFlushed = wallet.flush();
             if (!isFlushed) {
                 logger.error(MSG_FAILED_TO_FLUSH_WALLET_FILE);
-                System.exit(1);
+                SystemUtil.exit(1);
             }
 
             logger.info(MSG_PASSWORD_CHANGED);
@@ -226,7 +232,7 @@ public class SemuxCLI {
         EdDSA account = wallet.getAccount(addressBytes);
         if (account == null) {
             logger.error(MSG_ADDRESS_NOT_IN_WALLET);
-            System.exit(1);
+            SystemUtil.exit(1);
         }
 
         String privateKey = Hex.encode(account.getPrivateKey());
@@ -242,13 +248,13 @@ public class SemuxCLI {
             boolean accountAdded = wallet.addAccount(account);
             if (!accountAdded) {
                 logger.error(MSG_PRIVATE_KEY_EXISTED);
-                System.exit(1);
+                SystemUtil.exit(1);
             }
 
             boolean walletFlushed = wallet.flush();
             if (!walletFlushed) {
                 logger.error(MSG_FAILED_TO_FLUSH_WALLET_FILE);
-                System.exit(2);
+                SystemUtil.exit(2);
             }
 
             logger.info(MSG_PRIVATE_KEY_IMPORTED);
@@ -257,10 +263,10 @@ public class SemuxCLI {
             logger.info(MSG_PRIVATE_KEY, Hex.encode(account.getPrivateKey()));
         } catch (InvalidKeySpecException exception) {
             logger.error(MSG_PRIVATE_KEY_SEPC_EXCETION, exception.getMessage());
-            System.exit(3);
+            SystemUtil.exit(3);
         } catch (WalletLockedException exception) {
             logger.error(exception.getMessage());
-            System.exit(-1);
+            SystemUtil.exit(-1);
         }
     }
 
@@ -271,7 +277,7 @@ public class SemuxCLI {
 
         Wallet wallet = loadWallet();
         if (!wallet.unlock(password)) {
-            System.exit(-1);
+            SystemUtil.exit(-1);
         }
 
         return wallet;

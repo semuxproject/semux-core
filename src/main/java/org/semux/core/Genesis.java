@@ -20,6 +20,7 @@ import org.semux.crypto.Hex;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.IOUtil;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +99,7 @@ public class Genesis extends Block {
                 instance = new Genesis(number, coinbase, prevHash, timestamp, data, premine, delegates, config);
             } catch (IOException e) {
                 logger.error("Failed to load genesis file", e);
-                System.exit(-1);
+                SystemUtil.exit(-1);
             }
         }
 

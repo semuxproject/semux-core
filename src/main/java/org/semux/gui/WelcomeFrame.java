@@ -31,6 +31,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.gui.model.WalletModel;
+import org.semux.util.SystemUtil;
 import org.semux.util.UnreachableException;
 
 public class WelcomeFrame extends JFrame implements ActionListener {
@@ -222,7 +223,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             }
             break;
         case CANCEL:
-            System.exit(0);
+            SystemUtil.exit(0);
             break;
         default:
             throw new UnreachableException();
@@ -234,7 +235,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             try {
                 done.wait();
             } catch (InterruptedException e) {
-                System.exit(0);
+                SystemUtil.exit(0);
             }
         }
     }
