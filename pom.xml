@@ -103,6 +103,7 @@
                             <jre>
                                 <minVersion>1.8.0</minVersion>
                                 <jdkPreference>preferJre</jdkPreference>
+                                <maxHeapPercent>80</maxHeapPercent>
                             </jre>
                             <versionInfo>
                                 <fileVersion>${dist.windowsExecutableVersion}</fileVersion>
@@ -139,6 +140,7 @@
                             <jre>
                                 <minVersion>1.8.0</minVersion>
                                 <jdkPreference>preferJre</jdkPreference>
+                                <maxHeapPercent>80</maxHeapPercent>
                             </jre>
                             <versionInfo>
                                 <fileVersion>${dist.windowsExecutableVersion}</fileVersion>
