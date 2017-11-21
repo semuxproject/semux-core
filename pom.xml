@@ -189,11 +189,13 @@
                                     </fileset>
                                 </copy>
                                 <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar" tofile="${dist.base}/unix/semux.jar" />
+                                <copy file="${project.basedir}/scripts/semux.sh" tofile="${dist.base}/unix/semux.sh" />
 
                                 <!-- add execute permission -->
                                 <chmod file="${dist.base}/windows/semux.exe" perm="755"/>
                                 <chmod file="${dist.base}/windows/semux-cli.exe" perm="755"/>
                                 <chmod file="${dist.base}/unix/semux.jar" perm="755"/>
+                                <chmod file="${dist.base}/unix/semux.sh" perm="755"/>
                             </target>
                         </configuration>
                         <goals>
