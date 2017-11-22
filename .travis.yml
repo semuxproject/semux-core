@@ -7,6 +7,10 @@ language: java
 jdk:
   - oraclejdk8
   - openjdk8
+cache:
+  directories:
+  - .autoconf
+  - $HOME/.m2
 script:
   - mvn license:check
   - mvn formatter:validate
