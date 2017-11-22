@@ -99,7 +99,7 @@ public class Genesis extends Block {
                 instance = new Genesis(number, coinbase, prevHash, timestamp, data, premine, delegates, config);
             } catch (IOException e) {
                 logger.error("Failed to load genesis file", e);
-                SystemUtil.exit(-1);
+                SystemUtil.exitAsync(-1);
             }
         }
 

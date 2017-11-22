@@ -65,11 +65,11 @@ public class LevelDB implements KVDB {
                     db = factory.open(f, options);
                 } catch (IOException ex) {
                     logger.error("Failed to repair the database", ex);
-                    SystemUtil.exit(-1);
+                    SystemUtil.exitAsync(-1);
                 }
             } else {
                 logger.error("Failed to open database", e);
-                SystemUtil.exit(-1);
+                SystemUtil.exitAsync(-1);
             }
         }
     }

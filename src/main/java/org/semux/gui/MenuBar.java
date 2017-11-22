@@ -178,7 +178,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
             break;
         }
         case EXIT: {
-            SystemUtil.exit(0);
+            SystemUtil.exitAsync(0);
             break;
         }
         case ABOUT: {

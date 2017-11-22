@@ -223,7 +223,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             }
             break;
         case CANCEL:
-            SystemUtil.exit(0);
+            SystemUtil.exitAsync(0);
             break;
         default:
             throw new UnreachableException();
@@ -235,7 +235,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             try {
                 done.wait();
             } catch (InterruptedException e) {
-                SystemUtil.exit(0);
+                SystemUtil.exitAsync(0);
             }
         }
     }

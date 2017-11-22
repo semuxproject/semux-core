@@ -77,7 +77,7 @@ public class SemuxGUI {
                 String pwd = dialog.getInput();
 
                 if (pwd == null) {
-                    SystemUtil.exit(-1);
+                    SystemUtil.exitAsync(-1);
                 } else if (wallet.unlock(pwd)) {
                     break;
                 }
@@ -119,7 +119,7 @@ public class SemuxGUI {
             SelectDialog dialog = new SelectDialog(null, message, options);
             int selected = dialog.getSelectedIndex();
             if (selected == -1) {
-                SystemUtil.exit(0);
+                SystemUtil.exitAsync(0);
             } else {
                 model.setCoinbase(selected);
             }
@@ -179,7 +179,7 @@ public class SemuxGUI {
                     for (String v : version) {
                         if (SystemUtil.compareVersion(Config.CLIENT_VERSION, v) < 0) {
                             JOptionPane.showMessageDialog(null, MessagesUtil.get("WalletNeedToBeUpgraded"));
-                            SystemUtil.exit(-1);
+                            SystemUtil.exitAsync(-1);
                         }
                     }
                 } catch (InterruptedException e) {

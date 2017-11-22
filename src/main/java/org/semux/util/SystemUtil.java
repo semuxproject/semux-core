@@ -139,9 +139,16 @@ public class SystemUtil {
     }
 
     /**
-     * Exits the program asynchronously.
+     * Terminates the JVM synchronously.
      */
     public static void exit(int code) {
+        System.exit(code);
+    }
+
+    /**
+     * Terminates the JVM asynchronously.
+     */
+    public static void exitAsync(int code) {
         new Thread(() -> {
             System.exit(code);
         }).start();
