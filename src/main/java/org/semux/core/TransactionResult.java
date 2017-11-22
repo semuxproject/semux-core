@@ -62,7 +62,7 @@ public class TransactionResult {
     public boolean validate() {
         return valid //
                 && returns != null //
-                && logs != null && logs.isEmpty(); // RESERVED FOR VM
+                && logs != null; // RESERVED FOR VM
     }
 
     public boolean isValid() {

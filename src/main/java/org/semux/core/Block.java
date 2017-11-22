@@ -18,10 +18,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.crypto.EdDSA.Signature;
+import org.semux.crypto.Hex;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
-import org.semux.crypto.Hex;
 
 /**
  * Represents a block in the blockchain.
@@ -135,7 +135,7 @@ public class Block implements Comparable<Block> {
      * @param previous
      * @return
      */
-    public static boolean validateHeader(Block previous, BlockHeader header) {
+    public static boolean validateHeader(BlockHeader previous, BlockHeader header) {
         return header != null && header.validate() //
                 && header.getNumber() == previous.getNumber() + 1 //
                 && Arrays.equals(header.getPrevHash(), previous.getHash()) //

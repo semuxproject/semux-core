@@ -20,16 +20,14 @@ import org.semux.Config;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.util.Bytes;
+import org.semux.util.MerkleUtil;
 import org.semux.util.SimpleDecoder;
 
 public class BlockTest {
-    private long number = 1;
+    private long number = 5;
     private byte[] coinbase = Bytes.random(20);
     private byte[] prevHash = Bytes.random(32);
     private long timestamp = System.currentTimeMillis();
-    private byte[] transactionsRoot = Bytes.random(32);
-    private byte[] resultsRoot = Bytes.random(32);
-    private byte[] stateRoot = Bytes.random(32);
     private byte[] data = Bytes.of("data");
 
     private Transaction tx = new Transaction(TransactionType.TRANSFER, Bytes.random(20), Bytes.random(20), 0,
@@ -39,6 +37,10 @@ public class BlockTest {
     private List<TransactionResult> results = Collections.singletonList(res);
     private int view = 1;
     private List<Signature> votes = new ArrayList<>();
+
+    private byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
+    private byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
+    private byte[] stateRoot = Bytes.EMPTY_HASH;
 
     private EdDSA key = new EdDSA();
     private byte[] hash;
@@ -101,5 +103,16 @@ public class BlockTest {
         SimpleDecoder dec = new SimpleDecoder(block.toBytesTransactions(), index.getLeft());
         Transaction tx2 = Transaction.fromBytes(dec.readBytes());
         assertArrayEquals(tx.getHash(), tx2.getHash());
+    }
+
+    @Test
+    public void testValidateTransactions() {
+        BlockHeader previousHeader = new BlockHeader(number - 1, coinbase, prevHash, timestamp - 1, transactionsRoot,
+                resultsRoot, stateRoot, data).sign(key);
+        BlockHeader header = new BlockHeader(number, coinbase, previousHeader.getHash(), timestamp, transactionsRoot,
+                resultsRoot, stateRoot, data).sign(key);
+
+        assertTrue(Block.validateHeader(previousHeader, header));
+        assertTrue(Block.validateTransactions(previousHeader, transactions));
     }
 }

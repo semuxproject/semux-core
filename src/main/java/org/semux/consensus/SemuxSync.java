@@ -324,7 +324,7 @@ public class SemuxSync implements Sync {
 
             // [1] check block header
             Block latest = chain.getLatestBlock();
-            if (!Block.validateHeader(latest, header)) {
+            if (!Block.validateHeader(latest.getHeader(), header)) {
                 logger.debug("Invalid block header");
                 return false;
             }
