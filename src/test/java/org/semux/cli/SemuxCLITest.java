@@ -6,8 +6,26 @@
  */
 package org.semux.cli;
 
-import com.google.common.collect.ImmutableList;
-import net.i2p.crypto.eddsa.KeyPairGenerator;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.doCallRealMethod;
+import static org.powermock.api.mockito.PowerMockito.doReturn;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.spy;
+import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static uk.org.lidalia.slf4jtest.LoggingEvent.info;
+
+import java.security.KeyPair;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.cli.ParseException;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,25 +42,15 @@ import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.util.SystemUtil;
+
+import com.google.common.collect.ImmutableList;
+
+import net.i2p.crypto.eddsa.KeyPairGenerator;
 import uk.org.lidalia.slf4jext.Level;
 import uk.org.lidalia.slf4jtest.LoggingEvent;
 import uk.org.lidalia.slf4jtest.TestLogger;
 import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 import uk.org.lidalia.slf4jtest.TestLoggerFactoryResetRule;
-
-import java.security.KeyPair;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.hamcrest.core.IsCollectionContaining.hasItem;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.*;
-import static uk.org.lidalia.slf4jtest.LoggingEvent.info;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ SystemUtil.class, Kernel.class, SemuxCLI.class })
@@ -268,7 +276,7 @@ public class SemuxCLITest {
     }
 
     @Test
-    public void testDumpPrivateKeyNotFound() {
+    public void testDumpPrivateKeyNotFound() throws Exception {
         SemuxCLI semuxCLI = spy(new SemuxCLI());
 
         // mock address
@@ -284,6 +292,7 @@ public class SemuxCLITest {
         // mock SystemUtil
         mockStatic(SystemUtil.class);
         when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        doCallRealMethod().when(SystemUtil.class, "exit", Mockito.any(Integer.class));
 
         // expect System.exit(1)
         exit.expectSystemExitWithStatus(1);
@@ -293,7 +302,7 @@ public class SemuxCLITest {
     }
 
     @Test
-    public void testImportPrivateKeyExisted() {
+    public void testImportPrivateKeyExisted() throws Exception {
         SemuxCLI semuxCLI = spy(new SemuxCLI());
 
         // mock private key
@@ -310,6 +319,7 @@ public class SemuxCLITest {
         // mock SystemUtil
         mockStatic(SystemUtil.class);
         when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        doCallRealMethod().when(SystemUtil.class, "exit", Mockito.any(Integer.class));
 
         // expectation
         exit.expectSystemExitWithStatus(1);
@@ -319,7 +329,7 @@ public class SemuxCLITest {
     }
 
     @Test
-    public void testImportPrivateKeyFailedToFlushWalletFile() {
+    public void testImportPrivateKeyFailedToFlushWalletFile() throws Exception {
         SemuxCLI semuxCLI = spy(new SemuxCLI());
 
         // mock private key
@@ -337,6 +347,7 @@ public class SemuxCLITest {
         // mock SystemUtil
         mockStatic(SystemUtil.class);
         when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        doCallRealMethod().when(SystemUtil.class, "exit", Mockito.any(Integer.class));
 
         // expectation
         exit.expectSystemExitWithStatus(2);
