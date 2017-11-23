@@ -190,7 +190,7 @@ public class Config {
     /**
      * P2P protocol version.
      */
-    public static short P2P_VERSION = 3;
+    public static short P2P_VERSION = 4;
 
     /**
      * P2P listening address.
