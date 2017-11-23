@@ -85,14 +85,14 @@ public class SemuxCLITest {
     @Test
     public void testHelp() throws ParseException {
         SemuxCLI semuxCLI = spy(new SemuxCLI());
-        semuxCLI.start(new String[] { "--cli", "--help" });
+        semuxCLI.start(new String[] { "--help" });
         verify(semuxCLI).printHelp();
     }
 
     @Test
     public void testVersion() throws ParseException {
         SemuxCLI semuxCLI = spy(new SemuxCLI());
-        semuxCLI.start(new String[] { "--cli", "--version" });
+        semuxCLI.start(new String[] { "--version" });
         verify(semuxCLI).printVersion();
     }
 
@@ -146,7 +146,7 @@ public class SemuxCLITest {
     public void testAccountActionList() throws ParseException {
         SemuxCLI semuxCLI = spy(new SemuxCLI());
         Mockito.doNothing().when(semuxCLI).listAccounts();
-        semuxCLI.start(new String[] { "--cli", "--account", "list" });
+        semuxCLI.start(new String[] { "--account", "list" });
         verify(semuxCLI).listAccounts();
     }
 
@@ -154,7 +154,7 @@ public class SemuxCLITest {
     public void testAccountActionCreate() throws ParseException {
         SemuxCLI semuxCLI = spy(new SemuxCLI());
         Mockito.doNothing().when(semuxCLI).createAccount();
-        semuxCLI.start(new String[] { "--cli", "--account", "create" });
+        semuxCLI.start(new String[] { "--account", "create" });
         verify(semuxCLI).createAccount();
     }
 

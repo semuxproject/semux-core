@@ -6,7 +6,17 @@
  */
 package org.semux.cli;
 
-import org.apache.commons.cli.*;
+import java.io.File;
+import java.security.spec.InvalidKeySpecException;
+import java.util.List;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.semux.Config;
 import org.semux.Kernel;
 import org.semux.core.Wallet;
@@ -16,10 +26,6 @@ import org.semux.crypto.Hex;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.security.spec.InvalidKeySpecException;
-import java.util.List;
 
 public class SemuxCLI {
 
@@ -50,44 +56,40 @@ public class SemuxCLI {
     private String password = null;
 
     SemuxCLI() {
-        // FIXME: the option is redundant in order to avoid ParseException
-        Option cli = Option.builder("cli").longOpt("cli").build();
-        options.addOption(cli);
-
-        Option help = Option.builder("h").longOpt("help").desc("Print help info and exit").build();
+        Option help = Option.builder().longOpt("help").desc("Print help info and exit").build();
         options.addOption(help);
 
-        Option version = Option.builder("v").longOpt("version").desc("Show the version of this client").build();
+        Option version = Option.builder().longOpt("version").desc("Show the version of this client").build();
         options.addOption(version);
 
-        Option account = Option.builder("a").longOpt("account")
+        Option account = Option.builder().longOpt("account")
                 .desc("action can be one of:" + "\n" + "create - Create an new account and exit" + "\n"
                         + "list - List all accounts and exit")
                 .hasArg(true).numberOfArgs(1).optionalArg(false).argName("action").type(String.class).build();
         options.addOption(account);
 
-        Option changepassword = Option.builder("cp").longOpt("changepassword").desc("Change password of the wallet")
+        Option changepassword = Option.builder().longOpt("changepassword").desc("Change password of the wallet")
                 .build();
         options.addOption(changepassword);
 
-        Option datadir = Option.builder("d").longOpt("datadir").desc("Specify the data directory").hasArg(true)
+        Option datadir = Option.builder().longOpt("datadir").desc("Specify the data directory").hasArg(true)
                 .numberOfArgs(1).optionalArg(false).argName("path").type(String.class).build();
         options.addOption(datadir);
 
-        Option coinbase = Option.builder("c").longOpt("coinbase").desc("Specify which account to be used as coinbase")
+        Option coinbase = Option.builder().longOpt("coinbase").desc("Specify which account to be used as coinbase")
                 .hasArg(true).numberOfArgs(1).optionalArg(false).argName("index").type(Number.class).build();
         options.addOption(coinbase);
 
-        Option password = Option.builder("p").longOpt("password").desc("Password of the wallet").hasArg(true)
+        Option password = Option.builder().longOpt("password").desc("Password of the wallet").hasArg(true)
                 .numberOfArgs(1).optionalArg(false).argName("password").type(String.class).build();
         options.addOption(password);
 
-        Option dumpprivatekey = Option.builder("dpk").longOpt("dumpprivatekey")
+        Option dumpprivatekey = Option.builder().longOpt("dumpprivatekey")
                 .desc("Prints the hexadecimal private key of an address").hasArg(true).optionalArg(false)
                 .argName("address").type(String.class).build();
         options.addOption(dumpprivatekey);
 
-        Option importprivatekey = Option.builder("ipk").longOpt("importprivatekey")
+        Option importprivatekey = Option.builder().longOpt("importprivatekey")
                 .desc("Imports a hexadecimal private key into the wallet").hasArg(true).optionalArg(false)
                 .argName("key").type(String.class).build();
         options.addOption(importprivatekey);
@@ -143,7 +145,7 @@ public class SemuxCLI {
     protected void printHelp() {
         HelpFormatter formatter = new HelpFormatter();
         formatter.setWidth(200);
-        formatter.printHelp("./semux.sh --cli [options] or semux.bat [options]", options);
+        formatter.printHelp("./semux-cli.sh [options]", options);
     }
 
     protected void printVersion() {

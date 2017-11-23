@@ -72,7 +72,7 @@
                             <resource>LICENSE</resource>
                         </transformer>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>org.semux.Semux</mainClass>
+                            <mainClass>org.semux.gui.SemuxGUI</mainClass>
                         </transformer>
                     </transformers>
                 </configuration>
@@ -96,7 +96,7 @@
                             <outfile>${project.build.directory}/semux.exe</outfile>
                             <downloadUrl>http://java.com/download</downloadUrl>
                             <classPath>
-                                <mainClass>org.semux.Semux</mainClass>
+                                <mainClass>org.semux.gui.SemuxGUI</mainClass>
                                 <preCp>anything</preCp>
                             </classPath>
                             <icon>src/main/resources/org/semux/gui/logo.ico</icon>
@@ -156,17 +156,20 @@
                                     </fileset>
                                 </copy>
                                 <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar" tofile="${dist.base}/unix/semux.jar" />
-                                <copy file="${project.basedir}/scripts/semux.sh" tofile="${dist.base}/unix/semux.sh" />
+                                <copy file="${project.basedir}/scripts/semux-cli.sh" tofile="${dist.base}/unix/semux-cli.sh" />
+                                <copy file="${project.basedir}/scripts/semux-gui.sh" tofile="${dist.base}/unix/semux-gui.sh" />
 
-                                <!-- add execute permission -->
-                                <chmod file="${dist.base}/windows/semux.exe" perm="755"/>
-                                <chmod file="${dist.base}/unix/semux.jar" perm="755"/>
-                                <chmod file="${dist.base}/unix/semux.sh" perm="755"/>
-                                
                                 <!-- unix build (executable jar) -->
                                 <copy todir="${dist.base}/macos">
                                     <fileset dir="${dist.base}/unix" />
                                 </copy>
+                                
+                                <!-- add execute permission -->
+                                <chmod file="${dist.base}/windows/semux.exe" perm="755"/>
+                                <chmod file="${dist.base}/unix/semux.jar" perm="755"/>
+                                <chmod file="${dist.base}/unix/semux*.sh" perm="755"/>
+                                <chmod file="${dist.base}/macos/semux.jar" perm="755"/>
+                                <chmod file="${dist.base}/macos/semux*.sh" perm="755"/>
                             </target>
                         </configuration>
                         <goals>
