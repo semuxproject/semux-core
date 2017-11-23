@@ -1,7 +1,8 @@
+<!DOCTYPE xml>
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -10,7 +11,7 @@
         <append>true</append>
         <immediateFlush>true</immediateFlush>
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -20,9 +21,9 @@
     <logger name="org.semux.db" level="DEBUG" />
     <logger name="org.semux.net" level="DEBUG" />
     <logger name="org.semux.vm" level="DEBUG" />
-    <logger name="log.io.netty" level="INFO" />
+    <logger name="io.netty" level="INFO" />
 
-    <root level="debug">
+    <root level="DEBUG">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </root>
