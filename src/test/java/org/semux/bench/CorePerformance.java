@@ -61,7 +61,7 @@ public class CorePerformance {
 
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
                 stateRoot, data);
-        Block block = new Block(header.sign(key), txs, res);
+        Block block = new Block(header, txs, res);
 
         List<Signature> votes = new ArrayList<>();
         for (int i = 0; i < Config.getNumberOfValidators(1000000L); i++) {

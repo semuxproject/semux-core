@@ -87,7 +87,7 @@ public class SemuxBFTTest {
 
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
                 stateRoot, data);
-        Block block = new Block(header.sign(key1), transactions, results);
+        Block block = new Block(header, transactions, results);
 
         List<Signature> votes = new ArrayList<>();
         Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), view, block.getHash())

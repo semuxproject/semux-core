@@ -8,13 +8,11 @@ package org.semux.core;
 
 import java.util.Arrays;
 
-import org.semux.crypto.EdDSA;
-import org.semux.crypto.EdDSA.Signature;
+import org.semux.crypto.Hash;
+import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
-import org.semux.crypto.Hash;
-import org.semux.crypto.Hex;
 
 public class BlockHeader {
 
@@ -37,7 +35,6 @@ public class BlockHeader {
     private byte[] data;
 
     private byte[] encoded;
-    private Signature signature;
 
     /**
      * Creates an instance of block header.
@@ -81,7 +78,7 @@ public class BlockHeader {
      * @param encoded
      * @param signature
      */
-    public BlockHeader(byte[] hash, byte[] encoded, byte[] signature) {
+    public BlockHeader(byte[] hash, byte[] encoded) {
         this.hash = hash;
 
         SimpleDecoder dec = new SimpleDecoder(encoded);
@@ -95,19 +92,6 @@ public class BlockHeader {
         this.data = dec.readBytes();
 
         this.encoded = encoded;
-        // allow null signature for genesis
-        this.signature = signature.length == 0 ? null : Signature.fromBytes(signature);
-    }
-
-    /**
-     * Signs this block header.
-     * 
-     * @param key
-     * @return
-     */
-    public BlockHeader sign(EdDSA key) {
-        this.signature = key.sign(this.hash);
-        return this;
     }
 
     /**
@@ -124,11 +108,9 @@ public class BlockHeader {
                 && transactionsRoot != null && transactionsRoot.length == 32 //
                 && resultsRoot != null && resultsRoot.length == 32 //
                 && stateRoot != null && Arrays.equals(Bytes.EMPTY_HASH, stateRoot) // RESERVED FOR VM
-                && data != null && data.length < 512 //
+                && data != null && data.length < 128 //
                 && encoded != null //
-                && (number == 0 || signature != null) //
-                && Arrays.equals(Hash.h256(encoded), hash) //
-                && (number == 0 || EdDSA.verify(hash, signature));
+                && Arrays.equals(Hash.h256(encoded), hash);
     }
 
     public byte[] getHash() {
@@ -167,17 +149,10 @@ public class BlockHeader {
         return data;
     }
 
-    public Signature getSignature() {
-        return signature;
-    }
-
     public byte[] toBytes() {
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeBytes(hash);
         enc.writeBytes(encoded);
-        // allow null signature for genesis
-        enc.writeBytes(signature == null ? Bytes.EMPY_BYTES : signature.toBytes());
-
         return enc.toBytes();
     }
 
@@ -185,9 +160,8 @@ public class BlockHeader {
         SimpleDecoder dec = new SimpleDecoder(bytes);
         byte[] hash = dec.readBytes();
         byte[] encoded = dec.readBytes();
-        byte[] signature = dec.readBytes();
 
-        return new BlockHeader(hash, encoded, signature);
+        return new BlockHeader(hash, encoded);
     }
 
     @Override

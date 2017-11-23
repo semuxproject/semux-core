@@ -194,7 +194,6 @@ public class BlockchainImplTest {
         assertArrayEquals(block1.getCoinbase(), block2.getCoinbase());
         assertArrayEquals(block1.getPrevHash(), block2.getPrevHash());
         assertEquals(block1.getNumber(), block2.getNumber());
-        assertArrayEquals(block1.getSignature().toBytes(), block2.getSignature().toBytes());
 
         assertEquals(block1.getTransactions().size(), block2.getTransactions().size());
     }
@@ -252,6 +251,6 @@ public class BlockchainImplTest {
 
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
                 stateRoot, data);
-        return new Block(header.sign(new EdDSA()), transactions, results);
+        return new Block(header, transactions, results);
     }
 }

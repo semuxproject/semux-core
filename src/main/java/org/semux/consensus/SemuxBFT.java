@@ -735,7 +735,7 @@ public class SemuxBFT implements Consensus {
         byte[] data = {};
         BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,
                 resultsRoot, stateRoot, data);
-        Block block = new Block(header.sign(coinbase), pending.getLeft(), pending.getRight());
+        Block block = new Block(header, pending.getLeft(), pending.getRight());
 
         long t2 = System.currentTimeMillis();
         logger.debug("Block creation: # txs = {}, time = {} ms", pending.getLeft().size(), t2 - t1);

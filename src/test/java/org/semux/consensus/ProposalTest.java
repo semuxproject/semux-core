@@ -63,6 +63,6 @@ public class ProposalTest {
 
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
                 stateRoot, data);
-        return new Block(header.sign(key), txs, res);
+        return new Block(header, txs, res);
     }
 }

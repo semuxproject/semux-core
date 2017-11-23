@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.semux.Config;
-import org.semux.crypto.EdDSA;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,16 +27,13 @@ public class BlockHeaderTest {
     private byte[] stateRoot = Bytes.random(32);
     private byte[] data = Bytes.of("data");
 
-    private EdDSA key = new EdDSA();
     private byte[] hash;
-    private byte[] signature;
 
     @Test
     public void testNew() {
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
-                stateRoot, data).sign(key);
+                stateRoot, data);
         hash = header.getHash();
-        signature = header.getSignature().toBytes();
 
         testFields(header);
     }
@@ -45,9 +41,8 @@ public class BlockHeaderTest {
     @Test
     public void testSerilization() {
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
-                stateRoot, data).sign(key);
+                stateRoot, data);
         hash = header.getHash();
-        signature = header.getSignature().toBytes();
 
         testFields(BlockHeader.fromBytes(header.toBytes()));
     }
@@ -55,7 +50,7 @@ public class BlockHeaderTest {
     @Test
     public void testBlockHeaderSize() {
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
-                stateRoot, data).sign(key);
+                stateRoot, data);
         byte[] bytes = header.toBytes();
 
         logger.info("block header size: {}", bytes.length);
@@ -73,6 +68,5 @@ public class BlockHeaderTest {
         assertArrayEquals(resultsRoot, header.getResultsRoot());
         assertArrayEquals(stateRoot, header.getStateRoot());
         assertArrayEquals(data, header.getData());
-        assertArrayEquals(signature, header.getSignature().toBytes());
     }
 }

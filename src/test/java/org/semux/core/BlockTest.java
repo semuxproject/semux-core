@@ -42,9 +42,7 @@ public class BlockTest {
     private byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
     private byte[] stateRoot = Bytes.EMPTY_HASH;
 
-    private EdDSA key = new EdDSA();
     private byte[] hash;
-    private byte[] signature;
 
     @Test
     public void testGenesis() {
@@ -55,10 +53,9 @@ public class BlockTest {
     @Test
     public void testNew() {
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
-                stateRoot, data).sign(key);
+                stateRoot, data);
         Block block = new Block(header, transactions, results, view, votes);
         hash = block.getHash();
-        signature = block.getSignature().toBytes();
 
         testFields(block);
     }
@@ -66,10 +63,9 @@ public class BlockTest {
     @Test
     public void testSerilization() {
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
-                stateRoot, data).sign(key);
+                stateRoot, data);
         Block block = new Block(header, transactions, results, view, votes);
         hash = block.getHash();
-        signature = block.getSignature().toBytes();
 
         testFields(Block.fromBytes(block.toBytesHeader(), block.toBytesTransactions(), block.toBytesResults(),
                 block.toBytesVotes()));
@@ -85,7 +81,6 @@ public class BlockTest {
         assertArrayEquals(resultsRoot, block.getResultsRoot());
         assertArrayEquals(stateRoot, block.getStateRoot());
         assertArrayEquals(data, block.getData());
-        assertArrayEquals(signature, block.getSignature().toBytes());
         assertEquals(view, block.getView());
         assertTrue(block.getVotes().isEmpty());
     }
@@ -93,7 +88,7 @@ public class BlockTest {
     @Test
     public void testTransactionIndexes() {
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
-                stateRoot, data).sign(key);
+                stateRoot, data);
         Block block = new Block(header, transactions, results, view, votes);
 
         List<Pair<Integer, Integer>> indexes = block.getTransacitonIndexes();
@@ -108,9 +103,9 @@ public class BlockTest {
     @Test
     public void testValidateTransactions() {
         BlockHeader previousHeader = new BlockHeader(number - 1, coinbase, prevHash, timestamp - 1, transactionsRoot,
-                resultsRoot, stateRoot, data).sign(key);
+                resultsRoot, stateRoot, data);
         BlockHeader header = new BlockHeader(number, coinbase, previousHeader.getHash(), timestamp, transactionsRoot,
-                resultsRoot, stateRoot, data).sign(key);
+                resultsRoot, stateRoot, data);
 
         assertTrue(Block.validateHeader(previousHeader, header));
         assertTrue(Block.validateTransactions(previousHeader, transactions));

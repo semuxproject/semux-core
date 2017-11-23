@@ -307,10 +307,6 @@ public class Block implements Comparable<Block> {
         return header.getData();
     }
 
-    public Signature getSignature() {
-        return header.getSignature();
-    }
-
     public byte[] toBytesHeader() {
         return encodedHeader;
     }

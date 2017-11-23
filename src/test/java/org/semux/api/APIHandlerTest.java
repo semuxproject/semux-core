@@ -422,7 +422,7 @@ public class APIHandlerTest {
 
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
                 stateRoot, data);
-        return new Block(header.sign(key), transactions, results);
+        return new Block(header, transactions, results);
     }
 
     private Transaction createTransaction() {
