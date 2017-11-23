@@ -189,11 +189,16 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         case WORLD: {
             // update peer state
             WorldMessage worldMsg = (WorldMessage) msg;
-            Peer peer = worldMsg.getPeer();
-            channel.onActive(peer);
 
-            // handshake done
-            onHandshakeDone(peer);
+            if (isValid(worldMsg)) {
+                Peer peer = worldMsg.getPeer();
+                channel.onActive(peer);
+
+                // handshake done
+                onHandshakeDone(peer);
+            } else {
+                msgQueue.disconnect(ReasonCode.INVALID_HANDSHAKE);
+            }
             break;
         }
         case PING: {
@@ -278,10 +283,17 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      * @return
      */
     private boolean isValid(HelloMessage msg) {
-        long now = System.currentTimeMillis();
-
         return msg.validate() //
-                && Math.abs(now - msg.getTimestamp()) <= Config.NET_HANDSHAKE_EXPIRE //
+                && (Config.isDevNet() || channel.getRemoteIp().equals(msg.getPeer().getIp()));
+    }
+
+    /**
+     * Checks if a World message is valid.
+     * 
+     * @return
+     */
+    private boolean isValid(WorldMessage msg) {
+        return msg.validate() //
                 && (Config.isDevNet() || channel.getRemoteIp().equals(msg.getPeer().getIp()));
     }
 

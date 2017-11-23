@@ -23,11 +23,11 @@ public class WorldMessageTest {
                 2);
 
         WorldMessage msg = new WorldMessage(peer, key);
-        assertTrue(msg.isValid());
+        assertTrue(msg.validate());
         assertEquals(key.toAddressString(), msg.getPeer().getPeerId());
 
         msg = new WorldMessage(msg.getEncoded());
-        assertTrue(msg.isValid());
+        assertTrue(msg.validate());
         assertEquals(key.toAddressString(), msg.getPeer().getPeerId());
     }
 }

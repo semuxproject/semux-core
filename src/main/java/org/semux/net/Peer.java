@@ -50,6 +50,15 @@ public class Peer {
         this.clientId = clientId;
     }
 
+    public boolean validate() {
+        return ip != null && ip.length() <= 128 //
+                && port >= 0 //
+                && p2pVersion >= 0 //
+                && clientId != null && clientId.length() < 128 //
+                && peerId != null && peerId.length() == 40 //
+                && latestBlockNumber >= 0;
+    }
+
     /**
      * Get the listening IP address.
      * 

@@ -6,9 +6,10 @@
  */
 package org.semux.net.msg.p2p;
 
-import org.bouncycastle.util.Arrays;
+import org.semux.Config;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
+import org.semux.crypto.Hex;
 import org.semux.net.Peer;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
@@ -18,10 +19,7 @@ import org.semux.util.SimpleEncoder;
 public class HelloMessage extends Message {
 
     private Peer peer;
-
     private long timestamp;
-
-    private byte[] dataToSign;
     private Signature signature;
 
     /**
@@ -34,14 +32,12 @@ public class HelloMessage extends Message {
         super(MessageCode.HELLO, WorldMessage.class);
 
         this.peer = peer;
-
         this.timestamp = System.currentTimeMillis();
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeBytes(peer.toBytes());
         enc.writeLong(timestamp);
-        this.dataToSign = enc.toBytes();
-        this.signature = coinbase.sign(dataToSign);
+        this.signature = coinbase.sign(enc.toBytes());
         enc.writeBytes(signature.toBytes());
 
         this.encoded = enc.toBytes();
@@ -55,13 +51,12 @@ public class HelloMessage extends Message {
     public HelloMessage(byte[] encoded) {
         super(MessageCode.HELLO, WorldMessage.class);
 
-        this.encoded = encoded;
-
         SimpleDecoder dec = new SimpleDecoder(encoded);
         this.peer = Peer.fromBytes(dec.readBytes());
         this.timestamp = dec.readLong();
-        this.dataToSign = Arrays.copyOfRange(encoded, 0, dec.getReadIndex());
         this.signature = Signature.fromBytes(dec.readBytes());
+
+        this.encoded = encoded;
     }
 
     /**
@@ -75,9 +70,19 @@ public class HelloMessage extends Message {
      * @return true if valid, otherwise false
      */
     public boolean validate() {
-        return peer != null //
-                && timestamp > 0//
-                && EdDSA.verify(dataToSign, signature);
+        if (peer != null && peer.validate() //
+                && Math.abs(System.currentTimeMillis() - timestamp) <= Config.NET_HANDSHAKE_EXPIRE //
+                && signature != null //
+                && peer.getPeerId().equals(Hex.encode(signature.getAddress()))) {
+
+            SimpleEncoder enc = new SimpleEncoder();
+            enc.writeBytes(peer.toBytes());
+            enc.writeLong(timestamp);
+
+            return EdDSA.verify(enc.toBytes(), signature);
+        } else {
+            return false;
+        }
     }
 
     public Peer getPeer() {
