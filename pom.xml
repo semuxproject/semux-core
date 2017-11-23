@@ -144,9 +144,10 @@
                                         <include name="semux.exe"/>
                                     </fileset>
                                 </copy>
-                                <copy file="${project.basedir}/misc/launch4j/semux.l4j.ini" tofile="${dist.base}/windows/semux.l4j.ini" />
-                                <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis" />
-                                <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis" />
+                                <copy file="${project.basedir}/misc/launch4j/semux.l4j.ini"
+                                      tofile="${dist.base}/windows/semux.l4j.ini"/>
+                                <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis"/>
+                                <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis"/>
 
                                 <!-- unix build (executable jar) -->
                                 <copy todir="${dist.base}/unix">
@@ -155,15 +156,18 @@
                                         <include name="LICENSE"/>
                                     </fileset>
                                 </copy>
-                                <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar" tofile="${dist.base}/unix/semux.jar" />
-                                <copy file="${project.basedir}/scripts/semux-cli.sh" tofile="${dist.base}/unix/semux-cli.sh" />
-                                <copy file="${project.basedir}/scripts/semux-gui.sh" tofile="${dist.base}/unix/semux-gui.sh" />
+                                <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar"
+                                      tofile="${dist.base}/unix/semux.jar"/>
+                                <copy file="${project.basedir}/scripts/semux-cli.sh"
+                                      tofile="${dist.base}/unix/semux-cli.sh"/>
+                                <copy file="${project.basedir}/scripts/semux-gui.sh"
+                                      tofile="${dist.base}/unix/semux-gui.sh"/>
 
                                 <!-- unix build (executable jar) -->
                                 <copy todir="${dist.base}/macos">
-                                    <fileset dir="${dist.base}/unix" />
+                                    <fileset dir="${dist.base}/unix"/>
                                 </copy>
-                                
+
                                 <!-- add execute permission -->
                                 <chmod file="${dist.base}/windows/semux.exe" perm="755"/>
                                 <chmod file="${dist.base}/unix/semux.jar" perm="755"/>
@@ -252,6 +256,8 @@
                     <classpathDependencyExcludes>
                         <classpathDependencyExcludes>ch.qos.logback:logback-classic</classpathDependencyExcludes>
                     </classpathDependencyExcludes>
+                    <excludedGroups>org.semux.IntegrationTest</excludedGroups>
+                    <goal>test</goal>
                 </configuration>
             </plugin>
         </plugins>
@@ -389,4 +395,41 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.20.1</version>
+                        <configuration>
+                            <groups>org.semux.windows.WindowsIntegrationTest</groups>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
