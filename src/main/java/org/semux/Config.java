@@ -394,7 +394,13 @@ public class Config {
      * @return
      */
     public static int getNumberOfValidators(long number) {
-        return 64;
+        long step = 2 * 60 * 2;
+
+        if (number < 48 * step) {
+            return (int) (16 + number / step);
+        } else {
+            return 64;
+        }
     }
 
     /**
