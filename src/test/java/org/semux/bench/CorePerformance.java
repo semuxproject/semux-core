@@ -36,14 +36,13 @@ public class CorePerformance {
 
         for (int i = 0; i < Config.MAX_BLOCK_SIZE; i++) {
             TransactionType type = TransactionType.TRANSFER;
-            byte[] from = key.toAddress();
             byte[] to = Bytes.random(20);
             long value = 1;
             long fee = Config.DELEGATE_BURN_AMOUNT;
             long nonce = 1 + i;
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.random(128);
-            Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+            Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
             tx.sign(key);
 
             txs.add(tx);
@@ -90,14 +89,13 @@ public class CorePerformance {
         EdDSA key = new EdDSA();
 
         TransactionType type = TransactionType.TRANSFER;
-        byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
         long value = 1;
         long fee = Config.DELEGATE_BURN_AMOUNT;
         long nonce = 1;
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
-        Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
         tx.sign(key);
 
         int repeat = 1000;

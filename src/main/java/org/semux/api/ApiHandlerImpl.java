@@ -332,7 +332,7 @@ public class ApiHandlerImpl implements ApiHandler {
             byte[] data = (pData == null) ? Bytes.EMPY_BYTES : Hex.parse(pData);
 
             // sign
-            Transaction tx = new Transaction(type, from.toAddress(), to, value, fee, nonce, timestamp, data);
+            Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
             tx.sign(from);
 
             if (pendingMgr.addTransactionSync(tx)) {

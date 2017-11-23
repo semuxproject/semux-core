@@ -26,7 +26,6 @@ public class TransactionTest {
     private EdDSA key = new EdDSA();
 
     private TransactionType type = TransactionType.TRANSFER;
-    private byte[] from = Bytes.random(20);
     private byte[] to = Bytes.random(20);
     private long value = 2;
     private long fee = Config.MIN_TRANSACTION_FEE;
@@ -36,7 +35,7 @@ public class TransactionTest {
 
     @Test
     public void testNew() {
-        Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
         assertNotNull(tx.getHash());
         assertNull(tx.getSignature());
         tx.sign(key);
@@ -47,7 +46,7 @@ public class TransactionTest {
 
     @Test
     public void testSerilization() {
-        Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
         tx.sign(key);
 
         testFields(Transaction.fromBytes(tx.toBytes()));
@@ -55,7 +54,7 @@ public class TransactionTest {
 
     @Test
     public void testTransactionSize() {
-        Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, Bytes.random(128)).sign(key);
+        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, Bytes.random(128)).sign(key);
         byte[] bytes = tx.toBytes();
 
         logger.info("tx size: {} B, {} GB per 1M txs", bytes.length, 1000000.0 * bytes.length / 1024 / 1024 / 1024);
@@ -63,7 +62,7 @@ public class TransactionTest {
 
     private void testFields(Transaction tx) {
         assertEquals(type, tx.getType());
-        assertArrayEquals(from, tx.getFrom());
+        assertArrayEquals(key.toAddress(), tx.getFrom());
         assertArrayEquals(to, tx.getTo());
         assertEquals(value, tx.getValue());
         assertEquals(fee, tx.getFee());

@@ -51,7 +51,6 @@ public class CorePerfomanceTest {
             EdDSA key = new EdDSA();
 
             TransactionType type = TransactionType.TRANSFER;
-            byte[] from = key.toAddress();
             byte[] to = Bytes.random(20);
             long value = 5;
             long fee = Config.MIN_TRANSACTION_FEE;
@@ -59,7 +58,7 @@ public class CorePerfomanceTest {
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.random(16);
 
-            Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+            Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
             tx.sign(key);
             txs.add(tx);
         }

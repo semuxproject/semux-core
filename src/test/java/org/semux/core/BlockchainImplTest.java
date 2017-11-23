@@ -30,18 +30,17 @@ public class BlockchainImplTest {
     private byte[] coinbase = Bytes.random(30);;
     private byte[] prevHash = Bytes.random(32);;
 
-    private byte[] from = Bytes.random(20);
+    private EdDSA key = new EdDSA();
+    private byte[] from = key.toAddress();
     private byte[] to = Bytes.random(20);
     private long value = 20;
     private long fee = 1;
     private long nonce = 12345;
     private byte[] data = Bytes.of("test");
     private long timestamp = System.currentTimeMillis() - 60 * 1000;
-    private Transaction tx = new Transaction(TransactionType.TRANSFER, from, to, value, fee, nonce, timestamp, data);
+    private Transaction tx = new Transaction(TransactionType.TRANSFER, to, value, fee, nonce, timestamp, data)
+            .sign(key);
     private TransactionResult res = new TransactionResult(true);
-    {
-        tx.sign(new EdDSA());
-    }
 
     @Test
     public void testGetLatestBlock() {

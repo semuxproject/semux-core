@@ -429,7 +429,6 @@ public class APIHandlerTest {
         EdDSA key = new EdDSA();
 
         TransactionType type = TransactionType.TRANSFER;
-        byte[] from = key.toAddress();
         byte[] to = key.toAddress();
         long value = 0;
         long fee = 0;
@@ -437,7 +436,7 @@ public class APIHandlerTest {
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
 
-        Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
         tx.sign(key);
 
         return tx;

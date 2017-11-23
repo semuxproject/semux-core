@@ -385,7 +385,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = {};
-                Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+                Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
                 tx.sign(a.getKey());
 
                 sendTransaction(pendingMgr, tx);
@@ -422,7 +422,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = Bytes.of(name);
-                Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+                Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
                 tx.sign(a.getKey());
 
                 sendTransaction(pendingMgr, tx);

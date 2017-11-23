@@ -12,18 +12,17 @@ import java.util.concurrent.Callable;
 import org.semux.Config;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
-import org.semux.util.SimpleDecoder;
-import org.semux.util.SimpleEncoder;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
+import org.semux.util.SimpleDecoder;
+import org.semux.util.SimpleEncoder;
+import org.xbill.DNS.Address;
 
 public class Transaction implements Callable<Boolean> {
 
     private byte[] hash;
 
     private TransactionType type;
-
-    private byte[] from;
 
     private byte[] to;
 
@@ -44,7 +43,6 @@ public class Transaction implements Callable<Boolean> {
      * Create a new transaction. Be sure to call {@link #hash()} afterwards.
      * 
      * @param type
-     * @param from
      * @param to
      * @param value
      * @param fee
@@ -52,10 +50,8 @@ public class Transaction implements Callable<Boolean> {
      * @param timestamp
      * @param data
      */
-    public Transaction(TransactionType type, byte[] from, byte[] to, long value, long fee, long nonce, long timestamp,
-            byte[] data) {
+    public Transaction(TransactionType type, byte[] to, long value, long fee, long nonce, long timestamp, byte[] data) {
         this.type = type;
-        this.from = from;
         this.to = to;
         this.value = value;
         this.fee = fee;
@@ -65,7 +61,6 @@ public class Transaction implements Callable<Boolean> {
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeByte(type.toByte());
-        enc.writeBytes(from);
         enc.writeBytes(to);
         enc.writeLong(value);
         enc.writeLong(fee);
@@ -81,7 +76,6 @@ public class Transaction implements Callable<Boolean> {
 
         SimpleDecoder dec = new SimpleDecoder(encoded);
         this.type = TransactionType.of(dec.readByte());
-        this.from = dec.readBytes();
         this.to = dec.readBytes();
         this.value = dec.readLong();
         this.fee = dec.readLong();
@@ -118,7 +112,6 @@ public class Transaction implements Callable<Boolean> {
     public boolean validate() {
         return hash != null && hash.length == 32 //
                 && type != null //
-                && from != null && from.length == 20 //
                 && to != null && to.length == 20 //
                 && value >= 0 //
                 && fee >= Config.MIN_TRANSACTION_FEE //
@@ -132,82 +125,101 @@ public class Transaction implements Callable<Boolean> {
                 && EdDSA.verify(hash, signature);
     }
 
+    /**
+     * Returns the transaction hash.
+     * 
+     * @return
+     */
     public byte[] getHash() {
         return hash;
     }
 
+    /**
+     * Returns the transaction type.
+     * 
+     * @return
+     */
     public TransactionType getType() {
         return type;
     }
 
-    public void setType(TransactionType type) {
-        this.type = type;
-    }
-
+    /**
+     * Parses the from address from signture.
+     * 
+     * @return an {@link Address} if the signature is valid, otherwise null
+     */
     public byte[] getFrom() {
-        return from;
+        return (signature == null) ? null : signature.getAddress();
     }
 
-    public void setFrom(byte[] from) {
-        this.from = from;
-    }
-
+    /**
+     * Returns the to address.
+     * 
+     * @return
+     */
     public byte[] getTo() {
         return to;
     }
 
-    public void setTo(byte[] to) {
-        this.to = to;
-    }
-
+    /**
+     * Returns the value.
+     * 
+     * @return
+     */
     public long getValue() {
         return value;
     }
 
-    public void setValue(long value) {
-        this.value = value;
-    }
-
+    /**
+     * Returns the transaction fee.
+     * 
+     * @return
+     */
     public long getFee() {
         return fee;
     }
 
-    public void setFee(long fee) {
-        this.fee = fee;
-    }
-
+    /**
+     * Returns the nonce.
+     * 
+     * @return
+     */
     public long getNonce() {
         return nonce;
     }
 
-    public void setNonce(long nonce) {
-        this.nonce = nonce;
-    }
-
+    /**
+     * Returns the timestamp.
+     * 
+     * @return
+     */
     public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
+    /**
+     * Returns the extra data.
+     * 
+     * @return
+     */
     public byte[] getData() {
         return data;
     }
 
-    public void setData(byte[] data) {
-        this.data = data;
-    }
-
+    /**
+     * Returns the signature.
+     * 
+     * @return
+     */
     public Signature getSignature() {
         return signature;
     }
 
-    public void setSignature(Signature signature) {
-        this.signature = signature;
-    }
-
+    /**
+     * Converts into a byte array.
+     * 
+     * @return
+     */
     public byte[] toBytes() {
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeBytes(hash);
@@ -217,6 +229,12 @@ public class Transaction implements Callable<Boolean> {
         return enc.toBytes();
     }
 
+    /**
+     * Parses from a byte array.
+     * 
+     * @param bytes
+     * @return
+     */
     public static Transaction fromBytes(byte[] bytes) {
         SimpleDecoder dec = new SimpleDecoder(bytes);
         byte[] hash = dec.readBytes();
@@ -228,7 +246,7 @@ public class Transaction implements Callable<Boolean> {
 
     @Override
     public String toString() {
-        return "Transaction [type=" + type + ", from=" + Hex.encode(from) + ", to=" + Hex.encode(to) + ", value="
+        return "Transaction [type=" + type + ", from=" + Hex.encode(getFrom()) + ", to=" + Hex.encode(to) + ", value="
                 + value + ", fee=" + fee + ", nonce=" + nonce + ", timestamp=" + timestamp + ", data="
                 + Hex.encode(data) + ", hash=" + Hex.encode(hash) + "]";
     }

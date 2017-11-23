@@ -57,7 +57,7 @@ public class TransactionExecutorTest {
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
 
-        Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
         tx.sign(key);
         assertTrue(tx.validate());
 
@@ -98,18 +98,18 @@ public class TransactionExecutorTest {
         byte[] data = Bytes.random(16);
 
         // register delegate (from != to, random name)
-        Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(delegate);
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isValid());
 
         // register delegate (from == to, random name)
-        tx = new Transaction(type, from, from, value, fee, nonce, timestamp, data);
+        tx = new Transaction(type, from, value, fee, nonce, timestamp, data).sign(delegate);
         result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isValid());
 
         // register delegate (from == to, normal name) and commit
         data = Bytes.of("test");
-        tx = new Transaction(type, from, from, value, fee, nonce, timestamp, data);
+        tx = new Transaction(type, from, value, fee, nonce, timestamp, data).sign(delegate);
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isValid());
         assertEquals(available - Config.DELEGATE_BURN_AMOUNT - fee, as.getAccount(delegate.toAddress()).getAvailable());
@@ -135,7 +135,7 @@ public class TransactionExecutorTest {
         byte[] data = Bytes.random(16);
 
         // vote for non-existing delegate
-        Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(voter);
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isValid());
 
@@ -169,7 +169,7 @@ public class TransactionExecutorTest {
         byte[] data = Bytes.random(16);
 
         // unvote (never voted before)
-        Transaction tx = new Transaction(type, from, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(voter);
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isValid());
 
