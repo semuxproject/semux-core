@@ -7,12 +7,16 @@ name=semux-${version}
 cd "$(dirname "$0")/../"
 
 # build
-mvn clean && mvn install -DskipTests || exit
+mvn clean install -DskipTests || exit
 
 # archive
 cd dist
 mv unix ${name}-unix
 tar -czvf ${name}-unix.tar.gz ${name}-unix || exit
+mv macos ${name}-macos
+tar -czvf ${name}-macos.tar.gz ${name}-macos || exit
 mv windows ${name}-windows
 zip -r ${name}-windows.zip ${name}-windows || exit
 
+# clean
+rm -r ${name}-unix ${name}-macos ${name}-windows

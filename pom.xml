@@ -85,44 +85,7 @@
                 <version>1.7.21</version>
                 <executions>
                     <execution>
-                        <id>semux-cli</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>launch4j</goal>
-                        </goals>
-                        <configuration>
-                            <headerType>console</headerType>
-                            <jar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</jar>
-                            <outfile>${project.build.directory}/semux-cli.exe</outfile>
-                            <downloadUrl>http://java.com/download</downloadUrl>
-                            <classPath>
-                                <mainClass>org.semux.cli.SemuxCLI</mainClass>
-                                <preCp>anything</preCp>
-                            </classPath>
-                            <icon>src/main/resources/org/semux/gui/logo.ico</icon>
-                            <jre>
-                                <minVersion>1.8.0</minVersion>
-                                <jdkPreference>preferJre</jdkPreference>
-                                <maxHeapPercent>80</maxHeapPercent>
-                            </jre>
-                            <versionInfo>
-                                <fileVersion>${dist.windowsExecutableVersion}</fileVersion>
-                                <fileDescription>${project.description}</fileDescription>
-                                <txtFileVersion>${project.version}</txtFileVersion>
-                                <copyright>MIT</copyright>
-                                <productVersion>${dist.windowsExecutableVersion}</productVersion>
-                                <txtProductVersion>${project.version}</txtProductVersion>
-                                <productName>semux</productName>
-                                <internalName>semux</internalName>
-                                <originalFilename>semux-cli.exe</originalFilename>
-                            </versionInfo>
-                            <singleInstance>
-                                <mutexName>semux</mutexName>
-                            </singleInstance>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>semux-gui</id>
+                        <id>semux</id>
                         <phase>package</phase>
                         <goals>
                             <goal>launch4j</goal>
@@ -133,7 +96,7 @@
                             <outfile>${project.build.directory}/semux.exe</outfile>
                             <downloadUrl>http://java.com/download</downloadUrl>
                             <classPath>
-                                <mainClass>org.semux.gui.SemuxGUI</mainClass>
+                                <mainClass>org.semux.Semux</mainClass>
                                 <preCp>anything</preCp>
                             </classPath>
                             <icon>src/main/resources/org/semux/gui/logo.ico</icon>
@@ -179,11 +142,9 @@
                                     </fileset>
                                     <fileset dir="${project.basedir}/target">
                                         <include name="semux.exe"/>
-                                        <include name="semux-cli.exe"/>
                                     </fileset>
                                 </copy>
                                 <copy file="${project.basedir}/misc/launch4j/semux.l4j.ini" tofile="${dist.base}/windows/semux.l4j.ini" />
-                                <copy file="${project.basedir}/misc/launch4j/semux.l4j.ini" tofile="${dist.base}/windows/semux-cli.l4j.ini" />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis" />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis" />
 
@@ -199,9 +160,13 @@
 
                                 <!-- add execute permission -->
                                 <chmod file="${dist.base}/windows/semux.exe" perm="755"/>
-                                <chmod file="${dist.base}/windows/semux-cli.exe" perm="755"/>
                                 <chmod file="${dist.base}/unix/semux.jar" perm="755"/>
                                 <chmod file="${dist.base}/unix/semux.sh" perm="755"/>
+                                
+                                <!-- unix build (executable jar) -->
+                                <copy todir="${dist.base}/macos">
+                                    <fileset dir="${dist.base}/unix" />
+                                </copy>
                             </target>
                         </configuration>
                         <goals>
