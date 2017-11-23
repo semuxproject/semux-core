@@ -4,4 +4,4 @@
 cd "$(dirname "$0")"
 
 # start kernel
-java -cp "./config:./lib/*" org.semux.Semux $@
+java -jar semux.jar $@
