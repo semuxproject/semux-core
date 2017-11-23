@@ -147,16 +147,12 @@ public class EdDSA {
      *            message hash
      * @param signature
      *            signature
-     * @return
+     * @return an {@link Signature} instance if valid, otherwise null
      */
-    public static boolean verify(byte[] msgHash, byte[] signature) {
+    public static Signature verify(byte[] msgHash, byte[] signature) {
         Signature sig = Signature.fromBytes(signature);
 
-        if (sig == null) {
-            return false;
-        } else {
-            return verify(msgHash, Signature.fromBytes(signature));
-        }
+        return verify(msgHash, sig) ? sig : null;
     }
 
     /**
@@ -181,7 +177,7 @@ public class EdDSA {
         private byte[] pub;
 
         /**
-         * Create a Signature instance.
+         * Creates a Signature instance.
          * 
          * @param sig
          * @param pub
@@ -192,7 +188,7 @@ public class EdDSA {
         }
 
         /**
-         * Get the raw signature.
+         * Returns the raw signature byte array.
          * 
          * @return
          */
@@ -201,7 +197,7 @@ public class EdDSA {
         }
 
         /**
-         * Get the public key.
+         * Returns the public key.
          * 
          * @return
          */
@@ -210,7 +206,16 @@ public class EdDSA {
         }
 
         /**
-         * Convert into a byte array.
+         * Returns the address of signer.
+         * 
+         * @return
+         */
+        public byte[] getAddress() {
+            return Hash.h160(pub);
+        }
+
+        /**
+         * Converts into a byte array.
          * 
          * @return
          */
@@ -223,7 +228,7 @@ public class EdDSA {
         }
 
         /**
-         * Parse from byte array.
+         * Parses from byte array.
          * 
          * @param bytes
          * @return a signature if success,or null

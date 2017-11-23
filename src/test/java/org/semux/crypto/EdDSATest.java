@@ -6,20 +6,24 @@
  */
 package org.semux.crypto;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.security.KeyPair;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
-import net.i2p.crypto.eddsa.KeyPairGenerator;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.semux.Config;
+import org.semux.crypto.EdDSA.Signature;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.i2p.crypto.eddsa.KeyPairGenerator;
 
 public class EdDSATest {
 
@@ -46,8 +50,22 @@ public class EdDSATest {
         byte[] hash = Hash.h256(data);
         byte[] sig = key.sign(hash).toBytes();
 
-        boolean isValid = EdDSA.verify(hash, sig);
-        assertTrue(isValid);
+        Signature s = EdDSA.verify(hash, sig);
+        assertNotNull(s);
+        assertArrayEquals(key.getPublicKey(), s.getPublicKey());
+        assertArrayEquals(key.toAddress(), s.getAddress());
+    }
+
+    @Test
+    public void testInvalidSignature() throws SignatureException {
+        byte[] data = Bytes.of("test");
+        byte[] hash = Hash.h256(data);
+
+        byte[] sig = Bytes.random(20);
+        assertNull(EdDSA.verify(hash, sig));
+
+        sig = Bytes.random(200);
+        assertNull(EdDSA.verify(hash, sig));
     }
 
     @Test
