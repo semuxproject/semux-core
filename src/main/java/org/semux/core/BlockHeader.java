@@ -76,7 +76,6 @@ public class BlockHeader {
      * 
      * @param hash
      * @param encoded
-     * @param signature
      */
     public BlockHeader(byte[] hash, byte[] encoded) {
         this.hash = hash;
@@ -95,7 +94,7 @@ public class BlockHeader {
     }
 
     /**
-     * Validates block header format and signature.
+     * Validates block header format.
      *
      * @return true if valid, otherwise false
      */

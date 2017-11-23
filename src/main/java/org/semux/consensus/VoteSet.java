@@ -15,9 +15,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semux.crypto.EdDSA.Signature;
-import org.semux.util.ByteArray;
-import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
+import org.semux.util.ByteArray;
 
 /**
  * <p>
@@ -73,7 +72,7 @@ public class VoteSet {
                 && vote.getView() == view //
                 && vote.getBlockHash() != null //
                 && vote.validate() //
-                && (peerId = Hex.encode(Hash.h160(sig.getPublicKey()))) != null //
+                && (peerId = Hex.encode(sig.getAddress())) != null //
                 && validators.contains(peerId)) {
             if (vote.getValue() == Vote.VALUE_APPROVE) {
                 ByteArray key = ByteArray.of(vote.getBlockHash());

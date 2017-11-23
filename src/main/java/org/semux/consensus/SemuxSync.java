@@ -35,7 +35,6 @@ import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
-import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
@@ -362,10 +361,10 @@ public class SemuxSync implements Sync {
             Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, number, block.getView(), block.getHash());
             byte[] encoded = vote.getEncoded();
             for (Signature sig : block.getVotes()) {
-                String addr = Hex.encode(Hash.h160(sig.getPublicKey()));
+                String a = Hex.encode(sig.getAddress());
 
-                if (!set.contains(addr) || !EdDSA.verify(encoded, sig)) {
-                    logger.debug("Invalid BFT vote: signer = {}", addr);
+                if (!set.contains(a) || !EdDSA.verify(encoded, sig)) {
+                    logger.debug("Invalid BFT vote: signer = {}", a);
                     return false;
                 }
             }

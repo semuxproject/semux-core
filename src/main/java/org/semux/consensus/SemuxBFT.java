@@ -475,8 +475,7 @@ public class SemuxBFT implements Consensus {
         if (p.getHeight() == height // at the same height
                 && (p.getView() == view && proposal == null && (state == State.NEW_HEIGHT || state == State.PROPOSE) // expecting
                         || p.getView() > view && state != State.COMMIT && state != State.FINALIZE) // larger view
-                && isFromValidator(p.getSignature()) //
-                && isPrimary(p.getHeight(), p.getView(), pubKeyToPeerId(p.getSignature().getPublicKey()))) {//
+                && isPrimary(p.getHeight(), p.getView(), Hex.encode(p.getSignature().getAddress()))) {//
 
             // check proof-of-unlock
             if (p.getView() != 0) {
@@ -647,16 +646,6 @@ public class SemuxBFT implements Consensus {
      */
     protected boolean isValidator() {
         return validators.contains(coinbase.toAddressString());
-    }
-
-    /**
-     * Converts a public key to peer id.
-     * 
-     * @param pubKey
-     * @return
-     */
-    protected String pubKeyToPeerId(byte[] pubKey) {
-        return Hex.encode(Hash.h160(pubKey));
     }
 
     /**
