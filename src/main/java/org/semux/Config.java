@@ -190,7 +190,7 @@ public class Config {
     /**
      * P2P protocol version.
      */
-    public static short P2P_VERSION = 2;
+    public static short P2P_VERSION = 3;
 
     /**
      * P2P listening address.
@@ -394,13 +394,7 @@ public class Config {
      * @return
      */
     public static int getNumberOfValidators(long number) {
-        long step = 2 * 60 * 2;
-
-        if (number < 48 * step) {
-            return (int) (16 + number / step);
-        } else {
-            return 64;
-        }
+        return 64;
     }
 
     /**

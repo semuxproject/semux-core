@@ -107,7 +107,7 @@ public class BlockHeader {
                 && transactionsRoot != null && transactionsRoot.length == 32 //
                 && resultsRoot != null && resultsRoot.length == 32 //
                 && stateRoot != null && Arrays.equals(Bytes.EMPTY_HASH, stateRoot) // RESERVED FOR VM
-                && data != null && data.length < 128 //
+                && data != null && data.length <= 128 //
                 && encoded != null //
                 && Arrays.equals(Hash.h256(encoded), hash);
     }

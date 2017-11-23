@@ -10,6 +10,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.security.KeyPair;
 import java.security.SignatureException;
@@ -54,6 +55,17 @@ public class EdDSATest {
         assertNotNull(s);
         assertArrayEquals(key.getPublicKey(), s.getPublicKey());
         assertArrayEquals(key.toAddress(), s.getAddress());
+    }
+
+    @Test
+    public void testSignLargeData() throws SignatureException {
+        byte[] data = Bytes.random(1024 * 1024);
+
+        EdDSA key = new EdDSA();
+        Signature sig = key.sign(data);
+
+        assertTrue(EdDSA.verify(data, sig));
+        assertArrayEquals(key.getPublicKey(), sig.getPublicKey());
     }
 
     @Test
