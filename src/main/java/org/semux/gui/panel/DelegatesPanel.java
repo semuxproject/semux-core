@@ -16,7 +16,6 @@ import java.awt.event.MouseEvent;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.GroupLayout;
@@ -89,6 +88,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private JTextField textVote;
     private JTextField textUnvote;
     private JTextField textName;
+    private JLabel labelSelectedDelegate;
 
     public DelegatesPanel(JFrame frame, WalletModel model) {
         this.model = model;
@@ -103,6 +103,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
         SwingUtil.setColumnWidths(table, 600, 0.07, 0.2, 0.25, 0.15, 0.15, 0.08, 0.1);
         SwingUtil.setColumnAlignments(table, false, false, false, true, true, true, true);
+
+        table.getSelectionModel().addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting() && !table.getSelectionModel().isSelectionEmpty()) {
+                updateSelectedDelegateLabel();
+            }
+        });
 
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent me) {
@@ -162,7 +168,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 .addGroup(groupLayout.createSequentialGroup()
                     .addComponent(from, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
-                    .addComponent(votePanel, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(votePanel, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
                     .addComponent(delegateRegistrationPanel, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
@@ -189,10 +195,17 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         JButton btnUnvote = SwingUtil.createDefaultButton(MessagesUtil.get("Unvote"), this, Action.UNVOTE);
 
+        labelSelectedDelegate = new JLabel(MessagesUtil.get("PleaseSelectDelegate"));
+        labelSelectedDelegate.setForeground(Color.DARK_GRAY);
+        labelSelectedDelegate.setHorizontalAlignment(JLabel.LEFT);
+
         // @formatter:off
         GroupLayout groupLayout2 = new GroupLayout(votePanel);
         groupLayout2.setHorizontalGroup(
             groupLayout2.createParallelGroup(Alignment.LEADING)
+                .addGroup(groupLayout2.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(labelSelectedDelegate))
                 .addGroup(groupLayout2.createSequentialGroup()
                     .addContainerGap()
                     .addGroup(groupLayout2.createParallelGroup(Alignment.LEADING)
@@ -207,6 +220,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         groupLayout2.setVerticalGroup(
             groupLayout2.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout2.createSequentialGroup()
+                    .addGap(16)
+                    .addGroup(groupLayout2.createParallelGroup(Alignment.BASELINE)
+                        .addComponent(labelSelectedDelegate))
                     .addGap(16)
                     .addGroup(groupLayout2.createParallelGroup(Alignment.BASELINE)
                         .addComponent(btnVote)
@@ -255,9 +271,10 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         // @formatter:on
 
         refreshAccounts();
+        refreshDelegates();
     }
 
-    class DelegatesTableModel extends AbstractTableModel {
+    private class DelegatesTableModel extends AbstractTableModel {
 
         private static final long serialVersionUID = 1L;
 
@@ -303,16 +320,15 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             case 0:
                 return SwingUtil.formatNumber(row + 1);
             case 1:
-                return Bytes.toString(d.getName());
+                return d.getNameString();
             case 2:
-                return Hex.PREF + Hex.encode(d.getAddress());
+                return Hex.PREF + d.getAddressString();
             case 3:
                 return SwingUtil.formatVote(d.getVotes());
             case 4:
                 return SwingUtil.formatVote(d.getVotesFromMe());
             case 5:
-                List<String> validators = Kernel.getInstance().getBlockchain().getValidators();
-                return new HashSet<>(validators).contains(Hex.encode(d.getAddress())) ? "V" : "S";
+                return d.isValidator() ? "V" : "S";
             case 6:
                 return SwingUtil.formatPercentage(d.getRate());
             default:
@@ -519,6 +535,13 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     break;
                 }
             }
+        }
+    }
+
+    private void updateSelectedDelegateLabel() {
+        Delegate d = getSelectedDelegate();
+        if (d != null) {
+            labelSelectedDelegate.setText(MessagesUtil.get("SelectedDeletgate", d.getNameString()));
         }
     }
 
