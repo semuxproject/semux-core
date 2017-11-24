@@ -388,5 +388,10 @@
             <version>1.2.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-swing-junit</artifactId>
+            <version>3.8.0</version>
+        </dependency>
     </dependencies>
 </project>

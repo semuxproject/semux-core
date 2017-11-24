@@ -96,6 +96,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         tableModel = new DelegatesTableModel();
         table = new JTable(tableModel);
+        table.setName("DelegatesTable");
         table.setBackground(Color.WHITE);
         table.setFillsViewportHeight(true);
         table.setGridColor(Color.LIGHT_GRAY);
@@ -196,6 +197,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         JButton btnUnvote = SwingUtil.createDefaultButton(MessagesUtil.get("Unvote"), this, Action.UNVOTE);
 
         labelSelectedDelegate = new JLabel(MessagesUtil.get("PleaseSelectDelegate"));
+        labelSelectedDelegate.setName("SelectedDelegateLabel");
         labelSelectedDelegate.setForeground(Color.DARK_GRAY);
         labelSelectedDelegate.setHorizontalAlignment(JLabel.LEFT);
 
@@ -503,7 +505,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         List<WalletDelegate> delegates = model.getDelegates();
         delegates.sort((d1, d2) -> {
             int c = Long.compare(d2.getVotes(), d1.getVotes());
-            return c != 0 ? c : new String(d1.getName()).compareTo(new String(d2.getName()));
+            return c != 0 ? c : d1.getNameString().compareTo(d2.getNameString());
         });
 
         WalletAccount acc = getSelectedAccount();
@@ -541,7 +543,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private void updateSelectedDelegateLabel() {
         Delegate d = getSelectedDelegate();
         if (d != null) {
-            labelSelectedDelegate.setText(MessagesUtil.get("SelectedDeletgate", d.getNameString()));
+            labelSelectedDelegate.setText(MessagesUtil.get("SelectedDelegate", d.getNameString()));
         }
     }
 
