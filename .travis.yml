@@ -16,6 +16,6 @@ before_install:
 script:
   - mvn license:check
   - mvn formatter:validate
-  - mvn test
+  - mvn cobertura:cobertura
 after_success:
-  - mvn clean cobertura:cobertura coveralls:report
+  - mvn coveralls:report
