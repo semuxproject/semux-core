@@ -41,12 +41,13 @@ the pull request affects. Valid areas as:
 
   - **API** for changes to the RESTful API code
   - **CLI** for changes to the wallet CLI code
+  - **Config** for changes to configurations
   - **Consensus** for changes to the consensus code
   - **Core** for changes to the core data structures and algorithms
   - **Crypto** for changes to the crypto code
   - **DB** for changes to the database code
   - **GUI** for changes to the wallet GUI code
-  - **Net** for changes to the peer-to-peer network code
+  - **Net** OR **P2P** for changes to the peer-to-peer network code
   - **Util** for changes to the utils and libraries
   - **VM** for changes to the database code
   - **Docs** for changes to the docs

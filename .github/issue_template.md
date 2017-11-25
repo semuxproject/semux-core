@@ -6,20 +6,24 @@ For general questions please use the Discord channel here: https://discord.gg/qQ
 
 #### System information
 
-Semux version: `./semux.sh --cli --version`
+Semux version: `e.g., v1.0.0-rc.1`
 
-OS & Version: Windows/Linux/OSX
+OS & Version: `e.g., Windows 7, Ubuntu 16.04, macOS 10.12.6`
 
-Commit hash : `git rev-parse HEAD`
+Commit hash : `git rev-parse HEAD` (optional)
 
 #### Expected behaviour
 
+Description
 
 #### Actual behaviour
 
+Description, screenshot allowed
 
 #### Steps to reproduce the behaviour
 
+1. Step one
+2. Step two
 
 #### Backtrace
 
