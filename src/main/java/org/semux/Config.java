@@ -85,6 +85,9 @@ public class Config {
                 case "net.maxQueueRate":
                     NET_MAX_QUEUE_RATE = Integer.parseInt(props.getProperty(name));
                     break;
+                case "net.relayRedundancy":
+                    NET_RELAY_REDUNDANCY = Integer.parseInt(props.getProperty(name));
+                    break;
 
                 case "api.enabled":
                     API_ENABLED = Boolean.parseBoolean(props.getProperty(name));
