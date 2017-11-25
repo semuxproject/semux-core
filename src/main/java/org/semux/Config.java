@@ -378,7 +378,7 @@ public class Config {
         if (humanReadable) {
             return String.format("%s v%s", CLIENT_NAME, CLIENT_VERSION);
         } else {
-            return String.format("%s/v%s/%s/%s", CLIENT_NAME, CLIENT_VERSION, SystemUtil.getOSName(),
+            return String.format("%s/v%s/%s/%s", CLIENT_NAME, CLIENT_VERSION, SystemUtil.getOS().toString(),
                     SystemUtil.getOSArch());
         }
     }

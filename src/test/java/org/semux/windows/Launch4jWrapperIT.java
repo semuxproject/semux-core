@@ -6,8 +6,9 @@
  */
 package org.semux.windows;
 
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,14 +16,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.semux.util.SystemUtil;
+import org.semux.util.SystemUtil.OS;
 
 @Category(org.semux.windows.WindowsIntegrationTest.class)
 public class Launch4jWrapperIT {
 
     @Test
     public void testLaunch4jWrapper() throws IOException, InterruptedException {
+        assumeTrue(SystemUtil.getOS() == OS.WINDOWS);
+
         Path prefix = Paths.get(System.getProperty("user.dir"), "dist", "windows");
         Path semuxExePath = Paths.get(prefix.toString(), "semux.exe");
         Process l4jWrapper = new ProcessBuilder(semuxExePath.toString(), "").directory(prefix.toFile()).start();

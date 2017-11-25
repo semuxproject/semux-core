@@ -24,22 +24,42 @@ public class SystemUtil {
 
     public static final Scanner SCANNER = new Scanner(System.in);
 
+    public static enum OS {
+        WINDOWS, LINUX, MACOS, UNKNOWN;
+
+        @Override
+        public String toString() {
+            switch (this) {
+            case WINDOWS:
+                return "Windows";
+            case LINUX:
+                return "Linux";
+            case MACOS:
+                return "macOS";
+            case UNKNOWN:
+                return "Unknown";
+            default:
+                return null;
+            }
+        }
+    }
+
     /**
      * Get the operating system name.
      * 
      * @return
      */
-    public static String getOSName() {
+    public static OS getOS() {
         String os = System.getProperty("os.name").toLowerCase();
 
         if (os.contains("win")) {
-            return "Windows";
+            return OS.WINDOWS;
         } else if (os.contains("linux")) {
-            return "Linux";
+            return OS.LINUX;
         } else if (os.contains("mac")) {
-            return "MacOS";
+            return OS.MACOS;
         } else {
-            return "Unkown";
+            return OS.UNKNOWN;
         }
     }
 
