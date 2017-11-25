@@ -67,6 +67,8 @@ public class Wrapper {
         String jvmOptionsString = "";
         if (commandLine.hasOption("jvm-options")) {
             jvmOptionsString = (String) commandLine.getParsedOptionValue("jvm-options");
+        } else {
+            logger.info("Specify --jvm-options for additional JVM options");
         }
 
         // dynamically specify maximum heap size according to available physical memory
