@@ -19,7 +19,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
-import static uk.org.lidalia.slf4jtest.LoggingEvent.info;
+import static org.semux.TestAppender.info;
 
 import java.security.KeyPair;
 import java.util.ArrayList;
@@ -27,6 +27,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.cli.ParseException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
@@ -38,19 +40,16 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.Kernel;
+import org.semux.TestAppender;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.util.SystemUtil;
+import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
-
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.LoggingEvent;
 import net.i2p.crypto.eddsa.KeyPairGenerator;
-import uk.org.lidalia.slf4jext.Level;
-import uk.org.lidalia.slf4jtest.LoggingEvent;
-import uk.org.lidalia.slf4jtest.TestLogger;
-import uk.org.lidalia.slf4jtest.TestLoggerFactory;
-import uk.org.lidalia.slf4jtest.TestLoggerFactoryResetRule;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ SystemUtil.class, Kernel.class, SemuxCLI.class })
@@ -65,10 +64,16 @@ public class SemuxCLITest {
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
-    @Rule
-    public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
+    @Before
+    public void setup() {
+        TestAppender.clear();
+        TestAppender.prepare(Level.INFO, SemuxCLI.class, LoggerFactory.getLogger(SemuxCLI.class));
+    }
 
-    TestLogger logger = TestLoggerFactory.getTestLogger(SemuxCLI.class);
+    @After
+    public void teardown() {
+        TestAppender.prepare(Level.OFF, null, null);
+    }
 
     @Test
     public void testMain() throws Exception {
@@ -98,7 +103,6 @@ public class SemuxCLITest {
 
     @Test
     public void testStartKernelWithEmptyWallet() throws Exception {
-        logger.setEnabledLevels(Level.INFO);
         SemuxCLI semuxCLI = spy(new SemuxCLI());
 
         // mock wallet
@@ -138,7 +142,7 @@ public class SemuxCLITest {
         verify(kernelMock).start();
 
         // assert outputs
-        ImmutableList<LoggingEvent> logs = logger.getLoggingEvents();
+        List<LoggingEvent> logs = TestAppender.events();
         assertThat(logs, hasItem(info(SemuxCLI.MSG_START_KERNEL_NEW_ACCOUNT_CREATED, newAccount.toAddressString())));
     }
 
@@ -160,7 +164,6 @@ public class SemuxCLITest {
 
     @Test
     public void testCreateAccount() throws Exception {
-        logger.setEnabledLevels(Level.INFO);
         SemuxCLI semuxCLI = spy(new SemuxCLI());
 
         // mock wallet
@@ -186,7 +189,7 @@ public class SemuxCLITest {
         verify(wallet).flush();
 
         // assert outputs
-        ImmutableList<LoggingEvent> logs = logger.getLoggingEvents();
+        List<LoggingEvent> logs = TestAppender.events();
         assertThat(logs, hasItem(info(SemuxCLI.MSG_NEW_ACCOUNT_CREATED)));
         assertThat(logs, hasItem(info(SemuxCLI.MSG_ADDRESS, newAccount.toAddressString())));
         assertThat(logs, hasItem(info(SemuxCLI.MSG_PUBLIC_KEY, Hex.encode(newAccount.getPublicKey()))));
@@ -195,7 +198,6 @@ public class SemuxCLITest {
 
     @Test
     public void testListAccounts() throws ParseException {
-        logger.setEnabledLevels(Level.INFO);
         SemuxCLI semuxCLI = spy(new SemuxCLI());
 
         // mock accounts
@@ -220,7 +222,7 @@ public class SemuxCLITest {
         verify(wallet).getAccounts();
 
         // assert outputs
-        ImmutableList<LoggingEvent> logs = logger.getLoggingEvents();
+        List<LoggingEvent> logs = TestAppender.events();
         assertThat(logs, hasItem(info(SemuxCLI.MSG_ACCOUNT, 0, account.toAddressString())));
     }
 
@@ -358,7 +360,6 @@ public class SemuxCLITest {
 
     @Test
     public void testImportPrivateKey() {
-        logger.setEnabledLevels(Level.INFO);
         SemuxCLI semuxCLI = spy(new SemuxCLI());
 
         // mock private key
@@ -379,7 +380,7 @@ public class SemuxCLITest {
         semuxCLI.importPrivateKey(key);
 
         // assertions
-        ImmutableList<LoggingEvent> logs = logger.getLoggingEvents();
+        List<LoggingEvent> logs = TestAppender.events();
         assertThat(logs, hasItem(info(SemuxCLI.MSG_PRIVATE_KEY_IMPORTED)));
         assertThat(logs, hasItem(info(SemuxCLI.MSG_ADDRESS, "0680a919c78faa59b127014b6181979ae0a62dbd")));
         assertThat(logs, hasItem(info(SemuxCLI.MSG_PRIVATE_KEY, key)));

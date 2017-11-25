@@ -249,19 +249,6 @@
                     </directories>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.20.1</version>
-                <configuration>
-                    <!-- Added for http://projects.lidalia.org.uk/slf4j-test/ -->
-                    <classpathDependencyExcludes>
-                        <classpathDependencyExcludes>ch.qos.logback:logback-classic</classpathDependencyExcludes>
-                    </classpathDependencyExcludes>
-                    <excludedGroups>org.semux.IntegrationTest</excludedGroups>
-                    <goal>test</goal>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
@@ -388,12 +375,6 @@
             <groupId>com.github.stefanbirkner</groupId>
             <artifactId>system-rules</artifactId>
             <version>1.16.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>uk.org.lidalia</groupId>
-            <artifactId>slf4j-test</artifactId>
-            <version>1.2.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
