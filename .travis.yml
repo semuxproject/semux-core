@@ -11,9 +11,11 @@ cache:
   directories:
   - .autoconf
   - $HOME/.m2
+before_install:
+  - source .travis/start_xvfb.sh
 script:
   - mvn license:check
   - mvn formatter:validate
-  - mvn test
+  - mvn cobertura:cobertura
 after_success:
-  - mvn clean cobertura:cobertura coveralls:report
+  - mvn coveralls:report
