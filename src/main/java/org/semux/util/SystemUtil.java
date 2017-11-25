@@ -59,7 +59,7 @@ public class SystemUtil {
      */
     public static String getIp() {
         try {
-            URL url = new URL("https://api.semux.org/ip");
+            URL url = new URL("http://api.ipify.org/");
             URLConnection con = url.openConnection();
             con.addRequestProperty("User-Agent", "Mozilla/4.0");
             con.setConnectTimeout(3000);
@@ -69,6 +69,7 @@ public class SystemUtil {
             String ip = reader.readLine().trim();
             reader.close();
 
+            // only IPv4 is supported currently
             if (ip.matches("(\\d{1,3}\\.){3}\\d{1,3}")) {
                 return ip;
             }
