@@ -53,12 +53,12 @@ public class DelegateStateImpl implements DelegateState {
     /**
      * Delegate updates
      */
-    protected Map<ByteArray, byte[]> delegateUpdates = new ConcurrentHashMap<>();
+    protected final Map<ByteArray, byte[]> delegateUpdates = new ConcurrentHashMap<>();
 
     /**
      * Vote updates
      */
-    protected Map<ByteArray, byte[]> voteUpdates = new ConcurrentHashMap<>();
+    protected final Map<ByteArray, byte[]> voteUpdates = new ConcurrentHashMap<>();
 
     /**
      * Create a DelegateState that work directly on a database.

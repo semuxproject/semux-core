@@ -54,7 +54,7 @@ public class ApiUtil {
         // construct parameters
         StringBuilder sb = new StringBuilder();
         for (String k : params.keySet()) {
-            String v = null;
+            String v;
             if (params.get(k) instanceof byte[]) {
                 v = Hex.encode((byte[]) params.get(k));
             } else {

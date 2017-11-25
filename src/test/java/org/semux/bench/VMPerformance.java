@@ -31,7 +31,7 @@ public class VMPerformance {
         Random r = new Random();
 
         for (int i = 0; i < ops.length; i++) {
-            Opcode op = null;
+            Opcode op;
             do {
                 op = Opcode.of(r.nextInt(256));
             } while (op == null || op == Opcode.STOP || op.getRequires() != 0);

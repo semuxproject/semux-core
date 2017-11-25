@@ -57,16 +57,16 @@ public class SemuxProcess implements Runnable {
             int size = 0; // stack size
             int gas = 0; // gas used
 
-            for (int pc = 0; pc < ops.length; pc++) {
+            for (byte op1 : ops) {
                 // check gas
                 if (gas >= gasLimit) {
                     throw new OutOfGasException();
                 }
 
                 // read opcode
-                Opcode op = Opcode.of(0xff & ops[pc]);
+                Opcode op = Opcode.of(0xff & op1);
                 if (op == null) {
-                    throw new InvalidOpCodeException(ops[pc]);
+                    throw new InvalidOpCodeException(op1);
                 }
 
                 // check stack requirements

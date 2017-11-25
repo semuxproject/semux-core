@@ -77,10 +77,10 @@ public class SemuxSync implements Sync {
     private Map<Long, Long> toComplete = new HashMap<>();
     private TreeSet<Block> toProcess = new TreeSet<>();
     private long target;
-    private Object lock = new Object();
+    private final Object lock = new Object();
 
     private volatile boolean isRunning;
-    private Object done = new Object();
+    private final Object done = new Object();
 
     private static SemuxSync instance;
 

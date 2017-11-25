@@ -37,7 +37,7 @@ public class AccountStateTest {
 
         for (ByteArray k : premine.keySet()) {
             Account acc = state.getAccount(k.getData());
-            assertEquals((long) premine.get(k).getAmount(), acc.getAvailable());
+            assertEquals(premine.get(k).getAmount(), acc.getAvailable());
         }
     }
 

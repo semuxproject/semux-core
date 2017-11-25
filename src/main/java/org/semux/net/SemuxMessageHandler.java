@@ -29,7 +29,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
     private static final Logger logger = LoggerFactory.getLogger(SemuxMessageHandler.class);
 
     private static final int MAX_PACKETS = 16;
-    protected Map<Integer, Pair<List<Frame>, AtomicInteger>> incompletePackets = new LRUMap<>(MAX_PACKETS);
+    protected final Map<Integer, Pair<List<Frame>, AtomicInteger>> incompletePackets = new LRUMap<>(MAX_PACKETS);
 
     private MessageFactory messageFactory;
 

@@ -34,7 +34,7 @@ public class IOUtil {
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
 
         BufferedInputStream bin = new BufferedInputStream(in);
-        for (int c = 0; (c = bin.read()) != -1;) {
+        for (int c; (c = bin.read()) != -1;) {
             buf.write(c);
         }
         bin.close();

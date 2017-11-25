@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE xml>
+<!DOCTYPE profiles>
 <profiles version="13">
 <profile kind="CodeFormatterProfile" name="semux" version="13">
 <setting id="org.eclipse.jdt.core.formatter.insert_space_after_ellipsis" value="insert"/>

@@ -340,7 +340,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             WalletAccount a = getSelectedAccount();
             WalletDelegate d = getSelectedDelegate();
             String v = action.equals(Action.VOTE) ? textVote.getText() : textUnvote.getText();
-            long value = 0;
+            long value;
             try {
                 value = SwingUtil.parseValue(v);
             } catch (ParseException ex) {

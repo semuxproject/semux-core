@@ -65,15 +65,16 @@ public class VoteSet {
      */
     public boolean addVote(Vote vote) {
         Signature sig = vote.getSignature();
-        String peerId;
 
         if (vote.getType() == type && //
                 vote.getHeight() == height //
                 && vote.getView() == view //
                 && vote.getBlockHash() != null //
                 && vote.validate() //
-                && (peerId = Hex.encode(sig.getAddress())) != null //
-                && validators.contains(peerId)) {
+                && sig != null //
+                && validators.contains(Hex.encode(sig.getAddress()))) {
+            String peerId = Hex.encode(sig.getAddress());
+
             if (vote.getValue() == Vote.VALUE_APPROVE) {
                 ByteArray key = ByteArray.of(vote.getBlockHash());
                 Map<String, Vote> map = approvals.computeIfAbsent(key, k -> new HashMap<>());

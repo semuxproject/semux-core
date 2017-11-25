@@ -37,7 +37,7 @@ public class AccountStateImpl implements AccountState {
     /**
      * All updates, or deletes if the value is null.
      */
-    protected Map<ByteArray, byte[]> updates = new ConcurrentHashMap<>();
+    protected final Map<ByteArray, byte[]> updates = new ConcurrentHashMap<>();
 
     /**
      * Create an AcccountState that work directly on a database.

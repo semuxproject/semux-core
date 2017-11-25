@@ -73,7 +73,7 @@ public class SwingUtil {
         Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
         int x = ((int) d.getWidth() - width) / 2;
         int y = ((int) d.getHeight() - height) / 2;
-        frame.setLocation((int) x, (int) y);
+        frame.setLocation(x, y);
         frame.setBounds(x, y, width, height);
     }
 
@@ -90,7 +90,8 @@ public class SwingUtil {
 
         if (imageURL == null) {
             logger.warn("Resource not found: " + imgLocation);
-            return null;
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            return new ImageIcon(image);
         } else {
             ImageIcon icon = new ImageIcon(imageURL);
             Image img = icon.getImage();
@@ -165,12 +166,13 @@ public class SwingUtil {
             QRCodeWriter writer = new QRCodeWriter();
             BitMatrix matrix = writer.encode(text, BarcodeFormat.QR_CODE, size, size, hintMap);
             int width = matrix.getWidth();
-            BufferedImage image = new BufferedImage(width, width, BufferedImage.TYPE_INT_RGB);
+            int height = matrix.getHeight();
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             image.createGraphics();
 
             Graphics2D graphics = (Graphics2D) image.getGraphics();
             graphics.setColor(Color.WHITE);
-            graphics.fillRect(0, 0, width, width);
+            graphics.fillRect(0, 0, width, height);
             graphics.setColor(Color.BLACK);
 
             for (int i = 0; i < width; i++) {

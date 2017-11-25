@@ -39,13 +39,12 @@ public class VoteTest {
     @Test
     public void testValidate() {
         VoteType type = VoteType.COMMIT;
-        boolean value = false;
 
         long height = 1;
         int view = 0;
         byte[] blockHash = Bytes.EMPTY_HASH;
 
-        Vote v = new Vote(type, value, height, view, blockHash);
+        Vote v = new Vote(type, false, height, view, blockHash);
         assertFalse(v.validate());
         v.sign(new EdDSA());
         assertTrue(v.validate());

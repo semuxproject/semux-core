@@ -21,8 +21,11 @@ public class FileUtil {
         }
 
         if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-                recursiveDelete(f);
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    recursiveDelete(f);
+                }
             }
         }
         file.delete();

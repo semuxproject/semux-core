@@ -26,9 +26,7 @@ import org.semux.net.SemuxChannelInitializer;
 
 public class SemuxP2pHandlerTest {
 
-    private static PeerClient remoteClient;
     private static InetSocketAddress remoteAddress;
-
     private static PeerServerMock server;
 
     @BeforeClass

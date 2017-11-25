@@ -18,8 +18,6 @@ public class SimpleCodecTest {
 
     @Test
     public void testCodec() {
-        boolean boolean1 = true;
-        boolean boolean2 = false;
         byte byte1 = Byte.MAX_VALUE;
         byte byte2 = Byte.MIN_VALUE;
         short short1 = Short.MAX_VALUE;
@@ -34,14 +32,14 @@ public class SimpleCodecTest {
         String string2 = "";
 
         SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBoolean(boolean1);
+        enc.writeBoolean(true);
         enc.writeByte(byte1);
         enc.writeShort(short1);
         enc.writeInt(int1);
         enc.writeLong(long1);
         enc.writeBytes(bytes1);
         enc.writeString(string1);
-        enc.writeBoolean(boolean2);
+        enc.writeBoolean(false);
         enc.writeByte(byte2);
         enc.writeShort(short2);
         enc.writeInt(int2);
@@ -51,14 +49,14 @@ public class SimpleCodecTest {
         byte[] encoded = enc.toBytes();
 
         SimpleDecoder dec = new SimpleDecoder(encoded);
-        assertEquals(boolean1, dec.readBoolean());
+        assertEquals(true, dec.readBoolean());
         assertEquals(byte1, dec.readByte());
         assertEquals(short1, dec.readShort());
         assertEquals(int1, dec.readInt());
         assertEquals(long1, dec.readLong());
         assertArrayEquals(bytes1, dec.readBytes());
         assertEquals(string1, dec.readString());
-        assertEquals(boolean2, dec.readBoolean());
+        assertEquals(false, dec.readBoolean());
         assertEquals(byte2, dec.readByte());
         assertEquals(short2, dec.readShort());
         assertEquals(int2, dec.readInt());

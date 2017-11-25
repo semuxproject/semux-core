@@ -108,7 +108,7 @@ public class ApiHandlerImpl implements ApiHandler {
                     nodeMgr.addNode(new InetSocketAddress(tokens[0], Integer.parseInt(tokens[1])));
                     return success(null);
                 } else {
-                    return failure("Invalid parameter: node = " + node);
+                    return failure("Invalid parameter: node can't be null");
                 }
             }
             case BLOCK_IP: {
@@ -117,7 +117,7 @@ public class ApiHandlerImpl implements ApiHandler {
                     Config.NET_BLACKLIST.add(ip);
                     return success(null);
                 } else {
-                    return failure("Invalid parameter: ip = " + ip);
+                    return failure("Invalid parameter: ip can't be null");
                 }
             }
 
@@ -138,7 +138,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 } else if (hash != null) {
                     return success(blockToJson(chain.getBlock(Hex.parse(hash))));
                 } else {
-                    return failure("Invalid parameter: number = " + number + ", hash = " + hash);
+                    return failure("Invalid parameter: number or hash can't be null");
                 }
             }
             case GET_PENDING_TRANSACTIONS: {
@@ -170,7 +170,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 if (hash != null) {
                     return success(transactionToJson(chain.getTransaction(Hex.parse(hash))));
                 } else {
-                    return failure("Invalid parameter: hash = " + hash);
+                    return failure("Invalid parameter: hash can't be null");
                 }
             }
             case SEND_TRANSACTION: {
@@ -180,7 +180,7 @@ public class ApiHandlerImpl implements ApiHandler {
                     pendingMgr.addTransaction(Transaction.fromBytes(bytes));
                     return success(null);
                 } else {
-                    return failure("Invalid parameter: raw = " + raw);
+                    return failure("Invalid parameter: raw can't be null");
                 }
             }
 
@@ -190,7 +190,7 @@ public class ApiHandlerImpl implements ApiHandler {
                     Account acc = chain.getAccountState().getAccount(Hex.parse(addr));
                     return success(accountToJson(acc));
                 } else {
-                    return failure("Invalid parameter: address = " + addr);
+                    return failure("Invalid parameter: address can't be null");
                 }
             }
             case GET_DELEGATE: {
@@ -200,7 +200,7 @@ public class ApiHandlerImpl implements ApiHandler {
                     Delegate d = chain.getDelegateState().getDelegateByAddress(Hex.parse(address));
                     return success(delegateToJson(d));
                 } else {
-                    return failure("Invalid parameter: address = " + address);
+                    return failure("Invalid parameter: address can't be null");
                 }
             }
             case GET_VALIDATORS: {
@@ -241,7 +241,7 @@ public class ApiHandlerImpl implements ApiHandler {
                     }
                     return success(obj);
                 } else {
-                    return failure("Invalid parameter: delegate = " + delegate);
+                    return failure("Invalid parameter: delegate can't be null");
                 }
             }
 
@@ -285,7 +285,7 @@ public class ApiHandlerImpl implements ApiHandler {
         }
 
         // [2] parse transaction type
-        TransactionType type = null;
+        TransactionType type;
         switch (cmd) {
         case TRANSFER:
             type = TransactionType.TRANSFER;

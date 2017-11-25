@@ -178,7 +178,7 @@ public class Kernel {
         SemuxBFT cons = SemuxBFT.getInstance();
         cons.init(chain, channelMgr, pendingMgr, coinbase);
 
-        Thread consThread = new Thread(() -> cons.start(), "cons");
+        Thread consThread = new Thread(cons::start, "cons");
         consThread.start();
 
         // ====================================

@@ -34,7 +34,7 @@ public class Wallet {
     private File file;
     private String password;
 
-    private List<EdDSA> accounts = Collections.synchronizedList(new ArrayList<>());
+    private final List<EdDSA> accounts = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Create a new wallet instance.
@@ -178,7 +178,7 @@ public class Wallet {
     public void setAccounts(List<EdDSA> list) throws WalletLockedException {
         requireUnlocked();
 
-        synchronized (list) {
+        synchronized (accounts) {
             accounts.clear();
             accounts.addAll(list);
         }
@@ -304,7 +304,7 @@ public class Wallet {
         requireUnlocked();
 
         if (newPassword == null) {
-            new IllegalArgumentException("Password can not be null");
+            throw new IllegalArgumentException("Password can not be null");
         }
 
         this.password = newPassword;

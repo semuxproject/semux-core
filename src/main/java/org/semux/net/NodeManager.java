@@ -156,7 +156,7 @@ public class NodeManager {
         Set<InetSocketAddress> nodes = new HashSet<>();
 
         try {
-            String name = null;
+            String name;
             if (network == 0) {
                 name = DNS_SEED_MAINNET;
             } else if (network == 1) {

@@ -12,18 +12,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.GroupLayout;
+import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JRadioButton;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -48,14 +38,14 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
     private File backupFile = null;
 
-    private Object done = new Object();
+    private final Object done = new Object();
 
     public WelcomeFrame(Wallet wallet, WalletModel model) {
         this.wallet = wallet;
 
         // setup frame properties
         this.setTitle(MessagesUtil.get("SemuxWallet"));
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.setMinimumSize(new Dimension(600, 400));
         SwingUtil.centerizeFrame(this, 600, 400);

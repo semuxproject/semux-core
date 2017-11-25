@@ -81,7 +81,6 @@ public class Vote {
      */
     public boolean validate() {
         return type != null //
-                && (value == VALUE_APPROVE || value == VALUE_REJECT) //
                 && height > 0 //
                 && view >= 0 //
                 && blockHash != null && blockHash.length == 32 //
