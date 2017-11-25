@@ -62,6 +62,7 @@
                             <exclude>org.powermock:*</exclude>
                             <exclude>com.github.stefanbirkner:system-rules</exclude>
                             <exclude>uk.org.lidalia:slf4j-test</exclude>
+                            <exclude>org.assertj:*</exclude>
                         </excludes>
                     </artifactSet>
                     <transformers>
@@ -399,6 +400,7 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-swing-junit</artifactId>
             <version>3.8.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
