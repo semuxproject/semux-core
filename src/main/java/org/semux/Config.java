@@ -64,6 +64,9 @@ public class Config {
                         }
                     }
                     break;
+                case "p2p.declaredIp":
+                    P2P_DECLARED_IP = props.getProperty(name);
+                    break;
 
                 case "net.blacklist":
                     String[] blacklist = props.getProperty(name).split(",");
@@ -206,6 +209,11 @@ public class Config {
      * Seed nodes for P2P.
      */
     public static Set<InetSocketAddress> P2P_SEED_NODES = new HashSet<>();
+    
+    /**
+     * Declared IP address
+     */
+    public static String P2P_DECLARED_IP = null;
 
     // =========================
     // Network

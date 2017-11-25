@@ -38,6 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
+import io.netty.util.internal.StringUtil;
+
 /**
  * Kernel maintains global instances of different kernel modules. It contains
  * functionalities shared by both GUI and CLI.
@@ -136,7 +138,7 @@ public class Kernel {
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
 
-        String ip = SystemUtil.getIp();
+        String ip = StringUtil.isNullOrEmpty(Config.P2P_DECLARED_IP) ? SystemUtil.getIp() : Config.P2P_DECLARED_IP;
         logger.info("Your IP address = {}", ip);
         client = new PeerClient(ip, Config.P2P_LISTEN_PORT, coinbase);
 
