@@ -11,6 +11,8 @@ import org.semux.gui.model.WalletModel;
 
 public class DelegatePanelTestApplication extends BaseTestApplication {
 
+    private static final long serialVersionUID = 1L;
+
     DelegatesPanel delegatesPanel;
 
     DelegatePanelTestApplication(WalletModel walletModel) {
