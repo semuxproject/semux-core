@@ -21,7 +21,7 @@ public class Bytes {
     /**
      * Empty byte array.
      */
-    public static final byte[] EMPY_BYTES = new byte[0];
+    public static final byte[] EMPTY_BYTES = new byte[0];
 
     /**
      * Empty address.

@@ -331,8 +331,8 @@ public class APIHandlerTest {
     @Test
     public void testTransfer() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
-        String uri = "/transfer?&from=0&to=" + key.toAddressString() + "&value=1000000000&fee="
-                + Config.MIN_TRANSACTION_FEE + "&data=test";
+        String uri = "/transfer?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + key.toAddressString()
+                + "&value=1000000000&fee=" + Config.MIN_TRANSACTION_FEE + "&data=test";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -347,8 +347,8 @@ public class APIHandlerTest {
 
     @Test
     public void testDelegate() throws IOException, InterruptedException {
-        String uri = "/delegate?&from=0&fee=" + Config.MIN_TRANSACTION_FEE + "&data="
-                + Hex.encode(Bytes.of("test_delegate"));
+        String uri = "/delegate?&from=" + wallet.getAccount(0).toAddressString() + "&fee=" + Config.MIN_TRANSACTION_FEE
+                + "&data=" + Hex.encode(Bytes.of("test_delegate"));
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -366,7 +366,8 @@ public class APIHandlerTest {
         EdDSA delegate = new EdDSA();
         ds.register(delegate.toAddress(), Bytes.of("test_vote"));
 
-        String uri = "/vote?&from=0&to=" + delegate.toAddressString() + "&value=1000000000&fee=50000000";
+        String uri = "/vote?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + delegate.toAddressString()
+                + "&value=1000000000&fee=50000000";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
@@ -389,7 +390,8 @@ public class APIHandlerTest {
         as.adjustLocked(voter, amount);
         ds.vote(voter, delegate.toAddress(), amount);
 
-        String uri = "/unvote?&from=0&to=" + delegate.toAddressString() + "&value=" + amount + "&fee=50000000";
+        String uri = "/unvote?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + delegate.toAddressString()
+                + "&value=" + amount + "&fee=50000000";
         JSONObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));

@@ -38,7 +38,7 @@ public abstract class Message {
         super();
         this.code = code;
         this.responseMessageClass = responseMessageClass;
-        this.encoded = Bytes.EMPY_BYTES;
+        this.encoded = Bytes.EMPTY_BYTES;
     }
 
     /**

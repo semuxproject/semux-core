@@ -351,7 +351,7 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     private void clear() {
-        setTo(Bytes.EMPY_BYTES);
+        setTo(Bytes.EMPTY_BYTES);
         setAmount(0);
         setFee(Config.MIN_TRANSACTION_FEE);
         setMemo("");

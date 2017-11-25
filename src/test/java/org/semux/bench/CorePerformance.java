@@ -64,7 +64,7 @@ public class CorePerformance {
 
         List<Signature> votes = new ArrayList<>();
         for (int i = 0; i < Config.getNumberOfValidators(1000000L); i++) {
-            votes.add(new EdDSA().sign(Bytes.EMPY_BYTES));
+            votes.add(new EdDSA().sign(Bytes.EMPTY_BYTES));
         }
         block.setView(1);
         block.setVotes(votes);

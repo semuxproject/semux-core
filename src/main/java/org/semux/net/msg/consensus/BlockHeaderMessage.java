@@ -23,7 +23,7 @@ public class BlockHeaderMessage extends Message {
         this.header = header;
 
         SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBytes(header == null ? Bytes.EMPY_BYTES : header.toBytes());
+        enc.writeBytes(header == null ? Bytes.EMPTY_BYTES : header.toBytes());
         this.encoded = enc.toBytes();
     }
 

@@ -36,7 +36,7 @@ public class SemuxPerformance {
             params.put("to", coinbase);
             params.put("value", 1 * Unit.MILLI_SEM);
             params.put("fee", Config.MIN_TRANSACTION_FEE);
-            params.put("data", Bytes.EMPY_BYTES);
+            params.put("data", Bytes.EMPTY_BYTES);
             params.put("password", password);
 
             ApiUtil api = new ApiUtil(server, username, password);

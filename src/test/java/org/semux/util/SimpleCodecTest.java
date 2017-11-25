@@ -27,7 +27,7 @@ public class SimpleCodecTest {
         long long1 = Long.MAX_VALUE;
         long long2 = Long.MIN_VALUE;
         byte[] bytes1 = Bytes.random(20);
-        byte[] bytes2 = Bytes.EMPY_BYTES;
+        byte[] bytes2 = Bytes.EMPTY_BYTES;
         String string1 = "test";
         String string2 = "";
 

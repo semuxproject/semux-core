@@ -102,7 +102,7 @@ public class SemuxVM {
         @Override
         public void run() {
             for (VMTask task : tasks) {
-                SemuxProcess proc = new SemuxProcess(task.getRuntime(), task.getOps(), task.getGas());
+                SemuxProcess proc = new SemuxProcess(task.getRuntime(), task.getCode(), task.getLimit());
                 proc.run();
                 task.setDone(true);
             }

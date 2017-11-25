@@ -12,28 +12,28 @@ package org.semux.vm;
  */
 public class VMTask {
     private SemuxRuntime runtime;
-    private byte[] ops;
-    private long gas;
+    private byte[] code;
+    private long limit;
 
-    private volatile boolean isDone;
+    private boolean isDone;
 
-    public VMTask(SemuxRuntime runtime, byte[] ops, long gas) {
+    public VMTask(SemuxRuntime runtime, byte[] code, long limit) {
         super();
         this.runtime = runtime;
-        this.ops = ops;
-        this.gas = gas;
+        this.code = code;
+        this.limit = limit;
     }
 
     public SemuxRuntime getRuntime() {
         return runtime;
     }
 
-    public byte[] getOps() {
-        return ops;
+    public byte[] getCode() {
+        return code;
     }
 
-    public long getGas() {
-        return gas;
+    public long getLimit() {
+        return limit;
     }
 
     public boolean isDone() {

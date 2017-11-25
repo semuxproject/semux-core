@@ -51,7 +51,7 @@ public class TransactionResult {
      * @param success
      */
     public TransactionResult(boolean success) {
-        this(success, Bytes.EMPY_BYTES, new ArrayList<>());
+        this(success, Bytes.EMPTY_BYTES, new ArrayList<>());
     }
 
     /**

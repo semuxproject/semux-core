@@ -356,14 +356,14 @@ public class Config {
     public static boolean VM_ENABLED = false;
 
     /**
-     * Maximum size of process stack.
+     * Maximum size of process stack in words.
      */
-    public static int VM_STACK_SIZE_LIMIT = 64 * 1024;
+    public static int VM_MAX_STACK_SIZE = 1024;
 
     /**
-     * Maximum size of process heap.
+     * Initial size of process heap in bytes.
      */
-    public static int VM_HEAP_SIZE_LIMIT = 4 * 1024 * 1024;
+    public static int VM_INIT_HEAP_SIZE = 128;
 
     // =========================
     // Extra

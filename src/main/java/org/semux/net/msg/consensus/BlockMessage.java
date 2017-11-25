@@ -23,10 +23,10 @@ public class BlockMessage extends Message {
         this.block = block;
 
         SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBytes(block == null ? Bytes.EMPY_BYTES : block.toBytesHeader());
-        enc.writeBytes(block == null ? Bytes.EMPY_BYTES : block.toBytesTransactions());
-        enc.writeBytes(block == null ? Bytes.EMPY_BYTES : block.toBytesResults());
-        enc.writeBytes(block == null ? Bytes.EMPY_BYTES : block.toBytesVotes());
+        enc.writeBytes(block == null ? Bytes.EMPTY_BYTES : block.toBytesHeader());
+        enc.writeBytes(block == null ? Bytes.EMPTY_BYTES : block.toBytesTransactions());
+        enc.writeBytes(block == null ? Bytes.EMPTY_BYTES : block.toBytesResults());
+        enc.writeBytes(block == null ? Bytes.EMPTY_BYTES : block.toBytesVotes());
         this.encoded = enc.toBytes();
     }
 

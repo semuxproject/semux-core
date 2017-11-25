@@ -38,6 +38,9 @@ public class Block implements Comparable<Block> {
         }
     };
 
+    private static final ExecutorService exec = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
+            factory);
+
     /**
      * The block header.
      */
@@ -153,7 +156,6 @@ public class Block implements Comparable<Block> {
         // validate transactions
         int cores = Runtime.getRuntime().availableProcessors();
         if (cores > 1) {
-            ExecutorService exec = Executors.newFixedThreadPool(cores, factory);
             try {
                 List<Future<Boolean>> list = exec.invokeAll(transactions);
                 for (Future<Boolean> f : list) {

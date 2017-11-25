@@ -309,15 +309,13 @@ public class ApiHandlerImpl implements ApiHandler {
                 && (type == TransactionType.DELEGATE || pValue != null) //
                 && pFee != null) {
             // from address
-            EdDSA from = (pFrom.length() >= 20) ? wallet.getAccount(Hex.parse(pFrom))
-                    : wallet.getAccount(Integer.parseInt(pFrom));
+            EdDSA from = wallet.getAccount(Hex.parse(pFrom));
             if (from == null) {
                 return failure("Invalid parameter: from = " + pFrom);
             }
 
             // to address
-            byte[] to = (type == TransactionType.DELEGATE) ? from.toAddress()
-                    : (pTo.length() >= 20) ? Hex.parse(pTo) : wallet.getAccount(Integer.parseInt(pTo)).toAddress();
+            byte[] to = (type == TransactionType.DELEGATE) ? from.toAddress() : Hex.parse(pTo);
             if (to == null) {
                 return failure("Invalid parameter: to = " + pTo);
             }
@@ -329,7 +327,7 @@ public class ApiHandlerImpl implements ApiHandler {
             // nonce, timestamp and data
             long nonce = pendingMgr.getNonce(from.toAddress());
             long timestamp = System.currentTimeMillis();
-            byte[] data = (pData == null) ? Bytes.EMPY_BYTES : Hex.parse(pData);
+            byte[] data = (pData == null) ? Bytes.EMPTY_BYTES : Hex.parse(pData);
 
             // sign
             Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);

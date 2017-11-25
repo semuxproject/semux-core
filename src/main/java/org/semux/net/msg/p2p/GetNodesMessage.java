@@ -24,7 +24,7 @@ public class GetNodesMessage extends Message {
     public GetNodesMessage() {
         super(MessageCode.GET_NODES, NodesMessage.class);
 
-        this.encoded = Bytes.EMPY_BYTES;
+        this.encoded = Bytes.EMPTY_BYTES;
     }
 
     /**
