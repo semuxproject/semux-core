@@ -12,32 +12,32 @@ import org.semux.net.msg.Message;
 
 public interface Sync {
     /**
-     * Initialize the sync manager.
+     * Initializes the sync manager.
      * 
      * @param chain
      * @param channelMgr
      */
-    public void init(Blockchain chain, ChannelManager channelMgr);
+    void init(Blockchain chain, ChannelManager channelMgr);
 
     /**
-     * Start sync manager, and sync blocks in [height, targetHeight).
+     * Starts sync manager, and sync blocks in [height, targetHeight).
      * 
      * @param targetHeight
      *            the target height, exclusive
      */
-    public void start(long targetHeight);
+    void start(long targetHeight);
 
     /**
-     * Stop sync manager.
+     * Stops sync manager.
      */
-    public void stop();
+    void stop();
 
     /**
-     * check if this sync manager is running.
+     * Returns if this sync manager is running.
      * 
      * @return
      */
-    public boolean isRunning();
+    boolean isRunning();
 
     /**
      * Callback when a message is received from network.
@@ -48,5 +48,5 @@ public interface Sync {
      *            the message
      * @return true if the message is processed, otherwise false
      */
-    public boolean onMessage(Channel channel, Message msg);
+    boolean onMessage(Channel channel, Message msg);
 }

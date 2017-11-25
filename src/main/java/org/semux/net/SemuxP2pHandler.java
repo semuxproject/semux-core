@@ -278,7 +278,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     }
 
     /**
-     * Checks if a HELLO message is valid.
+     * Checks if a HELLO message is success.
      * 
      * @return
      */
@@ -288,7 +288,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     }
 
     /**
-     * Checks if a World message is valid.
+     * Checks if a World message is success.
      * 
      * @return
      */
@@ -308,14 +308,12 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             consenus.onMessage(channel, new BFTNewHeightMessage(peer.getLatestBlockNumber() + 1));
 
             // start peers exchange
-            getNodes = exec.scheduleAtFixedRate(() -> {
-                msgQueue.sendMessage(new GetNodesMessage());
-            }, channel.isInbound() ? 2 : 0, 2, TimeUnit.MINUTES);
+            getNodes = exec.scheduleAtFixedRate(() -> msgQueue.sendMessage(new GetNodesMessage()),
+                    channel.isInbound() ? 2 : 0, 2, TimeUnit.MINUTES);
 
             // start ping pong
-            pingPong = exec.scheduleAtFixedRate(() -> {
-                msgQueue.sendMessage(new PingMessage());
-            }, channel.isInbound() ? 1 : 0, 1, TimeUnit.MINUTES);
+            pingPong = exec.scheduleAtFixedRate(() -> msgQueue.sendMessage(new PingMessage()),
+                    channel.isInbound() ? 1 : 0, 1, TimeUnit.MINUTES);
 
             // set indicator
             isHandshakeDone = true;

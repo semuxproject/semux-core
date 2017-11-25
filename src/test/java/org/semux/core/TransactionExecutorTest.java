@@ -63,20 +63,20 @@ public class TransactionExecutorTest {
 
         // insufficient available
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
-        assertFalse(result.isValid());
+        assertFalse(result.isSuccess());
 
         long available = 1000 * Unit.SEM;
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
         result = exec.execute(tx, as.track(), ds.track());
-        assertTrue(result.isValid());
+        assertTrue(result.isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(0, as.getAccount(to).getAvailable());
 
         // execute and commit
         result = executeAndCommit(exec, tx, as.track(), ds.track());
-        assertTrue(result.isValid());
+        assertTrue(result.isSuccess());
         assertEquals(available - value - fee, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(value, as.getAccount(to).getAvailable());
     }
@@ -100,18 +100,18 @@ public class TransactionExecutorTest {
         // register delegate (from != to, random name)
         Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(delegate);
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
-        assertFalse(result.isValid());
+        assertFalse(result.isSuccess());
 
         // register delegate (from == to, random name)
         tx = new Transaction(type, from, value, fee, nonce, timestamp, data).sign(delegate);
         result = exec.execute(tx, as.track(), ds.track());
-        assertFalse(result.isValid());
+        assertFalse(result.isSuccess());
 
         // register delegate (from == to, normal name) and commit
         data = Bytes.of("test");
         tx = new Transaction(type, from, value, fee, nonce, timestamp, data).sign(delegate);
         result = executeAndCommit(exec, tx, as.track(), ds.track());
-        assertTrue(result.isValid());
+        assertTrue(result.isSuccess());
         assertEquals(available - Config.DELEGATE_BURN_AMOUNT - fee, as.getAccount(delegate.toAddress()).getAvailable());
         assertArrayEquals(delegate.toAddress(), ds.getDelegateByName(data).getAddress());
         assertArrayEquals(data, ds.getDelegateByAddress(delegate.toAddress()).getName());
@@ -137,13 +137,13 @@ public class TransactionExecutorTest {
         // vote for non-existing delegate
         Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(voter);
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
-        assertFalse(result.isValid());
+        assertFalse(result.isSuccess());
 
         ds.register(delegate.toAddress(), Bytes.of("delegate"));
 
         // vote for delegate
         result = executeAndCommit(exec, tx, as.track(), ds.track());
-        assertTrue(result.isValid());
+        assertTrue(result.isSuccess());
         assertEquals(available - value - fee, as.getAccount(voter.toAddress()).getAvailable());
         assertEquals(value, as.getAccount(voter.toAddress()).getLocked());
         assertEquals(value, ds.getDelegateByAddress(delegate.toAddress()).getVotes());
@@ -171,19 +171,19 @@ public class TransactionExecutorTest {
         // unvote (never voted before)
         Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(voter);
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
-        assertFalse(result.isValid());
+        assertFalse(result.isSuccess());
 
         ds.vote(voter.toAddress(), delegate.toAddress(), value);
 
         // unvote (locked = 0)
         result = exec.execute(tx, as.track(), ds.track());
-        assertFalse(result.isValid());
+        assertFalse(result.isSuccess());
 
         as.adjustLocked(voter.toAddress(), value);
 
         // normal unvote
         result = executeAndCommit(exec, tx, as.track(), ds.track());
-        assertTrue(result.isValid());
+        assertTrue(result.isSuccess());
         assertEquals(available + value - fee, as.getAccount(voter.toAddress()).getAvailable());
         assertEquals(0, as.getAccount(voter.toAddress()).getLocked());
         assertEquals(0, ds.getDelegateByAddress(delegate.toAddress()).getVotes());

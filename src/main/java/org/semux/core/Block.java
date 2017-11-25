@@ -145,7 +145,7 @@ public class Block implements Comparable<Block> {
     /**
      * Validates transactions in parallel.
      * 
-     * @param transactionsRoot
+     * @param header
      * @param transactions
      * @return
      */
@@ -182,7 +182,7 @@ public class Block implements Comparable<Block> {
     /**
      * Validates results.
      * 
-     * @param resultsRoot
+     * @param header
      * @param results
      * @return
      */

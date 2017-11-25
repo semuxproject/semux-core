@@ -282,7 +282,6 @@ public class DelegateStateImpl implements DelegateState {
      * 
      * @param key
      *            the byte array representation of [delegate, voter].
-     * @param v
      * @return
      */
     protected long getVote(ByteArray key) {

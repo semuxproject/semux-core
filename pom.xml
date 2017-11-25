@@ -211,6 +211,7 @@
                     <instrumentation>
                         <ignoreTrivial>true</ignoreTrivial>
                     </instrumentation>
+                    <check/>
                 </configuration>
             </plugin>
 

@@ -19,8 +19,7 @@ public class GetNodesMessage extends Message {
 
     /**
      * Create a GET_NODES message.
-     * 
-     * @param nodes
+     *
      */
     public GetNodesMessage() {
         super(MessageCode.GET_NODES, NodesMessage.class);

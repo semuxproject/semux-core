@@ -57,7 +57,7 @@ public enum ReasonCode {
         return intToCode[0xff & code];
     }
 
-    private ReasonCode(int code) {
+    ReasonCode(int code) {
         this.code = code;
     }
 

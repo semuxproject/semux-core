@@ -35,7 +35,7 @@ public class SelectDialog extends JDialog implements ActionListener {
     private JComboBox<Object> comboBox;
     private int selected = -1;
 
-    public SelectDialog(JFrame parent, String message, List<? extends Object> options) {
+    public SelectDialog(JFrame parent, String message, List<?> options) {
         super(parent, MessagesUtil.get("Select"));
 
         JLabel labelLogo = new JLabel("");
@@ -48,7 +48,7 @@ public class SelectDialog extends JDialog implements ActionListener {
 
         JButton btnCancel = SwingUtil.createDefaultButton(MessagesUtil.get("Cancel"), this, Action.CANCEL);
 
-        comboBox = new JComboBox<Object>();
+        comboBox = new JComboBox<>();
         comboBox.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         for (Object opt : options) {
             comboBox.addItem(opt);

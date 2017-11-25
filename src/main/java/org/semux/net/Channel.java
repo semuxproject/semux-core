@@ -67,8 +67,6 @@ public class Channel {
      * @param isDiscoveryMode
      * @param client
      * @param remoteAddress
-     * @param sync
-     * @param consensus
      */
     public void init(ChannelPipeline pipe, boolean isInbound, boolean isDiscoveryMode, PeerClient client,
             InetSocketAddress remoteAddress) {
@@ -254,9 +252,7 @@ public class Channel {
         if (getClass() != obj.getClass())
             return false;
         Channel other = (Channel) obj;
-        if (id != other.id)
-            return false;
-        return true;
+        return id == other.id;
     }
 
     @Override

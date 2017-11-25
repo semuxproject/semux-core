@@ -32,13 +32,13 @@ public class MerkleUtil {
     /**
      * Compute results merkle root.
      * 
-     * @param txs
+     * @param results
      *            transaction results
      * @return
      */
-    public static byte[] computeResultsRoot(List<TransactionResult> res) {
+    public static byte[] computeResultsRoot(List<TransactionResult> results) {
         List<byte[]> hashes = new ArrayList<>();
-        for (TransactionResult tx : res) {
+        for (TransactionResult tx : results) {
             hashes.add(Hash.h256(tx.toBytes()));
         }
         return new MerkleTree(hashes).getRootHash();

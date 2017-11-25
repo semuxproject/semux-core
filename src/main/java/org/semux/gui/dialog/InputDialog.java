@@ -100,7 +100,7 @@ public class InputDialog extends JDialog implements ActionListener {
 
         switch (action) {
         case OK:
-            text = new String(textField.getText());
+            text = textField.getText();
             this.dispose();
             break;
         case CANCEL:

@@ -40,7 +40,7 @@ public class SimpleDecoder {
 
     public boolean readBoolean() {
         require(1);
-        return in[index++] > 0 ? true : false;
+        return in[index++] != 0;
     }
 
     public byte readByte() {

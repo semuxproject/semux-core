@@ -37,12 +37,11 @@ public class ApiUtil {
     }
 
     /**
-     * Send an API request. <br>
+     * Sends an API request. <br>
      * <br>
      * NOTE: Byte array parameters will be automatically converted into its Hex
      * representation.
-     * 
-     * @param server
+     *
      * @param cmd
      * @param params
      * @return
@@ -61,7 +60,7 @@ public class ApiUtil {
             } else {
                 v = URLEncoder.encode(params.get(k).toString(), "UTF-8");
             }
-            sb.append("&" + k + "=" + v);
+            sb.append("&").append(k).append("=").append(v);
         }
         url += sb.length() == 0 ? "" : "?" + sb.substring(1);
         sb.setLength(0);
@@ -83,9 +82,11 @@ public class ApiUtil {
     }
 
     /**
-     * Send an API request.
-     * 
-     * @param server
+     * Sends an API request.<br>
+     * <br>
+     * NOTE: Byte array parameters will be automatically converted into its Hex
+     * representation.
+     *
      * @param cmd
      * @param params
      * @return

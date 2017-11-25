@@ -28,7 +28,7 @@ public class PeerServerTest {
         assertTrue(ps.getServer().isListening());
 
         try (Socket sock = new Socket(remoteClient.getIp(), remoteClient.getPort())) {
-            // do nothing
+            sock.getInputStream();
         } catch (IOException e) {
             fail(String.format("Server is not listenning at [%s:%s]", remoteClient.getIp(), remoteClient.getPort()));
         }

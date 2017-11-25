@@ -31,15 +31,11 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
     private static final int MAX_PACKETS = 16;
     protected Map<Integer, Pair<List<Frame>, AtomicInteger>> incompletePackets = new LRUMap<>(MAX_PACKETS);
 
-    @SuppressWarnings("unused")
-    private Channel channel;
-
     private MessageFactory messageFactory;
 
     private AtomicInteger count;
 
     public SemuxMessageHandler(Channel channel) {
-        this.channel = channel;
         this.messageFactory = new MessageFactory();
         this.count = new AtomicInteger(0);
     }
@@ -114,7 +110,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
         }
     }
 
-    private Message decodeMessage(ChannelHandlerContext ctx, List<Frame> frames) throws IOException {
+    private Message decodeMessage(ChannelHandlerContext ctx, List<Frame> frames) {
         if (frames == null || frames.isEmpty()) {
             return null;
         }

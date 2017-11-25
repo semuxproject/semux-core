@@ -20,7 +20,7 @@ public interface DelegateState {
      * @param registeredAt
      * @return
      */
-    public boolean register(byte[] addres, byte[] name, long registeredAt);
+    boolean register(byte[] addres, byte[] name, long registeredAt);
 
     /**
      * Registers a delegate.
@@ -29,7 +29,7 @@ public interface DelegateState {
      * @param name
      * @return
      */
-    public boolean register(byte[] address, byte[] name);
+    boolean register(byte[] address, byte[] name);
 
     /**
      * Adds vote to a delegate.
@@ -40,7 +40,7 @@ public interface DelegateState {
      * 
      * @return
      */
-    public boolean vote(byte[] voter, byte[] delegate, long value);
+    boolean vote(byte[] voter, byte[] delegate, long value);
 
     /**
      * Removes vote of a delegate.
@@ -51,7 +51,7 @@ public interface DelegateState {
      * 
      * @return
      */
-    public boolean unvote(byte[] voter, byte[] delegate, long value);
+    boolean unvote(byte[] voter, byte[] delegate, long value);
 
     /**
      * Returns vote that one voter has given to the specified delegate.
@@ -60,16 +60,15 @@ public interface DelegateState {
      * @param delegate
      * @return
      */
-    public long getVote(byte[] voter, byte[] delegate);
+    long getVote(byte[] voter, byte[] delegate);
 
     /**
      * Returns all the votes for one delegate.
-     * 
-     * @param voter
+     *
      * @param delegate
      * @return
      */
-    public Map<ByteArray, Long> getVotes(byte[] delegate);
+    Map<ByteArray, Long> getVotes(byte[] delegate);
 
     /**
      * Retrieves delegate by its name.
@@ -77,7 +76,7 @@ public interface DelegateState {
      * @param name
      * @return
      */
-    public Delegate getDelegateByName(byte[] name);
+    Delegate getDelegateByName(byte[] name);
 
     /**
      * Retrieves delegate by its address.
@@ -85,27 +84,27 @@ public interface DelegateState {
      * @param address
      * @return
      */
-    public Delegate getDelegateByAddress(byte[] address);
+    Delegate getDelegateByAddress(byte[] address);
 
     /**
      * Returns all delegates.
      * 
      * @return
      */
-    public List<Delegate> getDelegates();
+    List<Delegate> getDelegates();
 
     /**
      * Returns a snapshot and starts tracking updates.
      */
-    public DelegateState track();
+    DelegateState track();
 
     /**
      * Commits all updates since last snapshot.
      */
-    public void commit();
+    void commit();
 
     /**
      * Reverts all updates since last snapshot.
      */
-    public void rollback();
+    void rollback();
 }

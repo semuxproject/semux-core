@@ -35,21 +35,16 @@ public class SemuxHttpHandlerTest {
 
     @Test(expected = IOException.class)
     public void testAuth() throws IOException {
-        SemuxAPI server = new SemuxAPI(new ApiHandler() {
-            @Override
-            public String service(String u, Map<String, String> p, HttpHeaders h) {
-                uri = u;
-                params = p;
-                headers = h;
+        SemuxAPI server = new SemuxAPI((u, p, h) -> {
+            uri = u;
+            params = p;
+            headers = h;
 
-                return "test";
-            }
+            return "test";
         });
 
         // wait for server to boot up
-        new Thread(() -> {
-            server.start(ip, port);
-        }).start();
+        new Thread(() -> server.start(ip, port)).start();
         while (!server.isListening()) {
             try {
                 Thread.sleep(200);
@@ -76,21 +71,16 @@ public class SemuxHttpHandlerTest {
 
     @Test
     public void testPOST() throws IOException {
-        SemuxAPI server = new SemuxAPI(new ApiHandler() {
-            @Override
-            public String service(String u, Map<String, String> p, HttpHeaders h) {
-                uri = u;
-                params = p;
-                headers = h;
+        SemuxAPI server = new SemuxAPI((u, p, h) -> {
+            uri = u;
+            params = p;
+            headers = h;
 
-                return "test";
-            }
+            return "test";
         });
 
         // wait for server to boot up
-        new Thread(() -> {
-            server.start(ip, port);
-        }).start();
+        new Thread(() -> server.start(ip, port)).start();
         while (!server.isListening()) {
             try {
                 Thread.sleep(200);
@@ -123,21 +113,16 @@ public class SemuxHttpHandlerTest {
 
     @Test
     public void testGET() throws IOException {
-        SemuxAPI server = new SemuxAPI(new ApiHandler() {
-            @Override
-            public String service(String u, Map<String, String> p, HttpHeaders h) {
-                uri = u;
-                params = p;
-                headers = h;
+        SemuxAPI server = new SemuxAPI((u, p, h) -> {
+            uri = u;
+            params = p;
+            headers = h;
 
-                return "test";
-            }
+            return "test";
         });
 
         // wait for server to boot up
-        new Thread(() -> {
-            server.start(ip, port);
-        }).start();
+        new Thread(() -> server.start(ip, port)).start();
         while (!server.isListening()) {
             try {
                 Thread.sleep(200);

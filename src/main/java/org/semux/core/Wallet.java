@@ -251,9 +251,7 @@ public class Wallet {
      * Add a list of accounts to the wallet.
      * 
      * NOTE: you need to call {@link #flush()} to update the wallet on disk.
-     * 
-     * @param newKey
-     *            a new account
+     *
      * @return the number accounts added
      * @throws WalletLockedException
      * 
@@ -314,8 +312,7 @@ public class Wallet {
 
     /**
      * Flush this wallet into the disk.
-     * 
-     * @param keys
+     *
      * @return true if the wallet has been flushed into disk successfully, otherwise
      *         false
      * @throws WalletLockedException

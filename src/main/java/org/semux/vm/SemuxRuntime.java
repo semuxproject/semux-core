@@ -16,64 +16,64 @@ public interface SemuxRuntime {
     // =============================
 
     /**
-     * Get the address of this contract.
+     * Returns the address of this contract.
      * 
      * @return
      */
-    public byte[] getAddress();
+    byte[] getAddress();
 
     /**
-     * Get sender address of this transaction
+     * Returns sender address of this transaction
      * 
      * @return
      */
-    public byte[] getSender();
+    byte[] getSender();
 
     /**
-     * Get the value of this transaction
+     * Returns the value of this transaction
      * 
      * @return
      */
-    public long getValue();
+    long getValue();
 
     /**
-     * Get the data of this transaction
+     * Returns the data of this transaction
      * 
      * @return
      */
-    public byte[] getData();
+    byte[] getData();
 
     // =============================
     // Block information
     // =============================
 
     /**
-     * Get the hash of last block.
+     * Returns the hash of last block.
      * 
      * @return
      */
-    public byte[] getBockHash();
+    byte[] getBockHash();
 
     /**
-     * Get the number of last block.
+     * Returns the number of last block.
      * 
      * @return
      */
-    public long getBlockNumber();
+    long getBlockNumber();
 
     /**
-     * Get the coinbase of last block.
+     * Returns the coinbase of last block.
      * 
      * @return
      */
-    public byte[] getBlockCoinbase();
+    byte[] getBlockCoinbase();
 
     /**
-     * Get the timestamp of last block.
+     * Returns the timestamp of last block.
      * 
      * @return
      */
-    public long getBlockTimestamp();
+    long getBlockTimestamp();
 
     // =============================
     // Extra
@@ -84,21 +84,21 @@ public interface SemuxRuntime {
      * 
      * @return
      */
-    public AccountState getAccountState();
+    AccountState getAccountState();
 
     /**
-     * Get the transaction result which stores output and logs.
+     * Returns the transaction result which stores output and logs.
      * 
      * @return
      */
-    public TransactionResult result();
+    TransactionResult result();
 
     /**
-     * Send a transaction to the specified address.
+     * Sends a transaction to the specified address.
      * 
      * @param to
      * @param value
      * @param data
      */
-    public void send(byte[] to, long value, byte[] data);
+    void send(byte[] to, long value, byte[] data);
 }

@@ -157,7 +157,7 @@ public class SwingUtil {
      */
     public static BufferedImage generateQR(String text, int size) {
         try {
-            Map<EncodeHintType, Object> hintMap = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
+            Map<EncodeHintType, Object> hintMap = new EnumMap<>(EncodeHintType.class);
             hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
             hintMap.put(EncodeHintType.MARGIN, 2);
             hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
@@ -363,11 +363,11 @@ public class SwingUtil {
     /**
      * Formats a vote
      * 
-     * @param percentage
+     * @param vote
      * @return
      */
-    public static String formatVote(long nano) {
-        return formatNumber(nano / (double) Unit.SEM);
+    public static String formatVote(long vote) {
+        return formatNumber(vote / (double) Unit.SEM);
     }
 
     /**

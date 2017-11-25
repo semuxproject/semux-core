@@ -147,7 +147,7 @@ public class EdDSA {
      *            message hash
      * @param signature
      *            signature
-     * @return an {@link Signature} instance if valid, otherwise null
+     * @return an {@link Signature} instance if success, otherwise null
      */
     public static Signature verify(byte[] msgHash, byte[] signature) {
         Signature sig = Signature.fromBytes(signature);

@@ -163,9 +163,8 @@ public class MessageQueue {
      * Notify this message queue that a new message has been received.
      * 
      * @param msg
-     * @throws InterruptedException
      */
-    public MessageRoundtrip receivedMessage(Message msg) throws InterruptedException {
+    public MessageRoundtrip receivedMessage(Message msg) {
         if (requests.peek() != null) {
             MessageRoundtrip mr = requests.peek();
             Message m = mr.getMessage();

@@ -96,7 +96,7 @@ public class BlockHeader {
     /**
      * Validates block header format.
      *
-     * @return true if valid, otherwise false
+     * @return true if success, otherwise false
      */
     public boolean validate() {
         return hash != null && hash.length == 32 //

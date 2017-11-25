@@ -61,9 +61,7 @@ public class WalletModel {
      */
     public void fireUpdateEvent() {
         for (ActionListener listener : listeners) {
-            EventQueue.invokeLater(() -> {
-                listener.actionPerformed(new ActionEvent(this, 0, Action.REFRESH.name()));
-            });
+            EventQueue.invokeLater(() -> listener.actionPerformed(new ActionEvent(this, 0, Action.REFRESH.name())));
         }
     }
 

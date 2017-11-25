@@ -91,12 +91,9 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
             ch.config().setOption(ChannelOption.SO_BACKLOG, 1024);
 
             // notify disconnection to channel manager
-            ch.closeFuture().addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) throws Exception {
-                    if (!isDiscoveryMode) {
-                        channelMgr.remove(channel);
-                    }
+            ch.closeFuture().addListener((future) -> {
+                if (!isDiscoveryMode) {
+                    channelMgr.remove(channel);
                 }
             });
         } catch (Exception e) {

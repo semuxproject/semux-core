@@ -32,11 +32,11 @@ public class SystemUtil {
     public static String getOSName() {
         String os = System.getProperty("os.name").toLowerCase();
 
-        if (os.indexOf("win") >= 0) {
+        if (os.contains("win")) {
             return "Windows";
-        } else if (os.indexOf("linux") >= 0) {
+        } else if (os.contains("linux")) {
             return "Linux";
-        } else if (os.indexOf("mac") >= 0) {
+        } else if (os.contains("mac")) {
             return "MacOS";
         } else {
             return "Unkown";
@@ -131,11 +131,7 @@ public class SystemUtil {
         Runtime rt = Runtime.getRuntime();
         logger.debug("# cores = {}, max memory = {}", rt.availableProcessors(), rt.maxMemory());
 
-        if (rt.availableProcessors() < 2 || rt.maxMemory() < 0.8 * 4 * 1024 * 1024 * 1024) {
-            return false;
-        }
-
-        return true;
+        return rt.availableProcessors() >= 2 && rt.maxMemory() >= 0.8 * 4 * 1024 * 1024 * 1024;
     }
 
     /**
@@ -149,8 +145,6 @@ public class SystemUtil {
      * Terminates the JVM asynchronously.
      */
     public static void exitAsync(int code) {
-        new Thread(() -> {
-            System.exit(code);
-        }).start();
+        new Thread(() -> System.exit(code)).start();
     }
 }

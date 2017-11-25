@@ -389,7 +389,7 @@ public enum Opcode {
     private int requires;
     private int produces;
 
-    private Opcode(int code, int requires, int produces) {
+    Opcode(int code, int requires, int produces) {
         this.code = code;
         this.requires = requires;
         this.produces = produces;

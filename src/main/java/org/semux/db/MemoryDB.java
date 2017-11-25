@@ -18,12 +18,7 @@ import org.semux.util.ClosableIterator;
 
 public class MemoryDB implements KVDB {
 
-    public static final DBFactory FACTORY = new DBFactory() {
-        @Override
-        public KVDB getDB(DBName name) {
-            return new MemoryDB();
-        }
-    };
+    public static final DBFactory FACTORY = (name) -> new MemoryDB();
 
     private Map<ByteArray, byte[]> db = new ConcurrentHashMap<>();
 

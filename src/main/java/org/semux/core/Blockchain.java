@@ -19,21 +19,21 @@ public interface Blockchain {
      * 
      * @return
      */
-    public Block getLatestBlock();
+    Block getLatestBlock();
 
     /**
      * Returns the hash of the latest block.
      * 
      * @return
      */
-    public byte[] getLatestBlockHash();
+    byte[] getLatestBlockHash();
 
     /**
      * Returns the number of the latest block.
      * 
      * @return
      */
-    public long getLatestBlockNumber();
+    long getLatestBlockNumber();
 
     /**
      * Returns block number by hash.
@@ -41,14 +41,14 @@ public interface Blockchain {
      * @param hash
      * @return
      */
-    public long getBlockNumber(byte[] hash);
+    long getBlockNumber(byte[] hash);
 
     /**
      * Returns genesis block.
      * 
      * @return
      */
-    public Genesis getGenesis();
+    Genesis getGenesis();
 
     /**
      * Returns block by number.
@@ -56,7 +56,7 @@ public interface Blockchain {
      * @param number
      * @return
      */
-    public Block getBlock(long number);
+    Block getBlock(long number);
 
     /**
      * Returns block by its hash.
@@ -64,7 +64,7 @@ public interface Blockchain {
      * @param hash
      * @return
      */
-    public Block getBlock(byte[] hash);
+    Block getBlock(byte[] hash);
 
     /**
      * Returns block header by block number.
@@ -72,7 +72,7 @@ public interface Blockchain {
      * @param number
      * @return
      */
-    public BlockHeader getBlockHeader(long number);
+    BlockHeader getBlockHeader(long number);
 
     /**
      * Returns block header by block hash.
@@ -80,7 +80,7 @@ public interface Blockchain {
      * @param hash
      * @return
      */
-    public BlockHeader getBlockHeader(byte[] hash);
+    BlockHeader getBlockHeader(byte[] hash);
 
     /**
      * Returns transaction by its hash.
@@ -88,7 +88,7 @@ public interface Blockchain {
      * @param hash
      * @return
      */
-    public Transaction getTransaction(byte[] hash);
+    Transaction getTransaction(byte[] hash);
 
     /**
      * Returns transaction result.
@@ -96,7 +96,7 @@ public interface Blockchain {
      * @param hash
      * @return
      */
-    public TransactionResult getTransactionResult(byte[] hash);
+    TransactionResult getTransactionResult(byte[] hash);
 
     /**
      * Returns the block number of the given transaction.
@@ -104,7 +104,7 @@ public interface Blockchain {
      * @param hash
      * @return
      */
-    public long getTransactionBlockNumber(byte[] hash);
+    long getTransactionBlockNumber(byte[] hash);
 
     /**
      * Returns the total number of transactions from/to the given address.
@@ -113,7 +113,7 @@ public interface Blockchain {
      *            account address
      * @return
      */
-    public int getTransactionCount(byte[] address);
+    int getTransactionCount(byte[] address);
 
     /**
      * Returns transactions from/to an address.
@@ -122,39 +122,39 @@ public interface Blockchain {
      *            account address
      * @param from
      *            transaction index from
-     * @param tio
+     * @param to
      *            transaction index to
      * @return
      */
-    public List<Transaction> getTransactions(byte[] address, int from, int to);
+    List<Transaction> getTransactions(byte[] address, int from, int to);
 
     /**
      * Add a block to the chain.
      * 
      * @param block
      */
-    public void addBlock(Block block);
+    void addBlock(Block block);
 
     /**
      * Returns account state.
      * 
      * @return
      */
-    public AccountState getAccountState();
+    AccountState getAccountState();
 
     /**
      * Returns delegate state.
      * 
      * @return
      */
-    public DelegateState getDelegateState();
+    DelegateState getDelegateState();
 
     /**
      * Returns the validator set based on current state.
      * 
      * @return the peerIds of validators
      */
-    public List<String> getValidators();
+    List<String> getValidators();
 
     /**
      * Returns the statistics of a validator.
@@ -162,12 +162,12 @@ public interface Blockchain {
      * @param address
      * @return
      */
-    public ValidatorStats getValidatorStats(byte[] address);
+    ValidatorStats getValidatorStats(byte[] address);
 
     /**
      * Register a blockchain listener.
      * 
      * @param listener
      */
-    public void addListener(BlockchainListener listener);
+    void addListener(BlockchainListener listener);
 }

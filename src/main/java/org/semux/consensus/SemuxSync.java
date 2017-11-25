@@ -126,12 +126,8 @@ public class SemuxSync implements Sync {
 
             // [2] start tasks
             exec = Executors.newSingleThreadScheduledExecutor(factory);
-            download = exec.scheduleAtFixedRate(() -> {
-                download();
-            }, 0, 50, TimeUnit.MILLISECONDS);
-            process = exec.scheduleAtFixedRate(() -> {
-                process();
-            }, 0, 10, TimeUnit.MILLISECONDS);
+            download = exec.scheduleAtFixedRate(this::download, 0, 50, TimeUnit.MILLISECONDS);
+            process = exec.scheduleAtFixedRate(this::process, 0, 10, TimeUnit.MILLISECONDS);
 
             // [3] wait until the sync is done
             synchronized (done) {
@@ -310,7 +306,7 @@ public class SemuxSync implements Sync {
     }
 
     /**
-     * Check if a block is valid, and apply to the chain if yes.
+     * Check if a block is success, and apply to the chain if yes.
      * 
      * @param block
      * @return

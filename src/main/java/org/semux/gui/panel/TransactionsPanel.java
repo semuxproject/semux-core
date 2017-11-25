@@ -88,7 +88,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         });
 
         // customized table sorter
-        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
         sorter.setComparator(2, SwingUtil.VALUE_COMPARATOR);
         sorter.setComparator(3, SwingUtil.TIMESTAMP_COMPARATOR);
         table.setRowSorter(sorter);
@@ -189,9 +189,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 }
             }
         }
-        transactions.sort((tx1, tx2) -> {
-            return Long.compare(tx2.getTimestamp(), tx1.getTimestamp());
-        });
+        transactions.sort((tx1, tx2) -> Long.compare(tx2.getTimestamp(), tx1.getTimestamp()));
 
         Map<String, Integer> accounts = new HashMap<>();
         int n = 0;

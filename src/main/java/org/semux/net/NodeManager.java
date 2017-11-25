@@ -97,13 +97,9 @@ public class NodeManager {
             peers.addAll(getSeedNodes(Config.NETWORK_ID));
             queue.addAll(peers);
 
-            connectFuture = exec.scheduleAtFixedRate(() -> {
-                doConnect();
-            }, 100, 500, TimeUnit.MILLISECONDS);
+            connectFuture = exec.scheduleAtFixedRate(this::doConnect, 100, 500, TimeUnit.MILLISECONDS);
 
-            persistFuture = exec.scheduleAtFixedRate(() -> {
-                doFetch();
-            }, 2, 4, TimeUnit.MINUTES);
+            persistFuture = exec.scheduleAtFixedRate(this::doFetch, 2, 4, TimeUnit.MINUTES);
 
             isRunning = true;
             logger.info("Node manager started");

@@ -8,10 +8,10 @@ package org.semux.db;
 
 public interface DBFactory {
     /**
-     * Get a KVDB instance for the specified database.
+     * Returns a KVDB instance for the specified database.
      * 
      * @param name
      * @return
      */
-    public KVDB getDB(DBName name);
+    KVDB getDB(DBName name);
 }

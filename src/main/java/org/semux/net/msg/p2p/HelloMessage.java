@@ -67,7 +67,7 @@ public class HelloMessage extends Message {
      * NOTE: only data format and signature is checked here.
      * </p>
      * 
-     * @return true if valid, otherwise false
+     * @return true if success, otherwise false
      */
     public boolean validate() {
         if (peer != null && peer.validate() //

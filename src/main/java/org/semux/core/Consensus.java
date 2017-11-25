@@ -24,22 +24,22 @@ public interface Consensus {
     void init(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, EdDSA coinbase);
 
     /**
-     * Start consensus.
+     * Starts consensus.
      * 
      */
-    public void start();
+    void start();
 
     /**
-     * Stop consensus.
+     * Stops consensus.
      */
-    public void stop();
+    void stop();
 
     /**
-     * check if this consenus is running.
+     * Returns if the consenus is running.
      * 
      * @return
      */
-    public boolean isRunning();
+    boolean isRunning();
 
     /**
      * Callback when a message is received from network.
@@ -50,5 +50,5 @@ public interface Consensus {
      *            the message
      * @return true if the message is processed, otherwise false
      */
-    public boolean onMessage(Channel channel, Message msg);
+    boolean onMessage(Channel channel, Message msg);
 }

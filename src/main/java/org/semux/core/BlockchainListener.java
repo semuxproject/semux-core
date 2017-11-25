@@ -9,9 +9,9 @@ package org.semux.core;
 public interface BlockchainListener {
 
     /**
-     * A new block was added.
+     * Callback when a new block was added.
      * 
      * @param block
      */
-    public void onBlockAdded(Block block);
+    void onBlockAdded(Block block);
 }

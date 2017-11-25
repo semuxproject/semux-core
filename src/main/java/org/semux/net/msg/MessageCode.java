@@ -113,7 +113,7 @@ public enum MessageCode {
 
     private int code;
 
-    private MessageCode(int code) {
+    MessageCode(int code) {
         this.code = code;
     }
 

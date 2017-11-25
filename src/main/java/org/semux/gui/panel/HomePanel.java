@@ -245,9 +245,7 @@ public class HomePanel extends JPanel implements ActionListener {
                 }
             }
         }
-        list.sort((tx1, tx2) -> {
-            return Long.compare(tx2.getTimestamp(), tx1.getTimestamp());
-        });
+        list.sort((tx1, tx2) -> Long.compare(tx2.getTimestamp(), tx1.getTimestamp()));
         list = list.size() > 6 ? list.subList(0, 6) : list;
 
         Set<ByteArray> accounts = new HashSet<>();

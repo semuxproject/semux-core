@@ -55,9 +55,7 @@ public class SemuxBFTTest {
         coinbase = new EdDSA();
         bft.init(chain, channelMgr, pendingMgr, coinbase);
 
-        new Thread(() -> {
-            bft.start();
-        }, "cons").start();
+        new Thread(() -> bft.start(), "cons").start();
 
         Thread.sleep(200);
     }

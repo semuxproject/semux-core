@@ -35,7 +35,7 @@ public class TransactionExecutor {
     /**
      * Execute a list of transactions.
      * 
-     * NOTE: transaction format and signature are assumed to be valid.
+     * NOTE: transaction format and signature are assumed to be success.
      * 
      * @param as
      *            account state
@@ -75,7 +75,7 @@ public class TransactionExecutor {
                     as.adjustAvailable(from, -value - fee);
                     as.adjustAvailable(to, value);
 
-                    result.setValid(true);
+                    result.setSuccess(true);
                 }
                 break;
             }
@@ -88,7 +88,7 @@ public class TransactionExecutor {
 
                     as.adjustAvailable(from, -value - fee);
 
-                    result.setValid(true);
+                    result.setSuccess(true);
                 }
                 break;
             }
@@ -99,7 +99,7 @@ public class TransactionExecutor {
                     as.adjustAvailable(from, -value - fee);
                     as.adjustLocked(from, value);
 
-                    result.setValid(true);
+                    result.setSuccess(true);
                 }
                 break;
             }
@@ -111,7 +111,7 @@ public class TransactionExecutor {
                     as.adjustAvailable(from, value - fee);
                     as.adjustLocked(from, -value);
 
-                    result.setValid(true);
+                    result.setSuccess(true);
                 }
                 break;
             }
@@ -120,8 +120,8 @@ public class TransactionExecutor {
                 break;
             }
 
-            // increase nonce if valid
-            if (result.isValid()) {
+            // increase nonce if success
+            if (result.isSuccess()) {
                 as.increaseNonce(from);
             }
         }
@@ -132,14 +132,12 @@ public class TransactionExecutor {
     /**
      * Execute one transaction.
      * 
-     * NOTE: transaction format and signature are assumed to be valid.
+     * NOTE: transaction format and signature are assumed to be success.
      * 
      * @param as
      *            account state
      * @param ds
      *            delegate state
-     * @param txs
-     *            transactions
      * @return
      */
     public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds) {

@@ -34,7 +34,7 @@ public class SemuxP2pHandlerTest {
     @BeforeClass
     public static void setup() {
         EdDSA key = new EdDSA();
-        remoteClient = new PeerClient("127.0.0.1", 5161, key);
+        PeerClient remoteClient = new PeerClient("127.0.0.1", 5161, key);
         remoteAddress = new InetSocketAddress(remoteClient.getIp(), remoteClient.getPort());
 
         server = new PeerServerMock();

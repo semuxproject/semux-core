@@ -69,8 +69,6 @@ public class SemuxBFT implements Consensus {
     private volatile Status status;
     private volatile State state;
 
-    private Block prevBlock;
-
     private long height;
     private int view;
     private Proof proof;
@@ -236,7 +234,7 @@ public class SemuxBFT implements Consensus {
         state = State.NEW_HEIGHT;
 
         // update previous block
-        prevBlock = chain.getLatestBlock();
+        Block prevBlock = chain.getLatestBlock();
 
         // update view state
         height = prevBlock.getNumber() + 1;
@@ -314,11 +312,8 @@ public class SemuxBFT implements Consensus {
         logger.info("Entered validate: proposal = {}, votes = {} {} {}", proposal != null, validateVotes,
                 precommitVotes, commitVotes);
 
-        boolean valid = (proposal == null) ? false
-                : validateBlock(proposal.getBlockHeader(), proposal.getTransactions());
-        if (valid) {
-
-        }
+        // validate block proposal
+        boolean valid = (proposal != null) && validateBlock(proposal.getBlockHeader(), proposal.getTransactions());
 
         // construct vote
         Vote vote = valid ? Vote.newApprove(VoteType.VALIDATE, height, view, proposal.getBlockHeader().getHash())
@@ -339,7 +334,7 @@ public class SemuxBFT implements Consensus {
         logger.info("Entered pre_commit: proposal = {}, votes = {} {} {}", proposal != null, validateVotes,
                 precommitVotes, commitVotes);
 
-        // vote YES as long as +2/3 validators received a valid block proposal
+        // vote YES as long as +2/3 validators received a success block proposal
         byte[] blockHash = validateVotes.isAnyApproved();
         Vote vote = (blockHash != null) ? Vote.newApprove(VoteType.PRECOMMIT, height, view, blockHash)
                 : Vote.newReject(VoteType.PRECOMMIT, height, view);
@@ -411,13 +406,7 @@ public class SemuxBFT implements Consensus {
     protected void resetTimeout(long timeout) {
         timer.timeout(timeout);
 
-        Iterator<Event> itr = events.iterator();
-        while (itr.hasNext()) {
-            Event e = itr.next();
-            if (e.type == Type.TIMEOUT) {
-                itr.remove();
-            }
-        }
+        events.removeIf(e -> e.type == Type.TIMEOUT);
     }
 
     protected void jumpToView(int view, Proof proof, Proposal proposal) {
@@ -665,8 +654,8 @@ public class SemuxBFT implements Consensus {
      *            block number
      * @param view
      *            a specific view
-     * @param pubKey
-     *            public key
+     * @param peerId
+     *            peer id
      * @return
      */
     protected boolean isPrimary(long height, int view, String peerId) {
@@ -733,10 +722,10 @@ public class SemuxBFT implements Consensus {
     }
 
     /**
-     * Check if a block proposal is valid.
+     * Check if a block proposal is success.
      * 
      * @param header
-     * @param txs
+     * @param transactions
      * @return
      */
     protected boolean validateBlock(BlockHeader header, List<Transaction> transactions) {

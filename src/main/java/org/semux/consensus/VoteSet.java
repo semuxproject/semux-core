@@ -76,11 +76,7 @@ public class VoteSet {
                 && validators.contains(peerId)) {
             if (vote.getValue() == Vote.VALUE_APPROVE) {
                 ByteArray key = ByteArray.of(vote.getBlockHash());
-                Map<String, Vote> map = approvals.get(key);
-                if (map == null) {
-                    map = new HashMap<>();
-                    approvals.put(key, map);
-                }
+                Map<String, Vote> map = approvals.computeIfAbsent(key, k -> new HashMap<>());
                 return map.put(peerId, vote) == null;
             } else {
                 return rejections.put(peerId, vote) == null;

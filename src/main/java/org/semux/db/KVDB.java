@@ -15,15 +15,15 @@ import org.semux.util.ClosableIterator;
 public interface KVDB {
 
     /**
-     * Get the value that is mapped to the specified key.
+     * Returns the value that is mapped to the specified key.
      * 
      * @param key
      * @return
      */
-    public byte[] get(byte[] key);
+    byte[] get(byte[] key);
 
     /**
-     * Associate a value to the specified key.
+     * Associates a value to the specified key.
      * 
      * 
      * 
@@ -31,46 +31,50 @@ public interface KVDB {
      * @param value
      *            can not be null
      */
-    public void put(byte[] key, byte[] value);
+    void put(byte[] key, byte[] value);
 
     /**
-     * Delete the specified key value pair if present.
+     * Deletes the specified key value pair if present.
      * 
      * 
      * @param key
      */
-    public void delete(byte[] key);
+    void delete(byte[] key);
 
     /**
-     * Update a list of key value pairs.
+     * Updates a list of key value pairs.
      * 
      * @param pairs
      *            key value pairs; pair with null value, will be deleted
      */
-    public void updateBatch(List<Pair<byte[], byte[]>> pairs);
+    void updateBatch(List<Pair<byte[], byte[]>> pairs);
 
     /**
-     * Get all the keys. NOTE: be sure to close it after iteration.
+     * Returns all the keys.<br>
+     * <br>
+     * NOTE: be sure to close the iterator after iteration.
      * 
      * @return
      */
-    public ClosableIterator<Entry<byte[], byte[]>> iterator();
+    ClosableIterator<Entry<byte[], byte[]>> iterator();
 
     /**
-     * Get all the keys. NOTE: be sure to close it after iteration.
-     * 
+     * Returns all the keys which has the given prefix.<br>
+     * <br>
+     * NOTE: be sure to close the iterator after iteration.
+     *
      * @return
      */
-    public ClosableIterator<Entry<byte[], byte[]>> iterator(byte[] prefix);
+    ClosableIterator<Entry<byte[], byte[]>> iterator(byte[] prefix);
 
     /**
-     * Close the database.
+     * Closes the database.
      */
-    public void close();
+    void close();
 
     /**
-     * Destroy this DB.
+     * Destroys this DB.
      * 
      */
-    public void destroy();
+    void destroy();
 }

@@ -156,9 +156,7 @@ public class Kernel {
         SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, pendingMgr, nodeMgr, client, null);
         PeerServer p2p = new PeerServer(ci);
 
-        Thread p2pThread = new Thread(() -> {
-            p2p.start(Config.P2P_LISTEN_IP, Config.P2P_LISTEN_PORT);
-        }, "p2p-main");
+        Thread p2pThread = new Thread(() -> p2p.start(Config.P2P_LISTEN_IP, Config.P2P_LISTEN_PORT), "p2p-main");
         p2pThread.start();
 
         // ====================================
@@ -167,9 +165,7 @@ public class Kernel {
         SemuxAPI api = new SemuxAPI(new ApiHandlerImpl(wallet, chain, channelMgr, pendingMgr, nodeMgr, client));
 
         if (Config.API_ENABLED) {
-            Thread apiThread = new Thread(() -> {
-                api.start(Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
-            }, "api-main");
+            Thread apiThread = new Thread(() -> api.start(Config.API_LISTEN_IP, Config.API_LISTEN_PORT), "api-main");
             apiThread.start();
         }
 
@@ -182,9 +178,7 @@ public class Kernel {
         SemuxBFT cons = SemuxBFT.getInstance();
         cons.init(chain, channelMgr, pendingMgr, coinbase);
 
-        Thread consThread = new Thread(() -> {
-            cons.start();
-        }, "cons");
+        Thread consThread = new Thread(() -> cons.start(), "cons");
         consThread.start();
 
         // ====================================

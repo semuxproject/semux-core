@@ -10,5 +10,8 @@ import java.util.Iterator;
 
 public interface ClosableIterator<T> extends Iterator<T> {
 
-    public void close();
+    /**
+     * Closes the underlying resources for this iterator.
+     */
+    void close();
 }

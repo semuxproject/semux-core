@@ -44,8 +44,6 @@ public class SemuxAPI {
 
     private ApiHandler handler;
 
-    private EventLoopGroup bossGroup;
-    private EventLoopGroup workerGroup;
     private ChannelFuture channelFuture;
 
     private boolean listening;
@@ -55,8 +53,8 @@ public class SemuxAPI {
     }
 
     public void start(String ip, int port) {
-        bossGroup = new NioEventLoopGroup(1, factory);
-        workerGroup = new NioEventLoopGroup(0, factory);
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1, factory);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(0, factory);
         try {
             ServerBootstrap b = new ServerBootstrap();
             ChannelInitializer<SocketChannel> initializer = new ChannelInitializer<SocketChannel>() {

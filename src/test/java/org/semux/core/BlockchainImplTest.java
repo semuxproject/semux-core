@@ -27,8 +27,8 @@ import org.semux.util.MerkleUtil;
 
 public class BlockchainImplTest {
 
-    private byte[] coinbase = Bytes.random(30);;
-    private byte[] prevHash = Bytes.random(32);;
+    private byte[] coinbase = Bytes.random(30);
+    private byte[] prevHash = Bytes.random(32);
 
     private EdDSA key = new EdDSA();
     private byte[] from = key.toAddress();

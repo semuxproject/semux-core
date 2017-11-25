@@ -40,7 +40,7 @@ public class Transaction implements Callable<Boolean> {
     private Signature signature;
 
     /**
-     * Create a new transaction. Be sure to call {@link #hash()} afterwards.
+     * Create a new transaction.
      * 
      * @param type
      * @param to
@@ -107,7 +107,7 @@ public class Transaction implements Callable<Boolean> {
      * {@link TransactionExecutor} for that purpose
      * </p>
      * 
-     * @return true if valid, otherwise false
+     * @return true if success, otherwise false
      */
     public boolean validate() {
         return hash != null && hash.length == 32 //
@@ -146,7 +146,7 @@ public class Transaction implements Callable<Boolean> {
     /**
      * Parses the from address from signture.
      * 
-     * @return an {@link Address} if the signature is valid, otherwise null
+     * @return an {@link Address} if the signature is success, otherwise null
      */
     public byte[] getFrom() {
         return (signature == null) ? null : signature.getAddress();

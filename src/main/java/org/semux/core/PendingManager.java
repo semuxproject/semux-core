@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Pending manager maintains all unconfirmed transactions, either from kernel or
- * network. All transactions are evaluated and propagated to peers if valid.
+ * network. All transactions are evaluated and propagated to peers if success.
  * 
  * TODO: sort transaction queue by fee, and other metrics
  *
@@ -271,7 +271,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             }
 
             if (tx.validate() && processTransaction(tx, true) >= 1) {
-                // exit after one valid transaction
+                // exit after one success transaction
                 return;
             }
 
@@ -280,13 +280,13 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Validates the given transaction and add to pool if valid.
+     * Validates the given transaction and add to pool if success.
      * 
      * @param tx
      *            transaction
      * @param relay
-     *            whether to relay the transaction if valid
-     * @return the number of valid transactions processed
+     *            whether to relay the transaction if success
+     * @return the number of success transactions processed
      */
     protected int processTransaction(Transaction tx, boolean relay) {
 
@@ -304,7 +304,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             DelegateState ds = pendingDS.track();
             TransactionResult result = new TransactionExecutor().execute(tx, as, ds);
 
-            if (result.isValid()) {
+            if (result.isSuccess()) {
                 // commit state updates
                 as.commit();
                 ds.commit();

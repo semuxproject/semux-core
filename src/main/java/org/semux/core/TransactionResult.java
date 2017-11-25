@@ -17,9 +17,9 @@ import org.semux.util.SimpleEncoder;
 public class TransactionResult {
 
     /**
-     * Indicates whether this transaction is valid or not.
+     * Indicates whether this transaction is success or not.
      */
-    protected boolean valid;
+    protected boolean success;
 
     /**
      * Transaction returns.
@@ -34,13 +34,13 @@ public class TransactionResult {
     /**
      * Create a transaction result.
      * 
-     * @param valid
+     * @param success
      * @param output
      * @param logs
      */
-    public TransactionResult(boolean valid, byte[] output, List<byte[]> logs) {
+    public TransactionResult(boolean success, byte[] output, List<byte[]> logs) {
         super();
-        this.valid = valid;
+        this.success = success;
         this.returns = output;
         this.logs = logs;
     }
@@ -48,10 +48,10 @@ public class TransactionResult {
     /**
      * Create a transaction result.
      * 
-     * @param valid
+     * @param success
      */
-    public TransactionResult(boolean valid) {
-        this(valid, Bytes.EMPY_BYTES, new ArrayList<>());
+    public TransactionResult(boolean success) {
+        this(success, Bytes.EMPY_BYTES, new ArrayList<>());
     }
 
     /**
@@ -60,17 +60,17 @@ public class TransactionResult {
      * @return
      */
     public boolean validate() {
-        return valid //
+        return success //
                 && returns != null //
                 && logs != null; // RESERVED FOR VM
     }
 
-    public boolean isValid() {
-        return valid;
+    public boolean isSuccess() {
+        return success;
     }
 
-    public void setValid(boolean valid) {
-        this.valid = valid;
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 
     public byte[] getReturns() {
@@ -95,7 +95,7 @@ public class TransactionResult {
 
     public byte[] toBytes() {
         SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBoolean(valid);
+        enc.writeBoolean(success);
         enc.writeBytes(returns);
         enc.writeInt(logs.size());
         for (byte[] log : logs) {
@@ -120,7 +120,7 @@ public class TransactionResult {
 
     @Override
     public String toString() {
-        return "TransactionResult [valid=" + valid + ", output=" + Arrays.toString(returns) + ", # logs=" + logs.size()
-                + "]";
+        return "TransactionResult [success=" + success + ", output=" + Arrays.toString(returns) + ", # logs="
+                + logs.size() + "]";
     }
 }

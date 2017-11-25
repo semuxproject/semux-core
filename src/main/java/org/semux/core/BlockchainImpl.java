@@ -392,8 +392,8 @@ public class BlockchainImpl implements Blockchain {
      *            validator address
      * @param type
      *            stats type
-     * @param blocksForged
-     *            forged or missed a block
+     * @param delta
+     *            difference
      */
     protected void adjustValidatorStats(byte[] address, StatsType type, long delta) {
         byte[] key = Bytes.merge(TYPE_VALIDATOR_STATS, address);

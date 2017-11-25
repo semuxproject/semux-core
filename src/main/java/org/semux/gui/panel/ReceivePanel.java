@@ -73,12 +73,11 @@ public class ReceivePanel extends JPanel implements ActionListener {
         SwingUtil.setColumnWidths(table, 600, 0.05, 0.55, 0.2, 0.2);
         SwingUtil.setColumnAlignments(table, false, false, true, true);
 
-        table.getSelectionModel().addListSelectionListener((ev) -> {
-            actionPerformed(new ActionEvent(ReceivePanel.this, 0, Action.SELECT_ACCOUNT.name()));
-        });
+        table.getSelectionModel().addListSelectionListener(
+                (ev) -> actionPerformed(new ActionEvent(ReceivePanel.this, 0, Action.SELECT_ACCOUNT.name())));
 
         // customized table sorter
-        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
         sorter.setComparator(0, SwingUtil.NUMBER_COMPARATOR);
         sorter.setComparator(2, SwingUtil.VALUE_COMPARATOR);
         sorter.setComparator(3, SwingUtil.VALUE_COMPARATOR);

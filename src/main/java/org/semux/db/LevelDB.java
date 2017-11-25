@@ -91,8 +91,7 @@ public class LevelDB implements KVDB {
 
     @Override
     public void updateBatch(List<Pair<byte[], byte[]>> pairs) {
-        WriteBatch batch = db.createWriteBatch();
-        try {
+        try (WriteBatch batch = db.createWriteBatch()) {
             for (Pair<byte[], byte[]> p : pairs) {
                 if (p.getValue() == null) {
                     batch.delete(p.getLeft());
@@ -101,12 +100,9 @@ public class LevelDB implements KVDB {
                 }
             }
             db.write(batch);
-        } finally {
-            try {
-                batch.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        } catch (IOException e) {
+            logger.error("Failed to update batch", e);
+            SystemUtil.exitAsync(-1);
         }
     }
 

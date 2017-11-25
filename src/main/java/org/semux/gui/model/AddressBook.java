@@ -53,7 +53,6 @@ public class AddressBook {
      * Adds or update an entry to the address book
      *
      * @param address
-     * @throws IllegalAddressException
      */
     public void put(Entry address) {
         database.put(address.getName(), address.getAddress());

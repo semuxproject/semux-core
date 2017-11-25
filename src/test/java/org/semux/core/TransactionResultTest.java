@@ -50,7 +50,7 @@ public class TransactionResultTest {
     }
 
     private void testFields(TransactionResult res) {
-        assertEquals(valid, res.isValid());
+        assertEquals(valid, res.isSuccess());
         assertArrayEquals(returns, res.getReturns());
         assertEquals(logs.size(), res.getLogs().size());
         for (int i = 0; i < logs.size(); i++) {

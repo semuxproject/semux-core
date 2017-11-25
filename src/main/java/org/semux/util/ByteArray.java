@@ -36,11 +36,7 @@ public class ByteArray {
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof ByteArray) {
-            return Arrays.equals(data, ((ByteArray) other).data);
-        } else {
-            return false;
-        }
+        return (other instanceof ByteArray) && Arrays.equals(data, ((ByteArray) other).data);
     }
 
     @Override

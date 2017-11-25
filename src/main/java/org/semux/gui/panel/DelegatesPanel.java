@@ -120,7 +120,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         });
 
         // customized table sorter
-        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
         sorter.setComparator(0, SwingUtil.NUMBER_COMPARATOR);
         sorter.setComparator(3, SwingUtil.NUMBER_COMPARATOR);
         sorter.setComparator(4, SwingUtil.NUMBER_COMPARATOR);
@@ -416,13 +416,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
                 TransactionType type = TransactionType.DELEGATE;
                 byte[] from = a.getKey().toAddress();
-                byte[] to = from;
                 long value = Config.DELEGATE_BURN_AMOUNT;
                 long fee = Config.MIN_TRANSACTION_FEE;
                 long nonce = pendingMgr.getNonce(from);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = Bytes.of(name);
-                Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+                Transaction tx = new Transaction(type, from, value, fee, nonce, timestamp, data);
                 tx.sign(a.getKey());
 
                 sendTransaction(pendingMgr, tx);
