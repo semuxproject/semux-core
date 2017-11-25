@@ -209,7 +209,7 @@ public class Config {
      * Seed nodes for P2P.
      */
     public static Set<InetSocketAddress> P2P_SEED_NODES = new HashSet<>();
-    
+
     /**
      * Declared IP address
      */

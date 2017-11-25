@@ -41,7 +41,6 @@ import org.semux.gui.dialog.TransactionDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
 import org.semux.util.ByteArray;
-import org.semux.util.StringUtil;
 import org.semux.util.UnreachableException;
 
 public class TransactionsPanel extends JPanel implements ActionListener {
@@ -145,7 +144,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
             switch (column) {
             case 0:
-                return StringUtil.toLowercaseExceptFirst(tx.getType().name());
+                return tx.getType().name();
             case 1:
                 return SwingUtil.getTransactionDescription(model, tx);
             case 2:
