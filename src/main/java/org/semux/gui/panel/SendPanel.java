@@ -271,7 +271,7 @@ public class SendPanel extends JPanel implements ActionListener {
                     JOptionPane.showMessageDialog(this, MessagesUtil.get("InvalidMemo", 128));
                 } else {
                     int ret = JOptionPane.showConfirmDialog(this,
-                            MessagesUtil.get("TransferInfo", SwingUtil.formatValue(value), Hex.PREF + Hex.encode(to)),
+                            MessagesUtil.get("TransferInfo", SwingUtil.formatValue(value), Hex.encodeWithPrefix(to)),
                             MessagesUtil.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
                     if (ret != JOptionPane.YES_OPTION) {
                         break;

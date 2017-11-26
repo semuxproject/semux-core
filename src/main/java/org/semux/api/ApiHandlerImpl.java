@@ -86,7 +86,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 obj.put("clientId", Config.getClientId(false));
                 obj.put("coinbase", Hex.PREF + client.getCoinbase());
                 obj.put("latestBlockNumber", chain.getLatestBlockNumber());
-                obj.put("latestBlockHash", Hex.PREF + Hex.encode(chain.getLatestBlockHash()));
+                obj.put("latestBlockHash", Hex.encodeWithPrefix(chain.getLatestBlockHash()));
                 obj.put("activePeers", channelMgr.getActivePeers().size());
                 obj.put("pendingTransactions", pendingMgr.getTransactions().size());
 
@@ -334,7 +334,7 @@ public class ApiHandlerImpl implements ApiHandler {
             tx.sign(from);
 
             if (pendingMgr.addTransactionSync(tx)) {
-                return success(Hex.PREF + Hex.encode(tx.getHash()));
+                return success(Hex.encodeWithPrefix(tx.getHash()));
             } else {
                 return failure("Transaciton rejected by pending manager");
             }
@@ -356,17 +356,17 @@ public class ApiHandlerImpl implements ApiHandler {
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         JSONObject obj = new JSONObject();
-        obj.put("hash", Hex.PREF + Hex.encode(block.getHash()));
+        obj.put("hash", Hex.encodeWithPrefix(block.getHash()));
         obj.put("number", block.getNumber());
         obj.put("view", block.getView());
-        obj.put("coinbase", Hex.PREF + Hex.encode(block.getCoinbase()));
-        obj.put("prevHash", Hex.PREF + Hex.encode(block.getPrevHash()));
+        obj.put("coinbase", Hex.encodeWithPrefix(block.getCoinbase()));
+        obj.put("prevHash", Hex.encodeWithPrefix(block.getPrevHash()));
         obj.put("timestamp", block.getTimestamp());
         obj.put("date", df.format(new Date(block.getTimestamp())));
-        obj.put("transactionsRoot", Hex.PREF + Hex.encode(block.getTransactionsRoot()));
-        obj.put("resultsRoot", Hex.PREF + Hex.encode(block.getResultsRoot()));
-        obj.put("stateRoot", Hex.PREF + Hex.encode(block.getStateRoot()));
-        obj.put("data", Hex.PREF + Hex.encode(block.getData()));
+        obj.put("transactionsRoot", Hex.encodeWithPrefix(block.getTransactionsRoot()));
+        obj.put("resultsRoot", Hex.encodeWithPrefix(block.getResultsRoot()));
+        obj.put("stateRoot", Hex.encodeWithPrefix(block.getStateRoot()));
+        obj.put("data", Hex.encodeWithPrefix(block.getData()));
         JSONArray arr = new JSONArray();
         for (Transaction tx : block.getTransactions()) {
             arr.put(transactionToJson(tx));
@@ -389,16 +389,16 @@ public class ApiHandlerImpl implements ApiHandler {
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         JSONObject obj = new JSONObject();
-        obj.put("hash", Hex.PREF + Hex.encode(tx.getHash()));
+        obj.put("hash", Hex.encodeWithPrefix(tx.getHash()));
         obj.put("type", tx.getType().toString());
-        obj.put("from", Hex.PREF + Hex.encode(tx.getFrom()));
-        obj.put("to", Hex.PREF + Hex.encode(tx.getTo()));
+        obj.put("from", Hex.encodeWithPrefix(tx.getFrom()));
+        obj.put("to", Hex.encodeWithPrefix(tx.getTo()));
         obj.put("value", tx.getValue());
         obj.put("fee", tx.getFee());
         obj.put("nonce", tx.getNonce());
         obj.put("timestamp", tx.getTimestamp());
         obj.put("date", df.format(new Date(tx.getTimestamp())));
-        obj.put("data", Hex.PREF + Hex.encode(tx.getData()));
+        obj.put("data", Hex.encodeWithPrefix(tx.getData()));
 
         return obj;
     }
@@ -415,7 +415,7 @@ public class ApiHandlerImpl implements ApiHandler {
         }
 
         JSONObject obj = new JSONObject();
-        obj.put("address", Hex.PREF + Hex.encode(acc.getAddress()));
+        obj.put("address", Hex.encodeWithPrefix(acc.getAddress()));
         obj.put("available", acc.getAvailable());
         obj.put("locked", acc.getLocked());
         obj.put("nonce", acc.getNonce());
@@ -435,7 +435,7 @@ public class ApiHandlerImpl implements ApiHandler {
         }
 
         JSONObject obj = new JSONObject();
-        obj.put("address", Hex.PREF + Hex.encode(delegate.getAddress()));
+        obj.put("address", Hex.encodeWithPrefix(delegate.getAddress()));
         obj.put("name", new String(delegate.getName()));
         obj.put("votes", delegate.getVotes());
         obj.put("registeredAt", delegate.getRegisteredAt());

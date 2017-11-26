@@ -6,6 +6,7 @@
  */
 package org.semux.util;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -13,8 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import org.junit.Test;
-import org.semux.util.ByteArray;
-import org.semux.util.Bytes;
+import org.semux.crypto.Hex;
 
 public class ByteArrayTest {
 
@@ -29,5 +29,11 @@ public class ByteArrayTest {
 
         assertFalse(map.containsKey(ByteArray.of(b2)));
         assertTrue(map.containsKey(ByteArray.of(b3)));
+    }
+
+    @Test
+    public void testToString() {
+        byte[] b = Bytes.random(20);
+        assertEquals(Hex.encode(b), ByteArray.of(b).toString());
     }
 }

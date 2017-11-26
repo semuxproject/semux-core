@@ -470,7 +470,7 @@ public class SwingUtil {
         }
 
         int n = m.getAccountNumber(address);
-        return n == -1 ? Hex.PREF + Hex.encode(address) : MessagesUtil.get("AccountNum", n);
+        return n == -1 ? Hex.encodeWithPrefix(address) : MessagesUtil.get("AccountNum", n);
     }
 
     /**

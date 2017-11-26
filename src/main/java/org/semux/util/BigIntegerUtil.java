@@ -8,9 +8,9 @@ package org.semux.util;
 
 import java.math.BigInteger;
 
-public class BIUtil {
+public class BigIntegerUtil {
     /**
-     * Check is a big integer is zero.
+     * Returns if the big integer is zero.
      * 
      * @param v
      * @return
@@ -20,7 +20,7 @@ public class BIUtil {
     }
 
     /**
-     * Check if two big integer are equal.
+     * Returns if the two big integer are equal.
      * 
      * @param v1
      * @param v2
@@ -31,7 +31,7 @@ public class BIUtil {
     }
 
     /**
-     * Check if two big integer are not equal.
+     * Returns if the two big integer are not equal.
      * 
      * @param v1
      * @param v2
@@ -42,7 +42,7 @@ public class BIUtil {
     }
 
     /**
-     * Check if the first big integer is less than the second one.
+     * Returns if the first big integer is less than the second one.
      * 
      * @param v1
      * @param v2
@@ -53,7 +53,7 @@ public class BIUtil {
     }
 
     /**
-     * Check if the first big integer is greater than the second one.
+     * Returns if the first big integer is greater than the second one.
      * 
      * @param v1
      * @param v2
@@ -64,7 +64,7 @@ public class BIUtil {
     }
 
     /**
-     * Check if a big integer is positive.
+     * Returns if the big integer is positive.
      * 
      * @param v
      * @return
@@ -74,7 +74,17 @@ public class BIUtil {
     }
 
     /**
-     * Add up two big integers.
+     * Returns if the big integer is negative.
+     * 
+     * @param v
+     * @return
+     */
+    public static boolean isNegative(BigInteger v) {
+        return v.signum() < 0;
+    }
+
+    /**
+     * Returns the sum of the big integers.
      * 
      * @param v1
      * @param v2
@@ -85,7 +95,7 @@ public class BIUtil {
     }
 
     /**
-     * Get the larger one of two big integer.
+     * Returns the larger one of two big integers.
      * 
      * @param v1
      * @param v2
@@ -93,5 +103,16 @@ public class BIUtil {
      */
     public static BigInteger max(BigInteger v1, BigInteger v2) {
         return v1.compareTo(v2) < 0 ? v2 : v1;
+    }
+
+    /**
+     * Returns the smaller one of two big integers.
+     * 
+     * @param v1
+     * @param v2
+     * @return
+     */
+    public static BigInteger min(BigInteger v1, BigInteger v2) {
+        return v1.compareTo(v2) < 0 ? v1 : v2;
     }
 }
