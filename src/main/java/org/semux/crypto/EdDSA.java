@@ -125,19 +125,23 @@ public class EdDSA {
      * @return True if the signature is valid, otherwise false
      */
     public static boolean verify(byte[] msgHash, Signature signature) {
-        try {
-            X509EncodedKeySpec spec = new X509EncodedKeySpec(signature.getPublicKey());
-            EdDSAPublicKey publicKey = new EdDSAPublicKey(spec);
+        if (msgHash != null && signature != null) { // avoid null pointer exception
+            try {
+                X509EncodedKeySpec spec = new X509EncodedKeySpec(signature.getPublicKey());
+                EdDSAPublicKey publicKey = new EdDSAPublicKey(spec);
 
-            EdDSAEngine engine = new EdDSAEngine();
-            engine.initVerify(publicKey);
+                EdDSAEngine engine = new EdDSAEngine();
+                engine.initVerify(publicKey);
 
-            // TODO: reject non-canonical signature
+                // TODO: reject non-canonical signature
 
-            return engine.verifyOneShot(msgHash, signature.getSignature());
-        } catch (Exception e) {
-            return false;
+                return engine.verifyOneShot(msgHash, signature.getSignature());
+            } catch (Exception e) {
+                // do nothing
+            }
         }
+
+        return false;
     }
 
     /**
