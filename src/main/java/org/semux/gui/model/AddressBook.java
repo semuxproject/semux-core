@@ -21,14 +21,14 @@ import org.slf4j.LoggerFactory;
 
 public class AddressBook {
 
-    private static Logger logger = LoggerFactory.getLogger(AddressBook.class);
+    private static final Logger logger = LoggerFactory.getLogger(AddressBook.class);
 
     private static final String FILENAME = "addressbook.json";
 
     // NOTE: A better solution would be storing as a list of entries, with index on
     // name and address.
 
-    private File file;
+    private final File file;
     private JSONObject database;
 
     /**
@@ -123,7 +123,7 @@ public class AddressBook {
                 return new JSONObject(json);
             }
         } catch (IOException e) {
-            logger.error("Failed to retrieve or accesss address book", e);
+            logger.error("Failed to retrieve or access address book", e);
         }
         return new JSONObject();
     }
@@ -175,7 +175,26 @@ public class AddressBook {
 
         @Override
         public int compareTo(Entry o) {
-            return name.compareTo(o.name);
+            int c = name.compareTo(o.name);
+            return (c == 0) ? address.compareTo(o.address) : c;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((address == null) ? 0 : address.hashCode());
+            result = prime * result + ((name == null) ? 0 : name.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Entry) {
+                Entry e = (Entry) obj;
+                return name.equals(e.getName()) && address.equals(e.getAddress());
+            }
+            return false;
         }
     }
 }

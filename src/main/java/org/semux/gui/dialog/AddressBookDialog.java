@@ -38,17 +38,17 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { MessagesUtil.get("Name"), MessagesUtil.get("Address") };
+    private static final String[] columnNames = { MessagesUtil.get("Name"), MessagesUtil.get("Address") };
 
-    private WalletModel model;
+    private final transient WalletModel model;
 
-    private JTable table;
-    private AdressTableModel tableModel;
+    private final JTable table;
+    private final AddressTableModel tableModel;
 
     public AddressBookDialog(JFrame parent, WalletModel model) {
         this.model = model;
 
-        tableModel = new AdressTableModel();
+        tableModel = new AddressTableModel();
         table = new JTable(tableModel);
         table.setBackground(Color.WHITE);
         table.setFillsViewportHeight(true);
@@ -86,21 +86,21 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         refresh();
     }
 
-    class AdressTableModel extends AbstractTableModel {
+    class AddressTableModel extends AbstractTableModel {
         private static final long serialVersionUID = 1L;
 
-        private List<Entry> addresses;
+        private transient List<Entry> addresses;
 
-        public AdressTableModel() {
+        AddressTableModel() {
             this.addresses = Collections.emptyList();
         }
 
-        public void setData(List<Entry> addresses) {
+        void setData(List<Entry> addresses) {
             this.addresses = addresses;
             this.fireTableDataChanged();
         }
 
-        public Entry getRow(int row) {
+        Entry getRow(int row) {
             if ((row >= 0) && (row < addresses.size())) {
                 return addresses.get(row);
             }
