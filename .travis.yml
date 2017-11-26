@@ -1,6 +1,18 @@
 language: java
 matrix:
   include:
+    # Linux OpenJDK Testing & Coverage Report
+    - os: linux
+      sudo: false
+      jdk: openjdk8
+      script:
+        - mvn license:check
+        - mvn formatter:validate
+        - mvn cobertura:cobertura
+      after_success:
+        - mvn coveralls:report
+
+    # Linux Oracle JDK Testing
     - os: linux
       sudo: false
       jdk: oraclejdk8
@@ -8,20 +20,29 @@ matrix:
         apt:
           packages:
             - oracle-java8-installer
-    - os: linux
-      sudo: false
-      jdk: openjdk8
+      script:
+        - mvn test
+
+    # Docker build
+    - language: none
+      os: linux
+      sudo: required
+      services:
+        - docker
+      script:
+        - docker build . -t semux:latest
+        - docker run -d -p 5161:5161 semux:latest --password=""
+        - timeout 10 .travis/test_docker.sh
+        - docker kill $(docker ps -q)
+
+    # OSX Testing
     - os: osx
       osx_image: xcode9.1
+      script:
+        - mvn test
 cache:
   directories:
   - .autoconf
   - $HOME/.m2
 before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then source .travis/start_xvfb.sh; fi
-script:
-  - mvn license:check
-  - mvn formatter:validate
-  - mvn cobertura:cobertura
-after_success:
-  - mvn coveralls:report
