@@ -12,9 +12,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JRadioButton;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -34,11 +45,11 @@ public class WelcomeFrame extends JFrame implements ActionListener {
     private JRadioButton btnCreate;
     private JRadioButton btnImport;
 
-    private Wallet wallet;
+    private transient Wallet wallet;
 
-    private File backupFile = null;
+    private transient File backupFile = null;
 
-    private final Object done = new Object();
+    private transient boolean done = false;
 
     public WelcomeFrame(Wallet wallet, WalletModel model) {
         this.wallet = wallet;
@@ -221,18 +232,21 @@ public class WelcomeFrame extends JFrame implements ActionListener {
     }
 
     public void join() {
-        synchronized (done) {
-            try {
-                done.wait();
-            } catch (InterruptedException e) {
-                SystemUtil.exitAsync(0);
+        synchronized (this) {
+            while (!done) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    SystemUtil.exitAsync(0);
+                }
             }
         }
     }
 
-    public void done() {
-        synchronized (done) {
-            done.notifyAll();
+    private void done() {
+        synchronized (this) {
+            done = true;
+            notifyAll();
         }
     }
 }

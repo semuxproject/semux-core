@@ -53,7 +53,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
     private static String[] columnNames = { MessagesUtil.get("Num"), MessagesUtil.get("Address"),
             MessagesUtil.get("Available"), MessagesUtil.get("Locked") };
 
-    private WalletModel model;
+    private transient WalletModel model;
 
     private JTable table;
     private ReceiveTableModel tableModel;
@@ -137,7 +137,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
         private static final long serialVersionUID = 1L;
 
-        private List<WalletAccount> data;
+        private transient List<WalletAccount> data;
 
         public ReceiveTableModel() {
             this.data = Collections.emptyList();

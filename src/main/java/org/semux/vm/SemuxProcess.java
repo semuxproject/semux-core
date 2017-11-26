@@ -70,7 +70,7 @@ public class SemuxProcess implements Runnable {
 
                 // TODO: interpret opcode
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.debug("VM exception", e);
         } finally {
             status = Status.STOPPED;

@@ -229,10 +229,10 @@ public class SemuxCLI {
         if (account == null) {
             logger.error(MSG_ADDRESS_NOT_IN_WALLET);
             SystemUtil.exit(1);
+        } else {
+            String privateKey = Hex.encode(account.getPrivateKey());
+            System.out.println(privateKey);
         }
-
-        String privateKey = Hex.encode(account.getPrivateKey());
-        System.out.println(privateKey);
     }
 
     protected void importPrivateKey(String key) {

@@ -64,7 +64,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             MessagesUtil.get("Address"), MessagesUtil.get("Votes"), MessagesUtil.get("VotesFromMe"),
             MessagesUtil.get("Status"), MessagesUtil.get("Rate") };
 
-    private WalletModel model;
+    private transient WalletModel model;
 
     private JTable table;
     private DelegatesTableModel tableModel;
@@ -281,7 +281,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         private static final long serialVersionUID = 1L;
 
-        private List<WalletDelegate> delegates;
+        private transient List<WalletDelegate> delegates;
 
         public DelegatesTableModel() {
             this.delegates = Collections.emptyList();

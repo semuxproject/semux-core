@@ -77,7 +77,7 @@ public class MessageQueue {
             this.timerTask = timer.scheduleAtFixedRate(() -> {
                 try {
                     nudgeQueue();
-                } catch (Throwable t) {
+                } catch (Exception t) {
                     logger.error("Exception in MessageQueue", t);
                 }
             }, Config.NET_MAX_QUEUE_RATE, Config.NET_MAX_QUEUE_RATE, TimeUnit.MILLISECONDS);

@@ -20,6 +20,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
@@ -79,8 +80,7 @@ public class SemuxSync implements Sync {
     private long target;
     private final Object lock = new Object();
 
-    private volatile boolean isRunning;
-    private final Object done = new Object();
+    private AtomicBoolean isRunning = new AtomicBoolean(false);
 
     private static SemuxSync instance;
 
@@ -109,7 +109,7 @@ public class SemuxSync implements Sync {
     @Override
     public void start(long targetHeight) {
         if (!isRunning()) {
-            isRunning = true;
+            isRunning.set(true);
             logger.info("Syncing started, best known block = {}", targetHeight - 1);
 
             // [1] set up queues
@@ -130,11 +130,14 @@ public class SemuxSync implements Sync {
             process = exec.scheduleAtFixedRate(this::process, 0, 10, TimeUnit.MILLISECONDS);
 
             // [3] wait until the sync is done
-            synchronized (done) {
-                try {
-                    done.wait();
-                } catch (InterruptedException e) {
-                    logger.info("Sync manager got interrupted");
+            while (isRunning.get()) {
+                synchronized (isRunning) {
+                    try {
+                        isRunning.wait();
+                    } catch (InterruptedException e) {
+                        logger.info("Sync manager got interrupted");
+                        break;
+                    }
                 }
             }
 
@@ -157,16 +160,17 @@ public class SemuxSync implements Sync {
     @Override
     public void stop() {
         if (isRunning()) {
-            isRunning = false;
-            synchronized (done) {
-                done.notifyAll();
+            isRunning.set(false);
+            ;
+            synchronized (isRunning) {
+                isRunning.notifyAll();
             }
         }
     }
 
     @Override
     public boolean isRunning() {
-        return isRunning;
+        return isRunning.get();
     }
 
     @Override
@@ -312,87 +316,82 @@ public class SemuxSync implements Sync {
      * @return
      */
     private boolean validateApplyBlock(Block block) {
-        try {
-            BlockHeader header = block.getHeader();
-            List<Transaction> transactions = block.getTransactions();
-            long number = header.getNumber();
+        BlockHeader header = block.getHeader();
+        List<Transaction> transactions = block.getTransactions();
+        long number = header.getNumber();
 
-            // [1] check block header
-            Block latest = chain.getLatestBlock();
-            if (!Block.validateHeader(latest.getHeader(), header)) {
-                logger.debug("Invalid block header");
-                return false;
-            }
-
-            // [2] check transactions and results
-            if (!Block.validateTransactions(header, block.getTransactions())) {
-                logger.debug("Invalid block transactions");
-                return false;
-            }
-            if (!Block.validateResults(header, block.getResults())) {
-                logger.debug("Results root does not match");
-                return false;
-            }
-
-            AccountState as = chain.getAccountState().track();
-            DelegateState ds = chain.getDelegateState().track();
-            TransactionExecutor exec = new TransactionExecutor();
-
-            // [3] evaluate transactions
-            List<TransactionResult> results = exec.execute(transactions, as, ds);
-            if (!Block.validateResults(header, results)) {
-                logger.debug("Invalid transactions");
-                return false;
-            }
-
-            // [4] evaluate votes
-            List<String> validators = chain.getValidators();
-            int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
-            if (block.getVotes().size() < twoThirds) {
-                logger.debug("Invalid BFT votes: {} < {}", block.getVotes().size(), twoThirds);
-                return false;
-            }
-
-            Set<String> set = new HashSet<>(validators);
-            Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, number, block.getView(), block.getHash());
-            byte[] encoded = vote.getEncoded();
-            for (Signature sig : block.getVotes()) {
-                String a = Hex.encode(sig.getAddress());
-
-                if (!set.contains(a) || !EdDSA.verify(encoded, sig)) {
-                    logger.debug("Invalid BFT vote: signer = {}", a);
-                    return false;
-                }
-            }
-
-            // [5] apply block reward and tx fees
-            long reward = Config.getBlockReward(number);
-            for (Transaction tx : block.getTransactions()) {
-                reward += tx.getFee();
-            }
-            if (reward > 0) {
-                as.adjustAvailable(block.getCoinbase(), reward);
-            }
-
-            // [6] commit the updates
-            as.commit();
-            ds.commit();
-
-            WriteLock lock = Config.STATE_LOCK.writeLock();
-            lock.lock();
-            try {
-                // [7] flush state to disk
-                chain.getAccountState().commit();
-                chain.getDelegateState().commit();
-
-                // [8] add block to chain
-                chain.addBlock(block);
-            } finally {
-                lock.unlock();
-            }
-        } catch (Exception e) {
-            logger.info("Exception in block validation", e);
+        // [1] check block header
+        Block latest = chain.getLatestBlock();
+        if (!Block.validateHeader(latest.getHeader(), header)) {
+            logger.debug("Invalid block header");
             return false;
+        }
+
+        // [2] check transactions and results
+        if (!Block.validateTransactions(header, block.getTransactions())) {
+            logger.debug("Invalid block transactions");
+            return false;
+        }
+        if (!Block.validateResults(header, block.getResults())) {
+            logger.debug("Results root does not match");
+            return false;
+        }
+
+        AccountState as = chain.getAccountState().track();
+        DelegateState ds = chain.getDelegateState().track();
+        TransactionExecutor exec = new TransactionExecutor();
+
+        // [3] evaluate transactions
+        List<TransactionResult> results = exec.execute(transactions, as, ds);
+        if (!Block.validateResults(header, results)) {
+            logger.debug("Invalid transactions");
+            return false;
+        }
+
+        // [4] evaluate votes
+        List<String> validators = chain.getValidators();
+        int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
+        if (block.getVotes().size() < twoThirds) {
+            logger.debug("Invalid BFT votes: {} < {}", block.getVotes().size(), twoThirds);
+            return false;
+        }
+
+        Set<String> set = new HashSet<>(validators);
+        Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, number, block.getView(), block.getHash());
+        byte[] encoded = vote.getEncoded();
+        for (Signature sig : block.getVotes()) {
+            String a = Hex.encode(sig.getAddress());
+
+            if (!set.contains(a) || !EdDSA.verify(encoded, sig)) {
+                logger.debug("Invalid BFT vote: signer = {}", a);
+                return false;
+            }
+        }
+
+        // [5] apply block reward and tx fees
+        long reward = Config.getBlockReward(number);
+        for (Transaction tx : block.getTransactions()) {
+            reward += tx.getFee();
+        }
+        if (reward > 0) {
+            as.adjustAvailable(block.getCoinbase(), reward);
+        }
+
+        // [6] commit the updates
+        as.commit();
+        ds.commit();
+
+        WriteLock lock = Config.STATE_LOCK.writeLock();
+        lock.lock();
+        try {
+            // [7] flush state to disk
+            chain.getAccountState().commit();
+            chain.getDelegateState().commit();
+
+            // [8] add block to chain
+            chain.addBlock(block);
+        } finally {
+            lock.unlock();
         }
 
         return true;

@@ -50,7 +50,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     private static String[] columnNames = { MessagesUtil.get("Type"), MessagesUtil.get("FromTo"),
             MessagesUtil.get("Value"), MessagesUtil.get("Time") };
 
-    private WalletModel model;
+    private transient WalletModel model;
 
     private JTable table;
     private TransactionsTableModel tableModel;
@@ -104,7 +104,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         private static final long serialVersionUID = 1L;
 
-        private List<Transaction> transactions;
+        private transient List<Transaction> transactions;
 
         public TransactionsTableModel() {
             this.transactions = Collections.emptyList();

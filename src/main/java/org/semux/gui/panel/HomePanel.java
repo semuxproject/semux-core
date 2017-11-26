@@ -43,7 +43,7 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private WalletModel model;
+    private transient WalletModel model;
 
     private JLabel blockNum;
     private JLabel blockTime;

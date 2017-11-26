@@ -63,13 +63,13 @@ public class IOUtil {
      */
     public static byte[] readFile(File file) throws IOException {
         if (file.exists()) {
-            InputStream in = new BufferedInputStream(new FileInputStream(file));
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-            for (int c; (c = in.read()) != -1;) {
-                out.write(c);
+            try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
+                for (int c; (c = in.read()) != -1;) {
+                    out.write(c);
+                }
             }
-            in.close();
 
             return out.toByteArray();
         } else {

@@ -39,7 +39,7 @@ public class SystemUtil {
             case UNKNOWN:
                 return "Unknown";
             default:
-                return null;
+                throw new UnreachableException();
             }
         }
     }
@@ -165,9 +165,8 @@ public class SystemUtil {
         }
 
         // check memory
-        long mb = 1024 * 1024;
-        if (rt.maxMemory() < 0.8 * 4 * 1024 * mb) {
-            logger.info("Max allowed JVM heap memory size = {} MB", rt.maxMemory() / mb);
+        if (rt.maxMemory() < 0.8 * 4 * 1024 * 1024 * 1024) {
+            logger.info("Max allowed JVM heap memory size = {} MB", rt.maxMemory() / 1024 / 1024);
             return false;
         }
 
