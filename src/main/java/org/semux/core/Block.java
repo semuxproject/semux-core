@@ -27,7 +27,7 @@ import org.semux.util.SimpleEncoder;
  * Represents a block in the blockchain.
  *
  */
-public class Block implements Comparable<Block> {
+public class Block {
 
     private static final ThreadFactory factory = new ThreadFactory() {
         AtomicInteger cnt = new AtomicInteger(0);
@@ -38,8 +38,8 @@ public class Block implements Comparable<Block> {
         }
     };
 
-    private static final ExecutorService exec = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
-            factory);
+    private static final int cores = Runtime.getRuntime().availableProcessors();
+    private static final ExecutorService exec = Executors.newFixedThreadPool(cores, factory);
 
     /**
      * The block header.
@@ -154,26 +154,15 @@ public class Block implements Comparable<Block> {
      */
     public static boolean validateTransactions(BlockHeader header, List<Transaction> transactions) {
         // validate transactions
-        int cores = Runtime.getRuntime().availableProcessors();
-        if (cores > 1) {
-            try {
-                List<Future<Boolean>> list = exec.invokeAll(transactions);
-                for (Future<Boolean> f : list) {
-                    if (!f.get()) {
-                        return false;
-                    }
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                return false;
-            } finally {
-                exec.shutdownNow();
-            }
-        } else {
-            for (Transaction tx : transactions) {
-                if (!tx.validate()) {
+        try {
+            List<Future<Boolean>> list = exec.invokeAll(transactions);
+            for (Future<Boolean> f : list) {
+                if (!f.get()) {
                     return false;
                 }
             }
+        } catch (InterruptedException | ExecutionException e) {
+            return false;
         }
 
         // validate transactions root
@@ -367,11 +356,6 @@ public class Block implements Comparable<Block> {
 
     public static Block fromBytes(byte[] h, byte[] t, byte[] r) {
         return fromBytes(h, t, r, null);
-    }
-
-    @Override
-    public int compareTo(Block other) {
-        return Long.compare(this.getNumber(), other.getNumber());
     }
 
     @Override

@@ -7,15 +7,15 @@
 package org.semux.core;
 
 public class Unit {
-    public static long NANO_SEM = 1L;
+    public static final long NANO_SEM = 1L;
 
-    public static long MICRO_SEM = 1000L;
+    public static final long MICRO_SEM = 1000L;
 
-    public static long MILLI_SEM = 1_000_000L;
+    public static final long MILLI_SEM = 1_000_000L;
 
-    public static long SEM = 1_000_000_000L;
+    public static final long SEM = 1_000_000_000L;
 
-    public static long KILO_SEM = 1_000_000_000_000L;
+    public static final long KILO_SEM = 1_000_000_000_000L;
 
-    public static long MEGA_SEM = 1_000_000_000_000_000L;
+    public static final long MEGA_SEM = 1_000_000_000_000_000L;
 }

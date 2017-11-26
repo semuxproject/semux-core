@@ -75,7 +75,7 @@ public class SemuxSync implements Sync {
     // task queues
     private TreeSet<Long> toDownload = new TreeSet<>();
     private Map<Long, Long> toComplete = new HashMap<>();
-    private TreeSet<Block> toProcess = new TreeSet<>();
+    private TreeSet<Block> toProcess = new TreeSet<>((b1, b2) -> Long.compare(b1.getNumber(), b2.getNumber()));
     private long target;
     private final Object lock = new Object();
 
