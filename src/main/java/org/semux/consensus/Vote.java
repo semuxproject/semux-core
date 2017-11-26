@@ -8,9 +8,9 @@ package org.semux.consensus;
 
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
+import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
-import org.semux.crypto.Hash;
 
 public class Vote {
     public static final boolean VALUE_APPROVE = true;
@@ -60,7 +60,7 @@ public class Vote {
     }
 
     public static Vote newReject(VoteType type, long height, int view) {
-        return new Vote(type, VALUE_REJECT, height, view, Hash.EMPTY_H256);
+        return new Vote(type, VALUE_REJECT, height, view, Bytes.EMPTY_HASH);
     }
 
     /**

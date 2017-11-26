@@ -84,7 +84,7 @@ public class MerkleTree {
 
     private Node build(List<Node> nodes) {
         if (nodes.isEmpty()) {
-            return new Node(Hash.EMPTY_H256);
+            return new Node(Bytes.EMPTY_HASH);
         }
 
         while (nodes.size() > 1) {

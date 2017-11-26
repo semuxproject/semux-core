@@ -20,7 +20,7 @@ import org.semux.core.BlockHeader;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.crypto.EdDSA;
-import org.semux.crypto.Hash;
+import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
 public class ProposalTest {
@@ -54,11 +54,11 @@ public class ProposalTest {
 
         EdDSA key = new EdDSA();
         byte[] coinbase = key.toAddress();
-        byte[] prevHash = Hash.EMPTY_H256;
+        byte[] prevHash = Bytes.EMPTY_HASH;
         long timestamp = System.currentTimeMillis();
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(txs);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(res);
-        byte[] stateRoot = Hash.EMPTY_H256;
+        byte[] stateRoot = Bytes.EMPTY_HASH;
         byte[] data = {};
 
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,

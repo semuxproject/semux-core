@@ -15,14 +15,14 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.semux.core.Genesis.Premine;
-import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.util.ByteArray;
+import org.semux.util.Bytes;
 
 public class GenesisTest {
 
     private static byte[] ZERO_ADDRESS = Hex.decode("0000000000000000000000000000000000000000");
-    private static byte[] ZERO_HASH = Hash.EMPTY_H256;
+    private static byte[] ZERO_HASH = Bytes.EMPTY_HASH;
 
     Genesis genesis = Genesis.getInstance();
 

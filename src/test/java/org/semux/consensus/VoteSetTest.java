@@ -15,7 +15,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.semux.crypto.EdDSA;
-import org.semux.crypto.Hash;
+import org.semux.util.Bytes;
 
 public class VoteSetTest {
 
@@ -42,25 +42,25 @@ public class VoteSetTest {
 
     @Test
     public void testAddVote() {
-        Vote vote = Vote.newApprove(VoteType.VALIDATE, height, view, Hash.EMPTY_H256);
+        Vote vote = Vote.newApprove(VoteType.VALIDATE, height, view, Bytes.EMPTY_HASH);
         assertFalse(vs.addVote(vote));
         vote.sign(new EdDSA());
         assertFalse(vs.addVote(vote));
         vote.sign(v1);
         assertTrue(vs.addVote(vote));
 
-        vote = Vote.newApprove(VoteType.VALIDATE, height + 1, view, Hash.EMPTY_H256);
+        vote = Vote.newApprove(VoteType.VALIDATE, height + 1, view, Bytes.EMPTY_HASH);
         vote.sign(v1);
         assertFalse(vs.addVote(vote));
 
-        vote = Vote.newApprove(VoteType.VALIDATE, height, view + 1, Hash.EMPTY_H256);
+        vote = Vote.newApprove(VoteType.VALIDATE, height, view + 1, Bytes.EMPTY_HASH);
         vote.sign(v1);
         assertFalse(vs.addVote(vote));
     }
 
     @Test
     public void testTwoThrids() {
-        Vote vote = Vote.newApprove(VoteType.VALIDATE, height, view, Hash.EMPTY_H256);
+        Vote vote = Vote.newApprove(VoteType.VALIDATE, height, view, Bytes.EMPTY_HASH);
         vote.sign(v1);
         assertTrue(vs.addVote(vote));
         assertFalse(vs.anyApproved().isPresent());
@@ -72,6 +72,6 @@ public class VoteSetTest {
         vote.sign(v3);
         assertTrue(vs.addVote(vote));
         assertTrue(vs.anyApproved().isPresent());
-        assertTrue(vs.isApproved(Hash.EMPTY_H256));
+        assertTrue(vs.isApproved(Bytes.EMPTY_HASH));
     }
 }

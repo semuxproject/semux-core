@@ -31,6 +31,7 @@ import org.semux.crypto.Hash;
 import org.semux.db.MemoryDB;
 import org.semux.net.ChannelManager;
 import org.semux.util.ByteArray;
+import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +80,7 @@ public class SemuxBFTTest {
         long timestamp = System.currentTimeMillis();
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
-        byte[] stateRoot = Hash.EMPTY_H256;
+        byte[] stateRoot = Bytes.EMPTY_HASH;
         byte[] data = {};
         int view = 1;
 

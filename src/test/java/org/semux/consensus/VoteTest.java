@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.semux.crypto.EdDSA;
-import org.semux.crypto.Hash;
 import org.semux.util.Bytes;
 
 public class VoteTest {
@@ -22,7 +21,7 @@ public class VoteTest {
     public void testVote() {
         long height = Long.MAX_VALUE;
         int view = Integer.MAX_VALUE;
-        Vote vote = Vote.newApprove(VoteType.COMMIT, height, view, Hash.EMPTY_H256);
+        Vote vote = Vote.newApprove(VoteType.COMMIT, height, view, Bytes.EMPTY_HASH);
 
         assertFalse(vote.validate());
         vote.sign(new EdDSA());
@@ -33,7 +32,7 @@ public class VoteTest {
         assertEquals(VoteType.COMMIT, vote2.getType());
         assertEquals(height, vote2.getHeight());
         assertEquals(view, vote2.getView());
-        assertArrayEquals(Hash.EMPTY_H256, vote2.getBlockHash());
+        assertArrayEquals(Bytes.EMPTY_HASH, vote2.getBlockHash());
     }
 
     @Test

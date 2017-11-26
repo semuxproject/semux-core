@@ -15,7 +15,6 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.semux.Config;
-import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
@@ -110,8 +109,8 @@ public class Genesis extends Block {
             Map<ByteArray, Premine> premine, //
             Map<String, byte[]> delegates, //
             Map<String, Object> config) {
-        super(new BlockHeader(number, coinbase, prevHash, timestamp, Hash.EMPTY_H256, Hash.EMPTY_H256, Hash.EMPTY_H256,
-                data), Collections.emptyList(), Collections.emptyList());
+        super(new BlockHeader(number, coinbase, prevHash, timestamp, Bytes.EMPTY_HASH, Bytes.EMPTY_HASH,
+                Bytes.EMPTY_HASH, data), Collections.emptyList(), Collections.emptyList());
 
         this.premines = premine;
         this.delegates = delegates;

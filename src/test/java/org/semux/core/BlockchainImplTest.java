@@ -20,7 +20,6 @@ import java.util.List;
 import org.junit.Test;
 import org.semux.core.BlockchainImpl.StatsType;
 import org.semux.crypto.EdDSA;
-import org.semux.crypto.Hash;
 import org.semux.db.MemoryDB;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
@@ -244,7 +243,7 @@ public class BlockchainImplTest {
     private Block createBlock(long number, List<Transaction> transactions, List<TransactionResult> results) {
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
-        byte[] stateRoot = Hash.EMPTY_H256;
+        byte[] stateRoot = Bytes.EMPTY_HASH;
         byte[] data = Bytes.of("test");
         long timestamp = System.currentTimeMillis();
 

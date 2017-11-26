@@ -19,7 +19,6 @@ import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
-import org.semux.crypto.Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +54,7 @@ public class CorePerformance {
         long timestamp = System.currentTimeMillis();
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(txs);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(res);
-        byte[] stateRoot = Hash.EMPTY_H256;
+        byte[] stateRoot = Bytes.EMPTY_HASH;
         byte[] data = {};
 
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,

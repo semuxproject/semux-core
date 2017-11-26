@@ -42,7 +42,6 @@ import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
-import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
@@ -419,7 +418,7 @@ public class APIHandlerTest {
         long timestamp = System.currentTimeMillis();
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
-        byte[] stateRoot = Hash.EMPTY_H256;
+        byte[] stateRoot = Bytes.EMPTY_HASH;
         byte[] data = {};
 
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,

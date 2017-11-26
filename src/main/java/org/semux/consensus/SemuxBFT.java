@@ -44,6 +44,7 @@ import org.semux.net.msg.consensus.BFTProposalMessage;
 import org.semux.net.msg.consensus.BFTVoteMessage;
 import org.semux.util.ArrayUtil;
 import org.semux.util.ByteArray;
+import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
@@ -704,7 +705,7 @@ public class SemuxBFT implements Consensus {
         // compute roots
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(pending.getLeft());
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(pending.getRight());
-        byte[] stateRoot = Hash.EMPTY_H256;
+        byte[] stateRoot = Bytes.EMPTY_HASH;
 
         // construct block
         long number = height;

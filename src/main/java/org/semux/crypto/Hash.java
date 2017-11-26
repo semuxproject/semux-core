@@ -22,9 +22,6 @@ public class Hash {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    public static final byte[] EMPTY_H256 = new byte[32];
-    public static final byte[] EMPTY_H160 = new byte[20];
-
     /**
      * Generate the 256-bit hash.
      * 
