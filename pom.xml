@@ -352,6 +352,13 @@
             <version>1.4</version>
         </dependency>
 
+        <!-- Operating System and Hardware Information library -->
+        <dependency>
+            <groupId>com.github.oshi</groupId>
+            <artifactId>oshi-core</artifactId>
+            <version>3.4.4</version>
+        </dependency>
+
         <!-- Testing Libraries -->
         <dependency>
             <groupId>junit</groupId>

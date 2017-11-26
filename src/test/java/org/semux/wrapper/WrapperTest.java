@@ -4,9 +4,8 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux;
+package org.semux.wrapper;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -15,24 +14,22 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.semux.cli.SemuxCLI;
 import org.semux.gui.SemuxGUI;
-import uk.org.lidalia.slf4jtest.TestLoggerFactoryResetRule;
+import org.semux.util.SystemUtil;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(Parameterized.class)
-@PrepareForTest({ ProcessBuilder.class, Wrapper.class })
+@PrepareForTest({ ProcessBuilder.class, Process.class, Wrapper.class, SystemUtil.class })
 public class WrapperTest {
-
-    @Rule
-    public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
@@ -44,34 +41,46 @@ public class WrapperTest {
                 { new String[] { "--gui" },
                         new String[] { getJavaBinPath(), "-Xmx100M", "-cp", "semux.jar",
                                 SemuxGUI.class.getCanonicalName() },
-                        100 },
+                        100L },
                 { new String[] { "--cli" }, new String[] { getJavaBinPath(), "-Xmx100M", "-cp", "semux.jar",
-                        SemuxCLI.class.getCanonicalName() }, 100 } });
+                        SemuxCLI.class.getCanonicalName() }, 100L } });
     }
 
     String[] inputArgs, javaArgs;
-    Integer mockAvailableMB;
+    Long mockAvailableMB;
 
-    public WrapperTest(String[] inputArgs, String[] javaArgs, Integer mockAvailableMB) {
+    public WrapperTest(String[] inputArgs, String[] javaArgs, Long mockAvailableMB) {
         this.inputArgs = inputArgs;
         this.javaArgs = javaArgs;
         this.mockAvailableMB = mockAvailableMB;
     }
 
     @Test
-    public void testJvmOptions() throws Exception {
-        ProcessBuilder processBuilderSpy = spy(new ProcessBuilder());
-        whenNew(ProcessBuilder.class).withNoArguments().thenReturn(processBuilderSpy);
+    public void testMain() throws Exception {
+        // mock ProcessBuilder & Process
+        ProcessBuilder processBuilderMock = mock(ProcessBuilder.class);
+        Process process = mock(Process.class);
+        when(process.exitValue()).thenReturn(0);
+        doReturn(process).when(processBuilderMock).start();
+        whenNew(ProcessBuilder.class).withNoArguments().thenReturn(processBuilderMock);
 
-        Wrapper wrapper = spy(new Wrapper());
+        // mock HeapSizeAllocator
         if (mockAvailableMB != null) {
-            doReturn(mockAvailableMB).when(wrapper).getAvailableMemoryInMB();
+            HeapSizeAllocator heapSizeAllocator = mock(HeapSizeAllocator.class);
+            when(heapSizeAllocator.getDynamicHeapAllocationInMB()).thenReturn(mockAvailableMB);
+            whenNew(HeapSizeAllocator.class).withNoArguments().thenReturn(heapSizeAllocator);
         }
 
-        wrapper.parseAndExecute(inputArgs);
+        // mock SystemUtil.exit
+        mockStatic(SystemUtil.class);
 
-        verifyNew(ProcessBuilder.class).withNoArguments();
-        verify(processBuilderSpy).command(javaArgs);
+        // execution
+        Wrapper.main(inputArgs);
+
+        // verify
+        verify(processBuilderMock).command(javaArgs);
+        verifyStatic(SystemUtil.class);
+        SystemUtil.exit(0);
     }
 
     protected static String getJavaBinPath() {
