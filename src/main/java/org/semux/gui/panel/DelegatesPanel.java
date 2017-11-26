@@ -53,6 +53,7 @@ import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
 import org.semux.util.Bytes;
+import org.semux.util.SystemUtil;
 import org.semux.util.UnreachableException;
 
 public class DelegatesPanel extends JPanel implements ActionListener {
@@ -421,11 +422,19 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("InsufficientFunds",
                         SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT + Config.MIN_TRANSACTION_FEE)));
             } else {
-                int ret = JOptionPane.showConfirmDialog(this,
+                // confirm system requirements
+                if (!SystemUtil.bench() && JOptionPane.showConfirmDialog(this, MessagesUtil.get("ComputerNotQualified"),
+                        MessagesUtil.get("ConfirmDelegateRegistration"),
+                        JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
+                    break;
+                }
+
+                // confirm burning amount
+                if (JOptionPane.showConfirmDialog(this,
                         MessagesUtil.get("DelegateRegistrationInfo",
                                 SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT)),
-                        MessagesUtil.get("ConfirmDelegateRegistration"), JOptionPane.YES_NO_OPTION);
-                if (ret != JOptionPane.YES_OPTION) {
+                        MessagesUtil.get("ConfirmDelegateRegistration"),
+                        JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
                     break;
                 }
 

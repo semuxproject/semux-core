@@ -150,9 +150,29 @@ public class SystemUtil {
      */
     public static boolean bench() {
         Runtime rt = Runtime.getRuntime();
-        logger.debug("# cores = {}, max memory = {}", rt.availableProcessors(), rt.maxMemory());
 
-        return rt.availableProcessors() >= 2 && rt.maxMemory() >= 0.8 * 4 * 1024 * 1024 * 1024;
+        // check JVM with best effort
+        String model = System.getProperty("sun.arch.data.model");
+        if (model != null && model.contains("32")) {
+            logger.info("You're running 32-bit JVM. Please consider upgrading to 64-bit JVM");
+            return false;
+        }
+
+        // check CPU
+        if (rt.availableProcessors() < 2) {
+            logger.info("# of CPU cores = {}", rt.availableProcessors());
+            return false;
+        }
+
+        // check memory
+        long mb = 1024 * 1024;
+        if (rt.maxMemory() < 0.8 * 4 * 1024 * mb) {
+            logger.info("Max allowed JVM heap memory size = {} MB", rt.maxMemory() / mb);
+            return false;
+        }
+
+        return true;
+
     }
 
     /**
