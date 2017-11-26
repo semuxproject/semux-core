@@ -66,7 +66,7 @@ public class Wrapper {
         if (Stream.of(jvmOptions).noneMatch(s -> xmxPattern.matcher(s).find())) {
             long toAllocateMB = new HeapSizeAllocator().getDynamicHeapAllocationInMB();
             allocatedJvmOptions.add(String.format("-Xmx%dM", toAllocateMB));
-            logger.info("Allocating {} MB of memory as maximum heap size", toAllocateMB);
+            logger.debug("Allocating {} MB of memory as maximum heap size", toAllocateMB);
         }
 
         return allocatedJvmOptions.toArray(new String[allocatedJvmOptions.size()]);
@@ -83,7 +83,7 @@ public class Wrapper {
     }
 
     protected int startProcess(String[] args) throws IOException, InterruptedException {
-        logger.info(String.join(" ", args));
+        logger.debug(String.join(" ", args));
 
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command(args);

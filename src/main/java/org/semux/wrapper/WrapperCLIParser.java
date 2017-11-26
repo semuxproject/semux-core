@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 class WrapperCLIParser {
 
-    final static Logger logger = LoggerFactory.getLogger(Wrapper.class);
+    final static Logger logger = LoggerFactory.getLogger(WrapperCLIParser.class);
 
     final Wrapper.Mode mode;
 
@@ -34,7 +34,7 @@ class WrapperCLIParser {
         if (commandLine.hasOption("jvm-options")) {
             jvmOptionsString = commandLine.getOptionValue("jvm-options").trim();
         } else {
-            logger.info("Specify --jvm-options for additional JVM options");
+            logger.debug("Specify --jvm-options for additional JVM options");
         }
 
         return jvmOptionsString.length() > 0 ? jvmOptionsString.split(" ") : new String[] {};
