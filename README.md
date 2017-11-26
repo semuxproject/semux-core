@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/semuxproject/semux.svg?branch=develop)](https://travis-ci.org/semuxproject/semux)
 [![Build status](https://ci.appveyor.com/api/projects/status/y0kgfqch4u79er1k?svg=true)](https://ci.appveyor.com/project/semux/semux)
 [![Coverage Status](https://coveralls.io/repos/github/semuxproject/semux/badge.svg?branch=develop)](https://coveralls.io/github/semuxproject/semux)
-
+[![Scrutinizer-CI Status](https://scrutinizer-ci.com/g/semuxproject/semux/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/semuxproject/semux/)
 
 ## What is Semux
 
