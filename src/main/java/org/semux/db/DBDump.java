@@ -26,14 +26,15 @@ public class DBDump {
 
         File f = new File("database/index");
         System.out.println(f.exists());
-        DB db = JniDBFactory.factory.open(f, options);
 
-        DBIterator itr = db.iterator();
-        itr.seekToFirst();
-        while (itr.hasNext()) {
-            Entry<byte[], byte[]> entry = itr.next();
-            System.out.println(Hex.encode(entry.getKey()) + " = " + Hex.encode(entry.getValue()));
+        try (DB db = JniDBFactory.factory.open(f, options)) {
+            DBIterator itr = db.iterator();
+            itr.seekToFirst();
+            while (itr.hasNext()) {
+                Entry<byte[], byte[]> entry = itr.next();
+                System.out.println(Hex.encode(entry.getKey()) + " = " + Hex.encode(entry.getValue()));
+            }
+            itr.close();
         }
-        itr.close();
     }
 }

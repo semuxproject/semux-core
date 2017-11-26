@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.semux.crypto.EdDSA.Signature;
@@ -99,31 +100,6 @@ public class VoteSet {
     }
 
     /**
-     * Whether a conclusion has been reached.
-     * 
-     * @return
-     */
-    public boolean isFinalized() {
-        return isAnyApproved() != null || isRejected();
-    }
-
-    /**
-     * Returns the blockHash which has been approved by +2/3 validators, if exists.
-     * 
-     * @return
-     */
-    public byte[] isAnyApproved() {
-        for (ByteArray k : approvals.keySet()) {
-            Map<String, Vote> v = approvals.get(k);
-            if (v.size() >= twoThirds) {
-                return k.getData();
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Returns whether the given block hash has been approved by +2/3 validators.
      * 
      * @param blockHash
@@ -131,7 +107,7 @@ public class VoteSet {
      */
     public boolean isApproved(byte[] blockHash) {
         Map<String, Vote> v = approvals.get(ByteArray.of(blockHash));
-        return v != null && v.size() >= twoThirds;
+        return v != null && v.size() >= getTwoThirds();
     }
 
     /**
@@ -140,7 +116,23 @@ public class VoteSet {
      * @return
      */
     public boolean isRejected() {
-        return rejections.size() >= twoThirds;
+        return rejections.size() >= getTwoThirds();
+    }
+
+    /**
+     * Returns the blockHash which has been approved by +2/3 validators, if exists.
+     * 
+     * @return
+     */
+    public Optional<byte[]> anyApproved() {
+        for (Map.Entry<ByteArray, Map<String, Vote>> e : approvals.entrySet()) {
+            Map<String, Vote> v = e.getValue();
+            if (v.size() >= getTwoThirds()) {
+                return Optional.of(e.getKey().getData());
+            }
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -156,14 +148,8 @@ public class VoteSet {
      * 
      * @return
      */
-    public List<Vote> getApprovals() {
-        for (Map<String, Vote> map : approvals.values()) {
-            if (map.size() >= twoThirds) {
-                return new ArrayList<>(map.values());
-            }
-        }
-
-        throw new RuntimeException("Voteset is not approved!");
+    public List<Vote> getApprovals(byte[] blockHash) {
+        return new ArrayList<>(approvals.get(ByteArray.of(blockHash)).values());
     }
 
     /**

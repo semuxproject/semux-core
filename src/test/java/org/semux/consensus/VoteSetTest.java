@@ -63,15 +63,15 @@ public class VoteSetTest {
         Vote vote = Vote.newApprove(VoteType.VALIDATE, height, view, Hash.EMPTY_H256);
         vote.sign(v1);
         assertTrue(vs.addVote(vote));
-        assertFalse(vs.isFinalized());
+        assertFalse(vs.anyApproved().isPresent());
 
         vote.sign(v2);
         assertTrue(vs.addVote(vote));
-        assertFalse(vs.isFinalized());
+        assertFalse(vs.anyApproved().isPresent());
 
         vote.sign(v3);
         assertTrue(vs.addVote(vote));
-        assertTrue(vs.isFinalized());
+        assertTrue(vs.anyApproved().isPresent());
         assertTrue(vs.isApproved(Hash.EMPTY_H256));
     }
 }

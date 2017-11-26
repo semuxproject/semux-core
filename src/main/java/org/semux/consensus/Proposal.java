@@ -27,12 +27,6 @@ public class Proposal {
     private Signature signature;
 
     public Proposal(Proof proof, BlockHeader blockHeader, List<Transaction> transactions) {
-        // NOTE: the view of proposed block is always zero before being added to
-        // blockchain, so do not check version match here.
-        if (proof.getHeight() != blockHeader.getNumber()) {
-            throw new RuntimeException("Proof-of-unlock and proposed block does not match");
-        }
-
         this.proof = proof;
         this.blockHeader = blockHeader;
         this.transactions = transactions;
@@ -90,10 +84,11 @@ public class Proposal {
         return getHeight() > 0//
                 && getView() >= 0 //
                 && proof != null //
-                && encoded != null//
-                && signature != null && EdDSA.verify(encoded, signature) //
                 && blockHeader != null //
-                && transactions != null;
+                && transactions != null //
+                && proof.getHeight() == blockHeader.getNumber() //
+                && encoded != null//
+                && signature != null && EdDSA.verify(encoded, signature);
     }
 
     public Proof getProof() {
