@@ -21,6 +21,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
@@ -57,6 +58,8 @@ public class WrapperTest {
 
     @Test
     public void testMain() throws Exception {
+        assumeTrue(SystemUtil.getOS() != SystemUtil.OS.WINDOWS);
+
         // mock ProcessBuilder & Process
         ProcessBuilder processBuilderMock = mock(ProcessBuilder.class);
         Process process = mock(Process.class);

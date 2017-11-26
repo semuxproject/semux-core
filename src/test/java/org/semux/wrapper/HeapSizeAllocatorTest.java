@@ -7,13 +7,17 @@
 package org.semux.wrapper;
 
 import org.junit.Test;
+import org.semux.util.SystemUtil;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 public class HeapSizeAllocatorTest {
 
     @Test
     public void testGetDynamicHeapAllocationInMB() {
+        assumeTrue(SystemUtil.getOS() != SystemUtil.OS.WINDOWS);
+
         HeapSizeAllocator heapSizeAllocator = new HeapSizeAllocator();
         assertTrue(heapSizeAllocator.getDynamicHeapAllocationInMB() > 0);
     }
