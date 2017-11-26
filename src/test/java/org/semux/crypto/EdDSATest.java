@@ -8,8 +8,7 @@ package org.semux.crypto;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.security.KeyPair;
@@ -51,10 +50,9 @@ public class EdDSATest {
         byte[] hash = Hash.h256(data);
         byte[] sig = key.sign(hash).toBytes();
 
-        Signature s = EdDSA.verify(hash, sig);
-        assertNotNull(s);
-        assertArrayEquals(key.getPublicKey(), s.getPublicKey());
-        assertArrayEquals(key.toAddress(), s.getAddress());
+        assertTrue(EdDSA.verify(hash, sig));
+        assertArrayEquals(key.getPublicKey(), Signature.fromBytes(sig).getPublicKey());
+        assertArrayEquals(key.toAddress(), Signature.fromBytes(sig).getAddress());
     }
 
     @Test
@@ -73,11 +71,8 @@ public class EdDSATest {
         byte[] data = Bytes.of("test");
         byte[] hash = Hash.h256(data);
 
-        byte[] sig = Bytes.random(20);
-        assertNull(EdDSA.verify(hash, sig));
-
-        sig = Bytes.random(200);
-        assertNull(EdDSA.verify(hash, sig));
+        assertFalse(EdDSA.verify(hash, Bytes.random(20)));
+        assertFalse(EdDSA.verify(hash, Bytes.random(200)));
     }
 
     @Test

@@ -122,7 +122,7 @@ public class EdDSA {
      *            message hash
      * @param signature
      *            signature
-     * @return
+     * @return True if the signature is valid, otherwise false
      */
     public static boolean verify(byte[] msgHash, Signature signature) {
         try {
@@ -147,12 +147,12 @@ public class EdDSA {
      *            message hash
      * @param signature
      *            signature
-     * @return an {@link Signature} instance if success, otherwise null
+     * @return True if the signature is valid, otherwise false
      */
-    public static Signature verify(byte[] msgHash, byte[] signature) {
+    public static boolean verify(byte[] msgHash, byte[] signature) {
         Signature sig = Signature.fromBytes(signature);
 
-        return verify(msgHash, sig) ? sig : null;
+        return verify(msgHash, sig);
     }
 
     /**
@@ -232,7 +232,6 @@ public class EdDSA {
          * 
          * @param bytes
          * @return a signature if success,or null
-         * @throws IndexOutOfBoundsException
          */
         public static Signature fromBytes(byte[] bytes) {
             if (bytes == null || bytes.length != SIG_LENGTH + PUB_LENGTH) {
