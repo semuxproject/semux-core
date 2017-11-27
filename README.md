@@ -30,7 +30,7 @@ cd semux
 mvn install
 
 cd dist
-./semux.sh
+./unix/semux-cli.sh
 ```
 
 
