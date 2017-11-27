@@ -64,7 +64,7 @@ public class Wrapper {
         // if Xmx is not specified in jvm-options
         final Pattern xmxPattern = Pattern.compile("^-Xmx");
         if (Stream.of(jvmOptions).noneMatch(s -> xmxPattern.matcher(s).find())) {
-            long toAllocateMB = new HeapSizeAllocator().getDynamicHeapAllocationInMB();
+            long toAllocateMB = (long) ((double) SystemUtil.getAvailableMemorySize() / 1024 / 1024 * 0.8);
             allocatedJvmOptions.add(String.format("-Xmx%dM", toAllocateMB));
             logger.debug("Allocating {} MB of memory as maximum heap size", toAllocateMB);
         }

@@ -34,26 +34,27 @@ public class WrapperTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                { new String[] { "--gui", "--jvm-options", "-Xmx1G -Xms1G" },
-                        new String[] { getJavaBinPath(), "-Xmx1G", "-Xms1G", "-cp", "semux.jar",
-                                SemuxGUI.class.getCanonicalName() },
-                        null },
-                { new String[] { "--gui" },
-                        new String[] { getJavaBinPath(), "-Xmx100M", "-cp", "semux.jar",
-                                SemuxGUI.class.getCanonicalName() },
-                        100L },
-                { new String[] { "--cli" }, new String[] { getJavaBinPath(), "-Xmx100M", "-cp", "semux.jar",
-                        SemuxCLI.class.getCanonicalName() }, 100L } });
+        return Arrays
+                .asList(new Object[][] {
+                        { new String[] { "--gui", "--jvm-options", "-Xmx1G -Xms1G" },
+                                new String[] { getJavaBinPath(), "-Xmx1G", "-Xms1G", "-cp", "semux.jar",
+                                        SemuxGUI.class.getCanonicalName() },
+                                null },
+                        { new String[] { "--gui" },
+                                new String[] { getJavaBinPath(), "-Xmx80M", "-cp", "semux.jar",
+                                        SemuxGUI.class.getCanonicalName() },
+                                100L * 1024 * 1024 },
+                        { new String[] { "--cli" }, new String[] { getJavaBinPath(), "-Xmx80M", "-cp", "semux.jar",
+                                SemuxCLI.class.getCanonicalName() }, 100L * 1024 * 1024 } });
     }
 
     String[] inputArgs, javaArgs;
     Long mockAvailableMB;
 
-    public WrapperTest(String[] inputArgs, String[] javaArgs, Long mockAvailableMB) {
+    public WrapperTest(String[] inputArgs, String[] javaArgs, Long mockAvailableBytes) {
         this.inputArgs = inputArgs;
         this.javaArgs = javaArgs;
-        this.mockAvailableMB = mockAvailableMB;
+        this.mockAvailableMB = mockAvailableBytes;
     }
 
     @Test
@@ -67,15 +68,11 @@ public class WrapperTest {
         doReturn(process).when(processBuilderMock).start();
         whenNew(ProcessBuilder.class).withNoArguments().thenReturn(processBuilderMock);
 
-        // mock HeapSizeAllocator
-        if (mockAvailableMB != null) {
-            HeapSizeAllocator heapSizeAllocator = mock(HeapSizeAllocator.class);
-            when(heapSizeAllocator.getDynamicHeapAllocationInMB()).thenReturn(mockAvailableMB);
-            whenNew(HeapSizeAllocator.class).withNoArguments().thenReturn(heapSizeAllocator);
-        }
-
-        // mock SystemUtil.exit
+        // mock SystemUtil
         mockStatic(SystemUtil.class);
+        if (mockAvailableMB != null) {
+            when(SystemUtil.getAvailableMemorySize()).thenReturn(mockAvailableMB);
+        }
 
         // execution
         Wrapper.main(inputArgs);

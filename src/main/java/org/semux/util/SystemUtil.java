@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.zafarkhaja.semver.Version;
+import oshi.SystemInfo;
 
 public class SystemUtil {
     private static final Logger logger = LoggerFactory.getLogger(SystemUtil.class);
@@ -186,5 +187,15 @@ public class SystemUtil {
      */
     public static void exitAsync(int code) {
         new Thread(() -> System.exit(code)).start();
+    }
+
+    /**
+     * Retrieves available physical memory size in bytes
+     * 
+     * @return
+     */
+    public static Long getAvailableMemorySize() {
+        SystemInfo systemInfo = new SystemInfo();
+        return systemInfo.getHardware().getMemory().getAvailable();
     }
 }
