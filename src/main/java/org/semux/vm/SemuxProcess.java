@@ -41,7 +41,7 @@ public class SemuxProcess implements Runnable {
     @Override
     public void run() {
         if (status != Status.INIT) {
-            logger.error("This process has been started, status: " + status);
+            logger.error("This process has been started, status: {}", status);
             return;
         } else {
             status = Status.RUNNING;

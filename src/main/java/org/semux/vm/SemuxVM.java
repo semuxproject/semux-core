@@ -41,12 +41,6 @@ public class SemuxVM {
     };
 
     /**
-     * Create a VM instance.
-     */
-    public SemuxVM() {
-    }
-
-    /**
      * Run a list of tasks in parallel.
      * 
      * @param tasks
@@ -67,8 +61,8 @@ public class SemuxVM {
 
         // [3] submit tasks
         List<Future<?>> futures = new ArrayList<>();
-        for (ByteArray k : queues.keySet()) {
-            futures.add(exec.submit(new Worker(queues.get(k))));
+        for (Map.Entry<ByteArray, List<VMTask>> entries : queues.entrySet()) {
+            futures.add(exec.submit(new Worker(entries.getValue())));
         }
 
         try {
@@ -89,6 +83,7 @@ public class SemuxVM {
 
         } catch (InterruptedException e) {
             logger.warn("VM got interrupted");
+            Thread.currentThread().interrupt(); // https://stackoverflow.com/a/4906814/670662
         }
     }
 
