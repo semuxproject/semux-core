@@ -29,12 +29,6 @@ public class MessageFactory {
     private static final Logger logger = LoggerFactory.getLogger(MessageFactory.class);
 
     /**
-     * Create a Message factory.
-     */
-    public MessageFactory() {
-    }
-
-    /**
      * Decode a raw message.
      * 
      * @param code

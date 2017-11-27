@@ -30,12 +30,6 @@ public class ChannelManager {
     private Map<String, Channel> activeChannels = new HashMap<>();
 
     /**
-     * Creates a channel manager instance.
-     */
-    public ChannelManager() {
-    }
-
-    /**
      * Returns whether an address is in the blacklist.
      * 
      * @param address

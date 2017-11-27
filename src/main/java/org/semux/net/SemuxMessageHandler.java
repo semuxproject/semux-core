@@ -35,7 +35,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
 
     private AtomicInteger count;
 
-    public SemuxMessageHandler(Channel channel) {
+    public SemuxMessageHandler() {
         this.messageFactory = new MessageFactory();
         this.count = new AtomicInteger(0);
     }
@@ -67,7 +67,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
     @Override
     protected void decode(ChannelHandlerContext ctx, Frame frame, List<Object> out) throws Exception {
         if (frame.isSingleFrame()) {
-            Message msg = decodeMessage(ctx, Collections.singletonList(frame));
+            Message msg = decodeMessage(Collections.singletonList(frame));
 
             if (msg == null) {
                 logger.debug("Failed to decode packet into message: {}", frame);
@@ -92,7 +92,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
                 pair.getLeft().add(frame);
                 int remaining = pair.getRight().addAndGet(-frame.getSize());
                 if (remaining == 0) {
-                    Message msg = decodeMessage(ctx, pair.getLeft());
+                    Message msg = decodeMessage(pair.getLeft());
 
                     if (msg == null) {
                         logger.debug("Failed to decode packets into message, 1st/{}: {}", pair.getLeft().size(), frame);
@@ -110,7 +110,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
         }
     }
 
-    private Message decodeMessage(ChannelHandlerContext ctx, List<Frame> frames) {
+    private Message decodeMessage(List<Frame> frames) {
         if (frames == null || frames.isEmpty()) {
             return null;
         }

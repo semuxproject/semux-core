@@ -81,7 +81,7 @@ public class Channel {
 
         this.timeoutHandler = new ReadTimeoutHandler(Config.NET_TIMEOUT_IDLE, TimeUnit.MILLISECONDS);
         this.frameHandler = new SemuxFrameHandler(this);
-        this.messageHandler = new SemuxMessageHandler(this);
+        this.messageHandler = new SemuxMessageHandler();
         this.p2pHandler = new SemuxP2pHandler(this);
 
         // register channel handlers

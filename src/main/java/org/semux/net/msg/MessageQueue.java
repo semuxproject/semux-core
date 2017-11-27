@@ -122,7 +122,7 @@ public class MessageQueue {
         try {
             ctx.writeAndFlush(new DisconnectMessage(code)).await(10_000);
         } catch (InterruptedException e) {
-            // do nothing
+            Thread.currentThread().interrupt(); // https://stackoverflow.com/a/4906814/670662
         } finally {
             ctx.close();
         }

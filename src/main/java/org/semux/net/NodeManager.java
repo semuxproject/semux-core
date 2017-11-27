@@ -42,13 +42,13 @@ public class NodeManager {
         }
     };
 
-    private static String DNS_SEED_MAINNET = "mainnet.semux.org";
-    private static String DNS_SEED_TESTNET = "testnet.semux.org";
+    private static final String DNS_SEED_MAINNET = "mainnet.semux.org";
+    private static final String DNS_SEED_TESTNET = "testnet.semux.org";
 
-    private static int DEFAULT_PORT = 5161;
+    private static final int DEFAULT_PORT = 5161;
 
-    private static int LRU_CACHE_SIZE = 1024;
-    private static long RECONNECT_WAIT = 2 * 60 * 1000;
+    private static final int LRU_CACHE_SIZE = 1024;
+    private static final long RECONNECT_WAIT = 2L * 60L * 1000L;
 
     private Blockchain chain;
     private ChannelManager channelMgr;

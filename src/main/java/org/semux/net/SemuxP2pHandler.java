@@ -142,7 +142,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     public void channelRead0(final ChannelHandlerContext ctx, Message msg) throws InterruptedException {
-        logger.trace("Received message: " + msg);
+        logger.trace("Received message: {}", msg);
         MessageRoundtrip mr = msgQueue.receivedMessage(msg);
 
         switch (msg.getCode()) {

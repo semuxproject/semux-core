@@ -26,7 +26,8 @@ public class Hex {
         }
     }
 
-    private Hex() {}
+    private Hex() {
+    }
 
     /**
      * Convert a byte array into a hex string, in lower-case.
