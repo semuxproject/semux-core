@@ -128,22 +128,22 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
                         && body.readableBytes() > 0) {
                     QueryStringDecoder decoder = new QueryStringDecoder("?" + body.toString(CHARSET));
                     Map<String, List<String>> map = decoder.parameters();
-                    for (String k : map.keySet()) {
-                        if (params.containsKey(k)) {
-                            params.get(k).addAll(map.get(k));
+                    for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+                        if (params.containsKey(entry.getKey())) {
+                            params.get(entry.getKey()).addAll(entry.getValue());
                         } else {
-                            params.put(k, map.get(k));
+                            params.put(entry.getKey(), entry.getValue());
                         }
                     }
                 }
 
                 // filter parameters
                 Map<String, String> map = new HashMap<>();
-                for (String k : params.keySet()) {
-                    List<String> v = params.get(k);
+                for (Map.Entry<String, List<String>> entry : params.entrySet()) {
+                    List<String> v = entry.getValue();
                     // duplicate names are not allowed.
                     if (!v.isEmpty()) {
-                        map.put(k, v.get(0));
+                        map.put(entry.getKey(), v.get(0));
                     }
                 }
 

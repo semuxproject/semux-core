@@ -236,8 +236,8 @@ public class ApiHandlerImpl implements ApiHandler {
                 if (delegate != null) {
                     Map<ByteArray, Long> votes = chain.getDelegateState().getVotes(Hex.parse(delegate));
                     JSONObject obj = new JSONObject();
-                    for (ByteArray k : votes.keySet()) {
-                        obj.put(Hex.PREF + k.toString(), votes.get(k));
+                    for (Map.Entry<ByteArray, Long> entry : votes.entrySet()) {
+                        obj.put(Hex.PREF + entry.getKey().toString(), entry.getValue());
                     }
                     return success(obj);
                 } else {
