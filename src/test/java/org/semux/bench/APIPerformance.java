@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class APIPerformance {
-    private static Logger logger = LoggerFactory.getLogger(APIPerformance.class);
+    private static final Logger logger = LoggerFactory.getLogger(APIPerformance.class);
 
     private static int REPEAT = 1000;
 

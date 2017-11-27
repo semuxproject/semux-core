@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CryptoPerformance {
-    private static Logger logger = LoggerFactory.getLogger(CryptoPerformance.class);
+    private static final Logger logger = LoggerFactory.getLogger(CryptoPerformance.class);
 
     private static int[] DATA_SIZES = { 1024, 1024 * 1024 };
     private static int REPEAT = 1000;

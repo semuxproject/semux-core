@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class VMPerformance {
-    private static Logger logger = LoggerFactory.getLogger(VMPerformance.class);
+    private static final Logger logger = LoggerFactory.getLogger(VMPerformance.class);
 
     private static byte[] ops = new byte[5 * 1024];
     private static long gas = 10 * 1024;

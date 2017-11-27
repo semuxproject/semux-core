@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class TransactionResultTest {
 
-    private static Logger logger = LoggerFactory.getLogger(TransactionResultTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransactionResultTest.class);
 
     private boolean valid = true;
     private byte[] returns = Bytes.random(20);

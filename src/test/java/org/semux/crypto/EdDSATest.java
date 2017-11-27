@@ -27,7 +27,7 @@ import net.i2p.crypto.eddsa.KeyPairGenerator;
 
 public class EdDSATest {
 
-    private static Logger logger = LoggerFactory.getLogger(EdDSATest.class);
+    private static final Logger logger = LoggerFactory.getLogger(EdDSATest.class);
 
     @Test
     public void testGenerateKeyPair() throws InvalidKeySpecException {

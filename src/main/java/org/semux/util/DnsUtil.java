@@ -21,7 +21,7 @@ import org.xbill.DNS.Type;
 
 public class DnsUtil {
 
-    private static Logger logger = LoggerFactory.getLogger(DnsUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(DnsUtil.class);
 
     /**
      * Returns the TXT records associated with a hostname.

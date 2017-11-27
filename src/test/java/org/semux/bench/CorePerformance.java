@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CorePerformance {
-    private static Logger logger = LoggerFactory.getLogger(CryptoPerformance.class);
+    private static final Logger logger = LoggerFactory.getLogger(CryptoPerformance.class);
 
     public static Block testBlockCreation() {
         EdDSA key = new EdDSA();

@@ -44,7 +44,7 @@ import org.xml.sax.SAXException;
  * functionalities shared by both GUI and CLI.
  */
 public class Kernel {
-    private static Logger logger = LoggerFactory.getLogger(Config.class);
+    private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
     public volatile boolean isRunning;
 

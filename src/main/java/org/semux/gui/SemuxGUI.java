@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SemuxGUI {
 
-    private static Logger logger = LoggerFactory.getLogger(SemuxGUI.class);
+    private static final Logger logger = LoggerFactory.getLogger(SemuxGUI.class);
 
     private static final int TRANSACTION_LIMIT = 1024; // per account
 

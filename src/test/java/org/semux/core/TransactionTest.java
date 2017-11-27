@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 public class TransactionTest {
 
-    private static Logger logger = LoggerFactory.getLogger(TransactionTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransactionTest.class);
 
     private EdDSA key = new EdDSA();
 

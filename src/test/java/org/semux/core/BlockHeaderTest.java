@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BlockHeaderTest {
-    private static Logger logger = LoggerFactory.getLogger(BlockHeaderTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(BlockHeaderTest.class);
 
     private long number = 1;
     private byte[] coinbase = Bytes.random(20);

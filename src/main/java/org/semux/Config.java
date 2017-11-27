@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Config {
 
-    private static Logger logger = LoggerFactory.getLogger(Config.class);
+    private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
     public static boolean init() {
         File f = new File(DATA_DIR, "config" + File.separator + "semux.properties");

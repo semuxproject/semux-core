@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 public class SemuxBFTTest {
 
-    private static Logger logger = LoggerFactory.getLogger(SemuxBFTTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(SemuxBFTTest.class);
 
     private static Blockchain chain;
     private static SemuxBFT bft;
