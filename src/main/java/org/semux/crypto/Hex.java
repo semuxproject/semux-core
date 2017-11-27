@@ -26,6 +26,8 @@ public class Hex {
         }
     }
 
+    private Hex() {}
+
     /**
      * Convert a byte array into a hex string, in lower-case.
      * 
@@ -61,7 +63,7 @@ public class Hex {
      */
     public static byte[] decode(String hex) {
         if (!hex.matches("([0-9a-zA-Z][0-9a-zA-Z])*")) {
-            throw new RuntimeException("Invalid hex string");
+            throw new CryptoException("Invalid hex string");
         }
 
         byte[] raw = new byte[hex.length() / 2];

@@ -17,6 +17,9 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 
 public class AES {
 
+    private AES() {
+    }
+
     private static byte[] cipherData(PaddedBufferedBlockCipher cipher, byte[] data)
             throws DataLengthException, IllegalStateException, InvalidCipherTextException {
         // create output buffer

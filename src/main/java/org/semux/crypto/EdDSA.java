@@ -111,7 +111,7 @@ public class EdDSA {
 
             return new Signature(sig, pub.getEncoded());
         } catch (InvalidKeyException | SignatureException e) {
-            throw new RuntimeException(e);
+            throw new CryptoException(e);
         }
     }
 
