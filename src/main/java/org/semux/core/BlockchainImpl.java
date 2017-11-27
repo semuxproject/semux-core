@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Config;
 import org.semux.core.Genesis.Premine;
+import org.semux.core.exception.BlockchainImplException;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.AccountStateImpl;
 import org.semux.core.state.Delegate;
@@ -59,17 +60,17 @@ public class BlockchainImpl implements Blockchain {
 
     private static final Logger logger = LoggerFactory.getLogger(BlockchainImpl.class);
 
-    protected static byte TYPE_LATEST_BLOCK_NUMBER = 0;
-    protected static byte TYPE_VALIDATORS = 1;
-    protected static byte TYPE_VALIDATOR_STATS = 2;
-    protected static byte TYPE_BLOCK_HASH = 3;
-    protected static byte TYPE_TRANSACTION_HASH = 4;
-    protected static byte TYPE_ACCOUNT_TRANSACTION = 5;
+    protected static final byte TYPE_LATEST_BLOCK_NUMBER = 0;
+    protected static final byte TYPE_VALIDATORS = 1;
+    protected static final byte TYPE_VALIDATOR_STATS = 2;
+    protected static final byte TYPE_BLOCK_HASH = 3;
+    protected static final byte TYPE_TRANSACTION_HASH = 4;
+    protected static final byte TYPE_ACCOUNT_TRANSACTION = 5;
 
-    protected static byte TYPE_BLOCK_HEADER = 0;
-    protected static byte TYPE_BLOCK_TRANSACTIONS = 1;
-    protected static byte TYPE_BLOCK_RESULTS = 2;
-    protected static byte TYPE_BLOCK_VOTES = 3;
+    protected static final byte TYPE_BLOCK_HEADER = 0;
+    protected static final byte TYPE_BLOCK_TRANSACTIONS = 1;
+    protected static final byte TYPE_BLOCK_RESULTS = 2;
+    protected static final byte TYPE_BLOCK_VOTES = 3;
 
     protected enum StatsType {
         FORGED, HIT, MISSED
@@ -242,7 +243,7 @@ public class BlockchainImpl implements Blockchain {
 
         if (number != genesis.getNumber() && number != latestBlock.getNumber() + 1) {
             logger.error("Adding wrong block: number = {}, expected = {}", number, latestBlock.getNumber() + 1);
-            throw new RuntimeException("Blocks can only be added sequentially");
+            throw new BlockchainImplException("Blocks can only be added sequentially");
         }
 
         // [1] update block

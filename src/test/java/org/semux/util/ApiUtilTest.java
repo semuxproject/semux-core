@@ -53,8 +53,10 @@ public class ApiUtilTest {
     }
 
     @AfterClass
-    public static void teardown() {
+    public static void teardown() throws IOException {
         api.stop();
-        wallet.delete();
+        if (wallet.exists()) {
+            wallet.delete();
+        }
     }
 }

@@ -27,12 +27,6 @@ public class TransactionExecutor {
     private static final Logger logger = LoggerFactory.getLogger(TransactionExecutor.class);
 
     /**
-     * Create a new transaction executor.
-     */
-    public TransactionExecutor() {
-    }
-
-    /**
      * Execute a list of transactions.
      * 
      * NOTE: transaction format and signature are assumed to be success.

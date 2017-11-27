@@ -404,9 +404,11 @@ public class APIHandlerTest {
     }
 
     @AfterClass
-    public static void teardown() {
+    public static void teardown() throws IOException {
         api.stop();
-        wallet.delete();
+        if (wallet.exists()) {
+            wallet.delete();
+        }
     }
 
     private Block createBlock(Blockchain chain, List<Transaction> transactions, List<TransactionResult> results) {

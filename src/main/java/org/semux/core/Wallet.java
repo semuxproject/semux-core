@@ -8,6 +8,7 @@ package org.semux.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,10 +53,8 @@ public class Wallet {
      * @param password
      *            the wallet password
      * @return true if the wallet is successfully unlocked, otherwise false
-     * 
-     * @throws IllegalArgumentException
      */
-    public boolean unlock(String password) throws IllegalArgumentException {
+    public boolean unlock(String password) {
         if (password == null) {
             throw new IllegalArgumentException("Password can not be null");
         }
@@ -111,8 +110,8 @@ public class Wallet {
     /**
      * Delete the wallet file.
      */
-    public void delete() {
-        file.delete();
+    public void delete() throws IOException {
+        Files.delete(file.toPath());
     }
 
     /**

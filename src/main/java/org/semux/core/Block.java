@@ -38,8 +38,8 @@ public class Block {
         }
     };
 
-    private static final int cores = Runtime.getRuntime().availableProcessors();
-    private static final ExecutorService exec = Executors.newFixedThreadPool(cores, factory);
+    private static final int CORES = Runtime.getRuntime().availableProcessors();
+    private static final ExecutorService exec = Executors.newFixedThreadPool(CORES, factory);
 
     /**
      * The block header.

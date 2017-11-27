@@ -198,12 +198,11 @@ public class DelegateStateImpl implements DelegateState {
     public void commit() {
         synchronized (delegateUpdates) {
             if (prev == null) {
-                for (ByteArray k : delegateUpdates.keySet()) {
-                    byte[] v = delegateUpdates.get(k);
-                    if (v == null) {
-                        delegateDB.delete(k.getData());
+                for (Map.Entry<ByteArray, byte[]> entry : delegateUpdates.entrySet()) {
+                    if (entry.getValue() == null) {
+                        delegateDB.delete(entry.getKey().getData());
                     } else {
-                        delegateDB.put(k.getData(), v);
+                        delegateDB.put(entry.getKey().getData(), entry.getValue());
                     }
                 }
             } else {
@@ -217,12 +216,11 @@ public class DelegateStateImpl implements DelegateState {
 
         synchronized (voteUpdates) {
             if (prev == null) {
-                for (ByteArray k : voteUpdates.keySet()) {
-                    byte[] v = voteUpdates.get(k);
-                    if (v == null) {
-                        voteDB.delete(k.getData());
+                for (Map.Entry<ByteArray, byte[]> entry : voteUpdates.entrySet()) {
+                    if (entry.getValue() == null) {
+                        voteDB.delete(entry.getKey().getData());
                     } else {
-                        voteDB.put(k.getData(), v);
+                        voteDB.put(entry.getKey().getData(), entry.getValue());
                     }
                 }
             } else {
@@ -247,15 +245,13 @@ public class DelegateStateImpl implements DelegateState {
      * @param map
      */
     protected void getDelegates(Map<ByteArray, Delegate> map) {
-        for (ByteArray k : delegateUpdates.keySet()) {
+        for (Map.Entry<ByteArray, byte[]> entry : delegateUpdates.entrySet()) {
             /* filter address */
-            if (k.length() == ADDRESS_LEN && !map.containsKey(k)) {
-                byte[] v = delegateUpdates.get(k);
-
-                if (v == null) {
-                    map.put(k, null);
+            if (entry.getKey().length() == ADDRESS_LEN && !map.containsKey(entry.getKey())) {
+                if (entry.getValue() == null) {
+                    map.put(entry.getKey(), null);
                 } else {
-                    map.put(k, Delegate.fromBytes(k.getData(), v));
+                    map.put(entry.getKey(), Delegate.fromBytes(entry.getKey().getData(), entry.getValue()));
                 }
             }
         }

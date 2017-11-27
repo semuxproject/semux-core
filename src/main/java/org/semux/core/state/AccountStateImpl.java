@@ -27,9 +27,9 @@ import org.semux.util.Bytes;
  */
 public class AccountStateImpl implements AccountState {
 
-    protected static byte TYPE_ACCOUNT = 0;
-    protected static byte TYPE_CODE = 1;
-    protected static byte TYPE_STORAGE = 2;
+    protected static final byte TYPE_ACCOUNT = 0;
+    protected static final byte TYPE_CODE = 1;
+    protected static final byte TYPE_STORAGE = 2;
 
     protected KVDB accountDB;
     protected AccountStateImpl prev;
@@ -133,12 +133,11 @@ public class AccountStateImpl implements AccountState {
     public void commit() {
         synchronized (updates) {
             if (prev == null) {
-                for (ByteArray k : updates.keySet()) {
-                    byte[] v = updates.get(k);
-                    if (v == null) {
-                        accountDB.delete(k.getData());
+                for (Map.Entry<ByteArray, byte[]> entry : updates.entrySet()) {
+                    if (entry.getValue() == null) {
+                        accountDB.delete(entry.getKey().getData());
                     } else {
-                        accountDB.put(k.getData(), v);
+                        accountDB.put(entry.getKey().getData(), entry.getValue());
                     }
                 }
             } else {
