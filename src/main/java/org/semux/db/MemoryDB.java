@@ -18,7 +18,7 @@ import org.semux.util.ClosableIterator;
 
 public class MemoryDB implements KVDB {
 
-    public static final DBFactory FACTORY = (name) -> new MemoryDB();
+    public static final DBFactory FACTORY = name -> new MemoryDB();
 
     private Map<ByteArray, byte[]> db = new ConcurrentHashMap<>();
 
@@ -83,6 +83,7 @@ public class MemoryDB implements KVDB {
 
             @Override
             public void close() {
+                // Do nothing
             }
         };
     }
@@ -94,9 +95,11 @@ public class MemoryDB implements KVDB {
 
     @Override
     public void close() {
+        // Do nothing
     }
 
     @Override
     public void destroy() {
+        // Do nothing
     }
 }

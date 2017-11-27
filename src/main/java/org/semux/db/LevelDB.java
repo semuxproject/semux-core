@@ -21,6 +21,7 @@ import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.semux.Config;
+import org.semux.db.exception.LevelDBException;
 import org.semux.util.ClosableIterator;
 import org.semux.util.FileUtil;
 import org.semux.util.SystemUtil;
@@ -45,7 +46,7 @@ public class LevelDB implements KVDB {
         options.compressionType(CompressionType.NONE);
         options.blockSize(4 * 1024 * 1024);
         options.writeBufferSize(8 * 1024 * 1024);
-        options.cacheSize(64 * 1024 * 1024);
+        options.cacheSize(64L * 1024L * 1024L);
         options.paranoidChecks(true);
         options.verifyChecksums(true);
         options.maxOpenFiles(128);
@@ -134,12 +135,14 @@ public class LevelDB implements KVDB {
 
         return new ClosableIterator<Entry<byte[], byte[]>>() {
             DBIterator itr = db.iterator();
-            {
+
+            private ClosableIterator<Entry<byte[], byte[]>> initialize() {
                 if (prefix != null) {
                     itr.seek(prefix);
                 } else {
                     itr.seekToFirst();
                 }
+                return this;
             }
 
             @Override
@@ -157,10 +160,10 @@ public class LevelDB implements KVDB {
                 try {
                     itr.close();
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new LevelDBException(e);
                 }
             }
-        };
+        }.initialize();
     }
 
     private File getFile(DBName name) {

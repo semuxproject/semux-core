@@ -21,7 +21,7 @@ public class DBDump {
     public static void main(String[] args) throws IOException {
         Options options = new Options();
         options.createIfMissing(false);
-        options.cacheSize(128 * 1024 * 1024);
+        options.cacheSize(128L * 1024L * 1024L);
         options.compressionType(CompressionType.NONE);
 
         File f = new File("database/index");
