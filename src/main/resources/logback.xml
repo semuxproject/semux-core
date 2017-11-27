@@ -4,9 +4,6 @@
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %class{0} - %msg%n</pattern>
         </encoder>
-
-        <!-- filter out debugging outputs from Wrapper classes -->
-        <filter class="org.semux.wrapper.WrapperConsoleLogFilter" />
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
@@ -18,17 +15,17 @@
         </encoder>
     </appender>
 
-    <logger name="org.semux.api" level="DEBUG" />
-    <logger name="org.semux.core" level="DEBUG" />
-    <logger name="org.semux.consensus" level="DEBUG" />
-    <logger name="org.semux.db" level="DEBUG" />
-    <logger name="org.semux.net" level="DEBUG" />
-    <logger name="org.semux.vm" level="DEBUG" />
-    <logger name="org.semux.wrapper" level="DEBUG" />
+    <logger name="org.semux.api" level="INFO" />
+    <logger name="org.semux.core" level="INFO" />
+    <logger name="org.semux.consensus" level="INFO" />
+    <logger name="org.semux.db" level="INFO" />
+    <logger name="org.semux.net" level="INFO" />
+    <logger name="org.semux.vm" level="INFO" />
+    <logger name="org.semux.wrapper" level="INFO" />
     <logger name="io.netty" level="INFO" />
     <logger name="oshi" level="INFO" />
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </root>
