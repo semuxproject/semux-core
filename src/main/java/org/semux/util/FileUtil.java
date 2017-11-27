@@ -10,6 +10,9 @@ import java.io.File;
 
 public class FileUtil {
 
+    private FileUtil() {
+    }
+
     /**
      * Delete a file or directory recursively.
      * 

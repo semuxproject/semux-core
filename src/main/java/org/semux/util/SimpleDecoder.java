@@ -6,6 +6,8 @@
  */
 package org.semux.util;
 
+import org.semux.util.exception.SimpleDecoderException;
+
 import java.io.UnsupportedEncodingException;
 
 public class SimpleDecoder {
@@ -91,7 +93,7 @@ public class SimpleDecoder {
         try {
             return new String(buf, ENCODING);
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new SimpleDecoderException(e);
         }
     }
 

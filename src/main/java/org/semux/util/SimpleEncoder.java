@@ -6,6 +6,8 @@
  */
 package org.semux.util;
 
+import org.semux.util.exception.SimpleEncoderException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -21,7 +23,7 @@ public class SimpleEncoder {
         try {
             out.write(toAppend);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new SimpleEncoderException(e);
         }
     }
 
@@ -58,7 +60,7 @@ public class SimpleEncoder {
         try {
             out.write(bytes);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new SimpleEncoderException(e);
         }
     }
 
@@ -67,7 +69,7 @@ public class SimpleEncoder {
         try {
             out.write(Bytes.of(s));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new SimpleEncoderException(e);
         }
     }
 
@@ -77,7 +79,7 @@ public class SimpleEncoder {
         try {
             out.write(bytes);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new SimpleEncoderException(e);
         }
     }
 

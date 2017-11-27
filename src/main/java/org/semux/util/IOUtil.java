@@ -23,6 +23,9 @@ import java.util.List;
 
 public class IOUtil {
 
+    private IOUtil() {
+    }
+
     /**
      * Reads stream into byte array, and close it afterwards.
      * 

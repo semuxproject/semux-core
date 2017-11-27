@@ -11,6 +11,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class ArrayUtil {
 
+    private ArrayUtil() {
+    }
+
     /**
      * Generate a random permutation of [0...n)
      * 

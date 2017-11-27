@@ -6,6 +6,8 @@
  */
 package org.semux.util;
 
+import org.semux.util.exception.BytesException;
+
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 
@@ -32,6 +34,9 @@ public class Bytes {
      * Empty 256-bit hash.
      */
     public static final byte[] EMPTY_HASH = new byte[32];
+
+    private Bytes() {
+    }
 
     /**
      * Generate a random byte array of required length.
@@ -118,7 +123,7 @@ public class Bytes {
         try {
             return str.getBytes(CHARSET);
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new BytesException(e);
         }
     }
 
@@ -189,7 +194,7 @@ public class Bytes {
         try {
             return new String(bytes, CHARSET);
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new BytesException(e);
         }
     }
 

@@ -9,6 +9,10 @@ package org.semux.util;
 import java.math.BigInteger;
 
 public class BigIntegerUtil {
+
+    private BigIntegerUtil() {
+    }
+
     /**
      * Returns if the big integer is zero.
      * 

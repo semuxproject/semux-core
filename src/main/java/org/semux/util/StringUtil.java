@@ -8,6 +8,9 @@ package org.semux.util;
 
 public class StringUtil {
 
+    private StringUtil() {
+    }
+
     /**
      * Returns if the given string is null or empty.
      * 

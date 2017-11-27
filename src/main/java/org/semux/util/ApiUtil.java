@@ -7,10 +7,7 @@
 package org.semux.util;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.net.*;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +17,6 @@ import org.json.JSONObject;
 import org.semux.crypto.Hex;
 
 public class ApiUtil {
-    private static final InetSocketAddress DEFAULT_SERVER = new InetSocketAddress("127.0.0.1", 5171);
-
     private InetSocketAddress server;
     private String username;
     private String password;
@@ -30,10 +25,6 @@ public class ApiUtil {
         this.server = server;
         this.username = username;
         this.password = password;
-    }
-
-    public ApiUtil(String username, String password) {
-        this(DEFAULT_SERVER, username, password);
     }
 
     /**
@@ -53,14 +44,14 @@ public class ApiUtil {
 
         // construct parameters
         StringBuilder sb = new StringBuilder();
-        for (String k : params.keySet()) {
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
             String v;
-            if (params.get(k) instanceof byte[]) {
-                v = Hex.encode((byte[]) params.get(k));
+            if (entry.getValue() instanceof byte[]) {
+                v = Hex.encode((byte[]) entry.getValue());
             } else {
-                v = URLEncoder.encode(params.get(k).toString(), "UTF-8");
+                v = URLEncoder.encode(entry.getValue().toString(), "UTF-8");
             }
-            sb.append("&").append(k).append("=").append(v);
+            sb.append("&").append(entry.getKey()).append("=").append(v);
         }
         url += sb.length() == 0 ? "" : "?" + sb.substring(1);
         sb.setLength(0);

@@ -23,6 +23,9 @@ public class DnsUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(DnsUtil.class);
 
+    private DnsUtil() {
+    }
+
     /**
      * Returns the TXT records associated with a hostname.
      * 

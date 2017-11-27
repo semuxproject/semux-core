@@ -14,6 +14,10 @@ import org.semux.core.TransactionResult;
 import org.semux.crypto.Hash;
 
 public class MerkleUtil {
+
+    private MerkleUtil() {
+    }
+
     /**
      * Compute transactions merkle root.
      * 
