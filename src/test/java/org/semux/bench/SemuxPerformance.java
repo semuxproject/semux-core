@@ -25,15 +25,15 @@ public class SemuxPerformance {
     private static String username = "";
     private static String password = "";
 
-    private static int coinbase = 0;
+    private static String address = "";
     private static int tps = 500;
 
     public static void testTransfer(int n) throws IOException, InterruptedException {
         long t1 = System.currentTimeMillis();
         for (int i = 1; i <= n; i++) {
             Map<String, Object> params = new HashMap<>();
-            params.put("from", coinbase);
-            params.put("to", coinbase);
+            params.put("from", address);
+            params.put("to", address);
             params.put("value", 1 * Unit.MILLI_SEM);
             params.put("fee", Config.MIN_TRANSACTION_FEE);
             params.put("data", Bytes.EMPTY_BYTES);

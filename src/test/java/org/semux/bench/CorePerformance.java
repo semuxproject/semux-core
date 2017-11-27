@@ -69,7 +69,7 @@ public class CorePerformance {
         block.setVotes(votes);
 
         long t2 = System.nanoTime();
-        logger.info("block header size: {} KB", block.toBytesHeader().length / 1024);
+        logger.info("block header size: {} B", block.toBytesHeader().length);
         logger.info("block transaction size: {} KB", block.toBytesTransactions().length / 1024);
         logger.info("block results size: {} KB", block.toBytesResults().length / 1024);
         logger.info("block votes size: {} KB", block.toBytesVotes().length / 1024);
