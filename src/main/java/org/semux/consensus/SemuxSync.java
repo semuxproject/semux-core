@@ -62,7 +62,7 @@ public class SemuxSync implements Sync {
 
     private static final int MAX_UNFINISHED_JOBS = 16;
 
-    private static final long MAX_DOWNLOAD_TIME = 30 * 1000; // 30 seconds
+    private static final long MAX_DOWNLOAD_TIME = 30L * 1000L; // 30 seconds
 
     private static final int MAX_PENDING_BLOCKS = 512;
 
@@ -339,10 +339,10 @@ public class SemuxSync implements Sync {
 
         AccountState as = chain.getAccountState().track();
         DelegateState ds = chain.getDelegateState().track();
-        TransactionExecutor exec = new TransactionExecutor();
+        TransactionExecutor transactionExecutor = new TransactionExecutor();
 
         // [3] evaluate transactions
-        List<TransactionResult> results = exec.execute(transactions, as, ds);
+        List<TransactionResult> results = transactionExecutor.execute(transactions, as, ds);
         if (!Block.validateResults(header, results)) {
             logger.debug("Invalid transactions");
             return false;
@@ -381,8 +381,8 @@ public class SemuxSync implements Sync {
         as.commit();
         ds.commit();
 
-        WriteLock lock = Config.STATE_LOCK.writeLock();
-        lock.lock();
+        WriteLock writeLock = Config.STATE_LOCK.writeLock();
+        writeLock.lock();
         try {
             // [7] flush state to disk
             chain.getAccountState().commit();
@@ -391,7 +391,7 @@ public class SemuxSync implements Sync {
             // [8] add block to chain
             chain.addBlock(block);
         } finally {
-            lock.unlock();
+            writeLock.unlock();
         }
 
         return true;

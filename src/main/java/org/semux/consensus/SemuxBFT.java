@@ -18,6 +18,7 @@ import org.apache.commons.collections4.map.LRUMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Config;
 import org.semux.consensus.SemuxBFT.Event.Type;
+import org.semux.consensus.exception.SemuxBFTException;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -357,7 +358,7 @@ public class SemuxBFT implements Consensus {
 
         Optional<byte[]> blockHash = precommitVotes.anyApproved();
         if (!blockHash.isPresent()) {
-            throw new RuntimeException("Entered COMMIT state without +2/3 pre-commit votes");
+            throw new SemuxBFTException("Entered COMMIT state without +2/3 pre-commit votes");
         } else {
             // create a COMMIT vote
             Vote vote = Vote.newApprove(VoteType.COMMIT, height, view, blockHash.get());
@@ -588,12 +589,10 @@ public class SemuxBFT implements Consensus {
             return true;
         }
         case BFT_PROPOSAL: {
-            BFTProposalMessage m = (BFTProposalMessage) msg;
-            Proposal proposal = m.getProposal();
-
-            if (proposal.getHeight() == height) {
+            BFTProposalMessage proposalMessage = (BFTProposalMessage) msg;
+            if (proposalMessage.getProposal().getHeight() == height) {
                 if (proposal.validate()) {
-                    events.add(new Event(Event.Type.PROPOSAL, m.getProposal()));
+                    events.add(new Event(Event.Type.PROPOSAL, proposalMessage.getProposal()));
                 } else {
                     logger.debug("Invalid proposal from {}", channel.getRemotePeer().getPeerId());
                     channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
@@ -775,9 +774,9 @@ public class SemuxBFT implements Consensus {
         long number = header.getNumber();
 
         if (header.getNumber() > Config.MANDATORY_UPGRADE) {
-            throw new RuntimeException("This client needs to be upgraded");
+            throw new SemuxBFTException("This client needs to be upgraded");
         } else if (header.getNumber() != chain.getLatestBlockNumber() + 1) {
-            throw new RuntimeException("Applying wrong block: number = " + header.getNumber());
+            throw new SemuxBFTException("Applying wrong block: number = " + header.getNumber());
         }
 
         // [1] check block header, skipped
