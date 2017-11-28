@@ -23,6 +23,7 @@ import org.semux.core.Wallet;
 import org.semux.core.WalletLockedException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
+import org.semux.gui.MessagesUtil;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,64 +35,61 @@ public class SemuxCLI {
     private Options options = new Options();
 
     static final String DEFAULT_DATA_DIR = ".";
-    static final String MSG_ADDRESS_NOT_IN_WALLET = "This address doesn't exist in the wallet";
-    static final String MSG_ENTER_NEW_PASSWORD = "Please enter the new password: ";
-    static final String MSG_PASSWORD_CHANGED = "Password is successfully changed";
-    static final String MSG_FAILED_TO_FLUSH_WALLET_FILE = "The wallet file cannot be updated";
-    static final String MSG_PRIVATE_KEY_EXISTED = "The private key is already existed in the wallet";
-    static final String MSG_PRIVATE_KEY_IMPORTED = "The private key is successfully imported";
-    static final String MSG_PRIVATE_KEY_SEPC_EXCETION = "The private key cannot be decoded: {}";
-    static final String MSG_ADDRESS = "Address = {}";
-    static final String MSG_PUBLIC_KEY = "Public Key = {}";
-    static final String MSG_PRIVATE_KEY = "Private Key = {}";
-    static final String MSG_ACCOUNT = "Account #{} = {}";
-    static final String MSG_ACCOUNT_EMPTY = "There is no account in your wallet!";
-    static final String MSG_PARSING_FAILED = "Parsing failed. Reason: {}";
-    static final String MSG_NEW_ACCOUNT_CREATED = "A new account has been created and stored in your wallet.";
-    static final String MSG_START_KERNEL_NEW_ACCOUNT_CREATED = "A new account has been created for you: address = {}";
-    static final String MSG_COINBASE_NOT_EXISTED = "Coinbase does not exist";
+    static final String MSG_ADDRESS_NOT_IN_WALLET = MessagesUtil.get("AddressNotInWallet");
+    static final String MSG_ENTER_NEW_PASSWORD = MessagesUtil.get("EnterNewPassword") + ": ";
+    static final String MSG_PASSWORD_CHANGED = MessagesUtil.get("PasswordChangedSuccessfully");
+    static final String MSG_FAILED_TO_FLUSH_WALLET_FILE = MessagesUtil.get("WalletFileCannotBeUpdated");
+    static final String MSG_PRIVATE_KEY_EXISTED = MessagesUtil.get("PrivateKeyAlreadyInWallet");
+    static final String MSG_PRIVATE_KEY_IMPORTED = MessagesUtil.get("PrivateKeyImportedSuccessfully");
+    static final String MSG_PRIVATE_KEY_SEPC_EXCETION = MessagesUtil.get("PrivateKeyCannotBeDecoded") + " {}";
+    static final String MSG_ADDRESS = MessagesUtil.get("Address") + " = {}";
+    static final String MSG_PUBLIC_KEY = MessagesUtil.get("PublicKey") + " = {}";
+    static final String MSG_PRIVATE_KEY = MessagesUtil.get("PrivateKey") + " = {}";
+    static final String MSG_ACCOUNT = MessagesUtil.get("AccountNum") + " = {}";
+    static final String MSG_ACCOUNT_EMPTY = MessagesUtil.get("AccountMissing");
+    static final String MSG_PARSING_FAILED = MessagesUtil.get("ParsingFailed") + " {}";
+    static final String MSG_NEW_ACCOUNT_CREATED = MessagesUtil.get("NewAccountCreated");
+    static final String MSG_START_KERNEL_NEW_ACCOUNT_CREATED = MessagesUtil.get("NewAccoutnCreatedForAddress")
+            + " = {}";
+    static final String MSG_COINBASE_NOT_EXISTED = MessagesUtil.get("CoinbaseDoesNotExist");
 
     private String dataDir = DEFAULT_DATA_DIR;
     private int coinbase = 0;
     private String password = null;
 
     SemuxCLI() {
-        Option help = Option.builder().longOpt("help").desc("Print help info and exit").build();
+        Option help = Option.builder().longOpt("help").desc(MessagesUtil.get("PrintHelp")).build();
         options.addOption(help);
 
-        Option version = Option.builder().longOpt("version").desc("Show the version of this client").build();
+        Option version = Option.builder().longOpt("version").desc(MessagesUtil.get("ShowVersion")).build();
         options.addOption(version);
 
-        Option account = Option.builder().longOpt("account")
-                .desc("action can be one of:" + "\n" + "create - Create an new account and exit" + "\n"
-                        + "list - List all accounts and exit")
-                .hasArg(true).numberOfArgs(1).optionalArg(false).argName("action").type(String.class).build();
+        Option account = Option.builder().longOpt("account").desc(MessagesUtil.get("ChooseAction")).hasArg(true)
+                .numberOfArgs(1).optionalArg(false).argName("action").type(String.class).build();
         options.addOption(account);
 
-        Option changepassword = Option.builder().longOpt("changepassword").desc("Change password of the wallet")
-                .build();
+        Option changepassword = Option.builder().longOpt("changepassword")
+                .desc(MessagesUtil.get("ChangeWalletPassword")).build();
         options.addOption(changepassword);
 
-        Option datadir = Option.builder().longOpt("datadir").desc("Specify the data directory").hasArg(true)
+        Option datadir = Option.builder().longOpt("datadir").desc(MessagesUtil.get("SpecifyDataDir")).hasArg(true)
                 .numberOfArgs(1).optionalArg(false).argName("path").type(String.class).build();
         options.addOption(datadir);
 
-        Option coinbase = Option.builder().longOpt("coinbase").desc("Specify which account to be used as coinbase")
-                .hasArg(true).numberOfArgs(1).optionalArg(false).argName("index").type(Number.class).build();
+        Option coinbase = Option.builder().longOpt("coinbase").desc(MessagesUtil.get("SpecifyCoinbase")).hasArg(true)
+                .numberOfArgs(1).optionalArg(false).argName("index").type(Number.class).build();
         options.addOption(coinbase);
 
-        Option password = Option.builder().longOpt("password").desc("Password of the wallet").hasArg(true)
+        Option password = Option.builder().longOpt("password").desc(MessagesUtil.get("WalletPassword")).hasArg(true)
                 .numberOfArgs(1).optionalArg(false).argName("password").type(String.class).build();
         options.addOption(password);
 
-        Option dumpprivatekey = Option.builder().longOpt("dumpprivatekey")
-                .desc("Prints the hexadecimal private key of an address").hasArg(true).optionalArg(false)
-                .argName("address").type(String.class).build();
+        Option dumpprivatekey = Option.builder().longOpt("dumpprivatekey").desc(MessagesUtil.get("PrintHexKey"))
+                .hasArg(true).optionalArg(false).argName("address").type(String.class).build();
         options.addOption(dumpprivatekey);
 
-        Option importprivatekey = Option.builder().longOpt("importprivatekey")
-                .desc("Imports a hexadecimal private key into the wallet").hasArg(true).optionalArg(false)
-                .argName("key").type(String.class).build();
+        Option importprivatekey = Option.builder().longOpt("importprivatekey").desc(MessagesUtil.get("ImportHexKey"))
+                .hasArg(true).optionalArg(false).argName("key").type(String.class).build();
         options.addOption(importprivatekey);
     }
 
