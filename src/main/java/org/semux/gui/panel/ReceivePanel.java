@@ -6,17 +6,17 @@
  */
 package org.semux.gui.panel;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import org.semux.Kernel;
+import org.semux.core.Wallet;
+import org.semux.crypto.EdDSA;
+import org.semux.crypto.Hex;
+import org.semux.gui.Action;
+import org.semux.gui.SemuxGUI;
+import org.semux.gui.SwingUtil;
+import org.semux.gui.model.WalletAccount;
+import org.semux.gui.model.WalletModel;
+import org.semux.message.GUIMessages;
+import org.semux.util.UnreachableException;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -32,18 +32,17 @@ import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-
-import org.semux.Kernel;
-import org.semux.core.Wallet;
-import org.semux.crypto.EdDSA;
-import org.semux.crypto.Hex;
-import org.semux.gui.Action;
-import org.semux.message.GUIMessages;
-import org.semux.gui.SemuxGUI;
-import org.semux.gui.SwingUtil;
-import org.semux.gui.model.WalletAccount;
-import org.semux.gui.model.WalletModel;
-import org.semux.util.UnreachableException;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class ReceivePanel extends JPanel implements ActionListener {
 

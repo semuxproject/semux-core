@@ -6,15 +6,18 @@
  */
 package org.semux.util;
 
+import org.json.JSONObject;
+import org.semux.crypto.Hex;
+
 import java.io.IOException;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-
-import org.json.JSONObject;
-import org.semux.crypto.Hex;
 
 public class ApiUtil {
     private InetSocketAddress server;
