@@ -113,12 +113,14 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         });
 
         table.addMouseListener(new MouseAdapter() {
+
+            @Override
             public void mousePressed(MouseEvent me) {
-                JTable table = (JTable) me.getSource();
+                JTable sourceTable = (JTable) me.getSource();
                 Point p = me.getPoint();
-                int row = table.rowAtPoint(p);
+                int row = sourceTable.rowAtPoint(p);
                 if (me.getClickCount() == 2) {
-                    WalletDelegate d = tableModel.getRow(table.convertRowIndexToModel(row));
+                    WalletDelegate d = tableModel.getRow(sourceTable.convertRowIndexToModel(row));
                     if (d != null) {
                         DelegateDialog dialog = new DelegateDialog(frame, d);
                         dialog.setVisible(true);
@@ -399,12 +401,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 PendingManager pendingMgr = kernel.getPendingManager();
 
                 TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
-                byte[] from = a.getKey().toAddress();
-                byte[] to = d.getAddress();
-                long nonce = pendingMgr.getNonce(from);
+                byte[] fromAddress = a.getKey().toAddress();
+                byte[] toAddress = d.getAddress();
+                long nonce = pendingMgr.getNonce(fromAddress);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = {};
-                Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+                Transaction tx = new Transaction(type, toAddress, value, fee, nonce, timestamp, data);
                 tx.sign(a.getKey());
 
                 sendTransaction(pendingMgr, tx);
@@ -442,13 +444,13 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 PendingManager pendingMgr = kernel.getPendingManager();
 
                 TransactionType type = TransactionType.DELEGATE;
-                byte[] from = a.getKey().toAddress();
+                byte[] fromAddress = a.getKey().toAddress();
                 long value = Config.DELEGATE_BURN_AMOUNT;
                 long fee = Config.MIN_TRANSACTION_FEE;
-                long nonce = pendingMgr.getNonce(from);
+                long nonce = pendingMgr.getNonce(fromAddress);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = Bytes.of(name);
-                Transaction tx = new Transaction(type, from, value, fee, nonce, timestamp, data);
+                Transaction tx = new Transaction(type, fromAddress, value, fee, nonce, timestamp, data);
                 tx.sign(a.getKey());
 
                 sendTransaction(pendingMgr, tx);

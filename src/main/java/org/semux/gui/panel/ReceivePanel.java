@@ -22,7 +22,6 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -59,7 +58,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
     private ReceiveTableModel tableModel;
     private JLabel qr;
 
-    public ReceivePanel(JFrame frame, WalletModel model) {
+    public ReceivePanel(WalletModel model) {
         this.model = model;
         this.model.addListener(this);
 
@@ -74,7 +73,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         SwingUtil.setColumnAlignments(table, false, false, true, true);
 
         table.getSelectionModel().addListSelectionListener(
-                (ev) -> actionPerformed(new ActionEvent(ReceivePanel.this, 0, Action.SELECT_ACCOUNT.name())));
+                ev -> actionPerformed(new ActionEvent(ReceivePanel.this, 0, Action.SELECT_ACCOUNT.name())));
 
         // customized table sorter
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());

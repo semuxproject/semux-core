@@ -116,10 +116,4 @@ public class InputDialog extends JDialog implements ActionListener {
         this.setVisible(true);
         return text;
     }
-
-    public static void main(String[] args) throws InterruptedException {
-        InputDialog pwd = new InputDialog(null, "Please enter your password", true);
-        String password = pwd.getInput();
-        System.out.println("Password: " + password);
-    }
 }

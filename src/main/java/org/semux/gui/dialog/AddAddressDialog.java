@@ -26,14 +26,14 @@ public class AddAddressDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private AddressBookDialog parent;
+    private AddressBookDialog addressBookDialog;
 
     private JTextField name;
     private JTextField address;
 
-    public AddAddressDialog(AddressBookDialog parent) {
-        super(parent, MessagesUtil.get("AddAddress"));
-        this.parent = parent;
+    public AddAddressDialog(AddressBookDialog addressBookDialog) {
+        super(addressBookDialog, MessagesUtil.get("AddAddress"));
+        this.addressBookDialog = addressBookDialog;
 
         JLabel lblName = new JLabel("Name");
         JLabel lblAddress = new JLabel("Address");
@@ -88,7 +88,7 @@ public class AddAddressDialog extends JDialog implements ActionListener {
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();
         this.setResizable(false);
-        this.setLocationRelativeTo(parent);
+        this.setLocationRelativeTo(addressBookDialog);
     }
 
     @Override
@@ -100,8 +100,8 @@ public class AddAddressDialog extends JDialog implements ActionListener {
             String n = name.getText().trim();
             String a = address.getText().trim();
             if (!n.isEmpty() && !a.isEmpty()) {
-                parent.getAddressBook().put(name.getText(), address.getText());
-                parent.refresh();
+                addressBookDialog.getAddressBook().put(name.getText(), address.getText());
+                addressBookDialog.refresh();
                 this.dispose();
             }
             break;

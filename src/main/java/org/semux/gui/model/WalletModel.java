@@ -42,12 +42,6 @@ public class WalletModel {
     private AddressBook addressBook = new AddressBook();
 
     /**
-     * Construct a new model.
-     */
-    public WalletModel() {
-    }
-
-    /**
      * Add a listener.
      * 
      * @param listener

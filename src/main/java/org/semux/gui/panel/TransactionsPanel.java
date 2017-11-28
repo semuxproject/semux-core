@@ -72,12 +72,13 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         SwingUtil.setColumnAlignments(table, false, false, true, true);
 
         table.addMouseListener(new MouseAdapter() {
+            @Override
             public void mousePressed(MouseEvent me) {
-                JTable table = (JTable) me.getSource();
+                JTable sourceTable = (JTable) me.getSource();
                 Point p = me.getPoint();
-                int row = table.rowAtPoint(p);
+                int row = sourceTable.rowAtPoint(p);
                 if (me.getClickCount() == 2) {
-                    Transaction tx = tableModel.getRow(table.convertRowIndexToModel(row));
+                    Transaction tx = tableModel.getRow(sourceTable.convertRowIndexToModel(row));
                     if (tx != null) {
                         TransactionDialog dialog = new TransactionDialog(frame, tx);
                         dialog.setVisible(true);
@@ -110,7 +111,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             this.transactions = Collections.emptyList();
         }
 
-        public void setData(List<Transaction> transactions, Map<String, Integer> accounts) {
+        public void setData(List<Transaction> transactions) {
             this.transactions = transactions;
             this.fireTableDataChanged();
         }
@@ -200,7 +201,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
          * update table model
          */
         Transaction tx = getSelectedTransaction();
-        tableModel.setData(transactions, accounts);
+        tableModel.setData(transactions);
 
         if (tx != null) {
             for (int i = 0; i < transactions.size(); i++) {

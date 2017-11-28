@@ -22,12 +22,15 @@ import java.util.ResourceBundle;
  */
 public final class MessagesUtil {
 
-    private final static String RESOURCES_PATH = "org/semux/gui/messages";
-    private final static ResourceBundle RESOURCES;
+    private static final String RESOURCES_PATH = "org/semux/gui/messages";
+    private static final ResourceBundle RESOURCES;
 
     static {
         ResourceBundle bundle = ResourceBundle.getBundle(RESOURCES_PATH, Locale.getDefault());
         RESOURCES = bundle == null ? ResourceBundle.getBundle(RESOURCES_PATH, Locale.ENGLISH) : bundle;
+    }
+
+    private MessagesUtil() {
     }
 
     /**

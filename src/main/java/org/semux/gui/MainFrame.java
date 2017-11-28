@@ -61,9 +61,9 @@ public class MainFrame extends JFrame implements ActionListener {
         lockGlassPane.setOpaque(false);
         this.setGlassPane(lockGlassPane);
 
-        panelHome = new HomePanel(this, model);
+        panelHome = new HomePanel(model);
         panelSend = new SendPanel(this, model);
-        panelReceive = new ReceivePanel(this, model);
+        panelReceive = new ReceivePanel(model);
         panelTransactions = new TransactionsPanel(this, model);
         panelDelegates = new DelegatesPanel(this, model);
 
@@ -153,9 +153,9 @@ public class MainFrame extends JFrame implements ActionListener {
         }
     }
 
-    private static Border BORDER_NORMAL = new CompoundBorder(new LineBorder(new Color(180, 180, 180)),
+    private static final Border BORDER_NORMAL = new CompoundBorder(new LineBorder(new Color(180, 180, 180)),
             new EmptyBorder(0, 5, 0, 10));
-    private static Border BORDER_FOCUS = new CompoundBorder(new LineBorder(new Color(51, 153, 255)),
+    private static final Border BORDER_FOCUS = new CompoundBorder(new LineBorder(new Color(51, 153, 255)),
             new EmptyBorder(0, 5, 0, 10));
 
     private void select(JPanel panel, JButton button) {
@@ -191,6 +191,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
         public LockGlassPane() {
             this.addMouseListener(new MouseAdapter() {
+                @Override
                 public void mousePressed(MouseEvent e) {
                     InputDialog dialog = new InputDialog(MainFrame.this, MessagesUtil.get("EnterPassword") + ":", true);
                     String pwd = dialog.getInput();
@@ -207,6 +208,7 @@ public class MainFrame extends JFrame implements ActionListener {
             });
         }
 
+        @Override
         public void paintComponent(Graphics g) {
             g.setColor(new Color(0, 0, 0, 96));
             g.fillRect(0, 0, this.getWidth(), this.getHeight());

@@ -99,7 +99,7 @@ public class SemuxGUI {
 
     public static void showWelcome() {
         // start welcome frame
-        WelcomeFrame frame = new WelcomeFrame(wallet, model);
+        WelcomeFrame frame = new WelcomeFrame(wallet);
         frame.setVisible(true);
         frame.join();
         frame.dispose();
@@ -158,6 +158,7 @@ public class SemuxGUI {
                     }
                 } catch (InterruptedException e) {
                     logger.info("Data refresh interrupted, exiting");
+                    Thread.currentThread().interrupt(); // https://stackoverflow.com/a/4906814/670662
                     break;
                 } catch (Exception e) {
                     logger.info("Data refresh exception", e);
@@ -171,7 +172,7 @@ public class SemuxGUI {
         new Thread(() -> {
             while (true) {
                 try {
-                    Thread.sleep(5 * 60 * 1000);
+                    Thread.sleep(5 * 60 * 1000L);
 
                     String hostname = "version.semux.org";
                     List<String> version = DnsUtil.queryTxt(hostname);
@@ -183,6 +184,7 @@ public class SemuxGUI {
                         }
                     }
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // https://stackoverflow.com/a/4906814/670662
                     break;
                 }
             }

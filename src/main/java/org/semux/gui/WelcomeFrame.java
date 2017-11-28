@@ -31,7 +31,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
-import org.semux.gui.model.WalletModel;
 import org.semux.util.SystemUtil;
 import org.semux.util.UnreachableException;
 
@@ -51,7 +50,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
     private transient boolean done = false;
 
-    public WelcomeFrame(Wallet wallet, WalletModel model) {
+    public WelcomeFrame(Wallet wallet) {
         this.wallet = wallet;
 
         // setup frame properties
@@ -191,11 +190,9 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         case OK:
             String password = new String(passwordField.getPassword());
             String repeat = new String(repeatField.getPassword());
-            if (repeatField.isVisible()) {
-                if (!password.equals(repeat)) {
-                    JOptionPane.showMessageDialog(this, MessagesUtil.get("RepeatPasswordError"));
-                    break;
-                }
+            if (repeatField.isVisible() && !password.equals(repeat)) {
+                JOptionPane.showMessageDialog(this, MessagesUtil.get("RepeatPasswordError"));
+                break;
             }
             if (!wallet.unlock(password)) {
                 JOptionPane.showMessageDialog(this, MessagesUtil.get("UnlockFailed"));
@@ -237,6 +234,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                 try {
                     wait();
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // https://stackoverflow.com/a/4906814/670662
                     SystemUtil.exitAsync(0);
                 }
             }

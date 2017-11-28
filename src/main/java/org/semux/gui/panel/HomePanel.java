@@ -18,7 +18,6 @@ import java.util.Set;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -56,7 +55,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private JPanel transactions;
     private JLabel peers;
 
-    public HomePanel(JFrame frame, WalletModel model) {
+    public HomePanel(WalletModel model) {
         this.model = model;
         this.model.addListener(this);
 

@@ -62,6 +62,9 @@ public class SwingUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SwingUtil.class);
 
+    private SwingUtil() {
+    }
+
     /**
      * Put a JFrame in the center of screen.
      * 
@@ -89,7 +92,7 @@ public class SwingUtil {
         URL imageURL = SwingUtil.class.getResource(imgLocation);
 
         if (imageURL == null) {
-            logger.warn("Resource not found: " + imgLocation);
+            logger.warn("Resource not found: {}", imgLocation);
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             return new ImageIcon(image);
         } else {
