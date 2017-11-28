@@ -2,3 +2,6 @@ files:
   - source: /src/main/resources/org/semux/gui/messages.properties
     translation: >-
       /src/main/resources/org/semux/gui/messages_%locale_with_underscore%.properties
+  - source: /src/main/resources/org/semux/cli/messages.properties
+    translation: >-
+      /src/main/resources/org/semux/cli/messages_%locale_with_underscore%.properties
