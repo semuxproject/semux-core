@@ -9,6 +9,7 @@ package org.semux;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.InetSocketAddress;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -32,7 +33,7 @@ public class Config {
     private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
     public static boolean init() {
-        File f = new File(DATA_DIR, "config" + File.separator + "semux.properties");
+        File f = Paths.get(DATA_DIR, Config.CONFIG_DIR, "semux.properties").toFile();
         Properties props = new Properties();
 
         try (FileInputStream in = new FileInputStream(f)) {
@@ -130,6 +131,11 @@ public class Config {
      * Work directory.
      */
     public static String DATA_DIR = ".";
+
+    /**
+     * Config directory.
+     */
+    public static final String CONFIG_DIR = "config";
 
     /**
      * Maximum number of transactions per block.

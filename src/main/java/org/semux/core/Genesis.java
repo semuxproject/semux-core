@@ -8,6 +8,7 @@ package org.semux.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +47,6 @@ public class Genesis extends Block {
 
     private static final Logger logger = LoggerFactory.getLogger(Genesis.class);
 
-    private static final String GENESIS_DIR = "config";
     private static final String GENESIS_FILE = "genesis.json";
 
     private Map<ByteArray, Premine> premines;
@@ -63,7 +63,7 @@ public class Genesis extends Block {
     public static synchronized Genesis getInstance() {
         if (instance == null) {
             try {
-                File file = new File(Config.DATA_DIR, GENESIS_DIR + File.separator + GENESIS_FILE);
+                File file = Paths.get(Config.DATA_DIR, Config.CONFIG_DIR, GENESIS_FILE).toFile();
                 String str = IOUtil.readFileAsString(file);
                 JSONObject json = new JSONObject(str);
 
@@ -93,7 +93,7 @@ public class Genesis extends Block {
                 }
 
                 // configurations
-                Map<String, Object> config = json.getJSONObject(GENESIS_DIR).toMap();
+                Map<String, Object> config = json.getJSONObject(Config.CONFIG_DIR).toMap();
 
                 instance = new Genesis(number, coinbase, prevHash, timestamp, data, premine, delegates, config);
             } catch (IOException e) {
