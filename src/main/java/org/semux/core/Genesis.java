@@ -93,7 +93,7 @@ public class Genesis extends Block {
                 }
 
                 // configurations
-                Map<String, Object> config = json.getJSONObject(Config.CONFIG_DIR).toMap();
+                Map<String, Object> config = json.getJSONObject("config").toMap();
 
                 instance = new Genesis(number, coinbase, prevHash, timestamp, data, premine, delegates, config);
             } catch (IOException e) {
