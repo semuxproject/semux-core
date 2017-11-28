@@ -7,6 +7,7 @@
 package org.semux.core.exception;
 
 public class BlockchainException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
 
     public BlockchainException() {
     }

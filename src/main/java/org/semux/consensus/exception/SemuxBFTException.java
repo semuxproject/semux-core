@@ -7,6 +7,7 @@
 package org.semux.consensus.exception;
 
 public class SemuxBFTException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
 
     public SemuxBFTException() {
     }

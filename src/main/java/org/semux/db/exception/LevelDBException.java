@@ -7,6 +7,7 @@
 package org.semux.db.exception;
 
 public class LevelDBException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
 
     public LevelDBException() {
     }

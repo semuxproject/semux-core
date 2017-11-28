@@ -7,6 +7,7 @@
 package org.semux.util.exception;
 
 public class SimpleDecoderException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
 
     public SimpleDecoderException() {
     }

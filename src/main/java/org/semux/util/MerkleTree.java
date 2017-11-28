@@ -21,9 +21,6 @@ public class MerkleTree {
     private int size;
     private int levels = 0;
 
-    private MerkleTree() {
-    }
-
     /**
      * Construct a Merkle tree.
      * 

@@ -8,6 +8,8 @@ package org.semux.util.exception;
 
 public class BytesException extends RuntimeException {
 
+    private static final long serialVersionUID = 1L;
+
     public BytesException() {
     }
 
