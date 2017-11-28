@@ -8,6 +8,7 @@ package org.semux.bench;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 import org.semux.Config;
 import org.semux.api.APIServerMock;
@@ -33,7 +34,8 @@ public class APIPerformance {
         try {
             long t1 = System.nanoTime();
             for (int i = 0; i < REPEAT; i++) {
-                ApiUtil a = new ApiUtil(Config.API_USERNAME, Config.API_PASSWORD);
+                ApiUtil a = new ApiUtil(new InetSocketAddress("127.0.0.1", 5171), Config.API_USERNAME,
+                        Config.API_PASSWORD);
                 a.request("get_info");
             }
             long t2 = System.nanoTime();
