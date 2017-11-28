@@ -9,7 +9,7 @@ package org.semux.gui.panel;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.junit.Test;
-import org.semux.gui.MessagesUtil;
+import org.semux.message.GUIMessages;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
 
@@ -41,19 +41,19 @@ public class DelegatePanelTest {
         window.show();
 
         // the initial label of selected delegate should be PleaseSelectDelegate
-        window.label("SelectedDelegateLabel").requireText(MessagesUtil.get("PleaseSelectDelegate"));
+        window.label("SelectedDelegateLabel").requireText(GUIMessages.get("PleaseSelectDelegate"));
 
         // click on the first delegate
         window.table("DelegatesTable").cell("delegate 1").click();
 
         // the label of selected delegate should display the first delegate's name
-        window.label("SelectedDelegateLabel").requireText(MessagesUtil.get("SelectedDelegate", "delegate 1"));
+        window.label("SelectedDelegateLabel").requireText(GUIMessages.get("SelectedDelegate", "delegate 1"));
 
         // click on the second delegate
         window.table("DelegatesTable").cell("delegate 2").click();
 
         // the label of selected delegate should display the second delegate's name
-        window.label("SelectedDelegateLabel").requireText(MessagesUtil.get("SelectedDelegate", "delegate 2"));
+        window.label("SelectedDelegateLabel").requireText(GUIMessages.get("SelectedDelegate", "delegate 2"));
 
         // clean up
         window.cleanUp();

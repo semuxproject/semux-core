@@ -46,6 +46,7 @@ import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.gui.model.WalletModel;
+import org.semux.message.GUIMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -200,13 +201,13 @@ public class SwingUtil {
     public static void addCopyPastePopup(JComponent comp) {
         JPopupMenu popup = new JPopupMenu();
         JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
-        item.setText(MessagesUtil.get("Cut"));
+        item.setText(GUIMessages.get("Cut"));
         popup.add(item);
         item = new JMenuItem(new DefaultEditorKit.CopyAction());
-        item.setText(MessagesUtil.get("Copy"));
+        item.setText(GUIMessages.get("Copy"));
         popup.add(item);
         item = new JMenuItem(new DefaultEditorKit.PasteAction());
-        item.setText(MessagesUtil.get("Paste"));
+        item.setText(GUIMessages.get("Paste"));
         popup.add(item);
         comp.setComponentPopupMenu(popup);
     }
@@ -447,13 +448,13 @@ public class SwingUtil {
     public static String getTransactionDescription(WalletModel m, Transaction tx) {
         switch (tx.getType()) {
         case COINBASE:
-            return MessagesUtil.get("BlockReward") + " => " + getDelegateName(tx.getTo()).get();
+            return GUIMessages.get("BlockReward") + " => " + getDelegateName(tx.getTo()).get();
         case VOTE:
         case UNVOTE:
         case TRANSFER:
             return getAddressName(m, tx.getFrom()) + " => " + getAddressName(m, tx.getTo());
         case DELEGATE:
-            return MessagesUtil.get("DelegateRegistration");
+            return GUIMessages.get("DelegateRegistration");
         default:
             return StringUtil.EMPTY_STRING;
         }
@@ -473,7 +474,7 @@ public class SwingUtil {
         }
 
         int n = m.getAccountNumber(address);
-        return n == -1 ? Hex.encodeWithPrefix(address) : MessagesUtil.get("AccountNum", n);
+        return n == -1 ? Hex.encodeWithPrefix(address) : GUIMessages.get("AccountNum", n);
     }
 
     /**

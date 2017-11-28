@@ -31,7 +31,7 @@ import org.semux.core.Block;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.gui.Action;
-import org.semux.gui.MessagesUtil;
+import org.semux.message.GUIMessages;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
@@ -63,59 +63,59 @@ public class HomePanel extends JPanel implements ActionListener {
         JPanel overview = new JPanel();
         overview.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
-                MessagesUtil.get("Overview"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+                GUIMessages.get("Overview"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
         overview.setLayout(new GridLayout(7, 2, 0, 0));
 
-        JLabel labelBlockNum = new JLabel(MessagesUtil.get("BlockNum") + ":");
+        JLabel labelBlockNum = new JLabel(GUIMessages.get("BlockNum") + ":");
         overview.add(labelBlockNum);
 
         blockNum = new JLabel("");
         overview.add(blockNum);
 
-        JLabel lblBlockTime = new JLabel(MessagesUtil.get("BlockTime") + ":");
+        JLabel lblBlockTime = new JLabel(GUIMessages.get("BlockTime") + ":");
         overview.add(lblBlockTime);
 
         blockTime = new JLabel("");
         overview.add(blockTime);
 
-        JLabel labelCoinbase = new JLabel(MessagesUtil.get("Coinbase") + ":");
+        JLabel labelCoinbase = new JLabel(GUIMessages.get("Coinbase") + ":");
         overview.add(labelCoinbase);
 
         coinbase = new JLabel("");
         overview.add(coinbase);
 
-        JLabel labelStatus = new JLabel(MessagesUtil.get("Status") + ":");
+        JLabel labelStatus = new JLabel(GUIMessages.get("Status") + ":");
         overview.add(labelStatus);
 
         status = new JLabel("");
         overview.add(status);
 
-        JLabel labelAvailable = new JLabel(MessagesUtil.get("Available") + ":");
+        JLabel labelAvailable = new JLabel(GUIMessages.get("Available") + ":");
         overview.add(labelAvailable);
 
         available = new JLabel("");
         overview.add(available);
 
-        JLabel labelLocked = new JLabel(MessagesUtil.get("Locked") + ":");
+        JLabel labelLocked = new JLabel(GUIMessages.get("Locked") + ":");
         overview.add(labelLocked);
 
         locked = new JLabel("");
         overview.add(locked);
 
-        JLabel labelTotal = new JLabel(MessagesUtil.get("TotalBalance") + ":");
+        JLabel labelTotal = new JLabel(GUIMessages.get("TotalBalance") + ":");
         overview.add(labelTotal);
 
         total = new JLabel("");
         overview.add(total);
 
-        JLabel lblPeers = new JLabel(MessagesUtil.get("Peers") + ":");
+        JLabel lblPeers = new JLabel(GUIMessages.get("Peers") + ":");
         peers = new JLabel("");
 
         // setup transactions panel
         transactions = new JPanel();
         transactions.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
-                MessagesUtil.get("Transactions"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+                GUIMessages.get("Transactions"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -224,8 +224,8 @@ public class HomePanel extends JPanel implements ActionListener {
         Block block = model.getLatestBlock();
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
-        this.coinbase.setText(MessagesUtil.get("AccountNum", model.getCoinbase()));
-        this.status.setText(model.isDelegate() ? MessagesUtil.get("Delegate") : MessagesUtil.get("Normal"));
+        this.coinbase.setText(GUIMessages.get("AccountNum", model.getCoinbase()));
+        this.status.setText(model.isDelegate() ? GUIMessages.get("Delegate") : GUIMessages.get("Normal"));
         this.available.setText(SwingUtil.formatValue(model.getTotalAvailable()));
         this.locked.setText(SwingUtil.formatValue(model.getTotalLocked()));
         this.peers.setText(SwingUtil.formatNumber(model.getActivePeers().size()));

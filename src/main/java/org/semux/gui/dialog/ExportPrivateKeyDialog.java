@@ -27,7 +27,7 @@ import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
-import org.semux.gui.MessagesUtil;
+import org.semux.message.GUIMessages;
 import org.semux.gui.SwingUtil;
 import org.semux.util.UnreachableException;
 
@@ -35,7 +35,7 @@ public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "#", MessagesUtil.get("Address"), MessagesUtil.get("PrivateKey") };
+    private static String[] columnNames = { "#", GUIMessages.get("Address"), GUIMessages.get("PrivateKey") };
     private JTable table;
 
     public ExportPrivateKeyDialog(JFrame parent) {
@@ -61,7 +61,7 @@ public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
 
         JPanel panel = new JPanel();
         getContentPane().add(panel, BorderLayout.SOUTH);
-        JButton btnCopy = SwingUtil.createDefaultButton(MessagesUtil.get("CopyPrivateKey"), this,
+        JButton btnCopy = SwingUtil.createDefaultButton(GUIMessages.get("CopyPrivateKey"), this,
                 Action.COPY_PRIVATE_KEY);
         panel.add(btnCopy);
 
@@ -70,7 +70,7 @@ public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
         getContentPane().add(scrollPane, BorderLayout.CENTER);
         scrollPane.setViewportView(table);
 
-        this.setTitle(MessagesUtil.get("ExportPrivateKey"));
+        this.setTitle(GUIMessages.get("ExportPrivateKey"));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();
@@ -91,9 +91,9 @@ public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
                 Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
                 cb.setContents(new StringSelection(privateKey), null);
 
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("PrivateKeyCopied", privateKey));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("PrivateKeyCopied", privateKey));
             } else {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
             }
             break;
         default:

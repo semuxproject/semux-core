@@ -32,7 +32,7 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
-import org.semux.gui.MessagesUtil;
+import org.semux.message.GUIMessages;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.AddressBookDialog;
 import org.semux.gui.model.WalletAccount;
@@ -53,7 +53,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
         public Item(WalletAccount a, int idx) {
             this.account = a;
-            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + MessagesUtil.get("AccountNumShort", idx)
+            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + GUIMessages.get("AccountNumShort", idx)
                     + ", " + SwingUtil.formatValue(account.getAvailable());
         }
 
@@ -75,13 +75,13 @@ public class SendPanel extends JPanel implements ActionListener {
         this.model.addListener(this);
         setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        JLabel lblFrom = new JLabel(MessagesUtil.get("From") + ":");
+        JLabel lblFrom = new JLabel(GUIMessages.get("From") + ":");
         lblFrom.setHorizontalAlignment(SwingConstants.RIGHT);
 
         fromComboBox = new JComboBox<>();
         fromComboBox.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
 
-        JLabel lblTo = new JLabel(MessagesUtil.get("To") + ":");
+        JLabel lblTo = new JLabel(GUIMessages.get("To") + ":");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
 
         toText = SwingUtil.textFieldWithCopyPastePopup();
@@ -89,7 +89,7 @@ public class SendPanel extends JPanel implements ActionListener {
         toText.setActionCommand(Action.SEND.name());
         toText.addActionListener(this);
 
-        JLabel lblAmount = new JLabel(MessagesUtil.get("Amount") + ":");
+        JLabel lblAmount = new JLabel(GUIMessages.get("Amount") + ":");
         lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
         amountText = SwingUtil.textFieldWithCopyPastePopup();
@@ -97,18 +97,18 @@ public class SendPanel extends JPanel implements ActionListener {
         amountText.setActionCommand(Action.SEND.name());
         amountText.addActionListener(this);
 
-        JLabel lblFee = new JLabel(MessagesUtil.get("Fee") + ":");
+        JLabel lblFee = new JLabel(GUIMessages.get("Fee") + ":");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblFee.setToolTipText(MessagesUtil.get("FeeTip", SwingUtil.formatValue(Config.MIN_TRANSACTION_FEE)));
+        lblFee.setToolTipText(GUIMessages.get("FeeTip", SwingUtil.formatValue(Config.MIN_TRANSACTION_FEE)));
 
         feeText = SwingUtil.textFieldWithCopyPastePopup();
         feeText.setColumns(10);
         feeText.setActionCommand(Action.SEND.name());
         feeText.addActionListener(this);
 
-        JLabel lblMemo = new JLabel(MessagesUtil.get("Memo") + ":");
+        JLabel lblMemo = new JLabel(GUIMessages.get("Memo") + ":");
         lblMemo.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblMemo.setToolTipText(MessagesUtil.get("MemoTip"));
+        lblMemo.setToolTipText(GUIMessages.get("MemoTip"));
 
         memoText = SwingUtil.textFieldWithCopyPastePopup();
         memoText.setColumns(10);
@@ -119,15 +119,15 @@ public class SendPanel extends JPanel implements ActionListener {
 
         JLabel lblSem2 = new JLabel("SEM");
 
-        JButton btnSend = new JButton(MessagesUtil.get("Send"));
+        JButton btnSend = new JButton(GUIMessages.get("Send"));
         btnSend.addActionListener(this);
         btnSend.setActionCommand(Action.SEND.name());
 
-        JButton btnClear = new JButton(MessagesUtil.get("Clear"));
+        JButton btnClear = new JButton(GUIMessages.get("Clear"));
         btnClear.addActionListener(this);
         btnClear.setActionCommand(Action.CLEAR.name());
 
-        JButton btnAddressBook = new JButton(MessagesUtil.get("AddressBook"));
+        JButton btnAddressBook = new JButton(GUIMessages.get("AddressBook"));
         btnAddressBook.addActionListener(this);
         btnAddressBook.setActionCommand(Action.SHOW_ADDRESSBOOK.name());
 
@@ -257,22 +257,22 @@ public class SendPanel extends JPanel implements ActionListener {
                 byte[] to = Hex.parse(getToText());
 
                 if (acc == null) {
-                    JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
+                    JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
                 } else if (value <= 0L) {
-                    JOptionPane.showMessageDialog(this, MessagesUtil.get("EnterValidValue"));
+                    JOptionPane.showMessageDialog(this, GUIMessages.get("EnterValidValue"));
                 } else if (fee < Config.MIN_TRANSACTION_FEE) {
-                    JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFeeTooLow"));
+                    JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionFeeTooLow"));
                 } else if (value + fee > acc.getAvailable()) {
                     JOptionPane.showMessageDialog(this,
-                            MessagesUtil.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
+                            GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
                 } else if (to.length != 20) {
-                    JOptionPane.showMessageDialog(this, MessagesUtil.get("InvalidReceivingAddress"));
+                    JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidReceivingAddress"));
                 } else if (Bytes.of(memo).length > 128) {
-                    JOptionPane.showMessageDialog(this, MessagesUtil.get("InvalidMemo", 128));
+                    JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidMemo", 128));
                 } else {
                     int ret = JOptionPane.showConfirmDialog(this,
-                            MessagesUtil.get("TransferInfo", SwingUtil.formatValue(value), Hex.encodeWithPrefix(to)),
-                            MessagesUtil.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
+                            GUIMessages.get("TransferInfo", SwingUtil.formatValue(value), Hex.encodeWithPrefix(to)),
+                            GUIMessages.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
                     if (ret != JOptionPane.YES_OPTION) {
                         break;
                     }
@@ -308,10 +308,10 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private void sendTransaction(PendingManager pendingMgr, Transaction tx) {
         if (pendingMgr.addTransactionSync(tx)) {
-            JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionSent", 30));
+            JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionSent", 30));
             clear();
         } else {
-            JOptionPane.showMessageDialog(this, MessagesUtil.get("TransactionFailed"));
+            JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionFailed"));
         }
     }
 

@@ -38,6 +38,7 @@ import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
 import org.semux.net.Peer;
 import org.semux.util.DnsUtil;
+import org.semux.message.GUIMessages;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,8 +73,8 @@ public class SemuxGUI {
             showWelcome();
         } else {
             for (int i = 0;; i++) {
-                InputDialog dialog = new InputDialog(null, i == 0 ? MessagesUtil.get("EnterPassword") + ":"
-                        : MessagesUtil.get("WrongPasswordPleaseTryAgain") + ":", true);
+                InputDialog dialog = new InputDialog(null, i == 0 ? GUIMessages.get("EnterPassword") + ":"
+                        : GUIMessages.get("WrongPasswordPleaseTryAgain") + ":", true);
                 String pwd = dialog.getInput();
 
                 if (pwd == null) {
@@ -109,11 +110,11 @@ public class SemuxGUI {
 
     public static void showMain() {
         if (wallet.size() > 1) {
-            String message = MessagesUtil.get("AccountSelection");
+            String message = GUIMessages.get("AccountSelection");
             List<Object> options = new ArrayList<>();
             List<EdDSA> list = wallet.getAccounts();
             for (int i = 0; i < list.size(); i++) {
-                options.add(Hex.PREF + list.get(i).toAddressString() + ", " + MessagesUtil.get("AccountNumShort", i));
+                options.add(Hex.PREF + list.get(i).toAddressString() + ", " + GUIMessages.get("AccountNumShort", i));
             }
 
             SelectDialog dialog = new SelectDialog(null, message, options);
@@ -179,7 +180,7 @@ public class SemuxGUI {
 
                     for (String v : version) {
                         if (SystemUtil.compareVersion(Config.CLIENT_VERSION, v) < 0) {
-                            JOptionPane.showMessageDialog(null, MessagesUtil.get("WalletNeedToBeUpgraded"));
+                            JOptionPane.showMessageDialog(null, GUIMessages.get("WalletNeedToBeUpgraded"));
                             SystemUtil.exitAsync(-1);
                         }
                     }

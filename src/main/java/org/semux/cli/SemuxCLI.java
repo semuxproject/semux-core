@@ -23,7 +23,7 @@ import org.semux.core.Wallet;
 import org.semux.core.WalletLockedException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
-import org.semux.gui.MessagesUtil;
+import org.semux.message.CLIMessages;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,62 +35,53 @@ public class SemuxCLI {
     private Options options = new Options();
 
     static final String DEFAULT_DATA_DIR = ".";
-    static final String MSG_ADDRESS_NOT_IN_WALLET = MessagesUtil.get("AddressNotInWallet");
-    static final String MSG_ENTER_NEW_PASSWORD = MessagesUtil.get("EnterNewPassword") + ": ";
-    static final String MSG_PASSWORD_CHANGED = MessagesUtil.get("PasswordChangedSuccessfully");
-    static final String MSG_FAILED_TO_FLUSH_WALLET_FILE = MessagesUtil.get("WalletFileCannotBeUpdated");
-    static final String MSG_PRIVATE_KEY_EXISTED = MessagesUtil.get("PrivateKeyAlreadyInWallet");
-    static final String MSG_PRIVATE_KEY_IMPORTED = MessagesUtil.get("PrivateKeyImportedSuccessfully");
-    static final String MSG_PRIVATE_KEY_SEPC_EXCETION = MessagesUtil.get("PrivateKeyCannotBeDecoded") + " {}";
-    static final String MSG_ADDRESS = MessagesUtil.get("Address") + " = {}";
-    static final String MSG_PUBLIC_KEY = MessagesUtil.get("PublicKey") + " = {}";
-    static final String MSG_PRIVATE_KEY = MessagesUtil.get("PrivateKey") + " = {}";
-    static final String MSG_ACCOUNT = MessagesUtil.get("AccountNum") + " = {}";
-    static final String MSG_ACCOUNT_EMPTY = MessagesUtil.get("AccountMissing");
-    static final String MSG_PARSING_FAILED = MessagesUtil.get("ParsingFailed") + " {}";
-    static final String MSG_NEW_ACCOUNT_CREATED = MessagesUtil.get("NewAccountCreated");
-    static final String MSG_START_KERNEL_NEW_ACCOUNT_CREATED = MessagesUtil.get("NewAccoutnCreatedForAddress")
-            + " = {}";
-    static final String MSG_COINBASE_NOT_EXISTED = MessagesUtil.get("CoinbaseDoesNotExist");
 
     private String dataDir = DEFAULT_DATA_DIR;
     private int coinbase = 0;
     private String password = null;
 
     SemuxCLI() {
-        Option help = Option.builder().longOpt("help").desc(MessagesUtil.get("PrintHelp")).build();
-        options.addOption(help);
+        Option helpOption = Option.builder().longOpt(CLIOptions.HELP.toString()).desc(CLIMessages.get("PrintHelp"))
+                .build();
+        options.addOption(helpOption);
 
-        Option version = Option.builder().longOpt("version").desc(MessagesUtil.get("ShowVersion")).build();
-        options.addOption(version);
+        Option versionOption = Option.builder().longOpt(CLIOptions.VERSION.toString())
+                .desc(CLIMessages.get("ShowVersion")).build();
+        options.addOption(versionOption);
 
-        Option account = Option.builder().longOpt("account").desc(MessagesUtil.get("ChooseAction")).hasArg(true)
-                .numberOfArgs(1).optionalArg(false).argName("action").type(String.class).build();
-        options.addOption(account);
+        Option accountOption = Option.builder().longOpt(CLIOptions.ACCOUNT.toString())
+                .desc(CLIMessages.get("ChooseAction")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("action")
+                .type(String.class).build();
+        options.addOption(accountOption);
 
-        Option changepassword = Option.builder().longOpt("changepassword")
-                .desc(MessagesUtil.get("ChangeWalletPassword")).build();
-        options.addOption(changepassword);
+        Option changePasswordOption = Option.builder().longOpt(CLIOptions.CHANGE_PASSWORD.toString())
+                .desc(CLIMessages.get("ChangeWalletPassword")).build();
+        options.addOption(changePasswordOption);
 
-        Option datadir = Option.builder().longOpt("datadir").desc(MessagesUtil.get("SpecifyDataDir")).hasArg(true)
-                .numberOfArgs(1).optionalArg(false).argName("path").type(String.class).build();
-        options.addOption(datadir);
+        Option dataDirOption = Option.builder().longOpt(CLIOptions.DATA_DIR.toString())
+                .desc(CLIMessages.get("SpecifyDataDir")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("path")
+                .type(String.class).build();
+        options.addOption(dataDirOption);
 
-        Option coinbase = Option.builder().longOpt("coinbase").desc(MessagesUtil.get("SpecifyCoinbase")).hasArg(true)
-                .numberOfArgs(1).optionalArg(false).argName("index").type(Number.class).build();
-        options.addOption(coinbase);
+        Option coinbaseOption = Option.builder().longOpt(CLIOptions.COINBASE.toString())
+                .desc(CLIMessages.get("SpecifyCoinbase")).hasArg(true).numberOfArgs(1).optionalArg(false)
+                .argName("index").type(Number.class).build();
+        options.addOption(coinbaseOption);
 
-        Option password = Option.builder().longOpt("password").desc(MessagesUtil.get("WalletPassword")).hasArg(true)
-                .numberOfArgs(1).optionalArg(false).argName("password").type(String.class).build();
-        options.addOption(password);
+        Option passwordOption = Option.builder().longOpt(CLIOptions.PASSWORD.toString())
+                .desc(CLIMessages.get("WalletPassword")).hasArg(true).numberOfArgs(1).optionalArg(false)
+                .argName(CLIOptions.PASSWORD.toString()).type(String.class).build();
+        options.addOption(passwordOption);
 
-        Option dumpprivatekey = Option.builder().longOpt("dumpprivatekey").desc(MessagesUtil.get("PrintHexKey"))
-                .hasArg(true).optionalArg(false).argName("address").type(String.class).build();
-        options.addOption(dumpprivatekey);
+        Option dumpPrivateKeyOption = Option.builder().longOpt(CLIOptions.DUMP_PRIVATE_KEY.toString())
+                .desc(CLIMessages.get("PrintHexKey")).hasArg(true).optionalArg(false).argName("address")
+                .type(String.class).build();
+        options.addOption(dumpPrivateKeyOption);
 
-        Option importprivatekey = Option.builder().longOpt("importprivatekey").desc(MessagesUtil.get("ImportHexKey"))
-                .hasArg(true).optionalArg(false).argName("key").type(String.class).build();
-        options.addOption(importprivatekey);
+        Option importPrivateKeyOption = Option.builder().longOpt(CLIOptions.IMPORT_PRIVATE_KEY.toString())
+                .desc(CLIMessages.get("ImportHexKey")).hasArg(true).optionalArg(false).argName("key").type(String.class)
+                .build();
+        options.addOption(importPrivateKeyOption);
     }
 
     public static void main(String[] args) {
@@ -98,7 +89,7 @@ public class SemuxCLI {
             SemuxCLI cli = new SemuxCLI();
             cli.start(args);
         } catch (ParseException exception) {
-            logger.error(MSG_PARSING_FAILED, exception.getMessage());
+            logger.error(CLIMessages.get("ParsingFailed", exception.getMessage()));
         }
     }
 
@@ -106,35 +97,35 @@ public class SemuxCLI {
         CommandLineParser parser = new DefaultParser();
         CommandLine commandLine = parser.parse(options, args);
 
-        if (commandLine.hasOption("datadir")) {
-            dataDir = commandLine.getOptionValue("datadir");
+        if (commandLine.hasOption(CLIOptions.DATA_DIR.toString())) {
+            dataDir = commandLine.getOptionValue(CLIOptions.DATA_DIR.toString());
         }
 
-        if (commandLine.hasOption("coinbase")) {
-            coinbase = ((Number) commandLine.getParsedOptionValue("coinbase")).intValue();
+        if (commandLine.hasOption(CLIOptions.COINBASE.toString())) {
+            coinbase = ((Number) commandLine.getParsedOptionValue(CLIOptions.COINBASE.toString())).intValue();
         }
 
-        if (commandLine.hasOption("password")) {
-            password = commandLine.getOptionValue("password");
+        if (commandLine.hasOption(CLIOptions.PASSWORD.toString())) {
+            password = commandLine.getOptionValue(CLIOptions.PASSWORD.toString());
         }
 
-        if (commandLine.hasOption("help")) {
+        if (commandLine.hasOption(CLIOptions.HELP.toString())) {
             printHelp();
-        } else if (commandLine.hasOption("version")) {
+        } else if (commandLine.hasOption(CLIOptions.VERSION.toString())) {
             printVersion();
-        } else if (commandLine.hasOption("account")) {
-            String accountAction = commandLine.getOptionValue("account").trim();
+        } else if (commandLine.hasOption(CLIOptions.ACCOUNT.toString())) {
+            String accountAction = commandLine.getOptionValue(CLIOptions.ACCOUNT.toString()).trim();
             if (accountAction.equals("create")) {
                 createAccount();
             } else if (accountAction.equals("list")) {
                 listAccounts();
             }
-        } else if (commandLine.hasOption("changepassword")) {
+        } else if (commandLine.hasOption(CLIOptions.CHANGE_PASSWORD.toString())) {
             changePassword();
-        } else if (commandLine.hasOption("dumpprivatekey")) {
-            dumpPrivateKey(commandLine.getOptionValue("dumpprivatekey").trim());
-        } else if (commandLine.hasOption("importprivatekey")) {
-            importPrivateKey(commandLine.getOptionValue("importprivatekey").trim());
+        } else if (commandLine.hasOption(CLIOptions.DUMP_PRIVATE_KEY.toString())) {
+            dumpPrivateKey(commandLine.getOptionValue(CLIOptions.DUMP_PRIVATE_KEY.toString()).trim());
+        } else if (commandLine.hasOption(CLIOptions.IMPORT_PRIVATE_KEY.toString())) {
+            importPrivateKey(commandLine.getOptionValue(CLIOptions.IMPORT_PRIVATE_KEY.toString()).trim());
         } else {
             startKernel();
         }
@@ -159,11 +150,11 @@ public class SemuxCLI {
             wallet.addAccount(key);
             wallet.flush();
             accounts = wallet.getAccounts();
-            logger.info(MSG_START_KERNEL_NEW_ACCOUNT_CREATED, key.toAddressString());
+            logger.info(CLIMessages.get("NewAccountCreatedForAddress", key.toAddressString()));
         }
 
         if (coinbase < 0 || coinbase >= accounts.size()) {
-            logger.error(MSG_COINBASE_NOT_EXISTED);
+            logger.error(CLIMessages.get("CoinbaseDoesNotExist"));
             SystemUtil.exit(-1);
         }
 
@@ -180,10 +171,9 @@ public class SemuxCLI {
         wallet.addAccount(key);
 
         if (wallet.flush()) {
-            logger.info(MSG_NEW_ACCOUNT_CREATED);
-            logger.info(MSG_ADDRESS, key.toString());
-            logger.info(MSG_PUBLIC_KEY, Hex.encode(key.getPublicKey()));
-            logger.info(MSG_PRIVATE_KEY, Hex.encode(key.getPrivateKey()));
+            logger.info(CLIMessages.get("NewAccountCreatedForAddress", key.toAddressString()));
+            logger.info(CLIMessages.get("PublicKey", Hex.encode(key.getPublicKey())));
+            logger.info(CLIMessages.get("PrivateKey", Hex.encode(key.getPrivateKey())));
         }
     }
 
@@ -193,10 +183,10 @@ public class SemuxCLI {
         List<EdDSA> accounts = wallet.getAccounts();
 
         if (accounts.isEmpty()) {
-            logger.info(MSG_ACCOUNT_EMPTY);
+            logger.info(CLIMessages.get("AccountMissing"));
         } else {
             for (int i = 0; i < accounts.size(); i++) {
-                logger.info(MSG_ACCOUNT, i, accounts.get(i).toString());
+                logger.info(CLIMessages.get("ListAccountItem", i, accounts.get(i).toString()));
             }
         }
     }
@@ -205,15 +195,15 @@ public class SemuxCLI {
         Wallet wallet = loadAndUnlockWallet();
 
         try {
-            String newPassword = SystemUtil.readPassword(MSG_ENTER_NEW_PASSWORD);
+            String newPassword = SystemUtil.readPassword(CLIMessages.get("EnterNewPassword"));
             wallet.changePassword(newPassword);
             Boolean isFlushed = wallet.flush();
             if (!isFlushed) {
-                logger.error(MSG_FAILED_TO_FLUSH_WALLET_FILE);
+                logger.error(CLIMessages.get("WalletFileCannotBeUpdated"));
                 SystemUtil.exit(1);
             }
 
-            logger.info(MSG_PASSWORD_CHANGED);
+            logger.info(CLIMessages.get("PasswordChangedSuccessfully"));
         } catch (WalletLockedException exception) {
             logger.error(exception.getMessage());
         }
@@ -225,7 +215,7 @@ public class SemuxCLI {
         byte[] addressBytes = Hex.parse(address);
         EdDSA account = wallet.getAccount(addressBytes);
         if (account == null) {
-            logger.error(MSG_ADDRESS_NOT_IN_WALLET);
+            logger.error(CLIMessages.get("AddressNotInWallet"));
             SystemUtil.exit(1);
         } else {
             String privateKey = Hex.encode(account.getPrivateKey());
@@ -241,22 +231,22 @@ public class SemuxCLI {
 
             boolean accountAdded = wallet.addAccount(account);
             if (!accountAdded) {
-                logger.error(MSG_PRIVATE_KEY_EXISTED);
+                logger.error(CLIMessages.get("PrivateKeyAlreadyInWallet"));
                 SystemUtil.exit(1);
             }
 
             boolean walletFlushed = wallet.flush();
             if (!walletFlushed) {
-                logger.error(MSG_FAILED_TO_FLUSH_WALLET_FILE);
+                logger.error(CLIMessages.get("WalletFileCannotBeUpdated"));
                 SystemUtil.exit(2);
             }
 
-            logger.info(MSG_PRIVATE_KEY_IMPORTED);
-            logger.info(MSG_ADDRESS, account.toAddressString());
-            logger.info(MSG_PUBLIC_KEY, Hex.encode(account.getPublicKey()));
-            logger.info(MSG_PRIVATE_KEY, Hex.encode(account.getPrivateKey()));
+            logger.info(CLIMessages.get("PrivateKeyImportedSuccessfully"));
+            logger.info(CLIMessages.get("Address", account.toAddressString()));
+            logger.info(CLIMessages.get("PublicKey", Hex.encode(account.getPublicKey())));
+            logger.info(CLIMessages.get("PrivateKey", Hex.encode(account.getPrivateKey())));
         } catch (InvalidKeySpecException exception) {
-            logger.error(MSG_PRIVATE_KEY_SEPC_EXCETION, exception.getMessage());
+            logger.error(CLIMessages.get("PrivateKeyCannotBeDecoded", exception.getMessage()));
             SystemUtil.exit(3);
         } catch (WalletLockedException exception) {
             logger.error(exception.getMessage());

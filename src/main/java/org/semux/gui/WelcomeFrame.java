@@ -31,6 +31,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
+import org.semux.message.GUIMessages;
 import org.semux.util.SystemUtil;
 import org.semux.util.UnreachableException;
 
@@ -54,7 +55,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         this.wallet = wallet;
 
         // setup frame properties
-        this.setTitle(MessagesUtil.get("SemuxWallet"));
+        this.setTitle(GUIMessages.get("SemuxWallet"));
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.setMinimumSize(new Dimension(600, 400));
@@ -65,7 +66,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         banner.setIcon(SwingUtil.loadImage("banner", 125, 200));
 
         // create description
-        JLabel description = new JLabel(MessagesUtil.get("WelcomeDescriptionHtml"));
+        JLabel description = new JLabel(GUIMessages.get("WelcomeDescriptionHtml"));
 
         // create select button group
         Color color = new Color(220, 220, 220);
@@ -75,7 +76,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         panel.setBackground(color);
         ButtonGroup buttonGroup = new ButtonGroup();
 
-        btnCreate = new JRadioButton(MessagesUtil.get("CreateNewAccount"));
+        btnCreate = new JRadioButton(GUIMessages.get("CreateNewAccount"));
         btnCreate.setSelected(true);
         btnCreate.setBackground(color);
         btnCreate.setActionCommand(Action.CREATE_ACCOUNT.name());
@@ -83,7 +84,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         buttonGroup.add(btnCreate);
         panel.add(btnCreate);
 
-        btnImport = new JRadioButton(MessagesUtil.get("ImportAccountsFromBackupFile"));
+        btnImport = new JRadioButton(GUIMessages.get("ImportAccountsFromBackupFile"));
         btnImport.setBackground(color);
         btnImport.setActionCommand(Action.IMPORT_ACCOUNTS.name());
         btnImport.addActionListener(this);
@@ -91,17 +92,17 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         panel.add(btnImport);
 
         // create buttons
-        JButton btnCancel = SwingUtil.createDefaultButton(MessagesUtil.get("Cancel"), this, Action.CANCEL);
+        JButton btnCancel = SwingUtil.createDefaultButton(GUIMessages.get("Cancel"), this, Action.CANCEL);
 
-        JButton btnNext = SwingUtil.createDefaultButton(MessagesUtil.get("Next"), this, Action.OK);
+        JButton btnNext = SwingUtil.createDefaultButton(GUIMessages.get("Next"), this, Action.OK);
         btnNext.setSelected(true);
 
-        JLabel lblPassword = new JLabel(MessagesUtil.get("Password") + ":");
+        JLabel lblPassword = new JLabel(GUIMessages.get("Password") + ":");
         passwordField = new JPasswordField();
         passwordField.setActionCommand(Action.OK.name());
         passwordField.addActionListener(this);
 
-        lblRepeat = new JLabel(MessagesUtil.get("RepeatPassword") + ":");
+        lblRepeat = new JLabel(GUIMessages.get("RepeatPassword") + ":");
         repeatField = new JPasswordField();
         repeatField.setActionCommand(Action.OK.name());
         repeatField.addActionListener(this);
@@ -177,7 +178,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         case IMPORT_ACCOUNTS:
             JFileChooser chooser = new JFileChooser();
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            chooser.setFileFilter(new FileNameExtensionFilter(MessagesUtil.get("WalletBinaryFormat"), "data"));
+            chooser.setFileFilter(new FileNameExtensionFilter(GUIMessages.get("WalletBinaryFormat"), "data"));
             int ret = chooser.showOpenDialog(this);
             if (ret == JFileChooser.APPROVE_OPTION) {
                 backupFile = chooser.getSelectedFile();
@@ -191,11 +192,11 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             String password = new String(passwordField.getPassword());
             String repeat = new String(repeatField.getPassword());
             if (repeatField.isVisible() && !password.equals(repeat)) {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("RepeatPasswordError"));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("RepeatPasswordError"));
                 break;
             }
             if (!wallet.unlock(password)) {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("UnlockFailed"));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("UnlockFailed"));
                 break;
             }
 
@@ -209,9 +210,9 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                 Wallet w = new Wallet(backupFile);
 
                 if (!w.unlock(password)) {
-                    JOptionPane.showMessageDialog(this, MessagesUtil.get("BackupUnlockFailed"));
+                    JOptionPane.showMessageDialog(this, GUIMessages.get("BackupUnlockFailed"));
                 } else if (w.size() == 0) {
-                    JOptionPane.showMessageDialog(this, MessagesUtil.get("NoAccountFound"));
+                    JOptionPane.showMessageDialog(this, GUIMessages.get("NoAccountFound"));
                 } else {
                     wallet.addAccounts(w.getAccounts());
                     wallet.flush();

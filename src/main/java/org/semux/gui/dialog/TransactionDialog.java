@@ -16,7 +16,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.semux.core.Transaction;
 import org.semux.crypto.Hex;
-import org.semux.gui.MessagesUtil;
+import org.semux.message.GUIMessages;
 import org.semux.gui.SwingUtil;
 
 public class TransactionDialog extends JDialog {
@@ -25,15 +25,15 @@ public class TransactionDialog extends JDialog {
 
     public TransactionDialog(JFrame parent, Transaction tx) {
 
-        JLabel lblHash = new JLabel(MessagesUtil.get("Hash") + ":");
-        JLabel lblType = new JLabel(MessagesUtil.get("Type") + ":");
-        JLabel lblFrom = new JLabel(MessagesUtil.get("From") + ":");
-        JLabel lblTo = new JLabel(MessagesUtil.get("To") + ":");
-        JLabel lblValue = new JLabel(MessagesUtil.get("Value") + ":");
-        JLabel lblFee = new JLabel(MessagesUtil.get("Fee") + ":");
-        JLabel lblNonce = new JLabel(MessagesUtil.get("Nonce") + ":");
-        JLabel lblTimestamp = new JLabel(MessagesUtil.get("Timestamp") + ":");
-        JLabel lblData = new JLabel(MessagesUtil.get("Data") + ":");
+        JLabel lblHash = new JLabel(GUIMessages.get("Hash") + ":");
+        JLabel lblType = new JLabel(GUIMessages.get("Type") + ":");
+        JLabel lblFrom = new JLabel(GUIMessages.get("From") + ":");
+        JLabel lblTo = new JLabel(GUIMessages.get("To") + ":");
+        JLabel lblValue = new JLabel(GUIMessages.get("Value") + ":");
+        JLabel lblFee = new JLabel(GUIMessages.get("Fee") + ":");
+        JLabel lblNonce = new JLabel(GUIMessages.get("Nonce") + ":");
+        JLabel lblTimestamp = new JLabel(GUIMessages.get("Timestamp") + ":");
+        JLabel lblData = new JLabel(GUIMessages.get("Data") + ":");
 
         JTextArea hash = SwingUtil.textAreaWithCopyPastePopup(Hex.encodeWithPrefix(tx.getHash()));
         JLabel type = new JLabel(tx.getType().name());
@@ -119,7 +119,7 @@ public class TransactionDialog extends JDialog {
         getContentPane().setLayout(groupLayout);
         // @formatter:on
 
-        this.setTitle(MessagesUtil.get("Transaction"));
+        this.setTitle(GUIMessages.get("Transaction"));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();

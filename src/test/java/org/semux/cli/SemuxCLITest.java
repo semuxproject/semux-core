@@ -10,6 +10,7 @@ import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doCallRealMethod;
@@ -44,6 +45,7 @@ import org.semux.TestAppender;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
+import org.semux.message.CLIMessages;
 import org.semux.util.SystemUtil;
 import org.slf4j.LoggerFactory;
 
@@ -143,7 +145,7 @@ public class SemuxCLITest {
 
         // assert outputs
         List<LoggingEvent> logs = TestAppender.events();
-        assertThat(logs, hasItem(info(SemuxCLI.MSG_START_KERNEL_NEW_ACCOUNT_CREATED, newAccount.toAddressString())));
+        assertThat(logs, hasItem(info(CLIMessages.get("NewAccountCreatedForAddress", newAccount.toAddressString()))));
     }
 
     @Test
@@ -190,10 +192,9 @@ public class SemuxCLITest {
 
         // assert outputs
         List<LoggingEvent> logs = TestAppender.events();
-        assertThat(logs, hasItem(info(SemuxCLI.MSG_NEW_ACCOUNT_CREATED)));
-        assertThat(logs, hasItem(info(SemuxCLI.MSG_ADDRESS, newAccount.toAddressString())));
-        assertThat(logs, hasItem(info(SemuxCLI.MSG_PUBLIC_KEY, Hex.encode(newAccount.getPublicKey()))));
-        assertThat(logs, hasItem(info(SemuxCLI.MSG_PRIVATE_KEY, Hex.encode(newAccount.getPrivateKey()))));
+        assertThat(logs, hasItem(info(CLIMessages.get("NewAccountCreatedForAddress", newAccount.toAddressString()))));
+        assertThat(logs, hasItem(info(CLIMessages.get("PublicKey", Hex.encode(newAccount.getPublicKey())))));
+        assertThat(logs, hasItem(info(CLIMessages.get("PrivateKey", Hex.encode(newAccount.getPrivateKey())))));
     }
 
     @Test
@@ -223,7 +224,7 @@ public class SemuxCLITest {
 
         // assert outputs
         List<LoggingEvent> logs = TestAppender.events();
-        assertThat(logs, hasItem(info(SemuxCLI.MSG_ACCOUNT, 0, account.toAddressString())));
+        assertThat(logs, hasItem(info(CLIMessages.get("ListAccountItem", 0, account.toAddressString()))));
     }
 
     @Test
@@ -239,7 +240,7 @@ public class SemuxCLITest {
         // mock SystemUtil
         mockStatic(SystemUtil.class);
         when(SystemUtil.readPassword()).thenReturn("oldpassword");
-        Mockito.when(SystemUtil.readPassword(SemuxCLI.MSG_ENTER_NEW_PASSWORD)).thenReturn("newpassword");
+        Mockito.when(SystemUtil.readPassword(anyString())).thenReturn("newpassword");
 
         // execution
         semuxCLI.changePassword();
@@ -381,8 +382,8 @@ public class SemuxCLITest {
 
         // assertions
         List<LoggingEvent> logs = TestAppender.events();
-        assertThat(logs, hasItem(info(SemuxCLI.MSG_PRIVATE_KEY_IMPORTED)));
-        assertThat(logs, hasItem(info(SemuxCLI.MSG_ADDRESS, "0680a919c78faa59b127014b6181979ae0a62dbd")));
-        assertThat(logs, hasItem(info(SemuxCLI.MSG_PRIVATE_KEY, key)));
+        assertThat(logs, hasItem(info(CLIMessages.get("PrivateKeyImportedSuccessfully"))));
+        assertThat(logs, hasItem(info(CLIMessages.get("Address", "0680a919c78faa59b127014b6181979ae0a62dbd"))));
+        assertThat(logs, hasItem(info(CLIMessages.get("PrivateKey", key))));
     }
 }

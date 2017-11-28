@@ -35,7 +35,7 @@ import javax.swing.table.TableRowSorter;
 import org.semux.core.Transaction;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
-import org.semux.gui.MessagesUtil;
+import org.semux.message.GUIMessages;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.TransactionDialog;
 import org.semux.gui.model.WalletAccount;
@@ -47,8 +47,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { MessagesUtil.get("Type"), MessagesUtil.get("FromTo"),
-            MessagesUtil.get("Value"), MessagesUtil.get("Time") };
+    private static String[] columnNames = { GUIMessages.get("Type"), GUIMessages.get("FromTo"),
+            GUIMessages.get("Value"), GUIMessages.get("Time") };
 
     private transient WalletModel model;
 

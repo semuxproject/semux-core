@@ -17,7 +17,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import org.semux.Kernel;
 import org.semux.core.Block;
 import org.semux.crypto.Hex;
-import org.semux.gui.MessagesUtil;
+import org.semux.message.GUIMessages;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletDelegate;
 
@@ -28,15 +28,15 @@ public class DelegateDialog extends JDialog {
     public DelegateDialog(JFrame parent, WalletDelegate d) {
         Block block = Kernel.getInstance().getBlockchain().getBlock(d.getRegisteredAt());
 
-        JLabel lblName = new JLabel(MessagesUtil.get("Name") + ":");
-        JLabel lblAddress = new JLabel(MessagesUtil.get("Address") + ":");
-        JLabel lblRegisteredAt = new JLabel(MessagesUtil.get("RegisteredAt") + ":");
-        JLabel lblVotes = new JLabel(MessagesUtil.get("Votes") + ":");
-        JLabel lblVotesFromMe = new JLabel(MessagesUtil.get("VotesFromMe") + ":");
-        JLabel lblNumOfBlocksForged = new JLabel(MessagesUtil.get("NumBlocksForged") + ":");
-        JLabel lblNumOfTurnsHit = new JLabel(MessagesUtil.get("NumTurnsHit") + ":");
-        JLabel lblNumOfTurnsMissed = new JLabel(MessagesUtil.get("NumTurnsMissed") + ":");
-        JLabel lblRate = new JLabel(MessagesUtil.get("Rate") + ":");
+        JLabel lblName = new JLabel(GUIMessages.get("Name") + ":");
+        JLabel lblAddress = new JLabel(GUIMessages.get("Address") + ":");
+        JLabel lblRegisteredAt = new JLabel(GUIMessages.get("RegisteredAt") + ":");
+        JLabel lblVotes = new JLabel(GUIMessages.get("Votes") + ":");
+        JLabel lblVotesFromMe = new JLabel(GUIMessages.get("VotesFromMe") + ":");
+        JLabel lblNumOfBlocksForged = new JLabel(GUIMessages.get("NumBlocksForged") + ":");
+        JLabel lblNumOfTurnsHit = new JLabel(GUIMessages.get("NumTurnsHit") + ":");
+        JLabel lblNumOfTurnsMissed = new JLabel(GUIMessages.get("NumTurnsMissed") + ":");
+        JLabel lblRate = new JLabel(GUIMessages.get("Rate") + ":");
 
         JTextArea name = SwingUtil.textAreaWithCopyPastePopup(d.getNameString());
         JTextArea address = SwingUtil.textAreaWithCopyPastePopup(Hex.encodeWithPrefix(d.getAddress()));
@@ -121,7 +121,7 @@ public class DelegateDialog extends JDialog {
         getContentPane().setLayout(groupLayout);
         // @formatter:on
 
-        this.setTitle(MessagesUtil.get("Delegate"));
+        this.setTitle(GUIMessages.get("Delegate"));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();

@@ -27,7 +27,7 @@ import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
 import org.semux.gui.Action;
-import org.semux.gui.MessagesUtil;
+import org.semux.message.GUIMessages;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.AddressBook;
 import org.semux.gui.model.AddressBook.Entry;
@@ -38,7 +38,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] columnNames = { MessagesUtil.get("Name"), MessagesUtil.get("Address") };
+    private static final String[] columnNames = { GUIMessages.get("Name"), GUIMessages.get("Address") };
 
     private final transient WalletModel model;
 
@@ -63,18 +63,18 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
         JPanel panel = new JPanel();
         getContentPane().add(panel, BorderLayout.SOUTH);
-        JButton btnNew = SwingUtil.createDefaultButton(MessagesUtil.get("Add"), this, Action.ADD_ADDRESS);
+        JButton btnNew = SwingUtil.createDefaultButton(GUIMessages.get("Add"), this, Action.ADD_ADDRESS);
         panel.add(btnNew);
-        JButton btnCopy = SwingUtil.createDefaultButton(MessagesUtil.get("Copy"), this, Action.COPY_ADDRESS);
+        JButton btnCopy = SwingUtil.createDefaultButton(GUIMessages.get("Copy"), this, Action.COPY_ADDRESS);
         panel.add(btnCopy);
-        JButton btnDelete = SwingUtil.createDefaultButton(MessagesUtil.get("Delete"), this, Action.DELETE_ADDRESS);
+        JButton btnDelete = SwingUtil.createDefaultButton(GUIMessages.get("Delete"), this, Action.DELETE_ADDRESS);
         panel.add(btnDelete);
 
         JScrollPane scrollPane = new JScrollPane();
         getContentPane().add(scrollPane, BorderLayout.CENTER);
         scrollPane.setViewportView(table);
 
-        this.setTitle(MessagesUtil.get("AddressBook"));
+        this.setTitle(GUIMessages.get("AddressBook"));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();
@@ -163,13 +163,13 @@ public class AddressBookDialog extends JDialog implements ActionListener {
                     Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
                     cb.setContents(new StringSelection(entry.getAddress()), null);
 
-                    JOptionPane.showMessageDialog(this, MessagesUtil.get("AddressCopied", entry.getAddress()));
+                    JOptionPane.showMessageDialog(this, GUIMessages.get("AddressCopied", entry.getAddress()));
                 } else {
                     getAddressBook().remove(entry.getName());
                     refresh();
                 }
             } else {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAddress"));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAddress"));
             }
             break;
         default:

@@ -18,7 +18,7 @@ import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.semux.gui.Action;
-import org.semux.gui.MessagesUtil;
+import org.semux.message.GUIMessages;
 import org.semux.gui.SwingUtil;
 import org.semux.util.UnreachableException;
 
@@ -32,7 +32,7 @@ public class AddAddressDialog extends JDialog implements ActionListener {
     private JTextField address;
 
     public AddAddressDialog(AddressBookDialog addressBookDialog) {
-        super(addressBookDialog, MessagesUtil.get("AddAddress"));
+        super(addressBookDialog, GUIMessages.get("AddAddress"));
         this.addressBookDialog = addressBookDialog;
 
         JLabel lblName = new JLabel("Name");
@@ -41,8 +41,8 @@ public class AddAddressDialog extends JDialog implements ActionListener {
         name = new JTextField();
         address = new JTextField();
 
-        JButton btnCancel = SwingUtil.createDefaultButton(MessagesUtil.get("Cancel"), this, Action.CANCEL);
-        JButton btnOk = SwingUtil.createDefaultButton(MessagesUtil.get("OK"), this, Action.OK);
+        JButton btnCancel = SwingUtil.createDefaultButton(GUIMessages.get("Cancel"), this, Action.CANCEL);
+        JButton btnOk = SwingUtil.createDefaultButton(GUIMessages.get("OK"), this, Action.OK);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());

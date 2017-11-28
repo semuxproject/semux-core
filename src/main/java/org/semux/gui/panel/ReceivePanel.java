@@ -38,7 +38,7 @@ import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
-import org.semux.gui.MessagesUtil;
+import org.semux.message.GUIMessages;
 import org.semux.gui.SemuxGUI;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletAccount;
@@ -49,8 +49,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { MessagesUtil.get("Num"), MessagesUtil.get("Address"),
-            MessagesUtil.get("Available"), MessagesUtil.get("Locked") };
+    private static String[] columnNames = { GUIMessages.get("Num"), GUIMessages.get("Address"),
+            GUIMessages.get("Available"), GUIMessages.get("Locked") };
 
     private transient WalletModel model;
 
@@ -89,13 +89,13 @@ public class ReceivePanel extends JPanel implements ActionListener {
         qr.setIcon(SwingUtil.emptyImage(200, 200));
         qr.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        JButton btnCopyAddress = SwingUtil.createDefaultButton(MessagesUtil.get("CopyAddress"), this,
+        JButton btnCopyAddress = SwingUtil.createDefaultButton(GUIMessages.get("CopyAddress"), this,
                 Action.COPY_ADDRESS);
 
-        JButton buttonNewAccount = SwingUtil.createDefaultButton(MessagesUtil.get("NewAccount"), this,
+        JButton buttonNewAccount = SwingUtil.createDefaultButton(GUIMessages.get("NewAccount"), this,
                 Action.NEW_ACCOUNT);
 
-        JButton btnDeleteAddress = SwingUtil.createDefaultButton(MessagesUtil.get("DeleteAccount"), this,
+        JButton btnDeleteAddress = SwingUtil.createDefaultButton(GUIMessages.get("DeleteAccount"), this,
                 Action.DELETE_ACCOUNT);
 
         // @formatter:off
@@ -209,14 +209,14 @@ public class ReceivePanel extends JPanel implements ActionListener {
         case COPY_ADDRESS: {
             WalletAccount acc = getSelectedAccount();
             if (acc == null) {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
             } else {
                 String address = Hex.PREF + acc.getKey().toAddressString();
                 StringSelection stringSelection = new StringSelection(address);
                 Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
                 clpbrd.setContents(stringSelection, null);
 
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("AddressCopied", address));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("AddressCopied", address));
             }
             break;
         }
@@ -230,16 +230,16 @@ public class ReceivePanel extends JPanel implements ActionListener {
             // fire update event
             SemuxGUI.fireUpdateEvent();
 
-            JOptionPane.showMessageDialog(this, MessagesUtil.get("NewAccountCreated"));
+            JOptionPane.showMessageDialog(this, GUIMessages.get("NewAccountCreated"));
             break;
         }
         case DELETE_ACCOUNT: {
             WalletAccount acc = getSelectedAccount();
             if (acc == null) {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("SelectAccount"));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
             } else {
-                int ret = JOptionPane.showConfirmDialog(this, MessagesUtil.get("ConfirmDeleteAccount"),
-                        MessagesUtil.get("DeleteAccount"), JOptionPane.YES_NO_OPTION);
+                int ret = JOptionPane.showConfirmDialog(this, GUIMessages.get("ConfirmDeleteAccount"),
+                        GUIMessages.get("DeleteAccount"), JOptionPane.YES_NO_OPTION);
 
                 if (ret == JOptionPane.OK_OPTION) {
                     Wallet wallet = Kernel.getInstance().getWallet();
@@ -249,7 +249,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
                     // fire update event
                     SemuxGUI.fireUpdateEvent();
 
-                    JOptionPane.showMessageDialog(this, MessagesUtil.get("AccountDeleted"));
+                    JOptionPane.showMessageDialog(this, GUIMessages.get("AccountDeleted"));
                 }
             }
             break;

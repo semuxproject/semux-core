@@ -22,25 +22,25 @@ import javax.swing.JPasswordField;
 import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.gui.Action;
-import org.semux.gui.MessagesUtil;
+import org.semux.message.GUIMessages;
 import org.semux.gui.SwingUtil;
 
 public class ChangePasswordDialog extends JDialog implements ActionListener {
 
     public ChangePasswordDialog(JFrame parent) {
-        super(parent, MessagesUtil.get("ChangePassword"));
+        super(parent, GUIMessages.get("ChangePassword"));
 
-        JLabel lblOldPassword = new JLabel(MessagesUtil.get("OldPassword") + ":");
-        JLabel lblPassword = new JLabel(MessagesUtil.get("Password") + ":");
-        JLabel lblRepeat = new JLabel(MessagesUtil.get("RepeatPassword") + ":");
+        JLabel lblOldPassword = new JLabel(GUIMessages.get("OldPassword") + ":");
+        JLabel lblPassword = new JLabel(GUIMessages.get("Password") + ":");
+        JLabel lblRepeat = new JLabel(GUIMessages.get("RepeatPassword") + ":");
 
         oldpasswordField = new JPasswordField();
         passwordField = new JPasswordField();
         repeatField = new JPasswordField();
 
-        JButton btnOk = SwingUtil.createDefaultButton(MessagesUtil.get("OK"), this, Action.OK);
+        JButton btnOk = SwingUtil.createDefaultButton(GUIMessages.get("OK"), this, Action.OK);
 
-        JButton btnCancel = SwingUtil.createDefaultButton(MessagesUtil.get("Cancel"), this, Action.CANCEL);
+        JButton btnCancel = SwingUtil.createDefaultButton(GUIMessages.get("Cancel"), this, Action.CANCEL);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());
@@ -114,13 +114,13 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
             Wallet wallet = kernel.getWallet();
 
             if (!password.equals(repeat)) {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("RepeatPasswordError"));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("RepeatPasswordError"));
             } else if (!wallet.getPassword().equals(oldPassword)) {
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("IncorrectPassword"));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("IncorrectPassword"));
             } else {
                 wallet.changePassword(password);
                 wallet.flush();
-                JOptionPane.showMessageDialog(this, MessagesUtil.get("PasswordChanged"));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("PasswordChanged"));
                 this.dispose();
             }
             break;

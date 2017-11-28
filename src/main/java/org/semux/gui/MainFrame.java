@@ -32,6 +32,7 @@ import org.semux.gui.panel.HomePanel;
 import org.semux.gui.panel.ReceivePanel;
 import org.semux.gui.panel.SendPanel;
 import org.semux.gui.panel.TransactionsPanel;
+import org.semux.message.GUIMessages;
 import org.semux.util.UnreachableException;
 
 public class MainFrame extends JFrame implements ActionListener {
@@ -68,7 +69,7 @@ public class MainFrame extends JFrame implements ActionListener {
         panelDelegates = new DelegatesPanel(this, model);
 
         // setup frame properties
-        this.setTitle(MessagesUtil.get("SemuxWallet"));
+        this.setTitle(GUIMessages.get("SemuxWallet"));
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.setMinimumSize(new Dimension(900, 600));
@@ -89,27 +90,27 @@ public class MainFrame extends JFrame implements ActionListener {
 
         Dimension gap = new Dimension(15, 0);
 
-        btnHome = createButton(MessagesUtil.get("Home"), "home", Action.SHOW_HOME);
+        btnHome = createButton(GUIMessages.get("Home"), "home", Action.SHOW_HOME);
         toolBar.add(btnHome);
         toolBar.add(Box.createRigidArea(gap));
 
-        btnSend = createButton(MessagesUtil.get("Send"), "send", Action.SHOW_SEND);
+        btnSend = createButton(GUIMessages.get("Send"), "send", Action.SHOW_SEND);
         toolBar.add(btnSend);
         toolBar.add(Box.createRigidArea(gap));
 
-        btnReceive = createButton(MessagesUtil.get("Receive"), "receive", Action.SHOW_RECEIVE);
+        btnReceive = createButton(GUIMessages.get("Receive"), "receive", Action.SHOW_RECEIVE);
         toolBar.add(btnReceive);
         toolBar.add(Box.createRigidArea(gap));
 
-        btnTransactions = createButton(MessagesUtil.get("Transactions"), "transactions", Action.SHOW_TRANSACTIONS);
+        btnTransactions = createButton(GUIMessages.get("Transactions"), "transactions", Action.SHOW_TRANSACTIONS);
         toolBar.add(btnTransactions);
         toolBar.add(Box.createRigidArea(gap));
 
-        btnDelegates = createButton(MessagesUtil.get("Delegates"), "delegates", Action.SHOW_DELEGATES);
+        btnDelegates = createButton(GUIMessages.get("Delegates"), "delegates", Action.SHOW_DELEGATES);
         toolBar.add(btnDelegates);
         toolBar.add(Box.createRigidArea(gap));
 
-        btnLock = createButton(MessagesUtil.get("Lock"), "lock", Action.LOCK);
+        btnLock = createButton(GUIMessages.get("Lock"), "lock", Action.LOCK);
         toolBar.add(btnLock);
 
         // setup tabs
@@ -193,7 +194,7 @@ public class MainFrame extends JFrame implements ActionListener {
             this.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    InputDialog dialog = new InputDialog(MainFrame.this, MessagesUtil.get("EnterPassword") + ":", true);
+                    InputDialog dialog = new InputDialog(MainFrame.this, GUIMessages.get("EnterPassword") + ":", true);
                     String pwd = dialog.getInput();
 
                     if (pwd != null) {
@@ -201,7 +202,7 @@ public class MainFrame extends JFrame implements ActionListener {
                         if (w.getPassword().equals(pwd)) {
                             lockGlassPane.setVisible(false);
                         } else {
-                            JOptionPane.showMessageDialog(MainFrame.this, MessagesUtil.get("IncorrectPassword"));
+                            JOptionPane.showMessageDialog(MainFrame.this, GUIMessages.get("IncorrectPassword"));
                         }
                     }
                 }
