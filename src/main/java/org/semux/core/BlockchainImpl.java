@@ -14,7 +14,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Config;
 import org.semux.core.Genesis.Premine;
-import org.semux.core.exception.BlockchainImplException;
+import org.semux.core.exception.BlockchainException;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.AccountStateImpl;
 import org.semux.core.state.Delegate;
@@ -243,7 +243,7 @@ public class BlockchainImpl implements Blockchain {
 
         if (number != genesis.getNumber() && number != latestBlock.getNumber() + 1) {
             logger.error("Adding wrong block: number = {}, expected = {}", number, latestBlock.getNumber() + 1);
-            throw new BlockchainImplException("Blocks can only be added sequentially");
+            throw new BlockchainException("Blocks can only be added sequentially");
         }
 
         // [1] update block

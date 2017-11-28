@@ -6,24 +6,24 @@
  */
 package org.semux.core.exception;
 
-public class BlockchainImplException extends RuntimeException {
+public class BlockchainException extends RuntimeException {
 
-    public BlockchainImplException() {
+    public BlockchainException() {
     }
 
-    public BlockchainImplException(String s) {
+    public BlockchainException(String s) {
         super(s);
     }
 
-    public BlockchainImplException(String s, Throwable throwable) {
+    public BlockchainException(String s, Throwable throwable) {
         super(s, throwable);
     }
 
-    public BlockchainImplException(Throwable throwable) {
+    public BlockchainException(Throwable throwable) {
         super(throwable);
     }
 
-    public BlockchainImplException(String s, Throwable throwable, boolean b, boolean b1) {
+    public BlockchainException(String s, Throwable throwable, boolean b, boolean b1) {
         super(s, throwable, b, b1);
     }
 }
