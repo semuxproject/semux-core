@@ -4,4 +4,4 @@
 cd "$(dirname "$0")"
 
 # start kernel
-java -cp semux.jar org.semux.gui.SemuxGUI $@
+java -cp semux.jar org.semux.wrapper.Wrapper --gui "$@"

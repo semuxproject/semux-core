@@ -21,7 +21,9 @@
     <logger name="org.semux.db" level="INFO" />
     <logger name="org.semux.net" level="INFO" />
     <logger name="org.semux.vm" level="INFO" />
+    <logger name="org.semux.wrapper" level="INFO" />
     <logger name="io.netty" level="ERROR" />
+    <logger name="oshi" level="INFO" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />
