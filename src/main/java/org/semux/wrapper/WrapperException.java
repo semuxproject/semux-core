@@ -8,6 +8,8 @@ package org.semux.wrapper;
 
 public class WrapperException extends RuntimeException {
 
+    private static final long serialVersionUID = 1L;
+
     WrapperException(String s) {
         super(s);
     }

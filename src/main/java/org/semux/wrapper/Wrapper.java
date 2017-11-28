@@ -36,7 +36,7 @@ public class Wrapper {
         GUI, CLI
     }
 
-    private static Class getModeClass(Mode mode) {
+    private static Class<?> getModeClass(Mode mode) {
         switch (mode) {
         case CLI:
             return SemuxCLI.class;
