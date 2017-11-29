@@ -6,6 +6,8 @@
  */
 package org.semux.consensus;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,6 +84,8 @@ public class SemuxSync implements Sync {
 
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
+    private Instant begin, end;
+
     private static SemuxSync instance;
 
     /**
@@ -109,6 +113,8 @@ public class SemuxSync implements Sync {
     @Override
     public void start(long targetHeight) {
         if (!isRunning()) {
+            begin = Instant.now();
+
             isRunning.set(true);
             logger.info("Syncing started, best known block = {}", targetHeight - 1);
 
@@ -135,6 +141,7 @@ public class SemuxSync implements Sync {
                     try {
                         isRunning.wait();
                     } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         logger.info("Sync manager got interrupted");
                         break;
                     }
@@ -149,9 +156,12 @@ public class SemuxSync implements Sync {
             exec.shutdown();
             try {
                 exec.awaitTermination(1, TimeUnit.MINUTES);
-                logger.info("Syncing finished");
-
+                end = Instant.now();
+                long durationSeconds = Duration.between(begin, end).getSeconds();
+                logger.info(String.format("Syncing finished, took %02d:%02d:%02d", durationSeconds / 3600,
+                        (durationSeconds % 3600) / 60, (durationSeconds % 60)));
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.error("Executors were not properly shut down");
             }
         }
@@ -303,7 +313,7 @@ public class SemuxSync implements Sync {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    // do nothing
+                    Thread.currentThread().interrupt();
                 }
             }
         }
