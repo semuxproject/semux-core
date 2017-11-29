@@ -9,6 +9,7 @@ package org.semux;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,6 +29,7 @@ import org.semux.db.DBFactory;
 import org.semux.db.DBName;
 import org.semux.db.KVDB;
 import org.semux.db.LevelDB;
+import org.semux.exception.KernelException;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
@@ -46,7 +48,7 @@ import org.xml.sax.SAXException;
 public class Kernel {
     private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
-    public volatile boolean isRunning;
+    private AtomicBoolean isRunning = new AtomicBoolean(false);
 
     private Wallet wallet;
     private EdDSA coinbase;
@@ -97,10 +99,10 @@ public class Kernel {
      * Start the kernel.
      */
     public void start() {
-        if (isRunning) {
+        if (isRunning()) {
             return;
         }
-        isRunning = true;
+        isRunning.set(true);
 
         // ====================================
         // initialization
@@ -129,7 +131,7 @@ public class Kernel {
                 case VOTE:
                     return voteDB;
                 default:
-                    throw new RuntimeException("Unexpected database: " + name);
+                    throw new KernelException("Unexpected database: " + name);
                 }
             }
         };
@@ -189,8 +191,8 @@ public class Kernel {
             try {
                 GatewayDiscover discover = new GatewayDiscover();
                 Map<InetAddress, GatewayDevice> devices = discover.discover();
-                for (InetAddress k : devices.keySet()) {
-                    GatewayDevice gw = devices.get(k);
+                for (Map.Entry<InetAddress, GatewayDevice> entry : devices.entrySet()) {
+                    GatewayDevice gw = entry.getValue();
                     logger.info("Found a gateway device: local address = {}, external address = {}",
                             gw.getLocalAddress().getHostAddress(), gw.getExternalIPAddress());
 
@@ -207,7 +209,7 @@ public class Kernel {
         // register shutdown hook
         // ====================================
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            isRunning = false;
+            isRunning.set(false);
 
             pendingMgr.stop();
             nodeMgr.stop();
@@ -219,6 +221,7 @@ public class Kernel {
                 // make sure consensus thread is fully stopped
                 consThread.join();
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // https://stackoverflow.com/a/4906814/670662
                 logger.error("Failed to stop sync/consensus properly");
             }
 
@@ -299,4 +302,14 @@ public class Kernel {
     public NodeManager getNodeManager() {
         return nodeMgr;
     }
+
+    /**
+     * Returns whether the kernel is running
+     *
+     * @return
+     */
+    public boolean isRunning() {
+        return isRunning.get();
+    }
+
 }

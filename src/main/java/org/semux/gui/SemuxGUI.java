@@ -145,7 +145,7 @@ public class SemuxGUI {
         new Thread(() -> {
             while (true) {
                 try {
-                    if (kernel.isRunning) {
+                    if (kernel.isRunning()) {
                         onBlockAdded(kernel.getBlockchain().getLatestBlock());
                     } else {
                         break;
