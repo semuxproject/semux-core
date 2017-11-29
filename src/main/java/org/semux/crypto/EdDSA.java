@@ -6,6 +6,12 @@
  */
 package org.semux.crypto;
 
+import net.i2p.crypto.eddsa.EdDSAEngine;
+import net.i2p.crypto.eddsa.EdDSAPrivateKey;
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
+import net.i2p.crypto.eddsa.KeyPairGenerator;
+import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
+
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -15,12 +21,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
-
-import net.i2p.crypto.eddsa.EdDSAEngine;
-import net.i2p.crypto.eddsa.EdDSAPrivateKey;
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import net.i2p.crypto.eddsa.KeyPairGenerator;
-import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Edwards-curve Digital Signature Algorithm (EdDSA), specifically ED25519.
@@ -115,6 +116,9 @@ public class EdDSA {
         }
     }
 
+    static ConcurrentHashMap<String, EdDSAPublicKey> cache = new ConcurrentHashMap<>();
+
+
     /**
      * Verify a signature.
      * 
@@ -128,7 +132,14 @@ public class EdDSA {
         if (msgHash != null && signature != null) { // avoid null pointer exception
             try {
                 X509EncodedKeySpec spec = new X509EncodedKeySpec(signature.getPublicKey());
-                EdDSAPublicKey publicKey = new EdDSAPublicKey(spec);
+                String key = Hex.encode(signature.getPublicKey());
+                EdDSAPublicKey publicKey = cache.computeIfAbsent(key, input -> {
+                    try {
+                        return new EdDSAPublicKey(spec);
+                    } catch (InvalidKeySpecException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
 
                 EdDSAEngine engine = new EdDSAEngine();
                 engine.initVerify(publicKey);
