@@ -6,6 +6,7 @@
  */
 package org.semux.crypto;
 
+import com.google.common.cache.CacheBuilder;
 import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
@@ -21,7 +22,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Edwards-curve Digital Signature Algorithm (EdDSA), specifically ED25519.
@@ -32,6 +33,17 @@ public class EdDSA {
 
     private PublicKey pub;
     private PrivateKey priv;
+
+    /**
+     * EdDSAPublicKey constructor consumes ~37% of CPU time of
+     * EdDSAPublicKey::verify mainly by creating precomputed tables. Considering
+     * that Semux has an infrequently changed list of validators, caching public
+     * keys can reduce the synchronization time significantly.
+     *
+     * softValues() allows GC to cleanup cached values automatically.
+     */
+    private static ConcurrentMap<String, EdDSAPublicKey> pubKeyCache = CacheBuilder.newBuilder().softValues()
+            .<String, EdDSAPublicKey>build().asMap();
 
     /**
      * Create a random ED25519 key pair.
@@ -116,9 +128,6 @@ public class EdDSA {
         }
     }
 
-    static ConcurrentHashMap<String, EdDSAPublicKey> cache = new ConcurrentHashMap<>();
-
-
     /**
      * Verify a signature.
      * 
@@ -132,12 +141,11 @@ public class EdDSA {
         if (msgHash != null && signature != null) { // avoid null pointer exception
             try {
                 X509EncodedKeySpec spec = new X509EncodedKeySpec(signature.getPublicKey());
-                String key = Hex.encode(signature.getPublicKey());
-                EdDSAPublicKey publicKey = cache.computeIfAbsent(key, input -> {
+                EdDSAPublicKey publicKey = pubKeyCache.computeIfAbsent(Hex.encode(signature.getPublicKey()), input -> {
                     try {
                         return new EdDSAPublicKey(spec);
                     } catch (InvalidKeySpecException e) {
-                        throw new RuntimeException(e);
+                        throw new CryptoException(e);
                     }
                 });
 
