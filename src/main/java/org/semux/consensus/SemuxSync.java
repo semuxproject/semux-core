@@ -44,6 +44,7 @@ import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
+import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -157,9 +158,7 @@ public class SemuxSync implements Sync {
             try {
                 exec.awaitTermination(1, TimeUnit.MINUTES);
                 end = Instant.now();
-                long durationSeconds = Duration.between(begin, end).getSeconds();
-                logger.info(String.format("Syncing finished, took %02d:%02d:%02d", durationSeconds / 3600,
-                        (durationSeconds % 3600) / 60, (durationSeconds % 60)));
+                logger.info("Syncing finished, took {}", TimeUtil.formatDuration(Duration.between(begin, end)));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 logger.error("Executors were not properly shut down");

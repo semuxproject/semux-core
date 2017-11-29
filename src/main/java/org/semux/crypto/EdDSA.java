@@ -156,6 +156,7 @@ public class EdDSA {
 
     /**
      * Returns cached EdDSAPublicKey hashed by hexadecimal message signature
+     * 
      * @param signature
      * @return
      */
