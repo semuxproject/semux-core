@@ -147,6 +147,8 @@
                                 </copy>
                                 <copy file="${project.basedir}/misc/launch4j/semux.l4j.ini"
                                       tofile="${dist.base}/windows/semux.l4j.ini"/>
+                                <copy file="${project.basedir}/src/main/resources/logback.xml"
+                                      tofile="${dist.base}/windows/config/logback.xml"/> />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis"/>
                                 <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis"/>
 
@@ -163,6 +165,8 @@
                                       tofile="${dist.base}/unix/semux-cli.sh"/>
                                 <copy file="${project.basedir}/scripts/semux-gui.sh"
                                       tofile="${dist.base}/unix/semux-gui.sh"/>
+                                <copy file="${project.basedir}/src/main/resources/logback.xml"
+                                      tofile="${dist.base}/unix/config/logback.xml"/> />
 
                                 <!-- unix build (executable jar) -->
                                 <copy todir="${dist.base}/macos">
