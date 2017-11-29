@@ -68,13 +68,17 @@ public class CryptoPerformance {
             byte[] hash = Hash.h256(data);
             byte[] sig = eckey.sign(hash).toBytes();
 
+            Runtime runtime = Runtime.getRuntime();
+            long usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
             long t1 = System.nanoTime();
             for (int i = 0; i < REPEAT; i++) {
                 EdDSA.verify(hash, sig);
             }
             long t2 = System.nanoTime();
+            long usedMemoryAfter = runtime.totalMemory() - runtime.freeMemory();
 
-            logger.info("Perf_verify_{}k: {} μs/time", size / 1024, (t2 - t1) / 1_000 / REPEAT);
+            logger.info("Perf_verify_{}k: {} μs/time, {} bytes", size / 1024, (t2 - t1) / 1_000 / REPEAT,
+                    usedMemoryAfter - usedMemoryBefore);
         }
     }
 
