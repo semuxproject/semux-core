@@ -6,12 +6,12 @@
  */
 package org.semux.crypto;
 
-import com.google.common.cache.CacheBuilder;
 import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import net.i2p.crypto.eddsa.KeyPairGenerator;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
+import org.semux.crypto.cache.EdDSAPublicKeyCache;
 
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -22,7 +22,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Edwards-curve Digital Signature Algorithm (EdDSA), specifically ED25519.
@@ -33,19 +32,6 @@ public class EdDSA {
 
     private PublicKey pub;
     private PrivateKey priv;
-
-    /**
-     * EdDSAPublicKey constructor consumes ~37% of CPU time of
-     * EdDSAPublicKey::verify mainly by creating precomputed tables. Considering
-     * that Semux has an infrequently changed list of validators, caching public
-     * keys can reduce the synchronization time significantly.
-     *
-     * The cache is a concurrent hash map of Hex(byte[] pubkey) ->  EdDSAPublicKey
-     *
-     * softValues() allows GC to cleanup cached values automatically.
-     */
-    private static ConcurrentMap<String, EdDSAPublicKey> pubKeyCache = CacheBuilder.newBuilder().softValues()
-            .<String, EdDSAPublicKey>build().asMap();
 
     /**
      * Create a random ED25519 key pair.
@@ -143,7 +129,7 @@ public class EdDSA {
         if (msgHash != null && signature != null) { // avoid null pointer exception
             try {
                 EdDSAEngine engine = new EdDSAEngine();
-                engine.initVerify(getPubKeyCache(signature.getPublicKey()));
+                engine.initVerify(EdDSAPublicKeyCache.computeIfAbsent(signature.getPublicKey()));
 
                 // TODO: reject non-canonical signature
 
@@ -154,22 +140,6 @@ public class EdDSA {
         }
 
         return false;
-    }
-
-    /**
-     * Returns cached EdDSAPublicKey hashed by hexadecimal public key
-     * 
-     * @param pubKey
-     * @return
-     */
-    private static EdDSAPublicKey getPubKeyCache(byte[] pubKey) {
-        return pubKeyCache.computeIfAbsent(Hex.encode(pubKey), input -> {
-            try {
-                return new EdDSAPublicKey(new X509EncodedKeySpec(pubKey));
-            } catch (InvalidKeySpecException e) {
-                throw new CryptoException(e);
-            }
-        });
     }
 
     /**

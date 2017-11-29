@@ -21,13 +21,9 @@ public class TimeUtilTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays
-                .asList(new Object[][] {
-                    {Duration.ofSeconds(86400), "24:00:00"},
-                    {Duration.ofSeconds(86400 - 1), "23:59:59"},
-                    {Duration.ofSeconds(0), "00:00:00"},
-                    {Duration.ofSeconds(-1), "00:00:-1"}
-                });
+        return Arrays.asList(new Object[][] { { Duration.ofSeconds(86400), "24:00:00" },
+                { Duration.ofSeconds(86400 - 1), "23:59:59" }, { Duration.ofSeconds(0), "00:00:00" },
+                { Duration.ofSeconds(-1), "00:00:-1" } });
     }
 
     Duration duration;
