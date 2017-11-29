@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2017 The Semux Developers
- * <p>
+ *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
@@ -19,7 +19,7 @@ import java.nio.file.Paths;
 
 /**
  * The configurator will try to load logback.xml from config directory at
- * runtime. If logback.xml doesn't exit in user's config directory, the factory
+ * runtime. If logback.xml doesn't exist in user's config directory, the factory
  * default of src/main/resources/logback.xml will be used.
  */
 public class LoggerConfigurator {
