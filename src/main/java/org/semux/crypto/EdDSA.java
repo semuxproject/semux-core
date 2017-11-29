@@ -40,9 +40,11 @@ public class EdDSA {
      * that Semux has an infrequently changed list of validators, caching public
      * keys can reduce the synchronization time significantly.
      *
+     * The cache is a concurrent hash map of Hex(byte[] pubkey) ->  EdDSAPublicKey
+     *
      * softValues() allows GC to cleanup cached values automatically.
      */
-    private static ConcurrentMap<String, EdDSAPublicKey> sigPubKeyCache = CacheBuilder.newBuilder().softValues()
+    private static ConcurrentMap<String, EdDSAPublicKey> pubKeyCache = CacheBuilder.newBuilder().softValues()
             .<String, EdDSAPublicKey>build().asMap();
 
     /**
@@ -141,7 +143,7 @@ public class EdDSA {
         if (msgHash != null && signature != null) { // avoid null pointer exception
             try {
                 EdDSAEngine engine = new EdDSAEngine();
-                engine.initVerify(getSigPubKeyCache(signature));
+                engine.initVerify(getPubKeyCache(signature.getPublicKey()));
 
                 // TODO: reject non-canonical signature
 
@@ -155,15 +157,15 @@ public class EdDSA {
     }
 
     /**
-     * Returns cached EdDSAPublicKey hashed by hexadecimal message signature
+     * Returns cached EdDSAPublicKey hashed by hexadecimal public key
      * 
-     * @param signature
+     * @param pubKey
      * @return
      */
-    private static EdDSAPublicKey getSigPubKeyCache(Signature signature) {
-        return sigPubKeyCache.computeIfAbsent(Hex.encode(signature.getPublicKey()), input -> {
+    private static EdDSAPublicKey getPubKeyCache(byte[] pubKey) {
+        return pubKeyCache.computeIfAbsent(Hex.encode(pubKey), input -> {
             try {
-                return new EdDSAPublicKey(new X509EncodedKeySpec(signature.getPublicKey()));
+                return new EdDSAPublicKey(new X509EncodedKeySpec(pubKey));
             } catch (InvalidKeySpecException e) {
                 throw new CryptoException(e);
             }
