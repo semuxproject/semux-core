@@ -42,7 +42,7 @@ public class EdDSA {
      *
      * softValues() allows GC to cleanup cached values automatically.
      */
-    private static ConcurrentMap<String, EdDSAPublicKey> pubKeyCache = CacheBuilder.newBuilder().softValues()
+    private static ConcurrentMap<String, EdDSAPublicKey> sigPubKeyCache = CacheBuilder.newBuilder().softValues()
             .<String, EdDSAPublicKey>build().asMap();
 
     /**
@@ -140,17 +140,8 @@ public class EdDSA {
     public static boolean verify(byte[] msgHash, Signature signature) {
         if (msgHash != null && signature != null) { // avoid null pointer exception
             try {
-                X509EncodedKeySpec spec = new X509EncodedKeySpec(signature.getPublicKey());
-                EdDSAPublicKey publicKey = pubKeyCache.computeIfAbsent(Hex.encode(signature.getPublicKey()), input -> {
-                    try {
-                        return new EdDSAPublicKey(spec);
-                    } catch (InvalidKeySpecException e) {
-                        throw new CryptoException(e);
-                    }
-                });
-
                 EdDSAEngine engine = new EdDSAEngine();
-                engine.initVerify(publicKey);
+                engine.initVerify(getSigPubKeyCache(signature));
 
                 // TODO: reject non-canonical signature
 
@@ -161,6 +152,21 @@ public class EdDSA {
         }
 
         return false;
+    }
+
+    /**
+     * Returns cached EdDSAPublicKey hashed by hexadecimal message signature
+     * @param signature
+     * @return
+     */
+    private static EdDSAPublicKey getSigPubKeyCache(Signature signature) {
+        return sigPubKeyCache.computeIfAbsent(Hex.encode(signature.getPublicKey()), input -> {
+            try {
+                return new EdDSAPublicKey(new X509EncodedKeySpec(signature.getPublicKey()));
+            } catch (InvalidKeySpecException e) {
+                throw new CryptoException(e);
+            }
+        });
     }
 
     /**
