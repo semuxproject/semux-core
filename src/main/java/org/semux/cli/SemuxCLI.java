@@ -23,6 +23,7 @@ import org.semux.core.Wallet;
 import org.semux.core.WalletLockedException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
+import org.semux.log.LoggerConfigurator;
 import org.semux.message.CLIMessages;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
@@ -86,6 +87,7 @@ public class SemuxCLI {
 
     public static void main(String[] args) {
         try {
+            LoggerConfigurator.configure();
             SemuxCLI cli = new SemuxCLI();
             cli.start(args);
         } catch (ParseException exception) {

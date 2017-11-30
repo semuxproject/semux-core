@@ -36,6 +36,7 @@ import org.semux.gui.dialog.SelectDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
+import org.semux.log.LoggerConfigurator;
 import org.semux.net.Peer;
 import org.semux.util.DnsUtil;
 import org.semux.message.GUIMessages;
@@ -64,6 +65,7 @@ public class SemuxGUI {
     }
 
     public static void main(String[] args) {
+        LoggerConfigurator.configure();
         setupLookAndFeel();
 
         wallet = new Wallet(new File(dataDir, "wallet.data"));

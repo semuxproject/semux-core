@@ -10,6 +10,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.semux.cli.SemuxCLI;
 import org.semux.gui.SemuxGUI;
+import org.semux.log.LoggerConfigurator;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,7 @@ public class Wrapper {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException, ParseException {
+        LoggerConfigurator.configure();
         WrapperCLIParser wrapperCLIParser = new WrapperCLIParser(args);
         Wrapper wrapper = new Wrapper();
         String[] jvmOptions = wrapper.allocateHeapSize(wrapperCLIParser.jvmOptions);
