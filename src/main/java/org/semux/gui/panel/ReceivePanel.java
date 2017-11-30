@@ -17,6 +17,9 @@ import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GUIMessages;
 import org.semux.util.UnreachableException;
+import org.semux.gui.exception.QRCodeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -47,6 +50,8 @@ import java.util.List;
 public class ReceivePanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LoggerFactory.getLogger(ReceivePanel.class);
 
     private static String[] columnNames = { GUIMessages.get("Num"), GUIMessages.get("Address"),
             GUIMessages.get("Available"), GUIMessages.get("Locked") };
@@ -198,10 +203,14 @@ public class ReceivePanel extends JPanel implements ActionListener {
             break;
         }
         case SELECT_ACCOUNT: {
-            WalletAccount acc = getSelectedAccount();
-            if (acc != null) {
-                BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getKey().toAddressString(), 200);
-                qr.setIcon(new ImageIcon(bi));
+            try {
+                WalletAccount acc = getSelectedAccount();
+                if (acc != null) {
+                    BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getKey().toAddressString(), 200);
+                    qr.setIcon(new ImageIcon(bi));
+                }
+            } catch (QRCodeException exception) {
+                logger.error("Unable to generate QR code", exception);
             }
             break;
         }

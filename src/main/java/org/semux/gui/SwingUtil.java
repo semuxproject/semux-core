@@ -47,6 +47,7 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GUIMessages;
+import org.semux.gui.exception.QRCodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,7 +161,7 @@ public class SwingUtil {
      * @param size
      * @return
      */
-    public static BufferedImage generateQR(String text, int size) {
+    public static BufferedImage generateQR(String text, int size) throws QRCodeException {
         try {
             Map<EncodeHintType, Object> hintMap = new EnumMap<>(EncodeHintType.class);
             hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
@@ -189,7 +190,7 @@ public class SwingUtil {
 
             return image;
         } catch (WriterException e) {
-            throw new RuntimeException(e);
+            throw new QRCodeException(e);
         }
     }
 
@@ -448,7 +449,8 @@ public class SwingUtil {
     public static String getTransactionDescription(WalletModel m, Transaction tx) {
         switch (tx.getType()) {
         case COINBASE:
-            return GUIMessages.get("BlockReward") + " => " + getDelegateName(tx.getTo()).get();
+            return GUIMessages.get("BlockReward") + " => "
+                    + getDelegateName(tx.getTo()).orElse(GUIMessages.get("UnknownDelegate"));
         case VOTE:
         case UNVOTE:
         case TRANSFER:

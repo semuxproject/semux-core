@@ -18,4 +18,7 @@ public class Unit {
     public static final long KILO_SEM = 1_000_000_000_000L;
 
     public static final long MEGA_SEM = 1_000_000_000_000_000L;
+
+    private Unit() {
+    }
 }
