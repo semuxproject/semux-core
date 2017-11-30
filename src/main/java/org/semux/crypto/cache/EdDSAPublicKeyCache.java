@@ -1,19 +1,19 @@
 /**
  * Copyright (c) 2017 The Semux Developers
- *
+ * <p>
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 package org.semux.crypto.cache;
 
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hex;
 
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.concurrent.ConcurrentMap;
 
 public final class EdDSAPublicKeyCache {
 
@@ -27,8 +27,7 @@ public final class EdDSAPublicKeyCache {
      * <p>
      * softValues() allows GC to cleanup cached values automatically.
      */
-    private static final ConcurrentMap<String, EdDSAPublicKey> pubKeyCache = CacheBuilder.newBuilder().softValues()
-            .<String, EdDSAPublicKey>build().asMap();
+    private static final Cache<String, EdDSAPublicKey> pubKeyCache = Caffeine.newBuilder().softValues().build();
 
     private EdDSAPublicKeyCache() {
     }
@@ -40,7 +39,7 @@ public final class EdDSAPublicKeyCache {
      * @return
      */
     public static final EdDSAPublicKey computeIfAbsent(byte[] pubKey) {
-        return pubKeyCache.computeIfAbsent(Hex.encode(pubKey), input -> {
+        return pubKeyCache.get(Hex.encode(pubKey), input -> {
             try {
                 return new EdDSAPublicKey(new X509EncodedKeySpec(pubKey));
             } catch (InvalidKeySpecException e) {
