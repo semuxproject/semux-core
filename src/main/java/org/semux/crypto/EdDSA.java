@@ -6,6 +6,13 @@
  */
 package org.semux.crypto;
 
+import net.i2p.crypto.eddsa.EdDSAEngine;
+import net.i2p.crypto.eddsa.EdDSAPrivateKey;
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
+import net.i2p.crypto.eddsa.KeyPairGenerator;
+import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
+import org.semux.crypto.cache.EdDSAPublicKeyCache;
+
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -15,12 +22,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
-
-import net.i2p.crypto.eddsa.EdDSAEngine;
-import net.i2p.crypto.eddsa.EdDSAPrivateKey;
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import net.i2p.crypto.eddsa.KeyPairGenerator;
-import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
 /**
  * Edwards-curve Digital Signature Algorithm (EdDSA), specifically ED25519.
@@ -127,11 +128,8 @@ public class EdDSA {
     public static boolean verify(byte[] msgHash, Signature signature) {
         if (msgHash != null && signature != null) { // avoid null pointer exception
             try {
-                X509EncodedKeySpec spec = new X509EncodedKeySpec(signature.getPublicKey());
-                EdDSAPublicKey publicKey = new EdDSAPublicKey(spec);
-
                 EdDSAEngine engine = new EdDSAEngine();
-                engine.initVerify(publicKey);
+                engine.initVerify(EdDSAPublicKeyCache.computeIfAbsent(signature.getPublicKey()));
 
                 // TODO: reject non-canonical signature
 

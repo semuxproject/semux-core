@@ -363,6 +363,13 @@
             <version>3.4.4</version>
         </dependency>
 
+        <!-- Caffeine Caching Library -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+
         <!-- Testing Libraries -->
         <dependency>
             <groupId>junit</groupId>

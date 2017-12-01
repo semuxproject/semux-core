@@ -6,6 +6,8 @@
  */
 package org.semux.consensus;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,6 +44,7 @@ import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
+import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +85,8 @@ public class SemuxSync implements Sync {
 
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
+    private Instant begin, end;
+
     private static SemuxSync instance;
 
     /**
@@ -109,6 +114,8 @@ public class SemuxSync implements Sync {
     @Override
     public void start(long targetHeight) {
         if (!isRunning()) {
+            begin = Instant.now();
+
             isRunning.set(true);
             logger.info("Syncing started, best known block = {}", targetHeight - 1);
 
@@ -135,6 +142,7 @@ public class SemuxSync implements Sync {
                     try {
                         isRunning.wait();
                     } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         logger.info("Sync manager got interrupted");
                         break;
                     }
@@ -149,9 +157,10 @@ public class SemuxSync implements Sync {
             exec.shutdown();
             try {
                 exec.awaitTermination(1, TimeUnit.MINUTES);
-                logger.info("Syncing finished");
-
+                end = Instant.now();
+                logger.info("Syncing finished, took {}", TimeUtil.formatDuration(Duration.between(begin, end)));
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.error("Executors were not properly shut down");
             }
         }
@@ -303,7 +312,7 @@ public class SemuxSync implements Sync {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    // do nothing
+                    Thread.currentThread().interrupt();
                 }
             }
         }
