@@ -8,6 +8,8 @@ package org.semux.exception;
 
 public class KernelException extends RuntimeException {
 
+    private static final long serialVersionUID = 1L;
+
     public KernelException() {
     }
 
