@@ -6,43 +6,39 @@
  */
 package org.semux.api;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Assert;
-import org.semux.core.Blockchain;
+import org.semux.Kernel;
+import org.semux.KernelMock;
+import org.semux.config.Constants;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
-import org.semux.core.Wallet;
-import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
 
-public class APIServerMock {
+public class SemuxAPIMock {
 
+    private KernelMock kernel;
     private SemuxAPI server;
 
-    private volatile boolean isRunning;
+    private AtomicBoolean isRunning = new AtomicBoolean(false);
 
-    public Blockchain chain;
-    public ChannelManager channelMgr;
-    public PendingManager pendingMgr;
-    public PeerClient client;
-    public NodeManager nodeMgr;
-
-    public synchronized void start(Wallet wallet, String ip, int port) {
-        if (!isRunning) {
-            isRunning = true;
+    public synchronized void start(String ip, int port) {
+        if (!isRunning.get()) {
+            isRunning.set(true);
 
             new Thread(() -> {
-                EdDSA coinbase = new EdDSA();
-                chain = new BlockchainImpl(MemoryDB.FACTORY);
+                kernel = new KernelMock();
+                kernel.setBlokchain(new BlockchainImpl(kernel.getConfig(), MemoryDB.FACTORY));
+                kernel.setChannelManager(new ChannelManager());
+                kernel.setPendingManager(new PendingManager(kernel));
+                kernel.setClient(new PeerClient("127.0.0.1", Constants.DEFAULT_P2P_PORT, kernel.getCoinbase()));
+                kernel.setNodeManager(new NodeManager(kernel));
 
-                channelMgr = new ChannelManager();
-                pendingMgr = new PendingManager(chain, channelMgr);
-                client = new PeerClient("127.0.0.1", 5161, coinbase);
-                nodeMgr = new NodeManager(chain, channelMgr, pendingMgr, client);
-
-                server = new SemuxAPI(new ApiHandlerImpl(wallet, chain, channelMgr, pendingMgr, nodeMgr, client));
+                server = new SemuxAPI(kernel);
                 server.start(ip, port);
             }, "api").start();
 
@@ -64,7 +60,7 @@ public class APIServerMock {
     }
 
     public synchronized void stop() {
-        if (isRunning) {
+        if (isRunning.get()) {
             server.stop();
 
             long timestamp = System.currentTimeMillis();
@@ -82,5 +78,9 @@ public class APIServerMock {
 
             Assert.fail("Failed to stop API server");
         }
+    }
+
+    public Kernel getKernel() {
+        return kernel;
     }
 }
