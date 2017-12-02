@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.semux.Config;
+import org.semux.Kernel;
 import org.semux.core.Genesis.Premine;
 import org.semux.core.exception.BlockchainException;
 import org.semux.core.state.AccountState;
@@ -76,6 +76,8 @@ public class BlockchainImpl implements Blockchain {
         FORGED, HIT, MISSED
     }
 
+    private Kernel kernel;
+
     private KVDB indexDB;
     private KVDB blockDB;
 
@@ -92,14 +94,16 @@ public class BlockchainImpl implements Blockchain {
      * 
      * @param factory
      */
-    public BlockchainImpl(DBFactory factory) {
+    public BlockchainImpl(Kernel kernel, DBFactory factory) {
+        this.kernel = kernel;
+
         this.indexDB = factory.getDB(DBName.INDEX);
         this.blockDB = factory.getDB(DBName.BLOCK);
 
         this.accountState = new AccountStateImpl(factory.getDB(DBName.ACCOUNT));
         this.delegateState = new DelegateStateImpl(this, factory.getDB(DBName.DELEGATE), factory.getDB(DBName.VOTE));
 
-        this.genesis = Genesis.getInstance();
+        this.genesis = Genesis.load(kernel.getConfig().dataDir());
 
         byte[] number = indexDB.get(Bytes.of(TYPE_LATEST_BLOCK_NUMBER));
         if (number == null) {
@@ -257,7 +261,7 @@ public class BlockchainImpl implements Blockchain {
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
         List<Pair<Integer, Integer>> txIndices = block.getTransacitonIndexes();
-        long reward = Config.getBlockReward(number);
+        long reward = kernel.getConfig().getBlockReward(number);
 
         for (int i = 0; i < txs.size(); i++) {
             Transaction tx = txs.get(i);
@@ -286,7 +290,7 @@ public class BlockchainImpl implements Blockchain {
 
             // [5] update validator statistics
             List<String> validators = getValidators();
-            String primary = Config.getPrimaryValidator(validators, number, 0);
+            String primary = kernel.getConfig().getPrimaryValidator(validators, number, 0);
             adjustValidatorStats(block.getCoinbase(), StatsType.FORGED, 1);
             if (primary.equals(Hex.encode(block.getCoinbase()))) {
                 adjustValidatorStats(Hex.decode(primary), StatsType.HIT, 1);
@@ -296,7 +300,7 @@ public class BlockchainImpl implements Blockchain {
         }
 
         // [6] update validator set
-        if (number % Config.VALIDATOR_REFRESH_RATE == 0) {
+        if (number % kernel.getConfig().getValidatorUpdateInterval() == 0) {
             updateValidators(block.getNumber());
         }
 
@@ -372,7 +376,7 @@ public class BlockchainImpl implements Blockchain {
         List<String> validators = new ArrayList<>();
 
         List<Delegate> delegates = delegateState.getDelegates();
-        int max = Math.min(delegates.size(), Config.getNumberOfValidators(number));
+        int max = Math.min(delegates.size(), kernel.getConfig().getNumberOfValidators(number));
         for (int i = 0; i < max; i++) {
             Delegate d = delegates.get(i);
             validators.add(Hex.encode(d.getAddress()));

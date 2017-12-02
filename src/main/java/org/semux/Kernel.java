@@ -24,7 +24,9 @@ import org.semux.consensus.SemuxBFT;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
+import org.semux.core.SyncManager;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.db.DBFactory;
@@ -36,7 +38,6 @@ import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
 import org.semux.net.PeerServer;
-import org.semux.net.SemuxChannelInitializer;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,9 @@ public class Kernel {
     private PendingManager pendingMgr;
     private ChannelManager channelMgr;
     private NodeManager nodeMgr;
+
+    private SemuxSync sync;
+    private SemuxBFT cons;
 
     /**
      * Creates a kernel instance and initializes it.
@@ -96,11 +100,11 @@ public class Kernel {
                 coinbase);
 
         DBFactory dbFactory = new DBFactory() {
-            private final KVDB indexDB = new LevelDB(DBName.INDEX);
-            private final KVDB blockDB = new LevelDB(DBName.BLOCK);
-            private final KVDB accountDB = new LevelDB(DBName.ACCOUNT);
-            private final KVDB delegateDB = new LevelDB(DBName.DELEGATE);
-            private final KVDB voteDB = new LevelDB(DBName.VOTE);
+            private final KVDB indexDB = new LevelDB(config.dataDir(), DBName.INDEX);
+            private final KVDB blockDB = new LevelDB(config.dataDir(), DBName.BLOCK);
+            private final KVDB accountDB = new LevelDB(config.dataDir(), DBName.ACCOUNT);
+            private final KVDB delegateDB = new LevelDB(config.dataDir(), DBName.DELEGATE);
+            private final KVDB voteDB = new LevelDB(config.dataDir(), DBName.VOTE);
 
             @Override
             public KVDB getDB(DBName name) {
@@ -120,7 +124,7 @@ public class Kernel {
                 }
             }
         };
-        chain = new BlockchainImpl(dbFactory);
+        chain = new BlockchainImpl(this, dbFactory);
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
 
@@ -132,8 +136,8 @@ public class Kernel {
         // start channel/pending/node manager
         // ====================================
         channelMgr = new ChannelManager();
-        pendingMgr = new PendingManager(chain, channelMgr);
-        nodeMgr = new NodeManager(chain, channelMgr, pendingMgr, client);
+        pendingMgr = new PendingManager(this);
+        nodeMgr = new NodeManager(this);
 
         pendingMgr.start();
         nodeMgr.start();
@@ -141,8 +145,7 @@ public class Kernel {
         // ====================================
         // start p2p module
         // ====================================
-        SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, pendingMgr, nodeMgr, client, null);
-        PeerServer p2p = new PeerServer(ci);
+        PeerServer p2p = new PeerServer(this);
 
         Thread p2pThread = new Thread(() -> p2p.start(config.p2pListenIp(), config.p2pListenPort()), "p2p");
         p2pThread.start();
@@ -160,11 +163,8 @@ public class Kernel {
         // ====================================
         // start sync/consensus
         // ====================================
-        SemuxSync sync = SemuxSync.getInstance();
-        sync.init(chain, channelMgr);
-
-        SemuxBFT cons = SemuxBFT.getInstance();
-        cons.init(chain, channelMgr, pendingMgr, coinbase);
+        sync = new SemuxSync(this);
+        cons = new SemuxBFT(this);
 
         Thread consThread = new Thread(cons::start, "cons");
         consThread.start();
@@ -313,5 +313,23 @@ public class Kernel {
      */
     public ReentrantReadWriteLock getStateLock() {
         return stateLock;
+    }
+
+    /**
+     * Returns the syncing manager.
+     * 
+     * @return
+     */
+    public SyncManager getSyncManager() {
+        return sync;
+    }
+
+    /**
+     * Returns the consensus.
+     * 
+     * @return
+     */
+    public Consensus getConsensus() {
+        return cons;
     }
 }

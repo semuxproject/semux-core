@@ -8,9 +8,7 @@ package org.semux.net;
 
 import java.net.InetSocketAddress;
 
-import org.semux.Config;
-import org.semux.core.Blockchain;
-import org.semux.core.PendingManager;
+import org.semux.Kernel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,74 +21,59 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxChannelInitializer.class);
 
-    private Blockchain chain;
+    private Kernel kernel;
     private ChannelManager channelMgr;
-    private PendingManager pendingMgr;
-    private NodeManager nodeMgr;
 
-    private PeerClient client;
     private InetSocketAddress remoteAddress;
-
-    private boolean isDiscoveryMode = false;
+    private boolean discoveryMode;
 
     /**
      * Create an instance of SemuxChannelInitializer.
      * 
-     * 
-     * @param chain
-     *            the blockchain instance
-     * @param channelMgr
-     *            the channel manager
-     * @param pendingMgr
-     *            the pending manager
-     * @param nodeMgr
-     *            the node manager
-     * @param client
-     *            the peer client
+     * @param kernel
+     *            the kernel instance
      * @param remoteAddress
-     *            the peer to connect, or null if in server mode
+     *            the address of the remote peer, or null if in server mode
+     * @param discoveryMode
+     *            whether in discovery mode or not
      */
-    public SemuxChannelInitializer(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr,
-            NodeManager nodeMgr, PeerClient client, InetSocketAddress remoteAddress) {
-        this.chain = chain;
-        this.pendingMgr = pendingMgr;
-        this.channelMgr = channelMgr;
-        this.nodeMgr = nodeMgr;
+    public SemuxChannelInitializer(Kernel kernel, InetSocketAddress remoteAddress, boolean discoveryMode) {
+        this.kernel = kernel;
+        this.channelMgr = kernel.getChannelManager();
 
-        this.client = client;
         this.remoteAddress = remoteAddress;
+        this.discoveryMode = discoveryMode;
     }
 
     @Override
     public void initChannel(NioSocketChannel ch) throws Exception {
         try {
-            InetSocketAddress address = isInbound() ? ch.remoteAddress() : remoteAddress;
-            logger.debug("New {} channel: remoteAddress = {}:{}", isInbound() ? "inbound" : "outbound",
+            InetSocketAddress address = isServerMode() ? ch.remoteAddress() : remoteAddress;
+            logger.debug("New {} channel: remoteAddress = {}:{}", isServerMode() ? "inbound" : "outbound",
                     address.getAddress().getHostAddress(), address.getPort());
 
-            if (isInbound() && channelMgr.isBlocked(address)) {
-                // avoid too frequent connection attempts
-                logger.debug("Drop connection from a blocked peer, channel: {}", ch);
+            if (isServerMode() && !channelMgr.isAcceptable(address)) {
+                logger.debug("Not allowed connection from: {}", ch);
                 ch.disconnect();
                 return;
             }
 
-            Channel channel = new Channel(chain, channelMgr, pendingMgr, nodeMgr);
-            channel.init(ch.pipeline(), isInbound(), isDiscoveryMode, client, address);
+            Channel channel = new Channel();
+            channel.init(ch.pipeline(), isServerMode(), address, discoveryMode, kernel);
 
-            if (!isDiscoveryMode) {
+            if (!discoveryMode) {
                 channelMgr.add(channel);
             }
 
             // limit the size of receiving buffer
-            int bufferSize = Frame.HEADER_SIZE + Config.NET_MAX_FRAME_SIZE;
+            int bufferSize = Frame.HEADER_SIZE + kernel.getConfig().netMaxFrameSize();
             ch.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(bufferSize));
             ch.config().setOption(ChannelOption.SO_RCVBUF, bufferSize);
             ch.config().setOption(ChannelOption.SO_BACKLOG, 1024);
 
             // notify disconnection to channel manager
             ch.closeFuture().addListener(future -> {
-                if (!isDiscoveryMode) {
+                if (!discoveryMode) {
                     channelMgr.remove(channel);
                 }
             });
@@ -99,11 +82,21 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
         }
     }
 
-    private boolean isInbound() {
+    /**
+     * Returns whether is in server mode.
+     * 
+     * @return
+     */
+    public boolean isServerMode() {
         return remoteAddress == null;
     }
 
-    public void setDiscoveryMode(boolean isDiscoveryMode) {
-        this.isDiscoveryMode = isDiscoveryMode;
+    /**
+     * Returns whether is in discovery mode.
+     * 
+     * @return
+     */
+    public boolean isDiscoveryMode() {
+        return discoveryMode;
     }
 }

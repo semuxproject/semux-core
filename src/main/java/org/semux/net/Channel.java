@@ -10,31 +10,23 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.semux.Config;
-import org.semux.core.Blockchain;
-import org.semux.core.PendingManager;
+import org.semux.Kernel;
+import org.semux.config.Constants;
 import org.semux.net.msg.MessageQueue;
 
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 
 public class Channel {
-    private static AtomicLong cnt = new AtomicLong(0);
+    private static final AtomicLong cnt = new AtomicLong(0);
 
     private long id;
 
-    private MessageQueue msgQueue;
-
     private boolean isInbound;
-    private boolean isDiscoveryMode;
-
-    private Blockchain chain;
-    private ChannelManager channelMgr;
-    private PendingManager pendingMgr;
-    private NodeManager nodeMgr;
-
-    private PeerClient client;
+    private boolean discoveryMode;
     private InetSocketAddress remoteAddress;
+
+    private MessageQueue msgQueue;
     private Peer remotePeer;
 
     private ReadTimeoutHandler timeoutHandler;
@@ -45,18 +37,9 @@ public class Channel {
     /**
      * Creates a new channel instance.
      * 
-     * @param chain
-     * @param channelMgr
-     * @param pendingMgr
-     * @param nodeMgr
      */
-    public Channel(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, NodeManager nodeMgr) {
+    public Channel() {
         this.id = cnt.getAndIncrement();
-
-        this.chain = chain;
-        this.pendingMgr = pendingMgr;
-        this.channelMgr = channelMgr;
-        this.nodeMgr = nodeMgr;
     }
 
     /**
@@ -64,25 +47,23 @@ public class Channel {
      * 
      * @param pipe
      * @param isInbound
-     * @param isDiscoveryMode
-     * @param client
      * @param remoteAddress
+     * @param discoveryMode
+     * @param kernel
      */
-    public void init(ChannelPipeline pipe, boolean isInbound, boolean isDiscoveryMode, PeerClient client,
-            InetSocketAddress remoteAddress) {
+    public void init(ChannelPipeline pipe, boolean isInbound, InetSocketAddress remoteAddress, boolean discoveryMode,
+            Kernel kernel) {
         this.isInbound = isInbound;
-        this.isDiscoveryMode = isDiscoveryMode;
-
-        this.client = client;
-        this.remotePeer = null;
         this.remoteAddress = remoteAddress;
+        this.discoveryMode = discoveryMode;
 
-        this.msgQueue = new MessageQueue();
+        this.msgQueue = new MessageQueue(kernel.getConfig());
+        this.remotePeer = null;
 
-        this.timeoutHandler = new ReadTimeoutHandler(Config.NET_TIMEOUT_IDLE, TimeUnit.MILLISECONDS);
-        this.frameHandler = new SemuxFrameHandler(this);
-        this.messageHandler = new SemuxMessageHandler();
-        this.p2pHandler = new SemuxP2pHandler(this);
+        this.timeoutHandler = new ReadTimeoutHandler(Constants.DEFAULT_READ_TIMEOUT, TimeUnit.MILLISECONDS);
+        this.frameHandler = new SemuxFrameHandler(kernel.getConfig());
+        this.messageHandler = new SemuxMessageHandler(kernel.getConfig());
+        this.p2pHandler = new SemuxP2pHandler(this, kernel);
 
         // register channel handlers
         pipe.addLast("readTimeoutHandler", timeoutHandler);
@@ -98,42 +79,6 @@ public class Channel {
      */
     public long getId() {
         return id;
-    }
-
-    /**
-     * Returns the blockchain instance.
-     * 
-     * @return
-     */
-    public Blockchain getBlockchain() {
-        return chain;
-    }
-
-    /**
-     * Returns the pending manager.
-     * 
-     * @return
-     */
-    public PendingManager getPendingManager() {
-        return pendingMgr;
-    }
-
-    /**
-     * Returns the channel manager.
-     * 
-     * @return
-     */
-    public ChannelManager getChannelManager() {
-        return channelMgr;
-    }
-
-    /**
-     * Returns the node manager.
-     * 
-     * @return
-     */
-    public NodeManager getNodeManager() {
-        return nodeMgr;
     }
 
     /**
@@ -160,16 +105,7 @@ public class Channel {
      * @return
      */
     public boolean isDiscoveryMode() {
-        return isDiscoveryMode;
-    }
-
-    /**
-     * Returns the peer client.
-     * 
-     * @return
-     */
-    public PeerClient getClient() {
-        return client;
+        return discoveryMode;
     }
 
     /**
@@ -197,8 +133,6 @@ public class Channel {
      */
     public void onActive(Peer remotePeer) {
         this.remotePeer = remotePeer;
-
-        channelMgr.onChannelActive(this); // notify channel manager
     }
 
     /**
@@ -233,26 +167,6 @@ public class Channel {
      */
     public int getRemotePort() {
         return remoteAddress.getPort();
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (int) (id ^ (id >>> 32));
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Channel other = (Channel) obj;
-        return id == other.id;
     }
 
     @Override

@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.gui.model;
+package org.semux.core;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +13,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
-import org.semux.Config;
 import org.semux.util.Bytes;
 import org.semux.util.IOUtil;
 import org.slf4j.Logger;
@@ -22,8 +21,6 @@ import org.slf4j.LoggerFactory;
 public class AddressBook {
 
     private static final Logger logger = LoggerFactory.getLogger(AddressBook.class);
-
-    private static final String FILENAME = "addressbook.json";
 
     // NOTE: A better solution would be storing as a list of entries, with index on
     // name and address.
@@ -34,8 +31,8 @@ public class AddressBook {
     /**
      * Creates an address book instance.
      */
-    public AddressBook() {
-        this.file = new File(Config.DATA_DIR, FILENAME);
+    public AddressBook(File file) {
+        this.file = file;
         this.database = load();
     }
 

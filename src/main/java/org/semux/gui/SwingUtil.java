@@ -39,15 +39,13 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.DefaultEditorKit;
 
-import org.semux.Kernel;
 import org.semux.core.Transaction;
 import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
-import org.semux.gui.model.WalletModel;
-import org.semux.message.GUIMessages;
 import org.semux.gui.exception.QRCodeException;
+import org.semux.message.GUIMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -446,15 +444,14 @@ public class SwingUtil {
      * @param tx
      * @return
      */
-    public static String getTransactionDescription(WalletModel m, Transaction tx) {
+    public static String getTransactionDescription(SemuxGUI gui, Transaction tx) {
         switch (tx.getType()) {
         case COINBASE:
-            return GUIMessages.get("BlockReward") + " => "
-                    + getDelegateName(tx.getTo()).orElse(GUIMessages.get("UnknownDelegate"));
+            return GUIMessages.get("BlockReward") + " => " + getAddressAlias(gui, tx.getTo());
         case VOTE:
         case UNVOTE:
         case TRANSFER:
-            return getAddressName(m, tx.getFrom()) + " => " + getAddressName(m, tx.getTo());
+            return getAddressAlias(gui, tx.getFrom()) + " => " + getAddressAlias(gui, tx.getTo());
         case DELEGATE:
             return GUIMessages.get("DelegateRegistration");
         default:
@@ -469,13 +466,13 @@ public class SwingUtil {
      * @param address
      * @return
      */
-    private static String getAddressName(WalletModel m, byte[] address) {
-        Optional<String> o = getDelegateName(address);
-        if (o.isPresent()) {
-            return o.get();
+    private static String getAddressAlias(SemuxGUI gui, byte[] address) {
+        Optional<String> name = getDelegateName(gui, address);
+        if (name.isPresent()) {
+            return name.get();
         }
 
-        int n = m.getAccountNumber(address);
+        int n = gui.getModel().getAccountNumber(address);
         return n == -1 ? Hex.encodeWithPrefix(address) : GUIMessages.get("AccountNum", n);
     }
 
@@ -485,11 +482,10 @@ public class SwingUtil {
      * @param address
      * @return
      */
-    public static Optional<String> getDelegateName(byte[] address) {
-        DelegateState ds = Kernel.getInstance().getBlockchain().getDelegateState();
+    public static Optional<String> getDelegateName(SemuxGUI gui, byte[] address) {
+        DelegateState ds = gui.getKernel().getBlockchain().getDelegateState();
         Delegate d = ds.getDelegateByAddress(address);
 
         return d == null ? Optional.empty() : Optional.of(d.getNameString());
     }
-
 }

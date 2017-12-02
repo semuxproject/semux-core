@@ -33,9 +33,14 @@ public enum Command {
     ADD_NODE,
 
     /**
-     * Block an IP address.
+     * Add an IP address to blacklist.
      */
-    BLOCK_IP,
+    ADD_TO_BLACKLIST,
+
+    /**
+     * Add an IP address to whitelist.
+     */
+    ADD_TO_WHITELIST,
 
     // =======================
     // block

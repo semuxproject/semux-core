@@ -15,7 +15,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.semux.Config;
+import org.semux.config.Config;
 import org.semux.net.msg.p2p.DisconnectMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class MessageQueue {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageQueue.class);
 
-    private static final ScheduledExecutorService timer = Executors.newScheduledThreadPool(1, new ThreadFactory() {
+    private static final ScheduledExecutorService timer = Executors.newScheduledThreadPool(2, new ThreadFactory() {
         private AtomicInteger cnt = new AtomicInteger(0);
 
         public Thread newThread(Runnable r) {
@@ -44,26 +44,19 @@ public class MessageQueue {
     private Queue<MessageRoundtrip> prioritizedResponses = new ConcurrentLinkedQueue<>();
 
     private ChannelHandlerContext ctx = null;
-    private int maxQueueSize;
+
+    private org.semux.config.Config config;
 
     private ScheduledFuture<?> timerTask;
     private volatile boolean isRunning;
 
     /**
-     * Create a message queue, with the default maximum queue size.
-     * 
-     */
-    public MessageQueue() {
-        this(Config.NET_MAX_QUEUE_SIZE);
-    }
-
-    /**
      * Create a message queue with the specified maximum queue size.
      * 
-     * @param maxQueueSize
+     * @param config
      */
-    public MessageQueue(int maxQueueSize) {
-        this.maxQueueSize = maxQueueSize;
+    public MessageQueue(Config config) {
+        this.config = config;
     }
 
     /**
@@ -80,7 +73,7 @@ public class MessageQueue {
                 } catch (Exception t) {
                     logger.error("Exception in MessageQueue", t);
                 }
-            }, Config.NET_MAX_QUEUE_RATE, Config.NET_MAX_QUEUE_RATE, TimeUnit.MILLISECONDS);
+            }, 1, 1, TimeUnit.MILLISECONDS);
 
             this.isRunning = true;
         }
@@ -141,6 +134,7 @@ public class MessageQueue {
             return false;
         }
 
+        int maxQueueSize = config.netMaxMessageQueueSize();
         if (requests.size() >= maxQueueSize || responses.size() >= maxQueueSize
                 || prioritizedResponses.size() >= maxQueueSize) {
             disconnect(ReasonCode.BAD_PEER);
@@ -150,7 +144,7 @@ public class MessageQueue {
         if (msg.getResponseMessageClass() != null) {
             requests.add(new MessageRoundtrip(msg));
         } else {
-            if (Config.PRIORITIZED_MESSAGES.contains(msg.getCode())) {
+            if (config.netPrioritizedMessages().contains(msg.getCode())) {
                 prioritizedResponses.add(new MessageRoundtrip(msg));
             } else {
                 responses.add(new MessageRoundtrip(msg));

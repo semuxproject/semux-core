@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.semux.Config;
+import org.semux.config.Config;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,14 +45,15 @@ import io.netty.util.CharsetUtil;
  * HTTP handler for Semux API.
  * 
  */
-public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
+public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
-    private static final Logger logger = LoggerFactory.getLogger(SemuxHttpHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(HttpHandler.class);
 
     private static final int MAX_BODY_SIZE = 512 * 1024; // 512KB
     private static final Charset CHARSET = CharsetUtil.UTF_8;
 
-    private ApiHandler handler;
+    private Config config;
+    private ApiHandler apiHandler;
 
     private boolean keepAlive;
     private String uri;
@@ -62,8 +63,9 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
 
     private String error = null;
 
-    public SemuxHttpHandler(ApiHandler handler) {
-        this.handler = handler;
+    public HttpHandler(Config config, ApiHandler apiHandler) {
+        this.config = config;
+        this.apiHandler = apiHandler;
     }
 
     @Override
@@ -105,7 +107,7 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
                 // trailing headers are ignored
 
                 // basic authentication
-                if (!checkBaiscAuth(headers, Config.API_USERNAME, Config.API_PASSWORD)) {
+                if (!checkBaiscAuth(headers, config.apiUsername(), config.apiPassword())) {
                     FullHttpResponse resp = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
 
                     resp.headers().set(HttpHeaderNames.WWW_AUTHENTICATE, "Basic realm=\"Semux RESTful API\"");
@@ -148,7 +150,7 @@ public class SemuxHttpHandler extends SimpleChannelInboundHandler<Object> {
                 }
 
                 // delegate requests
-                String response = (error != null) ? error : handler.service(uri, map, headers);
+                String response = (error != null) ? error : apiHandler.service(uri, map, headers);
 
                 if (!writeResponse(ctx, response)) {
                     // if keep-alive is off, close the connection after flushing

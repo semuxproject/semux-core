@@ -9,7 +9,6 @@ package org.semux.core;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 
-import org.semux.Config;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hash;
@@ -114,7 +113,7 @@ public class Transaction implements Callable<Boolean> {
                 && type != null //
                 && to != null && to.length == 20 //
                 && value >= 0 //
-                && fee >= Config.MIN_TRANSACTION_FEE //
+                && fee >= 0 //
                 && nonce >= 0 //
                 && timestamp > 0 //
                 && data != null && (data.length <= 128) //

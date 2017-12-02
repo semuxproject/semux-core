@@ -7,10 +7,7 @@
 package org.semux.core.state;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 
-import org.semux.Kernel;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
@@ -59,11 +56,6 @@ public class Delegate {
 
     public long getVotes() {
         return votes;
-    }
-
-    public boolean isValidator() {
-        List<String> validators = Kernel.getInstance().getBlockchain().getValidators();
-        return new HashSet<>(validators).contains(Hex.encode(getAddress()));
     }
 
     void setVotes(long votes) {

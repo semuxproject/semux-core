@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.map.LRUMap;
 import org.apache.commons.lang3.tuple.Pair;
-import org.semux.Config;
+import org.semux.config.Config;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageFactory;
 import org.slf4j.Logger;
@@ -31,11 +31,14 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
     private static final int MAX_PACKETS = 16;
     protected final Map<Integer, Pair<List<Frame>, AtomicInteger>> incompletePackets = new LRUMap<>(MAX_PACKETS);
 
-    private MessageFactory messageFactory;
+    private Config config;
 
+    private MessageFactory messageFactory;
     private AtomicInteger count;
 
-    public SemuxMessageHandler() {
+    public SemuxMessageHandler(Config config) {
+        this.config = config;
+
         this.messageFactory = new MessageFactory();
         this.count = new AtomicInteger(0);
     }
@@ -46,14 +49,14 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
         int packetId = count.incrementAndGet() % Integer.MAX_VALUE;
         int packetSize = encoded.length;
         byte type = msg.getCode().toByte();
-        byte network = Config.NETWORK_ID;
+        byte network = config.networkId();
 
-        if (packetSize > Config.NET_MAX_PACKET_SIZE) {
-            logger.error("Invalid packet size, max = {}, actual = {}", Config.NET_MAX_PACKET_SIZE, packetSize);
+        if (packetSize > config.netMaxPacketSize()) {
+            logger.error("Invalid packet size, max = {}, actual = {}", config.netMaxPacketSize(), packetSize);
             return;
         }
 
-        int limit = Config.NET_MAX_FRAME_SIZE;
+        int limit = config.netMaxFrameSize();
         int total = (encoded.length - 1) / limit + 1;
         for (int i = 0; i < total; i++) {
             byte[] playload = new byte[(i < total - 1) ? limit : encoded.length % limit];
@@ -80,7 +83,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
                 Pair<List<Frame>, AtomicInteger> pair = incompletePackets.get(packetId);
                 if (pair == null) {
                     int packetSize = frame.getPacketSize();
-                    if (packetSize > Config.NET_MAX_PACKET_SIZE) {
+                    if (packetSize > config.netMaxPacketSize()) {
                         // this will kill the connection
                         throw new IOException("Invalid packet size: " + packetSize);
                     }

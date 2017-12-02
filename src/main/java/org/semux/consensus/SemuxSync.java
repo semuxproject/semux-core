@@ -26,11 +26,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-import org.semux.Config;
+import org.semux.Kernel;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
-import org.semux.core.Sync;
+import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
@@ -48,7 +48,7 @@ import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SemuxSync implements Sync {
+public class SemuxSync implements SyncManager {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxSync.class);
 
@@ -69,6 +69,8 @@ public class SemuxSync implements Sync {
 
     private static final int MAX_PENDING_BLOCKS = 512;
 
+    private Kernel kernel;
+
     private Blockchain chain;
     private ChannelManager channelMgr;
 
@@ -87,28 +89,10 @@ public class SemuxSync implements Sync {
 
     private Instant begin, end;
 
-    private static SemuxSync instance;
-
-    /**
-     * Get the singleton instance.
-     * 
-     * @return
-     */
-    public static synchronized SemuxSync getInstance() {
-        if (instance == null) {
-            instance = new SemuxSync();
-        }
-
-        return instance;
-    }
-
-    private SemuxSync() {
-    }
-
-    @Override
-    public void init(Blockchain chain, ChannelManager channelMgr) {
-        this.chain = chain;
-        this.channelMgr = channelMgr;
+    public SemuxSync(Kernel kernel) {
+        this.kernel = kernel;
+        this.chain = kernel.getBlockchain();
+        this.channelMgr = kernel.getChannelManager();
     }
 
     @Override
@@ -249,7 +233,7 @@ public class SemuxSync implements Sync {
                 for (int j = 0; j < BLOCK_REQUEST_REDUNDANCY; j++) {
                     Channel c = channels.get(i + j);
                     if (c.getRemotePeer().getLatestBlockNumber() >= task) {
-                        logger.debug("Request block #{} from cid = {}", task, c.getId());
+                        logger.debug("Request block #{} from channel = {}", task, c.getId());
                         c.getMessageQueue().sendMessage(new GetBlockMessage(task));
                         requested = true;
                     }
@@ -337,7 +321,8 @@ public class SemuxSync implements Sync {
         }
 
         // [2] check transactions and results
-        if (!Block.validateTransactions(header, block.getTransactions())) {
+        if (transactions.size() > kernel.getConfig().maxBlockSize()
+                || !Block.validateTransactions(header, block.getTransactions())) {
             logger.debug("Invalid block transactions");
             return false;
         }
@@ -348,7 +333,7 @@ public class SemuxSync implements Sync {
 
         AccountState as = chain.getAccountState().track();
         DelegateState ds = chain.getDelegateState().track();
-        TransactionExecutor transactionExecutor = new TransactionExecutor();
+        TransactionExecutor transactionExecutor = new TransactionExecutor(kernel.getConfig());
 
         // [3] evaluate transactions
         List<TransactionResult> results = transactionExecutor.execute(transactions, as, ds);
@@ -378,7 +363,7 @@ public class SemuxSync implements Sync {
         }
 
         // [5] apply block reward and tx fees
-        long reward = Config.getBlockReward(number);
+        long reward = kernel.getConfig().getBlockReward(number);
         for (Transaction tx : block.getTransactions()) {
             reward += tx.getFee();
         }
@@ -390,7 +375,7 @@ public class SemuxSync implements Sync {
         as.commit();
         ds.commit();
 
-        WriteLock writeLock = Config.STATE_LOCK.writeLock();
+        WriteLock writeLock = kernel.getStateLock().writeLock();
         writeLock.lock();
         try {
             // [7] flush state to disk

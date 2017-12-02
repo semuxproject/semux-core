@@ -26,11 +26,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import org.semux.core.AddressBook;
+import org.semux.core.AddressBook.Entry;
 import org.semux.gui.Action;
 import org.semux.message.GUIMessages;
 import org.semux.gui.SwingUtil;
-import org.semux.gui.model.AddressBook;
-import org.semux.gui.model.AddressBook.Entry;
 import org.semux.gui.model.WalletModel;
 import org.semux.util.UnreachableException;
 

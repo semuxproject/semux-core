@@ -9,12 +9,14 @@ package org.semux.config;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
 import org.semux.core.Unit;
+import org.semux.net.msg.MessageCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +30,7 @@ public abstract class AbstractConfig implements Config {
     // General
     // =========================
     protected File dataDir = null;
-    protected byte networkId = Constants.ID_DEV_NET;
+    protected byte networkId = Constants.DEV_NET_ID;
     protected short networkVersion = 4;
     protected int maxBlockSize = 5000;
     protected long minTransactionFee = 50L * Unit.MILLI_SEM;
@@ -40,7 +42,7 @@ public abstract class AbstractConfig implements Config {
     // =========================
     protected String p2pDeclaredIp = null;
     protected String p2pListenIp = "0.0.0.0";
-    protected int p2pListenPort = Constants.PORT_P2P;
+    protected int p2pListenPort = Constants.DEFAULT_P2P_PORT;
     protected Set<InetSocketAddress> p2pSeedNodes = new HashSet<>();
 
     // =========================
@@ -53,13 +55,19 @@ public abstract class AbstractConfig implements Config {
     protected int netMaxPacketSize = 8 * 1024 * 1024;
     protected int netRelayRedundancy = 16;
     protected int netHandshakeExpiry = 5 * 60 * 1000;
+    protected Set<MessageCode> netPrioritizedMessages = new HashSet<>(Arrays.asList( //
+            MessageCode.BFT_NEW_HEIGHT, //
+            MessageCode.BFT_NEW_VIEW, //
+            MessageCode.BFT_PROPOSAL, //
+            MessageCode.BFT_VOTE //
+    ));
 
     // =========================
     // API
     // =========================
     protected boolean apiEnabled = false;
     protected String apiListenIp = "127.0.0.1";
-    protected int apiListenPort = Constants.PORT_API;
+    protected int apiListenPort = Constants.DEFAULT_API_PORT;
     protected String apiUsername = "";
     protected String apiPassword = "";
 
@@ -87,7 +95,7 @@ public abstract class AbstractConfig implements Config {
     }
 
     protected void init() {
-        File f = new File(dataDir, Constants.DIR_CONFIG + File.separator + CONFIG_FILE);
+        File f = new File(dataDir, Constants.CONFIG_DIR + File.separator + CONFIG_FILE);
         Properties props = new Properties();
 
         try (FileInputStream in = new FileInputStream(f)) {
@@ -246,6 +254,11 @@ public abstract class AbstractConfig implements Config {
     @Override
     public int netHandshakeExpiry() {
         return netHandshakeExpiry;
+    }
+
+    @Override
+    public Set<MessageCode> netPrioritizedMessages() {
+        return netPrioritizedMessages;
     }
 
     @Override

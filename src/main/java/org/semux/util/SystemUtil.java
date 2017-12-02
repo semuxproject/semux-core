@@ -14,10 +14,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Scanner;
 
+import org.semux.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.zafarkhaja.semver.Version;
+
 import oshi.SystemInfo;
 
 public class SystemUtil {
@@ -85,9 +87,9 @@ public class SystemUtil {
         try {
             URL url = new URL("http://api.ipify.org/");
             URLConnection con = url.openConnection();
-            con.addRequestProperty("User-Agent", "Mozilla/4.0");
-            con.setConnectTimeout(3000);
-            con.setReadTimeout(3000);
+            con.addRequestProperty("User-Agent", Constants.DEFAULT_USER_AGENT);
+            con.setConnectTimeout(Constants.DEFAULT_CONNECT_TIMEOUT);
+            con.setReadTimeout(Constants.DEFAULT_READ_TIMEOUT);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String ip = reader.readLine().trim();

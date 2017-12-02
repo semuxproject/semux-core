@@ -22,9 +22,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.map.LRUMap;
-import org.semux.Config;
-import org.semux.core.Blockchain;
-import org.semux.core.PendingManager;
+import org.semux.Kernel;
+import org.semux.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +32,6 @@ public class NodeManager {
     private static final Logger logger = LoggerFactory.getLogger(NodeManager.class);
 
     private static final ThreadFactory factory = new ThreadFactory() {
-
         private AtomicInteger cnt = new AtomicInteger(0);
 
         @Override
@@ -45,14 +43,11 @@ public class NodeManager {
     private static final String DNS_SEED_MAINNET = "mainnet.semux.org";
     private static final String DNS_SEED_TESTNET = "testnet.semux.org";
 
-    private static final int DEFAULT_PORT = 5161;
-
     private static final int LRU_CACHE_SIZE = 1024;
     private static final long RECONNECT_WAIT = 2L * 60L * 1000L;
 
-    private Blockchain chain;
+    private Kernel kernel;
     private ChannelManager channelMgr;
-    private PendingManager pendingMgr;
     private PeerClient client;
 
     private Queue<InetSocketAddress> queue;
@@ -72,11 +67,10 @@ public class NodeManager {
      * @param pendingMgr
      * @param client
      */
-    public NodeManager(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, PeerClient client) {
-        this.chain = chain;
-        this.pendingMgr = pendingMgr;
-        this.channelMgr = channelMgr;
-        this.client = client;
+    public NodeManager(Kernel kernel) {
+        this.kernel = kernel;
+        this.channelMgr = kernel.getChannelManager();
+        this.client = kernel.getPeerClient();
 
         this.queue = new ConcurrentLinkedQueue<>();
         this.lastConnect = new LRUMap<>(LRU_CACHE_SIZE);
@@ -93,8 +87,8 @@ public class NodeManager {
              * Push all known peers to the queue.
              */
             Set<InetSocketAddress> peers = new HashSet<>();
-            peers.addAll(Config.P2P_SEED_NODES);
-            peers.addAll(getSeedNodes(Config.NETWORK_ID));
+            peers.addAll(kernel.getConfig().p2pSeedNodes());
+            peers.addAll(getSeedNodes(kernel.getConfig().networkId()));
             queue.addAll(peers);
 
             connectFuture = exec.scheduleAtFixedRate(this::doConnect, 100, 500, TimeUnit.MILLISECONDS);
@@ -149,24 +143,24 @@ public class NodeManager {
     /**
      * Get seed nodes from DNS records.
      * 
-     * @param network
+     * @param networkId
      * @return
      */
-    public static Set<InetSocketAddress> getSeedNodes(short network) {
+    public static Set<InetSocketAddress> getSeedNodes(byte networkId) {
         Set<InetSocketAddress> nodes = new HashSet<>();
 
         try {
             String name;
-            if (network == 0) {
+            if (networkId == Constants.MAIN_NET_ID) {
                 name = DNS_SEED_MAINNET;
-            } else if (network == 1) {
+            } else if (networkId == Constants.TEST_NET_ID) {
                 name = DNS_SEED_TESTNET;
             } else {
                 return nodes;
             }
 
             for (InetAddress addr : InetAddress.getAllByName(name)) {
-                nodes.add(new InetSocketAddress(addr, DEFAULT_PORT));
+                nodes.add(new InetSocketAddress(addr, Constants.DEFAULT_P2P_PORT));
             }
         } catch (UnknownHostException e) {
             logger.info("Failed to get bootstrapping nodes by dns");
@@ -182,7 +176,7 @@ public class NodeManager {
         Set<InetSocketAddress> activeAddresses = channelMgr.getActiveAddresses();
         InetSocketAddress addr;
 
-        while ((addr = queue.poll()) != null && channelMgr.size() < Config.NET_MAX_CONNECTIONS) {
+        while ((addr = queue.poll()) != null && channelMgr.size() < kernel.getConfig().netMaxOutboundConnections()) {
             Long l = lastConnect.get(addr);
             long now = System.currentTimeMillis();
 
@@ -190,8 +184,7 @@ public class NodeManager {
                     && !activeAddresses.contains(addr) //
                     && (l == null || l + RECONNECT_WAIT < now)) {
 
-                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, pendingMgr, this, client,
-                        addr);
+                SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, addr, false);
                 client.connectAsync(addr, ci);
                 lastConnect.put(addr, now);
                 break;
@@ -203,6 +196,6 @@ public class NodeManager {
      * Fetch seed nodes from DNS records.
      */
     protected void doFetch() {
-        addNodes(getSeedNodes(Config.NETWORK_ID));
+        addNodes(getSeedNodes(kernel.getConfig().networkId()));
     }
 }

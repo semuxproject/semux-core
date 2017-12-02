@@ -9,6 +9,7 @@ package org.semux.api;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.semux.Kernel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,14 +43,13 @@ public class SemuxAPI {
         }
     };
 
-    private ApiHandler handler;
-
+    private Kernel kernel;
     private ChannelFuture channelFuture;
 
     private boolean listening;
 
-    public SemuxAPI(ApiHandler handler) {
-        this.handler = handler;
+    public SemuxAPI(Kernel kernel) {
+        this.kernel = kernel;
     }
 
     public void start(String ip, int port) {
@@ -63,7 +63,7 @@ public class SemuxAPI {
                     ChannelPipeline p = ch.pipeline();
                     p.addLast(new HttpRequestDecoder());
                     p.addLast(new HttpResponseEncoder());
-                    p.addLast(new SemuxHttpHandler(handler));
+                    p.addLast(new HttpHandler(kernel.getConfig(), new ApiHandlerImpl(kernel)));
                 }
             };
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)

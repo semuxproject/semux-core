@@ -23,12 +23,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
-import org.semux.message.GUIMessages;
+import org.semux.gui.SemuxGUI;
 import org.semux.gui.SwingUtil;
+import org.semux.message.GUIMessages;
 import org.semux.util.UnreachableException;
 
 public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
@@ -38,9 +38,8 @@ public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
     private static String[] columnNames = { "#", GUIMessages.get("Address"), GUIMessages.get("PrivateKey") };
     private JTable table;
 
-    public ExportPrivateKeyDialog(JFrame parent) {
-        Wallet wallet = Kernel.getInstance().getWallet();
-        wallet.size();
+    public ExportPrivateKeyDialog(SemuxGUI gui, JFrame parent) {
+        Wallet wallet = gui.getKernel().getWallet();
 
         Object[][] data = new Object[wallet.size()][];
         for (int i = 0; i < wallet.size(); i++) {

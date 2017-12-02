@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.semux.Config;
+import org.semux.config.Config;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -25,6 +25,17 @@ import org.slf4j.LoggerFactory;
 public class TransactionExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionExecutor.class);
+
+    private Config config;
+
+    /**
+     * Creates a new transaction executor.
+     * 
+     * @param config
+     */
+    public TransactionExecutor(Config config) {
+        this.config = config;
+    }
 
     /**
      * Execute a list of transactions.
@@ -62,6 +73,11 @@ public class TransactionExecutor {
                 continue;
             }
 
+            // check transaction fee
+            if (fee < config.minTransactionFee()) {
+                continue;
+            }
+
             switch (tx.getType()) {
             case TRANSFER: {
                 if (fee <= available && value <= available && value + fee <= available) {
@@ -76,7 +92,7 @@ public class TransactionExecutor {
             case DELEGATE: {
                 if (fee <= available && value <= available && value + fee <= available //
                         && Arrays.equals(from, to) //
-                        && value >= Config.DELEGATE_BURN_AMOUNT //
+                        && value >= config.minDelegateFee() //
                         && data.length <= 16 && Bytes.toString(data).matches("[_a-z0-9]{4,16}") //
                         && ds.register(to, data)) {
 

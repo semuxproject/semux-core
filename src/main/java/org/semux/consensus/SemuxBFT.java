@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.apache.commons.collections4.map.LRUMap;
 import org.apache.commons.lang3.tuple.Pair;
-import org.semux.Config;
+import org.semux.Kernel;
 import org.semux.consensus.SemuxBFT.Event.Type;
 import org.semux.consensus.exception.SemuxBFTException;
 import org.semux.core.Block;
@@ -24,7 +24,7 @@ import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
-import org.semux.core.Sync;
+import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
@@ -54,10 +54,12 @@ import org.slf4j.LoggerFactory;
 public class SemuxBFT implements Consensus {
     static final Logger logger = LoggerFactory.getLogger(SemuxBFT.class);
 
+    private Kernel kernel;
+
     private Blockchain chain;
     private ChannelManager channelMgr;
     private PendingManager pendingMgr;
-    private Sync sync;
+    private SyncManager sync;
 
     private EdDSA coinbase;
 
@@ -86,31 +88,14 @@ public class SemuxBFT implements Consensus {
     private VoteSet precommitVotes;
     private VoteSet commitVotes;
 
-    private static SemuxBFT instance;
+    public SemuxBFT(Kernel kernel) {
+        this.kernel = kernel;
 
-    /**
-     * Get the singleton instance of consensus.
-     * 
-     * @return
-     */
-    public static synchronized SemuxBFT getInstance() {
-        if (instance == null) {
-            instance = new SemuxBFT();
-        }
-
-        return instance;
-    }
-
-    private SemuxBFT() {
-    }
-
-    @Override
-    public void init(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, EdDSA coinbase) {
-        this.chain = chain;
-        this.channelMgr = channelMgr;
-        this.pendingMgr = pendingMgr;
-        this.sync = SemuxSync.getInstance();
-        this.coinbase = coinbase;
+        this.chain = kernel.getBlockchain();
+        this.channelMgr = kernel.getChannelManager();
+        this.pendingMgr = kernel.getPendingManager();
+        this.sync = kernel.getSyncManager();
+        this.coinbase = kernel.getCoinbase();
 
         this.accountState = chain.getAccountState();
         this.delegateState = chain.getDelegateState();
@@ -257,7 +242,7 @@ public class SemuxBFT implements Consensus {
                 logger.error("You need to upgrade your computer to join the BFT consensus!");
                 SystemUtil.exitAsync(-1);
             }
-            resetTimeout(Config.BFT_NEW_HEIGHT_TIMEOUT);
+            resetTimeout(kernel.getConfig().bftNewHeightTimeout());
         }
 
         // Broadcast NEW_HEIGHT messages to ALL peers.
@@ -272,7 +257,7 @@ public class SemuxBFT implements Consensus {
      */
     protected void enterPropose() {
         state = State.PROPOSE;
-        resetTimeout(Config.BFT_PROPOSE_TIMEOUT);
+        resetTimeout(kernel.getConfig().bftProposeTimeout());
 
         updateValidators();
 
@@ -310,7 +295,7 @@ public class SemuxBFT implements Consensus {
      */
     protected void enterValidate() {
         state = State.VALIDATE;
-        resetTimeout(Config.BFT_VALIDATE_TIMEOUT);
+        resetTimeout(kernel.getConfig().bftValidateTimeout());
         logger.info("Entered validate: proposal = {}, votes = {} {} {}", proposal != null, validateVotes,
                 precommitVotes, commitVotes);
 
@@ -332,7 +317,7 @@ public class SemuxBFT implements Consensus {
      */
     protected void enterPreCommit() {
         state = State.PRE_COMMIT;
-        resetTimeout(Config.BFT_PRE_COMMIT_TIMEOUT);
+        resetTimeout(kernel.getConfig().bftPreCommitTimeout());
         logger.info("Entered pre_commit: proposal = {}, votes = {} {} {}", proposal != null, validateVotes,
                 precommitVotes, commitVotes);
 
@@ -352,7 +337,7 @@ public class SemuxBFT implements Consensus {
      */
     protected void enterCommit() {
         state = State.COMMIT;
-        resetTimeout(Config.BFT_COMMIT_TIMEOUT);
+        resetTimeout(kernel.getConfig().bftCommitTimeout());
         logger.info("Entered commit: proposal = {}, votes = {} {} {}", proposal != null, validateVotes, precommitVotes,
                 commitVotes);
 
@@ -380,7 +365,7 @@ public class SemuxBFT implements Consensus {
         }
 
         state = State.FINALIZE;
-        resetTimeout(Config.BFT_FINALIZE_TIMEOUT);
+        resetTimeout(kernel.getConfig().bftFinalizeTimeout());
         logger.info("Entered finalize: proposal = {}, votes = {} {} {}", proposal != null, validateVotes,
                 precommitVotes, commitVotes);
 
@@ -659,7 +644,7 @@ public class SemuxBFT implements Consensus {
      * @return
      */
     protected boolean isPrimary(long height, int view, String peerId) {
-        return Config.getPrimaryValidator(validators, height, view).equals(peerId);
+        return kernel.getConfig().getPrimaryValidator(validators, height, view).equals(peerId);
     }
 
     /**
@@ -699,7 +684,7 @@ public class SemuxBFT implements Consensus {
 
         // fetch pending transactions
         Pair<List<Transaction>, List<TransactionResult>> pending = pendingMgr
-                .getTransactionsAndResults(Config.MAX_BLOCK_SIZE);
+                .getTransactionsAndResults(kernel.getConfig().maxBlockSize());
 
         // compute roots
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(pending.getLeft());
@@ -739,14 +724,15 @@ public class SemuxBFT implements Consensus {
         }
 
         // [2] check transactions and results (skipped)
-        if (!Block.validateTransactions(header, transactions)) {
+        if (transactions.size() > kernel.getConfig().maxBlockSize()
+                || !Block.validateTransactions(header, transactions)) {
             logger.debug("Invalid block transactions");
             return false;
         }
 
         AccountState as = accountState.track();
         DelegateState ds = delegateState.track();
-        TransactionExecutor exec = new TransactionExecutor();
+        TransactionExecutor exec = new TransactionExecutor(kernel.getConfig());
 
         // [3] evaluate transactions
         List<TransactionResult> results = exec.execute(transactions, as, ds);
@@ -773,7 +759,7 @@ public class SemuxBFT implements Consensus {
         List<Transaction> transactions = block.getTransactions();
         long number = header.getNumber();
 
-        if (header.getNumber() > Config.MANDATORY_UPGRADE) {
+        if (header.getNumber() > kernel.getConfig().mandatoryUpgrade()) {
             throw new SemuxBFTException("This client needs to be upgraded");
         } else if (header.getNumber() != chain.getLatestBlockNumber() + 1) {
             throw new SemuxBFTException("Applying wrong block: number = " + header.getNumber());
@@ -785,7 +771,7 @@ public class SemuxBFT implements Consensus {
 
         AccountState as = chain.getAccountState().track();
         DelegateState ds = chain.getDelegateState().track();
-        TransactionExecutor exec = new TransactionExecutor();
+        TransactionExecutor exec = new TransactionExecutor(kernel.getConfig());
 
         // [3] evaluate all transactions
         List<TransactionResult> results = exec.execute(transactions, as, ds);
@@ -797,7 +783,7 @@ public class SemuxBFT implements Consensus {
         // [4] evaluate votes, skipped
 
         // [5] apply block reward and tx fees
-        long reward = Config.getBlockReward(number);
+        long reward = kernel.getConfig().getBlockReward(number);
         for (Transaction tx : block.getTransactions()) {
             reward += tx.getFee();
         }
@@ -809,7 +795,7 @@ public class SemuxBFT implements Consensus {
         as.commit();
         ds.commit();
 
-        WriteLock lock = Config.STATE_LOCK.writeLock();
+        WriteLock lock = kernel.getStateLock().writeLock();
         lock.lock();
         try {
             // [7] flush state to disk
@@ -904,7 +890,7 @@ public class SemuxBFT implements Consensus {
                     List<Channel> channels = activeValidators;
                     if (channels != null) {
                         int[] indices = ArrayUtil.permutation(channels.size());
-                        for (int i = 0; i < indices.length && i < Config.NET_RELAY_REDUNDANCY; i++) {
+                        for (int i = 0; i < indices.length && i < kernel.getConfig().netRelayRedundancy(); i++) {
                             Channel c = channels.get(indices[i]);
                             if (c.isActive()) {
                                 c.getMessageQueue().sendMessage(msg);

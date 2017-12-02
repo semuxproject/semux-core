@@ -20,7 +20,7 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
-import org.semux.Config;
+import org.semux.config.Constants;
 import org.semux.db.exception.LevelDBException;
 import org.semux.util.ClosableIterator;
 import org.semux.util.FileUtil;
@@ -32,13 +32,13 @@ public class LevelDB implements KVDB {
 
     private static final Logger logger = LoggerFactory.getLogger(LevelDB.class);
 
-    private static final String DATABASE_DIR = "database";
-
+    private File dataDir;
     private DBName name;
     private DB db;
     private boolean isOpened;
 
-    public LevelDB(DBName name) {
+    public LevelDB(File dataDir, DBName name) {
+        this.dataDir = dataDir;
         this.name = name;
 
         Options options = new Options();
@@ -167,6 +167,6 @@ public class LevelDB implements KVDB {
     }
 
     private File getFile(DBName name) {
-        return new File(Config.DATA_DIR, DATABASE_DIR + File.separator + name.toString().toLowerCase());
+        return new File(dataDir, Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
     }
 }

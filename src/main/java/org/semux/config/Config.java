@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.semux.net.msg.MessageCode;
+
 /**
  * Describes the blockchain configurations.
  */
@@ -186,11 +188,18 @@ public interface Config {
     int netRelayRedundancy();
 
     /**
-     * Return the handshake expire time in miliseconds.
+     * Returns the handshake expire time in milliseconds.
      * 
      * @return
      */
     int netHandshakeExpiry();
+
+    /**
+     * Returns a set of prioritized messages.
+     * 
+     * @return
+     */
+    Set<MessageCode> netPrioritizedMessages();
 
     // =========================
     // API
