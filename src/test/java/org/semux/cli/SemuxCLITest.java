@@ -47,7 +47,7 @@ import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.message.CLIMessages;
 import org.semux.util.SystemUtil;
-import org.semux.util.SystemUtil.OS;
+import org.semux.util.SystemUtil.OsName;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
@@ -125,8 +125,8 @@ public class SemuxCLITest {
         // mock SystemUtil
         mockStatic(SystemUtil.class);
         when(SystemUtil.readPassword()).thenReturn("oldpassword");
-        when(SystemUtil.getOs()).thenReturn(OS.LINUX);
-        when(SystemUtil.getArch()).thenReturn("amd64");
+        when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
+        when(SystemUtil.getOsArch()).thenReturn("amd64");
 
         // execution
         semuxCLI.startKernel();

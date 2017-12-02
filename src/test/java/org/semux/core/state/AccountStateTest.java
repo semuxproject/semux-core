@@ -13,10 +13,12 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.semux.config.Constants;
+import org.semux.config.DevNetConfig;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis.Premine;
-import org.semux.db.MemoryDB;
+import org.semux.db.MemoryDB.MemoryDBFactory;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
@@ -27,7 +29,7 @@ public class AccountStateTest {
 
     @Before
     public void setup() {
-        chain = new BlockchainImpl(MemoryDB.FACTORY);
+        chain = new BlockchainImpl(new DevNetConfig(Constants.DEFAULT_DATA_DIR), new MemoryDBFactory());
         state = chain.getAccountState();
     }
 

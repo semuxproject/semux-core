@@ -30,7 +30,6 @@ import org.semux.crypto.Hex;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.Peer;
-import org.semux.net.PeerClient;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
@@ -42,12 +41,13 @@ import io.netty.handler.codec.http.HttpHeaders;
  */
 public class ApiHandlerImpl implements ApiHandler {
 
+    private Kernel kernel;
+
     private Wallet wallet;
     private Blockchain chain;
     private ChannelManager channelMgr;
     private PendingManager pendingMgr;
     private NodeManager nodeMgr;
-    private PeerClient client;
 
     private Config config;
 
@@ -57,12 +57,12 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param kernel
      */
     public ApiHandlerImpl(Kernel kernel) {
+        this.kernel = kernel;
         this.wallet = kernel.getWallet();
         this.chain = kernel.getBlockchain();
         this.channelMgr = kernel.getChannelManager();
         this.pendingMgr = kernel.getPendingManager();
         this.nodeMgr = kernel.getNodeManager();
-        this.client = kernel.getClient();
 
         this.config = kernel.getConfig();
     }
@@ -83,7 +83,7 @@ public class ApiHandlerImpl implements ApiHandler {
             case GET_INFO: {
                 JSONObject obj = new JSONObject();
                 obj.put("clientId", config.getClientId());
-                obj.put("coinbase", Hex.PREF + client.getCoinbase());
+                obj.put("coinbase", Hex.PREF + kernel.getCoinbase());
                 obj.put("latestBlockNumber", chain.getLatestBlockNumber());
                 obj.put("latestBlockHash", Hex.encodeWithPrefix(chain.getLatestBlockHash()));
                 obj.put("activePeers", channelMgr.getActivePeers().size());

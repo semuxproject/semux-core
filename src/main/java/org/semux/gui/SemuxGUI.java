@@ -56,13 +56,17 @@ public class SemuxGUI {
 
     private String dataDir = Constants.DEFAULT_DATA_DIR;
     private int coinbase = 0;
-
     private Wallet wallet;
-    private WalletModel model;
 
     private Kernel kernel;
+    private WalletModel model;
 
-    SemuxGUI() {
+    public SemuxGUI() {
+    }
+
+    public SemuxGUI(Kernel kernel, WalletModel model) {
+        this.kernel = kernel;
+        this.model = model;
     }
 
     public void start(String[] args) {

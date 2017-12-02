@@ -15,7 +15,7 @@ import java.util.Random;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.MainNetConfig;
+import org.semux.config.DevNetConfig;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB.MemoryDBFactory;
@@ -27,7 +27,7 @@ public class CorePerfomanceTest {
 
     private static final Logger logger = LoggerFactory.getLogger(CorePerfomanceTest.class);
 
-    private Config config = new MainNetConfig(Constants.DEFAULT_DATA_DIR);
+    private Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
 
     @Test
     public void testSortDelegate() {

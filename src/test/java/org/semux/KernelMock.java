@@ -10,7 +10,7 @@ import java.io.File;
 
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.MainNetConfig;
+import org.semux.config.DevNetConfig;
 import org.semux.consensus.SemuxBFT;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
@@ -24,7 +24,7 @@ import org.semux.net.PeerClient;
 public class KernelMock extends Kernel {
 
     public KernelMock() {
-        super(new MainNetConfig(Constants.DEFAULT_DATA_DIR), // config
+        super(new DevNetConfig(Constants.DEFAULT_DATA_DIR), // config
                 new Wallet(new File(Constants.DEFAULT_DATA_DIR, "wallet_test.data")), // wallet
                 new EdDSA()); // coinbase
 

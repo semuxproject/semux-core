@@ -100,6 +100,9 @@ public class Kernel {
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
 
+        // ====================================
+        // set up client
+        // ====================================
         String ip = config.p2pDeclaredIp().isPresent() ? config.p2pDeclaredIp().get() : SystemUtil.getIp();
         logger.info("Your IP address = {}", ip);
         client = new PeerClient(ip, config.p2pListenPort(), coinbase);

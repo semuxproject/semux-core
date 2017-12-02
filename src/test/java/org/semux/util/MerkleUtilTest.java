@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Test;
-import org.semux.Config;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
@@ -27,7 +26,7 @@ public class MerkleUtilTest {
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
         long value = 1 * Unit.SEM;
-        long fee = Config.MIN_TRANSACTION_FEE;
+        long fee = 0;
         long nonce = 1;
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(128);

@@ -9,7 +9,6 @@ package org.semux.net;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.semux.Config;
 import org.semux.crypto.EdDSA;
 
 public class PeerTest {
@@ -19,7 +18,7 @@ public class PeerTest {
         String ip = "127.0.0.1";
         int port = 1234;
         short p2pVersion = 2;
-        String clientId = Config.getClientId(false);
+        String clientId = "client";
         String peerId = new EdDSA().toAddressString();
         long latestBlockNumber = 1;
 

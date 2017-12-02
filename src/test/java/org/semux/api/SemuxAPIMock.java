@@ -27,9 +27,7 @@ public class SemuxAPIMock {
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public synchronized void start(String ip, int port) {
-        if (!isRunning.get()) {
-            isRunning.set(true);
-
+        if (isRunning.compareAndSet(false, true)) {
             new Thread(() -> {
                 kernel = new KernelMock();
                 kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new MemoryDBFactory()));
@@ -60,7 +58,7 @@ public class SemuxAPIMock {
     }
 
     public synchronized void stop() {
-        if (isRunning.get()) {
+        if (isRunning.compareAndSet(true, false)) {
             server.stop();
 
             long timestamp = System.currentTimeMillis();

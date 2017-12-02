@@ -12,71 +12,64 @@ import static org.junit.Assert.assertTrue;
 import java.net.InetSocketAddress;
 import java.util.Set;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semux.Config;
-import org.semux.core.Blockchain;
+import org.semux.KernelMock;
+import org.semux.config.Constants;
+import org.semux.consensus.SemuxBFT;
+import org.semux.consensus.SemuxSync;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB;
+import org.semux.db.MemoryDB.MemoryDBFactory;
 
 public class NodeManagerTest {
 
-    private static byte network;
-
-    @BeforeClass
-    public static void setup() {
-        network = Config.NETWORK_ID;
-        Config.NETWORK_ID = 2;
-    }
+    private static final String P2P_IP = "127.0.0.1";
+    private static final int P2P_PORT = 15161;
 
     @Test
     public void testGetSeedNodes() {
         // Seed nodes for main net
-        Set<InetSocketAddress> peers = NodeManager.getSeedNodes((short) 0);
+        Set<InetSocketAddress> peers = NodeManager.getSeedNodes(Constants.MAIN_NET_ID);
         assertFalse(peers.isEmpty());
 
         // Seed nodes for test net
-        peers = NodeManager.getSeedNodes((short) 1);
+        peers = NodeManager.getSeedNodes(Constants.TEST_NET_ID);
         assertFalse(peers.isEmpty());
 
         // Seed nodes for dev net
-        peers = NodeManager.getSeedNodes((short) 2);
+        peers = NodeManager.getSeedNodes(Constants.DEV_NET_ID);
         assertTrue(peers.isEmpty());
     }
 
     @Test
     public void testConnect() throws InterruptedException {
-        EdDSA key = new EdDSA();
-        PeerClient remoteClient = new PeerClient("127.0.0.1", 5161, key);
-
         // start server
         PeerServerMock ps = new PeerServerMock();
-        ps.start(remoteClient, true);
+        ps.start(P2P_IP, P2P_PORT);
 
         try {
-            PeerClient client = new PeerClient("127.0.0.1", 5162, new EdDSA());
+            EdDSA key = new EdDSA();
+            PeerClient client = new PeerClient(P2P_IP, P2P_PORT + 1, key);
 
-            Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
-            ChannelManager channelMgr = new ChannelManager();
-            PendingManager pendingMgr = new PendingManager(chain, channelMgr);
-            NodeManager nodeMgr = new NodeManager(chain, channelMgr, pendingMgr, client);
+            KernelMock kernel = new KernelMock();
+            kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new MemoryDBFactory()));
+            kernel.setClient(client);
+            kernel.setChannelManager(new ChannelManager());
+            kernel.setPendingManager(new PendingManager(kernel));
+            kernel.setNodeManager(new NodeManager(kernel));
+            kernel.setConsensus(new SemuxBFT(kernel));
+            kernel.setSyncManager(new SemuxSync(kernel));
+
+            NodeManager nodeMgr = kernel.getNodeManager();
             nodeMgr.start();
-
-            nodeMgr.addNode(new InetSocketAddress(remoteClient.getIp(), remoteClient.getPort()));
+            nodeMgr.addNode(new InetSocketAddress(P2P_IP, P2P_PORT));
             nodeMgr.doConnect();
 
             Thread.sleep(500);
-            assertFalse(channelMgr.getActivePeers().isEmpty());
+            assertFalse(kernel.getChannelManager().getActivePeers().isEmpty());
         } finally {
             ps.stop();
         }
-    }
-
-    @AfterClass
-    public static void teardown() {
-        Config.NETWORK_ID = network;
     }
 }

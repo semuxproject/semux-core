@@ -51,7 +51,7 @@ import org.semux.util.MerkleUtil;
 public class ApiHandlerTest {
 
     private static final String API_IP = "127.0.0.1";
-    private static final int API_PORT = 5172;
+    private static final int API_PORT = 15171;
 
     private static SemuxAPIMock api;
 

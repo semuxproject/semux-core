@@ -15,7 +15,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 import org.semux.config.Constants;
-import org.semux.config.MainNetConfig;
+import org.semux.config.DevNetConfig;
 import org.semux.core.Unit;
 import org.semux.util.ApiUtil;
 import org.semux.util.Bytes;
@@ -30,7 +30,7 @@ public class SemuxPerformance {
     private static int tps = 500;
 
     public static void testTransfer(int n) throws IOException, InterruptedException {
-        MainNetConfig config = new MainNetConfig(Constants.DEFAULT_DATA_DIR);
+        DevNetConfig config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
 
         long t1 = System.currentTimeMillis();
         for (int i = 1; i <= n; i++) {

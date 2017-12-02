@@ -66,7 +66,7 @@ public class PeerServer {
             b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Constants.DEFAULT_CONNECT_TIMEOUT);
 
             b.handler(new LoggingHandler());
-            b.childHandler(new SemuxChannelInitializer(kernel, null, false));
+            b.childHandler(new SemuxChannelInitializer(kernel, null));
 
             logger.info("Starting peer server: address = {}:{}", ip, port);
             channelFuture = b.bind(ip, port).sync();

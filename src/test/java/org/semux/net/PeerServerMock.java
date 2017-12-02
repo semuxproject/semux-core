@@ -6,34 +6,40 @@
  */
 package org.semux.net;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Assert;
-import org.semux.core.Blockchain;
+import org.semux.Kernel;
+import org.semux.KernelMock;
+import org.semux.consensus.SemuxBFT;
+import org.semux.consensus.SemuxSync;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
-import org.semux.db.MemoryDB;
+import org.semux.db.MemoryDB.MemoryDBFactory;
 
 public class PeerServerMock {
 
+    private KernelMock kernel;
     private PeerServer server;
 
-    private volatile boolean isRunning;
+    private AtomicBoolean isRunning = new AtomicBoolean(false);
 
-    public synchronized void start(PeerClient client, boolean isDiscoveryMode) {
-        if (!isRunning) {
-            isRunning = true;
-
+    public synchronized void start(String ip, int port) {
+        if (isRunning.compareAndSet(false, true)) {
             new Thread(() -> {
-                Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
-                ChannelManager channelMgr = new ChannelManager();
-                PendingManager pendingMgr = new PendingManager(chain, channelMgr);
-                NodeManager nodeMgr = new NodeManager(chain, channelMgr, pendingMgr, client);
-                SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, pendingMgr, nodeMgr, client,
-                        null);
+                kernel = new KernelMock();
 
-                ci.setDiscoveryMode(isDiscoveryMode);
+                kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new MemoryDBFactory()));
+                kernel.setClient(new PeerClient(ip, port, kernel.getCoinbase()));
+                kernel.setChannelManager(new ChannelManager());
+                kernel.setPendingManager(new PendingManager(kernel));
+                kernel.setNodeManager(new NodeManager(kernel));
 
-                server = new PeerServer(ci);
-                server.start(client.getIp(), client.getPort());
+                kernel.setConsensus(new SemuxBFT(kernel));
+                kernel.setSyncManager(new SemuxSync(kernel));
+
+                server = new PeerServer(kernel);
+                server.start(ip, port);
             }, "p2p-server").start();
 
             long timestamp = System.currentTimeMillis();
@@ -54,7 +60,7 @@ public class PeerServerMock {
     }
 
     public synchronized void stop() {
-        if (isRunning) {
+        if (isRunning.compareAndSet(true, false)) {
             server.stop();
 
             long timestamp = System.currentTimeMillis();
@@ -72,6 +78,10 @@ public class PeerServerMock {
 
             Assert.fail("Failed to stop server");
         }
+    }
+
+    public Kernel getKernel() {
+        return kernel;
     }
 
     public PeerServer getServer() {

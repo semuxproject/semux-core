@@ -184,7 +184,7 @@ public class NodeManager {
                     && !activeAddresses.contains(addr) //
                     && (l == null || l + RECONNECT_WAIT < now)) {
 
-                SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, addr, false);
+                SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, addr);
                 client.connectAsync(addr, ci);
                 lastConnect.put(addr, now);
                 break;

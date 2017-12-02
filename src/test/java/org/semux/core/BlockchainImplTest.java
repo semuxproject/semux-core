@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.MainNetConfig;
+import org.semux.config.DevNetConfig;
 import org.semux.core.BlockchainImpl.StatsType;
 import org.semux.crypto.EdDSA;
 import org.semux.db.MemoryDB.MemoryDBFactory;
@@ -50,7 +50,7 @@ public class BlockchainImplTest {
 
     @Before
     public void setup() {
-        config = new MainNetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
         chain = new BlockchainImpl(config, new MemoryDBFactory());
     }
 

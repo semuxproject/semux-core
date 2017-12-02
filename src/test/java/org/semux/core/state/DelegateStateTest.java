@@ -18,11 +18,13 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.semux.config.Constants;
+import org.semux.config.DevNetConfig;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Unit;
 import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB;
+import org.semux.db.MemoryDB.MemoryDBFactory;
 import org.semux.util.Bytes;
 
 public class DelegateStateTest {
@@ -33,7 +35,7 @@ public class DelegateStateTest {
 
     @Before
     public void init() {
-        chain = new BlockchainImpl(MemoryDB.FACTORY);
+        chain = new BlockchainImpl(new DevNetConfig(Constants.DEFAULT_DATA_DIR), new MemoryDBFactory());
         ds = chain.getDelegateState();
         delegates = chain.getGenesis().getDelegates();
     }

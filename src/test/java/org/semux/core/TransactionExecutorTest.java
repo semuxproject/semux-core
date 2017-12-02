@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.MainNetConfig;
+import org.semux.config.DevNetConfig;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
@@ -32,7 +32,7 @@ public class TransactionExecutorTest {
 
     @Before
     public void prepare() {
-        config = new MainNetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
         chain = new BlockchainImpl(config, new MemoryDBFactory());
         as = chain.getAccountState();
         ds = chain.getDelegateState();

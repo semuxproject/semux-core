@@ -19,14 +19,14 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.semux.util.SystemUtil;
-import org.semux.util.SystemUtil.OS;
+import org.semux.util.SystemUtil.OsName;
 
 @Category(org.semux.windows.WindowsIntegrationTest.class)
 public class Launch4jWrapperIT {
 
     @Test
     public void testLaunch4jWrapper() throws IOException, InterruptedException {
-        assumeTrue(SystemUtil.getOs() == OS.WINDOWS);
+        assumeTrue(SystemUtil.getOsName() == OsName.WINDOWS);
 
         Path prefix = Paths.get(System.getProperty("user.dir"), "dist", "windows");
         Path semuxExePath = Paths.get(prefix.toString(), "semux.exe");

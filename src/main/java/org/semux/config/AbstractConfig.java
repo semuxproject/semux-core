@@ -11,13 +11,17 @@ import java.io.FileInputStream;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
 import org.semux.core.Unit;
+import org.semux.crypto.Hash;
 import org.semux.net.msg.MessageCode;
+import org.semux.util.Bytes;
 import org.semux.util.StringUtil;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +34,10 @@ public abstract class AbstractConfig implements Config {
     // =========================
     // General
     // =========================
-    protected File dataDir = null;
-    protected byte networkId = Constants.DEV_NET_ID;
-    protected short networkVersion = 4;
+    protected File dataDir;
+    protected byte networkId;
+    protected short networkVersion;
+
     protected int maxBlockSize = 5000;
     protected long minTransactionFee = 50L * Unit.MILLI_SEM;
     protected long minDelegateFee = 1000L * Unit.SEM;
@@ -89,7 +94,51 @@ public abstract class AbstractConfig implements Config {
     protected int vmMaxStackSize = 1024;
     protected int vmInitHeapSize = 128;
 
-    protected AbstractConfig(String dataDir) {
+    @Override
+    public long getBlockReward(long number) {
+        if (number <= 75_000_000L) {
+            return 1 * Unit.SEM;
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public long getValidatorUpdateInterval() {
+        return 64L * 2L;
+    }
+
+    @Override
+    public int getNumberOfValidators(long number) {
+        long step = 2 * 60 * 2;
+
+        if (number < 48 * step) {
+            return (int) (16 + number / step);
+        } else {
+            return 64;
+        }
+    }
+
+    @Override
+    public String getPrimaryValidator(List<String> validators, long height, int view) {
+        byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
+        return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
+    }
+
+    @Override
+    public String getClientId() {
+        return String.format("%s/v%s/%s/%s", Constants.CLIENT_NAME, Constants.CLIENT_VERSION,
+                SystemUtil.getOsName().toString(), SystemUtil.getOsArch());
+    }
+
+    /**
+     * Create an {@link AbstractConfig} instance.
+     * 
+     * @param dataDir
+     * @param networkId
+     * @param networkVersion
+     */
+    protected AbstractConfig(String dataDir, byte networkId, short networkVersion) {
         this.dataDir = new File(dataDir);
 
         init();
@@ -106,10 +155,6 @@ public abstract class AbstractConfig implements Config {
                 String name = (String) k;
 
                 switch (name) {
-                case "networkId":
-                    networkId = Byte.parseByte(props.getProperty(name));
-                    break;
-
                 case "p2p.declaredIp":
                     p2pDeclaredIp = props.getProperty(name);
                     break;

@@ -6,7 +6,9 @@
  */
 package org.semux.gui.panel;
 
+import org.semux.KernelMock;
 import org.semux.gui.BaseTestApplication;
+import org.semux.gui.SemuxGUI;
 import org.semux.gui.model.WalletModel;
 
 public class DelegatePanelTestApplication extends BaseTestApplication {
@@ -17,7 +19,8 @@ public class DelegatePanelTestApplication extends BaseTestApplication {
 
     DelegatePanelTestApplication(WalletModel walletModel) {
         super();
-        delegatesPanel = new DelegatesPanel(this, walletModel);
+        SemuxGUI gui = new SemuxGUI(new KernelMock(), new WalletModel(null));
+        delegatesPanel = new DelegatesPanel(gui, this);
         getContentPane().add(delegatesPanel);
     }
 }

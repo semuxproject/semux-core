@@ -120,5 +120,7 @@ public class CorePerformance {
         Block block = testBlockCreation();
         testBlockValidation(block);
         testTransactionValidation();
+
+        System.exit(0);
     }
 }
