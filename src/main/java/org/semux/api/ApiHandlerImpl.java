@@ -62,7 +62,7 @@ public class ApiHandlerImpl implements ApiHandler {
         this.channelMgr = kernel.getChannelManager();
         this.pendingMgr = kernel.getPendingManager();
         this.nodeMgr = kernel.getNodeManager();
-        this.client = kernel.getPeerClient();
+        this.client = kernel.getClient();
 
         this.config = kernel.getConfig();
     }

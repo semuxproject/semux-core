@@ -91,7 +91,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         this.pendingMgr = kernel.getPendingManager();
         this.channelMgr = kernel.getChannelManager();
         this.nodeMgr = kernel.getNodeManager();
-        this.client = kernel.getPeerClient();
+        this.client = kernel.getClient();
 
         this.sync = kernel.getSyncManager();
         this.consenus = kernel.getConsensus();

@@ -19,7 +19,6 @@ import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
 import org.semux.api.SemuxAPI;
 import org.semux.config.Config;
-import org.semux.config.MainNetConfig;
 import org.semux.consensus.SemuxBFT;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
@@ -47,40 +46,39 @@ import org.xml.sax.SAXException;
  * Kernel holds references to each individual components.
  */
 public class Kernel {
-    private static final Logger logger = LoggerFactory.getLogger(Kernel.class);
+    protected static final Logger logger = LoggerFactory.getLogger(Kernel.class);
 
-    private AtomicBoolean isRunning = new AtomicBoolean(false);
-    private ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
-    private Config config = null;
+    protected AtomicBoolean isRunning = new AtomicBoolean(false);
+    protected ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
+    protected Config config = null;
 
-    private Wallet wallet;
-    private EdDSA coinbase;
+    protected Wallet wallet;
+    protected EdDSA coinbase;
 
-    private Blockchain chain;
-    private PeerClient client;
+    protected Blockchain chain;
+    protected PeerClient client;
 
-    private PendingManager pendingMgr;
-    private ChannelManager channelMgr;
-    private NodeManager nodeMgr;
+    protected PendingManager pendingMgr;
+    protected ChannelManager channelMgr;
+    protected NodeManager nodeMgr;
 
-    private SemuxSync sync;
-    private SemuxBFT cons;
+    protected SemuxSync sync;
+    protected SemuxBFT cons;
 
     /**
      * Creates a kernel instance and initializes it.
      * 
-     * @param dataDir
-     *            work directory
+     * @param config
+     *            the config instance
      * @param wallet
-     *            wallet instance
+     *            the wallet instance
      * @param coinbase
-     *            coinbase account
+     *            the coinbase key
      */
-    public Kernel(String dataDir, Wallet wallet, int coinbase) {
-        this.config = new MainNetConfig(dataDir);
-
+    public Kernel(Config config, Wallet wallet, EdDSA coinbase) {
+        this.config = config;
         this.wallet = wallet;
-        this.coinbase = wallet.getAccounts().get(coinbase);
+        this.coinbase = coinbase;
     }
 
     /**
@@ -257,7 +255,7 @@ public class Kernel {
      * 
      * @return
      */
-    public PeerClient getPeerClient() {
+    public PeerClient getClient() {
         return client;
     }
 

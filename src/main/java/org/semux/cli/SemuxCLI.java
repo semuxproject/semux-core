@@ -19,6 +19,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
 import org.semux.config.Constants;
+import org.semux.config.MainNetConfig;
 import org.semux.core.Wallet;
 import org.semux.core.WalletLockedException;
 import org.semux.crypto.EdDSA;
@@ -160,7 +161,7 @@ public class SemuxCLI {
         }
 
         // start kernel
-        Kernel kernel = new Kernel(dataDir, wallet, coinbase);
+        Kernel kernel = new Kernel(new MainNetConfig(dataDir), wallet, wallet.getAccount(coinbase));
         kernel.start();
     }
 

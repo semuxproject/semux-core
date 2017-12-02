@@ -20,6 +20,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import org.semux.Kernel;
 import org.semux.config.Constants;
+import org.semux.config.MainNetConfig;
 import org.semux.core.AddressBook;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
@@ -118,7 +119,7 @@ public class SemuxGUI {
         }
 
         // start kernel
-        Kernel kernel = new Kernel(dataDir, wallet, coinbase);
+        Kernel kernel = new Kernel(new MainNetConfig(dataDir), wallet, wallet.getAccount(coinbase));
         kernel.start();
         onBlockAdded(kernel.getBlockchain().getLatestBlock());
 

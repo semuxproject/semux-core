@@ -70,7 +70,7 @@ public class NodeManager {
     public NodeManager(Kernel kernel) {
         this.kernel = kernel;
         this.channelMgr = kernel.getChannelManager();
-        this.client = kernel.getPeerClient();
+        this.client = kernel.getClient();
 
         this.queue = new ConcurrentLinkedQueue<>();
         this.lastConnect = new LRUMap<>(LRU_CACHE_SIZE);

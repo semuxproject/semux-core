@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.semux.core.Unit;
 import org.semux.net.msg.MessageCode;
+import org.semux.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -203,7 +204,7 @@ public abstract class AbstractConfig implements Config {
 
     @Override
     public Optional<String> p2pDeclaredIp() {
-        return Optional.ofNullable(p2pDeclaredIp);
+        return StringUtil.isNullOrEmpty(p2pDeclaredIp) ? Optional.empty() : Optional.of(p2pDeclaredIp);
     }
 
     @Override
