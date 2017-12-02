@@ -19,7 +19,6 @@ import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 public class ApiUtil {
     private InetSocketAddress server;
