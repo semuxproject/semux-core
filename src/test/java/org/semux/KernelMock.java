@@ -34,7 +34,7 @@ public class KernelMock extends Kernel {
         }
     }
 
-    public void setBlokchain(Blockchain chain) {
+    public void setBlockchain(Blockchain chain) {
         this.chain = chain;
     }
 

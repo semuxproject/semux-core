@@ -26,7 +26,7 @@ public class Launch4jWrapperIT {
 
     @Test
     public void testLaunch4jWrapper() throws IOException, InterruptedException {
-        assumeTrue(SystemUtil.getOS() == OS.WINDOWS);
+        assumeTrue(SystemUtil.getOs() == OS.WINDOWS);
 
         Path prefix = Paths.get(System.getProperty("user.dir"), "dist", "windows");
         Path semuxExePath = Paths.get(prefix.toString(), "semux.exe");

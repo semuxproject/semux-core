@@ -17,14 +17,21 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.semux.config.Config;
+import org.semux.config.Constants;
+import org.semux.config.MainNetConfig;
 import org.semux.core.BlockchainImpl.StatsType;
 import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB;
+import org.semux.db.MemoryDB.MemoryDBFactory;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
 public class BlockchainImplTest {
+
+    private Config config;
+    private BlockchainImpl chain;
 
     private byte[] coinbase = Bytes.random(30);
     private byte[] prevHash = Bytes.random(32);
@@ -41,10 +48,14 @@ public class BlockchainImplTest {
             .sign(key);
     private TransactionResult res = new TransactionResult(true);
 
+    @Before
+    public void setup() {
+        config = new MainNetConfig(Constants.DEFAULT_DATA_DIR);
+        chain = new BlockchainImpl(config, new MemoryDBFactory());
+    }
+
     @Test
     public void testGetLatestBlock() {
-        Blockchain chain = createBlockchain();
-
         assertEquals(0, chain.getLatestBlockNumber());
         assertNotNull(chain.getLatestBlockHash());
         assertNotNull(chain.getLatestBlock());
@@ -58,8 +69,6 @@ public class BlockchainImplTest {
 
     @Test
     public void testGetLatestBlockHash() {
-        Blockchain chain = createBlockchain();
-
         Block newBlock = createBlock(1);
         chain.addBlock(newBlock);
 
@@ -69,8 +78,6 @@ public class BlockchainImplTest {
 
     @Test
     public void testGetBlock() {
-        Blockchain chain = createBlockchain();
-
         assertEquals(0, chain.getBlock(0).getNumber());
         assertNull(chain.getBlock(1));
 
@@ -84,8 +91,6 @@ public class BlockchainImplTest {
 
     @Test
     public void testGetBlockNumber() {
-        Blockchain chain = createBlockchain();
-
         long number = 1;
         Block newBlock = createBlock(number);
         chain.addBlock(newBlock);
@@ -95,16 +100,12 @@ public class BlockchainImplTest {
 
     @Test
     public void testGetGenesis() {
-        Blockchain chain = createBlockchain();
-
-        assertArrayEquals(Genesis.getInstance().getHash(), chain.getGenesis().getHash());
+        assertArrayEquals(Genesis.load(config.dataDir()).getHash(), chain.getGenesis().getHash());
     }
 
     @Test
     public void testGetBlockHeader() {
-        Blockchain chain = createBlockchain();
-
-        assertArrayEquals(Genesis.getInstance().getHash(), chain.getBlockHeader(0).getHash());
+        assertArrayEquals(Genesis.load(config.dataDir()).getHash(), chain.getBlockHeader(0).getHash());
 
         long number = 1;
         Block newBlock = createBlock(number);
@@ -116,8 +117,6 @@ public class BlockchainImplTest {
 
     @Test
     public void testGetTransaction() {
-        Blockchain chain = createBlockchain();
-
         assertNull(chain.getTransaction(tx.getHash()));
 
         Block newBlock = createBlock(1);
@@ -135,8 +134,6 @@ public class BlockchainImplTest {
 
     @Test
     public void testGetTransactionResult() {
-        Blockchain chain = createBlockchain();
-
         assertNull(chain.getTransaction(tx.getHash()));
 
         Block newBlock = createBlock(1);
@@ -148,8 +145,6 @@ public class BlockchainImplTest {
 
     @Test
     public void testGetTransactionBlockNumber() {
-        Blockchain chain = createBlockchain();
-
         Block newBlock = createBlock(1);
         chain.addBlock(newBlock);
 
@@ -158,8 +153,6 @@ public class BlockchainImplTest {
 
     @Test
     public void testGetTransactionCount() {
-        Blockchain chain = createBlockchain();
-
         assertNull(chain.getTransaction(tx.getHash()));
 
         Block newBlock = createBlock(1);
@@ -170,8 +163,6 @@ public class BlockchainImplTest {
 
     @Test
     public void testGetAccountTransactions() {
-        Blockchain chain = createBlockchain();
-
         assertNull(chain.getTransaction(tx.getHash()));
 
         Block newBlock = createBlock(1);
@@ -199,7 +190,6 @@ public class BlockchainImplTest {
     @Test
     public void testGetTransactions() {
         Block block = createBlock(1);
-        Blockchain chain = createBlockchain();
         chain.addBlock(block);
 
         List<Transaction> list = chain.getTransactions(from, 0, 1024);
@@ -213,7 +203,6 @@ public class BlockchainImplTest {
 
     @Test
     public void testValidatorStates() {
-        BlockchainImpl chain = createBlockchain();
         byte[] address = Bytes.random(20);
 
         assertEquals(0, chain.getValidatorStats(address).getBlocksForged());
@@ -230,10 +219,6 @@ public class BlockchainImplTest {
         assertEquals(1, chain.getValidatorStats(address).getTurnsMissed());
         chain.adjustValidatorStats(address, StatsType.MISSED, 1);
         assertEquals(2, chain.getValidatorStats(address).getTurnsMissed());
-    }
-
-    private BlockchainImpl createBlockchain() {
-        return new BlockchainImpl(MemoryDB.FACTORY);
     }
 
     private Block createBlock(long number) {

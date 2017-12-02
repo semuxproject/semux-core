@@ -55,7 +55,7 @@ public class SystemUtil {
      * 
      * @return
      */
-    public static OS getOS() {
+    public static OS getOs() {
         String os = System.getProperty("os.name").toLowerCase();
 
         if (os.contains("win")) {
@@ -74,7 +74,7 @@ public class SystemUtil {
      * 
      * @return
      */
-    public static String getOSArch() {
+    public static String getArch() {
         return System.getProperty("os.arch");
     }
 

@@ -4,12 +4,13 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.gui.model;
+package org.semux.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +19,7 @@ import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import org.semux.gui.model.AddressBook.Entry;
+import org.semux.core.AddressBook.Entry;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AdressBookTest {
@@ -32,7 +33,7 @@ public class AdressBookTest {
 
     @Before
     public void setup() {
-        ab = new AddressBook();
+        ab = new AddressBook(new File("addressbook.json"));
     }
 
     @Test

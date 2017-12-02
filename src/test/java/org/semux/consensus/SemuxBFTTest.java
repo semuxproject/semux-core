@@ -17,18 +17,17 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semux.KernelMock;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
-import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
-import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hash;
-import org.semux.db.MemoryDB;
+import org.semux.db.MemoryDB.MemoryDBFactory;
 import org.semux.net.ChannelManager;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
@@ -40,30 +39,29 @@ public class SemuxBFTTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxBFTTest.class);
 
-    private static Blockchain chain;
+    private static KernelMock kernel;
     private static SemuxBFT bft;
-    private static EdDSA coinbase;
 
     @BeforeClass
     public static void setup() throws InterruptedException {
-        chain = new BlockchainImpl(MemoryDB.FACTORY);
-        ChannelManager channelMgr = new ChannelManager();
-        PendingManager pendingMgr = new PendingManager(chain, channelMgr);
+        kernel = new KernelMock();
 
-        pendingMgr.start();
+        kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new MemoryDBFactory()));
+        kernel.setChannelManager(new ChannelManager());
+        kernel.setPendingManager(new PendingManager(kernel));
 
-        bft = SemuxBFT.getInstance();
-        coinbase = new EdDSA();
-        bft.init(chain, channelMgr, pendingMgr, coinbase);
+        kernel.setSyncManager(new SemuxSync(kernel));
+        kernel.setConsensus(bft = new SemuxBFT(kernel));
 
-        new Thread(() -> bft.start(), "cons").start();
+        kernel.getPendingManager().start();
 
+        new Thread(() -> kernel.getConsensus().start(), "cons").start();
         Thread.sleep(200);
     }
 
     @Test
     public void testStart() {
-        Assert.assertTrue(bft.isRunning());
+        Assert.assertTrue(kernel.getConsensus().isRunning());
     }
 
     @Test
@@ -76,7 +74,7 @@ public class SemuxBFTTest {
 
         long number = 1;
         byte[] coinbase = key1.toAddress();
-        byte[] prevHash = Genesis.getInstance().getHash();
+        byte[] prevHash = kernel.getBlockchain().getGenesis().getHash();
         long timestamp = System.currentTimeMillis();
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
@@ -110,7 +108,7 @@ public class SemuxBFTTest {
 
     @Test
     public void testIsPrimary() {
-        List<String> validators = chain.getValidators();
+        List<String> validators = kernel.getBlockchain().getValidators();
         int blocks = 1000;
         int repeat = 0;
         int last = -1;

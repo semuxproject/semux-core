@@ -78,6 +78,16 @@ public class Constants {
      */
     public static final int DEFAULT_READ_TIMEOUT = 4000;
 
+    /**
+     * The number of blocks per day.
+     */
+    public static final long BLOCKS_PER_DAY = 2 * 60 * 24;
+
+    /**
+     * The number of blocks per year.
+     */
+    public static final long BLOCKS_PER_YEAR = 2 * 60 * 24 * 365;
+
     private Constants() {
     }
 }

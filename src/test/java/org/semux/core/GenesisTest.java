@@ -10,10 +10,13 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.semux.config.Constants;
 import org.semux.core.Genesis.Premine;
 import org.semux.crypto.Hex;
 import org.semux.util.ByteArray;
@@ -24,19 +27,20 @@ public class GenesisTest {
     private static byte[] ZERO_ADDRESS = Hex.decode("0000000000000000000000000000000000000000");
     private static byte[] ZERO_HASH = Bytes.EMPTY_HASH;
 
-    Genesis genesis = Genesis.getInstance();
+    Genesis genesis;
+
+    @Before
+    public void setup() {
+        genesis = Genesis.load(new File(Constants.DEFAULT_DATA_DIR));
+    }
 
     @Test
     public void testIsGenesis() {
-        Genesis genesis = Genesis.getInstance();
-
         assertTrue(genesis.getNumber() == 0);
     }
 
     @Test
     public void testBlock() {
-        Genesis genesis = Genesis.getInstance();
-
         assertTrue(genesis.getNumber() == 0);
         assertArrayEquals(ZERO_ADDRESS, genesis.getCoinbase());
         assertArrayEquals(ZERO_HASH, genesis.getPrevHash());
@@ -46,7 +50,6 @@ public class GenesisTest {
 
     @Test
     public void testPremines() {
-        Genesis genesis = Genesis.getInstance();
         Map<ByteArray, Premine> premine = genesis.getPremines();
 
         assertFalse(premine.isEmpty());
@@ -57,7 +60,6 @@ public class GenesisTest {
 
     @Test
     public void testDelegates() {
-        Genesis genesis = Genesis.getInstance();
         Map<String, byte[]> delegates = genesis.getDelegates();
 
         assertFalse(delegates.isEmpty());
@@ -68,8 +70,6 @@ public class GenesisTest {
 
     @Test
     public void testConfig() {
-        Genesis genesis = Genesis.getInstance();
-
         assertTrue(genesis.getConfig().isEmpty());
     }
 }

@@ -36,7 +36,7 @@ public abstract class AbstractConfig implements Config {
     protected int maxBlockSize = 5000;
     protected long minTransactionFee = 50L * Unit.MILLI_SEM;
     protected long minDelegateFee = 1000L * Unit.SEM;
-    protected long mandatoryUpgrade = 2L * 60L * 24L * 60L;
+    protected long mandatoryUpgrade = Constants.BLOCKS_PER_DAY * 60L;
 
     // =========================
     // P2P

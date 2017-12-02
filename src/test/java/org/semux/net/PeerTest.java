@@ -28,7 +28,7 @@ public class PeerTest {
 
         assertEquals(ip, peer.getIp());
         assertEquals(port, peer.getPort());
-        assertEquals(p2pVersion, peer.getP2pVersion());
+        assertEquals(p2pVersion, peer.getNetworkVersion());
         assertEquals(clientId, peer.getClientId());
         assertEquals(peerId, peer.getPeerId());
         assertEquals(latestBlockNumber, peer.getLatestBlockNumber());

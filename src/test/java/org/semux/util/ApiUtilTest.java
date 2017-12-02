@@ -18,7 +18,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semux.Config;
-import org.semux.api.APIServerMock;
+import org.semux.api.SemuxAPIMock;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 
@@ -27,7 +27,7 @@ public class ApiUtilTest {
     private static String password = "password";
 
     private static Wallet wallet;
-    private static APIServerMock api;
+    private static SemuxAPIMock api;
 
     @BeforeClass
     public static void setup() {
@@ -37,7 +37,7 @@ public class ApiUtilTest {
         wallet.unlock(password);
         wallet.addAccount(new EdDSA());
 
-        api = new APIServerMock();
+        api = new SemuxAPIMock();
         api.start(wallet, Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
     }
 

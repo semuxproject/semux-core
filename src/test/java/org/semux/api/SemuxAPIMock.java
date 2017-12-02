@@ -14,7 +14,7 @@ import org.semux.KernelMock;
 import org.semux.config.Constants;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
-import org.semux.db.MemoryDB;
+import org.semux.db.MemoryDB.MemoryDBFactory;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
@@ -32,7 +32,7 @@ public class SemuxAPIMock {
 
             new Thread(() -> {
                 kernel = new KernelMock();
-                kernel.setBlokchain(new BlockchainImpl(kernel.getConfig(), MemoryDB.FACTORY));
+                kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new MemoryDBFactory()));
                 kernel.setChannelManager(new ChannelManager());
                 kernel.setPendingManager(new PendingManager(kernel));
                 kernel.setClient(new PeerClient("127.0.0.1", Constants.DEFAULT_P2P_PORT, kernel.getCoinbase()));

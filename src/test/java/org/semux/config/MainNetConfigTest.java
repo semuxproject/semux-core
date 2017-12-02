@@ -38,7 +38,7 @@ public class MainNetConfigTest {
     @Test
     public void testNumberOfValidators() {
         int last = 0;
-        for (int i = 0; i < 2 * 60 * 24 * 60; i++) {
+        for (int i = 0; i < 60 * Constants.BLOCKS_PER_DAY; i++) {
             int n = config.getNumberOfValidators(i);
             if (n != last) {
                 assertTrue(n > last && (n - last == 1 || last == 0));

@@ -59,7 +59,7 @@ public class WrapperTest {
 
     @Test
     public void testMain() throws Exception {
-        assumeTrue(SystemUtil.getOS() != SystemUtil.OS.WINDOWS);
+        assumeTrue(SystemUtil.getOs() != SystemUtil.OS.WINDOWS);
 
         // mock ProcessBuilder & Process
         ProcessBuilder processBuilderMock = mock(ProcessBuilder.class);

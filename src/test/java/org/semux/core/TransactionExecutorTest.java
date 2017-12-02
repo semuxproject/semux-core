@@ -13,15 +13,18 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.semux.Config;
+import org.semux.config.Config;
+import org.semux.config.Constants;
+import org.semux.config.MainNetConfig;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB;
+import org.semux.db.MemoryDB.MemoryDBFactory;
 import org.semux.util.Bytes;
 
 public class TransactionExecutorTest {
 
+    private Config config;
     private Blockchain chain;
     private AccountState as;
     private DelegateState ds;
@@ -29,10 +32,11 @@ public class TransactionExecutorTest {
 
     @Before
     public void prepare() {
-        chain = new BlockchainImpl(MemoryDB.FACTORY);
+        config = new MainNetConfig(Constants.DEFAULT_DATA_DIR);
+        chain = new BlockchainImpl(config, new MemoryDBFactory());
         as = chain.getAccountState();
         ds = chain.getDelegateState();
-        exec = new TransactionExecutor();
+        exec = new TransactionExecutor(config);
     }
 
     private TransactionResult executeAndCommit(TransactionExecutor exec, Transaction tx, AccountState as,
@@ -52,7 +56,7 @@ public class TransactionExecutorTest {
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
         long value = 5;
-        long fee = Config.MIN_TRANSACTION_FEE;
+        long fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
@@ -91,8 +95,8 @@ public class TransactionExecutorTest {
         TransactionType type = TransactionType.DELEGATE;
         byte[] from = delegate.toAddress();
         byte[] to = Bytes.random(20);
-        long value = Config.DELEGATE_BURN_AMOUNT;
-        long fee = Config.MIN_TRANSACTION_FEE;
+        long value = config.minDelegateFee();
+        long fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
@@ -112,7 +116,7 @@ public class TransactionExecutorTest {
         tx = new Transaction(type, from, value, fee, nonce, timestamp, data).sign(delegate);
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isSuccess());
-        assertEquals(available - Config.DELEGATE_BURN_AMOUNT - fee, as.getAccount(delegate.toAddress()).getAvailable());
+        assertEquals(available - config.minDelegateFee() - fee, as.getAccount(delegate.toAddress()).getAvailable());
         assertArrayEquals(delegate.toAddress(), ds.getDelegateByName(data).getAddress());
         assertArrayEquals(data, ds.getDelegateByAddress(delegate.toAddress()).getName());
     }
@@ -129,7 +133,7 @@ public class TransactionExecutorTest {
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
         long value = available / 3;
-        long fee = Config.MIN_TRANSACTION_FEE;
+        long fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
@@ -163,7 +167,7 @@ public class TransactionExecutorTest {
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
         long value = available / 3;
-        long fee = Config.MIN_TRANSACTION_FEE;
+        long fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);

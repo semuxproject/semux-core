@@ -53,6 +53,6 @@ public class MainNetConfig extends AbstractConfig {
     @Override
     public String getClientId() {
         return String.format("%s/v%s/%s/%s", Constants.CLIENT_NAME, Constants.CLIENT_VERSION,
-                SystemUtil.getOS().toString(), SystemUtil.getOSArch());
+                SystemUtil.getOs().toString(), SystemUtil.getArch());
     }
 }

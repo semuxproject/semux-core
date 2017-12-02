@@ -16,19 +16,18 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semux.Config;
+import org.semux.KernelMock;
 import org.semux.core.state.AccountState;
 import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB;
+import org.semux.db.MemoryDB.MemoryDBFactory;
 import org.semux.net.ChannelManager;
 import org.semux.util.ArrayUtil;
 import org.semux.util.Bytes;
 
 public class PendingManagerTest {
 
-    private static Blockchain chain;
+    private static KernelMock kernel;
     private static PendingManager pendingMgr;
-    private static ChannelManager channelMgr;
 
     private static AccountState accountState;
 
@@ -37,20 +36,24 @@ public class PendingManagerTest {
     private static byte[] from = key.toAddress();
     private static byte[] to = new EdDSA().toAddress();
     private static long value = 1 * Unit.MILLI_SEM;
-    private static long fee = Config.MIN_TRANSACTION_FEE;
+    private static long fee;
 
     @BeforeClass
     public static void setup() {
-        chain = new BlockchainImpl(MemoryDB.FACTORY);
-        channelMgr = new ChannelManager();
+        kernel = new KernelMock();
 
-        accountState = chain.getAccountState();
+        kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new MemoryDBFactory()));
+        kernel.setChannelManager(new ChannelManager());
+
+        accountState = kernel.getBlockchain().getAccountState();
         accountState.adjustAvailable(from, 10000 * Unit.SEM);
+
+        fee = kernel.getConfig().minTransactionFee();
     }
 
     @Before
     public void start() {
-        pendingMgr = new PendingManager(chain, channelMgr);
+        pendingMgr = new PendingManager(kernel);
         pendingMgr.start();
     }
 
@@ -141,8 +144,8 @@ public class PendingManagerTest {
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
                 stateRoot, data);
         Block block = new Block(header, transactions, results);
-        chain.getAccountState().increaseNonce(from);
-        chain.getAccountState().increaseNonce(from);
+        kernel.getBlockchain().getAccountState().increaseNonce(from);
+        kernel.getBlockchain().getAccountState().increaseNonce(from);
         pendingMgr.onBlockAdded(block);
 
         Transaction tx3 = new Transaction(type, to, value, fee, nonce + 2, now, Bytes.EMPTY_BYTES).sign(key);
