@@ -43,13 +43,16 @@ public class SemuxAPI {
         }
     };
 
-    private Kernel kernel;
+    private HttpHandler handler;
     private ChannelFuture channelFuture;
-
     private boolean listening;
 
     public SemuxAPI(Kernel kernel) {
-        this.kernel = kernel;
+        this.handler = new HttpHandler(kernel.getConfig(), new ApiHandlerImpl(kernel));
+    }
+
+    public SemuxAPI(HttpHandler handler) {
+        this.handler = handler;
     }
 
     public void start(String ip, int port) {
@@ -63,7 +66,7 @@ public class SemuxAPI {
                     ChannelPipeline p = ch.pipeline();
                     p.addLast(new HttpRequestDecoder());
                     p.addLast(new HttpResponseEncoder());
-                    p.addLast(new HttpHandler(kernel.getConfig(), new ApiHandlerImpl(kernel)));
+                    p.addLast(handler);
                 }
             };
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)

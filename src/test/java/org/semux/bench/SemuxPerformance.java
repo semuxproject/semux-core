@@ -14,14 +14,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONObject;
-import org.semux.Config;
+import org.semux.config.Constants;
+import org.semux.config.MainNetConfig;
 import org.semux.core.Unit;
 import org.semux.util.ApiUtil;
 import org.semux.util.Bytes;
 import org.semux.util.SystemUtil;
 
 public class SemuxPerformance {
-    private static InetSocketAddress server = new InetSocketAddress("localhost", 5171);
+    private static InetSocketAddress server = new InetSocketAddress("127.0.0.1", 5171);
     private static String username = "";
     private static String password = "";
 
@@ -29,13 +30,15 @@ public class SemuxPerformance {
     private static int tps = 500;
 
     public static void testTransfer(int n) throws IOException, InterruptedException {
+        MainNetConfig config = new MainNetConfig(Constants.DEFAULT_DATA_DIR);
+
         long t1 = System.currentTimeMillis();
         for (int i = 1; i <= n; i++) {
             Map<String, Object> params = new HashMap<>();
             params.put("from", address);
             params.put("to", address);
             params.put("value", 1 * Unit.MILLI_SEM);
-            params.put("fee", Config.MIN_TRANSACTION_FEE);
+            params.put("fee", config.minTransactionFee());
             params.put("data", Bytes.EMPTY_BYTES);
             params.put("password", password);
 

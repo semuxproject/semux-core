@@ -122,7 +122,7 @@ public class Kernel {
                 }
             }
         };
-        chain = new BlockchainImpl(this, dbFactory);
+        chain = new BlockchainImpl(config, dbFactory);
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
 

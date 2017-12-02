@@ -203,4 +203,14 @@ public class SystemUtil {
         SystemInfo systemInfo = new SystemInfo();
         return systemInfo.getHardware().getMemory().getAvailable();
     }
+
+    /**
+     * Returns the size of heap in use.
+     * 
+     * @return
+     */
+    public static long getUsedHeapSize() {
+        Runtime runtime = Runtime.getRuntime();
+        return runtime.totalMemory() - runtime.freeMemory();
+    }
 }

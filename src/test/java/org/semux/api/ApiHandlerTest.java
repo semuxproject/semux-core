@@ -50,8 +50,8 @@ import org.semux.util.MerkleUtil;
 
 public class ApiHandlerTest {
 
-    private static final String ip = "127.0.0.1";
-    private static final int port = 5172;
+    private static final String API_IP = "127.0.0.1";
+    private static final int API_PORT = 5172;
 
     private static SemuxAPIMock api;
 
@@ -67,7 +67,7 @@ public class ApiHandlerTest {
     @BeforeClass
     public static void setup() {
         api = new SemuxAPIMock();
-        api.start(ip, port);
+        api.start(API_IP, API_PORT);
 
         config = api.getKernel().getConfig();
         wallet = api.getKernel().getWallet();
@@ -90,7 +90,7 @@ public class ApiHandlerTest {
     }
 
     private static JSONObject request(String uri) throws IOException {
-        URL u = new URL("http://" + ip + ":" + port + uri);
+        URL u = new URL("http://" + API_IP + ":" + API_PORT + uri);
         HttpURLConnection con = (HttpURLConnection) u.openConnection();
         con.setRequestProperty("Authorization", "Basic "
                 + Base64.getEncoder().encodeToString(Bytes.of(config.apiUsername() + ":" + config.apiPassword())));

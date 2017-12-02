@@ -9,9 +9,11 @@ package org.semux.bench;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.semux.Config;
+import org.semux.Kernel;
+import org.semux.KernelMock;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
+import org.semux.core.Genesis;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
@@ -25,19 +27,20 @@ import org.slf4j.LoggerFactory;
 public class CorePerformance {
     private static final Logger logger = LoggerFactory.getLogger(CorePerformance.class);
 
-    public static Block testBlockCreation() {
-        EdDSA key = new EdDSA();
+    private static Kernel kernel = new KernelMock();
+    private static EdDSA key = kernel.getCoinbase();
 
+    public static Block testBlockCreation() {
         long t1 = System.nanoTime();
 
         List<Transaction> txs = new ArrayList<>();
         List<TransactionResult> res = new ArrayList<>();
 
-        for (int i = 0; i < Config.MAX_BLOCK_SIZE; i++) {
+        for (int i = 0; i < kernel.getConfig().maxBlockSize(); i++) {
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
             long value = 1;
-            long fee = Config.DELEGATE_BURN_AMOUNT;
+            long fee = kernel.getConfig().minTransactionFee();
             long nonce = 1 + i;
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.random(128);
@@ -62,7 +65,7 @@ public class CorePerformance {
         Block block = new Block(header, txs, res);
 
         List<Signature> votes = new ArrayList<>();
-        for (int i = 0; i < Config.getNumberOfValidators(1000000L); i++) {
+        for (int i = 0; i < kernel.getConfig().getNumberOfValidators(1000000L); i++) {
             votes.add(new EdDSA().sign(Bytes.EMPTY_BYTES));
         }
         block.setView(1);
@@ -78,9 +81,15 @@ public class CorePerformance {
     }
 
     public static void testBlockValidation(Block block) {
+        Genesis gen = Genesis.load(kernel.getConfig().dataDir());
+
         long t1 = System.nanoTime();
-        // proof validation is not counted here
+        Block.validateHeader(gen.getHeader(), block.getHeader());
+        Block.validateTransactions(gen.getHeader(), block.getTransactions());
+        Block.validateResults(gen.getHeader(), block.getResults());
+        // block votes validation skipped
         long t2 = System.nanoTime();
+
         logger.info("Perf_block_validation: {} ms", (t2 - t1) / 1_000_000);
     }
 
@@ -90,7 +99,7 @@ public class CorePerformance {
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
         long value = 1;
-        long fee = Config.DELEGATE_BURN_AMOUNT;
+        long fee = kernel.getConfig().minTransactionFee();
         long nonce = 1;
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
