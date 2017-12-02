@@ -30,9 +30,7 @@ import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.db.DBFactory;
 import org.semux.db.DBName;
-import org.semux.db.KVDB;
-import org.semux.db.LevelDB;
-import org.semux.exception.KernelException;
+import org.semux.db.LevelDB.LevelDBFactory;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
@@ -97,31 +95,7 @@ public class Kernel {
         logger.info("System booting up: network = [{}, {}], coinbase = {}", config.networkId(), config.networkVersion(),
                 coinbase);
 
-        DBFactory dbFactory = new DBFactory() {
-            private final KVDB indexDB = new LevelDB(config.dataDir(), DBName.INDEX);
-            private final KVDB blockDB = new LevelDB(config.dataDir(), DBName.BLOCK);
-            private final KVDB accountDB = new LevelDB(config.dataDir(), DBName.ACCOUNT);
-            private final KVDB delegateDB = new LevelDB(config.dataDir(), DBName.DELEGATE);
-            private final KVDB voteDB = new LevelDB(config.dataDir(), DBName.VOTE);
-
-            @Override
-            public KVDB getDB(DBName name) {
-                switch (name) {
-                case INDEX:
-                    return indexDB;
-                case BLOCK:
-                    return blockDB;
-                case ACCOUNT:
-                    return accountDB;
-                case DELEGATE:
-                    return delegateDB;
-                case VOTE:
-                    return voteDB;
-                default:
-                    throw new KernelException("Unexpected database: " + name);
-                }
-            }
-        };
+        DBFactory dbFactory = new LevelDBFactory(config);
         chain = new BlockchainImpl(config, dbFactory);
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);

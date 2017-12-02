@@ -10,7 +10,9 @@ import static org.fusesource.leveldbjni.JniDBFactory.factory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -20,6 +22,7 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
+import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.db.exception.LevelDBException;
 import org.semux.util.ClosableIterator;
@@ -32,14 +35,12 @@ public class LevelDB implements KVDB {
 
     private static final Logger logger = LoggerFactory.getLogger(LevelDB.class);
 
-    private File dataDir;
-    private DBName name;
+    private File f;
     private DB db;
     private boolean isOpened;
 
-    public LevelDB(File dataDir, DBName name) {
-        this.dataDir = dataDir;
-        this.name = name;
+    public LevelDB(File file) {
+        this.f = file;
 
         Options options = new Options();
         options.createIfMissing(true);
@@ -51,7 +52,6 @@ public class LevelDB implements KVDB {
         options.verifyChecksums(true);
         options.maxOpenFiles(128);
 
-        File f = getFile(name);
         f.getParentFile().mkdirs();
 
         try {
@@ -115,14 +115,14 @@ public class LevelDB implements KVDB {
                 isOpened = false;
             }
         } catch (IOException e) {
-            logger.error("Failed to close database: {}", name, e);
+            logger.error("Failed to close database: {}", f, e);
         }
     }
 
     @Override
     public void destroy() {
         close();
-        FileUtil.recursiveDelete(getFile(name));
+        FileUtil.recursiveDelete(f);
     }
 
     @Override
@@ -166,7 +166,21 @@ public class LevelDB implements KVDB {
         }.initialize();
     }
 
-    private File getFile(DBName name) {
-        return new File(dataDir, Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
+    public static class LevelDBFactory implements DBFactory {
+
+        private Map<DBName, KVDB> databases = new HashMap<>();
+
+        public LevelDBFactory(Config config) {
+            for (DBName name : DBName.values()) {
+                File file = new File(config.dataDir(),
+                        Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
+                databases.put(name, new LevelDB(file));
+            }
+        }
+
+        @Override
+        public KVDB getDB(DBName name) {
+            return databases.get(name);
+        }
     }
 }

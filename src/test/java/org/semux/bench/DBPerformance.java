@@ -9,7 +9,6 @@ package org.semux.bench;
 import java.io.File;
 
 import org.semux.config.Constants;
-import org.semux.db.DBName;
 import org.semux.db.LevelDB;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
@@ -21,7 +20,7 @@ public class DBPerformance {
     private static final int REPEAT = 100_000;
 
     private static LevelDB getTestDB() {
-        return new LevelDB(new File(Constants.DEFAULT_DATA_DIR), DBName.TEST);
+        return new LevelDB(new File(Constants.DEFAULT_DATA_DIR, "test"));
     }
 
     public static void testWrite() {

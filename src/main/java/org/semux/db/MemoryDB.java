@@ -6,6 +6,7 @@
  */
 package org.semux.db;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +18,6 @@ import org.semux.util.ByteArray;
 import org.semux.util.ClosableIterator;
 
 public class MemoryDB implements KVDB {
-
-    public static final DBFactory FACTORY = name -> new MemoryDB();
 
     private Map<ByteArray, byte[]> db = new ConcurrentHashMap<>();
 
@@ -101,5 +100,21 @@ public class MemoryDB implements KVDB {
     @Override
     public void destroy() {
         // Do nothing
+    }
+
+    public static class MemoryDBFactory implements DBFactory {
+
+        private Map<DBName, KVDB> databases = new HashMap<>();
+
+        public MemoryDBFactory() {
+            for (DBName name : DBName.values()) {
+                databases.put(name, new MemoryDB());
+            }
+        }
+
+        @Override
+        public KVDB getDB(DBName name) {
+            return databases.get(name);
+        }
     }
 }
