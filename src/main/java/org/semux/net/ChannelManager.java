@@ -7,6 +7,7 @@
 package org.semux.net;
 
 import java.net.InetSocketAddress;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.semux.Config;
 import org.semux.net.filter.SemuxIpFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +34,9 @@ public class ChannelManager {
     private final SemuxIpFilter ipFilter;
 
     public ChannelManager() {
-        ipFilter = (new SemuxIpFilter.Loader()).load().orElse(null);
+        ipFilter = (new SemuxIpFilter.Loader())
+                .load(Paths.get(Config.CONFIG_DIR, "ipfilter.json"))
+                .orElse(null);
     }
 
     public SemuxIpFilter getIpFilter() {

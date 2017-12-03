@@ -8,24 +8,28 @@ package org.semux.net.filter;
 
 import io.netty.handler.ipfilter.IpFilterRule;
 import io.netty.handler.ipfilter.IpFilterRuleType;
-import org.semux.Config;
+import org.semux.net.filter.exception.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.JsonString;
 import javax.json.JsonValue;
+import javax.json.stream.JsonParsingException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collector;
 
 public class SemuxIpFilter {
 
@@ -43,6 +47,10 @@ public class SemuxIpFilter {
 
     public SemuxIpFilter() {
         this.rules = new CopyOnWriteArrayList<>();
+    }
+
+    public List<IpFilterRule> getRules() {
+        return rules;
     }
 
     /**
@@ -95,6 +103,14 @@ public class SemuxIpFilter {
             return this;
         }
 
+        public boolean addAll(Builder builder) {
+            return this.rules.addAll(builder.getRules());
+        }
+
+        public List<IpFilterRule> getRules() {
+            return rules;
+        }
+
         public SemuxIpFilter build() {
             return new SemuxIpFilter(rules);
         }
@@ -104,47 +120,81 @@ public class SemuxIpFilter {
 
         private static final Logger logger = LoggerFactory.getLogger(Loader.class);
 
-        private static final String IPFILTER_JSON = "ipfilter.json";
-
-        public Optional<SemuxIpFilter> load() {
-            return loadJson().flatMap(this::parseJson);
-        }
-
-        private Optional<JsonObject> loadJson() {
-            Path ipFilterJsonPath = Paths.get(Config.CONFIG_DIR, IPFILTER_JSON);
+        public Optional<SemuxIpFilter> load(Path ipFilterJsonPath) {
             if (!ipFilterJsonPath.toFile().exists()) {
                 logger.info("{} doesn't exist, skip loading");
                 return Optional.empty();
             }
 
+            return loadRules(ipFilterJsonPath).flatMap(this::parseRules);
+        }
+
+        private Optional<JsonArray> loadRules(Path ipFilterJsonPath) {
             try (JsonReader jsonReader = Json.createReader(Files.newBufferedReader(ipFilterJsonPath))) {
-                return Optional.of(jsonReader.readObject());
+                JsonObject json = jsonReader.readObject();
+                JsonArray rules = json.getJsonArray("rules");
+                if (rules == null) {
+                    throw new ParseException("rules field doesn't exist");
+                }
+                return Optional.of(rules);
             } catch (IOException ex) {
                 logger.error(String.format("Failed to load %s", ipFilterJsonPath.toAbsolutePath()), ex);
                 return Optional.empty();
+            } catch (ClassCastException | JsonParsingException ex) {
+                throw new ParseException("ipfilter must be an json object", ex);
             }
         }
 
-        private Optional<SemuxIpFilter> parseJson(JsonObject ipFilterJson) {
-            Builder builder = new Builder();
-            ipFilterJson.getJsonArray("rules").stream().map(JsonValue::asJsonObject).forEach(rule -> {
-                IpFilterRuleType type = IpFilterRuleType.valueOf(rule.getString("type"));
-                String address = rule.getString("address");
-                try {
-                    if (type == IpFilterRuleType.ACCEPT) {
-                        logger.info("Loaded rule: ACCEPT {}", address);
-                        builder.accept(address);
-                    } else if (type == IpFilterRuleType.REJECT) {
-                        logger.info("Loaded rule: REJECT {}", address);
-                        builder.reject(address);
-                    } else {
-                        throw new IllegalArgumentException("Rule type of ip filter must be either ACCEPT or REJECT");
-                    }
-                } catch (UnknownHostException ex) {
-                    throw new IllegalArgumentException(String.format("Invalid address %s", address), ex);
+        private Optional<SemuxIpFilter> parseRules(JsonArray rules) {
+            return Optional.of(rules.stream()
+                    .sequential()
+                    .map(this::validateRule)
+                    .collect(Collector.of(
+                            Builder::new,
+                            this::parseRule,
+                            (builder1, builder2) -> {
+                                builder1.addAll(builder2);
+                                return builder1;
+                            },
+                            Builder::build)));
+        }
+
+        private JsonObject validateRule(JsonValue rule) {
+            try {
+                JsonObject ruleObject = rule.asJsonObject();
+
+                JsonString type = ruleObject.getJsonString("type");
+                if (type == null) {
+                    throw new ParseException(String.format("type field doesn't exist in rule %s", rule.toString()));
                 }
-            });
-            return Optional.of(builder.build());
+
+                JsonString address = ruleObject.getJsonString("address");
+                if (address == null) {
+                    throw new ParseException(String.format("address field doesn't exist in rule %s", rule.toString()));
+                }
+
+                return ruleObject;
+            } catch (ClassCastException ex) {
+                throw new ParseException(String.format("rule %s is not an object", rule.toString()));
+            }
+        }
+
+        private void parseRule(Builder builder, JsonObject rule) {
+            String type = rule.getString("type");
+            String address = rule.getString("address");
+            try {
+                if (type.equals(IpFilterRuleType.ACCEPT.toString())) {
+                    logger.info("Loaded rule: ACCEPT {}", address);
+                    builder.accept(address);
+                } else if (type.equals(IpFilterRuleType.REJECT.toString())) {
+                    logger.info("Loaded rule: REJECT {}", address);
+                    builder.reject(address);
+                } else {
+                    throw new ParseException("Rule type of ip filter must be either ACCEPT or REJECT");
+                }
+            } catch (UnknownHostException ex) {
+                throw new ParseException(String.format("Invalid address %s", address), ex);
+            }
         }
     }
 }

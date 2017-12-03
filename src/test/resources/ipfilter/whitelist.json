@@ -1,0 +1,7 @@
+{
+  "rules": [
+    {"type": "ACCEPT", "address": "127.0.0.1/8"},
+    {"type": "ACCEPT", "address": "192.168.0.0/16"},
+    {"type": "REJECT", "address": "0.0.0.0/0"}
+  ]
+}
