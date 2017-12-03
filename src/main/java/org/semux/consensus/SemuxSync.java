@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.semux.Kernel;
+import org.semux.config.Config;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -70,6 +71,7 @@ public class SemuxSync implements SyncManager {
     private static final int MAX_PENDING_BLOCKS = 512;
 
     private Kernel kernel;
+    private Config config;
 
     private Blockchain chain;
     private ChannelManager channelMgr;
@@ -91,6 +93,8 @@ public class SemuxSync implements SyncManager {
 
     public SemuxSync(Kernel kernel) {
         this.kernel = kernel;
+        this.config = kernel.getConfig();
+
         this.chain = kernel.getBlockchain();
         this.channelMgr = kernel.getChannelManager();
     }
@@ -321,7 +325,7 @@ public class SemuxSync implements SyncManager {
         }
 
         // [2] check transactions and results
-        if (transactions.size() > kernel.getConfig().maxBlockSize()
+        if (transactions.size() > config.maxBlockSize()
                 || !Block.validateTransactions(header, block.getTransactions())) {
             logger.debug("Invalid block transactions");
             return false;
@@ -333,7 +337,7 @@ public class SemuxSync implements SyncManager {
 
         AccountState as = chain.getAccountState().track();
         DelegateState ds = chain.getDelegateState().track();
-        TransactionExecutor transactionExecutor = new TransactionExecutor(kernel.getConfig());
+        TransactionExecutor transactionExecutor = new TransactionExecutor(config);
 
         // [3] evaluate transactions
         List<TransactionResult> results = transactionExecutor.execute(transactions, as, ds);
@@ -363,7 +367,7 @@ public class SemuxSync implements SyncManager {
         }
 
         // [5] apply block reward and tx fees
-        long reward = kernel.getConfig().getBlockReward(number);
+        long reward = config.getBlockReward(number);
         for (Transaction tx : block.getTransactions()) {
             reward += tx.getFee();
         }

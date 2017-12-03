@@ -39,19 +39,19 @@ public class HttpHandlerTest {
     @Before
     public void setup() {
         kernel = new KernelMock();
-        server = new SemuxAPI(new HttpHandler(kernel.getConfig(), (u, p, h) -> {
+        server = new SemuxAPI(kernel);
+        auth = "Basic " + Base64.getEncoder()
+                .encodeToString(Bytes.of(kernel.getConfig().apiUsername() + ":" + kernel.getConfig().apiPassword()));
+
+        // wait for server to boot up
+        new Thread(() -> server.start(ip, port, new HttpHandler(kernel.getConfig(), (u, p, h) -> {
             uri = u;
             params = p;
             headers = h;
 
             return "test";
-        }));
-        auth = "Basic " + Base64.getEncoder()
-                .encodeToString(Bytes.of(kernel.getConfig().apiUsername() + ":" + kernel.getConfig().apiPassword()));
-
-        // wait for server to boot up
-        new Thread(() -> server.start(ip, port)).start();
-        while (!server.isListening()) {
+        }))).start();
+        while (!server.isRunning()) {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {

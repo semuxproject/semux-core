@@ -122,7 +122,7 @@ public class Kernel {
         // ====================================
         PeerServer p2p = new PeerServer(this);
 
-        Thread p2pThread = new Thread(() -> p2p.start(config.p2pListenIp(), config.p2pListenPort()), "p2p");
+        Thread p2pThread = new Thread(() -> p2p.start(), "p2p");
         p2pThread.start();
 
         // ====================================
@@ -131,7 +131,7 @@ public class Kernel {
         SemuxAPI api = new SemuxAPI(this);
 
         if (config.apiEnabled()) {
-            Thread apiThread = new Thread(() -> api.start(config.apiListenIp(), config.apiListenPort()), "api");
+            Thread apiThread = new Thread(() -> api.start(), "api");
             apiThread.start();
         }
 

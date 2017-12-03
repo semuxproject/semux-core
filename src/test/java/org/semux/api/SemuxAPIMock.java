@@ -42,7 +42,7 @@ public class SemuxAPIMock {
 
             long timestamp = System.currentTimeMillis();
             while (System.currentTimeMillis() - timestamp < 30000) {
-                if (server == null || !server.isListening()) {
+                if (server == null || !server.isRunning()) {
                     try {
                         Thread.sleep(200);
                     } catch (InterruptedException e) {
@@ -63,7 +63,7 @@ public class SemuxAPIMock {
 
             long timestamp = System.currentTimeMillis();
             while (System.currentTimeMillis() - timestamp < 30000) {
-                if (server.isListening()) {
+                if (server.isRunning()) {
                     try {
                         Thread.sleep(200);
                     } catch (InterruptedException e) {

@@ -170,6 +170,8 @@ public abstract class AbstractConfig implements Config {
                         String[] tokens = node.trim().split(":");
                         if (tokens.length == 2) {
                             p2pSeedNodes.add(new InetSocketAddress(tokens[0], Integer.parseInt(tokens[1])));
+                        } else {
+                            p2pSeedNodes.add(new InetSocketAddress(tokens[0], Constants.DEFAULT_P2P_PORT));
                         }
                     }
                     break;

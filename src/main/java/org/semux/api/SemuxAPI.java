@@ -7,9 +7,11 @@
 package org.semux.api;
 
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.Kernel;
+import org.semux.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,19 +45,26 @@ public class SemuxAPI {
         }
     };
 
-    private HttpHandler handler;
+    private Kernel kernel;
+    private Config config;
+
     private ChannelFuture channelFuture;
-    private boolean listening;
+    private AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public SemuxAPI(Kernel kernel) {
-        this.handler = new HttpHandler(kernel.getConfig(), new ApiHandlerImpl(kernel));
+        this.kernel = kernel;
+        this.config = kernel.getConfig();
     }
 
-    public SemuxAPI(HttpHandler handler) {
-        this.handler = handler;
+    public void start() {
+        start(config.apiListenIp(), config.apiListenPort(), new HttpHandler(config, new ApiHandlerImpl(kernel)));
     }
 
     public void start(String ip, int port) {
+        start(ip, port, new HttpHandler(config, new ApiHandlerImpl(kernel)));
+    }
+
+    public void start(String ip, int port, HttpHandler handler) {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1, factory);
         EventLoopGroup workerGroup = new NioEventLoopGroup(0, factory);
         try {
@@ -75,7 +84,7 @@ public class SemuxAPI {
             logger.info("Starting API server: address = {}:{}", ip, port);
             channelFuture = b.bind(ip, port).sync();
 
-            listening = true;
+            isRunning.set(true);
             channelFuture.channel().closeFuture().sync();
             logger.info("API server shut down");
 
@@ -84,12 +93,12 @@ public class SemuxAPI {
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
-            listening = false;
+            isRunning.set(false);
         }
     }
 
     public void stop() {
-        if (listening && channelFuture != null && channelFuture.channel().isOpen()) {
+        if (isRunning() && channelFuture != null && channelFuture.channel().isOpen()) {
             try {
                 channelFuture.channel().close().sync();
             } catch (Exception e) {
@@ -98,7 +107,7 @@ public class SemuxAPI {
         }
     }
 
-    public boolean isListening() {
-        return listening;
+    public boolean isRunning() {
+        return isRunning.get();
     }
 }

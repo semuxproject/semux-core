@@ -33,12 +33,12 @@ public enum Command {
     ADD_NODE,
 
     /**
-     * Add an IP address to blacklist.
+     * Add an IP address to the blacklist.
      */
     ADD_TO_BLACKLIST,
 
     /**
-     * Add an IP address to whitelist.
+     * Add an IP address to the whitelist.
      */
     ADD_TO_WHITELIST,
 

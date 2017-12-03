@@ -51,6 +51,10 @@ public class PeerServer {
         this.kernel = kernel;
     }
 
+    public void start() {
+        start(kernel.getConfig().p2pListenIp(), kernel.getConfig().p2pListenPort());
+    }
+
     public void start(String ip, int port) {
         bossGroup = new NioEventLoopGroup(1, factory);
         workerGroup = new NioEventLoopGroup(0, factory);
