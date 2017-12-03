@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.semux.net.filter.exception.ParseException;
 
+import java.io.File;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -53,20 +54,20 @@ public class SemuxIpFilterLoaderTest {
         });
     };
 
-    String jsonFile;
+    File jsonFile;
 
     List<IpFilterRule> rules;
 
     Class<? extends Throwable> exception;
 
-    public SemuxIpFilterLoaderTest(String jsonFile, List<IpFilterRule> rules, Class<? extends Throwable> exception) {
+    public SemuxIpFilterLoaderTest(File jsonFile, List<IpFilterRule> rules, Class<? extends Throwable> exception) {
         this.jsonFile = jsonFile;
         this.rules = rules;
         this.exception = exception;
     }
 
-    private static String getFile(String fileName) {
-        return SemuxIpFilterLoaderTest.class.getResource("/ipfilter/" + fileName).getFile();
+    private static File getFile(String fileName) {
+        return new File(SemuxIpFilterLoaderTest.class.getResource("/ipfilter/" + fileName).getFile());
     }
 
     @Test
@@ -76,7 +77,7 @@ public class SemuxIpFilterLoaderTest {
         }
 
         SemuxIpFilter.Loader loader = new SemuxIpFilter.Loader();
-        SemuxIpFilter semuxIpFilter = loader.load(Paths.get(jsonFile)).get();
+        SemuxIpFilter semuxIpFilter = loader.load(jsonFile.toPath()).get();
         List<IpFilterRule> loadedRules = semuxIpFilter.getRules();
         assertTrue(loadedRules.size() == rules.size());
         for (int i = 0; i < loadedRules.size(); i++) {
