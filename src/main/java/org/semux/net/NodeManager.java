@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.map.LRUMap;
 import org.semux.Kernel;
+import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,8 @@ public class NodeManager {
     private static final long RECONNECT_WAIT = 2L * 60L * 1000L;
 
     private Kernel kernel;
+    private Config config;
+
     private ChannelManager channelMgr;
     private PeerClient client;
 
@@ -69,6 +72,8 @@ public class NodeManager {
      */
     public NodeManager(Kernel kernel) {
         this.kernel = kernel;
+        this.config = kernel.getConfig();
+
         this.channelMgr = kernel.getChannelManager();
         this.client = kernel.getClient();
 
@@ -87,8 +92,8 @@ public class NodeManager {
              * Push all known peers to the queue.
              */
             Set<InetSocketAddress> peers = new HashSet<>();
-            peers.addAll(kernel.getConfig().p2pSeedNodes());
-            peers.addAll(getSeedNodes(kernel.getConfig().networkId()));
+            peers.addAll(config.p2pSeedNodes());
+            peers.addAll(getSeedNodes(config.networkId()));
             queue.addAll(peers);
 
             connectFuture = exec.scheduleAtFixedRate(this::doConnect, 100, 500, TimeUnit.MILLISECONDS);
@@ -151,11 +156,14 @@ public class NodeManager {
 
         try {
             String name;
-            if (networkId == Constants.MAIN_NET_ID) {
+            switch (networkId) {
+            case Constants.MAIN_NET_ID:
                 name = DNS_SEED_MAINNET;
-            } else if (networkId == Constants.TEST_NET_ID) {
+                break;
+            case Constants.TEST_NET_ID:
                 name = DNS_SEED_TESTNET;
-            } else {
+                break;
+            default:
                 return nodes;
             }
 
@@ -176,7 +184,7 @@ public class NodeManager {
         Set<InetSocketAddress> activeAddresses = channelMgr.getActiveAddresses();
         InetSocketAddress addr;
 
-        while ((addr = queue.poll()) != null && channelMgr.size() < kernel.getConfig().netMaxOutboundConnections()) {
+        while ((addr = queue.poll()) != null && channelMgr.size() < config.netMaxOutboundConnections()) {
             Long l = lastConnect.get(addr);
             long now = System.currentTimeMillis();
 
@@ -196,6 +204,6 @@ public class NodeManager {
      * Fetch seed nodes from DNS records.
      */
     protected void doFetch() {
-        addNodes(getSeedNodes(kernel.getConfig().networkId()));
+        addNodes(getSeedNodes(config.networkId()));
     }
 }

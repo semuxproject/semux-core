@@ -58,15 +58,24 @@ public class SemuxGUI {
     private int coinbase = 0;
     private Wallet wallet;
 
-    private Kernel kernel;
     private WalletModel model;
+
+    private Kernel kernel;
 
     public SemuxGUI() {
     }
 
-    public SemuxGUI(Kernel kernel, WalletModel model) {
-        this.kernel = kernel;
+    public SemuxGUI(WalletModel model, Kernel kernel) {
         this.model = model;
+        this.kernel = kernel;
+    }
+
+    public Kernel getKernel() {
+        return kernel;
+    }
+
+    public WalletModel getModel() {
+        return model;
     }
 
     public void start(String[] args) {
@@ -123,7 +132,7 @@ public class SemuxGUI {
         }
 
         // start kernel
-        Kernel kernel = new Kernel(new MainNetConfig(dataDir), wallet, wallet.getAccount(coinbase));
+        kernel = new Kernel(new MainNetConfig(dataDir), wallet, wallet.getAccount(coinbase));
         kernel.start();
         onBlockAdded(kernel.getBlockchain().getLatestBlock());
 
@@ -225,14 +234,6 @@ public class SemuxGUI {
         model.setActivePeers(activePeers);
 
         model.updateView();
-    }
-
-    public Kernel getKernel() {
-        return kernel;
-    }
-
-    public WalletModel getModel() {
-        return model;
     }
 
     public static void setupLookAndFeel() {

@@ -37,11 +37,16 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
      * @param discoveryMode
      *            whether in discovery mode or not
      */
-    public SemuxChannelInitializer(Kernel kernel, InetSocketAddress remoteAddress) {
+    public SemuxChannelInitializer(Kernel kernel, InetSocketAddress remoteAddress, boolean discoveryMode) {
         this.kernel = kernel;
         this.channelMgr = kernel.getChannelManager();
 
         this.remoteAddress = remoteAddress;
+        this.discoveryMode = discoveryMode;
+    }
+
+    public SemuxChannelInitializer(Kernel kernel, InetSocketAddress remoteAddress) {
+        this(kernel, remoteAddress, false);
     }
 
     @Override
@@ -58,8 +63,10 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
             }
 
             Channel channel = new Channel();
-            channel.init(ch.pipeline(), isServerMode(), address, discoveryMode, kernel);
-            channelMgr.add(channel);
+            channel.init(ch.pipeline(), isServerMode(), address, kernel);
+            if (!isDiscoveryMode()) {
+                channelMgr.add(channel);
+            }
 
             // limit the size of receiving buffer
             int bufferSize = Frame.HEADER_SIZE + kernel.getConfig().netMaxFrameSize();
@@ -69,7 +76,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
 
             // notify disconnection to channel manager
             ch.closeFuture().addListener(future -> {
-                if (!discoveryMode) {
+                if (!isDiscoveryMode()) {
                     channelMgr.remove(channel);
                 }
             });

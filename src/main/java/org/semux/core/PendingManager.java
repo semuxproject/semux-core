@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.collections4.map.LRUMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
+import org.semux.config.Config;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.net.Channel;
@@ -58,7 +59,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     private static final int DELAYED_MAX_SIZE = 16 * 1024;
     private static final int PROCESSED_MAX_SIZE = 16 * 1024;
 
-    private Kernel kernel;
+    private Config config;
 
     private Blockchain chain;
     private ChannelManager channelMgr;
@@ -90,7 +91,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * Creates a pending manager.
      */
     public PendingManager(Kernel kernel) {
-        this.kernel = kernel;
+        this.config = kernel.getConfig();
 
         this.chain = kernel.getBlockchain();
         this.channelMgr = kernel.getChannelManager();
@@ -267,7 +268,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         while (pool.size() < POOL_MAX_SIZE //
                 && (tx = queue.poll()) != null //
-                && tx.getFee() >= kernel.getConfig().minTransactionFee()) {
+                && tx.getFee() >= config.minTransactionFee()) {
             // filter by cache
             ByteArray key = ByteArray.of(tx.getHash());
             if (processed.containsKey(key)) {
@@ -306,7 +307,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             // execute transactions
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
-            TransactionResult result = new TransactionExecutor(kernel.getConfig()).execute(tx, as, ds);
+            TransactionResult result = new TransactionExecutor(config).execute(tx, as, ds);
 
             if (result.isSuccess()) {
                 // commit state updates
@@ -324,7 +325,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                     List<Channel> channels = channelMgr.getActiveChannels();
                     TransactionMessage msg = new TransactionMessage(tx);
                     int[] indices = ArrayUtil.permutation(channels.size());
-                    for (int i = 0; i < indices.length && i < kernel.getConfig().netRelayRedundancy(); i++) {
+                    for (int i = 0; i < indices.length && i < config.netRelayRedundancy(); i++) {
                         Channel c = channels.get(indices[i]);
                         if (c.isActive()) {
                             c.getMessageQueue().sendMessage(msg);

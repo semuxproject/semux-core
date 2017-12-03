@@ -57,17 +57,19 @@ public class ReceivePanel extends JPanel implements ActionListener {
     private static String[] columnNames = { GUIMessages.get("Num"), GUIMessages.get("Address"),
             GUIMessages.get("Available"), GUIMessages.get("Locked") };
 
-    private transient Kernel kernel;
     private transient WalletModel model;
+
+    private transient Kernel kernel;
 
     private JTable table;
     private ReceiveTableModel tableModel;
     private JLabel qr;
 
     public ReceivePanel(SemuxGUI gui) {
-        this.kernel = gui.getKernel();
         this.model = gui.getModel();
         this.model.addListener(this);
+
+        this.kernel = gui.getKernel();
 
         tableModel = new ReceiveTableModel();
         table = new JTable(tableModel);
@@ -239,7 +241,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             wallet.flush();
 
             // fire update event
-            model.fireUpdatedEvent();
+            model.fireUpdateEvent();
 
             JOptionPane.showMessageDialog(this, GUIMessages.get("NewAccountCreated"));
             break;
@@ -258,7 +260,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
                     wallet.flush();
 
                     // fire update event
-                    model.fireUpdatedEvent();
+                    model.fireUpdateEvent();
 
                     JOptionPane.showMessageDialog(this, GUIMessages.get("AccountDeleted"));
                 }

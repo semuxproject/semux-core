@@ -23,7 +23,6 @@ public class Channel {
     private long id;
 
     private boolean isInbound;
-    private boolean discoveryMode;
     private InetSocketAddress remoteAddress;
 
     private MessageQueue msgQueue;
@@ -51,11 +50,9 @@ public class Channel {
      * @param discoveryMode
      * @param kernel
      */
-    public void init(ChannelPipeline pipe, boolean isInbound, InetSocketAddress remoteAddress, boolean discoveryMode,
-            Kernel kernel) {
+    public void init(ChannelPipeline pipe, boolean isInbound, InetSocketAddress remoteAddress, Kernel kernel) {
         this.isInbound = isInbound;
         this.remoteAddress = remoteAddress;
-        this.discoveryMode = discoveryMode;
 
         this.msgQueue = new MessageQueue(kernel.getConfig());
         this.remotePeer = null;
@@ -97,15 +94,6 @@ public class Channel {
      */
     public boolean isInbound() {
         return isInbound;
-    }
-
-    /**
-     * Returns whether this channel is in discovery mode.
-     * 
-     * @return
-     */
-    public boolean isDiscoveryMode() {
-        return discoveryMode;
     }
 
     /**

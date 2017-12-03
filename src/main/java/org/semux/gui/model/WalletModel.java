@@ -50,9 +50,9 @@ public class WalletModel {
     }
 
     /**
-     * Fires an model updated event.
+     * Fires an model update event.
      */
-    public void fireUpdatedEvent() {
+    public void fireUpdateEvent() {
         updated.set(true);
     }
 
@@ -75,7 +75,7 @@ public class WalletModel {
     }
 
     /**
-     * Updates view.
+     * Updates MVC view.
      */
     public void updateView() {
         for (ActionListener listener : listeners) {

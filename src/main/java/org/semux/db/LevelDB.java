@@ -35,12 +35,12 @@ public class LevelDB implements KVDB {
 
     private static final Logger logger = LoggerFactory.getLogger(LevelDB.class);
 
-    private File f;
+    private File file;
     private DB db;
     private boolean isOpened;
 
     public LevelDB(File file) {
-        this.f = file;
+        this.file = file;
 
         Options options = new Options();
         options.createIfMissing(true);
@@ -52,18 +52,18 @@ public class LevelDB implements KVDB {
         options.verifyChecksums(true);
         options.maxOpenFiles(128);
 
-        f.getParentFile().mkdirs();
+        file.getParentFile().mkdirs();
 
         try {
-            db = JniDBFactory.factory.open(f, options);
+            db = JniDBFactory.factory.open(file, options);
             isOpened = true;
         } catch (IOException e) {
             if (e.getMessage().contains("Corruption:")) {
                 try {
                     logger.info("Database is corrupted, trying to repair");
-                    factory.repair(f, options);
+                    factory.repair(file, options);
                     logger.info("Repair done!");
-                    db = factory.open(f, options);
+                    db = factory.open(file, options);
                 } catch (IOException ex) {
                     logger.error("Failed to repair the database", ex);
                     SystemUtil.exitAsync(-1);
@@ -115,14 +115,14 @@ public class LevelDB implements KVDB {
                 isOpened = false;
             }
         } catch (IOException e) {
-            logger.error("Failed to close database: {}", f, e);
+            logger.error("Failed to close database: {}", file, e);
         }
     }
 
     @Override
     public void destroy() {
         close();
-        FileUtil.recursiveDelete(f);
+        FileUtil.recursiveDelete(file);
     }
 
     @Override

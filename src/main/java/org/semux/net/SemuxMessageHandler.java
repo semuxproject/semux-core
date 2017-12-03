@@ -51,7 +51,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
         byte type = msg.getCode().toByte();
         byte network = config.networkId();
 
-        if (packetSize > config.netMaxPacketSize()) {
+        if (packetSize < 0 || packetSize > config.netMaxPacketSize()) {
             logger.error("Invalid packet size, max = {}, actual = {}", config.netMaxPacketSize(), packetSize);
             return;
         }
@@ -83,7 +83,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
                 Pair<List<Frame>, AtomicInteger> pair = incompletePackets.get(packetId);
                 if (pair == null) {
                     int packetSize = frame.getPacketSize();
-                    if (packetSize > config.netMaxPacketSize()) {
+                    if (packetSize < 0 || packetSize > config.netMaxPacketSize()) {
                         // this will kill the connection
                         throw new IOException("Invalid packet size: " + packetSize);
                     }

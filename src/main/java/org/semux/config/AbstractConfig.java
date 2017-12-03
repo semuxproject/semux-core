@@ -94,6 +94,21 @@ public abstract class AbstractConfig implements Config {
     protected int vmMaxStackSize = 1024;
     protected int vmInitHeapSize = 128;
 
+    /**
+     * Create an {@link AbstractConfig} instance.
+     * 
+     * @param dataDir
+     * @param networkId
+     * @param networkVersion
+     */
+    protected AbstractConfig(String dataDir, byte networkId, short networkVersion) {
+        this.dataDir = new File(dataDir);
+        this.networkId = networkId;
+        this.networkVersion = networkVersion;
+
+        init();
+    }
+
     @Override
     public long getBlockReward(long number) {
         if (number <= 75_000_000L) {
@@ -129,89 +144,6 @@ public abstract class AbstractConfig implements Config {
     public String getClientId() {
         return String.format("%s/v%s/%s/%s", Constants.CLIENT_NAME, Constants.CLIENT_VERSION,
                 SystemUtil.getOsName().toString(), SystemUtil.getOsArch());
-    }
-
-    /**
-     * Create an {@link AbstractConfig} instance.
-     * 
-     * @param dataDir
-     * @param networkId
-     * @param networkVersion
-     */
-    protected AbstractConfig(String dataDir, byte networkId, short networkVersion) {
-        this.dataDir = new File(dataDir);
-
-        init();
-    }
-
-    protected void init() {
-        File f = new File(dataDir, Constants.CONFIG_DIR + File.separator + CONFIG_FILE);
-        Properties props = new Properties();
-
-        try (FileInputStream in = new FileInputStream(f)) {
-            props.load(in);
-
-            for (Object k : props.keySet()) {
-                String name = (String) k;
-
-                switch (name) {
-                case "p2p.declaredIp":
-                    p2pDeclaredIp = props.getProperty(name);
-                    break;
-                case "p2p.listenIp":
-                    p2pListenIp = props.getProperty(name);
-                    break;
-                case "p2p.listenPort":
-                    p2pListenPort = Integer.parseInt(props.getProperty(name));
-                    break;
-                case "p2p.seedNodes":
-                    String[] nodes = props.getProperty(name).split(",");
-                    for (String node : nodes) {
-                        String[] tokens = node.trim().split(":");
-                        if (tokens.length == 2) {
-                            p2pSeedNodes.add(new InetSocketAddress(tokens[0], Integer.parseInt(tokens[1])));
-                        } else {
-                            p2pSeedNodes.add(new InetSocketAddress(tokens[0], Constants.DEFAULT_P2P_PORT));
-                        }
-                    }
-                    break;
-
-                case "net.maxInboundConnections":
-                    netMaxInboundConnections = Integer.parseInt(props.getProperty(name));
-                    break;
-                case "net.maxOutboundConnections":
-                    netMaxInboundConnections = Integer.parseInt(props.getProperty(name));
-                    break;
-                case "net.maxMessageQueueSize":
-                    netMaxMessageQueueSize = Integer.parseInt(props.getProperty(name));
-                    break;
-                case "net.relayRedundancy":
-                    netRelayRedundancy = Integer.parseInt(props.getProperty(name));
-                    break;
-
-                case "api.enabled":
-                    apiEnabled = Boolean.parseBoolean(props.getProperty(name));
-                    break;
-                case "api.listenIp":
-                    apiListenIp = props.getProperty(name);
-                    break;
-                case "api.listenPort":
-                    apiListenPort = Integer.parseInt(props.getProperty(name));
-                    break;
-                case "api.username":
-                    apiUsername = props.getProperty(name);
-                    break;
-                case "api.password":
-                    apiPassword = props.getProperty(name);
-                    break;
-                default:
-                    logger.error("Unsupported option: {} = {}", name, props.getProperty(name));
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Failed to load config file: {}", f, e);
-        }
     }
 
     @Override
@@ -377,5 +309,75 @@ public abstract class AbstractConfig implements Config {
     @Override
     public int vmInitialHeapSize() {
         return vmInitHeapSize;
+    }
+
+    protected void init() {
+        File f = new File(dataDir, Constants.CONFIG_DIR + File.separator + CONFIG_FILE);
+        Properties props = new Properties();
+
+        try (FileInputStream in = new FileInputStream(f)) {
+            props.load(in);
+
+            for (Object k : props.keySet()) {
+                String name = (String) k;
+
+                switch (name) {
+                case "p2p.declaredIp":
+                    p2pDeclaredIp = props.getProperty(name);
+                    break;
+                case "p2p.listenIp":
+                    p2pListenIp = props.getProperty(name);
+                    break;
+                case "p2p.listenPort":
+                    p2pListenPort = Integer.parseInt(props.getProperty(name));
+                    break;
+                case "p2p.seedNodes":
+                    String[] nodes = props.getProperty(name).split(",");
+                    for (String node : nodes) {
+                        String[] tokens = node.trim().split(":");
+                        if (tokens.length == 2) {
+                            p2pSeedNodes.add(new InetSocketAddress(tokens[0], Integer.parseInt(tokens[1])));
+                        } else {
+                            p2pSeedNodes.add(new InetSocketAddress(tokens[0], Constants.DEFAULT_P2P_PORT));
+                        }
+                    }
+                    break;
+
+                case "net.maxInboundConnections":
+                    netMaxInboundConnections = Integer.parseInt(props.getProperty(name));
+                    break;
+                case "net.maxOutboundConnections":
+                    netMaxInboundConnections = Integer.parseInt(props.getProperty(name));
+                    break;
+                case "net.maxMessageQueueSize":
+                    netMaxMessageQueueSize = Integer.parseInt(props.getProperty(name));
+                    break;
+                case "net.relayRedundancy":
+                    netRelayRedundancy = Integer.parseInt(props.getProperty(name));
+                    break;
+
+                case "api.enabled":
+                    apiEnabled = Boolean.parseBoolean(props.getProperty(name));
+                    break;
+                case "api.listenIp":
+                    apiListenIp = props.getProperty(name);
+                    break;
+                case "api.listenPort":
+                    apiListenPort = Integer.parseInt(props.getProperty(name));
+                    break;
+                case "api.username":
+                    apiUsername = props.getProperty(name);
+                    break;
+                case "api.password":
+                    apiPassword = props.getProperty(name);
+                    break;
+                default:
+                    logger.error("Unsupported option: {} = {}", name, props.getProperty(name));
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Failed to load config file: {}", f, e);
+        }
     }
 }

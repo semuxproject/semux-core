@@ -447,7 +447,8 @@ public class SwingUtil {
     public static String getTransactionDescription(SemuxGUI gui, Transaction tx) {
         switch (tx.getType()) {
         case COINBASE:
-            return GUIMessages.get("BlockReward") + " => " + getAddressAlias(gui, tx.getTo());
+            return GUIMessages.get("BlockReward") + " => "
+                    + getDelegateName(gui, tx.getTo()).orElse(GUIMessages.get("UnknownDelegate"));
         case VOTE:
         case UNVOTE:
         case TRANSFER:
