@@ -37,7 +37,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(MenuBar.class);
 
-    private SemuxGUI gui;
+    private transient SemuxGUI gui;
     private JFrame frame;
 
     public MenuBar(SemuxGUI gui, JFrame frame) {

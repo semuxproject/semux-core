@@ -7,11 +7,15 @@
 package org.semux.util;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileUtil {
 
-    private FileUtil() {
-    }
+    private static final Logger log = LoggerFactory.getLogger(FileUtil.class);
 
     /**
      * Delete a file or directory recursively.
@@ -31,7 +35,15 @@ public class FileUtil {
                 }
             }
         }
-        file.delete();
+
+        try {
+            Files.delete(file.toPath());
+        } catch (IOException e) {
+            log.error("Failed to delete file: {}", file, e);
+        }
+    }
+
+    private FileUtil() {
     }
 
 }

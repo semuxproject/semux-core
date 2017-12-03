@@ -6,7 +6,7 @@
  */
 package org.semux.db;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +104,7 @@ public class MemoryDB implements KVDB {
 
     public static class MemoryDBFactory implements DBFactory {
 
-        private Map<DBName, KVDB> databases = new HashMap<>();
+        private EnumMap<DBName, KVDB> databases = new EnumMap<>(DBName.class);
 
         public MemoryDBFactory() {
             for (DBName name : DBName.values()) {

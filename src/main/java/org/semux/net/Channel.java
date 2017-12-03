@@ -28,11 +28,6 @@ public class Channel {
     private MessageQueue msgQueue;
     private Peer remotePeer;
 
-    private ReadTimeoutHandler timeoutHandler;
-    private SemuxFrameHandler frameHandler;
-    private SemuxMessageHandler messageHandler;
-    private SemuxP2pHandler p2pHandler;
-
     /**
      * Creates a new channel instance.
      * 
@@ -57,16 +52,12 @@ public class Channel {
         this.msgQueue = new MessageQueue(kernel.getConfig());
         this.remotePeer = null;
 
-        this.timeoutHandler = new ReadTimeoutHandler(Constants.DEFAULT_READ_TIMEOUT, TimeUnit.MILLISECONDS);
-        this.frameHandler = new SemuxFrameHandler(kernel.getConfig());
-        this.messageHandler = new SemuxMessageHandler(kernel.getConfig());
-        this.p2pHandler = new SemuxP2pHandler(this, kernel);
-
         // register channel handlers
-        pipe.addLast("readTimeoutHandler", timeoutHandler);
-        pipe.addLast("frameHandler", frameHandler);
-        pipe.addLast("messageHandler", messageHandler);
-        pipe.addLast("p2pHandler", p2pHandler);
+        pipe.addLast("readTimeoutHandler",
+                new ReadTimeoutHandler(Constants.DEFAULT_READ_TIMEOUT, TimeUnit.MILLISECONDS));
+        pipe.addLast("frameHandler", new SemuxFrameHandler(kernel.getConfig()));
+        pipe.addLast("messageHandler", new SemuxMessageHandler(kernel.getConfig()));
+        pipe.addLast("p2pHandler", new SemuxP2pHandler(this, kernel));
     }
 
     /**

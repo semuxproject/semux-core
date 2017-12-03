@@ -174,6 +174,7 @@ public class SemuxBFT implements Consensus {
                     break;
                 }
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 break;
             } catch (Exception e) {
                 logger.warn("Unexpected exception in event loop", e);
@@ -208,7 +209,10 @@ public class SemuxBFT implements Consensus {
             broadcaster.stop();
 
             status = Status.STOPPED;
-            events.offer(new Event(Event.Type.STOP));
+            Event ev = new Event(Event.Type.STOP);
+            if (!events.offer(ev)) {
+                logger.error("Failed to add an event to message queue: ev = {}", ev);
+            }
         }
     }
 
@@ -829,7 +833,7 @@ public class SemuxBFT implements Consensus {
 
         @Override
         public void run() {
-            while (true) {
+            while (!Thread.currentThread().isInterrupted()) {
                 synchronized (this) {
                     if (timeout != -1 && timeout < System.currentTimeMillis()) {
                         events.add(new Event(Type.TIMEOUT));
@@ -841,7 +845,8 @@ public class SemuxBFT implements Consensus {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
-                    return;
+                    Thread.currentThread().interrupt();
+                    break;
                 }
             }
         }
@@ -860,6 +865,7 @@ public class SemuxBFT implements Consensus {
                     t.join(10000);
                 } catch (InterruptedException e) {
                     logger.warn("Failed to stop consensus timer");
+                    Thread.currentThread().interrupt();
                 }
                 t = null;
             }
@@ -884,7 +890,7 @@ public class SemuxBFT implements Consensus {
 
         @Override
         public void run() {
-            while (true) {
+            while (!Thread.currentThread().isInterrupted()) {
                 try {
                     Message msg = queue.take();
 
@@ -900,6 +906,7 @@ public class SemuxBFT implements Consensus {
                         }
                     }
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     break;
                 }
             }
@@ -919,13 +926,16 @@ public class SemuxBFT implements Consensus {
                     t.join();
                 } catch (InterruptedException e) {
                     logger.error("Failed to stop consensus broadcaster");
+                    Thread.currentThread().interrupt();
                 }
                 t = null;
             }
         }
 
         public void broadcast(Message msg) {
-            queue.offer(msg);
+            if (!queue.offer(msg)) {
+                logger.error("Failed to add a message to the broadcast queue: msg = {}", msg);
+            }
         }
     }
 

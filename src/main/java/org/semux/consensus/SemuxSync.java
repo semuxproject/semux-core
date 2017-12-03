@@ -76,10 +76,6 @@ public class SemuxSync implements SyncManager {
     private Blockchain chain;
     private ChannelManager channelMgr;
 
-    private ScheduledExecutorService exec;
-    private ScheduledFuture<?> download;
-    private ScheduledFuture<?> process;
-
     // task queues
     private TreeSet<Long> toDownload = new TreeSet<>();
     private Map<Long, Long> toComplete = new HashMap<>();
@@ -88,8 +84,6 @@ public class SemuxSync implements SyncManager {
     private final Object lock = new Object();
 
     private AtomicBoolean isRunning = new AtomicBoolean(false);
-
-    private Instant begin, end;
 
     public SemuxSync(Kernel kernel) {
         this.kernel = kernel;
@@ -101,10 +95,9 @@ public class SemuxSync implements SyncManager {
 
     @Override
     public void start(long targetHeight) {
-        if (!isRunning()) {
-            begin = Instant.now();
+        if (isRunning.compareAndSet(false, true)) {
+            Instant begin = Instant.now();
 
-            isRunning.set(true);
             logger.info("Syncing started, best known block = {}", targetHeight - 1);
 
             // [1] set up queues
@@ -120,9 +113,9 @@ public class SemuxSync implements SyncManager {
             }
 
             // [2] start tasks
-            exec = Executors.newSingleThreadScheduledExecutor(factory);
-            download = exec.scheduleAtFixedRate(this::download, 0, 50, TimeUnit.MILLISECONDS);
-            process = exec.scheduleAtFixedRate(this::process, 0, 10, TimeUnit.MILLISECONDS);
+            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor(factory);
+            ScheduledFuture<?> download = exec.scheduleAtFixedRate(this::download, 0, 50, TimeUnit.MILLISECONDS);
+            ScheduledFuture<?> process = exec.scheduleAtFixedRate(this::process, 0, 10, TimeUnit.MILLISECONDS);
 
             // [3] wait until the sync is done
             while (isRunning.get()) {
@@ -145,7 +138,7 @@ public class SemuxSync implements SyncManager {
             exec.shutdown();
             try {
                 exec.awaitTermination(1, TimeUnit.MINUTES);
-                end = Instant.now();
+                Instant end = Instant.now();
                 logger.info("Syncing finished, took {}", TimeUtil.formatDuration(Duration.between(begin, end)));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -156,9 +149,7 @@ public class SemuxSync implements SyncManager {
 
     @Override
     public void stop() {
-        if (isRunning()) {
-            isRunning.set(false);
-            ;
+        if (isRunning.compareAndSet(true, false)) {
             synchronized (isRunning) {
                 isRunning.notifyAll();
             }

@@ -125,10 +125,10 @@ public abstract class AbstractConfig implements Config {
 
     @Override
     public int getNumberOfValidators(long number) {
-        long step = 2 * 60 * 2;
+        long step = 2L * 60L * 2L;
 
-        if (number < 48 * step) {
-            return (int) (16 + number / step);
+        if (number < 48L * step) {
+            return 16 + (int) (number / step);
         } else {
             return 64;
         }

@@ -81,12 +81,12 @@ public class Constants {
     /**
      * The number of blocks per day.
      */
-    public static final long BLOCKS_PER_DAY = 2 * 60 * 24;
+    public static final long BLOCKS_PER_DAY = 2L * 60L * 24L;
 
     /**
      * The number of blocks per year.
      */
-    public static final long BLOCKS_PER_YEAR = 2 * 60 * 24 * 365;
+    public static final long BLOCKS_PER_YEAR = 2L * 60L * 24L * 365L;
 
     private Constants() {
     }

@@ -27,7 +27,7 @@ import org.semux.message.GUIMessages;
 
 public class ChangePasswordDialog extends JDialog implements ActionListener {
 
-    private SemuxGUI gui;
+    private transient SemuxGUI gui;
 
     public ChangePasswordDialog(SemuxGUI gui, JFrame parent) {
         super(parent, GUIMessages.get("ChangePassword"));

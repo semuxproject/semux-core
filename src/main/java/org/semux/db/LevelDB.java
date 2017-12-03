@@ -10,9 +10,8 @@ import static org.fusesource.leveldbjni.JniDBFactory.factory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -168,7 +167,7 @@ public class LevelDB implements KVDB {
 
     public static class LevelDBFactory implements DBFactory {
 
-        private Map<DBName, KVDB> databases = new HashMap<>();
+        private EnumMap<DBName, KVDB> databases = new EnumMap<>(DBName.class);
 
         public LevelDBFactory(Config config) {
             for (DBName name : DBName.values()) {

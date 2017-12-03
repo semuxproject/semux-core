@@ -44,7 +44,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private Kernel kernel;
+    private transient Kernel kernel;
 
     private LockGlassPane lockGlassPane;
 

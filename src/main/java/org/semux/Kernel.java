@@ -9,6 +9,7 @@ package org.semux;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -103,7 +104,8 @@ public class Kernel {
         // ====================================
         // set up client
         // ====================================
-        String ip = config.p2pDeclaredIp().isPresent() ? config.p2pDeclaredIp().get() : SystemUtil.getIp();
+        Optional<String> declaredIp = config.p2pDeclaredIp();
+        String ip = declaredIp.isPresent() ? declaredIp.get() : SystemUtil.getIp();
         logger.info("Your IP address = {}", ip);
         client = new PeerClient(ip, config.p2pListenPort(), coinbase);
 
@@ -181,7 +183,7 @@ public class Kernel {
                 // make sure consensus thread is fully stopped
                 consThread.join();
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // https://stackoverflow.com/a/4906814/670662
+                Thread.currentThread().interrupt();
                 logger.error("Failed to stop sync/consensus properly");
             }
 

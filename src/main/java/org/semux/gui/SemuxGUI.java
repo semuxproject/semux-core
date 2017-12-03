@@ -78,7 +78,7 @@ public class SemuxGUI {
         return model;
     }
 
-    public void start(String[] args) {
+    public void start() {
         wallet = new Wallet(new File(dataDir, "wallet.data"));
         model = new WalletModel(new AddressBook(new File(dataDir, "addressbook.json")));
 
@@ -251,6 +251,6 @@ public class SemuxGUI {
         // TODO: use specified data directory
         LoggerConfigurator.configure(new File(Constants.DEFAULT_DATA_DIR));
         setupLookAndFeel();
-        new SemuxGUI().start(args);
+        new SemuxGUI().start();
     }
 }
