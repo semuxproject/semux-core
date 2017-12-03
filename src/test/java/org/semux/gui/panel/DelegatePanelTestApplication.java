@@ -19,7 +19,7 @@ public class DelegatePanelTestApplication extends BaseTestApplication {
 
     DelegatePanelTestApplication(WalletModel walletModel) {
         super();
-        SemuxGUI gui = new SemuxGUI(new KernelMock(), new WalletModel(null));
+        SemuxGUI gui = new SemuxGUI(new KernelMock(), walletModel);
         delegatesPanel = new DelegatesPanel(gui, this);
         getContentPane().add(delegatesPanel);
     }

@@ -111,9 +111,13 @@ public class ApiHandlerImpl implements ApiHandler {
                 }
             }
             case ADD_TO_BLACKLIST: {
+                // TODO: blacklist
+
                 return failure("Not implmemented yet!");
             }
             case ADD_TO_WHITELIST: {
+                // TODO: whitelist
+
                 return failure("Not implmemented yet!");
             }
 
@@ -451,7 +455,7 @@ public class ApiHandlerImpl implements ApiHandler {
         JSONObject obj = new JSONObject();
         obj.put("ip", peer.getIp());
         obj.put("port", peer.getPort());
-        obj.put("p2pVersion", peer.getNetworkVersion());
+        obj.put("networkVersion", peer.getNetworkVersion());
         obj.put("clientId", peer.getClientId());
         obj.put("peerId", Hex.PREF + peer.getPeerId());
         obj.put("latestBlockNumber", peer.getLatestBlockNumber());

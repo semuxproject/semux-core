@@ -31,11 +31,5 @@ public enum DBName {
     /**
      * Delegate vote data.
      */
-    VOTE,
-
-    /**
-     * Test data
-     */
-    TEST
-
+    VOTE
 }

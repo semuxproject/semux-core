@@ -62,7 +62,6 @@ public class NodeManagerTest {
             kernel.setSyncManager(new SemuxSync(kernel));
 
             NodeManager nodeMgr = kernel.getNodeManager();
-            nodeMgr.start();
             nodeMgr.addNode(new InetSocketAddress(P2P_IP, P2P_PORT));
             nodeMgr.doConnect();
 

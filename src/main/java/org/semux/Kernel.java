@@ -189,9 +189,7 @@ public class Kernel {
             WriteLock lock = stateLock.writeLock();
             lock.lock();
             for (DBName name : DBName.values()) {
-                if (name != DBName.TEST) {
-                    dbFactory.getDB(name).close();
-                }
+                dbFactory.getDB(name).close();
             }
             lock.unlock();
 

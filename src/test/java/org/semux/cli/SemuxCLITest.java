@@ -37,7 +37,6 @@ import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.Kernel;
@@ -116,11 +115,14 @@ public class SemuxCLITest {
         ).when(wallet).getAccounts();
         when(wallet.addAccount(any(EdDSA.class))).thenReturn(true);
         when(wallet.flush()).thenReturn(true);
+
+        // mock CLI
         when(semuxCLI.loadWallet()).thenReturn(wallet);
+        doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
 
         // mock new account
         EdDSA newAccount = new EdDSA();
-        PowerMockito.whenNew(EdDSA.class).withAnyArguments().thenReturn(newAccount);
+        whenNew(EdDSA.class).withAnyArguments().thenReturn(newAccount);
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
@@ -129,13 +131,16 @@ public class SemuxCLITest {
         when(SystemUtil.getOsArch()).thenReturn("amd64");
 
         // execution
-        semuxCLI.startKernel();
+        semuxCLI.start();
 
         // verifies that a new account is added the empty wallet
         verify(wallet).unlock("oldpassword");
         verify(wallet, times(2)).getAccounts();
         verify(wallet).addAccount(any(EdDSA.class));
         verify(wallet).flush();
+
+        // verifies that kernel starts
+        verify(semuxCLI).startKernel(any(), any(), any());
 
         // assert outputs
         List<LoggingEvent> logs = TestAppender.events();
@@ -171,7 +176,7 @@ public class SemuxCLITest {
 
         // mock account
         EdDSA newAccount = new EdDSA();
-        PowerMockito.whenNew(EdDSA.class).withAnyArguments().thenReturn(newAccount);
+        whenNew(EdDSA.class).withAnyArguments().thenReturn(newAccount);
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
@@ -289,7 +294,7 @@ public class SemuxCLITest {
         // mock SystemUtil
         mockStatic(SystemUtil.class);
         when(SystemUtil.readPassword()).thenReturn("oldpassword");
-        doCallRealMethod().when(SystemUtil.class, "exit", Mockito.any(Integer.class));
+        doCallRealMethod().when(SystemUtil.class, "exit", any(Integer.class));
 
         // expect System.exit(1)
         exit.expectSystemExitWithStatus(1);
@@ -316,7 +321,7 @@ public class SemuxCLITest {
         // mock SystemUtil
         mockStatic(SystemUtil.class);
         when(SystemUtil.readPassword()).thenReturn("oldpassword");
-        doCallRealMethod().when(SystemUtil.class, "exit", Mockito.any(Integer.class));
+        doCallRealMethod().when(SystemUtil.class, "exit", any(Integer.class));
 
         // expectation
         exit.expectSystemExitWithStatus(1);
@@ -344,7 +349,7 @@ public class SemuxCLITest {
         // mock SystemUtil
         mockStatic(SystemUtil.class);
         when(SystemUtil.readPassword()).thenReturn("oldpassword");
-        doCallRealMethod().when(SystemUtil.class, "exit", Mockito.any(Integer.class));
+        doCallRealMethod().when(SystemUtil.class, "exit", any(Integer.class));
 
         // expectation
         exit.expectSystemExitWithStatus(2);

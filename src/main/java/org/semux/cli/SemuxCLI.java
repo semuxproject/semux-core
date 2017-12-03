@@ -18,6 +18,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
+import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.MainNetConfig;
 import org.semux.core.Wallet;
@@ -129,7 +130,7 @@ public class SemuxCLI {
         } else if (commandLine.hasOption(CLIOptions.IMPORT_PRIVATE_KEY.toString())) {
             importPrivateKey(commandLine.getOptionValue(CLIOptions.IMPORT_PRIVATE_KEY.toString()).trim());
         } else {
-            startKernel();
+            start();
         }
     }
 
@@ -143,7 +144,7 @@ public class SemuxCLI {
         System.out.println(Constants.CLIENT_VERSION);
     }
 
-    protected void startKernel() {
+    protected void start() {
         Wallet wallet = loadAndUnlockWallet();
 
         List<EdDSA> accounts = wallet.getAccounts();
@@ -161,8 +162,14 @@ public class SemuxCLI {
         }
 
         // start kernel
-        Kernel kernel = new Kernel(new MainNetConfig(dataDir), wallet, wallet.getAccount(coinbase));
+        startKernel(new MainNetConfig(dataDir), wallet, wallet.getAccount(coinbase));
+    }
+
+    protected Kernel startKernel(Config config, Wallet wallet, EdDSA coinbase) {
+        Kernel kernel = new Kernel(config, wallet, coinbase);
         kernel.start();
+
+        return kernel;
     }
 
     protected void createAccount() {

@@ -191,7 +191,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
             if (isValid(worldMsg)) {
                 Peer peer = worldMsg.getPeer();
-                channel.onActive(peer);
+                channelMgr.onChannelActive(channel, peer);
 
                 // handshake done
                 onHandshakeDone(peer);
