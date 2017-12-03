@@ -27,14 +27,18 @@ public class CIDRFilterRuleTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                // ipv4 cidr notation
-                { "127.0.0.1/8", "127.1.2.3", true }, { "127.0.0.1/8", "128.0.0.1", false },
+                // ipv4 cidr notations
+                { "127.0.0.1/8", "127.1.2.3", true },
+                { "127.0.0.1/8", "128.0.0.1", false },
+                { "192.168.0.0/16", "192.168.1.2", true },
 
                 // ipv4 single ip
-                { "127.0.0.1", "127.0.0.1", true }, { "127.0.0.1", "127.0.0.2", false },
+                { "127.0.0.1", "127.0.0.1", true },
+                { "127.0.0.1", "127.0.0.2", false },
 
-                // ipv6 cidr notation
-                { "2001:db8::/48", "2001:db8:0:0:0:0:0:0", true }, { "2001:db8::/48", "2001:db8:1:0:0:0:0:0", false },
+                // ipv6 cidr notations
+                { "2001:db8::/48", "2001:db8:0:0:0:0:0:0", true },
+                { "2001:db8::/48", "2001:db8:1:0:0:0:0:0", false },
 
                 // ipv6 single ip
                 { "2001:4860:4860::8888", "2001:4860:4860::8888", true },

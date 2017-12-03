@@ -6,7 +6,6 @@
  */
 package org.semux.net.filter;
 
-import io.netty.handler.ipfilter.IpFilterRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -62,12 +61,15 @@ public class SemuxIpFilterTest {
                 {
                         new SemuxIpFilter.Builder()
                                 .accept("127.0.0.1")
+                                .accept("192.168.0.0/16")
                                 .reject("0.0.0.0/0")
                                 .reject("::/0")
                                 .build(),
                         new HashMap<String, Boolean>() {
                             {
                                 put("127.0.0.1", false);
+                                put("192.168.0.1", false);
+                                put("192.168.1.2", false);
                                 put("8.8.8.8", true);
                                 put("0:0:0:0:0:0:0:1", true);
                                 put("2001:4860:4860::8888", true);
@@ -79,10 +81,13 @@ public class SemuxIpFilterTest {
                 {
                         new SemuxIpFilter.Builder()
                                 .reject("127.0.0.1")
+                                .reject("192.168.0.0/16")
                                 .build(),
                         new HashMap<String, Boolean>() {
                             {
                                 put("127.0.0.1", true);
+                                put("192.168.0.1", true);
+                                put("192.168.1.2", true);
                                 put("8.8.8.8", false);
                                 put("0:0:0:0:0:0:0:1", false);
                                 put("2001:4860:4860::8888", false);
