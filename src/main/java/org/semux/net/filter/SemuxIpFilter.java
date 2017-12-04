@@ -81,8 +81,8 @@ public class SemuxIpFilter {
         // prepend a REJECT IP rule to the rules list to ensure that the IP will be
         // blocked
         IpSingleFilterRule rule = new IpSingleFilterRule(ip, IpFilterRuleType.REJECT);
-        rules.remove(rule);
-        rules.add(0, rule);
+        rules.remove(rule); // remove duplicated rule
+        rules.add(0, rule); // prepend rule
         logger.info("Blacklisted IP {}", ip);
     }
 
@@ -96,8 +96,8 @@ public class SemuxIpFilter {
         // prepend an ACCEPT IP rule to the rules list to ensure that the IP will be
         // accepted
         IpSingleFilterRule rule = new IpSingleFilterRule(ip, IpFilterRuleType.ACCEPT);
-        rules.remove(rule);
-        rules.add(0, rule);
+        rules.remove(rule); // remove duplicated rule
+        rules.add(0, rule); // prepend rule
         logger.info("Whitelisted IP {}", ip);
     }
 

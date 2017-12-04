@@ -25,9 +25,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import io.netty.handler.ipfilter.IpFilterRuleType;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.core.Block;
@@ -92,8 +91,8 @@ public class APIHandlerTest {
     private static NodeManager nodeMgr;
     private static ChannelManager channelMgr;
 
-    @BeforeClass
-    public static void setup() {
+    @Before
+    public void setUp() {
         api = new SemuxAPIMock();
         api.start(API_IP, API_PORT);
 
@@ -102,22 +101,19 @@ public class APIHandlerTest {
 
         chain = api.getKernel().getBlockchain();
         accountState = api.getKernel().getBlockchain().getAccountState();
+        accountState.adjustAvailable(wallet.getAccount(0).toAddress(), 5000 * Unit.SEM);
         delegateState = api.getKernel().getBlockchain().getDelegateState();
         pendingMgr = api.getKernel().getPendingManager();
         nodeMgr = api.getKernel().getNodeManager();
         channelMgr = api.getKernel().getChannelManager();
     }
 
-    @Before
-    public void rollbackState() {
-        accountState.rollback();
-        delegateState.rollback();
-
-        pendingMgr.clear();
-
-        accountState.adjustAvailable(wallet.getAccount(0).toAddress(), 5000 * Unit.SEM);
-
-        channelMgr.getIpFilter().purgeRules();
+    @After
+    public void tearDown() throws IOException {
+        api.stop();
+        if (wallet.exists()) {
+            wallet.delete();
+        }
     }
 
     private static JSONObject request(String uri) throws IOException {
@@ -183,13 +179,12 @@ public class APIHandlerTest {
 
     @Test
     public void testAddToBlacklist() throws IOException {
-        String uri = "/add_to_blacklist?ip=8.8.8.8";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
+        // blacklist 8.8.8.8
+        assertTrue(request("/add_to_blacklist?ip=8.8.8.8").getBoolean("success"));
 
+        // assert that 8.8.8.8 is no longer acceptable
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
         when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
-
         assertFalse(channelMgr.isAcceptable(inetSocketAddress));
     }
 
@@ -198,14 +193,28 @@ public class APIHandlerTest {
         // reject all connections
         channelMgr.getIpFilter().appendRule(new CIDRFilterRule("0.0.0.0/0", IpFilterRuleType.REJECT));
 
-        String uri = "/add_to_whitelist?ip=8.8.8.8";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
+        // whitelist 8.8.8.8
+        assertTrue(request("/add_to_whitelist?ip=8.8.8.8").getBoolean("success"));
 
+        // assert that 8.8.8.8 is acceptable
+        InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
+        when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
+        assertTrue(channelMgr.isAcceptable(inetSocketAddress));
+    }
+
+    @Test
+    public void tesAddToBlacklistThenWhitelist() throws IOException {
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
         when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
 
+        assertTrue(request("/add_to_blacklist?ip=8.8.8.8").getBoolean("success"));
+        assertTrue(!channelMgr.isAcceptable(inetSocketAddress));
+
+        assertTrue(request("/add_to_whitelist?ip=8.8.8.8").getBoolean("success"));
         assertTrue(channelMgr.isAcceptable(inetSocketAddress));
+
+        assertTrue(request("/add_to_blacklist?ip=8.8.8.8").getBoolean("success"));
+        assertTrue(!channelMgr.isAcceptable(inetSocketAddress));
     }
 
     @Test
@@ -256,18 +265,12 @@ public class APIHandlerTest {
         Block block = createBlock(chain, Collections.singletonList(tx), Collections.singletonList(res));
         chain.addBlock(block);
 
-        try {
-            String uri = "/get_pending_transactions";
-            JsonObject response = request(uri);
-            assertTrue(response.getBoolean("success"));
+        String uri = "/get_pending_transactions";
+        JsonObject response = request(uri);
+        assertTrue(response.getBoolean("success"));
 
-            JsonArray arr = response.getJsonArray("result");
-            assertNotNull(arr);
-        } finally {
-            // Reset the API server
-            teardown();
-            setup();
-        }
+        JsonArray arr = response.getJsonArray("result");
+        assertNotNull(arr);
     }
 
     @Test
@@ -277,18 +280,12 @@ public class APIHandlerTest {
         Block block = createBlock(chain, Collections.singletonList(tx), Collections.singletonList(res));
         chain.addBlock(block);
 
-        try {
-            String uri = "/get_account_transactions?address=" + Hex.encode(tx.getFrom()) + "&from=0&to=1024";
-            JsonObject response = request(uri);
-            assertTrue(response.getBoolean("success"));
+        String uri = "/get_account_transactions?address=" + Hex.encode(tx.getFrom()) + "&from=0&to=1024";
+        JsonObject response = request(uri);
+        assertTrue(response.getBoolean("success"));
 
-            JsonArray arr = response.getJsonArray("result");
-            assertNotNull(arr);
-        } finally {
-            // Reset the API server
-            teardown();
-            setup();
-        }
+        JsonArray arr = response.getJsonArray("result");
+        assertNotNull(arr);
     }
 
     @Test
@@ -298,18 +295,12 @@ public class APIHandlerTest {
         Block block = createBlock(chain, Collections.singletonList(tx), Collections.singletonList(res));
         chain.addBlock(block);
 
-        try {
-            String uri = "/get_transaction?hash=" + Hex.encode(tx.getHash());
-            JsonObject response = request(uri);
-            assertTrue(response.getBoolean("success"));
+        String uri = "/get_transaction?hash=" + Hex.encode(tx.getHash());
+        JsonObject response = request(uri);
+        assertTrue(response.getBoolean("success"));
 
-            JsonObject obj = response.getJsonObject("result");
-            assertArrayEquals(tx.getHash(), Hex.parse(obj.getString("hash")));
-        } finally {
-            // Reset the API server
-            teardown();
-            setup();
-        }
+        JsonObject obj = response.getJsonObject("result");
+        assertArrayEquals(tx.getHash(), Hex.parse(obj.getString("hash")));
     }
 
     @Test
@@ -471,14 +462,6 @@ public class APIHandlerTest {
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.getString("result")));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.UNVOTE);
-    }
-
-    @AfterClass
-    public static void teardown() throws IOException {
-        api.stop();
-        if (wallet.exists()) {
-            wallet.delete();
-        }
     }
 
     private Block createBlock(Blockchain chain, List<Transaction> transactions, List<TransactionResult> results) {
