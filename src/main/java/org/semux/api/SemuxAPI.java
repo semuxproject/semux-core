@@ -6,27 +6,21 @@
  */
 package org.semux.api;
 
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Semux API launcher
@@ -57,29 +51,20 @@ public class SemuxAPI {
     }
 
     public void start() {
-        start(config.apiListenIp(), config.apiListenPort(), new HttpHandler(config, new ApiHandlerImpl(kernel)));
+        start(config.apiListenIp(), config.apiListenPort(), new SemuxAPIHttpChannelInitializer());
     }
 
     public void start(String ip, int port) {
-        start(ip, port, new HttpHandler(config, new ApiHandlerImpl(kernel)));
+        start(ip, port, new SemuxAPIHttpChannelInitializer());
     }
 
-    public void start(String ip, int port, HttpHandler handler) {
+    public void start(String ip, int port, HttpChannelInitializer httpChannelInitializer) {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1, factory);
         EventLoopGroup workerGroup = new NioEventLoopGroup(0, factory);
         try {
             ServerBootstrap b = new ServerBootstrap();
-            ChannelInitializer<SocketChannel> initializer = new ChannelInitializer<SocketChannel>() {
-                @Override
-                public void initChannel(SocketChannel ch) {
-                    ChannelPipeline p = ch.pipeline();
-                    p.addLast(new HttpRequestDecoder());
-                    p.addLast(new HttpResponseEncoder());
-                    p.addLast(handler);
-                }
-            };
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                    .handler(new LoggingHandler(LogLevel.INFO)).childHandler(initializer);
+                    .handler(new LoggingHandler(LogLevel.INFO)).childHandler(httpChannelInitializer);
 
             logger.info("Starting API server: address = {}:{}", ip, port);
             channelFuture = b.bind(ip, port).sync();
@@ -109,5 +94,13 @@ public class SemuxAPI {
 
     public boolean isRunning() {
         return isRunning.get();
+    }
+
+    private class SemuxAPIHttpChannelInitializer extends HttpChannelInitializer {
+
+        @Override
+        public HttpHandler initHandler() {
+            return new HttpHandler(config, new ApiHandlerImpl(kernel));
+        }
     }
 }
