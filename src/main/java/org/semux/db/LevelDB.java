@@ -10,7 +10,6 @@ import static org.fusesource.leveldbjni.JniDBFactory.factory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -52,10 +51,9 @@ public class LevelDB implements KVDB {
         options.verifyChecksums(true);
         options.maxOpenFiles(128);
 
-        try {
-            Files.createDirectory(file.getParentFile().toPath());
-        } catch (IOException e) {
-            logger.error("Failed to create directory: {}", file.getParentFile(), e);
+        File dir = file.getParentFile();
+        if (!dir.exists() && !dir.mkdirs()) {
+            logger.error("Failed to create directory: {}", dir);
         }
 
         try {
