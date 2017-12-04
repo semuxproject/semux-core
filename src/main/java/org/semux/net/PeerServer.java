@@ -9,7 +9,8 @@ package org.semux.net;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.semux.Config;
+import org.semux.Kernel;
+import org.semux.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,7 @@ public class PeerServer {
         }
     };
 
-    protected SemuxChannelInitializer channelHandler;
+    protected Kernel kernel;
 
     protected boolean listening;
 
@@ -46,8 +47,12 @@ public class PeerServer {
     protected EventLoopGroup workerGroup;
     protected ChannelFuture channelFuture;
 
-    public PeerServer(SemuxChannelInitializer channelHandler) {
-        this.channelHandler = channelHandler;
+    public PeerServer(Kernel kernel) {
+        this.kernel = kernel;
+    }
+
+    public void start() {
+        start(kernel.getConfig().p2pListenIp(), kernel.getConfig().p2pListenPort());
     }
 
     public void start(String ip, int port) {
@@ -62,10 +67,10 @@ public class PeerServer {
 
             b.option(ChannelOption.SO_KEEPALIVE, true);
             b.option(ChannelOption.MESSAGE_SIZE_ESTIMATOR, DefaultMessageSizeEstimator.DEFAULT);
-            b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Config.NET_TIMEOUT_CONNECT);
+            b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Constants.DEFAULT_CONNECT_TIMEOUT);
 
             b.handler(new LoggingHandler());
-            b.childHandler(channelHandler);
+            b.childHandler(new SemuxChannelInitializer(kernel, null));
 
             logger.info("Starting peer server: address = {}:{}", ip, port);
             channelFuture = b.bind(ip, port).sync();

@@ -13,43 +13,49 @@ import static org.junit.Assert.assertTrue;
 import java.net.InetSocketAddress;
 
 import org.junit.Test;
-import org.semux.core.Blockchain;
+import org.semux.KernelMock;
+import org.semux.consensus.SemuxBFT;
+import org.semux.consensus.SemuxSync;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB;
+import org.semux.db.MemoryDB.MemoryDBFactory;
 
 public class PeerClientTest {
 
+    private static final String P2P_IP = "127.0.0.1";
+    private static final int P2P_PORT = 15161;
+
     @Test
-    public void testServer() throws InterruptedException {
-        EdDSA key1 = new EdDSA();
-        PeerClient remoteClient = new PeerClient("127.0.0.1", 5161, key1);
-        InetSocketAddress remoteAddress = new InetSocketAddress(remoteClient.getIp(), remoteClient.getPort());
+    public void testConnect() throws InterruptedException {
 
         PeerServerMock ps = new PeerServerMock();
-        ps.start(remoteClient, true);
+        ps.start(P2P_IP, P2P_PORT);
         assertTrue(ps.getServer().isListening());
 
         try {
-            EdDSA key2 = new EdDSA();
-            PeerClient client = new PeerClient("127.0.0.1", 5162, key2);
+            EdDSA key = new EdDSA();
+            PeerClient client = new PeerClient(P2P_IP, P2P_PORT + 1, key);
 
-            Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
-            ChannelManager channelMgr = new ChannelManager();
-            PendingManager pendingMgr = new PendingManager(chain, channelMgr);
-            NodeManager nodeMgr = new NodeManager(chain, channelMgr, pendingMgr, client);
+            KernelMock kernel = new KernelMock();
+            kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new MemoryDBFactory()));
+            kernel.setClient(client);
+            kernel.setChannelManager(new ChannelManager());
+            kernel.setPendingManager(new PendingManager(kernel));
+            kernel.setNodeManager(new NodeManager(kernel));
+            kernel.setConsensus(new SemuxBFT(kernel));
+            kernel.setSyncManager(new SemuxSync(kernel));
 
-            SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, pendingMgr, nodeMgr, client,
-                    remoteAddress);
+            InetSocketAddress remoteAddress = new InetSocketAddress(P2P_IP, P2P_PORT);
+            SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, remoteAddress);
             client.connectAsync(remoteAddress, ci).sync();
 
             // waiting for the HELLO message to be sent
             Thread.sleep(1000);
-            assertEquals(1, channelMgr.getActivePeers().size());
+            assertEquals(1, kernel.getChannelManager().getActivePeers().size());
 
             client.close();
-            assertEquals(0, channelMgr.getActivePeers().size());
+            assertEquals(0, kernel.getChannelManager().getActivePeers().size());
         } finally {
             ps.stop();
             assertFalse(ps.getServer().isListening());

@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.semux.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,13 +29,15 @@ public class ChannelManager {
     private Map<String, Channel> activeChannels = new HashMap<>();
 
     /**
-     * Returns whether an address is in the blacklist.
+     * Returns whether a connection from the given address is acceptable or not.
      * 
      * @param address
      * @return
      */
-    public synchronized boolean isBlocked(InetSocketAddress address) {
-        return Config.NET_BLACKLIST.contains(address.getAddress().getHostAddress());
+    public synchronized boolean isAcceptable(InetSocketAddress address) {
+        // TODO: implement whitelist, blacklist and connection policy
+
+        return true;
     }
 
     /**
@@ -116,9 +117,11 @@ public class ChannelManager {
      * When a channel becomes active.
      * 
      * @param channel
+     * @param peer
      */
-    public synchronized void onChannelActive(Channel channel) {
-        activeChannels.put(channel.getRemotePeer().getPeerId(), channel);
+    public synchronized void onChannelActive(Channel channel, Peer peer) {
+        channel.onActive(peer);
+        activeChannels.put(peer.getPeerId(), channel);
     }
 
     /**

@@ -6,11 +6,13 @@
  */
 package org.semux.vm;
 
+import org.semux.config.Constants;
+import org.semux.config.DevNetConfig;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.TransactionResult;
 import org.semux.core.state.AccountState;
-import org.semux.db.MemoryDB;
+import org.semux.db.MemoryDB.MemoryDBFactory;
 import org.semux.util.Bytes;
 
 public class SemuxRuntimeMock implements SemuxRuntime {
@@ -39,7 +41,7 @@ public class SemuxRuntimeMock implements SemuxRuntime {
         this.blockCoinbase = Bytes.random(20);
         this.blockTimestamp = System.currentTimeMillis() - 24 * 60 * 60 * 1000;
 
-        Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
+        Blockchain chain = new BlockchainImpl(new DevNetConfig(Constants.DEFAULT_DATA_DIR), new MemoryDBFactory());
         this.accountState = chain.getAccountState();
         this.result = new TransactionResult(true);
     }

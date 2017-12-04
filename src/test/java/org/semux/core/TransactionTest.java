@@ -13,7 +13,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.semux.Config;
+import org.semux.config.Config;
+import org.semux.config.Constants;
+import org.semux.config.DevNetConfig;
 import org.semux.crypto.EdDSA;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
@@ -23,12 +25,13 @@ public class TransactionTest {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionTest.class);
 
+    private Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
     private EdDSA key = new EdDSA();
 
     private TransactionType type = TransactionType.TRANSFER;
     private byte[] to = Bytes.random(20);
     private long value = 2;
-    private long fee = Config.MIN_TRANSACTION_FEE;
+    private long fee = config.minTransactionFee();
     private long nonce = 1;
     private long timestamp = System.currentTimeMillis();
     private byte[] data = Bytes.of("data");

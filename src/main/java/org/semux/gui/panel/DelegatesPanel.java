@@ -35,8 +35,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
-import org.semux.Config;
 import org.semux.Kernel;
+import org.semux.config.Config;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.PendingManager;
@@ -46,12 +46,13 @@ import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
-import org.semux.message.GUIMessages;
+import org.semux.gui.SemuxGUI;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.DelegateDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
+import org.semux.message.GUIMessages;
 import org.semux.util.Bytes;
 import org.semux.util.SystemUtil;
 import org.semux.util.UnreachableException;
@@ -65,6 +66,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             GUIMessages.get("Status"), GUIMessages.get("Rate") };
 
     private transient WalletModel model;
+
+    private transient Kernel kernel;
+    private transient Config config;
 
     private JTable table;
     private DelegatesTableModel tableModel;
@@ -91,9 +95,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private JTextField textName;
     private JLabel labelSelectedDelegate;
 
-    public DelegatesPanel(JFrame frame, WalletModel model) {
-        this.model = model;
+    public DelegatesPanel(SemuxGUI gui, JFrame frame) {
+        this.model = gui.getModel();
         this.model.addListener(this);
+
+        this.kernel = gui.getKernel();
+        this.config = kernel.getConfig();
 
         tableModel = new DelegatesTableModel();
         table = new JTable(tableModel);
@@ -122,7 +129,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 if (me.getClickCount() == 2) {
                     WalletDelegate d = tableModel.getRow(sourceTable.convertRowIndexToModel(row));
                     if (d != null) {
-                        DelegateDialog dialog = new DelegateDialog(frame, d);
+                        DelegateDialog dialog = new DelegateDialog(gui, frame, d);
                         dialog.setVisible(true);
                     }
                 }
@@ -147,7 +154,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         delegateRegistrationPanel.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         JLabel label = new JLabel(GUIMessages.get("DelegateRegistrationNoteHtml",
-                SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT), SwingUtil.formatValue(Config.MIN_TRANSACTION_FEE)));
+                SwingUtil.formatValue(config.minDelegateFee()), SwingUtil.formatValue(config.minTransactionFee())));
         label.setForeground(Color.DARK_GRAY);
 
         from = new JComboBox<>();
@@ -243,7 +250,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         JButton btnDelegate = SwingUtil.createDefaultButton(GUIMessages.get("RegisterAsDelegate"), this,
                 Action.DELEGATE);
         btnDelegate.setToolTipText(
-                GUIMessages.get("RegisterAsDelegateToolTip", SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT)));
+                GUIMessages.get("RegisterAsDelegateToolTip", SwingUtil.formatValue(config.minDelegateFee())));
 
         textName = SwingUtil.textFieldWithCopyPastePopup();
 
@@ -333,7 +340,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             case 4:
                 return SwingUtil.formatVote(d.getVotesFromMe());
             case 5:
-                return d.isValidator() ? "V" : "S";
+                return d.isValidator(kernel) ? "V" : "S";
             case 6:
                 return SwingUtil.formatPercentage(d.getRate());
             default:
@@ -368,7 +375,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, GUIMessages.get("EnterValidNumberOfvotes"));
                 break;
             }
-            long fee = Config.MIN_TRANSACTION_FEE;
+            long fee = config.minTransactionFee();
 
             if (a == null) {
                 JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
@@ -397,7 +404,6 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     break;
                 }
 
-                Kernel kernel = Kernel.getInstance();
                 PendingManager pendingMgr = kernel.getPendingManager();
 
                 TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
@@ -420,9 +426,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
             } else if (!name.matches("[_a-z0-9]{4,16}")) {
                 JOptionPane.showMessageDialog(this, GUIMessages.get("AccountNameError"));
-            } else if (a.getAvailable() < Config.DELEGATE_BURN_AMOUNT + Config.MIN_TRANSACTION_FEE) {
+            } else if (a.getAvailable() < config.minDelegateFee() + config.minTransactionFee()) {
                 JOptionPane.showMessageDialog(this, GUIMessages.get("InsufficientFunds",
-                        SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT + Config.MIN_TRANSACTION_FEE)));
+                        SwingUtil.formatValue(config.minDelegateFee() + config.minTransactionFee())));
             } else {
                 // confirm system requirements
                 if (!SystemUtil.bench() && JOptionPane.showConfirmDialog(this, GUIMessages.get("ComputerNotQualified"),
@@ -433,19 +439,18 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
                 // confirm burning amount
                 if (JOptionPane.showConfirmDialog(this,
-                        GUIMessages.get("DelegateRegistrationInfo", SwingUtil.formatValue(Config.DELEGATE_BURN_AMOUNT)),
+                        GUIMessages.get("DelegateRegistrationInfo", SwingUtil.formatValue(config.minDelegateFee())),
                         GUIMessages.get("ConfirmDelegateRegistration"),
                         JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
                     break;
                 }
 
-                Kernel kernel = Kernel.getInstance();
                 PendingManager pendingMgr = kernel.getPendingManager();
 
                 TransactionType type = TransactionType.DELEGATE;
                 byte[] fromAddress = a.getKey().toAddress();
-                long value = Config.DELEGATE_BURN_AMOUNT;
-                long fee = Config.MIN_TRANSACTION_FEE;
+                long value = config.minDelegateFee();
+                long fee = config.minTransactionFee();
                 long nonce = pendingMgr.getNonce(fromAddress);
                 long timestamp = System.currentTimeMillis();
                 byte[] data = Bytes.of(name);
@@ -520,7 +525,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         WalletAccount acc = getSelectedAccount();
         if (acc != null) {
             byte[] voter = acc.getKey().toAddress();
-            Blockchain chain = Kernel.getInstance().getBlockchain();
+            Blockchain chain = kernel.getBlockchain();
             DelegateState ds = chain.getDelegateState();
             for (WalletDelegate wd : delegates) {
                 long vote = ds.getVote(voter, wd.getAddress());

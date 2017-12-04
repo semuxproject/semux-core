@@ -9,90 +9,75 @@ package org.semux;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
-import org.semux.api.ApiHandlerImpl;
 import org.semux.api.SemuxAPI;
+import org.semux.config.Config;
 import org.semux.consensus.SemuxBFT;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
+import org.semux.core.SyncManager;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.db.DBFactory;
 import org.semux.db.DBName;
-import org.semux.db.KVDB;
-import org.semux.db.LevelDB;
-import org.semux.exception.KernelException;
+import org.semux.db.LevelDB.LevelDBFactory;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
 import org.semux.net.PeerServer;
-import org.semux.net.SemuxChannelInitializer;
-import org.semux.util.StringUtil;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
- * Kernel maintains global instances of different kernel modules. It contains
- * functionalities shared by both GUI and CLI.
+ * Kernel holds references to each individual components.
  */
 public class Kernel {
-    private static final Logger logger = LoggerFactory.getLogger(Config.class);
+    protected static final Logger logger = LoggerFactory.getLogger(Kernel.class);
 
-    private AtomicBoolean isRunning = new AtomicBoolean(false);
+    protected AtomicBoolean isRunning = new AtomicBoolean(false);
+    protected ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
+    protected Config config = null;
 
-    private Wallet wallet;
-    private EdDSA coinbase;
+    protected Wallet wallet;
+    protected EdDSA coinbase;
 
-    private Blockchain chain;
-    private PeerClient client;
+    protected Blockchain chain;
+    protected PeerClient client;
 
-    private PendingManager pendingMgr;
-    private ChannelManager channelMgr;
-    private NodeManager nodeMgr;
+    protected PendingManager pendingMgr;
+    protected ChannelManager channelMgr;
+    protected NodeManager nodeMgr;
 
-    private static Kernel instance;
-
-    /**
-     * Get the kernel instance.
-     * 
-     * @return
-     */
-    public static synchronized Kernel getInstance() {
-        if (instance == null) {
-            instance = new Kernel();
-        }
-        return instance;
-    }
-
-    private Kernel() {
-    }
+    protected SemuxSync sync;
+    protected SemuxBFT cons;
 
     /**
-     * Initialize the kernel with the given arguments.
+     * Creates a kernel instance and initializes it.
      * 
-     * @param dataDir
-     *            work directory
+     * @param config
+     *            the config instance
      * @param wallet
-     *            wallet instance
+     *            the wallet instance
      * @param coinbase
-     *            coinbase account
+     *            the coinbase key
      */
-    public void init(String dataDir, Wallet wallet, int coinbase) {
-        Config.DATA_DIR = dataDir;
-        Config.init();
-
+    public Kernel(Config config, Wallet wallet, EdDSA coinbase) {
+        this.config = config;
         this.wallet = wallet;
-        this.coinbase = wallet.getAccounts().get(coinbase);
+        this.coinbase = coinbase;
     }
 
     /**
@@ -107,48 +92,29 @@ public class Kernel {
         // ====================================
         // initialization
         // ====================================
-        logger.info(Config.getClientId(true));
-        logger.info("System booting up: network = {}, coinbase = {}", Config.NETWORK_ID, coinbase);
+        logger.info(config.getClientId());
+        logger.info("System booting up: network = [{}, {}], coinbase = {}", config.networkId(), config.networkVersion(),
+                coinbase);
 
-        DBFactory dbFactory = new DBFactory() {
-            private final KVDB indexDB = new LevelDB(DBName.INDEX);
-            private final KVDB blockDB = new LevelDB(DBName.BLOCK);
-            private final KVDB accountDB = new LevelDB(DBName.ACCOUNT);
-            private final KVDB delegateDB = new LevelDB(DBName.DELEGATE);
-            private final KVDB voteDB = new LevelDB(DBName.VOTE);
-
-            @Override
-            public KVDB getDB(DBName name) {
-                switch (name) {
-                case INDEX:
-                    return indexDB;
-                case BLOCK:
-                    return blockDB;
-                case ACCOUNT:
-                    return accountDB;
-                case DELEGATE:
-                    return delegateDB;
-                case VOTE:
-                    return voteDB;
-                default:
-                    throw new KernelException("Unexpected database: " + name);
-                }
-            }
-        };
-        chain = new BlockchainImpl(dbFactory);
+        DBFactory dbFactory = new LevelDBFactory(config);
+        chain = new BlockchainImpl(config, dbFactory);
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
 
-        String ip = StringUtil.isNullOrEmpty(Config.P2P_DECLARED_IP) ? SystemUtil.getIp() : Config.P2P_DECLARED_IP;
+        // ====================================
+        // set up client
+        // ====================================
+        Optional<String> declaredIp = config.p2pDeclaredIp();
+        String ip = declaredIp.isPresent() ? declaredIp.get() : SystemUtil.getIp();
         logger.info("Your IP address = {}", ip);
-        client = new PeerClient(ip, Config.P2P_LISTEN_PORT, coinbase);
+        client = new PeerClient(ip, config.p2pListenPort(), coinbase);
 
         // ====================================
         // start channel/pending/node manager
         // ====================================
         channelMgr = new ChannelManager();
-        pendingMgr = new PendingManager(chain, channelMgr);
-        nodeMgr = new NodeManager(chain, channelMgr, pendingMgr, client);
+        pendingMgr = new PendingManager(this);
+        nodeMgr = new NodeManager(this);
 
         pendingMgr.start();
         nodeMgr.start();
@@ -156,30 +122,26 @@ public class Kernel {
         // ====================================
         // start p2p module
         // ====================================
-        SemuxChannelInitializer ci = new SemuxChannelInitializer(chain, channelMgr, pendingMgr, nodeMgr, client, null);
-        PeerServer p2p = new PeerServer(ci);
+        PeerServer p2p = new PeerServer(this);
 
-        Thread p2pThread = new Thread(() -> p2p.start(Config.P2P_LISTEN_IP, Config.P2P_LISTEN_PORT), "p2p-main");
+        Thread p2pThread = new Thread(() -> p2p.start(), "p2p");
         p2pThread.start();
 
         // ====================================
         // start API module
         // ====================================
-        SemuxAPI api = new SemuxAPI(new ApiHandlerImpl(wallet, chain, channelMgr, pendingMgr, nodeMgr, client));
+        SemuxAPI api = new SemuxAPI(this);
 
-        if (Config.API_ENABLED) {
-            Thread apiThread = new Thread(() -> api.start(Config.API_LISTEN_IP, Config.API_LISTEN_PORT), "api-main");
+        if (config.apiEnabled()) {
+            Thread apiThread = new Thread(() -> api.start(), "api");
             apiThread.start();
         }
 
         // ====================================
         // start sync/consensus
         // ====================================
-        SemuxSync sync = SemuxSync.getInstance();
-        sync.init(chain, channelMgr);
-
-        SemuxBFT cons = SemuxBFT.getInstance();
-        cons.init(chain, channelMgr, pendingMgr, coinbase);
+        sync = new SemuxSync(this);
+        cons = new SemuxBFT(this);
 
         Thread consThread = new Thread(cons::start, "cons");
         consThread.start();
@@ -196,8 +158,8 @@ public class Kernel {
                     logger.info("Found a gateway device: local address = {}, external address = {}",
                             gw.getLocalAddress().getHostAddress(), gw.getExternalIPAddress());
 
-                    gw.deletePortMapping(Config.P2P_LISTEN_PORT, "TCP");
-                    gw.addPortMapping(Config.P2P_LISTEN_PORT, Config.P2P_LISTEN_PORT,
+                    gw.deletePortMapping(config.p2pListenPort(), "TCP");
+                    gw.addPortMapping(config.p2pListenPort(), config.p2pListenPort(),
                             gw.getLocalAddress().getHostAddress(), "TCP", "Semux P2P network");
                 }
             } catch (IOException | SAXException | ParserConfigurationException e) {
@@ -221,17 +183,15 @@ public class Kernel {
                 // make sure consensus thread is fully stopped
                 consThread.join();
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // https://stackoverflow.com/a/4906814/670662
+                Thread.currentThread().interrupt();
                 logger.error("Failed to stop sync/consensus properly");
             }
 
-            // make sure no thread is updating state
-            WriteLock lock = Config.STATE_LOCK.writeLock();
+            // make sure no thread is reading/writing the state
+            WriteLock lock = stateLock.writeLock();
             lock.lock();
             for (DBName name : DBName.values()) {
-                if (name != DBName.TEST) {
-                    dbFactory.getDB(name).close();
-                }
+                dbFactory.getDB(name).close();
             }
             lock.unlock();
 
@@ -272,7 +232,7 @@ public class Kernel {
      * 
      * @return
      */
-    public PeerClient getPeerClient() {
+    public PeerClient getClient() {
         return client;
     }
 
@@ -312,4 +272,39 @@ public class Kernel {
         return isRunning.get();
     }
 
+    /**
+     * Returns the config.
+     * 
+     * @return
+     */
+    public Config getConfig() {
+        return config;
+    }
+
+    /**
+     * Returns the state lock.
+     * 
+     * @return
+     */
+    public ReentrantReadWriteLock getStateLock() {
+        return stateLock;
+    }
+
+    /**
+     * Returns the syncing manager.
+     * 
+     * @return
+     */
+    public SyncManager getSyncManager() {
+        return sync;
+    }
+
+    /**
+     * Returns the consensus.
+     * 
+     * @return
+     */
+    public Consensus getConsensus() {
+        return cons;
+    }
 }

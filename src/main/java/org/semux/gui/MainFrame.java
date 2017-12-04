@@ -6,17 +6,16 @@
  */
 package org.semux.gui;
 
-import org.semux.Kernel;
-import org.semux.core.Wallet;
-import org.semux.gui.dialog.InputDialog;
-import org.semux.gui.model.WalletModel;
-import org.semux.gui.panel.DelegatesPanel;
-import org.semux.gui.panel.HomePanel;
-import org.semux.gui.panel.ReceivePanel;
-import org.semux.gui.panel.SendPanel;
-import org.semux.gui.panel.TransactionsPanel;
-import org.semux.message.GUIMessages;
-import org.semux.util.UnreachableException;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -29,20 +28,23 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+
+import org.semux.Kernel;
+import org.semux.core.Wallet;
+import org.semux.gui.dialog.InputDialog;
+import org.semux.gui.panel.DelegatesPanel;
+import org.semux.gui.panel.HomePanel;
+import org.semux.gui.panel.ReceivePanel;
+import org.semux.gui.panel.SendPanel;
+import org.semux.gui.panel.TransactionsPanel;
+import org.semux.message.GUIMessages;
+import org.semux.util.UnreachableException;
 
 public class MainFrame extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
+
+    private transient Kernel kernel;
 
     private LockGlassPane lockGlassPane;
 
@@ -62,16 +64,18 @@ public class MainFrame extends JFrame implements ActionListener {
     private JPanel activePanel;
     private JButton activeButton;
 
-    public MainFrame(WalletModel model) {
+    public MainFrame(SemuxGUI gui) {
+        this.kernel = gui.getKernel();
+
         lockGlassPane = new LockGlassPane();
         lockGlassPane.setOpaque(false);
         this.setGlassPane(lockGlassPane);
 
-        panelHome = new HomePanel(model);
-        panelSend = new SendPanel(this, model);
-        panelReceive = new ReceivePanel(model);
-        panelTransactions = new TransactionsPanel(this, model);
-        panelDelegates = new DelegatesPanel(this, model);
+        panelHome = new HomePanel(gui);
+        panelSend = new SendPanel(gui, this);
+        panelReceive = new ReceivePanel(gui);
+        panelTransactions = new TransactionsPanel(gui, this);
+        panelDelegates = new DelegatesPanel(gui, this);
 
         // setup frame properties
         this.setTitle(GUIMessages.get("SemuxWallet"));
@@ -81,7 +85,7 @@ public class MainFrame extends JFrame implements ActionListener {
         SwingUtil.centerizeFrame(this, 900, 600);
 
         // setup menu bar
-        JMenuBar menuBar = new MenuBar(this);
+        JMenuBar menuBar = new MenuBar(gui, this);
         this.setJMenuBar(menuBar);
 
         // setup tool bar
@@ -203,7 +207,7 @@ public class MainFrame extends JFrame implements ActionListener {
                     String pwd = dialog.getInput();
 
                     if (pwd != null) {
-                        Wallet w = Kernel.getInstance().getWallet();
+                        Wallet w = kernel.getWallet();
                         if (w.getPassword().equals(pwd)) {
                             lockGlassPane.setVisible(false);
                         } else {

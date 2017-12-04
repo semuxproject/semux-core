@@ -19,6 +19,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.semux.Kernel;
 import org.semux.util.ByteArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,17 @@ public class SemuxVM {
             return new Thread(r, "vm-" + cnt.getAndIncrement());
         }
     };
+
+    private Kernel kernel;
+
+    /**
+     * Create a Semux virtual machine.
+     * 
+     * @param kernel
+     */
+    public SemuxVM(Kernel kernel) {
+        this.kernel = kernel;
+    }
 
     /**
      * Run a list of tasks in parallel.
@@ -87,7 +99,7 @@ public class SemuxVM {
         }
     }
 
-    private static class Worker implements Runnable {
+    private class Worker implements Runnable {
         private List<VMTask> tasks;
 
         public Worker(List<VMTask> queue) {
@@ -97,7 +109,7 @@ public class SemuxVM {
         @Override
         public void run() {
             for (VMTask task : tasks) {
-                SemuxProcess proc = new SemuxProcess(task.getRuntime(), task.getCode(), task.getLimit());
+                SemuxProcess proc = new SemuxProcess(kernel, task.getRuntime(), task.getCode(), task.getLimit());
                 proc.run();
                 task.setDone(true);
             }

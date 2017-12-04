@@ -9,7 +9,6 @@ package org.semux.util;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
@@ -17,35 +16,28 @@ import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semux.Config;
-import org.semux.api.APIServerMock;
-import org.semux.core.Wallet;
-import org.semux.crypto.EdDSA;
+import org.semux.api.SemuxAPIMock;
+import org.semux.config.Config;
 
 public class ApiUtilTest {
-    private static File file = new File("wallet_test.data");
-    private static String password = "password";
 
-    private static Wallet wallet;
-    private static APIServerMock api;
+    private static final String API_IP = "127.0.0.1";
+    private static final int API_PORT = 15171;
+
+    private static SemuxAPIMock api;
 
     @BeforeClass
     public static void setup() {
-        Config.init();
-
-        wallet = new Wallet(file);
-        wallet.unlock(password);
-        wallet.addAccount(new EdDSA());
-
-        api = new APIServerMock();
-        api.start(wallet, Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
+        api = new SemuxAPIMock();
+        api.start(API_IP, API_PORT);
     }
 
     @Test
     public void testRequest() throws IOException {
         String cmd = "get_block";
 
-        ApiUtil api = new ApiUtil(new InetSocketAddress("127.0.0.1", 5171), Config.API_USERNAME, Config.API_PASSWORD);
+        Config config = api.getKernel().getConfig();
+        ApiUtil api = new ApiUtil(new InetSocketAddress(API_IP, API_PORT), config.apiUsername(), config.apiPassword());
         JSONObject obj = api.request(cmd, "number", 0);
 
         assertTrue(obj.getBoolean("success"));
@@ -55,8 +47,5 @@ public class ApiUtilTest {
     @AfterClass
     public static void teardown() throws IOException {
         api.stop();
-        if (wallet.exists()) {
-            wallet.delete();
-        }
     }
 }

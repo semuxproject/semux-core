@@ -10,7 +10,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.semux.Config;
+import org.semux.config.Constants;
 import org.semux.crypto.EdDSA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,7 +129,7 @@ public class PeerClient {
 
         b.option(ChannelOption.SO_KEEPALIVE, true);
         b.option(ChannelOption.MESSAGE_SIZE_ESTIMATOR, DefaultMessageSizeEstimator.DEFAULT);
-        b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Config.NET_TIMEOUT_CONNECT);
+        b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Constants.DEFAULT_CONNECT_TIMEOUT);
         b.remoteAddress(remoteAddress);
 
         b.handler(ci);

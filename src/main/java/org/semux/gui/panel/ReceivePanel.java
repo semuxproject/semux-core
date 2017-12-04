@@ -6,20 +6,17 @@
  */
 package org.semux.gui.panel;
 
-import org.semux.Kernel;
-import org.semux.core.Wallet;
-import org.semux.crypto.EdDSA;
-import org.semux.crypto.Hex;
-import org.semux.gui.Action;
-import org.semux.gui.SemuxGUI;
-import org.semux.gui.SwingUtil;
-import org.semux.gui.model.WalletAccount;
-import org.semux.gui.model.WalletModel;
-import org.semux.message.GUIMessages;
-import org.semux.util.UnreachableException;
-import org.semux.gui.exception.QRCodeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -35,17 +32,21 @@ import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+
+import org.semux.Kernel;
+import org.semux.core.Wallet;
+import org.semux.crypto.EdDSA;
+import org.semux.crypto.Hex;
+import org.semux.gui.Action;
+import org.semux.gui.SemuxGUI;
+import org.semux.gui.SwingUtil;
+import org.semux.gui.exception.QRCodeException;
+import org.semux.gui.model.WalletAccount;
+import org.semux.gui.model.WalletModel;
+import org.semux.message.GUIMessages;
+import org.semux.util.UnreachableException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ReceivePanel extends JPanel implements ActionListener {
 
@@ -58,13 +59,17 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
     private transient WalletModel model;
 
+    private transient Kernel kernel;
+
     private JTable table;
     private ReceiveTableModel tableModel;
     private JLabel qr;
 
-    public ReceivePanel(WalletModel model) {
-        this.model = model;
+    public ReceivePanel(SemuxGUI gui) {
+        this.model = gui.getModel();
         this.model.addListener(this);
+
+        this.kernel = gui.getKernel();
 
         tableModel = new ReceiveTableModel();
         table = new JTable(tableModel);
@@ -231,12 +236,12 @@ public class ReceivePanel extends JPanel implements ActionListener {
         case NEW_ACCOUNT: {
             EdDSA key = new EdDSA();
 
-            Wallet wallet = Kernel.getInstance().getWallet();
+            Wallet wallet = kernel.getWallet();
             wallet.addAccount(key);
             wallet.flush();
 
             // fire update event
-            SemuxGUI.fireUpdateEvent();
+            model.fireUpdateEvent();
 
             JOptionPane.showMessageDialog(this, GUIMessages.get("NewAccountCreated"));
             break;
@@ -250,12 +255,12 @@ public class ReceivePanel extends JPanel implements ActionListener {
                         GUIMessages.get("DeleteAccount"), JOptionPane.YES_NO_OPTION);
 
                 if (ret == JOptionPane.OK_OPTION) {
-                    Wallet wallet = Kernel.getInstance().getWallet();
+                    Wallet wallet = kernel.getWallet();
                     wallet.deleteAccount(acc.getKey());
                     wallet.flush();
 
                     // fire update event
-                    SemuxGUI.fireUpdateEvent();
+                    model.fireUpdateEvent();
 
                     JOptionPane.showMessageDialog(this, GUIMessages.get("AccountDeleted"));
                 }

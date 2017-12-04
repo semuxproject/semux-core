@@ -14,7 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.semux.core.AddressBook;
 import org.semux.core.Block;
 import org.semux.gui.Action;
 import org.semux.net.Peer;
@@ -39,7 +41,29 @@ public class WalletModel {
 
     private Map<String, Peer> activePeers = new HashMap<>();
 
-    private AddressBook addressBook = new AddressBook();
+    private AtomicBoolean updated = new AtomicBoolean(false);
+
+    private AddressBook addressBook;
+
+    public WalletModel(AddressBook addressBook) {
+        this.addressBook = addressBook;
+    }
+
+    /**
+     * Fires an model update event.
+     */
+    public void fireUpdateEvent() {
+        updated.set(true);
+    }
+
+    /**
+     * Returns the updated flag reference.
+     * 
+     * @return
+     */
+    public AtomicBoolean isUpdated() {
+        return updated;
+    }
 
     /**
      * Add a listener.
@@ -51,9 +75,9 @@ public class WalletModel {
     }
 
     /**
-     * Fire an update event to all listeners.
+     * Updates MVC view.
      */
-    public void fireUpdateEvent() {
+    public void updateView() {
         for (ActionListener listener : listeners) {
             EventQueue.invokeLater(() -> listener.actionPerformed(new ActionEvent(this, 0, Action.REFRESH.name())));
         }

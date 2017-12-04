@@ -31,10 +31,11 @@ import org.semux.core.Block;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.gui.Action;
-import org.semux.message.GUIMessages;
+import org.semux.gui.SemuxGUI;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
+import org.semux.message.GUIMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.UnreachableException;
 
@@ -42,6 +43,7 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
+    private transient SemuxGUI gui;
     private transient WalletModel model;
 
     private JLabel blockNum;
@@ -55,8 +57,9 @@ public class HomePanel extends JPanel implements ActionListener {
     private JPanel transactions;
     private JLabel peers;
 
-    public HomePanel(WalletModel model) {
-        this.model = model;
+    public HomePanel(SemuxGUI gui) {
+        this.gui = gui;
+        this.model = gui.getModel();
         this.model.addListener(this);
 
         // setup overview panel
@@ -255,8 +258,7 @@ public class HomePanel extends JPanel implements ActionListener {
         for (Transaction tx : list) {
             boolean inBound = accounts.contains(ByteArray.of(tx.getTo()));
             boolean outBound = accounts.contains(ByteArray.of(tx.getFrom()));
-            transactions
-                    .add(new TransactionPanel(tx, inBound, outBound, SwingUtil.getTransactionDescription(model, tx)));
+            transactions.add(new TransactionPanel(tx, inBound, outBound, SwingUtil.getTransactionDescription(gui, tx)));
         }
         transactions.revalidate();
     }

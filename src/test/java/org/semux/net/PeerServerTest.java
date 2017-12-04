@@ -18,13 +18,16 @@ import org.semux.crypto.EdDSA;
 
 public class PeerServerTest {
 
+    private static final String P2P_IP = "127.0.0.1";
+    private static final int P2P_PORT = 15161;
+
     @Test
     public void testServer() throws InterruptedException {
         EdDSA key = new EdDSA();
-        PeerClient remoteClient = new PeerClient("127.0.0.1", 5161, key);
+        PeerClient remoteClient = new PeerClient(P2P_IP, P2P_PORT, key);
 
         PeerServerMock ps = new PeerServerMock();
-        ps.start(remoteClient, true);
+        ps.start(P2P_IP, P2P_PORT);
         assertTrue(ps.getServer().isListening());
 
         try (Socket sock = new Socket(remoteClient.getIp(), remoteClient.getPort())) {

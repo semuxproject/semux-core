@@ -16,7 +16,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
-import org.semux.Config;
+import org.semux.config.Config;
+import org.semux.config.Constants;
+import org.semux.config.DevNetConfig;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.util.Bytes;
@@ -24,13 +26,16 @@ import org.semux.util.MerkleUtil;
 import org.semux.util.SimpleDecoder;
 
 public class BlockTest {
+
+    private Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
+
     private long number = 5;
     private byte[] coinbase = Bytes.random(20);
     private byte[] prevHash = Bytes.random(32);
     private long timestamp = System.currentTimeMillis();
     private byte[] data = Bytes.of("data");
 
-    private Transaction tx = new Transaction(TransactionType.TRANSFER, Bytes.random(20), 0, Config.MIN_TRANSACTION_FEE,
+    private Transaction tx = new Transaction(TransactionType.TRANSFER, Bytes.random(20), 0, config.minTransactionFee(),
             1, System.currentTimeMillis(), Bytes.EMPTY_BYTES).sign(new EdDSA());
     private TransactionResult res = new TransactionResult(true);
     private List<Transaction> transactions = Collections.singletonList(tx);
@@ -46,7 +51,7 @@ public class BlockTest {
 
     @Test
     public void testGenesis() {
-        Block block = Genesis.getInstance();
+        Block block = Genesis.load(config.dataDir());
         assertTrue(block.getHeader().validate());
     }
 

@@ -9,7 +9,7 @@ package org.semux.net;
 import java.io.IOException;
 import java.util.List;
 
-import org.semux.Config;
+import org.semux.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +21,10 @@ public class SemuxFrameHandler extends ByteToMessageCodec<Frame> {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxFrameHandler.class);
 
-    private Channel channel;
+    private Config config;
 
-    public SemuxFrameHandler(Channel channel) {
-        this.channel = channel;
+    public SemuxFrameHandler(Config config) {
+        this.config = config;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class SemuxFrameHandler extends ByteToMessageCodec<Frame> {
         int size = in.readInt();
         in.readerIndex(index);
 
-        if (size < 0 || size > Config.NET_MAX_FRAME_SIZE) {
+        if (size < 0 || size > config.netMaxFrameSize()) {
             throw new IOException("Invalid frame size: " + size);
         }
 
@@ -77,13 +77,13 @@ public class SemuxFrameHandler extends ByteToMessageCodec<Frame> {
             /*
              * If the peer is not in our network, drop connection immediately.
              */
-            if (network != Config.NETWORK_ID) {
+            if (network != config.networkId()) {
                 ctx.close();
                 return;
             }
 
             if (size < 0 || type < 0 || packetId < 0 || packetSize < 0) {
-                logger.debug("Invalid frame from peer, frame: {}, peer: {}", frame, channel.getRemotePeer());
+                logger.debug("Invalid frame: {}", frame);
             } else {
                 out.add(frame);
             }

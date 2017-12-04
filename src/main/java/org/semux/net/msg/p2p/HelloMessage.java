@@ -6,7 +6,7 @@
  */
 package org.semux.net.msg.p2p;
 
-import org.semux.Config;
+import org.semux.config.Config;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hex;
@@ -67,11 +67,13 @@ public class HelloMessage extends Message {
      * NOTE: only data format and signature is checked here.
      * </p>
      * 
+     * @param config
+     * 
      * @return true if success, otherwise false
      */
-    public boolean validate() {
+    public boolean validate(Config config) {
         if (peer != null && peer.validate() //
-                && Math.abs(System.currentTimeMillis() - timestamp) <= Config.NET_HANDSHAKE_EXPIRE //
+                && Math.abs(System.currentTimeMillis() - timestamp) <= config.netHandshakeExpiry() //
                 && signature != null //
                 && peer.getPeerId().equals(Hex.encode(signature.getAddress()))) {
 

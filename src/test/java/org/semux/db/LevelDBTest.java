@@ -14,8 +14,10 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.iq80.leveldb.DBException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.semux.Config;
+import org.semux.config.Constants;
 import org.semux.util.Bytes;
 
 public class LevelDBTest {
@@ -23,10 +25,20 @@ public class LevelDBTest {
     private byte[] key = Bytes.of("key");
     private byte[] value = Bytes.of("value");
 
+    private KVDB kvdb;
+
+    @Before
+    public void setup() {
+        kvdb = new LevelDB(new File(Constants.DEFAULT_DATA_DIR, Constants.DATABASE_DIR + File.separator + "test"));
+    }
+
+    @After
+    public void teardown() {
+        kvdb.close();
+    }
+
     @Test
     public void testGetAndPut() {
-        KVDB kvdb = new LevelDB(DBName.BLOCK);
-
         try {
             assertNull(kvdb.get(key));
             kvdb.put(key, value);
@@ -39,7 +51,6 @@ public class LevelDBTest {
 
     @Test(expected = DBException.class)
     public void testClose() {
-        KVDB kvdb = new LevelDB(DBName.BLOCK);
         kvdb.close();
 
         kvdb.get(key);
@@ -47,11 +58,9 @@ public class LevelDBTest {
 
     @Test
     public void testDestroy() {
-        KVDB kvdb = new LevelDB(DBName.BLOCK);
         kvdb.destroy();
 
-        File dir = new File(Config.DATA_DIR, "database");
-        File f = new File(dir, DBName.BLOCK.toString().toLowerCase());
+        File f = new File(Constants.DEFAULT_DATA_DIR, Constants.DATABASE_DIR + File.separator + "test");
         assertFalse(f.exists());
     }
 }

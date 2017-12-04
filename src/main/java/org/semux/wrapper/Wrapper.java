@@ -6,15 +6,9 @@
  */
 package org.semux.wrapper;
 
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang3.ArrayUtils;
-import org.semux.cli.SemuxCLI;
-import org.semux.gui.SemuxGUI;
-import org.semux.log.LoggerConfigurator;
-import org.semux.util.SystemUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Arrays.asList;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,7 +16,15 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.ArrayUtils;
+import org.semux.cli.SemuxCLI;
+import org.semux.config.Constants;
+import org.semux.gui.SemuxGUI;
+import org.semux.log.LoggerConfigurator;
+import org.semux.util.SystemUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is a process wrapper mainly created for dynamic allocation of the
@@ -51,7 +53,8 @@ public class Wrapper {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException, ParseException {
-        LoggerConfigurator.configure();
+        // TODO: use specified data directory
+        LoggerConfigurator.configure(new File(Constants.DEFAULT_DATA_DIR));
         WrapperCLIParser wrapperCLIParser = new WrapperCLIParser(args);
         Wrapper wrapper = new Wrapper();
         String[] jvmOptions = wrapper.allocateHeapSize(wrapperCLIParser.jvmOptions);

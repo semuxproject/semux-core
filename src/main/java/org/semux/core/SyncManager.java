@@ -7,17 +7,9 @@
 package org.semux.core;
 
 import org.semux.net.Channel;
-import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
 
-public interface Sync {
-    /**
-     * Initializes the sync manager.
-     * 
-     * @param chain
-     * @param channelMgr
-     */
-    void init(Blockchain chain, ChannelManager channelMgr);
+public interface SyncManager {
 
     /**
      * Starts sync manager, and sync blocks in [height, targetHeight).

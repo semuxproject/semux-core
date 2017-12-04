@@ -6,7 +6,7 @@
  */
 package org.semux.vm;
 
-import org.semux.Config;
+import org.semux.Kernel;
 import org.semux.vm.exception.InvalidOpCodeException;
 import org.semux.vm.exception.OutOfGasException;
 import org.semux.vm.exception.StackOverflowException;
@@ -22,20 +22,24 @@ public class SemuxProcess implements Runnable {
 
     private Status status = Status.INIT;
 
-    private long[] stack = new long[Config.VM_MAX_STACK_SIZE];
-    private byte[] heap = new byte[Config.VM_INIT_HEAP_SIZE];
+    private long[] stack;
+    private byte[] heap;
 
     /**
      * Create a process that runs the specified byte code, with a gas limit.
      * 
+     * @param kernel
      * @param rt
      * @param code
      * @param limit
      */
-    public SemuxProcess(SemuxRuntime rt, byte[] code, long limit) {
+    public SemuxProcess(Kernel kernel, SemuxRuntime rt, byte[] code, long limit) {
         this.rt = rt;
         this.code = code;
         this.limit = limit;
+
+        this.stack = new long[kernel.getConfig().vmMaxStackSize()];
+        this.heap = new byte[kernel.getConfig().vmInitialHeapSize()];
     }
 
     @Override

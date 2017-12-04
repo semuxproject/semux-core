@@ -10,6 +10,7 @@ import static org.fusesource.leveldbjni.JniDBFactory.factory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -20,7 +21,8 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
-import org.semux.Config;
+import org.semux.config.Config;
+import org.semux.config.Constants;
 import org.semux.db.exception.LevelDBException;
 import org.semux.util.ClosableIterator;
 import org.semux.util.FileUtil;
@@ -32,14 +34,12 @@ public class LevelDB implements KVDB {
 
     private static final Logger logger = LoggerFactory.getLogger(LevelDB.class);
 
-    private static final String DATABASE_DIR = "database";
-
-    private DBName name;
+    private File file;
     private DB db;
     private boolean isOpened;
 
-    public LevelDB(DBName name) {
-        this.name = name;
+    public LevelDB(File file) {
+        this.file = file;
 
         Options options = new Options();
         options.createIfMissing(true);
@@ -51,19 +51,18 @@ public class LevelDB implements KVDB {
         options.verifyChecksums(true);
         options.maxOpenFiles(128);
 
-        File f = getFile(name);
-        f.getParentFile().mkdirs();
+        file.getParentFile().mkdirs();
 
         try {
-            db = JniDBFactory.factory.open(f, options);
+            db = JniDBFactory.factory.open(file, options);
             isOpened = true;
         } catch (IOException e) {
             if (e.getMessage().contains("Corruption:")) {
                 try {
                     logger.info("Database is corrupted, trying to repair");
-                    factory.repair(f, options);
+                    factory.repair(file, options);
                     logger.info("Repair done!");
-                    db = factory.open(f, options);
+                    db = factory.open(file, options);
                 } catch (IOException ex) {
                     logger.error("Failed to repair the database", ex);
                     SystemUtil.exitAsync(-1);
@@ -115,14 +114,14 @@ public class LevelDB implements KVDB {
                 isOpened = false;
             }
         } catch (IOException e) {
-            logger.error("Failed to close database: {}", name, e);
+            logger.error("Failed to close database: {}", file, e);
         }
     }
 
     @Override
     public void destroy() {
         close();
-        FileUtil.recursiveDelete(getFile(name));
+        FileUtil.recursiveDelete(file);
     }
 
     @Override
@@ -166,7 +165,21 @@ public class LevelDB implements KVDB {
         }.initialize();
     }
 
-    private File getFile(DBName name) {
-        return new File(Config.DATA_DIR, DATABASE_DIR + File.separator + name.toString().toLowerCase());
+    public static class LevelDBFactory implements DBFactory {
+
+        private EnumMap<DBName, KVDB> databases = new EnumMap<>(DBName.class);
+
+        public LevelDBFactory(Config config) {
+            for (DBName name : DBName.values()) {
+                File file = new File(config.dataDir(),
+                        Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
+                databases.put(name, new LevelDB(file));
+            }
+        }
+
+        @Override
+        public KVDB getDB(DBName name) {
+            return databases.get(name);
+        }
     }
 }

@@ -13,10 +13,12 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
-import org.semux.Config;
+import org.semux.config.Config;
+import org.semux.config.Constants;
+import org.semux.config.DevNetConfig;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB;
+import org.semux.db.MemoryDB.MemoryDBFactory;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,8 @@ import org.slf4j.LoggerFactory;
 public class CorePerfomanceTest {
 
     private static final Logger logger = LoggerFactory.getLogger(CorePerfomanceTest.class);
+
+    private Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
 
     @Test
     public void testSortDelegate() {
@@ -53,7 +57,7 @@ public class CorePerfomanceTest {
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
             long value = 5;
-            long fee = Config.MIN_TRANSACTION_FEE;
+            long fee = config.minTransactionFee();
             long nonce = 1;
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.random(16);
@@ -70,8 +74,8 @@ public class CorePerfomanceTest {
         long t2 = System.nanoTime();
         logger.info("Perf_transaction_1: {} μs/tx", (t2 - t1) / 1_000 / repeat);
 
-        Blockchain chain = new BlockchainImpl(MemoryDB.FACTORY);
-        TransactionExecutor exec = new TransactionExecutor();
+        Blockchain chain = new BlockchainImpl(config, new MemoryDBFactory());
+        TransactionExecutor exec = new TransactionExecutor(config);
 
         t1 = System.nanoTime();
         exec.execute(txs, chain.getAccountState().track(), chain.getDelegateState().track());

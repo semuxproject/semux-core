@@ -21,8 +21,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.semux.Config;
-import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
@@ -39,9 +37,11 @@ public class MenuBar extends JMenuBar implements ActionListener {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(MenuBar.class);
 
+    private transient SemuxGUI gui;
     private JFrame frame;
 
-    public MenuBar(JFrame frame) {
+    public MenuBar(SemuxGUI gui, JFrame frame) {
+        this.gui = gui;
         this.frame = frame;
 
         JMenu menuFile = new JMenu(GUIMessages.get("File"));
@@ -111,11 +111,11 @@ public class MenuBar extends JMenuBar implements ActionListener {
                         break;
                     }
 
-                    Wallet wallet = Kernel.getInstance().getWallet();
+                    Wallet wallet = gui.getKernel().getWallet();
                     int n = wallet.addAccounts(w.getAccounts());
                     wallet.flush();
                     JOptionPane.showMessageDialog(frame, GUIMessages.get("ImportSuccess", n));
-                    SemuxGUI.fireUpdateEvent();
+                    gui.getModel().fireUpdateEvent();
                 }
             }
 
@@ -137,7 +137,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
                         return;
                     }
                 }
-                File src = Kernel.getInstance().getWallet().getFile();
+                File src = gui.getKernel().getWallet().getFile();
                 try {
                     Files.copy(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     JOptionPane.showMessageDialog(frame, GUIMessages.get("WalletSavedAt", dst.getAbsolutePath()));
@@ -149,7 +149,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
             break;
         }
         case EXPORT_PRIVATE_KEY: {
-            ExportPrivateKeyDialog d = new ExportPrivateKeyDialog(frame);
+            ExportPrivateKeyDialog d = new ExportPrivateKeyDialog(gui, frame);
             d.setVisible(true);
             break;
         }
@@ -158,12 +158,12 @@ public class MenuBar extends JMenuBar implements ActionListener {
             String pk = dialog.getInput();
             if (pk != null) {
                 try {
-                    Wallet wallet = Kernel.getInstance().getWallet();
+                    Wallet wallet = gui.getKernel().getWallet();
                     EdDSA account = new EdDSA(Hex.parse(pk));
                     if (wallet.addAccount(account)) {
                         wallet.flush();
                         JOptionPane.showMessageDialog(frame, GUIMessages.get("PrivateKeyImportSuccess"));
-                        SemuxGUI.fireUpdateEvent();
+                        gui.getModel().fireUpdateEvent();
                     } else {
                         JOptionPane.showMessageDialog(frame, GUIMessages.get("PrivateKeyAlreadyExists"));
                     }
@@ -174,7 +174,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
             break;
         }
         case CHANGE_PASSWORD: {
-            ChangePasswordDialog d = new ChangePasswordDialog(frame);
+            ChangePasswordDialog d = new ChangePasswordDialog(gui, frame);
             d.setVisible(true);
             break;
         }
@@ -183,7 +183,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
             break;
         }
         case ABOUT: {
-            JOptionPane.showMessageDialog(frame, Config.getClientId(true));
+            JOptionPane.showMessageDialog(frame, gui.getKernel().getConfig().getClientId());
             break;
         }
         default:

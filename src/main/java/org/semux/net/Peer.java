@@ -20,7 +20,7 @@ public class Peer {
     private String ip;
     private int port;
 
-    private short p2pVersion;
+    private short networkVersion;
     private String clientId;
     private String peerId;
     private long latestBlockNumber;
@@ -31,36 +31,36 @@ public class Peer {
     private long latency;
 
     /**
-     * Create a new Peer.
+     * Create a new Peer instance.
      * 
      * @param ip
      * @param port
-     * @param p2pVersion
+     * @param networkVersion
      * @param clientId
      * @param peerId
      * @param latestBlockNumber
      */
-    public Peer(String ip, int port, short p2pVersion, String clientId, String peerId, long latestBlockNumber) {
+    public Peer(String ip, int port, short networkVersion, String clientId, String peerId, long latestBlockNumber) {
         super();
         this.ip = ip;
         this.port = port;
         this.peerId = peerId;
         this.latestBlockNumber = latestBlockNumber;
-        this.p2pVersion = p2pVersion;
+        this.networkVersion = networkVersion;
         this.clientId = clientId;
     }
 
     public boolean validate() {
         return ip != null && ip.length() <= 128 //
                 && port >= 0 //
-                && p2pVersion >= 0 //
+                && networkVersion >= 0 //
                 && clientId != null && clientId.length() < 128 //
                 && peerId != null && peerId.length() == 40 //
                 && latestBlockNumber >= 0;
     }
 
     /**
-     * Get the listening IP address.
+     * Returns the listening IP address.
      * 
      * @return
      */
@@ -69,7 +69,7 @@ public class Peer {
     }
 
     /**
-     * Get the listening port number.
+     * Returns the listening port number.
      * 
      * @return
      */
@@ -78,16 +78,16 @@ public class Peer {
     }
 
     /**
-     * Get the P2P version number.
+     * Returns the network version.
      * 
      * @return
      */
-    public short getP2pVersion() {
-        return p2pVersion;
+    public short getNetworkVersion() {
+        return networkVersion;
     }
 
     /**
-     * Get the client id.
+     * Returns the client id.
      * 
      * @return
      */
@@ -96,7 +96,7 @@ public class Peer {
     }
 
     /**
-     * Get the peerId.
+     * Returns the peerId.
      * 
      * @return
      */
@@ -105,7 +105,7 @@ public class Peer {
     }
 
     /**
-     * Get the latestBlockNumber.
+     * Returns the latestBlockNumber.
      * 
      * @return
      */
@@ -114,7 +114,7 @@ public class Peer {
     }
 
     /**
-     * Set the latestBlockNumber.
+     * Sets the latestBlockNumber.
      * 
      * @param number
      */
@@ -123,7 +123,7 @@ public class Peer {
     }
 
     /**
-     * Get peer latency.
+     * Returns peer latency.
      * 
      * @return
      */
@@ -132,7 +132,7 @@ public class Peer {
     }
 
     /**
-     * Set peer latency.
+     * Sets peer latency.
      * 
      * @param latency
      */
@@ -141,7 +141,7 @@ public class Peer {
     }
 
     /**
-     * Convert to a byte array.
+     * Converts into a byte array.
      * 
      * @return
      */
@@ -149,7 +149,7 @@ public class Peer {
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeString(ip);
         enc.writeInt(port);
-        enc.writeShort(p2pVersion);
+        enc.writeShort(networkVersion);
         enc.writeString(clientId);
         enc.writeString(peerId);
         enc.writeLong(latestBlockNumber);
@@ -158,7 +158,7 @@ public class Peer {
     }
 
     /**
-     * Parse from a byte array.
+     * Parses from a byte array.
      * 
      * @param bytes
      * @return
@@ -175,9 +175,6 @@ public class Peer {
         return new Peer(ip, port, p2pVersion, clientId, peerId, latestBlockNumber);
     }
 
-    /**
-     * Return the string representation
-     */
     @Override
     public String toString() {
         return getPeerId() + "@" + ip + ":" + port;

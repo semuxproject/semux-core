@@ -17,8 +17,10 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.semux.Config;
 import org.semux.Kernel;
+import org.semux.config.Config;
+import org.semux.config.Constants;
+import org.semux.config.MainNetConfig;
 import org.semux.core.Wallet;
 import org.semux.core.WalletLockedException;
 import org.semux.crypto.EdDSA;
@@ -35,9 +37,7 @@ public class SemuxCLI {
 
     private Options options = new Options();
 
-    static final String DEFAULT_DATA_DIR = ".";
-
-    private String dataDir = DEFAULT_DATA_DIR;
+    private String dataDir = Constants.DEFAULT_DATA_DIR;
     private int coinbase = 0;
     private String password = null;
 
@@ -87,7 +87,8 @@ public class SemuxCLI {
 
     public static void main(String[] args) {
         try {
-            LoggerConfigurator.configure();
+            // TODO: use specified data directory
+            LoggerConfigurator.configure(new File(Constants.DEFAULT_DATA_DIR));
             SemuxCLI cli = new SemuxCLI();
             cli.start(args);
         } catch (ParseException exception) {
@@ -129,7 +130,7 @@ public class SemuxCLI {
         } else if (commandLine.hasOption(CLIOptions.IMPORT_PRIVATE_KEY.toString())) {
             importPrivateKey(commandLine.getOptionValue(CLIOptions.IMPORT_PRIVATE_KEY.toString()).trim());
         } else {
-            startKernel();
+            start();
         }
     }
 
@@ -140,10 +141,10 @@ public class SemuxCLI {
     }
 
     protected void printVersion() {
-        System.out.println(Config.CLIENT_VERSION);
+        System.out.println(Constants.CLIENT_VERSION);
     }
 
-    protected void startKernel() {
+    protected void start() {
         Wallet wallet = loadAndUnlockWallet();
 
         List<EdDSA> accounts = wallet.getAccounts();
@@ -161,9 +162,14 @@ public class SemuxCLI {
         }
 
         // start kernel
-        Kernel kernel = Kernel.getInstance();
-        kernel.init(dataDir, wallet, coinbase);
+        startKernel(new MainNetConfig(dataDir), wallet, wallet.getAccount(coinbase));
+    }
+
+    protected Kernel startKernel(Config config, Wallet wallet, EdDSA coinbase) {
+        Kernel kernel = new Kernel(config, wallet, coinbase);
         kernel.start();
+
+        return kernel;
     }
 
     protected void createAccount() {

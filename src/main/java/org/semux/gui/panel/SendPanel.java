@@ -25,18 +25,19 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
-import org.semux.Config;
 import org.semux.Kernel;
+import org.semux.config.Config;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
-import org.semux.message.GUIMessages;
+import org.semux.gui.SemuxGUI;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.AddressBookDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
+import org.semux.message.GUIMessages;
 import org.semux.util.Bytes;
 import org.semux.util.UnreachableException;
 
@@ -47,21 +48,8 @@ public class SendPanel extends JPanel implements ActionListener {
     private JFrame frame;
     private transient WalletModel model;
 
-    private class Item {
-        WalletAccount account;
-        String name;
-
-        public Item(WalletAccount a, int idx) {
-            this.account = a;
-            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + GUIMessages.get("AccountNumShort", idx)
-                    + ", " + SwingUtil.formatValue(account.getAvailable());
-        }
-
-        @Override
-        public String toString() {
-            return this.name;
-        }
-    }
+    private transient Kernel kernel;
+    private transient Config config;
 
     private JComboBox<Item> fromComboBox;
     private JTextField toText;
@@ -69,10 +57,15 @@ public class SendPanel extends JPanel implements ActionListener {
     private JTextField feeText;
     private JTextField memoText;
 
-    public SendPanel(JFrame frame, WalletModel model) {
-        this.frame = frame;
-        this.model = model;
+    public SendPanel(SemuxGUI gui, JFrame frame) {
+        this.model = gui.getModel();
         this.model.addListener(this);
+
+        this.kernel = gui.getKernel();
+        this.config = kernel.getConfig();
+
+        this.frame = frame;
+
         setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         JLabel lblFrom = new JLabel(GUIMessages.get("From") + ":");
@@ -99,7 +92,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
         JLabel lblFee = new JLabel(GUIMessages.get("Fee") + ":");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblFee.setToolTipText(GUIMessages.get("FeeTip", SwingUtil.formatValue(Config.MIN_TRANSACTION_FEE)));
+        lblFee.setToolTipText(GUIMessages.get("FeeTip", SwingUtil.formatValue(config.minTransactionFee())));
 
         feeText = SwingUtil.textFieldWithCopyPastePopup();
         feeText.setColumns(10);
@@ -114,6 +107,7 @@ public class SendPanel extends JPanel implements ActionListener {
         memoText.setColumns(10);
         memoText.setActionCommand(Action.SEND.name());
         memoText.addActionListener(this);
+        memoText.setToolTipText(GUIMessages.get("MemoTip"));
 
         JLabel lblSem1 = new JLabel("SEM");
 
@@ -260,7 +254,7 @@ public class SendPanel extends JPanel implements ActionListener {
                     JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
                 } else if (value <= 0L) {
                     JOptionPane.showMessageDialog(this, GUIMessages.get("EnterValidValue"));
-                } else if (fee < Config.MIN_TRANSACTION_FEE) {
+                } else if (fee < config.minTransactionFee()) {
                     JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionFeeTooLow"));
                 } else if (value + fee > acc.getAvailable()) {
                     JOptionPane.showMessageDialog(this,
@@ -277,7 +271,6 @@ public class SendPanel extends JPanel implements ActionListener {
                         break;
                     }
 
-                    Kernel kernel = Kernel.getInstance();
                     PendingManager pendingMgr = kernel.getPendingManager();
 
                     TransactionType type = TransactionType.TRANSFER;
@@ -353,7 +346,23 @@ public class SendPanel extends JPanel implements ActionListener {
     private void clear() {
         setToText(Bytes.EMPTY_BYTES);
         setAmountText(0);
-        setFeeText(Config.MIN_TRANSACTION_FEE);
+        setFeeText(config.minTransactionFee());
         setMemoText("");
+    }
+
+    private class Item {
+        WalletAccount account;
+        String name;
+
+        public Item(WalletAccount a, int idx) {
+            this.account = a;
+            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + GUIMessages.get("AccountNumShort", idx)
+                    + ", " + SwingUtil.formatValue(account.getAvailable());
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
     }
 }

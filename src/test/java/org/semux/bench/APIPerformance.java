@@ -10,8 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import org.semux.Config;
-import org.semux.api.APIServerMock;
+import org.semux.api.SemuxAPIMock;
+import org.semux.config.Config;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.util.ApiUtil;
@@ -21,6 +21,9 @@ import org.slf4j.LoggerFactory;
 public class APIPerformance {
     private static final Logger logger = LoggerFactory.getLogger(APIPerformance.class);
 
+    private static final String API_IP = "127.0.0.1";
+    private static final int API_PORT = 15171;
+
     private static int REPEAT = 1000;
 
     public static void testBasic() throws IOException {
@@ -28,14 +31,16 @@ public class APIPerformance {
         wallet.unlock("passw0rd");
         wallet.addAccount(new EdDSA());
 
-        APIServerMock api = new APIServerMock();
-        api.start(wallet, Config.API_LISTEN_IP, Config.API_LISTEN_PORT);
+        SemuxAPIMock api = new SemuxAPIMock();
+        api.start(API_IP, API_PORT);
 
         try {
+            Config config = api.getKernel().getConfig();
             long t1 = System.nanoTime();
             for (int i = 0; i < REPEAT; i++) {
-                ApiUtil a = new ApiUtil(new InetSocketAddress("127.0.0.1", 5171), Config.API_USERNAME,
-                        Config.API_PASSWORD);
+
+                ApiUtil a = new ApiUtil(new InetSocketAddress(API_IP, API_PORT), config.apiUsername(),
+                        config.apiPassword());
                 a.request("get_info");
             }
             long t2 = System.nanoTime();

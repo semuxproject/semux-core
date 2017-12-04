@@ -14,7 +14,8 @@ import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.semux.Config;
+import org.semux.Kernel;
+import org.semux.config.Config;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl.ValidatorStats;
@@ -29,7 +30,6 @@ import org.semux.crypto.Hex;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.Peer;
-import org.semux.net.PeerClient;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
@@ -41,31 +41,30 @@ import io.netty.handler.codec.http.HttpHeaders;
  */
 public class ApiHandlerImpl implements ApiHandler {
 
+    private Kernel kernel;
+
     private Wallet wallet;
     private Blockchain chain;
     private ChannelManager channelMgr;
     private PendingManager pendingMgr;
     private NodeManager nodeMgr;
-    private PeerClient client;
+
+    private Config config;
 
     /**
      * Create an API handler.
      * 
-     * @param wallet
-     * @param chain
-     * @param channelMgr
-     * @param pendingMgr
-     * @param nodeMgr
-     * @param client
+     * @param kernel
      */
-    public ApiHandlerImpl(Wallet wallet, Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr,
-            NodeManager nodeMgr, PeerClient client) {
-        this.wallet = wallet;
-        this.chain = chain;
-        this.channelMgr = channelMgr;
-        this.pendingMgr = pendingMgr;
-        this.nodeMgr = nodeMgr;
-        this.client = client;
+    public ApiHandlerImpl(Kernel kernel) {
+        this.kernel = kernel;
+        this.wallet = kernel.getWallet();
+        this.chain = kernel.getBlockchain();
+        this.channelMgr = kernel.getChannelManager();
+        this.pendingMgr = kernel.getPendingManager();
+        this.nodeMgr = kernel.getNodeManager();
+
+        this.config = kernel.getConfig();
     }
 
     @Override
@@ -83,8 +82,8 @@ public class ApiHandlerImpl implements ApiHandler {
             switch (cmd) {
             case GET_INFO: {
                 JSONObject obj = new JSONObject();
-                obj.put("clientId", Config.getClientId(false));
-                obj.put("coinbase", Hex.PREF + client.getCoinbase());
+                obj.put("clientId", config.getClientId());
+                obj.put("coinbase", Hex.PREF + kernel.getCoinbase());
                 obj.put("latestBlockNumber", chain.getLatestBlockNumber());
                 obj.put("latestBlockHash", Hex.encodeWithPrefix(chain.getLatestBlockHash()));
                 obj.put("activePeers", channelMgr.getActivePeers().size());
@@ -111,14 +110,15 @@ public class ApiHandlerImpl implements ApiHandler {
                     return failure("Invalid parameter: node can't be null");
                 }
             }
-            case BLOCK_IP: {
-                String ip = params.get("ip");
-                if (ip != null) {
-                    Config.NET_BLACKLIST.add(ip);
-                    return success(null);
-                } else {
-                    return failure("Invalid parameter: ip can't be null");
-                }
+            case ADD_TO_BLACKLIST: {
+                // TODO: blacklist
+
+                return failure("Not implmemented yet!");
+            }
+            case ADD_TO_WHITELIST: {
+                // TODO: whitelist
+
+                return failure("Not implmemented yet!");
             }
 
             case GET_LATEST_BLOCK_NUMBER: {
@@ -321,7 +321,7 @@ public class ApiHandlerImpl implements ApiHandler {
             }
 
             // value and fee
-            long value = (type == TransactionType.DELEGATE) ? Config.DELEGATE_BURN_AMOUNT : Long.parseLong(pValue);
+            long value = (type == TransactionType.DELEGATE) ? config.minDelegateFee() : Long.parseLong(pValue);
             long fee = Long.parseLong(pFee);
 
             // nonce, timestamp and data
@@ -455,7 +455,7 @@ public class ApiHandlerImpl implements ApiHandler {
         JSONObject obj = new JSONObject();
         obj.put("ip", peer.getIp());
         obj.put("port", peer.getPort());
-        obj.put("p2pVersion", peer.getP2pVersion());
+        obj.put("networkVersion", peer.getNetworkVersion());
         obj.put("clientId", peer.getClientId());
         obj.put("peerId", Hex.PREF + peer.getPeerId());
         obj.put("latestBlockNumber", peer.getLatestBlockNumber());

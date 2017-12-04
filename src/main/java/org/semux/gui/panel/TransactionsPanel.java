@@ -35,11 +35,12 @@ import javax.swing.table.TableRowSorter;
 import org.semux.core.Transaction;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
-import org.semux.message.GUIMessages;
+import org.semux.gui.SemuxGUI;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.TransactionDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
+import org.semux.message.GUIMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.UnreachableException;
 
@@ -50,13 +51,15 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     private static String[] columnNames = { GUIMessages.get("Type"), GUIMessages.get("FromTo"),
             GUIMessages.get("Value"), GUIMessages.get("Time") };
 
+    private transient SemuxGUI gui;
     private transient WalletModel model;
 
     private JTable table;
     private TransactionsTableModel tableModel;
 
-    public TransactionsPanel(JFrame frame, WalletModel model) {
-        this.model = model;
+    public TransactionsPanel(SemuxGUI gui, JFrame frame) {
+        this.gui = gui;
+        this.model = gui.getModel();
         this.model.addListener(this);
 
         setLayout(new BorderLayout(0, 0));
@@ -147,7 +150,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             case 0:
                 return tx.getType().name();
             case 1:
-                return SwingUtil.getTransactionDescription(model, tx);
+                return SwingUtil.getTransactionDescription(gui, tx);
             case 2:
                 return SwingUtil.formatValue(tx.getValue());
             case 3:

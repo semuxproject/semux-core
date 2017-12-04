@@ -20,7 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.map.LRUMap;
 import org.apache.commons.lang3.tuple.Pair;
-import org.semux.Config;
+import org.semux.Kernel;
+import org.semux.config.Config;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.net.Channel;
@@ -53,10 +54,12 @@ public class PendingManager implements Runnable, BlockchainListener {
         }
     };
 
-    private static final int QUEUE_MAX_SIZE = 16 * Config.MAX_BLOCK_SIZE;
-    private static final int POOL_MAX_SIZE = 2 * Config.MAX_BLOCK_SIZE;
-    private static final int DELAYED_MAX_SIZE = 4 * Config.MAX_BLOCK_SIZE;
-    private static final int PROCESSED_MAX_SIZE = 4 * Config.MAX_BLOCK_SIZE;
+    private static final int QUEUE_MAX_SIZE = 64 * 1024;
+    private static final int POOL_MAX_SIZE = 8 * 1024;
+    private static final int DELAYED_MAX_SIZE = 16 * 1024;
+    private static final int PROCESSED_MAX_SIZE = 16 * 1024;
+
+    private Config config;
 
     private Blockchain chain;
     private ChannelManager channelMgr;
@@ -87,9 +90,12 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Creates a pending manager.
      */
-    public PendingManager(Blockchain chain, ChannelManager channelMgr) {
-        this.chain = chain;
-        this.channelMgr = channelMgr;
+    public PendingManager(Kernel kernel) {
+        this.config = kernel.getConfig();
+
+        this.chain = kernel.getBlockchain();
+        this.channelMgr = kernel.getChannelManager();
+
         this.pendingAS = chain.getAccountState().track();
         this.pendingDS = chain.getDelegateState().track();
 
@@ -102,12 +108,11 @@ public class PendingManager implements Runnable, BlockchainListener {
     public synchronized void start() {
         if (!isRunning) {
             /*
-             * Use a rate smaller than the message queue sending rate to prevent message
-             * queues from hitting the NET_MAX_QUEUE_SIZE, especially when the network load
-             * is heavy.
+             * NOTE: a rate smaller than the message queue sending rate should be used to
+             * prevent message queues from hitting the NET_MAX_QUEUE_SIZE, especially when
+             * the network load is heavy.
              */
-            long rate = Config.NET_MAX_QUEUE_RATE * 3 / 2;
-            this.validateFuture = exec.scheduleAtFixedRate(this, 0, rate, TimeUnit.MILLISECONDS);
+            this.validateFuture = exec.scheduleAtFixedRate(this, 2, 2, TimeUnit.MILLISECONDS);
 
             this.chain.addListener(this);
 
@@ -263,7 +268,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         while (pool.size() < POOL_MAX_SIZE //
                 && (tx = queue.poll()) != null //
-                && tx.getFee() >= Config.MIN_TRANSACTION_FEE) {
+                && tx.getFee() >= config.minTransactionFee()) {
             // filter by cache
             ByteArray key = ByteArray.of(tx.getHash());
             if (processed.containsKey(key)) {
@@ -302,7 +307,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             // execute transactions
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
-            TransactionResult result = new TransactionExecutor().execute(tx, as, ds);
+            TransactionResult result = new TransactionExecutor(config).execute(tx, as, ds);
 
             if (result.isSuccess()) {
                 // commit state updates
@@ -320,7 +325,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                     List<Channel> channels = channelMgr.getActiveChannels();
                     TransactionMessage msg = new TransactionMessage(tx);
                     int[] indices = ArrayUtil.permutation(channels.size());
-                    for (int i = 0; i < indices.length && i < Config.NET_RELAY_REDUNDANCY; i++) {
+                    for (int i = 0; i < indices.length && i < config.netRelayRedundancy(); i++) {
                         Channel c = channels.get(indices[i]);
                         if (c.isActive()) {
                             c.getMessageQueue().sendMessage(msg);

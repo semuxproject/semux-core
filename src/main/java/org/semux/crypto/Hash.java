@@ -11,7 +11,7 @@ import java.security.Security;
 
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.semux.Config;
+import org.semux.config.Constants;
 
 /**
  * Hash generator
@@ -33,7 +33,7 @@ public class Hash {
      */
     public static byte[] h256(byte[] input) {
         try {
-            MessageDigest digest = MessageDigest.getInstance(Config.CRYPTO_H256_ALG);
+            MessageDigest digest = MessageDigest.getInstance(Constants.HASH_ALGO);
             return digest.digest(input);
         } catch (Exception e) {
             throw new CryptoException(e);

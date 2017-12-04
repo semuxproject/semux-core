@@ -19,16 +19,19 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 
-import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.gui.Action;
-import org.semux.message.GUIMessages;
+import org.semux.gui.SemuxGUI;
 import org.semux.gui.SwingUtil;
+import org.semux.message.GUIMessages;
 
 public class ChangePasswordDialog extends JDialog implements ActionListener {
 
-    public ChangePasswordDialog(JFrame parent) {
+    private transient SemuxGUI gui;
+
+    public ChangePasswordDialog(SemuxGUI gui, JFrame parent) {
         super(parent, GUIMessages.get("ChangePassword"));
+        this.gui = gui;
 
         JLabel lblOldPassword = new JLabel(GUIMessages.get("OldPassword") + ":");
         JLabel lblPassword = new JLabel(GUIMessages.get("Password") + ":");
@@ -110,8 +113,7 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
             String password = new String(passwordField.getPassword());
             String repeat = new String(repeatField.getPassword());
 
-            Kernel kernel = Kernel.getInstance();
-            Wallet wallet = kernel.getWallet();
+            Wallet wallet = gui.getKernel().getWallet();
 
             if (!password.equals(repeat)) {
                 JOptionPane.showMessageDialog(this, GUIMessages.get("RepeatPasswordError"));

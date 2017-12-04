@@ -6,23 +6,10 @@
  */
 package org.semux.core;
 
-import org.semux.crypto.EdDSA;
 import org.semux.net.Channel;
-import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
 
 public interface Consensus {
-    /**
-     * Initialize this consensus manager. Be sure to call this method before
-     * starting consensus.
-     * 
-     * @param chain
-     * @param channelMgr
-     * @param pendingMgr
-     * @param coinbase
-     */
-    void init(Blockchain chain, ChannelManager channelMgr, PendingManager pendingMgr, EdDSA coinbase);
-
     /**
      * Starts consensus.
      * 

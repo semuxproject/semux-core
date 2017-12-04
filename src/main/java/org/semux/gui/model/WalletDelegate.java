@@ -6,7 +6,11 @@
  */
 package org.semux.gui.model;
 
+import java.util.List;
+
+import org.semux.Kernel;
 import org.semux.core.state.Delegate;
+import org.semux.crypto.Hex;
 
 public class WalletDelegate extends Delegate {
 
@@ -55,5 +59,15 @@ public class WalletDelegate extends Delegate {
     public double getRate() {
         long total = numberOfTurnsHit + numberOfTurnsMissed;
         return total == 0 ? 0 : numberOfTurnsHit * 100.0 / total;
+    }
+
+    public boolean isValidator(Kernel kernel) {
+        List<String> validators = kernel.getBlockchain().getValidators();
+        for (String v : validators) {
+            if (v.equals(Hex.encode(getAddress()))) {
+                return true;
+            }
+        }
+        return false;
     }
 }

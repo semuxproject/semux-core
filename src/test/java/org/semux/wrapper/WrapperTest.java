@@ -6,6 +6,20 @@
  */
 package org.semux.wrapper;
 
+import static org.junit.Assume.assumeTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -15,17 +29,7 @@ import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.semux.cli.SemuxCLI;
 import org.semux.gui.SemuxGUI;
 import org.semux.util.SystemUtil;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
-
-import static org.junit.Assume.assumeTrue;
-import static org.mockito.Mockito.*;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
+import org.semux.util.SystemUtil.OsName;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(Parameterized.class)
@@ -59,7 +63,7 @@ public class WrapperTest {
 
     @Test
     public void testMain() throws Exception {
-        assumeTrue(SystemUtil.getOS() != SystemUtil.OS.WINDOWS);
+        assumeTrue(SystemUtil.getOsName() != OsName.WINDOWS);
 
         // mock ProcessBuilder & Process
         ProcessBuilder processBuilderMock = mock(ProcessBuilder.class);

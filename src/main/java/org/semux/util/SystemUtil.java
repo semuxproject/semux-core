@@ -14,10 +14,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Scanner;
 
+import org.semux.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.zafarkhaja.semver.Version;
+
 import oshi.SystemInfo;
 
 public class SystemUtil {
@@ -25,27 +27,25 @@ public class SystemUtil {
 
     public static final Scanner SCANNER = new Scanner(System.in);
 
-    public static enum OS {
-        WINDOWS, LINUX, MACOS, UNKNOWN;
+    public static enum OsName {
+        WINDOWS("Windows"),
+
+        LINUX("Linux"),
+
+        MACOS("macOS"),
+
+        UNKNOWN("Unkown");
+
+        private String name;
+
+        OsName(String name) {
+            this.name = name;
+        }
 
         @Override
         public String toString() {
-            switch (this) {
-            case WINDOWS:
-                return "Windows";
-            case LINUX:
-                return "Linux";
-            case MACOS:
-                return "macOS";
-            case UNKNOWN:
-                return "Unknown";
-            default:
-                throw new UnreachableException();
-            }
+            return name;
         }
-    }
-
-    private SystemUtil() {
     }
 
     /**
@@ -53,17 +53,17 @@ public class SystemUtil {
      * 
      * @return
      */
-    public static OS getOS() {
+    public static OsName getOsName() {
         String os = System.getProperty("os.name").toLowerCase();
 
         if (os.contains("win")) {
-            return OS.WINDOWS;
+            return OsName.WINDOWS;
         } else if (os.contains("linux")) {
-            return OS.LINUX;
+            return OsName.LINUX;
         } else if (os.contains("mac")) {
-            return OS.MACOS;
+            return OsName.MACOS;
         } else {
-            return OS.UNKNOWN;
+            return OsName.UNKNOWN;
         }
     }
 
@@ -72,7 +72,7 @@ public class SystemUtil {
      * 
      * @return
      */
-    public static String getOSArch() {
+    public static String getOsArch() {
         return System.getProperty("os.arch");
     }
 
@@ -85,9 +85,9 @@ public class SystemUtil {
         try {
             URL url = new URL("http://api.ipify.org/");
             URLConnection con = url.openConnection();
-            con.addRequestProperty("User-Agent", "Mozilla/4.0");
-            con.setConnectTimeout(3000);
-            con.setReadTimeout(3000);
+            con.addRequestProperty("User-Agent", Constants.DEFAULT_USER_AGENT);
+            con.setConnectTimeout(Constants.DEFAULT_CONNECT_TIMEOUT);
+            con.setReadTimeout(Constants.DEFAULT_READ_TIMEOUT);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String ip = reader.readLine().trim();
@@ -200,5 +200,18 @@ public class SystemUtil {
     public static Long getAvailableMemorySize() {
         SystemInfo systemInfo = new SystemInfo();
         return systemInfo.getHardware().getMemory().getAvailable();
+    }
+
+    /**
+     * Returns the size of heap in use.
+     * 
+     * @return
+     */
+    public static long getUsedHeapSize() {
+        Runtime runtime = Runtime.getRuntime();
+        return runtime.totalMemory() - runtime.freeMemory();
+    }
+
+    private SystemUtil() {
     }
 }

@@ -14,19 +14,19 @@ import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
-import org.semux.Kernel;
 import org.semux.core.Block;
 import org.semux.crypto.Hex;
-import org.semux.message.GUIMessages;
+import org.semux.gui.SemuxGUI;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletDelegate;
+import org.semux.message.GUIMessages;
 
 public class DelegateDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    public DelegateDialog(JFrame parent, WalletDelegate d) {
-        Block block = Kernel.getInstance().getBlockchain().getBlock(d.getRegisteredAt());
+    public DelegateDialog(SemuxGUI gui, JFrame parent, WalletDelegate d) {
+        Block block = gui.getKernel().getBlockchain().getBlock(d.getRegisteredAt());
 
         JLabel lblName = new JLabel(GUIMessages.get("Name") + ":");
         JLabel lblAddress = new JLabel(GUIMessages.get("Address") + ":");

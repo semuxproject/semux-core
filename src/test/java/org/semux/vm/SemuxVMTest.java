@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
+import org.semux.KernelMock;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
 
@@ -26,7 +27,7 @@ public class SemuxVMTest {
         VMTask task2 = new VMTask(rt2, Bytes.EMPTY_BYTES, 10000);
 
         List<VMTask> tasks = Arrays.asList(task1, task2);
-        SemuxVM vm = new SemuxVM();
+        SemuxVM vm = new SemuxVM(new KernelMock());
         vm.run(tasks, 2);
     }
 }
