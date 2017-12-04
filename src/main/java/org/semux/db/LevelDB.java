@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -21,7 +22,6 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
-import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.db.exception.LevelDBException;
 import org.semux.util.ClosableIterator;
@@ -172,17 +172,39 @@ public class LevelDB implements KVDB {
 
         private EnumMap<DBName, KVDB> databases = new EnumMap<>(DBName.class);
 
-        public LevelDBFactory(Config config) {
-            for (DBName name : DBName.values()) {
-                File file = new File(config.dataDir(),
-                        Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
-                databases.put(name, new LevelDB(file));
+        private File dataDir;
+        private AtomicBoolean open;
+
+        public LevelDBFactory(File dataDir) {
+            this.dataDir = dataDir;
+            this.open = new AtomicBoolean(false);
+
+            open();
+        }
+
+        protected void open() {
+            if (open.compareAndSet(false, true)) {
+                for (DBName name : DBName.values()) {
+                    File file = new File(dataDir,
+                            Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
+                    databases.put(name, new LevelDB(file));
+                }
             }
         }
 
         @Override
         public KVDB getDB(DBName name) {
+            open();
             return databases.get(name);
+        }
+
+        @Override
+        public void close() {
+            if (open.compareAndSet(true, false)) {
+                for (KVDB db : databases.values()) {
+                    db.close();
+                }
+            }
         }
     }
 }

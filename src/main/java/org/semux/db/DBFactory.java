@@ -14,4 +14,9 @@ public interface DBFactory {
      * @return
      */
     KVDB getDB(DBName name);
+
+    /**
+     * Close all opened resources.
+     */
+    void close();
 }

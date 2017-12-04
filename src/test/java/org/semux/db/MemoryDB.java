@@ -17,6 +17,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.semux.util.ByteArray;
 import org.semux.util.ClosableIterator;
 
+/**
+ * A dummy key-value database implementation.
+ */
 public class MemoryDB implements KVDB {
 
     private Map<ByteArray, byte[]> db = new ConcurrentHashMap<>();
@@ -115,6 +118,11 @@ public class MemoryDB implements KVDB {
         @Override
         public KVDB getDB(DBName name) {
             return databases.get(name);
+        }
+
+        @Override
+        public void close() {
+            // do nothing
         }
     }
 }

@@ -96,7 +96,7 @@ public class Kernel {
         logger.info("System booting up: network = [{}, {}], coinbase = {}", config.networkId(), config.networkVersion(),
                 coinbase);
 
-        DBFactory dbFactory = new LevelDBFactory(config);
+        DBFactory dbFactory = new LevelDBFactory(config.dataDir());
         chain = new BlockchainImpl(config, dbFactory);
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
