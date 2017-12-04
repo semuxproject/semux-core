@@ -29,7 +29,7 @@ import org.semux.gui.Action;
 import org.semux.gui.SemuxGUI;
 import org.semux.gui.SwingUtil;
 import org.semux.message.GUIMessages;
-import org.semux.util.UnreachableException;
+import org.semux.util.exception.UnreachableException;
 
 public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
 

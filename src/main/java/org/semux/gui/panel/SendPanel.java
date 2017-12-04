@@ -39,7 +39,7 @@ import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GUIMessages;
 import org.semux.util.Bytes;
-import org.semux.util.UnreachableException;
+import org.semux.util.exception.UnreachableException;
 
 public class SendPanel extends JPanel implements ActionListener {
 
