@@ -214,6 +214,13 @@ public class APIHandlerTest {
     }
 
     @Test
+    public void testAddToBlacklistInvalidAddress() throws IOException {
+        JsonObject response = request("/add_to_blacklist?ip=I_am_not_an_IP");
+        assertFalse(response.getBoolean("success"));
+        assertTrue(response.containsKey("message"));
+    }
+
+    @Test
     public void testAddToWhitelist() throws IOException {
         // reject all connections
         channelMgr.getIpFilter().appendRule(new CIDRFilterRule("0.0.0.0/0", IpFilterRuleType.REJECT));
@@ -225,6 +232,13 @@ public class APIHandlerTest {
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
         when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
         assertTrue(channelMgr.isAcceptable(inetSocketAddress));
+    }
+
+    @Test
+    public void testAddToWhitelistInvalidAddress() throws IOException {
+        JsonObject response = request("/add_to_whitelist?ip=I_am_not_an_IP");
+        assertFalse(response.getBoolean("success"));
+        assertTrue(response.containsKey("message"));
     }
 
     @Test
