@@ -582,10 +582,10 @@ public class SemuxBFT implements Consensus {
         }
         case BFT_PROPOSAL: {
             BFTProposalMessage m = (BFTProposalMessage) msg;
-            Proposal proposal = m.getProposal();
+            Proposal p = m.getProposal();
 
-            if (proposal.getHeight() == height) {
-                if (proposal.validate()) {
+            if (p.getHeight() == height) {
+                if (p.validate()) {
                     events.add(new Event(Event.Type.PROPOSAL, m.getProposal()));
                 } else {
                     logger.debug("Invalid proposal from {}", channel.getRemotePeer().getPeerId());
