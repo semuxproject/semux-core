@@ -51,7 +51,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
         byte type = msg.getCode().toByte();
         byte network = config.networkId();
 
-        if (packetSize < 0 || packetSize > config.netMaxPacketSize()) {
+        if (packetSize > config.netMaxPacketSize()) {
             logger.error("Invalid packet size, max = {}, actual = {}", config.netMaxPacketSize(), packetSize);
             return;
         }

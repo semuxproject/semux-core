@@ -107,7 +107,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 // trailing headers are ignored
 
                 // basic authentication
-                if (!checkBaiscAuth(headers, config.apiUsername(), config.apiPassword())) {
+                if (!checkBasicAuth(headers, config.apiUsername(), config.apiPassword())) {
                     FullHttpResponse resp = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
 
                     resp.headers().set(HttpHeaderNames.WWW_AUTHENTICATE, "Basic realm=\"Semux RESTful API\"");
@@ -169,7 +169,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
         error = "Bad request";
     }
 
-    private boolean checkBaiscAuth(HttpHeaders headers, String username, String password) {
+    private boolean checkBasicAuth(HttpHeaders headers, String username, String password) {
         try {
             String auth = headers.get(HttpHeaderNames.AUTHORIZATION);
             if (auth != null && auth.startsWith("Basic ")) {

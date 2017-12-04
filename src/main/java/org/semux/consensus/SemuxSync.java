@@ -9,6 +9,7 @@ package org.semux.consensus;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -79,11 +80,11 @@ public class SemuxSync implements SyncManager {
     // task queues
     private TreeSet<Long> toDownload = new TreeSet<>();
     private Map<Long, Long> toComplete = new HashMap<>();
-    private TreeSet<Block> toProcess = new TreeSet<>((b1, b2) -> Long.compare(b1.getNumber(), b2.getNumber()));
+    private TreeSet<Block> toProcess = new TreeSet<>(Comparator.comparingLong(Block::getNumber));
     private long target;
     private final Object lock = new Object();
 
-    private AtomicBoolean isRunning = new AtomicBoolean(false);
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public SemuxSync(Kernel kernel) {
         this.kernel = kernel;
@@ -162,13 +163,13 @@ public class SemuxSync implements SyncManager {
     }
 
     @Override
-    public boolean onMessage(Channel channel, Message msg) {
+    public void onMessage(Channel channel, Message msg) {
         if (!isRunning()) {
-            return false;
+            return;
         }
 
         switch (msg.getCode()) {
-        case BLOCK:
+        case BLOCK: {
             BlockMessage blockMsg = (BlockMessage) msg;
             Block block = blockMsg.getBlock();
             if (block != null) {
@@ -178,12 +179,15 @@ public class SemuxSync implements SyncManager {
                     toProcess.add(block);
                 }
             }
-            return true;
-        case BLOCK_HEADER:
+            break;
+        }
+        case BLOCK_HEADER: {
             // TODO implement block header
-            return true;
-        default:
-            return false;
+            break;
+        }
+        default: {
+            break;
+        }
         }
     }
 

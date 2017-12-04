@@ -17,10 +17,8 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JFrame;
@@ -33,7 +31,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.semux.core.Transaction;
-import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.SemuxGUI;
 import org.semux.gui.SwingUtil;
@@ -193,12 +190,6 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             }
         }
         transactions.sort((tx1, tx2) -> Long.compare(tx2.getTimestamp(), tx1.getTimestamp()));
-
-        Map<String, Integer> accounts = new HashMap<>();
-        int n = 0;
-        for (WalletAccount a : model.getAccounts()) {
-            accounts.put(Hex.encode(a.getKey().toAddress()), n++);
-        }
 
         /*
          * update table model

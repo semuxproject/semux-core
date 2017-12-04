@@ -549,10 +549,10 @@ public class SemuxBFT implements Consensus {
     }
 
     @Override
-    public boolean onMessage(Channel channel, Message msg) {
+    public void onMessage(Channel channel, Message msg) {
         // only process BFT_NEW_HEIGHT message when not running
         if (!isRunning() && msg.getCode() != MessageCode.BFT_NEW_HEIGHT) {
-            return false;
+            return;
         }
 
         switch (msg.getCode()) {
@@ -565,7 +565,7 @@ public class SemuxBFT implements Consensus {
             if (m.getHeight() > height) {
                 events.add(new Event(Event.Type.NEW_HEIGHT, m.getHeight()));
             }
-            return true;
+            break;
         }
         case BFT_NEW_VIEW: {
             BFTNewViewMessage m = (BFTNewViewMessage) msg;
@@ -578,7 +578,7 @@ public class SemuxBFT implements Consensus {
             } else if (m.getHeight() == height) {
                 events.add(new Event(Event.Type.NEW_VIEW, m.getProof()));
             }
-            return true;
+            break;
         }
         case BFT_PROPOSAL: {
             BFTProposalMessage proposalMessage = (BFTProposalMessage) msg;
@@ -590,7 +590,7 @@ public class SemuxBFT implements Consensus {
                     channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
                 }
             }
-            return true;
+            break;
         }
         case BFT_VOTE: {
             BFTVoteMessage m = (BFTVoteMessage) msg;
@@ -604,10 +604,11 @@ public class SemuxBFT implements Consensus {
                     channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
                 }
             }
-            return true;
+            break;
         }
-        default:
-            return false;
+        default: {
+            break;
+        }
         }
     }
 

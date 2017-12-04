@@ -65,10 +65,7 @@ public class NodeManager {
     /**
      * Creates a node manager instance.
      * 
-     * @param chain
-     * @param channelMgr
-     * @param pendingMgr
-     * @param client
+     * @param kernel
      */
     public NodeManager(Kernel kernel) {
         this.kernel = kernel;

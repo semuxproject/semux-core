@@ -63,7 +63,7 @@ public class LoggerConfiguratorTest {
         String usedDefinedConfig = getFactoryDefaultConfig();
         mockConfigFile(usedDefinedConfig);
         spy(LoggerConfigurator.class);
-        when(LoggerConfigurator.getConfigurationFile(dataDir)).thenReturn(null);
+        when(LoggerConfigurator.getConfigurationFile(dataDir)).thenReturn(new File("non_exist"));
 
         // execution
         LoggerConfigurator.configure(dataDir);
@@ -109,7 +109,7 @@ public class LoggerConfiguratorTest {
     private void assertRootLogLevel(Level level) {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         StatusPrinter.printInCaseOfErrorsOrWarnings(context);
-        assertTrue((context).getLogger(Logger.ROOT_LOGGER_NAME).getLevel() == level);
+        assertTrue(context.getLogger(Logger.ROOT_LOGGER_NAME).getLevel() == level);
     }
 
     private void mockConfigFile(String content) throws IOException {

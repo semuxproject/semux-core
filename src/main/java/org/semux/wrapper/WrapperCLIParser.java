@@ -35,7 +35,7 @@ class WrapperCLIParser {
         this.remainingArgs = commandLine.getArgs();
     }
 
-    protected String[] parseJvmOptions(CommandLine commandLine) throws ParseException {
+    protected String[] parseJvmOptions(CommandLine commandLine) {
         String jvmOptionsString = "";
         if (commandLine.hasOption("jvm-options")) {
             jvmOptionsString = commandLine.getOptionValue("jvm-options").trim();

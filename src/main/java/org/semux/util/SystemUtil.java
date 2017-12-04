@@ -27,14 +27,14 @@ public class SystemUtil {
 
     public static final Scanner SCANNER = new Scanner(System.in);
 
-    public static enum OsName {
+    public enum OsName {
         WINDOWS("Windows"),
 
         LINUX("Linux"),
 
         MACOS("macOS"),
 
-        UNKNOWN("Unkown");
+        UNKNOWN("Unknown");
 
         private String name;
 

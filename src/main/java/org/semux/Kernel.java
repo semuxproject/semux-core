@@ -105,7 +105,7 @@ public class Kernel {
         // set up client
         // ====================================
         Optional<String> declaredIp = config.p2pDeclaredIp();
-        String ip = declaredIp.isPresent() ? declaredIp.get() : SystemUtil.getIp();
+        String ip = declaredIp.orElseGet(SystemUtil::getIp);
         logger.info("Your IP address = {}", ip);
         client = new PeerClient(ip, config.p2pListenPort(), coinbase);
 
@@ -124,7 +124,7 @@ public class Kernel {
         // ====================================
         PeerServer p2p = new PeerServer(this);
 
-        Thread p2pThread = new Thread(() -> p2p.start(), "p2p");
+        Thread p2pThread = new Thread(p2p::start, "p2p");
         p2pThread.start();
 
         // ====================================
@@ -133,7 +133,7 @@ public class Kernel {
         SemuxAPI api = new SemuxAPI(this);
 
         if (config.apiEnabled()) {
-            Thread apiThread = new Thread(() -> api.start(), "api");
+            Thread apiThread = new Thread(api::start, "api");
             apiThread.start();
         }
 

@@ -463,7 +463,7 @@ public class SwingUtil {
     /**
      * Returns the name of an address.
      * 
-     * @param m
+     * @param gui
      * @param address
      * @return
      */

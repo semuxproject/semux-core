@@ -42,7 +42,6 @@ public class Channel {
      * @param pipe
      * @param isInbound
      * @param remoteAddress
-     * @param discoveryMode
      * @param kernel
      */
     public void init(ChannelPipeline pipe, boolean isInbound, InetSocketAddress remoteAddress, Kernel kernel) {

@@ -38,7 +38,6 @@ public interface SyncManager {
      *            the channel where the message is coming from
      * @param msg
      *            the message
-     * @return true if the message is processed, otherwise false
      */
-    boolean onMessage(Channel channel, Message msg);
+    void onMessage(Channel channel, Message msg);
 }

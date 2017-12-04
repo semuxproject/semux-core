@@ -32,7 +32,7 @@ public class LoggerConfigurator {
     public static void configure(File dataDir) {
         File file = getConfigurationFile(dataDir);
 
-        if (file != null && file.exists()) {
+        if (file.exists()) {
             LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
             try {
                 JoranConfigurator configurator = new JoranConfigurator();
