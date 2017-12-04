@@ -61,6 +61,7 @@ public abstract class AbstractConfig implements Config {
     protected int netMaxPacketSize = 8 * 1024 * 1024;
     protected int netRelayRedundancy = 16;
     protected int netHandshakeExpiry = 5 * 60 * 1000;
+    protected int netChannelIdleTimeout = 2 * 60 * 1000;
     protected Set<MessageCode> netPrioritizedMessages = new HashSet<>(Arrays.asList( //
             MessageCode.BFT_NEW_HEIGHT, //
             MessageCode.BFT_NEW_VIEW, //
@@ -237,6 +238,11 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
+    public int netChannelIdleTimeout() {
+        return netChannelIdleTimeout;
+    }
+
+    @Override
     public Set<MessageCode> netPrioritizedMessages() {
         return netPrioritizedMessages;
     }
@@ -354,6 +360,9 @@ public abstract class AbstractConfig implements Config {
                     break;
                 case "net.relayRedundancy":
                     netRelayRedundancy = Integer.parseInt(props.getProperty(name));
+                    break;
+                case "net.channelIdleTimeout":
+                    netChannelIdleTimeout = Integer.parseInt(props.getProperty(name));
                     break;
 
                 case "api.enabled":

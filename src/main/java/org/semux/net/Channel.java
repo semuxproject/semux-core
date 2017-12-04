@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.semux.Kernel;
-import org.semux.config.Constants;
 import org.semux.net.msg.MessageQueue;
 
 import io.netty.channel.ChannelPipeline;
@@ -53,7 +52,7 @@ public class Channel {
 
         // register channel handlers
         pipe.addLast("readTimeoutHandler",
-                new ReadTimeoutHandler(Constants.DEFAULT_READ_TIMEOUT, TimeUnit.MILLISECONDS));
+                new ReadTimeoutHandler(kernel.getConfig().netChannelIdleTimeout(), TimeUnit.MILLISECONDS));
         pipe.addLast("frameHandler", new SemuxFrameHandler(kernel.getConfig()));
         pipe.addLast("messageHandler", new SemuxMessageHandler(kernel.getConfig()));
         pipe.addLast("p2pHandler", new SemuxP2pHandler(this, kernel));

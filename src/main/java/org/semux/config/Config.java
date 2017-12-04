@@ -195,6 +195,13 @@ public interface Config {
     int netHandshakeExpiry();
 
     /**
+     * Returns the channel idle timeout.
+     * 
+     * @return
+     */
+    int netChannelIdleTimeout();
+
+    /**
      * Returns a set of prioritized messages.
      * 
      * @return
