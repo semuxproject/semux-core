@@ -35,7 +35,7 @@ public class TransactionResultTest {
     }
 
     @Test
-    public void testSerilization() {
+    public void testSerialization() {
         TransactionResult res = new TransactionResult(valid, returns, logs);
 
         testFields(TransactionResult.fromBytes(res.toBytes()));

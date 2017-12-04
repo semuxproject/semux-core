@@ -41,7 +41,7 @@ public class Constants {
     /**
      * Algorithm name for the 256-bit hash.
      */
-    public static final String HASH_ALGO = "BLAKE2B-256";
+    public static final String HASH_ALGORITHM = "BLAKE2B-256";
 
     /**
      * Name of the config directory.

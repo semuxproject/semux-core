@@ -72,7 +72,7 @@ public class Proposal {
      * </p>
      *
      * <p>
-     * NOTOE: this method will NOT validate the proposed block, nor the proof, nor
+     * NOTE: this method will NOT validate the proposed block, nor the proof, nor
      * the transactions inside the block. Use
      * {@link Block#validateHeader(BlockHeader, BlockHeader)} and
      * {@link Block#validateTransactions(BlockHeader, List)} for that purpose.

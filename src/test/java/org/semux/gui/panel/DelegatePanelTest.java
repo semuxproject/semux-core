@@ -24,7 +24,7 @@ public class DelegatePanelTest {
     @Test
     public void testSelectDelegate() throws InterruptedException {
         WalletModel walletModel = mock(WalletModel.class);
-        List<WalletDelegate> walletDelegates = new ArrayList<WalletDelegate>();
+        List<WalletDelegate> walletDelegates = new ArrayList<>();
 
         WalletDelegate delegate1 = mock(WalletDelegate.class, "delegate 1");
         when(delegate1.getNameString()).thenReturn("delegate 1");

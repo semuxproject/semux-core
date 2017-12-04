@@ -24,7 +24,7 @@ import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageQueue;
-import org.semux.net.msg.MessageRoundtrip;
+import org.semux.net.msg.MessageRT;
 import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BFTNewHeightMessage;
 import org.semux.net.msg.consensus.BlockHeaderMessage;
@@ -72,7 +72,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private PeerClient client;
 
     private SyncManager sync;
-    private Consensus consenus;
+    private Consensus consensus;
 
     private MessageQueue msgQueue;
     private boolean isHandshakeDone;
@@ -96,7 +96,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         this.client = kernel.getClient();
 
         this.sync = kernel.getSyncManager();
-        this.consenus = kernel.getConsensus();
+        this.consensus = kernel.getConsensus();
 
         this.msgQueue = channel.getMessageQueue();
         this.isHandshakeDone = false;
@@ -143,7 +143,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     public void channelRead0(final ChannelHandlerContext ctx, Message msg) throws InterruptedException {
         logger.trace("Received message: {}", msg);
-        MessageRoundtrip mr = msgQueue.receivedMessage(msg);
+        MessageRT mr = msgQueue.receivedMessage(msg);
 
         switch (msg.getCode()) {
         /* p2p */
@@ -266,7 +266,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         case BFT_PROPOSAL:
         case BFT_VOTE: {
             if (isHandshakeDone) {
-                consenus.onMessage(channel, msg);
+                consensus.onMessage(channel, msg);
             }
             break;
         }
@@ -306,7 +306,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private void onHandshakeDone(Peer peer) {
         if (!isHandshakeDone) {
             // notify consensus about peer height
-            consenus.onMessage(channel, new BFTNewHeightMessage(peer.getLatestBlockNumber() + 1));
+            consensus.onMessage(channel, new BFTNewHeightMessage(peer.getLatestBlockNumber() + 1));
 
             // start peers exchange
             getNodes = exec.scheduleAtFixedRate(() -> msgQueue.sendMessage(new GetNodesMessage()),

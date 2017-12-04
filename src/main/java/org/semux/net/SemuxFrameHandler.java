@@ -69,10 +69,10 @@ public class SemuxFrameHandler extends ByteToMessageCodec<Frame> {
             int packetSize = in.readInt();
 
             in.readerIndex(index + Frame.HEADER_SIZE);
-            byte[] playload = new byte[size];
-            in.readBytes(playload);
+            byte[] payload = new byte[size];
+            in.readBytes(payload);
 
-            Frame frame = new Frame(size, type, network, packetId, packetSize, playload);
+            Frame frame = new Frame(size, type, network, packetId, packetSize, payload);
 
             /*
              * If the peer is not in our network, drop connection immediately.

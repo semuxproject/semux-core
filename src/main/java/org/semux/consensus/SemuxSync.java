@@ -259,14 +259,14 @@ public class SemuxSync implements SyncManager {
 
         Block block = null;
         synchronized (lock) {
-            Iterator<Block> iter = toProcess.iterator();
-            while (iter.hasNext()) {
-                Block b = iter.next();
+            Iterator<Block> iterator = toProcess.iterator();
+            while (iterator.hasNext()) {
+                Block b = iterator.next();
 
                 if (b.getNumber() <= latest) {
-                    iter.remove();
+                    iterator.remove();
                 } else if (b.getNumber() == latest + 1) {
-                    iter.remove();
+                    iterator.remove();
                     block = b;
                     break;
                 } else {

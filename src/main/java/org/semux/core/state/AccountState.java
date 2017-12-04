@@ -11,74 +11,74 @@ public interface AccountState {
     /**
      * Returns an account if exists.
      * 
-     * @param addr
+     * @param address
      * @return
      */
-    Account getAccount(byte[] addr);
+    Account getAccount(byte[] address);
 
     /**
      * Increases the nonce of an account.
      * 
-     * @param addr
+     * @param address
      */
-    void increaseNonce(byte[] addr);
+    void increaseNonce(byte[] address);
 
     /**
      * Adjusts the available balance of an account.
      * 
-     * @param addr
+     * @param address
      * @param delta
      */
-    void adjustAvailable(byte[] addr, long delta);
+    void adjustAvailable(byte[] address, long delta);
 
     /**
      * Adjusts the locked balance of an account.
      * 
-     * @param addr
+     * @param address
      * @param delta
      */
-    void adjustLocked(byte[] addr, long delta);
+    void adjustLocked(byte[] address, long delta);
 
     /**
      * Returns the code of an account.
      * 
-     * @param addr
+     * @param address
      */
-    void getCode(byte[] addr);
+    void getCode(byte[] address);
 
     /**
      * Sets the code of an account.
      * 
-     * @param addr
+     * @param address
      * @param code
      */
-    void setCode(byte[] addr, byte[] code);
+    void setCode(byte[] address, byte[] code);
 
     /**
      * Returns the value that is mapped to the key.
      * 
-     * @param addr
+     * @param address
      * @param key
      * @return the value if exists, otherwise null.
      */
-    byte[] getStorage(byte[] addr, byte[] key);
+    byte[] getStorage(byte[] address, byte[] key);
 
     /**
      * Associates the specified value with the specified key.
      * 
-     * @param addr
+     * @param address
      * @param key
      * @param value
      */
-    void putStorage(byte[] addr, byte[] key, byte[] value);
+    void putStorage(byte[] address, byte[] key, byte[] value);
 
     /**
      * Remove a key value pair from the storage if exists.
      * 
-     * @param addr
+     * @param address
      * @param key
      */
-    void removeStorage(byte[] addr, byte[] key);
+    void removeStorage(byte[] address, byte[] key);
 
     /**
      * Makes a snapshot and starts tracking further updates.

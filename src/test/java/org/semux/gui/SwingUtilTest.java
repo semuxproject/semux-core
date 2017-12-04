@@ -34,14 +34,14 @@ public class SwingUtilTest {
     }
 
     @Test
-    public void testFromatAndEncodeValue() throws ParseException {
+    public void testFormatAndEncodeValue() throws ParseException {
         long x = 1_234_123_000_000L;
         assertEquals("1,234.12 SEM", SwingUtil.formatValue(x));
         assertEquals(x, SwingUtil.parseValue("1,234.123 SEM"));
     }
 
     @Test
-    public void testFromatAndEncodePercentage() throws ParseException {
+    public void testFormatAndEncodePercentage() throws ParseException {
         double x = 12.3456;
         assertEquals("12.3 %", SwingUtil.formatPercentage(x));
         assertEquals(12.3, SwingUtil.parsePercentage("12.3 %"), 10e-9);

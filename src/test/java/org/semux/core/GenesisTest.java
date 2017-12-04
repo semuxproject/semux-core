@@ -63,8 +63,8 @@ public class GenesisTest {
         Map<String, byte[]> delegates = genesis.getDelegates();
 
         assertFalse(delegates.isEmpty());
-        for (byte[] addr : delegates.values()) {
-            assertTrue(addr.length == 20);
+        for (byte[] address : delegates.values()) {
+            assertTrue(address.length == 20);
         }
     }
 

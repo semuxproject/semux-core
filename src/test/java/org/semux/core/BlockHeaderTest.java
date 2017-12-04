@@ -39,7 +39,7 @@ public class BlockHeaderTest {
     }
 
     @Test
-    public void testSerilization() {
+    public void testSerialization() {
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
                 stateRoot, data);
         hash = header.getHash();

@@ -15,12 +15,12 @@ public interface DelegateState {
     /**
      * Registers a delegate.
      * 
-     * @param addres
+     * @param address
      * @param name
      * @param registeredAt
      * @return
      */
-    boolean register(byte[] addres, byte[] name, long registeredAt);
+    boolean register(byte[] address, byte[] name, long registeredAt);
 
     /**
      * Registers a delegate.

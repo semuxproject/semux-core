@@ -33,7 +33,7 @@ public class Hash {
      */
     public static byte[] h256(byte[] input) {
         try {
-            MessageDigest digest = MessageDigest.getInstance(Constants.HASH_ALGO);
+            MessageDigest digest = MessageDigest.getInstance(Constants.HASH_ALGORITHM);
             return digest.digest(input);
         } catch (Exception e) {
             throw new CryptoException(e);

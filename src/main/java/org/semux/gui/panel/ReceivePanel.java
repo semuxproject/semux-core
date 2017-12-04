@@ -226,8 +226,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
             } else {
                 String address = Hex.PREF + acc.getKey().toAddressString();
                 StringSelection stringSelection = new StringSelection(address);
-                Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-                clpbrd.setContents(stringSelection, null);
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(stringSelection, null);
 
                 JOptionPane.showMessageDialog(this, GUIMessages.get("AddressCopied", address));
             }

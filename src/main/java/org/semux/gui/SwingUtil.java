@@ -217,9 +217,9 @@ public class SwingUtil {
      * @return
      */
     public static JTextField textFieldWithCopyPastePopup() {
-        JTextField textfield = new JTextField();
-        addCopyPastePopup(textfield);
-        return textfield;
+        JTextField textField = new JTextField();
+        addCopyPastePopup(textField);
+        return textField;
     }
 
     /**

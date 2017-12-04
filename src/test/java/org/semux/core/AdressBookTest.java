@@ -85,7 +85,7 @@ public class AdressBookTest {
     }
 
     @Test
-    public void testRemoveNotExistant() {
+    public void testRemoveNotExistent() {
         ab.remove("unknownEntry");
         assertNull(ab.getByName("unknownEntry"));
     }

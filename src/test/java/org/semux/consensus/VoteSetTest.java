@@ -59,7 +59,7 @@ public class VoteSetTest {
     }
 
     @Test
-    public void testTwoThrids() {
+    public void testTwoThirds() {
         Vote vote = Vote.newApprove(VoteType.VALIDATE, height, view, Bytes.EMPTY_HASH);
         vote.sign(v1);
         assertTrue(vs.addVote(vote));

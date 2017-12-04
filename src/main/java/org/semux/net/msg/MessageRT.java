@@ -10,7 +10,7 @@ package org.semux.net.msg;
  * Utility that keeps track of the number of retries and lastTimestamp.
  *
  */
-public class MessageRoundtrip {
+public class MessageRT {
 
     private final Message message;
     private long lastTimestamp = 0;
@@ -19,11 +19,11 @@ public class MessageRoundtrip {
     private boolean isAnswered = false;
 
     /**
-     * Create a message roundtrip.
+     * Create a message round trip.
      * 
      * @param message
      */
-    public MessageRoundtrip(Message message) {
+    public MessageRT(Message message) {
         this.message = message;
         saveTime();
     }
@@ -36,7 +36,7 @@ public class MessageRoundtrip {
         this.isAnswered = true;
     }
 
-    public void increseRetries() {
+    public void increaseRetries() {
         ++retries;
     }
 

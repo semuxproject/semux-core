@@ -252,7 +252,7 @@ public interface Config {
     long bftNewHeightTimeout();
 
     /**
-     * Returns the duration of PREPROSE state.
+     * Returns the duration of PROPOSE state.
      * 
      * @return
      */

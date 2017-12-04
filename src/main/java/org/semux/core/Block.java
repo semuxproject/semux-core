@@ -258,7 +258,7 @@ public class Block {
      * 
      * @return
      */
-    public List<Pair<Integer, Integer>> getTransacitonIndexes() {
+    public List<Pair<Integer, Integer>> getTransactionIndices() {
         return new ArrayList<>(indexes);
     }
 

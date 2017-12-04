@@ -113,12 +113,12 @@ public class ApiHandlerImpl implements ApiHandler {
             case ADD_TO_BLACKLIST: {
                 // TODO: blacklist
 
-                return failure("Not implmemented yet!");
+                return failure("Not implemented yet!");
             }
             case ADD_TO_WHITELIST: {
                 // TODO: whitelist
 
-                return failure("Not implmemented yet!");
+                return failure("Not implemented yet!");
             }
 
             case GET_LATEST_BLOCK_NUMBER: {
@@ -336,7 +336,7 @@ public class ApiHandlerImpl implements ApiHandler {
             if (pendingMgr.addTransactionSync(tx)) {
                 return success(Hex.encodeWithPrefix(tx.getHash()));
             } else {
-                return failure("Transaciton rejected by pending manager");
+                return failure("Transaction rejected by pending manager");
             }
         } else {
             return failure("Invalid parameters");

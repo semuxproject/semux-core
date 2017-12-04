@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * [2, address] => [validator_stats]
  * 
  * [3, block_hash] => [block_number]
- * [4, transaciton_hash] => [block_number, from, to]
+ * [4, transaction_hash] => [block_number, from, to]
  * [5, address, n] => [transaction] OR [transaction_hash]
  * </pre>
  *
@@ -260,7 +260,7 @@ public class BlockchainImpl implements Blockchain {
 
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
-        List<Pair<Integer, Integer>> txIndices = block.getTransacitonIndexes();
+        List<Pair<Integer, Integer>> txIndices = block.getTransactionIndices();
         long reward = config.getBlockReward(number);
 
         for (int i = 0; i < txs.size(); i++) {

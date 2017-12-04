@@ -143,7 +143,7 @@ public class Transaction implements Callable<Boolean> {
     }
 
     /**
-     * Parses the from address from signture.
+     * Parses the from address from signature.
      * 
      * @return an {@link Address} if the signature is success, otherwise null
      */

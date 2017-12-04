@@ -59,10 +59,10 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
         int limit = config.netMaxFrameSize();
         int total = (encoded.length - 1) / limit + 1;
         for (int i = 0; i < total; i++) {
-            byte[] playload = new byte[(i < total - 1) ? limit : encoded.length % limit];
-            System.arraycopy(encoded, i * limit, playload, 0, playload.length);
+            byte[] payload = new byte[(i < total - 1) ? limit : encoded.length % limit];
+            System.arraycopy(encoded, i * limit, payload, 0, payload.length);
 
-            Frame f = new Frame(playload.length, type, network, packetId, packetSize, playload);
+            Frame f = new Frame(payload.length, type, network, packetId, packetSize, payload);
             out.add(f);
         }
     }

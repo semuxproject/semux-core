@@ -66,7 +66,7 @@ public class BlockTest {
     }
 
     @Test
-    public void testSerilization() {
+    public void testSerialization() {
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
                 stateRoot, data);
         Block block = new Block(header, transactions, results, view, votes);
@@ -96,7 +96,7 @@ public class BlockTest {
                 stateRoot, data);
         Block block = new Block(header, transactions, results, view, votes);
 
-        List<Pair<Integer, Integer>> indexes = block.getTransacitonIndexes();
+        List<Pair<Integer, Integer>> indexes = block.getTransactionIndices();
         assertEquals(1, indexes.size());
 
         Pair<Integer, Integer> index = indexes.get(0);

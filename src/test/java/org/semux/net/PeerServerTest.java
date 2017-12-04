@@ -33,7 +33,7 @@ public class PeerServerTest {
         try (Socket sock = new Socket(remoteClient.getIp(), remoteClient.getPort())) {
             sock.getInputStream();
         } catch (IOException e) {
-            fail(String.format("Server is not listenning at [%s:%s]", remoteClient.getIp(), remoteClient.getPort()));
+            fail(String.format("Server is not listening at [%s:%s]", remoteClient.getIp(), remoteClient.getPort()));
         }
 
         ps.stop();

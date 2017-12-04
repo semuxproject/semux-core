@@ -99,9 +99,10 @@ public class SemuxBFTTest {
                 block.toBytesVotes());
 
         for (Signature sig : block.getVotes()) {
-            ByteArray addr = ByteArray.of(Hash.h160(sig.getPublicKey()));
+            ByteArray address = ByteArray.of(Hash.h160(sig.getPublicKey()));
 
-            assertTrue(addr.equals(ByteArray.of(key1.toAddress())) || addr.equals(ByteArray.of(key2.toAddress())));
+            assertTrue(
+                    address.equals(ByteArray.of(key1.toAddress())) || address.equals(ByteArray.of(key2.toAddress())));
             assertTrue(EdDSA.verify(vote.getEncoded(), sig));
         }
     }

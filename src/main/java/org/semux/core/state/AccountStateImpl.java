@@ -40,7 +40,7 @@ public class AccountStateImpl implements AccountState {
     protected final Map<ByteArray, byte[]> updates = new ConcurrentHashMap<>();
 
     /**
-     * Create an AcccountState that work directly on a database.
+     * Create an {@link AccountState} that work directly on a database.
      * 
      * @param accountDB
      */
@@ -49,7 +49,7 @@ public class AccountStateImpl implements AccountState {
     }
 
     /**
-     * Create an AcccountState based on a previous AccountState.
+     * Create an {@link AccountState} based on a previous AccountState.
      * 
      * @param prev
      */
@@ -58,69 +58,69 @@ public class AccountStateImpl implements AccountState {
     }
 
     @Override
-    public Account getAccount(byte[] addr) {
-        ByteArray k = getKey(TYPE_ACCOUNT, addr);
+    public Account getAccount(byte[] address) {
+        ByteArray k = getKey(TYPE_ACCOUNT, address);
 
         if (updates.containsKey(k)) {
             byte[] v = updates.get(k);
-            return v == null ? new Account(addr, 0, 0, 0) : Account.fromBytes(addr, v);
+            return v == null ? new Account(address, 0, 0, 0) : Account.fromBytes(address, v);
         } else if (prev != null) {
-            return prev.getAccount(addr);
+            return prev.getAccount(address);
         } else {
             byte[] v = accountDB.get(k.getData());
-            return v == null ? new Account(addr, 0, 0, 0) : Account.fromBytes(addr, v);
+            return v == null ? new Account(address, 0, 0, 0) : Account.fromBytes(address, v);
         }
     }
 
     @Override
-    public void increaseNonce(byte[] addr) {
-        ByteArray k = getKey(TYPE_ACCOUNT, addr);
+    public void increaseNonce(byte[] address) {
+        ByteArray k = getKey(TYPE_ACCOUNT, address);
 
-        Account acc = getAccount(addr);
+        Account acc = getAccount(address);
         acc.setNonce(acc.getNonce() + 1);
         updates.put(k, acc.toBytes());
     }
 
     @Override
-    public void adjustAvailable(byte[] addr, long delta) {
-        ByteArray k = getKey(TYPE_ACCOUNT, addr);
+    public void adjustAvailable(byte[] address, long delta) {
+        ByteArray k = getKey(TYPE_ACCOUNT, address);
 
-        Account acc = getAccount(addr);
+        Account acc = getAccount(address);
         acc.setAvailable(acc.getAvailable() + delta);
         updates.put(k, acc.toBytes());
     }
 
     @Override
-    public void adjustLocked(byte[] addr, long delta) {
-        ByteArray k = getKey(TYPE_ACCOUNT, addr);
+    public void adjustLocked(byte[] address, long delta) {
+        ByteArray k = getKey(TYPE_ACCOUNT, address);
 
-        Account acc = getAccount(addr);
+        Account acc = getAccount(address);
         acc.setLocked(acc.getLocked() + delta);
         updates.put(k, acc.toBytes());
     }
 
     @Override
-    public void getCode(byte[] addr) {
+    public void getCode(byte[] address) {
         throw new UnsupportedOperationException("getCode() is not yet supported");
     }
 
     @Override
-    public void setCode(byte[] addr, byte[] code) {
+    public void setCode(byte[] address, byte[] code) {
         throw new UnsupportedOperationException("setCode() is not yet supported");
     }
 
     @Override
-    public byte[] getStorage(byte[] addr, byte[] key) {
+    public byte[] getStorage(byte[] address, byte[] key) {
         throw new UnsupportedOperationException("getStorage() is not yet supported");
     }
 
     @Override
-    public void putStorage(byte[] addr, byte[] key, byte[] value) {
+    public void putStorage(byte[] address, byte[] key, byte[] value) {
         throw new UnsupportedOperationException("putStorage() is not yet supported");
     }
 
     @Override
-    public void removeStorage(byte[] addr, byte[] key) {
+    public void removeStorage(byte[] address, byte[] key) {
         throw new UnsupportedOperationException("removeStorage() is not yet yetsupported");
     }
 
@@ -155,15 +155,15 @@ public class AccountStateImpl implements AccountState {
         updates.clear();
     }
 
-    protected ByteArray getKey(byte type, byte[] addr) {
-        return ByteArray.of(Bytes.merge(type, addr));
+    protected ByteArray getKey(byte type, byte[] address) {
+        return ByteArray.of(Bytes.merge(type, address));
     }
 
-    protected ByteArray getStorageKey(byte[] addr, byte[] key) {
-        byte[] buf = new byte[1 + addr.length + key.length];
+    protected ByteArray getStorageKey(byte[] address, byte[] key) {
+        byte[] buf = new byte[1 + address.length + key.length];
         buf[0] = TYPE_STORAGE;
-        System.arraycopy(addr, 0, buf, 1, addr.length);
-        System.arraycopy(key, 0, buf, 1 + addr.length, key.length);
+        System.arraycopy(address, 0, buf, 1, address.length);
+        System.arraycopy(key, 0, buf, 1 + address.length, key.length);
 
         return ByteArray.of(buf);
     }

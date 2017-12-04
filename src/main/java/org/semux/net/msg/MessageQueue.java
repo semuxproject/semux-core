@@ -39,9 +39,9 @@ public class MessageQueue {
         }
     });
 
-    private Queue<MessageRoundtrip> requests = new ConcurrentLinkedQueue<>();
-    private Queue<MessageRoundtrip> responses = new ConcurrentLinkedQueue<>();
-    private Queue<MessageRoundtrip> prioritizedResponses = new ConcurrentLinkedQueue<>();
+    private Queue<MessageRT> requests = new ConcurrentLinkedQueue<>();
+    private Queue<MessageRT> responses = new ConcurrentLinkedQueue<>();
+    private Queue<MessageRT> prioritizedResponses = new ConcurrentLinkedQueue<>();
 
     private ChannelHandlerContext ctx = null;
 
@@ -107,7 +107,7 @@ public class MessageQueue {
     public void disconnect(ReasonCode code) {
         logger.debug("Disconnect: reason = {}", code);
 
-        // Turn off message queue, and stop sending/receiving messages imediately.
+        // Turn off message queue, and stop sending/receiving messages immediately.
         close();
 
         // Send reason code and flush all enqueued message (to avoid
@@ -142,12 +142,12 @@ public class MessageQueue {
         }
 
         if (msg.getResponseMessageClass() != null) {
-            requests.add(new MessageRoundtrip(msg));
+            requests.add(new MessageRT(msg));
         } else {
             if (config.netPrioritizedMessages().contains(msg.getCode())) {
-                prioritizedResponses.add(new MessageRoundtrip(msg));
+                prioritizedResponses.add(new MessageRT(msg));
             } else {
-                responses.add(new MessageRoundtrip(msg));
+                responses.add(new MessageRT(msg));
             }
         }
         return true;
@@ -158,9 +158,9 @@ public class MessageQueue {
      * 
      * @param msg
      */
-    public MessageRoundtrip receivedMessage(Message msg) {
+    public MessageRT receivedMessage(Message msg) {
         if (requests.peek() != null) {
-            MessageRoundtrip mr = requests.peek();
+            MessageRT mr = requests.peek();
             Message m = mr.getMessage();
 
             if (m.getResponseMessageClass() != null && msg.getClass() == m.getResponseMessageClass()) {
@@ -176,20 +176,20 @@ public class MessageQueue {
         removeAnsweredMessage(requests.peek());
 
         // send responses
-        MessageRoundtrip msg = prioritizedResponses.poll();
+        MessageRT msg = prioritizedResponses.poll();
         sendToWire(msg == null ? responses.poll() : msg);
 
         // send requests
         sendToWire(requests.peek());
     }
 
-    private void removeAnsweredMessage(MessageRoundtrip mr) {
+    private void removeAnsweredMessage(MessageRT mr) {
         if (mr != null && mr.isAnswered()) {
             requests.remove();
         }
     }
 
-    private void sendToWire(MessageRoundtrip mr) {
+    private void sendToWire(MessageRT mr) {
 
         if (mr != null && mr.getRetries() == 0) {
             Message msg = mr.getMessage();
@@ -198,7 +198,7 @@ public class MessageQueue {
             ctx.writeAndFlush(msg).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 
             if (msg.getResponseMessageClass() != null) {
-                mr.increseRetries();
+                mr.increaseRetries();
                 mr.saveTime();
             }
         }

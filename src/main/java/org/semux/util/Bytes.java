@@ -114,7 +114,7 @@ public class Bytes {
     }
 
     /**
-     * Convert string ininto an byte array.
+     * Convert string into an byte array.
      * 
      * @param str
      * @return

@@ -418,12 +418,12 @@ public class SemuxBFT implements Consensus {
         logger.trace("On new_height: {}", h);
 
         if (h > height && activeValidators != null) {
-            long lastestBlockNum = chain.getLatestBlockNumber();
+            long latestBlockNum = chain.getLatestBlockNumber();
 
             int count = 0;
             for (Channel c : activeValidators) {
                 if (c.isActive()) {
-                    count += c.getRemotePeer().getLatestBlockNumber() > lastestBlockNum ? 1 : 0;
+                    count += c.getRemotePeer().getLatestBlockNumber() > latestBlockNum ? 1 : 0;
                 }
             }
 
@@ -872,11 +872,11 @@ public class SemuxBFT implements Consensus {
             }
         }
 
-        public synchronized void timeout(long miliseconds) {
-            if (miliseconds < 0) {
+        public synchronized void timeout(long milliseconds) {
+            if (milliseconds < 0) {
                 throw new IllegalArgumentException("Timeout can not be negative");
             }
-            timeout = System.currentTimeMillis() + miliseconds;
+            timeout = System.currentTimeMillis() + milliseconds;
         }
 
         public synchronized void clear() {

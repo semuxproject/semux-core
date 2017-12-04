@@ -74,7 +74,7 @@ public class PeerServer {
 
             logger.info("Starting peer server: address = {}:{}", ip, port);
             channelFuture = b.bind(ip, port).sync();
-            logger.debug("Binding was sucessfully");
+            logger.debug("Binding was sucessful");
 
             listening = true;
             channelFuture.channel().closeFuture().sync();

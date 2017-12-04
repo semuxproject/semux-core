@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * delegate DB structure:
  * 
- * [name] => [address] // NOTE: assuming name_length != adress_length
+ * [name] => [address] // NOTE: assuming name_length != address_length
  * [address] => [delegate_object]
  * </pre>
  *
@@ -155,14 +155,14 @@ public class DelegateStateImpl implements DelegateState {
     }
 
     @Override
-    public Delegate getDelegateByAddress(byte[] addr) {
-        ByteArray k = ByteArray.of(addr);
+    public Delegate getDelegateByAddress(byte[] address) {
+        ByteArray k = ByteArray.of(address);
 
         if (delegateUpdates.containsKey(k)) {
             byte[] v = delegateUpdates.get(k);
             return v == null ? null : Delegate.fromBytes(k.getData(), v);
         } else if (prev != null) {
-            return prev.getDelegateByAddress(addr);
+            return prev.getDelegateByAddress(address);
         } else {
             byte[] v = delegateDB.get(k.getData());
             return v == null ? null : Delegate.fromBytes(k.getData(), v);

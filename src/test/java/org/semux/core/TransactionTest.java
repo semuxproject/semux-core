@@ -48,7 +48,7 @@ public class TransactionTest {
     }
 
     @Test
-    public void testSerilization() {
+    public void testSerialization() {
         Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
         tx.sign(key);
 

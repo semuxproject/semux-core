@@ -23,9 +23,9 @@ import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CorePerfomanceTest {
+public class CorePerformanceTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(CorePerfomanceTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(CorePerformanceTest.class);
 
     private Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
 

@@ -22,7 +22,7 @@ public interface Consensus {
     void stop();
 
     /**
-     * Returns if the consenus is running.
+     * Returns if the consensus is running.
      * 
      * @return
      */
