@@ -6,14 +6,16 @@
  */
 package org.semux.crypto.cache;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import org.semux.crypto.CryptoException;
-import org.semux.crypto.Hex;
-
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+
+import org.semux.crypto.CryptoException;
+import org.semux.util.ByteArray;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public final class EdDSAPublicKeyCache {
 
@@ -27,7 +29,7 @@ public final class EdDSAPublicKeyCache {
      * <p>
      * softValues() allows GC to cleanup cached values automatically.
      */
-    private static final Cache<String, EdDSAPublicKey> pubKeyCache = Caffeine.newBuilder().softValues().build();
+    private static final Cache<ByteArray, EdDSAPublicKey> pubKeyCache = Caffeine.newBuilder().softValues().build();
 
     private EdDSAPublicKeyCache() {
     }
@@ -39,7 +41,7 @@ public final class EdDSAPublicKeyCache {
      * @return
      */
     public static EdDSAPublicKey computeIfAbsent(byte[] pubKey) {
-        return pubKeyCache.get(Hex.encode(pubKey), input -> {
+        return pubKeyCache.get(ByteArray.of(pubKey), input -> {
             try {
                 return new EdDSAPublicKey(new X509EncodedKeySpec(pubKey));
             } catch (InvalidKeySpecException e) {

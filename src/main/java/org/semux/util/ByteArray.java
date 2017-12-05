@@ -6,11 +6,10 @@
  */
 package org.semux.util;
 
-import java.util.Arrays;
-
+import org.bouncycastle.util.Arrays;
 import org.semux.crypto.Hex;
 
-public class ByteArray {
+public class ByteArray implements Comparable<ByteArray> {
     private final byte[] data;
     private final int hash;
 
@@ -36,12 +35,17 @@ public class ByteArray {
 
     @Override
     public boolean equals(Object other) {
-        return (other instanceof ByteArray) && Arrays.equals(data, ((ByteArray) other).data);
+        return (other instanceof ByteArray) && Arrays.areEqual(data, ((ByteArray) other).data);
     }
 
     @Override
     public int hashCode() {
         return hash;
+    }
+
+    @Override
+    public int compareTo(ByteArray o) {
+        return Arrays.compareUnsigned(data, o.data);
     }
 
     @Override
