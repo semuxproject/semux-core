@@ -11,6 +11,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.After;
@@ -35,6 +36,13 @@ public class WalletTest {
     }
 
     @Test
+    public void testGetters() {
+        wallet.unlock(pwd);
+        assertEquals(file, wallet.getFile());
+        assertEquals(pwd, wallet.getPassword());
+    }
+
+    @Test
     public void testUnlock() {
         assertFalse(wallet.unlocked());
 
@@ -50,6 +58,18 @@ public class WalletTest {
 
         wallet.lock();
         assertFalse(wallet.unlocked());
+    }
+
+    @Test
+    public void testAddAccounts() {
+        wallet.unlock(pwd);
+
+        EdDSA key1 = new EdDSA();
+        EdDSA key2 = new EdDSA();
+        wallet.addAccounts(Arrays.asList(key1, key2));
+
+        // TODO: add equals function to EdDSA
+        // assertThat(wallet.getAccounts(), containsInAnyOrder(key1, key2));
     }
 
     @Test

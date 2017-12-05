@@ -114,5 +114,6 @@ public class BlockTest {
 
         assertTrue(Block.validateHeader(previousHeader, header));
         assertTrue(Block.validateTransactions(previousHeader, transactions));
+        assertTrue(Block.validateResults(previousHeader, results));
     }
 }
