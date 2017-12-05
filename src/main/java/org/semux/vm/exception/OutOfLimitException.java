@@ -6,11 +6,11 @@
  */
 package org.semux.vm.exception;
 
-public class OutOfGasException extends VMException {
+public class OutOfLimitException extends VMException {
 
     private static final long serialVersionUID = 1L;
 
-    public OutOfGasException() {
+    public OutOfLimitException() {
         super("Out of gas");
     }
 }

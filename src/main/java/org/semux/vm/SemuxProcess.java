@@ -8,7 +8,7 @@ package org.semux.vm;
 
 import org.semux.Kernel;
 import org.semux.vm.exception.InvalidOpCodeException;
-import org.semux.vm.exception.OutOfGasException;
+import org.semux.vm.exception.OutOfLimitException;
 import org.semux.vm.exception.StackOverflowException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,12 +53,12 @@ public class SemuxProcess implements Runnable {
 
         try {
             int size = 0; // stack size
-            int gas = 0; // gas used
+            int meter = 0; // computation meter
 
             for (byte c : code) {
                 // check gas
-                if (gas >= limit) {
-                    throw new OutOfGasException();
+                if (meter >= limit) {
+                    throw new OutOfLimitException();
                 }
 
                 // read opcode
