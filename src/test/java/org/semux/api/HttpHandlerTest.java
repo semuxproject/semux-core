@@ -44,13 +44,18 @@ public class HttpHandlerTest {
                 .encodeToString(Bytes.of(kernel.getConfig().apiUsername() + ":" + kernel.getConfig().apiPassword()));
 
         // wait for server to boot up
-        new Thread(() -> server.start(ip, port, new HttpHandler(kernel.getConfig(), (u, p, h) -> {
-            uri = u;
-            params = p;
-            headers = h;
+        new Thread(() -> server.start(ip, port, new HttpChannelInitializer() {
+            @Override
+            HttpHandler initHandler() {
+                return new HttpHandler(kernel.getConfig(), (u, p, h) -> {
+                    uri = u;
+                    params = p;
+                    headers = h;
 
-            return "test";
-        }))).start();
+                    return "test";
+                });
+            }
+        })).start();
         while (!server.isRunning()) {
             try {
                 Thread.sleep(200);
