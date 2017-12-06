@@ -23,7 +23,7 @@ import org.junit.runners.Parameterized;
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
 @RunWith(Parameterized.class)
-public class CIDRFilterRuleTest {
+public class FilterRuleTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
@@ -53,7 +53,7 @@ public class CIDRFilterRuleTest {
 
     private boolean matches;
 
-    public CIDRFilterRuleTest(String cidrNotation, String matchesIp, boolean matches) {
+    public FilterRuleTest(String cidrNotation, String matchesIp, boolean matches) {
         this.cidrNotation = cidrNotation;
         this.matchesIp = matchesIp;
         this.matches = matches;
@@ -61,10 +61,10 @@ public class CIDRFilterRuleTest {
 
     @Test
     public void testMatches() throws UnknownHostException {
-        CIDRFilterRule filterRule = new CIDRFilterRule(cidrNotation, IpFilterRuleType.REJECT);
+        FilterRule FilterRule = new FilterRule(cidrNotation, IpFilterRuleType.REJECT);
         InetAddress inetAddress = InetAddress.getByName(matchesIp);
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
         when(inetSocketAddress.getAddress()).thenReturn(inetAddress);
-        assertTrue(filterRule.matches(inetSocketAddress) == matches);
+        assertTrue(FilterRule.matches(inetSocketAddress) == matches);
     }
 }

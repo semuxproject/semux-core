@@ -13,34 +13,58 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.validator.routines.InetAddressValidator;
+import org.semux.net.filter.exception.ParseException;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.netty.handler.ipfilter.IpFilterRule;
 import io.netty.handler.ipfilter.IpFilterRuleType;
 import io.netty.handler.ipfilter.IpSubnetFilterRule;
 
 /**
- * CIDRFilterRule composes IpSubnetFilterRule and IpSingleFilterRule
+ * FilterRule is a proxy class of {@link IpSubnetFilterRule} and
+ * {@link IpSingleFilterRule}
  */
-public class CIDRFilterRule implements IpFilterRule {
+public class FilterRule implements IpFilterRule {
 
     private static final Pattern CIDR_PATTERN = Pattern
             .compile("^(?<address>[0-9.a-fA-F:]+?)(/(?<cidrPrefix>\\d{1,3}))?$");
 
     private static final InetAddressValidator inetAddressValidator = new InetAddressValidator();
 
+    /**
+     * The actual instance of IpFilterRule to be matched against of.
+     */
     private final IpFilterRule ipFilterRule;
 
     private final IpFilterRuleType ruleType;
 
-    public CIDRFilterRule(String cidrNotation, IpFilterRuleType ruleType) throws UnknownHostException {
+    /**
+     * FilterRule constructor decides on the type of IpFilterRule based the provided
+     * address parameter.
+     * <p>
+     * The following cases are handled:
+     * <ul>
+     * <li>CIDR Notation: {@link IpSubnetFilterRule}</li>
+     * <li>IP Address: {@link IpSingleFilterRule}</li>
+     * </ul>
+     * 
+     * @param address
+     *            An IP address or a CIDR notation
+     * @param ruleType
+     *            ACCEPT or REJECT
+     * @throws UnknownHostException
+     */
+    public FilterRule(String address, IpFilterRuleType ruleType) throws UnknownHostException {
         this.ruleType = ruleType;
 
-        Matcher matcher = CIDR_PATTERN.matcher(cidrNotation);
+        Matcher matcher = CIDR_PATTERN.matcher(address);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("Invalid cidrNotation");
+            throw new IllegalArgumentException("Invalid CIDR notation or IP address");
         }
 
-        String address = matcher.group("address");
+        address = matcher.group("address");
         if (!inetAddressValidator.isValid(address)) {
             throw new IllegalArgumentException(String.format("%s is not a valid ip address", address));
         }
@@ -65,14 +89,27 @@ public class CIDRFilterRule implements IpFilterRule {
 
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof CIDRFilterRule))
+        if (!(object instanceof FilterRule))
             return false;
-        CIDRFilterRule rule = (CIDRFilterRule) object;
+        FilterRule rule = (FilterRule) object;
         return rule.ruleType.equals(this.ruleType) && rule.ipFilterRule.equals(this.ipFilterRule);
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(79, 103).append(ipFilterRule).append(ruleType).toHashCode();
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public static FilterRule jsonCreator(
+            @JsonProperty(value = "type", required = true) String type,
+            @JsonProperty(value = "address", required = true) String address) {
+        try {
+            return new FilterRule(address, IpFilterRuleType.valueOf(type));
+        } catch (IllegalArgumentException | NullPointerException ex) {
+            throw new ParseException("Rule type of ip filter must be either ACCEPT or REJECT");
+        } catch (UnknownHostException ex) {
+            throw new ParseException(String.format("Invalid address %s", address), ex);
+        }
     }
 }

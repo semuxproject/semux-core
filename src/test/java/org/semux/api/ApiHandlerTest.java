@@ -53,7 +53,7 @@ import org.semux.crypto.Hex;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.Peer;
-import org.semux.net.filter.CIDRFilterRule;
+import org.semux.net.filter.FilterRule;
 import org.semux.rules.TemporaryDBRule;
 import org.semux.util.BasicAuth;
 import org.semux.util.ByteArray;
@@ -193,7 +193,7 @@ public class ApiHandlerTest {
     @Test
     public void testAddToWhitelist() throws IOException {
         // reject all connections
-        channelMgr.getIpFilter().appendRule(new CIDRFilterRule("0.0.0.0/0", IpFilterRuleType.REJECT));
+        channelMgr.getIpFilter().appendRule(new FilterRule("0.0.0.0/0", IpFilterRuleType.REJECT));
 
         // whitelist 8.8.8.8
         assertTrue(request("/add_to_whitelist?ip=8.8.8.8").getBoolean("success"));
