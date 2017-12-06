@@ -8,13 +8,13 @@ package org.semux.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.semux.config.Constants;
+import org.semux.Config;
 import org.semux.crypto.Hex;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
@@ -22,6 +22,12 @@ import org.semux.util.IOUtil;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
 
 public class Genesis extends Block {
 
@@ -31,11 +37,11 @@ public class Genesis extends Block {
 
     private Map<ByteArray, Premine> premines;
     private Map<String, byte[]> delegates;
-    private Map<String, Object> config;
+    private Map<String, JsonValue> config;
 
     /**
      * Creates a {@link Genesis} block instance.
-     * 
+     *
      * @param header
      * @param premine
      * @param delegates
@@ -52,7 +58,7 @@ public class Genesis extends Block {
 
     /**
      * Loads the genesis file.
-     * 
+     *
      * @return
      */
     public static Genesis load(File dataDir) {
@@ -101,7 +107,7 @@ public class Genesis extends Block {
 
     /**
      * Get premine.
-     * 
+     *
      * @return
      */
     public Map<ByteArray, Premine> getPremines() {
@@ -110,7 +116,7 @@ public class Genesis extends Block {
 
     /**
      * Get delegates.
-     * 
+     *
      * @return
      */
     public Map<String, byte[]> getDelegates() {
@@ -119,10 +125,10 @@ public class Genesis extends Block {
 
     /**
      * Get genesis configurations.
-     * 
+     *
      * @return
      */
-    public Map<String, Object> getConfig() {
+    public Map<String, JsonValue> getConfig() {
         return config;
     }
 

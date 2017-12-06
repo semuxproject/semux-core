@@ -8,15 +8,23 @@ package org.semux.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
+import org.semux.Config;
 import org.semux.util.Bytes;
 import org.semux.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonWriter;
 
 public class AddressBook {
 
@@ -25,8 +33,8 @@ public class AddressBook {
     // NOTE: A better solution would be storing as a list of entries, with index on
     // name and address.
 
-    private final File file;
-    private JSONObject database;
+    private final Path pathToDatabase;
+    private JsonObject database;
 
     /**
      * Creates an address book instance.
@@ -52,7 +60,8 @@ public class AddressBook {
      * @param address
      */
     public void put(Entry address) {
-        database.put(address.getName(), address.getAddress());
+        database = Json.createObjectBuilder(database).add(address.getName(), Json.createValue(address.getAddress()))
+                .build();
         persist();
     }
 
@@ -76,12 +85,12 @@ public class AddressBook {
      * @return An {@link Entry} if exists, otherwise null
      */
     public Entry getByName(String name) {
-        return database.has(name) ? new Entry(name, database.getString(name)) : null;
+        return database.containsKey(name) ? new Entry(name, database.getString(name)) : null;
     }
 
     /**
      * Returns an {@link Entry} by address.
-     * 
+     *
      * @param address
      * @return An {@link Entry} if exists, otherwise null
      */
@@ -95,7 +104,8 @@ public class AddressBook {
      * @param name
      */
     public void remove(String name) {
-        if (database.remove(name) != null) {
+        if (database.containsKey(name)) {
+            database = Json.createObjectBuilder(database).remove(name).build();
             persist();
         }
     }
@@ -104,33 +114,32 @@ public class AddressBook {
      * Clears all entries in the address book.
      */
     public void clear() {
-        database = new JSONObject();
+        database = Json.createObjectBuilder().build();
         persist();
     }
 
     /**
-     * Loads database from file.
-     * 
+     * Loads database from pathToDatabase.
+     *
      * @return
      */
-    private JSONObject load() {
-        try {
-            if (file.exists()) {
-                String json = IOUtil.readFileAsString(file);
-                return new JSONObject(json);
+    private JsonObject load() {
+        if (pathToDatabase.toFile().exists()) {
+            try (JsonReader jsonReader = Json.createReader(Files.newBufferedReader(pathToDatabase))) {
+                return jsonReader.readObject();
+            } catch (IOException e) {
+                logger.error("Failed to retrieve or access address book", e);
             }
-        } catch (IOException e) {
-            logger.error("Failed to retrieve or access address book", e);
         }
-        return new JSONObject();
+        return Json.createObjectBuilder().build();
     }
 
     /**
-     * Persists database to file
+     * Persists database to pathToDatabase
      */
     private void persist() {
-        try {
-            IOUtil.writeToFile(Bytes.of(database.toString()), file);
+        try (JsonWriter jsonWriter = Json.createWriter(Files.newBufferedWriter(pathToDatabase))) {
+            jsonWriter.write(database);
         } catch (IOException e) {
             logger.error("Failed to retrieve or access address book", e);
         }

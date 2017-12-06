@@ -6,16 +6,8 @@
  */
 package org.semux.api;
 
-import java.net.InetSocketAddress;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.semux.Kernel;
-import org.semux.config.Config;
+import io.netty.handler.codec.http.HttpHeaders;
+import org.semux.Config;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl.ValidatorStats;
@@ -30,10 +22,19 @@ import org.semux.crypto.Hex;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.Peer;
-import org.semux.util.ByteArray;
+import org.semux.net.PeerClient;
 import org.semux.util.Bytes;
 
-import io.netty.handler.codec.http.HttpHeaders;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+import javax.json.stream.JsonCollectors;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * Semux RESTful API handler implementation.
@@ -53,7 +54,7 @@ public class ApiHandlerImpl implements ApiHandler {
 
     /**
      * Create an API handler.
-     * 
+     *
      * @param kernel
      */
     public ApiHandlerImpl(Kernel kernel) {
@@ -70,7 +71,7 @@ public class ApiHandlerImpl implements ApiHandler {
     @Override
     public String service(String uri, Map<String, String> params, HttpHeaders headers) {
         if ("/".equals(uri)) {
-            return success("Semux API works");
+            return success(Json.createValue("Semux API works"));
         }
 
         Command cmd = Command.of(uri.substring(1));
@@ -81,49 +82,45 @@ public class ApiHandlerImpl implements ApiHandler {
         try {
             switch (cmd) {
             case GET_INFO: {
-                JSONObject obj = new JSONObject();
-                obj.put("clientId", config.getClientId());
-                obj.put("coinbase", Hex.PREF + kernel.getCoinbase());
-                obj.put("latestBlockNumber", chain.getLatestBlockNumber());
-                obj.put("latestBlockHash", Hex.encodeWithPrefix(chain.getLatestBlockHash()));
-                obj.put("activePeers", channelMgr.getActivePeers().size());
-                obj.put("pendingTransactions", pendingMgr.getTransactions().size());
-
-                return success(obj);
+                return success(Json.createObjectBuilder()
+                        .add("clientId", Config.getClientId(false))
+                        .add("coinbase", Hex.PREF + client.getCoinbase())
+                        .add("latestBlockNumber", chain.getLatestBlockNumber())
+                        .add("latestBlockHash", Hex.encodeWithPrefix(chain.getLatestBlockHash()))
+                        .add("activePeers", channelMgr.getActivePeers().size())
+                        .add("pendingTransactions", pendingMgr.getTransactions().size()).build());
             }
 
             case GET_PEERS: {
-                JSONArray arr = new JSONArray();
-                for (Peer peer : channelMgr.getActivePeers()) {
-                    arr.put(peerToJson(peer));
-                }
-
-                return success(arr);
+                return success(channelMgr.getActivePeers().stream().map(this::peerToJson)
+                        .collect(JsonCollectors.toJsonArray()));
             }
             case ADD_NODE: {
                 String node = params.get("node");
                 if (node != null) {
                     String[] tokens = node.trim().split(":");
                     nodeMgr.addNode(new InetSocketAddress(tokens[0], Integer.parseInt(tokens[1])));
-                    return success(null);
+                    return success(JsonValue.NULL);
                 } else {
                     return failure("Invalid parameter: node can't be null");
                 }
             }
-            case ADD_TO_BLACKLIST: {
-                // TODO: blacklist
+            case BLOCK_IP: {
+                try {
+                    String ip = params.get("ip");
+                    if (ip == null || ip.trim().length() == 0) {
+                        return failure("Invalid parameter: ip can't be empty");
+                    }
 
-                return failure("Not implemented yet!");
-            }
-            case ADD_TO_WHITELIST: {
-                // TODO: whitelist
-
-                return failure("Not implemented yet!");
+                    channelMgr.getIpFilter().blockIp(ip.trim());
+                    return success(JsonValue.NULL);
+                } catch (UnknownHostException | IllegalArgumentException ex) {
+                    return failure(ex.getMessage());
+                }
             }
 
             case GET_LATEST_BLOCK_NUMBER: {
-                long num = chain.getLatestBlockNumber();
-                return success(num);
+                return success(Json.createValue(chain.getLatestBlockNumber()));
             }
             case GET_LATEST_BLOCK: {
                 Block block = chain.getLatestBlock();
@@ -142,25 +139,17 @@ public class ApiHandlerImpl implements ApiHandler {
                 }
             }
             case GET_PENDING_TRANSACTIONS: {
-                List<Transaction> txs = pendingMgr.getTransactions();
-                JSONArray arr = new JSONArray();
-                for (Transaction tx : txs) {
-                    arr.put(transactionToJson(tx));
-                }
-                return success(arr);
+                return success(pendingMgr.getTransactions().stream().map(this::transactionToJson)
+                        .collect(JsonCollectors.toJsonArray()));
             }
             case GET_ACCOUNT_TRANSACTIONS: {
                 String addr = params.get("address");
                 String from = params.get("from");
                 String to = params.get("to");
                 if (addr != null && from != null && to != null) {
-                    List<Transaction> txs = chain.getTransactions(Hex.parse(addr), Integer.parseInt(from),
-                            Integer.parseInt(to));
-                    JSONArray arr = new JSONArray();
-                    for (Transaction tx : txs) {
-                        arr.put(transactionToJson(tx));
-                    }
-                    return success(arr);
+                    return success(chain.getTransactions(Hex.parse(addr), Integer.parseInt(from),
+                            Integer.parseInt(to)).stream().map(this::transactionToJson)
+                            .collect(JsonCollectors.toJsonArray()));
                 } else {
                     return failure("Invalid parameter: address = " + addr + ", from = " + from + ", to = " + to);
                 }
@@ -178,7 +167,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 if (raw != null) {
                     byte[] bytes = Hex.parse(raw);
                     pendingMgr.addTransaction(Transaction.fromBytes(bytes));
-                    return success(null);
+                    return success(JsonValue.NULL);
                 } else {
                     return failure("Invalid parameter: raw can't be null");
                 }
@@ -204,28 +193,21 @@ public class ApiHandlerImpl implements ApiHandler {
                 }
             }
             case GET_VALIDATORS: {
-                List<String> validators = chain.getValidators();
-                JSONArray arr = new JSONArray();
-                for (String v : validators) {
-                    arr.put(Hex.PREF + v);
-                }
-                return success(arr);
+                return success(chain.getValidators().stream().map(v -> Json.createValue(Hex.PREF + v))
+                        .collect(JsonCollectors.toJsonArray()));
             }
             case GET_DELEGATES: {
-                List<Delegate> delegates = chain.getDelegateState().getDelegates();
-                JSONArray arr = new JSONArray();
-                for (Delegate d : delegates) {
-                    arr.put(delegateToJson(d));
-                }
-                return success(arr);
+                return success(
+                        chain.getDelegateState().getDelegates().stream().map(this::delegateToJson)
+                                .collect(JsonCollectors.toJsonArray()));
             }
             case GET_VOTE: {
                 String voter = params.get("voter");
                 String delegate = params.get("delegate");
 
                 if (voter != null && delegate != null) {
-                    long vote = chain.getDelegateState().getVote(Hex.parse(voter), Hex.parse(delegate));
-                    return success(vote);
+                    return success(
+                            Json.createValue(chain.getDelegateState().getVote(Hex.parse(voter), Hex.parse(delegate))));
                 } else {
                     return failure("Invalid parameter: voter = " + voter + ", delegate = " + delegate);
                 }
@@ -234,30 +216,26 @@ public class ApiHandlerImpl implements ApiHandler {
                 String delegate = params.get("delegate");
 
                 if (delegate != null) {
-                    Map<ByteArray, Long> votes = chain.getDelegateState().getVotes(Hex.parse(delegate));
-                    JSONObject obj = new JSONObject();
-                    for (Map.Entry<ByteArray, Long> entry : votes.entrySet()) {
-                        obj.put(Hex.PREF + entry.getKey().toString(), entry.getValue());
-                    }
-                    return success(obj);
+                    return success(chain.getDelegateState().getVotes(Hex.parse(delegate)).entrySet()
+                            .stream()
+                            .map(entry -> new SimpleEntry<String, JsonValue>(Hex.PREF + entry.getKey().toString(),
+                                    Json.createValue(entry.getValue())))
+                            .collect(JsonCollectors.toJsonObject()));
                 } else {
                     return failure("Invalid parameter: delegate can't be null");
                 }
             }
 
             case LIST_ACCOUNTS: {
-                List<EdDSA> accounts = wallet.getAccounts();
-                JSONArray arr = new JSONArray();
-                for (EdDSA acc : accounts) {
-                    arr.put(Hex.PREF + acc.toAddressString());
-                }
-                return success(arr);
+                return success(
+                        wallet.getAccounts().stream().map(acc -> Json.createValue(Hex.PREF + acc.toAddressString()))
+                                .collect(JsonCollectors.toJsonArray()));
             }
             case CREATE_ACCOUNT: {
                 EdDSA key = new EdDSA();
                 wallet.addAccount(key);
                 wallet.flush();
-                return success(Hex.PREF + key.toAddressString());
+                return success(Json.createValue(Hex.PREF + key.toAddressString()));
             }
             case TRANSFER:
             case DELEGATE:
@@ -334,7 +312,7 @@ public class ApiHandlerImpl implements ApiHandler {
             tx.sign(from);
 
             if (pendingMgr.addTransactionSync(tx)) {
-                return success(Hex.encodeWithPrefix(tx.getHash()));
+                return success(Json.createValue(Hex.encodeWithPrefix(tx.getHash())));
             } else {
                 return failure("Transaction rejected by pending manager");
             }
@@ -345,152 +323,134 @@ public class ApiHandlerImpl implements ApiHandler {
 
     /**
      * Convert a block to JSON object.
-     * 
+     *
      * @param block
      * @return
      */
-    protected Object blockToJson(Block block) {
+    protected JsonValue blockToJson(Block block) {
         if (block == null) {
-            return JSONObject.NULL;
+            return JsonObject.NULL;
         }
 
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        JSONObject obj = new JSONObject();
-        obj.put("hash", Hex.encodeWithPrefix(block.getHash()));
-        obj.put("number", block.getNumber());
-        obj.put("view", block.getView());
-        obj.put("coinbase", Hex.encodeWithPrefix(block.getCoinbase()));
-        obj.put("prevHash", Hex.encodeWithPrefix(block.getPrevHash()));
-        obj.put("timestamp", block.getTimestamp());
-        obj.put("date", df.format(new Date(block.getTimestamp())));
-        obj.put("transactionsRoot", Hex.encodeWithPrefix(block.getTransactionsRoot()));
-        obj.put("resultsRoot", Hex.encodeWithPrefix(block.getResultsRoot()));
-        obj.put("stateRoot", Hex.encodeWithPrefix(block.getStateRoot()));
-        obj.put("data", Hex.encodeWithPrefix(block.getData()));
-        JSONArray arr = new JSONArray();
-        for (Transaction tx : block.getTransactions()) {
-            arr.put(transactionToJson(tx));
-        }
-        obj.put("transactions", arr);
-
-        return obj;
+        return Json.createObjectBuilder()
+                .add("hash", Hex.encodeWithPrefix(block.getHash()))
+                .add("number", block.getNumber())
+                .add("view", block.getView())
+                .add("coinbase", Hex.encodeWithPrefix(block.getCoinbase()))
+                .add("prevHash", Hex.encodeWithPrefix(block.getPrevHash()))
+                .add("timestamp", block.getTimestamp())
+                .add("date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(block.getTimestamp())))
+                .add("transactionsRoot", Hex.encodeWithPrefix(block.getTransactionsRoot()))
+                .add("resultsRoot", Hex.encodeWithPrefix(block.getResultsRoot()))
+                .add("stateRoot", Hex.encodeWithPrefix(block.getStateRoot()))
+                .add("data", Hex.encodeWithPrefix(block.getData()))
+                .add("transactions", Json.createArrayBuilder(block
+                        .getTransactions().stream().map(this::transactionToJson).collect(JsonCollectors.toJsonArray())))
+                .build();
     }
 
     /**
      * Convert a transaction to JSON object.
-     * 
+     *
      * @param tx
      * @return
      */
-    protected Object transactionToJson(Transaction tx) {
+    protected JsonValue transactionToJson(Transaction tx) {
         if (tx == null) {
-            return JSONObject.NULL;
+            return JsonObject.NULL;
         }
 
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        JSONObject obj = new JSONObject();
-        obj.put("hash", Hex.encodeWithPrefix(tx.getHash()));
-        obj.put("type", tx.getType().toString());
-        obj.put("from", Hex.encodeWithPrefix(tx.getFrom()));
-        obj.put("to", Hex.encodeWithPrefix(tx.getTo()));
-        obj.put("value", tx.getValue());
-        obj.put("fee", tx.getFee());
-        obj.put("nonce", tx.getNonce());
-        obj.put("timestamp", tx.getTimestamp());
-        obj.put("date", df.format(new Date(tx.getTimestamp())));
-        obj.put("data", Hex.encodeWithPrefix(tx.getData()));
-
-        return obj;
+        return Json.createObjectBuilder()
+                .add("hash", Hex.encodeWithPrefix(tx.getHash()))
+                .add("type", tx.getType().toString())
+                .add("from", Hex.encodeWithPrefix(tx.getFrom()))
+                .add("to", Hex.encodeWithPrefix(tx.getTo()))
+                .add("value", tx.getValue())
+                .add("fee", tx.getFee())
+                .add("nonce", tx.getNonce())
+                .add("timestamp", tx.getTimestamp())
+                .add("date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(tx.getTimestamp())))
+                .add("data", Hex.encodeWithPrefix(tx.getData())).build();
     }
 
     /**
      * Convert an account to JSON object.
-     * 
+     *
      * @param acc
      * @return
      */
-    protected Object accountToJson(Account acc) {
+    protected JsonValue accountToJson(Account acc) {
         if (acc == null) {
-            return JSONObject.NULL;
+            return JsonObject.NULL;
         }
 
-        JSONObject obj = new JSONObject();
-        obj.put("address", Hex.encodeWithPrefix(acc.getAddress()));
-        obj.put("available", acc.getAvailable());
-        obj.put("locked", acc.getLocked());
-        obj.put("nonce", acc.getNonce());
-
-        return obj;
+        return Json.createObjectBuilder()
+                .add("address", Hex.encodeWithPrefix(acc.getAddress()))
+                .add("available", acc.getAvailable())
+                .add("locked", acc.getLocked())
+                .add("nonce", acc.getNonce())
+                .build();
     }
 
     /**
      * Convert a delegate to JSON object.
-     * 
+     *
      * @param delegate
      * @return
      */
-    protected Object delegateToJson(Delegate delegate) {
+    protected JsonValue delegateToJson(Delegate delegate) {
         if (delegate == null) {
-            return JSONObject.NULL;
+            return JsonObject.NULL;
         }
 
-        JSONObject obj = new JSONObject();
-        obj.put("address", Hex.encodeWithPrefix(delegate.getAddress()));
-        obj.put("name", new String(delegate.getName()));
-        obj.put("votes", delegate.getVotes());
-        obj.put("registeredAt", delegate.getRegisteredAt());
         ValidatorStats s = chain.getValidatorStats(delegate.getAddress());
-        obj.put("blocksForged", s.getBlocksForged());
-        obj.put("turnsHit", s.getTurnsHit());
-        obj.put("turnsMissed", s.getTurnsMissed());
 
-        return obj;
+        return Json.createObjectBuilder()
+                .add("address", Hex.encodeWithPrefix(delegate.getAddress()))
+                .add("name", new String(delegate.getName()))
+                .add("votes", delegate.getVotes())
+                .add("registeredAt", delegate.getRegisteredAt())
+                .add("blocksForged", s.getBlocksForged())
+                .add("turnsHit", s.getTurnsHit())
+                .add("turnsMissed", s.getTurnsMissed()).build();
     }
 
-    protected Object peerToJson(Peer peer) {
+    protected JsonValue peerToJson(Peer peer) {
         if (peer == null) {
-            return JSONObject.NULL;
+            return JsonObject.NULL;
         }
 
-        JSONObject obj = new JSONObject();
-        obj.put("ip", peer.getIp());
-        obj.put("port", peer.getPort());
-        obj.put("networkVersion", peer.getNetworkVersion());
-        obj.put("clientId", peer.getClientId());
-        obj.put("peerId", Hex.PREF + peer.getPeerId());
-        obj.put("latestBlockNumber", peer.getLatestBlockNumber());
-        obj.put("latency", peer.getLatency());
-
-        return obj;
+        return Json.createObjectBuilder()
+                .add("ip", peer.getIp())
+                .add("port", peer.getPort())
+                .add("p2pVersion", peer.getP2pVersion())
+                .add("clientId", peer.getClientId())
+                .add("peerId", Hex.PREF + peer.getPeerId())
+                .add("latestBlockNumber", peer.getLatestBlockNumber())
+                .add("latency", peer.getLatency()).build();
     }
 
     /**
      * Construct a success response.
-     * 
+     *
      * @param result
      * @return
      */
-    protected String success(Object result) {
-        JSONObject obj = new JSONObject();
-        obj.put("success", true);
-        if (result != null) {
-            obj.put("result", result);
-        }
-        return obj.toString();
+    protected String success(JsonValue result) {
+        return Json.createObjectBuilder()
+                .add("success", true)
+                .add("result", result).build().toString();
     }
 
     /**
      * Construct a failure response.
-     * 
+     *
      * @param msg
      * @return
      */
     protected String failure(String msg) {
-        JSONObject obj = new JSONObject();
-        obj.put("success", false);
-        if (msg != null) {
-            obj.put("message", msg);
-        }
-        return obj.toString();
+        return Json.createObjectBuilder()
+                .add("success", false)
+                .add("message", msg).build().toString();
     }
 }

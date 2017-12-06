@@ -12,12 +12,13 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semux.api.SemuxAPIMock;
 import org.semux.config.Config;
+
+import javax.json.JsonObject;
 
 public class ApiUtilTest {
 
@@ -41,7 +42,7 @@ public class ApiUtilTest {
         JSONObject obj = api.request(cmd, "number", 0);
 
         assertTrue(obj.getBoolean("success"));
-        assertNotNull(obj.getJSONObject("result"));
+        assertNotNull(obj.getJsonObject("result"));
     }
 
     @AfterClass

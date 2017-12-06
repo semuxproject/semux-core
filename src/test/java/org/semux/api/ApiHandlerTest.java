@@ -6,23 +6,6 @@
  */
 package org.semux.api;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Scanner;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -48,7 +31,30 @@ import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
-public class ApiHandlerTest {
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URL;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+public class APIHandlerTest {
 
     private static final String API_IP = "127.0.0.1";
     private static final int API_PORT = 15171;
@@ -95,24 +101,24 @@ public class ApiHandlerTest {
         con.setRequestProperty("Authorization", "Basic "
                 + Base64.getEncoder().encodeToString(Bytes.of(config.apiUsername() + ":" + config.apiPassword())));
 
-        try (Scanner s = new Scanner(con.getInputStream())) {
-            return new JSONObject(s.nextLine());
+        try (JsonReader jsonReader = Json.createReader(con.getInputStream())) {
+            return jsonReader.readObject();
         }
     }
 
     @Test
     public void testRoot() throws IOException {
         String uri = "/";
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
     }
 
     @Test
     public void testGetInfo() throws IOException {
         String uri = "/get_info";
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        JSONObject result = response.getJSONObject("result");
+        JsonObject result = response.getJsonObject("result");
 
         assertNotNull(result);
         assertEquals(0, result.getInt("latestBlockNumber"));
@@ -121,28 +127,41 @@ public class ApiHandlerTest {
     @Test
     public void testGetPeers() throws IOException {
         String uri = "/get_peers";
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        JSONArray result = response.getJSONArray("result");
+        JsonArray result = response.getJsonArray("result");
 
         assertNotNull(result);
-        assertEquals(0, result.length());
+        assertEquals(0, result.size());
     }
 
     @Test
     public void testAddNode() throws IOException {
         String uri = "/add_node?node=127.0.0.1:5162";
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
 
-        assertEquals(1, nodeMgr.queueSize());
+        assertEquals(1, api.nodeMgr.queueSize());
+    }
+
+    @Test
+    public void testBlockIp() throws IOException {
+        String uri = "/block_ip?ip=8.8.8.8";
+        JsonObject response = request(uri);
+        assertTrue(response.getBoolean("success"));
+
+        InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
+        when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
+
+        assertTrue(api.channelMgr.isBlocked(inetSocketAddress));
     }
 
     @Test
     public void testGetLatestBlockNumber() throws IOException {
         String uri = "/get_latest_block_number";
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
+        assertEquals(0, response.getJsonNumber("result").longValueExact());
     }
 
     @Test
@@ -150,15 +169,15 @@ public class ApiHandlerTest {
         Genesis gen = chain.getGenesis();
 
         String uri = "/get_latest_block";
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        JSONObject block = response.getJSONObject("result");
+        JsonObject block = response.getJsonObject("result");
 
         assertArrayEquals(gen.getHash(), Hex.parse(block.getString("hash")));
-        assertEquals(gen.getNumber(), block.getLong("number"));
+        assertEquals(gen.getNumber(), block.getJsonNumber("number").longValueExact());
         assertArrayEquals(gen.getCoinbase(), Hex.parse(block.getString("coinbase")));
         assertArrayEquals(gen.getPrevHash(), Hex.parse(block.getString("prevHash")));
-        assertEquals(gen.getTimestamp(), block.getLong("timestamp"));
+        assertEquals(gen.getTimestamp(), block.getJsonNumber("timestamp").longValueExact());
         assertArrayEquals(gen.getTransactionsRoot(), Hex.parse(block.getString("transactionsRoot")));
         assertArrayEquals(gen.getData(), Hex.parse(block.getString("data")));
     }
@@ -168,14 +187,14 @@ public class ApiHandlerTest {
         Genesis gen = chain.getGenesis();
 
         String uri = "/get_block?number=" + gen.getNumber();
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        assertArrayEquals(gen.getHash(), Hex.parse(response.getJSONObject("result").getString("hash")));
+        assertArrayEquals(gen.getHash(), Hex.parse(response.getJsonObject("result").getString("hash")));
 
         uri = "/get_block?hash=" + Hex.encode(gen.getHash());
         response = request(uri);
         assertTrue(response.getBoolean("success"));
-        assertArrayEquals(gen.getHash(), Hex.parse(response.getJSONObject("result").getString("hash")));
+        assertArrayEquals(gen.getHash(), Hex.parse(response.getJsonObject("result").getString("hash")));
     }
 
     @Test
@@ -187,10 +206,10 @@ public class ApiHandlerTest {
 
         try {
             String uri = "/get_pending_transactions";
-            JSONObject response = request(uri);
+            JsonObject response = request(uri);
             assertTrue(response.getBoolean("success"));
 
-            JSONArray arr = response.getJSONArray("result");
+            JsonArray arr = response.getJsonArray("result");
             assertNotNull(arr);
         } finally {
             // Reset the API server
@@ -208,10 +227,10 @@ public class ApiHandlerTest {
 
         try {
             String uri = "/get_account_transactions?address=" + Hex.encode(tx.getFrom()) + "&from=0&to=1024";
-            JSONObject response = request(uri);
+            JsonObject response = request(uri);
             assertTrue(response.getBoolean("success"));
 
-            JSONArray arr = response.getJSONArray("result");
+            JsonArray arr = response.getJsonArray("result");
             assertNotNull(arr);
         } finally {
             // Reset the API server
@@ -229,10 +248,10 @@ public class ApiHandlerTest {
 
         try {
             String uri = "/get_transaction?hash=" + Hex.encode(tx.getHash());
-            JSONObject response = request(uri);
+            JsonObject response = request(uri);
             assertTrue(response.getBoolean("success"));
 
-            JSONObject obj = response.getJSONObject("result");
+            JsonObject obj = response.getJsonObject("result");
             assertArrayEquals(tx.getHash(), Hex.parse(obj.getString("hash")));
         } finally {
             // Reset the API server
@@ -246,7 +265,7 @@ public class ApiHandlerTest {
         Transaction tx = createTransaction();
 
         String uri = "/send_transaction?raw=" + Hex.encode(tx.toBytes());
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
 
         Thread.sleep(200);
@@ -261,9 +280,10 @@ public class ApiHandlerTest {
         Entry<ByteArray, Premine> entry = gen.getPremines().entrySet().iterator().next();
 
         String uri = "/get_account?address=" + entry.getKey();
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        assertEquals(entry.getValue().getAmount(), response.getJSONObject("result").getLong("available"));
+        assertEquals(entry.getValue().getAmount(),
+                response.getJsonObject("result").getJsonNumber("available").longValueExact());
     }
 
     @Test
@@ -272,25 +292,25 @@ public class ApiHandlerTest {
         Entry<String, byte[]> entry = gen.getDelegates().entrySet().iterator().next();
 
         String uri = "/get_delegate?address=" + Hex.encode(entry.getValue());
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        assertEquals(entry.getKey(), response.getJSONObject("result").getString("name"));
+        assertEquals(entry.getKey(), response.getJsonObject("result").getString("name"));
     }
 
     @Test
     public void testGetDelegates() throws IOException {
         String uri = "/get_delegates";
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        assertTrue(response.getJSONArray("result").length() > 0);
+        assertTrue(response.getJsonArray("result").size() > 0);
     }
 
     @Test
     public void testGetValidators() throws IOException {
         String uri = "/get_validators";
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        assertTrue(response.getJSONArray("result").length() > 0);
+        assertTrue(response.getJsonArray("result").size() > 0);
     }
 
     @Test
@@ -302,25 +322,25 @@ public class ApiHandlerTest {
         ds.vote(key.toAddress(), key2.toAddress(), 200L);
 
         String uri = "/get_vote?voter=" + key.toAddressString() + "&delegate=" + key2.toAddressString();
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        assertEquals(200L, response.getLong("result"));
+        assertEquals(200L, response.getJsonNumber("result").longValueExact());
     }
 
     @Test
     public void testGetAccounts() throws IOException {
-        String uri = "/list_accounts";
-        JSONObject response = request(uri);
+        String uri = "/list_accounts?password=" + password;
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        assertNotNull(response.getJSONArray("result"));
+        assertNotNull(response.getJsonArray("result"));
     }
 
     @Test
     public void testCreateAccount() throws IOException {
         int size = wallet.getAccounts().size();
 
-        String uri = "/create_account";
-        JSONObject response = request(uri);
+        String uri = "/create_account?password=" + password;
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertEquals(size + 1, wallet.getAccounts().size());
     }
@@ -329,8 +349,8 @@ public class ApiHandlerTest {
     public void testTransfer() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
         String uri = "/transfer?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + key.toAddressString()
-                + "&value=1000000000&fee=" + config.minTransactionFee() + "&data=test";
-        JSONObject response = request(uri);
+                + "&value=1000000000&fee=" + Config.MIN_TRANSACTION_FEE + "&data=test";
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
 
@@ -346,7 +366,7 @@ public class ApiHandlerTest {
     public void testDelegate() throws IOException, InterruptedException {
         String uri = "/delegate?&from=" + wallet.getAccount(0).toAddressString() + "&fee=" + config.minTransactionFee()
                 + "&data=" + Hex.encode(Bytes.of("test_delegate"));
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
 
@@ -365,7 +385,7 @@ public class ApiHandlerTest {
 
         String uri = "/vote?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + delegate.toAddressString()
                 + "&value=1000000000&fee=50000000";
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
 
@@ -389,7 +409,7 @@ public class ApiHandlerTest {
 
         String uri = "/unvote?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + delegate.toAddressString()
                 + "&value=" + amount + "&fee=50000000";
-        JSONObject response = request(uri);
+        JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));
 

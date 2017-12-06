@@ -6,9 +6,11 @@
  */
 package org.semux.util;
 
-import org.json.JSONObject;
 import org.semux.crypto.Hex;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -41,7 +43,7 @@ public class ApiUtil {
      * @return
      * @throws IOException
      */
-    public JSONObject request(String cmd, Map<String, Object> params) throws IOException {
+    public JsonObject request(String cmd, Map<String, Object> params) throws IOException {
         // construct URL
         String url = "http://" + server.getAddress().getHostAddress() + ":" + server.getPort() + "/" + cmd;
 
@@ -65,14 +67,9 @@ public class ApiUtil {
         con.setRequestProperty("Authorization",
                 "Basic " + Base64.getEncoder().encodeToString(Bytes.of(username + ":" + password)));
 
-        // download
-        try (Scanner s = new Scanner(con.getInputStream())) {
-            while (s.hasNextLine()) {
-                sb.append(s.nextLine());
-            }
+        try (JsonReader jsonReader = Json.createReader(con.getInputStream())) {
+            return jsonReader.readObject();
         }
-
-        return new JSONObject(sb.toString());
     }
 
     /**
@@ -86,7 +83,7 @@ public class ApiUtil {
      * @return
      * @throws IOException
      */
-    public JSONObject request(String cmd, Object... params) throws IOException {
+    public JsonObject request(String cmd, Object... params) throws IOException {
         Map<String, Object> map = new HashMap<>();
         for (int i = 0; i + 1 < params.length; i += 2) {
             map.put(params[i].toString(), params[i + 1]);
