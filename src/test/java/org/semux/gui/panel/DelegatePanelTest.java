@@ -28,10 +28,12 @@ public class DelegatePanelTest {
 
         WalletDelegate delegate1 = mock(WalletDelegate.class, "delegate 1");
         when(delegate1.getNameString()).thenReturn("delegate 1");
+        when(delegate1.getAddressString()).thenReturn("1111");
         walletDelegates.add(delegate1);
 
         WalletDelegate delegate2 = mock(WalletDelegate.class, "delegate 2");
         when(delegate2.getNameString()).thenReturn("delegate 2");
+        when(delegate2.getAddressString()).thenReturn("2222");
         walletDelegates.add(delegate2);
 
         when(walletModel.getDelegates()).thenReturn(walletDelegates);

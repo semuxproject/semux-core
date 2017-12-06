@@ -6,13 +6,6 @@
  */
 package org.semux.crypto;
 
-import net.i2p.crypto.eddsa.EdDSAEngine;
-import net.i2p.crypto.eddsa.EdDSAPrivateKey;
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import net.i2p.crypto.eddsa.KeyPairGenerator;
-import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
-import org.semux.crypto.cache.EdDSAPublicKeyCache;
-
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -22,6 +15,14 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
+
+import org.semux.crypto.cache.EdDSAPublicKeyCache;
+
+import net.i2p.crypto.eddsa.EdDSAEngine;
+import net.i2p.crypto.eddsa.EdDSAPrivateKey;
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
+import net.i2p.crypto.eddsa.KeyPairGenerator;
+import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
 /**
  * Edwards-curve Digital Signature Algorithm (EdDSA), specifically ED25519.
@@ -246,4 +247,15 @@ public class EdDSA {
             return new Signature(sig, pub);
         }
     }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(getPrivateKey());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof EdDSA) && Arrays.equals(getPrivateKey(), ((EdDSA) obj).getPrivateKey());
+    }
+
 }

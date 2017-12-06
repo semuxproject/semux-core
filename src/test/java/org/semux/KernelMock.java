@@ -7,6 +7,7 @@
 package org.semux;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.semux.config.Config;
 import org.semux.config.Constants;
@@ -16,6 +17,7 @@ import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.Wallet;
+import org.semux.core.WalletLockedException;
 import org.semux.crypto.EdDSA;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
@@ -23,14 +25,21 @@ import org.semux.net.PeerClient;
 
 public class KernelMock extends Kernel {
 
-    public KernelMock() {
-        super(new DevNetConfig(Constants.DEFAULT_DATA_DIR), // config
-                new Wallet(new File(Constants.DEFAULT_DATA_DIR, "wallet_test.data")), // wallet
-                new EdDSA()); // coinbase
+    private String password = "password";
 
-        getWallet().unlock("test");
-        for (int i = 0; i < 10; i++) {
-            getWallet().addAccount(new EdDSA());
+    public KernelMock() {
+        super(null, null, null);
+
+        try {
+            this.config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
+            this.wallet = new Wallet(File.createTempFile("wallet", ".data"));
+            this.wallet.unlock(password);
+            for (int i = 0; i < 10; i++) {
+                this.wallet.addAccount(new EdDSA());
+            }
+            this.coinbase = wallet.getAccount(0);
+        } catch (WalletLockedException | IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -25,7 +25,7 @@ public final class EdDSAPublicKeyCache {
      * that Semux has an infrequently changed list of validators, caching public
      * keys can reduce the synchronization time significantly.
      * <p>
-     * The cache is a concurrent hash map of Hex(byte[] publicKey) -> EdDSAPublicKey
+     * The cache is a concurrent hash map of ByteArray.of(pubKey) -> EdDSAPublicKey
      * <p>
      * softValues() allows GC to cleanup cached values automatically.
      */
@@ -35,7 +35,7 @@ public final class EdDSAPublicKeyCache {
     }
 
     /**
-     * Returns cached EdDSAPublicKey hashed by hexadecimal public key
+     * Returns cached EdDSAPublicKey from its byte array format.
      *
      * @param pubKey
      * @return

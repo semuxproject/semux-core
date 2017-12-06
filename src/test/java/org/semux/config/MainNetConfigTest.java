@@ -24,6 +24,7 @@ public class MainNetConfigTest {
     @Before
     public void testLoad() {
         config = new MainNetConfig(Constants.DEFAULT_DATA_DIR);
+        assertEquals(Constants.MAIN_NET_ID, config.networkId());
     }
 
     @Test

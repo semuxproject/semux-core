@@ -6,11 +6,14 @@
  */
 package org.semux.core;
 
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -21,13 +24,19 @@ import org.semux.crypto.EdDSA;
 
 public class WalletTest {
 
-    private static File file = new File("wallet_test.data");
-    private static String pwd = "passw0rd";
-
+    private File file;
+    private String pwd;
     private Wallet wallet;
 
     @Before
     public void setup() {
+        try {
+            file = File.createTempFile("wallet", ".data");
+            pwd = "password";
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         wallet = new Wallet(file);
         wallet.unlock(pwd);
         wallet.setAccounts(Collections.singletonList(new EdDSA()));
@@ -63,13 +72,13 @@ public class WalletTest {
     @Test
     public void testAddAccounts() {
         wallet.unlock(pwd);
+        wallet.setAccounts(Collections.emptyList());
 
         EdDSA key1 = new EdDSA();
         EdDSA key2 = new EdDSA();
         wallet.addAccounts(Arrays.asList(key1, key2));
 
-        // TODO: add equals function to EdDSA
-        // assertThat(wallet.getAccounts(), containsInAnyOrder(key1, key2));
+        assertThat(wallet.getAccounts(), contains(key1, key2));
     }
 
     @Test

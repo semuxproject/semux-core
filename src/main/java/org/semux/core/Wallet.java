@@ -66,7 +66,7 @@ public class Wallet {
         try {
             byte[] key = Hash.h256(Bytes.of(password));
 
-            if (file.exists()) {
+            if (exists()) {
                 SimpleDecoder dec = new SimpleDecoder(IOUtil.readFile(file));
                 dec.readInt(); // version
                 int total = dec.readInt();
@@ -104,7 +104,7 @@ public class Wallet {
      * @return
      */
     public boolean exists() {
-        return file.isFile();
+        return file.isFile() && file.length() > 0;
     }
 
     /**
