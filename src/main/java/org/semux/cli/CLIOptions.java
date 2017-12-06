@@ -24,7 +24,9 @@ public enum CLIOptions {
 
     DUMP_PRIVATE_KEY("dumpprivatekey"),
 
-    IMPORT_PRIVATE_KEY("importprivatekey");
+    IMPORT_PRIVATE_KEY("importprivatekey"),
+
+    NETWORK("network");
 
     private final String name;
 

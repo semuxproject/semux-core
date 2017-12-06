@@ -18,9 +18,12 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
+import org.semux.config.AbstractConfig;
 import org.semux.config.Config;
 import org.semux.config.Constants;
+import org.semux.config.DevNetConfig;
 import org.semux.config.MainNetConfig;
+import org.semux.config.TestNetConfig;
 import org.semux.core.Wallet;
 import org.semux.core.WalletLockedException;
 import org.semux.crypto.EdDSA;
@@ -33,6 +36,12 @@ import org.slf4j.LoggerFactory;
 
 public class SemuxCLI {
 
+    private static final String DEVNET = "devnet";
+
+    private static final String TESTNET = "testnet";
+
+    private static final String MAINNET = "mainnet";
+
     private static final Logger logger = LoggerFactory.getLogger(SemuxCLI.class);
 
     private Options options = new Options();
@@ -40,6 +49,7 @@ public class SemuxCLI {
     private String dataDir = Constants.DEFAULT_DATA_DIR;
     private int coinbase = 0;
     private String password = null;
+    private String network = MAINNET;
 
     SemuxCLI() {
         Option helpOption = Option.builder().longOpt(CLIOptions.HELP.toString()).desc(CLIMessages.get("PrintHelp"))
@@ -68,6 +78,11 @@ public class SemuxCLI {
                 .desc(CLIMessages.get("SpecifyCoinbase")).hasArg(true).numberOfArgs(1).optionalArg(false)
                 .argName("index").type(Number.class).build();
         options.addOption(coinbaseOption);
+
+        Option networkOption = Option.builder().longOpt(CLIOptions.NETWORK.toString())
+                .desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1).optionalArg(false)
+                .argName("network").type(String.class).build();
+        options.addOption(networkOption);
 
         Option passwordOption = Option.builder().longOpt(CLIOptions.PASSWORD.toString())
                 .desc(CLIMessages.get("WalletPassword")).hasArg(true).numberOfArgs(1).optionalArg(false)
@@ -106,6 +121,10 @@ public class SemuxCLI {
 
         if (commandLine.hasOption(CLIOptions.COINBASE.toString())) {
             coinbase = ((Number) commandLine.getParsedOptionValue(CLIOptions.COINBASE.toString())).intValue();
+        }
+
+        if (commandLine.hasOption(CLIOptions.NETWORK.toString())) {
+            network = commandLine.getOptionValue(CLIOptions.NETWORK.toString());
         }
 
         if (commandLine.hasOption(CLIOptions.PASSWORD.toString())) {
@@ -162,7 +181,7 @@ public class SemuxCLI {
         }
 
         // start kernel
-        startKernel(new MainNetConfig(dataDir), wallet, wallet.getAccount(coinbase));
+        startKernel(getConfig(), wallet, wallet.getAccount(coinbase));
     }
 
     protected Kernel startKernel(Config config, Wallet wallet, EdDSA coinbase) {
@@ -277,5 +296,29 @@ public class SemuxCLI {
 
     protected Wallet loadWallet() {
         return new Wallet(new File(dataDir, "wallet.data"));
+    }
+
+    /**
+     * Creates the correct Instance of an AbstractConfig Implementation depending on
+     * the CLI --network option given.<br />
+     * Defaults to MainNet.
+     * 
+     * @return AbstractConfigImplementation
+     */
+    protected AbstractConfig getConfig() {
+        AbstractConfig config = null;
+        switch (network != null ? network : MAINNET) {
+        case TESTNET:
+            config = new TestNetConfig(dataDir);
+            break;
+        case DEVNET:
+            config = new DevNetConfig(dataDir);
+            break;
+        case MAINNET:
+        default:
+            config = new MainNetConfig(dataDir);
+            break;
+        }
+        return config;
     }
 }

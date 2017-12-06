@@ -9,6 +9,7 @@ package org.semux.cli;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -41,6 +42,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.Kernel;
 import org.semux.TestAppender;
+import org.semux.config.DevNetConfig;
+import org.semux.config.MainNetConfig;
+import org.semux.config.TestNetConfig;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
@@ -101,6 +105,120 @@ public class SemuxCLITest {
         SemuxCLI semuxCLI = spy(new SemuxCLI());
         semuxCLI.start(new String[] { "--version" });
         verify(semuxCLI).printVersion();
+    }
+
+    @Test
+    public void testMainNetwork() throws ParseException {
+        SemuxCLI semuxCLI = spy(new SemuxCLI());
+
+        // mock accounts
+        List<EdDSA> accounts = new ArrayList<>();
+        EdDSA account = new EdDSA();
+        accounts.add(account);
+
+        // mock wallet
+        Wallet wallet = mock(Wallet.class);
+        when(wallet.unlock("oldpassword")).thenReturn(true);
+        when(wallet.getAccounts()).thenReturn(accounts);
+        when(semuxCLI.loadWallet()).thenReturn(wallet);
+
+        // mock SystemUtil
+        mockStatic(SystemUtil.class);
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
+        when(SystemUtil.getOsArch()).thenReturn("amd64");
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
+        semuxCLI.start(new String[] { "--network", "mainnet" });
+
+        assertTrue(semuxCLI.getConfig() instanceof MainNetConfig);
+    }
+
+    @Test
+    public void testMainNetworkNotSpecified() throws ParseException {
+
+        SemuxCLI semuxCLI = spy(new SemuxCLI());
+
+        // mock accounts
+        List<EdDSA> accounts = new ArrayList<>();
+        EdDSA account = new EdDSA();
+        accounts.add(account);
+
+        // mock wallet
+        Wallet wallet = mock(Wallet.class);
+        when(wallet.unlock("oldpassword")).thenReturn(true);
+        when(wallet.getAccounts()).thenReturn(accounts);
+        when(semuxCLI.loadWallet()).thenReturn(wallet);
+
+        // mock SystemUtil
+        mockStatic(SystemUtil.class);
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
+        when(SystemUtil.getOsArch()).thenReturn("amd64");
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
+        semuxCLI.start();
+
+        assertTrue(semuxCLI.getConfig() instanceof MainNetConfig);
+
+    }
+
+    @Test
+    public void testTestNetwork() throws ParseException {
+
+        SemuxCLI semuxCLI = spy(new SemuxCLI());
+
+        // mock accounts
+        List<EdDSA> accounts = new ArrayList<>();
+        EdDSA account = new EdDSA();
+        accounts.add(account);
+
+        // mock wallet
+        Wallet wallet = mock(Wallet.class);
+        when(wallet.unlock("oldpassword")).thenReturn(true);
+        when(wallet.getAccounts()).thenReturn(accounts);
+        when(semuxCLI.loadWallet()).thenReturn(wallet);
+
+        // mock SystemUtil
+        mockStatic(SystemUtil.class);
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
+        when(SystemUtil.getOsArch()).thenReturn("amd64");
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
+        semuxCLI.start(new String[] { "--network", "testnet" });
+
+        assertTrue(semuxCLI.getConfig() instanceof TestNetConfig);
+
+    }
+
+    @Test
+    public void testDevNetwork() throws ParseException {
+
+        SemuxCLI semuxCLI = spy(new SemuxCLI());
+
+        // mock accounts
+        List<EdDSA> accounts = new ArrayList<>();
+        EdDSA account = new EdDSA();
+        accounts.add(account);
+
+        // mock wallet
+        Wallet wallet = mock(Wallet.class);
+        when(wallet.unlock("oldpassword")).thenReturn(true);
+        when(wallet.getAccounts()).thenReturn(accounts);
+        when(semuxCLI.loadWallet()).thenReturn(wallet);
+
+        // mock SystemUtil
+        mockStatic(SystemUtil.class);
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
+        when(SystemUtil.getOsArch()).thenReturn("amd64");
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
+        semuxCLI.start(new String[] { "--network", "devnet" });
+
+        assertTrue(semuxCLI.getConfig() instanceof DevNetConfig);
+
     }
 
     @Test
