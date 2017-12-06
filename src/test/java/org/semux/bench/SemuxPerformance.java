@@ -6,19 +6,21 @@
  */
 package org.semux.bench;
 
-import org.semux.Config;
-import org.semux.core.Unit;
-import org.semux.util.ApiUtil;
-import org.semux.util.Bytes;
-import org.semux.util.SystemUtil;
-
-import javax.json.JsonObject;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.json.JsonObject;
+
+import org.semux.config.Constants;
+import org.semux.config.DevNetConfig;
+import org.semux.core.Unit;
+import org.semux.util.ApiUtil;
+import org.semux.util.Bytes;
+import org.semux.util.SystemUtil;
 
 public class SemuxPerformance {
     private static InetSocketAddress server = new InetSocketAddress("127.0.0.1", 5171);

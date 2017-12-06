@@ -6,6 +6,11 @@
  */
 package org.semux.core;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,11 +22,6 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.rules.TemporaryDBRule;
 import org.semux.util.Bytes;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class TransactionExecutorTest {
 

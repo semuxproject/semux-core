@@ -7,6 +7,9 @@
 package org.semux.net.filter.exception;
 
 public class ParseException extends IllegalArgumentException {
+
+    private static final long serialVersionUID = 1L;
+
     public ParseException() {
     }
 

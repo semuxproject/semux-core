@@ -6,6 +6,15 @@
  */
 package org.semux.core.state;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+import java.util.Map;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -19,15 +28,6 @@ import org.semux.crypto.EdDSA;
 import org.semux.rules.TemporaryDBRule;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class DelegateStateTest {
 

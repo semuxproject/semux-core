@@ -6,6 +6,11 @@
  */
 package org.semux.core.state;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,11 +22,6 @@ import org.semux.core.Genesis.Premine;
 import org.semux.rules.TemporaryDBRule;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
-
-import java.util.Map;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 public class AccountStateTest {
 

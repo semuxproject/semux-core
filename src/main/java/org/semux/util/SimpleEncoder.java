@@ -6,10 +6,10 @@
  */
 package org.semux.util;
 
-import org.semux.util.exception.SimpleEncoderException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+
+import org.semux.util.exception.SimpleEncoderException;
 
 public class SimpleEncoder {
     private ByteArrayOutputStream out;

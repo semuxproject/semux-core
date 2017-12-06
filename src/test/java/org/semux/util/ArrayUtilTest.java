@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.TreeSet;
 
 import org.junit.Test;
-import org.semux.util.ArrayUtil;
 
 public class ArrayUtilTest {
 

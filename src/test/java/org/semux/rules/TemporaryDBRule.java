@@ -6,15 +6,15 @@
  */
 package org.semux.rules;
 
+import java.io.File;
+import java.util.EnumMap;
+
 import org.junit.rules.TemporaryFolder;
 import org.semux.config.Constants;
 import org.semux.db.DBFactory;
 import org.semux.db.DBName;
 import org.semux.db.KVDB;
 import org.semux.db.LevelDB;
-
-import java.io.File;
-import java.util.EnumMap;
 
 public class TemporaryDBRule extends TemporaryFolder implements DBFactory {
 
@@ -24,18 +24,22 @@ public class TemporaryDBRule extends TemporaryFolder implements DBFactory {
     protected void before() throws Throwable {
         create();
         for (DBName name : DBName.values()) {
-            File file = new File(getRoot(),
-                    Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
+            File file = new File(getRoot(), Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
             databases.put(name, new LevelDB(file));
         }
     }
 
     @Override
     protected void after() {
+        close();
+        delete();
+    }
+
+    @Override
+    public void close() {
         for (KVDB db : databases.values()) {
             db.close();
         }
-        delete();
     }
 
     @Override

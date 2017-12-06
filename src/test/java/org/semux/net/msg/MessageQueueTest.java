@@ -6,6 +6,11 @@
  */
 package org.semux.net.msg;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.net.InetSocketAddress;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,11 +30,6 @@ import org.semux.net.SemuxChannelInitializer;
 import org.semux.net.msg.p2p.PingMessage;
 import org.semux.net.msg.p2p.PongMessage;
 import org.semux.rules.TemporaryDBRule;
-
-import java.net.InetSocketAddress;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class MessageQueueTest {
 

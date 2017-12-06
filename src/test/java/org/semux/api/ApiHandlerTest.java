@@ -26,7 +26,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
-import io.netty.handler.ipfilter.IpFilterRuleType;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -56,30 +60,9 @@ import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import java.io.File;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.URL;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
+import io.netty.handler.ipfilter.IpFilterRuleType;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-public class APIHandlerTest {
+public class ApiHandlerTest {
 
     @Rule
     public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
@@ -124,7 +107,7 @@ public class APIHandlerTest {
         }
     }
 
-    private static JSONObject request(String uri) throws IOException {
+    private static JsonObject request(String uri) throws IOException {
         URL u = new URL("http://" + API_IP + ":" + API_PORT + uri);
         HttpURLConnection con = (HttpURLConnection) u.openConnection();
         con.setRequestProperty("Authorization", "Basic "
@@ -156,8 +139,7 @@ public class APIHandlerTest {
     @Test
     public void testGetPeers() throws IOException {
         channelMgr = spy(api.getKernel().getChannelManager());
-        List<Peer> peers = Arrays.asList(
-                new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", 1),
+        List<Peer> peers = Arrays.asList(new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", 1),
                 new Peer("2.3.4.5", 5171, (short) 2, "client2", "peer2", 2));
         when(channelMgr.getActivePeers()).thenReturn(peers);
         api.getKernel().setChannelManager(channelMgr);
@@ -187,19 +169,7 @@ public class APIHandlerTest {
         JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
 
-        assertEquals(1, api.nodeMgr.queueSize());
-    }
-
-    @Test
-    public void testBlockIp() throws IOException {
-        String uri = "/block_ip?ip=8.8.8.8";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-
-        InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
-        when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
-
-        assertTrue(api.channelMgr.isBlocked(inetSocketAddress));
+        assertEquals(1, nodeMgr.queueSize());
     }
 
     @Test
@@ -261,7 +231,6 @@ public class APIHandlerTest {
         String uri = "/get_latest_block_number";
         JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
-        assertEquals(0, response.getJsonNumber("result").longValueExact());
     }
 
     @Test
@@ -426,7 +395,7 @@ public class APIHandlerTest {
 
     @Test
     public void testGetAccounts() throws IOException {
-        String uri = "/list_accounts?password=" + password;
+        String uri = "/list_accounts";
         JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getJsonArray("result"));
@@ -436,7 +405,7 @@ public class APIHandlerTest {
     public void testCreateAccount() throws IOException {
         int size = wallet.getAccounts().size();
 
-        String uri = "/create_account?password=" + password;
+        String uri = "/create_account";
         JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertEquals(size + 1, wallet.getAccounts().size());
@@ -446,7 +415,7 @@ public class APIHandlerTest {
     public void testTransfer() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
         String uri = "/transfer?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + key.toAddressString()
-                + "&value=1000000000&fee=" + Config.MIN_TRANSACTION_FEE + "&data=test";
+                + "&value=1000000000&fee=" + config.minTransactionFee() + "&data=test";
         JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertNotNull(response.getString("result"));

@@ -6,10 +6,10 @@
  */
 package org.semux.util;
 
-import org.semux.util.exception.BytesException;
-
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
+
+import org.semux.util.exception.BytesException;
 
 public class Bytes {
 

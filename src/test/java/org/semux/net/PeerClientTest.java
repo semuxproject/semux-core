@@ -6,6 +6,12 @@
  */
 package org.semux.net;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.net.InetSocketAddress;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
@@ -15,12 +21,6 @@ import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.crypto.EdDSA;
 import org.semux.rules.TemporaryDBRule;
-
-import java.net.InetSocketAddress;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class PeerClientTest {
 

@@ -10,9 +10,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.semux.util.Bytes;
-import org.semux.util.SimpleDecoder;
-import org.semux.util.SimpleEncoder;
 
 public class SimpleCodecTest {
 

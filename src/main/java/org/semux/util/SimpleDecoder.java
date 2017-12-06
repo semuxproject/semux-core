@@ -6,9 +6,9 @@
  */
 package org.semux.util;
 
-import org.semux.util.exception.SimpleDecoderException;
-
 import java.io.UnsupportedEncodingException;
+
+import org.semux.util.exception.SimpleDecoderException;
 
 public class SimpleDecoder {
     private static final String ENCODING = "UTF-8";

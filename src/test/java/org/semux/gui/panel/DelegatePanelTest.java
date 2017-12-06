@@ -6,18 +6,18 @@
  */
 package org.semux.gui.panel;
 
-import org.assertj.swing.edt.GuiActionRunner;
-import org.assertj.swing.fixture.FrameFixture;
-import org.junit.Test;
-import org.semux.message.GUIMessages;
-import org.semux.gui.model.WalletDelegate;
-import org.semux.gui.model.WalletModel;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.assertj.swing.edt.GuiActionRunner;
+import org.assertj.swing.fixture.FrameFixture;
+import org.junit.Test;
+import org.semux.gui.model.WalletDelegate;
+import org.semux.gui.model.WalletModel;
+import org.semux.message.GUIMessages;
 
 public class DelegatePanelTest {
 

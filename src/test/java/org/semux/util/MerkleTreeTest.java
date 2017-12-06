@@ -16,7 +16,6 @@ import java.util.List;
 import org.junit.Test;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
-import org.semux.util.MerkleTree;
 
 public class MerkleTreeTest {
 

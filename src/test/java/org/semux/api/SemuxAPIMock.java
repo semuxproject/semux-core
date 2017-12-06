@@ -6,6 +6,8 @@
  */
 package org.semux.api;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Assert;
 import org.semux.KernelMock;
 import org.semux.config.Constants;
@@ -15,8 +17,6 @@ import org.semux.db.DBFactory;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SemuxAPIMock {
 

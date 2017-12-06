@@ -6,16 +6,17 @@
  */
 package org.semux.net.filter;
 
-import io.netty.handler.ipfilter.IpFilterRule;
-import io.netty.handler.ipfilter.IpFilterRuleType;
-import io.netty.handler.ipfilter.IpSubnetFilterRule;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.validator.routines.InetAddressValidator;
-
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.validator.routines.InetAddressValidator;
+
+import io.netty.handler.ipfilter.IpFilterRule;
+import io.netty.handler.ipfilter.IpFilterRuleType;
+import io.netty.handler.ipfilter.IpSubnetFilterRule;
 
 /**
  * CIDRFilterRule composes IpSubnetFilterRule and IpSingleFilterRule

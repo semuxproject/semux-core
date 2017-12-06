@@ -6,19 +6,6 @@
  */
 package org.semux.net.filter;
 
-import io.netty.handler.ipfilter.IpFilterRule;
-import io.netty.handler.ipfilter.IpFilterRuleType;
-import org.semux.net.filter.exception.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.json.stream.JsonParsingException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -30,6 +17,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collector;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import javax.json.stream.JsonParsingException;
+
+import org.semux.net.filter.exception.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.netty.handler.ipfilter.IpFilterRule;
+import io.netty.handler.ipfilter.IpFilterRuleType;
 
 public class SemuxIpFilter {
 
@@ -171,17 +173,11 @@ public class SemuxIpFilter {
         }
 
         private Optional<SemuxIpFilter> parseRules(JsonArray rules) {
-            return Optional.of(rules.stream()
-                    .sequential()
-                    .map(this::validateRule)
-                    .collect(Collector.of(
-                            Builder::new,
-                            this::parseRule,
-                            (builder1, builder2) -> {
-                                builder1.addAll(builder2);
-                                return builder1;
-                            },
-                            Builder::build)));
+            return Optional.of(rules.stream().sequential().map(this::validateRule)
+                    .collect(Collector.of(Builder::new, this::parseRule, (builder1, builder2) -> {
+                        builder1.addAll(builder2);
+                        return builder1;
+                    }, Builder::build)));
         }
 
         private JsonObject validateRule(JsonValue rule) {

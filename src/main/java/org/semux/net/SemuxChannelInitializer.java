@@ -29,7 +29,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
 
     /**
      * Create an instance of SemuxChannelInitializer.
-     *
+     * 
      * @param kernel
      *            the kernel instance
      * @param remoteAddress
@@ -56,9 +56,8 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
             logger.debug("New {} channel: remoteAddress = {}:{}", isServerMode() ? "inbound" : "outbound",
                     address.getAddress().getHostAddress(), address.getPort());
 
-            if (isInbound() && channelMgr.isBlocked(address)) {
-                // avoid too frequent connection attempts
-                logger.debug("Drop inbound connection {}:{}", address.getAddress().getHostAddress(), address.getPort());
+            if (isServerMode() && !channelMgr.isAcceptable(address)) {
+                logger.debug("Not allowed connection from: {}", ch);
                 ch.disconnect();
                 return;
             }
@@ -88,7 +87,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
 
     /**
      * Returns whether is in server mode.
-     *
+     * 
      * @return
      */
     public boolean isServerMode() {
@@ -97,7 +96,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
 
     /**
      * Returns whether is in discovery mode.
-     *
+     * 
      * @return
      */
     public boolean isDiscoveryMode() {

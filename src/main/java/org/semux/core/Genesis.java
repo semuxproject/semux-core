@@ -6,25 +6,27 @@
  */
 package org.semux.core;
 
-import org.semux.Config;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+
+import org.semux.config.Constants;
 import org.semux.crypto.Hex;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonValue;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Genesis extends Block {
 
@@ -34,18 +36,18 @@ public class Genesis extends Block {
 
     private Map<ByteArray, Premine> premines;
     private Map<String, byte[]> delegates;
-    private Map<String, JsonValue> config;
+    private JsonObject config;
 
     /**
      * Creates a {@link Genesis} block instance.
-     *
+     * 
      * @param header
      * @param premine
      * @param delegates
      * @param config
      */
     public Genesis(BlockHeader header, Map<ByteArray, Premine> premine, Map<String, byte[]> delegates,
-            Map<String, Object> config) {
+            JsonObject config) {
         super(header, Collections.emptyList(), Collections.emptyList());
 
         this.premines = premine;
@@ -55,42 +57,41 @@ public class Genesis extends Block {
 
     /**
      * Loads the genesis file.
-     *
+     * 
      * @return
      */
     public static Genesis load(File dataDir) {
-        try {
-            File file = new File(dataDir, Constants.CONFIG_DIR + File.separator + GENESIS_FILE);
-            String str = IOUtil.readFileAsString(file);
-            JSONObject json = new JSONObject(str);
+        Path path = Paths.get(dataDir.getAbsolutePath(), Constants.CONFIG_DIR, GENESIS_FILE);
+        try (JsonReader jsonReader = Json.createReader(Files.newBufferedReader(path))) {
+            JsonObject json = jsonReader.readObject();
 
             // block information
-            long number = json.getLong("number");
+            long number = json.getJsonNumber("number").longValueExact();
             byte[] coinbase = Hex.parse(json.getString("coinbase"));
             byte[] prevHash = Hex.parse(json.getString("parentHash"));
-            long timestamp = json.getLong("timestamp");
+            long timestamp = json.getJsonNumber("timestamp").longValueExact();
             byte[] data = Bytes.of(json.getString("data"));
 
             // premine
             Map<ByteArray, Premine> premine = new HashMap<>();
-            JSONArray arr = json.getJSONArray("premine");
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject obj = arr.getJSONObject(i);
+            JsonArray arr = json.getJsonArray("premine");
+            for (int i = 0; i < arr.size(); i++) {
+                JsonObject obj = arr.getJsonObject(i);
                 byte[] address = Hex.parse(obj.getString("address"));
-                long amount = obj.getLong("amount") * Unit.SEM;
+                long amount = obj.getJsonNumber("amount").longValueExact() * Unit.SEM;
                 premine.put(ByteArray.of(address), new Premine(address, amount));
             }
 
             // delegates
             Map<String, byte[]> delegates = new HashMap<>();
-            JSONObject obj = json.getJSONObject("delegates");
+            JsonObject obj = json.getJsonObject("delegates");
             for (String k : obj.keySet()) {
                 byte[] address = Hex.parse(obj.getString(k));
                 delegates.put(k, address);
             }
 
             // configurations
-            Map<String, Object> config = json.getJSONObject("config").toMap();
+            JsonObject config = json.getJsonObject("config");
 
             BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, Bytes.EMPTY_HASH,
                     Bytes.EMPTY_HASH, Bytes.EMPTY_HASH, data);
@@ -104,7 +105,7 @@ public class Genesis extends Block {
 
     /**
      * Get premine.
-     *
+     * 
      * @return
      */
     public Map<ByteArray, Premine> getPremines() {
@@ -113,7 +114,7 @@ public class Genesis extends Block {
 
     /**
      * Get delegates.
-     *
+     * 
      * @return
      */
     public Map<String, byte[]> getDelegates() {
@@ -122,10 +123,10 @@ public class Genesis extends Block {
 
     /**
      * Get genesis configurations.
-     *
+     * 
      * @return
      */
-    public Map<String, JsonValue> getConfig() {
+    public JsonObject getConfig() {
         return config;
     }
 

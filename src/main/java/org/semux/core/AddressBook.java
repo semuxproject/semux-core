@@ -6,21 +6,20 @@
  */
 package org.semux.core;
 
-import org.apache.commons.lang3.StringUtils;
-import org.semux.Config;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AddressBook {
 
@@ -29,7 +28,7 @@ public class AddressBook {
     // NOTE: A better solution would be storing as a list of entries, with index on
     // name and address.
 
-    private final Path pathToDatabase;
+    private final File file;
     private JsonObject database;
 
     /**
@@ -86,7 +85,7 @@ public class AddressBook {
 
     /**
      * Returns an {@link Entry} by address.
-     *
+     * 
      * @param address
      * @return An {@link Entry} if exists, otherwise null
      */
@@ -115,13 +114,13 @@ public class AddressBook {
     }
 
     /**
-     * Loads database from pathToDatabase.
-     *
+     * Loads database from file.
+     * 
      * @return
      */
     private JsonObject load() {
-        if (pathToDatabase.toFile().exists()) {
-            try (JsonReader jsonReader = Json.createReader(Files.newBufferedReader(pathToDatabase))) {
+        if (file.exists()) {
+            try (JsonReader jsonReader = Json.createReader(Files.newBufferedReader(file.toPath()))) {
                 return jsonReader.readObject();
             } catch (IOException e) {
                 logger.error("Failed to retrieve or access address book", e);
@@ -131,10 +130,10 @@ public class AddressBook {
     }
 
     /**
-     * Persists database to pathToDatabase
+     * Persists database to file
      */
     private void persist() {
-        try (JsonWriter jsonWriter = Json.createWriter(Files.newBufferedWriter(pathToDatabase))) {
+        try (JsonWriter jsonWriter = Json.createWriter(Files.newBufferedWriter(file.toPath()))) {
             jsonWriter.write(database);
         } catch (IOException e) {
             logger.error("Failed to retrieve or access address book", e);

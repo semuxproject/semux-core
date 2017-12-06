@@ -9,7 +9,6 @@ package org.semux.util.exception;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.semux.util.exception.UnreachableException;
 
 public class UnreachableExceptionTest {
 

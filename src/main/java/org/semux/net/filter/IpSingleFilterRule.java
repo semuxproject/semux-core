@@ -6,14 +6,15 @@
  */
 package org.semux.net.filter;
 
-import io.netty.handler.ipfilter.IpFilterRule;
-import io.netty.handler.ipfilter.IpFilterRuleType;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.validator.routines.InetAddressValidator;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.validator.routines.InetAddressValidator;
+
+import io.netty.handler.ipfilter.IpFilterRule;
+import io.netty.handler.ipfilter.IpFilterRuleType;
 
 public class IpSingleFilterRule implements IpFilterRule {
 

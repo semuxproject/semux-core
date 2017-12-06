@@ -6,8 +6,19 @@
  */
 package org.semux.api;
 
-import io.netty.handler.codec.http.HttpHeaders;
-import org.semux.Config;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Date;
+import java.util.Map;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+import javax.json.stream.JsonCollectors;
+
+import org.semux.Kernel;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
@@ -17,19 +28,9 @@ import org.semux.core.state.Delegate;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.net.Peer;
-import org.semux.net.PeerClient;
 import org.semux.util.Bytes;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-import javax.json.stream.JsonCollectors;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Date;
-import java.util.Map;
+import io.netty.handler.codec.http.HttpHeaders;
 
 /**
  * Semux RESTful API handler implementation.
@@ -62,14 +63,12 @@ public class ApiHandlerImpl implements ApiHandler {
         try {
             switch (cmd) {
             case GET_INFO: {
-                return success(Json.createObjectBuilder()
-                        .add("clientId", kernel.getConfig().getClientId())
+                return success(Json.createObjectBuilder().add("clientId", kernel.getConfig().getClientId())
                         .add("coinbase", Hex.PREF + kernel.getCoinbase())
                         .add("latestBlockNumber", kernel.getBlockchain().getLatestBlockNumber())
                         .add("latestBlockHash", Hex.encodeWithPrefix(kernel.getBlockchain().getLatestBlockHash()))
                         .add("activePeers", kernel.getChannelManager().getActivePeers().size())
-                        .add("pendingTransactions", kernel.getPendingManager().getTransactions().size())
-                        .build());
+                        .add("pendingTransactions", kernel.getPendingManager().getTransactions().size()).build());
             }
 
             case GET_PEERS: {
@@ -86,7 +85,7 @@ public class ApiHandlerImpl implements ApiHandler {
                     return failure("Invalid parameter: node can't be null");
                 }
             }
-            case BLOCK_IP: {
+            case ADD_TO_BLACKLIST: {
                 try {
                     String ip = params.get("ip");
                     if (ip == null || ip.trim().length() == 0) {
@@ -141,9 +140,9 @@ public class ApiHandlerImpl implements ApiHandler {
                 String from = params.get("from");
                 String to = params.get("to");
                 if (addr != null && from != null && to != null) {
-                    return success(kernel.getBlockchain().getTransactions(Hex.parse(addr), Integer.parseInt(from),
-                            Integer.parseInt(to)).stream().map(this::transactionToJson)
-                            .collect(JsonCollectors.toJsonArray()));
+                    return success(kernel.getBlockchain()
+                            .getTransactions(Hex.parse(addr), Integer.parseInt(from), Integer.parseInt(to)).stream()
+                            .map(this::transactionToJson).collect(JsonCollectors.toJsonArray()));
                 } else {
                     return failure("Invalid parameter: address = " + addr + ", from = " + from + ", to = " + to);
                 }
@@ -191,18 +190,16 @@ public class ApiHandlerImpl implements ApiHandler {
                         .collect(JsonCollectors.toJsonArray()));
             }
             case GET_DELEGATES: {
-                return success(
-                        kernel.getBlockchain().getDelegateState().getDelegates().stream().map(this::delegateToJson)
-                                .collect(JsonCollectors.toJsonArray()));
+                return success(kernel.getBlockchain().getDelegateState().getDelegates().stream()
+                        .map(this::delegateToJson).collect(JsonCollectors.toJsonArray()));
             }
             case GET_VOTE: {
                 String voter = params.get("voter");
                 String delegate = params.get("delegate");
 
                 if (voter != null && delegate != null) {
-                    return success(
-                            Json.createValue(kernel.getBlockchain().getDelegateState().getVote(Hex.parse(voter),
-                                    Hex.parse(delegate))));
+                    return success(Json.createValue(
+                            kernel.getBlockchain().getDelegateState().getVote(Hex.parse(voter), Hex.parse(delegate))));
                 } else {
                     return failure("Invalid parameter: voter = " + voter + ", delegate = " + delegate);
                 }
@@ -211,21 +208,20 @@ public class ApiHandlerImpl implements ApiHandler {
                 String delegate = params.get("delegate");
 
                 if (delegate != null) {
-                    return success(kernel.getBlockchain().getDelegateState().getVotes(Hex.parse(delegate)).entrySet()
-                            .stream()
-                            .map(entry -> new SimpleEntry<String, JsonValue>(Hex.PREF + entry.getKey().toString(),
-                                    Json.createValue(entry.getValue())))
-                            .collect(JsonCollectors.toJsonObject()));
+                    return success(
+                            kernel.getBlockchain().getDelegateState().getVotes(Hex.parse(delegate)).entrySet().stream()
+                                    .map(entry -> new SimpleEntry<String, JsonValue>(
+                                            Hex.PREF + entry.getKey().toString(), Json.createValue(entry.getValue())))
+                                    .collect(JsonCollectors.toJsonObject()));
                 } else {
                     return failure("Invalid parameter: delegate can't be null");
                 }
             }
 
             case LIST_ACCOUNTS: {
-                return success(
-                        kernel.getWallet().getAccounts().stream()
-                                .map(acc -> Json.createValue(Hex.PREF + acc.toAddressString()))
-                                .collect(JsonCollectors.toJsonArray()));
+                return success(kernel.getWallet().getAccounts().stream()
+                        .map(acc -> Json.createValue(Hex.PREF + acc.toAddressString()))
+                        .collect(JsonCollectors.toJsonArray()));
             }
             case CREATE_ACCOUNT: {
                 EdDSA key = new EdDSA();
@@ -329,19 +325,15 @@ public class ApiHandlerImpl implements ApiHandler {
             return JsonObject.NULL;
         }
 
-        return Json.createObjectBuilder()
-                .add("hash", Hex.encodeWithPrefix(block.getHash()))
-                .add("number", block.getNumber())
-                .add("view", block.getView())
+        return Json.createObjectBuilder().add("hash", Hex.encodeWithPrefix(block.getHash()))
+                .add("number", block.getNumber()).add("view", block.getView())
                 .add("coinbase", Hex.encodeWithPrefix(block.getCoinbase()))
-                .add("prevHash", Hex.encodeWithPrefix(block.getPrevHash()))
-                .add("timestamp", block.getTimestamp())
+                .add("prevHash", Hex.encodeWithPrefix(block.getPrevHash())).add("timestamp", block.getTimestamp())
                 .add("date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(block.getTimestamp())))
                 .add("transactionsRoot", Hex.encodeWithPrefix(block.getTransactionsRoot()))
                 .add("resultsRoot", Hex.encodeWithPrefix(block.getResultsRoot()))
                 .add("stateRoot", Hex.encodeWithPrefix(block.getStateRoot()))
-                .add("data", Hex.encodeWithPrefix(block.getData()))
-                .add("transactions", Json.createArrayBuilder(block
+                .add("data", Hex.encodeWithPrefix(block.getData())).add("transactions", Json.createArrayBuilder(block
                         .getTransactions().stream().map(this::transactionToJson).collect(JsonCollectors.toJsonArray())))
                 .build();
     }
@@ -357,15 +349,10 @@ public class ApiHandlerImpl implements ApiHandler {
             return JsonObject.NULL;
         }
 
-        return Json.createObjectBuilder()
-                .add("hash", Hex.encodeWithPrefix(tx.getHash()))
-                .add("type", tx.getType().toString())
-                .add("from", Hex.encodeWithPrefix(tx.getFrom()))
-                .add("to", Hex.encodeWithPrefix(tx.getTo()))
-                .add("value", tx.getValue())
-                .add("fee", tx.getFee())
-                .add("nonce", tx.getNonce())
-                .add("timestamp", tx.getTimestamp())
+        return Json.createObjectBuilder().add("hash", Hex.encodeWithPrefix(tx.getHash()))
+                .add("type", tx.getType().toString()).add("from", Hex.encodeWithPrefix(tx.getFrom()))
+                .add("to", Hex.encodeWithPrefix(tx.getTo())).add("value", tx.getValue()).add("fee", tx.getFee())
+                .add("nonce", tx.getNonce()).add("timestamp", tx.getTimestamp())
                 .add("date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(tx.getTimestamp())))
                 .add("data", Hex.encodeWithPrefix(tx.getData())).build();
     }
@@ -381,11 +368,8 @@ public class ApiHandlerImpl implements ApiHandler {
             return JsonObject.NULL;
         }
 
-        return Json.createObjectBuilder()
-                .add("address", Hex.encodeWithPrefix(acc.getAddress()))
-                .add("available", acc.getAvailable())
-                .add("locked", acc.getLocked())
-                .add("nonce", acc.getNonce())
+        return Json.createObjectBuilder().add("address", Hex.encodeWithPrefix(acc.getAddress()))
+                .add("available", acc.getAvailable()).add("locked", acc.getLocked()).add("nonce", acc.getNonce())
                 .build();
     }
 
@@ -402,14 +386,10 @@ public class ApiHandlerImpl implements ApiHandler {
 
         BlockchainImpl.ValidatorStats s = kernel.getBlockchain().getValidatorStats(delegate.getAddress());
 
-        return Json.createObjectBuilder()
-                .add("address", Hex.encodeWithPrefix(delegate.getAddress()))
-                .add("name", new String(delegate.getName()))
-                .add("votes", delegate.getVotes())
-                .add("registeredAt", delegate.getRegisteredAt())
-                .add("blocksForged", s.getBlocksForged())
-                .add("turnsHit", s.getTurnsHit())
-                .add("turnsMissed", s.getTurnsMissed()).build();
+        return Json.createObjectBuilder().add("address", Hex.encodeWithPrefix(delegate.getAddress()))
+                .add("name", new String(delegate.getName())).add("votes", delegate.getVotes())
+                .add("registeredAt", delegate.getRegisteredAt()).add("blocksForged", s.getBlocksForged())
+                .add("turnsHit", s.getTurnsHit()).add("turnsMissed", s.getTurnsMissed()).build();
     }
 
     protected JsonValue peerToJson(Peer peer) {
@@ -417,13 +397,9 @@ public class ApiHandlerImpl implements ApiHandler {
             return JsonObject.NULL;
         }
 
-        return Json.createObjectBuilder()
-                .add("ip", peer.getIp())
-                .add("port", peer.getPort())
-                .add("p2pVersion", peer.getP2pVersion())
-                .add("clientId", peer.getClientId())
-                .add("peerId", Hex.PREF + peer.getPeerId())
-                .add("latestBlockNumber", peer.getLatestBlockNumber())
+        return Json.createObjectBuilder().add("ip", peer.getIp()).add("port", peer.getPort())
+                .add("p2pVersion", peer.getNetworkVersion()).add("clientId", peer.getClientId())
+                .add("peerId", Hex.PREF + peer.getPeerId()).add("latestBlockNumber", peer.getLatestBlockNumber())
                 .add("latency", peer.getLatency()).build();
     }
 
@@ -434,9 +410,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @return
      */
     protected String success(JsonValue result) {
-        return Json.createObjectBuilder()
-                .add("success", true)
-                .add("result", result).build().toString();
+        return Json.createObjectBuilder().add("success", true).add("result", result).build().toString();
     }
 
     /**
@@ -446,8 +420,6 @@ public class ApiHandlerImpl implements ApiHandler {
      * @return
      */
     protected String failure(String msg) {
-        return Json.createObjectBuilder()
-                .add("success", false)
-                .add("message", msg).build().toString();
+        return Json.createObjectBuilder().add("success", false).add("message", msg).build().toString();
     }
 }

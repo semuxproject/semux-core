@@ -6,11 +6,6 @@
  */
 package org.semux.util;
 
-import org.semux.crypto.Hex;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -19,6 +14,12 @@ import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+
+import org.semux.crypto.Hex;
 
 public class ApiUtil {
     private InetSocketAddress server;

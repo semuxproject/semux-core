@@ -6,7 +6,7 @@
  */
 package org.semux.gui;
 
-import javax.swing.*;
+import javax.swing.JFrame;
 
 public class BaseTestApplication extends JFrame {
 

@@ -13,7 +13,6 @@ import static org.junit.Assert.assertFalse;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.semux.util.Bytes;
 
 public class BytesTest {
 

@@ -6,6 +6,8 @@
  */
 package org.semux.net;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Assert;
 import org.semux.Kernel;
 import org.semux.KernelMock;
@@ -14,8 +16,6 @@ import org.semux.consensus.SemuxSync;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.db.DBFactory;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PeerServerMock {
 

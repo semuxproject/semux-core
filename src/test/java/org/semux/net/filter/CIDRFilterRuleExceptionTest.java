@@ -6,16 +6,17 @@
  */
 package org.semux.net.filter;
 
-import io.netty.handler.ipfilter.IpFilterRuleType;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Collection;
+import io.netty.handler.ipfilter.IpFilterRuleType;
 
 @RunWith(Parameterized.class)
 public class CIDRFilterRuleExceptionTest {
@@ -27,22 +28,15 @@ public class CIDRFilterRuleExceptionTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 // invalid addresses
-                { "127.0.0.1/33", IllegalArgumentException.class },
-                { "127.0.0.1/abc", IllegalArgumentException.class },
-                { "127.0.0.1/", IllegalArgumentException.class },
-                { "127001", IllegalArgumentException.class },
-                { "127.0.0", IllegalArgumentException.class },
-                { "2001:db8::/255", IllegalArgumentException.class },
+                { "127.0.0.1/33", IllegalArgumentException.class }, { "127.0.0.1/abc", IllegalArgumentException.class },
+                { "127.0.0.1/", IllegalArgumentException.class }, { "127001", IllegalArgumentException.class },
+                { "127.0.0", IllegalArgumentException.class }, { "2001:db8::/255", IllegalArgumentException.class },
 
                 // valid addresses
-                { "127.0.0.1", null },
-                { "2001:4860:4860::8888", null },
-        });
+                { "127.0.0.1", null }, { "2001:4860:4860::8888", null }, });
     }
 
     private String cidrNotation;
-
-    private String matchesIp;
 
     private Class<? extends Throwable> throwsException;
 
@@ -57,6 +51,6 @@ public class CIDRFilterRuleExceptionTest {
             expectedException.expect(throwsException);
         }
 
-        CIDRFilterRule filterRule = new CIDRFilterRule(cidrNotation, IpFilterRuleType.REJECT);
+        new CIDRFilterRule(cidrNotation, IpFilterRuleType.REJECT);
     }
 }
