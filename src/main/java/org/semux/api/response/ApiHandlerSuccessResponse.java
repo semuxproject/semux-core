@@ -8,7 +8,7 @@ package org.semux.api.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ApiHandlerSuccessResponse {
+public class ApiHandlerSuccessResponse extends ApiHandlerResponse {
 
     @JsonProperty("success")
     public Boolean success = true;

@@ -12,17 +12,17 @@ public class ApiHandlerException extends Exception {
 
     private static final long serialVersionUID = -493145471711360873L;
 
-    public String response;
+    public final String response;
 
-    public HttpResponseStatus status;
+    public final int statusCode;
 
     public ApiHandlerException(String response, HttpResponseStatus status) {
         this.response = response;
-        this.status = status;
+        this.statusCode = status.code();
     }
 
     public ApiHandlerException(HttpResponseStatus status) {
         this.response = status.toString();
-        this.status = status;
+        this.statusCode = status.code();
     }
 }

@@ -159,7 +159,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                         status = OK;
                     } catch (ApiHandlerException ex) {
                         response = ex.response;
-                        status = ex.status;
+                        status = HttpResponseStatus.valueOf(ex.statusCode);
                     }
                 }
 

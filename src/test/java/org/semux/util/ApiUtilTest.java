@@ -19,6 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.semux.api.SemuxAPIMock;
+import org.semux.api.response.ApiHandlerResponse;
 import org.semux.config.Config;
 import org.semux.rules.TemporaryDBRule;
 
@@ -45,10 +46,10 @@ public class ApiUtilTest {
         Config config = api.getKernel().getConfig();
         ApiClient api = new ApiClient(new InetSocketAddress(API_IP, API_PORT), config.apiUsername(),
                 config.apiPassword());
-        JsonObject obj = api.request(cmd, "number", 0);
+        ApiHandlerResponse response = api.request(cmd, "number", 0);
 
-        assertTrue(obj.getBoolean("success"));
-        assertNotNull(obj.getJsonObject("result"));
+        assertTrue(response.success);
+        assertNotNull(response.result);
     }
 
     @AfterClass

@@ -8,15 +8,11 @@ package org.semux.api.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ApiHandlerFailureResponse extends ApiHandlerResponse {
+public class ApiHandlerResponse {
 
     @JsonProperty("success")
-    public Boolean success = false;
+    public Boolean success;
 
-    @JsonProperty("message")
-    public String message;
-
-    public ApiHandlerFailureResponse(String message) {
-        this.message = message;
-    }
+    @JsonProperty("result")
+    public Object result;
 }
