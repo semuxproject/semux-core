@@ -9,7 +9,6 @@ package org.semux;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -36,7 +35,6 @@ import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
 import org.semux.net.PeerServer;
-import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -104,10 +102,7 @@ public class Kernel {
         // ====================================
         // set up client
         // ====================================
-        Optional<String> declaredIp = config.p2pDeclaredIp();
-        String ip = declaredIp.orElseGet(SystemUtil::getIp);
-        logger.info("Your IP address = {}", ip);
-        client = new PeerClient(ip, config.p2pListenPort(), coinbase);
+        client = new PeerClient(config, coinbase);
 
         // ====================================
         // start channel/pending/node manager

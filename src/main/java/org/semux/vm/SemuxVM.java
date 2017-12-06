@@ -32,7 +32,7 @@ public class SemuxVM {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxVM.class);
 
-    private static ThreadFactory factory = new ThreadFactory() {
+    private static final ThreadFactory factory = new ThreadFactory() {
         private AtomicInteger cnt = new AtomicInteger(0);
 
         @Override

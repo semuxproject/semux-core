@@ -7,11 +7,17 @@
 package org.semux.net;
 
 import java.net.InetSocketAddress;
+import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.crypto.EdDSA;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +36,7 @@ public class PeerClient {
 
     private static final Logger logger = LoggerFactory.getLogger(PeerClient.class);
 
-    private static ThreadFactory factory = new ThreadFactory() {
+    private static final ThreadFactory factory = new ThreadFactory() {
         AtomicInteger cnt = new AtomicInteger(0);
 
         @Override
@@ -38,6 +44,8 @@ public class PeerClient {
             return new Thread(r, "client-" + cnt.getAndIncrement());
         }
     };
+
+    private static final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor(factory);
 
     private String ip;
     private int port;
@@ -48,16 +56,42 @@ public class PeerClient {
     /**
      * Create a new PeerClient instance.
      * 
-     * @param ip
-     * @param port
+     * @param config
      * @param coinbase
      */
+    public PeerClient(Config config, EdDSA coinbase) {
+        Optional<String> delcaredIp = config.p2pDeclaredIp();
+        if (delcaredIp.isPresent()) {
+            this.ip = delcaredIp.get();
+            logger.info("Use delcared IP address: {}", ip);
+        } else {
+            this.ip = SystemUtil.getIp();
+            logger.info("Use detected IP address: {}", ip);
+            startIpRefresh();
+        }
+        this.port = config.p2pListenPort();
+        this.coinbase = coinbase;
+
+        this.workerGroup = new NioEventLoopGroup(0, factory);
+    }
+
     public PeerClient(String ip, int port, EdDSA coinbase) {
         this.ip = ip;
         this.port = port;
         this.coinbase = coinbase;
 
         this.workerGroup = new NioEventLoopGroup(0, factory);
+    }
+
+    private void startIpRefresh() {
+        timer.scheduleAtFixedRate(() -> {
+            String newIp = SystemUtil.getIp();
+            if (!ip.equals(newIp)) {
+                logger.info("Noticed IP change: {} => {}", ip, newIp);
+                ip = newIp;
+            }
+
+        }, 15, 30, TimeUnit.SECONDS);
     }
 
     /**
