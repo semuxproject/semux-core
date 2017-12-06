@@ -112,7 +112,20 @@ public class ApiHandlerImpl implements ApiHandler {
                         return failure("Invalid parameter: ip can't be empty");
                     }
 
-                    channelMgr.getIpFilter().blockIp(ip.trim());
+                    channelMgr.getIpFilter().blacklistIp(ip.trim());
+                    return success(JsonValue.NULL);
+                } catch (UnknownHostException | IllegalArgumentException ex) {
+                    return failure(ex.getMessage());
+                }
+            }
+            case ADD_TO_WHITELIST: {
+                try {
+                    String ip = params.get("ip");
+                    if (ip == null || ip.trim().length() == 0) {
+                        return failure("Invalid parameter: ip can't be empty");
+                    }
+
+                    channelMgr.getIpFilter().whitelistIp(ip.trim());
                     return success(JsonValue.NULL);
                 } catch (UnknownHostException | IllegalArgumentException ex) {
                     return failure(ex.getMessage());

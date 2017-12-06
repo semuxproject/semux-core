@@ -54,21 +54,21 @@ public class SemuxIpFilter {
     }
 
     /**
-     * isBlocked method matches supplied address against defined rules sequentially
-     * and returns a result based on the first matched rule's type
+     * isAcceptable method matches supplied address against defined rules
+     * sequentially and returns a result based on the first matched rule's type
      * 
      * @param address
      *            an address which will be matched against defined rules
      * @return whether the address is blocked or not
      */
-    public boolean isBlocked(InetSocketAddress address) {
+    public boolean isAcceptable(InetSocketAddress address) {
         return rules.stream().filter(rule -> rule != null && rule.matches(address)).findFirst().flatMap(rule -> {
-            if (rule.ruleType() == IpFilterRuleType.REJECT) {
+            if (rule.ruleType() == IpFilterRuleType.ACCEPT) {
                 return Optional.of(true);
             } else {
                 return Optional.of(false);
             }
-        }).orElse(false);
+        }).orElse(true);
     }
 
     /**
@@ -77,11 +77,36 @@ public class SemuxIpFilter {
      * @param ip
      * @throws UnknownHostException
      */
-    public void blockIp(String ip) throws UnknownHostException {
+    public void blacklistIp(String ip) throws UnknownHostException {
         // prepend a REJECT IP rule to the rules list to ensure that the IP will be
         // blocked
-        rules.add(0, new IpSingleFilterRule(ip, IpFilterRuleType.REJECT));
-        logger.info("Blocked IP {}", ip);
+        IpSingleFilterRule rule = new IpSingleFilterRule(ip, IpFilterRuleType.REJECT);
+        rules.remove(rule);
+        rules.add(0, rule);
+        logger.info("Blacklisted IP {}", ip);
+    }
+
+    /**
+     * Whitelist a single IP at runtime
+     *
+     * @param ip
+     * @throws UnknownHostException
+     */
+    public void whitelistIp(String ip) throws UnknownHostException {
+        // prepend an ACCEPT IP rule to the rules list to ensure that the IP will be
+        // accepted
+        IpSingleFilterRule rule = new IpSingleFilterRule(ip, IpFilterRuleType.ACCEPT);
+        rules.remove(rule);
+        rules.add(0, rule);
+        logger.info("Whitelisted IP {}", ip);
+    }
+
+    public void appendRule(IpFilterRule rule) {
+        rules.add(rule);
+    }
+
+    public void purgeRules() {
+        rules.clear();
     }
 
     public static final class Builder {

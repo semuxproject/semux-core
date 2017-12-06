@@ -6,6 +6,25 @@
  */
 package org.semux.api;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URL;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
+
+import io.netty.handler.ipfilter.IpFilterRuleType;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -26,7 +45,9 @@ import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
+import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
+import org.semux.net.filter.CIDRFilterRule;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
@@ -69,6 +90,7 @@ public class APIHandlerTest {
     private static DelegateState delegateState;
     private static PendingManager pendingMgr;
     private static NodeManager nodeMgr;
+    private static ChannelManager channelMgr;
 
     @BeforeClass
     public static void setup() {
@@ -83,6 +105,7 @@ public class APIHandlerTest {
         delegateState = api.getKernel().getBlockchain().getDelegateState();
         pendingMgr = api.getKernel().getPendingManager();
         nodeMgr = api.getKernel().getNodeManager();
+        channelMgr = api.getKernel().getChannelManager();
     }
 
     @Before
@@ -93,6 +116,8 @@ public class APIHandlerTest {
         pendingMgr.clear();
 
         accountState.adjustAvailable(wallet.getAccount(0).toAddress(), 5000 * Unit.SEM);
+
+        channelMgr.getIpFilter().purgeRules();
     }
 
     private static JSONObject request(String uri) throws IOException {
@@ -154,6 +179,33 @@ public class APIHandlerTest {
         when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
 
         assertTrue(api.channelMgr.isBlocked(inetSocketAddress));
+    }
+
+    @Test
+    public void testAddToBlacklist() throws IOException {
+        String uri = "/add_to_blacklist?ip=8.8.8.8";
+        JsonObject response = request(uri);
+        assertTrue(response.getBoolean("success"));
+
+        InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
+        when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
+
+        assertFalse(channelMgr.isAcceptable(inetSocketAddress));
+    }
+
+    @Test
+    public void testAddToWhitelist() throws IOException {
+        // reject all connections
+        channelMgr.getIpFilter().appendRule(new CIDRFilterRule("0.0.0.0/0", IpFilterRuleType.REJECT));
+
+        String uri = "/add_to_whitelist?ip=8.8.8.8";
+        JsonObject response = request(uri);
+        assertTrue(response.getBoolean("success"));
+
+        InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
+        when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
+
+        assertTrue(channelMgr.isAcceptable(inetSocketAddress));
     }
 
     @Test

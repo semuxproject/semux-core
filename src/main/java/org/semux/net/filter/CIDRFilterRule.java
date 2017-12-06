@@ -9,6 +9,7 @@ package org.semux.net.filter;
 import io.netty.handler.ipfilter.IpFilterRule;
 import io.netty.handler.ipfilter.IpFilterRuleType;
 import io.netty.handler.ipfilter.IpSubnetFilterRule;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.validator.routines.InetAddressValidator;
 
 import java.net.InetSocketAddress;
@@ -59,5 +60,18 @@ public class CIDRFilterRule implements IpFilterRule {
     @Override
     public IpFilterRuleType ruleType() {
         return ruleType;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof CIDRFilterRule))
+            return false;
+        CIDRFilterRule rule = (CIDRFilterRule) object;
+        return rule.ruleType.equals(this.ruleType) && rule.ipFilterRule.equals(this.ipFilterRule);
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(79, 103).append(ipFilterRule).append(ruleType).toHashCode();
     }
 }

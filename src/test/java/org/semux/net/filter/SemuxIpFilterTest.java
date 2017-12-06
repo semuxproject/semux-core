@@ -33,10 +33,10 @@ public class SemuxIpFilterTest {
                         new SemuxIpFilter.Builder().build(),
                         new HashMap<String, Boolean>() {
                             {
-                                put("127.0.0.1", false);
-                                put("8.8.8.8", false);
-                                put("0:0:0:0:0:0:0:1", false);
-                                put("2001:4860:4860::8888", false);
+                                put("127.0.0.1", true);
+                                put("8.8.8.8", true);
+                                put("0:0:0:0:0:0:0:1", true);
+                                put("2001:4860:4860::8888", true);
                             }
                         }
                 },
@@ -49,10 +49,10 @@ public class SemuxIpFilterTest {
                                 .build(),
                         new HashMap<String, Boolean>() {
                             {
-                                put("127.0.0.1", false);
-                                put("8.8.8.8", false);
-                                put("0:0:0:0:0:0:0:1", false);
-                                put("2001:4860:4860::8888", false);
+                                put("127.0.0.1", true);
+                                put("8.8.8.8", true);
+                                put("0:0:0:0:0:0:0:1", true);
+                                put("2001:4860:4860::8888", true);
                             }
                         }
                 },
@@ -67,12 +67,12 @@ public class SemuxIpFilterTest {
                                 .build(),
                         new HashMap<String, Boolean>() {
                             {
-                                put("127.0.0.1", false);
-                                put("192.168.0.1", false);
-                                put("192.168.1.2", false);
-                                put("8.8.8.8", true);
-                                put("0:0:0:0:0:0:0:1", true);
-                                put("2001:4860:4860::8888", true);
+                                put("127.0.0.1", true);
+                                put("192.168.0.1", true);
+                                put("192.168.1.2", true);
+                                put("8.8.8.8", false);
+                                put("0:0:0:0:0:0:0:1", false);
+                                put("2001:4860:4860::8888", false);
                             }
                         }
                 },
@@ -85,12 +85,12 @@ public class SemuxIpFilterTest {
                                 .build(),
                         new HashMap<String, Boolean>() {
                             {
-                                put("127.0.0.1", true);
-                                put("192.168.0.1", true);
-                                put("192.168.1.2", true);
-                                put("8.8.8.8", false);
-                                put("0:0:0:0:0:0:0:1", false);
-                                put("2001:4860:4860::8888", false);
+                                put("127.0.0.1", false);
+                                put("192.168.0.1", false);
+                                put("192.168.1.2", false);
+                                put("8.8.8.8", true);
+                                put("0:0:0:0:0:0:0:1", true);
+                                put("2001:4860:4860::8888", true);
                             }
                         }
                 }
@@ -99,17 +99,17 @@ public class SemuxIpFilterTest {
 
     SemuxIpFilter filter;
 
-    HashMap<String, Boolean> isBlocked;
+    HashMap<String, Boolean> isAcceptable;
 
-    public SemuxIpFilterTest(SemuxIpFilter filter, HashMap<String, Boolean> isBlocked) {
+    public SemuxIpFilterTest(SemuxIpFilter filter, HashMap<String, Boolean> isAcceptable) {
         this.filter = filter;
-        this.isBlocked = isBlocked;
+        this.isAcceptable = isAcceptable;
     }
 
     @Test
-    public void testIsBlocked() throws UnknownHostException {
-        for (Map.Entry<String, Boolean> entry : isBlocked.entrySet()) {
-            assertTrue(filter.isBlocked(mockAddress(entry.getKey())) == entry.getValue());
+    public void testIsAcceptable() throws UnknownHostException {
+        for (Map.Entry<String, Boolean> entry : isAcceptable.entrySet()) {
+            assertTrue(filter.isAcceptable(mockAddress(entry.getKey())) == entry.getValue());
         }
     }
 

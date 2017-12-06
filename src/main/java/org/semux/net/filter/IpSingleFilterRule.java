@@ -8,6 +8,7 @@ package org.semux.net.filter;
 
 import io.netty.handler.ipfilter.IpFilterRule;
 import io.netty.handler.ipfilter.IpFilterRuleType;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.validator.routines.InetAddressValidator;
 
 import java.net.InetAddress;
@@ -39,5 +40,18 @@ public class IpSingleFilterRule implements IpFilterRule {
     @Override
     public IpFilterRuleType ruleType() {
         return type;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof IpSingleFilterRule))
+            return false;
+        IpSingleFilterRule rule = (IpSingleFilterRule) object;
+        return rule.type.equals(this.type) && rule.address.equals(this.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(173, 211).append(address).append(type).toHashCode();
     }
 }
