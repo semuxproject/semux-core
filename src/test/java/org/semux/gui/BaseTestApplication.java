@@ -13,6 +13,7 @@ public class BaseTestApplication extends JFrame {
     private static final long serialVersionUID = 1L;
 
     public BaseTestApplication() {
+        super();
         setTitle(getClass().getCanonicalName());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }

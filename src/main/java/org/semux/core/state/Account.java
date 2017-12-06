@@ -10,6 +10,8 @@ import org.semux.crypto.Hex;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Account {
 
     private byte[] address;
@@ -71,11 +73,17 @@ public class Account {
         return address;
     }
 
+    @JsonProperty("address")
+    public String getAddressString() {
+        return Hex.encodeWithPrefix(getAddress());
+    }
+
     /**
      * Returns the available balance of this account.
      * 
      * @return
      */
+    @JsonProperty("available")
     public long getAvailable() {
         return available;
     }
@@ -94,6 +102,7 @@ public class Account {
      * 
      * @return
      */
+    @JsonProperty("locked")
     public long getLocked() {
         return locked;
     }
@@ -112,6 +121,7 @@ public class Account {
      * 
      * @return
      */
+    @JsonProperty("nonce")
     public long getNonce() {
         return nonce;
     }

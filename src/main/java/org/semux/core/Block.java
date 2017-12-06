@@ -6,8 +6,10 @@
  */
 package org.semux.core;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -22,6 +24,8 @@ import org.semux.crypto.Hex;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Represents a block in the blockchain.
@@ -222,6 +226,7 @@ public class Block {
      * 
      * @return
      */
+    @JsonProperty("view")
     public int getView() {
         return view;
     }
@@ -266,6 +271,12 @@ public class Block {
         return header.getHash();
     }
 
+    @JsonProperty("hash")
+    public String getHashString() {
+        return Hex.encodeWithPrefix(getHash());
+    }
+
+    @JsonProperty("number")
     public long getNumber() {
         return header.getNumber();
     }
@@ -274,28 +285,64 @@ public class Block {
         return header.getCoinbase();
     }
 
+    @JsonProperty("coinbase")
+    public String getCoinbaseString() {
+        return Hex.encodeWithPrefix(getCoinbase());
+    }
+
     public byte[] getPrevHash() {
         return header.getPrevHash();
     }
 
+    @JsonProperty("prevHash")
+    public String getPrevHashString() {
+        return Hex.encodeWithPrefix(getPrevHash());
+    }
+
+    @JsonProperty("timestamp")
     public long getTimestamp() {
         return header.getTimestamp();
+    }
+
+    @JsonProperty("date")
+    public String getDateString() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(getTimestamp()));
     }
 
     public byte[] getTransactionsRoot() {
         return header.getTransactionsRoot();
     }
 
+    @JsonProperty("transactionsRoot")
+    public String getTransactionsRootString() {
+        return Hex.encodeWithPrefix(getTransactionsRoot());
+    }
+
     public byte[] getResultsRoot() {
         return header.getResultsRoot();
+    }
+
+    @JsonProperty("resultsRoot")
+    public String getResultsRootString() {
+        return Hex.encodeWithPrefix(getResultsRoot());
     }
 
     public byte[] getStateRoot() {
         return header.getStateRoot();
     }
 
+    @JsonProperty("stateRoot")
+    public String getStateRootString() {
+        return Hex.encodeWithPrefix(getStateRoot());
+    }
+
     public byte[] getData() {
         return header.getData();
+    }
+
+    @JsonProperty("data")
+    public String getDataString() {
+        return Hex.encodeWithPrefix(getData());
     }
 
     public byte[] toBytesHeader() {

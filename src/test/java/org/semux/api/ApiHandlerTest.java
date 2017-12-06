@@ -216,10 +216,14 @@ public class ApiHandlerTest {
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
         when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
 
-        assertTrue(request("/add_to_blacklist?ip=8.8.8.8").getBoolean("success"));
+        JsonObject response;
+
+        response = request("/add_to_blacklist?ip=8.8.8.8");
+        assertTrue(response.getBoolean("success"));
         assertTrue(!channelMgr.isAcceptable(inetSocketAddress));
 
-        assertTrue(request("/add_to_whitelist?ip=8.8.8.8").getBoolean("success"));
+        response = request("/add_to_whitelist?ip=8.8.8.8");
+        assertTrue(response.getBoolean("success"));
         assertTrue(channelMgr.isAcceptable(inetSocketAddress));
 
         assertTrue(request("/add_to_blacklist?ip=8.8.8.8").getBoolean("success"));
@@ -394,7 +398,7 @@ public class ApiHandlerTest {
     }
 
     @Test
-    public void testGetAccounts() throws IOException {
+    public void testListAccounts() throws IOException {
         String uri = "/list_accounts";
         JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));

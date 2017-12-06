@@ -6,7 +6,9 @@
  */
 package org.semux.core;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.concurrent.Callable;
 
 import org.semux.crypto.EdDSA;
@@ -16,6 +18,8 @@ import org.semux.crypto.Hex;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 import org.xbill.DNS.Address;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Transaction implements Callable<Boolean> {
 
@@ -133,6 +137,11 @@ public class Transaction implements Callable<Boolean> {
         return hash;
     }
 
+    @JsonProperty("hash")
+    public String getHashString() {
+        return Hex.encodeWithPrefix(getHash());
+    }
+
     /**
      * Returns the transaction type.
      * 
@@ -140,6 +149,11 @@ public class Transaction implements Callable<Boolean> {
      */
     public TransactionType getType() {
         return type;
+    }
+
+    @JsonProperty("type")
+    public String getTypeString() {
+        return getType().toString();
     }
 
     /**
@@ -151,6 +165,11 @@ public class Transaction implements Callable<Boolean> {
         return (signature == null) ? null : signature.getAddress();
     }
 
+    @JsonProperty("from")
+    public String getFromString() {
+        return Hex.encodeWithPrefix(getFrom());
+    }
+
     /**
      * Returns the to address.
      * 
@@ -160,11 +179,17 @@ public class Transaction implements Callable<Boolean> {
         return to;
     }
 
+    @JsonProperty("to")
+    public String getToString() {
+        return Hex.encodeWithPrefix(getTo());
+    }
+
     /**
      * Returns the value.
      * 
      * @return
      */
+    @JsonProperty("value")
     public long getValue() {
         return value;
     }
@@ -174,6 +199,7 @@ public class Transaction implements Callable<Boolean> {
      * 
      * @return
      */
+    @JsonProperty("fee")
     public long getFee() {
         return fee;
     }
@@ -183,6 +209,7 @@ public class Transaction implements Callable<Boolean> {
      * 
      * @return
      */
+    @JsonProperty("nonce")
     public long getNonce() {
         return nonce;
     }
@@ -192,8 +219,14 @@ public class Transaction implements Callable<Boolean> {
      * 
      * @return
      */
+    @JsonProperty("timestamp")
     public long getTimestamp() {
         return timestamp;
+    }
+
+    @JsonProperty("date")
+    public String getDateString() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(getTimestamp()));
     }
 
     /**
@@ -203,6 +236,11 @@ public class Transaction implements Callable<Boolean> {
      */
     public byte[] getData() {
         return data;
+    }
+
+    @JsonProperty("data")
+    public String getDataString() {
+        return Hex.encodeWithPrefix(getData());
     }
 
     /**
