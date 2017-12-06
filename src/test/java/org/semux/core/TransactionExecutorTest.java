@@ -6,12 +6,8 @@
  */
 package org.semux.core;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
@@ -19,10 +15,18 @@ import org.semux.config.DevNetConfig;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB.MemoryDBFactory;
+import org.semux.rules.TemporaryDBRule;
 import org.semux.util.Bytes;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class TransactionExecutorTest {
+
+    @Rule
+    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
 
     private Config config;
     private Blockchain chain;
@@ -33,7 +37,7 @@ public class TransactionExecutorTest {
     @Before
     public void prepare() {
         config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
-        chain = new BlockchainImpl(config, new MemoryDBFactory());
+        chain = new BlockchainImpl(config, temporaryDBFactory);
         as = chain.getAccountState();
         ds = chain.getDelegateState();
         exec = new TransactionExecutor(config);

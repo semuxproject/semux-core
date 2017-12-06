@@ -6,17 +6,9 @@
  */
 package org.semux.core.state;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-import java.util.Map;
-
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Constants;
 import org.semux.config.DevNetConfig;
@@ -24,8 +16,18 @@ import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Unit;
 import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB.MemoryDBFactory;
+import org.semux.rules.TemporaryDBRule;
+import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class DelegateStateTest {
 
@@ -33,9 +35,12 @@ public class DelegateStateTest {
     private DelegateState ds;
     Map<String, byte[]> delegates;
 
+    @Rule
+    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+
     @Before
     public void init() {
-        chain = new BlockchainImpl(new DevNetConfig(Constants.DEFAULT_DATA_DIR), new MemoryDBFactory());
+        chain = new BlockchainImpl(new DevNetConfig(Constants.DEFAULT_DATA_DIR), temporaryDBFactory);
         ds = chain.getDelegateState();
         delegates = chain.getGenesis().getDelegates();
     }
@@ -129,6 +134,24 @@ public class DelegateStateTest {
         assertEquals(value * 2, ds.getVote(voter, delegate));
         ds.commit();
         assertEquals(value * 2, ds.getVote(voter, delegate));
+    }
+
+    @Test
+    public void testGetVotes() {
+        EdDSA delegateKey = new EdDSA();
+        EdDSA voterKey1 = new EdDSA();
+        long value1 = 1 * Unit.SEM;
+        EdDSA voterKey2 = new EdDSA();
+        long value2 = 2 * Unit.SEM;
+
+        ds.register(delegateKey.toAddress(), Bytes.of("test"));
+        assertTrue(ds.vote(voterKey1.toAddress(), delegateKey.toAddress(), value1));
+        assertTrue(ds.vote(voterKey2.toAddress(), delegateKey.toAddress(), value2));
+        ds.commit();
+
+        Map<ByteArray, Long> votes = ds.getVotes(delegateKey.toAddress());
+        assertEquals(value1, (long) votes.get(new ByteArray(voterKey1.toAddress())));
+        assertEquals(value2, (long) votes.get(new ByteArray(voterKey2.toAddress())));
     }
 
     @After

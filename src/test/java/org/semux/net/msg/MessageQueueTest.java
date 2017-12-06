@@ -6,13 +6,9 @@
  */
 package org.semux.net.msg;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.net.InetSocketAddress;
-
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
 import org.semux.consensus.SemuxBFT;
@@ -20,7 +16,6 @@ import org.semux.consensus.SemuxSync;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB.MemoryDBFactory;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
@@ -29,6 +24,12 @@ import org.semux.net.PeerServerMock;
 import org.semux.net.SemuxChannelInitializer;
 import org.semux.net.msg.p2p.PingMessage;
 import org.semux.net.msg.p2p.PongMessage;
+import org.semux.rules.TemporaryDBRule;
+
+import java.net.InetSocketAddress;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class MessageQueueTest {
 
@@ -37,9 +38,12 @@ public class MessageQueueTest {
 
     private PeerServerMock server;
 
+    @Rule
+    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+
     @Before
     public void setup() {
-        server = new PeerServerMock();
+        server = new PeerServerMock(temporaryDBFactory);
         server.start(P2P_IP, P2P_PORT);
         assertTrue(server.getServer().isListening());
     }
@@ -49,7 +53,7 @@ public class MessageQueueTest {
         PeerClient client = new PeerClient(P2P_IP, P2P_PORT + 1, key);
 
         KernelMock kernel = new KernelMock();
-        kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new MemoryDBFactory()));
+        kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), temporaryDBFactory));
         kernel.setClient(client);
         kernel.setChannelManager(new ChannelManager());
         kernel.setPendingManager(new PendingManager(kernel));

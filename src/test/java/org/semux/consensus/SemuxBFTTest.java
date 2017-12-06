@@ -6,16 +6,10 @@
  */
 package org.semux.consensus;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.semux.KernelMock;
 import org.semux.core.Block;
@@ -27,15 +21,25 @@ import org.semux.core.TransactionResult;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hash;
-import org.semux.db.MemoryDB.MemoryDBFactory;
 import org.semux.net.ChannelManager;
+import org.semux.rules.TemporaryDBRule;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class SemuxBFTTest {
+
+    @ClassRule
+    public static TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxBFTTest.class);
 
@@ -46,7 +50,7 @@ public class SemuxBFTTest {
     public static void setup() throws InterruptedException {
         kernel = new KernelMock();
 
-        kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new MemoryDBFactory()));
+        kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), temporaryDBFactory));
         kernel.setChannelManager(new ChannelManager());
         kernel.setPendingManager(new PendingManager(kernel));
 

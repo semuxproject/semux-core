@@ -9,18 +9,13 @@ package org.semux.api;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.semux.Config;
 import org.semux.core.Block;
-import org.semux.core.Blockchain;
-import org.semux.core.BlockchainImpl.ValidatorStats;
-import org.semux.core.PendingManager;
+import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.core.Wallet;
 import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
-import org.semux.net.ChannelManager;
-import org.semux.net.NodeManager;
 import org.semux.net.Peer;
 import org.semux.net.PeerClient;
 import org.semux.util.Bytes;
@@ -44,14 +39,6 @@ public class ApiHandlerImpl implements ApiHandler {
 
     private Kernel kernel;
 
-    private Wallet wallet;
-    private Blockchain chain;
-    private ChannelManager channelMgr;
-    private PendingManager pendingMgr;
-    private NodeManager nodeMgr;
-
-    private Config config;
-
     /**
      * Create an API handler.
      *
@@ -59,13 +46,6 @@ public class ApiHandlerImpl implements ApiHandler {
      */
     public ApiHandlerImpl(Kernel kernel) {
         this.kernel = kernel;
-        this.wallet = kernel.getWallet();
-        this.chain = kernel.getBlockchain();
-        this.channelMgr = kernel.getChannelManager();
-        this.pendingMgr = kernel.getPendingManager();
-        this.nodeMgr = kernel.getNodeManager();
-
-        this.config = kernel.getConfig();
     }
 
     @Override
@@ -83,23 +63,24 @@ public class ApiHandlerImpl implements ApiHandler {
             switch (cmd) {
             case GET_INFO: {
                 return success(Json.createObjectBuilder()
-                        .add("clientId", Config.getClientId(false))
-                        .add("coinbase", Hex.PREF + client.getCoinbase())
-                        .add("latestBlockNumber", chain.getLatestBlockNumber())
-                        .add("latestBlockHash", Hex.encodeWithPrefix(chain.getLatestBlockHash()))
-                        .add("activePeers", channelMgr.getActivePeers().size())
-                        .add("pendingTransactions", pendingMgr.getTransactions().size()).build());
+                        .add("clientId", kernel.getConfig().getClientId())
+                        .add("coinbase", Hex.PREF + kernel.getCoinbase())
+                        .add("latestBlockNumber", kernel.getBlockchain().getLatestBlockNumber())
+                        .add("latestBlockHash", Hex.encodeWithPrefix(kernel.getBlockchain().getLatestBlockHash()))
+                        .add("activePeers", kernel.getChannelManager().getActivePeers().size())
+                        .add("pendingTransactions", kernel.getPendingManager().getTransactions().size())
+                        .build());
             }
 
             case GET_PEERS: {
-                return success(channelMgr.getActivePeers().stream().map(this::peerToJson)
+                return success(kernel.getChannelManager().getActivePeers().stream().map(this::peerToJson)
                         .collect(JsonCollectors.toJsonArray()));
             }
             case ADD_NODE: {
                 String node = params.get("node");
                 if (node != null) {
                     String[] tokens = node.trim().split(":");
-                    nodeMgr.addNode(new InetSocketAddress(tokens[0], Integer.parseInt(tokens[1])));
+                    kernel.getNodeManager().addNode(new InetSocketAddress(tokens[0], Integer.parseInt(tokens[1])));
                     return success(JsonValue.NULL);
                 } else {
                     return failure("Invalid parameter: node can't be null");
@@ -112,7 +93,7 @@ public class ApiHandlerImpl implements ApiHandler {
                         return failure("Invalid parameter: ip can't be empty");
                     }
 
-                    channelMgr.getIpFilter().blacklistIp(ip.trim());
+                    kernel.getChannelManager().getIpFilter().blacklistIp(ip.trim());
                     return success(JsonValue.NULL);
                 } catch (UnknownHostException | IllegalArgumentException ex) {
                     return failure(ex.getMessage());
@@ -125,7 +106,7 @@ public class ApiHandlerImpl implements ApiHandler {
                         return failure("Invalid parameter: ip can't be empty");
                     }
 
-                    channelMgr.getIpFilter().whitelistIp(ip.trim());
+                    kernel.getChannelManager().getIpFilter().whitelistIp(ip.trim());
                     return success(JsonValue.NULL);
                 } catch (UnknownHostException | IllegalArgumentException ex) {
                     return failure(ex.getMessage());
@@ -133,10 +114,10 @@ public class ApiHandlerImpl implements ApiHandler {
             }
 
             case GET_LATEST_BLOCK_NUMBER: {
-                return success(Json.createValue(chain.getLatestBlockNumber()));
+                return success(Json.createValue(kernel.getBlockchain().getLatestBlockNumber()));
             }
             case GET_LATEST_BLOCK: {
-                Block block = chain.getLatestBlock();
+                Block block = kernel.getBlockchain().getLatestBlock();
                 return success(blockToJson(block));
             }
             case GET_BLOCK: {
@@ -144,15 +125,15 @@ public class ApiHandlerImpl implements ApiHandler {
                 String hash = params.get("hash");
 
                 if (number != null) {
-                    return success(blockToJson(chain.getBlock(Long.parseLong(number))));
+                    return success(blockToJson(kernel.getBlockchain().getBlock(Long.parseLong(number))));
                 } else if (hash != null) {
-                    return success(blockToJson(chain.getBlock(Hex.parse(hash))));
+                    return success(blockToJson(kernel.getBlockchain().getBlock(Hex.parse(hash))));
                 } else {
                     return failure("Invalid parameter: number or hash can't be null");
                 }
             }
             case GET_PENDING_TRANSACTIONS: {
-                return success(pendingMgr.getTransactions().stream().map(this::transactionToJson)
+                return success(kernel.getPendingManager().getTransactions().stream().map(this::transactionToJson)
                         .collect(JsonCollectors.toJsonArray()));
             }
             case GET_ACCOUNT_TRANSACTIONS: {
@@ -160,7 +141,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 String from = params.get("from");
                 String to = params.get("to");
                 if (addr != null && from != null && to != null) {
-                    return success(chain.getTransactions(Hex.parse(addr), Integer.parseInt(from),
+                    return success(kernel.getBlockchain().getTransactions(Hex.parse(addr), Integer.parseInt(from),
                             Integer.parseInt(to)).stream().map(this::transactionToJson)
                             .collect(JsonCollectors.toJsonArray()));
                 } else {
@@ -170,7 +151,7 @@ public class ApiHandlerImpl implements ApiHandler {
             case GET_TRANSACTION: {
                 String hash = params.get("hash");
                 if (hash != null) {
-                    return success(transactionToJson(chain.getTransaction(Hex.parse(hash))));
+                    return success(transactionToJson(kernel.getBlockchain().getTransaction(Hex.parse(hash))));
                 } else {
                     return failure("Invalid parameter: hash can't be null");
                 }
@@ -179,7 +160,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 String raw = params.get("raw");
                 if (raw != null) {
                     byte[] bytes = Hex.parse(raw);
-                    pendingMgr.addTransaction(Transaction.fromBytes(bytes));
+                    kernel.getPendingManager().addTransaction(Transaction.fromBytes(bytes));
                     return success(JsonValue.NULL);
                 } else {
                     return failure("Invalid parameter: raw can't be null");
@@ -189,7 +170,7 @@ public class ApiHandlerImpl implements ApiHandler {
             case GET_ACCOUNT: {
                 String addr = params.get("address");
                 if (addr != null) {
-                    Account acc = chain.getAccountState().getAccount(Hex.parse(addr));
+                    Account acc = kernel.getBlockchain().getAccountState().getAccount(Hex.parse(addr));
                     return success(accountToJson(acc));
                 } else {
                     return failure("Invalid parameter: address can't be null");
@@ -199,19 +180,19 @@ public class ApiHandlerImpl implements ApiHandler {
                 String address = params.get("address");
 
                 if (address != null) {
-                    Delegate d = chain.getDelegateState().getDelegateByAddress(Hex.parse(address));
+                    Delegate d = kernel.getBlockchain().getDelegateState().getDelegateByAddress(Hex.parse(address));
                     return success(delegateToJson(d));
                 } else {
                     return failure("Invalid parameter: address can't be null");
                 }
             }
             case GET_VALIDATORS: {
-                return success(chain.getValidators().stream().map(v -> Json.createValue(Hex.PREF + v))
+                return success(kernel.getBlockchain().getValidators().stream().map(v -> Json.createValue(Hex.PREF + v))
                         .collect(JsonCollectors.toJsonArray()));
             }
             case GET_DELEGATES: {
                 return success(
-                        chain.getDelegateState().getDelegates().stream().map(this::delegateToJson)
+                        kernel.getBlockchain().getDelegateState().getDelegates().stream().map(this::delegateToJson)
                                 .collect(JsonCollectors.toJsonArray()));
             }
             case GET_VOTE: {
@@ -220,7 +201,8 @@ public class ApiHandlerImpl implements ApiHandler {
 
                 if (voter != null && delegate != null) {
                     return success(
-                            Json.createValue(chain.getDelegateState().getVote(Hex.parse(voter), Hex.parse(delegate))));
+                            Json.createValue(kernel.getBlockchain().getDelegateState().getVote(Hex.parse(voter),
+                                    Hex.parse(delegate))));
                 } else {
                     return failure("Invalid parameter: voter = " + voter + ", delegate = " + delegate);
                 }
@@ -229,7 +211,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 String delegate = params.get("delegate");
 
                 if (delegate != null) {
-                    return success(chain.getDelegateState().getVotes(Hex.parse(delegate)).entrySet()
+                    return success(kernel.getBlockchain().getDelegateState().getVotes(Hex.parse(delegate)).entrySet()
                             .stream()
                             .map(entry -> new SimpleEntry<String, JsonValue>(Hex.PREF + entry.getKey().toString(),
                                     Json.createValue(entry.getValue())))
@@ -241,13 +223,14 @@ public class ApiHandlerImpl implements ApiHandler {
 
             case LIST_ACCOUNTS: {
                 return success(
-                        wallet.getAccounts().stream().map(acc -> Json.createValue(Hex.PREF + acc.toAddressString()))
+                        kernel.getWallet().getAccounts().stream()
+                                .map(acc -> Json.createValue(Hex.PREF + acc.toAddressString()))
                                 .collect(JsonCollectors.toJsonArray()));
             }
             case CREATE_ACCOUNT: {
                 EdDSA key = new EdDSA();
-                wallet.addAccount(key);
-                wallet.flush();
+                kernel.getWallet().addAccount(key);
+                kernel.getWallet().flush();
                 return success(Json.createValue(Hex.PREF + key.toAddressString()));
             }
             case TRANSFER:
@@ -270,8 +253,8 @@ public class ApiHandlerImpl implements ApiHandler {
         String pFee = params.get("fee");
         String pData = params.get("data");
 
-        // [1] check if wallet is unlocked
-        if (!wallet.unlocked()) {
+        // [1] check if kernel.getWallet().is unlocked
+        if (!kernel.getWallet().unlocked()) {
             return failure("Wallet is locked");
         }
 
@@ -300,7 +283,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 && (type == TransactionType.DELEGATE || pValue != null) //
                 && pFee != null) {
             // from address
-            EdDSA from = wallet.getAccount(Hex.parse(pFrom));
+            EdDSA from = kernel.getWallet().getAccount(Hex.parse(pFrom));
             if (from == null) {
                 return failure("Invalid parameter: from = " + pFrom);
             }
@@ -312,11 +295,12 @@ public class ApiHandlerImpl implements ApiHandler {
             }
 
             // value and fee
-            long value = (type == TransactionType.DELEGATE) ? config.minDelegateFee() : Long.parseLong(pValue);
+            long value = (type == TransactionType.DELEGATE) ? kernel.getConfig().minDelegateFee()
+                    : Long.parseLong(pValue);
             long fee = Long.parseLong(pFee);
 
             // nonce, timestamp and data
-            long nonce = pendingMgr.getNonce(from.toAddress());
+            long nonce = kernel.getPendingManager().getNonce(from.toAddress());
             long timestamp = System.currentTimeMillis();
             byte[] data = (pData == null) ? Bytes.EMPTY_BYTES : Hex.parse(pData);
 
@@ -324,7 +308,7 @@ public class ApiHandlerImpl implements ApiHandler {
             Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
             tx.sign(from);
 
-            if (pendingMgr.addTransactionSync(tx)) {
+            if (kernel.getPendingManager().addTransactionSync(tx)) {
                 return success(Json.createValue(Hex.encodeWithPrefix(tx.getHash())));
             } else {
                 return failure("Transaction rejected by pending manager");
@@ -416,7 +400,7 @@ public class ApiHandlerImpl implements ApiHandler {
             return JsonObject.NULL;
         }
 
-        ValidatorStats s = chain.getValidatorStats(delegate.getAddress());
+        BlockchainImpl.ValidatorStats s = kernel.getBlockchain().getValidatorStats(delegate.getAddress());
 
         return Json.createObjectBuilder()
                 .add("address", Hex.encodeWithPrefix(delegate.getAddress()))

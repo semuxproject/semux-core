@@ -14,13 +14,19 @@ import java.net.InetSocketAddress;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.semux.api.SemuxAPIMock;
 import org.semux.config.Config;
+import org.semux.rules.TemporaryDBRule;
 
 import javax.json.JsonObject;
 
 public class ApiUtilTest {
+
+    @ClassRule
+    public static TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
 
     private static final String API_IP = "127.0.0.1";
     private static final int API_PORT = 15171;
@@ -29,7 +35,7 @@ public class ApiUtilTest {
 
     @BeforeClass
     public static void setup() {
-        api = new SemuxAPIMock();
+        api = new SemuxAPIMock(temporaryDBFactory);
         api.start(API_IP, API_PORT);
     }
 

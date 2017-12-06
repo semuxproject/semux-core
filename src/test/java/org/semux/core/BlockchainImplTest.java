@@ -6,6 +6,22 @@
  */
 package org.semux.core;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.semux.config.Config;
+import org.semux.config.Constants;
+import org.semux.config.DevNetConfig;
+import org.semux.core.BlockchainImpl.StatsType;
+import org.semux.crypto.EdDSA;
+import org.semux.rules.TemporaryDBRule;
+import org.semux.util.Bytes;
+import org.semux.util.MerkleUtil;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -13,22 +29,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.semux.config.Config;
-import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
-import org.semux.core.BlockchainImpl.StatsType;
-import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB.MemoryDBFactory;
-import org.semux.util.Bytes;
-import org.semux.util.MerkleUtil;
-
 public class BlockchainImplTest {
+
+    @Rule
+    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
 
     private Config config;
     private BlockchainImpl chain;
@@ -51,7 +55,7 @@ public class BlockchainImplTest {
     @Before
     public void setup() {
         config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
-        chain = new BlockchainImpl(config, new MemoryDBFactory());
+        chain = new BlockchainImpl(config, temporaryDBFactory);
     }
 
     @Test

@@ -14,6 +14,7 @@ import org.semux.api.SemuxAPIMock;
 import org.semux.config.Config;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
+import org.semux.rules.TemporaryDBRule;
 import org.semux.util.ApiUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ public class APIPerformance {
         wallet.unlock("passw0rd");
         wallet.addAccount(new EdDSA());
 
-        SemuxAPIMock api = new SemuxAPIMock();
+        SemuxAPIMock api = new SemuxAPIMock(new TemporaryDBRule());
         api.start(API_IP, API_PORT);
 
         try {

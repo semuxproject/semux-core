@@ -6,23 +6,24 @@
  */
 package org.semux.core;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.semux.KernelMock;
 import org.semux.core.state.AccountState;
 import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB.MemoryDBFactory;
 import org.semux.net.ChannelManager;
+import org.semux.rules.TemporaryDBRule;
 import org.semux.util.ArrayUtil;
 import org.semux.util.Bytes;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class PendingManagerTest {
 
@@ -38,11 +39,14 @@ public class PendingManagerTest {
     private static long value = 1 * Unit.MILLI_SEM;
     private static long fee;
 
+    @ClassRule
+    public static TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+
     @BeforeClass
     public static void setup() {
         kernel = new KernelMock();
 
-        kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new MemoryDBFactory()));
+        kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), temporaryDBFactory));
         kernel.setChannelManager(new ChannelManager());
 
         accountState = kernel.getBlockchain().getAccountState();

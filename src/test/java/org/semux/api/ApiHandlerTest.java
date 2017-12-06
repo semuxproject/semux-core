@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +29,7 @@ import java.util.Map.Entry;
 import io.netty.handler.ipfilter.IpFilterRuleType;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.core.Block;
@@ -46,7 +49,9 @@ import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
+import org.semux.net.Peer;
 import org.semux.net.filter.CIDRFilterRule;
+import org.semux.rules.TemporaryDBRule;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
@@ -76,6 +81,9 @@ import static org.mockito.Mockito.when;
 
 public class APIHandlerTest {
 
+    @Rule
+    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+
     private static final String API_IP = "127.0.0.1";
     private static final int API_PORT = 15171;
 
@@ -93,7 +101,7 @@ public class APIHandlerTest {
 
     @Before
     public void setUp() {
-        api = new SemuxAPIMock();
+        api = new SemuxAPIMock(temporaryDBFactory);
         api.start(API_IP, API_PORT);
 
         config = api.getKernel().getConfig();
@@ -147,13 +155,30 @@ public class APIHandlerTest {
 
     @Test
     public void testGetPeers() throws IOException {
-        String uri = "/get_peers";
-        JsonObject response = request(uri);
+        channelMgr = spy(api.getKernel().getChannelManager());
+        List<Peer> peers = Arrays.asList(
+                new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", 1),
+                new Peer("2.3.4.5", 5171, (short) 2, "client2", "peer2", 2));
+        when(channelMgr.getActivePeers()).thenReturn(peers);
+        api.getKernel().setChannelManager(channelMgr);
+
+        JsonObject response = request("/get_peers");
         assertTrue(response.getBoolean("success"));
         JsonArray result = response.getJsonArray("result");
 
         assertNotNull(result);
-        assertEquals(0, result.size());
+        assertEquals(peers.size(), result.size());
+        for (int i = 0; i < peers.size(); i++) {
+            JsonObject peerJson = result.getJsonObject(i);
+            Peer peer = peers.get(i);
+            assertEquals(peer.getIp(), peerJson.getString("ip"));
+            assertEquals(peer.getPort(), peerJson.getInt("port"));
+            assertEquals(peer.getNetworkVersion(), peerJson.getInt("networkVersion"));
+            assertEquals(peer.getClientId(), peerJson.getString("clientId"));
+            assertEquals(Hex.PREF + peer.getPeerId(), peerJson.getString("peerId"));
+            assertEquals(peer.getLatestBlockNumber(), peerJson.getInt("latestBlockNumber"));
+            assertEquals(peer.getLatency(), peerJson.getInt("latency"));
+        }
     }
 
     @Test
@@ -368,6 +393,21 @@ public class APIHandlerTest {
         JsonObject response = request(uri);
         assertTrue(response.getBoolean("success"));
         assertEquals(200L, response.getJsonNumber("result").longValueExact());
+    }
+
+    @Test
+    public void testGetVotes() throws IOException {
+        EdDSA voterKey = new EdDSA();
+        EdDSA delegateKey = new EdDSA();
+        DelegateState ds = chain.getDelegateState();
+        assertTrue(ds.register(delegateKey.toAddress(), Bytes.of("test")));
+        assertTrue(ds.vote(voterKey.toAddress(), delegateKey.toAddress(), 200L));
+        ds.commit();
+
+        JsonObject response = request("/get_votes?delegate=" + delegateKey.toAddressString());
+        assertTrue(response.getBoolean("success"));
+        assertEquals(200L,
+                response.getJsonObject("result").getJsonNumber(Hex.PREF + voterKey.toAddressString()).longValueExact());
     }
 
     @Test

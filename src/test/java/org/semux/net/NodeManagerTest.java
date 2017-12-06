@@ -6,12 +6,7 @@
  */
 package org.semux.net;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.net.InetSocketAddress;
-import java.util.Set;
-
+import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
 import org.semux.config.Constants;
@@ -20,12 +15,21 @@ import org.semux.consensus.SemuxSync;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB.MemoryDBFactory;
+import org.semux.rules.TemporaryDBRule;
+
+import java.net.InetSocketAddress;
+import java.util.Set;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class NodeManagerTest {
 
     private static final String P2P_IP = "127.0.0.1";
     private static final int P2P_PORT = 15161;
+
+    @Rule
+    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
 
     @Test
     public void testGetSeedNodes() {
@@ -45,7 +49,7 @@ public class NodeManagerTest {
     @Test
     public void testConnect() throws InterruptedException {
         // start server
-        PeerServerMock ps = new PeerServerMock();
+        PeerServerMock ps = new PeerServerMock(temporaryDBFactory);
         ps.start(P2P_IP, P2P_PORT);
 
         try {
@@ -53,7 +57,7 @@ public class NodeManagerTest {
             PeerClient client = new PeerClient(P2P_IP, P2P_PORT + 1, key);
 
             KernelMock kernel = new KernelMock();
-            kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new MemoryDBFactory()));
+            kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), temporaryDBFactory));
             kernel.setClient(client);
             kernel.setChannelManager(new ChannelManager());
             kernel.setPendingManager(new PendingManager(kernel));

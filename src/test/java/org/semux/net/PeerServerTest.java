@@ -13,20 +13,25 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.net.Socket;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.semux.crypto.EdDSA;
+import org.semux.rules.TemporaryDBRule;
 
 public class PeerServerTest {
 
     private static final String P2P_IP = "127.0.0.1";
     private static final int P2P_PORT = 15161;
 
+    @Rule
+    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+
     @Test
     public void testServer() throws InterruptedException {
         EdDSA key = new EdDSA();
         PeerClient remoteClient = new PeerClient(P2P_IP, P2P_PORT, key);
 
-        PeerServerMock ps = new PeerServerMock();
+        PeerServerMock ps = new PeerServerMock(temporaryDBFactory);
         ps.start(P2P_IP, P2P_PORT);
         assertTrue(ps.getServer().isListening());
 

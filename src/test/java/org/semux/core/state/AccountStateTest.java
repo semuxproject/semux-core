@@ -6,30 +6,34 @@
  */
 package org.semux.core.state;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
-import java.util.Map;
-
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Constants;
 import org.semux.config.DevNetConfig;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis.Premine;
-import org.semux.db.MemoryDB.MemoryDBFactory;
+import org.semux.rules.TemporaryDBRule;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
+
+import java.util.Map;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class AccountStateTest {
 
     private Blockchain chain;
     private AccountState state;
 
+    @Rule
+    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+
     @Before
     public void setup() {
-        chain = new BlockchainImpl(new DevNetConfig(Constants.DEFAULT_DATA_DIR), new MemoryDBFactory());
+        chain = new BlockchainImpl(new DevNetConfig(Constants.DEFAULT_DATA_DIR), temporaryDBFactory);
         state = chain.getAccountState();
     }
 

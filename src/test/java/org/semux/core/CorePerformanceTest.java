@@ -6,24 +6,28 @@
  */
 package org.semux.core;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevNetConfig;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.EdDSA;
-import org.semux.db.MemoryDB.MemoryDBFactory;
+import org.semux.rules.TemporaryDBRule;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.Assert.assertTrue;
+
 public class CorePerformanceTest {
+
+    @Rule
+    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
 
     private static final Logger logger = LoggerFactory.getLogger(CorePerformanceTest.class);
 
@@ -74,7 +78,7 @@ public class CorePerformanceTest {
         long t2 = System.nanoTime();
         logger.info("Perf_transaction_1: {} μs/tx", (t2 - t1) / 1_000 / repeat);
 
-        Blockchain chain = new BlockchainImpl(config, new MemoryDBFactory());
+        Blockchain chain = new BlockchainImpl(config, temporaryDBFactory);
         TransactionExecutor exec = new TransactionExecutor(config);
 
         t1 = System.nanoTime();
