@@ -306,19 +306,14 @@ public class SemuxCLI {
      * @return AbstractConfigImplementation
      */
     protected AbstractConfig getConfig() {
-        AbstractConfig config = null;
-        switch (network != null ? network : MAINNET) {
+        switch (network) {
         case TESTNET:
-            config = new TestNetConfig(dataDir);
-            break;
+            return new TestNetConfig(dataDir);
         case DEVNET:
-            config = new DevNetConfig(dataDir);
-            break;
+            return new DevNetConfig(dataDir);
         case MAINNET:
         default:
-            config = new MainNetConfig(dataDir);
-            break;
+            return new MainNetConfig(dataDir);
         }
-        return config;
     }
 }

@@ -398,7 +398,7 @@ public class ApiHandlerImpl implements ApiHandler {
         }
 
         return Json.createObjectBuilder().add("ip", peer.getIp()).add("port", peer.getPort())
-                .add("p2pVersion", peer.getNetworkVersion()).add("clientId", peer.getClientId())
+                .add("networkVersion", peer.getNetworkVersion()).add("clientId", peer.getClientId())
                 .add("peerId", Hex.PREF + peer.getPeerId()).add("latestBlockNumber", peer.getLatestBlockNumber())
                 .add("latency", peer.getLatency()).build();
     }
