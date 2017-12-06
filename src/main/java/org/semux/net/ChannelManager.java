@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.semux.Kernel;
 import org.semux.config.Constants;
 import org.semux.net.filter.SemuxIpFilter;
 import org.slf4j.Logger;
@@ -32,8 +33,10 @@ public class ChannelManager {
 
     private final SemuxIpFilter ipFilter;
 
-    public ChannelManager() {
-        ipFilter = (new SemuxIpFilter.Loader()).load(Paths.get(Constants.CONFIG_DIR, "ipfilter.json")).orElse(null);
+    public ChannelManager(Kernel kernel) {
+        ipFilter = (new SemuxIpFilter.Loader())
+                .load(Paths.get(kernel.getConfig().dataDir().getAbsolutePath(), Constants.CONFIG_DIR, "ipfilter.json"))
+                .orElse(null);
     }
 
     public SemuxIpFilter getIpFilter() {

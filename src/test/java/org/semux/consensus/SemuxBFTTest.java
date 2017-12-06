@@ -51,7 +51,7 @@ public class SemuxBFTTest {
         kernel = new KernelMock();
 
         kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), temporaryDBFactory));
-        kernel.setChannelManager(new ChannelManager());
+        kernel.setChannelManager(new ChannelManager(kernel));
         kernel.setPendingManager(new PendingManager(kernel));
 
         kernel.setSyncManager(new SemuxSync(kernel));

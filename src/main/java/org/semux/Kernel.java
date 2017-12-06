@@ -112,7 +112,7 @@ public class Kernel {
         // ====================================
         // start channel/pending/node manager
         // ====================================
-        channelMgr = new ChannelManager();
+        channelMgr = new ChannelManager(this);
         pendingMgr = new PendingManager(this);
         nodeMgr = new NodeManager(this);
 

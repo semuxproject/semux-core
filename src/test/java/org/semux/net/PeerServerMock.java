@@ -37,7 +37,7 @@ public class PeerServerMock {
 
                 kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), this.dbFactory));
                 kernel.setClient(new PeerClient(ip, port, kernel.getCoinbase()));
-                kernel.setChannelManager(new ChannelManager());
+                kernel.setChannelManager(new ChannelManager(kernel));
                 kernel.setPendingManager(new PendingManager(kernel));
                 kernel.setNodeManager(new NodeManager(kernel));
 

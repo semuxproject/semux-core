@@ -36,7 +36,7 @@ public class SemuxAPIMock {
             new Thread(() -> {
                 kernel = new KernelMock();
                 kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), dbFactory));
-                kernel.setChannelManager(new ChannelManager());
+                kernel.setChannelManager(new ChannelManager(kernel));
                 kernel.setPendingManager(new PendingManager(kernel));
                 kernel.setClient(new PeerClient("127.0.0.1", Constants.DEFAULT_P2P_PORT, kernel.getCoinbase()));
                 kernel.setNodeManager(new NodeManager(kernel));

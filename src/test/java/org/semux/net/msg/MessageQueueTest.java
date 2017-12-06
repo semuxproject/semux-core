@@ -55,7 +55,7 @@ public class MessageQueueTest {
         KernelMock kernel = new KernelMock();
         kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), temporaryDBFactory));
         kernel.setClient(client);
-        kernel.setChannelManager(new ChannelManager());
+        kernel.setChannelManager(new ChannelManager(kernel));
         kernel.setPendingManager(new PendingManager(kernel));
         kernel.setNodeManager(new NodeManager(kernel));
         kernel.setConsensus(new SemuxBFT(kernel));

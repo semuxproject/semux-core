@@ -47,7 +47,7 @@ public class PendingManagerTest {
         kernel = new KernelMock();
 
         kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), temporaryDBFactory));
-        kernel.setChannelManager(new ChannelManager());
+        kernel.setChannelManager(new ChannelManager(kernel));
 
         accountState = kernel.getBlockchain().getAccountState();
         accountState.adjustAvailable(from, 10000 * Unit.SEM);
