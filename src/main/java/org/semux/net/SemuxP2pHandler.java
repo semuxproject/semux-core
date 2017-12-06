@@ -82,7 +82,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
     /**
      * Creates a new P2P handler.
-     * 
+     *
      * @param channel
      */
     public SemuxP2pHandler(Channel channel, Kernel kernel) {
@@ -280,7 +280,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
     /**
      * Checks if a HELLO message is success.
-     * 
+     *
      * @return
      */
     private boolean isValid(HelloMessage msg) {
@@ -290,7 +290,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
     /**
      * Checks if a World message is success.
-     * 
+     *
      * @return
      */
     private boolean isValid(WorldMessage msg) {
@@ -300,7 +300,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
     /**
      * When handshake is done.
-     * 
+     *
      * @param peer
      */
     private void onHandshakeDone(Peer peer) {
@@ -323,7 +323,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
     /**
      * Returns whether the p2p version is supported.
-     * 
+     *
      * @param version
      * @return
      */

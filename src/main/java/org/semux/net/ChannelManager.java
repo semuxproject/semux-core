@@ -14,12 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.semux.net.filter.SemuxIpFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Channel Manager.
- * 
+ *
  */
 public class ChannelManager {
 
@@ -28,21 +29,33 @@ public class ChannelManager {
     private Map<InetSocketAddress, Channel> channels = new HashMap<>();
     private Map<String, Channel> activeChannels = new HashMap<>();
 
+    private final SemuxIpFilter ipFilter;
+
+    public ChannelManager() {
+        ipFilter = (new SemuxIpFilter.Loader()).load().orElse(null);
+    }
+
+    public SemuxIpFilter getIpFilter() {
+        return ipFilter;
+    }
+
     /**
-     * Returns whether a connection from the given address is acceptable or not.
-     * 
+     * Returns whether a connection from the given address is blocked or not.
+     *
      * @param address
      * @return
      */
-    public synchronized boolean isAcceptable(InetSocketAddress address) {
-        // TODO: implement whitelist, blacklist and connection policy
-
-        return true;
+    public boolean isBlocked(InetSocketAddress address) {
+        if (ipFilter == null) {
+            return false;
+        } else {
+            return ipFilter.isBlocked(address);
+        }
     }
 
     /**
      * Returns whether a socket address is connected.
-     * 
+     *
      * @param addr
      * @return
      */
@@ -52,7 +65,7 @@ public class ChannelManager {
 
     /**
      * Returns whether the specified IP is connected.
-     * 
+     *
      * @param ip
      * @return
      */
@@ -68,7 +81,7 @@ public class ChannelManager {
 
     /**
      * Returns whether the specified peer is connected.
-     * 
+     *
      * @param peerId
      * @return
      */
@@ -78,7 +91,7 @@ public class ChannelManager {
 
     /**
      * Returns the number of channels.
-     * 
+     *
      * @return
      */
     public synchronized int size() {
@@ -87,7 +100,7 @@ public class ChannelManager {
 
     /**
      * Adds a new channel to this manager.
-     * 
+     *
      * @param ch
      *            channel instance
      */
@@ -99,7 +112,7 @@ public class ChannelManager {
 
     /**
      * Removes a disconnected channel from this manager.
-     * 
+     *
      * @param ch
      *            channel instance
      */
@@ -115,7 +128,7 @@ public class ChannelManager {
 
     /**
      * When a channel becomes active.
-     * 
+     *
      * @param channel
      * @param peer
      */
@@ -126,7 +139,7 @@ public class ChannelManager {
 
     /**
      * Returns a copy of the active peers.
-     * 
+     *
      * @return
      */
     public synchronized List<Peer> getActivePeers() {
@@ -140,7 +153,7 @@ public class ChannelManager {
 
     /**
      * Returns the listening IP addresses of active peers.
-     * 
+     *
      * @return
      */
     public synchronized Set<InetSocketAddress> getActiveAddresses() {
@@ -156,7 +169,7 @@ public class ChannelManager {
 
     /**
      * Returns the active channels.
-     * 
+     *
      * @return
      */
     public synchronized List<Channel> getActiveChannels() {
@@ -168,7 +181,7 @@ public class ChannelManager {
 
     /**
      * Returns the active channels, filtered by peerId.
-     * 
+     *
      * @param peerIds
      *            peerId filter
      * @return
@@ -186,7 +199,7 @@ public class ChannelManager {
 
     /**
      * Returns the active channels, whose message queue is idle.
-     * 
+     *
      * @return
      */
     public synchronized List<Channel> getIdleChannels() {
