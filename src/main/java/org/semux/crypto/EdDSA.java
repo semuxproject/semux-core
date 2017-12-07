@@ -6,10 +6,10 @@
  */
 package org.semux.crypto;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -17,11 +17,16 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 
 import org.semux.crypto.cache.EdDSAPublicKeyCache;
+import org.semux.util.SystemUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import net.i2p.crypto.eddsa.KeyPairGenerator;
+import net.i2p.crypto.eddsa.spec.EdDSANamedCurveSpec;
+import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
 /**
@@ -31,75 +36,100 @@ import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
  */
 public class EdDSA {
 
-    private PublicKey pub;
-    private PrivateKey priv;
+    private static final Logger logger = LoggerFactory.getLogger(EdDSA.class);
+
+    private static final KeyPairGenerator gen = new KeyPairGenerator();
+    static {
+        /*
+         * Algorithm specifications
+         * 
+         * Name: Ed25519
+         * 
+         * Curve: ed25519curve
+         * 
+         * H: SHA-512
+         * 
+         * l: $q = 2^{252} + 27742317777372353535851937790883648493$
+         * 
+         * B: 0x5866666666666666666666666666666666666666666666666666666666666666
+         */
+        try {
+            EdDSANamedCurveSpec params = EdDSANamedCurveTable.getByName("Ed25519");
+            gen.initialize(params, new SecureRandom());
+        } catch (InvalidAlgorithmParameterException e) {
+            logger.error("Failed to initialize keygen", e);
+            SystemUtil.exit(-1);
+        }
+    }
+
+    protected EdDSAPrivateKey sk;
+    protected EdDSAPublicKey pk;
 
     /**
-     * Create a random ED25519 key pair.
+     * Creates a random ED25519 key pair.
      */
     public EdDSA() {
-        KeyPairGenerator gen = new KeyPairGenerator();
         KeyPair keypair = gen.generateKeyPair();
-        pub = keypair.getPublic();
-        priv = keypair.getPrivate();
+        sk = (EdDSAPrivateKey) keypair.getPrivate();
+        pk = (EdDSAPublicKey) keypair.getPublic();
     }
 
     /**
-     * Create an ED25519 key pair with the specified public and private keys.
+     * Creates an ED25519 key pair with the specified public and private keys.
      * 
-     * @param publicKey
      * @param privateKey
+     * @param publicKey
+     * 
      * @throws InvalidKeySpecException
      */
-    public EdDSA(byte[] publicKey, byte[] privateKey) throws InvalidKeySpecException {
-        this.pub = new EdDSAPublicKey(new X509EncodedKeySpec(publicKey));
-        this.priv = new EdDSAPrivateKey(new PKCS8EncodedKeySpec(privateKey));
+    public EdDSA(byte[] privateKey, byte[] publicKey) throws InvalidKeySpecException {
+        this.sk = new EdDSAPrivateKey(new PKCS8EncodedKeySpec(privateKey));
+        this.pk = new EdDSAPublicKey(new X509EncodedKeySpec(publicKey));
     }
 
     /**
-     * Create an ED25519 key pair with a specified private key
+     * Creates an ED25519 key pair with a specified private key
      *
      * @param privateKey
      * @throws InvalidKeySpecException
      */
     public EdDSA(byte[] privateKey) throws InvalidKeySpecException {
-        EdDSAPrivateKey edDSAPrivateKey = new EdDSAPrivateKey(new PKCS8EncodedKeySpec(privateKey));
-        this.pub = new EdDSAPublicKey(new EdDSAPublicKeySpec(edDSAPrivateKey.getA(), edDSAPrivateKey.getParams()));
-        this.priv = edDSAPrivateKey;
+        this.sk = new EdDSAPrivateKey(new PKCS8EncodedKeySpec(privateKey));
+        this.pk = new EdDSAPublicKey(new EdDSAPublicKeySpec(sk.getA(), sk.getParams()));
     }
 
     /**
-     * Get the public key.
+     * Returns the private key, encoded in "PKCS#8".
+     */
+    public byte[] getPrivateKey() {
+        return sk.getEncoded();
+    }
+
+    /**
+     * Returns the public key, encoded in "X.509".
      * 
      * @return
      */
     public byte[] getPublicKey() {
-        return pub.getEncoded();
+        return pk.getEncoded();
     }
 
     /**
-     * Get the private key.
-     */
-    public byte[] getPrivateKey() {
-        return priv.getEncoded();
-    }
-
-    /**
-     * Convert this key to an address.
+     * Returns the Semux address.
      */
     public byte[] toAddress() {
         return Hash.h160(getPublicKey());
     }
 
     /**
-     * Convert this key to an address, in string.
+     * Returns the Semux address in {@link String}.
      */
     public String toAddressString() {
         return Hex.encode(toAddress());
     }
 
     /**
-     * Sign a message hash.
+     * Signs a message hash.
      * 
      * @param msgHash
      *            message hash
@@ -108,17 +138,17 @@ public class EdDSA {
     public Signature sign(byte[] msgHash) {
         try {
             EdDSAEngine engine = new EdDSAEngine();
-            engine.initSign(priv);
+            engine.initSign(sk);
             byte[] sig = engine.signOneShot(msgHash);
 
-            return new Signature(sig, pub.getEncoded());
+            return new Signature(sig, pk.getEncoded());
         } catch (InvalidKeyException | SignatureException e) {
             throw new CryptoException(e);
         }
     }
 
     /**
-     * Verify a signature.
+     * Verifys a signature.
      * 
      * @param msgHash
      *            message hash
@@ -132,8 +162,6 @@ public class EdDSA {
                 EdDSAEngine engine = new EdDSAEngine();
                 engine.initVerify(EdDSAPublicKeyCache.computeIfAbsent(signature.getPublicKey()));
 
-                // TODO: reject non-canonical signature
-
                 return engine.verifyOneShot(msgHash, signature.getSignature());
             } catch (Exception e) {
                 // do nothing
@@ -144,7 +172,7 @@ public class EdDSA {
     }
 
     /**
-     * Verify a signature.
+     * Verifies a signature.
      * 
      * @param msgHash
      *            message hash
@@ -159,7 +187,7 @@ public class EdDSA {
     }
 
     /**
-     * Get a string representation of this key.
+     * Returns a string representation of this key.
      * 
      * @return the address of this EdDSA.
      */

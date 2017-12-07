@@ -76,7 +76,7 @@ public class Wallet {
                     byte[] publicKey = dec.readBytes();
                     byte[] privateKey = AES.decrypt(dec.readBytes(), key, iv);
 
-                    accounts.add(new EdDSA(publicKey, privateKey));
+                    accounts.add(new EdDSA(privateKey, publicKey));
                 }
             }
             this.password = password;

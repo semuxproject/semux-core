@@ -11,10 +11,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 
+import org.bouncycastle.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 import org.semux.config.Constants;
@@ -30,13 +32,50 @@ public class EdDSATest {
     private static final Logger logger = LoggerFactory.getLogger(EdDSATest.class);
 
     @Test
+    public void testKeyStorage() {
+        EdDSA key = new EdDSA();
+
+        System.out.println("pk_encoded     : " + Hex.encode(key.pk.getEncoded()));
+        System.out.println("pk_algo        : " + key.pk.getAlgorithm());
+        System.out.println("pk_format      : " + key.pk.getFormat());
+        System.out.println("pk_A           : " + Hex.encode(key.pk.getAbyte()));
+        System.out.println();
+        System.out.println("sk_encoded     : " + Hex.encode(key.sk.getEncoded()));
+        System.out.println("sk_algo        : " + key.sk.getAlgorithm());
+        System.out.println("sk_format      : " + key.sk.getFormat());
+        System.out.println("sk_seed        : " + Hex.encode(key.sk.getSeed()));
+        System.out.println("sk_hash_of_seed: " + Hex.encode(key.sk.getH()));
+    }
+
+    @Test
+    public void testMalleability() {
+        EdDSA key = new EdDSA();
+        byte[] data = Bytes.of("test");
+        byte[] hash = Hash.h256(data);
+
+        Signature sig = key.sign(hash);
+        assertTrue(EdDSA.verify(hash, sig));
+
+        byte[] R = Arrays.copyOf(sig.getSignature(), 32);
+        byte[] S = Arrays.copyOfRange(sig.getSignature(), 32, 64);
+
+        BigInteger s = new BigInteger(1, S);
+        BigInteger l = BigInteger.valueOf(2).pow(252).add(new BigInteger("27742317777372353535851937790883648493"));
+        byte[] sPlusL = s.add(l).toByteArray();
+        sPlusL = Arrays.copyOfRange(sPlusL, sPlusL.length - 32, sPlusL.length);
+
+        Signature sig2 = new Signature(Bytes.merge(R, sPlusL), sig.getPublicKey());
+        assertFalse(EdDSA.verify(hash, sig2));
+    }
+
+    @Test
     public void testGenerateKeyPair() throws InvalidKeySpecException {
         EdDSA key1 = new EdDSA();
 
         assertEquals(44, key1.getPublicKey().length);
         assertEquals(48, key1.getPrivateKey().length);
 
-        EdDSA key2 = new EdDSA(key1.getPublicKey(), key1.getPrivateKey());
+        EdDSA key2 = new EdDSA(key1.getPrivateKey(), key1.getPublicKey());
 
         Assert.assertArrayEquals(key1.getPublicKey(), key2.getPublicKey());
         Assert.assertArrayEquals(key1.getPrivateKey(), key2.getPrivateKey());
