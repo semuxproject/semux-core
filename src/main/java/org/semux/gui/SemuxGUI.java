@@ -24,8 +24,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
+import org.semux.Launcher;
 import org.semux.cli.CLIOptions;
-import org.semux.cli.OptionStart;
 import org.semux.config.Constants;
 import org.semux.core.AddressBook;
 import org.semux.core.Block;
@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Graphic user interface.
  */
-public class SemuxGUI extends OptionStart {
+public class SemuxGUI extends Launcher {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxGUI.class);
 

@@ -17,6 +17,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
+import org.semux.Launcher;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.core.Wallet;
@@ -29,7 +30,7 @@ import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SemuxCLI extends OptionStart {
+public class SemuxCLI extends Launcher {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxCLI.class);
 
