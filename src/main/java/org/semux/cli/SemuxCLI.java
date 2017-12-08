@@ -15,15 +15,10 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
-import org.semux.config.AbstractConfig;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
-import org.semux.config.MainNetConfig;
-import org.semux.config.TestNetConfig;
 import org.semux.core.Wallet;
 import org.semux.core.WalletLockedException;
 import org.semux.crypto.EdDSA;
@@ -34,71 +29,9 @@ import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SemuxCLI {
-
-    private static final String DEVNET = "devnet";
-
-    private static final String TESTNET = "testnet";
-
-    private static final String MAINNET = "mainnet";
+public class SemuxCLI extends OptionStart {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxCLI.class);
-
-    private Options options = new Options();
-
-    private String dataDir = Constants.DEFAULT_DATA_DIR;
-    private int coinbase = 0;
-    private String password = null;
-    private String network = MAINNET;
-
-    SemuxCLI() {
-        Option helpOption = Option.builder().longOpt(CLIOptions.HELP.toString()).desc(CLIMessages.get("PrintHelp"))
-                .build();
-        options.addOption(helpOption);
-
-        Option versionOption = Option.builder().longOpt(CLIOptions.VERSION.toString())
-                .desc(CLIMessages.get("ShowVersion")).build();
-        options.addOption(versionOption);
-
-        Option accountOption = Option.builder().longOpt(CLIOptions.ACCOUNT.toString())
-                .desc(CLIMessages.get("ChooseAction")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("action")
-                .type(String.class).build();
-        options.addOption(accountOption);
-
-        Option changePasswordOption = Option.builder().longOpt(CLIOptions.CHANGE_PASSWORD.toString())
-                .desc(CLIMessages.get("ChangeWalletPassword")).build();
-        options.addOption(changePasswordOption);
-
-        Option dataDirOption = Option.builder().longOpt(CLIOptions.DATA_DIR.toString())
-                .desc(CLIMessages.get("SpecifyDataDir")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("path")
-                .type(String.class).build();
-        options.addOption(dataDirOption);
-
-        Option coinbaseOption = Option.builder().longOpt(CLIOptions.COINBASE.toString())
-                .desc(CLIMessages.get("SpecifyCoinbase")).hasArg(true).numberOfArgs(1).optionalArg(false)
-                .argName("index").type(Number.class).build();
-        options.addOption(coinbaseOption);
-
-        Option networkOption = Option.builder().longOpt(CLIOptions.NETWORK.toString())
-                .desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1).optionalArg(false)
-                .argName("network").type(String.class).build();
-        options.addOption(networkOption);
-
-        Option passwordOption = Option.builder().longOpt(CLIOptions.PASSWORD.toString())
-                .desc(CLIMessages.get("WalletPassword")).hasArg(true).numberOfArgs(1).optionalArg(false)
-                .argName(CLIOptions.PASSWORD.toString()).type(String.class).build();
-        options.addOption(passwordOption);
-
-        Option dumpPrivateKeyOption = Option.builder().longOpt(CLIOptions.DUMP_PRIVATE_KEY.toString())
-                .desc(CLIMessages.get("PrintHexKey")).hasArg(true).optionalArg(false).argName("address")
-                .type(String.class).build();
-        options.addOption(dumpPrivateKeyOption);
-
-        Option importPrivateKeyOption = Option.builder().longOpt(CLIOptions.IMPORT_PRIVATE_KEY.toString())
-                .desc(CLIMessages.get("ImportHexKey")).hasArg(true).optionalArg(false).argName("key").type(String.class)
-                .build();
-        options.addOption(importPrivateKeyOption);
-    }
 
     public static void main(String[] args) {
         try {
@@ -111,24 +44,74 @@ public class SemuxCLI {
         }
     }
 
+    public SemuxCLI() {
+        super();
+        Option helpOption = Option.builder().longOpt(CLIOptions.HELP.toString()).desc(CLIMessages.get("PrintHelp"))
+                .build();
+        addOption(helpOption);
+
+        Option versionOption = Option.builder().longOpt(CLIOptions.VERSION.toString())
+                .desc(CLIMessages.get("ShowVersion")).build();
+        addOption(versionOption);
+
+        Option accountOption = Option.builder().longOpt(CLIOptions.ACCOUNT.toString())
+                .desc(CLIMessages.get("ChooseAction")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("action")
+                .type(String.class).build();
+        addOption(accountOption);
+
+        Option changePasswordOption = Option.builder().longOpt(CLIOptions.CHANGE_PASSWORD.toString())
+                .desc(CLIMessages.get("ChangeWalletPassword")).build();
+        addOption(changePasswordOption);
+
+        Option dataDirOption = Option.builder().longOpt(CLIOptions.DATA_DIR.toString())
+                .desc(CLIMessages.get("SpecifyDataDir")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("path")
+                .type(String.class).build();
+        addOption(dataDirOption);
+
+        Option coinbaseOption = Option.builder().longOpt(CLIOptions.COINBASE.toString())
+                .desc(CLIMessages.get("SpecifyCoinbase")).hasArg(true).numberOfArgs(1).optionalArg(false)
+                .argName("index").type(Number.class).build();
+        addOption(coinbaseOption);
+
+        Option networkOption = Option.builder().longOpt(CLIOptions.NETWORK.toString())
+                .desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1).optionalArg(false)
+                .argName("network").type(String.class).build();
+        addOption(networkOption);
+
+        Option passwordOption = Option.builder().longOpt(CLIOptions.PASSWORD.toString())
+                .desc(CLIMessages.get("WalletPassword")).hasArg(true).numberOfArgs(1).optionalArg(false)
+                .argName(CLIOptions.PASSWORD.toString()).type(String.class).build();
+        addOption(passwordOption);
+
+        Option dumpPrivateKeyOption = Option.builder().longOpt(CLIOptions.DUMP_PRIVATE_KEY.toString())
+                .desc(CLIMessages.get("PrintHexKey")).hasArg(true).optionalArg(false).argName("address")
+                .type(String.class).build();
+        addOption(dumpPrivateKeyOption);
+
+        Option importPrivateKeyOption = Option.builder().longOpt(CLIOptions.IMPORT_PRIVATE_KEY.toString())
+                .desc(CLIMessages.get("ImportHexKey")).hasArg(true).optionalArg(false).argName("key").type(String.class)
+                .build();
+        addOption(importPrivateKeyOption);
+    }
+
     public void start(String[] args) throws ParseException {
         CommandLineParser parser = new DefaultParser();
-        CommandLine commandLine = parser.parse(options, args);
+        CommandLine commandLine = parser.parse(getOptions(), args);
 
         if (commandLine.hasOption(CLIOptions.DATA_DIR.toString())) {
-            dataDir = commandLine.getOptionValue(CLIOptions.DATA_DIR.toString());
+            setDataDir(commandLine.getOptionValue(CLIOptions.DATA_DIR.toString()));
         }
 
         if (commandLine.hasOption(CLIOptions.COINBASE.toString())) {
-            coinbase = ((Number) commandLine.getParsedOptionValue(CLIOptions.COINBASE.toString())).intValue();
+            setCoinbase(((Number) commandLine.getParsedOptionValue(CLIOptions.COINBASE.toString())).intValue());
         }
 
         if (commandLine.hasOption(CLIOptions.NETWORK.toString())) {
-            network = commandLine.getOptionValue(CLIOptions.NETWORK.toString());
+            setNetwork(commandLine.getOptionValue(CLIOptions.NETWORK.toString()));
         }
 
         if (commandLine.hasOption(CLIOptions.PASSWORD.toString())) {
-            password = commandLine.getOptionValue(CLIOptions.PASSWORD.toString());
+            setPassword(commandLine.getOptionValue(CLIOptions.PASSWORD.toString()));
         }
 
         if (commandLine.hasOption(CLIOptions.HELP.toString())) {
@@ -156,7 +139,7 @@ public class SemuxCLI {
     protected void printHelp() {
         HelpFormatter formatter = new HelpFormatter();
         formatter.setWidth(200);
-        formatter.printHelp("./semux-cli.sh [options]", options);
+        formatter.printHelp("./semux-cli.sh [options]", getOptions());
     }
 
     protected void printVersion() {
@@ -175,13 +158,13 @@ public class SemuxCLI {
             logger.info(CLIMessages.get("NewAccountCreatedForAddress", key.toAddressString()));
         }
 
-        if (coinbase < 0 || coinbase >= accounts.size()) {
+        if (getCoinbase() < 0 || getCoinbase() >= accounts.size()) {
             logger.error(CLIMessages.get("CoinbaseDoesNotExist"));
             SystemUtil.exit(-1);
         }
 
         // start kernel
-        startKernel(getConfig(), wallet, wallet.getAccount(coinbase));
+        startKernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
     }
 
     protected Kernel startKernel(Config config, Wallet wallet, EdDSA coinbase) {
@@ -282,12 +265,12 @@ public class SemuxCLI {
     }
 
     protected Wallet loadAndUnlockWallet() {
-        if (password == null) {
-            password = SystemUtil.readPassword();
+        if (getPassword() == null) {
+            setPassword(SystemUtil.readPassword());
         }
 
         Wallet wallet = loadWallet();
-        if (!wallet.unlock(password)) {
+        if (!wallet.unlock(getPassword())) {
             SystemUtil.exit(-1);
         }
 
@@ -295,25 +278,7 @@ public class SemuxCLI {
     }
 
     protected Wallet loadWallet() {
-        return new Wallet(new File(dataDir, "wallet.data"));
+        return new Wallet(new File(getDataDir(), "wallet.data"));
     }
 
-    /**
-     * Creates the correct Instance of an AbstractConfig Implementation depending on
-     * the CLI --network option given.<br />
-     * Defaults to MainNet.
-     * 
-     * @return AbstractConfigImplementation
-     */
-    protected AbstractConfig getConfig() {
-        switch (network) {
-        case TESTNET:
-            return new TestNetConfig(dataDir);
-        case DEVNET:
-            return new DevNetConfig(dataDir);
-        case MAINNET:
-        default:
-            return new MainNetConfig(dataDir);
-        }
-    }
 }

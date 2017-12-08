@@ -18,9 +18,15 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
+import org.semux.cli.CLIOptions;
+import org.semux.cli.OptionStart;
 import org.semux.config.Constants;
-import org.semux.config.MainNetConfig;
 import org.semux.core.AddressBook;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
@@ -38,6 +44,7 @@ import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
 import org.semux.log.LoggerConfigurator;
+import org.semux.message.CLIMessages;
 import org.semux.message.GUIMessages;
 import org.semux.net.Peer;
 import org.semux.util.DnsUtil;
@@ -48,14 +55,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Graphic user interface.
  */
-public class SemuxGUI {
+public class SemuxGUI extends OptionStart {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxGUI.class);
 
     private static final int TRANSACTION_LIMIT = 1024; // per account
 
-    private String dataDir = Constants.DEFAULT_DATA_DIR;
-    private int coinbase = 0;
     private Wallet wallet;
 
     private WalletModel model;
@@ -63,6 +68,17 @@ public class SemuxGUI {
     private Kernel kernel;
 
     public SemuxGUI() {
+        super();
+        Option dataDirOption = Option.builder().longOpt(CLIOptions.DATA_DIR.toString())
+                .desc(CLIMessages.get("SpecifyDataDir")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("path")
+                .type(String.class).build();
+        addOption(dataDirOption);
+
+        Option networkOption = Option.builder().longOpt(CLIOptions.NETWORK.toString())
+                .desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1).optionalArg(false)
+                .argName("network").type(String.class).build();
+        addOption(networkOption);
+
     }
 
     public SemuxGUI(WalletModel model, Kernel kernel) {
@@ -78,9 +94,25 @@ public class SemuxGUI {
         return model;
     }
 
-    public void start() {
-        wallet = new Wallet(new File(dataDir, "wallet.data"));
-        model = new WalletModel(new AddressBook(new File(dataDir, "addressbook.json")));
+    public void start(String[] args) throws ParseException {
+        CommandLineParser parser = new DefaultParser();
+        CommandLine commandLine = parser.parse(getOptions(), args);
+
+        if (commandLine.hasOption(CLIOptions.DATA_DIR.toString())) {
+            setDataDir(commandLine.getOptionValue(CLIOptions.DATA_DIR.toString()));
+        }
+
+        if (commandLine.hasOption(CLIOptions.NETWORK.toString())) {
+            setNetwork(commandLine.getOptionValue(CLIOptions.NETWORK.toString()));
+        }
+
+        start();
+
+    }
+
+    protected void start() {
+        wallet = new Wallet(new File(getDataDir(), "wallet.data"));
+        model = new WalletModel(new AddressBook(new File(getDataDir(), "addressbook.json")));
 
         if (!wallet.exists()) {
             showWelcome();
@@ -120,11 +152,11 @@ public class SemuxGUI {
             }
 
             SelectDialog dialog = new SelectDialog(null, message, options);
-            coinbase = dialog.getSelectedIndex();
-            if (coinbase == -1) {
+            setCoinbase(dialog.getSelectedIndex());
+            if (getCoinbase() == -1) {
                 SystemUtil.exitAsync(0);
             } else {
-                model.setCoinbase(coinbase);
+                model.setCoinbase(getCoinbase());
             }
         } else if (wallet.size() == 0) {
             wallet.addAccount(new EdDSA());
@@ -132,7 +164,7 @@ public class SemuxGUI {
         }
 
         // start kernel
-        kernel = new Kernel(new MainNetConfig(dataDir), wallet, wallet.getAccount(coinbase));
+        kernel = new Kernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
         kernel.start();
         onBlockAdded(kernel.getBlockchain().getLatestBlock());
 
@@ -249,8 +281,12 @@ public class SemuxGUI {
 
     public static void main(String[] args) {
         // TODO: use specified data directory
-        LoggerConfigurator.configure(new File(Constants.DEFAULT_DATA_DIR));
-        setupLookAndFeel();
-        new SemuxGUI().start();
+        try {
+            LoggerConfigurator.configure(new File(Constants.DEFAULT_DATA_DIR));
+            setupLookAndFeel();
+            new SemuxGUI().start(args);
+        } catch (ParseException exception) {
+            logger.error(CLIMessages.get("ParsingFailed", exception.getMessage()));
+        }
     }
 }
