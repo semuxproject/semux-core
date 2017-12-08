@@ -76,8 +76,8 @@ public abstract class AbstractConfig implements Config {
     protected boolean apiEnabled = false;
     protected String apiListenIp = InetAddress.getLoopbackAddress().getHostAddress();
     protected int apiListenPort = Constants.DEFAULT_API_PORT;
-    protected String apiUsername = Constants.DEFAULT_API_USERNAME;
-    protected String apiPassword = Constants.DEFAULT_API_PASSWORD;
+    protected String apiUsername = null;
+    protected String apiPassword = null;
 
     // =========================
     // BFT consensus
@@ -264,13 +264,13 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public String apiUsername() {
-        return apiUsername;
+    public Optional<String> apiUsername() {
+        return StringUtil.isNullOrEmpty(apiUsername) ? Optional.empty() : Optional.of(apiUsername);
     }
 
     @Override
-    public String apiPassword() {
-        return apiPassword;
+    public Optional<String> apiPassword() {
+        return StringUtil.isNullOrEmpty(apiPassword) ? Optional.empty() : Optional.of(apiPassword);
     }
 
     @Override

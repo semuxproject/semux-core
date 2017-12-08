@@ -15,6 +15,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.semux.config.Config;
 import org.semux.util.Bytes;
@@ -107,7 +108,10 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 // trailing headers are ignored
 
                 // basic authentication
-                if (!checkBasicAuth(headers, config.apiUsername(), config.apiPassword())) {
+                Optional<String> username = config.apiUsername();
+                Optional<String> password = config.apiPassword();
+                if (username.isPresent() && password.isPresent()
+                        && !checkBasicAuth(headers, username.get(), password.get())) {
                     FullHttpResponse resp = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
 
                     resp.headers().set(HttpHeaderNames.WWW_AUTHENTICATE, "Basic realm=\"Semux RESTful API\"");

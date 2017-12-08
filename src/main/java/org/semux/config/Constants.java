@@ -64,16 +64,6 @@ public class Constants {
     public static final int DEFAULT_API_PORT = 5171;
 
     /**
-     * The default username.
-     */
-    public static final String DEFAULT_API_USERNAME = "username";
-
-    /**
-     * The default password.
-     */
-    public static final String DEFAULT_API_PASSWORD = "password";
-
-    /**
      * The default user agent for HTTP requests.
      */
     public static final String DEFAULT_USER_AGENT = "Mozilla/4.0";

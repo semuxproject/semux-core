@@ -15,7 +15,7 @@ import org.semux.config.Config;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.rules.TemporaryDBRule;
-import org.semux.util.ApiUtil;
+import org.semux.util.ApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ public class APIPerformance {
             long t1 = System.nanoTime();
             for (int i = 0; i < REPEAT; i++) {
 
-                ApiUtil a = new ApiUtil(new InetSocketAddress(API_IP, API_PORT), config.apiUsername(),
+                ApiClient a = new ApiClient(new InetSocketAddress(API_IP, API_PORT), config.apiUsername(),
                         config.apiPassword());
                 a.request("get_info");
             }

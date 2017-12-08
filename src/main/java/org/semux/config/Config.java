@@ -238,14 +238,14 @@ public interface Config {
      * 
      * @return
      */
-    String apiUsername();
+    Optional<String> apiUsername();
 
     /**
      * Returns the password for API basic authentication.
      * 
      * @return
      */
-    String apiPassword();
+    Optional<String> apiPassword();
 
     // =========================
     // BFT consensus

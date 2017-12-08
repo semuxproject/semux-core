@@ -43,7 +43,8 @@ public class ApiUtilTest {
         String cmd = "get_block";
 
         Config config = api.getKernel().getConfig();
-        ApiUtil api = new ApiUtil(new InetSocketAddress(API_IP, API_PORT), config.apiUsername(), config.apiPassword());
+        ApiClient api = new ApiClient(new InetSocketAddress(API_IP, API_PORT), config.apiUsername(),
+                config.apiPassword());
         JsonObject obj = api.request(cmd, "number", 0);
 
         assertTrue(obj.getBoolean("success"));

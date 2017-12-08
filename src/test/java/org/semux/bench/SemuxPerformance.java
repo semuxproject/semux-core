@@ -12,13 +12,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.json.JsonObject;
 
 import org.semux.config.Constants;
 import org.semux.config.DevNetConfig;
 import org.semux.core.Unit;
-import org.semux.util.ApiUtil;
+import org.semux.util.ApiClient;
 import org.semux.util.Bytes;
 import org.semux.util.SystemUtil;
 
@@ -43,7 +44,7 @@ public class SemuxPerformance {
             params.put("data", Bytes.EMPTY_BYTES);
             params.put("password", password);
 
-            ApiUtil api = new ApiUtil(server, username, password);
+            ApiClient api = new ApiClient(server, Optional.of(username), Optional.of(password));
             JsonObject response = api.request("transfer", params);
             if (!response.getBoolean("success")) {
                 System.out.println(response);
