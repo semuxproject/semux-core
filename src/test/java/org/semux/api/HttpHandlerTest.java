@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Base64;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -19,7 +18,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semux.KernelMock;
-import org.semux.util.Bytes;
+import org.semux.util.BasicAuth;
 
 import io.netty.handler.codec.http.HttpHeaders;
 
@@ -40,8 +39,7 @@ public class HttpHandlerTest {
     public void setup() {
         kernel = new KernelMock();
         server = new SemuxAPI(kernel);
-        auth = "Basic " + Base64.getEncoder().encodeToString(
-                Bytes.of(kernel.getConfig().apiUsername().get() + ":" + kernel.getConfig().apiPassword().get()));
+        auth = BasicAuth.generateAuth(kernel.getConfig().apiUsername(), kernel.getConfig().apiPassword());
 
         // wait for server to boot up
         new Thread(() -> server.start(ip, port, new HttpChannelInitializer() {

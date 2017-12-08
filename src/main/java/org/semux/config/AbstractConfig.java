@@ -264,13 +264,13 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public Optional<String> apiUsername() {
-        return StringUtil.isNullOrEmpty(apiUsername) ? Optional.empty() : Optional.of(apiUsername);
+    public String apiUsername() {
+        return apiUsername == null ? "admin" : apiUsername;
     }
 
     @Override
-    public Optional<String> apiPassword() {
-        return StringUtil.isNullOrEmpty(apiPassword) ? Optional.empty() : Optional.of(apiPassword);
+    public String apiPassword() {
+        return apiPassword == null ? "admin" : apiPassword;
     }
 
     @Override

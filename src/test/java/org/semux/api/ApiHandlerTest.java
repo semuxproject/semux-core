@@ -21,11 +21,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -57,6 +55,7 @@ import org.semux.net.NodeManager;
 import org.semux.net.Peer;
 import org.semux.net.filter.CIDRFilterRule;
 import org.semux.rules.TemporaryDBRule;
+import org.semux.util.BasicAuth;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
@@ -112,12 +111,7 @@ public class ApiHandlerTest {
         URL u = new URL("http://" + API_IP + ":" + API_PORT + uri);
         HttpURLConnection con = (HttpURLConnection) u.openConnection();
 
-        Optional<String> username = config.apiUsername();
-        Optional<String> password = config.apiPassword();
-        if (username.isPresent() && password.isPresent()) {
-            con.setRequestProperty("Authorization", "Basic " + Base64.getEncoder()
-                    .encodeToString(Bytes.of(config.apiUsername().get() + ":" + config.apiPassword().get())));
-        }
+        con.setRequestProperty("Authorization", BasicAuth.generateAuth(config.apiUsername(), config.apiPassword()));
 
         try (JsonReader jsonReader = Json.createReader(con.getInputStream())) {
             return jsonReader.readObject();

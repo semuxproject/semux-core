@@ -11,10 +11,8 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -24,8 +22,8 @@ import org.semux.crypto.Hex;
 
 public class ApiClient {
     private InetSocketAddress server;
-    private Optional<String> username;
-    private Optional<String> password;
+    private String username;
+    private String password;
 
     /**
      * Crate an ApiUtil instance.
@@ -34,7 +32,7 @@ public class ApiClient {
      * @param username
      * @param password
      */
-    public ApiClient(InetSocketAddress server, Optional<String> username, Optional<String> password) {
+    public ApiClient(InetSocketAddress server, String username, String password) {
         this.server = server;
         this.username = username;
         this.password = password;
@@ -72,10 +70,7 @@ public class ApiClient {
         // request
         URL u = new URL(url);
         HttpURLConnection con = (HttpURLConnection) u.openConnection();
-        if (username.isPresent() && password.isPresent()) {
-            con.setRequestProperty("Authorization",
-                    "Basic " + Base64.getEncoder().encodeToString(Bytes.of(username.get() + ":" + password.get())));
-        }
+        con.setRequestProperty("Authorization", BasicAuth.generateAuth(username, password));
 
         try (JsonReader jsonReader = Json.createReader(con.getInputStream())) {
             return jsonReader.readObject();
