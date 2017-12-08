@@ -13,10 +13,10 @@ import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 
 import org.semux.crypto.cache.EdDSAPublicKeyCache;
+import org.semux.util.Bytes;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +30,16 @@ import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
 /**
- * Edwards-curve Digital Signature Algorithm (EdDSA), specifically ED25519.
+ * Represents a key pair of the Edwards-curve Digital Signature Algorithm
+ * (EdDSA), specifically ED25519.
+ * <p>
  * Public key is encoded in "X.509"; private key is encoded in "PKCS#8".
- *
  */
 public class EdDSA {
+
+    public static final int PUBLIC_KEY_LEN = 44;
+    public static final int PRIVATE_KEY_LEN = 48;
+    public static final int SIGNATURE_LEN = 96;
 
     private static final Logger logger = LoggerFactory.getLogger(EdDSA.class);
 
@@ -83,8 +88,11 @@ public class EdDSA {
      * @throws InvalidKeySpecException
      */
     public EdDSA(byte[] privateKey, byte[] publicKey) throws InvalidKeySpecException {
-        this.sk = new EdDSAPrivateKey(new PKCS8EncodedKeySpec(privateKey));
-        this.pk = new EdDSAPublicKey(new X509EncodedKeySpec(publicKey));
+        this(privateKey);
+
+        if (!Arrays.equals(getPublicKey(), publicKey)) {
+            throw new InvalidKeySpecException("Public key private does not match!");
+        }
     }
 
     /**
@@ -141,7 +149,7 @@ public class EdDSA {
             engine.initSign(sk);
             byte[] sig = engine.signOneShot(msgHash);
 
-            return new Signature(sig, pk.getEncoded());
+            return new Signature(sig, pk.getAbyte());
         } catch (InvalidKeyException | SignatureException e) {
             throw new CryptoException(e);
         }
@@ -162,7 +170,7 @@ public class EdDSA {
                 EdDSAEngine engine = new EdDSAEngine();
                 engine.initVerify(EdDSAPublicKeyCache.computeIfAbsent(signature.getPublicKey()));
 
-                return engine.verifyOneShot(msgHash, signature.getSignature());
+                return engine.verifyOneShot(msgHash, signature.getS());
             } catch (Exception e) {
                 // do nothing
             }
@@ -201,39 +209,52 @@ public class EdDSA {
      * 
      */
     public static class Signature {
-        private static final int SIG_LENGTH = 64;
-        private static final int PUB_LENGTH = 44;
+        private static final byte[] X509 = Hex.decode("302a300506032b6570032100");
+        private static final int S_LEN = 64;
+        private static final int A_LEN = 32;
 
-        private byte[] sig;
-        private byte[] pub;
+        private byte[] s;
+        private byte[] a;
 
         /**
          * Creates a Signature instance.
          * 
-         * @param sig
-         * @param pub
+         * @param s
+         * @param a
          */
-        public Signature(byte[] sig, byte[] pub) {
-            this.sig = sig;
-            this.pub = pub;
+        public Signature(byte[] s, byte[] a) {
+            if (s == null || s.length != S_LEN || a == null || a.length != A_LEN) {
+                throw new IllegalArgumentException("Invalid S or A");
+            }
+            this.s = s;
+            this.a = a;
         }
 
         /**
-         * Returns the raw signature byte array.
+         * Returns the S byte array.
          * 
          * @return
          */
-        public byte[] getSignature() {
-            return sig;
+        public byte[] getS() {
+            return s;
         }
 
         /**
-         * Returns the public key.
+         * Returns the A byte array.
+         * 
+         * @return
+         */
+        public byte[] getA() {
+            return a;
+        }
+
+        /**
+         * Returns the public key of the signer.
          * 
          * @return
          */
         public byte[] getPublicKey() {
-            return pub;
+            return Bytes.merge(X509, a);
         }
 
         /**
@@ -242,7 +263,7 @@ public class EdDSA {
          * @return
          */
         public byte[] getAddress() {
-            return Hash.h160(pub);
+            return Hash.h160(getPublicKey());
         }
 
         /**
@@ -251,9 +272,9 @@ public class EdDSA {
          * @return
          */
         public byte[] toBytes() {
-            byte[] result = new byte[sig.length + pub.length];
-            System.arraycopy(sig, 0, result, 0, sig.length);
-            System.arraycopy(pub, 0, result, sig.length, pub.length);
+            byte[] result = new byte[s.length + a.length];
+            System.arraycopy(s, 0, result, 0, s.length);
+            System.arraycopy(a, 0, result, s.length, a.length);
 
             return result;
         }
@@ -262,17 +283,17 @@ public class EdDSA {
          * Parses from byte array.
          * 
          * @param bytes
-         * @return a signature if success,or null
+         * @return a {@link Signature} if success,or null
          */
         public static Signature fromBytes(byte[] bytes) {
-            if (bytes == null || bytes.length != SIG_LENGTH + PUB_LENGTH) {
+            if (bytes == null || bytes.length != S_LEN + A_LEN) {
                 return null;
             }
 
-            byte[] sig = Arrays.copyOf(bytes, SIG_LENGTH);
-            byte[] pub = Arrays.copyOfRange(bytes, SIG_LENGTH, bytes.length);
+            byte[] s = Arrays.copyOfRange(bytes, 0, S_LEN);
+            byte[] a = Arrays.copyOfRange(bytes, S_LEN, S_LEN + A_LEN);
 
-            return new Signature(sig, pub);
+            return new Signature(s, a);
         }
     }
 

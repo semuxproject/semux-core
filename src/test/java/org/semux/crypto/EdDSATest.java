@@ -56,15 +56,15 @@ public class EdDSATest {
         Signature sig = key.sign(hash);
         assertTrue(EdDSA.verify(hash, sig));
 
-        byte[] R = Arrays.copyOf(sig.getSignature(), 32);
-        byte[] S = Arrays.copyOfRange(sig.getSignature(), 32, 64);
+        byte[] R = Arrays.copyOf(sig.getS(), 32);
+        byte[] S = Arrays.copyOfRange(sig.getS(), 32, 64);
 
         BigInteger s = new BigInteger(1, S);
         BigInteger l = BigInteger.valueOf(2).pow(252).add(new BigInteger("27742317777372353535851937790883648493"));
         byte[] sPlusL = s.add(l).toByteArray();
         sPlusL = Arrays.copyOfRange(sPlusL, sPlusL.length - 32, sPlusL.length);
 
-        Signature sig2 = new Signature(Bytes.merge(R, sPlusL), sig.getPublicKey());
+        Signature sig2 = new Signature(Bytes.merge(R, sPlusL), sig.getA());
         assertFalse(EdDSA.verify(hash, sig2));
     }
 
@@ -72,13 +72,20 @@ public class EdDSATest {
     public void testGenerateKeyPair() throws InvalidKeySpecException {
         EdDSA key1 = new EdDSA();
 
-        assertEquals(44, key1.getPublicKey().length);
-        assertEquals(48, key1.getPrivateKey().length);
+        assertEquals(EdDSA.PUBLIC_KEY_LEN, key1.getPublicKey().length);
+        assertEquals(EdDSA.PRIVATE_KEY_LEN, key1.getPrivateKey().length);
 
         EdDSA key2 = new EdDSA(key1.getPrivateKey(), key1.getPublicKey());
 
         Assert.assertArrayEquals(key1.getPublicKey(), key2.getPublicKey());
         Assert.assertArrayEquals(key1.getPrivateKey(), key2.getPrivateKey());
+    }
+
+    @Test(expected = InvalidKeySpecException.class)
+    public void testPublicPrivateKeyMismatch() throws InvalidKeySpecException {
+        EdDSA key1 = new EdDSA();
+
+        new EdDSA(key1.getPrivateKey(), new byte[EdDSA.PUBLIC_KEY_LEN]);
     }
 
     @Test
@@ -89,6 +96,7 @@ public class EdDSATest {
         byte[] hash = Hash.h256(data);
         byte[] sig = key.sign(hash).toBytes();
 
+        assertEquals(EdDSA.SIGNATURE_LEN, sig.length);
         assertTrue(EdDSA.verify(hash, sig));
         assertArrayEquals(key.getPublicKey(), Signature.fromBytes(sig).getPublicKey());
         assertArrayEquals(key.toAddress(), Signature.fromBytes(sig).getAddress());
