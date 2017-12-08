@@ -25,6 +25,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -110,8 +111,13 @@ public class ApiHandlerTest {
     private static JsonObject request(String uri) throws IOException {
         URL u = new URL("http://" + API_IP + ":" + API_PORT + uri);
         HttpURLConnection con = (HttpURLConnection) u.openConnection();
-        con.setRequestProperty("Authorization", "Basic "
-                + Base64.getEncoder().encodeToString(Bytes.of(config.apiUsername() + ":" + config.apiPassword())));
+
+        Optional<String> username = config.apiUsername();
+        Optional<String> password = config.apiPassword();
+        if (username.isPresent() && password.isPresent()) {
+            con.setRequestProperty("Authorization", "Basic " + Base64.getEncoder()
+                    .encodeToString(Bytes.of(config.apiUsername().get() + ":" + config.apiPassword().get())));
+        }
 
         try (JsonReader jsonReader = Json.createReader(con.getInputStream())) {
             return jsonReader.readObject();

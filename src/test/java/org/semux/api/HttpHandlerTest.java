@@ -40,8 +40,8 @@ public class HttpHandlerTest {
     public void setup() {
         kernel = new KernelMock();
         server = new SemuxAPI(kernel);
-        auth = "Basic " + Base64.getEncoder()
-                .encodeToString(Bytes.of(kernel.getConfig().apiUsername() + ":" + kernel.getConfig().apiPassword()));
+        auth = "Basic " + Base64.getEncoder().encodeToString(
+                Bytes.of(kernel.getConfig().apiUsername().get() + ":" + kernel.getConfig().apiPassword().get()));
 
         // wait for server to boot up
         new Thread(() -> server.start(ip, port, new HttpChannelInitializer() {
