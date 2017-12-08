@@ -35,11 +35,11 @@ matrix:
         - timeout 10 .travis/test_docker.sh
         - docker kill $(docker ps -q)
 
-    ## OSX Testing
-    #- os: osx
-    #  osx_image: xcode9.1
-    #  script:
-    #    - mvn test
+    # OSX Testing
+    - os: osx
+      osx_image: xcode9.1
+      script:
+        - mvn test
 cache:
   directories:
   - .autoconf
