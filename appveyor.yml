@@ -15,6 +15,9 @@ install:
   - echo %M2_HOME%
   - mvn -X -v
 
+# disable MSBuild
+build: off
+
 build_script:
   - cd C:\projects\semux
   - mvn clean install -DskipTests
