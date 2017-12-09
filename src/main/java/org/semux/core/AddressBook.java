@@ -119,7 +119,7 @@ public class AddressBook {
      * @return
      */
     private JsonObject load() {
-        if (file.exists()) {
+        if (file.length() > 0) {
             try (JsonReader jsonReader = Json.createReader(Files.newBufferedReader(file.toPath()))) {
                 return jsonReader.readObject();
             } catch (IOException e) {

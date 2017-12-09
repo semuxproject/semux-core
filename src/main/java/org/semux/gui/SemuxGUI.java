@@ -176,20 +176,10 @@ public class SemuxGUI extends Launcher {
 
         // start data refresh
         new Thread(() -> {
-            while (true) {
+            while (kernel.isRunning() && !Thread.currentThread().isInterrupted()) {
                 try {
-                    if (kernel.isRunning()) {
-                        onBlockAdded(kernel.getBlockchain().getLatestBlock());
-                    } else {
-                        break;
-                    }
-
-                    for (int i = 0; i < 100; i++) {
-                        Thread.sleep(50);
-                        if (model.isUpdated().compareAndSet(true, false)) {
-                            break;
-                        }
-                    }
+                    onBlockAdded(kernel.getBlockchain().getLatestBlock());
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     logger.info("Data refresh interrupted, exiting");
                     Thread.currentThread().interrupt();
@@ -265,7 +255,7 @@ public class SemuxGUI extends Launcher {
         }
         model.setActivePeers(activePeers);
 
-        model.updateView();
+        model.fireUpdateEvent();
     }
 
     public static void setupLookAndFeel() {

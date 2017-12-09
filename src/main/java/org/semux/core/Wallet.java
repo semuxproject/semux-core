@@ -104,7 +104,7 @@ public class Wallet {
      * @return
      */
     public boolean exists() {
-        return file.isFile() && file.length() > 0;
+        return file.length() > 0;
     }
 
     /**

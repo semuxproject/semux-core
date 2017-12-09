@@ -7,6 +7,7 @@
 package org.semux.gui.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.semux.core.Transaction;
@@ -20,6 +21,10 @@ public class WalletAccount extends Account {
     public WalletAccount(EdDSA key, Account acc) {
         super(acc.getAddress(), acc.getAvailable(), acc.getLocked(), acc.getNonce());
         this.key = key;
+
+        if (!Arrays.equals(key.toAddress(), acc.getAddress())) {
+            throw new IllegalArgumentException("Key and account does not match");
+        }
     }
 
     public EdDSA getKey() {
