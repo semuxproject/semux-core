@@ -398,6 +398,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.8.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
             <version>1.7.3</version>
@@ -413,12 +419,6 @@
             <groupId>com.github.stefanbirkner</groupId>
             <artifactId>system-rules</artifactId>
             <version>1.16.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-swing-junit</artifactId>
-            <version>3.8.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

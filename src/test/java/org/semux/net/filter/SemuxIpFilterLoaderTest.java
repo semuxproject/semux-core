@@ -6,8 +6,8 @@
  */
 package org.semux.net.filter;
 
-import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.net.UnknownHostException;
