@@ -18,6 +18,7 @@ import org.semux.config.Constants;
 import org.semux.config.DevNetConfig;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Unit;
 import org.semux.core.Genesis.Premine;
 import org.semux.rules.TemporaryDBRule;
 import org.semux.util.ByteArray;
@@ -43,7 +44,7 @@ public class AccountStateTest {
 
         for (ByteArray k : premine.keySet()) {
             Account acc = state.getAccount(k.getData());
-            assertEquals(premine.get(k).getAmount(), acc.getAvailable());
+            assertEquals(premine.get(k).getAmount() * Unit.SEM, acc.getAvailable());
         }
     }
 

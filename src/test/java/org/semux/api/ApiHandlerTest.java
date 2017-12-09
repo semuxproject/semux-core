@@ -345,7 +345,7 @@ public class ApiHandlerTest {
         String uri = "/get_account?address=" + entry.getKey();
         GetAccountResponse response = request(uri, GetAccountResponse.class);
         assertTrue(response.success);
-        assertEquals(entry.getValue().getAmount(), response.account.available);
+        assertEquals(entry.getValue().getAmount() * Unit.SEM, response.account.available);
     }
 
     @Test
