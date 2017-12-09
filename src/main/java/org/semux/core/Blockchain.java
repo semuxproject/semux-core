@@ -91,7 +91,7 @@ public interface Blockchain {
     Transaction getTransaction(byte[] hash);
 
     /**
-     * Returns transaction vote.
+     * Returns transaction result.
      * 
      * @param hash
      * @return

@@ -22,7 +22,7 @@ import org.junit.runners.MethodSorters;
 import org.semux.core.AddressBook.Entry;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class AdressBookTest {
+public class AddressBookTest {
 
     private static final String NAME1 = "testname";
     private static final String ADDRESS1 = "0fc1ea0571e639a8f83a9434d65326ea43b2fd00";

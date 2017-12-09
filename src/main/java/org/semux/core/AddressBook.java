@@ -8,9 +8,9 @@ package org.semux.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -63,11 +63,11 @@ public class AddressBook {
      * @return List of entries
      */
     public List<Entry> list() {
-        List<Entry> list = new ArrayList<>();
-        for (String name : database.keySet()) {
-            list.add(new Entry(name, database.get(name)));
-        }
-        return list;
+        return database
+                .keySet()
+                .parallelStream()
+                .map(name -> new Entry(name, database.get(name)))
+                .collect(Collectors.toList());
     }
 
     /**
