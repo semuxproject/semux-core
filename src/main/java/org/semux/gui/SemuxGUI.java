@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -176,17 +177,25 @@ public class SemuxGUI extends Launcher {
 
         // start data refresh
         new Thread(() -> {
-            while (kernel.isRunning() && !Thread.currentThread().isInterrupted()) {
+            while (true) {
                 try {
-                    onBlockAdded(kernel.getBlockchain().getLatestBlock());
-                    Thread.sleep(1000);
+                    Thread.sleep(3000L);
                 } catch (InterruptedException e) {
                     logger.info("Data refresh interrupted, exiting");
                     Thread.currentThread().interrupt();
                     break;
-                } catch (Exception e) {
-                    logger.info("Data refresh exception", e);
                 }
+
+                // stops if kernel stops
+                if (!kernel.isRunning()) {
+                    break;
+                }
+
+                // necessary because when kernel exists, the GUI component is not closed.
+                ReadLock lock = kernel.getStateLock().readLock();
+                lock.lock();
+                onBlockAdded(kernel.getBlockchain().getLatestBlock());
+                lock.unlock();
             }
 
             logger.info("Data refresh stopped");

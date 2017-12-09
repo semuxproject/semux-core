@@ -290,7 +290,8 @@ public class SemuxSync implements SyncManager {
                 }
             } else {
                 InetSocketAddress addr = pair.getValue().getRemoteAddress();
-                logger.info("Invalid block from {}:{}", addr.getHostString(), addr.getPort());
+                logger.info("Invalid block from {}:{}", addr.getAddress().getHostAddress(), addr.getPort());
+
                 synchronized (lock) {
                     // Set the task as expired instead of adding it to toDownload, preventing
                     // the client from getting stuck (when the buffer is full).
@@ -328,7 +329,7 @@ public class SemuxSync implements SyncManager {
             return false;
         }
         if (!Block.validateResults(header, block.getResults())) {
-            logger.debug("Results root does not match");
+            logger.debug("Invalid results");
             return false;
         }
 
