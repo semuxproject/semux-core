@@ -46,7 +46,7 @@ public class TransactionResultTest {
         TransactionResult res = new TransactionResult(valid, returns, logs);
         byte[] bytes = res.toBytes();
 
-        logger.info("result size: {} B, {} GB per 1M txs", bytes.length, 1000000.0 * bytes.length / 1024 / 1024 / 1024);
+        logger.info("vote size: {} B, {} GB per 1M txs", bytes.length, 1000000.0 * bytes.length / 1024 / 1024 / 1024);
     }
 
     private void testFields(TransactionResult res) {

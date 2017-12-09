@@ -6,13 +6,27 @@
  */
 package org.semux.api.response;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * ApiHandlerResponse is the base class of Semux API responses
+ */
 public class ApiHandlerResponse {
 
-    @JsonProperty("success")
-    public Boolean success;
+    @JsonProperty(value = "success", required = true)
+    public final Boolean success;
 
-    @JsonProperty("result")
-    public Object result;
+    @JsonProperty("message")
+    @JsonInclude(NON_NULL)
+    public String message;
+
+    public ApiHandlerResponse(
+            @JsonProperty(value = "success", required = true) Boolean success,
+            @JsonProperty("message") String message) {
+        this.success = success;
+        this.message = message;
+    }
 }

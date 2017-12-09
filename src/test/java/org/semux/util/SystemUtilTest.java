@@ -36,6 +36,6 @@ public class SystemUtilTest {
 
     @Test
     public void testBench() {
-        logger.info("System benchmark result = {}", SystemUtil.bench());
+        logger.info("System benchmark vote = {}", SystemUtil.bench());
     }
 }

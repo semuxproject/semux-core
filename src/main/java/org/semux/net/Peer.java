@@ -10,8 +10,6 @@ import org.semux.crypto.Hex;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Represents a Peer in the Semux network.
  */
@@ -67,7 +65,6 @@ public class Peer {
      * 
      * @return
      */
-    @JsonProperty("ip")
     public String getIp() {
         return ip;
     }
@@ -77,7 +74,6 @@ public class Peer {
      * 
      * @return
      */
-    @JsonProperty("port")
     public int getPort() {
         return port;
     }
@@ -87,7 +83,6 @@ public class Peer {
      * 
      * @return
      */
-    @JsonProperty("networkVersion")
     public short getNetworkVersion() {
         return networkVersion;
     }
@@ -97,7 +92,6 @@ public class Peer {
      * 
      * @return
      */
-    @JsonProperty("clientId")
     public String getClientId() {
         return clientId;
     }
@@ -114,7 +108,6 @@ public class Peer {
     /**
      * @return peerId with a prefix of 0x
      */
-    @JsonProperty("peerId")
     public String getPeerIdWithPrefix() {
         return Hex.PREF + peerId;
     }
@@ -124,7 +117,6 @@ public class Peer {
      * 
      * @return
      */
-    @JsonProperty("latestBlockNumber")
     public long getLatestBlockNumber() {
         return latestBlockNumber;
     }
@@ -143,7 +135,6 @@ public class Peer {
      * 
      * @return
      */
-    @JsonProperty("latency")
     public long getLatency() {
         return latency;
     }

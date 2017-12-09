@@ -11,32 +11,60 @@ import org.semux.crypto.Hex;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class GetInfoResponse {
+public class GetInfoResponse extends ApiHandlerResponse {
 
-    @JsonProperty("clientId")
-    public String clientId;
+    @JsonProperty("result")
+    public final Result info;
 
-    @JsonProperty("coinbase")
-    public String coinbase;
+    public GetInfoResponse(
+            @JsonProperty("success") Boolean success,
+            @JsonProperty("result") Result info) {
+        super(success, null);
+        this.info = info;
+    }
 
-    @JsonProperty("latestBlockNumber")
-    public Number latestBlockNumber;
+    public static class Result {
+        @JsonProperty("clientId")
+        public final String clientId;
 
-    @JsonProperty("latestBlockHash")
-    public String latestBlockHash;
+        @JsonProperty("coinbase")
+        public final String coinbase;
 
-    @JsonProperty("activePeers")
-    public Number activePeers;
+        @JsonProperty("latestBlockNumber")
+        public final Number latestBlockNumber;
 
-    @JsonProperty("pendingTransactions")
-    public Number pendingTransactions;
+        @JsonProperty("latestBlockHash")
+        public final String latestBlockHash;
 
-    public GetInfoResponse(Kernel kernel) {
-        clientId = kernel.getConfig().getClientId();
-        coinbase = Hex.PREF + kernel.getCoinbase();
-        latestBlockNumber = kernel.getBlockchain().getLatestBlockNumber();
-        latestBlockHash = Hex.encodeWithPrefix(kernel.getBlockchain().getLatestBlockHash());
-        activePeers = kernel.getChannelManager().getActivePeers().size();
-        pendingTransactions = kernel.getPendingManager().getTransactions().size();
+        @JsonProperty("activePeers")
+        public final Number activePeers;
+
+        @JsonProperty("pendingTransactions")
+        public final Number pendingTransactions;
+
+        public Result(
+                @JsonProperty("clientId") String clientId,
+                @JsonProperty("coinbase") String coinbase,
+                @JsonProperty("latestBlockNumber") Number latestBlockNumber,
+                @JsonProperty("latestBlockHash") String latestBlockHash,
+                @JsonProperty("activePeers") Number activePeers,
+                @JsonProperty("pendingTransactions") Number pendingTransactions) {
+            this.clientId = clientId;
+            this.coinbase = coinbase;
+            this.latestBlockNumber = latestBlockNumber;
+            this.latestBlockHash = latestBlockHash;
+            this.activePeers = activePeers;
+            this.pendingTransactions = pendingTransactions;
+        }
+
+        public Result(Kernel kernel) {
+            this(
+                    kernel.getConfig().getClientId(),
+                    Hex.PREF + kernel.getCoinbase(),
+                    kernel.getBlockchain().getLatestBlockNumber(),
+                    Hex.encodeWithPrefix(kernel.getBlockchain().getLatestBlockHash()),
+                    kernel.getChannelManager().getActivePeers().size(),
+                    kernel.getPendingManager().getTransactions().size());
+        }
     }
 }

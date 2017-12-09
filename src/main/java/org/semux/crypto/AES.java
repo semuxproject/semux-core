@@ -31,7 +31,7 @@ public class AES {
         int length2 = cipher.doFinal(buf, length1);
         int length = length1 + length2;
 
-        // copy buffer to result, without padding
+        // copy buffer to vote, without padding
         byte[] result = new byte[length];
         System.arraycopy(buf, 0, result, 0, result.length);
 
