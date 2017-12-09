@@ -260,13 +260,13 @@ public class ApiHandlerTest {
         assertTrue(response.success);
 
         GetBlockResponse.Result blockJson = response.block;
-        assertEquals(genesisBlock.getHashString(), blockJson.hash);
+        assertEquals(Hex.encodeWithPrefix(genesisBlock.getHash()), blockJson.hash);
         assertEquals(genesisBlock.getNumber(), blockJson.number.longValue());
-        assertEquals(genesisBlock.getCoinbaseString(), blockJson.coinbase);
-        assertEquals(genesisBlock.getPrevHashString(), blockJson.prevHash);
+        assertEquals(Hex.encodeWithPrefix(genesisBlock.getCoinbase()), blockJson.coinbase);
+        assertEquals(Hex.encodeWithPrefix(genesisBlock.getPrevHash()), blockJson.prevHash);
         assertEquals(genesisBlock.getTimestamp(), blockJson.timestamp.longValue());
-        assertEquals(genesisBlock.getTransactionsRootString(), blockJson.transactionsRoot);
-        assertEquals(genesisBlock.getDataString(), blockJson.data);
+        assertEquals(Hex.encodeWithPrefix(genesisBlock.getTransactionsRoot()), blockJson.transactionsRoot);
+        assertEquals(Hex.encodeWithPrefix(genesisBlock.getData()), blockJson.data);
     }
 
     @Test
@@ -276,12 +276,12 @@ public class ApiHandlerTest {
         String uri = "/get_block?number=" + gen.getNumber();
         GetBlockResponse response = request(uri, GetBlockResponse.class);
         assertTrue(response.success);
-        assertEquals(gen.getHashString(), response.block.hash);
+        assertEquals(Hex.encodeWithPrefix(gen.getHash()), response.block.hash);
 
         uri = "/get_block?hash=" + Hex.encode(gen.getHash());
         response = request(uri, GetBlockResponse.class);
         assertTrue(response.success);
-        assertEquals(gen.getHashString(), response.block.hash);
+        assertEquals(Hex.encodeWithPrefix(gen.getHash()), response.block.hash);
     }
 
     @Test
@@ -320,7 +320,7 @@ public class ApiHandlerTest {
         String uri = "/get_transaction?hash=" + Hex.encode(tx.getHash());
         GetTransactionResponse response = request(uri, GetTransactionResponse.class);
         assertTrue(response.success);
-        assertEquals(tx.getHashString(), response.transaction.hash);
+        assertEquals(Hex.encodeWithPrefix(tx.getHash()), response.transaction.hash);
     }
 
     @Test

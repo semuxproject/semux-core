@@ -7,6 +7,8 @@
 package org.semux.api.response;
 
 import org.semux.core.Block;
+import org.semux.crypto.Hex;
+import org.semux.util.TimeUtil;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -79,16 +81,17 @@ public class GetBlockResponse extends ApiHandlerResponse {
 
         public Result(Block block) {
             this(
-                    block.getHashString(),
+                    Hex.encodeWithPrefix(block.getHash()),
                     block.getNumber(),
-                    block.getCoinbaseString(),
-                    block.getPrevHashString(),
+                    Hex.encodeWithPrefix(block.getCoinbase()),
+                    Hex.encodeWithPrefix(block.getPrevHash()),
                     block.getTimestamp(),
-                    block.getDateString(),
-                    block.getTransactionsRootString(),
-                    block.getResultsRootString(),
-                    block.getStateRootString(),
-                    block.getDataString());
+                    TimeUtil.formatTimestamp(block.getTimestamp()),
+                    Hex.encodeWithPrefix(block.getTransactionsRoot()),
+                    Hex.encodeWithPrefix(block.getResultsRoot()),
+                    Hex.encodeWithPrefix(block.getStateRoot()),
+                    Hex.encodeWithPrefix(block.getData())
+            );
         }
     }
 }

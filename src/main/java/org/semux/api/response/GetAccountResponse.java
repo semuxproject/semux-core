@@ -7,6 +7,7 @@
 package org.semux.api.response;
 
 import org.semux.core.state.Account;
+import org.semux.crypto.Hex;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -44,7 +45,7 @@ public class GetAccountResponse extends ApiHandlerResponse {
 
         public Result(Account account) {
             this(
-                    account.getAddressString(),
+                    Hex.encodeWithPrefix(account.getAddress()),
                     account.getAvailable(),
                     account.getLocked(),
                     account.getNonce());

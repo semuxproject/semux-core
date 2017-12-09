@@ -6,7 +6,11 @@
  */
 package org.semux.api.response;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.semux.core.Transaction;
+import org.semux.crypto.Hex;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -74,15 +78,15 @@ public class GetTransactionResponse extends ApiHandlerResponse {
 
         public Result(Transaction tx) {
             this(
-                    tx.getHashString(),
-                    tx.getTypeString(),
-                    tx.getFromString(),
-                    tx.getToString(),
+                    Hex.encodeWithPrefix(tx.getHash()),
+                    tx.getType().toString(),
+                    Hex.encodeWithPrefix(tx.getFrom()),
+                    Hex.encodeWithPrefix(tx.getTo()),
                     tx.getValue(),
                     tx.getFee(),
                     tx.getNonce(),
-                    tx.getDateString(),
-                    tx.getDataString());
+                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(tx.getTimestamp())),
+                    Hex.encodeWithPrefix(tx.getData()));
         }
     }
 }

@@ -6,10 +6,8 @@
  */
 package org.semux.core;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -268,10 +266,6 @@ public class Block {
         return header.getHash();
     }
 
-    public String getHashString() {
-        return Hex.encodeWithPrefix(getHash());
-    }
-
     public long getNumber() {
         return header.getNumber();
     }
@@ -280,56 +274,28 @@ public class Block {
         return header.getCoinbase();
     }
 
-    public String getCoinbaseString() {
-        return Hex.encodeWithPrefix(getCoinbase());
-    }
-
     public byte[] getPrevHash() {
         return header.getPrevHash();
-    }
-
-    public String getPrevHashString() {
-        return Hex.encodeWithPrefix(getPrevHash());
     }
 
     public long getTimestamp() {
         return header.getTimestamp();
     }
 
-    public String getDateString() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(getTimestamp()));
-    }
-
     public byte[] getTransactionsRoot() {
         return header.getTransactionsRoot();
-    }
-
-    public String getTransactionsRootString() {
-        return Hex.encodeWithPrefix(getTransactionsRoot());
     }
 
     public byte[] getResultsRoot() {
         return header.getResultsRoot();
     }
 
-    public String getResultsRootString() {
-        return Hex.encodeWithPrefix(getResultsRoot());
-    }
-
     public byte[] getStateRoot() {
         return header.getStateRoot();
     }
 
-    public String getStateRootString() {
-        return Hex.encodeWithPrefix(getStateRoot());
-    }
-
     public byte[] getData() {
         return header.getData();
-    }
-
-    public String getDataString() {
-        return Hex.encodeWithPrefix(getData());
     }
 
     public byte[] toBytesHeader() {
