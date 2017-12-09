@@ -20,7 +20,9 @@
     <logger name="org.semux.db" level="DEBUG" />
     <logger name="org.semux.net" level="DEBUG" />
     <logger name="org.semux.vm" level="DEBUG" />
-    <logger name="io.netty" level="INFO" />
+
+    <logger name="io.netty" level="ERROR" />
+    <logger name="oshi" level="INFO" />
     <logger name="net.sourceforge.cobertura" level="INFO" />
 
     <root level="DEBUG">
