@@ -292,19 +292,13 @@ public class SemuxSync implements SyncManager {
                 InetSocketAddress addr = pair.getValue().getRemoteAddress();
                 logger.info("Invalid block from {}:{}", addr.getHostString(), addr.getPort());
                 synchronized (lock) {
-                    toDownload.add(pair.getKey().getNumber());
+                    // Set the task as expired instead of adding it to toDownload, preventing
+                    // the client from getting stuck (when the buffer is full).
+                    toComplete.put(pair.getKey().getNumber(), 0L);
                 }
 
                 // disconnect if the peer sends us invalid block
                 pair.getValue().getMessageQueue().disconnect(ReasonCode.BAD_PEER);
-
-                // sleep a while if you received an invalid block, to avoid consuming to much
-                // resources.
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
             }
         }
     }
