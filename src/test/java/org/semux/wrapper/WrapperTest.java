@@ -40,7 +40,7 @@ public class WrapperTest {
     public static Collection<Object[]> data() {
         return Arrays
                 .asList(new Object[][] {
-                        { new String[] { "--gui", "--jvm-options", "-Xmx1G -Xms1G" },
+                        { new String[] { "--gui", "--jvmoptions", "-Xmx1G -Xms1G" },
                                 new String[] { getJavaBinPath(), "-Xmx1G", "-Xms1G", "-cp", "semux.jar",
                                         SemuxGUI.class.getCanonicalName() },
                                 null },

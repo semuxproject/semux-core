@@ -66,7 +66,7 @@ public class Wrapper {
         ArrayList<String> allocatedJvmOptions = new ArrayList<>(asList(jvmOptions));
 
         // dynamically specify maximum heap size according to available physical memory
-        // if Xmx is not specified in jvm-options
+        // if Xmx is not specified in jvmoptions
         final Pattern xmxPattern = Pattern.compile("^-Xmx");
         if (Stream.of(jvmOptions).noneMatch(s -> xmxPattern.matcher(s).find())) {
             long toAllocateMB = (long) ((double) SystemUtil.getAvailableMemorySize() / 1024 / 1024 * 0.8);

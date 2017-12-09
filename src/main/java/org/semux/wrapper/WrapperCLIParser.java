@@ -37,10 +37,10 @@ class WrapperCLIParser {
 
     protected String[] parseJvmOptions(CommandLine commandLine) {
         String jvmOptionsString = "";
-        if (commandLine.hasOption("jvm-options")) {
-            jvmOptionsString = commandLine.getOptionValue("jvm-options").trim();
+        if (commandLine.hasOption("jvmoptions")) {
+            jvmOptionsString = commandLine.getOptionValue("jvmoptions").trim();
         } else {
-            logger.debug("Specify --jvm-options for additional JVM options");
+            logger.debug("Specify --jvmoptions for additional JVM options");
         }
 
         return jvmOptionsString.length() > 0 ? jvmOptionsString.split(" ") : new String[] {};
@@ -59,7 +59,7 @@ class WrapperCLIParser {
     protected Options buildOptions() {
         Options options = new Options();
 
-        options.addOption(Option.builder().longOpt("jvm-options").hasArg(true).type(String.class).build());
+        options.addOption(Option.builder().longOpt("jvmoptions").hasArg(true).type(String.class).build());
 
         OptionGroup modeOption = new OptionGroup();
         modeOption.setRequired(true);
