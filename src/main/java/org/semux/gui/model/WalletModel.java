@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.semux.core.AddressBook;
 import org.semux.core.Block;
 import org.semux.gui.Action;
+import org.semux.gui.AddressBook;
 import org.semux.net.Peer;
 import org.semux.util.ByteArray;
 

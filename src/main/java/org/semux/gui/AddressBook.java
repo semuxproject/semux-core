@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.core;
+package org.semux.gui;
 
 import java.io.File;
 import java.io.IOException;

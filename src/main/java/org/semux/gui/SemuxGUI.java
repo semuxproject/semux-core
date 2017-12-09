@@ -28,7 +28,6 @@ import org.semux.Kernel;
 import org.semux.Launcher;
 import org.semux.cli.CLIOptions;
 import org.semux.config.Constants;
-import org.semux.core.AddressBook;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.Transaction;

@@ -33,9 +33,9 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.semux.core.AddressBook;
 import org.semux.core.Block;
 import org.semux.crypto.EdDSA;
+import org.semux.gui.AddressBook;
 import org.semux.net.Peer;
 
 @RunWith(MockitoJUnitRunner.class)
