@@ -6,6 +6,7 @@
  */
 package org.semux.api;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.semux.api.exception.ApiHandlerException;
 import org.semux.config.Config;
 import org.semux.util.BasicAuth;
 import org.slf4j.Logger;
@@ -61,7 +63,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
     private HttpHeaders headers;
     private ByteBuf body;
 
-    private String error = null;
+    private String response = null;
+    private HttpResponseStatus status;
 
     public HttpHandler(Config config, ApiHandler apiHandler) {
         this.config = config;
@@ -149,13 +152,23 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                     }
                 }
 
-                // delegate requests
-                String response = (error != null) ? error : apiHandler.service(uri, map, headers);
+                // delegate the request to api handler if a response has not been generated
+                if (response == null) {
+                    try {
+                        response = apiHandler.service(uri, map, headers);
+                        status = OK;
+                    } catch (ApiHandlerException ex) {
+                        response = ex.response;
+                        status = HttpResponseStatus.valueOf(ex.statusCode);
+                    }
+                }
 
-                if (!writeResponse(ctx, response)) {
+                if (!writeResponse(ctx, status, response)) {
                     // if keep-alive is off, close the connection after flushing
                     ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
                 }
+
+                reset();
             }
         }
     }
@@ -166,7 +179,13 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
             return;
         }
 
-        error = "Bad request";
+        response = BAD_REQUEST.toString();
+        status = BAD_REQUEST;
+    }
+
+    private void reset() {
+        response = null;
+        status = null;
     }
 
     private boolean checkBasicAuth(HttpHeaders headers, String username, String password) {
@@ -175,9 +194,9 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
         return auth != null && username.equals(auth.getKey()) && password.equals(auth.getValue());
     }
 
-    private boolean writeResponse(ChannelHandlerContext ctx, String response) {
+    private boolean writeResponse(ChannelHandlerContext ctx, HttpResponseStatus status, String response) {
         // construct a HTTP response
-        FullHttpResponse resp = new DefaultFullHttpResponse(HTTP_1_1, OK,
+        FullHttpResponse resp = new DefaultFullHttpResponse(HTTP_1_1, status,
                 Unpooled.copiedBuffer(response == null ? "" : response, CHARSET));
 
         // set response headers

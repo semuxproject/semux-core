@@ -6,7 +6,6 @@
  */
 package org.semux.gui.panel;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -15,23 +14,33 @@ import java.util.List;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GUIMessages;
 
+@RunWith(MockitoJUnitRunner.class)
 public class DelegatePanelTest {
 
+    @Mock
+    private WalletModel walletModel;
+
+    @Mock
+    private WalletDelegate delegate1;
+
+    @Mock
+    private WalletDelegate delegate2;
+
     @Test
-    public void testSelectDelegate() throws InterruptedException {
-        WalletModel walletModel = mock(WalletModel.class);
+    public void testSelectDelegate() {
         List<WalletDelegate> walletDelegates = new ArrayList<>();
 
-        WalletDelegate delegate1 = mock(WalletDelegate.class, "delegate 1");
         when(delegate1.getNameString()).thenReturn("delegate 1");
         when(delegate1.getAddressString()).thenReturn("1111");
         walletDelegates.add(delegate1);
 
-        WalletDelegate delegate2 = mock(WalletDelegate.class, "delegate 2");
         when(delegate2.getNameString()).thenReturn("delegate 2");
         when(delegate2.getAddressString()).thenReturn("2222");
         walletDelegates.add(delegate2);

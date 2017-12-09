@@ -14,13 +14,12 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-
 import org.semux.crypto.Hex;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ApiClient {
+
     private InetSocketAddress server;
     private String username;
     private String password;
@@ -49,7 +48,7 @@ public class ApiClient {
      * @return
      * @throws IOException
      */
-    public JsonObject request(String cmd, Map<String, Object> params) throws IOException {
+    public <T> T request(Class<T> clazz, String cmd, Map<String, Object> params) throws IOException {
         // construct URL
         String url = "http://" + server.getAddress().getHostAddress() + ":" + server.getPort() + "/" + cmd;
 
@@ -72,9 +71,7 @@ public class ApiClient {
         HttpURLConnection con = (HttpURLConnection) u.openConnection();
         con.setRequestProperty("Authorization", BasicAuth.generateAuth(username, password));
 
-        try (JsonReader jsonReader = Json.createReader(con.getInputStream())) {
-            return jsonReader.readObject();
-        }
+        return new ObjectMapper().readValue(con.getInputStream(), clazz);
     }
 
     /**
@@ -88,12 +85,12 @@ public class ApiClient {
      * @return
      * @throws IOException
      */
-    public JsonObject request(String cmd, Object... params) throws IOException {
+    public <T> T request(Class<T> clazz, String cmd, Object... params) throws IOException {
         Map<String, Object> map = new HashMap<>();
         for (int i = 0; i + 1 < params.length; i += 2) {
             map.put(params[i].toString(), params[i + 1]);
         }
 
-        return request(cmd, map);
+        return request(clazz, cmd, map);
     }
 }

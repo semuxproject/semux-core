@@ -9,30 +9,60 @@ package org.semux.net.filter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collector;
-
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.json.stream.JsonParsingException;
 
 import org.semux.net.filter.exception.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.netty.handler.ipfilter.IpFilterRule;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
+/**
+ * SemuxIpFilter is responsible for matching IP address of incoming connection
+ * against defined rules in ipconfig.json
+ * 
+ * <p>
+ * Example Definition of Blacklisting IP Addresses:
+ * <p>
+ * <blockquote>
+ *
+ * <pre>
+ *     {
+ *         "rules": [
+ *             {"type": "REJECT", "address": "1.2.3.4"},
+ *             {"type": "REJECT", "address": "5.6.7.8"}
+ *         ]
+ *     }
+ * </pre>
+ *
+ * </blockquote>
+ * </p>
+ * Example Definition of Whitelisting Local Networks:
+ * <p>
+ * <blockquote>
+ *
+ * <pre>
+ *     {
+ *         "rules": [
+ *             {"type": "ACCEPT", "address": "127.0.0.1/8"},
+ *             {"type": "ACCEPT", "address": "192.168.0.0/16"},
+ *             {"type": "REJECT", "address": "0.0.0.0/0"}
+ *         ]
+ *     }
+ * </pre>
+ *
+ * </blockquote>
+ * </p>
+ */
 public class SemuxIpFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxIpFilter.class);
@@ -41,9 +71,9 @@ public class SemuxIpFilter {
      * CopyOnWriteArrayList allows APIs to update rules atomically without affecting
      * the performance of read-only iteration
      */
-    private CopyOnWriteArrayList<IpFilterRule> rules;
+    private CopyOnWriteArrayList<FilterRule> rules;
 
-    public SemuxIpFilter(Collection<IpFilterRule> rules) {
+    public SemuxIpFilter(List<FilterRule> rules) {
         this.rules = new CopyOnWriteArrayList<>(rules);
     }
 
@@ -51,14 +81,14 @@ public class SemuxIpFilter {
         this.rules = new CopyOnWriteArrayList<>();
     }
 
-    public List<IpFilterRule> getRules() {
+    public List<FilterRule> getRules() {
         return rules;
     }
 
     /**
      * isAcceptable method matches supplied address against defined rules
      * sequentially and returns a result based on the first matched rule's type
-     * 
+     *
      * @param address
      *            an address which will be matched against defined rules
      * @return whether the address is blocked or not
@@ -77,12 +107,13 @@ public class SemuxIpFilter {
      * Block a single IP at runtime
      *
      * @param ip
+     *            The IP address to be blacklisted
      * @throws UnknownHostException
      */
     public void blacklistIp(String ip) throws UnknownHostException {
         // prepend a REJECT IP rule to the rules list to ensure that the IP will be
         // blocked
-        IpSingleFilterRule rule = new IpSingleFilterRule(ip, IpFilterRuleType.REJECT);
+        FilterRule rule = new FilterRule(ip, IpFilterRuleType.REJECT);
         rules.remove(rule); // remove duplicated rule
         rules.add(0, rule); // prepend rule
         logger.info("Blacklisted IP {}", ip);
@@ -92,31 +123,79 @@ public class SemuxIpFilter {
      * Whitelist a single IP at runtime
      *
      * @param ip
+     *            The IP address to be whitelisted
      * @throws UnknownHostException
      */
     public void whitelistIp(String ip) throws UnknownHostException {
         // prepend an ACCEPT IP rule to the rules list to ensure that the IP will be
         // accepted
-        IpSingleFilterRule rule = new IpSingleFilterRule(ip, IpFilterRuleType.ACCEPT);
+        FilterRule rule = new FilterRule(ip, IpFilterRuleType.ACCEPT);
         rules.remove(rule); // remove duplicated rule
         rules.add(0, rule); // prepend rule
         logger.info("Whitelisted IP {}", ip);
     }
 
-    public void appendRule(IpFilterRule rule) {
+    /**
+     * Append a rule to the rear of rules list
+     *
+     * @param rule
+     *            The rule to be appended
+     */
+    public void appendRule(FilterRule rule) {
         rules.add(rule);
     }
 
+    /**
+     * Remove all rules
+     */
     public void purgeRules() {
         rules.clear();
     }
 
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public static SemuxIpFilter jsonCreator(
+            @JsonProperty(value = "rules", required = true) List<FilterRule> rules) {
+        return new SemuxIpFilter(rules);
+    }
+
+    /**
+     * Builder is an object builder of SemuxIpFilter.
+     * <p>
+     * <blockquote>
+     * 
+     * <pre>
+     * SemuxIpFilter ipFilter = new Builder()
+     *         .accept("127.0.0.1")
+     *         .accept("192.168.0.0/16")
+     *         .reject("0.0.0.0/0")
+     *         .build();
+     * </pre>
+     * 
+     * </blockquote>
+     * </p>
+     * is equivalent to the definition of:
+     * <p>
+     * <blockquote>
+     * 
+     * <pre>
+     *     {
+     *         "rules": [
+     *             {"type": "ACCEPT", "address": "127.0.0.1/8"},
+     *             {"type": "ACCEPT", "address": "192.168.0.0/16"},
+     *             {"type": "REJECT", "address": "0.0.0.0/0"}
+     *         ]
+     *     }
+     * </pre>
+     * 
+     * </blockquote>
+     * </p>
+     */
     public static final class Builder {
 
-        private ArrayList<IpFilterRule> rules = new ArrayList<>();
+        private ArrayList<FilterRule> rules = new ArrayList<>();
 
         private void addRule(String cidrNotation, IpFilterRuleType type) throws UnknownHostException {
-            IpFilterRule ipSubnetFilterRule = new CIDRFilterRule(cidrNotation, type);
+            FilterRule ipSubnetFilterRule = new FilterRule(cidrNotation, type);
             rules.add(ipSubnetFilterRule);
         }
 
@@ -130,11 +209,7 @@ public class SemuxIpFilter {
             return this;
         }
 
-        public boolean addAll(Builder builder) {
-            return this.rules.addAll(builder.getRules());
-        }
-
-        public List<IpFilterRule> getRules() {
+        public List<FilterRule> getRules() {
             return rules;
         }
 
@@ -143,78 +218,33 @@ public class SemuxIpFilter {
         }
     }
 
+    /**
+     * Loader is responsible for loading ipfilter.json file into an instance of
+     * SemuxIpFilter
+     */
     public static final class Loader {
 
         private static final Logger logger = LoggerFactory.getLogger(Loader.class);
 
         public Optional<SemuxIpFilter> load(Path ipFilterJsonPath) {
-            if (!ipFilterJsonPath.toFile().exists()) {
-                logger.info("{} doesn't exist, skip loading");
-                return Optional.empty();
-            }
-
-            return loadRules(ipFilterJsonPath).flatMap(this::parseRules);
-        }
-
-        private Optional<JsonArray> loadRules(Path ipFilterJsonPath) {
-            try (JsonReader jsonReader = Json.createReader(Files.newBufferedReader(ipFilterJsonPath))) {
-                JsonObject json = jsonReader.readObject();
-                JsonArray rules = json.getJsonArray("rules");
-                if (rules == null) {
-                    throw new ParseException("rules field doesn't exist");
-                }
-                return Optional.of(rules);
-            } catch (IOException ex) {
-                logger.error(String.format("Failed to load %s", ipFilterJsonPath.toAbsolutePath()), ex);
-                return Optional.empty();
-            } catch (ClassCastException | JsonParsingException ex) {
-                throw new ParseException("ipfilter must be an json object", ex);
-            }
-        }
-
-        private Optional<SemuxIpFilter> parseRules(JsonArray rules) {
-            return Optional.of(rules.stream().sequential().map(this::validateRule)
-                    .collect(Collector.of(Builder::new, this::parseRule, (builder1, builder2) -> {
-                        builder1.addAll(builder2);
-                        return builder1;
-                    }, Builder::build)));
-        }
-
-        private JsonObject validateRule(JsonValue rule) {
             try {
-                JsonObject ruleObject = rule.asJsonObject();
-
-                JsonString type = ruleObject.getJsonString("type");
-                if (type == null) {
-                    throw new ParseException(String.format("type field doesn't exist in rule %s", rule.toString()));
+                if (!ipFilterJsonPath.toFile().exists()) {
+                    logger.info("{} doesn't exist, skip loading");
+                    return Optional.empty();
                 }
 
-                JsonString address = ruleObject.getJsonString("address");
-                if (address == null) {
-                    throw new ParseException(String.format("address field doesn't exist in rule %s", rule.toString()));
+                SemuxIpFilter semuxIpFilter = new ObjectMapper()
+                        .readValue(ipFilterJsonPath.toFile(), SemuxIpFilter.class);
+                if (semuxIpFilter == null) {
+                    throw new ParseException("failed to parse ipfilter json");
                 }
 
-                return ruleObject;
-            } catch (ClassCastException ex) {
-                throw new ParseException(String.format("rule %s is not an object", rule.toString()));
-            }
-        }
-
-        private void parseRule(Builder builder, JsonObject rule) {
-            String type = rule.getString("type");
-            String address = rule.getString("address");
-            try {
-                if (type.equals(IpFilterRuleType.ACCEPT.toString())) {
-                    logger.info("Loaded rule: ACCEPT {}", address);
-                    builder.accept(address);
-                } else if (type.equals(IpFilterRuleType.REJECT.toString())) {
-                    logger.info("Loaded rule: REJECT {}", address);
-                    builder.reject(address);
-                } else {
-                    throw new ParseException("Rule type of ip filter must be either ACCEPT or REJECT");
-                }
-            } catch (UnknownHostException ex) {
-                throw new ParseException(String.format("Invalid address %s", address), ex);
+                return Optional.of(semuxIpFilter);
+            } catch (JsonProcessingException e) {
+                throw new ParseException("failed to parse ipfilter json", e);
+            } catch (IOException e) {
+                logger.error("failed to load ipfilter json file", e);
+                return Optional.empty();
             }
         }
     }

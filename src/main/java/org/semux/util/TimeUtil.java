@@ -6,9 +6,13 @@
  */
 package org.semux.util;
 
+import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.Date;
 
 public class TimeUtil {
+
+    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     private TimeUtil() {
     }
@@ -17,10 +21,21 @@ public class TimeUtil {
      * Returns a human-readable duration
      * 
      * @param duration
-     * @return
+     *            duration object to be formatted
+     * @return formatted duration in 00:00:00
      */
     public static String formatDuration(Duration duration) {
         long seconds = duration.getSeconds();
         return String.format("%02d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, (seconds % 60));
+    }
+
+    /**
+     *
+     * @param timestamp
+     *            timestamp in milliseconds to be formatter
+     * @return formatted timestamp in yyyy-MM-dd HH:mm:ss
+     */
+    public static String formatTimestamp(Long timestamp) {
+        return new SimpleDateFormat(DATE_FORMAT).format(new Date(timestamp));
     }
 }

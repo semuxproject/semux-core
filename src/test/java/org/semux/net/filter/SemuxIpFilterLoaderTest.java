@@ -36,13 +36,13 @@ public class SemuxIpFilterLoaderTest {
     public static Collection<Object[]> data() throws UnknownHostException {
         return Arrays.asList(new Object[][] { { getFile("empty.json"), new ArrayList<IpFilterRule>(), null },
                 { getFile("blacklist.json"),
-                        Arrays.asList(new CIDRFilterRule("1.2.3.4", IpFilterRuleType.REJECT),
-                                new CIDRFilterRule("5.6.7.8", IpFilterRuleType.REJECT)),
+                        Arrays.asList(new FilterRule("1.2.3.4", IpFilterRuleType.REJECT),
+                                new FilterRule("5.6.7.8", IpFilterRuleType.REJECT)),
                         null },
                 { getFile("whitelist.json"),
-                        Arrays.asList(new CIDRFilterRule("127.0.0.1/8", IpFilterRuleType.ACCEPT),
-                                new CIDRFilterRule("192.168.0.0/16", IpFilterRuleType.ACCEPT),
-                                new CIDRFilterRule("0.0.0.0/0", IpFilterRuleType.REJECT)),
+                        Arrays.asList(new FilterRule("127.0.0.1/8", IpFilterRuleType.ACCEPT),
+                                new FilterRule("192.168.0.0/16", IpFilterRuleType.ACCEPT),
+                                new FilterRule("0.0.0.0/0", IpFilterRuleType.REJECT)),
                         null },
                 { getFile("exception_empty_object.json"), null, ParseException.class },
                 { getFile("exception_typo_in_rules1.json"), null, ParseException.class },
@@ -78,7 +78,7 @@ public class SemuxIpFilterLoaderTest {
 
         SemuxIpFilter.Loader loader = new SemuxIpFilter.Loader();
         SemuxIpFilter semuxIpFilter = loader.load(jsonFile.toPath()).get();
-        List<IpFilterRule> loadedRules = semuxIpFilter.getRules();
+        List<FilterRule> loadedRules = semuxIpFilter.getRules();
         assertTrue(loadedRules.size() == rules.size());
         for (int i = 0; i < loadedRules.size(); i++) {
             assertThat(loadedRules.get(i)).isEqualToComparingFieldByFieldRecursively(rules.get(i));

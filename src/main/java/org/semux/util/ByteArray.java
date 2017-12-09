@@ -6,8 +6,13 @@
  */
 package org.semux.util;
 
+import java.io.IOException;
+
 import org.bouncycastle.util.Arrays;
 import org.semux.crypto.Hex;
+
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.KeyDeserializer;
 
 public class ByteArray implements Comparable<ByteArray> {
     private final byte[] data;
@@ -51,5 +56,13 @@ public class ByteArray implements Comparable<ByteArray> {
     @Override
     public String toString() {
         return Hex.encode(data);
+    }
+
+    public static class ByteArrayKeyDeserializer extends KeyDeserializer {
+
+        @Override
+        public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException {
+            return new ByteArray(Hex.parse(key));
+        }
     }
 }

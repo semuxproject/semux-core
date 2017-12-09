@@ -13,8 +13,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.json.JsonObject;
-
+import org.semux.api.response.ApiHandlerResponse;
+import org.semux.api.response.DoTransactionResponse;
 import org.semux.config.Constants;
 import org.semux.config.DevNetConfig;
 import org.semux.core.Unit;
@@ -44,8 +44,8 @@ public class SemuxPerformance {
             params.put("password", password);
 
             ApiClient api = new ApiClient(server, username, password);
-            JsonObject response = api.request("transfer", params);
-            if (!response.getBoolean("success")) {
+            ApiHandlerResponse response = api.request(DoTransactionResponse.class, "transfer", params);
+            if (!response.success) {
                 System.out.println(response);
                 return;
             }

@@ -19,7 +19,7 @@ import org.junit.runners.Parameterized;
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
 @RunWith(Parameterized.class)
-public class CIDRFilterRuleExceptionTest {
+public class FilterRuleExceptionTest {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -40,7 +40,7 @@ public class CIDRFilterRuleExceptionTest {
 
     private Class<? extends Throwable> throwsException;
 
-    public CIDRFilterRuleExceptionTest(String cidrNotation, Class<? extends Throwable> throwsException) {
+    public FilterRuleExceptionTest(String cidrNotation, Class<? extends Throwable> throwsException) {
         this.cidrNotation = cidrNotation;
         this.throwsException = throwsException;
     }
@@ -51,6 +51,6 @@ public class CIDRFilterRuleExceptionTest {
             expectedException.expect(throwsException);
         }
 
-        new CIDRFilterRule(cidrNotation, IpFilterRuleType.REJECT);
+        new FilterRule(cidrNotation, IpFilterRuleType.REJECT);
     }
 }

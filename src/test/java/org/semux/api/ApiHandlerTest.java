@@ -25,15 +25,31 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.semux.api.response.AddNodeResponse;
+import org.semux.api.response.ApiHandlerResponse;
+import org.semux.api.response.CreateAccountResponse;
+import org.semux.api.response.DoTransactionResponse;
+import org.semux.api.response.GetAccountResponse;
+import org.semux.api.response.GetAccountTransactionsResponse;
+import org.semux.api.response.GetBlockResponse;
+import org.semux.api.response.GetDelegateResponse;
+import org.semux.api.response.GetDelegatesResponse;
+import org.semux.api.response.GetInfoResponse;
+import org.semux.api.response.GetLatestBlockNumberResponse;
+import org.semux.api.response.GetLatestBlockResponse;
+import org.semux.api.response.GetPeersResponse;
+import org.semux.api.response.GetPendingTransactionsResponse;
+import org.semux.api.response.GetRootResponse;
+import org.semux.api.response.GetTransactionResponse;
+import org.semux.api.response.GetValidatorsResponse;
+import org.semux.api.response.GetVoteResponse;
+import org.semux.api.response.GetVotesResponse;
+import org.semux.api.response.ListAccountsResponse;
+import org.semux.api.response.SendTransactionResponse;
 import org.semux.config.Config;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
@@ -53,12 +69,14 @@ import org.semux.crypto.Hex;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.Peer;
-import org.semux.net.filter.CIDRFilterRule;
+import org.semux.net.filter.FilterRule;
 import org.semux.rules.TemporaryDBRule;
 import org.semux.util.BasicAuth;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
@@ -107,75 +125,71 @@ public class ApiHandlerTest {
         }
     }
 
-    private static JsonObject request(String uri) throws IOException {
+    private static <T extends ApiHandlerResponse> T request(String uri, Class<T> clazz) throws IOException {
         URL u = new URL("http://" + API_IP + ":" + API_PORT + uri);
         HttpURLConnection con = (HttpURLConnection) u.openConnection();
 
         con.setRequestProperty("Authorization", BasicAuth.generateAuth(config.apiUsername(), config.apiPassword()));
 
-        try (JsonReader jsonReader = Json.createReader(con.getInputStream())) {
-            return jsonReader.readObject();
-        }
+        return new ObjectMapper().readValue(con.getInputStream(), clazz);
     }
 
     @Test
     public void testRoot() throws IOException {
         String uri = "/";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
+        GetRootResponse response = request(uri, GetRootResponse.class);
+        assertTrue(response.success);
     }
 
     @Test
     public void testGetInfo() throws IOException {
         String uri = "/get_info";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        JsonObject result = response.getJsonObject("result");
-
-        assertNotNull(result);
-        assertEquals(0, result.getInt("latestBlockNumber"));
+        GetInfoResponse response = request(uri, GetInfoResponse.class);
+        assertTrue(response.success);
+        assertNotNull(response.info);
+        assertEquals(0, response.info.latestBlockNumber);
     }
 
     @Test
     public void testGetPeers() throws IOException {
         channelMgr = spy(api.getKernel().getChannelManager());
-        List<Peer> peers = Arrays.asList(new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", 1),
+        List<Peer> peers = Arrays.asList(
+                new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", 1),
                 new Peer("2.3.4.5", 5171, (short) 2, "client2", "peer2", 2));
         when(channelMgr.getActivePeers()).thenReturn(peers);
         api.getKernel().setChannelManager(channelMgr);
 
-        JsonObject response = request("/get_peers");
-        assertTrue(response.getBoolean("success"));
-        JsonArray result = response.getJsonArray("result");
+        GetPeersResponse response = request("/get_peers", GetPeersResponse.class);
+        assertTrue(response.success);
+        List<GetPeersResponse.Result> result = response.peers;
 
         assertNotNull(result);
         assertEquals(peers.size(), result.size());
         for (int i = 0; i < peers.size(); i++) {
-            JsonObject peerJson = result.getJsonObject(i);
+            GetPeersResponse.Result peerJson = result.get(i);
             Peer peer = peers.get(i);
-            assertEquals(peer.getIp(), peerJson.getString("ip"));
-            assertEquals(peer.getPort(), peerJson.getInt("port"));
-            assertEquals(peer.getNetworkVersion(), peerJson.getInt("networkVersion"));
-            assertEquals(peer.getClientId(), peerJson.getString("clientId"));
-            assertEquals(Hex.PREF + peer.getPeerId(), peerJson.getString("peerId"));
-            assertEquals(peer.getLatestBlockNumber(), peerJson.getInt("latestBlockNumber"));
-            assertEquals(peer.getLatency(), peerJson.getInt("latency"));
+            assertEquals(peer.getIp(), peerJson.ip);
+            assertEquals(peer.getPort(), peerJson.port.intValue());
+            assertEquals(peer.getNetworkVersion(), peerJson.networkVersion.shortValue());
+            assertEquals(peer.getClientId(), peerJson.clientId);
+            assertEquals(Hex.PREF + peer.getPeerId(), peerJson.peerId);
+            assertEquals(peer.getLatestBlockNumber(), peerJson.latestBlockNumber.longValue());
+            assertEquals(peer.getLatency(), peerJson.latency.longValue());
         }
     }
 
     @Test
     public void testAddNode() throws IOException {
         String uri = "/add_node?node=127.0.0.1:5162";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-
+        AddNodeResponse response = request(uri, AddNodeResponse.class);
+        assertTrue(response.success);
         assertEquals(1, nodeMgr.queueSize());
     }
 
     @Test
     public void testAddToBlacklist() throws IOException {
         // blacklist 8.8.8.8
-        assertTrue(request("/add_to_blacklist?ip=8.8.8.8").getBoolean("success"));
+        assertTrue(request("/add_to_blacklist?ip=8.8.8.8", ApiHandlerResponse.class).success);
 
         // assert that 8.8.8.8 is no longer acceptable
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
@@ -185,18 +199,18 @@ public class ApiHandlerTest {
 
     @Test
     public void testAddToBlacklistInvalidAddress() throws IOException {
-        JsonObject response = request("/add_to_blacklist?ip=I_am_not_an_IP");
-        assertFalse(response.getBoolean("success"));
-        assertTrue(response.containsKey("message"));
+        ApiHandlerResponse response = request("/add_to_blacklist?ip=I_am_not_an_IP", ApiHandlerResponse.class);
+        assertFalse(response.success);
+        assertNotNull(response.message);
     }
 
     @Test
     public void testAddToWhitelist() throws IOException {
         // reject all connections
-        channelMgr.getIpFilter().appendRule(new CIDRFilterRule("0.0.0.0/0", IpFilterRuleType.REJECT));
+        channelMgr.getIpFilter().appendRule(new FilterRule("0.0.0.0/0", IpFilterRuleType.REJECT));
 
         // whitelist 8.8.8.8
-        assertTrue(request("/add_to_whitelist?ip=8.8.8.8").getBoolean("success"));
+        assertTrue(request("/add_to_whitelist?ip=8.8.8.8", ApiHandlerResponse.class).success);
 
         // assert that 8.8.8.8 is acceptable
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
@@ -206,9 +220,9 @@ public class ApiHandlerTest {
 
     @Test
     public void testAddToWhitelistInvalidAddress() throws IOException {
-        JsonObject response = request("/add_to_whitelist?ip=I_am_not_an_IP");
-        assertFalse(response.getBoolean("success"));
-        assertTrue(response.containsKey("message"));
+        ApiHandlerResponse response = request("/add_to_whitelist?ip=I_am_not_an_IP", ApiHandlerResponse.class);
+        assertFalse(response.success);
+        assertNotNull(response.message);
     }
 
     @Test
@@ -216,39 +230,43 @@ public class ApiHandlerTest {
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
         when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
 
-        assertTrue(request("/add_to_blacklist?ip=8.8.8.8").getBoolean("success"));
+        ApiHandlerResponse response;
+
+        response = request("/add_to_blacklist?ip=8.8.8.8", ApiHandlerResponse.class);
+        assertTrue(response.success);
         assertTrue(!channelMgr.isAcceptable(inetSocketAddress));
 
-        assertTrue(request("/add_to_whitelist?ip=8.8.8.8").getBoolean("success"));
+        response = request("/add_to_whitelist?ip=8.8.8.8", ApiHandlerResponse.class);
+        assertTrue(response.success);
         assertTrue(channelMgr.isAcceptable(inetSocketAddress));
 
-        assertTrue(request("/add_to_blacklist?ip=8.8.8.8").getBoolean("success"));
+        assertTrue(request("/add_to_blacklist?ip=8.8.8.8", ApiHandlerResponse.class).success);
         assertTrue(!channelMgr.isAcceptable(inetSocketAddress));
     }
 
     @Test
     public void testGetLatestBlockNumber() throws IOException {
         String uri = "/get_latest_block_number";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
+        GetLatestBlockNumberResponse response = request(uri, GetLatestBlockNumberResponse.class);
+        assertTrue(response.success);
     }
 
     @Test
     public void testGetLatestBlock() throws IOException {
-        Genesis gen = chain.getGenesis();
+        Genesis genesisBlock = chain.getGenesis();
 
         String uri = "/get_latest_block";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        JsonObject block = response.getJsonObject("result");
+        GetLatestBlockResponse response = request(uri, GetLatestBlockResponse.class);
+        assertTrue(response.success);
 
-        assertArrayEquals(gen.getHash(), Hex.parse(block.getString("hash")));
-        assertEquals(gen.getNumber(), block.getJsonNumber("number").longValueExact());
-        assertArrayEquals(gen.getCoinbase(), Hex.parse(block.getString("coinbase")));
-        assertArrayEquals(gen.getPrevHash(), Hex.parse(block.getString("prevHash")));
-        assertEquals(gen.getTimestamp(), block.getJsonNumber("timestamp").longValueExact());
-        assertArrayEquals(gen.getTransactionsRoot(), Hex.parse(block.getString("transactionsRoot")));
-        assertArrayEquals(gen.getData(), Hex.parse(block.getString("data")));
+        GetBlockResponse.Result blockJson = response.block;
+        assertEquals(Hex.encodeWithPrefix(genesisBlock.getHash()), blockJson.hash);
+        assertEquals(genesisBlock.getNumber(), blockJson.number.longValue());
+        assertEquals(Hex.encodeWithPrefix(genesisBlock.getCoinbase()), blockJson.coinbase);
+        assertEquals(Hex.encodeWithPrefix(genesisBlock.getPrevHash()), blockJson.prevHash);
+        assertEquals(genesisBlock.getTimestamp(), blockJson.timestamp.longValue());
+        assertEquals(Hex.encodeWithPrefix(genesisBlock.getTransactionsRoot()), blockJson.transactionsRoot);
+        assertEquals(Hex.encodeWithPrefix(genesisBlock.getData()), blockJson.data);
     }
 
     @Test
@@ -256,14 +274,14 @@ public class ApiHandlerTest {
         Genesis gen = chain.getGenesis();
 
         String uri = "/get_block?number=" + gen.getNumber();
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertArrayEquals(gen.getHash(), Hex.parse(response.getJsonObject("result").getString("hash")));
+        GetBlockResponse response = request(uri, GetBlockResponse.class);
+        assertTrue(response.success);
+        assertEquals(Hex.encodeWithPrefix(gen.getHash()), response.block.hash);
 
         uri = "/get_block?hash=" + Hex.encode(gen.getHash());
-        response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertArrayEquals(gen.getHash(), Hex.parse(response.getJsonObject("result").getString("hash")));
+        response = request(uri, GetBlockResponse.class);
+        assertTrue(response.success);
+        assertEquals(Hex.encodeWithPrefix(gen.getHash()), response.block.hash);
     }
 
     @Test
@@ -274,11 +292,9 @@ public class ApiHandlerTest {
         chain.addBlock(block);
 
         String uri = "/get_pending_transactions";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-
-        JsonArray arr = response.getJsonArray("result");
-        assertNotNull(arr);
+        GetPendingTransactionsResponse response = request(uri, GetPendingTransactionsResponse.class);
+        assertTrue(response.success);
+        assertNotNull(response.pendingTransactions);
     }
 
     @Test
@@ -289,11 +305,9 @@ public class ApiHandlerTest {
         chain.addBlock(block);
 
         String uri = "/get_account_transactions?address=" + Hex.encode(tx.getFrom()) + "&from=0&to=1024";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-
-        JsonArray arr = response.getJsonArray("result");
-        assertNotNull(arr);
+        GetAccountTransactionsResponse response = request(uri, GetAccountTransactionsResponse.class);
+        assertTrue(response.success);
+        assertNotNull(response.transactions);
     }
 
     @Test
@@ -304,11 +318,9 @@ public class ApiHandlerTest {
         chain.addBlock(block);
 
         String uri = "/get_transaction?hash=" + Hex.encode(tx.getHash());
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-
-        JsonObject obj = response.getJsonObject("result");
-        assertArrayEquals(tx.getHash(), Hex.parse(obj.getString("hash")));
+        GetTransactionResponse response = request(uri, GetTransactionResponse.class);
+        assertTrue(response.success);
+        assertEquals(Hex.encodeWithPrefix(tx.getHash()), response.transaction.hash);
     }
 
     @Test
@@ -316,8 +328,8 @@ public class ApiHandlerTest {
         Transaction tx = createTransaction();
 
         String uri = "/send_transaction?raw=" + Hex.encode(tx.toBytes());
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
+        SendTransactionResponse response = request(uri, SendTransactionResponse.class);
+        assertTrue(response.success);
 
         Thread.sleep(200);
         List<Transaction> list = pendingMgr.getQueue();
@@ -331,10 +343,9 @@ public class ApiHandlerTest {
         Entry<ByteArray, Premine> entry = gen.getPremines().entrySet().iterator().next();
 
         String uri = "/get_account?address=" + entry.getKey();
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertEquals(entry.getValue().getAmount(),
-                response.getJsonObject("result").getJsonNumber("available").longValueExact());
+        GetAccountResponse response = request(uri, GetAccountResponse.class);
+        assertTrue(response.success);
+        assertEquals(entry.getValue().getAmount(), response.account.available);
     }
 
     @Test
@@ -343,25 +354,25 @@ public class ApiHandlerTest {
         Entry<String, byte[]> entry = gen.getDelegates().entrySet().iterator().next();
 
         String uri = "/get_delegate?address=" + Hex.encode(entry.getValue());
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertEquals(entry.getKey(), response.getJsonObject("result").getString("name"));
+        GetDelegateResponse response = request(uri, GetDelegateResponse.class);
+        assertTrue(response.success);
+        assertEquals(entry.getKey(), response.delegateResult.name);
     }
 
     @Test
     public void testGetDelegates() throws IOException {
         String uri = "/get_delegates";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertTrue(response.getJsonArray("result").size() > 0);
+        GetDelegatesResponse response = request(uri, GetDelegatesResponse.class);
+        assertTrue(response.success);
+        assertTrue(response.delegateResults.size() > 0);
     }
 
     @Test
     public void testGetValidators() throws IOException {
         String uri = "/get_validators";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertTrue(response.getJsonArray("result").size() > 0);
+        GetValidatorsResponse response = request(uri, GetValidatorsResponse.class);
+        assertTrue(response.success);
+        assertTrue(response.validators.size() > 0);
     }
 
     @Test
@@ -373,9 +384,9 @@ public class ApiHandlerTest {
         ds.vote(key.toAddress(), key2.toAddress(), 200L);
 
         String uri = "/get_vote?voter=" + key.toAddressString() + "&delegate=" + key2.toAddressString();
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertEquals(200L, response.getJsonNumber("result").longValueExact());
+        GetVoteResponse response = request(uri, GetVoteResponse.class);
+        assertTrue(response.success);
+        assertEquals(200L, response.vote.longValue());
     }
 
     @Test
@@ -387,18 +398,19 @@ public class ApiHandlerTest {
         assertTrue(ds.vote(voterKey.toAddress(), delegateKey.toAddress(), 200L));
         ds.commit();
 
-        JsonObject response = request("/get_votes?delegate=" + delegateKey.toAddressString());
-        assertTrue(response.getBoolean("success"));
-        assertEquals(200L,
-                response.getJsonObject("result").getJsonNumber(Hex.PREF + voterKey.toAddressString()).longValueExact());
+        GetVotesResponse response = request("/get_votes?delegate=" + delegateKey.toAddressString(),
+                GetVotesResponse.class);
+        assertTrue(response.success);
+        assertEquals(200L, response.votes.get(Hex.PREF + voterKey.toAddressString()).longValue());
     }
 
     @Test
-    public void testGetAccounts() throws IOException {
+    public void testListAccounts() throws IOException {
         String uri = "/list_accounts";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertNotNull(response.getJsonArray("result"));
+        ListAccountsResponse response = request(uri, ListAccountsResponse.class);
+        assertTrue(response.success);
+        assertNotNull(response.accounts);
+        assertTrue(response.accounts.size() > 0);
     }
 
     @Test
@@ -406,8 +418,8 @@ public class ApiHandlerTest {
         int size = wallet.getAccounts().size();
 
         String uri = "/create_account";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
+        CreateAccountResponse response = request(uri, CreateAccountResponse.class);
+        assertTrue(response.success);
         assertEquals(size + 1, wallet.getAccounts().size());
     }
 
@@ -416,15 +428,15 @@ public class ApiHandlerTest {
         EdDSA key = new EdDSA();
         String uri = "/transfer?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + key.toAddressString()
                 + "&value=1000000000&fee=" + config.minTransactionFee() + "&data=test";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertNotNull(response.getString("result"));
+        DoTransactionResponse response = request(uri, DoTransactionResponse.class);
+        assertTrue(response.success);
+        assertNotNull(response.txId);
 
         Thread.sleep(200);
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.getString("result")));
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.txId));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.TRANSFER);
     }
 
@@ -432,15 +444,15 @@ public class ApiHandlerTest {
     public void testDelegate() throws IOException, InterruptedException {
         String uri = "/delegate?&from=" + wallet.getAccount(0).toAddressString() + "&fee=" + config.minTransactionFee()
                 + "&data=" + Hex.encode(Bytes.of("test_delegate"));
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertNotNull(response.getString("result"));
+        DoTransactionResponse response = request(uri, DoTransactionResponse.class);
+        assertTrue(response.success);
+        assertNotNull(response.txId);
 
         Thread.sleep(200);
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.getString("result")));
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.txId));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.DELEGATE);
     }
 
@@ -451,15 +463,15 @@ public class ApiHandlerTest {
 
         String uri = "/vote?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + delegate.toAddressString()
                 + "&value=1000000000&fee=50000000";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertNotNull(response.getString("result"));
+        DoTransactionResponse response = request(uri, DoTransactionResponse.class);
+        assertTrue(response.success);
+        assertNotNull(response.txId);
 
         Thread.sleep(200);
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(0).getHash(), Hex.parse(response.getString("result")));
+        assertArrayEquals(list.get(0).getHash(), Hex.parse(response.txId));
         assertEquals(list.get(0).getType(), TransactionType.VOTE);
     }
 
@@ -475,15 +487,15 @@ public class ApiHandlerTest {
 
         String uri = "/unvote?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + delegate.toAddressString()
                 + "&value=" + amount + "&fee=50000000";
-        JsonObject response = request(uri);
-        assertTrue(response.getBoolean("success"));
-        assertNotNull(response.getString("result"));
+        DoTransactionResponse response = request(uri, DoTransactionResponse.class);
+        assertTrue(response.success);
+        assertNotNull(response.txId);
 
         Thread.sleep(200);
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.getString("result")));
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.txId));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.UNVOTE);
     }
 
