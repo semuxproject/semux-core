@@ -8,18 +8,16 @@ package org.semux.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonWriter;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AddressBook {
 
@@ -29,7 +27,7 @@ public class AddressBook {
     // name and address.
 
     private final File file;
-    private JsonObject database;
+    private ConcurrentHashMap<String, String> database;
 
     /**
      * Creates an address book instance.
@@ -55,8 +53,7 @@ public class AddressBook {
      * @param address
      */
     public void put(Entry address) {
-        database = Json.createObjectBuilder(database).add(address.getName(), Json.createValue(address.getAddress()))
-                .build();
+        database.put(address.getName(), address.getAddress());
         persist();
     }
 
@@ -68,7 +65,7 @@ public class AddressBook {
     public List<Entry> list() {
         List<Entry> list = new ArrayList<>();
         for (String name : database.keySet()) {
-            list.add(new Entry(name, database.getString(name)));
+            list.add(new Entry(name, database.get(name)));
         }
         return list;
     }
@@ -80,7 +77,7 @@ public class AddressBook {
      * @return An {@link Entry} if exists, otherwise null
      */
     public Entry getByName(String name) {
-        return database.containsKey(name) ? new Entry(name, database.getString(name)) : null;
+        return database.containsKey(name) ? new Entry(name, database.get(name)) : null;
     }
 
     /**
@@ -100,7 +97,7 @@ public class AddressBook {
      */
     public void remove(String name) {
         if (database.containsKey(name)) {
-            database = Json.createObjectBuilder(database).remove(name).build();
+            database.remove(name);
             persist();
         }
     }
@@ -109,7 +106,7 @@ public class AddressBook {
      * Clears all entries in the address book.
      */
     public void clear() {
-        database = Json.createObjectBuilder().build();
+        database = new ConcurrentHashMap<>();
         persist();
     }
 
@@ -118,23 +115,24 @@ public class AddressBook {
      * 
      * @return
      */
-    private JsonObject load() {
-        if (file.length() > 0) {
-            try (JsonReader jsonReader = Json.createReader(Files.newBufferedReader(file.toPath()))) {
-                return jsonReader.readObject();
+    private ConcurrentHashMap<String, String> load() {
+        if (file.exists()) {
+            try {
+                return new ObjectMapper().readValue(file, new TypeReference<ConcurrentHashMap<String, String>>() {
+                });
             } catch (IOException e) {
                 logger.error("Failed to retrieve or access address book", e);
             }
         }
-        return Json.createObjectBuilder().build();
+        return new ConcurrentHashMap<>();
     }
 
     /**
      * Persists database to file
      */
     private void persist() {
-        try (JsonWriter jsonWriter = Json.createWriter(Files.newBufferedWriter(file.toPath()))) {
-            jsonWriter.write(database);
+        try {
+            new ObjectMapper().writeValue(file, database);
         } catch (IOException e) {
             logger.error("Failed to retrieve or access address book", e);
         }
