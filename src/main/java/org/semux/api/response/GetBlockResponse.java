@@ -90,8 +90,7 @@ public class GetBlockResponse extends ApiHandlerResponse {
                     Hex.encodeWithPrefix(block.getTransactionsRoot()),
                     Hex.encodeWithPrefix(block.getResultsRoot()),
                     Hex.encodeWithPrefix(block.getStateRoot()),
-                    Hex.encodeWithPrefix(block.getData())
-            );
+                    Hex.encodeWithPrefix(block.getData()));
         }
     }
 }

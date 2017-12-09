@@ -20,7 +20,8 @@ public class TimeUtil {
     /**
      * Returns a human-readable duration
      * 
-     * @param duration duration object to be formatted
+     * @param duration
+     *            duration object to be formatted
      * @return formatted duration in 00:00:00
      */
     public static String formatDuration(Duration duration) {
@@ -30,7 +31,8 @@ public class TimeUtil {
 
     /**
      *
-     * @param timestamp timestamp in milliseconds to be formatter
+     * @param timestamp
+     *            timestamp in milliseconds to be formatter
      * @return formatted timestamp in yyyy-MM-dd HH:mm:ss
      */
     public static String formatTimestamp(Long timestamp) {

@@ -6,13 +6,14 @@
  */
 package org.semux.gui.model;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.awt.event.ActionListener;
@@ -22,15 +23,22 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.semux.core.AddressBook;
 import org.semux.core.Block;
 import org.semux.crypto.EdDSA;
 import org.semux.net.Peer;
 
+@RunWith(MockitoJUnitRunner.class)
 public class WalletModelTest {
 
     private File file;
@@ -46,16 +54,23 @@ public class WalletModelTest {
 
     @Test
     public void testFireEvent() throws InterruptedException {
+        AtomicBoolean actionPerformed = new AtomicBoolean(false);
         ActionListener listener = mock(ActionListener.class);
+        doAnswer((Answer<Object>) invocation -> {
+            actionPerformed.set(true);
+            return null;
+        }).when(listener).actionPerformed(any());
         model.addListener(listener);
 
         new Thread(() -> {
             model.fireUpdateEvent();
         }).start();
 
-        Thread.sleep(300);
-        verify(model).updateView();
-        verify(listener).actionPerformed(any());
+        await().until(actionPerformed::get);
+
+        InOrder inOrder = Mockito.inOrder(model, listener);
+        inOrder.verify(model).updateView();
+        inOrder.verify(listener).actionPerformed(any());
     }
 
     @Test
