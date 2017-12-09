@@ -116,7 +116,7 @@ public class AddressBook {
      * @return
      */
     private ConcurrentHashMap<String, String> load() {
-        if (file.exists()) {
+        if (file.length() > 0) {
             try {
                 return new ObjectMapper().readValue(file, new TypeReference<ConcurrentHashMap<String, String>>() {
                 });

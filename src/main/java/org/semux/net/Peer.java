@@ -6,7 +6,6 @@
  */
 package org.semux.net;
 
-import org.semux.crypto.Hex;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
@@ -103,13 +102,6 @@ public class Peer {
      */
     public String getPeerId() {
         return peerId;
-    }
-
-    /**
-     * @return peerId with a prefix of 0x
-     */
-    public String getPeerIdWithPrefix() {
-        return Hex.PREF + peerId;
     }
 
     /**

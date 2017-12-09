@@ -8,6 +8,7 @@ package org.semux.api.response;
 
 import java.util.List;
 
+import org.semux.crypto.Hex;
 import org.semux.net.Peer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -38,8 +39,8 @@ public class GetPeersResponse extends ApiHandlerResponse {
         @JsonProperty("clientId")
         public final String clientId;
 
-        @JsonProperty("peerIdWithPrefix")
-        public final String peerIdWithPrefix;
+        @JsonProperty("peerId")
+        public final String peerId;
 
         @JsonProperty("latestBlockNumber")
         public final Long latestBlockNumber;
@@ -52,14 +53,14 @@ public class GetPeersResponse extends ApiHandlerResponse {
                 @JsonProperty("port") int port,
                 @JsonProperty("networkVersion") short networkVersion,
                 @JsonProperty("clientId") String clientId,
-                @JsonProperty("peerIdWithPrefix") String peerIdWithPrefix,
+                @JsonProperty("peerId") String peerId,
                 @JsonProperty("latestBlockNumber") long latestBlockNumber,
                 @JsonProperty("latency") long latency) {
             this.ip = ip;
             this.port = port;
             this.networkVersion = networkVersion;
             this.clientId = clientId;
-            this.peerIdWithPrefix = peerIdWithPrefix;
+            this.peerId = peerId;
             this.latestBlockNumber = latestBlockNumber;
             this.latency = latency;
         }
@@ -70,7 +71,7 @@ public class GetPeersResponse extends ApiHandlerResponse {
                     peer.getPort(),
                     peer.getNetworkVersion(),
                     peer.getClientId(),
-                    peer.getPeerIdWithPrefix(),
+                    Hex.PREF + peer.getPeerId(),
                     peer.getLatestBlockNumber(),
                     peer.getLatency());
         }

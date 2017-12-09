@@ -172,7 +172,7 @@ public class ApiHandlerTest {
             assertEquals(peer.getPort(), peerJson.port.intValue());
             assertEquals(peer.getNetworkVersion(), peerJson.networkVersion.shortValue());
             assertEquals(peer.getClientId(), peerJson.clientId);
-            assertEquals(peer.getPeerIdWithPrefix(), peerJson.peerIdWithPrefix);
+            assertEquals(Hex.PREF + peer.getPeerId(), peerJson.peerId);
             assertEquals(peer.getLatestBlockNumber(), peerJson.latestBlockNumber.longValue());
             assertEquals(peer.getLatency(), peerJson.latency.longValue());
         }
