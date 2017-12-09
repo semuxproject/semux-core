@@ -155,7 +155,7 @@ public class Genesis extends Block {
                 @JsonProperty("address") String address,
                 @JsonProperty("amount") long amount,
                 @JsonProperty("note") String note) {
-            this(Bytes.of(address), amount, note);
+            this(Hex.parse(address), amount, note);
         }
 
         public byte[] getAddress() {
