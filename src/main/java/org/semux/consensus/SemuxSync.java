@@ -6,10 +6,10 @@
  */
 package org.semux.consensus;
 
+import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.core.Block;
@@ -44,6 +45,7 @@ import org.semux.crypto.Hex;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
+import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
 import org.semux.util.TimeUtil;
@@ -80,7 +82,9 @@ public class SemuxSync implements SyncManager {
     // task queues
     private TreeSet<Long> toDownload = new TreeSet<>();
     private Map<Long, Long> toComplete = new HashMap<>();
-    private TreeSet<Block> toProcess = new TreeSet<>(Comparator.comparingLong(Block::getNumber));
+    private TreeSet<Pair<Block, Channel>> toProcess = new TreeSet<>((o1, o2) -> {
+        return Long.compare(o1.getKey().getNumber(), o2.getKey().getNumber());
+    });
     private long target;
     private final Object lock = new Object();
 
@@ -176,7 +180,7 @@ public class SemuxSync implements SyncManager {
                 synchronized (lock) {
                     toDownload.remove(block.getNumber());
                     toComplete.remove(block.getNumber());
-                    toProcess.add(block);
+                    toProcess.add(Pair.of(block, channel));
                 }
             }
             break;
@@ -257,38 +261,42 @@ public class SemuxSync implements SyncManager {
             return; // This is important because stop() only notify
         }
 
-        Block block = null;
+        Pair<Block, Channel> pair = null;
         synchronized (lock) {
-            Iterator<Block> iterator = toProcess.iterator();
+            Iterator<Pair<Block, Channel>> iterator = toProcess.iterator();
             while (iterator.hasNext()) {
-                Block b = iterator.next();
+                Pair<Block, Channel> p = iterator.next();
 
-                if (b.getNumber() <= latest) {
+                if (p.getKey().getNumber() <= latest) {
                     iterator.remove();
-                } else if (b.getNumber() == latest + 1) {
+                } else if (p.getKey().getNumber() == latest + 1) {
                     iterator.remove();
-                    block = b;
+                    pair = p;
                     break;
                 } else {
-                    toProcess.add(b);
+                    toProcess.add(p);
                     break;
                 }
             }
         }
 
-        if (block != null) {
-            logger.info("{}", block);
+        if (pair != null) {
+            logger.info("{}", pair.getKey());
 
-            if (validateApplyBlock(block)) {
+            if (validateApplyBlock(pair.getKey())) {
                 synchronized (lock) {
-                    toDownload.remove(block.getNumber());
-                    toComplete.remove(block.getNumber());
+                    toDownload.remove(pair.getKey().getNumber());
+                    toComplete.remove(pair.getKey().getNumber());
                 }
             } else {
-                logger.info("Invalid block");
+                InetSocketAddress addr = pair.getValue().getRemoteAddress();
+                logger.info("Invalid block from {}:{}", addr.getHostString(), addr.getPort());
                 synchronized (lock) {
-                    toDownload.add(block.getNumber());
+                    toDownload.add(pair.getKey().getNumber());
                 }
+
+                // disconnect if the peer sends us invalid block
+                pair.getValue().getMessageQueue().disconnect(ReasonCode.BAD_PEER);
 
                 // sleep a while if you received an invalid block, to avoid consuming to much
                 // resources.
