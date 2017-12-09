@@ -1,6 +1,6 @@
 FROM alpine:3.6
 
-ARG SEMUXVER="1.0.0-rc.3"
+ARG SEMUXVER="1.0.0-rc.4"
 
 ENV JAVA_HOME=/usr/lib/jvm/default-jvm/jre
 
