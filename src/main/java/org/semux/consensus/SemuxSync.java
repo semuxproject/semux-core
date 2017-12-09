@@ -9,13 +9,13 @@ package org.semux.consensus;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
@@ -65,13 +65,13 @@ public class SemuxSync implements SyncManager {
         }
     };
 
-    private static final int BLOCK_REQUEST_REDUNDANCY = 1;
+    private static final long MAX_DOWNLOAD_TIME = 10L * 1000L; // 30 seconds
 
     private static final int MAX_UNFINISHED_JOBS = 16;
 
-    private static final long MAX_DOWNLOAD_TIME = 30L * 1000L; // 30 seconds
-
     private static final int MAX_PENDING_BLOCKS = 512;
+
+    private static final Random random = new Random();
 
     private Kernel kernel;
     private Config config;
@@ -119,8 +119,8 @@ public class SemuxSync implements SyncManager {
 
             // [2] start tasks
             ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor(factory);
-            ScheduledFuture<?> download = exec.scheduleAtFixedRate(this::download, 0, 50, TimeUnit.MILLISECONDS);
-            ScheduledFuture<?> process = exec.scheduleAtFixedRate(this::process, 0, 10, TimeUnit.MILLISECONDS);
+            ScheduledFuture<?> download = exec.scheduleAtFixedRate(this::download, 0, 5, TimeUnit.MILLISECONDS);
+            ScheduledFuture<?> process = exec.scheduleAtFixedRate(this::process, 0, 5, TimeUnit.MILLISECONDS);
 
             // [3] wait until the sync is done
             while (isRunning.get()) {
@@ -201,12 +201,18 @@ public class SemuxSync implements SyncManager {
         }
 
         List<Channel> channels = channelMgr.getIdleChannels();
-        Collections.shuffle(channels);
         logger.trace("Idle peers = {}", channels.size());
+
+        // quit if no idle channels.
+        if (channels.isEmpty()) {
+            return;
+        }
+
+        // pick a random channel
+        Channel c = channels.get(random.nextInt(channels.size()));
 
         synchronized (lock) {
             // filter all expired tasks
-            boolean hasExpired = false;
             long now = System.currentTimeMillis();
             Iterator<Entry<Long, Long>> itr = toComplete.entrySet().iterator();
             while (itr.hasNext()) {
@@ -216,36 +222,34 @@ public class SemuxSync implements SyncManager {
                     logger.debug("Downloading of block #{} has expired", entry.getKey());
                     toDownload.add(entry.getKey());
                     itr.remove();
-                    hasExpired = true;
                 }
             }
 
-            // quit if too many pending blocks
-            if (!hasExpired && toProcess.size() > MAX_PENDING_BLOCKS) {
+            // quite if no more tasks
+            if (toDownload.isEmpty()) {
+                return;
+            }
+            Long task = toDownload.first();
+
+            // quit if too many unfinished jobs
+            if (toComplete.size() > MAX_UNFINISHED_JOBS) {
+                logger.trace("Max unfinished jobs reached");
                 return;
             }
 
-            for (int i = 0; i + BLOCK_REQUEST_REDUNDANCY <= channels.size(); i += BLOCK_REQUEST_REDUNDANCY) {
-                // quit if no more tasks or two many unfinished jobs
-                if (toDownload.isEmpty() || toComplete.size() > MAX_UNFINISHED_JOBS) {
-                    break;
-                }
+            // quit if too many pending blocks
+            if (toProcess.size() > MAX_PENDING_BLOCKS && task > toProcess.first().getKey().getNumber()) {
+                logger.trace("Pending block queue is full");
+                return;
+            }
 
-                Long task = toDownload.first();
-                boolean requested = false;
-                for (int j = 0; j < BLOCK_REQUEST_REDUNDANCY; j++) {
-                    Channel c = channels.get(i + j);
-                    if (c.getRemotePeer().getLatestBlockNumber() >= task) {
-                        logger.debug("Request block #{} from channel = {}", task, c.getId());
-                        c.getMessageQueue().sendMessage(new GetBlockMessage(task));
-                        requested = true;
-                    }
-                }
+            // request the block
+            if (c.getRemotePeer().getLatestBlockNumber() >= task) {
+                logger.debug("Request block #{} from channel = {}", task, c.getId());
+                c.getMessageQueue().sendMessage(new GetBlockMessage(task));
 
-                if (requested) {
-                    toDownload.remove(task);
-                    toComplete.put(task, System.currentTimeMillis());
-                }
+                toDownload.remove(task);
+                toComplete.put(task, System.currentTimeMillis());
             }
         }
     }
@@ -274,7 +278,6 @@ public class SemuxSync implements SyncManager {
                     pair = p;
                     break;
                 } else {
-                    toProcess.add(p);
                     break;
                 }
             }
@@ -293,9 +296,8 @@ public class SemuxSync implements SyncManager {
                 logger.info("Invalid block from {}:{}", addr.getAddress().getHostAddress(), addr.getPort());
 
                 synchronized (lock) {
-                    // Set the task as expired instead of adding it to toDownload, preventing
-                    // the client from getting stuck (when the buffer is full).
-                    toComplete.put(pair.getKey().getNumber(), 0L);
+                    toDownload.add(pair.getKey().getNumber());
+                    toComplete.remove(pair.getKey().getNumber());
                 }
 
                 // disconnect if the peer sends us invalid block
