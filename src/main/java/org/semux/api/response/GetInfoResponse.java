@@ -62,7 +62,7 @@ public class GetInfoResponse extends ApiHandlerResponse {
                     kernel.getConfig().getClientId(),
                     Hex.PREF + kernel.getCoinbase(),
                     kernel.getBlockchain().getLatestBlockNumber(),
-                    Hex.encodeWithPrefix(kernel.getBlockchain().getLatestBlockHash()),
+                    Hex.encode0x(kernel.getBlockchain().getLatestBlockHash()),
                     kernel.getChannelManager().getActivePeers().size(),
                     kernel.getPendingManager().getTransactions().size());
         }

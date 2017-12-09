@@ -474,7 +474,7 @@ public class SwingUtil {
         }
 
         int n = gui.getModel().getAccountNumber(address);
-        return n == -1 ? Hex.encodeWithPrefix(address) : GUIMessages.get("AccountNum", n);
+        return n == -1 ? Hex.encode0x(address) : GUIMessages.get("AccountNum", n);
     }
 
     /**

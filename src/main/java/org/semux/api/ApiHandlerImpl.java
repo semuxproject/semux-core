@@ -379,7 +379,7 @@ public class ApiHandlerImpl implements ApiHandler {
             tx.sign(from);
 
             if (kernel.getPendingManager().addTransactionSync(tx)) {
-                return success(new DoTransactionResponse(true, Hex.encodeWithPrefix(tx.getHash())));
+                return success(new DoTransactionResponse(true, Hex.encode0x(tx.getHash())));
             } else {
                 return failure("Transaction rejected by pending manager");
             }

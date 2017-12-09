@@ -81,16 +81,16 @@ public class GetBlockResponse extends ApiHandlerResponse {
 
         public Result(Block block) {
             this(
-                    Hex.encodeWithPrefix(block.getHash()),
+                    Hex.encode0x(block.getHash()),
                     block.getNumber(),
-                    Hex.encodeWithPrefix(block.getCoinbase()),
-                    Hex.encodeWithPrefix(block.getPrevHash()),
+                    Hex.encode0x(block.getCoinbase()),
+                    Hex.encode0x(block.getPrevHash()),
                     block.getTimestamp(),
                     TimeUtil.formatTimestamp(block.getTimestamp()),
-                    Hex.encodeWithPrefix(block.getTransactionsRoot()),
-                    Hex.encodeWithPrefix(block.getResultsRoot()),
-                    Hex.encodeWithPrefix(block.getStateRoot()),
-                    Hex.encodeWithPrefix(block.getData()));
+                    Hex.encode0x(block.getTransactionsRoot()),
+                    Hex.encode0x(block.getResultsRoot()),
+                    Hex.encode0x(block.getStateRoot()),
+                    Hex.encode0x(block.getData()));
         }
     }
 }

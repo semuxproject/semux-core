@@ -52,7 +52,7 @@ public class Hex {
      * @param raw
      * @return the hex encoding with 0x prefix
      */
-    public static String encodeWithPrefix(byte[] raw) {
+    public static String encode0x(byte[] raw) {
         return Hex.PREF + encode(raw);
     }
 

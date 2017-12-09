@@ -35,15 +35,15 @@ public class TransactionDialog extends JDialog {
         JLabel lblTimestamp = new JLabel(GUIMessages.get("Timestamp") + ":");
         JLabel lblData = new JLabel(GUIMessages.get("Data") + ":");
 
-        JTextArea hash = SwingUtil.textAreaWithCopyPastePopup(Hex.encodeWithPrefix(tx.getHash()));
+        JTextArea hash = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(tx.getHash()));
         JLabel type = new JLabel(tx.getType().name());
-        JTextArea from = SwingUtil.textAreaWithCopyPastePopup(Hex.encodeWithPrefix(tx.getFrom()));
-        JTextArea to = SwingUtil.textAreaWithCopyPastePopup(Hex.encodeWithPrefix(tx.getTo()));
+        JTextArea from = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(tx.getFrom()));
+        JTextArea to = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(tx.getTo()));
         JLabel value = new JLabel(SwingUtil.formatValue((tx.getValue())));
         JLabel fee = new JLabel(SwingUtil.formatValue((tx.getFee())));
         JLabel nonce = new JLabel(SwingUtil.formatNumber(tx.getNonce()));
         JLabel timestamp = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
-        JTextArea data = new JTextArea(Hex.encodeWithPrefix(tx.getData()));
+        JTextArea data = new JTextArea(Hex.encode0x(tx.getData()));
         data.setEditable(false);
 
         // @formatter:off

@@ -45,8 +45,8 @@ public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
         for (int i = 0; i < wallet.size(); i++) {
             data[i] = new Object[3];
             data[i][0] = i;
-            data[i][1] = Hex.encodeWithPrefix(wallet.getAccount(i).toAddress());
-            data[i][2] = Hex.encodeWithPrefix(wallet.getAccount(i).getPrivateKey());
+            data[i][1] = Hex.encode0x(wallet.getAccount(i).toAddress());
+            data[i][2] = Hex.encode0x(wallet.getAccount(i).getPrivateKey());
         }
 
         table = new JTable(data, columnNames);
