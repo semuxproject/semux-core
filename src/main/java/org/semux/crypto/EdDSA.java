@@ -39,7 +39,6 @@ public class EdDSA {
 
     public static final int PUBLIC_KEY_LEN = 44;
     public static final int PRIVATE_KEY_LEN = 48;
-    public static final int SIGNATURE_LEN = 96;
 
     private static final Logger logger = LoggerFactory.getLogger(EdDSA.class);
 
@@ -209,6 +208,9 @@ public class EdDSA {
      * 
      */
     public static class Signature {
+        // TODO: remove the extra 12 bytes
+        public static final int SIGNATURE_LEN = 96 + 12;
+
         private static final byte[] X509 = Hex.decode("302a300506032b6570032100");
         private static final int S_LEN = 64;
         private static final int A_LEN = 32;
@@ -272,11 +274,7 @@ public class EdDSA {
          * @return
          */
         public byte[] toBytes() {
-            byte[] result = new byte[s.length + a.length];
-            System.arraycopy(s, 0, result, 0, s.length);
-            System.arraycopy(a, 0, result, s.length, a.length);
-
-            return result;
+            return Bytes.merge(s, X509, a);
         }
 
         /**
@@ -286,12 +284,12 @@ public class EdDSA {
          * @return a {@link Signature} if success,or null
          */
         public static Signature fromBytes(byte[] bytes) {
-            if (bytes == null || bytes.length != S_LEN + A_LEN) {
+            if (bytes == null || bytes.length != SIGNATURE_LEN) {
                 return null;
             }
 
             byte[] s = Arrays.copyOfRange(bytes, 0, S_LEN);
-            byte[] a = Arrays.copyOfRange(bytes, S_LEN, S_LEN + A_LEN);
+            byte[] a = Arrays.copyOfRange(bytes, SIGNATURE_LEN - A_LEN, SIGNATURE_LEN);
 
             return new Signature(s, a);
         }

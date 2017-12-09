@@ -96,7 +96,7 @@ public class EdDSATest {
         byte[] hash = Hash.h256(data);
         byte[] sig = key.sign(hash).toBytes();
 
-        assertEquals(EdDSA.SIGNATURE_LEN, sig.length);
+        assertEquals(Signature.SIGNATURE_LEN, sig.length);
         assertTrue(EdDSA.verify(hash, sig));
         assertArrayEquals(key.getPublicKey(), Signature.fromBytes(sig).getPublicKey());
         assertArrayEquals(key.toAddress(), Signature.fromBytes(sig).getAddress());
