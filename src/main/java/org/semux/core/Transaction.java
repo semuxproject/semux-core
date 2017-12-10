@@ -70,6 +70,13 @@ public class Transaction implements Callable<Boolean> {
         this.hash = Hash.h256(encoded);
     }
 
+    /**
+     * Create a transaction from raw bytes
+     * 
+     * @param hash
+     * @param encoded
+     * @param signature
+     */
     public Transaction(byte[] hash, byte[] encoded, byte[] signature) {
         this.hash = hash;
 

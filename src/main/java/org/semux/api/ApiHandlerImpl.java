@@ -155,6 +155,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 return createAccount();
 
             case TRANSFER:
+            case TRANSFER_MANY:
             case DELEGATE:
             case VOTE:
             case UNVOTE:

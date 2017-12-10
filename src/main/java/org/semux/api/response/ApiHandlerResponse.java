@@ -8,6 +8,9 @@ package org.semux.api.response;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -21,6 +24,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
  * ApiHandlerResponse is the base class of Semux API responses
  */
 public class ApiHandlerResponse {
+
+    private Logger logger = LoggerFactory.getLogger(ApiHandlerResponse.class);
 
     @JsonProperty(value = "success", required = true)
     public final Boolean success;
