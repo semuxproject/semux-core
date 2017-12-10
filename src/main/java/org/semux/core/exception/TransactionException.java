@@ -7,6 +7,9 @@
 package org.semux.core.exception;
 
 public class TransactionException extends RuntimeException {
+
+    private static final long serialVersionUID = 5275920477610912364L;
+
     public TransactionException() {
     }
 
