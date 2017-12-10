@@ -125,7 +125,7 @@ public class TransactionExecutorTest {
         // execute and commit
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isSuccess());
-        assertEquals(available - (value + fee) * numberOfRecipients, as.getAccount(key.toAddress()).getAvailable());
+        assertEquals(available - value * numberOfRecipients - fee, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(value, as.getAccount(recipients[0]).getAvailable());
         assertEquals(value, as.getAccount(recipients[1]).getAvailable());
     }

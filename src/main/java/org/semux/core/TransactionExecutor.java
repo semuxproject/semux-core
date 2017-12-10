@@ -93,7 +93,7 @@ public class TransactionExecutor {
             case TRANSFER_MANY: {
                 byte[][] recipients = tx.getRecipients();
                 int numberOfRecipients = Array.getLength(recipients);
-                long deduction = (value + fee) * numberOfRecipients;
+                long deduction = value * numberOfRecipients + fee;
 
                 if (deduction <= available) {
                     as.adjustAvailable(from, -deduction);
