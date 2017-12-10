@@ -219,6 +219,10 @@
                     <quiet>true</quiet>
                     <instrumentation>
                         <ignoreTrivial>true</ignoreTrivial>
+                        <excludes>
+                            <!-- GUI code coverage is not prioritized before the 1st release -->
+                            <exclude>src/org/semux/gui/**/*.class</exclude>
+                        </excludes>
                     </instrumentation>
                     <check/>
                 </configuration>

@@ -9,6 +9,7 @@ package org.semux.consensus;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -82,9 +83,8 @@ public class SemuxSync implements SyncManager {
     // task queues
     private TreeSet<Long> toDownload = new TreeSet<>();
     private Map<Long, Long> toComplete = new HashMap<>();
-    private TreeSet<Pair<Block, Channel>> toProcess = new TreeSet<>((o1, o2) -> {
-        return Long.compare(o1.getKey().getNumber(), o2.getKey().getNumber());
-    });
+    private TreeSet<Pair<Block, Channel>> toProcess = new TreeSet<>(
+            Comparator.comparingLong(o -> o.getKey().getNumber()));
     private long target;
     private final Object lock = new Object();
 
@@ -307,7 +307,7 @@ public class SemuxSync implements SyncManager {
     }
 
     /**
-     * Check if a block is success, and apply to the chain if yes.
+     * Check if a block is valid, and apply to the chain if yes.
      * 
      * @param block
      * @return
