@@ -41,7 +41,12 @@ public enum TransactionType {
     /**
      * (0x06) Call a contract.
      */
-    CALL(0x06);
+    CALL(0x06),
+
+    /**
+     * (0x07) Balance transfer to multiple recipients.
+     */
+    TRANSFER_MANY(0x07);
 
     private static final TransactionType[] map = new TransactionType[256];
     static {

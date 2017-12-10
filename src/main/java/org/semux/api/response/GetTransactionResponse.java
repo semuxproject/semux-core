@@ -81,7 +81,7 @@ public class GetTransactionResponse extends ApiHandlerResponse {
                     Hex.encode0x(tx.getHash()),
                     tx.getType().toString(),
                     Hex.encode0x(tx.getFrom()),
-                    Hex.encode0x(tx.getTo()),
+                    Hex.encode0x(tx.getRecipient(0)),
                     tx.getValue(),
                     tx.getFee(),
                     tx.getNonce(),

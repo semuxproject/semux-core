@@ -15,6 +15,9 @@ import static io.netty.handler.codec.http.HttpResponseStatus.UNPROCESSABLE_ENTIT
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -72,6 +75,19 @@ public class ApiHandlerImpl implements ApiHandler {
     private final Kernel kernel;
 
     /**
+     * Required parameters of each type of transaction
+     */
+    private static final EnumMap<TransactionType, List<String>> TRANSACTION_REQUIRED_PARAMS = new EnumMap<>(
+            TransactionType.class);
+    static {
+        TRANSACTION_REQUIRED_PARAMS.put(TransactionType.TRANSFER, Arrays.asList("from", "to", "value", "fee"));
+        TRANSACTION_REQUIRED_PARAMS.put(TransactionType.TRANSFER_MANY, Arrays.asList("from", "to[]", "value", "fee"));
+        TRANSACTION_REQUIRED_PARAMS.put(TransactionType.DELEGATE, Arrays.asList("from", "fee"));
+        TRANSACTION_REQUIRED_PARAMS.put(TransactionType.VOTE, Arrays.asList("from", "to", "value", "fee"));
+        TRANSACTION_REQUIRED_PARAMS.put(TransactionType.UNVOTE, Arrays.asList("from", "to", "value", "fee"));
+    }
+
+    /**
      * Create an API handler.
      *
      * @param kernel
@@ -81,7 +97,7 @@ public class ApiHandlerImpl implements ApiHandler {
     }
 
     @Override
-    public ApiHandlerResponse service(String uri, Map<String, String> params, HttpHeaders headers)
+    public ApiHandlerResponse service(String uri, Map<String, Object> params, HttpHeaders headers)
             throws ApiHandlerException {
         if ("/".equals(uri)) {
             return new GetRootResponse(true, "Semux API works");
@@ -391,7 +407,7 @@ public class ApiHandlerImpl implements ApiHandler {
      */
     private ApiHandlerResponse addToBlackList(Map<String, String> params) {
         try {
-            String ip = params.get("ip");
+            String ip = (String) params.get("ip");
             if (ip == null || ip.trim().length() == 0) {
                 return failure("Invalid parameter: ip can't be empty", BAD_REQUEST);
             }
@@ -411,7 +427,7 @@ public class ApiHandlerImpl implements ApiHandler {
      */
     private ApiHandlerResponse addToWhiteList(Map<String, String> params) {
         try {
-            String ip = params.get("ip");
+            String ip = (String) params.get("ip");
             if (ip == null || ip.trim().length() == 0) {
                 return failure("Invalid parameter: ip can't be empty", BAD_REQUEST);
             }
@@ -607,7 +623,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse doTransaction(Command cmd, Map<String, String> params) {
+    private ApiHandlerResponse doTransaction(Command cmd, Map<String, Object> params) {
         // [1] check if kernel.getWallet().is unlocked
         if (!kernel.getWallet().isUnlocked()) {
             return failure("Wallet is locked", INTERNAL_SERVER_ERROR);
@@ -618,6 +634,9 @@ public class ApiHandlerImpl implements ApiHandler {
         switch (cmd) {
         case TRANSFER:
             type = TransactionType.TRANSFER;
+            break;
+        case TRANSFER_MANY:
+            type = TransactionType.TRANSFER_MANY;
             break;
         case DELEGATE:
             type = TransactionType.DELEGATE;
@@ -636,15 +655,15 @@ public class ApiHandlerImpl implements ApiHandler {
         try {
             Transaction tx = new TransactionBuilder(kernel)
                     .withType(type)
-                    .withFrom(params.get("from"))
-                    .withTo(params.get("to"))
-                    .withValue(params.get("value"))
-                    .withFee(params.get("fee"))
-                    .withData(params.get("data"))
+                    .withFrom((String) params.get("from"))
+                    .withTo((String) params.get("to"))
+                    .withValue((String) params.get("value"))
+                    .withFee((String) params.get("fee"))
+                    .withData((String) params.get("data"))
                     .build();
 
             if (kernel.getPendingManager().addTransactionSync(tx)) {
-                return new DoTransactionResponse(true, Hex.encode0x(tx.getHash()));
+                return new DoTransactionResponse(true, null, Hex.encode0x(tx.getHash()));
             } else {
                 // TODO: report the actual reason of rejection
                 return failure("Transaction rejected by pending manager", UNPROCESSABLE_ENTITY);

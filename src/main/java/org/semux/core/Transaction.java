@@ -6,9 +6,12 @@
  */
 package org.semux.core;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 
+import org.semux.core.exception.TransactionException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hash;
@@ -118,7 +121,7 @@ public class Transaction implements Callable<Boolean> {
     public boolean validate() {
         return hash != null && hash.length == 32 //
                 && type != null //
-                && to != null && to.length == 20 //
+                && to != null && to.length >= EdDSA.ADDRESS_LEN && (to.length % EdDSA.ADDRESS_LEN == 0) //
                 && value >= 0 //
                 && fee >= 0 //
                 && nonce >= 0 //
@@ -163,8 +166,40 @@ public class Transaction implements Callable<Boolean> {
      * 
      * @return
      */
-    public byte[] getTo() {
+    protected byte[] getTo() {
         return to;
+    }
+
+    /**
+     * Returns an array of recipients
+     *
+     * @return an array of recipients' address
+     */
+    public byte[][] getRecipients() {
+        int numberOfRecipients = numberOfRecipients();
+        byte[][] recipients = new byte[numberOfRecipients][EdDSA.ADDRESS_LEN];
+        for (int i = 0; i < numberOfRecipients; i++) {
+            recipients[i] = getRecipient(i);
+        }
+        return recipients;
+    }
+
+    public byte[] getRecipient(int i) {
+        return Arrays.copyOfRange(to, i * EdDSA.ADDRESS_LEN, EdDSA.ADDRESS_LEN);
+    }
+
+    /**
+     * Returns the number of recipients by checking the length of {@link #to} array
+     *
+     * @return number of recipients
+     */
+    public int numberOfRecipients() {
+        int toLength = Array.getLength(to);
+        if (toLength % EdDSA.ADDRESS_LEN != 0) {
+            throw new TransactionException(
+                    "then length of 'byte[] to' array is not a multiple of " + EdDSA.ADDRESS_LEN);
+        }
+        return toLength / EdDSA.ADDRESS_LEN;
     }
 
     /**

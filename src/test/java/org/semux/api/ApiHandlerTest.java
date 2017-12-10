@@ -399,6 +399,26 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
     }
 
     @Test
+    public void testTransferMany() throws IOException, InterruptedException {
+        EdDSA key1 = new EdDSA(), key2 = new EdDSA();
+        String uri = "/transfer_many?&from=" + wallet.getAccount(0).toAddressString() +
+                "&to[]=" + key1.toAddressString() +
+                "&to[]=" + key2.toAddressString() +
+                "&value=1000000000&fee=" + config.minTransactionFee() +
+                "&data=test";
+        DoTransactionResponse response = request(uri, DoTransactionResponse.class);
+        assertTrue(response.success);
+        assertNotNull(response.txId);
+
+        Thread.sleep(200);
+
+        List<Transaction> list = pendingMgr.getTransactions();
+        assertFalse(list.isEmpty());
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.txId));
+        assertEquals(list.get(list.size() - 1).getType(), TransactionType.TRANSFER_MANY);
+    }
+
+    @Test
     public void testDelegate() throws IOException, InterruptedException {
         String uri = "/delegate?&from=" + wallet.getAccount(0).toAddressString() + "&fee=" + config.minTransactionFee()
                 + "&data=" + Hex.encode(Bytes.of("test_delegate"));

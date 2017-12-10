@@ -6,6 +6,7 @@
  */
 package org.semux.core;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -85,6 +86,20 @@ public class TransactionExecutor {
                     as.adjustAvailable(from, -value - fee);
                     as.adjustAvailable(to, value);
 
+                    result.setSuccess(true);
+                }
+                break;
+            }
+            case TRANSFER_MANY: {
+                byte[][] recipients = tx.getRecipients();
+                int numberOfRecipients = Array.getLength(recipients);
+                long deduction = (value + fee) * numberOfRecipients;
+
+                if (deduction <= available) {
+                    as.adjustAvailable(from, -deduction);
+                    for (byte[] recipient : recipients) {
+                        as.adjustAvailable(recipient, value);
+                    }
                     result.setSuccess(true);
                 }
                 break;

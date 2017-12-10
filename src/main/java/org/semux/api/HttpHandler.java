@@ -16,6 +16,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.api.exception.ApiHandlerException;
@@ -57,6 +58,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
     private static final int MAX_BODY_SIZE = 512 * 1024; // 512KB
     private static final Charset CHARSET = CharsetUtil.UTF_8;
+    private static final Pattern ARRAY_PARAM_PATTERN = Pattern.compile("\\[\\]$");
 
     private Config config;
     private ApiHandler apiHandler;
@@ -147,12 +149,13 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 }
 
                 // filter parameters
-                Map<String, String> map = new HashMap<>();
+                Map<String, Object> map = new HashMap<>();
                 for (Map.Entry<String, List<String>> entry : params.entrySet()) {
                     List<String> v = entry.getValue();
                     // duplicate names are not allowed.
                     if (!v.isEmpty()) {
-                        map.put(entry.getKey(), v.get(0));
+                        boolean isArray = ARRAY_PARAM_PATTERN.matcher(entry.getKey()).find();
+                        map.put(entry.getKey(), isArray ? v : v.get(0));
                     }
                 }
 

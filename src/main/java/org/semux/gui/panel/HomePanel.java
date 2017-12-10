@@ -11,6 +11,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -259,7 +260,8 @@ public class HomePanel extends JPanel implements ActionListener {
         }
         transactions.removeAll();
         for (Transaction tx : list) {
-            boolean inBound = accounts.contains(ByteArray.of(tx.getTo()));
+            boolean inBound = Arrays.stream(tx.getRecipients())
+                    .anyMatch(recipient -> accounts.contains(ByteArray.of(recipient)));
             boolean outBound = accounts.contains(ByteArray.of(tx.getFrom()));
             transactions.add(new TransactionPanel(tx, inBound, outBound, SwingUtil.getTransactionDescription(gui, tx)));
         }

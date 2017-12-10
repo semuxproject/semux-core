@@ -277,7 +277,9 @@ public class BlockchainImpl implements Blockchain {
             // [3] update transaction_by_account index
             addTransactionToAccount(tx, tx.getFrom());
             if (!Arrays.equals(tx.getFrom(), tx.getTo())) {
-                addTransactionToAccount(tx, tx.getTo());
+                for (byte[] recipient : tx.getRecipients()) {
+                    addTransactionToAccount(tx, recipient);
+                }
             }
         }
 
