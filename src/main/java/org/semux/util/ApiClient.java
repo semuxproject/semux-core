@@ -16,8 +16,9 @@ import java.util.Map;
 
 import org.semux.crypto.Hex;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+/**
+ * Simple API client.
+ */
 public class ApiClient {
 
     private InetSocketAddress server;
@@ -25,7 +26,7 @@ public class ApiClient {
     private String password;
 
     /**
-     * Crate an ApiUtil instance.
+     * Crate an API client instance.
      * 
      * @param server
      * @param username
@@ -38,7 +39,7 @@ public class ApiClient {
     }
 
     /**
-     * Sends an API request. <br>
+     * Sends a request. <br>
      * <br>
      * NOTE: Byte array parameters will be automatically converted into its Hex
      * representation.
@@ -48,7 +49,7 @@ public class ApiClient {
      * @return
      * @throws IOException
      */
-    public <T> T request(Class<T> clazz, String cmd, Map<String, Object> params) throws IOException {
+    public String request(String cmd, Map<String, Object> params) throws IOException {
         // construct URL
         String url = "http://" + server.getAddress().getHostAddress() + ":" + server.getPort() + "/" + cmd;
 
@@ -71,11 +72,11 @@ public class ApiClient {
         HttpURLConnection con = (HttpURLConnection) u.openConnection();
         con.setRequestProperty("Authorization", BasicAuth.generateAuth(username, password));
 
-        return new ObjectMapper().readValue(con.getInputStream(), clazz);
+        return IOUtil.readStreamAsString(con.getInputStream());
     }
 
     /**
-     * Sends an API request.<br>
+     * Sends a request.<br>
      * <br>
      * NOTE: Byte array parameters will be automatically converted into its Hex
      * representation.
@@ -85,12 +86,12 @@ public class ApiClient {
      * @return
      * @throws IOException
      */
-    public <T> T request(Class<T> clazz, String cmd, Object... params) throws IOException {
+    public String request(String cmd, Object... params) throws IOException {
         Map<String, Object> map = new HashMap<>();
         for (int i = 0; i + 1 < params.length; i += 2) {
             map.put(params[i].toString(), params[i + 1]);
         }
 
-        return request(clazz, cmd, map);
+        return request(cmd, map);
     }
 }

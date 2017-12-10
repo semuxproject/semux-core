@@ -6,7 +6,6 @@
  */
 package org.semux.util;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -17,11 +16,10 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.semux.api.SemuxAPIMock;
-import org.semux.api.response.GetBlockResponse;
 import org.semux.config.Config;
 import org.semux.rules.TemporaryDBRule;
 
-public class ApiUtilTest {
+public class ApiClientTest {
 
     @ClassRule
     public static TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
@@ -44,10 +42,10 @@ public class ApiUtilTest {
         Config config = api.getKernel().getConfig();
         ApiClient api = new ApiClient(new InetSocketAddress(API_IP, API_PORT), config.apiUsername(),
                 config.apiPassword());
-        GetBlockResponse response = api.request(GetBlockResponse.class, cmd, "number", 0);
+        String response = api.request(cmd, "number", 0);
 
-        assertTrue(response.success);
-        assertNotNull(response.block);
+        assertTrue(response.contains("success"));
+        assertTrue(response.contains("result"));
     }
 
     @AfterClass

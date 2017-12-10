@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import org.semux.api.SemuxAPIMock;
-import org.semux.api.response.GetInfoResponse;
 import org.semux.config.Config;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
@@ -43,7 +42,7 @@ public class APIPerformance {
 
                 ApiClient a = new ApiClient(new InetSocketAddress(API_IP, API_PORT), config.apiUsername(),
                         config.apiPassword());
-                a.request(GetInfoResponse.class, "get_info");
+                a.request("get_info");
             }
             long t2 = System.nanoTime();
             logger.info("Perf_api_basic: " + (t2 - t1) / 1_000 / REPEAT + " μs/time");
