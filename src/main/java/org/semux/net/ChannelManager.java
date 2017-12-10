@@ -50,11 +50,7 @@ public class ChannelManager {
      * @return
      */
     public boolean isAcceptable(InetSocketAddress address) {
-        if (ipFilter == null) {
-            return true;
-        } else {
-            return ipFilter.isAcceptable(address);
-        }
+        return ipFilter == null || ipFilter.isAcceptable(address);
     }
 
     /**

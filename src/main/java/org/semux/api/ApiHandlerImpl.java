@@ -253,8 +253,7 @@ public class ApiHandlerImpl implements ApiHandler {
                             kernel.getBlockchain().getDelegateState().getVotes(Hex.parse(delegate)).entrySet()
                                     .parallelStream()
                                     .collect(Collectors.toMap(
-                                            entry -> Hex.PREF + entry.getKey().toString(),
-                                            entry -> entry.getValue()))));
+                                            entry -> Hex.PREF + entry.getKey().toString(), Map.Entry::getValue))));
                 } else {
                     return failure("Invalid parameter: delegate can't be null");
                 }

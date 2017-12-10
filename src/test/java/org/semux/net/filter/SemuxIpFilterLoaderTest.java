@@ -52,7 +52,7 @@ public class SemuxIpFilterLoaderTest {
                 { getFile("exception_type_cast1.json"), null, ParseException.class },
                 { getFile("exception_type_cast2.json"), null, ParseException.class },
                 { getFile("exception_type_cast3.json"), null, ParseException.class }, });
-    };
+    }
 
     File jsonFile;
 

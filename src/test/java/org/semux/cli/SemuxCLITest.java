@@ -392,7 +392,8 @@ public class SemuxCLITest {
         // verification
         verify(wallet).getAccount(addressBytes);
         verify(account).getPrivateKey();
-        assertEquals(Hex.encode(account.getPrivateKey()), systemOutRule.getLog().trim());
+        assertEquals(CLIMessages.get("PrivateKeyIs", Hex.encode(account.getPrivateKey())),
+                systemOutRule.getLog().trim());
     }
 
     @Test

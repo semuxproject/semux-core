@@ -25,7 +25,7 @@ import io.netty.handler.codec.http.HttpHeaders;
 public class HttpHandlerTest {
 
     private static String ip = "127.0.0.1";
-    private static int port = 5171;
+    private static int port = 15171;
 
     private String uri = null;
     private Map<String, String> params = null;

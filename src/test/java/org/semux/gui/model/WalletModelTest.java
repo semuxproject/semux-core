@@ -62,9 +62,7 @@ public class WalletModelTest {
         }).when(listener).actionPerformed(any());
         model.addListener(listener);
 
-        new Thread(() -> {
-            model.fireUpdateEvent();
-        }).start();
+        new Thread(() -> model.fireUpdateEvent()).start();
 
         await().until(actionPerformed::get);
 

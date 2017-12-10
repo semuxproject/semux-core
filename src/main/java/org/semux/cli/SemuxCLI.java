@@ -229,8 +229,7 @@ public class SemuxCLI extends Launcher {
             logger.error(CLIMessages.get("AddressNotInWallet"));
             SystemUtil.exit(1);
         } else {
-            String privateKey = Hex.encode(account.getPrivateKey());
-            System.out.println(privateKey);
+            System.out.println(CLIMessages.get("PrivateKeyIs", Hex.encode(account.getPrivateKey())));
         }
     }
 
