@@ -85,6 +85,17 @@ public class TransactionTest {
                 bytes.length, 1000000.0 * bytes.length / 1024 / 1024 / 1024);
     }
 
+    @Test
+    public void testGetRecipients() {
+        Transaction tx = new Transaction(TransactionType.TRANSFER_MANY, Bytes.random(EdDSA.ADDRESS_LEN * 10), value,
+                fee, nonce, timestamp, Bytes.EMPTY_BYTES).sign(key);
+        byte[][] recipients = tx.getRecipients();
+        assertEquals(10, recipients.length);
+        for (byte[] recipient : recipients) {
+            assertEquals(EdDSA.ADDRESS_LEN, recipient.length);
+        }
+    }
+
     private void testFields(Transaction tx) {
         assertEquals(type, tx.getType());
         assertArrayEquals(key.toAddress(), tx.getFrom());

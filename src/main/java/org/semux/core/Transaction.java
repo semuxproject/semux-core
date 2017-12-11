@@ -203,7 +203,7 @@ public class Transaction implements Callable<Boolean> {
      * @return a recipient's address
      */
     public byte[] getRecipient(int i) {
-        return Arrays.copyOfRange(to, i * EdDSA.ADDRESS_LEN, EdDSA.ADDRESS_LEN);
+        return Arrays.copyOfRange(to, i * EdDSA.ADDRESS_LEN, i * EdDSA.ADDRESS_LEN + EdDSA.ADDRESS_LEN);
     }
 
     /**
