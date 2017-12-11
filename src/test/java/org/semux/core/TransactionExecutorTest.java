@@ -98,7 +98,7 @@ public class TransactionExecutorTest {
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(EdDSA.ADDRESS_LEN * numberOfRecipients);
         long value = 5;
-        long fee = config.minTransactionFee();
+        long fee = config.minTransactionFee() * 2;
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);

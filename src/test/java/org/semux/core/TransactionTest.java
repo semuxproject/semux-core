@@ -63,6 +63,28 @@ public class TransactionTest {
         logger.info("tx size: {} B, {} GB per 1M txs", bytes.length, 1000000.0 * bytes.length / 1024 / 1024 / 1024);
     }
 
+    @Test
+    public void testTransactionSizeMaximumRecipients() {
+        // binary search for maximum number of recipients per transaction
+        int low = 1, high = Transaction.MAX_SIZE / EdDSA.ADDRESS_LEN, mid = (low + high) / 2;
+        Transaction tx = new Transaction(TransactionType.TRANSFER_MANY, Bytes.random(EdDSA.ADDRESS_LEN * mid), value,
+                fee, nonce, timestamp, Bytes.EMPTY_BYTES).sign(key);
+        while (high - low > 1) {
+            if (tx.validate()) {
+                low = mid;
+            } else {
+                high = mid;
+            }
+            mid = (low + high) / 2;
+            tx = new Transaction(TransactionType.TRANSFER_MANY, Bytes.random(EdDSA.ADDRESS_LEN * mid), value, fee,
+                    nonce, timestamp, Bytes.EMPTY_BYTES).sign(key);
+        }
+
+        byte[] bytes = tx.toBytes();
+        logger.info("tx size with maximum number of recipients: {} recipients, {} B, {} GB per 1M txs", mid,
+                bytes.length, 1000000.0 * bytes.length / 1024 / 1024 / 1024);
+    }
+
     private void testFields(Transaction tx) {
         assertEquals(type, tx.getType());
         assertArrayEquals(key.toAddress(), tx.getFrom());

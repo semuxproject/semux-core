@@ -6,7 +6,6 @@
  */
 package org.semux.core;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -75,7 +74,7 @@ public class TransactionExecutor {
             }
 
             // check transaction fee
-            if (fee < config.minTransactionFee()) {
+            if (fee < tx.numberOfRecipients() * config.minTransactionFee()) {
                 continue;
             }
 
@@ -92,8 +91,7 @@ public class TransactionExecutor {
             }
             case TRANSFER_MANY: {
                 byte[][] recipients = tx.getRecipients();
-                int numberOfRecipients = Array.getLength(recipients);
-                long deduction = value * numberOfRecipients + fee;
+                long deduction = value * recipients.length + fee;
 
                 if (deduction <= available) {
                     as.adjustAvailable(from, -deduction);

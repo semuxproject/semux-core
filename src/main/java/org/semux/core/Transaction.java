@@ -6,7 +6,6 @@
  */
 package org.semux.core;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 
@@ -17,9 +16,17 @@ import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xbill.DNS.Address;
 
 public class Transaction implements Callable<Boolean> {
+
+    private static final Logger logger = LoggerFactory.getLogger(Transaction.class);
+
+    public static final int MAX_SIZE = 102_400; // 100KB
+
+    public static final int MAX_DATA_LENGTH = 128;
 
     private byte[] hash;
 
@@ -118,6 +125,11 @@ public class Transaction implements Callable<Boolean> {
      * @return true if success, otherwise false
      */
     public boolean validate() {
+        if (size() > MAX_SIZE) {
+            logger.info("ignoring large transaction (size: {}, hash: {})", size(), getHash());
+            return false;
+        }
+
         return hash != null && hash.length == 32 //
                 && type != null //
                 && to != null && to.length >= EdDSA.ADDRESS_LEN && (to.length % EdDSA.ADDRESS_LEN == 0) //
@@ -125,12 +137,12 @@ public class Transaction implements Callable<Boolean> {
                 && fee >= 0 //
                 && nonce >= 0 //
                 && timestamp > 0 //
-                && data != null && (data.length <= 128) //
+                && data != null && (data.length <= MAX_DATA_LENGTH) //
                 && encoded != null //
                 && signature != null //
 
                 && Arrays.equals(Hash.h256(encoded), hash) //
-                && EdDSA.verify(hash, signature);
+                && EdDSA.verify(hash, signature); //
     }
 
     /**
@@ -183,6 +195,13 @@ public class Transaction implements Callable<Boolean> {
         return recipients;
     }
 
+    /**
+     * Returns number <code>i</code> recipient of the transaction
+     *
+     * @param i
+     *            number of a recipient
+     * @return a recipient's address
+     */
     public byte[] getRecipient(int i) {
         return Arrays.copyOfRange(to, i * EdDSA.ADDRESS_LEN, EdDSA.ADDRESS_LEN);
     }
@@ -193,7 +212,7 @@ public class Transaction implements Callable<Boolean> {
      * @return number of recipients
      */
     public int numberOfRecipients() {
-        int toLength = Array.getLength(to);
+        int toLength = to.length;
         if (toLength % EdDSA.ADDRESS_LEN != 0) {
             throw new TransactionException(
                     "then length of 'byte[] to' array is not a multiple of " + EdDSA.ADDRESS_LEN);
@@ -267,6 +286,15 @@ public class Transaction implements Callable<Boolean> {
         enc.writeBytes(signature.toBytes());
 
         return enc.toBytes();
+    }
+
+    /**
+     * Size of the transaction in bytes
+     *
+     * @return Size of the transaction in bytes
+     */
+    public int size() {
+        return toBytes().length;
     }
 
     /**
