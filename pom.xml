@@ -139,7 +139,7 @@
                                 <copy todir="${dist.base}/windows">
                                     <fileset dir="${project.basedir}">
                                         <include name="config/**"/>
-                                        <include name="LICENSE"/>
+                                        <include name="LICENSE*"/>
                                     </fileset>
                                     <fileset dir="${project.basedir}/target">
                                         <include name="semux.exe"/>
@@ -151,12 +151,13 @@
                                       tofile="${dist.base}/windows/config/logback.xml"/> />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis"/>
                                 <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis"/>
+                                <fixcrlf srcdir="${dist.base}/windows" includes="LICENSE*" eol="dos" eof="asis"/>
 
                                 <!-- unix build (executable jar) -->
                                 <copy todir="${dist.base}/unix">
                                     <fileset dir="${project.basedir}">
                                         <include name="config/**"/>
-                                        <include name="LICENSE"/>
+                                        <include name="LICENSE*"/>
                                     </fileset>
                                 </copy>
                                 <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar"
@@ -219,10 +220,6 @@
                     <quiet>true</quiet>
                     <instrumentation>
                         <ignoreTrivial>true</ignoreTrivial>
-                        <excludes>
-                            <!-- GUI code coverage is not prioritized before the 1st release -->
-                            <exclude>src/org/semux/gui/**/*.class</exclude>
-                        </excludes>
                     </instrumentation>
                     <check/>
                 </configuration>
