@@ -24,7 +24,7 @@ public class Transaction implements Callable<Boolean> {
 
     private static final Logger logger = LoggerFactory.getLogger(Transaction.class);
 
-    public static final int MAX_SIZE = 102_400; // 100KB
+    public static final int MAX_SIZE = 8192; // 8KB
 
     public static final int MAX_DATA_LENGTH = 128;
 

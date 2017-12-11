@@ -322,6 +322,15 @@ public class Block {
         return enc.toBytes();
     }
 
+    /**
+     * Get block size in bytes
+     *
+     * @return block size in bytes
+     */
+    public int size() {
+        return toBytesHeader().length + toBytesTransactions().length + toBytesResults().length + toBytesVotes().length;
+    }
+
     public static Block fromBytes(byte[] h, byte[] t, byte[] r, byte[] v) {
         BlockHeader header = BlockHeader.fromBytes(h);
 
