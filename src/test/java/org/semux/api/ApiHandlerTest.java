@@ -404,7 +404,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         String uri = "/transfer_many?&from=" + wallet.getAccount(0).toAddressString() +
                 "&to[]=" + key1.toAddressString() +
                 "&to[]=" + key2.toAddressString() +
-                "&value=1000000000&fee=" + config.minTransactionFee() +
+                "&value=1000000000&fee=" + config.minTransactionFee() * 2 +
                 "&data=test";
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
