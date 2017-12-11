@@ -126,7 +126,7 @@ public class Transaction implements Callable<Boolean> {
      */
     public boolean validate() {
         if (size() > MAX_SIZE) {
-            logger.info("ignoring large transaction (size: {}, hash: {})", size(), getHash());
+            logger.info("ignoring large transaction (size: {}, hash: {})", size(), Hex.encode(getHash()));
             return false;
         }
 
