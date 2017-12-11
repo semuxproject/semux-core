@@ -92,11 +92,14 @@ public class VoteSet {
      * Add votes to this set, by iteratively calling {@link #addVote(Vote)}.
      * 
      * @param votes
+     * @return Number of votes added
      */
-    public void addVotes(Collection<Vote> votes) {
+    public int addVotes(Collection<Vote> votes) {
+        int n = 0;
         for (Vote v : votes) {
-            addVote(v);
+            n += addVote(v) ? 1 : 0;
         }
+        return n;
     }
 
     /**
@@ -149,7 +152,8 @@ public class VoteSet {
      * @return
      */
     public List<Vote> getApprovals(byte[] blockHash) {
-        return new ArrayList<>(approvals.get(ByteArray.of(blockHash)).values());
+        Map<String, Vote> map = approvals.get(ByteArray.of(blockHash));
+        return map == null ? new ArrayList<>() : new ArrayList<>(map.values());
     }
 
     /**

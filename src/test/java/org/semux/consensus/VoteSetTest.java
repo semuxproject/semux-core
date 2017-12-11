@@ -6,10 +6,12 @@
  */
 package org.semux.consensus;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -59,6 +61,35 @@ public class VoteSetTest {
     }
 
     @Test
+    public void testClear() {
+        Vote vote = Vote.newApprove(VoteType.VALIDATE, height, view, Bytes.EMPTY_HASH);
+        vote.sign(v1);
+        assertTrue(vs.addVote(vote));
+        Vote vote2 = Vote.newReject(VoteType.VALIDATE, height, view);
+        vote2.sign(v1);
+        assertTrue(vs.addVote(vote2));
+
+        assertEquals(1, vs.getApprovals(Bytes.EMPTY_HASH).size());
+        assertEquals(1, vs.getRejections().size());
+        vs.clear();
+        assertEquals(0, vs.getApprovals(Bytes.EMPTY_HASH).size());
+        assertEquals(0, vs.getRejections().size());
+    }
+
+    @Test
+    public void testAddVotes() {
+        Vote vote = Vote.newApprove(VoteType.VALIDATE, height, view, Bytes.EMPTY_HASH);
+        vote.sign(v1);
+        Vote vote2 = Vote.newReject(VoteType.VALIDATE, height, view);
+        vote2.sign(v1);
+        assertEquals(2, vs.addVotes(Arrays.asList(vote, vote2)));
+        assertEquals(2, vs.size());
+
+        assertEquals(1, vs.getApprovals(Bytes.EMPTY_HASH).size());
+        assertEquals(1, vs.getRejections().size());
+    }
+
+    @Test
     public void testTwoThirds() {
         Vote vote = Vote.newApprove(VoteType.VALIDATE, height, view, Bytes.EMPTY_HASH);
         vote.sign(v1);
@@ -73,5 +104,10 @@ public class VoteSetTest {
         assertTrue(vs.addVote(vote));
         assertTrue(vs.anyApproved().isPresent());
         assertTrue(vs.isApproved(Bytes.EMPTY_HASH));
+    }
+
+    @Test
+    public void testToString() {
+        assertTrue(!vs.toString().startsWith("java.lang.Object"));
     }
 }
