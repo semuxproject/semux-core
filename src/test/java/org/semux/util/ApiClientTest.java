@@ -44,7 +44,7 @@ public class ApiClientTest {
                 config.apiPassword());
         String response = api.request(cmd, "number", 0);
 
-        assertTrue(response.contains("success"));
+        assertTrue(response.contains("\"success\":true"));
         assertTrue(response.contains("result"));
     }
 

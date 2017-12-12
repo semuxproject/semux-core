@@ -266,7 +266,7 @@ public class ApiHandlerTest {
         assertEquals(Hex.encode0x(genesisBlock.getPrevHash()), blockJson.prevHash);
         assertEquals(genesisBlock.getTimestamp(), blockJson.timestamp.longValue());
         assertEquals(Hex.encode0x(genesisBlock.getTransactionsRoot()), blockJson.transactionsRoot);
-        assertEquals(Hex.encode(genesisBlock.getData()), blockJson.data);
+        assertEquals(Hex.encode0x(genesisBlock.getData()), blockJson.data);
     }
 
     @Test

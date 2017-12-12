@@ -99,15 +99,15 @@ public class SendPanel extends JPanel implements ActionListener {
         feeText.setActionCommand(Action.SEND.name());
         feeText.addActionListener(this);
 
-        JLabel lblMemo = new JLabel(GUIMessages.get("Memo") + ":");
+        JLabel lblMemo = new JLabel(GUIMessages.get("Data") + ":");
         lblMemo.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblMemo.setToolTipText(GUIMessages.get("MemoTip"));
+        lblMemo.setToolTipText(GUIMessages.get("DataTip"));
 
         memoText = SwingUtil.textFieldWithCopyPastePopup();
         memoText.setColumns(10);
         memoText.setActionCommand(Action.SEND.name());
         memoText.addActionListener(this);
-        memoText.setToolTipText(GUIMessages.get("MemoTip"));
+        memoText.setToolTipText(GUIMessages.get("DataTip"));
 
         JLabel lblSem1 = new JLabel("SEM");
 
@@ -262,7 +262,7 @@ public class SendPanel extends JPanel implements ActionListener {
                 } else if (to.length != 20) {
                     JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidReceivingAddress"));
                 } else if (Bytes.of(memo).length > 128) {
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidMemo", 128));
+                    JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidData", 128));
                 } else {
                     int ret = JOptionPane.showConfirmDialog(this,
                             GUIMessages.get("TransferInfo", SwingUtil.formatValue(value), Hex.encode0x(to)),

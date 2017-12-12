@@ -99,7 +99,7 @@ public class GetBlockResponse extends ApiHandlerResponse {
                     Hex.encode0x(block.getTransactionsRoot()),
                     Hex.encode0x(block.getResultsRoot()),
                     Hex.encode0x(block.getStateRoot()),
-                    (block.getData() == null || block.getData().length == 0) ? null : Hex.encode(block.getData()),
+                    Hex.encode0x(block.getData()),
                     block.getTransactions().stream().map(GetTransactionResponse.Result::new)
                             .collect(Collectors.toList()));
         }

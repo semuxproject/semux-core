@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2017 The Semux Developers
- *
+ * <p>
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
@@ -43,7 +43,7 @@ public class SemuxPerformance {
 
             ApiClient api = new ApiClient(server, username, password);
             String response = api.request("transfer", params);
-            if (!response.contains("success")) {
+            if (!response.contains("\"success\":true")) {
                 System.out.println(response);
                 return;
             }
