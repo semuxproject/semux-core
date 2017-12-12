@@ -12,7 +12,7 @@ line limit: 120 chars
 
 To format your code, please run the following command:
 ```
-mvn formatter:format
+mvn formatter:format license:format
 ```
 
 An [Eclipse Java formatter](https://raw.githubusercontent.com/semuxproject/semux/master/misc/eclipse/formatter.xml) is also provided.

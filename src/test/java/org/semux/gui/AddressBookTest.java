@@ -11,7 +11,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.After;
@@ -19,7 +22,6 @@ import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import org.semux.gui.AddressBook;
 import org.semux.gui.AddressBook.Entry;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -103,6 +105,22 @@ public class AddressBookTest {
 
         ab.remove(username);
         assertNull(ab.getByName(username));
+    }
+
+    @Test
+    public void testEntry() {
+        Map<Entry, Integer> map = new HashMap<>();
+
+        List<Entry> list = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            Entry e = new Entry(Integer.toString(i), Integer.toString(i));
+            map.put(e, i);
+            list.add(e);
+        }
+
+        for (Entry e : list) {
+            assertEquals(e.getAddress(), map.get(e).toString());
+        }
     }
 
     @After

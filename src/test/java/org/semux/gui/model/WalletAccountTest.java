@@ -7,13 +7,16 @@
 package org.semux.gui.model;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 
+import org.apache.commons.lang3.builder.ToStringExclude;
 import org.junit.Test;
+import org.junit.experimental.theories.suppliers.TestedOn;
 import org.semux.core.state.Account;
 import org.semux.crypto.EdDSA;
 
@@ -34,6 +37,12 @@ public class WalletAccountTest {
 
         wa.setTransactions(Collections.singletonList(null));
         assertFalse(wa.getTransactions().isEmpty());
+
+        assertEquals(key, wa.getKey());
+
+        EdDSA key2 = new EdDSA();
+        wa.setKey(key2);
+        assertEquals(key2, wa.getKey());
     }
 
     @Test(expected = IllegalArgumentException.class)

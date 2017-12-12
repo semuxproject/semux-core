@@ -8,9 +8,17 @@ package org.semux.gui.model;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
 
 import org.junit.Test;
+import org.semux.Kernel;
+import org.semux.core.Blockchain;
 import org.semux.core.state.Delegate;
 import org.semux.util.Bytes;
 
@@ -46,6 +54,26 @@ public class WalletDelegateTest {
         assertEquals(2L, wd.getNumberOfBlocksForged());
         assertEquals(3L, wd.getNumberOfTurnsHit());
         assertEquals(4L, wd.getNumberOfTurnsMissed());
+
+        assertEquals(100.0 * 3 / (3 + 4), wd.getRate(), 10 ^ -8);
     }
 
+    @Test
+    public void testIsValidator() {
+        Kernel kernel = mock(Kernel.class);
+        Blockchain blockchain = mock(Blockchain.class);
+
+        String v1 = "validator1";
+        String v2 = "validator2";
+        when(kernel.getBlockchain()).thenReturn(blockchain);
+        when(blockchain.getValidators()).thenReturn(Arrays.asList(v1, v2));
+
+        Delegate d = new Delegate(address, name, registeredAt, votes);
+        WalletDelegate wd = new WalletDelegate(d);
+        assertFalse(wd.isValidator(kernel));
+
+        d = new Delegate(address, Bytes.of(v1), registeredAt, votes);
+        wd = new WalletDelegate(d);
+        assertFalse(wd.isValidator(kernel));
+    }
 }
