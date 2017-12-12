@@ -203,7 +203,7 @@ public class ApiHandlerImpl implements ApiHandler {
     }
 
     /**
-     * Validate node parameter
+     * Validate node parameter of /add_node API
      *
      * @param node
      *            node parameter of /add_node API
@@ -256,20 +256,40 @@ public class ApiHandlerImpl implements ApiHandler {
     }
 
     private ApiHandlerResponse getAccountTransactions(Map<String, String> params) {
-        String addr = params.get("address");
+        String address = params.get("address");
         String from = params.get("from");
         String to = params.get("to");
-        if (addr != null && from != null && to != null) {
-            return new GetAccountTransactionsResponse(true, kernel.getBlockchain()
-                    .getTransactions(Hex.parse(addr), Integer.parseInt(from), Integer.parseInt(to))
-                    .parallelStream()
-                    .map(GetTransactionResponse.Result::new)
-                    .collect(Collectors.toList()));
-        } else {
-            return failure(
-                    "Invalid parameter: address = " + addr + ", from = " + from + ", to = " + to,
-                    BAD_REQUEST);
+        byte[] addressBytes;
+        int fromInt;
+        int toInt;
+
+        if (address == null) {
+            return failure("address is required", BAD_REQUEST);
         }
+
+        try {
+            addressBytes = Hex.parse(address);
+        } catch (CryptoException ex) {
+            return failure("address is not a valid hexadecimal string", BAD_REQUEST);
+        }
+
+        try {
+            fromInt = Integer.parseInt(from);
+        } catch (NumberFormatException ex) {
+            return failure("from is not a valid integer", BAD_REQUEST);
+        }
+
+        try {
+            toInt = Integer.parseInt(to);
+        } catch (NumberFormatException ex) {
+            return failure("to is not a valid integer", BAD_REQUEST);
+        }
+
+        return new GetAccountTransactionsResponse(true, kernel.getBlockchain()
+                .getTransactions(addressBytes, fromInt, toInt)
+                .parallelStream()
+                .map(GetTransactionResponse.Result::new)
+                .collect(Collectors.toList()));
     }
 
     private ApiHandlerResponse getTransaction(Map<String, String> params) {
@@ -282,7 +302,7 @@ public class ApiHandlerImpl implements ApiHandler {
         try {
             hashBytes = Hex.parse(hash);
         } catch (CryptoException ex) {
-            return failure(ex.getMessage(), BAD_REQUEST);
+            return failure("hash parameter is not a valid hexadecimal string", BAD_REQUEST);
         }
 
         Transaction transaction = kernel.getBlockchain().getTransaction(hashBytes);
