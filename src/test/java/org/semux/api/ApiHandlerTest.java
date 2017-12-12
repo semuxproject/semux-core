@@ -277,11 +277,21 @@ public class ApiHandlerTest {
         GetBlockResponse response = request(uri, GetBlockResponse.class);
         assertTrue(response.success);
         assertEquals(Hex.encode0x(gen.getHash()), response.block.hash);
+        assertNotNull(response.block.transactions);
 
         uri = "/get_block?hash=" + Hex.encode(gen.getHash());
         response = request(uri, GetBlockResponse.class);
         assertTrue(response.success);
         assertEquals(Hex.encode0x(gen.getHash()), response.block.hash);
+        assertNotNull(response.block.transactions);
+    }
+
+    @Test
+    public void testGetBlockNotFound() throws IOException {
+        String uri = "/get_block?number=9999999999999999";
+        GetBlockResponse response = request(uri, GetBlockResponse.class);
+        assertFalse(response.success);
+        assertNotNull(response.message);
     }
 
     @Test

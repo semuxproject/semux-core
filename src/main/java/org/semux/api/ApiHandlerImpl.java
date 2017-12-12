@@ -36,6 +36,7 @@ import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
+import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
@@ -127,16 +128,21 @@ public class ApiHandlerImpl implements ApiHandler {
             case GET_BLOCK: {
                 String number = params.get("number");
                 String hash = params.get("hash");
+                Block block;
 
                 if (number != null) {
-                    return success(new GetBlockResponse(true,
-                            new GetBlockResponse.Result(kernel.getBlockchain().getBlock(Long.parseLong(number)))));
+                    block = kernel.getBlockchain().getBlock(Long.parseLong(number));
                 } else if (hash != null) {
-                    return success(new GetBlockResponse(true,
-                            new GetBlockResponse.Result(kernel.getBlockchain().getBlock(Hex.parse(hash)))));
+                    block = kernel.getBlockchain().getBlock(Hex.parse(hash));
                 } else {
                     return failure("Invalid parameter: number or hash can't be null");
                 }
+
+                if (block == null) {
+                    return failure("block is not found");
+                }
+
+                return success(new GetBlockResponse(true, new GetBlockResponse.Result(block)));
             }
 
             case GET_PENDING_TRANSACTIONS: {

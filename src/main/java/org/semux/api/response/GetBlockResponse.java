@@ -6,7 +6,11 @@
  */
 package org.semux.api.response;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.semux.core.Block;
+import org.semux.core.Transaction;
 import org.semux.crypto.Hex;
 import org.semux.util.TimeUtil;
 
@@ -56,6 +60,9 @@ public class GetBlockResponse extends ApiHandlerResponse {
         @JsonProperty("data")
         public final String data;
 
+        @JsonProperty("transactions")
+        public final List<GetTransactionResponse.Result> transactions;
+
         public Result(
                 @JsonProperty("hash") String hash,
                 @JsonProperty("number") Long number,
@@ -66,7 +73,8 @@ public class GetBlockResponse extends ApiHandlerResponse {
                 @JsonProperty("transactionsRoot") String transactionsRoot,
                 @JsonProperty("resultsRoot") String resultsRoot,
                 @JsonProperty("stateRoot") String stateRoot,
-                @JsonProperty("data") String data) {
+                @JsonProperty("data") String data,
+                @JsonProperty("transactions") List<GetTransactionResponse.Result> transactions) {
             this.hash = hash;
             this.number = number;
             this.coinbase = coinbase;
@@ -77,6 +85,7 @@ public class GetBlockResponse extends ApiHandlerResponse {
             this.resultsRoot = resultsRoot;
             this.stateRoot = stateRoot;
             this.data = data;
+            this.transactions = transactions;
         }
 
         public Result(Block block) {
@@ -90,7 +99,9 @@ public class GetBlockResponse extends ApiHandlerResponse {
                     Hex.encode0x(block.getTransactionsRoot()),
                     Hex.encode0x(block.getResultsRoot()),
                     Hex.encode0x(block.getStateRoot()),
-                    Hex.encode0x(block.getData()));
+                    (block.getData() == null || block.getData().length == 0) ? null : Hex.encode(block.getData()),
+                    block.getTransactions().stream().map(GetTransactionResponse.Result::new)
+                            .collect(Collectors.toList()));
         }
     }
 }

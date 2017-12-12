@@ -78,15 +78,15 @@ public class GetTransactionResponse extends ApiHandlerResponse {
 
         public Result(Transaction tx) {
             this(
-                    Hex.encode0x(tx.getHash()),
-                    tx.getType().toString(),
-                    Hex.encode0x(tx.getFrom()),
-                    Hex.encode0x(tx.getTo()),
+                    tx.getHash() == null ? null : Hex.encode0x(tx.getHash()),
+                    tx.getType() == null ? null : tx.getType().toString(),
+                    tx.getFrom() == null ? null : Hex.encode0x(tx.getFrom()),
+                    tx.getTo() == null ? null : Hex.encode0x(tx.getTo()),
                     tx.getValue(),
                     tx.getFee(),
                     tx.getNonce(),
                     new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(tx.getTimestamp())),
-                    Hex.encode0x(tx.getData()));
+                    (tx.getData() == null || tx.getData().length == 0) ? null : Hex.encode(tx.getData()));
         }
     }
 }
