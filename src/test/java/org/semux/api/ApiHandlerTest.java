@@ -487,7 +487,8 @@ public class ApiHandlerTest {
     public void testTransfer() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
         String uri = "/transfer?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + key.toAddressString()
-                + "&value=1000000000&fee=" + config.minTransactionFee() + "&data=" + Hex.encode(Bytes.of("test_transfer"));
+                + "&value=1000000000&fee=" + config.minTransactionFee() + "&data="
+                + Hex.encode(Bytes.of("test_transfer"));
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
         assertNotNull(response.txId);
@@ -532,7 +533,7 @@ public class ApiHandlerTest {
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(0).getHash(), Hex.parse(response.txId));
-        assertEquals(list.get(0).getType(), TransactionType.VOTE);
+        assertEquals(TransactionType.VOTE, list.get(0).getType());
     }
 
     @Test
@@ -556,7 +557,7 @@ public class ApiHandlerTest {
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.txId));
-        assertEquals(list.get(list.size() - 1).getType(), TransactionType.UNVOTE);
+        assertEquals(TransactionType.UNVOTE, list.get(list.size() - 1).getType());
     }
 
     private Block createBlock(Blockchain chain, List<Transaction> transactions, List<TransactionResult> results) {

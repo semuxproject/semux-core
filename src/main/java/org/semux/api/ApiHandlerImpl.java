@@ -92,68 +92,88 @@ public class ApiHandlerImpl implements ApiHandler {
 
         try {
             switch (cmd) {
-            case GET_INFO: return new GetInfoResponse(true, new GetInfoResponse.Result(kernel));
+            case GET_INFO:
+                return new GetInfoResponse(true, new GetInfoResponse.Result(kernel));
 
-            case GET_PEERS: return new GetPeersResponse(true, kernel.getChannelManager()
-                    .getActivePeers()
-                    .parallelStream()
-                    .map(GetPeersResponse.Result::new).collect(Collectors.toList()));
+            case GET_PEERS:
+                return new GetPeersResponse(true, kernel.getChannelManager()
+                        .getActivePeers()
+                        .parallelStream()
+                        .map(GetPeersResponse.Result::new).collect(Collectors.toList()));
 
-            case ADD_NODE: return addNode(params);
+            case ADD_NODE:
+                return addNode(params);
 
-            case ADD_TO_BLACKLIST: return addToBlackList(params);
+            case ADD_TO_BLACKLIST:
+                return addToBlackList(params);
 
-            case ADD_TO_WHITELIST: return addToWhiteList(params);
+            case ADD_TO_WHITELIST:
+                return addToWhiteList(params);
 
-            case GET_LATEST_BLOCK_NUMBER: return new GetLatestBlockNumberResponse(true, kernel.getBlockchain().getLatestBlockNumber());
+            case GET_LATEST_BLOCK_NUMBER:
+                return new GetLatestBlockNumberResponse(true, kernel.getBlockchain().getLatestBlockNumber());
 
-            case GET_LATEST_BLOCK: return new GetLatestBlockResponse(true,
-                    new GetBlockResponse.Result(kernel.getBlockchain().getLatestBlock()));
+            case GET_LATEST_BLOCK:
+                return new GetLatestBlockResponse(true,
+                        new GetBlockResponse.Result(kernel.getBlockchain().getLatestBlock()));
 
-            case GET_BLOCK: return getBlock(params);
+            case GET_BLOCK:
+                return getBlock(params);
 
-            case GET_PENDING_TRANSACTIONS: return new GetPendingTransactionsResponse(true, kernel.getPendingManager()
-                    .getTransactions()
-                    .parallelStream()
-                    .map(GetTransactionResponse.Result::new)
-                    .collect(Collectors.toList()));
+            case GET_PENDING_TRANSACTIONS:
+                return new GetPendingTransactionsResponse(true, kernel.getPendingManager()
+                        .getTransactions()
+                        .parallelStream()
+                        .map(GetTransactionResponse.Result::new)
+                        .collect(Collectors.toList()));
 
-            case GET_ACCOUNT_TRANSACTIONS: return getAccountTransactions(params);
+            case GET_ACCOUNT_TRANSACTIONS:
+                return getAccountTransactions(params);
 
-            case GET_TRANSACTION: return getTransaction(params);
+            case GET_TRANSACTION:
+                return getTransaction(params);
 
-            case SEND_TRANSACTION: return sendTransaction(params);
+            case SEND_TRANSACTION:
+                return sendTransaction(params);
 
-            case GET_ACCOUNT: return getAccount(params);
+            case GET_ACCOUNT:
+                return getAccount(params);
 
-            case GET_DELEGATE: return getDelegate(params);
+            case GET_DELEGATE:
+                return getDelegate(params);
 
-            case GET_VALIDATORS: return new GetValidatorsResponse(
-                    true,
-                    kernel.getBlockchain().getValidators().parallelStream()
-                            .map(v -> Hex.PREF + v)
-                            .collect(Collectors.toList()));
+            case GET_VALIDATORS:
+                return new GetValidatorsResponse(
+                        true,
+                        kernel.getBlockchain().getValidators().parallelStream()
+                                .map(v -> Hex.PREF + v)
+                                .collect(Collectors.toList()));
 
-            case GET_DELEGATES: return new GetDelegatesResponse(
-                    true,
-                    kernel.getBlockchain()
-                            .getDelegateState().getDelegates().parallelStream()
-                            .map(delegate -> new GetDelegateResponse.Result(
-                                    kernel.getBlockchain().getValidatorStats(delegate.getAddress()),
-                                    delegate))
-                            .collect(Collectors.toList()));
+            case GET_DELEGATES:
+                return new GetDelegatesResponse(
+                        true,
+                        kernel.getBlockchain()
+                                .getDelegateState().getDelegates().parallelStream()
+                                .map(delegate -> new GetDelegateResponse.Result(
+                                        kernel.getBlockchain().getValidatorStats(delegate.getAddress()),
+                                        delegate))
+                                .collect(Collectors.toList()));
 
-            case GET_VOTE: return getVote(params);
+            case GET_VOTE:
+                return getVote(params);
 
-            case GET_VOTES: return getVotes(params);
+            case GET_VOTES:
+                return getVotes(params);
 
-            case LIST_ACCOUNTS: return new ListAccountsResponse(
-                    true,
-                    kernel.getWallet().getAccounts().parallelStream()
-                            .map(acc -> Hex.PREF + acc.toAddressString())
-                            .collect(Collectors.toList()));
+            case LIST_ACCOUNTS:
+                return new ListAccountsResponse(
+                        true,
+                        kernel.getWallet().getAccounts().parallelStream()
+                                .map(acc -> Hex.PREF + acc.toAddressString())
+                                .collect(Collectors.toList()));
 
-            case CREATE_ACCOUNT: return createAccount();
+            case CREATE_ACCOUNT:
+                return createAccount();
 
             case TRANSFER:
             case DELEGATE:
@@ -246,8 +266,7 @@ public class ApiHandlerImpl implements ApiHandler {
         } else {
             return failure(
                     "Invalid parameter: address = " + addr + ", from = " + from + ", to = " + to,
-                    BAD_REQUEST
-            );
+                    BAD_REQUEST);
         }
     }
 
@@ -366,7 +385,6 @@ public class ApiHandlerImpl implements ApiHandler {
             return failure("parameter 'voter' is required", BAD_REQUEST);
         }
 
-
         if (delegate == null) {
             return failure("parameter 'delegate' is required", BAD_REQUEST);
         }
@@ -454,30 +472,41 @@ public class ApiHandlerImpl implements ApiHandler {
         }
 
         // from address
-        EdDSA from = kernel.getWallet().getAccount(Hex.parse(pFrom));
-        if (from == null) {
-            return failure("Invalid parameter: from = " + pFrom, BAD_REQUEST);
+        EdDSA fromAccount;
+        try {
+            fromAccount = kernel.getWallet().getAccount(Hex.parse(pFrom));
+            if (fromAccount == null) {
+                return failure(String.format("provided address %s doesn't belong to the wallet", pFrom), BAD_REQUEST);
+            }
+        } catch (CryptoException e) {
+            return failure("parameter 'from' is not a valid hexadecimal string", BAD_REQUEST);
         }
 
         // to address
-        byte[] to = (type == TransactionType.DELEGATE) ? from.toAddress() : Hex.parse(pTo);
-        if (to == null) {
-            return failure("Invalid parameter: to = " + pTo, BAD_REQUEST);
+        byte[] toBytes;
+        try {
+            toBytes = (type == TransactionType.DELEGATE) ? fromAccount.toAddress() : Hex.parse(pTo);
+        } catch (CryptoException e) {
+            return failure("'to' is not a valid hexadecimal string", BAD_REQUEST);
         }
 
         // value and fee
-        long value = (type == TransactionType.DELEGATE) ? kernel.getConfig().minDelegateFee()
-                : Long.parseLong(pValue);
+        long value = (type == TransactionType.DELEGATE) ? kernel.getConfig().minDelegateFee() : Long.parseLong(pValue);
         long fee = Long.parseLong(pFee);
 
         // nonce, timestamp and data
-        long nonce = kernel.getPendingManager().getNonce(from.toAddress());
+        long nonce = kernel.getPendingManager().getNonce(fromAccount.toAddress());
         long timestamp = System.currentTimeMillis();
-        byte[] data = (pData == null) ? Bytes.EMPTY_BYTES : Hex.parse(pData);
+
+        byte[] dataBytes;
+        try {
+            dataBytes = (pData == null) ? Bytes.EMPTY_BYTES : Hex.parse(pData);
+        } catch (CryptoException e) {
+            return failure("'data' is not a valid hexadecimal string", BAD_REQUEST);
+        }
 
         // sign
-        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
-        tx.sign(from);
+        Transaction tx = new Transaction(type, toBytes, value, fee, nonce, timestamp, dataBytes).sign(fromAccount);
 
         if (kernel.getPendingManager().addTransactionSync(tx)) {
             return new DoTransactionResponse(true, Hex.encode0x(tx.getHash()));
