@@ -41,6 +41,8 @@ import org.semux.util.exception.UnreachableException;
 
 public class HomePanel extends JPanel implements ActionListener {
 
+    private static final int NUMBER_OF_TRANSACTIONS = 6;
+
     private static final long serialVersionUID = 1L;
 
     private transient SemuxGUI gui;
@@ -163,10 +165,11 @@ public class HomePanel extends JPanel implements ActionListener {
             this.setBorder(new EmptyBorder(10, 10, 10, 10));
 
             JLabel lblType = new JLabel("");
-            String name = (inBound && outBound) ? "cycle" : (inBound ? "inbound" : "outbound");
-            lblType.setIcon(SwingUtil.loadImage(name, 48, 48));
-
-            String prefix = (inBound && outBound) ? "" : (inBound ? "+" : "-");
+            String bounding = inBound ? "inbound" : "outbound";
+            String name = (inBound && outBound) ? "cycle" : (bounding);
+            lblType.setIcon(SwingUtil.loadImage(name, 42, 42));
+            String mathSign = inBound ? "+" : "-";
+            String prefix = (inBound && outBound) ? "" : (mathSign);
             JLabel lblAmount = new JLabel(prefix + SwingUtil.formatValue(tx.getValue()));
             lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
@@ -202,7 +205,7 @@ public class HomePanel extends JPanel implements ActionListener {
                                     .addComponent(lblAmount, GroupLayout.PREFERRED_SIZE, 19, GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(labelAddress))
-                            .addComponent(lblType, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 48, GroupLayout.PREFERRED_SIZE))
+                            .addComponent(lblType, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 36, GroupLayout.PREFERRED_SIZE))
                         .addContainerGap())
             );
             this.setLayout(groupLayout);
@@ -248,7 +251,7 @@ public class HomePanel extends JPanel implements ActionListener {
             }
         }
         list.sort((tx1, tx2) -> Long.compare(tx2.getTimestamp(), tx1.getTimestamp()));
-        list = list.size() > 6 ? list.subList(0, 6) : list;
+        list = list.size() > NUMBER_OF_TRANSACTIONS ? list.subList(0, NUMBER_OF_TRANSACTIONS) : list;
 
         Set<ByteArray> accounts = new HashSet<>();
         for (WalletAccount a : model.getAccounts()) {
