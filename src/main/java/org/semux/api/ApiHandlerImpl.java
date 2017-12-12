@@ -9,6 +9,7 @@ package org.semux.api;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
+import static io.netty.handler.codec.http.HttpResponseStatus.NOT_IMPLEMENTED;
 import static io.netty.handler.codec.http.HttpResponseStatus.UNPROCESSABLE_ENTITY;
 
 import java.net.InetAddress;
@@ -43,6 +44,7 @@ import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
+import org.semux.api.transaction.TransactionBuilder;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
@@ -53,7 +55,6 @@ import org.semux.core.state.Delegate;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
-import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -211,7 +212,7 @@ public class ApiHandlerImpl implements ApiHandler {
      */
     private ImmutablePair<String, Integer> validateAddNodeParameter(String node) {
         if (node == null || node.length() == 0) {
-            throw new IllegalArgumentException("Invalid parameter: node can't be null");
+            throw new IllegalArgumentException("Invalid parameter: node can't be empty");
         }
 
         Matcher matcher = Pattern.compile("^(?<host>.+?):(?<port>\\d+)$").matcher(node.trim());
@@ -219,20 +220,7 @@ public class ApiHandlerImpl implements ApiHandler {
             throw new IllegalArgumentException("node parameter must in format of 'host:port'");
         }
 
-        // validate host
-        String host = matcher.group("host");
-        if (host == null) {
-            throw new IllegalArgumentException("hostname is required");
-        }
-
-        // validate port
-        String port = matcher.group("port");
-        if (port == null) {
-            throw new IllegalArgumentException("port number is required");
-        }
-        int portNumber = Integer.parseInt(port);
-
-        return new ImmutablePair<>(host, portNumber);
+        return new ImmutablePair<>(matcher.group("host"), Integer.parseInt(matcher.group("port")));
     }
 
     private ApiHandlerResponse getBlock(Map<String, String> params) {
@@ -323,7 +311,7 @@ public class ApiHandlerImpl implements ApiHandler {
             kernel.getPendingManager().addTransaction(Transaction.fromBytes(Hex.parse(raw)));
             return new SendTransactionResponse(true);
         } catch (CryptoException e) {
-            return failure(e.getMessage(), BAD_REQUEST);
+            return failure("parameter 'raw' is not a valid hexadecimal string", BAD_REQUEST);
         }
     }
 
@@ -341,10 +329,6 @@ public class ApiHandlerImpl implements ApiHandler {
         }
 
         Account account = kernel.getBlockchain().getAccountState().getAccount(addressBytes);
-        if (account == null) {
-            return failure("provided address doesn't exist in the wallet", BAD_REQUEST);
-        }
-
         return new GetAccountResponse(true, new GetAccountResponse.Result(account));
     }
 
@@ -402,19 +386,33 @@ public class ApiHandlerImpl implements ApiHandler {
     private ApiHandlerResponse getVote(Map<String, String> params) {
         String voter = params.get("voter");
         String delegate = params.get("delegate");
+        byte[] voterBytes;
+        byte[] delegateBytes;
 
         if (voter == null) {
             return failure("parameter 'voter' is required", BAD_REQUEST);
+        }
+
+        try {
+            voterBytes = Hex.parse(voter);
+        } catch (CryptoException ex) {
+            return failure("parameter 'voter' is not a valid hexadecimal string", BAD_REQUEST);
         }
 
         if (delegate == null) {
             return failure("parameter 'delegate' is required", BAD_REQUEST);
         }
 
+        try {
+            delegateBytes = Hex.parse(delegate);
+        } catch (CryptoException ex) {
+            return failure("parameter 'delegate' is not a valid hexadecimal string", BAD_REQUEST);
+        }
+
         return new GetVoteResponse(
                 true,
                 kernel.getBlockchain().getDelegateState()
-                        .getVote(Hex.parse(voter), Hex.parse(delegate)));
+                        .getVote(voterBytes, delegateBytes));
     }
 
     private ApiHandlerResponse getVotes(Map<String, String> params) {
@@ -423,13 +421,17 @@ public class ApiHandlerImpl implements ApiHandler {
             return failure("Invalid parameter: delegate can't be null", BAD_REQUEST);
         }
 
+        byte[] delegateBytes;
+        try {
+            delegateBytes = Hex.parse(delegate);
+        } catch (CryptoException ex) {
+            return failure("delegate is not a valid hexadecimal string", BAD_REQUEST);
+        }
+
         return new GetVotesResponse(
                 true,
-                kernel.getBlockchain().getDelegateState().getVotes(Hex.parse(delegate)).entrySet()
-                        .parallelStream()
-                        .collect(Collectors.toMap(
-                                entry -> Hex.PREF + entry.getKey().toString(),
-                                Map.Entry::getValue)));
+                kernel.getBlockchain().getDelegateState().getVotes(delegateBytes).entrySet().parallelStream()
+                        .collect(Collectors.toMap(entry -> Hex.PREF + entry.getKey().toString(), Map.Entry::getValue)));
     }
 
     private ApiHandlerResponse createAccount() {
@@ -444,12 +446,6 @@ public class ApiHandlerImpl implements ApiHandler {
     }
 
     private ApiHandlerResponse doTransaction(Command cmd, Map<String, String> params) {
-        String pFrom = params.get("from");
-        String pTo = params.get("to");
-        String pValue = params.get("value");
-        String pFee = params.get("fee");
-        String pData = params.get("data");
-
         // [1] check if kernel.getWallet().is unlocked
         if (!kernel.getWallet().unlocked()) {
             return failure("Wallet is locked", INTERNAL_SERVER_ERROR);
@@ -471,69 +467,28 @@ public class ApiHandlerImpl implements ApiHandler {
             type = TransactionType.UNVOTE;
             break;
         default:
-            return failure("Unsupported transaction type: " + cmd, BAD_REQUEST);
+            return failure("Unsupported transaction type: " + cmd.toString(), NOT_IMPLEMENTED);
         }
 
-        // [3] parse parameters
-        if (pFrom == null) {
-            return failure("parameter 'from' is required", BAD_REQUEST);
-        }
-
-        if (pFee == null) {
-            return failure("parameter 'fee' is required", BAD_REQUEST);
-        }
-
-        if (type != TransactionType.DELEGATE) {
-            if (pTo == null) {
-                return failure("parameter 'pTo' is required", BAD_REQUEST);
-            }
-
-            if (pValue == null) {
-                return failure("parameter 'pValue' is required", BAD_REQUEST);
-            }
-        }
-
-        // from address
-        EdDSA fromAccount;
+        // [3] build and send the transaction to PendingManager
         try {
-            fromAccount = kernel.getWallet().getAccount(Hex.parse(pFrom));
-            if (fromAccount == null) {
-                return failure(String.format("provided address %s doesn't belong to the wallet", pFrom), BAD_REQUEST);
+            Transaction tx = new TransactionBuilder(kernel)
+                    .withType(type)
+                    .withFrom(params.get("from"))
+                    .withTo(params.get("to"))
+                    .withValue(params.get("value"))
+                    .withFee(params.get("fee"))
+                    .withData(params.get("data"))
+                    .build();
+
+            if (kernel.getPendingManager().addTransactionSync(tx)) {
+                return new DoTransactionResponse(true, Hex.encode0x(tx.getHash()));
+            } else {
+                // TODO: report the actual reason of rejection
+                return failure("Transaction rejected by pending manager", UNPROCESSABLE_ENTITY);
             }
-        } catch (CryptoException e) {
-            return failure("parameter 'from' is not a valid hexadecimal string", BAD_REQUEST);
-        }
-
-        // to address
-        byte[] toBytes;
-        try {
-            toBytes = (type == TransactionType.DELEGATE) ? fromAccount.toAddress() : Hex.parse(pTo);
-        } catch (CryptoException e) {
-            return failure("'to' is not a valid hexadecimal string", BAD_REQUEST);
-        }
-
-        // value and fee
-        long value = (type == TransactionType.DELEGATE) ? kernel.getConfig().minDelegateFee() : Long.parseLong(pValue);
-        long fee = Long.parseLong(pFee);
-
-        // nonce, timestamp and data
-        long nonce = kernel.getPendingManager().getNonce(fromAccount.toAddress());
-        long timestamp = System.currentTimeMillis();
-
-        byte[] dataBytes;
-        try {
-            dataBytes = (pData == null) ? Bytes.EMPTY_BYTES : Hex.parse(pData);
-        } catch (CryptoException e) {
-            return failure("'data' is not a valid hexadecimal string", BAD_REQUEST);
-        }
-
-        // sign
-        Transaction tx = new Transaction(type, toBytes, value, fee, nonce, timestamp, dataBytes).sign(fromAccount);
-
-        if (kernel.getPendingManager().addTransactionSync(tx)) {
-            return new DoTransactionResponse(true, Hex.encode0x(tx.getHash()));
-        } else {
-            return failure("Transaction rejected by pending manager", UNPROCESSABLE_ENTITY);
+        } catch (IllegalArgumentException ex) {
+            return failure(ex.getMessage(), BAD_REQUEST);
         }
     }
 
@@ -543,7 +498,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param message
      * @return
      */
-    protected ApiHandlerResponse failure(String message, HttpResponseStatus status) {
+    private ApiHandlerResponse failure(String message, HttpResponseStatus status) {
         return new ApiHandlerResponse(false, message, status);
     }
 }
