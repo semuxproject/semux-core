@@ -16,12 +16,20 @@ public class ApiHandlerException extends Exception {
 
     public final int statusCode;
 
+    public ApiHandlerException(String response, HttpResponseStatus status, Throwable cause) {
+        super(response, cause);
+        this.response = response;
+        this.statusCode = status.code();
+    }
+
     public ApiHandlerException(String response, HttpResponseStatus status) {
+        super(response);
         this.response = response;
         this.statusCode = status.code();
     }
 
     public ApiHandlerException(HttpResponseStatus status) {
+        super(status.toString());
         this.response = status.toString();
         this.statusCode = status.code();
     }

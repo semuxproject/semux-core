@@ -266,7 +266,7 @@ public class ApiHandlerTest {
         assertEquals(Hex.encode0x(genesisBlock.getPrevHash()), blockJson.prevHash);
         assertEquals(genesisBlock.getTimestamp(), blockJson.timestamp.longValue());
         assertEquals(Hex.encode0x(genesisBlock.getTransactionsRoot()), blockJson.transactionsRoot);
-        assertEquals(Hex.encode0x(genesisBlock.getData()), blockJson.data);
+        assertEquals(Hex.encode(genesisBlock.getData()), blockJson.data);
     }
 
     @Test
@@ -277,11 +277,21 @@ public class ApiHandlerTest {
         GetBlockResponse response = request(uri, GetBlockResponse.class);
         assertTrue(response.success);
         assertEquals(Hex.encode0x(gen.getHash()), response.block.hash);
+        assertNotNull(response.block.transactions);
 
         uri = "/get_block?hash=" + Hex.encode(gen.getHash());
         response = request(uri, GetBlockResponse.class);
         assertTrue(response.success);
         assertEquals(Hex.encode0x(gen.getHash()), response.block.hash);
+        assertNotNull(response.block.transactions);
+    }
+
+    @Test
+    public void testGetBlockNotFound() throws IOException {
+        String uri = "/get_block?number=9999999999999999";
+        GetBlockResponse response = request(uri, GetBlockResponse.class);
+        assertFalse(response.success);
+        assertNotNull(response.message);
     }
 
     @Test
@@ -357,6 +367,14 @@ public class ApiHandlerTest {
         GetDelegateResponse response = request(uri, GetDelegateResponse.class);
         assertTrue(response.success);
         assertEquals(entry.getKey(), response.delegateResult.name);
+    }
+
+    @Test
+    public void testGetDelegateNotFound() throws IOException {
+        String uri = "/get_delegate?address=" + Hex.encode(Bytes.random(20));
+        GetDelegateResponse response = request(uri, GetDelegateResponse.class);
+        assertFalse(response.success);
+        assertNotNull(response.message);
     }
 
     @Test

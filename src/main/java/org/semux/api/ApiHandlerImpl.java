@@ -36,8 +36,11 @@ import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
+import org.semux.core.Block;
+import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
+import org.semux.core.state.Delegate;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
@@ -125,16 +128,21 @@ public class ApiHandlerImpl implements ApiHandler {
             case GET_BLOCK: {
                 String number = params.get("number");
                 String hash = params.get("hash");
+                Block block;
 
                 if (number != null) {
-                    return success(new GetBlockResponse(true,
-                            new GetBlockResponse.Result(kernel.getBlockchain().getBlock(Long.parseLong(number)))));
+                    block = kernel.getBlockchain().getBlock(Long.parseLong(number));
                 } else if (hash != null) {
-                    return success(new GetBlockResponse(true,
-                            new GetBlockResponse.Result(kernel.getBlockchain().getBlock(Hex.parse(hash)))));
+                    block = kernel.getBlockchain().getBlock(Hex.parse(hash));
                 } else {
                     return failure("Invalid parameter: number or hash can't be null");
                 }
+
+                if (block == null) {
+                    return failure("block is not found");
+                }
+
+                return success(new GetBlockResponse(true, new GetBlockResponse.Result(block)));
             }
 
             case GET_PENDING_TRANSACTIONS: {
@@ -199,16 +207,21 @@ public class ApiHandlerImpl implements ApiHandler {
             case GET_DELEGATE: {
                 String address = params.get("address");
 
-                if (address != null) {
-                    return success(new GetDelegateResponse(
-                            true,
-                            new GetDelegateResponse.Result(
-                                    kernel.getBlockchain().getValidatorStats(Hex.parse(address)),
-                                    kernel.getBlockchain().getDelegateState()
-                                            .getDelegateByAddress(Hex.parse(address)))));
-                } else {
+                if (address == null) {
                     return failure("Invalid parameter: address can't be null");
                 }
+
+                byte[] addressBytes = Hex.parse(address);
+                Delegate delegate = kernel.getBlockchain().getDelegateState().getDelegateByAddress(addressBytes);
+                if (delegate == null) {
+                    return failure("Invalid parameter: provided address is not a delegate");
+                }
+
+                BlockchainImpl.ValidatorStats validatorStats = kernel.getBlockchain().getValidatorStats(addressBytes);
+
+                return success(new GetDelegateResponse(
+                        true,
+                        new GetDelegateResponse.Result(validatorStats, delegate)));
             }
 
             case GET_VALIDATORS: {
@@ -281,7 +294,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 return doTransaction(cmd, params);
             }
         } catch (Exception e) {
-            throw new ApiHandlerException("Internal error: " + e.getMessage(), INTERNAL_SERVER_ERROR);
+            throw new ApiHandlerException("Internal error: " + e.getMessage(), INTERNAL_SERVER_ERROR, e);
         }
 
         throw new ApiHandlerException("Not implemented: command = " + cmd, HttpResponseStatus.NOT_IMPLEMENTED);

@@ -158,6 +158,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                         response = apiHandler.service(uri, map, headers);
                         status = OK;
                     } catch (ApiHandlerException ex) {
+                        logger.error(ex.getMessage(), ex);
                         response = ex.response;
                         status = HttpResponseStatus.valueOf(ex.statusCode);
                     }
