@@ -18,6 +18,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semux.KernelMock;
+import org.semux.api.response.ApiHandlerResponse;
 import org.semux.util.BasicAuth;
 
 import io.netty.handler.codec.http.HttpHeaders;
@@ -50,7 +51,7 @@ public class HttpHandlerTest {
                     params = p;
                     headers = h;
 
-                    return "test";
+                    return new ApiHandlerResponse(true, "test");
                 });
             }
         })).start();
