@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.semux.Kernel;
 import org.semux.api.exception.ApiHandlerException;
 import org.semux.api.response.AddNodeResponse;
@@ -190,47 +191,48 @@ public class ApiHandlerImpl implements ApiHandler {
     }
 
     private ApiHandlerResponse addNode(Map<String, String> params) {
-        String node = params.get("node");
-        if (node == null) {
-            return failure("Invalid parameter: node can't be null", BAD_REQUEST);
+        try {
+            ImmutablePair<String, Integer> hostAndPort = validateAddNodeParameter(params.get("node"));
+            kernel.getNodeManager().addNode(new InetSocketAddress(
+                    InetAddress.getByName(hostAndPort.left),
+                    hostAndPort.right));
+            return new AddNodeResponse(true);
+        } catch (IllegalArgumentException | UnknownHostException e) {
+            return failure(e.getMessage(), BAD_REQUEST);
+        }
+    }
+
+    /**
+     * Validate node parameter
+     *
+     * @param node
+     *            node parameter of /add_node API
+     * @return validated hostname and port number
+     */
+    private ImmutablePair<String, Integer> validateAddNodeParameter(String node) {
+        if (node == null || node.length() == 0) {
+            throw new IllegalArgumentException("Invalid parameter: node can't be null");
         }
 
-        // validate node parameter
         Matcher matcher = Pattern.compile("^(?<host>.+?):(?<port>\\d+)$").matcher(node.trim());
         if (!matcher.matches()) {
-            return failure("node parameter must in format of 'host:port'", BAD_REQUEST);
+            throw new IllegalArgumentException("node parameter must in format of 'host:port'");
         }
 
         // validate host
         String host = matcher.group("host");
         if (host == null) {
-            return failure("host is required", BAD_REQUEST);
-        }
-
-        InetAddress hostInetAddress;
-        try {
-            hostInetAddress = InetAddress.getByName(host);
-        } catch (UnknownHostException e) {
-            return failure(e.getMessage(), BAD_REQUEST);
+            throw new IllegalArgumentException("hostname is required");
         }
 
         // validate port
         String port = matcher.group("port");
         if (port == null) {
-            return failure("port number is required", BAD_REQUEST);
+            throw new IllegalArgumentException("port number is required");
         }
         int portNumber = Integer.parseInt(port);
 
-        // combine host and port into an InetSocketAddress object
-        InetSocketAddress nodeInetSocketAddress;
-        try {
-            nodeInetSocketAddress = new InetSocketAddress(hostInetAddress, portNumber);
-        } catch (IllegalArgumentException e) {
-            return failure(e.getMessage(), BAD_REQUEST);
-        }
-
-        kernel.getNodeManager().addNode(nodeInetSocketAddress);
-        return new AddNodeResponse(true);
+        return new ImmutablePair<>(host, portNumber);
     }
 
     private ApiHandlerResponse getBlock(Map<String, String> params) {
