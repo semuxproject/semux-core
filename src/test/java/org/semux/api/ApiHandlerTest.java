@@ -360,6 +360,14 @@ public class ApiHandlerTest {
     }
 
     @Test
+    public void testGetDelegateNotFound() throws IOException {
+        String uri = "/get_delegate?address=" + Hex.encode(Bytes.random(20));
+        GetDelegateResponse response = request(uri, GetDelegateResponse.class);
+        assertFalse(response.success);
+        assertNotNull(response.message);
+    }
+
+    @Test
     public void testGetDelegates() throws IOException {
         String uri = "/get_delegates";
         GetDelegatesResponse response = request(uri, GetDelegatesResponse.class);
