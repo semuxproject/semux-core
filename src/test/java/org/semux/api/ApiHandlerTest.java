@@ -16,6 +16,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -79,6 +80,7 @@ import org.semux.util.MerkleUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.netty.handler.ipfilter.IpFilterRuleType;
+import net.bytebuddy.utility.RandomString;
 
 public class ApiHandlerTest {
 
@@ -131,7 +133,15 @@ public class ApiHandlerTest {
 
         con.setRequestProperty("Authorization", BasicAuth.generateAuth(config.apiUsername(), config.apiPassword()));
 
-        return new ObjectMapper().readValue(con.getInputStream(), clazz);
+        InputStream inputStream = con.getResponseCode() < 400 ? con.getInputStream() : con.getErrorStream();
+        return new ObjectMapper().readValue(inputStream, clazz);
+    }
+
+    @Test
+    public void testInvalidCommand() throws IOException {
+        String uri = "/" + RandomString.make(32);
+        ApiHandlerResponse response = request(uri, ApiHandlerResponse.class);
+        assertFalse(response.success);
     }
 
     @Test
@@ -184,6 +194,22 @@ public class ApiHandlerTest {
         AddNodeResponse response = request(uri, AddNodeResponse.class);
         assertTrue(response.success);
         assertEquals(1, nodeMgr.queueSize());
+    }
+
+    @Test
+    public void testAddNodeIllegalPort() throws IOException {
+        String uri = "/add_node?node=127.0.0.1:65536";
+        AddNodeResponse response = request(uri, AddNodeResponse.class);
+        assertFalse(response.success);
+        assertEquals(0, nodeMgr.queueSize());
+    }
+
+    @Test
+    public void testAddNodeIllegalHost() throws IOException {
+        String uri = "/add_node?node=.com:5161";
+        AddNodeResponse response = request(uri, AddNodeResponse.class);
+        assertFalse(response.success);
+        assertEquals(0, nodeMgr.queueSize());
     }
 
     @Test
@@ -359,6 +385,14 @@ public class ApiHandlerTest {
     }
 
     @Test
+    public void testGetAccountInvalidAddress() throws IOException {
+        String uri = "/get_account?address=0xabc";
+        GetAccountResponse response = request(uri, GetAccountResponse.class);
+        assertFalse(response.success);
+        assertNotNull(response.message);
+    }
+
+    @Test
     public void testGetDelegate() throws IOException {
         Genesis gen = chain.getGenesis();
         Entry<String, byte[]> entry = gen.getDelegates().entrySet().iterator().next();
@@ -372,6 +406,14 @@ public class ApiHandlerTest {
     @Test
     public void testGetDelegateNotFound() throws IOException {
         String uri = "/get_delegate?address=" + Hex.encode(Bytes.random(20));
+        GetDelegateResponse response = request(uri, GetDelegateResponse.class);
+        assertFalse(response.success);
+        assertNotNull(response.message);
+    }
+
+    @Test
+    public void testGetDelegateInvalidAddress() throws IOException {
+        String uri = "/get_delegate?address=I_am_not_an_address";
         GetDelegateResponse response = request(uri, GetDelegateResponse.class);
         assertFalse(response.success);
         assertNotNull(response.message);
@@ -445,7 +487,7 @@ public class ApiHandlerTest {
     public void testTransfer() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
         String uri = "/transfer?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + key.toAddressString()
-                + "&value=1000000000&fee=" + config.minTransactionFee() + "&data=test";
+                + "&value=1000000000&fee=" + config.minTransactionFee() + "&data=" + Hex.encode(Bytes.of("test_transfer"));
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
         assertNotNull(response.txId);
