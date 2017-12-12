@@ -58,6 +58,7 @@ public class SemuxPerformance {
     }
 
     public static void main(String[] args) throws Exception {
+        address = SystemUtil.readPassword("Please enter your wallet address: ");
         username = SystemUtil.readPassword("Please enter your username: ");
         password = SystemUtil.readPassword();
 
