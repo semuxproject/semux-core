@@ -26,7 +26,7 @@ import org.semux.rules.TemporaryDBRule;
 import org.semux.util.Bytes;
 
 /**
- * The test case covers error handling conditions of ApiHandlerImpl
+ * The test case covers validation rules of ApiHandlerImpl
  */
 @RunWith(Parameterized.class)
 public class ApiHandlerErrorTest extends ApiHandlerTestBase {

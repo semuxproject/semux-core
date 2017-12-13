@@ -180,8 +180,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                     // if keep-alive is off, close the connection after flushing
                     ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
                 }
-
-                reset();
             }
         }
     }
@@ -221,6 +219,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
         // write response
         ctx.write(resp);
+
+        reset();
 
         return keepAlive;
     }
