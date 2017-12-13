@@ -63,7 +63,7 @@ public class Hex {
      * @return
      */
     public static byte[] decode(String hex) {
-        if (!hex.matches("([0-9a-fA-F]{2})+")) {
+        if (!hex.matches("([0-9a-fA-F]{2})*")) {
             throw new CryptoException("Invalid hex string");
         }
 
