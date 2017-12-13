@@ -63,7 +63,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 
 /**
  * Semux RESTful API handler implementation.
- *
+ * 
+ * @TODO: Auto-generate API docs
  */
 public class ApiHandlerImpl implements ApiHandler {
 
@@ -95,13 +96,10 @@ public class ApiHandlerImpl implements ApiHandler {
         try {
             switch (cmd) {
             case GET_INFO:
-                return new GetInfoResponse(true, new GetInfoResponse.Result(kernel));
+                return getInfo();
 
             case GET_PEERS:
-                return new GetPeersResponse(true, kernel.getChannelManager()
-                        .getActivePeers()
-                        .parallelStream()
-                        .map(GetPeersResponse.Result::new).collect(Collectors.toList()));
+                return getPeers();
 
             case ADD_NODE:
                 return addNode(params);
@@ -113,21 +111,16 @@ public class ApiHandlerImpl implements ApiHandler {
                 return addToWhiteList(params);
 
             case GET_LATEST_BLOCK_NUMBER:
-                return new GetLatestBlockNumberResponse(true, kernel.getBlockchain().getLatestBlockNumber());
+                return getLatestBlockNumber();
 
             case GET_LATEST_BLOCK:
-                return new GetLatestBlockResponse(true,
-                        new GetBlockResponse.Result(kernel.getBlockchain().getLatestBlock()));
+                return getLatestBlock();
 
             case GET_BLOCK:
                 return getBlock(params);
 
             case GET_PENDING_TRANSACTIONS:
-                return new GetPendingTransactionsResponse(true, kernel.getPendingManager()
-                        .getTransactions()
-                        .parallelStream()
-                        .map(GetTransactionResponse.Result::new)
-                        .collect(Collectors.toList()));
+                return getPendingTransactions();
 
             case GET_ACCOUNT_TRANSACTIONS:
                 return getAccountTransactions(params);
@@ -145,21 +138,10 @@ public class ApiHandlerImpl implements ApiHandler {
                 return getDelegate(params);
 
             case GET_VALIDATORS:
-                return new GetValidatorsResponse(
-                        true,
-                        kernel.getBlockchain().getValidators().parallelStream()
-                                .map(v -> Hex.PREF + v)
-                                .collect(Collectors.toList()));
+                return getValidators();
 
             case GET_DELEGATES:
-                return new GetDelegatesResponse(
-                        true,
-                        kernel.getBlockchain()
-                                .getDelegateState().getDelegates().parallelStream()
-                                .map(delegate -> new GetDelegateResponse.Result(
-                                        kernel.getBlockchain().getValidatorStats(delegate.getAddress()),
-                                        delegate))
-                                .collect(Collectors.toList()));
+                return getDelegates();
 
             case GET_VOTE:
                 return getVote(params);
@@ -168,11 +150,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 return getVotes(params);
 
             case LIST_ACCOUNTS:
-                return new ListAccountsResponse(
-                        true,
-                        kernel.getWallet().getAccounts().parallelStream()
-                                .map(acc -> Hex.PREF + acc.toAddressString())
-                                .collect(Collectors.toList()));
+                return listAccounts();
 
             case CREATE_ACCOUNT:
                 return createAccount();
@@ -191,14 +169,38 @@ public class ApiHandlerImpl implements ApiHandler {
         throw new ApiHandlerException("Not implemented: command = " + cmd, HttpResponseStatus.NOT_IMPLEMENTED);
     }
 
+    /**
+     * GET /get_info
+     *
+     * @return
+     */
+    private ApiHandlerResponse getInfo() {
+        return new GetInfoResponse(true, new GetInfoResponse.Result(kernel));
+    }
+
+    /**
+     * GET /get_peers
+     *
+     * @return
+     */
+    private ApiHandlerResponse getPeers() {
+        return new GetPeersResponse(true, kernel.getChannelManager()
+                .getActivePeers()
+                .parallelStream()
+                .map(GetPeersResponse.Result::new).collect(Collectors.toList()));
+    }
+
+    /**
+     * GET /add_node?node
+     *
+     * @param params
+     * @return result
+     */
     private ApiHandlerResponse addNode(Map<String, String> params) {
         try {
-            ImmutablePair<String, Integer> hostAndPort = validateAddNodeParameter(params.get("node"));
-            kernel.getNodeManager().addNode(new InetSocketAddress(
-                    InetAddress.getByName(hostAndPort.left),
-                    hostAndPort.right));
+            kernel.getNodeManager().addNode(validateAddNodeParameter(params.get("node")));
             return new AddNodeResponse(true);
-        } catch (IllegalArgumentException | UnknownHostException e) {
+        } catch (IllegalArgumentException e) {
             return failure(e.getMessage(), BAD_REQUEST);
         }
     }
@@ -210,7 +212,7 @@ public class ApiHandlerImpl implements ApiHandler {
      *            node parameter of /add_node API
      * @return validated hostname and port number
      */
-    private ImmutablePair<String, Integer> validateAddNodeParameter(String node) {
+    private InetSocketAddress validateAddNodeParameter(String node) {
         if (node == null || node.length() == 0) {
             throw new IllegalArgumentException("Invalid parameter: node can't be empty");
         }
@@ -220,9 +222,21 @@ public class ApiHandlerImpl implements ApiHandler {
             throw new IllegalArgumentException("node parameter must in format of 'host:port'");
         }
 
-        return new ImmutablePair<>(matcher.group("host"), Integer.parseInt(matcher.group("port")));
+        try {
+            return new InetSocketAddress(
+                    InetAddress.getByName(matcher.group("host")),
+                    Integer.parseInt(matcher.group("port")));
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
     }
 
+    /**
+     * GET /get_block?number&hash
+     *
+     * @param params
+     * @return
+     */
     private ApiHandlerResponse getBlock(Map<String, String> params) {
         String number = params.get("number");
         String hash = params.get("hash");
@@ -243,6 +257,25 @@ public class ApiHandlerImpl implements ApiHandler {
         return new GetBlockResponse(true, new GetBlockResponse.Result(block));
     }
 
+    /**
+     * GET /get_pending_transactions
+     *
+     * @return
+     */
+    private ApiHandlerResponse getPendingTransactions() {
+        return new GetPendingTransactionsResponse(true, kernel.getPendingManager()
+                .getTransactions()
+                .parallelStream()
+                .map(GetTransactionResponse.Result::new)
+                .collect(Collectors.toList()));
+    }
+
+    /**
+     * GET /get_account_transactions?address&from&to
+     *
+     * @param params
+     * @return
+     */
     private ApiHandlerResponse getAccountTransactions(Map<String, String> params) {
         String address = params.get("address");
         String from = params.get("from");
@@ -280,6 +313,12 @@ public class ApiHandlerImpl implements ApiHandler {
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * GET /get_transaction?hash
+     *
+     * @param params
+     * @return
+     */
     private ApiHandlerResponse getTransaction(Map<String, String> params) {
         String hash = params.get("hash");
         if (hash == null) {
@@ -301,6 +340,12 @@ public class ApiHandlerImpl implements ApiHandler {
         return new GetTransactionResponse(true, new GetTransactionResponse.Result(transaction));
     }
 
+    /**
+     * GET /send_transaction?raw
+     *
+     * @param params
+     * @return
+     */
     private ApiHandlerResponse sendTransaction(Map<String, String> params) {
         try {
             String raw = params.get("raw");
@@ -315,6 +360,12 @@ public class ApiHandlerImpl implements ApiHandler {
         }
     }
 
+    /**
+     * GET /get_account?address
+     *
+     * @param params
+     * @return
+     */
     private ApiHandlerResponse getAccount(Map<String, String> params) {
         String address = params.get("address");
         if (address == null) {
@@ -332,6 +383,12 @@ public class ApiHandlerImpl implements ApiHandler {
         return new GetAccountResponse(true, new GetAccountResponse.Result(account));
     }
 
+    /**
+     * GET /add_to_blacklist?ip
+     *
+     * @param params
+     * @return
+     */
     private ApiHandlerResponse addToBlackList(Map<String, String> params) {
         try {
             String ip = params.get("ip");
@@ -346,6 +403,12 @@ public class ApiHandlerImpl implements ApiHandler {
         }
     }
 
+    /**
+     * GET /add_to_whitelist?ip
+     *
+     * @param params
+     * @return
+     */
     private ApiHandlerResponse addToWhiteList(Map<String, String> params) {
         try {
             String ip = params.get("ip");
@@ -360,6 +423,31 @@ public class ApiHandlerImpl implements ApiHandler {
         }
     }
 
+    /**
+     * GET /get_latest_block_number
+     *
+     * @return
+     */
+    private ApiHandlerResponse getLatestBlockNumber() {
+        return new GetLatestBlockNumberResponse(true, kernel.getBlockchain().getLatestBlockNumber());
+    }
+
+    /**
+     * GET /get_latest_block
+     *
+     * @return
+     */
+    private ApiHandlerResponse getLatestBlock() {
+        return new GetLatestBlockResponse(true,
+                new GetBlockResponse.Result(kernel.getBlockchain().getLatestBlock()));
+    }
+
+    /**
+     * GET /get_delegate?address
+     *
+     * @param params
+     * @return
+     */
     private ApiHandlerResponse getDelegate(Map<String, String> params) {
         String address = params.get("address");
         if (address == null) {
@@ -383,6 +471,41 @@ public class ApiHandlerImpl implements ApiHandler {
         return new GetDelegateResponse(true, new GetDelegateResponse.Result(validatorStats, delegate));
     }
 
+    /**
+     * GET /get_validators
+     *
+     * @return
+     */
+    private ApiHandlerResponse getValidators() {
+        return new GetValidatorsResponse(
+                true,
+                kernel.getBlockchain().getValidators().parallelStream()
+                        .map(v -> Hex.PREF + v)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * GET /get_delegates
+     *
+     * @return
+     */
+    private ApiHandlerResponse getDelegates() {
+        return new GetDelegatesResponse(
+                true,
+                kernel.getBlockchain()
+                        .getDelegateState().getDelegates().parallelStream()
+                        .map(delegate -> new GetDelegateResponse.Result(
+                                kernel.getBlockchain().getValidatorStats(delegate.getAddress()),
+                                delegate))
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * GET /get_vote?voter&delegate
+     *
+     * @param params
+     * @return
+     */
     private ApiHandlerResponse getVote(Map<String, String> params) {
         String voter = params.get("voter");
         String delegate = params.get("delegate");
@@ -415,6 +538,12 @@ public class ApiHandlerImpl implements ApiHandler {
                         .getVote(voterBytes, delegateBytes));
     }
 
+    /**
+     * GET /get_votes?delegate
+     *
+     * @param params
+     * @return
+     */
     private ApiHandlerResponse getVotes(Map<String, String> params) {
         String delegate = params.get("delegate");
         if (delegate == null) {
@@ -434,6 +563,24 @@ public class ApiHandlerImpl implements ApiHandler {
                         .collect(Collectors.toMap(entry -> Hex.PREF + entry.getKey().toString(), Map.Entry::getValue)));
     }
 
+    /**
+     * GET /list_accounts
+     *
+     * @return
+     */
+    private ApiHandlerResponse listAccounts() {
+        return new ListAccountsResponse(
+                true,
+                kernel.getWallet().getAccounts().parallelStream()
+                        .map(acc -> Hex.PREF + acc.toAddressString())
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * GET /create_account
+     *
+     * @return
+     */
     private ApiHandlerResponse createAccount() {
         try {
             EdDSA key = new EdDSA();
@@ -445,6 +592,21 @@ public class ApiHandlerImpl implements ApiHandler {
         }
     }
 
+    /**
+     * This method processes the following transaction-related endpoints:
+     *
+     * <ul>
+     * <li>GET /transfer?from&to&value&fee&data</li>
+     * <li>GET /delegate?from&fee&data</li>
+     * <li>GET /vote?from&to&value&fee&data</li>
+     * <li>GET /unvote?from&to&value&fee&data</li>
+     * </ul>
+     *
+     * @param cmd
+     *            type of transaction
+     * @param params
+     * @return
+     */
     private ApiHandlerResponse doTransaction(Command cmd, Map<String, String> params) {
         // [1] check if kernel.getWallet().is unlocked
         if (!kernel.getWallet().unlocked()) {
