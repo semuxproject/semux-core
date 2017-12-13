@@ -23,6 +23,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.semux.api.response.AddNodeResponse;
 import org.semux.api.response.ApiHandlerResponse;
@@ -57,6 +60,7 @@ import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
+import org.semux.rules.TemporaryDBRule;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
@@ -64,6 +68,34 @@ import io.netty.handler.ipfilter.IpFilterRuleType;
 import net.bytebuddy.utility.RandomString;
 
 public class ApiHandlerTest extends ApiHandlerTestBase {
+
+    @Rule
+    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+
+    @Rule
+    public ApiServerRule apiServerRule = new ApiServerRule(temporaryDBFactory);
+
+    @Before
+    public void setUp() {
+        api = apiServerRule.getApi();
+        config = api.getKernel().getConfig();
+        wallet = api.getKernel().getWallet();
+
+        chain = api.getKernel().getBlockchain();
+        accountState = api.getKernel().getBlockchain().getAccountState();
+        accountState.adjustAvailable(wallet.getAccount(0).toAddress(), 5000 * Unit.SEM);
+        delegateState = api.getKernel().getBlockchain().getDelegateState();
+        pendingMgr = api.getKernel().getPendingManager();
+        nodeMgr = api.getKernel().getNodeManager();
+        channelMgr = api.getKernel().getChannelManager();
+    }
+
+    @After
+    public void tearDown() throws IOException {
+        if (wallet.exists()) {
+            wallet.delete();
+        }
+    }
 
     @Test
     public void testInvalidCommand() throws IOException {

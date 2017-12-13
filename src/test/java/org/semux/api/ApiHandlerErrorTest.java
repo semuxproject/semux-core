@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -20,6 +22,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.semux.api.response.ApiHandlerResponse;
 import org.semux.crypto.Hex;
+import org.semux.rules.TemporaryDBRule;
 import org.semux.util.Bytes;
 
 /**
@@ -27,6 +30,14 @@ import org.semux.util.Bytes;
  */
 @RunWith(Parameterized.class)
 public class ApiHandlerErrorTest extends ApiHandlerTestBase {
+
+    @ClassRule
+    public static TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+
+    @ClassRule
+    public static ApiServerRule apiServerRule = new ApiServerRule(temporaryDBFactory);
+
+    private static final String WALLET_ADDRESS_PLACEHOLDER = "[wallet]";
 
     @Parameters(name = "request(\"{0}\")")
     public static Collection<Object[]> data() {
@@ -49,34 +60,64 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
                 { "/get_delegate?address=I_am_not_an_address" },
                 { "/get_account_transactions" },
                 { "/get_account_transactions?address=I_am_not_an_address" },
-                { String.format("/get_account_transactions?address=%s", Hex.encode0x(Bytes.random(20))) },
-                { String.format("/get_account_transactions?address=%s&from=%s", Hex.encode0x(Bytes.random(20)),
-                        "I_am_not_a_number") },
-                { String.format("/get_account_transactions?address=%s&from=%s&to=%s", Hex.encode0x(Bytes.random(20)),
+                { String.format("/get_account_transactions?address=%s", randomHex()) },
+                { String.format("/get_account_transactions?address=%s&from=%s", randomHex(), "I_am_not_a_number") },
+                { String.format("/get_account_transactions?address=%s&from=%s&to=%s", randomHex(),
                         "0", "I_am_not_a_number") },
                 { "/get_transaction" },
                 { String.format("/get_transaction?hash=%s", "I_am_not_a_hexadecimal_string") },
-                { String.format("/get_transaction?hash=%s", Hex.encode0x(Bytes.random(20))) },
+                { String.format("/get_transaction?hash=%s", randomHex()) },
                 { "/send_transaction" },
                 { "/send_transaction?raw=I_am_not_a_hexadecimal_string" },
                 { "/get_vote" },
                 { String.format("/get_vote?voter=%s", "I_am_not_a_valid_address") },
-                { String.format("/get_vote?voter=%s", Hex.encode0x(Bytes.random(20))) },
-                { String.format("/get_vote?voter=%s&delegate=%s", Hex.encode0x(Bytes.random(20)),
-                        "I_am_not_a_valid_address") },
+                { String.format("/get_vote?voter=%s", randomHex()) },
+                { String.format("/get_vote?voter=%s&delegate=%s", randomHex(), "I_am_not_a_valid_address") },
                 { "/get_votes" },
                 { "/get_votes?delegate=I_am_not_hexadecimal_string" },
                 { "/transfer" },
+                { String.format("/transfer?from=%s", "_") }, // non-hexadecimal address
+                { String.format("/transfer?from=%s", randomHex()) }, // non wallet address
+                { String.format("/transfer?from=%s", WALLET_ADDRESS_PLACEHOLDER) },
+                { String.format("/transfer?from=%s&to=%s", WALLET_ADDRESS_PLACEHOLDER, "_") }, // non-hexadecimal
+                                                                                               // recipient address
+                { String.format("/transfer?from=%s&to=%s", WALLET_ADDRESS_PLACEHOLDER, randomHex()) },
+                { String.format("/transfer?from=%s&to=%s&value=%s", WALLET_ADDRESS_PLACEHOLDER, randomHex(), "_") }, // non-number
+                                                                                                                     // value
+                { String.format("/transfer?from=%s&to=%s&value=%s", WALLET_ADDRESS_PLACEHOLDER, randomHex(), "10") },
+                { String.format("/transfer?from=%s&to=%s&value=%s&fee=%s", WALLET_ADDRESS_PLACEHOLDER, randomHex(),
+                        "10", "_") }, // non-number fee
+                { String.format("/transfer?from=%s&to=%s&value=%s&fee=%s", WALLET_ADDRESS_PLACEHOLDER, randomHex(),
+                        "10", "10") },
+                { String.format("/transfer?from=%s&to=%s&value=%s&fee=%s&data=%s", WALLET_ADDRESS_PLACEHOLDER,
+                        randomHex(), "10", "10", "_") }, // non-hexadecimal data
+                { String.format("/transfer?from=%s&to=%s&value=%s&fee=%s&data=%s", WALLET_ADDRESS_PLACEHOLDER,
+                        randomHex(), "10", "10", randomHex()) }, // hexadecimal data
         });
+    }
+
+    private static String randomHex() {
+        return Hex.encode0x(Bytes.random(20));
     }
 
     @Parameter
     public String uri;
 
+    @Before
+    public void setUp() {
+        api = apiServerRule.getApi();
+        wallet = api.getKernel().getWallet();
+        config = api.getKernel().getConfig();
+    }
+
     @Test
     public void testError() throws IOException {
+        uri = uri.replace(WALLET_ADDRESS_PLACEHOLDER, wallet.getAccount(0).toAddressString());
+
         ApiHandlerResponse response = request(uri, ApiHandlerResponse.class);
         assertFalse(response.success);
         assertNotNull(response.message);
+
+        System.out.println(response.message);
     }
 }

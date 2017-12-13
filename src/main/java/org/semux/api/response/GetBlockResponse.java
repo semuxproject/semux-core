@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.semux.core.Block;
-import org.semux.core.Transaction;
 import org.semux.crypto.Hex;
 import org.semux.util.TimeUtil;
 

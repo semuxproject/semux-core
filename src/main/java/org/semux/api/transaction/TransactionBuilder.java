@@ -80,27 +80,13 @@ public class TransactionBuilder {
         return this;
     }
 
-    public TransactionBuilder withFee(String pFee) {
-        if (pFee == null) {
-            throw new IllegalArgumentException("parameter 'fee' is required");
-        }
-
-        try {
-            fee = Long.parseLong(pFee);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("parameter 'fee' is not a valid number");
-        }
-
-        return this;
-    }
-
     public TransactionBuilder withTo(String pTo) {
         if (type == TransactionType.DELEGATE) {
             if (pTo != null) {
                 throw new IllegalArgumentException(
                         "DELEGATE transaction should never have a customized 'to' parameter");
             }
-            return this;
+            return this; // ignore the provided parameter
         }
 
         if (pTo == null) {
@@ -122,7 +108,7 @@ public class TransactionBuilder {
                 throw new IllegalArgumentException(
                         "DELEGATE transaction should never have a customized 'value' parameter");
             }
-            return this;
+            return this; // ignore the provided parameter
         }
 
         if (pValue == null) {
@@ -133,6 +119,20 @@ public class TransactionBuilder {
             value = Long.parseLong(pValue);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("parameter 'value' is not a valida number");
+        }
+
+        return this;
+    }
+
+    public TransactionBuilder withFee(String pFee) {
+        if (pFee == null) {
+            throw new IllegalArgumentException("parameter 'fee' is required");
+        }
+
+        try {
+            fee = Long.parseLong(pFee);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("parameter 'fee' is not a valid number");
         }
 
         return this;

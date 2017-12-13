@@ -12,9 +12,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
 import org.semux.api.response.ApiHandlerResponse;
 import org.semux.config.Config;
 import org.semux.core.Block;
@@ -24,67 +21,32 @@ import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
-import org.semux.rules.TemporaryDBRule;
 import org.semux.util.BasicAuth;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ApiHandlerTestBase {
+public abstract class ApiHandlerTestBase {
 
-    @Rule
-    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
-
-    protected static final String API_IP = "127.0.0.1";
-    protected static final int API_PORT = 15171;
-
-    protected static SemuxAPIMock api;
-
+    protected SemuxAPIMock api;
     protected static Config config;
-    protected static Wallet wallet;
-
-    protected static Blockchain chain;
-    protected static AccountState accountState;
-    protected static DelegateState delegateState;
-    protected static PendingManager pendingMgr;
-    protected static NodeManager nodeMgr;
-    protected static ChannelManager channelMgr;
-
-    @Before
-    public void setUp() {
-        api = new SemuxAPIMock(temporaryDBFactory);
-        api.start(API_IP, API_PORT);
-
-        config = api.getKernel().getConfig();
-        wallet = api.getKernel().getWallet();
-
-        chain = api.getKernel().getBlockchain();
-        accountState = api.getKernel().getBlockchain().getAccountState();
-        accountState.adjustAvailable(wallet.getAccount(0).toAddress(), 5000 * Unit.SEM);
-        delegateState = api.getKernel().getBlockchain().getDelegateState();
-        pendingMgr = api.getKernel().getPendingManager();
-        nodeMgr = api.getKernel().getNodeManager();
-        channelMgr = api.getKernel().getChannelManager();
-    }
-
-    @After
-    public void tearDown() throws IOException {
-        api.stop();
-        if (wallet.exists()) {
-            wallet.delete();
-        }
-    }
+    protected Wallet wallet;
+    protected Blockchain chain;
+    protected AccountState accountState;
+    protected DelegateState delegateState;
+    protected PendingManager pendingMgr;
+    protected NodeManager nodeMgr;
+    protected ChannelManager channelMgr;
 
     protected static <T extends ApiHandlerResponse> T request(String uri, Class<T> clazz) throws IOException {
-        URL u = new URL("http://" + API_IP + ":" + API_PORT + uri);
+        URL u = new URL("http://" + ApiServerRule.API_IP + ":" + ApiServerRule.API_PORT + uri);
         HttpURLConnection con = (HttpURLConnection) u.openConnection();
 
         con.setRequestProperty("Authorization", BasicAuth.generateAuth(config.apiUsername(), config.apiPassword()));
