@@ -20,7 +20,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.semux.Kernel;
 import org.semux.api.exception.ApiHandlerException;
 import org.semux.api.response.AddNodeResponse;
