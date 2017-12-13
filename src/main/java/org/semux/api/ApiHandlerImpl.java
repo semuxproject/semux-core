@@ -69,7 +69,7 @@ public class ApiHandlerImpl implements ApiHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiHandlerImpl.class);
 
-    private Kernel kernel;
+    private final Kernel kernel;
 
     /**
      * Create an API handler.
