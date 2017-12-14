@@ -6,10 +6,10 @@
  */
 package org.semux.api;
 
+import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.nio.charset.Charset;
@@ -94,6 +94,9 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
             keepAlive = HttpUtil.isKeepAlive(request);
             uri = request.uri();
             params = new QueryStringDecoder(request.uri(), CHARSET).parameters();
+            if (params.isEmpty()) {
+                params = new HashMap<>();
+            }
             headers = request.headers();
             body = Unpooled.buffer(MAX_BODY_SIZE);
 
@@ -135,7 +138,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 }
 
                 // parse parameter from body
-                if ("application/x-www-form-urlencoded".equals(headers.get("Content-type"))
+                if ("application/x-www-form-urlencoded".equals(headers.get(CONTENT_TYPE))
                         && body.readableBytes() > 0) {
                     QueryStringDecoder decoder = new QueryStringDecoder("?" + body.toString(CHARSET));
                     Map<String, List<String>> map = decoder.parameters();
@@ -149,20 +152,19 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 }
 
                 // filter parameters
-                Map<String, Object> map = new HashMap<>();
+                Map<String, Object> filteredParams = new HashMap<>();
                 for (Map.Entry<String, List<String>> entry : params.entrySet()) {
                     List<String> v = entry.getValue();
-                    // duplicate names are not allowed.
                     if (!v.isEmpty()) {
-                        boolean isArray = ARRAY_PARAM_PATTERN.matcher(entry.getKey()).find();
-                        map.put(entry.getKey(), isArray ? v : v.get(0));
+                        filteredParams.put(entry.getKey(),
+                                ARRAY_PARAM_PATTERN.matcher(entry.getKey()).find() ? v : v.get(0));
                     }
                 }
 
                 // delegate the request to api handler if a response has not been generated
                 if (response == null) {
                     try {
-                        response = apiHandler.service(uri, map, headers);
+                        response = apiHandler.service(uri, filteredParams, headers);
                         status = response.status;
                     } catch (ApiHandlerException ex) {
                         response = new ApiHandlerResponse(false, ex.response);

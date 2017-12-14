@@ -601,6 +601,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * <li>GET /delegate?from&fee&data</li>
      * <li>GET /vote?from&to&value&fee&data</li>
      * <li>GET /unvote?from&to&value&fee&data</li>
+     * <li>GET/POST /transfer_many?from&to[]&value&fee&data</li>
      * </ul>
      *
      * @param cmd

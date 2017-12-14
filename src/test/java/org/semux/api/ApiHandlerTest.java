@@ -18,10 +18,12 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Before;
@@ -400,13 +402,18 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testTransferMany() throws IOException, InterruptedException {
-        EdDSA key1 = new EdDSA(), key2 = new EdDSA();
-        String uri = "/transfer_many?&from=" + wallet.getAccount(0).toAddressString() +
-                "&to[]=" + key1.toAddressString() +
-                "&to[]=" + key2.toAddressString() +
-                "&value=1000000000&fee=" + config.minTransactionFee() * 2 +
+        ArrayList<EdDSA> keys = new ArrayList<>();
+        for (int i = 0; i < Transaction.MAX_RECIPIENTS; i++) {
+            keys.add(new EdDSA());
+        }
+        String keyParams = keys.stream().map(k -> "to[]=" + k.toAddressString()).collect(Collectors.joining("&"));
+
+        String uri = "/transfer_many";
+        String body = "from=" + wallet.getAccount(0).toAddressString() +
+                "&" + keyParams +
+                "&value=1000000000&fee=" + config.minTransactionFee() * Transaction.MAX_RECIPIENTS +
                 "&data=" + Hex.encode((new String("test_data")).getBytes());
-        DoTransactionResponse response = request(uri, DoTransactionResponse.class);
+        DoTransactionResponse response = postRequest(uri, body, DoTransactionResponse.class);
         assertTrue(response.success);
         assertNotNull(response.txId);
 
