@@ -126,12 +126,10 @@ public class TransferManyTransaction {
         assertEquals(200, response.getStatusLine().getStatusCode());
 
         // wait until both of kernel2 and kernel3 have received the transaction
-        await().atMost(3, TimeUnit.MINUTES).until(() ->
-                kernel2.getBlockchain().getAccountState()
-                        .getAccount(kernel2.getWallet().getAccounts().get(0).toAddress()).getAvailable() == value &&
+        await().atMost(3, TimeUnit.MINUTES).until(() -> kernel2.getBlockchain().getAccountState()
+                .getAccount(kernel2.getWallet().getAccounts().get(0).toAddress()).getAvailable() == value &&
                 kernel3.getBlockchain().getAccountState()
-                        .getAccount(kernel2.getWallet().getAccounts().get(0).toAddress()).getAvailable() == value
-        );
+                        .getAccount(kernel2.getWallet().getAccounts().get(0).toAddress()).getAvailable() == value);
     }
 
     private KernelMock mockKernel(int p2pPort, int apiPort, TemporaryFolder folder) throws IOException {
