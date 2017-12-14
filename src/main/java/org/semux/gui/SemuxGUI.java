@@ -8,6 +8,9 @@ package org.semux.gui;
 
 import java.awt.EventQueue;
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,10 +50,12 @@ import org.semux.log.LoggerConfigurator;
 import org.semux.message.CLIMessages;
 import org.semux.message.GUIMessages;
 import org.semux.net.Peer;
-import org.semux.util.DnsUtil;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Graphic user interface.
@@ -204,20 +209,27 @@ public class SemuxGUI extends Launcher {
         new Thread(() -> {
             while (true) {
                 try {
-                    Thread.sleep(5 * 60 * 1000L);
+                    Thread.sleep(5L * 60L * 1000L);
 
-                    String hostname = "version.semux.org";
-                    List<String> version = DnsUtil.queryTxt(hostname);
+                    URL url = new URL("http://api.semux.org");
+                    URLConnection con = url.openConnection();
+                    con.addRequestProperty("User-Agent", Constants.DEFAULT_USER_AGENT);
+                    con.setConnectTimeout(Constants.DEFAULT_CONNECT_TIMEOUT);
+                    con.setReadTimeout(Constants.DEFAULT_READ_TIMEOUT);
 
-                    for (String v : version) {
-                        if (SystemUtil.compareVersion(Constants.CLIENT_VERSION, v) < 0) {
-                            JOptionPane.showMessageDialog(null, GUIMessages.get("WalletNeedToBeUpgraded"));
-                            SystemUtil.exitAsync(-1);
-                        }
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode node = mapper.readTree(con.getInputStream());
+                    String v = node.get("latestVersion").asText();
+
+                    if (SystemUtil.compareVersion(Constants.CLIENT_VERSION, v) < 0) {
+                        JOptionPane.showMessageDialog(null, GUIMessages.get("WalletNeedToBeUpgraded"));
+                        SystemUtil.exitAsync(-1);
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
+                } catch (IOException e) {
+                    logger.info("Failed to retrive latest version");
                 }
             }
         }, "gui-version").start();
