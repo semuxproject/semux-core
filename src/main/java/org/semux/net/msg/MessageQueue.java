@@ -25,7 +25,6 @@ import io.netty.channel.ChannelHandlerContext;
 
 /**
  * This class contains the logic for sending messages.
- * 
  */
 public class MessageQueue {
 
@@ -35,7 +34,7 @@ public class MessageQueue {
         private AtomicInteger cnt = new AtomicInteger(0);
 
         public Thread newThread(Runnable r) {
-            return new Thread(r, "msg-queue-" + cnt.getAndIncrement());
+            return new Thread(r, "msg-" + cnt.getAndIncrement());
         }
     });
 
@@ -52,7 +51,7 @@ public class MessageQueue {
 
     /**
      * Create a message queue with the specified maximum queue size.
-     * 
+     *
      * @param config
      */
     public MessageQueue(Config config) {
@@ -61,7 +60,7 @@ public class MessageQueue {
 
     /**
      * Bind this message queue to a channel, and start scheduled sending.
-     * 
+     *
      * @param ctx
      */
     public void activate(ChannelHandlerContext ctx) {
@@ -92,7 +91,7 @@ public class MessageQueue {
 
     /**
      * Check if this message queue is idle.
-     * 
+     *
      * @return true if both request and response queues are empty, otherwise false
      */
     public boolean isIdle() {
@@ -101,7 +100,7 @@ public class MessageQueue {
 
     /**
      * Disconnect aggressively.
-     * 
+     *
      * @param code
      */
     public void disconnect(ReasonCode code) {
@@ -123,7 +122,7 @@ public class MessageQueue {
 
     /**
      * Add a message to the sending queue.
-     * 
+     *
      * @param msg
      *            the message to be sent
      * @return true if the message is successfully added to the queue, otherwise
@@ -155,7 +154,7 @@ public class MessageQueue {
 
     /**
      * Notify this message queue that a new message has been received.
-     * 
+     *
      * @param msg
      */
     public MessageRT receivedMessage(Message msg) {

@@ -53,6 +53,15 @@ import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Syncing manager downloads blocks from the network and imports them into
+ * blockchain.
+ * <p>
+ * The {@link #download()} and the {@link #process()} methods are not
+ * synchronized and need to be executed by one single thread at anytime.
+ * <p>
+ * The download/unfinished/pending queues are protected by lock.
+ */
 public class SemuxSync implements SyncManager {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxSync.class);
@@ -65,6 +74,9 @@ public class SemuxSync implements SyncManager {
             return new Thread(r, "sync-" + cnt.getAndIncrement());
         }
     };
+
+    private static final ScheduledExecutorService timer1 = Executors.newSingleThreadScheduledExecutor(factory);
+    private static final ScheduledExecutorService timer2 = Executors.newSingleThreadScheduledExecutor(factory);
 
     private static final long MAX_DOWNLOAD_TIME = 10L * 1000L; // 30 seconds
 
@@ -118,9 +130,8 @@ public class SemuxSync implements SyncManager {
             }
 
             // [2] start tasks
-            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor(factory);
-            ScheduledFuture<?> download = exec.scheduleAtFixedRate(this::download, 0, 5, TimeUnit.MILLISECONDS);
-            ScheduledFuture<?> process = exec.scheduleAtFixedRate(this::process, 0, 5, TimeUnit.MILLISECONDS);
+            ScheduledFuture<?> download = timer1.scheduleAtFixedRate(this::download, 0, 5, TimeUnit.MILLISECONDS);
+            ScheduledFuture<?> process = timer2.scheduleAtFixedRate(this::process, 0, 5, TimeUnit.MILLISECONDS);
 
             // [3] wait until the sync is done
             while (isRunning.get()) {
@@ -139,16 +150,8 @@ public class SemuxSync implements SyncManager {
             download.cancel(true);
             process.cancel(false);
 
-            // [5] shutdown executor
-            exec.shutdown();
-            try {
-                exec.awaitTermination(1, TimeUnit.MINUTES);
-                Instant end = Instant.now();
-                logger.info("Syncing finished, took {}", TimeUtil.formatDuration(Duration.between(begin, end)));
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                logger.error("Executors were not properly shut down");
-            }
+            Instant end = Instant.now();
+            logger.info("Syncing finished, took {}", TimeUtil.formatDuration(Duration.between(begin, end)));
         }
     }
 
@@ -308,7 +311,7 @@ public class SemuxSync implements SyncManager {
 
     /**
      * Check if a block is valid, and apply to the chain if yes.
-     * 
+     *
      * @param block
      * @return
      */
@@ -325,8 +328,8 @@ public class SemuxSync implements SyncManager {
         }
 
         // [2] check transactions and results
-        if (transactions.size() > config.maxBlockSize()
-                || !Block.validateTransactions(header, block.getTransactions())) {
+        if (transactions.size() > config.maxBlockSize() || !Block
+                .validateTransactions(header, block.getTransactions())) {
             logger.debug("Invalid block transactions");
             return false;
         }
