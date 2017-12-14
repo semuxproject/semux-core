@@ -6,7 +6,6 @@
  */
 package org.semux.api;
 
-import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
@@ -16,7 +15,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.api.exception.ApiHandlerException;
@@ -58,7 +56,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
     private static final int MAX_BODY_SIZE = 512 * 1024; // 512KB
     private static final Charset CHARSET = CharsetUtil.UTF_8;
-    private static final Pattern ARRAY_PARAM_PATTERN = Pattern.compile("\\[\\]$");
 
     private Config config;
     private ApiHandler apiHandler;
@@ -95,6 +92,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
             uri = request.uri();
             params = new QueryStringDecoder(request.uri(), CHARSET).parameters();
             if (params.isEmpty()) {
+                // empty params has to be reinitialized as a instance of HashMap to avoid
+                // UnsupportedOperationException
                 params = new HashMap<>();
             }
             headers = request.headers();
@@ -138,7 +137,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 }
 
                 // parse parameter from body
-                if ("application/x-www-form-urlencoded".equals(headers.get(CONTENT_TYPE))
+                if ("application/x-www-form-urlencoded".equals(headers.get("Content-type"))
                         && body.readableBytes() > 0) {
                     QueryStringDecoder decoder = new QueryStringDecoder("?" + body.toString(CHARSET));
                     Map<String, List<String>> map = decoder.parameters();
@@ -152,19 +151,19 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 }
 
                 // filter parameters
-                Map<String, Object> filteredParams = new HashMap<>();
+                Map<String, String> map = new HashMap<>();
                 for (Map.Entry<String, List<String>> entry : params.entrySet()) {
                     List<String> v = entry.getValue();
+                    // duplicate names are not allowed.
                     if (!v.isEmpty()) {
-                        filteredParams.put(entry.getKey(),
-                                ARRAY_PARAM_PATTERN.matcher(entry.getKey()).find() ? v : v.get(0));
+                        map.put(entry.getKey(), v.get(0));
                     }
                 }
 
                 // delegate the request to api handler if a response has not been generated
                 if (response == null) {
                     try {
-                        response = apiHandler.service(uri, filteredParams, headers);
+                        response = apiHandler.service(uri, map, headers);
                         status = response.status;
                     } catch (ApiHandlerException ex) {
                         response = new ApiHandlerResponse(false, ex.response);

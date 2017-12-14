@@ -15,12 +15,14 @@ import static io.netty.handler.codec.http.HttpResponseStatus.UNPROCESSABLE_ENTIT
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.semux.Kernel;
 import org.semux.api.exception.ApiHandlerException;
 import org.semux.api.response.AddNodeResponse;
@@ -82,7 +84,7 @@ public class ApiHandlerImpl implements ApiHandler {
     }
 
     @Override
-    public ApiHandlerResponse service(String uri, Map<String, Object> params, HttpHeaders headers)
+    public ApiHandlerResponse service(String uri, Map<String, String> params, HttpHeaders headers)
             throws ApiHandlerException {
         if ("/".equals(uri)) {
             return new GetRootResponse(true, "Semux API works");
@@ -197,9 +199,9 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return result
      */
-    private ApiHandlerResponse addNode(Map<String, Object> params) {
+    private ApiHandlerResponse addNode(Map<String, String> params) {
         try {
-            kernel.getNodeManager().addNode(validateAddNodeParameter((String) params.get("node")));
+            kernel.getNodeManager().addNode(validateAddNodeParameter(params.get("node")));
             return new AddNodeResponse(true);
         } catch (IllegalArgumentException e) {
             return failure(e.getMessage(), BAD_REQUEST);
@@ -238,9 +240,9 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getBlock(Map<String, Object> params) {
-        String number = (String) params.get("number");
-        String hash = (String) params.get("hash");
+    private ApiHandlerResponse getBlock(Map<String, String> params) {
+        String number = params.get("number");
+        String hash = params.get("hash");
         Block block;
 
         if (number != null) {
@@ -277,10 +279,10 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getAccountTransactions(Map<String, Object> params) {
-        String address = (String) params.get("address");
-        String from = (String) params.get("from");
-        String to = (String) params.get("to");
+    private ApiHandlerResponse getAccountTransactions(Map<String, String> params) {
+        String address = params.get("address");
+        String from = params.get("from");
+        String to = params.get("to");
         byte[] addressBytes;
         int fromInt;
         int toInt;
@@ -320,8 +322,8 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getTransaction(Map<String, Object> params) {
-        String hash = (String) params.get("hash");
+    private ApiHandlerResponse getTransaction(Map<String, String> params) {
+        String hash = params.get("hash");
         if (hash == null) {
             return failure("Invalid parameter: hash can't be null", BAD_REQUEST);
         }
@@ -347,9 +349,9 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse sendTransaction(Map<String, Object> params) {
+    private ApiHandlerResponse sendTransaction(Map<String, String> params) {
         try {
-            String raw = (String) params.get("raw");
+            String raw = params.get("raw");
             if (raw == null) {
                 return failure("Invalid parameter: raw can't be null", BAD_REQUEST);
             }
@@ -367,8 +369,8 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getAccount(Map<String, Object> params) {
-        String address = (String) params.get("address");
+    private ApiHandlerResponse getAccount(Map<String, String> params) {
+        String address = params.get("address");
         if (address == null) {
             return failure("Invalid parameter: address can't be null", BAD_REQUEST);
         }
@@ -390,9 +392,9 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse addToBlackList(Map<String, Object> params) {
+    private ApiHandlerResponse addToBlackList(Map<String, String> params) {
         try {
-            String ip = (String) params.get("ip");
+            String ip = params.get("ip");
             if (ip == null || ip.trim().length() == 0) {
                 return failure("Invalid parameter: ip can't be empty", BAD_REQUEST);
             }
@@ -410,9 +412,9 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse addToWhiteList(Map<String, Object> params) {
+    private ApiHandlerResponse addToWhiteList(Map<String, String> params) {
         try {
-            String ip = (String) params.get("ip");
+            String ip = params.get("ip");
             if (ip == null || ip.trim().length() == 0) {
                 return failure("Invalid parameter: ip can't be empty", BAD_REQUEST);
             }
@@ -449,8 +451,8 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getDelegate(Map<String, Object> params) {
-        String address = (String) params.get("address");
+    private ApiHandlerResponse getDelegate(Map<String, String> params) {
+        String address = params.get("address");
         if (address == null) {
             return failure("Invalid parameter: address can't be null", BAD_REQUEST);
         }
@@ -507,9 +509,9 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getVote(Map<String, Object> params) {
-        String voter = (String) params.get("voter");
-        String delegate = (String) params.get("delegate");
+    private ApiHandlerResponse getVote(Map<String, String> params) {
+        String voter = params.get("voter");
+        String delegate = params.get("delegate");
         byte[] voterBytes;
         byte[] delegateBytes;
 
@@ -545,8 +547,8 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getVotes(Map<String, Object> params) {
-        String delegate = (String) params.get("delegate");
+    private ApiHandlerResponse getVotes(Map<String, String> params) {
+        String delegate = params.get("delegate");
         if (delegate == null) {
             return failure("Invalid parameter: delegate can't be null", BAD_REQUEST);
         }
@@ -609,7 +611,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse doTransaction(Command cmd, Map<String, Object> params) {
+    private ApiHandlerResponse doTransaction(Command cmd, Map<String, String> params) {
         // [1] check if kernel.getWallet().is unlocked
         if (!kernel.getWallet().isUnlocked()) {
             return failure("Wallet is locked", INTERNAL_SERVER_ERROR);
@@ -640,15 +642,15 @@ public class ApiHandlerImpl implements ApiHandler {
         // [3] build and send the transaction to PendingManager
         try {
             TransactionBuilder transactionBuilder = new TransactionBuilder(kernel, type)
-                    .withFrom((String) params.get("from"))
-                    .withValue((String) params.get("value"))
-                    .withFee((String) params.get("fee"))
-                    .withData((String) params.get("data"));
+                    .withFrom(params.get("from"))
+                    .withValue(params.get("value"))
+                    .withFee(params.get("fee"))
+                    .withData(params.get("data"));
 
             if (type == TransactionType.TRANSFER_MANY) {
-                transactionBuilder.withToMany((List<String>) params.get("to[]"));
+                transactionBuilder.withToMany(Arrays.asList(StringUtils.split(params.get("to"), ",")));
             } else {
-                transactionBuilder.withTo((String) params.get("to"));
+                transactionBuilder.withTo(params.get("to"));
             }
 
             Transaction tx = transactionBuilder.build();

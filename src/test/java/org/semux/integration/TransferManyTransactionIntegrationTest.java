@@ -16,24 +16,17 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -53,8 +46,12 @@ import org.semux.core.Unit;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.net.NodeManager;
+import org.semux.util.ApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
@@ -113,20 +110,21 @@ public class TransferManyTransactionIntegrationTest {
 
         // make transfer_many request
         final long value = 1000 * Unit.SEM;
-        HttpClient httpClient = HttpClientBuilder.create().useSystemProperties().build();
-        HttpPost httpPost = new HttpPost("http://user:pass@127.0.0.1:51710/transfer_many");
-        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-        String body = String.format(
-                "from=%s&to[]=%s&to[]=%s&value=%d&fee=%d",
-                kernel1.getWallet().getAccount(0).toAddressString(),
-                kernel2.getWallet().getAccount(0).toAddressString(),
-                kernel3.getWallet().getAccount(0).toAddressString(),
-                value,
-                kernel1.getConfig().minTransactionFee() * 2);
-        HttpEntity entity = new StringEntity(body, ContentType.APPLICATION_FORM_URLENCODED);
-        httpPost.setEntity(entity);
-        HttpResponse response = httpClient.execute(httpPost);
-        assertEquals(200, response.getStatusLine().getStatusCode());
+        ApiClient apiClient = new ApiClient(
+                new InetSocketAddress("127.0.0.1", 51710),
+                "user",
+                "pass");
+
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("from", kernel1.getWallet().getAccount(0).toAddressString());
+        params.put("to", kernel2.getWallet().getAccount(0).toAddressString() + ","
+                + kernel3.getWallet().getAccount(0).toAddressString());
+        params.put("value", String.valueOf(value));
+        params.put("fee", String.valueOf(kernel1.getConfig().minTransactionFee() * 2));
+        String response = apiClient.request("transfer_many", params);
+        Map<String, String> result = new ObjectMapper().readValue(response, new TypeReference<Map<String, String>>() {
+        });
+        assertEquals("true", result.get("success"));
 
         // wait until both of kernel2 and kernel3 have received the transaction
         await().atMost(3, TimeUnit.MINUTES).until(() -> kernel2.getBlockchain().getAccountState()

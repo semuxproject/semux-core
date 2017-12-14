@@ -323,12 +323,6 @@
             <version>2.6</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.4</version>
-            <scope>test</scope>
-        </dependency>
 
         <!-- JSON -->
         <dependency>

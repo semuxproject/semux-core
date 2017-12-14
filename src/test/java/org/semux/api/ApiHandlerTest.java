@@ -406,11 +406,11 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         for (int i = 0; i < Transaction.MAX_RECIPIENTS; i++) {
             keys.add(new EdDSA());
         }
-        String keyParams = keys.stream().map(k -> "to[]=" + k.toAddressString()).collect(Collectors.joining("&"));
+        String keyParams = keys.stream().map(EdDSA::toAddressString).collect(Collectors.joining(","));
 
         String uri = "/transfer_many";
         String body = "from=" + wallet.getAccount(0).toAddressString() +
-                "&" + keyParams +
+                "&to=" + keyParams +
                 "&value=1000000000&fee=" + config.minTransactionFee() * Transaction.MAX_RECIPIENTS +
                 "&data=" + Hex.encode((new String("test_data")).getBytes());
         DoTransactionResponse response = postRequest(uri, body, DoTransactionResponse.class);
