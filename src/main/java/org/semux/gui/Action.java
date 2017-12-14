@@ -9,7 +9,7 @@ package org.semux.gui;
 public enum Action {
     CREATE_ACCOUNT,
 
-    IMPORT_ACCOUNTS,
+    RECOVER_ACCOUNTS,
 
     OK,
 

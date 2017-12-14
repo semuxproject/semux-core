@@ -172,7 +172,6 @@ public class MainFrame extends JFrame implements ActionListener {
 
         lockGlassPane.setVisible(true);
         btnLock.setText("Unlock");
-        kernel.getWallet().lock();
     }
 
     /**
@@ -184,7 +183,6 @@ public class MainFrame extends JFrame implements ActionListener {
         if (password != null && w.unlock(password)) {
             lockGlassPane.setVisible(false);
             btnLock.setText("lock");
-            kernel.getWallet().lock();
             return true;
         }
 

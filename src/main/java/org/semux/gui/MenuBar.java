@@ -55,8 +55,15 @@ public class MenuBar extends JMenuBar implements ActionListener {
         JMenu menuWallet = new JMenu(GUIMessages.get("Wallet"));
         this.add(menuWallet);
 
-        JMenuItem itemImport = new JMenuItem(GUIMessages.get("ImportAccountsFromFile"));
-        itemImport.setActionCommand(Action.IMPORT_ACCOUNTS.name());
+        JMenuItem itemChangePwd = new JMenuItem(GUIMessages.get("ChangePassword"));
+        itemChangePwd.setActionCommand(Action.CHANGE_PASSWORD.name());
+        itemChangePwd.addActionListener(this);
+        menuWallet.add(itemChangePwd);
+
+        menuWallet.addSeparator();
+
+        JMenuItem itemImport = new JMenuItem(GUIMessages.get("RecoverWallet"));
+        itemImport.setActionCommand(Action.RECOVER_ACCOUNTS.name());
         itemImport.addActionListener(this);
         menuWallet.add(itemImport);
 
@@ -65,20 +72,17 @@ public class MenuBar extends JMenuBar implements ActionListener {
         itemBackup.addActionListener(this);
         menuWallet.add(itemBackup);
 
-        JMenuItem itemChangePwd = new JMenuItem(GUIMessages.get("ChangePassword"));
-        itemChangePwd.setActionCommand(Action.CHANGE_PASSWORD.name());
-        itemChangePwd.addActionListener(this);
-        menuWallet.add(itemChangePwd);
-
-        JMenuItem itemExportPrivKey = new JMenuItem(GUIMessages.get("ExportPrivateKey"));
-        itemExportPrivKey.setActionCommand(Action.EXPORT_PRIVATE_KEY.name());
-        itemExportPrivKey.addActionListener(this);
-        menuWallet.add(itemExportPrivKey);
+        menuWallet.addSeparator();
 
         JMenuItem itemImportPrivKey = new JMenuItem(GUIMessages.get("ImportPrivateKey"));
         itemImportPrivKey.setActionCommand(Action.IMPORT_PRIVATE_KEY.name());
         itemImportPrivKey.addActionListener(this);
         menuWallet.add(itemImportPrivKey);
+
+        JMenuItem itemExportPrivKey = new JMenuItem(GUIMessages.get("ExportPrivateKey"));
+        itemExportPrivKey.setActionCommand(Action.EXPORT_PRIVATE_KEY.name());
+        itemExportPrivKey.addActionListener(this);
+        menuWallet.add(itemExportPrivKey);
 
         JMenu menuHelp = new JMenu(GUIMessages.get("Help"));
         this.add(menuHelp);
@@ -94,7 +98,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
         Action action = Action.valueOf(e.getActionCommand());
 
         switch (action) {
-        case IMPORT_ACCOUNTS: {
+        case RECOVER_ACCOUNTS: {
             JFileChooser chooser = new JFileChooser();
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setFileFilter(new FileNameExtensionFilter(GUIMessages.get("WalletBinaryFormat"), "data"));
@@ -148,11 +152,6 @@ public class MenuBar extends JMenuBar implements ActionListener {
             }
             break;
         }
-        case EXPORT_PRIVATE_KEY: {
-            ExportPrivateKeyDialog d = new ExportPrivateKeyDialog(gui, frame);
-            d.setVisible(true);
-            break;
-        }
         case IMPORT_PRIVATE_KEY: {
             InputDialog dialog = new InputDialog(frame, GUIMessages.get("EnterPrivateKey"), false);
             String pk = dialog.getInput();
@@ -171,6 +170,11 @@ public class MenuBar extends JMenuBar implements ActionListener {
                     JOptionPane.showMessageDialog(frame, GUIMessages.get("PrivateKeyImportFailed"));
                 }
             }
+            break;
+        }
+        case EXPORT_PRIVATE_KEY: {
+            ExportPrivateKeyDialog d = new ExportPrivateKeyDialog(gui, frame);
+            d.setVisible(true);
             break;
         }
         case CHANGE_PASSWORD: {

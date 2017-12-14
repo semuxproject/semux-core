@@ -86,7 +86,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
         btnImport = new JRadioButton(GUIMessages.get("ImportAccountsFromBackupFile"));
         btnImport.setBackground(color);
-        btnImport.setActionCommand(Action.IMPORT_ACCOUNTS.name());
+        btnImport.setActionCommand(Action.RECOVER_ACCOUNTS.name());
         btnImport.addActionListener(this);
         buttonGroup.add(btnImport);
         panel.add(btnImport);
@@ -175,7 +175,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             repeatField.setVisible(true);
             lblRepeat.setVisible(true);
             break;
-        case IMPORT_ACCOUNTS:
+        case RECOVER_ACCOUNTS:
             JFileChooser chooser = new JFileChooser();
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setFileFilter(new FileNameExtensionFilter(GUIMessages.get("WalletBinaryFormat"), "data"));

@@ -6,14 +6,14 @@
  */
 package org.semux.consensus;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class ProposalTest {
 
         long height = Long.MAX_VALUE;
         int view = Integer.MAX_VALUE;
-        Block block = createBlock(height, Arrays.asList(tx), Arrays.asList(res));
+        Block block = createBlock(height, Collections.singletonList(tx), Collections.singletonList(res));
         Vote vote = Vote.newReject(VoteType.VALIDATE, height, view - 1);
         vote.sign(new EdDSA());
 
