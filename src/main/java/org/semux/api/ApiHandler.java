@@ -9,6 +9,7 @@ package org.semux.api;
 import java.util.Map;
 
 import org.semux.api.exception.ApiHandlerException;
+import org.semux.api.response.ApiHandlerResponse;
 
 import io.netty.handler.codec.http.HttpHeaders;
 
@@ -26,5 +27,5 @@ public interface ApiHandler {
      * @param headers
      * @return
      */
-    String service(String uri, Map<String, String> params, HttpHeaders headers) throws ApiHandlerException;
+    ApiHandlerResponse service(String uri, Map<String, String> params, HttpHeaders headers) throws ApiHandlerException;
 }

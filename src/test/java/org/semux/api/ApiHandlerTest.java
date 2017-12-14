@@ -16,10 +16,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -50,61 +48,36 @@ import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
-import org.semux.config.Config;
 import org.semux.core.Block;
-import org.semux.core.BlockHeader;
-import org.semux.core.Blockchain;
 import org.semux.core.Genesis;
 import org.semux.core.Genesis.Premine;
-import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
-import org.semux.core.Wallet;
-import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
-import org.semux.net.ChannelManager;
-import org.semux.net.NodeManager;
 import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
 import org.semux.rules.TemporaryDBRule;
-import org.semux.util.BasicAuth;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
-import org.semux.util.MerkleUtil;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.netty.handler.ipfilter.IpFilterRuleType;
+import net.bytebuddy.utility.RandomString;
 
-public class ApiHandlerTest {
+public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Rule
     public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
 
-    private static final String API_IP = "127.0.0.1";
-    private static final int API_PORT = 15171;
-
-    private static SemuxAPIMock api;
-
-    private static Config config;
-    private static Wallet wallet;
-
-    private static Blockchain chain;
-    private static AccountState accountState;
-    private static DelegateState delegateState;
-    private static PendingManager pendingMgr;
-    private static NodeManager nodeMgr;
-    private static ChannelManager channelMgr;
+    @Rule
+    public ApiServerRule apiServerRule = new ApiServerRule(temporaryDBFactory);
 
     @Before
     public void setUp() {
-        api = new SemuxAPIMock(temporaryDBFactory);
-        api.start(API_IP, API_PORT);
-
+        api = apiServerRule.getApi();
         config = api.getKernel().getConfig();
         wallet = api.getKernel().getWallet();
 
@@ -119,19 +92,16 @@ public class ApiHandlerTest {
 
     @After
     public void tearDown() throws IOException {
-        api.stop();
         if (wallet.exists()) {
             wallet.delete();
         }
     }
 
-    private static <T extends ApiHandlerResponse> T request(String uri, Class<T> clazz) throws IOException {
-        URL u = new URL("http://" + API_IP + ":" + API_PORT + uri);
-        HttpURLConnection con = (HttpURLConnection) u.openConnection();
-
-        con.setRequestProperty("Authorization", BasicAuth.generateAuth(config.apiUsername(), config.apiPassword()));
-
-        return new ObjectMapper().readValue(con.getInputStream(), clazz);
+    @Test
+    public void testInvalidCommand() throws IOException {
+        String uri = "/" + RandomString.make(32);
+        ApiHandlerResponse response = request(uri, ApiHandlerResponse.class);
+        assertFalse(response.success);
     }
 
     @Test
@@ -198,13 +168,6 @@ public class ApiHandlerTest {
     }
 
     @Test
-    public void testAddToBlacklistInvalidAddress() throws IOException {
-        ApiHandlerResponse response = request("/add_to_blacklist?ip=I_am_not_an_IP", ApiHandlerResponse.class);
-        assertFalse(response.success);
-        assertNotNull(response.message);
-    }
-
-    @Test
     public void testAddToWhitelist() throws IOException {
         // reject all connections
         channelMgr.getIpFilter().appendRule(new FilterRule("0.0.0.0/0", IpFilterRuleType.REJECT));
@@ -216,13 +179,6 @@ public class ApiHandlerTest {
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
         when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
         assertTrue(channelMgr.isAcceptable(inetSocketAddress));
-    }
-
-    @Test
-    public void testAddToWhitelistInvalidAddress() throws IOException {
-        ApiHandlerResponse response = request("/add_to_whitelist?ip=I_am_not_an_IP", ApiHandlerResponse.class);
-        assertFalse(response.success);
-        assertNotNull(response.message);
     }
 
     @Test
@@ -284,14 +240,6 @@ public class ApiHandlerTest {
         assertTrue(response.success);
         assertEquals(Hex.encode0x(gen.getHash()), response.block.hash);
         assertNotNull(response.block.transactions);
-    }
-
-    @Test
-    public void testGetBlockNotFound() throws IOException {
-        String uri = "/get_block?number=9999999999999999";
-        GetBlockResponse response = request(uri, GetBlockResponse.class);
-        assertFalse(response.success);
-        assertNotNull(response.message);
     }
 
     @Test
@@ -370,14 +318,6 @@ public class ApiHandlerTest {
     }
 
     @Test
-    public void testGetDelegateNotFound() throws IOException {
-        String uri = "/get_delegate?address=" + Hex.encode(Bytes.random(20));
-        GetDelegateResponse response = request(uri, GetDelegateResponse.class);
-        assertFalse(response.success);
-        assertNotNull(response.message);
-    }
-
-    @Test
     public void testGetDelegates() throws IOException {
         String uri = "/get_delegates";
         GetDelegatesResponse response = request(uri, GetDelegatesResponse.class);
@@ -445,7 +385,8 @@ public class ApiHandlerTest {
     public void testTransfer() throws IOException, InterruptedException {
         EdDSA key = new EdDSA();
         String uri = "/transfer?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + key.toAddressString()
-                + "&value=1000000000&fee=" + config.minTransactionFee() + "&data=test";
+                + "&value=1000000000&fee=" + config.minTransactionFee() + "&data="
+                + Hex.encode(Bytes.of("test_transfer"));
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
         assertNotNull(response.txId);
@@ -490,7 +431,7 @@ public class ApiHandlerTest {
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(0).getHash(), Hex.parse(response.txId));
-        assertEquals(list.get(0).getType(), TransactionType.VOTE);
+        assertEquals(TransactionType.VOTE, list.get(0).getType());
     }
 
     @Test
@@ -514,40 +455,6 @@ public class ApiHandlerTest {
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.txId));
-        assertEquals(list.get(list.size() - 1).getType(), TransactionType.UNVOTE);
-    }
-
-    private Block createBlock(Blockchain chain, List<Transaction> transactions, List<TransactionResult> results) {
-        EdDSA key = new EdDSA();
-
-        long number = chain.getLatestBlockNumber() + 1;
-        byte[] coinbase = key.toAddress();
-        byte[] prevHash = chain.getLatestBlockHash();
-        long timestamp = System.currentTimeMillis();
-        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
-        byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
-        byte[] stateRoot = Bytes.EMPTY_HASH;
-        byte[] data = {};
-
-        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
-                stateRoot, data);
-        return new Block(header, transactions, results);
-    }
-
-    private Transaction createTransaction() {
-        EdDSA key = new EdDSA();
-
-        TransactionType type = TransactionType.TRANSFER;
-        byte[] to = key.toAddress();
-        long value = 0;
-        long fee = 0;
-        long nonce = 1;
-        long timestamp = System.currentTimeMillis();
-        byte[] data = {};
-
-        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
-        tx.sign(key);
-
-        return tx;
+        assertEquals(TransactionType.UNVOTE, list.get(list.size() - 1).getType());
     }
 }

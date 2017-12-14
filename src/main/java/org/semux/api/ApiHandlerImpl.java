@@ -6,11 +6,18 @@
  */
 package org.semux.api;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
+import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
+import static io.netty.handler.codec.http.HttpResponseStatus.NOT_IMPLEMENTED;
+import static io.netty.handler.codec.http.HttpResponseStatus.UNPROCESSABLE_ENTITY;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.semux.Kernel;
@@ -36,32 +43,33 @@ import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
+import org.semux.api.transaction.TransactionBuilder;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
+import org.semux.core.WalletLockedException;
+import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
+import org.semux.crypto.CryptoException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
-import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
 /**
  * Semux RESTful API handler implementation.
- *
+ * 
+ * @TODO: Auto-generate API docs
  */
 public class ApiHandlerImpl implements ApiHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiHandlerImpl.class);
 
-    private Kernel kernel;
+    private final Kernel kernel;
 
     /**
      * Create an API handler.
@@ -73,219 +81,78 @@ public class ApiHandlerImpl implements ApiHandler {
     }
 
     @Override
-    public String service(String uri, Map<String, String> params, HttpHeaders headers) throws ApiHandlerException {
+    public ApiHandlerResponse service(String uri, Map<String, String> params, HttpHeaders headers)
+            throws ApiHandlerException {
         if ("/".equals(uri)) {
-            return success(new GetRootResponse(true, "Semux API works"));
+            return new GetRootResponse(true, "Semux API works");
         }
 
         Command cmd = Command.of(uri.substring(1));
         if (cmd == null) {
-            return failure("Invalid request: uri = " + uri);
+            return failure("Invalid request: uri = " + uri, BAD_REQUEST);
         }
 
         try {
             switch (cmd) {
-            case GET_INFO: {
-                return success(new GetInfoResponse(true, new GetInfoResponse.Result(kernel)));
-            }
+            case GET_INFO:
+                return getInfo();
 
-            case GET_PEERS: {
-                return success(
-                        new GetPeersResponse(true, kernel.getChannelManager()
-                                .getActivePeers()
-                                .parallelStream()
-                                .map(GetPeersResponse.Result::new).collect(Collectors.toList())));
-            }
+            case GET_PEERS:
+                return getPeers();
 
-            case ADD_NODE: {
-                String node = params.get("node");
-                if (node != null) {
-                    String[] tokens = node.trim().split(":");
-                    kernel.getNodeManager().addNode(new InetSocketAddress(tokens[0], Integer.parseInt(tokens[1])));
-                    return success(new AddNodeResponse(true));
-                } else {
-                    return failure("Invalid parameter: node can't be null");
-                }
-            }
+            case ADD_NODE:
+                return addNode(params);
 
-            case ADD_TO_BLACKLIST: {
+            case ADD_TO_BLACKLIST:
                 return addToBlackList(params);
-            }
 
-            case ADD_TO_WHITELIST: {
+            case ADD_TO_WHITELIST:
                 return addToWhiteList(params);
-            }
 
-            case GET_LATEST_BLOCK_NUMBER: {
-                return success(new GetLatestBlockNumberResponse(true, kernel.getBlockchain().getLatestBlockNumber()));
-            }
+            case GET_LATEST_BLOCK_NUMBER:
+                return getLatestBlockNumber();
 
-            case GET_LATEST_BLOCK: {
-                return success(new GetLatestBlockResponse(true,
-                        new GetBlockResponse.Result(kernel.getBlockchain().getLatestBlock())));
-            }
+            case GET_LATEST_BLOCK:
+                return getLatestBlock();
 
-            case GET_BLOCK: {
-                String number = params.get("number");
-                String hash = params.get("hash");
-                Block block;
+            case GET_BLOCK:
+                return getBlock(params);
 
-                if (number != null) {
-                    block = kernel.getBlockchain().getBlock(Long.parseLong(number));
-                } else if (hash != null) {
-                    block = kernel.getBlockchain().getBlock(Hex.parse(hash));
-                } else {
-                    return failure("Invalid parameter: number or hash can't be null");
-                }
+            case GET_PENDING_TRANSACTIONS:
+                return getPendingTransactions();
 
-                if (block == null) {
-                    return failure("block is not found");
-                }
+            case GET_ACCOUNT_TRANSACTIONS:
+                return getAccountTransactions(params);
 
-                return success(new GetBlockResponse(true, new GetBlockResponse.Result(block)));
-            }
+            case GET_TRANSACTION:
+                return getTransaction(params);
 
-            case GET_PENDING_TRANSACTIONS: {
-                return success(new GetPendingTransactionsResponse(true, kernel.getPendingManager()
-                        .getTransactions()
-                        .parallelStream()
-                        .map(GetTransactionResponse.Result::new)
-                        .collect(Collectors.toList())));
-            }
+            case SEND_TRANSACTION:
+                return sendTransaction(params);
 
-            case GET_ACCOUNT_TRANSACTIONS: {
-                String addr = params.get("address");
-                String from = params.get("from");
-                String to = params.get("to");
-                if (addr != null && from != null && to != null) {
-                    return success(new GetAccountTransactionsResponse(true, kernel.getBlockchain()
-                            .getTransactions(Hex.parse(addr), Integer.parseInt(from), Integer.parseInt(to))
-                            .parallelStream()
-                            .map(GetTransactionResponse.Result::new)
-                            .collect(Collectors.toList())));
-                } else {
-                    return failure("Invalid parameter: address = " + addr + ", from = " + from + ", to = " + to);
-                }
-            }
+            case GET_ACCOUNT:
+                return getAccount(params);
 
-            case GET_TRANSACTION: {
-                String hash = params.get("hash");
-                if (hash != null) {
-                    Transaction transaction = kernel.getBlockchain().getTransaction(Hex.parse(hash));
-                    return success(
-                            new GetTransactionResponse(
-                                    true,
-                                    new GetTransactionResponse.Result(transaction)));
-                } else {
-                    return failure("Invalid parameter: hash can't be null");
-                }
-            }
+            case GET_DELEGATE:
+                return getDelegate(params);
 
-            case SEND_TRANSACTION: {
-                String raw = params.get("raw");
-                if (raw != null) {
-                    byte[] bytes = Hex.parse(raw);
-                    kernel.getPendingManager().addTransaction(Transaction.fromBytes(bytes));
-                    return success(new SendTransactionResponse(true));
-                } else {
-                    return failure("Invalid parameter: raw can't be null");
-                }
-            }
+            case GET_VALIDATORS:
+                return getValidators();
 
-            case GET_ACCOUNT: {
-                String addr = params.get("address");
-                if (addr != null) {
-                    return success(new GetAccountResponse(
-                            true,
-                            new GetAccountResponse.Result(
-                                    kernel.getBlockchain().getAccountState().getAccount(Hex.parse(addr)))));
-                } else {
-                    return failure("Invalid parameter: address can't be null");
-                }
-            }
+            case GET_DELEGATES:
+                return getDelegates();
 
-            case GET_DELEGATE: {
-                String address = params.get("address");
+            case GET_VOTE:
+                return getVote(params);
 
-                if (address == null) {
-                    return failure("Invalid parameter: address can't be null");
-                }
+            case GET_VOTES:
+                return getVotes(params);
 
-                byte[] addressBytes = Hex.parse(address);
-                Delegate delegate = kernel.getBlockchain().getDelegateState().getDelegateByAddress(addressBytes);
-                if (delegate == null) {
-                    return failure("Invalid parameter: provided address is not a delegate");
-                }
+            case LIST_ACCOUNTS:
+                return listAccounts();
 
-                BlockchainImpl.ValidatorStats validatorStats = kernel.getBlockchain().getValidatorStats(addressBytes);
-
-                return success(new GetDelegateResponse(
-                        true,
-                        new GetDelegateResponse.Result(validatorStats, delegate)));
-            }
-
-            case GET_VALIDATORS: {
-                return success(new GetValidatorsResponse(
-                        true,
-                        kernel.getBlockchain().getValidators().parallelStream()
-                                .map(v -> Hex.PREF + v)
-                                .collect(Collectors.toList())));
-            }
-
-            case GET_DELEGATES: {
-                return success(new GetDelegatesResponse(
-                        true,
-                        kernel.getBlockchain()
-                                .getDelegateState().getDelegates().parallelStream()
-                                .map(delegate -> new GetDelegateResponse.Result(
-                                        kernel.getBlockchain().getValidatorStats(delegate.getAddress()),
-                                        delegate))
-                                .collect(Collectors.toList())));
-            }
-
-            case GET_VOTE: {
-                String voter = params.get("voter");
-                String delegate = params.get("delegate");
-
-                if (voter != null && delegate != null) {
-                    return success(new GetVoteResponse(
-                            true,
-                            kernel.getBlockchain().getDelegateState()
-                                    .getVote(Hex.parse(voter), Hex.parse(delegate))));
-                } else {
-                    return failure("Invalid parameter: voter = " + voter + ", delegate = " + delegate);
-                }
-            }
-
-            case GET_VOTES: {
-                String delegate = params.get("delegate");
-
-                if (delegate != null) {
-                    return success(new GetVotesResponse(
-                            true,
-                            kernel.getBlockchain().getDelegateState().getVotes(Hex.parse(delegate)).entrySet()
-                                    .parallelStream()
-                                    .collect(Collectors.toMap(
-                                            entry -> Hex.PREF + entry.getKey().toString(), Map.Entry::getValue))));
-                } else {
-                    return failure("Invalid parameter: delegate can't be null");
-                }
-            }
-
-            case LIST_ACCOUNTS: {
-                return success(new ListAccountsResponse(
-                        true,
-                        kernel.getWallet().getAccounts().parallelStream()
-                                .map(acc -> Hex.PREF + acc.toAddressString())
-                                .collect(Collectors.toList())));
-            }
-
-            case CREATE_ACCOUNT: {
-                EdDSA key = new EdDSA();
-                kernel.getWallet().addAccount(key);
-                kernel.getWallet().flush();
-                return success(new CreateAccountResponse(true, Hex.PREF + key.toAddressString()));
-            }
+            case CREATE_ACCOUNT:
+                return createAccount();
 
             case TRANSFER:
             case DELEGATE:
@@ -294,50 +161,455 @@ public class ApiHandlerImpl implements ApiHandler {
                 return doTransaction(cmd, params);
             }
         } catch (Exception e) {
+            logger.error("Unhandled exception", e);
             throw new ApiHandlerException("Internal error: " + e.getMessage(), INTERNAL_SERVER_ERROR, e);
         }
 
         throw new ApiHandlerException("Not implemented: command = " + cmd, HttpResponseStatus.NOT_IMPLEMENTED);
     }
 
-    protected String addToBlackList(Map<String, String> params) throws ApiHandlerException {
+    /**
+     * GET /get_info
+     *
+     * @return
+     */
+    private ApiHandlerResponse getInfo() {
+        return new GetInfoResponse(true, new GetInfoResponse.Result(kernel));
+    }
+
+    /**
+     * GET /get_peers
+     *
+     * @return
+     */
+    private ApiHandlerResponse getPeers() {
+        return new GetPeersResponse(true, kernel.getChannelManager()
+                .getActivePeers()
+                .parallelStream()
+                .map(GetPeersResponse.Result::new).collect(Collectors.toList()));
+    }
+
+    /**
+     * GET /add_node?node
+     *
+     * @param params
+     * @return result
+     */
+    private ApiHandlerResponse addNode(Map<String, String> params) {
+        try {
+            kernel.getNodeManager().addNode(validateAddNodeParameter(params.get("node")));
+            return new AddNodeResponse(true);
+        } catch (IllegalArgumentException e) {
+            return failure(e.getMessage(), BAD_REQUEST);
+        }
+    }
+
+    /**
+     * Validate node parameter of /add_node API
+     *
+     * @param node
+     *            node parameter of /add_node API
+     * @return validated hostname and port number
+     */
+    private InetSocketAddress validateAddNodeParameter(String node) {
+        if (node == null || node.length() == 0) {
+            throw new IllegalArgumentException("Invalid parameter: node can't be empty");
+        }
+
+        Matcher matcher = Pattern.compile("^(?<host>.+?):(?<port>\\d+)$").matcher(node.trim());
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("node parameter must in format of 'host:port'");
+        }
+
+        try {
+            return new InetSocketAddress(
+                    InetAddress.getByName(matcher.group("host")),
+                    Integer.parseInt(matcher.group("port")));
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * GET /get_block?number&hash
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse getBlock(Map<String, String> params) {
+        String number = params.get("number");
+        String hash = params.get("hash");
+        Block block;
+
+        if (number != null) {
+            block = kernel.getBlockchain().getBlock(Long.parseLong(number));
+        } else if (hash != null) {
+            block = kernel.getBlockchain().getBlock(Hex.parse(hash));
+        } else {
+            return failure("Invalid parameter: either number or hash has to be provided", BAD_REQUEST);
+        }
+
+        if (block == null) {
+            return failure("block is not found", NOT_FOUND);
+        }
+
+        return new GetBlockResponse(true, new GetBlockResponse.Result(block));
+    }
+
+    /**
+     * GET /get_pending_transactions
+     *
+     * @return
+     */
+    private ApiHandlerResponse getPendingTransactions() {
+        return new GetPendingTransactionsResponse(true, kernel.getPendingManager()
+                .getTransactions()
+                .parallelStream()
+                .map(GetTransactionResponse.Result::new)
+                .collect(Collectors.toList()));
+    }
+
+    /**
+     * GET /get_account_transactions?address&from&to
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse getAccountTransactions(Map<String, String> params) {
+        String address = params.get("address");
+        String from = params.get("from");
+        String to = params.get("to");
+        byte[] addressBytes;
+        int fromInt;
+        int toInt;
+
+        if (address == null) {
+            return failure("address is required", BAD_REQUEST);
+        }
+
+        try {
+            addressBytes = Hex.parse(address);
+        } catch (CryptoException ex) {
+            return failure("address is not a valid hexadecimal string", BAD_REQUEST);
+        }
+
+        try {
+            fromInt = Integer.parseInt(from);
+        } catch (NumberFormatException ex) {
+            return failure("from is not a valid integer", BAD_REQUEST);
+        }
+
+        try {
+            toInt = Integer.parseInt(to);
+        } catch (NumberFormatException ex) {
+            return failure("to is not a valid integer", BAD_REQUEST);
+        }
+
+        return new GetAccountTransactionsResponse(true, kernel.getBlockchain()
+                .getTransactions(addressBytes, fromInt, toInt)
+                .parallelStream()
+                .map(GetTransactionResponse.Result::new)
+                .collect(Collectors.toList()));
+    }
+
+    /**
+     * GET /get_transaction?hash
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse getTransaction(Map<String, String> params) {
+        String hash = params.get("hash");
+        if (hash == null) {
+            return failure("Invalid parameter: hash can't be null", BAD_REQUEST);
+        }
+
+        byte[] hashBytes;
+        try {
+            hashBytes = Hex.parse(hash);
+        } catch (CryptoException ex) {
+            return failure("hash parameter is not a valid hexadecimal string", BAD_REQUEST);
+        }
+
+        Transaction transaction = kernel.getBlockchain().getTransaction(hashBytes);
+        if (transaction == null) {
+            return failure("transaction not found", NOT_FOUND);
+        }
+
+        return new GetTransactionResponse(true, new GetTransactionResponse.Result(transaction));
+    }
+
+    /**
+     * GET /send_transaction?raw
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse sendTransaction(Map<String, String> params) {
+        try {
+            String raw = params.get("raw");
+            if (raw == null) {
+                return failure("Invalid parameter: raw can't be null", BAD_REQUEST);
+            }
+
+            kernel.getPendingManager().addTransaction(Transaction.fromBytes(Hex.parse(raw)));
+            return new SendTransactionResponse(true);
+        } catch (CryptoException e) {
+            return failure("parameter 'raw' is not a valid hexadecimal string", BAD_REQUEST);
+        }
+    }
+
+    /**
+     * GET /get_account?address
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse getAccount(Map<String, String> params) {
+        String address = params.get("address");
+        if (address == null) {
+            return failure("Invalid parameter: address can't be null", BAD_REQUEST);
+        }
+
+        byte[] addressBytes;
+        try {
+            addressBytes = Hex.parse(address);
+        } catch (CryptoException ex) {
+            return failure(ex.getMessage(), BAD_REQUEST);
+        }
+
+        Account account = kernel.getBlockchain().getAccountState().getAccount(addressBytes);
+        return new GetAccountResponse(true, new GetAccountResponse.Result(account));
+    }
+
+    /**
+     * GET /add_to_blacklist?ip
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse addToBlackList(Map<String, String> params) {
         try {
             String ip = params.get("ip");
             if (ip == null || ip.trim().length() == 0) {
-                return failure("Invalid parameter: ip can't be empty");
+                return failure("Invalid parameter: ip can't be empty", BAD_REQUEST);
             }
 
             kernel.getChannelManager().getIpFilter().blacklistIp(ip.trim());
-            return success(new ApiHandlerResponse(true, null));
+            return new ApiHandlerResponse(true, null);
         } catch (UnknownHostException | IllegalArgumentException ex) {
-            return failure(ex.getMessage());
+            return failure(ex.getMessage(), BAD_REQUEST);
         }
     }
 
-    protected String addToWhiteList(Map<String, String> params) throws ApiHandlerException {
+    /**
+     * GET /add_to_whitelist?ip
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse addToWhiteList(Map<String, String> params) {
         try {
             String ip = params.get("ip");
             if (ip == null || ip.trim().length() == 0) {
-                return failure("Invalid parameter: ip can't be empty");
+                return failure("Invalid parameter: ip can't be empty", BAD_REQUEST);
             }
 
             kernel.getChannelManager().getIpFilter().whitelistIp(ip.trim());
-            return success(new ApiHandlerResponse(true, null));
+            return new ApiHandlerResponse(true, null);
         } catch (UnknownHostException | IllegalArgumentException ex) {
-            return failure(ex.getMessage());
+            return failure(ex.getMessage(), BAD_REQUEST);
         }
     }
 
-    protected String doTransaction(Command cmd, Map<String, String> params) throws ApiHandlerException {
-        String pFrom = params.get("from");
-        String pTo = params.get("to");
-        String pValue = params.get("value");
-        String pFee = params.get("fee");
-        String pData = params.get("data");
+    /**
+     * GET /get_latest_block_number
+     *
+     * @return
+     */
+    private ApiHandlerResponse getLatestBlockNumber() {
+        return new GetLatestBlockNumberResponse(true, kernel.getBlockchain().getLatestBlockNumber());
+    }
 
+    /**
+     * GET /get_latest_block
+     *
+     * @return
+     */
+    private ApiHandlerResponse getLatestBlock() {
+        return new GetLatestBlockResponse(true,
+                new GetBlockResponse.Result(kernel.getBlockchain().getLatestBlock()));
+    }
+
+    /**
+     * GET /get_delegate?address
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse getDelegate(Map<String, String> params) {
+        String address = params.get("address");
+        if (address == null) {
+            return failure("Invalid parameter: address can't be null", BAD_REQUEST);
+        }
+
+        byte[] addressBytes;
+        try {
+            addressBytes = Hex.parse(address);
+        } catch (CryptoException e) {
+            return failure(e.getMessage(), BAD_REQUEST);
+        }
+
+        Delegate delegate = kernel.getBlockchain().getDelegateState().getDelegateByAddress(addressBytes);
+        if (delegate == null) {
+            return failure("Invalid parameter: provided address is not a delegate", NOT_FOUND);
+        }
+
+        BlockchainImpl.ValidatorStats validatorStats = kernel.getBlockchain().getValidatorStats(addressBytes);
+
+        return new GetDelegateResponse(true, new GetDelegateResponse.Result(validatorStats, delegate));
+    }
+
+    /**
+     * GET /get_validators
+     *
+     * @return
+     */
+    private ApiHandlerResponse getValidators() {
+        return new GetValidatorsResponse(
+                true,
+                kernel.getBlockchain().getValidators().parallelStream()
+                        .map(v -> Hex.PREF + v)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * GET /get_delegates
+     *
+     * @return
+     */
+    private ApiHandlerResponse getDelegates() {
+        return new GetDelegatesResponse(
+                true,
+                kernel.getBlockchain()
+                        .getDelegateState().getDelegates().parallelStream()
+                        .map(delegate -> new GetDelegateResponse.Result(
+                                kernel.getBlockchain().getValidatorStats(delegate.getAddress()),
+                                delegate))
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * GET /get_vote?voter&delegate
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse getVote(Map<String, String> params) {
+        String voter = params.get("voter");
+        String delegate = params.get("delegate");
+        byte[] voterBytes;
+        byte[] delegateBytes;
+
+        if (voter == null) {
+            return failure("parameter 'voter' is required", BAD_REQUEST);
+        }
+
+        try {
+            voterBytes = Hex.parse(voter);
+        } catch (CryptoException ex) {
+            return failure("parameter 'voter' is not a valid hexadecimal string", BAD_REQUEST);
+        }
+
+        if (delegate == null) {
+            return failure("parameter 'delegate' is required", BAD_REQUEST);
+        }
+
+        try {
+            delegateBytes = Hex.parse(delegate);
+        } catch (CryptoException ex) {
+            return failure("parameter 'delegate' is not a valid hexadecimal string", BAD_REQUEST);
+        }
+
+        return new GetVoteResponse(
+                true,
+                kernel.getBlockchain().getDelegateState()
+                        .getVote(voterBytes, delegateBytes));
+    }
+
+    /**
+     * GET /get_votes?delegate
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse getVotes(Map<String, String> params) {
+        String delegate = params.get("delegate");
+        if (delegate == null) {
+            return failure("Invalid parameter: delegate can't be null", BAD_REQUEST);
+        }
+
+        byte[] delegateBytes;
+        try {
+            delegateBytes = Hex.parse(delegate);
+        } catch (CryptoException ex) {
+            return failure("delegate is not a valid hexadecimal string", BAD_REQUEST);
+        }
+
+        return new GetVotesResponse(
+                true,
+                kernel.getBlockchain().getDelegateState().getVotes(delegateBytes).entrySet().parallelStream()
+                        .collect(Collectors.toMap(entry -> Hex.PREF + entry.getKey().toString(), Map.Entry::getValue)));
+    }
+
+    /**
+     * GET /list_accounts
+     *
+     * @return
+     */
+    private ApiHandlerResponse listAccounts() {
+        return new ListAccountsResponse(
+                true,
+                kernel.getWallet().getAccounts().parallelStream()
+                        .map(acc -> Hex.PREF + acc.toAddressString())
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * GET /create_account
+     *
+     * @return
+     */
+    private ApiHandlerResponse createAccount() {
+        try {
+            EdDSA key = new EdDSA();
+            kernel.getWallet().addAccount(key);
+            kernel.getWallet().flush();
+            return new CreateAccountResponse(true, Hex.PREF + key.toAddressString());
+        } catch (WalletLockedException e) {
+            return failure(e.getMessage(), INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * This method processes the following transaction-related endpoints:
+     *
+     * <ul>
+     * <li>GET /transfer?from&to&value&fee&data</li>
+     * <li>GET /delegate?from&fee&data</li>
+     * <li>GET /vote?from&to&value&fee&data</li>
+     * <li>GET /unvote?from&to&value&fee&data</li>
+     * </ul>
+     *
+     * @param cmd
+     *            type of transaction
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse doTransaction(Command cmd, Map<String, String> params) {
         // [1] check if kernel.getWallet().is unlocked
         if (!kernel.getWallet().unlocked()) {
-            return failure("Wallet is locked");
+            return failure("Wallet is locked", INTERNAL_SERVER_ERROR);
         }
 
         // [2] parse transaction type
@@ -356,56 +628,28 @@ public class ApiHandlerImpl implements ApiHandler {
             type = TransactionType.UNVOTE;
             break;
         default:
-            return failure("Unsupported transaction type: " + cmd);
+            return failure("Unsupported transaction type: " + cmd.toString(), NOT_IMPLEMENTED);
         }
 
-        // [3] parse parameters
-        if (pFrom != null //
-                && (type == TransactionType.DELEGATE || pTo != null) //
-                && (type == TransactionType.DELEGATE || pValue != null) //
-                && pFee != null) {
-            // from address
-            EdDSA from = kernel.getWallet().getAccount(Hex.parse(pFrom));
-            if (from == null) {
-                return failure("Invalid parameter: from = " + pFrom);
-            }
-
-            // to address
-            byte[] to = (type == TransactionType.DELEGATE) ? from.toAddress() : Hex.parse(pTo);
-            if (to == null) {
-                return failure("Invalid parameter: to = " + pTo);
-            }
-
-            // value and fee
-            long value = (type == TransactionType.DELEGATE) ? kernel.getConfig().minDelegateFee()
-                    : Long.parseLong(pValue);
-            long fee = Long.parseLong(pFee);
-
-            // nonce, timestamp and data
-            long nonce = kernel.getPendingManager().getNonce(from.toAddress());
-            long timestamp = System.currentTimeMillis();
-            byte[] data = (pData == null) ? Bytes.EMPTY_BYTES : Hex.parse(pData);
-
-            // sign
-            Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
-            tx.sign(from);
+        // [3] build and send the transaction to PendingManager
+        try {
+            Transaction tx = new TransactionBuilder(kernel)
+                    .withType(type)
+                    .withFrom(params.get("from"))
+                    .withTo(params.get("to"))
+                    .withValue(params.get("value"))
+                    .withFee(params.get("fee"))
+                    .withData(params.get("data"))
+                    .build();
 
             if (kernel.getPendingManager().addTransactionSync(tx)) {
-                return success(new DoTransactionResponse(true, Hex.encode0x(tx.getHash())));
+                return new DoTransactionResponse(true, Hex.encode0x(tx.getHash()));
             } else {
-                return failure("Transaction rejected by pending manager");
+                // TODO: report the actual reason of rejection
+                return failure("Transaction rejected by pending manager", UNPROCESSABLE_ENTITY);
             }
-        } else {
-            return failure("Invalid parameters");
-        }
-    }
-
-    protected String success(ApiHandlerResponse response) throws ApiHandlerException {
-        try {
-            return new ObjectMapper().writeValueAsString(response);
-        } catch (JsonProcessingException ex) {
-            logger.error("failed to output success message", ex);
-            throw new ApiHandlerException(INTERNAL_SERVER_ERROR);
+        } catch (IllegalArgumentException ex) {
+            return failure(ex.getMessage(), BAD_REQUEST);
         }
     }
 
@@ -415,12 +659,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param message
      * @return
      */
-    protected String failure(String message) throws ApiHandlerException {
-        try {
-            return new ObjectMapper().writeValueAsString(new ApiHandlerResponse(false, message));
-        } catch (JsonProcessingException ex) {
-            logger.error("failed to output error message", ex);
-            throw new ApiHandlerException(INTERNAL_SERVER_ERROR);
-        }
+    private ApiHandlerResponse failure(String message, HttpResponseStatus status) {
+        return new ApiHandlerResponse(false, message, status);
     }
 }
