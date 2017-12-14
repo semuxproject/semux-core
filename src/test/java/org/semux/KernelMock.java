@@ -17,7 +17,7 @@ import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.Wallet;
-import org.semux.core.WalletLockedException;
+import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.EdDSA;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;

@@ -20,6 +20,7 @@ import java.util.Collections;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.EdDSA;
 
 public class WalletTest {
@@ -53,10 +54,10 @@ public class WalletTest {
 
     @Test
     public void testUnlock() {
-        assertFalse(wallet.unlocked());
+        assertFalse(wallet.isUnlocked());
 
         wallet.unlock(pwd);
-        assertTrue(wallet.unlocked());
+        assertTrue(wallet.isUnlocked());
 
         assertEquals(1, wallet.getAccounts().size());
     }
@@ -66,7 +67,7 @@ public class WalletTest {
         wallet.unlock(pwd);
 
         wallet.lock();
-        assertFalse(wallet.unlocked());
+        assertFalse(wallet.isUnlocked());
     }
 
     @Test

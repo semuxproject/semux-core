@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.AES;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.EdDSA;
@@ -59,7 +60,7 @@ public class Wallet {
             throw new IllegalArgumentException("Password can not be null");
         }
 
-        if (unlocked()) {
+        if (isUnlocked()) {
             return true;
         }
 
@@ -91,7 +92,7 @@ public class Wallet {
     }
 
     /**
-     * Lock the wallet.
+     * Locks the wallet.
      */
     public void lock() {
         accounts.clear();
@@ -99,7 +100,7 @@ public class Wallet {
     }
 
     /**
-     * Check whether the wallet file exists.
+     * Returns whether the wallet file exists.
      * 
      * @return
      */
@@ -115,12 +116,21 @@ public class Wallet {
     }
 
     /**
-     * Check if this wallet is unlocked.
+     * Returns whether the wallet is locked.
+     * 
+     * @return
+     */
+    public boolean isLocked() {
+        return password == null;
+    }
+
+    /**
+     * Returns if this wallet is unlocked.
      * 
      * @return true if the wallet is locked, otherwise false
      */
-    public boolean unlocked() {
-        return password != null;
+    public boolean isUnlocked() {
+        return !isLocked();
     }
 
     /**
@@ -348,7 +358,7 @@ public class Wallet {
     }
 
     private void requireUnlocked() throws WalletLockedException {
-        if (!unlocked()) {
+        if (!isUnlocked()) {
             throw new WalletLockedException();
         }
     }

@@ -48,7 +48,7 @@ import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.core.WalletLockedException;
+import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.CryptoException;
@@ -608,7 +608,7 @@ public class ApiHandlerImpl implements ApiHandler {
      */
     private ApiHandlerResponse doTransaction(Command cmd, Map<String, String> params) {
         // [1] check if kernel.getWallet().is unlocked
-        if (!kernel.getWallet().unlocked()) {
+        if (!kernel.getWallet().isUnlocked()) {
             return failure("Wallet is locked", INTERNAL_SERVER_ERROR);
         }
 

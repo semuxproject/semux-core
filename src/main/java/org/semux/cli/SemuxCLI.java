@@ -21,7 +21,7 @@ import org.semux.Launcher;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.core.Wallet;
-import org.semux.core.WalletLockedException;
+import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.log.LoggerConfigurator;

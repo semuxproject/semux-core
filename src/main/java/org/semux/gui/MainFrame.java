@@ -156,11 +156,39 @@ public class MainFrame extends JFrame implements ActionListener {
             select(panelDelegates, btnDelegates);
             break;
         case LOCK:
-            lockGlassPane.setVisible(true);
+            lock();
             break;
         default:
             throw new UnreachableException();
         }
+    }
+
+    /**
+     * Locks the wallet.
+     */
+    protected void lock() {
+        Wallet w = kernel.getWallet();
+        w.lock();
+
+        lockGlassPane.setVisible(true);
+        btnLock.setText("Unlock");
+        kernel.getWallet().lock();
+    }
+
+    /**
+     * Unlocks the wallet.
+     */
+    protected boolean unlock(String password) {
+        Wallet w = kernel.getWallet();
+
+        if (password != null && w.unlock(password)) {
+            lockGlassPane.setVisible(false);
+            btnLock.setText("lock");
+            kernel.getWallet().lock();
+            return true;
+        }
+
+        return false;
     }
 
     private static final Border BORDER_NORMAL = new CompoundBorder(new LineBorder(new Color(180, 180, 180)),
@@ -206,13 +234,8 @@ public class MainFrame extends JFrame implements ActionListener {
                     InputDialog dialog = new InputDialog(MainFrame.this, GUIMessages.get("EnterPassword") + ":", true);
                     String pwd = dialog.getInput();
 
-                    if (pwd != null) {
-                        Wallet w = kernel.getWallet();
-                        if (w.getPassword().equals(pwd)) {
-                            lockGlassPane.setVisible(false);
-                        } else {
-                            JOptionPane.showMessageDialog(MainFrame.this, GUIMessages.get("IncorrectPassword"));
-                        }
+                    if (!unlock(pwd)) {
+                        JOptionPane.showMessageDialog(MainFrame.this, GUIMessages.get("IncorrectPassword"));
                     }
                 }
             });

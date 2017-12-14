@@ -240,25 +240,30 @@ public class SemuxGUI extends Launcher {
         AccountState as = chain.getAccountState();
         DelegateState ds = chain.getDelegateState();
 
-        // update latestBlock and isDelegate
+        // update latest block and coinbase delegate status
         model.setLatestBlock(block);
         model.setDelegate(ds.getDelegateByAddress(kernel.getCoinbase().toAddress()) != null);
 
-        // update accounts
-        List<WalletAccount> was = new ArrayList<>();
-        for (EdDSA key : wallet.getAccounts()) {
-            Account a = as.getAccount(key.toAddress());
-            WalletAccount wa = new WalletAccount(key, a);
-            was.add(wa);
+        // refresh accounts
+        if (wallet.isUnlocked()) {
+            List<WalletAccount> accounts = new ArrayList<>();
+            for (EdDSA key : wallet.getAccounts()) {
+                Account a = as.getAccount(key.toAddress());
+                WalletAccount wa = new WalletAccount(key, a);
+                accounts.add(wa);
+            }
+            model.setAccounts(accounts);
+        }
 
+        // update transactions
+        for (WalletAccount a : model.getAccounts()) {
             // most recent transactions of this account
-            byte[] address = wa.getKey().toAddress();
+            byte[] address = a.getKey().toAddress();
             int total = chain.getTransactionCount(address);
             List<Transaction> list = chain.getTransactions(address, Math.max(0, total - TRANSACTION_LIMIT), total);
             Collections.reverse(list);
-            wa.setTransactions(list);
+            a.setTransactions(list);
         }
-        model.setAccounts(was);
 
         // update delegates
         List<WalletDelegate> wds = new ArrayList<>();
@@ -275,6 +280,7 @@ public class SemuxGUI extends Launcher {
         }
         model.setActivePeers(activePeers);
 
+        // fire an update event
         model.fireUpdateEvent();
     }
 
