@@ -6,6 +6,9 @@
  */
 package org.semux.api.transaction;
 
+import java.util.List;
+
+import org.apache.commons.lang3.ArrayUtils;
 import org.semux.Kernel;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
@@ -52,13 +55,9 @@ public class TransactionBuilder {
      */
     private byte[] data;
 
-    public TransactionBuilder(Kernel kernel) {
+    public TransactionBuilder(Kernel kernel, TransactionType type) {
         this.kernel = kernel;
-    }
-
-    public TransactionBuilder withType(TransactionType type) {
         this.type = type;
-        return this;
     }
 
     public TransactionBuilder withFrom(String pFrom) {
@@ -98,6 +97,17 @@ public class TransactionBuilder {
         } catch (CryptoException e) {
             throw new IllegalArgumentException("'to' is not a valid hexadecimal string");
         }
+
+        return this;
+    }
+
+    public TransactionBuilder withToMany(List<String> toMany) {
+        if (type != TransactionType.TRANSFER_MANY) {
+            throw new IllegalArgumentException("non-TRANSFER_MANY transaction should never have a 'to[]' parameter");
+        }
+
+        // concatenate all recipients into a single byte array
+        to = toMany.stream().map(Hex::parse).reduce(new byte[0], ArrayUtils::addAll);
 
         return this;
     }

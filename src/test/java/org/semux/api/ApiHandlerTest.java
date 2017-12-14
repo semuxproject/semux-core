@@ -405,7 +405,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
                 "&to[]=" + key1.toAddressString() +
                 "&to[]=" + key2.toAddressString() +
                 "&value=1000000000&fee=" + config.minTransactionFee() * 2 +
-                "&data=test";
+                "&data=" + Hex.encode((new String("test_data")).getBytes());
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
         assertNotNull(response.txId);
