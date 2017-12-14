@@ -62,6 +62,8 @@ public class Kernel {
     protected SemuxSync sync;
     protected SemuxBFT cons;
 
+    protected SemuxAPI api;
+
     /**
      * Creates a kernel instance and initializes it.
      * 
@@ -125,7 +127,7 @@ public class Kernel {
         // ====================================
         // start API module
         // ====================================
-        SemuxAPI api = new SemuxAPI(this);
+        api = new SemuxAPI(this);
 
         if (config.apiEnabled()) {
             Thread apiThread = new Thread(api::start, "api");
@@ -301,5 +303,14 @@ public class Kernel {
      */
     public Consensus getConsensus() {
         return cons;
+    }
+
+    /**
+     * Get instance of Semux API server
+     *
+     * @return API server
+     */
+    public SemuxAPI getApi() {
+        return api;
     }
 }

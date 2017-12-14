@@ -28,10 +28,8 @@ public class KernelMock extends Kernel {
     private String password = "password";
 
     public KernelMock() {
-        super(null, null, null);
-
+        this(new DevNetConfig(Constants.DEFAULT_DATA_DIR));
         try {
-            this.config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
             this.wallet = new Wallet(File.createTempFile("wallet", ".data"));
             this.wallet.unlock(password);
             for (int i = 0; i < 10; i++) {
@@ -41,6 +39,11 @@ public class KernelMock extends Kernel {
         } catch (WalletLockedException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public KernelMock(Config config) {
+        super(null, null, null);
+        this.config = config;
     }
 
     public void setBlockchain(Blockchain chain) {
