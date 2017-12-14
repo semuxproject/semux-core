@@ -16,6 +16,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.After;
@@ -57,9 +59,9 @@ import org.slf4j.LoggerFactory;
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class })
-public class TransferManyTransaction {
+public class TransferManyTransactionIntegrationTest {
 
-    private static Logger logger = LoggerFactory.getLogger(TransferManyTransaction.class);
+    private static Logger logger = LoggerFactory.getLogger(TransferManyTransactionIntegrationTest.class);
 
     @Rule
     public TemporaryFolder kernel1Folder = new TemporaryFolder();
@@ -79,11 +81,12 @@ public class TransferManyTransaction {
         kernels.add(mockKernel(51620, 51720, kernel2Folder));
         kernels.add(mockKernel(51630, 51730, kernel3Folder));
 
+        // mock genesis.json
         Genesis genesis = mockGenesis(kernels.get(0).getWallet().getAccount(0).toAddressString());
-
         mockStatic(Genesis.class);
         when(Genesis.load(any())).thenReturn(genesis);
 
+        // mock seed nodes
         Set<InetSocketAddress> nodes = new HashSet<>();
         nodes.add(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 51610));
         mockStatic(NodeManager.class);
@@ -120,7 +123,7 @@ public class TransferManyTransaction {
                 kernel3.getWallet().getAccount(0).toAddressString(),
                 value,
                 kernel1.getConfig().minTransactionFee() * 2);
-        HttpEntity entity = new StringEntity(body, "application/x-www-form-urlencoded", "UTF-8");
+        HttpEntity entity = new StringEntity(body, ContentType.APPLICATION_FORM_URLENCODED);
         httpPost.setEntity(entity);
         HttpResponse response = httpClient.execute(httpPost);
         assertEquals(200, response.getStatusLine().getStatusCode());

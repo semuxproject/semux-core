@@ -455,16 +455,26 @@ public class SwingUtil {
         case UNVOTE:
         case TRANSFER:
         case TRANSFER_MANY:
-            return getAddressAlias(gui, tx.getFrom()) +
-                    " => " +
-                    Arrays.stream(tx.getRecipients())
-                            .map(recipient -> getAddressAlias(gui, recipient))
-                            .collect(Collectors.joining(", "));
+            return getTransactionRecipientsDescription(gui, tx);
         case DELEGATE:
             return GUIMessages.get("DelegateRegistration");
         default:
             return StringUtil.EMPTY_STRING;
         }
+    }
+
+    /**
+     *
+     * @param gui
+     * @param tx
+     * @return description of transaction with one or multiple recipients
+     */
+    private static String getTransactionRecipientsDescription(SemuxGUI gui, Transaction tx) {
+        return getAddressAlias(gui, tx.getFrom()) +
+                " => " +
+                Arrays.stream(tx.getRecipients())
+                        .map(recipient -> getAddressAlias(gui, recipient))
+                        .collect(Collectors.joining(", "));
     }
 
     /**
