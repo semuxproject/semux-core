@@ -28,6 +28,7 @@ import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionExecutor;
+
 import org.semux.core.TransactionResult;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -734,7 +735,8 @@ public class SemuxBFT implements Consensus {
         }
 
         // [2] check transactions and results (skipped)
-        if (transactions.size() > config.maxBlockSize() || !Block.validateTransactions(header, transactions)) {
+        if (transactions.stream().mapToDouble(Transaction::weightedSize).sum() > (double) config.maxBlockSize() ||
+                !Block.validateTransactions(header, transactions)) {
             logger.debug("Invalid block transactions");
             return false;
         }

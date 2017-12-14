@@ -32,7 +32,6 @@ public class BlockchainPerformance {
 
     private static final Logger logger = LoggerFactory.getLogger(BlockchainPerformance.class);
 
-    private static final int RECIPIENTS = 399;
     private static final byte[] coinbase = Bytes.random(30);
     private static final byte[] prevHash = Bytes.random(32);
     private static final EdDSA key = new EdDSA();
@@ -42,6 +41,10 @@ public class BlockchainPerformance {
     private static final byte[] data = Bytes.of("test");
     private static final long timestamp = System.currentTimeMillis() - 60 * 1000;
 
+    /**
+     * The benchmark tries to create a block filled with TRANSFER_MANY transactions
+     * each with Transaction.MAX_RECIPIENTS recipients
+     */
     private static void testLargeBlock(DBFactory dbFactory) {
         Instant begin = Instant.now();
 
@@ -50,10 +53,11 @@ public class BlockchainPerformance {
 
         ArrayList<Transaction> transactions = new ArrayList<>();
         ArrayList<TransactionResult> transactionResults = new ArrayList<>();
-        for (int i = 1; i <= config.maxBlockSize(); i++) {
+        // there can be 50 transactions in this case
+        for (int i = 1; i <= config.maxBlockSize() / (Transaction.MAX_RECIPIENTS / 2); i++) {
             Transaction tx = new Transaction(
                     TransactionType.TRANSFER_MANY,
-                    Bytes.random(EdDSA.ADDRESS_LEN * RECIPIENTS),
+                    Bytes.random(EdDSA.ADDRESS_LEN * Transaction.MAX_RECIPIENTS),
                     value,
                     fee,
                     nonce,

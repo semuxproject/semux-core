@@ -24,7 +24,10 @@ public class Transaction implements Callable<Boolean> {
 
     private static final Logger logger = LoggerFactory.getLogger(Transaction.class);
 
-    public static final int MAX_SIZE = 8192; // 8KB
+    /**
+     * The maximum number of recipients of a TRANSFER_MANY transaction
+     */
+    public static final int MAX_RECIPIENTS = 200;
 
     public static final int MAX_DATA_LENGTH = 128;
 
@@ -125,7 +128,7 @@ public class Transaction implements Callable<Boolean> {
      * @return true if success, otherwise false
      */
     public boolean validate() {
-        if (size() > MAX_SIZE) {
+        if (numberOfRecipients() > MAX_RECIPIENTS) {
             logger.info("ignoring large transaction (size: {}, hash: {})", size(), Hex.encode(getHash()));
             return false;
         }
@@ -295,6 +298,15 @@ public class Transaction implements Callable<Boolean> {
      */
     public int size() {
         return toBytes().length;
+    }
+
+    /**
+     * Returns weighted size of this transaction for calculating block limitation
+     *
+     * @return max(1, number of recipients / 2)
+     */
+    public double weightedSize() {
+        return Math.max(1.0, (double) numberOfRecipients() / 2.0);
     }
 
     /**

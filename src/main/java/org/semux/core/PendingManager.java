@@ -8,6 +8,7 @@ package org.semux.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -194,12 +195,20 @@ public class PendingManager implements Runnable, BlockchainListener {
         List<Transaction> txs = new ArrayList<>();
         List<TransactionResult> res = new ArrayList<>();
 
-        if (transactions.size() > limit && limit != -1) {
-            txs.addAll(transactions.subList(0, limit));
-            res.addAll(results.subList(0, limit));
-        } else {
+        if (limit == -1) {
             txs.addAll(transactions);
             res.addAll(results);
+        } else {
+            double weightedSize = 0;
+            for (Iterator<Transaction> it = transactions.iterator(); it.hasNext();) {
+                Transaction tx = it.next();
+                weightedSize += tx.weightedSize();
+                if (weightedSize > limit) {
+                    break;
+                } else {
+                    txs.add(tx);
+                }
+            }
         }
 
         return Pair.of(txs, res);
