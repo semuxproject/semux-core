@@ -14,9 +14,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 
-import org.apache.commons.lang3.builder.ToStringExclude;
 import org.junit.Test;
-import org.junit.experimental.theories.suppliers.TestedOn;
 import org.semux.core.state.Account;
 import org.semux.crypto.EdDSA;
 

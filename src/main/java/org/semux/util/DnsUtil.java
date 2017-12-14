@@ -37,7 +37,7 @@ public class DnsUtil {
 
         try {
             Lookup lookup = new Lookup(hostname, Type.TXT);
-            lookup.setResolver(new SimpleResolver());
+            lookup.setResolver(new SimpleResolver("8.8.8.8"));
             lookup.setCache(null);
             Record[] records = lookup.run();
 

@@ -38,6 +38,10 @@ public class MessageFactory {
     public Message create(byte code, byte[] encoded) {
         try {
             MessageCode c = MessageCode.of(code);
+            if (c == null) {
+                logger.warn("Unknown message code: {}", code);
+                return null;
+            }
 
             switch (c) {
             case DISCONNECT:
