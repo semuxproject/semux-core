@@ -10,6 +10,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -280,6 +281,23 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         GetTransactionResponse response = request(uri, GetTransactionResponse.class);
         assertTrue(response.success);
         assertEquals(Hex.encode0x(tx.getHash()), response.transaction.hash);
+        assertNotNull(response.transaction.to);
+        assertNull(response.transaction.toMany);
+    }
+
+    @Test
+    public void testGetTransactionToMany() throws IOException {
+        Transaction tx = createTransactionToMany();
+        TransactionResult res = new TransactionResult(true);
+        Block block = createBlock(chain, Collections.singletonList(tx), Collections.singletonList(res));
+        chain.addBlock(block);
+
+        String uri = "/get_transaction?hash=" + Hex.encode(tx.getHash());
+        GetTransactionResponse response = request(uri, GetTransactionResponse.class);
+        assertTrue(response.success);
+        assertEquals(Hex.encode0x(tx.getHash()), response.transaction.hash);
+        assertNotNull(response.transaction.toMany);
+        assertNull(response.transaction.to);
     }
 
     @Test

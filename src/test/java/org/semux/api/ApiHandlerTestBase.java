@@ -111,4 +111,19 @@ public abstract class ApiHandlerTestBase {
 
         return tx;
     }
+
+    protected Transaction createTransactionToMany() {
+        TransactionType type = TransactionType.TRANSFER_MANY;
+        byte[] to = Bytes.random(EdDSA.ADDRESS_LEN * 2);
+        long value = 0;
+        long fee = 0;
+        long nonce = 1;
+        long timestamp = System.currentTimeMillis();
+        byte[] data = {};
+
+        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+        tx.sign(new EdDSA());
+
+        return tx;
+    }
 }
