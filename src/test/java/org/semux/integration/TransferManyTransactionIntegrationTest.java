@@ -101,12 +101,12 @@ public class TransferManyTransactionIntegrationTest {
         KernelMock kernel3 = kernels.get(2);
 
         // start kernels
-        kernel1.start();
-        await().until(() -> kernel1.getApi().isRunning());
+        new Thread(kernel1::start, "kernel1").start();
+        await().until(() -> kernel1.getApi() != null && kernel1.getApi().isRunning());
         logger.info("Kernel-1 API Started");
 
-        kernel2.start();
-        kernel3.start();
+        new Thread(kernel2::start, "kernel2").start();
+        new Thread(kernel3::start, "kernel3").start();
 
         // make transfer_many request
         final long value = 1000 * Unit.SEM;
