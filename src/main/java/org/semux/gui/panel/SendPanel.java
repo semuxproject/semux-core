@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.swing.GroupLayout;
@@ -83,6 +84,7 @@ public class SendPanel extends JPanel implements ActionListener {
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
 
         toText = SwingUtil.textFieldWithCopyPastePopup();
+        toText.setName("toText");
         toText.setColumns(24);
         toText.setActionCommand(Action.SEND.name());
         toText.addActionListener(this);
@@ -91,6 +93,7 @@ public class SendPanel extends JPanel implements ActionListener {
         lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
         amountText = SwingUtil.textFieldWithCopyPastePopup();
+        amountText.setName("amountText");
         amountText.setColumns(10);
         amountText.setActionCommand(Action.SEND.name());
         amountText.addActionListener(this);
@@ -119,6 +122,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblSem2 = new JLabel("SEM");
 
         JButton btnSend = new JButton(GUIMessages.get("Send"));
+        btnSend.setName("sendButton");
         btnSend.addActionListener(this);
         btnSend.setActionCommand(Action.SEND.name());
 
@@ -272,8 +276,13 @@ public class SendPanel extends JPanel implements ActionListener {
                 } else if (Bytes.of(memo).length > 128) {
                     JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidData", 128));
                 } else {
+                    String recipients = Stream.of(toList)
+                            .map(String::trim)
+                            .map(Hex::decode)
+                            .map(Hex::encode0x)
+                            .collect(Collectors.joining(","));
                     int ret = JOptionPane.showConfirmDialog(this,
-                            GUIMessages.get("TransferInfo", SwingUtil.formatValue(value), Hex.encode0x(to)),
+                            GUIMessages.get("TransferInfo", SwingUtil.formatValue(value), recipients),
                             GUIMessages.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
                     if (ret != JOptionPane.YES_OPTION) {
                         break;
