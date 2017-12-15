@@ -103,16 +103,15 @@ public class TransactionTest {
         }
 
         Transaction tx = new Transaction(
-            TransactionType.TRANSFER_MANY,
-            recipients.stream().map(EdDSA::toAddress).reduce(new byte[0], ArrayUtils::addAll),
-            value,
-            fee,
-            nonce,
-            timestamp,
-            Bytes.EMPTY_BYTES
-        );
+                TransactionType.TRANSFER_MANY,
+                recipients.stream().map(EdDSA::toAddress).reduce(new byte[0], ArrayUtils::addAll),
+                value,
+                fee,
+                nonce,
+                timestamp,
+                Bytes.EMPTY_BYTES);
 
-        for (int i = 0;i < numberOfRecipients;i++) {
+        for (int i = 0; i < numberOfRecipients; i++) {
             assertArrayEquals(recipients.get(i).toAddress(), tx.getRecipient(i));
         }
     }

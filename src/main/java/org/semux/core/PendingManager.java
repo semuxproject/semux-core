@@ -196,14 +196,18 @@ public class PendingManager implements Runnable, BlockchainListener {
         List<TransactionResult> res = new ArrayList<>();
 
         if (limit == -1) {
+            // returns all transactions if there is no limit
             txs.addAll(transactions);
             res.addAll(results);
         } else {
+            // append transaction to result list until the sum of weighted transaction size
+            // is greater than provided limit
             double weightedSize = 0;
-            Iterator<TransactionResult> itResult = results.iterator();
-            for (Iterator<Transaction> it = transactions.iterator(); it.hasNext() && itResult.hasNext();) {
-                Transaction tx = it.next();
-                TransactionResult txResult = itResult.next();
+            Iterator<TransactionResult> itTransactionResult = results.iterator();
+            Iterator<Transaction> itTransaction = transactions.iterator();
+            while (itTransaction.hasNext() && itTransactionResult.hasNext()) {
+                Transaction tx = itTransaction.next();
+                TransactionResult txResult = itTransactionResult.next();
                 weightedSize += tx.weightedSize();
                 if (weightedSize > limit) {
                     break;
