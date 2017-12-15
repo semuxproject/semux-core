@@ -16,7 +16,6 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
