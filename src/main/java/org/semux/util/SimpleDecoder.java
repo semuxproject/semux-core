@@ -97,13 +97,6 @@ public class SimpleDecoder {
         }
     }
 
-    public SimpleDecoder readRecursively() {
-        int len = readInt();
-
-        require(len);
-        return new SimpleDecoder(in, index, index + len);
-    }
-
     public int getReadIndex() {
         return index;
     }

@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class SimpleCodecTest {
+public class SimpleDecoderTest {
 
     @Test
     public void testCodec() {

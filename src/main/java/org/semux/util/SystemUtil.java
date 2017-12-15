@@ -111,20 +111,22 @@ public class SystemUtil {
 
     /**
      * Read a password from console with a customized message.
-     * 
+     *
+     * @param prompt
+     *            A message to display before reading password
      * @return
      */
-    public static String readPassword(String message) {
+    public static String readPassword(String prompt) {
         Console console = System.console();
 
         if (console == null) {
-            System.out.print(message);
+            System.out.print(prompt);
             System.out.flush();
 
             return SCANNER.nextLine();
         }
 
-        return new String(console.readPassword(message));
+        return new String(console.readPassword(prompt));
     }
 
     /**

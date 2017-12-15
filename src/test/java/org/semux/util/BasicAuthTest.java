@@ -7,6 +7,7 @@
 package org.semux.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
@@ -23,4 +24,10 @@ public class BasicAuthTest {
         assertEquals(username, p.getKey());
         assertEquals(password, p.getValue());
     }
+
+    @Test
+    public void testInvalid() {
+        assertNull(BasicAuth.parseAuth("invalid_auth_string"));
+    }
+
 }

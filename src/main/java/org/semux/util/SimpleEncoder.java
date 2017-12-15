@@ -73,16 +73,6 @@ public class SimpleEncoder {
         }
     }
 
-    public void writeRecursively(SimpleEncoder se) {
-        byte[] bytes = se.toBytes();
-        writeInt(bytes.length);
-        try {
-            out.write(bytes);
-        } catch (IOException e) {
-            throw new SimpleEncoderException(e);
-        }
-    }
-
     public byte[] toBytes() {
         return out.toByteArray();
     }
