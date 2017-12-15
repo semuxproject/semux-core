@@ -46,6 +46,9 @@ public class Kernel {
     protected static final Logger logger = LoggerFactory.getLogger(Kernel.class);
 
     protected AtomicBoolean isRunning = new AtomicBoolean(false);
+
+    protected AtomicBoolean isBooted = new AtomicBoolean(false);
+
     protected ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
     protected Config config = null;
 
@@ -194,7 +197,11 @@ public class Kernel {
 
             api.stop();
             p2p.stop();
+
+            isBooted.set(false);
         }, "shutdown-hook"));
+
+        isBooted.set(true);
     }
 
     /**
@@ -267,6 +274,15 @@ public class Kernel {
      */
     public boolean isRunning() {
         return isRunning.get();
+    }
+
+    /**
+     * Returns whether the kernel is booted
+     *
+     * @return
+     */
+    public boolean isBooted() {
+        return isBooted.get();
     }
 
     /**

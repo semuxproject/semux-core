@@ -8,6 +8,7 @@ package org.semux;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 import org.semux.config.Config;
 import org.semux.config.Constants;
@@ -22,6 +23,7 @@ import org.semux.crypto.EdDSA;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
+import org.semux.util.ApiClient;
 
 public class KernelMock extends Kernel {
 
@@ -84,5 +86,18 @@ public class KernelMock extends Kernel {
 
     public void setCoinbase(EdDSA coinbase) {
         this.coinbase = coinbase;
+    }
+
+    /**
+     *
+     * @return an instance of ApiClient connecting to this kernel
+     */
+    public ApiClient getApiClient() {
+        return new ApiClient(
+                new InetSocketAddress(
+                        this.getConfig().apiListenIp(),
+                        this.getConfig().apiListenPort()),
+                this.getConfig().apiUsername(),
+                this.getConfig().apiPassword());
     }
 }

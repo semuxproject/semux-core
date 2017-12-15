@@ -7,8 +7,11 @@
 package org.semux.integration;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertArrayEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.spy;
@@ -25,9 +28,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.awaitility.Awaitility;
+import org.awaitility.Duration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,15 +44,17 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.IntegrationTest;
 import org.semux.KernelMock;
+import org.semux.api.response.GetAccountResponse;
+import org.semux.api.response.GetAccountTransactionsResponse;
+import org.semux.api.response.GetTransactionResponse;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevNetConfig;
 import org.semux.core.Genesis;
-import org.semux.core.Transaction;
 import org.semux.core.Unit;
 import org.semux.core.Wallet;
-import org.semux.core.state.Account;
 import org.semux.crypto.EdDSA;
+import org.semux.crypto.Hex;
 import org.semux.net.NodeManager;
 import org.semux.util.ApiClient;
 import org.slf4j.Logger;
@@ -65,31 +73,42 @@ public class TransferManyTransactionIntegrationTest {
     private static final long PREMINE = 1000000;
 
     @Rule
-    public TemporaryFolder kernel1Folder = new TemporaryFolder();
+    KernelTestRule kernelValidatorRule = new KernelTestRule(51610, 51710);
 
     @Rule
-    public TemporaryFolder kernel2Folder = new TemporaryFolder();
+    KernelTestRule kernelPremineRule = new KernelTestRule(51620, 51720);
 
     @Rule
-    public TemporaryFolder kernel3Folder = new TemporaryFolder();
+    KernelTestRule kernelReceiver1Rule = new KernelTestRule(51630, 51730);
 
     @Rule
-    public TemporaryFolder kernel4Folder = new TemporaryFolder();
+    KernelTestRule kernelReceiver2Rule = new KernelTestRule(51640, 51740);
 
+    /**
+     * The kernel that is solely responsible of forging blocks
+     */
     public KernelMock kernelValidator;
 
+    /**
+     * The kernel that has 1000000 SEM available from height 0
+     */
     public KernelMock kernelPremine;
 
-    public KernelMock kernelReceiver1;
+    /**
+     * The kernels who will receive transaction from kernelPremine
+     */
+    public KernelMock kernelReceiver1, kernelReceiver2;
 
-    public KernelMock kernelReceiver2;
+    public TransferManyTransactionIntegrationTest() throws IOException {
+    }
 
     @Before
     public void setUp() throws IOException {
-        kernelValidator = mockKernel(51610, 51710, kernel1Folder);
-        kernelPremine = mockKernel(51620, 51720, kernel2Folder);
-        kernelReceiver1 = mockKernel(51630, 51730, kernel3Folder);
-        kernelReceiver2 = mockKernel(51640, 51740, kernel4Folder);
+        // prepare kernels
+        kernelValidator = kernelValidatorRule.getKernelMock();
+        kernelPremine = kernelPremineRule.getKernelMock();
+        kernelReceiver1 = kernelReceiver1Rule.getKernelMock();
+        kernelReceiver2 = kernelReceiver2Rule.getKernelMock();
 
         // mock genesis.json
         Genesis genesis = mockGenesis();
@@ -98,12 +117,15 @@ public class TransferManyTransactionIntegrationTest {
 
         // mock seed nodes
         Set<InetSocketAddress> nodes = new HashSet<>();
-        nodes.add(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 51610));
-        nodes.add(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 51620));
-        nodes.add(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 51630));
-        nodes.add(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 51640));
+        nodes.add(new InetSocketAddress(
+                InetAddress.getByName(kernelValidator.getConfig().p2pListenIp()),
+                kernelValidator.getConfig().p2pListenPort()));
         mockStatic(NodeManager.class);
         when(NodeManager.getSeedNodes(Constants.DEV_NET_ID)).thenReturn(nodes);
+
+        // configure Awaitility
+        Awaitility.setDefaultPollInterval(Duration.ONE_SECOND);
+        Awaitility.setDefaultTimeout(Duration.ONE_MINUTE);
     }
 
     /**
@@ -122,105 +144,79 @@ public class TransferManyTransactionIntegrationTest {
         new KernelTestThread(kernelPremine).start();
         new KernelTestThread(kernelReceiver1).start();
         new KernelTestThread(kernelReceiver2).start();
-        await().until(() -> kernelValidator.getApi() != null && kernelValidator.getApi().isRunning());
-        await().until(() -> kernelPremine.getApi() != null && kernelPremine.getApi().isRunning());
-        await().until(() -> kernelReceiver1.getApi() != null && kernelReceiver1.getApi().isRunning());
-        await().until(() -> kernelReceiver2.getApi() != null && kernelReceiver2.getApi().isRunning());
+        await().until(() -> kernelValidator.isBooted());
+        await().until(() -> kernelPremine.isBooted());
+        await().until(() -> kernelReceiver1.isBooted());
+        await().until(() -> kernelReceiver2.isBooted());
 
         // make transfer_many request from kernelPremine to kernelReceiver1 and
         // kernelReceiver2
         final long value = 1000 * Unit.SEM;
         final long fee = kernelPremine.getConfig().minTransactionFee() * 2;
-        ApiClient apiClient = new ApiClient(
-                new InetSocketAddress("127.0.0.1", 51720),
-                "user",
-                "pass");
         HashMap<String, Object> params = new HashMap<>();
-        params.put("from", kernelPremine.getWallet().getAccount(0).toAddressString());
-        params.put("to", kernelReceiver1.getWallet().getAccount(0).toAddressString() + ","
-                + kernelReceiver2.getWallet().getAccount(0).toAddressString());
+        params.put("from", addressStringOf(kernelPremine));
+        params.put("to", addressStringOf(kernelReceiver1) + "," + addressStringOf(kernelReceiver2));
         params.put("value", String.valueOf(value));
         params.put("fee", String.valueOf(fee));
-        String response = apiClient.request("transfer_many", params);
+        logger.info("Making transfer_many request", params);
+        String response = kernelPremine.getApiClient().request("transfer_many", params);
         Map<String, String> result = new ObjectMapper().readValue(response, new TypeReference<Map<String, String>>() {
         });
         assertEquals("true", result.get("success"));
 
         // wait until both of kernelReceiver1 and kernelReceiver2 have received the
-        // transaction
-        await().atMost(3, TimeUnit.MINUTES).until(() -> kernelReceiver1.getBlockchain().getAccountState()
-                .getAccount(kernelReceiver1.getWallet().getAccounts().get(0).toAddress())
-                .getAvailable() == value &&
-                kernelReceiver2.getBlockchain().getAccountState()
-                        .getAccount(kernelReceiver2.getWallet().getAccounts().get(0).toAddress())
-                        .getAvailable() == value);
+        // transaction.
+        // (2x transaction value + 2x min transaction fee) should be deducted from
+        // kernelPremine's account
+        logger.info("Waiting for the transaction to be processed...");
+        await().until(availableOf(kernelPremine), equalTo(PREMINE * Unit.SEM - value * 2 - fee));
+        await().until(availableOf(kernelReceiver1), equalTo(value));
+        await().until(availableOf(kernelReceiver2), equalTo(value));
 
-        // make assertions
-        assertions(value, fee);
+        // assert that the transaction has been recorded across nodes
+        assertTransferManyTransaction(kernelPremine);
+        assertTransferManyTransaction(kernelReceiver1);
+        assertTransferManyTransaction(kernelReceiver2);
     }
 
-    /**
-     * (2x transaction value + 2x min transaction fee) should be deducted from
-     * kernelPremine's account
-     * 
-     * @param value
-     * @param fee
-     */
-    private synchronized void assertions(final long value, final long fee) {
-        Account accountPremine = kernelPremine.getBlockchain().getAccountState()
-                .getAccount(kernelPremine.getWallet().getAccount(0).toAddress());
-        Account accountReceiver1 = kernelReceiver1.getBlockchain().getAccountState()
-                .getAccount(kernelReceiver1.getWallet().getAccount(0).toAddress());
-        Account accountReceiver2 = kernelReceiver2.getBlockchain().getAccountState()
-                .getAccount(kernelReceiver2.getWallet().getAccount(0).toAddress());
-        assertEquals(0, kernelValidator.getPendingManager().getTransactions().size());
-        List<Transaction> transactions = kernelPremine.getBlockchain().getTransactions(
-                kernelPremine.getWallet().getAccount(0).toAddress(),
-                0,
-                1);
-        assertArrayEquals(accountPremine.getAddress(), transactions.get(0).getFrom());
-        assertArrayEquals(accountReceiver1.getAddress(), transactions.get(0).getRecipient(0));
-        assertArrayEquals(accountReceiver2.getAddress(), transactions.get(0).getRecipient(1));
-        assertEquals(value, transactions.get(0).getValue());
-        assertEquals(PREMINE * Unit.SEM - value * 2 - fee, accountPremine.getAvailable());
+    private void assertTransferManyTransaction(KernelMock kernelMock) throws IOException {
+        GetTransactionResponse.Result transactionResultPremine = getTransactionResultOf(kernelMock, 0);
+        assertEquals(addressStringOf(kernelPremine), transactionResultPremine.from);
+        assertNull(transactionResultPremine.to);
+        assertThat(transactionResultPremine.toMany,
+                contains(addressStringOf(kernelReceiver1), addressStringOf(kernelReceiver2)));
     }
 
-    private KernelMock mockKernel(int p2pPort, int apiPort, TemporaryFolder folder) throws IOException {
-        // create a new data directory
-        FileUtils.copyDirectory(
-                Paths.get(Constants.DEFAULT_DATA_DIR, "config").toFile(),
-                Paths.get(folder.getRoot().getAbsolutePath(), "config").toFile());
+    private Callable<Long> availableOf(KernelMock kernelMock) {
+        return () -> {
+            ApiClient apiClient = kernelMock.getApiClient();
+            GetAccountResponse response = new ObjectMapper().readValue(
+                    apiClient.request("get_account", "address", addressStringOf(kernelMock)),
+                    GetAccountResponse.class);
+            logger.info("Available of {} = {}", addressStringOf(kernelMock), response.account.available);
+            return response.account.available;
+        };
+    }
 
-        Config config = spy(new DevNetConfig(folder.getRoot().getAbsolutePath()));
-        when(config.p2pListenPort()).thenReturn(p2pPort);
-        when(config.p2pListenIp()).thenReturn("127.0.0.1");
-        when(config.p2pDeclaredIp()).thenReturn(Optional.of("127.0.0.1"));
-        when(config.apiListenIp()).thenReturn("127.0.0.1");
-        when(config.apiListenPort()).thenReturn(apiPort);
-        when(config.apiEnabled()).thenReturn(true);
-        when(config.apiUsername()).thenReturn("user");
-        when(config.apiPassword()).thenReturn("pass");
+    private GetTransactionResponse.Result getTransactionResultOf(KernelMock kernelMock, int n) throws IOException {
+        ApiClient apiClient = kernelMock.getApiClient();
+        GetAccountTransactionsResponse response = new ObjectMapper().readValue(
+                apiClient.request(
+                        "get_account_transactions",
+                        "address", addressStringOf(kernelMock),
+                        "from", String.valueOf(n),
+                        "to", String.valueOf(n + 1)),
+                GetAccountTransactionsResponse.class);
+        return response.transactions.get(0);
+    }
 
-        // speed up consensus
-        when(config.bftNewHeightTimeout()).thenReturn(1000L);
-        when(config.bftProposeTimeout()).thenReturn(1000L);
-        when(config.bftValidateTimeout()).thenReturn(1000L);
-        when(config.bftPreCommitTimeout()).thenReturn(1000L);
-        when(config.bftCommitTimeout()).thenReturn(1000L);
-        when(config.bftFinalizeTimeout()).thenReturn(1000L);
-
-        KernelMock kernelMock = new KernelMock(config);
-
-        Wallet wallet = mockWallet(folder);
-        kernelMock.setWallet(wallet);
-        kernelMock.setCoinbase(wallet.getAccount(0));
-
-        return kernelMock;
+    private String addressStringOf(KernelMock kernelMock) {
+        return Hex.encode0x(kernelMock.getWallet().getAccount(0).toAddress());
     }
 
     private Genesis mockGenesis() {
-        String premineAddress = kernelPremine.getWallet().getAccount(0).toAddressString();
-        String delegateAddress = kernelValidator.getWallet().getAccount(0).toAddressString();
+        String premineAddress = addressStringOf(kernelPremine);
+        String delegateAddress = addressStringOf(kernelValidator);
 
         // mock premine
         Genesis.Premine premine = new Genesis.Premine(premineAddress, PREMINE, "premine");
@@ -240,12 +236,5 @@ public class TransferManyTransactionIntegrationTest {
                 premines,
                 delegates,
                 new HashMap<>());
-    }
-
-    private Wallet mockWallet(TemporaryFolder folder) throws IOException {
-        Wallet wallet = new Wallet(folder.newFile("wallet.data"));
-        wallet.unlock("password");
-        wallet.addAccount(new EdDSA());
-        return wallet;
     }
 }
