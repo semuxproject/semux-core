@@ -107,17 +107,21 @@ public class TransferManyTransactionIntegrationTest {
     }
 
     /**
-     * Expectations: 1. kernelReceiver1 and kernelReceiver2 should receive 1000 SEM
-     * from kernelPremine 2. kernelPremine's account should be deducted with 1000
-     * SEM * 2 + 0.05 SEM * 2
+     * Expectations:
+     * <ul>
+     * <li>kernelReceiver1 and kernelReceiver2 should receive <code>1000 SEM</code>
+     * from kernelPremine</li>
+     * <li>kernelPremine's account should be deducted with
+     * <code>1000 SEM * 2 + 0.05 SEM * 2</code></li>
+     * </ul>
      */
     @Test
     public void testTransferManyTransaction() throws IOException {
         // start kernels
-        new Thread(kernelValidator::start, "kernelValidator").start();
-        new Thread(kernelPremine::start, "kernelPremine").start();
-        new Thread(kernelReceiver1::start, "kernelReceiver1").start();
-        new Thread(kernelReceiver2::start, "kernelReceiver2").start();
+        new KernelTestThread(kernelValidator).start();
+        new KernelTestThread(kernelPremine).start();
+        new KernelTestThread(kernelReceiver1).start();
+        new KernelTestThread(kernelReceiver2).start();
         await().until(() -> kernelValidator.getApi() != null && kernelValidator.getApi().isRunning());
         await().until(() -> kernelPremine.getApi() != null && kernelPremine.getApi().isRunning());
         await().until(() -> kernelReceiver1.getApi() != null && kernelReceiver1.getApi().isRunning());
@@ -145,13 +149,24 @@ public class TransferManyTransactionIntegrationTest {
         // wait until both of kernelReceiver1 and kernelReceiver2 have received the
         // transaction
         await().atMost(3, TimeUnit.MINUTES).until(() -> kernelReceiver1.getBlockchain().getAccountState()
-                .getAccount(kernelReceiver1.getWallet().getAccounts().get(0).toAddress()).getAvailable() == value &&
+                .getAccount(kernelReceiver1.getWallet().getAccounts().get(0).toAddress())
+                .getAvailable() == value &&
                 kernelReceiver2.getBlockchain().getAccountState()
                         .getAccount(kernelReceiver2.getWallet().getAccounts().get(0).toAddress())
                         .getAvailable() == value);
 
-        // (2x transaction value + 2x min transaction fee) should be deducted from
-        // kernelPremine's account
+        // make assertions
+        assertions(value, fee);
+    }
+
+    /**
+     * (2x transaction value + 2x min transaction fee) should be deducted from
+     * kernelPremine's account
+     * 
+     * @param value
+     * @param fee
+     */
+    private synchronized void assertions(final long value, final long fee) {
         Account accountPremine = kernelPremine.getBlockchain().getAccountState()
                 .getAccount(kernelPremine.getWallet().getAccount(0).toAddress());
         Account accountReceiver1 = kernelReceiver1.getBlockchain().getAccountState()
@@ -185,6 +200,15 @@ public class TransferManyTransactionIntegrationTest {
         when(config.apiEnabled()).thenReturn(true);
         when(config.apiUsername()).thenReturn("user");
         when(config.apiPassword()).thenReturn("pass");
+
+        // speed up consensus
+        when(config.bftNewHeightTimeout()).thenReturn(1000L);
+        when(config.bftProposeTimeout()).thenReturn(1000L);
+        when(config.bftValidateTimeout()).thenReturn(1000L);
+        when(config.bftPreCommitTimeout()).thenReturn(1000L);
+        when(config.bftCommitTimeout()).thenReturn(1000L);
+        when(config.bftFinalizeTimeout()).thenReturn(1000L);
+
         KernelMock kernelMock = new KernelMock(config);
 
         Wallet wallet = mockWallet(folder);
