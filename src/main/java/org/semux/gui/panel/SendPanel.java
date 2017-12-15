@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -25,11 +26,15 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
+import org.semux.crypto.CryptoException;
+import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.SemuxGUI;
@@ -248,7 +253,10 @@ public class SendPanel extends JPanel implements ActionListener {
                 long value = getAmountText();
                 long fee = getFeeText();
                 String memo = getMemoText();
-                byte[] to = Hex.parse(getToText());
+
+                // parse recipient address
+                String[] toList = StringUtils.split(getToText(), ",");
+                byte[] to = Stream.of(toList).map(String::trim).map(Hex::parse).reduce(new byte[0], ArrayUtils::addAll);
 
                 if (acc == null) {
                     JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
@@ -259,7 +267,7 @@ public class SendPanel extends JPanel implements ActionListener {
                 } else if (value + fee > acc.getAvailable()) {
                     JOptionPane.showMessageDialog(this,
                             GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
-                } else if (to.length != 20) {
+                } else if (to.length < EdDSA.ADDRESS_LEN || to.length % EdDSA.ADDRESS_LEN != 0) {
                     JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidReceivingAddress"));
                 } else if (Bytes.of(memo).length > 128) {
                     JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidData", 128));
@@ -273,18 +281,29 @@ public class SendPanel extends JPanel implements ActionListener {
 
                     PendingManager pendingMgr = kernel.getPendingManager();
 
-                    TransactionType type = TransactionType.TRANSFER;
+                    int numberOfRecipients = to.length / EdDSA.ADDRESS_LEN;
+                    TransactionType type = numberOfRecipients == 1 ? TransactionType.TRANSFER
+                            : TransactionType.TRANSFER_MANY;
                     byte[] from = acc.getKey().toAddress();
                     long nonce = pendingMgr.getNonce(from);
                     long timestamp = System.currentTimeMillis();
                     byte[] data = Bytes.of(memo);
-                    Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+                    Transaction tx = new Transaction(
+                            type,
+                            to,
+                            value,
+                            Math.max(fee, config.minTransactionFee() * numberOfRecipients),
+                            nonce,
+                            timestamp,
+                            data);
                     tx.sign(acc.getKey());
 
                     sendTransaction(pendingMgr, tx);
                 }
             } catch (ParseException ex) {
                 JOptionPane.showMessageDialog(this, "Exception: " + ex.getMessage());
+            } catch (CryptoException ex) {
+                JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidReceivingAddress"));
             }
             break;
         case CLEAR:
