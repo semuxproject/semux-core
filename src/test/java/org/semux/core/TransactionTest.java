@@ -12,6 +12,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
@@ -87,6 +91,29 @@ public class TransactionTest {
         assertEquals(10, recipients.length);
         for (byte[] recipient : recipients) {
             assertEquals(EdDSA.ADDRESS_LEN, recipient.length);
+        }
+    }
+
+    @Test
+    public void testGetRecipient() {
+        ArrayList<EdDSA> recipients = new ArrayList<>();
+        int numberOfRecipients = RandomUtils.nextInt(1, Transaction.MAX_RECIPIENTS);
+        for (int i = 0; i < numberOfRecipients; i++) {
+            recipients.add(new EdDSA());
+        }
+
+        Transaction tx = new Transaction(
+            TransactionType.TRANSFER_MANY,
+            recipients.stream().map(EdDSA::toAddress).reduce(new byte[0], ArrayUtils::addAll),
+            value,
+            fee,
+            nonce,
+            timestamp,
+            Bytes.EMPTY_BYTES
+        );
+
+        for (int i = 0;i < numberOfRecipients;i++) {
+            assertArrayEquals(recipients.get(i).toAddress(), tx.getRecipient(i));
         }
     }
 
