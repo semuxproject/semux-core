@@ -294,9 +294,9 @@ public class BlockchainImpl implements Blockchain {
             String primary = config.getPrimaryValidator(validators, number, 0);
             adjustValidatorStats(block.getCoinbase(), StatsType.FORGED, 1);
             if (primary.equals(Hex.encode(block.getCoinbase()))) {
-                adjustValidatorStats(Hex.decode(primary), StatsType.HIT, 1);
+                adjustValidatorStats(Hex.parse(primary), StatsType.HIT, 1);
             } else {
-                adjustValidatorStats(Hex.decode(primary), StatsType.MISSED, 1);
+                adjustValidatorStats(Hex.parse(primary), StatsType.MISSED, 1);
             }
         }
 

@@ -29,6 +29,7 @@ import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.core.state.Account;
 import org.semux.crypto.EdDSA;
+import org.semux.crypto.Hex;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
 
@@ -60,7 +61,10 @@ public class SendPanelTest {
 
         // fill form
         EdDSA recipient1 = new EdDSA(), recipient2 = new EdDSA();
-        window.textBox("toText").setText(recipient1.toAddressString() + "," + recipient2.toAddressString());
+        window.textBox("toText").setText(
+                Hex.encode0x(recipient1.toAddress()) +
+                        "," +
+                        Hex.encode0x(recipient2.toAddress()));
         window.textBox("amountText").setText("100");
         window.button("sendButton").click();
 

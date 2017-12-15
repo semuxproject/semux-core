@@ -278,7 +278,7 @@ public class SendPanel extends JPanel implements ActionListener {
                 } else {
                     String recipients = Stream.of(toList)
                             .map(String::trim)
-                            .map(Hex::decode)
+                            .map(Hex::parse)
                             .map(Hex::encode0x)
                             .collect(Collectors.joining(","));
                     int ret = JOptionPane.showConfirmDialog(this,

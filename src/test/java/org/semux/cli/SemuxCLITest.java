@@ -402,7 +402,7 @@ public class SemuxCLITest {
 
         // mock address
         String address = "c583b6ad1d1cccfc00ae9113db6408f022822b20";
-        byte[] addressBytes = Hex.decode(address);
+        byte[] addressBytes = Hex.parse(address);
 
         // mock wallet
         Wallet wallet = mock(Wallet.class);
