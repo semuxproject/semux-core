@@ -131,6 +131,39 @@ public class TransactionExecutorTest {
     }
 
     @Test
+    public void testTransferManyLowFee() {
+        EdDSA key = new EdDSA();
+        final int numberOfRecipients = 2;
+
+        TransactionType type = TransactionType.TRANSFER_MANY;
+        byte[] from = key.toAddress();
+        byte[] to = Bytes.random(EdDSA.ADDRESS_LEN * numberOfRecipients);
+        long value = 5;
+        long fee = config.minTransactionFee();
+        long nonce = as.getAccount(from).getNonce();
+        long timestamp = System.currentTimeMillis();
+        byte[] data = Bytes.random(16);
+
+        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+        tx.sign(key);
+        assertTrue(tx.validate());
+
+        // insufficient available
+        TransactionResult result = exec.execute(tx, as.track(), ds.track());
+        assertFalse(result.isSuccess());
+
+        long available = 1000 * Unit.SEM;
+        as.adjustAvailable(key.toAddress(), available);
+
+        // execution should be failed
+        result = exec.execute(tx, as.track(), ds.track());
+        assertFalse(
+            "transaction with a fee lower than 'number of recipients * minimum fee' should be rejected",
+            result.isSuccess()
+        );
+    }
+
+    @Test
     public void testDelegate() {
         EdDSA delegate = new EdDSA();
 

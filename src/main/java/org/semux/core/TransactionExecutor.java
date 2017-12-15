@@ -15,6 +15,7 @@ import org.semux.config.Config;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
+import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +76,12 @@ public class TransactionExecutor {
 
             // check transaction fee
             if (fee < tx.numberOfRecipients() * config.minTransactionFee()) {
+                logger.warn(
+                    "Transaction fee is too low, skipping: hash = {}, recipients = {}, fee = {}",
+                    Hex.encode0x(tx.getHash()),
+                    tx.numberOfRecipients(),
+                    tx.getFee()
+                );
                 continue;
             }
 
