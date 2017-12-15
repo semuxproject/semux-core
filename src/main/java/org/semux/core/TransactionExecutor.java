@@ -77,11 +77,10 @@ public class TransactionExecutor {
             // check transaction fee
             if (fee < tx.numberOfRecipients() * config.minTransactionFee()) {
                 logger.warn(
-                    "Transaction fee is too low, skipping: hash = {}, recipients = {}, fee = {}",
-                    Hex.encode0x(tx.getHash()),
-                    tx.numberOfRecipients(),
-                    tx.getFee()
-                );
+                        "Transaction fee is too low, skipping: hash = {}, recipients = {}, fee = {}",
+                        Hex.encode0x(tx.getHash()),
+                        tx.numberOfRecipients(),
+                        tx.getFee());
                 continue;
             }
 

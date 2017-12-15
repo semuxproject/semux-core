@@ -107,10 +107,9 @@ public class TransferManyTransactionIntegrationTest {
     }
 
     /**
-     * Expectations:
-     * 1. kernelReceiver1 and kernelReceiver2 should receive 1000 SEM from
-     * kernelPremine 2. kernelPremine's account should be deducted with 1000 SEM * 2
-     * + 0.05 SEM * 2
+     * Expectations: 1. kernelReceiver1 and kernelReceiver2 should receive 1000 SEM
+     * from kernelPremine 2. kernelPremine's account should be deducted with 1000
+     * SEM * 2 + 0.05 SEM * 2
      */
     @Test
     public void testTransferManyTransaction() throws IOException {
