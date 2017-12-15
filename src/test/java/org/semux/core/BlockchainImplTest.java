@@ -129,7 +129,7 @@ public class BlockchainImplTest {
         Transaction t = chain.getTransaction(tx.getHash());
         assertNotNull(t);
         assertTrue(Arrays.equals(from, t.getFrom()));
-        assertTrue(Arrays.equals(to, t.getTo()));
+        assertTrue(Arrays.equals(to, t.getRecipient(0)));
         assertTrue(Arrays.equals(data, t.getData()));
         assertTrue(t.getValue() == value);
         assertTrue(t.getNonce() == nonce);

@@ -59,7 +59,6 @@ public class TransactionExecutor {
             results.add(result);
 
             byte[] from = tx.getFrom();
-            byte[] to = tx.getTo();
             long value = tx.getValue();
             long nonce = tx.getNonce();
             long fee = tx.getFee();
@@ -89,7 +88,7 @@ public class TransactionExecutor {
                 if (fee <= available && value <= available && value + fee <= available) {
 
                     as.adjustAvailable(from, -value - fee);
-                    as.adjustAvailable(to, value);
+                    as.adjustAvailable(tx.getRecipient(0), value);
 
                     result.setSuccess(true);
                 }
@@ -109,6 +108,7 @@ public class TransactionExecutor {
                 break;
             }
             case DELEGATE: {
+                byte[] to = tx.getRecipient(0);
                 if (fee <= available && value <= available && value + fee <= available //
                         && Arrays.equals(from, to) //
                         && value >= config.minDelegateFee() //
@@ -123,7 +123,7 @@ public class TransactionExecutor {
             }
             case VOTE: {
                 if (fee <= available && value <= available && value + fee <= available //
-                        && ds.vote(from, to, value)) {
+                        && ds.vote(from, tx.getRecipient(0), value)) {
 
                     as.adjustAvailable(from, -value - fee);
                     as.adjustLocked(from, value);
@@ -135,7 +135,7 @@ public class TransactionExecutor {
             case UNVOTE: {
                 if (fee <= available //
                         && value <= locked //
-                        && ds.unvote(from, to, value)) {
+                        && ds.unvote(from, tx.getRecipient(0), value)) {
 
                     as.adjustAvailable(from, value - fee);
                     as.adjustLocked(from, -value);

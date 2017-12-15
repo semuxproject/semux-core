@@ -29,25 +29,29 @@ public class Transaction implements Callable<Boolean> {
      */
     public static final int MAX_RECIPIENTS = 200;
 
+    /**
+     * The maximum length transaction data in bytes
+     */
     public static final int MAX_DATA_LENGTH = 128;
 
-    private byte[] hash;
+    private final byte[] hash;
 
-    private TransactionType type;
+    private final TransactionType type;
 
-    private byte[] to;
+    private final byte[] to;
 
-    private long value;
+    private final long value;
 
-    private long fee;
+    private final long fee;
 
-    private long nonce;
+    private final long nonce;
 
-    private long timestamp;
+    private final long timestamp;
 
-    private byte[] data;
+    private final byte[] data;
 
-    private byte[] encoded;
+    private final byte[] encoded;
+
     private Signature signature;
 
     /**
@@ -128,8 +132,19 @@ public class Transaction implements Callable<Boolean> {
      * @return true if success, otherwise false
      */
     public boolean validate() {
+        long numberOfRecipients = numberOfRecipients();
+
+        if (numberOfRecipients > 1 && type != TransactionType.TRANSFER_MANY) {
+            logger.warn(
+                    "The feature of multiple recipients is only supported by TRANSFER_MANY transaction (recipients: {}, hash: {})",
+                    numberOfRecipients, Hex.encode(getHash()));
+            return false;
+        }
+
         if (numberOfRecipients() > MAX_RECIPIENTS) {
-            logger.warn("ignoring large transaction (size: {}, hash: {})", size(), Hex.encode(getHash()));
+            logger.warn(
+                    "ignoring large transaction (recipients: {}, hash: {})",
+                    numberOfRecipients, Hex.encode(getHash()));
             return false;
         }
 
@@ -173,15 +188,6 @@ public class Transaction implements Callable<Boolean> {
      */
     public byte[] getFrom() {
         return (signature == null) ? null : signature.getAddress();
-    }
-
-    /**
-     * Returns the to address.
-     * 
-     * @return
-     */
-    protected byte[] getTo() {
-        return to;
     }
 
     /**

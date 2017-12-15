@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
@@ -276,11 +277,9 @@ public class BlockchainImpl implements Blockchain {
 
             // [3] update transaction_by_account index
             addTransactionToAccount(tx, tx.getFrom());
-            if (!Arrays.equals(tx.getFrom(), tx.getTo())) {
-                for (byte[] recipient : tx.getRecipients()) {
-                    addTransactionToAccount(tx, recipient);
-                }
-            }
+            Stream.of(tx.getRecipients())
+                    .filter(recipient -> !Arrays.equals(tx.getFrom(), recipient))
+                    .forEach(recipient -> addTransactionToAccount(tx, recipient));
         }
 
         if (number != genesis.getNumber()) {

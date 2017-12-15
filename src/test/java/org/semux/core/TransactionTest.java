@@ -8,11 +8,13 @@ package org.semux.core;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -77,6 +79,7 @@ public class TransactionTest {
                 nonce,
                 timestamp,
                 Bytes.EMPTY_BYTES).sign(key);
+        assertTrue(tx.validate());
         byte[] bytes = tx.toBytes();
         logger.info("tx size with maximum number of recipients: {} recipients, {} B, {} GB per 1M txs",
                 Transaction.MAX_RECIPIENTS,
@@ -116,10 +119,42 @@ public class TransactionTest {
         }
     }
 
+    @Test
+    public void testValidateMultiRecipientException() {
+        EnumSet<TransactionType> transactionTypes = EnumSet.allOf(TransactionType.class);
+        transactionTypes.remove(TransactionType.TRANSFER_MANY);
+        for (TransactionType type : transactionTypes) {
+            Transaction tx = new Transaction(
+                    type,
+                    Bytes.random(EdDSA.ADDRESS_LEN * 2),
+                    value,
+                    fee,
+                    nonce,
+                    timestamp,
+                    Bytes.EMPTY_BYTES);
+            assertFalse(
+                    "TRANSFER_MANY should be the only transaction type that supports multiple recipients",
+                    tx.validate());
+        }
+    }
+
+    @Test
+    public void testValidateLargeTransaction() {
+        Transaction tx = new Transaction(
+                type,
+                Bytes.random((Transaction.MAX_RECIPIENTS + 1) * EdDSA.ADDRESS_LEN),
+                value,
+                fee,
+                nonce,
+                timestamp,
+                Bytes.EMPTY_BYTES);
+        assertFalse(tx.validate());
+    }
+
     private void testFields(Transaction tx) {
         assertEquals(type, tx.getType());
         assertArrayEquals(key.toAddress(), tx.getFrom());
-        assertArrayEquals(to, tx.getTo());
+        assertArrayEquals(to, tx.getRecipient(0));
         assertEquals(value, tx.getValue());
         assertEquals(fee, tx.getFee());
         assertEquals(nonce, tx.getNonce());
