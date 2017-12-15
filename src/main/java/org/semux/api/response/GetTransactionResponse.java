@@ -49,6 +49,9 @@ public class GetTransactionResponse extends ApiHandlerResponse {
         @JsonProperty("nonce")
         public final Long nonce;
 
+        @JsonProperty("timestamp")
+        public final Long timestamp;
+
         @JsonProperty("date")
         public final String date;
 
@@ -63,6 +66,7 @@ public class GetTransactionResponse extends ApiHandlerResponse {
                 @JsonProperty("value") Long value,
                 @JsonProperty("fee") Long fee,
                 @JsonProperty("nonce") Long nonce,
+                @JsonProperty("timestamp") Long timestamp,
                 @JsonProperty("date") String date,
                 @JsonProperty("data") String data) {
             this.hash = hash;
@@ -72,6 +76,7 @@ public class GetTransactionResponse extends ApiHandlerResponse {
             this.value = value;
             this.fee = fee;
             this.nonce = nonce;
+            this.timestamp = timestamp;
             this.date = date;
             this.data = data;
         }
@@ -85,6 +90,7 @@ public class GetTransactionResponse extends ApiHandlerResponse {
                     tx.getValue(),
                     tx.getFee(),
                     tx.getNonce(),
+                    tx.getTimestamp(),
                     new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(tx.getTimestamp())),
                     Hex.encode0x(tx.getData()));
         }

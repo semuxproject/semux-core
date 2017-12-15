@@ -35,6 +35,9 @@ public class GetBlockResponse extends ApiHandlerResponse {
         @JsonProperty("number")
         public final Long number;
 
+        @JsonProperty("view")
+        public final Integer view;
+
         @JsonProperty("coinbase")
         public final String coinbase;
 
@@ -65,6 +68,7 @@ public class GetBlockResponse extends ApiHandlerResponse {
         public Result(
                 @JsonProperty("hash") String hash,
                 @JsonProperty("number") Long number,
+                @JsonProperty("view") Integer view,
                 @JsonProperty("coinbase") String coinbase,
                 @JsonProperty("prevHash") String prevHash,
                 @JsonProperty("timestamp") Long timestamp,
@@ -76,6 +80,7 @@ public class GetBlockResponse extends ApiHandlerResponse {
                 @JsonProperty("transactions") List<GetTransactionResponse.Result> transactions) {
             this.hash = hash;
             this.number = number;
+            this.view = view;
             this.coinbase = coinbase;
             this.prevHash = prevHash;
             this.timestamp = timestamp;
@@ -91,6 +96,7 @@ public class GetBlockResponse extends ApiHandlerResponse {
             this(
                     Hex.encode0x(block.getHash()),
                     block.getNumber(),
+                    block.getView(),
                     Hex.encode0x(block.getCoinbase()),
                     Hex.encode0x(block.getPrevHash()),
                     block.getTimestamp(),
