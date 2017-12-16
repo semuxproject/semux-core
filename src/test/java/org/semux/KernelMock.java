@@ -27,11 +27,12 @@ import org.semux.util.ApiClient;
 
 public class KernelMock extends Kernel {
 
-    private String password = "password";
+    private static final String password = "password";
 
     public KernelMock() {
-        this(new DevNetConfig(Constants.DEFAULT_DATA_DIR));
+        super(null, null, null);
         try {
+            this.config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
             this.wallet = new Wallet(File.createTempFile("wallet", ".data"));
             this.wallet.unlock(password);
             for (int i = 0; i < 10; i++) {
@@ -43,9 +44,8 @@ public class KernelMock extends Kernel {
         }
     }
 
-    public KernelMock(Config config) {
-        super(null, null, null);
-        this.config = config;
+    public KernelMock(Config config, Wallet wallet, EdDSA coinbase) {
+        super(config, wallet, coinbase);
     }
 
     public void setBlockchain(Blockchain chain) {
@@ -80,24 +80,17 @@ public class KernelMock extends Kernel {
         this.config = config;
     }
 
-    public void setWallet(Wallet wallet) {
-        this.wallet = wallet;
-    }
-
     public void setCoinbase(EdDSA coinbase) {
         this.coinbase = coinbase;
     }
 
     /**
+     * Returns an API client instance which connects to the mock kernel.
      *
-     * @return an instance of ApiClient connecting to this kernel
+     * @return an {@link ApiClient} instance
      */
     public ApiClient getApiClient() {
-        return new ApiClient(
-                new InetSocketAddress(
-                        this.getConfig().apiListenIp(),
-                        this.getConfig().apiListenPort()),
-                this.getConfig().apiUsername(),
-                this.getConfig().apiPassword());
+        return new ApiClient(new InetSocketAddress(this.getConfig().apiListenIp(), this.getConfig().apiListenPort()),
+                this.getConfig().apiUsername(), this.getConfig().apiPassword());
     }
 }

@@ -33,7 +33,7 @@ public class PeerServerTest {
 
         PeerServerMock ps = new PeerServerMock(temporaryDBFactory);
         ps.start(P2P_IP, P2P_PORT);
-        assertTrue(ps.getServer().isListening());
+        assertTrue(ps.getServer().isRunning());
 
         try (Socket sock = new Socket(remoteClient.getIp(), remoteClient.getPort())) {
             sock.getInputStream();
@@ -42,6 +42,6 @@ public class PeerServerTest {
         }
 
         ps.stop();
-        assertFalse(ps.getServer().isListening());
+        assertFalse(ps.getServer().isRunning());
     }
 }

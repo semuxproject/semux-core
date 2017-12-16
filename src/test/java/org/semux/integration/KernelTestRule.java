@@ -81,11 +81,8 @@ public class KernelTestRule extends TemporaryFolder {
         when(config.bftCommitTimeout()).thenReturn(1000L);
         when(config.bftFinalizeTimeout()).thenReturn(1000L);
 
-        KernelMock kernelMock = new KernelMock(config);
-
         Wallet wallet = mockWallet();
-        kernelMock.setWallet(wallet);
-        kernelMock.setCoinbase(wallet.getAccount(0));
+        KernelMock kernelMock = new KernelMock(config, wallet, wallet.getAccount(0));
 
         return kernelMock;
     }

@@ -134,10 +134,10 @@ public class TransferManyTransactionIntegrationTest {
         new KernelTestThread(kernelPremine).start();
         new KernelTestThread(kernelReceiver1).start();
         new KernelTestThread(kernelReceiver2).start();
-        await().until(() -> kernelValidator.isBooted());
-        await().until(() -> kernelPremine.isBooted());
-        await().until(() -> kernelReceiver1.isBooted());
-        await().until(() -> kernelReceiver2.isBooted());
+        await().until(() -> kernelValidator.isRunning());
+        await().until(() -> kernelPremine.isRunning());
+        await().until(() -> kernelReceiver1.isRunning());
+        await().until(() -> kernelReceiver2.isRunning());
 
         // make transfer_many request from kernelPremine to kernelReceiver1 and
         // kernelReceiver2

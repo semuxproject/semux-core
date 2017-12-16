@@ -116,6 +116,15 @@ public class NodeManager {
     }
 
     /**
+     * Returns if the node manager is running or not.
+     *
+     * @return true if running, otherwise false
+     */
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    /**
      * Add a node to the connection queue.
      * 
      * @param node

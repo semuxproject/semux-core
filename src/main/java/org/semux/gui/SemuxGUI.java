@@ -219,7 +219,7 @@ public class SemuxGUI extends Launcher {
 
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode node = mapper.readTree(con.getInputStream());
-                    String v = node.get("latestVersion").asText();
+                    String v = node.get("minVersion").asText();
 
                     if (SystemUtil.compareVersion(Constants.CLIENT_VERSION, v) < 0) {
                         JOptionPane.showMessageDialog(null, GUIMessages.get("WalletNeedToBeUpgraded"));
@@ -229,7 +229,7 @@ public class SemuxGUI extends Launcher {
                     Thread.currentThread().interrupt();
                     break;
                 } catch (IOException e) {
-                    logger.info("Failed to retrive latest version");
+                    logger.info("Failed to retrieve latest version");
                 }
             }
         }, "gui-version").start();
