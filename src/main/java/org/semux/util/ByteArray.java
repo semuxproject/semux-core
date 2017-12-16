@@ -62,7 +62,7 @@ public class ByteArray implements Comparable<ByteArray> {
 
         @Override
         public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException {
-            return new ByteArray(Hex.parse(key));
+            return new ByteArray(Hex.decode0x(key));
         }
     }
 }

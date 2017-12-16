@@ -27,8 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -57,9 +55,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class })
-public class TransferManyTransactionIntegrationTest {
+public class TransferManyTest {
 
-    private static Logger logger = LoggerFactory.getLogger(TransferManyTransactionIntegrationTest.class);
+    private static Logger logger = LoggerFactory.getLogger(TransferManyTest.class);
 
     private static final long PREMINE = 1000000;
 
@@ -90,11 +88,11 @@ public class TransferManyTransactionIntegrationTest {
      */
     public KernelMock kernelReceiver1, kernelReceiver2;
 
-    public TransferManyTransactionIntegrationTest() throws IOException {
+    public TransferManyTest() throws IOException {
     }
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws Exception {
         // prepare kernels
         kernelValidator = kernelValidatorRule.getKernelMock();
         kernelPremine = kernelPremineRule.getKernelMock();
@@ -114,13 +112,20 @@ public class TransferManyTransactionIntegrationTest {
         mockStatic(NodeManager.class);
         when(NodeManager.getSeedNodes(Constants.DEV_NET_ID)).thenReturn(nodes);
 
-        // configure Awaitility
-        Awaitility.setDefaultPollInterval(Duration.ONE_SECOND);
-        Awaitility.setDefaultTimeout(Duration.ONE_MINUTE);
+        // start kernels
+        kernelValidator.start();
+        kernelPremine.start();
+        kernelReceiver1.start();
+        kernelReceiver2.start();
+
+        // the kernel will start component threads asynchronously
+        // have to wait a bit
+        Thread.sleep(1000);
     }
 
     @After
     public void teardown() {
+        // stop kernels
         kernelValidator.stop();
         kernelPremine.stop();
         kernelReceiver1.stop();
@@ -138,16 +143,6 @@ public class TransferManyTransactionIntegrationTest {
      */
     @Test
     public void testTransferManyTransaction() throws IOException {
-        // start kernels
-        new KernelTestThread(kernelValidator).start();
-        new KernelTestThread(kernelPremine).start();
-        new KernelTestThread(kernelReceiver1).start();
-        new KernelTestThread(kernelReceiver2).start();
-        await().until(() -> kernelValidator.isRunning());
-        await().until(() -> kernelPremine.isRunning());
-        await().until(() -> kernelReceiver1.isRunning());
-        await().until(() -> kernelReceiver2.isRunning());
-
         // make transfer_many request from kernelPremine to kernelReceiver1 and
         // kernelReceiver2
         final long value = 1000 * Unit.SEM;

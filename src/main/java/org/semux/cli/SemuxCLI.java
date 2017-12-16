@@ -223,7 +223,7 @@ public class SemuxCLI extends Launcher {
     protected void dumpPrivateKey(String address) {
         Wallet wallet = loadAndUnlockWallet();
 
-        byte[] addressBytes = Hex.parse(address);
+        byte[] addressBytes = Hex.decode0x(address);
         EdDSA account = wallet.getAccount(addressBytes);
         if (account == null) {
             logger.error(CLIMessages.get("AddressNotInWallet"));
@@ -236,7 +236,7 @@ public class SemuxCLI extends Launcher {
     protected void importPrivateKey(String key) {
         try {
             Wallet wallet = loadAndUnlockWallet();
-            byte[] keyBytes = Hex.parse(key);
+            byte[] keyBytes = Hex.decode0x(key);
             EdDSA account = new EdDSA(keyBytes);
 
             boolean accountAdded = wallet.addAccount(account);

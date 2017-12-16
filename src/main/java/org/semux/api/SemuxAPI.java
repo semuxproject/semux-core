@@ -51,14 +51,31 @@ public class SemuxAPI {
         this.config = kernel.getConfig();
     }
 
+    /**
+     * Starts API server with configured binding address.
+     */
     public void start() {
         start(config.apiListenIp(), config.apiListenPort(), new SemuxAPIHttpChannelInitializer());
     }
 
+    /**
+     * Starts API server at the given binding IP and port.
+     *
+     * @param ip
+     * @param port
+     */
     public void start(String ip, int port) {
         start(ip, port, new SemuxAPIHttpChannelInitializer());
     }
 
+    /**
+     * Starts API server at the given binding IP and port, with the specified
+     * channel initializer.
+     * 
+     * @param ip
+     * @param port
+     * @param httpChannelInitializer
+     */
     public void start(String ip, int port, HttpChannelInitializer httpChannelInitializer) {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1, factory);
         EventLoopGroup workerGroup = new NioEventLoopGroup(0, factory);
@@ -83,6 +100,9 @@ public class SemuxAPI {
         }
     }
 
+    /**
+     * Stops the API server if started.
+     */
     public void stop() {
         if (isRunning() && channelFuture != null && channelFuture.channel().isOpen()) {
             try {
@@ -93,10 +113,18 @@ public class SemuxAPI {
         }
     }
 
+    /**
+     * Returns whether the API server is running or not.
+     * 
+     * @return
+     */
     public boolean isRunning() {
         return isRunning.get();
     }
 
+    /**
+     * The default channel initializer using {@link ApiHandlerImpl}.
+     */
     private class SemuxAPIHttpChannelInitializer extends HttpChannelInitializer {
 
         @Override

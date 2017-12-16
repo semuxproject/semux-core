@@ -258,9 +258,10 @@ public class SendPanel extends JPanel implements ActionListener {
                 long fee = getFeeText();
                 String memo = getMemoText();
 
-                // parse recipient address
+                // decode0x recipient address
                 String[] toList = StringUtils.split(getToText(), ",");
-                byte[] to = Stream.of(toList).map(String::trim).map(Hex::parse).reduce(new byte[0], ArrayUtils::addAll);
+                byte[] to = Stream.of(toList).map(String::trim).map(Hex::decode0x).reduce(new byte[0],
+                        ArrayUtils::addAll);
 
                 if (acc == null) {
                     JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
@@ -278,7 +279,7 @@ public class SendPanel extends JPanel implements ActionListener {
                 } else {
                     String recipients = Stream.of(toList)
                             .map(String::trim)
-                            .map(Hex::parse)
+                            .map(Hex::decode0x)
                             .map(Hex::encode0x)
                             .collect(Collectors.joining(","));
                     int ret = JOptionPane.showConfirmDialog(this,

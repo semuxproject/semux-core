@@ -135,11 +135,6 @@ public enum Command {
     TRANSFER,
 
     /**
-     * Batch transfer
-     */
-    TRANSFER_MANY,
-
-    /**
      * Register as a delegate.
      */
     DELEGATE,

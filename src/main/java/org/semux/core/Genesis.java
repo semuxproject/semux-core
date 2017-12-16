@@ -77,8 +77,8 @@ public class Genesis extends Block {
         // load block header
         BlockHeader header = new BlockHeader(
                 number,
-                Hex.parse(coinbase),
-                Hex.parse(parentHash),
+                Hex.decode0x(coinbase),
+                Hex.decode0x(parentHash),
                 timestamp,
                 Bytes.EMPTY_HASH,
                 Bytes.EMPTY_HASH,
@@ -88,7 +88,7 @@ public class Genesis extends Block {
         // load initial delegates
         Map<String, byte[]> delegatesMap = new HashMap<>();
         for (Map.Entry<String, String> entry : delegates.entrySet()) {
-            delegatesMap.put(entry.getKey(), Hex.parse(entry.getValue()));
+            delegatesMap.put(entry.getKey(), Hex.decode0x(entry.getValue()));
         }
 
         return new Genesis(header, premineMap, delegatesMap, config);
@@ -155,7 +155,7 @@ public class Genesis extends Block {
                 @JsonProperty("address") String address,
                 @JsonProperty("amount") long amount,
                 @JsonProperty("note") String note) {
-            this(Hex.parse(address), amount, note);
+            this(Hex.decode0x(address), amount, note);
         }
 
         public byte[] getAddress() {

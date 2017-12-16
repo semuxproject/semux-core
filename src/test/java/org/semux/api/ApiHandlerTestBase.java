@@ -48,7 +48,8 @@ public abstract class ApiHandlerTestBase {
     protected NodeManager nodeMgr;
     protected ChannelManager channelMgr;
 
-    protected static <T extends ApiHandlerResponse> T request(String uri, Class<T> clazz) throws IOException {
+    protected static <T extends ApiHandlerResponse> T request(String uri, Class<T> clazz)
+            throws IOException {
         URL u = new URL("http://" + ApiServerRule.API_IP + ":" + ApiServerRule.API_PORT + uri);
         HttpURLConnection con = (HttpURLConnection) u.openConnection();
 

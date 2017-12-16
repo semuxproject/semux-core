@@ -1,15 +1,8 @@
-/**
- * Copyright (c) 2017 The Semux Developers
- *
- * Distributed under the MIT software license, see the accompanying file
- * LICENSE or https://opensource.org/licenses/mit-license.php
- */
 package org.semux.api.response;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,25 +22,24 @@ public class ApiHandlerResponse {
     @JsonInclude(NON_NULL)
     public String message;
 
-    @JsonIgnore
-    public final HttpResponseStatus status;
-
     @JsonCreator
     public ApiHandlerResponse(
             @JsonProperty(value = "success", required = true) Boolean success,
             @JsonProperty("message") String message) {
         this.success = success;
         this.message = message;
-        this.status = HttpResponseStatus.OK;
     }
 
     public ApiHandlerResponse(Boolean success, String message, HttpResponseStatus status) {
         this.success = success;
         this.message = message;
-        this.status = status;
     }
 
-    public String serialize() throws JsonProcessingException {
-        return new ObjectMapper().writeValueAsString(this);
+    public String serialize() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return "{\"success\":false,\"message\":\"Internal server error\"}";
+        }
     }
 }

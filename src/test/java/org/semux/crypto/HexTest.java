@@ -55,12 +55,12 @@ public class HexTest {
     @Test
     public void testParse() {
         String encoded = "48656c6c6f20576f726c64";
-        assertEquals("Hello World", new String(Hex.parse(encoded)));
+        assertEquals("Hello World", new String(Hex.decode0x(encoded)));
     }
 
     @Test
     public void testParse0x() {
         String encoded = "0x48656c6c6f20576f726c64";
-        assertEquals("Hello World", new String(Hex.parse(encoded)));
+        assertEquals("Hello World", new String(Hex.decode0x(encoded)));
     }
 }

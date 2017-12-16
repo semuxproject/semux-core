@@ -158,7 +158,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
             if (pk != null) {
                 try {
                     Wallet wallet = gui.getKernel().getWallet();
-                    EdDSA account = new EdDSA(Hex.parse(pk));
+                    EdDSA account = new EdDSA(Hex.decode0x(pk));
                     if (wallet.addAccount(account)) {
                         wallet.flush();
                         JOptionPane.showMessageDialog(frame, GUIMessages.get("PrivateKeyImportSuccess"));

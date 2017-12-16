@@ -414,7 +414,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.txId));
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txId));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.TRANSFER);
     }
 
@@ -439,7 +439,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.txId));
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txId));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.TRANSFER_MANY);
     }
 
@@ -455,7 +455,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.txId));
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txId));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.DELEGATE);
     }
 
@@ -474,7 +474,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(0).getHash(), Hex.parse(response.txId));
+        assertArrayEquals(list.get(0).getHash(), Hex.decode0x(response.txId));
         assertEquals(TransactionType.VOTE, list.get(0).getType());
     }
 
@@ -498,7 +498,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.txId));
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txId));
         assertEquals(TransactionType.UNVOTE, list.get(list.size() - 1).getType());
     }
 }

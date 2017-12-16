@@ -6,9 +6,12 @@
  */
 package org.semux.api.transaction;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.semux.Kernel;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
@@ -38,7 +41,7 @@ public class TransactionBuilder {
     /**
      * Transaction recipient address
      */
-    private byte[] to;
+    private List<byte[]> to;
 
     /**
      * Transaction value
@@ -60,54 +63,46 @@ public class TransactionBuilder {
         this.type = type;
     }
 
-    public TransactionBuilder withFrom(String pFrom) {
-        if (pFrom == null) {
-            throw new IllegalArgumentException("parameter 'from' is required");
+    public TransactionBuilder withFrom(String from) {
+        if (from == null) {
+            throw new IllegalArgumentException("Parameter `from` can't be null");
         }
 
         try {
-            account = kernel.getWallet().getAccount(Hex.parse(pFrom));
+            account = kernel.getWallet().getAccount(Hex.decode0x(from));
         } catch (CryptoException e) {
-            throw new IllegalArgumentException("parameter 'from' is not a valid hexadecimal string");
+            throw new IllegalArgumentException("Parameter `from` is not a valid hexadecimal string");
         }
 
         if (account == null) {
             throw new IllegalArgumentException(
-                    String.format("provided address %s doesn't belong to the wallet", pFrom));
+                    String.format("The provided address %s doesn't belong to the wallet", from));
         }
 
         return this;
     }
 
-    public TransactionBuilder withTo(String pTo) {
+    public TransactionBuilder withTo(String to) {
         if (type == TransactionType.DELEGATE) {
-            if (pTo != null) {
+            if (to != null) {
                 throw new IllegalArgumentException(
-                        "DELEGATE transaction should never have a customized 'to' parameter");
+                        "DELEGATE transaction should never have a customized `to` parameter");
             }
             return this; // ignore the provided parameter
         }
 
-        if (pTo == null) {
-            throw new IllegalArgumentException("parameter 'to' is required");
+        if (to == null) {
+            throw new IllegalArgumentException("Parameter `to` can't be null");
         }
 
         try {
-            to = Hex.parse(pTo);
+            this.to = Arrays.asList(StringUtils.split(to.trim(), ","))
+                    .stream()
+                    .map(Hex::decode0x)
+                    .collect(Collectors.toList());
         } catch (CryptoException e) {
-            throw new IllegalArgumentException("'to' is not a valid hexadecimal string");
+            throw new IllegalArgumentException("Parameter `to` is not a valid hexadecimal string");
         }
-
-        return this;
-    }
-
-    public TransactionBuilder withToMany(List<String> toMany) {
-        if (type != TransactionType.TRANSFER_MANY) {
-            throw new IllegalArgumentException("non-TRANSFER_MANY transaction should never have a 'to[]' parameter");
-        }
-
-        // concatenate all recipients into a single byte array
-        to = toMany.stream().map(Hex::parse).reduce(new byte[0], ArrayUtils::addAll);
 
         return this;
     }
@@ -150,7 +145,7 @@ public class TransactionBuilder {
 
     public TransactionBuilder withData(String pData) {
         try {
-            data = (pData == null) ? Bytes.EMPTY_BYTES : Hex.parse(pData);
+            data = (pData == null) ? Bytes.EMPTY_BYTES : Hex.decode0x(pData);
         } catch (CryptoException e) {
             throw new IllegalArgumentException("'data' is not a valid hexadecimal string");
         }
@@ -164,13 +159,13 @@ public class TransactionBuilder {
 
         // DELEGATE transaction has fixed receiver and value
         if (type == TransactionType.DELEGATE) {
-            to = account.toAddress();
+            to = Collections.singletonList(account.toAddress());
             value = kernel.getConfig().minDelegateFee();
         }
 
         return new Transaction(
                 type,
-                to,
+                Bytes.merge(to),
                 value,
                 fee,
                 nonce,
