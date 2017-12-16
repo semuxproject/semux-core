@@ -19,7 +19,7 @@ import org.semux.integration.KernelTestRule;
 public class KernelTest {
 
     @Rule
-    public KernelTestRule kernelRule = new KernelTestRule(51610, 51710);
+    public KernelTestRule kernelRule = new KernelTestRule(15160, 15170);
 
     public KernelTest() throws IOException {
     }

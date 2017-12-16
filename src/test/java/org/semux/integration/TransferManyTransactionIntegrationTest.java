@@ -29,6 +29,7 @@ import java.util.concurrent.Callable;
 
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -116,6 +117,14 @@ public class TransferManyTransactionIntegrationTest {
         // configure Awaitility
         Awaitility.setDefaultPollInterval(Duration.ONE_SECOND);
         Awaitility.setDefaultTimeout(Duration.ONE_MINUTE);
+    }
+
+    @After
+    public void teardown() {
+        kernelValidator.stop();
+        kernelPremine.stop();
+        kernelReceiver1.stop();
+        kernelReceiver2.stop();
     }
 
     /**

@@ -125,10 +125,9 @@ public class Kernel {
         // ====================================
         // start API module
         // ====================================
+        api = new SemuxAPI(this);
         if (config.apiEnabled()) {
-            api = new SemuxAPI(this);
-            Thread apiThread = new Thread(api::start, "api");
-            apiThread.start();
+            new Thread(api::start, "api").start();
         }
 
         // ====================================
