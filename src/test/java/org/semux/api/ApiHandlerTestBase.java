@@ -6,8 +6,11 @@
  */
 package org.semux.api;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -55,6 +58,26 @@ public abstract class ApiHandlerTestBase {
         return new ObjectMapper().readValue(inputStream, clazz);
     }
 
+    protected static <T extends ApiHandlerResponse> T postRequest(String uri, String body, Class<T> clazz)
+            throws IOException {
+        URL u = new URL("http://" + ApiServerRule.API_IP + ":" + ApiServerRule.API_PORT + uri);
+        HttpURLConnection con = (HttpURLConnection) u.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Authorization", BasicAuth.generateAuth(config.apiUsername(), config.apiPassword()));
+        con.setDoOutput(true);
+
+        // write body
+        OutputStream os = con.getOutputStream();
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+        bufferedWriter.write(body);
+        bufferedWriter.flush();
+        bufferedWriter.close();
+        os.close();
+
+        InputStream inputStream = con.getResponseCode() < 400 ? con.getInputStream() : con.getErrorStream();
+        return new ObjectMapper().readValue(inputStream, clazz);
+    }
+
     protected Block createBlock(Blockchain chain, List<Transaction> transactions, List<TransactionResult> results) {
         EdDSA key = new EdDSA();
 
@@ -85,6 +108,21 @@ public abstract class ApiHandlerTestBase {
 
         Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
         tx.sign(key);
+
+        return tx;
+    }
+
+    protected Transaction createTransactionToMany() {
+        TransactionType type = TransactionType.TRANSFER_MANY;
+        byte[] to = Bytes.random(EdDSA.ADDRESS_LEN * 2);
+        long value = 0;
+        long fee = 0;
+        long nonce = 1;
+        long timestamp = System.currentTimeMillis();
+        byte[] data = {};
+
+        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+        tx.sign(new EdDSA());
 
         return tx;
     }

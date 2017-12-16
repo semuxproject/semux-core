@@ -21,7 +21,7 @@ public class TemporaryDBRule extends TemporaryFolder implements DBFactory {
     private EnumMap<DBName, KVDB> databases = new EnumMap<>(DBName.class);
 
     @Override
-    protected void before() throws Throwable {
+    public void before() throws Throwable {
         create();
         for (DBName name : DBName.values()) {
             File file = new File(getRoot(), Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
@@ -30,7 +30,7 @@ public class TemporaryDBRule extends TemporaryFolder implements DBFactory {
     }
 
     @Override
-    protected void after() {
+    public void after() {
         close();
         delete();
     }

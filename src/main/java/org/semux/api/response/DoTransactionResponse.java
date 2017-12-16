@@ -15,8 +15,9 @@ public class DoTransactionResponse extends ApiHandlerResponse {
 
     public DoTransactionResponse(
             @JsonProperty("success") Boolean success,
+            @JsonProperty("message") String message,
             @JsonProperty("result") String txId) {
-        super(success, null);
+        super(success, message);
         this.txId = txId;
     }
 }

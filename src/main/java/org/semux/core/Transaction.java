@@ -9,33 +9,49 @@ package org.semux.core;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 
+import org.semux.core.exception.TransactionException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xbill.DNS.Address;
 
 public class Transaction implements Callable<Boolean> {
 
-    private byte[] hash;
+    private static final Logger logger = LoggerFactory.getLogger(Transaction.class);
 
-    private TransactionType type;
+    /**
+     * The maximum number of recipients of a TRANSFER_MANY transaction
+     */
+    public static final int MAX_RECIPIENTS = 200;
 
-    private byte[] to;
+    /**
+     * The maximum length transaction data in bytes
+     */
+    public static final int MAX_DATA_LENGTH = 128;
 
-    private long value;
+    private final byte[] hash;
 
-    private long fee;
+    private final TransactionType type;
 
-    private long nonce;
+    private final byte[] to;
 
-    private long timestamp;
+    private final long value;
 
-    private byte[] data;
+    private final long fee;
 
-    private byte[] encoded;
+    private final long nonce;
+
+    private final long timestamp;
+
+    private final byte[] data;
+
+    private final byte[] encoded;
+
     private Signature signature;
 
     /**
@@ -70,6 +86,13 @@ public class Transaction implements Callable<Boolean> {
         this.hash = Hash.h256(encoded);
     }
 
+    /**
+     * Create a transaction from raw bytes
+     * 
+     * @param hash
+     * @param encoded
+     * @param signature
+     */
     public Transaction(byte[] hash, byte[] encoded, byte[] signature) {
         this.hash = hash;
 
@@ -109,19 +132,35 @@ public class Transaction implements Callable<Boolean> {
      * @return true if success, otherwise false
      */
     public boolean validate() {
+        long numberOfRecipients = numberOfRecipients();
+
+        if (numberOfRecipients > 1 && type != TransactionType.TRANSFER_MANY) {
+            logger.warn(
+                    "The feature of multiple recipients is only supported by TRANSFER_MANY transaction (recipients: {}, hash: {})",
+                    numberOfRecipients, Hex.encode(getHash()));
+            return false;
+        }
+
+        if (numberOfRecipients() > MAX_RECIPIENTS) {
+            logger.warn(
+                    "ignoring large transaction (recipients: {}, hash: {})",
+                    numberOfRecipients, Hex.encode(getHash()));
+            return false;
+        }
+
         return hash != null && hash.length == 32 //
                 && type != null //
-                && to != null && to.length == 20 //
+                && to != null && to.length >= EdDSA.ADDRESS_LEN && (to.length % EdDSA.ADDRESS_LEN == 0) //
                 && value >= 0 //
                 && fee >= 0 //
                 && nonce >= 0 //
                 && timestamp > 0 //
-                && data != null && (data.length <= 128) //
+                && data != null && (data.length <= MAX_DATA_LENGTH) //
                 && encoded != null //
                 && signature != null //
 
                 && Arrays.equals(Hash.h256(encoded), hash) //
-                && EdDSA.verify(hash, signature);
+                && EdDSA.verify(hash, signature); //
     }
 
     /**
@@ -152,12 +191,42 @@ public class Transaction implements Callable<Boolean> {
     }
 
     /**
-     * Returns the to address.
-     * 
-     * @return
+     * Returns an array of recipients
+     *
+     * @return an array of recipients' address
      */
-    public byte[] getTo() {
-        return to;
+    public byte[][] getRecipients() {
+        int numberOfRecipients = numberOfRecipients();
+        byte[][] recipients = new byte[numberOfRecipients][EdDSA.ADDRESS_LEN];
+        for (int i = 0; i < numberOfRecipients; i++) {
+            recipients[i] = getRecipient(i);
+        }
+        return recipients;
+    }
+
+    /**
+     * Returns number <code>i</code> recipient of the transaction
+     *
+     * @param i
+     *            number of a recipient
+     * @return a recipient's address
+     */
+    public byte[] getRecipient(int i) {
+        return Arrays.copyOfRange(to, i * EdDSA.ADDRESS_LEN, i * EdDSA.ADDRESS_LEN + EdDSA.ADDRESS_LEN);
+    }
+
+    /**
+     * Returns the number of recipients by checking the length of {@link #to} array
+     *
+     * @return number of recipients
+     */
+    public int numberOfRecipients() {
+        int toLength = to.length;
+        if (toLength % EdDSA.ADDRESS_LEN != 0) {
+            throw new TransactionException(
+                    "then length of 'byte[] to' array is not a multiple of " + EdDSA.ADDRESS_LEN);
+        }
+        return toLength / EdDSA.ADDRESS_LEN;
     }
 
     /**
@@ -226,6 +295,24 @@ public class Transaction implements Callable<Boolean> {
         enc.writeBytes(signature.toBytes());
 
         return enc.toBytes();
+    }
+
+    /**
+     * Size of the transaction in bytes
+     *
+     * @return Size of the transaction in bytes
+     */
+    public int size() {
+        return toBytes().length;
+    }
+
+    /**
+     * Returns weighted size of this transaction for calculating block limitation
+     *
+     * @return max(1, number of recipients / 2)
+     */
+    public double weightedSize() {
+        return Math.max(1.0, (double) numberOfRecipients() / 2.0);
     }
 
     /**

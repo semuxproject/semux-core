@@ -15,11 +15,13 @@ import static io.netty.handler.codec.http.HttpResponseStatus.UNPROCESSABLE_ENTIT
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.semux.Kernel;
 import org.semux.api.exception.ApiHandlerException;
 import org.semux.api.response.AddNodeResponse;
@@ -155,6 +157,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 return createAccount();
 
             case TRANSFER:
+            case TRANSFER_MANY:
             case DELEGATE:
             case VOTE:
             case UNVOTE:
@@ -599,6 +602,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * <li>GET /delegate?from&fee&data</li>
      * <li>GET /vote?from&to&value&fee&data</li>
      * <li>GET /unvote?from&to&value&fee&data</li>
+     * <li>GET/POST /transfer_many?from&to[]&value&fee&data</li>
      * </ul>
      *
      * @param cmd
@@ -618,6 +622,9 @@ public class ApiHandlerImpl implements ApiHandler {
         case TRANSFER:
             type = TransactionType.TRANSFER;
             break;
+        case TRANSFER_MANY:
+            type = TransactionType.TRANSFER_MANY;
+            break;
         case DELEGATE:
             type = TransactionType.DELEGATE;
             break;
@@ -633,17 +640,21 @@ public class ApiHandlerImpl implements ApiHandler {
 
         // [3] build and send the transaction to PendingManager
         try {
-            Transaction tx = new TransactionBuilder(kernel)
-                    .withType(type)
+            TransactionBuilder transactionBuilder = new TransactionBuilder(kernel, type)
                     .withFrom(params.get("from"))
-                    .withTo(params.get("to"))
                     .withValue(params.get("value"))
                     .withFee(params.get("fee"))
-                    .withData(params.get("data"))
-                    .build();
+                    .withData(params.get("data"));
 
+            if (type == TransactionType.TRANSFER_MANY) {
+                transactionBuilder.withToMany(Arrays.asList(StringUtils.split(params.get("to"), ",")));
+            } else {
+                transactionBuilder.withTo(params.get("to"));
+            }
+
+            Transaction tx = transactionBuilder.build();
             if (kernel.getPendingManager().addTransactionSync(tx)) {
-                return new DoTransactionResponse(true, Hex.encode0x(tx.getHash()));
+                return new DoTransactionResponse(true, null, Hex.encode0x(tx.getHash()));
             } else {
                 // TODO: report the actual reason of rejection
                 return failure("Transaction rejected by pending manager", UNPROCESSABLE_ENTITY);

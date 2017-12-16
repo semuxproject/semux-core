@@ -46,6 +46,9 @@ public class Kernel {
     protected static final Logger logger = LoggerFactory.getLogger(Kernel.class);
 
     protected AtomicBoolean isRunning = new AtomicBoolean(false);
+
+    protected AtomicBoolean isBooted = new AtomicBoolean(false);
+
     protected ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
     protected Config config = null;
 
@@ -61,6 +64,8 @@ public class Kernel {
 
     protected SemuxSync sync;
     protected SemuxBFT cons;
+
+    protected SemuxAPI api;
 
     /**
      * Creates a kernel instance and initializes it.
@@ -125,7 +130,7 @@ public class Kernel {
         // ====================================
         // start API module
         // ====================================
-        SemuxAPI api = new SemuxAPI(this);
+        api = new SemuxAPI(this);
 
         if (config.apiEnabled()) {
             Thread apiThread = new Thread(api::start, "api");
@@ -192,7 +197,11 @@ public class Kernel {
 
             api.stop();
             p2p.stop();
+
+            isBooted.set(false);
         }, "shutdown-hook"));
+
+        isBooted.set(true);
     }
 
     /**
@@ -268,6 +277,15 @@ public class Kernel {
     }
 
     /**
+     * Returns whether the kernel is booted
+     *
+     * @return
+     */
+    public boolean isBooted() {
+        return isBooted.get();
+    }
+
+    /**
      * Returns the config.
      * 
      * @return
@@ -301,5 +319,14 @@ public class Kernel {
      */
     public Consensus getConsensus() {
         return cons;
+    }
+
+    /**
+     * Get instance of Semux API server
+     *
+     * @return API server
+     */
+    public SemuxAPI getApi() {
+        return api;
     }
 }

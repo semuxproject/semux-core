@@ -8,6 +8,7 @@ package org.semux;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 import org.semux.config.Config;
 import org.semux.config.Constants;
@@ -22,16 +23,15 @@ import org.semux.crypto.EdDSA;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
+import org.semux.util.ApiClient;
 
 public class KernelMock extends Kernel {
 
     private String password = "password";
 
     public KernelMock() {
-        super(null, null, null);
-
+        this(new DevNetConfig(Constants.DEFAULT_DATA_DIR));
         try {
-            this.config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
             this.wallet = new Wallet(File.createTempFile("wallet", ".data"));
             this.wallet.unlock(password);
             for (int i = 0; i < 10; i++) {
@@ -41,6 +41,11 @@ public class KernelMock extends Kernel {
         } catch (WalletLockedException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public KernelMock(Config config) {
+        super(null, null, null);
+        this.config = config;
     }
 
     public void setBlockchain(Blockchain chain) {
@@ -81,5 +86,18 @@ public class KernelMock extends Kernel {
 
     public void setCoinbase(EdDSA coinbase) {
         this.coinbase = coinbase;
+    }
+
+    /**
+     *
+     * @return an instance of ApiClient connecting to this kernel
+     */
+    public ApiClient getApiClient() {
+        return new ApiClient(
+                new InetSocketAddress(
+                        this.getConfig().apiListenIp(),
+                        this.getConfig().apiListenPort()),
+                this.getConfig().apiUsername(),
+                this.getConfig().apiPassword());
     }
 }

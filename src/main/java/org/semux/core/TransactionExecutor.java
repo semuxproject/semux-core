@@ -15,6 +15,7 @@ import org.semux.config.Config;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
+import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,6 @@ public class TransactionExecutor {
             results.add(result);
 
             byte[] from = tx.getFrom();
-            byte[] to = tx.getTo();
             long value = tx.getValue();
             long nonce = tx.getNonce();
             long fee = tx.getFee();
@@ -74,7 +74,12 @@ public class TransactionExecutor {
             }
 
             // check transaction fee
-            if (fee < config.minTransactionFee()) {
+            if (fee < tx.numberOfRecipients() * config.minTransactionFee()) {
+                logger.warn(
+                        "Transaction fee is too low, skipping: hash = {}, recipients = {}, fee = {}",
+                        Hex.encode0x(tx.getHash()),
+                        tx.numberOfRecipients(),
+                        tx.getFee());
                 continue;
             }
 
@@ -83,13 +88,27 @@ public class TransactionExecutor {
                 if (fee <= available && value <= available && value + fee <= available) {
 
                     as.adjustAvailable(from, -value - fee);
-                    as.adjustAvailable(to, value);
+                    as.adjustAvailable(tx.getRecipient(0), value);
 
                     result.setSuccess(true);
                 }
                 break;
             }
+            case TRANSFER_MANY: {
+                byte[][] recipients = tx.getRecipients();
+                long deduction = value * recipients.length + fee;
+
+                if (deduction <= available) {
+                    as.adjustAvailable(from, -deduction);
+                    for (byte[] recipient : recipients) {
+                        as.adjustAvailable(recipient, value);
+                    }
+                    result.setSuccess(true);
+                }
+                break;
+            }
             case DELEGATE: {
+                byte[] to = tx.getRecipient(0);
                 if (fee <= available && value <= available && value + fee <= available //
                         && Arrays.equals(from, to) //
                         && value >= config.minDelegateFee() //
@@ -104,7 +123,7 @@ public class TransactionExecutor {
             }
             case VOTE: {
                 if (fee <= available && value <= available && value + fee <= available //
-                        && ds.vote(from, to, value)) {
+                        && ds.vote(from, tx.getRecipient(0), value)) {
 
                     as.adjustAvailable(from, -value - fee);
                     as.adjustLocked(from, value);
@@ -116,7 +135,7 @@ public class TransactionExecutor {
             case UNVOTE: {
                 if (fee <= available //
                         && value <= locked //
-                        && ds.unvote(from, to, value)) {
+                        && ds.unvote(from, tx.getRecipient(0), value)) {
 
                     as.adjustAvailable(from, value - fee);
                     as.adjustLocked(from, -value);

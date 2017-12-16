@@ -19,11 +19,13 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -448,16 +450,31 @@ public class SwingUtil {
         switch (tx.getType()) {
         case COINBASE:
             return GUIMessages.get("BlockReward") + " => "
-                    + getDelegateName(gui, tx.getTo()).orElse(GUIMessages.get("UnknownDelegate"));
+                    + getDelegateName(gui, tx.getRecipient(0)).orElse(GUIMessages.get("UnknownDelegate"));
         case VOTE:
         case UNVOTE:
         case TRANSFER:
-            return getAddressAlias(gui, tx.getFrom()) + " => " + getAddressAlias(gui, tx.getTo());
+        case TRANSFER_MANY:
+            return getTransactionRecipientsDescription(gui, tx);
         case DELEGATE:
             return GUIMessages.get("DelegateRegistration");
         default:
             return StringUtil.EMPTY_STRING;
         }
+    }
+
+    /**
+     *
+     * @param gui
+     * @param tx
+     * @return description of transaction with one or multiple recipients
+     */
+    private static String getTransactionRecipientsDescription(SemuxGUI gui, Transaction tx) {
+        return getAddressAlias(gui, tx.getFrom()) +
+                " => " +
+                Arrays.stream(tx.getRecipients())
+                        .map(recipient -> getAddressAlias(gui, recipient))
+                        .collect(Collectors.joining(", "));
     }
 
     /**

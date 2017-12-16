@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
@@ -276,9 +277,9 @@ public class BlockchainImpl implements Blockchain {
 
             // [3] update transaction_by_account index
             addTransactionToAccount(tx, tx.getFrom());
-            if (!Arrays.equals(tx.getFrom(), tx.getTo())) {
-                addTransactionToAccount(tx, tx.getTo());
-            }
+            Stream.of(tx.getRecipients())
+                    .filter(recipient -> !Arrays.equals(tx.getFrom(), recipient))
+                    .forEach(recipient -> addTransactionToAccount(tx, recipient));
         }
 
         if (number != genesis.getNumber()) {
@@ -293,9 +294,9 @@ public class BlockchainImpl implements Blockchain {
             String primary = config.getPrimaryValidator(validators, number, 0);
             adjustValidatorStats(block.getCoinbase(), StatsType.FORGED, 1);
             if (primary.equals(Hex.encode(block.getCoinbase()))) {
-                adjustValidatorStats(Hex.decode(primary), StatsType.HIT, 1);
+                adjustValidatorStats(Hex.parse(primary), StatsType.HIT, 1);
             } else {
-                adjustValidatorStats(Hex.decode(primary), StatsType.MISSED, 1);
+                adjustValidatorStats(Hex.parse(primary), StatsType.MISSED, 1);
             }
         }
 

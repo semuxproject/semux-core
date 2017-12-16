@@ -8,6 +8,8 @@ package org.semux.api.transaction;
 
 import static org.mockito.Mockito.mock;
 
+import java.util.ArrayList;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -22,12 +24,18 @@ public class TransactionBuilderTest {
     @Test
     public void testDelegateWithTo() {
         expectedException.expect(IllegalArgumentException.class);
-        new TransactionBuilder(mock(Kernel.class)).withType(TransactionType.DELEGATE).withTo("0xabc");
+        new TransactionBuilder(mock(Kernel.class), TransactionType.DELEGATE).withTo("0xabc");
     }
 
     @Test
     public void testDelegateWithValue() {
         expectedException.expect(IllegalArgumentException.class);
-        new TransactionBuilder(mock(Kernel.class)).withType(TransactionType.DELEGATE).withValue("10");
+        new TransactionBuilder(mock(Kernel.class), TransactionType.DELEGATE).withValue("10");
+    }
+
+    @Test
+    public void testTransferWithToMany() {
+        expectedException.expect(IllegalArgumentException.class);
+        new TransactionBuilder(mock(Kernel.class), TransactionType.TRANSFER).withToMany(new ArrayList<>());
     }
 }
