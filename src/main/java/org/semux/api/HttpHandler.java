@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.semux.api.response.ApiHandlerResponse;
 import org.semux.config.Config;
 import org.semux.util.BasicAuth;
 import org.slf4j.Logger;

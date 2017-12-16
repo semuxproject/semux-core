@@ -153,8 +153,8 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Adds a transaction to the queue, which will be validated later by the
-     * background worker.
+     * Adds a transaction to the queue, which will be validated later by the background
+     * worker.
      * 
      * @param tx
      */
@@ -168,8 +168,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * Adds a transaction to the pool.
      * 
      * @param tx
-     * @return true if the transaction is successfully added to the pool, otherwise
-     *         false
+     * @return true if the transaction is successfully added to the pool, otherwise false
      */
     public synchronized boolean addTransactionSync(Transaction tx) {
         return tx.validate() && processTransaction(tx, true) >= 1;
@@ -200,16 +199,15 @@ public class PendingManager implements Runnable, BlockchainListener {
             txs.addAll(transactions);
             res.addAll(results);
         } else {
-            // append transaction to result list until the sum of weighted transaction size
-            // is greater than provided limit
-            double weightedSize = 0;
-            Iterator<TransactionResult> itTransactionResult = results.iterator();
             Iterator<Transaction> itTransaction = transactions.iterator();
-            while (itTransaction.hasNext() && itTransactionResult.hasNext()) {
+            Iterator<TransactionResult> itResult = results.iterator();
+
+            int size = 0;
+            while (itTransaction.hasNext() && itResult.hasNext()) {
                 Transaction tx = itTransaction.next();
-                TransactionResult txResult = itTransactionResult.next();
-                weightedSize += tx.weightedSize();
-                if (weightedSize > limit) {
+                TransactionResult txResult = itResult.next();
+
+                if (size + tx.size() > limit) {
                     break;
                 } else {
                     txs.add(tx);

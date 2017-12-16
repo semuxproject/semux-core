@@ -6,6 +6,7 @@
  */
 package org.semux.api.response;
 
+import org.semux.api.ApiHandlerResponse;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.state.Delegate;
 

@@ -8,6 +8,7 @@ package org.semux.api.response;
 
 import java.util.List;
 
+import org.semux.api.ApiHandlerResponse;
 import org.semux.crypto.Hex;
 import org.semux.net.Peer;
 

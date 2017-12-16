@@ -31,7 +31,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.api.response.AddNodeResponse;
-import org.semux.api.response.ApiHandlerResponse;
 import org.semux.api.response.CreateAccountResponse;
 import org.semux.api.response.DoTransactionResponse;
 import org.semux.api.response.GetAccountResponse;

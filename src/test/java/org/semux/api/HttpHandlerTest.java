@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semux.KernelMock;
 import org.semux.api.exception.ApiHandlerException;
-import org.semux.api.response.ApiHandlerResponse;
 import org.semux.util.BasicAuth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

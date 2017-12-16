@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 
 import org.semux.Kernel;
 import org.semux.api.response.AddNodeResponse;
-import org.semux.api.response.ApiHandlerResponse;
 import org.semux.api.response.CreateAccountResponse;
 import org.semux.api.response.DoTransactionResponse;
 import org.semux.api.response.GetAccountResponse;
@@ -36,7 +35,7 @@ import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
-import org.semux.api.transaction.TransactionBuilder;
+import org.semux.api.util.TransactionBuilder;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
@@ -586,7 +585,7 @@ public class ApiHandlerImpl implements ApiHandler {
     }
 
     /**
-     * This method processes the following transaction-related endpoints:
+     * This method processes the following util-related endpoints:
      *
      * <ul>
      * <li>GET /transfer?from&to&value&fee&data</li>
@@ -596,7 +595,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * </ul>
      *
      * @param cmd
-     *            type of transaction
+     *            type of util
      * @param params
      * @return
      */

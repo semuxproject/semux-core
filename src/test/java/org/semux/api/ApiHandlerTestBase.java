@@ -15,7 +15,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
-import org.semux.api.response.ApiHandlerResponse;
 import org.semux.config.Config;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;

@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * 
  * [3, block_hash] => [block_number]
  * [4, transaction_hash] => [block_number, from, to]
- * [5, address, n] => [transaction] OR [transaction_hash]
+ * [5, address, n] => [util] OR [transaction_hash]
  * </pre>
  *
  * <pre>

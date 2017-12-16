@@ -14,7 +14,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
 import org.semux.Launcher;
@@ -30,6 +29,9 @@ import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Semux command line interface.
+ */
 public class SemuxCLI extends Launcher {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxCLI.class);
@@ -47,49 +49,59 @@ public class SemuxCLI extends Launcher {
 
     public SemuxCLI() {
         super();
-        Option helpOption = Option.builder().longOpt(CLIOptions.HELP.toString()).desc(CLIMessages.get("PrintHelp"))
+        org.apache.commons.cli.Option helpOption = org.apache.commons.cli.Option.builder()
+                .longOpt(Option.HELP.toString()).desc(CLIMessages.get("PrintHelp"))
                 .build();
         addOption(helpOption);
 
-        Option versionOption = Option.builder().longOpt(CLIOptions.VERSION.toString())
+        org.apache.commons.cli.Option versionOption = org.apache.commons.cli.Option.builder()
+                .longOpt(Option.VERSION.toString())
                 .desc(CLIMessages.get("ShowVersion")).build();
         addOption(versionOption);
 
-        Option accountOption = Option.builder().longOpt(CLIOptions.ACCOUNT.toString())
+        org.apache.commons.cli.Option accountOption = org.apache.commons.cli.Option.builder()
+                .longOpt(Option.ACCOUNT.toString())
                 .desc(CLIMessages.get("ChooseAction")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("action")
                 .type(String.class).build();
         addOption(accountOption);
 
-        Option changePasswordOption = Option.builder().longOpt(CLIOptions.CHANGE_PASSWORD.toString())
+        org.apache.commons.cli.Option changePasswordOption = org.apache.commons.cli.Option.builder()
+                .longOpt(Option.CHANGE_PASSWORD.toString())
                 .desc(CLIMessages.get("ChangeWalletPassword")).build();
         addOption(changePasswordOption);
 
-        Option dataDirOption = Option.builder().longOpt(CLIOptions.DATA_DIR.toString())
+        org.apache.commons.cli.Option dataDirOption = org.apache.commons.cli.Option.builder()
+                .longOpt(Option.DATA_DIR.toString())
                 .desc(CLIMessages.get("SpecifyDataDir")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("path")
                 .type(String.class).build();
         addOption(dataDirOption);
 
-        Option coinbaseOption = Option.builder().longOpt(CLIOptions.COINBASE.toString())
+        org.apache.commons.cli.Option coinbaseOption = org.apache.commons.cli.Option.builder()
+                .longOpt(Option.COINBASE.toString())
                 .desc(CLIMessages.get("SpecifyCoinbase")).hasArg(true).numberOfArgs(1).optionalArg(false)
                 .argName("index").type(Number.class).build();
         addOption(coinbaseOption);
 
-        Option networkOption = Option.builder().longOpt(CLIOptions.NETWORK.toString())
+        org.apache.commons.cli.Option networkOption = org.apache.commons.cli.Option.builder()
+                .longOpt(Option.NETWORK.toString())
                 .desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1).optionalArg(false)
-                .argName("network").type(String.class).build();
+                .argName("name").type(String.class).build();
         addOption(networkOption);
 
-        Option passwordOption = Option.builder().longOpt(CLIOptions.PASSWORD.toString())
+        org.apache.commons.cli.Option passwordOption = org.apache.commons.cli.Option.builder()
+                .longOpt(Option.PASSWORD.toString())
                 .desc(CLIMessages.get("WalletPassword")).hasArg(true).numberOfArgs(1).optionalArg(false)
-                .argName(CLIOptions.PASSWORD.toString()).type(String.class).build();
+                .argName(Option.PASSWORD.toString()).type(String.class).build();
         addOption(passwordOption);
 
-        Option dumpPrivateKeyOption = Option.builder().longOpt(CLIOptions.DUMP_PRIVATE_KEY.toString())
+        org.apache.commons.cli.Option dumpPrivateKeyOption = org.apache.commons.cli.Option.builder()
+                .longOpt(Option.DUMP_PRIVATE_KEY.toString())
                 .desc(CLIMessages.get("PrintHexKey")).hasArg(true).optionalArg(false).argName("address")
                 .type(String.class).build();
         addOption(dumpPrivateKeyOption);
 
-        Option importPrivateKeyOption = Option.builder().longOpt(CLIOptions.IMPORT_PRIVATE_KEY.toString())
+        org.apache.commons.cli.Option importPrivateKeyOption = org.apache.commons.cli.Option.builder()
+                .longOpt(Option.IMPORT_PRIVATE_KEY.toString())
                 .desc(CLIMessages.get("ImportHexKey")).hasArg(true).optionalArg(false).argName("key").type(String.class)
                 .build();
         addOption(importPrivateKeyOption);
@@ -99,39 +111,39 @@ public class SemuxCLI extends Launcher {
         CommandLineParser parser = new DefaultParser();
         CommandLine commandLine = parser.parse(getOptions(), args);
 
-        if (commandLine.hasOption(CLIOptions.DATA_DIR.toString())) {
-            setDataDir(commandLine.getOptionValue(CLIOptions.DATA_DIR.toString()));
+        if (commandLine.hasOption(Option.DATA_DIR.toString())) {
+            setDataDir(commandLine.getOptionValue(Option.DATA_DIR.toString()));
         }
 
-        if (commandLine.hasOption(CLIOptions.COINBASE.toString())) {
-            setCoinbase(((Number) commandLine.getParsedOptionValue(CLIOptions.COINBASE.toString())).intValue());
+        if (commandLine.hasOption(Option.COINBASE.toString())) {
+            setCoinbase(((Number) commandLine.getParsedOptionValue(Option.COINBASE.toString())).intValue());
         }
 
-        if (commandLine.hasOption(CLIOptions.NETWORK.toString())) {
-            setNetwork(commandLine.getOptionValue(CLIOptions.NETWORK.toString()));
+        if (commandLine.hasOption(Option.NETWORK.toString())) {
+            setNetwork(commandLine.getOptionValue(Option.NETWORK.toString()));
         }
 
-        if (commandLine.hasOption(CLIOptions.PASSWORD.toString())) {
-            setPassword(commandLine.getOptionValue(CLIOptions.PASSWORD.toString()));
+        if (commandLine.hasOption(Option.PASSWORD.toString())) {
+            setPassword(commandLine.getOptionValue(Option.PASSWORD.toString()));
         }
 
-        if (commandLine.hasOption(CLIOptions.HELP.toString())) {
+        if (commandLine.hasOption(Option.HELP.toString())) {
             printHelp();
-        } else if (commandLine.hasOption(CLIOptions.VERSION.toString())) {
+        } else if (commandLine.hasOption(Option.VERSION.toString())) {
             printVersion();
-        } else if (commandLine.hasOption(CLIOptions.ACCOUNT.toString())) {
-            String accountAction = commandLine.getOptionValue(CLIOptions.ACCOUNT.toString()).trim();
+        } else if (commandLine.hasOption(Option.ACCOUNT.toString())) {
+            String accountAction = commandLine.getOptionValue(Option.ACCOUNT.toString()).trim();
             if (accountAction.equals("create")) {
                 createAccount();
             } else if (accountAction.equals("list")) {
                 listAccounts();
             }
-        } else if (commandLine.hasOption(CLIOptions.CHANGE_PASSWORD.toString())) {
+        } else if (commandLine.hasOption(Option.CHANGE_PASSWORD.toString())) {
             changePassword();
-        } else if (commandLine.hasOption(CLIOptions.DUMP_PRIVATE_KEY.toString())) {
-            dumpPrivateKey(commandLine.getOptionValue(CLIOptions.DUMP_PRIVATE_KEY.toString()).trim());
-        } else if (commandLine.hasOption(CLIOptions.IMPORT_PRIVATE_KEY.toString())) {
-            importPrivateKey(commandLine.getOptionValue(CLIOptions.IMPORT_PRIVATE_KEY.toString()).trim());
+        } else if (commandLine.hasOption(Option.DUMP_PRIVATE_KEY.toString())) {
+            dumpPrivateKey(commandLine.getOptionValue(Option.DUMP_PRIVATE_KEY.toString()).trim());
+        } else if (commandLine.hasOption(Option.IMPORT_PRIVATE_KEY.toString())) {
+            importPrivateKey(commandLine.getOptionValue(Option.IMPORT_PRIVATE_KEY.toString()).trim());
         } else {
             start();
         }

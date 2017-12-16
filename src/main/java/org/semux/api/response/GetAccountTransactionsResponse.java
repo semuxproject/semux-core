@@ -8,6 +8,7 @@ package org.semux.api.response;
 
 import java.util.List;
 
+import org.semux.api.ApiHandlerResponse;
 import org.semux.api.response.GetTransactionResponse.Result;
 
 import com.fasterxml.jackson.annotation.JsonProperty;

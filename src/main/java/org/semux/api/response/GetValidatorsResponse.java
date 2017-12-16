@@ -8,6 +8,8 @@ package org.semux.api.response;
 
 import java.util.List;
 
+import org.semux.api.ApiHandlerResponse;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GetValidatorsResponse extends ApiHandlerResponse {

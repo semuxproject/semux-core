@@ -6,6 +6,8 @@
  */
 package org.semux.api.response;
 
+import org.semux.api.ApiHandlerResponse;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GetLatestBlockNumberResponse extends ApiHandlerResponse {

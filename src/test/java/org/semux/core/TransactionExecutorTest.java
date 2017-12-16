@@ -158,7 +158,7 @@ public class TransactionExecutorTest {
         // execution should be failed
         result = exec.execute(tx, as.track(), ds.track());
         assertFalse(
-                "transaction with a fee lower than 'number of recipients * minimum fee' should be rejected",
+                "util with a fee lower than 'number of recipients * minimum fee' should be rejected",
                 result.isSuccess());
     }
 

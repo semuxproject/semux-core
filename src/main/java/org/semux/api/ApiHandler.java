@@ -8,8 +8,6 @@ package org.semux.api;
 
 import java.util.Map;
 
-import org.semux.api.response.ApiHandlerResponse;
-
 import io.netty.handler.codec.http.HttpHeaders;
 
 /**

@@ -48,7 +48,7 @@ public enum MessageCode {
     NODES(0x06),
 
     /**
-     * [0x07] Propagate transaction.
+     * [0x07] Propagate util.
      */
     TRANSACTION(0x07),
 
