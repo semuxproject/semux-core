@@ -14,8 +14,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-
 /**
  * ApiHandlerResponse is the base class of Semux API responses
  */
@@ -33,11 +31,6 @@ public class ApiHandlerResponse {
             @JsonProperty(value = "success", required = true) Boolean success, //
             @JsonProperty("message") String message //
     ) {
-        this.success = success;
-        this.message = message;
-    }
-
-    public ApiHandlerResponse(Boolean success, String message, HttpResponseStatus status) {
         this.success = success;
         this.message = message;
     }
