@@ -19,9 +19,10 @@ public class GetPeersResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final List<Result> peers;
 
-    public GetPeersResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") List<Result> peers) {
+    public GetPeersResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") List<Result> peers //
+    ) {
         super(success, null);
         this.peers = peers;
     }
@@ -49,13 +50,9 @@ public class GetPeersResponse extends ApiHandlerResponse {
         @JsonProperty("latency")
         public final Long latency;
 
-        public Result(
-                @JsonProperty("ip") String ip,
-                @JsonProperty("port") int port,
-                @JsonProperty("networkVersion") short networkVersion,
-                @JsonProperty("clientId") String clientId,
-                @JsonProperty("peerId") String peerId,
-                @JsonProperty("latestBlockNumber") long latestBlockNumber,
+        public Result(@JsonProperty("ip") String ip, @JsonProperty("port") int port,
+                @JsonProperty("networkVersion") short networkVersion, @JsonProperty("clientId") String clientId,
+                @JsonProperty("peerId") String peerId, @JsonProperty("latestBlockNumber") long latestBlockNumber,
                 @JsonProperty("latency") long latency) {
             this.ip = ip;
             this.port = port;
@@ -67,14 +64,8 @@ public class GetPeersResponse extends ApiHandlerResponse {
         }
 
         public Result(Peer peer) {
-            this(
-                    peer.getIp(),
-                    peer.getPort(),
-                    peer.getNetworkVersion(),
-                    peer.getClientId(),
-                    Hex.PREF + peer.getPeerId(),
-                    peer.getLatestBlockNumber(),
-                    peer.getLatency());
+            this(peer.getIp(), peer.getPort(), peer.getNetworkVersion(), peer.getClientId(),
+                    Hex.PREF + peer.getPeerId(), peer.getLatestBlockNumber(), peer.getLatency());
         }
     }
 }

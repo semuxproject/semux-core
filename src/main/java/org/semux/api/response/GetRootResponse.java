@@ -15,9 +15,10 @@ public class GetRootResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final String result;
 
-    public GetRootResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") String result) {
+    public GetRootResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") String result //
+    ) {
         super(success, null);
         this.result = result;
     }

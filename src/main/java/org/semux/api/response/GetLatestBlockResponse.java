@@ -15,9 +15,10 @@ public class GetLatestBlockResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final GetBlockResponse.Result block;
 
-    public GetLatestBlockResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") GetBlockResponse.Result block) {
+    public GetLatestBlockResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") GetBlockResponse.Result block //
+    ) {
         super(success, null);
         this.block = block;
     }

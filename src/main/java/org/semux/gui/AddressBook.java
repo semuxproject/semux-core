@@ -63,10 +63,8 @@ public class AddressBook {
      * @return List of entries
      */
     public List<Entry> list() {
-        return database
-                .keySet()
-                .parallelStream()
-                .map(name -> new Entry(name, database.get(name)))
+        return database.keySet().parallelStream() //
+                .map(name -> new Entry(name, database.get(name))) //
                 .collect(Collectors.toList());
     }
 

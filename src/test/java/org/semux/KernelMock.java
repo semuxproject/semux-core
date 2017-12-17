@@ -29,6 +29,7 @@ public class KernelMock extends Kernel {
 
     private static final String password = "password";
 
+    // TODO: disable this constructor, use the KernelRule by cryptokat
     public KernelMock() {
         super(null, null, null);
         try {

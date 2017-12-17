@@ -46,8 +46,7 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static final EnumSet<TransactionType> FEDERATED_TRANSACTION_TYPES = EnumSet.of(
-            TransactionType.COINBASE,
+    private static final EnumSet<TransactionType> FEDERATED_TRANSACTION_TYPES = EnumSet.of(TransactionType.COINBASE,
             TransactionType.TRANSFER);
 
     private transient SemuxGUI gui;

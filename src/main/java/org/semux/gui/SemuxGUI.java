@@ -74,15 +74,13 @@ public class SemuxGUI extends Launcher {
     public SemuxGUI() {
         super();
         org.apache.commons.cli.Option dataDirOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.DATA_DIR.toString())
-                .desc(CLIMessages.get("SpecifyDataDir")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("path")
-                .type(String.class).build();
+                .longOpt(Option.DATA_DIR.toString()).desc(CLIMessages.get("SpecifyDataDir")).hasArg(true)
+                .numberOfArgs(1).optionalArg(false).argName("path").type(String.class).build();
         addOption(dataDirOption);
 
         org.apache.commons.cli.Option networkOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.NETWORK.toString())
-                .desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1).optionalArg(false)
-                .argName("network").type(String.class).build();
+                .longOpt(Option.NETWORK.toString()).desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1)
+                .optionalArg(false).argName("network").type(String.class).build();
         addOption(networkOption);
 
     }

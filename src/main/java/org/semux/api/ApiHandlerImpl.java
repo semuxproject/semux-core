@@ -170,10 +170,10 @@ public class ApiHandlerImpl implements ApiHandler {
      * @return
      */
     private ApiHandlerResponse getPeers() {
-        return new GetPeersResponse(true, kernel.getChannelManager()
-                .getActivePeers()
-                .parallelStream()
-                .map(GetPeersResponse.Result::new).collect(Collectors.toList()));
+        return new GetPeersResponse(true, //
+                kernel.getChannelManager().getActivePeers().parallelStream() //
+                        .map(GetPeersResponse.Result::new) //
+                        .collect(Collectors.toList()));
     }
 
     /**
@@ -209,8 +209,7 @@ public class ApiHandlerImpl implements ApiHandler {
         }
 
         try {
-            return new InetSocketAddress(
-                    InetAddress.getByName(matcher.group("host")),
+            return new InetSocketAddress(InetAddress.getByName(matcher.group("host")),
                     Integer.parseInt(matcher.group("port")));
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException(e.getMessage(), e);
@@ -249,11 +248,10 @@ public class ApiHandlerImpl implements ApiHandler {
      * @return
      */
     private ApiHandlerResponse getPendingTransactions() {
-        return new GetPendingTransactionsResponse(true, kernel.getPendingManager()
-                .getTransactions()
-                .parallelStream()
-                .map(GetTransactionResponse.Result::new)
-                .collect(Collectors.toList()));
+        return new GetPendingTransactionsResponse(true, //
+                kernel.getPendingManager().getTransactions().parallelStream() //
+                        .map(GetTransactionResponse.Result::new) //
+                        .collect(Collectors.toList()));
     }
 
     /**
@@ -292,11 +290,10 @@ public class ApiHandlerImpl implements ApiHandler {
             return failure("Parameter `to` is not a valid integer");
         }
 
-        return new GetAccountTransactionsResponse(true, kernel.getBlockchain()
-                .getTransactions(addressBytes, fromInt, toInt)
-                .parallelStream()
-                .map(GetTransactionResponse.Result::new)
-                .collect(Collectors.toList()));
+        return new GetAccountTransactionsResponse(true,
+                kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream() //
+                        .map(GetTransactionResponse.Result::new) //
+                        .collect(Collectors.toList()));
     }
 
     /**
@@ -426,8 +423,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @return
      */
     private ApiHandlerResponse getLatestBlock() {
-        return new GetLatestBlockResponse(true,
-                new GetBlockResponse.Result(kernel.getBlockchain().getLatestBlock()));
+        return new GetLatestBlockResponse(true, new GetBlockResponse.Result(kernel.getBlockchain().getLatestBlock()));
     }
 
     /**
@@ -465,11 +461,8 @@ public class ApiHandlerImpl implements ApiHandler {
      * @return
      */
     private ApiHandlerResponse getValidators() {
-        return new GetValidatorsResponse(
-                true,
-                kernel.getBlockchain().getValidators().parallelStream()
-                        .map(v -> Hex.PREF + v)
-                        .collect(Collectors.toList()));
+        return new GetValidatorsResponse(true, kernel.getBlockchain().getValidators().parallelStream()
+                .map(v -> Hex.PREF + v).collect(Collectors.toList()));
     }
 
     /**
@@ -478,13 +471,10 @@ public class ApiHandlerImpl implements ApiHandler {
      * @return
      */
     private ApiHandlerResponse getDelegates() {
-        return new GetDelegatesResponse(
-                true,
-                kernel.getBlockchain()
-                        .getDelegateState().getDelegates().parallelStream()
+        return new GetDelegatesResponse(true,
+                kernel.getBlockchain().getDelegateState().getDelegates().parallelStream()
                         .map(delegate -> new GetDelegateResponse.Result(
-                                kernel.getBlockchain().getValidatorStats(delegate.getAddress()),
-                                delegate))
+                                kernel.getBlockchain().getValidatorStats(delegate.getAddress()), delegate))
                         .collect(Collectors.toList()));
     }
 
@@ -520,10 +510,7 @@ public class ApiHandlerImpl implements ApiHandler {
             return failure("Parameter `delegate` is not a valid hexadecimal string");
         }
 
-        return new GetVoteResponse(
-                true,
-                kernel.getBlockchain().getDelegateState()
-                        .getVote(voterBytes, delegateBytes));
+        return new GetVoteResponse(true, kernel.getBlockchain().getDelegateState().getVote(voterBytes, delegateBytes));
     }
 
     /**
@@ -545,8 +532,7 @@ public class ApiHandlerImpl implements ApiHandler {
             return failure("Parameter `delegate` is not a valid hexadecimal string");
         }
 
-        return new GetVotesResponse(
-                true,
+        return new GetVotesResponse(true,
                 kernel.getBlockchain().getDelegateState().getVotes(delegateBytes).entrySet().parallelStream()
                         .collect(Collectors.toMap(entry -> Hex.PREF + entry.getKey().toString(), Map.Entry::getValue)));
     }
@@ -557,11 +543,9 @@ public class ApiHandlerImpl implements ApiHandler {
      * @return
      */
     private ApiHandlerResponse listAccounts() {
-        return new ListAccountsResponse(
-                true,
-                kernel.getWallet().getAccounts().parallelStream()
-                        .map(acc -> Hex.PREF + acc.toAddressString())
-                        .collect(Collectors.toList()));
+        return new ListAccountsResponse(true, kernel.getWallet().getAccounts().parallelStream() //
+                .map(acc -> Hex.PREF + acc.toAddressString()) //
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -581,7 +565,7 @@ public class ApiHandlerImpl implements ApiHandler {
     }
 
     /**
-     * This method processes the following util-related endpoints:
+     * This method processes the following transaction-related endpoints:
      *
      * <ul>
      * <li>GET /transfer?from&to&value&fee&data</li>
@@ -591,7 +575,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * </ul>
      *
      * @param cmd
-     *            type of util
+     *            type of transaction
      * @param params
      * @return
      */
@@ -601,7 +585,7 @@ public class ApiHandlerImpl implements ApiHandler {
             return failure("Wallet is locked");
         }
 
-        // [2] decode0x transaction type
+        // [2] parse transaction type
         TransactionType type;
         switch (cmd) {
         case TRANSFER:
@@ -622,11 +606,11 @@ public class ApiHandlerImpl implements ApiHandler {
 
         // [3] build and send the transaction to PendingManager
         try {
-            TransactionBuilder transactionBuilder = new TransactionBuilder(kernel, type)
-                    .withFrom(params.get("from"))
-                    .withTo(params.get("to"))
-                    .withValue(params.get("value"))
-                    .withFee(params.get("fee"))
+            TransactionBuilder transactionBuilder = new TransactionBuilder(kernel, type) //
+                    .withFrom(params.get("from")) //
+                    .withTo(params.get("to")) //
+                    .withValue(params.get("value")) //
+                    .withFee(params.get("fee")) //
                     .withData(params.get("data"));
 
             Transaction tx = transactionBuilder.build();

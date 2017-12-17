@@ -29,9 +29,10 @@ public class ApiHandlerResponse {
     public String message;
 
     @JsonCreator
-    public ApiHandlerResponse(
-            @JsonProperty(value = "success", required = true) Boolean success,
-            @JsonProperty("message") String message) {
+    public ApiHandlerResponse( //
+            @JsonProperty(value = "success", required = true) Boolean success, //
+            @JsonProperty("message") String message //
+    ) {
         this.success = success;
         this.message = message;
     }

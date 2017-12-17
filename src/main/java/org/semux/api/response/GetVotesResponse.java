@@ -17,9 +17,10 @@ public class GetVotesResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final Map<String, Long> votes;
 
-    public GetVotesResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Map<String, Long> votes) {
+    public GetVotesResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") Map<String, Long> votes //
+    ) {
         super(success, null);
         this.votes = votes;
     }

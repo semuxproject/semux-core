@@ -17,9 +17,10 @@ public class GetDelegateResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final Result delegateResult;
 
-    public GetDelegateResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Result delegateResult) {
+    public GetDelegateResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") Result delegateResult //
+    ) {
         super(success, null);
         this.delegateResult = delegateResult;
     }
@@ -48,23 +49,13 @@ public class GetDelegateResponse extends ApiHandlerResponse {
         public final Long turnsMissed;
 
         public Result(BlockchainImpl.ValidatorStats validatorStats, Delegate delegate) {
-            this(
-                    delegate.getAddressString(),
-                    delegate.getNameString(),
-                    delegate.getRegisteredAt(),
-                    delegate.getVotes(),
-                    validatorStats.getBlocksForged(),
-                    validatorStats.getTurnsHit(),
-                    validatorStats.getTurnsMissed());
+            this(delegate.getAddressString(), delegate.getNameString(), delegate.getRegisteredAt(), delegate.getVotes(),
+                    validatorStats.getBlocksForged(), validatorStats.getTurnsHit(), validatorStats.getTurnsMissed());
         }
 
-        public Result(
-                @JsonProperty("address") String address,
-                @JsonProperty("name") String name,
-                @JsonProperty("registeredAt") Long registeredAt,
-                @JsonProperty("votes") Long votes,
-                @JsonProperty("blocksForged") Long blocksForged,
-                @JsonProperty("turnsHit") Long turnsHit,
+        public Result(@JsonProperty("address") String address, @JsonProperty("name") String name,
+                @JsonProperty("registeredAt") Long registeredAt, @JsonProperty("votes") Long votes,
+                @JsonProperty("blocksForged") Long blocksForged, @JsonProperty("turnsHit") Long turnsHit,
                 @JsonProperty("turnsMissed") Long turnsMissed) {
             this.address = address;
             this.name = name;

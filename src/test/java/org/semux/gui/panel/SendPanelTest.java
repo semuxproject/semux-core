@@ -76,7 +76,7 @@ public class SendPanelTest {
         assertEquals(TransactionType.TRANSFER, tx.getType());
         assertArrayEquals(recipient.toAddress(), tx.getTo());
         assertEquals(100 * Unit.SEM, tx.getValue());
-        assertEquals(application.kernelMock.getConfig().minTransactionFee() * 2, tx.getFee());
+        assertEquals(application.kernelMock.getConfig().minTransactionFee(), tx.getFee());
 
         // clean up
         window.cleanUp();

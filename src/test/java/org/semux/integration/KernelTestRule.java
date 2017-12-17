@@ -59,8 +59,7 @@ public class KernelTestRule extends TemporaryFolder {
 
     private KernelMock mockKernel(int p2pPort, int apiPort) throws IOException {
         // create a new data directory
-        FileUtils.copyDirectory(
-                Paths.get(Constants.DEFAULT_DATA_DIR, "config").toFile(),
+        FileUtils.copyDirectory(Paths.get(Constants.DEFAULT_DATA_DIR, "config").toFile(),
                 Paths.get(getRoot().getAbsolutePath(), "config").toFile());
 
         Config config = spy(new DevNetConfig(getRoot().getAbsolutePath()));

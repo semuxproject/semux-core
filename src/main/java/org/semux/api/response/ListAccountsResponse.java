@@ -17,9 +17,10 @@ public class ListAccountsResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final List<String> accounts;
 
-    public ListAccountsResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") List<String> accounts) {
+    public ListAccountsResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") List<String> accounts //
+    ) {
         super(success, null);
         this.accounts = accounts;
     }

@@ -18,9 +18,10 @@ public class GetAccountResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final Result account;
 
-    public GetAccountResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Result account) {
+    public GetAccountResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") Result account //
+    ) {
         super(success, null);
         this.account = account;
     }
@@ -33,11 +34,12 @@ public class GetAccountResponse extends ApiHandlerResponse {
         public final long nonce;
 
         @JsonCreator
-        public Result(
-                @JsonProperty("address") String address,
-                @JsonProperty("available") long available,
-                @JsonProperty("locked") long locked,
-                @JsonProperty("nonce") long nonce) {
+        public Result( //
+                @JsonProperty("address") String address, //
+                @JsonProperty("available") long available, //
+                @JsonProperty("locked") long locked, //
+                @JsonProperty("nonce") long nonce //
+        ) {
             this.address = address;
             this.available = available;
             this.locked = locked;
@@ -45,11 +47,7 @@ public class GetAccountResponse extends ApiHandlerResponse {
         }
 
         public Result(Account account) {
-            this(
-                    Hex.encode0x(account.getAddress()),
-                    account.getAvailable(),
-                    account.getLocked(),
-                    account.getNonce());
+            this(Hex.encode0x(account.getAddress()), account.getAvailable(), account.getLocked(), account.getNonce());
         }
     }
 }

@@ -17,9 +17,10 @@ public class GetValidatorsResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final List<String> validators;
 
-    public GetValidatorsResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") List<String> validators) {
+    public GetValidatorsResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") List<String> validators //
+    ) {
         super(success, null);
         this.validators = validators;
     }

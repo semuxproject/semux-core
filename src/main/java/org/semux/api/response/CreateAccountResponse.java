@@ -15,9 +15,10 @@ public class CreateAccountResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final String accountAddress;
 
-    public CreateAccountResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") String accountAddress) {
+    public CreateAccountResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") String accountAddress //
+    ) {
         super(success, null);
         this.accountAddress = accountAddress;
     }

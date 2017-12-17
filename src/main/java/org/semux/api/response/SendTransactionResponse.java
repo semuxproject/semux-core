@@ -12,8 +12,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SendTransactionResponse extends ApiHandlerResponse {
 
-    public SendTransactionResponse(
-            @JsonProperty("success") Boolean success) {
+    public SendTransactionResponse( //
+            @JsonProperty("success") Boolean success //
+    ) {
         super(success, null);
     }
 }

@@ -50,60 +50,50 @@ public class SemuxCLI extends Launcher {
     public SemuxCLI() {
         super();
         org.apache.commons.cli.Option helpOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.HELP.toString()).desc(CLIMessages.get("PrintHelp"))
-                .build();
+                .longOpt(Option.HELP.toString()).desc(CLIMessages.get("PrintHelp")).build();
         addOption(helpOption);
 
         org.apache.commons.cli.Option versionOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.VERSION.toString())
-                .desc(CLIMessages.get("ShowVersion")).build();
+                .longOpt(Option.VERSION.toString()).desc(CLIMessages.get("ShowVersion")).build();
         addOption(versionOption);
 
         org.apache.commons.cli.Option accountOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.ACCOUNT.toString())
-                .desc(CLIMessages.get("ChooseAction")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("action")
-                .type(String.class).build();
+                .longOpt(Option.ACCOUNT.toString()).desc(CLIMessages.get("ChooseAction")).hasArg(true).numberOfArgs(1)
+                .optionalArg(false).argName("action").type(String.class).build();
         addOption(accountOption);
 
         org.apache.commons.cli.Option changePasswordOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.CHANGE_PASSWORD.toString())
-                .desc(CLIMessages.get("ChangeWalletPassword")).build();
+                .longOpt(Option.CHANGE_PASSWORD.toString()).desc(CLIMessages.get("ChangeWalletPassword")).build();
         addOption(changePasswordOption);
 
         org.apache.commons.cli.Option dataDirOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.DATA_DIR.toString())
-                .desc(CLIMessages.get("SpecifyDataDir")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("path")
-                .type(String.class).build();
+                .longOpt(Option.DATA_DIR.toString()).desc(CLIMessages.get("SpecifyDataDir")).hasArg(true)
+                .numberOfArgs(1).optionalArg(false).argName("path").type(String.class).build();
         addOption(dataDirOption);
 
         org.apache.commons.cli.Option coinbaseOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.COINBASE.toString())
-                .desc(CLIMessages.get("SpecifyCoinbase")).hasArg(true).numberOfArgs(1).optionalArg(false)
-                .argName("index").type(Number.class).build();
+                .longOpt(Option.COINBASE.toString()).desc(CLIMessages.get("SpecifyCoinbase")).hasArg(true)
+                .numberOfArgs(1).optionalArg(false).argName("index").type(Number.class).build();
         addOption(coinbaseOption);
 
         org.apache.commons.cli.Option networkOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.NETWORK.toString())
-                .desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1).optionalArg(false)
-                .argName("name").type(String.class).build();
+                .longOpt(Option.NETWORK.toString()).desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1)
+                .optionalArg(false).argName("name").type(String.class).build();
         addOption(networkOption);
 
         org.apache.commons.cli.Option passwordOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.PASSWORD.toString())
-                .desc(CLIMessages.get("WalletPassword")).hasArg(true).numberOfArgs(1).optionalArg(false)
-                .argName(Option.PASSWORD.toString()).type(String.class).build();
+                .longOpt(Option.PASSWORD.toString()).desc(CLIMessages.get("WalletPassword")).hasArg(true)
+                .numberOfArgs(1).optionalArg(false).argName(Option.PASSWORD.toString()).type(String.class).build();
         addOption(passwordOption);
 
         org.apache.commons.cli.Option dumpPrivateKeyOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.DUMP_PRIVATE_KEY.toString())
-                .desc(CLIMessages.get("PrintHexKey")).hasArg(true).optionalArg(false).argName("address")
-                .type(String.class).build();
+                .longOpt(Option.DUMP_PRIVATE_KEY.toString()).desc(CLIMessages.get("PrintHexKey")).hasArg(true)
+                .optionalArg(false).argName("address").type(String.class).build();
         addOption(dumpPrivateKeyOption);
 
         org.apache.commons.cli.Option importPrivateKeyOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.IMPORT_PRIVATE_KEY.toString())
-                .desc(CLIMessages.get("ImportHexKey")).hasArg(true).optionalArg(false).argName("key").type(String.class)
-                .build();
+                .longOpt(Option.IMPORT_PRIVATE_KEY.toString()).desc(CLIMessages.get("ImportHexKey")).hasArg(true)
+                .optionalArg(false).argName("key").type(String.class).build();
         addOption(importPrivateKeyOption);
     }
 

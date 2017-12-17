@@ -166,8 +166,8 @@ public class Kernel {
                         gw.getLocalAddress().getHostAddress(), gw.getExternalIPAddress());
 
                 gw.deletePortMapping(config.p2pListenPort(), "TCP");
-                gw.addPortMapping(config.p2pListenPort(), config.p2pListenPort(),
-                        gw.getLocalAddress().getHostAddress(), "TCP", "Semux P2P network");
+                gw.addPortMapping(config.p2pListenPort(), config.p2pListenPort(), gw.getLocalAddress().getHostAddress(),
+                        "TCP", "Semux P2P network");
             }
         } catch (IOException | SAXException | ParserConfigurationException e) {
             logger.info("Failed to add port mapping", e);

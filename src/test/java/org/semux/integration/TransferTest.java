@@ -82,7 +82,7 @@ public class TransferTest {
     /**
      * The kernels who will receive transaction from kernelPremine
      */
-    public KernelMock kernelReceiver, kernelReceiver2;
+    public KernelMock kernelReceiver;
 
     public TransferTest() throws IOException {
     }
@@ -131,14 +131,14 @@ public class TransferTest {
     /**
      * Expectations:
      * <ul>
-     * <li>kernelReceiver1 and kernelReceiver2 should receive <code>1000 SEM</code>
-     * from kernelPremine</li>
+     * <li>kernelReceiver should receive <code>1000 SEM</code> from
+     * kernelPremine</li>
      * <li>kernelPremine's account should be deducted with
-     * <code>1000 SEM * 2 + 0.05 SEM * 2</code></li>
+     * <code>1000 SEM + 0.05 SEM </code></li>
      * </ul>
      */
     @Test
-    public void testTransferManyTransaction() throws IOException {
+    public void testTransfer() throws IOException {
         // make transfer_many request from kernelPremine to kernelReceiver1 and
         // kernelReceiver2
         final long value = 1000 * Unit.SEM;
@@ -161,12 +161,10 @@ public class TransferTest {
         logger.info("Waiting for the transaction to be processed...");
         await().until(availableOf(kernelPremine), equalTo(PREMINE * Unit.SEM - value - fee));
         await().until(availableOf(kernelReceiver), equalTo(value));
-        await().until(availableOf(kernelReceiver2), equalTo(value));
 
         // assert that the transaction has been recorded across nodes
         assertTransferTransaction(kernelPremine);
         assertTransferTransaction(kernelReceiver);
-        assertTransferTransaction(kernelReceiver2);
     }
 
     private void assertTransferTransaction(KernelMock kernelMock) throws IOException {

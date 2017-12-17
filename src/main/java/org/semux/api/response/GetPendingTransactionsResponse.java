@@ -18,9 +18,10 @@ public class GetPendingTransactionsResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final List<Result> pendingTransactions;
 
-    public GetPendingTransactionsResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") List<Result> pendingTransactions) {
+    public GetPendingTransactionsResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") List<Result> pendingTransactions //
+    ) {
         super(success, null);
         this.pendingTransactions = pendingTransactions;
     }

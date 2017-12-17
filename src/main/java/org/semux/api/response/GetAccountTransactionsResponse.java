@@ -18,9 +18,10 @@ public class GetAccountTransactionsResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final List<Result> transactions;
 
-    public GetAccountTransactionsResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") List<Result> transactions) {
+    public GetAccountTransactionsResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") List<Result> transactions //
+    ) {
         super(success, null);
         this.transactions = transactions;
     }

@@ -12,8 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -27,14 +25,11 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.crypto.CryptoException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
@@ -61,7 +56,7 @@ public class SendPanel extends JPanel implements ActionListener {
     private JTextField toText;
     private JTextField amountText;
     private JTextField feeText;
-    private JTextField memoText;
+    private JTextField dataText;
 
     public SendPanel(SemuxGUI gui, JFrame frame) {
         this.model = gui.getModel();
@@ -107,15 +102,15 @@ public class SendPanel extends JPanel implements ActionListener {
         feeText.setActionCommand(Action.SEND.name());
         feeText.addActionListener(this);
 
-        JLabel lblMemo = new JLabel(GUIMessages.get("Data") + ":");
-        lblMemo.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblMemo.setToolTipText(GUIMessages.get("DataTip"));
+        JLabel lblData = new JLabel(GUIMessages.get("Data") + ":");
+        lblData.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblData.setToolTipText(GUIMessages.get("DataTip"));
 
-        memoText = SwingUtil.textFieldWithCopyPastePopup();
-        memoText.setColumns(10);
-        memoText.setActionCommand(Action.SEND.name());
-        memoText.addActionListener(this);
-        memoText.setToolTipText(GUIMessages.get("DataTip"));
+        dataText = SwingUtil.textFieldWithCopyPastePopup();
+        dataText.setColumns(10);
+        dataText.setActionCommand(Action.SEND.name());
+        dataText.addActionListener(this);
+        dataText.setToolTipText(GUIMessages.get("DataTip"));
 
         JLabel lblSem1 = new JLabel("SEM");
 
@@ -145,7 +140,7 @@ public class SendPanel extends JPanel implements ActionListener {
                         .addComponent(lblFrom)
                         .addComponent(lblAmount)
                         .addComponent(lblFee)
-                        .addComponent(lblMemo))
+                        .addComponent(lblData))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addGroup(groupLayout.createSequentialGroup()
@@ -163,7 +158,7 @@ public class SendPanel extends JPanel implements ActionListener {
                                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
                                         .addComponent(amountText, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
                                         .addComponent(feeText)
-                                        .addComponent(memoText))
+                                        .addComponent(dataText))
                                     .addGap(12)
                                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
                                         .addComponent(lblSem1)
@@ -193,8 +188,8 @@ public class SendPanel extends JPanel implements ActionListener {
                         .addComponent(lblSem2))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(lblMemo)
-                        .addComponent(memoText, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(lblData)
+                        .addComponent(dataText, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(btnAddressBook)
@@ -210,6 +205,8 @@ public class SendPanel extends JPanel implements ActionListener {
         refresh();
         clear();
     }
+
+    // TODO: clean methods below
 
     public String getToText() {
         return toText.getText().trim();
@@ -235,12 +232,12 @@ public class SendPanel extends JPanel implements ActionListener {
         feeText.setText(SwingUtil.formatValue(f, false));
     }
 
-    public String getMemoText() {
-        return memoText.getText().trim();
+    public String getDataText() {
+        return dataText.getText().trim();
     }
 
-    public void setMemoText(String memoText) {
-        toText.setText(memoText.trim());
+    public void setDataText(String dataText) {
+        toText.setText(dataText.trim());
     }
 
     @Override
@@ -256,12 +253,10 @@ public class SendPanel extends JPanel implements ActionListener {
                 WalletAccount acc = getSelectedAccount();
                 long value = getAmountText();
                 long fee = getFeeText();
-                String memo = getMemoText();
+                String data = getDataText();
 
                 // decode0x recipient address
-                String[] toList = StringUtils.split(getToText(), ",");
-                byte[] to = Stream.of(toList).map(String::trim).map(Hex::decode0x).reduce(new byte[0],
-                        ArrayUtils::addAll);
+                byte[] to = Hex.decode0x(getToText());
 
                 if (acc == null) {
                     JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
@@ -272,18 +267,13 @@ public class SendPanel extends JPanel implements ActionListener {
                 } else if (value + fee > acc.getAvailable()) {
                     JOptionPane.showMessageDialog(this,
                             GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
-                } else if (to.length < EdDSA.ADDRESS_LEN || to.length % EdDSA.ADDRESS_LEN != 0) {
+                } else if (to.length != EdDSA.ADDRESS_LEN) {
                     JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidReceivingAddress"));
-                } else if (Bytes.of(memo).length > 128) {
+                } else if (Bytes.of(data).length > 128) {
                     JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidData", 128));
                 } else {
-                    String recipients = Stream.of(toList)
-                            .map(String::trim)
-                            .map(Hex::decode0x)
-                            .map(Hex::encode0x)
-                            .collect(Collectors.joining(","));
                     int ret = JOptionPane.showConfirmDialog(this,
-                            GUIMessages.get("TransferInfo", SwingUtil.formatValue(value), recipients),
+                            GUIMessages.get("TransferInfo", SwingUtil.formatValue(value), Hex.encode0x(to)),
                             GUIMessages.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
                     if (ret != JOptionPane.YES_OPTION) {
                         break;
@@ -295,23 +285,13 @@ public class SendPanel extends JPanel implements ActionListener {
                     byte[] from = acc.getKey().toAddress();
                     long nonce = pendingMgr.getNonce(from);
                     long timestamp = System.currentTimeMillis();
-                    byte[] data = Bytes.of(memo);
-                    Transaction tx = new Transaction(
-                            type,
-                            to,
-                            value,
-                            fee,
-                            nonce,
-                            timestamp,
-                            data);
+                    Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, Bytes.of(data));
                     tx.sign(acc.getKey());
 
                     sendTransaction(pendingMgr, tx);
                 }
             } catch (ParseException ex) {
                 JOptionPane.showMessageDialog(this, "Exception: " + ex.getMessage());
-            } catch (CryptoException ex) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidReceivingAddress"));
             }
             break;
         case CLEAR:
@@ -374,7 +354,7 @@ public class SendPanel extends JPanel implements ActionListener {
         setToText(Bytes.EMPTY_BYTES);
         setAmountText(0);
         setFeeText(config.minTransactionFee());
-        setMemoText("");
+        setDataText("");
     }
 
     private class Item {

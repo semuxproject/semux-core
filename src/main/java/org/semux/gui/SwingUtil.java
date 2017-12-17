@@ -467,8 +467,7 @@ public class SwingUtil {
      * @return description of transaction with one or multiple recipients
      */
     private static String getTransactionRecipientsDescription(SemuxGUI gui, Transaction tx) {
-        return getAddressAlias(gui, tx.getFrom()) +
-                " => " + getAddressAlias(gui, tx.getTo());
+        return getAddressAlias(gui, tx.getFrom()) + " => " + getAddressAlias(gui, tx.getTo());
     }
 
     /**
