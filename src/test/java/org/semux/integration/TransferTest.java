@@ -136,7 +136,9 @@ public class TransferTest {
     @Test
     public void testTransfer() throws IOException {
         // wait
-        await().until(() -> kernelPremine.getApi().isRunning());
+        await().until(() -> kernelValidator.isRunning());
+        await().until(() -> kernelPremine.isRunning());
+        await().until(() -> kernelReceiver.isRunning());
 
         // make transfer_many request from kernelPremine to kernelReceiver1 and
         // kernelReceiver2

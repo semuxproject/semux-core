@@ -49,7 +49,7 @@ public class SystemUtil {
     }
 
     /**
-     * Get the operating system name.
+     * Returns the operating system name.
      * 
      * @return
      */
@@ -68,7 +68,7 @@ public class SystemUtil {
     }
 
     /**
-     * Get the operating system architecture
+     * Returns the operating system architecture
      * 
      * @return
      */
@@ -77,9 +77,9 @@ public class SystemUtil {
     }
 
     /**
-     * Get the IP address of this peer.
+     * Returns the public IP address of this peer.
      * 
-     * @return the public IP address if available, otherwise local address
+     * @return an IP address if available, otherwise local address
      */
     public static String getIp() {
         try {
@@ -98,7 +98,7 @@ public class SystemUtil {
                 return ip;
             }
         } catch (Exception e) {
-            logger.error("Failed to retrieve your IP address", e);
+            logger.error("Failed to retrieve your IP address from ipify.org");
         }
 
         try {
@@ -110,7 +110,7 @@ public class SystemUtil {
     }
 
     /**
-     * Read a password from console with a customized message.
+     * Reads a password from console with a customized message.
      *
      * @param prompt
      *            A message to display before reading password
@@ -130,7 +130,7 @@ public class SystemUtil {
     }
 
     /**
-     * Read a password from console.
+     * Reads a password from console.
      *
      * @return
      */

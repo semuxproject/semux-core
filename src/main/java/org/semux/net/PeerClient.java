@@ -6,10 +6,13 @@
  */
 package org.semux.net;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,6 +50,8 @@ public class PeerClient {
 
     private static final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor(factory);
 
+    private ScheduledFuture<?> ipRefreshFuture = null;
+
     private String ip;
     private int port;
     private EdDSA coinbase;
@@ -75,6 +80,13 @@ public class PeerClient {
         this.workerGroup = new NioEventLoopGroup(0, factory);
     }
 
+    /**
+     * Create a new PeerClient with the given public IP address and coinbase.
+     *
+     * @param ip
+     * @param port
+     * @param coinbase
+     */
     public PeerClient(String ip, int port, EdDSA coinbase) {
         this.ip = ip;
         this.port = port;
@@ -83,19 +95,26 @@ public class PeerClient {
         this.workerGroup = new NioEventLoopGroup(0, factory);
     }
 
-    private void startIpRefresh() {
-        timer.scheduleAtFixedRate(() -> {
+    /**
+     * Keeps updating public IP address.
+     */
+    protected void startIpRefresh() {
+        ipRefreshFuture = timer.scheduleAtFixedRate(() -> {
             String newIp = SystemUtil.getIp();
-            if (!ip.equals(newIp)) {
-                logger.info("Noticed IP change: {} => {}", ip, newIp);
-                ip = newIp;
+            try {
+                if (!ip.equals(newIp) && !InetAddress.getByName(newIp).isSiteLocalAddress()) {
+                    logger.info("Noticed IP change: {} => {}", ip, newIp);
+                    ip = newIp;
+                }
+            } catch (UnknownHostException e) {
+                logger.error("The fetched IP address is invalid: {}", newIp);
             }
 
         }, 15, 30, TimeUnit.SECONDS);
     }
 
     /**
-     * Get the listening IP address.
+     * Returns the listening IP address.
      * 
      * @return
      */
@@ -104,7 +123,7 @@ public class PeerClient {
     }
 
     /**
-     * Get the listening IP port.
+     * Returns the listening IP port.
      * 
      * @return
      */
@@ -113,7 +132,7 @@ public class PeerClient {
     }
 
     /**
-     * Get the peerId of this client.
+     * Returns the peerId of this client.
      * 
      * @return
      */
@@ -122,7 +141,7 @@ public class PeerClient {
     }
 
     /**
-     * Get the coinbase.
+     * Returns the coinbase.
      * 
      * @return
      */
@@ -131,7 +150,7 @@ public class PeerClient {
     }
 
     /**
-     * Connect to a remote peer.
+     * Connects to a remote peer.
      * 
      * @param remoteAddress
      */
@@ -151,7 +170,7 @@ public class PeerClient {
     }
 
     /**
-     * Connect to a remote peer asynchronously.
+     * Connects to a remote peer asynchronously.
      * 
      * @param remoteAddress
      * @return
@@ -172,12 +191,15 @@ public class PeerClient {
     }
 
     /**
-     * Close this client.
-     * 
+     * Closes this client.
      */
     public void close() {
         logger.info("Shutting down PeerClient");
         workerGroup.shutdownGracefully();
         workerGroup.terminationFuture().syncUninterruptibly();
+
+        if (ipRefreshFuture != null) {
+            ipRefreshFuture.cancel(true);
+        }
     }
 }

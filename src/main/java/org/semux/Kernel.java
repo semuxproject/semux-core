@@ -202,6 +202,9 @@ public class Kernel {
         pendingMgr.stop();
         nodeMgr.stop();
 
+        // close client
+        client.close();
+
         // set flag
         isRunning.set(false);
     }
