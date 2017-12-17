@@ -8,7 +8,6 @@ package org.semux.api;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
-import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.nio.charset.Charset;
@@ -17,14 +16,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.semux.api.exception.ApiHandlerException;
-import org.semux.api.response.ApiHandlerResponse;
 import org.semux.config.Config;
 import org.semux.util.BasicAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -91,6 +86,11 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
             keepAlive = HttpUtil.isKeepAlive(request);
             uri = request.uri();
             params = new QueryStringDecoder(request.uri(), CHARSET).parameters();
+            if (params.isEmpty()) {
+                // empty params has to be reinitialized as a instance of HashMap to avoid
+                // UnsupportedOperationException
+                params = new HashMap<>();
+            }
             headers = request.headers();
             body = Unpooled.buffer(MAX_BODY_SIZE);
 
@@ -157,26 +157,12 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
                 // delegate the request to api handler if a response has not been generated
                 if (response == null) {
-                    try {
-                        response = apiHandler.service(uri, map, headers);
-                        status = response.status;
-                    } catch (ApiHandlerException ex) {
-                        response = new ApiHandlerResponse(false, ex.response);
-                        status = HttpResponseStatus.valueOf(ex.statusCode);
-                    }
+                    response = apiHandler.service(uri, map, headers);
+                    status = HttpResponseStatus.OK;
                 }
 
-                // serialize response
-                String responseBody;
-                try {
-                    responseBody = response.serialize();
-                } catch (JsonProcessingException ex) {
-                    logger.error("failed to serialize response", ex);
-                    status = INTERNAL_SERVER_ERROR;
-                    responseBody = "{\"success\":false,\"message\":\"Internal Server Error\"}";
-                }
-
-                if (!writeResponse(ctx, status, responseBody)) {
+                // write response
+                if (!writeResponse(ctx, status, response.serialize())) {
                     // if keep-alive is off, close the connection after flushing
                     ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
                 }

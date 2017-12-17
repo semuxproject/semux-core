@@ -18,6 +18,7 @@ import org.apache.commons.collections4.map.LRUMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.config.Config;
+import org.semux.config.Constants;
 import org.semux.consensus.SemuxBFT.Event.Type;
 import org.semux.consensus.exception.SemuxBFTException;
 import org.semux.core.Block;
@@ -245,7 +246,7 @@ public class SemuxBFT implements Consensus {
 
         logger.info("Entered new_height: height = {}, # validators = {}", height, validators.size());
         if (isValidator()) {
-            if (!SystemUtil.bench()) {
+            if (this.config.networkId() == Constants.MAIN_NET_ID && !SystemUtil.bench()) {
                 logger.error("You need to upgrade your computer to join the BFT consensus!");
                 SystemUtil.exitAsync(-1);
             }
@@ -330,8 +331,8 @@ public class SemuxBFT implements Consensus {
 
         // vote YES as long as +2/3 validators received a success block proposal
         Optional<byte[]> blockHash = validateVotes.anyApproved();
-        Vote vote = (blockHash.isPresent()) ? Vote.newApprove(VoteType.PRECOMMIT, height, view, blockHash.get())
-                : Vote.newReject(VoteType.PRECOMMIT, height, view);
+        Vote vote = blockHash.map(bytes -> Vote.newApprove(VoteType.PRECOMMIT, height, view, bytes))
+                .orElseGet(() -> Vote.newReject(VoteType.PRECOMMIT, height, view));
         vote.sign(coinbase);
 
         // always broadcast vote directly.
@@ -734,7 +735,8 @@ public class SemuxBFT implements Consensus {
         }
 
         // [2] check transactions and results (skipped)
-        if (transactions.size() > config.maxBlockSize() || !Block.validateTransactions(header, transactions)) {
+        if (!Block.validateTransactions(header, transactions)
+                || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockSize()) {
             logger.debug("Invalid block transactions");
             return false;
         }

@@ -4,13 +4,13 @@
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yy-MM-dd HH:mm:ss} %highlight(%-5level) [%thread] %cyan(%logger{0}) - %msg%n</pattern>
+            <pattern>%d{yy-MM-dd HH:mm:ss} [%-5level] [%thread] %logger{0} - %msg%n</pattern>
         </encoder>
     </appender>
     
-    <appender name="TEST" class="org.semux.TestAppender">
+    <appender name="TEST" class="org.semux.LoggingAppender">
         <encoder>
-            <pattern>%d{yy-MM-dd HH:mm:ss} %highlight(%-5level) [%thread] %cyan(%logger{0}) - %msg%n</pattern>
+            <pattern>%d{yy-MM-dd HH:mm:ss} [%-5level] [%thread] %logger{0} - %msg%n</pattern>
         </encoder>
     </appender>
 

@@ -24,11 +24,11 @@ public class SemuxVMTest {
     @Test
     public void testParallel() {
         SemuxRuntimeMock rt1 = new SemuxRuntimeMock(temporaryDBFactory);
-        rt1.address = Hex.parse("0x1111111111111111111111111111111111111111");
+        rt1.address = Hex.decode0x("0x1111111111111111111111111111111111111111");
         VMTask task1 = new VMTask(rt1, Bytes.EMPTY_BYTES, 10000);
 
         SemuxRuntimeMock rt2 = new SemuxRuntimeMock(temporaryDBFactory);
-        rt2.address = Hex.parse("0x2222222222222222222222222222222222222222");
+        rt2.address = Hex.decode0x("0x2222222222222222222222222222222222222222");
         VMTask task2 = new VMTask(rt2, Bytes.EMPTY_BYTES, 10000);
 
         List<VMTask> tasks = Arrays.asList(task1, task2);

@@ -6,12 +6,14 @@
  */
 package org.semux.api.response;
 
+import org.semux.api.ApiHandlerResponse;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AddNodeResponse extends ApiHandlerResponse {
 
-    public AddNodeResponse(
-            @JsonProperty("success") Boolean success) {
+    public AddNodeResponse(@JsonProperty("success") Boolean success //
+    ) {
         super(success, null);
     }
 }

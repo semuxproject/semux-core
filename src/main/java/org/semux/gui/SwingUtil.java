@@ -72,7 +72,7 @@ public class SwingUtil {
      * @param width
      * @param height
      */
-    public static void centerizeFrame(JFrame frame, int width, int height) {
+    public static void alignFrameToMiddle(JFrame frame, int width, int height) {
         Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
         int x = ((int) d.getWidth() - width) / 2;
         int y = ((int) d.getHeight() - height) / 2;
@@ -452,12 +452,22 @@ public class SwingUtil {
         case VOTE:
         case UNVOTE:
         case TRANSFER:
-            return getAddressAlias(gui, tx.getFrom()) + " => " + getAddressAlias(gui, tx.getTo());
+            return getTransactionRecipientsDescription(gui, tx);
         case DELEGATE:
             return GUIMessages.get("DelegateRegistration");
         default:
             return StringUtil.EMPTY_STRING;
         }
+    }
+
+    /**
+     *
+     * @param gui
+     * @param tx
+     * @return description of transaction with one or multiple recipients
+     */
+    private static String getTransactionRecipientsDescription(SemuxGUI gui, Transaction tx) {
+        return getAddressAlias(gui, tx.getFrom()) + " => " + getAddressAlias(gui, tx.getTo());
     }
 
     /**

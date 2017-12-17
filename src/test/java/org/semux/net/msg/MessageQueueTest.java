@@ -45,7 +45,7 @@ public class MessageQueueTest {
     public void setup() {
         server = new PeerServerMock(temporaryDBFactory);
         server.start(P2P_IP, P2P_PORT);
-        assertTrue(server.getServer().isListening());
+        assertTrue(server.getServer().isRunning());
     }
 
     private Channel connect() throws InterruptedException {

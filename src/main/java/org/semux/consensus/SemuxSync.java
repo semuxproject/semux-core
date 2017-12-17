@@ -295,8 +295,8 @@ public class SemuxSync implements SyncManager {
                     toComplete.remove(pair.getKey().getNumber());
                 }
             } else {
-                InetSocketAddress addr = pair.getValue().getRemoteAddress();
-                logger.info("Invalid block from {}:{}", addr.getAddress().getHostAddress(), addr.getPort());
+                InetSocketAddress a = pair.getValue().getRemoteAddress();
+                logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
 
                 synchronized (lock) {
                     toDownload.add(pair.getKey().getNumber());
@@ -328,8 +328,8 @@ public class SemuxSync implements SyncManager {
         }
 
         // [2] check transactions and results
-        if (transactions.size() > config.maxBlockSize() || !Block
-                .validateTransactions(header, block.getTransactions())) {
+        if (!Block.validateTransactions(header, transactions)
+                || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockSize()) {
             logger.debug("Invalid block transactions");
             return false;
         }

@@ -28,7 +28,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.api.response.AddNodeResponse;
-import org.semux.api.response.ApiHandlerResponse;
 import org.semux.api.response.CreateAccountResponse;
 import org.semux.api.response.DoTransactionResponse;
 import org.semux.api.response.GetAccountResponse;
@@ -278,6 +277,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         GetTransactionResponse response = request(uri, GetTransactionResponse.class);
         assertTrue(response.success);
         assertEquals(Hex.encode0x(tx.getHash()), response.transaction.hash);
+        assertNotNull(response.transaction.to);
     }
 
     @Test
@@ -388,13 +388,13 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
                 + Hex.encode(Bytes.of("test_transfer"));
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
-        assertNotNull(response.txId);
+        assertNotNull(response.txHash);
 
         Thread.sleep(200);
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.txId));
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txHash));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.TRANSFER);
     }
 
@@ -404,13 +404,13 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
                 + "&data=" + Hex.encode(Bytes.of("test_delegate"));
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
-        assertNotNull(response.txId);
+        assertNotNull(response.txHash);
 
         Thread.sleep(200);
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.txId));
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txHash));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.DELEGATE);
     }
 
@@ -423,13 +423,13 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
                 + "&value=1000000000&fee=50000000";
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
-        assertNotNull(response.txId);
+        assertNotNull(response.txHash);
 
         Thread.sleep(200);
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(0).getHash(), Hex.parse(response.txId));
+        assertArrayEquals(list.get(0).getHash(), Hex.decode0x(response.txHash));
         assertEquals(TransactionType.VOTE, list.get(0).getType());
     }
 
@@ -447,13 +447,13 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
                 + "&value=" + amount + "&fee=50000000";
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
-        assertNotNull(response.txId);
+        assertNotNull(response.txHash);
 
         Thread.sleep(200);
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.parse(response.txId));
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txHash));
         assertEquals(TransactionType.UNVOTE, list.get(list.size() - 1).getType());
     }
 }

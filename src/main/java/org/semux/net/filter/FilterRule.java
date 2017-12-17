@@ -101,9 +101,9 @@ public class FilterRule implements IpFilterRule {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public static FilterRule jsonCreator(
-            @JsonProperty(value = "type", required = true) String type,
-            @JsonProperty(value = "address", required = true) String address) {
+    public static FilterRule jsonCreator(@JsonProperty(value = "type", required = true) String type, //
+            @JsonProperty(value = "address", required = true) String address //
+    ) {
         try {
             return new FilterRule(address, IpFilterRuleType.valueOf(type));
         } catch (IllegalArgumentException | NullPointerException ex) {

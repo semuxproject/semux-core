@@ -19,23 +19,23 @@ import org.xbill.DNS.Address;
 
 public class Transaction implements Callable<Boolean> {
 
-    private byte[] hash;
+    private final TransactionType type;
 
-    private TransactionType type;
+    private final byte[] to;
 
-    private byte[] to;
+    private final long value;
 
-    private long value;
+    private final long fee;
 
-    private long fee;
+    private final long nonce;
 
-    private long nonce;
+    private final long timestamp;
 
-    private long timestamp;
+    private final byte[] data;
 
-    private byte[] data;
+    private final byte[] encoded;
 
-    private byte[] encoded;
+    private final byte[] hash; // not serialized
     private Signature signature;
 
     /**
@@ -70,6 +70,13 @@ public class Transaction implements Callable<Boolean> {
         this.hash = Hash.h256(encoded);
     }
 
+    /**
+     * Create a transaction from raw bytes
+     * 
+     * @param hash
+     * @param encoded
+     * @param signature
+     */
     public Transaction(byte[] hash, byte[] encoded, byte[] signature) {
         this.hash = hash;
 
@@ -111,17 +118,17 @@ public class Transaction implements Callable<Boolean> {
     public boolean validate() {
         return hash != null && hash.length == 32 //
                 && type != null //
-                && to != null && to.length == 20 //
+                && to != null && to.length == EdDSA.ADDRESS_LEN //
                 && value >= 0 //
                 && fee >= 0 //
                 && nonce >= 0 //
                 && timestamp > 0 //
-                && data != null && (data.length <= 128) //
+                && data != null //
                 && encoded != null //
                 && signature != null //
 
                 && Arrays.equals(Hash.h256(encoded), hash) //
-                && EdDSA.verify(hash, signature);
+                && EdDSA.verify(hash, signature); //
     }
 
     /**
@@ -152,8 +159,8 @@ public class Transaction implements Callable<Boolean> {
     }
 
     /**
-     * Returns the to address.
-     * 
+     * Returns the recipient address.
+     *
      * @return
      */
     public byte[] getTo() {
@@ -226,6 +233,15 @@ public class Transaction implements Callable<Boolean> {
         enc.writeBytes(signature.toBytes());
 
         return enc.toBytes();
+    }
+
+    /**
+     * Size of the transaction in bytes
+     *
+     * @return Size of the transaction in bytes
+     */
+    public int size() {
+        return toBytes().length;
     }
 
     /**

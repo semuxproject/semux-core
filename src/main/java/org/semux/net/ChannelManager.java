@@ -56,11 +56,11 @@ public class ChannelManager {
     /**
      * Returns whether a socket address is connected.
      * 
-     * @param addr
+     * @param address
      * @return
      */
-    public synchronized boolean isConnected(InetSocketAddress addr) {
-        return channels.containsKey(addr);
+    public synchronized boolean isConnected(InetSocketAddress address) {
+        return channels.containsKey(address);
     }
 
     /**

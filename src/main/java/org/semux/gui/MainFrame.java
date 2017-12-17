@@ -82,7 +82,7 @@ public class MainFrame extends JFrame implements ActionListener {
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.setMinimumSize(new Dimension(900, 600));
-        SwingUtil.centerizeFrame(this, 900, 600);
+        SwingUtil.alignFrameToMiddle(this, 900, 600);
 
         // setup menu bar
         JMenuBar menuBar = new MenuBar(gui, this);

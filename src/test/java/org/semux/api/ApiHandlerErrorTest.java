@@ -20,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import org.semux.api.response.ApiHandlerResponse;
 import org.semux.crypto.Hex;
 import org.semux.rules.TemporaryDBRule;
 import org.semux.util.Bytes;

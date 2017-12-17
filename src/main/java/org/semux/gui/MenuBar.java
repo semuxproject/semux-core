@@ -74,15 +74,15 @@ public class MenuBar extends JMenuBar implements ActionListener {
 
         menuWallet.addSeparator();
 
-        JMenuItem itemImportPrivKey = new JMenuItem(GUIMessages.get("ImportPrivateKey"));
-        itemImportPrivKey.setActionCommand(Action.IMPORT_PRIVATE_KEY.name());
-        itemImportPrivKey.addActionListener(this);
-        menuWallet.add(itemImportPrivKey);
+        JMenuItem itemImportPrivateKey = new JMenuItem(GUIMessages.get("ImportPrivateKey"));
+        itemImportPrivateKey.setActionCommand(Action.IMPORT_PRIVATE_KEY.name());
+        itemImportPrivateKey.addActionListener(this);
+        menuWallet.add(itemImportPrivateKey);
 
-        JMenuItem itemExportPrivKey = new JMenuItem(GUIMessages.get("ExportPrivateKey"));
-        itemExportPrivKey.setActionCommand(Action.EXPORT_PRIVATE_KEY.name());
-        itemExportPrivKey.addActionListener(this);
-        menuWallet.add(itemExportPrivKey);
+        JMenuItem itemExportPrivateKey = new JMenuItem(GUIMessages.get("ExportPrivateKey"));
+        itemExportPrivateKey.setActionCommand(Action.EXPORT_PRIVATE_KEY.name());
+        itemExportPrivateKey.addActionListener(this);
+        menuWallet.add(itemExportPrivateKey);
 
         JMenu menuHelp = new JMenu(GUIMessages.get("Help"));
         this.add(menuHelp);
@@ -158,7 +158,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
             if (pk != null) {
                 try {
                     Wallet wallet = gui.getKernel().getWallet();
-                    EdDSA account = new EdDSA(Hex.parse(pk));
+                    EdDSA account = new EdDSA(Hex.decode0x(pk));
                     if (wallet.addAccount(account)) {
                         wallet.flush();
                         JOptionPane.showMessageDialog(frame, GUIMessages.get("PrivateKeyImportSuccess"));

@@ -30,7 +30,7 @@ public class Hex {
     }
 
     /**
-     * Convert a byte array into a hex string, in lower-case.
+     * Encodes a byte array into a hex string.
      * 
      * @param raw
      * @return
@@ -47,7 +47,7 @@ public class Hex {
     }
 
     /**
-     * Encode an byte array as hex string.
+     * Encodes a byte array into hex string.
      * 
      * @param raw
      * @return the hex encoding with 0x prefix
@@ -57,13 +57,15 @@ public class Hex {
     }
 
     /**
-     * Convert a hex string into a byte array.
+     * Decode a hex encoded byte array.
      * 
      * @param hex
+     * @throws CryptoException
+     *             if the input is not a valid hex string
      * @return
      */
-    public static byte[] decode(String hex) {
-        if (!hex.matches("([0-9a-fA-F]{2})*")) {
+    public static byte[] decode(String hex) throws CryptoException {
+        if (hex == null || !hex.matches("([0-9a-fA-F]{2})*")) {
             throw new CryptoException("Invalid hex string");
         }
 
@@ -78,14 +80,17 @@ public class Hex {
     }
 
     /**
-     * Parse a hex string into bytes. This method will automatically detect the '0x'
-     * prefix.
+     * Decodes a hex encoded byte array.
+     * <p>
+     * This method will automatically detect the '0x' prefix.
      * 
      * @param hex
+     * @throws CryptoException
+     *             if the input is not a valid hex string
      * @return
      */
-    public static byte[] parse(String hex) {
-        if (hex.startsWith(Hex.PREF)) {
+    public static byte[] decode0x(String hex) throws CryptoException {
+        if (hex != null && hex.startsWith(Hex.PREF)) {
             return decode(hex.substring(2));
         } else {
             return decode(hex);

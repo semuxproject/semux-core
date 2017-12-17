@@ -31,9 +31,9 @@ public class NodesMessage extends Message {
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeInt(nodes.size());
-        for (InetSocketAddress addr : nodes) {
-            enc.writeString(addr.getAddress().getHostAddress());
-            enc.writeInt(addr.getPort());
+        for (InetSocketAddress a : nodes) {
+            enc.writeString(a.getAddress().getHostAddress());
+            enc.writeInt(a.getPort());
         }
         this.encoded = enc.toBytes();
     }

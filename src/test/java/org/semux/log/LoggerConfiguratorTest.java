@@ -123,7 +123,7 @@ public class LoggerConfiguratorTest {
         fileWriter.close();
     }
 
-    private String getFactoryDefaultConfig() throws FileNotFoundException {
+    private String getFactoryDefaultConfig() {
         InputStream in = getClass().getResourceAsStream("/" + LoggerConfigurator.LOGBACK_XML);
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         return reader.lines().collect(Collectors.joining("\n"));

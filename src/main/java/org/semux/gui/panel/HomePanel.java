@@ -11,6 +11,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +45,9 @@ public class HomePanel extends JPanel implements ActionListener {
     private static final int NUMBER_OF_TRANSACTIONS = 6;
 
     private static final long serialVersionUID = 1L;
+
+    private static final EnumSet<TransactionType> FEDERATED_TRANSACTION_TYPES = EnumSet.of(TransactionType.COINBASE,
+            TransactionType.TRANSFER);
 
     private transient SemuxGUI gui;
     private transient WalletModel model;
@@ -243,8 +247,7 @@ public class HomePanel extends JPanel implements ActionListener {
         for (WalletAccount acc : model.getAccounts()) {
             for (Transaction tx : acc.getTransactions()) {
                 ByteArray key = ByteArray.of(tx.getHash());
-                if ((tx.getType() == TransactionType.COINBASE || tx.getType() == TransactionType.TRANSFER)
-                        && !hashes.contains(key)) {
+                if (FEDERATED_TRANSACTION_TYPES.contains(tx.getType()) && !hashes.contains(key)) {
                     list.add(tx);
                     hashes.add(key);
                 }

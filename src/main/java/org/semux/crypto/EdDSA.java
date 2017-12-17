@@ -39,6 +39,7 @@ public class EdDSA {
 
     public static final int PUBLIC_KEY_LEN = 44;
     public static final int PRIVATE_KEY_LEN = 48;
+    public static final int ADDRESS_LEN = 20;
 
     private static final Logger logger = LoggerFactory.getLogger(EdDSA.class);
 
@@ -155,7 +156,7 @@ public class EdDSA {
     }
 
     /**
-     * Verifys a signature.
+     * Verifies a signature.
      * 
      * @param msgHash
      *            message hash

@@ -140,7 +140,7 @@ public class TransactionExecutorTest {
         long fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
-        byte[] data = Bytes.random(16);
+        byte[] data = {};
 
         // vote for non-existing delegate
         Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(voter);
@@ -174,7 +174,7 @@ public class TransactionExecutorTest {
         long fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
-        byte[] data = Bytes.random(16);
+        byte[] data = {};
 
         // unvote (never voted before)
         Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(voter);

@@ -24,7 +24,7 @@ import org.semux.util.Bytes;
 
 public class GenesisTest {
 
-    private static byte[] ZERO_ADDRESS = Hex.decode("0000000000000000000000000000000000000000");
+    private static byte[] ZERO_ADDRESS = Hex.decode0x("0000000000000000000000000000000000000000");
     private static byte[] ZERO_HASH = Bytes.EMPTY_HASH;
 
     Genesis genesis;

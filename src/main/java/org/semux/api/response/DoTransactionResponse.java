@@ -6,17 +6,21 @@
  */
 package org.semux.api.response;
 
+import org.semux.api.ApiHandlerResponse;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DoTransactionResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final String txId;
+    public final String txHash;
 
-    public DoTransactionResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") String txId) {
-        super(success, null);
-        this.txId = txId;
+    public DoTransactionResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("message") String message, //
+            @JsonProperty("result") String txHash //
+    ) {
+        super(success, message);
+        this.txHash = txHash;
     }
 }

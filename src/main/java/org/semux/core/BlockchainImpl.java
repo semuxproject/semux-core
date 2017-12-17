@@ -7,7 +7,6 @@
 package org.semux.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -276,9 +275,7 @@ public class BlockchainImpl implements Blockchain {
 
             // [3] update transaction_by_account index
             addTransactionToAccount(tx, tx.getFrom());
-            if (!Arrays.equals(tx.getFrom(), tx.getTo())) {
-                addTransactionToAccount(tx, tx.getTo());
-            }
+            addTransactionToAccount(tx, tx.getTo());
         }
 
         if (number != genesis.getNumber()) {
@@ -293,9 +290,9 @@ public class BlockchainImpl implements Blockchain {
             String primary = config.getPrimaryValidator(validators, number, 0);
             adjustValidatorStats(block.getCoinbase(), StatsType.FORGED, 1);
             if (primary.equals(Hex.encode(block.getCoinbase()))) {
-                adjustValidatorStats(Hex.decode(primary), StatsType.HIT, 1);
+                adjustValidatorStats(Hex.decode0x(primary), StatsType.HIT, 1);
             } else {
-                adjustValidatorStats(Hex.decode(primary), StatsType.MISSED, 1);
+                adjustValidatorStats(Hex.decode0x(primary), StatsType.MISSED, 1);
             }
         }
 

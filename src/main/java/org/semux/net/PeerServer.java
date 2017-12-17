@@ -41,7 +41,7 @@ public class PeerServer {
 
     protected Kernel kernel;
 
-    protected boolean listening;
+    protected boolean isRunning;
 
     protected EventLoopGroup bossGroup;
     protected EventLoopGroup workerGroup;
@@ -56,6 +56,10 @@ public class PeerServer {
     }
 
     public void start(String ip, int port) {
+        if (isRunning()) {
+            return;
+        }
+
         bossGroup = new NioEventLoopGroup(1, factory);
         workerGroup = new NioEventLoopGroup(0, factory);
 
@@ -74,9 +78,9 @@ public class PeerServer {
 
             logger.info("Starting peer server: address = {}:{}", ip, port);
             channelFuture = b.bind(ip, port).sync();
-            logger.debug("Binding was sucessful");
+            logger.debug("Binding was successful");
 
-            listening = true;
+            isRunning = true;
             channelFuture.channel().closeFuture().sync();
             logger.info("PeerServer shut down");
 
@@ -85,12 +89,12 @@ public class PeerServer {
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
-            listening = false;
+            isRunning = false;
         }
     }
 
     public void stop() {
-        if (listening && channelFuture != null && channelFuture.channel().isOpen()) {
+        if (isRunning() && channelFuture != null && channelFuture.channel().isOpen()) {
             try {
                 channelFuture.channel().close().sync();
             } catch (Exception e) {
@@ -99,7 +103,7 @@ public class PeerServer {
         }
     }
 
-    public boolean isListening() {
-        return listening;
+    public boolean isRunning() {
+        return isRunning;
     }
 }

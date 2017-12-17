@@ -21,7 +21,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
-import static org.semux.TestAppender.info;
+import static org.semux.LoggingAppender.info;
 
 import java.security.KeyPair;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.Kernel;
-import org.semux.TestAppender;
+import org.semux.LoggingAppender;
 import org.semux.config.DevNetConfig;
 import org.semux.config.MainNetConfig;
 import org.semux.config.TestNetConfig;
@@ -72,13 +72,13 @@ public class SemuxCLITest {
 
     @Before
     public void setup() {
-        TestAppender.clear();
-        TestAppender.prepare(Level.INFO, SemuxCLI.class, LoggerFactory.getLogger(SemuxCLI.class));
+        LoggingAppender.clear();
+        LoggingAppender.prepare(Level.INFO, SemuxCLI.class, LoggerFactory.getLogger(SemuxCLI.class));
     }
 
     @After
     public void teardown() {
-        TestAppender.prepare(Level.OFF, null, null);
+        LoggingAppender.prepare(Level.OFF, null, null);
     }
 
     @Test
@@ -261,7 +261,7 @@ public class SemuxCLITest {
         verify(semuxCLI).startKernel(any(), any(), any());
 
         // assert outputs
-        List<LoggingEvent> logs = TestAppender.events();
+        List<LoggingEvent> logs = LoggingAppender.events();
         assertThat(logs, hasItem(info(CLIMessages.get("NewAccountCreatedForAddress", newAccount.toAddressString()))));
     }
 
@@ -308,7 +308,7 @@ public class SemuxCLITest {
         verify(wallet).flush();
 
         // assert outputs
-        List<LoggingEvent> logs = TestAppender.events();
+        List<LoggingEvent> logs = LoggingAppender.events();
         assertThat(logs, hasItem(info(CLIMessages.get("NewAccountCreatedForAddress", newAccount.toAddressString()))));
         assertThat(logs, hasItem(info(CLIMessages.get("PublicKey", Hex.encode(newAccount.getPublicKey())))));
         assertThat(logs, hasItem(info(CLIMessages.get("PrivateKey", Hex.encode(newAccount.getPrivateKey())))));
@@ -340,7 +340,7 @@ public class SemuxCLITest {
         verify(wallet).getAccounts();
 
         // assert outputs
-        List<LoggingEvent> logs = TestAppender.events();
+        List<LoggingEvent> logs = LoggingAppender.events();
         assertThat(logs, hasItem(info(CLIMessages.get("ListAccountItem", 0, account.toAddressString()))));
     }
 
@@ -402,7 +402,7 @@ public class SemuxCLITest {
 
         // mock address
         String address = "c583b6ad1d1cccfc00ae9113db6408f022822b20";
-        byte[] addressBytes = Hex.decode(address);
+        byte[] addressBytes = Hex.decode0x(address);
 
         // mock wallet
         Wallet wallet = mock(Wallet.class);
@@ -499,7 +499,7 @@ public class SemuxCLITest {
         semuxCLI.importPrivateKey(key);
 
         // assertions
-        List<LoggingEvent> logs = TestAppender.events();
+        List<LoggingEvent> logs = LoggingAppender.events();
         assertThat(logs, hasItem(info(CLIMessages.get("PrivateKeyImportedSuccessfully"))));
         assertThat(logs, hasItem(info(CLIMessages.get("Address", "0680a919c78faa59b127014b6181979ae0a62dbd"))));
         assertThat(logs, hasItem(info(CLIMessages.get("PrivateKey", key))));

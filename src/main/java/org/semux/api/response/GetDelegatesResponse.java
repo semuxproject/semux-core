@@ -8,6 +8,8 @@ package org.semux.api.response;
 
 import java.util.List;
 
+import org.semux.api.ApiHandlerResponse;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GetDelegatesResponse extends ApiHandlerResponse {
@@ -15,9 +17,10 @@ public class GetDelegatesResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final List<GetDelegateResponse.Result> delegateResults;
 
-    public GetDelegatesResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") List<GetDelegateResponse.Result> delegateResults) {
+    public GetDelegatesResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") List<GetDelegateResponse.Result> delegateResults //
+    ) {
         super(success, null);
         this.delegateResults = delegateResults;
     }

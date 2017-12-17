@@ -6,6 +6,8 @@
  */
 package org.semux.api.response;
 
+import org.semux.api.ApiHandlerResponse;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GetVoteResponse extends ApiHandlerResponse {
@@ -13,9 +15,10 @@ public class GetVoteResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final Long vote;
 
-    public GetVoteResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Long vote) {
+    public GetVoteResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") Long vote //
+    ) {
         super(success, null);
         this.vote = vote;
     }

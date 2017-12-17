@@ -6,7 +6,10 @@
  */
 package org.semux.cli;
 
-public enum CLIOptions {
+/**
+ * Option enum for CLI
+ */
+public enum Option {
 
     HELP("help"),
 
@@ -30,7 +33,7 @@ public enum CLIOptions {
 
     private final String name;
 
-    CLIOptions(String s) {
+    Option(String s) {
         name = s;
     }
 

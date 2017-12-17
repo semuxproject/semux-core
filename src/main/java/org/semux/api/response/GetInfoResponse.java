@@ -7,6 +7,7 @@
 package org.semux.api.response;
 
 import org.semux.Kernel;
+import org.semux.api.ApiHandlerResponse;
 import org.semux.crypto.Hex;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,9 +17,10 @@ public class GetInfoResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final Result info;
 
-    public GetInfoResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Result info) {
+    public GetInfoResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") Result info //
+    ) {
         super(success, null);
         this.info = info;
     }
@@ -42,9 +44,7 @@ public class GetInfoResponse extends ApiHandlerResponse {
         @JsonProperty("pendingTransactions")
         public final Number pendingTransactions;
 
-        public Result(
-                @JsonProperty("clientId") String clientId,
-                @JsonProperty("coinbase") String coinbase,
+        public Result(@JsonProperty("clientId") String clientId, @JsonProperty("coinbase") String coinbase,
                 @JsonProperty("latestBlockNumber") Number latestBlockNumber,
                 @JsonProperty("latestBlockHash") String latestBlockHash,
                 @JsonProperty("activePeers") Number activePeers,
@@ -58,9 +58,7 @@ public class GetInfoResponse extends ApiHandlerResponse {
         }
 
         public Result(Kernel kernel) {
-            this(
-                    kernel.getConfig().getClientId(),
-                    Hex.PREF + kernel.getCoinbase(),
+            this(kernel.getConfig().getClientId(), Hex.PREF + kernel.getCoinbase(),
                     kernel.getBlockchain().getLatestBlockNumber(),
                     Hex.encode0x(kernel.getBlockchain().getLatestBlockHash()),
                     kernel.getChannelManager().getActivePeers().size(),

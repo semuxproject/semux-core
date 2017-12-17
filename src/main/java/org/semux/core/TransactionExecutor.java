@@ -16,15 +16,11 @@ import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Transaction executor
  */
 public class TransactionExecutor {
-
-    private static final Logger logger = LoggerFactory.getLogger(TransactionExecutor.class);
 
     private Config config;
 
@@ -41,13 +37,13 @@ public class TransactionExecutor {
      * Execute a list of transactions.
      * 
      * NOTE: transaction format and signature are assumed to be success.
-     * 
+     *
+     * @param txs
+     *            transactions
      * @param as
      *            account state
      * @param ds
      *            delegate state
-     * @param txs
-     *            transactions
      * @return
      */
     public List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds) {
@@ -70,63 +66,103 @@ public class TransactionExecutor {
 
             // check nonce
             if (nonce != acc.getNonce()) {
+                result.setError("Invalid nonce");
                 continue;
             }
 
             // check transaction fee
             if (fee < config.minTransactionFee()) {
+                result.setError("Transaction fee too low");
                 continue;
             }
 
+            // TODO: use enum to represent error
             switch (tx.getType()) {
             case TRANSFER: {
+                if (data.length > config.maxTransferDataSize()) {
+                    result.setError("Invalid data length");
+                    break;
+                }
+
                 if (fee <= available && value <= available && value + fee <= available) {
 
                     as.adjustAvailable(from, -value - fee);
                     as.adjustAvailable(to, value);
 
                     result.setSuccess(true);
+                } else {
+                    result.setError("Insufficient available balance");
                 }
                 break;
             }
             case DELEGATE: {
-                if (fee <= available && value <= available && value + fee <= available //
-                        && Arrays.equals(from, to) //
-                        && value >= config.minDelegateFee() //
-                        && data.length <= 16 && Bytes.toString(data).matches("[_a-z0-9]{4,16}") //
-                        && ds.register(to, data)) {
+                if (data.length > 16 || !Bytes.toString(data).matches("[_a-z0-9]{4,16}")) {
+                    result.setError("Invalid data");
+                    break;
+                }
+                if (value < config.minDelegateFee()) {
+                    result.setError("Invalid fee");
+                    break;
+                }
 
-                    as.adjustAvailable(from, -value - fee);
+                if (fee <= available && value <= available && value + fee <= available) {
+                    if (Arrays.equals(from, to) && ds.register(to, data)) {
 
-                    result.setSuccess(true);
+                        as.adjustAvailable(from, -value - fee);
+
+                        result.setSuccess(true);
+                    } else {
+                        result.setError("Unable to register as delegate");
+                    }
+                } else {
+                    result.setError("Insufficient available balance");
                 }
                 break;
             }
             case VOTE: {
-                if (fee <= available && value <= available && value + fee <= available //
-                        && ds.vote(from, to, value)) {
+                if (data.length > 0) {
+                    result.setError("Invalid data length");
+                    break;
+                }
 
-                    as.adjustAvailable(from, -value - fee);
-                    as.adjustLocked(from, value);
+                if (fee <= available && value <= available && value + fee <= available) {
+                    if (ds.vote(from, to, value)) {
 
-                    result.setSuccess(true);
+                        as.adjustAvailable(from, -value - fee);
+                        as.adjustLocked(from, value);
+
+                        result.setSuccess(true);
+                    } else {
+                        result.setError("Unable to vote");
+                    }
+                } else {
+                    result.setError("Insufficient available balance");
                 }
                 break;
             }
             case UNVOTE: {
-                if (fee <= available //
-                        && value <= locked //
-                        && ds.unvote(from, to, value)) {
+                if (data.length > 0) {
+                    result.setError("Invalid data length");
+                    break;
+                }
 
-                    as.adjustAvailable(from, value - fee);
-                    as.adjustLocked(from, -value);
+                if (fee <= available && value <= locked) {
+                    if (ds.unvote(from, to, value)) {
 
-                    result.setSuccess(true);
+                        as.adjustAvailable(from, value - fee);
+                        as.adjustLocked(from, -value);
+
+                        result.setSuccess(true);
+                    } else {
+                        result.setError("Unable to unvote");
+                    }
+                } else {
+                    result.setError("Insufficient locked balance");
                 }
                 break;
             }
             default:
-                logger.debug("Unsupported transaction type: {}", tx.getType());
+                result.setError("Unsupported type");
                 break;
             }
 

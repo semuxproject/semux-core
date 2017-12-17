@@ -6,6 +6,8 @@
  */
 package org.semux.api.response;
 
+import org.semux.api.ApiHandlerResponse;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GetRootResponse extends ApiHandlerResponse {
@@ -13,9 +15,10 @@ public class GetRootResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final String result;
 
-    public GetRootResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") String result) {
+    public GetRootResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") String result //
+    ) {
         super(success, null);
         this.result = result;
     }

@@ -121,7 +121,7 @@ public class AccountStateImpl implements AccountState {
 
     @Override
     public void removeStorage(byte[] address, byte[] key) {
-        throw new UnsupportedOperationException("removeStorage() is not yet yetsupported");
+        throw new UnsupportedOperationException("removeStorage() is not yet yet supported");
     }
 
     @Override

@@ -69,7 +69,7 @@ public class SwingUtilTest {
 
     @Test(expected = NumberFormatException.class)
     public void testNumberComparatorExceptionTotallyWrongInput() {
-        SwingUtil.NUMBER_COMPARATOR.compare("1.0000", "worstWordt");
+        SwingUtil.NUMBER_COMPARATOR.compare("1.0000", "worstWord");
     }
 
 }

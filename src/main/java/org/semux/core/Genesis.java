@@ -45,29 +45,31 @@ public class Genesis extends Block {
      * Creates a {@link Genesis} block instance.
      * 
      * @param header
-     * @param premine
+     * @param premines
      * @param delegates
      * @param config
      */
-    public Genesis(BlockHeader header, Map<ByteArray, Premine> premine, Map<String, byte[]> delegates,
+    public Genesis(BlockHeader header, Map<ByteArray, Premine> premines, Map<String, byte[]> delegates,
             Map<String, Object> config) {
         super(header, Collections.emptyList(), Collections.emptyList());
 
-        this.premines = premine;
+        this.premines = premines;
         this.delegates = delegates;
         this.config = config;
     }
 
     @JsonCreator
-    public static Genesis jsonCreator(
-            @JsonProperty("number") long number,
-            @JsonProperty("coinbase") String coinbase,
-            @JsonProperty("parentHash") String parentHash,
-            @JsonProperty("timestamp") long timestamp,
-            @JsonProperty("data") String data,
-            @JsonProperty("premine") List<Premine> premineList,
-            @JsonProperty("delegates") Map<String, String> delegates,
-            @JsonProperty("config") Map<String, Object> config) {
+    public static Genesis jsonCreator( //
+            @JsonProperty("number") long number, //
+            @JsonProperty("coinbase") String coinbase, //
+            @JsonProperty("parentHash") String parentHash, //
+            @JsonProperty("timestamp") long timestamp, //
+            @JsonProperty("data") String data, //
+            @JsonProperty("premine") List<Premine> premineList, //
+            @JsonProperty("delegates") Map<String, String> delegates, //
+            @JsonProperty("config") Map<String, Object> config //
+    ) {
+
         // load premines
         Map<ByteArray, Premine> premineMap = new HashMap<>();
         for (Premine premine : premineList) {
@@ -75,20 +77,13 @@ public class Genesis extends Block {
         }
 
         // load block header
-        BlockHeader header = new BlockHeader(
-                number,
-                Hex.parse(coinbase),
-                Hex.parse(parentHash),
-                timestamp,
-                Bytes.EMPTY_HASH,
-                Bytes.EMPTY_HASH,
-                Bytes.EMPTY_HASH,
-                Bytes.of(data));
+        BlockHeader header = new BlockHeader(number, Hex.decode0x(coinbase), Hex.decode0x(parentHash), timestamp,
+                Bytes.EMPTY_HASH, Bytes.EMPTY_HASH, Bytes.EMPTY_HASH, Bytes.of(data));
 
         // load initial delegates
         Map<String, byte[]> delegatesMap = new HashMap<>();
         for (Map.Entry<String, String> entry : delegates.entrySet()) {
-            delegatesMap.put(entry.getKey(), Hex.parse(entry.getValue()));
+            delegatesMap.put(entry.getKey(), Hex.decode0x(entry.getValue()));
         }
 
         return new Genesis(header, premineMap, delegatesMap, config);
@@ -102,8 +97,7 @@ public class Genesis extends Block {
     public static Genesis load(File dataDir) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(
-                    Paths.get(dataDir.getAbsolutePath(), Constants.CONFIG_DIR, GENESIS_FILE).toFile(),
+            return mapper.readValue(Paths.get(dataDir.getAbsolutePath(), Constants.CONFIG_DIR, GENESIS_FILE).toFile(),
                     Genesis.class);
         } catch (IOException e) {
             logger.error("Failed to load genesis file", e);
@@ -151,11 +145,9 @@ public class Genesis extends Block {
         }
 
         @JsonCreator
-        public Premine(
-                @JsonProperty("address") String address,
-                @JsonProperty("amount") long amount,
+        public Premine(@JsonProperty("address") String address, @JsonProperty("amount") long amount,
                 @JsonProperty("note") String note) {
-            this(Hex.parse(address), amount, note);
+            this(Hex.decode0x(address), amount, note);
         }
 
         public byte[] getAddress() {

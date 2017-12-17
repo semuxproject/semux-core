@@ -8,6 +8,7 @@ package org.semux;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 import org.semux.config.Config;
 import org.semux.config.Constants;
@@ -22,14 +23,15 @@ import org.semux.crypto.EdDSA;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
+import org.semux.util.ApiClient;
 
 public class KernelMock extends Kernel {
 
-    private String password = "password";
+    private static final String password = "password";
 
+    // TODO: disable this constructor, use the KernelRule by cryptokat
     public KernelMock() {
         super(null, null, null);
-
         try {
             this.config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
             this.wallet = new Wallet(File.createTempFile("wallet", ".data"));
@@ -41,6 +43,10 @@ public class KernelMock extends Kernel {
         } catch (WalletLockedException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public KernelMock(Config config, Wallet wallet, EdDSA coinbase) {
+        super(config, wallet, coinbase);
     }
 
     public void setBlockchain(Blockchain chain) {
@@ -75,11 +81,17 @@ public class KernelMock extends Kernel {
         this.config = config;
     }
 
-    public void setWallet(Wallet wallet) {
-        this.wallet = wallet;
-    }
-
     public void setCoinbase(EdDSA coinbase) {
         this.coinbase = coinbase;
+    }
+
+    /**
+     * Returns an API client instance which connects to the mock kernel.
+     *
+     * @return an {@link ApiClient} instance
+     */
+    public ApiClient getApiClient() {
+        return new ApiClient(new InetSocketAddress(this.getConfig().apiListenIp(), this.getConfig().apiListenPort()),
+                this.getConfig().apiUsername(), this.getConfig().apiPassword());
     }
 }

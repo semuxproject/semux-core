@@ -153,8 +153,9 @@ public class SemuxIpFilter {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public static SemuxIpFilter jsonCreator(
-            @JsonProperty(value = "rules", required = true) List<FilterRule> rules) {
+    public static SemuxIpFilter jsonCreator( //
+            @JsonProperty(value = "rules", required = true //
+            ) List<FilterRule> rules) {
         return new SemuxIpFilter(rules);
     }
 
@@ -164,11 +165,7 @@ public class SemuxIpFilter {
      * <blockquote>
      * 
      * <pre>
-     * SemuxIpFilter ipFilter = new Builder()
-     *         .accept("127.0.0.1")
-     *         .accept("192.168.0.0/16")
-     *         .reject("0.0.0.0/0")
-     *         .build();
+     * SemuxIpFilter ipFilter = new Builder().accept("127.0.0.1").accept("192.168.0.0/16").reject("0.0.0.0/0").build();
      * </pre>
      * 
      * </blockquote>
@@ -233,8 +230,8 @@ public class SemuxIpFilter {
                     return Optional.empty();
                 }
 
-                SemuxIpFilter semuxIpFilter = new ObjectMapper()
-                        .readValue(ipFilterJsonPath.toFile(), SemuxIpFilter.class);
+                SemuxIpFilter semuxIpFilter = new ObjectMapper().readValue(ipFilterJsonPath.toFile(),
+                        SemuxIpFilter.class);
                 if (semuxIpFilter == null) {
                     throw new ParseException("failed to parse ipfilter json");
                 }

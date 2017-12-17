@@ -8,6 +8,8 @@ package org.semux.util;
 
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.List;
 
 import org.semux.util.exception.BytesException;
 
@@ -97,18 +99,35 @@ public class Bytes {
     }
 
     /**
-     * Merge three byte arrays into one.
+     * Merge byte arrays into one.
      * 
-     * @param b1
-     * @param b2
-     * @param b3
+     * @param bytes
+     *            byte arrays
      * @return
      */
-    public static byte[] merge(byte[] b1, byte[] b2, byte[] b3) {
-        byte[] res = new byte[b1.length + b2.length + b3.length];
-        System.arraycopy(b1, 0, res, 0, b1.length);
-        System.arraycopy(b2, 0, res, b1.length, b2.length);
-        System.arraycopy(b3, 0, res, b1.length + b2.length, b3.length);
+    public static byte[] merge(byte[]... bytes) {
+        return merge(Arrays.asList(bytes));
+    }
+
+    /**
+     * Merge byte arrays into one.
+     *
+     * @param bytes
+     *            byte arrays
+     * @return
+     */
+    public static byte[] merge(List<byte[]> bytes) {
+        int length = 0;
+        for (byte[] b : bytes) {
+            length += b.length;
+        }
+
+        byte[] res = new byte[length];
+        int i = 0;
+        for (byte[] b : bytes) {
+            System.arraycopy(b, 0, res, i, b.length);
+            i += b.length;
+        }
 
         return res;
     }

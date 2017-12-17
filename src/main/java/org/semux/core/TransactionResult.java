@@ -32,6 +32,11 @@ public class TransactionResult {
     protected List<byte[]> logs;
 
     /**
+     * Error message for API/GUI, not sent over the network.
+     */
+    protected String error;
+
+    /**
      * Create a transaction result.
      * 
      * @param success
@@ -91,6 +96,14 @@ public class TransactionResult {
 
     public void addLog(byte[] log) {
         this.logs.add(log);
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 
     public byte[] toBytes() {

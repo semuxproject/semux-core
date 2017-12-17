@@ -11,7 +11,6 @@ import java.net.InetAddress;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -29,7 +28,6 @@ import org.semux.core.SyncManager;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.db.DBFactory;
-import org.semux.db.DBName;
 import org.semux.db.LevelDB.LevelDBFactory;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
@@ -45,7 +43,8 @@ import org.xml.sax.SAXException;
 public class Kernel {
     protected static final Logger logger = LoggerFactory.getLogger(Kernel.class);
 
-    protected AtomicBoolean isRunning = new AtomicBoolean(false);
+    protected final AtomicBoolean isRunning = new AtomicBoolean(false);
+
     protected ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
     protected Config config = null;
 
@@ -55,10 +54,14 @@ public class Kernel {
     protected Blockchain chain;
     protected PeerClient client;
 
-    protected PendingManager pendingMgr;
     protected ChannelManager channelMgr;
+    protected PendingManager pendingMgr;
     protected NodeManager nodeMgr;
 
+    protected PeerServer p2p;
+    protected SemuxAPI api;
+
+    protected Thread consThread;
     protected SemuxSync sync;
     protected SemuxBFT cons;
 
@@ -81,11 +84,10 @@ public class Kernel {
     /**
      * Start the kernel.
      */
-    public void start() {
-        if (isRunning()) {
+    public synchronized void start() {
+        if (isRunning.get()) {
             return;
         }
-        isRunning.set(true);
 
         // ====================================
         // initialization
@@ -117,19 +119,15 @@ public class Kernel {
         // ====================================
         // start p2p module
         // ====================================
-        PeerServer p2p = new PeerServer(this);
-
-        Thread p2pThread = new Thread(p2p::start, "p2p");
-        p2pThread.start();
+        p2p = new PeerServer(this);
+        new Thread(p2p::start, "p2p").start();
 
         // ====================================
         // start API module
         // ====================================
-        SemuxAPI api = new SemuxAPI(this);
-
+        api = new SemuxAPI(this);
         if (config.apiEnabled()) {
-            Thread apiThread = new Thread(api::start, "api");
-            apiThread.start();
+            new Thread(api::start, "api").start();
         }
 
         // ====================================
@@ -138,61 +136,83 @@ public class Kernel {
         sync = new SemuxSync(this);
         cons = new SemuxBFT(this);
 
-        Thread consThread = new Thread(cons::start, "cons");
+        consThread = new Thread(cons::start, "cons");
         consThread.start();
 
         // ====================================
         // add port forwarding
         // ====================================
-        new Thread(() -> {
-            try {
-                GatewayDiscover discover = new GatewayDiscover();
-                Map<InetAddress, GatewayDevice> devices = discover.discover();
-                for (Map.Entry<InetAddress, GatewayDevice> entry : devices.entrySet()) {
-                    GatewayDevice gw = entry.getValue();
-                    logger.info("Found a gateway device: local address = {}, external address = {}",
-                            gw.getLocalAddress().getHostAddress(), gw.getExternalIPAddress());
-
-                    gw.deletePortMapping(config.p2pListenPort(), "TCP");
-                    gw.addPortMapping(config.p2pListenPort(), config.p2pListenPort(),
-                            gw.getLocalAddress().getHostAddress(), "TCP", "Semux P2P network");
-                }
-            } catch (IOException | SAXException | ParserConfigurationException e) {
-                logger.info("Failed to add port mapping", e);
-            }
-        }, "upnp").start();
+        new Thread(this::setupUpnp, "upnp").start();
 
         // ====================================
         // register shutdown hook
         // ====================================
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            isRunning.set(false);
+        Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "shutdown-hook"));
 
-            pendingMgr.stop();
-            nodeMgr.stop();
+        // set flag
+        isRunning.set(true);
+    }
 
-            try {
-                sync.stop();
-                cons.stop();
+    /**
+     * Sets up uPnP port mapping.
+     */
+    protected void setupUpnp() {
+        try {
+            GatewayDiscover discover = new GatewayDiscover();
+            Map<InetAddress, GatewayDevice> devices = discover.discover();
+            for (Map.Entry<InetAddress, GatewayDevice> entry : devices.entrySet()) {
+                GatewayDevice gw = entry.getValue();
+                logger.info("Found a gateway device: local address = {}, external address = {}",
+                        gw.getLocalAddress().getHostAddress(), gw.getExternalIPAddress());
 
-                // make sure consensus thread is fully stopped
-                consThread.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                logger.error("Failed to stop sync/consensus properly");
+                gw.deletePortMapping(config.p2pListenPort(), "TCP");
+                gw.addPortMapping(config.p2pListenPort(), config.p2pListenPort(), gw.getLocalAddress().getHostAddress(),
+                        "TCP", "Semux P2P network");
             }
+        } catch (IOException | SAXException | ParserConfigurationException e) {
+            logger.info("Failed to add port mapping", e);
+        }
+    }
 
-            // make sure no thread is reading/writing the state
-            WriteLock lock = stateLock.writeLock();
-            lock.lock();
-            for (DBName name : DBName.values()) {
-                dbFactory.getDB(name).close();
-            }
-            lock.unlock();
+    /**
+     * Stops the kernel.
+     */
+    public synchronized void stop() {
+        if (!isRunning.get()) {
+            return;
+        }
 
-            api.stop();
-            p2p.stop();
-        }, "shutdown-hook"));
+        // stop consensus
+        try {
+            sync.stop();
+            cons.stop();
+
+            // make sure consensus thread is fully stopped
+            consThread.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Failed to stop sync/consensus properly");
+        }
+
+        // stop API and p2p
+        api.stop();
+        p2p.stop();
+
+        // stop pending manager and node manager
+        pendingMgr.stop();
+        nodeMgr.stop();
+
+        // set flag
+        isRunning.set(false);
+    }
+
+    /**
+     * Returns whether the kernel is running
+     *
+     * @return
+     */
+    public boolean isRunning() {
+        return isRunning.get();
     }
 
     /**
@@ -259,15 +279,6 @@ public class Kernel {
     }
 
     /**
-     * Returns whether the kernel is running
-     *
-     * @return
-     */
-    public boolean isRunning() {
-        return isRunning.get();
-    }
-
-    /**
      * Returns the config.
      * 
      * @return
@@ -301,5 +312,23 @@ public class Kernel {
      */
     public Consensus getConsensus() {
         return cons;
+    }
+
+    /**
+     * Get instance of Semux API server
+     *
+     * @return API server
+     */
+    public SemuxAPI getApi() {
+        return api;
+    }
+
+    /**
+     * Returns the p2p server instance.
+     *
+     * @return a {@link PeerServer} instance or null
+     */
+    public PeerServer getP2p() {
+        return p2p;
     }
 }

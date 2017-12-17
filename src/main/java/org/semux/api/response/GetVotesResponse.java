@@ -8,6 +8,8 @@ package org.semux.api.response;
 
 import java.util.Map;
 
+import org.semux.api.ApiHandlerResponse;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GetVotesResponse extends ApiHandlerResponse {
@@ -15,9 +17,10 @@ public class GetVotesResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final Map<String, Long> votes;
 
-    public GetVotesResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Map<String, Long> votes) {
+    public GetVotesResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("result") Map<String, Long> votes //
+    ) {
         super(success, null);
         this.votes = votes;
     }

@@ -35,7 +35,7 @@ public class PeerClientTest {
 
         PeerServerMock ps = new PeerServerMock(temporaryDBFactory);
         ps.start(P2P_IP, P2P_PORT);
-        assertTrue(ps.getServer().isListening());
+        assertTrue(ps.getServer().isRunning());
 
         try {
             EdDSA key = new EdDSA();
@@ -62,7 +62,7 @@ public class PeerClientTest {
             assertEquals(0, kernel.getChannelManager().getActivePeers().size());
         } finally {
             ps.stop();
-            assertFalse(ps.getServer().isListening());
+            assertFalse(ps.getServer().isRunning());
         }
     }
 }

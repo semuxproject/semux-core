@@ -37,7 +37,7 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
         JLabel lblPassword = new JLabel(GUIMessages.get("Password") + ":");
         JLabel lblRepeat = new JLabel(GUIMessages.get("RepeatPassword") + ":");
 
-        oldpasswordField = new JPasswordField();
+        oldPasswordField = new JPasswordField();
         passwordField = new JPasswordField();
         repeatField = new JPasswordField();
 
@@ -64,7 +64,7 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
                         .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                             .addComponent(repeatField, GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)
                             .addComponent(passwordField, GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)
-                            .addComponent(oldpasswordField, GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)))
+                            .addComponent(oldPasswordField, GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)))
                     .addGap(23))
         );
         groupLayout.setVerticalGroup(
@@ -73,7 +73,7 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
                     .addGap(32)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblOldPassword)
-                        .addComponent(oldpasswordField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(oldPasswordField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblPassword)
@@ -99,7 +99,7 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
     }
 
     private static final long serialVersionUID = 1L;
-    private JPasswordField oldpasswordField;
+    private JPasswordField oldPasswordField;
     private JPasswordField passwordField;
     private JPasswordField repeatField;
 
@@ -109,7 +109,7 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
 
         switch (action) {
         case OK: {
-            String oldPassword = new String(oldpasswordField.getPassword());
+            String oldPassword = new String(oldPasswordField.getPassword());
             String password = new String(passwordField.getPassword());
             String repeat = new String(repeatField.getPassword());
 

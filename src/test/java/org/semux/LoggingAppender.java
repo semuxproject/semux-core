@@ -20,7 +20,7 @@ import ch.qos.logback.core.AppenderBase;
  * testing purpose only.
  *
  */
-public class TestAppender extends AppenderBase<LoggingEvent> {
+public class LoggingAppender extends AppenderBase<LoggingEvent> {
 
     private static List<LoggingEvent> events = new ArrayList<>();
 
@@ -99,7 +99,7 @@ public class TestAppender extends AppenderBase<LoggingEvent> {
 
     protected static LoggingEvent log(Level lvl, String msg, Object[] args) {
         if (testClass == null || testLogger == null) {
-            throw new RuntimeException("TestAppender is not prepared");
+            throw new RuntimeException("LoggingAppender is not prepared");
         }
 
         Throwable throwable = null;

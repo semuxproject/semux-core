@@ -25,11 +25,10 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
 import org.semux.Launcher;
-import org.semux.cli.CLIOptions;
+import org.semux.cli.Option;
 import org.semux.config.Constants;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
@@ -74,14 +73,14 @@ public class SemuxGUI extends Launcher {
 
     public SemuxGUI() {
         super();
-        Option dataDirOption = Option.builder().longOpt(CLIOptions.DATA_DIR.toString())
-                .desc(CLIMessages.get("SpecifyDataDir")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("path")
-                .type(String.class).build();
+        org.apache.commons.cli.Option dataDirOption = org.apache.commons.cli.Option.builder()
+                .longOpt(Option.DATA_DIR.toString()).desc(CLIMessages.get("SpecifyDataDir")).hasArg(true)
+                .numberOfArgs(1).optionalArg(false).argName("path").type(String.class).build();
         addOption(dataDirOption);
 
-        Option networkOption = Option.builder().longOpt(CLIOptions.NETWORK.toString())
-                .desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1).optionalArg(false)
-                .argName("network").type(String.class).build();
+        org.apache.commons.cli.Option networkOption = org.apache.commons.cli.Option.builder()
+                .longOpt(Option.NETWORK.toString()).desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1)
+                .optionalArg(false).argName("network").type(String.class).build();
         addOption(networkOption);
 
     }
@@ -103,12 +102,12 @@ public class SemuxGUI extends Launcher {
         CommandLineParser parser = new DefaultParser();
         CommandLine commandLine = parser.parse(getOptions(), args);
 
-        if (commandLine.hasOption(CLIOptions.DATA_DIR.toString())) {
-            setDataDir(commandLine.getOptionValue(CLIOptions.DATA_DIR.toString()));
+        if (commandLine.hasOption(Option.DATA_DIR.toString())) {
+            setDataDir(commandLine.getOptionValue(Option.DATA_DIR.toString()));
         }
 
-        if (commandLine.hasOption(CLIOptions.NETWORK.toString())) {
-            setNetwork(commandLine.getOptionValue(CLIOptions.NETWORK.toString()));
+        if (commandLine.hasOption(Option.NETWORK.toString())) {
+            setNetwork(commandLine.getOptionValue(Option.NETWORK.toString()));
         }
 
         start();
@@ -219,7 +218,7 @@ public class SemuxGUI extends Launcher {
 
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode node = mapper.readTree(con.getInputStream());
-                    String v = node.get("latestVersion").asText();
+                    String v = node.get("minVersion").asText();
 
                     if (SystemUtil.compareVersion(Constants.CLIENT_VERSION, v) < 0) {
                         JOptionPane.showMessageDialog(null, GUIMessages.get("WalletNeedToBeUpgraded"));
@@ -229,7 +228,7 @@ public class SemuxGUI extends Launcher {
                     Thread.currentThread().interrupt();
                     break;
                 } catch (IOException e) {
-                    logger.info("Failed to retrive latest version");
+                    logger.info("Failed to retrieve latest version");
                 }
             }
         }, "gui-version").start();

@@ -28,8 +28,8 @@ import javax.swing.table.AbstractTableModel;
 
 import org.semux.gui.Action;
 import org.semux.gui.AddressBook;
-import org.semux.gui.SwingUtil;
 import org.semux.gui.AddressBook.Entry;
+import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GUIMessages;
 import org.semux.util.exception.UnreachableException;

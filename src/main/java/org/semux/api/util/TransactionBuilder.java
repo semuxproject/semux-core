@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.transaction;
+package org.semux.api.util;
 
 import org.semux.Kernel;
 import org.semux.core.Transaction;
@@ -52,97 +52,91 @@ public class TransactionBuilder {
      */
     private byte[] data;
 
-    public TransactionBuilder(Kernel kernel) {
+    public TransactionBuilder(Kernel kernel, TransactionType type) {
         this.kernel = kernel;
-    }
-
-    public TransactionBuilder withType(TransactionType type) {
         this.type = type;
-        return this;
     }
 
-    public TransactionBuilder withFrom(String pFrom) {
-        if (pFrom == null) {
-            throw new IllegalArgumentException("parameter 'from' is required");
+    public TransactionBuilder withFrom(String fromStr) {
+        if (fromStr == null) {
+            throw new IllegalArgumentException("Parameter `from` can't be null");
         }
 
         try {
-            account = kernel.getWallet().getAccount(Hex.parse(pFrom));
+            account = kernel.getWallet().getAccount(Hex.decode0x(fromStr));
         } catch (CryptoException e) {
-            throw new IllegalArgumentException("parameter 'from' is not a valid hexadecimal string");
+            throw new IllegalArgumentException("Parameter `from` is not a valid hexadecimal string");
         }
 
         if (account == null) {
             throw new IllegalArgumentException(
-                    String.format("provided address %s doesn't belong to the wallet", pFrom));
+                    String.format("The provided address %s doesn't belong to the wallet", fromStr));
         }
 
         return this;
     }
 
-    public TransactionBuilder withTo(String pTo) {
+    public TransactionBuilder withTo(String toStr) {
         if (type == TransactionType.DELEGATE) {
-            if (pTo != null) {
-                throw new IllegalArgumentException(
-                        "DELEGATE transaction should never have a customized 'to' parameter");
+            if (toStr != null) {
+                throw new IllegalArgumentException("Parameter `to` is not needed for DELEGATE transaction");
             }
             return this; // ignore the provided parameter
         }
 
-        if (pTo == null) {
-            throw new IllegalArgumentException("parameter 'to' is required");
+        if (toStr == null) {
+            throw new IllegalArgumentException("Parameter `to` can't be null");
         }
 
         try {
-            to = Hex.parse(pTo);
+            this.to = Hex.decode0x(toStr);
         } catch (CryptoException e) {
-            throw new IllegalArgumentException("'to' is not a valid hexadecimal string");
+            throw new IllegalArgumentException("Parameter `to` is not a valid hexadecimal string");
         }
 
         return this;
     }
 
-    public TransactionBuilder withValue(String pValue) {
+    public TransactionBuilder withValue(String valueStr) {
         if (type == TransactionType.DELEGATE) {
-            if (pValue != null) {
-                throw new IllegalArgumentException(
-                        "DELEGATE transaction should never have a customized 'value' parameter");
+            if (valueStr != null) {
+                throw new IllegalArgumentException("Parameter `value` is not needed for DELEGATE transaction");
             }
             return this; // ignore the provided parameter
         }
 
-        if (pValue == null) {
-            throw new IllegalArgumentException("parameter 'value' is required");
+        if (valueStr == null) {
+            throw new IllegalArgumentException("Parameter `value` is required");
         }
 
         try {
-            value = Long.parseLong(pValue);
+            value = Long.parseLong(valueStr);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("parameter 'value' is not a valida number");
+            throw new IllegalArgumentException("Parameter `value` is not a valida number");
         }
 
         return this;
     }
 
-    public TransactionBuilder withFee(String pFee) {
-        if (pFee == null) {
-            throw new IllegalArgumentException("parameter 'fee' is required");
+    public TransactionBuilder withFee(String feeStr) {
+        if (feeStr == null) {
+            throw new IllegalArgumentException("Parameter `fee` is required");
         }
 
         try {
-            fee = Long.parseLong(pFee);
+            fee = Long.parseLong(feeStr);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("parameter 'fee' is not a valid number");
+            throw new IllegalArgumentException("Parameter `fee` is not a valid number");
         }
 
         return this;
     }
 
-    public TransactionBuilder withData(String pData) {
+    public TransactionBuilder withData(String dataStr) {
         try {
-            data = (pData == null) ? Bytes.EMPTY_BYTES : Hex.parse(pData);
+            data = (dataStr == null) ? Bytes.EMPTY_BYTES : Hex.decode0x(dataStr);
         } catch (CryptoException e) {
-            throw new IllegalArgumentException("'data' is not a valid hexadecimal string");
+            throw new IllegalArgumentException("Parameter `data` is not a valid hexadecimal string");
         }
 
         return this;
@@ -158,13 +152,6 @@ public class TransactionBuilder {
             value = kernel.getConfig().minDelegateFee();
         }
 
-        return new Transaction(
-                type,
-                to,
-                value,
-                fee,
-                nonce,
-                timestamp,
-                data).sign(account);
+        return new Transaction(type, to, value, fee, nonce, timestamp, data).sign(account);
     }
 }

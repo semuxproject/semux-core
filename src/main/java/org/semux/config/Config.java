@@ -44,11 +44,18 @@ public interface Config {
     short networkVersion();
 
     /**
-     * Returns the max block size in transactions.
+     * Returns the max block size in bytes.
      * 
      * @return
      */
     int maxBlockSize();
+
+    /**
+     * Returns the max data size for transaction
+     * 
+     * @return
+     */
+    int maxTransferDataSize();
 
     /**
      * Returns the min transaction fee.
