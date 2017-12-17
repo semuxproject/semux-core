@@ -7,11 +7,8 @@
 package org.semux.integration;
 
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -27,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import org.awaitility.Awaitility;
+import org.awaitility.Duration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -55,9 +54,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class })
-public class TransferManyTest {
+public class TransferTest {
 
-    private static Logger logger = LoggerFactory.getLogger(TransferManyTest.class);
+    private static Logger logger = LoggerFactory.getLogger(TransferTest.class);
 
     private static final long PREMINE = 1000000;
 
@@ -65,13 +64,10 @@ public class TransferManyTest {
     KernelTestRule kernelValidatorRule = new KernelTestRule(51610, 51710);
 
     @Rule
-    KernelTestRule kernelPremineRule = new KernelTestRule(51620, 51720);
+    KernelTestRule kernelSenderRule = new KernelTestRule(51620, 51720);
 
     @Rule
-    KernelTestRule kernelReceiver1Rule = new KernelTestRule(51630, 51730);
-
-    @Rule
-    KernelTestRule kernelReceiver2Rule = new KernelTestRule(51640, 51740);
+    KernelTestRule kernelReceiverRule = new KernelTestRule(51630, 51730);
 
     /**
      * The kernel that is solely responsible of forging blocks
@@ -86,18 +82,17 @@ public class TransferManyTest {
     /**
      * The kernels who will receive transaction from kernelPremine
      */
-    public KernelMock kernelReceiver1, kernelReceiver2;
+    public KernelMock kernelReceiver, kernelReceiver2;
 
-    public TransferManyTest() throws IOException {
+    public TransferTest() throws IOException {
     }
 
     @Before
     public void setUp() throws Exception {
         // prepare kernels
         kernelValidator = kernelValidatorRule.getKernelMock();
-        kernelPremine = kernelPremineRule.getKernelMock();
-        kernelReceiver1 = kernelReceiver1Rule.getKernelMock();
-        kernelReceiver2 = kernelReceiver2Rule.getKernelMock();
+        kernelPremine = kernelSenderRule.getKernelMock();
+        kernelReceiver = kernelReceiverRule.getKernelMock();
 
         // mock genesis.json
         Genesis genesis = mockGenesis();
@@ -106,17 +101,19 @@ public class TransferManyTest {
 
         // mock seed nodes
         Set<InetSocketAddress> nodes = new HashSet<>();
-        nodes.add(new InetSocketAddress(
-                InetAddress.getByName(kernelValidator.getConfig().p2pListenIp()),
+        nodes.add(new InetSocketAddress(InetAddress.getByName(kernelValidator.getConfig().p2pListenIp()),
                 kernelValidator.getConfig().p2pListenPort()));
         mockStatic(NodeManager.class);
         when(NodeManager.getSeedNodes(Constants.DEV_NET_ID)).thenReturn(nodes);
 
+        // configure Awaitility
+        Awaitility.setDefaultPollInterval(Duration.ONE_SECOND);
+        Awaitility.setDefaultTimeout(Duration.ONE_MINUTE);
+
         // start kernels
         kernelValidator.start();
         kernelPremine.start();
-        kernelReceiver1.start();
-        kernelReceiver2.start();
+        kernelReceiver.start();
 
         // the kernel will start component threads asynchronously
         // have to wait a bit
@@ -128,8 +125,7 @@ public class TransferManyTest {
         // stop kernels
         kernelValidator.stop();
         kernelPremine.stop();
-        kernelReceiver1.stop();
-        kernelReceiver2.stop();
+        kernelReceiver.stop();
     }
 
     /**
@@ -149,11 +145,11 @@ public class TransferManyTest {
         final long fee = kernelPremine.getConfig().minTransactionFee() * 2;
         HashMap<String, Object> params = new HashMap<>();
         params.put("from", addressStringOf(kernelPremine));
-        params.put("to", addressStringOf(kernelReceiver1) + "," + addressStringOf(kernelReceiver2));
+        params.put("to", addressStringOf(kernelReceiver));
         params.put("value", String.valueOf(value));
         params.put("fee", String.valueOf(fee));
-        logger.info("Making transfer_many request", params);
-        String response = kernelPremine.getApiClient().request("transfer_many", params);
+        logger.info("Making transfer request", params);
+        String response = kernelPremine.getApiClient().request("transfer", params);
         Map<String, String> result = new ObjectMapper().readValue(response, new TypeReference<Map<String, String>>() {
         });
         assertEquals("true", result.get("success"));
@@ -163,30 +159,27 @@ public class TransferManyTest {
         // (2x transaction value + 2x min transaction fee) should be deducted from
         // kernelPremine's account
         logger.info("Waiting for the transaction to be processed...");
-        await().until(availableOf(kernelPremine), equalTo(PREMINE * Unit.SEM - value * 2 - fee));
-        await().until(availableOf(kernelReceiver1), equalTo(value));
+        await().until(availableOf(kernelPremine), equalTo(PREMINE * Unit.SEM - value - fee));
+        await().until(availableOf(kernelReceiver), equalTo(value));
         await().until(availableOf(kernelReceiver2), equalTo(value));
 
         // assert that the transaction has been recorded across nodes
-        assertTransferManyTransaction(kernelPremine);
-        assertTransferManyTransaction(kernelReceiver1);
-        assertTransferManyTransaction(kernelReceiver2);
+        assertTransferTransaction(kernelPremine);
+        assertTransferTransaction(kernelReceiver);
+        assertTransferTransaction(kernelReceiver2);
     }
 
-    private void assertTransferManyTransaction(KernelMock kernelMock) throws IOException {
-        GetTransactionResponse.Result transactionResultPremine = getTransactionResultOf(kernelMock, 0);
-        assertEquals(addressStringOf(kernelPremine), transactionResultPremine.from);
-        assertNull(transactionResultPremine.to);
-        assertThat(transactionResultPremine.toMany,
-                contains(addressStringOf(kernelReceiver1), addressStringOf(kernelReceiver2)));
+    private void assertTransferTransaction(KernelMock kernelMock) throws IOException {
+        GetTransactionResponse.Result result = getTransactionResultOf(kernelMock, 0);
+        assertEquals(addressStringOf(kernelPremine), result.from);
+        assertEquals(result.to, addressStringOf(kernelReceiver));
     }
 
     private Callable<Long> availableOf(KernelMock kernelMock) {
         return () -> {
             ApiClient apiClient = kernelMock.getApiClient();
             GetAccountResponse response = new ObjectMapper().readValue(
-                    apiClient.request("get_account", "address", addressStringOf(kernelMock)),
-                    GetAccountResponse.class);
+                    apiClient.request("get_account", "address", addressStringOf(kernelMock)), GetAccountResponse.class);
             logger.info("Available of {} = {}", addressStringOf(kernelMock), response.account.available);
             return response.account.available;
         };
@@ -194,13 +187,9 @@ public class TransferManyTest {
 
     private GetTransactionResponse.Result getTransactionResultOf(KernelMock kernelMock, int n) throws IOException {
         ApiClient apiClient = kernelMock.getApiClient();
-        GetAccountTransactionsResponse response = new ObjectMapper().readValue(
-                apiClient.request(
-                        "get_account_transactions",
-                        "address", addressStringOf(kernelMock),
-                        "from", String.valueOf(n),
-                        "to", String.valueOf(n + 1)),
-                GetAccountTransactionsResponse.class);
+        GetAccountTransactionsResponse response = new ObjectMapper()
+                .readValue(apiClient.request("get_account_transactions", "address", addressStringOf(kernelMock), "from",
+                        String.valueOf(n), "to", String.valueOf(n + 1)), GetAccountTransactionsResponse.class);
         return response.transactions.get(0);
     }
 
@@ -221,14 +210,8 @@ public class TransferManyTest {
         HashMap<String, String> delegates = new HashMap<>();
         delegates.put("delegate", delegateAddress);
 
-        return Genesis.jsonCreator(
-                0,
-                "0x0000000000000000000000000000000000000000",
-                "0x0000000000000000000000000000000000000000000000000000000000000000",
-                1504742400000L,
-                "semux",
-                premines,
-                delegates,
-                new HashMap<>());
+        return Genesis.jsonCreator(0, "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000000000000000000000000000", 1504742400000L, "semux", premines,
+                delegates, new HashMap<>());
     }
 }

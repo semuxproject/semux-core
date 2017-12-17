@@ -11,7 +11,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -49,8 +48,7 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private static final EnumSet<TransactionType> FEDERATED_TRANSACTION_TYPES = EnumSet.of(
             TransactionType.COINBASE,
-            TransactionType.TRANSFER,
-            TransactionType.TRANSFER_MANY);
+            TransactionType.TRANSFER);
 
     private transient SemuxGUI gui;
     private transient WalletModel model;
@@ -177,9 +175,7 @@ public class HomePanel extends JPanel implements ActionListener {
             lblType.setIcon(SwingUtil.loadImage(name, 42, 42));
             String mathSign = inBound ? "+" : "-";
             String prefix = (inBound && outBound) ? "" : (mathSign);
-            JLabel lblAmount = new JLabel(prefix + SwingUtil.formatValue(
-                    tx.getType() == TransactionType.TRANSFER_MANY ? tx.getValue() * tx.numberOfRecipients()
-                            : tx.getValue()));
+            JLabel lblAmount = new JLabel(prefix + SwingUtil.formatValue(tx.getValue()));
             lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
             JLabel lblTime = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
@@ -267,8 +263,7 @@ public class HomePanel extends JPanel implements ActionListener {
         }
         transactions.removeAll();
         for (Transaction tx : list) {
-            boolean inBound = Arrays.stream(tx.getRecipients())
-                    .anyMatch(recipient -> accounts.contains(ByteArray.of(recipient)));
+            boolean inBound = accounts.contains(ByteArray.of(tx.getTo()));
             boolean outBound = accounts.contains(ByteArray.of(tx.getFrom()));
             transactions.add(new TransactionPanel(tx, inBound, outBound, SwingUtil.getTransactionDescription(gui, tx)));
         }

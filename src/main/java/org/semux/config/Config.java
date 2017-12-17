@@ -52,6 +52,7 @@ public interface Config {
 
     /**
      * Returns the max data size for transaction
+     * 
      * @return
      */
     int maxTransferDataSize();

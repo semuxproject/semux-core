@@ -19,13 +19,11 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -450,11 +448,10 @@ public class SwingUtil {
         switch (tx.getType()) {
         case COINBASE:
             return GUIMessages.get("BlockReward") + " => "
-                    + getDelegateName(gui, tx.getRecipient(0)).orElse(GUIMessages.get("UnknownDelegate"));
+                    + getDelegateName(gui, tx.getTo()).orElse(GUIMessages.get("UnknownDelegate"));
         case VOTE:
         case UNVOTE:
         case TRANSFER:
-        case TRANSFER_MANY:
             return getTransactionRecipientsDescription(gui, tx);
         case DELEGATE:
             return GUIMessages.get("DelegateRegistration");
@@ -471,10 +468,7 @@ public class SwingUtil {
      */
     private static String getTransactionRecipientsDescription(SemuxGUI gui, Transaction tx) {
         return getAddressAlias(gui, tx.getFrom()) +
-                " => " +
-                Arrays.stream(tx.getRecipients())
-                        .map(recipient -> getAddressAlias(gui, recipient))
-                        .collect(Collectors.joining(", "));
+                " => " + getAddressAlias(gui, tx.getTo());
     }
 
     /**

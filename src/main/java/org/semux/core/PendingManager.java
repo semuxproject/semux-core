@@ -153,8 +153,8 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Adds a transaction to the queue, which will be validated later by the background
-     * worker.
+     * Adds a transaction to the queue, which will be validated later by the
+     * background worker.
      * 
      * @param tx
      */
@@ -168,7 +168,8 @@ public class PendingManager implements Runnable, BlockchainListener {
      * Adds a transaction to the pool.
      * 
      * @param tx
-     * @return true if the transaction is successfully added to the pool, otherwise false
+     * @return true if the transaction is successfully added to the pool, otherwise
+     *         false
      */
     public synchronized boolean addTransactionSync(Transaction tx) {
         return tx.validate() && processTransaction(tx, true) >= 1;

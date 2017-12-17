@@ -7,7 +7,6 @@
 package org.semux.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,17 +14,11 @@ import org.semux.config.Config;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.Hex;
-import org.semux.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Transaction executor
  */
 public class TransactionExecutor {
-
-    private static final Logger logger = LoggerFactory.getLogger(TransactionExecutor.class);
 
     private Config config;
 
@@ -76,8 +69,7 @@ public class TransactionExecutor {
             }
 
             // check transaction data
-            if ((tx.getType() != TransactionType.TRANSFER && data.length != 0)
-                    || (tx.getType() == TransactionType.TRANSFER && data.length > config.maxTransferDataSize())) {
+            if (data.length > config.maxTransferDataSize()) {
                 result.setError("Invalid data length");
                 continue;
             }

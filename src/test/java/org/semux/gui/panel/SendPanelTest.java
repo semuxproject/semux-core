@@ -47,8 +47,7 @@ public class SendPanelTest {
         WalletModel walletModel = mock(WalletModel.class);
         when(walletModel.getAccounts()).thenReturn(accountList);
 
-        SendPanelTestApplication application = GuiActionRunner
-                .execute(() -> new SendPanelTestApplication(walletModel));
+        SendPanelTestApplication application = GuiActionRunner.execute(() -> new SendPanelTestApplication(walletModel));
 
         // mock pending manager
         PendingManager pendingManager = mock(PendingManager.class);
@@ -60,11 +59,8 @@ public class SendPanelTest {
         window.show();
 
         // fill form
-        EdDSA recipient1 = new EdDSA(), recipient2 = new EdDSA();
-        window.textBox("toText").setText(
-                Hex.encode0x(recipient1.toAddress()) +
-                        "," +
-                        Hex.encode0x(recipient2.toAddress()));
+        EdDSA recipient = new EdDSA();
+        window.textBox("toText").setText(Hex.encode0x(recipient.toAddress()));
         window.textBox("amountText").setText("100");
         window.button("sendButton").click();
 
@@ -77,10 +73,8 @@ public class SendPanelTest {
         window.dialog().button(withText("Yes")).click();
         verify(pendingManager).addTransactionSync(transactionArgumentCaptor.capture());
         Transaction tx = transactionArgumentCaptor.getValue();
-        assertEquals(TransactionType.TRANSFER_MANY, tx.getType());
-        assertEquals(2, tx.numberOfRecipients());
-        assertArrayEquals(recipient1.toAddress(), tx.getRecipient(0));
-        assertArrayEquals(recipient2.toAddress(), tx.getRecipient(1));
+        assertEquals(TransactionType.TRANSFER, tx.getType());
+        assertArrayEquals(recipient.toAddress(), tx.getTo());
         assertEquals(100 * Unit.SEM, tx.getValue());
         assertEquals(application.kernelMock.getConfig().minTransactionFee() * 2, tx.getFee());
 

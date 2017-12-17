@@ -37,7 +37,7 @@ public class BlockchainPerformance {
     private static final EdDSA key = new EdDSA();
     private static final long value = 20;
     private static final long fee = 1;
-    private static final long nonce = 12345;
+    private static final long nonce = 0;
     private static final byte[] data = Bytes.of("test");
     private static final long timestamp = System.currentTimeMillis() - 60 * 1000;
 
@@ -54,30 +54,22 @@ public class BlockchainPerformance {
         ArrayList<Transaction> transactions = new ArrayList<>();
         ArrayList<TransactionResult> transactionResults = new ArrayList<>();
         // there can be 50 transactions in this case
-        for (int i = 1; i <= config.maxBlockSize() / (Transaction.MAX_RECIPIENTS / 2); i++) {
-            Transaction tx = new Transaction(
-                    TransactionType.TRANSFER_MANY,
-                    Bytes.random(EdDSA.ADDRESS_LEN * Transaction.MAX_RECIPIENTS),
-                    value,
-                    fee,
-                    nonce,
-                    timestamp,
-                    data).sign(key);
-            transactions.add(tx);
-            transactionResults.add(new TransactionResult(true));
+        for (int i = 0, size = 0;; i++) {
+            Transaction tx = new Transaction(TransactionType.TRANSFER, Bytes.random(EdDSA.ADDRESS_LEN), value, fee,
+                    nonce + i, timestamp, data).sign(key);
+
+            if (size + tx.size() > config.maxBlockSize()) {
+                break;
+            } else {
+                transactions.add(tx);
+                transactionResults.add(new TransactionResult(true));
+            }
         }
+
         Block block = new Block(
-                new BlockHeader(
-                        1,
-                        coinbase,
-                        prevHash,
-                        timestamp,
-                        MerkleUtil.computeTransactionsRoot(transactions),
-                        MerkleUtil.computeResultsRoot(transactionResults),
-                        Bytes.EMPTY_HASH,
-                        Bytes.EMPTY_BYTES),
-                transactions,
-                transactionResults);
+                new BlockHeader(1, coinbase, prevHash, timestamp, MerkleUtil.computeTransactionsRoot(transactions),
+                        MerkleUtil.computeResultsRoot(transactionResults), Bytes.EMPTY_HASH, Bytes.EMPTY_BYTES),
+                transactions, transactionResults);
         blockchain.addBlock(block);
 
         Duration duration = Duration.between(begin, Instant.now());

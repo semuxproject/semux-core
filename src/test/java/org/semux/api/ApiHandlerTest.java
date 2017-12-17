@@ -10,7 +10,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -19,12 +18,10 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Before;
@@ -281,22 +278,6 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         assertTrue(response.success);
         assertEquals(Hex.encode0x(tx.getHash()), response.transaction.hash);
         assertNotNull(response.transaction.to);
-        assertNull(response.transaction.toMany);
-    }
-
-    @Test
-    public void testGetTransactionToMany() throws IOException {
-        Transaction tx = createTransactionToMany();
-        TransactionResult res = new TransactionResult(true);
-        Block block = createBlock(chain, Collections.singletonList(tx), Collections.singletonList(res));
-        chain.addBlock(block);
-
-        String uri = "/get_transaction?hash=" + Hex.encode(tx.getHash());
-        GetTransactionResponse response = request(uri, GetTransactionResponse.class);
-        assertTrue(response.success);
-        assertEquals(Hex.encode0x(tx.getHash()), response.transaction.hash);
-        assertNotNull(response.transaction.toMany);
-        assertNull(response.transaction.to);
     }
 
     @Test
@@ -407,39 +388,14 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
                 + Hex.encode(Bytes.of("test_transfer"));
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
-        assertNotNull(response.txId);
+        assertNotNull(response.txHash);
 
         Thread.sleep(200);
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txId));
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txHash));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.TRANSFER);
-    }
-
-    @Test
-    public void testTransferMany() throws IOException, InterruptedException {
-        ArrayList<EdDSA> keys = new ArrayList<>();
-        for (int i = 0; i < Transaction.MAX_RECIPIENTS; i++) {
-            keys.add(new EdDSA());
-        }
-        String keyParams = keys.stream().map(EdDSA::toAddressString).collect(Collectors.joining(","));
-
-        String uri = "/transfer_many";
-        String body = "from=" + wallet.getAccount(0).toAddressString() +
-                "&to=" + keyParams +
-                "&value=1000000000&fee=" + config.minTransactionFee() * Transaction.MAX_RECIPIENTS +
-                "&data=" + Hex.encode((new String("test_data")).getBytes());
-        DoTransactionResponse response = postRequest(uri, body, DoTransactionResponse.class);
-        assertTrue(response.success);
-        assertNotNull(response.txId);
-
-        Thread.sleep(200);
-
-        List<Transaction> list = pendingMgr.getTransactions();
-        assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txId));
-        assertEquals(list.get(list.size() - 1).getType(), TransactionType.TRANSFER_MANY);
     }
 
     @Test
@@ -448,13 +404,13 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
                 + "&data=" + Hex.encode(Bytes.of("test_delegate"));
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
-        assertNotNull(response.txId);
+        assertNotNull(response.txHash);
 
         Thread.sleep(200);
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txId));
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txHash));
         assertEquals(list.get(list.size() - 1).getType(), TransactionType.DELEGATE);
     }
 
@@ -467,13 +423,13 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
                 + "&value=1000000000&fee=50000000";
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
-        assertNotNull(response.txId);
+        assertNotNull(response.txHash);
 
         Thread.sleep(200);
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(0).getHash(), Hex.decode0x(response.txId));
+        assertArrayEquals(list.get(0).getHash(), Hex.decode0x(response.txHash));
         assertEquals(TransactionType.VOTE, list.get(0).getType());
     }
 
@@ -491,13 +447,13 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
                 + "&value=" + amount + "&fee=50000000";
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
-        assertNotNull(response.txId);
+        assertNotNull(response.txHash);
 
         Thread.sleep(200);
 
         List<Transaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txId));
+        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txHash));
         assertEquals(TransactionType.UNVOTE, list.get(list.size() - 1).getType());
     }
 }

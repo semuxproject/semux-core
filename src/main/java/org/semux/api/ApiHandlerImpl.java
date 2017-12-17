@@ -47,8 +47,6 @@ import org.semux.crypto.CryptoException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.util.exception.UnreachableException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.netty.handler.codec.http.HttpHeaders;
 
@@ -58,8 +56,6 @@ import io.netty.handler.codec.http.HttpHeaders;
  * TODO: Auto-generate API docs
  */
 public class ApiHandlerImpl implements ApiHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(ApiHandlerImpl.class);
 
     private final Kernel kernel;
 

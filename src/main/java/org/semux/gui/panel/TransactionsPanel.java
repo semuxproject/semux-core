@@ -31,7 +31,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.semux.core.Transaction;
-import org.semux.core.TransactionType;
 import org.semux.gui.Action;
 import org.semux.gui.SemuxGUI;
 import org.semux.gui.SwingUtil;
@@ -150,9 +149,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             case 1:
                 return SwingUtil.getTransactionDescription(gui, tx);
             case 2:
-                return SwingUtil.formatValue(
-                        tx.getType() == TransactionType.TRANSFER_MANY ? tx.getValue() * tx.numberOfRecipients()
-                                : tx.getValue());
+                return SwingUtil.formatValue(tx.getValue());
             case 3:
                 return SwingUtil.formatTimestamp(tx.getTimestamp());
             default:

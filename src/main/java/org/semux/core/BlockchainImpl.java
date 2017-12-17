@@ -7,10 +7,8 @@
 package org.semux.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
@@ -44,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * 
  * [3, block_hash] => [block_number]
  * [4, transaction_hash] => [block_number, from, to]
- * [5, address, n] => [util] OR [transaction_hash]
+ * [5, address, n] => [transaction] OR [transaction_hash]
  * </pre>
  *
  * <pre>
@@ -277,9 +275,7 @@ public class BlockchainImpl implements Blockchain {
 
             // [3] update transaction_by_account index
             addTransactionToAccount(tx, tx.getFrom());
-            Stream.of(tx.getRecipients())
-                    .filter(recipient -> !Arrays.equals(tx.getFrom(), recipient))
-                    .forEach(recipient -> addTransactionToAccount(tx, recipient));
+            addTransactionToAccount(tx, tx.getTo());
         }
 
         if (number != genesis.getNumber()) {

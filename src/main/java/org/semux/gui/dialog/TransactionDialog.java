@@ -6,9 +6,6 @@
  */
 package org.semux.gui.dialog;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JDialog;
@@ -41,9 +38,7 @@ public class TransactionDialog extends JDialog {
         JTextArea hash = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(tx.getHash()));
         JLabel type = new JLabel(tx.getType().name());
         JTextArea from = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(tx.getFrom()));
-        JTextArea to = SwingUtil.textAreaWithCopyPastePopup(Arrays.stream(tx.getRecipients())
-                .map(Hex::encode0x)
-                .collect(Collectors.joining(", ")));
+        JTextArea to = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(tx.getTo()));
         JLabel value = new JLabel(SwingUtil.formatValue((tx.getValue())));
         JLabel fee = new JLabel(SwingUtil.formatValue((tx.getFee())));
         JLabel nonce = new JLabel(SwingUtil.formatNumber(tx.getNonce()));

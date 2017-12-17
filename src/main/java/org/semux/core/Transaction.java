@@ -15,13 +15,9 @@ import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xbill.DNS.Address;
 
 public class Transaction implements Callable<Boolean> {
-
-    private static final Logger logger = LoggerFactory.getLogger(Transaction.class);
 
     private final TransactionType type;
 

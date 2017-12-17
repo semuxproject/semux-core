@@ -8,8 +8,6 @@ package org.semux.api.util;
 
 import static org.mockito.Mockito.mock;
 
-import java.util.ArrayList;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -31,11 +29,5 @@ public class TransactionBuilderTest {
     public void testDelegateWithValue() {
         expectedException.expect(IllegalArgumentException.class);
         new TransactionBuilder(mock(Kernel.class), TransactionType.DELEGATE).withValue("10");
-    }
-
-    @Test
-    public void testTransferWithToMany() {
-        expectedException.expect(IllegalArgumentException.class);
-        new TransactionBuilder(mock(Kernel.class), TransactionType.TRANSFER).withToMany(new ArrayList<>());
     }
 }

@@ -13,13 +13,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DoTransactionResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final String txId;
+    public final String txHash;
 
-    public DoTransactionResponse(
-            @JsonProperty("success") Boolean success,
-            @JsonProperty("message") String message,
-            @JsonProperty("result") String txId) {
+    public DoTransactionResponse( //
+            @JsonProperty("success") Boolean success, //
+            @JsonProperty("message") String message, //
+            @JsonProperty("result") String txHash //
+    ) {
         super(success, message);
-        this.txId = txId;
+        this.txHash = txHash;
     }
 }

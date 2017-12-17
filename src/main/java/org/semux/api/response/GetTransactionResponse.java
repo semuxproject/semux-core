@@ -7,17 +7,12 @@
 package org.semux.api.response;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.semux.api.ApiHandlerResponse;
 import org.semux.core.Transaction;
-import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GetTransactionResponse extends ApiHandlerResponse {
