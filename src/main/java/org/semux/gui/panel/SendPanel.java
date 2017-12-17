@@ -212,8 +212,8 @@ public class SendPanel extends JPanel implements ActionListener {
         return toText.getText().trim();
     }
 
-    public void setToText(byte[] addr) {
-        toText.setText(Hex.encode(addr));
+    public void setToText(byte[] address) {
+        toText.setText(Hex.encode(address));
     }
 
     public long getAmountText() throws ParseException {

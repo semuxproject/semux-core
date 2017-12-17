@@ -60,10 +60,10 @@ public class PeerClient {
      * @param coinbase
      */
     public PeerClient(Config config, EdDSA coinbase) {
-        Optional<String> delcaredIp = config.p2pDeclaredIp();
-        if (delcaredIp.isPresent()) {
-            this.ip = delcaredIp.get();
-            logger.info("Use delcared IP address: {}", ip);
+        Optional<String> declaredIp = config.p2pDeclaredIp();
+        if (declaredIp.isPresent()) {
+            this.ip = declaredIp.get();
+            logger.info("Use declared IP address: {}", ip);
         } else {
             this.ip = SystemUtil.getIp();
             logger.info("Use detected IP address: {}", ip);

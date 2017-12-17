@@ -45,15 +45,15 @@ public class Genesis extends Block {
      * Creates a {@link Genesis} block instance.
      * 
      * @param header
-     * @param premine
+     * @param premines
      * @param delegates
      * @param config
      */
-    public Genesis(BlockHeader header, Map<ByteArray, Premine> premine, Map<String, byte[]> delegates,
+    public Genesis(BlockHeader header, Map<ByteArray, Premine> premines, Map<String, byte[]> delegates,
             Map<String, Object> config) {
         super(header, Collections.emptyList(), Collections.emptyList());
 
-        this.premines = premine;
+        this.premines = premines;
         this.delegates = delegates;
         this.config = config;
     }

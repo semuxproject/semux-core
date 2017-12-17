@@ -156,7 +156,7 @@ public class EdDSA {
     }
 
     /**
-     * Verifys a signature.
+     * Verifies a signature.
      * 
      * @param msgHash
      *            message hash

@@ -331,8 +331,8 @@ public class SemuxBFT implements Consensus {
 
         // vote YES as long as +2/3 validators received a success block proposal
         Optional<byte[]> blockHash = validateVotes.anyApproved();
-        Vote vote = (blockHash.isPresent()) ? Vote.newApprove(VoteType.PRECOMMIT, height, view, blockHash.get())
-                : Vote.newReject(VoteType.PRECOMMIT, height, view);
+        Vote vote = blockHash.map(bytes -> Vote.newApprove(VoteType.PRECOMMIT, height, view, bytes))
+                .orElseGet(() -> Vote.newReject(VoteType.PRECOMMIT, height, view));
         vote.sign(coinbase);
 
         // always broadcast vote directly.

@@ -295,8 +295,8 @@ public class SemuxSync implements SyncManager {
                     toComplete.remove(pair.getKey().getNumber());
                 }
             } else {
-                InetSocketAddress addr = pair.getValue().getRemoteAddress();
-                logger.info("Invalid block from {}:{}", addr.getAddress().getHostAddress(), addr.getPort());
+                InetSocketAddress a = pair.getValue().getRemoteAddress();
+                logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
 
                 synchronized (lock) {
                     toDownload.add(pair.getKey().getNumber());

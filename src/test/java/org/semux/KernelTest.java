@@ -30,7 +30,7 @@ public class KernelTest {
 
         // start kernel
         kernel.start();
-        await().until(() -> kernel.isRunning());
+        await().until(kernel::isRunning);
 
         assertTrue(kernel.getNodeManager().isRunning());
         assertTrue(kernel.getPendingManager().isRunning());

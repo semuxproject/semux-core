@@ -74,15 +74,15 @@ public class MenuBar extends JMenuBar implements ActionListener {
 
         menuWallet.addSeparator();
 
-        JMenuItem itemImportPrivKey = new JMenuItem(GUIMessages.get("ImportPrivateKey"));
-        itemImportPrivKey.setActionCommand(Action.IMPORT_PRIVATE_KEY.name());
-        itemImportPrivKey.addActionListener(this);
-        menuWallet.add(itemImportPrivKey);
+        JMenuItem itemImportPrivateKey = new JMenuItem(GUIMessages.get("ImportPrivateKey"));
+        itemImportPrivateKey.setActionCommand(Action.IMPORT_PRIVATE_KEY.name());
+        itemImportPrivateKey.addActionListener(this);
+        menuWallet.add(itemImportPrivateKey);
 
-        JMenuItem itemExportPrivKey = new JMenuItem(GUIMessages.get("ExportPrivateKey"));
-        itemExportPrivKey.setActionCommand(Action.EXPORT_PRIVATE_KEY.name());
-        itemExportPrivKey.addActionListener(this);
-        menuWallet.add(itemExportPrivKey);
+        JMenuItem itemExportPrivateKey = new JMenuItem(GUIMessages.get("ExportPrivateKey"));
+        itemExportPrivateKey.setActionCommand(Action.EXPORT_PRIVATE_KEY.name());
+        itemExportPrivateKey.addActionListener(this);
+        menuWallet.add(itemExportPrivateKey);
 
         JMenu menuHelp = new JMenu(GUIMessages.get("Help"));
         this.add(menuHelp);

@@ -173,8 +173,8 @@ public class NodeManager {
                 return nodes;
             }
 
-            for (InetAddress addr : InetAddress.getAllByName(name)) {
-                nodes.add(new InetSocketAddress(addr, Constants.DEFAULT_P2P_PORT));
+            for (InetAddress a : InetAddress.getAllByName(name)) {
+                nodes.add(new InetSocketAddress(a, Constants.DEFAULT_P2P_PORT));
             }
         } catch (UnknownHostException e) {
             logger.info("Failed to get bootstrapping nodes by dns");

@@ -372,7 +372,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             try {
                 value = SwingUtil.parseValue(v);
             } catch (ParseException ex) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("EnterValidNumberOfvotes"));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("EnterValidNumberOfVotes"));
                 break;
             }
             long fee = config.minTransactionFee();
@@ -382,7 +382,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             } else if (d == null) {
                 JOptionPane.showMessageDialog(this, GUIMessages.get("SelectDelegate"));
             } else if (value <= 0) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("EnterValidNumberOfvotes"));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("EnterValidNumberOfVotes"));
             } else {
                 if (action == Action.VOTE) {
                     if (value + fee > a.getAvailable()) {
@@ -507,8 +507,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         }
 
         for (int i = 0; i < list.size(); i++) {
-            String addr = list.get(i).getKey().toAddressString();
-            if (addr.equals(address)) {
+            String a = list.get(i).getKey().toAddressString();
+            if (a.equals(address)) {
                 from.setSelectedIndex(i);
                 break;
             }

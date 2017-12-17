@@ -30,7 +30,7 @@ public class KernelTestRule extends TemporaryFolder {
 
     private int p2pPort, apiPort;
 
-    public KernelTestRule(int p2pPort, int apiPort) throws IOException {
+    public KernelTestRule(int p2pPort, int apiPort) {
         super();
         this.p2pPort = p2pPort;
         this.apiPort = apiPort;
@@ -41,20 +41,10 @@ public class KernelTestRule extends TemporaryFolder {
     }
 
     @Override
-    public Statement apply(Statement base, Description description) {
-        return super.apply(base, description);
-    }
-
-    @Override
     protected void before() throws Throwable {
         super.before();
 
         kernelMock = mockKernel(p2pPort, apiPort);
-    }
-
-    @Override
-    protected void after() {
-        super.after();
     }
 
     private KernelMock mockKernel(int p2pPort, int apiPort) throws IOException {
@@ -81,9 +71,8 @@ public class KernelTestRule extends TemporaryFolder {
         when(config.bftFinalizeTimeout()).thenReturn(1000L);
 
         Wallet wallet = mockWallet();
-        KernelMock kernelMock = new KernelMock(config, wallet, wallet.getAccount(0));
 
-        return kernelMock;
+        return new KernelMock(config, wallet, wallet.getAccount(0));
     }
 
     private Wallet mockWallet() throws IOException {

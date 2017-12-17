@@ -72,7 +72,7 @@ public class SwingUtil {
      * @param width
      * @param height
      */
-    public static void centerizeFrame(JFrame frame, int width, int height) {
+    public static void alignFrameToMiddle(JFrame frame, int width, int height) {
         Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
         int x = ((int) d.getWidth() - width) / 2;
         int y = ((int) d.getHeight() - height) / 2;
