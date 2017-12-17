@@ -217,7 +217,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         assertEquals(Hex.encode0x(genesisBlock.getHash()), blockJson.hash);
         assertEquals(genesisBlock.getNumber(), blockJson.number.longValue());
         assertEquals(Hex.encode0x(genesisBlock.getCoinbase()), blockJson.coinbase);
-        assertEquals(Hex.encode0x(genesisBlock.getPrevHash()), blockJson.prevHash);
+        assertEquals(Hex.encode0x(genesisBlock.getParentHash()), blockJson.parentHash);
         assertEquals(genesisBlock.getTimestamp(), blockJson.timestamp.longValue());
         assertEquals(Hex.encode0x(genesisBlock.getTransactionsRoot()), blockJson.transactionsRoot);
         assertEquals(Hex.encode0x(genesisBlock.getData()), blockJson.data);

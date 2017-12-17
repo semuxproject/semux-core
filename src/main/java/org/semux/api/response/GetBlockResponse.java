@@ -43,8 +43,8 @@ public class GetBlockResponse extends ApiHandlerResponse {
         @JsonProperty("coinbase")
         public final String coinbase;
 
-        @JsonProperty("prevHash")
-        public final String prevHash;
+        @JsonProperty("parentHash")
+        public final String parentHash;
 
         @JsonProperty("timestamp")
         public final Long timestamp;
@@ -69,7 +69,7 @@ public class GetBlockResponse extends ApiHandlerResponse {
 
         public Result(@JsonProperty("hash") String hash, @JsonProperty("number") Long number,
                 @JsonProperty("view") Integer view, @JsonProperty("coinbase") String coinbase,
-                @JsonProperty("prevHash") String prevHash, @JsonProperty("timestamp") Long timestamp,
+                @JsonProperty("parentHash") String prevHash, @JsonProperty("timestamp") Long timestamp,
                 @JsonProperty("date") String date, @JsonProperty("transactionsRoot") String transactionsRoot,
                 @JsonProperty("resultsRoot") String resultsRoot, @JsonProperty("stateRoot") String stateRoot,
                 @JsonProperty("data") String data,
@@ -78,7 +78,7 @@ public class GetBlockResponse extends ApiHandlerResponse {
             this.number = number;
             this.view = view;
             this.coinbase = coinbase;
-            this.prevHash = prevHash;
+            this.parentHash = prevHash;
             this.timestamp = timestamp;
             this.date = date;
             this.transactionsRoot = transactionsRoot;
@@ -90,7 +90,7 @@ public class GetBlockResponse extends ApiHandlerResponse {
 
         public Result(Block block) {
             this(Hex.encode0x(block.getHash()), block.getNumber(), block.getView(), Hex.encode0x(block.getCoinbase()),
-                    Hex.encode0x(block.getPrevHash()), block.getTimestamp(),
+                    Hex.encode0x(block.getParentHash()), block.getTimestamp(),
                     TimeUtil.formatTimestamp(block.getTimestamp()), Hex.encode0x(block.getTransactionsRoot()),
                     Hex.encode0x(block.getResultsRoot()), Hex.encode0x(block.getStateRoot()),
                     Hex.encode0x(block.getData()), block.getTransactions().stream()

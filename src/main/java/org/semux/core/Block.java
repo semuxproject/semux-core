@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2017 The Semux Developers
- *
+ * <p>
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
@@ -25,7 +25,6 @@ import org.semux.util.SimpleEncoder;
 
 /**
  * Represents a block in the blockchain.
- *
  */
 public class Block {
 
@@ -79,7 +78,7 @@ public class Block {
 
     /**
      * Create a new block, with no BFT information.
-     * 
+     *
      * @param header
      *            a signed block header
      * @param transactions
@@ -93,7 +92,7 @@ public class Block {
 
     /**
      * Create a new block.
-     * 
+     *
      * @param header
      *            a signed block header
      * @param transactions
@@ -133,7 +132,7 @@ public class Block {
 
     /**
      * Validates block header.
-     * 
+     *
      * @param header
      * @param previous
      * @return
@@ -141,13 +140,13 @@ public class Block {
     public static boolean validateHeader(BlockHeader previous, BlockHeader header) {
         return header != null && header.validate() //
                 && header.getNumber() == previous.getNumber() + 1 //
-                && Arrays.equals(header.getPrevHash(), previous.getHash()) //
+                && Arrays.equals(header.getParentHash(), previous.getHash()) //
                 && header.getTimestamp() > previous.getTimestamp();
     }
 
     /**
      * Validates transactions in parallel.
-     * 
+     *
      * @param header
      * @param transactions
      * @return
@@ -172,7 +171,7 @@ public class Block {
 
     /**
      * Validates results.
-     * 
+     *
      * @param header
      * @param results
      * @return
@@ -192,7 +191,7 @@ public class Block {
 
     /**
      * Returns a shallow copy of the block header.
-     * 
+     *
      * @return
      */
     public BlockHeader getHeader() {
@@ -201,7 +200,7 @@ public class Block {
 
     /**
      * Returns a shallow copy of the transactions.
-     * 
+     *
      * @return
      */
     public List<Transaction> getTransactions() {
@@ -210,7 +209,7 @@ public class Block {
 
     /**
      * Returns a shallow copy of the transactions results.
-     * 
+     *
      * @return
      */
     public List<TransactionResult> getResults() {
@@ -219,7 +218,7 @@ public class Block {
 
     /**
      * Returns the BFT view.
-     * 
+     *
      * @return
      */
     public int getView() {
@@ -228,7 +227,7 @@ public class Block {
 
     /**
      * Sets the BFT view.
-     * 
+     *
      * @param view
      */
     public void setView(int view) {
@@ -237,7 +236,7 @@ public class Block {
 
     /**
      * Returns a shallow copy of the votes.
-     * 
+     *
      * @return
      */
     public List<Signature> getVotes() {
@@ -246,7 +245,7 @@ public class Block {
 
     /**
      * Sets the votes for this block.
-     * 
+     *
      * @param votes
      */
     public void setVotes(List<Signature> votes) {
@@ -255,61 +254,126 @@ public class Block {
 
     /**
      * Returns a shallow copy of the transaction indexes;
-     * 
+     *
      * @return
      */
     public List<Pair<Integer, Integer>> getTransactionIndices() {
         return new ArrayList<>(indexes);
     }
 
+    /**
+     * Returns the block hash.
+     *
+     * @return
+     */
     public byte[] getHash() {
         return header.getHash();
     }
 
+    /**
+     * Returns the block number.
+     *
+     * @return
+     */
     public long getNumber() {
         return header.getNumber();
     }
 
+    /**
+     * Returns the coinbase
+     *
+     * @return
+     */
     public byte[] getCoinbase() {
         return header.getCoinbase();
     }
 
-    public byte[] getPrevHash() {
-        return header.getPrevHash();
+    /**
+     * Returns the hash of the parent block
+     *
+     * @return
+     */
+    public byte[] getParentHash() {
+        return header.getParentHash();
     }
 
+    /**
+     * Returns the block timestamp.
+     *
+     * @return
+     */
     public long getTimestamp() {
         return header.getTimestamp();
     }
 
+    /**
+     * Returns the merkle root of all transactions.
+     *
+     * @return
+     */
     public byte[] getTransactionsRoot() {
         return header.getTransactionsRoot();
     }
 
+    /**
+     * Returns the merkle root of all transaction results.
+     *
+     * @return
+     */
     public byte[] getResultsRoot() {
         return header.getResultsRoot();
     }
 
+    /**
+     * Returns the state root.
+     *
+     * @return
+     */
     public byte[] getStateRoot() {
         return header.getStateRoot();
     }
 
+    /**
+     * Returns the extra data.
+     *
+     * @return
+     */
     public byte[] getData() {
         return header.getData();
     }
 
+    /**
+     * Serializes the block header into byte array.
+     *
+     * @return
+     */
     public byte[] toBytesHeader() {
         return encodedHeader;
     }
 
+    /**
+     * Serializes the block transactions into byte array.
+     *
+     * @return
+     */
     public byte[] toBytesTransactions() {
         return encodedTransactions;
     }
 
+    /**
+     * Serializes the block transactions results into byte array.
+     *
+     * @return
+     */
     public byte[] toBytesResults() {
         return encodedResults;
     }
 
+    /**
+     * Serializes the BFT votes into byte array.
+     *
+     * @return
+     */
     public byte[] toBytesVotes() {
         SimpleEncoder enc = new SimpleEncoder();
 
@@ -331,6 +395,19 @@ public class Block {
         return toBytesHeader().length + toBytesTransactions().length + toBytesResults().length + toBytesVotes().length;
     }
 
+    /**
+     * Parses a block instance from bytes.
+     *
+     * @param h
+     *            Serialized header
+     * @param t
+     *            Serialized transactions
+     * @param r
+     *            Serialized transaction results
+     * @param v
+     *            Serailized votes
+     * @return
+     */
     public static Block fromBytes(byte[] h, byte[] t, byte[] r, byte[] v) {
         BlockHeader header = BlockHeader.fromBytes(h);
 

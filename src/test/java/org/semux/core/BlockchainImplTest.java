@@ -185,7 +185,7 @@ public class BlockchainImplTest {
                 block1.toBytesVotes());
         assertArrayEquals(block1.getHash(), block2.getHash());
         assertArrayEquals(block1.getCoinbase(), block2.getCoinbase());
-        assertArrayEquals(block1.getPrevHash(), block2.getPrevHash());
+        assertArrayEquals(block1.getParentHash(), block2.getParentHash());
         assertEquals(block1.getNumber(), block2.getNumber());
 
         assertEquals(block1.getTransactions().size(), block2.getTransactions().size());

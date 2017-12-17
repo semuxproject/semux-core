@@ -43,7 +43,7 @@ public class GenesisTest {
     public void testBlock() {
         assertTrue(genesis.getNumber() == 0);
         assertArrayEquals(ZERO_ADDRESS, genesis.getCoinbase());
-        assertArrayEquals(ZERO_HASH, genesis.getPrevHash());
+        assertArrayEquals(ZERO_HASH, genesis.getParentHash());
         assertTrue(genesis.getTimestamp() > 0);
         assertFalse(Arrays.equals(ZERO_ADDRESS, genesis.getHash()));
     }

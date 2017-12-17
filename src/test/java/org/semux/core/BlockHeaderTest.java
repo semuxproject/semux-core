@@ -62,7 +62,7 @@ public class BlockHeaderTest {
         assertArrayEquals(hash, header.getHash());
         assertEquals(number, header.getNumber());
         assertArrayEquals(coinbase, header.getCoinbase());
-        assertArrayEquals(prevHash, header.getPrevHash());
+        assertArrayEquals(prevHash, header.getParentHash());
         assertEquals(timestamp, header.getTimestamp());
         assertArrayEquals(transactionsRoot, header.getTransactionsRoot());
         assertArrayEquals(resultsRoot, header.getResultsRoot());

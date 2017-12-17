@@ -15,8 +15,6 @@ import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.rules.TemporaryFolder;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 import org.semux.KernelMock;
 import org.semux.config.Config;
 import org.semux.config.Constants;

@@ -80,7 +80,7 @@ public class BlockTest {
         assertArrayEquals(hash, block.getHash());
         assertEquals(number, block.getNumber());
         assertArrayEquals(coinbase, block.getCoinbase());
-        assertArrayEquals(prevHash, block.getPrevHash());
+        assertArrayEquals(prevHash, block.getParentHash());
         assertEquals(timestamp, block.getTimestamp());
         assertArrayEquals(transactionsRoot, block.getTransactionsRoot());
         assertArrayEquals(resultsRoot, block.getResultsRoot());

@@ -22,7 +22,7 @@ public class BlockHeader {
 
     private byte[] coinbase;
 
-    private byte[] prevHash;
+    private byte[] parentHash;
 
     private long timestamp;
 
@@ -51,7 +51,7 @@ public class BlockHeader {
             byte[] resultsRoot, byte[] stateRoot, byte[] data) {
         this.number = number;
         this.coinbase = coinbase;
-        this.prevHash = prevHash;
+        this.parentHash = prevHash;
         this.timestamp = timestamp;
         this.transactionsRoot = transactionsRoot;
         this.resultsRoot = resultsRoot;
@@ -83,7 +83,7 @@ public class BlockHeader {
         SimpleDecoder dec = new SimpleDecoder(encoded);
         this.number = dec.readLong();
         this.coinbase = dec.readBytes();
-        this.prevHash = dec.readBytes();
+        this.parentHash = dec.readBytes();
         this.timestamp = dec.readLong();
         this.transactionsRoot = dec.readBytes();
         this.resultsRoot = dec.readBytes();
@@ -102,7 +102,7 @@ public class BlockHeader {
         return hash != null && hash.length == 32 //
                 && number >= 0 //
                 && coinbase != null && coinbase.length == 20 //
-                && prevHash != null && prevHash.length == 32 //
+                && parentHash != null && parentHash.length == 32 //
                 && timestamp >= 0 //
                 && transactionsRoot != null && transactionsRoot.length == 32 //
                 && resultsRoot != null && resultsRoot.length == 32 //
@@ -124,8 +124,8 @@ public class BlockHeader {
         return coinbase;
     }
 
-    public byte[] getPrevHash() {
-        return prevHash;
+    public byte[] getParentHash() {
+        return parentHash;
     }
 
     public long getTimestamp() {
@@ -166,7 +166,7 @@ public class BlockHeader {
     @Override
     public String toString() {
         return "BlockHeader [number=" + number + ", timestamp=" + timestamp + ", data=" + Hex.encode(data)
-                + ", parentHash=" + Hex.encode(prevHash) + ", hash=" + Hex.encode(hash) + "]";
+                + ", parentHash=" + Hex.encode(parentHash) + ", hash=" + Hex.encode(hash) + "]";
     }
 
 }
