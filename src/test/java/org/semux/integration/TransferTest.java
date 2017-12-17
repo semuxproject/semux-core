@@ -114,10 +114,6 @@ public class TransferTest {
         kernelValidator.start();
         kernelPremine.start();
         kernelReceiver.start();
-
-        // the kernel will start component threads asynchronously
-        // have to wait a bit
-        Thread.sleep(1000);
     }
 
     @After
@@ -139,6 +135,9 @@ public class TransferTest {
      */
     @Test
     public void testTransfer() throws IOException {
+        // wait
+        await().until(() -> kernelPremine.getApi().isRunning());
+
         // make transfer_many request from kernelPremine to kernelReceiver1 and
         // kernelReceiver2
         final long value = 1000 * Unit.SEM;
