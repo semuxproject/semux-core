@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.semux.config.Config;
+import org.semux.core.TransactionResult.Error;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -66,13 +67,13 @@ public class TransactionExecutor {
 
             // check nonce
             if (nonce != acc.getNonce()) {
-                result.setError("Invalid nonce");
+                result.setError(Error.INVALID_NONCE);
                 continue;
             }
 
             // check transaction fee
             if (fee < config.minTransactionFee()) {
-                result.setError("Transaction fee too low");
+                result.setError(Error.INSUFFICIENT_FEE);
                 continue;
             }
 
@@ -80,7 +81,7 @@ public class TransactionExecutor {
             switch (tx.getType()) {
             case TRANSFER: {
                 if (data.length > config.maxTransferDataSize()) {
-                    result.setError("Invalid data length");
+                    result.setError(Error.INVALID_DATA_LENGTH);
                     break;
                 }
 
@@ -91,17 +92,17 @@ public class TransactionExecutor {
 
                     result.setSuccess(true);
                 } else {
-                    result.setError("Insufficient available balance");
+                    result.setError(Error.INSUFFICIENT_AVAILABLE);
                 }
                 break;
             }
             case DELEGATE: {
                 if (data.length > 16 || !Bytes.toString(data).matches("[_a-z0-9]{4,16}")) {
-                    result.setError("Invalid data");
+                    result.setError(Error.INVALID_DELEGATE_NAME);
                     break;
                 }
                 if (value < config.minDelegateFee()) {
-                    result.setError("Invalid fee");
+                    result.setError(Error.INSUFFICIENT_FEE);
                     break;
                 }
 
@@ -112,16 +113,16 @@ public class TransactionExecutor {
 
                         result.setSuccess(true);
                     } else {
-                        result.setError("Unable to register as delegate");
+                        result.setError(Error.FAILED);
                     }
                 } else {
-                    result.setError("Insufficient available balance");
+                    result.setError(Error.INSUFFICIENT_AVAILABLE);
                 }
                 break;
             }
             case VOTE: {
                 if (data.length > 0) {
-                    result.setError("Invalid data length");
+                    result.setError(Error.INVALID_DATA_LENGTH);
                     break;
                 }
 
@@ -133,16 +134,16 @@ public class TransactionExecutor {
 
                         result.setSuccess(true);
                     } else {
-                        result.setError("Unable to vote");
+                        result.setError(Error.FAILED);
                     }
                 } else {
-                    result.setError("Insufficient available balance");
+                    result.setError(Error.INSUFFICIENT_AVAILABLE);
                 }
                 break;
             }
             case UNVOTE: {
                 if (data.length > 0) {
-                    result.setError("Invalid data length");
+                    result.setError(Error.INVALID_DATA_LENGTH);
                     break;
                 }
 
@@ -154,15 +155,16 @@ public class TransactionExecutor {
 
                         result.setSuccess(true);
                     } else {
-                        result.setError("Unable to unvote");
+                        result.setError(Error.FAILED);
                     }
                 } else {
-                    result.setError("Insufficient locked balance");
+                    result.setError(Error.INSUFFICIENT_LOCKED);
                 }
                 break;
             }
             default:
-                result.setError("Unsupported type");
+                // unsupported transaction type
+                result.setError(Error.INVALID_TYPE);
                 break;
             }
 
