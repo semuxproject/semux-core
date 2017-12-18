@@ -8,16 +8,15 @@ package org.semux.crypto.cache;
 
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-
 import org.semux.crypto.CryptoException;
 import org.semux.util.ByteArray;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public final class EdDSAPublicKeyCache {
+
+    private static final int MAX_CACHE_SIZE = 16 * 1024;
 
     /**
      * EdDSAPublicKey constructor consumes ~37% of CPU time of
@@ -26,10 +25,9 @@ public final class EdDSAPublicKeyCache {
      * keys can reduce the synchronization time significantly.
      * <p>
      * The cache is a concurrent hash map of ByteArray.of(pubKey) -> EdDSAPublicKey
-     * <p>
-     * softValues() allows GC to cleanup cached values automatically.
      */
-    private static final Cache<ByteArray, EdDSAPublicKey> pubKeyCache = Caffeine.newBuilder().softValues().build();
+    private static final Cache<ByteArray, EdDSAPublicKey> pubKeyCache = Caffeine.newBuilder()
+            .maximumSize(MAX_CACHE_SIZE).build();
 
     private EdDSAPublicKeyCache() {
     }

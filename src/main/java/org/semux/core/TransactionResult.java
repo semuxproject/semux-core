@@ -9,12 +9,67 @@ package org.semux.core;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
 public class TransactionResult {
+
+    /**
+     * Transaction error code.
+     */
+    public enum Error {
+        /**
+         * The transaction format is invalid. See {@link Transaction#validate()}
+         */
+        INVALID_FORMAT,
+
+        /**
+         * The transaction timestamp is incorrect. See
+         * {@link PendingManager#processTransaction(Transaction, boolean)}.
+         */
+        INVALID_TIMESTAMP,
+
+        /**
+         * The transaction type is invalid.
+         */
+        INVALID_TYPE,
+
+        /**
+         * The transaction nonce does not match the account nonce.
+         */
+        INVALID_NONCE,
+
+        /**
+         * The transaction fee doesn't meet the minimum.
+         */
+        INVALID_FEE,
+
+        /**
+         * The transaction data is invalid, typically too large.
+         */
+        INVALID_DATA_LENGTH,
+
+        /**
+         * Insufficient available balance.
+         */
+        INSUFFICIENT_AVAILABLE,
+
+        /**
+         * Insufficient locked balance.
+         */
+        INSUFFICIENT_LOCKED,
+
+        /**
+         * Invalid delegate name.
+         */
+        INVALID_DELEGATE_NAME,
+
+        /**
+         * Transaction failed.
+         */
+        FAILED
+    }
 
     /**
      * Indicates whether this transaction is success or not.
@@ -34,7 +89,7 @@ public class TransactionResult {
     /**
      * Error message for API/GUI, not sent over the network.
      */
-    protected String error;
+    protected Error error;
 
     /**
      * Create a transaction result.
@@ -98,11 +153,11 @@ public class TransactionResult {
         this.logs.add(log);
     }
 
-    public String getError() {
+    public Error getError() {
         return error;
     }
 
-    public void setError(String error) {
+    public void setError(Error error) {
         this.error = error;
     }
 

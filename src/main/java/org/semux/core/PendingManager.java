@@ -310,15 +310,18 @@ public class PendingManager implements Runnable, BlockchainListener {
      */
     protected int processTransaction(Transaction tx, boolean relay) {
 
-        // check timestamp. this is not part of validation protocol
-        long now = System.currentTimeMillis();
-        long twoHours = TimeUnit.HOURS.toMillis(2);
-        if (tx.getTimestamp() < now - twoHours || tx.getTimestamp() > now + twoHours) {
-            return 0;
-        }
+        // NOTE: assume transaction format is valid
 
         int cnt = 0;
         while (tx != null && tx.getNonce() == getNonce(tx.getFrom())) {
+
+            // check transaction timestamp
+            long now = System.currentTimeMillis();
+            long twoHours = TimeUnit.HOURS.toMillis(2);
+            if (tx.getTimestamp() < now - twoHours || tx.getTimestamp() > now + twoHours) {
+                return 0;
+            }
+
             // execute transactions
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
