@@ -10,6 +10,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
+import java.time.Duration;
+import java.time.Instant;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,10 +31,12 @@ public class SystemUtilTest {
 
     @Test
     public void testGetIp() {
+        Instant begin = Instant.now();
         String ip = SystemUtil.getIp();
         logger.info("IP address = {}", ip);
         assertNotNull(ip);
         assertFalse(ip.equals("127.0.0.1"));
+        logger.info("SystemUtil.getIp took {} ms", Duration.between(begin, Instant.now()).toMillis());
     }
 
     @Test
