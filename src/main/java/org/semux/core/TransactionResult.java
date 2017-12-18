@@ -9,7 +9,6 @@ package org.semux.core;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
@@ -26,6 +25,12 @@ public class TransactionResult {
         INVALID_FORMAT,
 
         /**
+         * The transaction timestamp is incorrect. See
+         * {@link PendingManager#processTransaction(Transaction, boolean)}.
+         */
+        INVALID_TIMESTAMP,
+
+        /**
          * The transaction type is invalid.
          */
         INVALID_TYPE,
@@ -38,7 +43,7 @@ public class TransactionResult {
         /**
          * The transaction fee doesn't meet the minimum.
          */
-        INSUFFICIENT_FEE,
+        INVALID_FEE,
 
         /**
          * The transaction data is invalid, typically too large.

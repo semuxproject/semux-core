@@ -73,7 +73,7 @@ public class TransactionExecutor {
 
             // check transaction fee
             if (fee < config.minTransactionFee()) {
-                result.setError(Error.INSUFFICIENT_FEE);
+                result.setError(Error.INVALID_FEE);
                 continue;
             }
 
@@ -102,7 +102,7 @@ public class TransactionExecutor {
                     break;
                 }
                 if (value < config.minDelegateFee()) {
-                    result.setError(Error.INSUFFICIENT_FEE);
+                    result.setError(Error.INVALID_FEE);
                     break;
                 }
 
