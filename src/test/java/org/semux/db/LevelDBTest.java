@@ -48,6 +48,8 @@ public class LevelDBTest {
 
     @Test
     public void testRecover() {
+        db.close();
+
         Options options = db.createOptions();
         db.recover(options);
     }

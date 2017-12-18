@@ -41,24 +41,12 @@ public class LevelDB implements KVDB {
     public LevelDB(File file) {
         this.file = file;
 
-        Options options = createOptions();
-
         File dir = file.getParentFile();
         if (!dir.exists() && !dir.mkdirs()) {
             logger.error("Failed to create directory: {}", dir);
         }
 
-        try {
-            db = JniDBFactory.factory.open(file, options);
-            isOpened = true;
-        } catch (IOException e) {
-            if (e.getMessage().contains("Corruption:")) {
-                recover(options);
-            } else {
-                logger.error("Failed to open database", e);
-                SystemUtil.exitAsync(-1);
-            }
-        }
+        open(createOptions());
     }
 
     /**
@@ -81,6 +69,35 @@ public class LevelDB implements KVDB {
     }
 
     /**
+     * Open the database.
+     * 
+     * @param options
+     */
+    protected void open(Options options) {
+        try {
+            db = JniDBFactory.factory.open(file, options);
+            isOpened = true;
+        } catch (IOException e) {
+            if (e.getMessage().contains("Corruption")) {
+                // recover
+                recover(options);
+
+                // reopen
+                try {
+                    db = JniDBFactory.factory.open(file, options);
+                    isOpened = true;
+                } catch (IOException ex) {
+                    logger.error("Failed to open database", e);
+                    SystemUtil.exitAsync(-1);
+                }
+            } else {
+                logger.error("Failed to open database", e);
+                SystemUtil.exitAsync(-1);
+            }
+        }
+    }
+
+    /**
      * Tries to recover the database in case of corruption.
      *
      * @param options
@@ -90,7 +107,6 @@ public class LevelDB implements KVDB {
             logger.info("Database is corrupted, trying to repair");
             factory.repair(file, options);
             logger.info("Repair done!");
-            db = factory.open(file, options);
         } catch (IOException ex) {
             logger.error("Failed to repair the database", ex);
             SystemUtil.exitAsync(-1);
