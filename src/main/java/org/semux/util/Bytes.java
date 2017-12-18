@@ -42,7 +42,7 @@ public class Bytes {
 
     /**
      * Generate a random byte array of required length.
-     * 
+     *
      * @param n
      * @return
      */
@@ -55,7 +55,7 @@ public class Bytes {
 
     /**
      * Merge two byte arrays into one.
-     * 
+     *
      * @param b1
      * @param b2
      * @return
@@ -70,7 +70,7 @@ public class Bytes {
 
     /**
      * Merge byte array and byte
-     * 
+     *
      * @param b1
      * @param b2
      * @return
@@ -85,7 +85,7 @@ public class Bytes {
 
     /**
      * Merge byte and byte array.
-     * 
+     *
      * @param b1
      * @param b2
      * @return
@@ -100,7 +100,7 @@ public class Bytes {
 
     /**
      * Merge byte arrays into one.
-     * 
+     *
      * @param bytes
      *            byte arrays
      * @return
@@ -134,7 +134,7 @@ public class Bytes {
 
     /**
      * Convert string into an byte array.
-     * 
+     *
      * @param str
      * @return
      */
@@ -148,7 +148,7 @@ public class Bytes {
 
     /**
      * Convert a byte into an byte array.
-     * 
+     *
      * @param b
      * @return
      */
@@ -158,7 +158,7 @@ public class Bytes {
 
     /**
      * Convert a short integer into an byte array.
-     * 
+     *
      * @param s
      * @return
      */
@@ -171,7 +171,7 @@ public class Bytes {
 
     /**
      * Convert an integer into an byte array.
-     * 
+     *
      * @param i
      * @return
      */
@@ -186,7 +186,7 @@ public class Bytes {
 
     /**
      * Convert a long integer into an byte array.
-     * 
+     *
      * @param i
      * @return
      */
@@ -205,7 +205,7 @@ public class Bytes {
 
     /**
      * Convert byte array into string.
-     * 
+     *
      * @param bytes
      * @return
      */
@@ -219,7 +219,7 @@ public class Bytes {
 
     /**
      * Covert byte array into a byte.
-     * 
+     *
      * @param bytes
      * @return
      */
@@ -229,7 +229,7 @@ public class Bytes {
 
     /**
      * Covert byte array into a short integer.
-     * 
+     *
      * @param bytes
      * @return
      */
@@ -239,23 +239,31 @@ public class Bytes {
 
     /**
      * Covert byte array into an integer.
-     * 
+     *
      * @param bytes
      * @return
      */
     public static int toInt(byte[] bytes) {
-        return ((bytes[0] & 0xff) << 24) | ((bytes[1] & 0xff) << 16) | ((bytes[2] & 0xff) << 8) | (bytes[3] & 0xff);
+        return ((bytes[0] & 0xff) << 24) //
+                | ((bytes[1] & 0xff) << 16) //
+                | ((bytes[2] & 0xff) << 8) //
+                | (bytes[3] & 0xff);
     }
 
     /**
      * Covert byte array into a long integer.
-     * 
+     *
      * @param bytes
      * @return
      */
     public static long toLong(byte[] bytes) {
-        return ((bytes[0] & 0xffL) << 56) | ((bytes[1] & 0xffL) << 48) | ((bytes[2] & 0xffL) << 40)
-                | ((bytes[3] & 0xffL) << 32) | ((bytes[4] & 0xffL) << 24) | ((bytes[5] & 0xffL) << 16)
-                | ((bytes[6] & 0xffL) << 8) | (bytes[7] & 0xff);
+        return ((bytes[0] & 0xffL) << 56) //
+                | ((bytes[1] & 0xffL) << 48) //
+                | ((bytes[2] & 0xffL) << 40) //
+                | ((bytes[3] & 0xffL) << 32) //
+                | ((bytes[4] & 0xffL) << 24) //
+                | ((bytes[5] & 0xffL) << 16) //
+                | ((bytes[6] & 0xffL) << 8) //
+                | (bytes[7] & 0xff);
     }
 }

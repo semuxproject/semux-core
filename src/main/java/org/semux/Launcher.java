@@ -8,7 +8,7 @@ package org.semux;
 
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.semux.config.AbstractConfig;
+import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevNetConfig;
 import org.semux.config.MainNetConfig;
@@ -28,13 +28,13 @@ public abstract class Launcher {
     private String dataDir = Constants.DEFAULT_DATA_DIR;
 
     /**
-     * Creates the correct Instance of an AbstractConfig Implementation depending on
-     * the CLI --network option given.<br />
+     * Creates an instance of {@link Config} based on the given `--network` option.
+     * <p>
      * Defaults to MainNet.
      * 
-     * @return AbstractConfigImplementation
+     * @return the configuration
      */
-    public AbstractConfig getConfig() {
+    public Config getConfig() {
         switch (network) {
         case TESTNET:
             return new TestNetConfig(getDataDir());

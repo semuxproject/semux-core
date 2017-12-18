@@ -6,10 +6,13 @@
  */
 package org.semux.util;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -35,5 +38,14 @@ public class ByteArrayTest {
     public void testToString() {
         byte[] b = Bytes.random(20);
         assertEquals(Hex.encode(b), ByteArray.of(b).toString());
+    }
+
+    @Test
+    public void testByteArrayKeyDeserializer() throws IOException {
+        byte[] x = Bytes.random(3);
+        ByteArray.ByteArrayKeyDeserializer d = new ByteArray.ByteArrayKeyDeserializer();
+        Object y = d.deserializeKey(Hex.encode0x(x), null);
+        assertTrue(y instanceof ByteArray);
+        assertThat(ByteArray.of(x), equalTo(y));
     }
 }

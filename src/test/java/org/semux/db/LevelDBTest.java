@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.iq80.leveldb.DBException;
+import org.iq80.leveldb.Options;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +34,7 @@ public class LevelDBTest {
     private byte[] key = Bytes.of("key");
     private byte[] value = Bytes.of("value");
 
-    private KVDB db;
+    private LevelDB db;
 
     @Before
     public void setup() {
@@ -43,6 +44,12 @@ public class LevelDBTest {
     @After
     public void teardown() {
         db.close();
+    }
+
+    @Test
+    public void testRecover() {
+        Options options = db.createOptions();
+        db.recover(options);
     }
 
     @Test

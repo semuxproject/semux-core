@@ -8,10 +8,12 @@ package org.semux.api.response;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.semux.api.ApiHandlerResponse;
 import org.semux.core.Block;
 import org.semux.crypto.Hex;
 import org.semux.util.TimeUtil;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GetBlockResponse extends ApiHandlerResponse {

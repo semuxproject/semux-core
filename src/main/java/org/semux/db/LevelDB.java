@@ -41,15 +41,7 @@ public class LevelDB implements KVDB {
     public LevelDB(File file) {
         this.file = file;
 
-        Options options = new Options();
-        options.createIfMissing(true);
-        options.compressionType(CompressionType.NONE);
-        options.blockSize(4 * 1024 * 1024);
-        options.writeBufferSize(8 * 1024 * 1024);
-        options.cacheSize(64L * 1024L * 1024L);
-        options.paranoidChecks(true);
-        options.verifyChecksums(true);
-        options.maxOpenFiles(128);
+        Options options = createOptions();
 
         File dir = file.getParentFile();
         if (!dir.exists() && !dir.mkdirs()) {
@@ -61,19 +53,47 @@ public class LevelDB implements KVDB {
             isOpened = true;
         } catch (IOException e) {
             if (e.getMessage().contains("Corruption:")) {
-                try {
-                    logger.info("Database is corrupted, trying to repair");
-                    factory.repair(file, options);
-                    logger.info("Repair done!");
-                    db = factory.open(file, options);
-                } catch (IOException ex) {
-                    logger.error("Failed to repair the database", ex);
-                    SystemUtil.exitAsync(-1);
-                }
+                recover(options);
             } else {
                 logger.error("Failed to open database", e);
                 SystemUtil.exitAsync(-1);
             }
+        }
+    }
+
+    /**
+     * Creates the default options.
+     *
+     * @return
+     */
+    protected Options createOptions() {
+        Options options = new Options();
+        options.createIfMissing(true);
+        options.compressionType(CompressionType.NONE);
+        options.blockSize(4 * 1024 * 1024);
+        options.writeBufferSize(8 * 1024 * 1024);
+        options.cacheSize(64L * 1024L * 1024L);
+        options.paranoidChecks(true);
+        options.verifyChecksums(true);
+        options.maxOpenFiles(128);
+
+        return options;
+    }
+
+    /**
+     * Tries to recover the database in case of corruption.
+     *
+     * @param options
+     */
+    protected void recover(Options options) {
+        try {
+            logger.info("Database is corrupted, trying to repair");
+            factory.repair(file, options);
+            logger.info("Repair done!");
+            db = factory.open(file, options);
+        } catch (IOException ex) {
+            logger.error("Failed to repair the database", ex);
+            SystemUtil.exitAsync(-1);
         }
     }
 

@@ -9,6 +9,7 @@ package org.semux.core;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;

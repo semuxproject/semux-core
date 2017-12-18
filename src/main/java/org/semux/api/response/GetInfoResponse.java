@@ -9,6 +9,7 @@ package org.semux.api.response;
 import org.semux.Kernel;
 import org.semux.api.ApiHandlerResponse;
 import org.semux.crypto.Hex;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GetInfoResponse extends ApiHandlerResponse {

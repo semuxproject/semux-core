@@ -8,9 +8,11 @@ package org.semux.api.response;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import org.semux.api.ApiHandlerResponse;
 import org.semux.core.Transaction;
 import org.semux.crypto.Hex;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GetTransactionResponse extends ApiHandlerResponse {

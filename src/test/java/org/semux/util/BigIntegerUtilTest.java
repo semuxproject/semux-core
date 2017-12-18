@@ -85,4 +85,9 @@ public class BigIntegerUtilTest {
         assertEquals(one, BigIntegerUtil.min(two, one));
         assertEquals(one, BigIntegerUtil.min(one, two));
     }
+
+    @Test
+    public void testSum() {
+        assertEquals(three, BigIntegerUtil.sum(one, two));
+    }
 }
