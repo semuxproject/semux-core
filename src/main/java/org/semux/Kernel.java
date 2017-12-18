@@ -28,6 +28,7 @@ import org.semux.core.SyncManager;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.db.DBFactory;
+import org.semux.db.DBName;
 import org.semux.db.LevelDB.LevelDBFactory;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
@@ -51,6 +52,7 @@ public class Kernel {
     protected Wallet wallet;
     protected EdDSA coinbase;
 
+    protected DBFactory dbFactory;
     protected Blockchain chain;
     protected PeerClient client;
 
@@ -96,7 +98,7 @@ public class Kernel {
         logger.info("System booting up: network = [{}, {}], coinbase = {}", config.networkId(), config.networkVersion(),
                 coinbase);
 
-        DBFactory dbFactory = new LevelDBFactory(config.dataDir());
+        dbFactory = new LevelDBFactory(config.dataDir());
         chain = new BlockchainImpl(config, dbFactory);
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
@@ -178,35 +180,40 @@ public class Kernel {
      * Stops the kernel.
      */
     public synchronized void stop() {
-        if (!isRunning.get()) {
-            return;
+        // set the flag first to sop the GUI from refreshing
+        if (isRunning.compareAndSet(true, false)) {
+
+            // stop consensus
+            try {
+                sync.stop();
+                cons.stop();
+
+                // make sure consensus thread is fully stopped
+                consThread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.error("Failed to stop sync/consensus properly");
+            }
+
+            // stop API and p2p
+            api.stop();
+            p2p.stop();
+
+            // stop pending manager and node manager
+            pendingMgr.stop();
+            nodeMgr.stop();
+
+            // close client
+            client.close();
+
+            // make sure no thread is reading/writing the state
+            ReentrantReadWriteLock.WriteLock lock = stateLock.writeLock();
+            lock.lock();
+            for (DBName name : DBName.values()) {
+                dbFactory.getDB(name).close();
+            }
+            lock.unlock();
         }
-
-        // stop consensus
-        try {
-            sync.stop();
-            cons.stop();
-
-            // make sure consensus thread is fully stopped
-            consThread.join();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.error("Failed to stop sync/consensus properly");
-        }
-
-        // stop API and p2p
-        api.stop();
-        p2p.stop();
-
-        // stop pending manager and node manager
-        pendingMgr.stop();
-        nodeMgr.stop();
-
-        // close client
-        client.close();
-
-        // set flag
-        isRunning.set(false);
     }
 
     /**
