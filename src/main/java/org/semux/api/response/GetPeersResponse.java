@@ -7,11 +7,9 @@
 package org.semux.api.response;
 
 import java.util.List;
-
 import org.semux.api.ApiHandlerResponse;
 import org.semux.crypto.Hex;
 import org.semux.net.Peer;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GetPeersResponse extends ApiHandlerResponse {
@@ -50,10 +48,15 @@ public class GetPeersResponse extends ApiHandlerResponse {
         @JsonProperty("latency")
         public final Long latency;
 
-        public Result(@JsonProperty("ip") String ip, @JsonProperty("port") int port,
-                @JsonProperty("networkVersion") short networkVersion, @JsonProperty("clientId") String clientId,
-                @JsonProperty("peerId") String peerId, @JsonProperty("latestBlockNumber") long latestBlockNumber,
-                @JsonProperty("latency") long latency) {
+        public Result( //
+                @JsonProperty("ip") String ip, //
+                @JsonProperty("port") int port, //
+                @JsonProperty("networkVersion") short networkVersion, //
+                @JsonProperty("clientId") String clientId, //
+                @JsonProperty("peerId") String peerId, //
+                @JsonProperty("latestBlockNumber") long latestBlockNumber, //
+                @JsonProperty("latency") long latency //
+        ) {
             this.ip = ip;
             this.port = port;
             this.networkVersion = networkVersion;
