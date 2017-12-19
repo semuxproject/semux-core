@@ -43,13 +43,12 @@ public class LevelDBTest {
 
     @After
     public void teardown() {
-        db.close();
+        db.destroy();
     }
 
     @Test
     public void testRecover() {
         db.close();
-
         Options options = db.createOptions();
         db.recover(options);
     }
