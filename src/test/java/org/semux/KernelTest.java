@@ -43,15 +43,12 @@ public class KernelTest {
 
         // stop kernel
         kernel.stop();
-        await().until(() -> !kernel.isRunning());
-
-        assertFalse(kernel.getNodeManager().isRunning());
-        assertFalse(kernel.getPendingManager().isRunning());
-
-        assertFalse(kernel.getApi().isRunning());
-        assertFalse(kernel.getP2p().isRunning());
-
-        assertFalse(kernel.getConsensus().isRunning());
-        assertFalse(kernel.getSyncManager().isRunning());
+        await().until(() -> !kernel.isRunning() //
+                && kernel.getNodeManager().isRunning() //
+                && kernel.getPendingManager().isRunning() //
+                && kernel.getApi().isRunning() //
+                && kernel.getP2p().isRunning() //
+                && kernel.getConsensus().isRunning() //
+                && kernel.getSyncManager().isRunning());
     }
 }
