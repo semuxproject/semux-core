@@ -58,7 +58,7 @@ public class NodeManager {
 
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> connectFuture;
-    private ScheduledFuture<?> persistFuture;
+    private ScheduledFuture<?> seedingFuture;
 
     private volatile boolean isRunning;
 
@@ -85,17 +85,10 @@ public class NodeManager {
      */
     public synchronized void start() {
         if (!isRunning) {
-            /*
-             * Push all known peers to the queue.
-             */
-            Set<InetSocketAddress> peers = new HashSet<>();
-            peers.addAll(config.p2pSeedNodes());
-            peers.addAll(getSeedNodes(config.networkId()));
-            queue.addAll(peers);
+            addNodes(config.p2pSeedNodes());
 
             connectFuture = exec.scheduleAtFixedRate(this::doConnect, 100, 500, TimeUnit.MILLISECONDS);
-
-            persistFuture = exec.scheduleAtFixedRate(this::doFetch, 2, 4, TimeUnit.MINUTES);
+            seedingFuture = exec.scheduleAtFixedRate(this::doFetch, 0, 3, TimeUnit.MINUTES);
 
             isRunning = true;
             logger.info("Node manager started");
@@ -108,7 +101,7 @@ public class NodeManager {
     public synchronized void stop() {
         if (isRunning) {
             connectFuture.cancel(true);
-            persistFuture.cancel(false);
+            seedingFuture.cancel(false);
 
             isRunning = false;
             logger.info("Node manager stopped");
@@ -184,7 +177,7 @@ public class NodeManager {
     }
 
     /**
-     * Connect to a node
+     * Connect to a node in the queue.
      */
     protected void doConnect() {
         Set<InetSocketAddress> activeAddresses = channelMgr.getActiveAddresses();
@@ -207,7 +200,7 @@ public class NodeManager {
     }
 
     /**
-     * Fetch seed nodes from DNS records.
+     * Fetches seed nodes from DNS records or configuration.
      */
     protected void doFetch() {
         addNodes(getSeedNodes(config.networkId()));

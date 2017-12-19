@@ -44,11 +44,11 @@ public class KernelTest {
         // stop kernel
         kernel.stop();
         await().until(() -> !kernel.isRunning() //
-                && kernel.getNodeManager().isRunning() //
-                && kernel.getPendingManager().isRunning() //
-                && kernel.getApi().isRunning() //
-                && kernel.getP2p().isRunning() //
-                && kernel.getConsensus().isRunning() //
-                && kernel.getSyncManager().isRunning());
+                && !kernel.getNodeManager().isRunning() //
+                && !kernel.getPendingManager().isRunning() //
+                && !kernel.getApi().isRunning() //
+                && !kernel.getP2p().isRunning() //
+                && !kernel.getConsensus().isRunning() //
+                && !kernel.getSyncManager().isRunning());
     }
 }
