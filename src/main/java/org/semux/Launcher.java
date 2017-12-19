@@ -6,13 +6,21 @@
  */
 package org.semux;
 
+import java.io.File;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.semux.cli.SemuxOption;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevNetConfig;
 import org.semux.config.MainNetConfig;
 import org.semux.config.TestNetConfig;
+import org.semux.log.LoggerConfigurator;
 
 public abstract class Launcher {
 
@@ -43,6 +51,18 @@ public abstract class Launcher {
         default:
             return new MainNetConfig(getDataDir());
         }
+    }
+
+    protected CommandLine parseOptions(String[] args) throws ParseException {
+        CommandLineParser parser = new DefaultParser();
+        return parser.parse(getOptions(), args);
+    }
+
+    protected void setupLogger(String[] args) throws ParseException {
+        CommandLine cmd = parseOptions(args);
+        LoggerConfigurator.configure(new File(
+                cmd.hasOption(SemuxOption.DATA_DIR.name()) ? cmd.getOptionValue(SemuxOption.DATA_DIR.name())
+                        : Constants.DEFAULT_DATA_DIR));
     }
 
     protected void addOption(Option option) {

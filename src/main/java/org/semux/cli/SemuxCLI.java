@@ -11,9 +11,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
 import org.semux.Launcher;
@@ -23,7 +22,6 @@ import org.semux.core.Wallet;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
-import org.semux.log.LoggerConfigurator;
 import org.semux.message.CLIMessages;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
@@ -38,102 +36,120 @@ public class SemuxCLI extends Launcher {
 
     public static void main(String[] args) {
         try {
-            // TODO: use specified data directory
-            LoggerConfigurator.configure(new File(Constants.DEFAULT_DATA_DIR));
             SemuxCLI cli = new SemuxCLI();
+            // set up logger
+            cli.setupLogger(args);
+            // start
             cli.start(args);
         } catch (ParseException exception) {
             logger.error(CLIMessages.get("ParsingFailed", exception.getMessage()));
         }
     }
 
+    /**
+     * Creates a new Semux CLI instance.
+     */
     public SemuxCLI() {
-        super();
-        org.apache.commons.cli.Option helpOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.HELP.toString()).desc(CLIMessages.get("PrintHelp")).build();
+        Option helpOption = Option.builder()
+                .longOpt(SemuxOption.HELP.toString())
+                .desc(CLIMessages.get("PrintHelp"))
+                .build();
         addOption(helpOption);
 
-        org.apache.commons.cli.Option versionOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.VERSION.toString()).desc(CLIMessages.get("ShowVersion")).build();
+        Option versionOption = Option.builder()
+                .longOpt(SemuxOption.VERSION.toString())
+                .desc(CLIMessages.get("ShowVersion"))
+                .build();
         addOption(versionOption);
 
-        org.apache.commons.cli.Option accountOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.ACCOUNT.toString()).desc(CLIMessages.get("ChooseAction")).hasArg(true).numberOfArgs(1)
-                .optionalArg(false).argName("action").type(String.class).build();
+        Option accountOption = Option.builder()
+                .longOpt(SemuxOption.ACCOUNT.toString())
+                .desc(CLIMessages.get("ChooseAction"))
+                .hasArg(true).numberOfArgs(1).optionalArg(false).argName("action").type(String.class)
+                .build();
         addOption(accountOption);
 
-        org.apache.commons.cli.Option changePasswordOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.CHANGE_PASSWORD.toString()).desc(CLIMessages.get("ChangeWalletPassword")).build();
+        Option changePasswordOption = Option.builder()
+                .longOpt(SemuxOption.CHANGE_PASSWORD.toString()).desc(CLIMessages.get("ChangeWalletPassword")).build();
         addOption(changePasswordOption);
 
-        org.apache.commons.cli.Option dataDirOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.DATA_DIR.toString()).desc(CLIMessages.get("SpecifyDataDir")).hasArg(true)
-                .numberOfArgs(1).optionalArg(false).argName("path").type(String.class).build();
+        Option dataDirOption = Option.builder()
+                .longOpt(SemuxOption.DATA_DIR.toString())
+                .desc(CLIMessages.get("SpecifyDataDir"))
+                .hasArg(true).numberOfArgs(1).optionalArg(false).argName("path").type(String.class)
+                .build();
         addOption(dataDirOption);
 
-        org.apache.commons.cli.Option coinbaseOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.COINBASE.toString()).desc(CLIMessages.get("SpecifyCoinbase")).hasArg(true)
-                .numberOfArgs(1).optionalArg(false).argName("index").type(Number.class).build();
+        Option coinbaseOption = Option.builder()
+                .longOpt(SemuxOption.COINBASE.toString()).desc(CLIMessages.get("SpecifyCoinbase"))
+                .hasArg(true).numberOfArgs(1).optionalArg(false).argName("index").type(Number.class)
+                .build();
         addOption(coinbaseOption);
 
-        org.apache.commons.cli.Option networkOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.NETWORK.toString()).desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1)
-                .optionalArg(false).argName("name").type(String.class).build();
+        Option networkOption = Option.builder()
+                .longOpt(SemuxOption.NETWORK.toString()).desc(CLIMessages.get("SpecifyNetwork"))
+                .hasArg(true).numberOfArgs(1).optionalArg(false).argName("name").type(String.class)
+                .build();
         addOption(networkOption);
 
-        org.apache.commons.cli.Option passwordOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.PASSWORD.toString()).desc(CLIMessages.get("WalletPassword")).hasArg(true)
-                .numberOfArgs(1).optionalArg(false).argName(Option.PASSWORD.toString()).type(String.class).build();
+        Option passwordOption = Option.builder()
+                .longOpt(SemuxOption.PASSWORD.toString()).desc(CLIMessages.get("WalletPassword"))
+                .hasArg(true).numberOfArgs(1).optionalArg(false).argName(SemuxOption.PASSWORD.toString())
+                .type(String.class)
+                .build();
         addOption(passwordOption);
 
-        org.apache.commons.cli.Option dumpPrivateKeyOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.DUMP_PRIVATE_KEY.toString()).desc(CLIMessages.get("PrintHexKey")).hasArg(true)
-                .optionalArg(false).argName("address").type(String.class).build();
+        Option dumpPrivateKeyOption = Option.builder()
+                .longOpt(SemuxOption.DUMP_PRIVATE_KEY.toString())
+                .desc(CLIMessages.get("PrintHexKey"))
+                .hasArg(true).optionalArg(false).argName("address").type(String.class)
+                .build();
         addOption(dumpPrivateKeyOption);
 
-        org.apache.commons.cli.Option importPrivateKeyOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.IMPORT_PRIVATE_KEY.toString()).desc(CLIMessages.get("ImportHexKey")).hasArg(true)
-                .optionalArg(false).argName("key").type(String.class).build();
+        Option importPrivateKeyOption = Option.builder()
+                .longOpt(SemuxOption.IMPORT_PRIVATE_KEY.toString())
+                .desc(CLIMessages.get("ImportHexKey"))
+                .hasArg(true).optionalArg(false).argName("key").type(String.class)
+                .build();
         addOption(importPrivateKeyOption);
     }
 
     public void start(String[] args) throws ParseException {
-        CommandLineParser parser = new DefaultParser();
-        CommandLine commandLine = parser.parse(getOptions(), args);
+        CommandLine cmd = parseOptions(args);
 
-        if (commandLine.hasOption(Option.DATA_DIR.toString())) {
-            setDataDir(commandLine.getOptionValue(Option.DATA_DIR.toString()));
+        if (cmd.hasOption(SemuxOption.DATA_DIR.toString())) {
+            setDataDir(cmd.getOptionValue(SemuxOption.DATA_DIR.toString()));
         }
 
-        if (commandLine.hasOption(Option.COINBASE.toString())) {
-            setCoinbase(((Number) commandLine.getParsedOptionValue(Option.COINBASE.toString())).intValue());
+        if (cmd.hasOption(SemuxOption.COINBASE.toString())) {
+            setCoinbase(((Number) cmd.getParsedOptionValue(SemuxOption.COINBASE.toString())).intValue());
         }
 
-        if (commandLine.hasOption(Option.NETWORK.toString())) {
-            setNetwork(commandLine.getOptionValue(Option.NETWORK.toString()));
+        if (cmd.hasOption(SemuxOption.NETWORK.toString())) {
+            setNetwork(cmd.getOptionValue(SemuxOption.NETWORK.toString()));
         }
 
-        if (commandLine.hasOption(Option.PASSWORD.toString())) {
-            setPassword(commandLine.getOptionValue(Option.PASSWORD.toString()));
+        if (cmd.hasOption(SemuxOption.PASSWORD.toString())) {
+            setPassword(cmd.getOptionValue(SemuxOption.PASSWORD.toString()));
         }
 
-        if (commandLine.hasOption(Option.HELP.toString())) {
+        if (cmd.hasOption(SemuxOption.HELP.toString())) {
             printHelp();
-        } else if (commandLine.hasOption(Option.VERSION.toString())) {
+        } else if (cmd.hasOption(SemuxOption.VERSION.toString())) {
             printVersion();
-        } else if (commandLine.hasOption(Option.ACCOUNT.toString())) {
-            String accountAction = commandLine.getOptionValue(Option.ACCOUNT.toString()).trim();
+        } else if (cmd.hasOption(SemuxOption.ACCOUNT.toString())) {
+            String accountAction = cmd.getOptionValue(SemuxOption.ACCOUNT.toString()).trim();
             if (accountAction.equals("create")) {
                 createAccount();
             } else if (accountAction.equals("list")) {
                 listAccounts();
             }
-        } else if (commandLine.hasOption(Option.CHANGE_PASSWORD.toString())) {
+        } else if (cmd.hasOption(SemuxOption.CHANGE_PASSWORD.toString())) {
             changePassword();
-        } else if (commandLine.hasOption(Option.DUMP_PRIVATE_KEY.toString())) {
-            dumpPrivateKey(commandLine.getOptionValue(Option.DUMP_PRIVATE_KEY.toString()).trim());
-        } else if (commandLine.hasOption(Option.IMPORT_PRIVATE_KEY.toString())) {
-            importPrivateKey(commandLine.getOptionValue(Option.IMPORT_PRIVATE_KEY.toString()).trim());
+        } else if (cmd.hasOption(SemuxOption.DUMP_PRIVATE_KEY.toString())) {
+            dumpPrivateKey(cmd.getOptionValue(SemuxOption.DUMP_PRIVATE_KEY.toString()).trim());
+        } else if (cmd.hasOption(SemuxOption.IMPORT_PRIVATE_KEY.toString())) {
+            importPrivateKey(cmd.getOptionValue(SemuxOption.IMPORT_PRIVATE_KEY.toString()).trim());
         } else {
             start();
         }

@@ -7,9 +7,9 @@
 package org.semux.cli;
 
 /**
- * Option enum for CLI
+ * Semux launcher options.
  */
-public enum Option {
+public enum SemuxOption {
 
     HELP("help"),
 
@@ -33,7 +33,7 @@ public enum Option {
 
     private final String name;
 
-    Option(String s) {
+    SemuxOption(String s) {
         name = s;
     }
 

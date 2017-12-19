@@ -25,10 +25,11 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
 import org.semux.Launcher;
-import org.semux.cli.Option;
+import org.semux.cli.SemuxOption;
 import org.semux.config.Constants;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
@@ -45,7 +46,6 @@ import org.semux.gui.dialog.SelectDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
-import org.semux.log.LoggerConfigurator;
 import org.semux.message.CLIMessages;
 import org.semux.message.GUIMessages;
 import org.semux.net.Peer;
@@ -71,18 +71,36 @@ public class SemuxGUI extends Launcher {
 
     private Kernel kernel;
 
+    public static void main(String[] args) {
+        try {
+            setupLookAndFeel();
+
+            SemuxGUI gui = new SemuxGUI();
+            // set up logger
+            gui.setupLogger(args);
+            // start
+            gui.start(args);
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(null, "Filed to parse the parameters: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Creates a new Semux GUI instance.
+     */
     public SemuxGUI() {
-        super();
-        org.apache.commons.cli.Option dataDirOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.DATA_DIR.toString()).desc(CLIMessages.get("SpecifyDataDir")).hasArg(true)
-                .numberOfArgs(1).optionalArg(false).argName("path").type(String.class).build();
+        Option dataDirOption = Option.builder()
+                .longOpt(SemuxOption.DATA_DIR.toString())
+                .desc(CLIMessages.get("SpecifyDataDir")).hasArg(true)
+                .numberOfArgs(1).optionalArg(false).argName("path").type(String.class)
+                .build();
         addOption(dataDirOption);
 
-        org.apache.commons.cli.Option networkOption = org.apache.commons.cli.Option.builder()
-                .longOpt(Option.NETWORK.toString()).desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1)
-                .optionalArg(false).argName("network").type(String.class).build();
+        Option networkOption = Option.builder()
+                .longOpt(SemuxOption.NETWORK.toString()).desc(CLIMessages.get("SpecifyNetwork")).hasArg(true)
+                .numberOfArgs(1).optionalArg(false).argName("network").type(String.class)
+                .build();
         addOption(networkOption);
-
     }
 
     public SemuxGUI(WalletModel model, Kernel kernel) {
@@ -100,18 +118,17 @@ public class SemuxGUI extends Launcher {
 
     public void start(String[] args) throws ParseException {
         CommandLineParser parser = new DefaultParser();
-        CommandLine commandLine = parser.parse(getOptions(), args);
+        CommandLine cmd = parser.parse(getOptions(), args);
 
-        if (commandLine.hasOption(Option.DATA_DIR.toString())) {
-            setDataDir(commandLine.getOptionValue(Option.DATA_DIR.toString()));
+        if (cmd.hasOption(SemuxOption.DATA_DIR.toString())) {
+            setDataDir(cmd.getOptionValue(SemuxOption.DATA_DIR.toString()));
         }
 
-        if (commandLine.hasOption(Option.NETWORK.toString())) {
-            setNetwork(commandLine.getOptionValue(Option.NETWORK.toString()));
+        if (cmd.hasOption(SemuxOption.NETWORK.toString())) {
+            setNetwork(cmd.getOptionValue(SemuxOption.NETWORK.toString()));
         }
 
         start();
-
     }
 
     protected void start() {
@@ -291,17 +308,6 @@ public class SemuxGUI extends Launcher {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
                 | UnsupportedLookAndFeelException e) {
             // do nothing
-        }
-    }
-
-    public static void main(String[] args) {
-        // TODO: use specified data directory
-        try {
-            LoggerConfigurator.configure(new File(Constants.DEFAULT_DATA_DIR));
-            setupLookAndFeel();
-            new SemuxGUI().start(args);
-        } catch (ParseException exception) {
-            logger.error(CLIMessages.get("ParsingFailed", exception.getMessage()));
         }
     }
 }
