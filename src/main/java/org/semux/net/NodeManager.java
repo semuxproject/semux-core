@@ -37,7 +37,7 @@ public class NodeManager {
 
         @Override
         public Thread newThread(Runnable r) {
-            return new Thread(r, "node-mgr-" + cnt.getAndIncrement());
+            return new Thread(r, "node-" + cnt.getAndIncrement());
         }
     };
 

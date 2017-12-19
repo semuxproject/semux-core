@@ -46,7 +46,7 @@ public class PeerServerMock {
 
                 server = new PeerServer(kernel);
                 server.start(ip, port);
-            }, "p2p-server").start();
+            }, "p2p").start();
 
             long timestamp = System.currentTimeMillis();
             while (System.currentTimeMillis() - timestamp < 30000) {

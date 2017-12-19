@@ -221,12 +221,10 @@ public class SemuxIpFilter {
      */
     public static final class Loader {
 
-        private static final Logger logger = LoggerFactory.getLogger(Loader.class);
-
         public Optional<SemuxIpFilter> load(Path ipFilterJsonPath) {
             try {
                 if (!ipFilterJsonPath.toFile().exists()) {
-                    logger.info("{} doesn't exist, skip loading");
+                    logger.info("{} doesn't exist, skip loading", ipFilterJsonPath);
                     return Optional.empty();
                 }
 

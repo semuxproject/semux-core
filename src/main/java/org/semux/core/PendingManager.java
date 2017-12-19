@@ -51,7 +51,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         @Override
         public Thread newThread(Runnable r) {
-            return new Thread(r, "pending-mgr-" + cnt.getAndIncrement());
+            return new Thread(r, "pending-" + cnt.getAndIncrement());
         }
     };
 
