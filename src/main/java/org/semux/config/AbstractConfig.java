@@ -8,7 +8,6 @@ package org.semux.config;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -49,7 +48,7 @@ public abstract class AbstractConfig implements Config {
     // P2P
     // =========================
     protected String p2pDeclaredIp = null;
-    protected String p2pListenIp = new InetSocketAddress(0).getAddress().getHostAddress();
+    protected String p2pListenIp = "0.0.0.0";
     protected int p2pListenPort = Constants.DEFAULT_P2P_PORT;
     protected Set<InetSocketAddress> p2pSeedNodes = new HashSet<>();
 
@@ -75,7 +74,7 @@ public abstract class AbstractConfig implements Config {
     // API
     // =========================
     protected boolean apiEnabled = false;
-    protected String apiListenIp = InetAddress.getLoopbackAddress().getHostAddress();
+    protected String apiListenIp = "127.0.0.1";
     protected int apiListenPort = Constants.DEFAULT_API_PORT;
     protected String apiUsername = null;
     protected String apiPassword = null;

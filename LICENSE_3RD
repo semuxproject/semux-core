@@ -15,10 +15,6 @@ Caffeine:
 	https://github.com/ben-manes/caffeine
 	Apache License, Version 2.0
 
-Oshi:
-	https://github.com/oshi/oshi
-	Eclipse Public License - v 1.0
-
 Java SemVer:
 	https://github.com/zafarkhaja/jsemver
 	Copyright 2012-2014 Zafar Khaja <zafarkhaja@gmail.com>.

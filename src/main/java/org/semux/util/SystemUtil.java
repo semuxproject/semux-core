@@ -7,10 +7,13 @@
 package org.semux.util;
 
 import java.io.Console;
+import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +25,6 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.resolver.dns.DnsNameResolver;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
 import io.netty.resolver.dns.SequentialDnsServerAddressStreamProvider;
-import oshi.SystemInfo;
 
 public class SystemUtil {
     private static final Logger logger = LoggerFactory.getLogger(SystemUtil.class);
@@ -79,7 +81,7 @@ public class SystemUtil {
     }
 
     /**
-     * Returns the public IP address of this peer by querying opendns.
+     * Returns the public IP address of this peer by querying OpenDNS.
      * 
      * @return an IP address if available, otherwise local address
      */
@@ -95,11 +97,9 @@ public class SystemUtil {
                             new InetSocketAddress("208.67.220.222", 53)))
                     .build();
             return nameResolver.resolve("myip.opendns.com").await().get().getHostAddress();
-        } catch (ExecutionException e) {
-            logger.error("Failed to retrieve your IP address from opendns", e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.error("Failed to retrieve your IP address from opendns", e);
+        } catch (Exception e) {
+            // no stack trace to avoid too many logs when the wallet goes offline
+            logger.error("Failed to retrieve your IP address from opendns");
         }
 
         try {
@@ -200,9 +200,16 @@ public class SystemUtil {
      * 
      * @return
      */
-    public static Long getAvailableMemorySize() {
-        SystemInfo systemInfo = new SystemInfo();
-        return systemInfo.getHardware().getMemory().getAvailable();
+    public static long getAvailableMemorySize() {
+        // NOTE: This following tweak is platform-dependent.
+        try {
+            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+            ObjectName name = new ObjectName("java.lang", "type", "OperatingSystem");
+            return (Long) server.getAttribute(name, "FreePhysicalMemorySize");
+        } catch (Exception e) {
+            logger.info("Failed to get free memory size", e);
+            return 0xffffffffL;
+        }
     }
 
     /**

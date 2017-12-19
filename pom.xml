@@ -377,13 +377,6 @@
             <version>0.9.0</version>
         </dependency>
 
-        <!-- Operating System and Hardware Information library -->
-        <dependency>
-            <groupId>com.github.oshi</groupId>
-            <artifactId>oshi-core</artifactId>
-            <version>3.4.4</version>
-        </dependency>
-
         <!-- Caffeine Caching Library -->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>

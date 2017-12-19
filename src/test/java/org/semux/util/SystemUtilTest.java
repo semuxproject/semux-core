@@ -8,7 +8,7 @@ package org.semux.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -33,10 +33,28 @@ public class SystemUtilTest {
     public void testGetIp() {
         Instant begin = Instant.now();
         String ip = SystemUtil.getIp();
-        logger.info("IP address = {}", ip);
-        assertNotNull(ip);
-        assertFalse(ip.equals("127.0.0.1"));
-        logger.info("SystemUtil.getIp took {} ms", Duration.between(begin, Instant.now()).toMillis());
+        logger.info("IP address = {}, took {} ms", ip, Duration.between(begin, Instant.now()).toMillis());
+
+        assertFalse("127.0.0.1".equals(ip));
+    }
+
+    @Test
+    public void testGetAvailableMemorySize() {
+        long size = SystemUtil.getAvailableMemorySize();
+        logger.info("Available memory size = {} MB", size / 1024L / 1024L);
+
+        assertTrue(size > 0);
+        assertTrue(size < 64L * 1024L * 1024L * 1024L);
+        assertTrue(size != 0xffffffffL);
+    }
+
+    @Test
+    public void testGetUsedHeapSize() {
+        long size = SystemUtil.getUsedHeapSize();
+        logger.info("Used heap size = {} MB", size / 1024L / 1024L);
+
+        assertTrue(size > 0);
+        assertTrue(size < 4L * 1024L * 1024L * 1024L);
     }
 
     @Test
