@@ -29,6 +29,9 @@ import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
 public class BlockchainPerformance {
 
     private static final Logger logger = LoggerFactory.getLogger(BlockchainPerformance.class);
@@ -41,6 +44,8 @@ public class BlockchainPerformance {
     private static final long nonce = 0;
     private static final byte[] data = Bytes.of("test");
     private static final long timestamp = System.currentTimeMillis() - 60 * 1000;
+
+    private static Cache<Long, Transaction> txCache = Caffeine.newBuilder().build();
 
     /**
      * The benchmark tries to create a block filled with single-recipient TRANSFER
@@ -78,8 +83,8 @@ public class BlockchainPerformance {
         List<TransactionResult> results = new ArrayList<>();
 
         for (int i = 0; i < numberOfTxs; i++) {
-            txs.add(new Transaction(TransactionType.TRANSFER, Bytes.random(EdDSA.ADDRESS_LEN), value, fee,
-                    nonce + numberOfTxs, timestamp, data).sign(key));
+            txs.add(txCache.get(nonce + numberOfTxs, (k) ->
+                    new Transaction(TransactionType.TRANSFER, Bytes.random(EdDSA.ADDRESS_LEN), value, fee, k, timestamp, data).sign(key)));
             results.add(new TransactionResult(true));
         }
 
