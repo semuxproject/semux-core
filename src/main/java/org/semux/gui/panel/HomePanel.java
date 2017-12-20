@@ -29,6 +29,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import org.semux.core.Block;
+import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.gui.Action;
@@ -52,6 +53,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private transient SemuxGUI gui;
     private transient WalletModel model;
 
+    private JLabel syncProgress;
     private JLabel blockNum;
     private JLabel blockTime;
     private JLabel coinbase;
@@ -73,7 +75,14 @@ public class HomePanel extends JPanel implements ActionListener {
         overview.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
                 GUIMessages.get("Overview"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        overview.setLayout(new GridLayout(7, 2, 0, 0));
+        overview.setLayout(new GridLayout(8, 2, 0, 0));
+
+        JLabel syncProgressLabel = new JLabel(GUIMessages.get("SyncProgress") + ":");
+        overview.add(syncProgressLabel);
+
+        syncProgress = new JLabel("");
+        syncProgress.setName("syncProgress");
+        overview.add(syncProgress);
 
         JLabel labelBlockNum = new JLabel(GUIMessages.get("BlockNum") + ":");
         overview.add(labelBlockNum);
@@ -232,6 +241,14 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private void refresh() {
         Block block = model.getLatestBlock();
+        SyncManager.Progress progress = model.getSyncProgress();
+        this.syncProgress.setText(
+                progress.getTargetHeight() > 0 ? //
+                        SwingUtil.formatPercentage( //
+                                (double) progress.getCurrentHeight() / (double) progress.getTargetHeight() * 100d //
+                        ) : //
+                        "-" //
+        );
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
         this.coinbase.setText(GUIMessages.get("AccountNum", model.getCoinbase()));

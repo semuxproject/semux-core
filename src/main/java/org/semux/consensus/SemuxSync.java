@@ -26,6 +26,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -97,7 +98,7 @@ public class SemuxSync implements SyncManager {
     private Map<Long, Long> toComplete = new HashMap<>();
     private TreeSet<Pair<Block, Channel>> toProcess = new TreeSet<>(
             Comparator.comparingLong(o -> o.getKey().getNumber()));
-    private long target;
+    private AtomicLong target = new AtomicLong();
     private final Object lock = new Object();
 
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
@@ -123,8 +124,8 @@ public class SemuxSync implements SyncManager {
                 toComplete.clear();
                 toProcess.clear();
 
-                target = targetHeight;
-                for (long i = chain.getLatestBlockNumber() + 1; i < target; i++) {
+                target.set(targetHeight);
+                for (long i = chain.getLatestBlockNumber() + 1; i < target.get(); i++) {
                     toDownload.add(i);
                 }
             }
@@ -263,7 +264,7 @@ public class SemuxSync implements SyncManager {
         }
 
         long latest = chain.getLatestBlockNumber();
-        if (latest + 1 == target) {
+        if (latest + 1 == target.get()) {
             stop();
             return; // This is important because stop() only notify
         }
@@ -396,5 +397,32 @@ public class SemuxSync implements SyncManager {
         }
 
         return true;
+    }
+
+    @Override
+    public Progress getProgress() {
+        return new Progress(chain.getLatestBlockNumber(), target.get());
+    }
+
+    class Progress implements SyncManager.Progress {
+
+        final long currentHeight;
+
+        final long targetHeight;
+
+        private Progress(long currentHeight, long targetHeight) {
+            this.currentHeight = currentHeight;
+            this.targetHeight = targetHeight;
+        }
+
+        @Override
+        public long getCurrentHeight() {
+            return currentHeight;
+        }
+
+        @Override
+        public long getTargetHeight() {
+            return targetHeight;
+        }
     }
 }
