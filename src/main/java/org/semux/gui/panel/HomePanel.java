@@ -241,14 +241,7 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private void refresh() {
         Block block = model.getLatestBlock();
-        SyncManager.Progress progress = model.getSyncProgress();
-        this.syncProgress.setText(
-                progress.getTargetHeight() > 0 ? //
-                        SwingUtil.formatPercentage( //
-                                (double) progress.getCurrentHeight() / (double) progress.getTargetHeight() * 100d //
-                        ) : //
-                        "-" //
-        );
+        this.syncProgress.setText(ProgressFormatter.format(model.getSyncProgress()));
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
         this.coinbase.setText(GUIMessages.get("AccountNum", model.getCoinbase()));
@@ -284,5 +277,20 @@ public class HomePanel extends JPanel implements ActionListener {
             transactions.add(new TransactionPanel(tx, inBound, outBound, SwingUtil.getTransactionDescription(gui, tx)));
         }
         transactions.revalidate();
+    }
+
+    public static class ProgressFormatter {
+
+        private ProgressFormatter() {
+        }
+
+        public static String format(SyncManager.Progress progress) {
+            if (progress.getTargetHeight() > 0) {
+                return SwingUtil.formatPercentage(
+                        (double) progress.getCurrentHeight() / (double) progress.getTargetHeight() * 100d);
+            } else {
+                return "-";
+            }
+        }
     }
 }

@@ -400,17 +400,17 @@ public class SemuxSync implements SyncManager {
     }
 
     @Override
-    public Progress getProgress() {
-        return new Progress(chain.getLatestBlockNumber(), target.get());
+    public SemuxSyncProgress getProgress() {
+        return new SemuxSyncProgress(chain.getLatestBlockNumber(), target.get());
     }
 
-    class Progress implements SyncManager.Progress {
+    public static class SemuxSyncProgress implements SyncManager.Progress {
 
         final long currentHeight;
 
         final long targetHeight;
 
-        private Progress(long currentHeight, long targetHeight) {
+        public SemuxSyncProgress(long currentHeight, long targetHeight) {
             this.currentHeight = currentHeight;
             this.targetHeight = targetHeight;
         }
