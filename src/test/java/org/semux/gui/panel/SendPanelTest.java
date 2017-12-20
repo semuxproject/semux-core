@@ -74,6 +74,7 @@ public class SendPanelTest {
         // filled transaction should be sent to PendingManager once "Yes" button is
         // clicked
         window.dialog().button(withText("Yes")).click();
+        assertEquals(GUIMessages.get("SuccessDialogTitle"), window.dialog().target().getTitle());
         verify(pendingManager).addTransactionSync(transactionArgumentCaptor.capture());
 
         // verify transaction

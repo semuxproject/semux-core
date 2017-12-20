@@ -41,10 +41,14 @@ import org.semux.gui.model.WalletModel;
 import org.semux.message.GUIMessages;
 import org.semux.util.Bytes;
 import org.semux.util.exception.UnreachableException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SendPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
+
+    private static Logger logger = LoggerFactory.getLogger(SendPanel.class);
 
     private JFrame frame;
     private transient WalletModel model;
@@ -290,7 +294,8 @@ public class SendPanel extends JPanel implements ActionListener {
                     sendTransaction(pendingMgr, tx);
                 }
             } catch (ParseException ex) {
-                JOptionPane.showMessageDialog(this, "Exception: " + ex.getMessage());
+                logger.error("Exception: " + ex.getMessage(), ex);
+                showErrorDialog("Exception: " + ex.getMessage());
             }
             break;
         case CLEAR:
@@ -308,7 +313,11 @@ public class SendPanel extends JPanel implements ActionListener {
     private void sendTransaction(PendingManager pendingMgr, Transaction tx) {
         PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
         if (result.error == null) {
-            JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionSent", 30));
+            JOptionPane.showMessageDialog(
+                    this,
+                    GUIMessages.get("TransactionSent", 30),
+                    GUIMessages.get("SuccessDialogTitle"),
+                    JOptionPane.INFORMATION_MESSAGE);
             clear();
         } else {
             showErrorDialog(GUIMessages.get("TransactionFailed", result.error.toString()));

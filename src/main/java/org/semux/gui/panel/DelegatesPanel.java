@@ -37,6 +37,7 @@ import javax.swing.table.TableRowSorter;
 
 import org.semux.Kernel;
 import org.semux.config.Config;
+import org.semux.config.Constants;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.PendingManager;
@@ -437,9 +438,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                         SwingUtil.formatValue(config.minDelegateFee() + config.minTransactionFee())));
             } else {
                 // confirm system requirements
-                if (!SystemUtil.bench() && JOptionPane.showConfirmDialog(this, GUIMessages.get("ComputerNotQualified"),
-                        GUIMessages.get("ConfirmDelegateRegistration"),
-                        JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
+                if ((config.networkId() == Constants.MAIN_NET_ID && !SystemUtil.bench()) &&
+                        JOptionPane.showConfirmDialog(
+                                this,
+                                GUIMessages.get("ComputerNotQualified"),
+                                GUIMessages.get("ConfirmDelegateRegistration"),
+                                JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
                     break;
                 }
 
