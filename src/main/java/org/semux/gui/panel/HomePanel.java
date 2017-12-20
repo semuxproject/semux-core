@@ -241,7 +241,7 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private void refresh() {
         Block block = model.getLatestBlock();
-        this.syncProgress.setText(ProgressFormatter.format(model.getSyncProgress()));
+        this.syncProgress.setText(SyncProgressFormatter.format(model.getSyncProgress()));
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
         this.coinbase.setText(GUIMessages.get("AccountNum", model.getCoinbase()));
@@ -279,9 +279,9 @@ public class HomePanel extends JPanel implements ActionListener {
         transactions.revalidate();
     }
 
-    public static class ProgressFormatter {
+    public static class SyncProgressFormatter {
 
-        private ProgressFormatter() {
+        private SyncProgressFormatter() {
         }
 
         public static String format(SyncManager.Progress progress) {
