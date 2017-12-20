@@ -83,8 +83,8 @@ public class BlockchainPerformance {
         List<TransactionResult> results = new ArrayList<>();
 
         for (int i = 0; i < numberOfTxs; i++) {
-            txs.add(txCache.get(nonce + numberOfTxs, (k) ->
-                    new Transaction(TransactionType.TRANSFER, Bytes.random(EdDSA.ADDRESS_LEN), value, fee, k, timestamp, data).sign(key)));
+            txs.add(txCache.get(nonce + numberOfTxs, (k) -> new Transaction(TransactionType.TRANSFER,
+                    Bytes.random(EdDSA.ADDRESS_LEN), value, fee, k, timestamp, data).sign(key)));
             results.add(new TransactionResult(true));
         }
 
