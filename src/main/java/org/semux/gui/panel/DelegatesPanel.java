@@ -191,20 +191,24 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         // @formatter:on
 
         textVote = SwingUtil.textFieldWithCopyPastePopup();
+        textVote.setName("textVote");
         textVote.setToolTipText(GUIMessages.get("NumVotes"));
         textVote.setColumns(10);
         textVote.setActionCommand(Action.VOTE.name());
         textVote.addActionListener(this);
 
         JButton btnVote = SwingUtil.createDefaultButton(GUIMessages.get("Vote"), this, Action.VOTE);
+        btnVote.setName("btnVote");
 
         textUnvote = SwingUtil.textFieldWithCopyPastePopup();
+        textUnvote.setName("testUnvote");
         textUnvote.setToolTipText(GUIMessages.get("NumVotes"));
         textUnvote.setColumns(10);
         textUnvote.setActionCommand(Action.UNVOTE.name());
         textUnvote.addActionListener(this);
 
         JButton btnUnvote = SwingUtil.createDefaultButton(GUIMessages.get("Unvote"), this, Action.UNVOTE);
+        btnUnvote.setName("btnUnvote");
 
         labelSelectedDelegate = new JLabel(GUIMessages.get("PleaseSelectDelegate"));
         labelSelectedDelegate.setName("SelectedDelegateLabel");
@@ -249,12 +253,14 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         JButton btnDelegate = SwingUtil.createDefaultButton(GUIMessages.get("RegisterAsDelegate"), this,
                 Action.DELEGATE);
+        btnDelegate.setName("btnDelegate");
         btnDelegate.setToolTipText(
                 GUIMessages.get("RegisterAsDelegateToolTip", SwingUtil.formatValue(config.minDelegateFee())));
 
         textName = SwingUtil.textFieldWithCopyPastePopup();
 
         textName.setToolTipText(GUIMessages.get("DelegateName"));
+        textName.setName("textName");
 
         textName.setColumns(10);
         textName.setActionCommand(Action.DELEGATE.name());
@@ -467,11 +473,20 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     }
 
     private void sendTransaction(PendingManager pendingMgr, Transaction tx) {
-        if (pendingMgr.addTransactionSync(tx)) {
-            JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionSent", 30));
+        PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
+        if (result.error == null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    GUIMessages.get("TransactionSent", 30),
+                    GUIMessages.get("SuccessDialogTitle"),
+                    JOptionPane.INFORMATION_MESSAGE);
             clear();
         } else {
-            JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionFailed"));
+            JOptionPane.showMessageDialog(
+                    this,
+                    GUIMessages.get("TransactionFailed", result.error.toString()),
+                    GUIMessages.get("ErrorDialogTitle"),
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 

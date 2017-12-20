@@ -38,6 +38,7 @@ import org.semux.api.response.SendTransactionResponse;
 import org.semux.api.util.TransactionBuilder;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.exception.WalletLockedException;
@@ -250,6 +251,7 @@ public class ApiHandlerImpl implements ApiHandler {
     private ApiHandlerResponse getPendingTransactions() {
         return new GetPendingTransactionsResponse(true, //
                 kernel.getPendingManager().getTransactions().parallelStream() //
+                        .map(pendingTransaction -> pendingTransaction.transaction) //
                         .map(GetTransactionResponse.Result::new) //
                         .collect(Collectors.toList()));
     }
@@ -615,12 +617,12 @@ public class ApiHandlerImpl implements ApiHandler {
 
             Transaction tx = transactionBuilder.build();
 
-            if (kernel.getPendingManager().addTransactionSync(tx)) {
-                return new DoTransactionResponse(true, null, Hex.encode0x(tx.getHash()));
-            } else {
-                // TODO: report the actual reason of rejection
-                return failure("Transaction rejected by pending manager");
+            PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
+            if (result.error != null) {
+                return failure("Transaction rejected by pending manager: " + result.error.toString());
             }
+
+            return new DoTransactionResponse(true, null, Hex.encode0x(tx.getHash()));
         } catch (IllegalArgumentException ex) {
             return failure(ex.getMessage());
         }

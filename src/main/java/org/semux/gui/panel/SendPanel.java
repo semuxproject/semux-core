@@ -259,18 +259,17 @@ public class SendPanel extends JPanel implements ActionListener {
                 byte[] to = Hex.decode0x(getToText());
 
                 if (acc == null) {
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
+                    showErrorDialog(GUIMessages.get("SelectAccount"));
                 } else if (value <= 0L) {
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("EnterValidValue"));
+                    showErrorDialog(GUIMessages.get("EnterValidValue"));
                 } else if (fee < config.minTransactionFee()) {
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionFeeTooLow"));
+                    showErrorDialog(GUIMessages.get("TransactionFeeTooLow"));
                 } else if (value + fee > acc.getAvailable()) {
-                    JOptionPane.showMessageDialog(this,
-                            GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
+                    showErrorDialog(GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
                 } else if (to.length != EdDSA.ADDRESS_LEN) {
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidReceivingAddress"));
-                } else if (Bytes.of(data).length > 128) {
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidData", 128));
+                    showErrorDialog(GUIMessages.get("InvalidReceivingAddress"));
+                } else if (Bytes.of(data).length > config.maxTransferDataSize()) {
+                    showErrorDialog(GUIMessages.get("InvalidData", config.maxTransferDataSize()));
                 } else {
                     int ret = JOptionPane.showConfirmDialog(this,
                             GUIMessages.get("TransferInfo", SwingUtil.formatValue(value), Hex.encode0x(to)),
@@ -307,12 +306,21 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     private void sendTransaction(PendingManager pendingMgr, Transaction tx) {
-        if (pendingMgr.addTransactionSync(tx)) {
+        PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
+        if (result.error == null) {
             JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionSent", 30));
             clear();
         } else {
-            JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionFailed"));
+            showErrorDialog(GUIMessages.get("TransactionFailed", result.error.toString()));
         }
+    }
+
+    private void showErrorDialog(String message) {
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                GUIMessages.get("ErrorDialogTitle"),
+                JOptionPane.ERROR_MESSAGE);
     }
 
     private WalletAccount getSelectedAccount() {
