@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
@@ -115,6 +116,28 @@ public class PendingManagerTest {
 
         Thread.sleep(100);
         assertEquals(3, pendingMgr.getTransactions().size());
+    }
+
+    @Test
+    public void testNonceJumpTimestampError() throws InterruptedException {
+        long now = System.currentTimeMillis();
+        long nonce = accountState.getAccount(from).getNonce();
+
+        Transaction tx3 = new Transaction(type, to, value, fee, nonce + 2, now - TimeUnit.HOURS.toMillis(2) + 1,
+                Bytes.EMPTY_BYTES).sign(key);
+        pendingMgr.addTransaction(tx3);
+        Transaction tx2 = new Transaction(type, to, value, fee, nonce + 1, now, Bytes.EMPTY_BYTES).sign(key);
+        pendingMgr.addTransaction(tx2);
+
+        Thread.sleep(100);
+        assertEquals(0, pendingMgr.getTransactions().size());
+
+        Transaction tx = new Transaction(type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
+        pendingMgr.addTransaction(tx);
+
+        Thread.sleep(100);
+        List<PendingManager.PendingTransaction> txs = pendingMgr.getTransactions();
+        assertEquals(3, txs.size());
     }
 
     @Test
