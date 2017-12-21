@@ -40,4 +40,27 @@ public interface SyncManager {
      *            the message
      */
     void onMessage(Channel channel, Message msg);
+
+    /**
+     * Returns current synchronisation progress.
+     *
+     * @return a ${@link Progress} object
+     */
+    Progress getProgress();
+
+    /**
+     * This interface represents synchronisation progress
+     */
+    interface Progress {
+
+        /**
+         * @return the current height of sync process.
+         */
+        long getCurrentHeight();
+
+        /**
+         * @return the target height of sync process.
+         */
+        long getTargetHeight();
+    }
 }

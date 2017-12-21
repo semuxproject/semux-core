@@ -29,6 +29,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import org.semux.core.Block;
+import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.gui.Action;
@@ -52,6 +53,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private transient SemuxGUI gui;
     private transient WalletModel model;
 
+    private JLabel syncProgress;
     private JLabel blockNum;
     private JLabel blockTime;
     private JLabel coinbase;
@@ -120,6 +122,11 @@ public class HomePanel extends JPanel implements ActionListener {
         JLabel lblPeers = new JLabel(GUIMessages.get("Peers") + ":");
         peers = new JLabel("");
 
+        JLabel syncProgressLabel = new JLabel(GUIMessages.get("SyncProgress") + ":");
+        overview.add(syncProgressLabel);
+        syncProgress = new JLabel("");
+        syncProgress.setName("syncProgress");
+
         // setup transactions panel
         transactions = new JPanel();
         transactions.setBorder(new TitledBorder(
@@ -135,8 +142,12 @@ public class HomePanel extends JPanel implements ActionListener {
                         .addGroup(groupLayout.createSequentialGroup()
                             .addContainerGap()
                             .addComponent(lblPeers)
+                            .addPreferredGap(ComponentPlacement.RELATED)
+                            .addComponent(peers)
                             .addPreferredGap(ComponentPlacement.UNRELATED)
-                            .addComponent(peers))
+                            .addComponent(syncProgressLabel)
+                            .addPreferredGap(ComponentPlacement.RELATED)
+                            .addComponent(syncProgress))
                         .addComponent(overview, GroupLayout.PREFERRED_SIZE, 324, GroupLayout.PREFERRED_SIZE))
                     .addGap(18)
                     .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE))
@@ -151,7 +162,10 @@ public class HomePanel extends JPanel implements ActionListener {
                             .addPreferredGap(ComponentPlacement.RELATED, 353, Short.MAX_VALUE)
                             .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                                 .addComponent(lblPeers)
-                                .addComponent(peers))
+                                .addComponent(peers)
+                                .addComponent(syncProgressLabel)
+                                .addComponent(syncProgress))
+
                             .addPreferredGap(ComponentPlacement.RELATED)))
                     .addGap(0))
         );
@@ -232,6 +246,7 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private void refresh() {
         Block block = model.getLatestBlock();
+        this.syncProgress.setText(SyncProgressFormatter.format(model.getSyncProgress()));
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
         this.coinbase.setText(GUIMessages.get("AccountNum", model.getCoinbase()));
@@ -267,5 +282,24 @@ public class HomePanel extends JPanel implements ActionListener {
             transactions.add(new TransactionPanel(tx, inBound, outBound, SwingUtil.getTransactionDescription(gui, tx)));
         }
         transactions.revalidate();
+    }
+
+    public static class SyncProgressFormatter {
+
+        private SyncProgressFormatter() {
+        }
+
+        public static String format(SyncManager.Progress progress) {
+            if (progress == null) {
+                return GUIMessages.get("SyncStopped");
+            } else if (progress.getCurrentHeight() > 0 && progress.getCurrentHeight() == progress.getTargetHeight()) {
+                return GUIMessages.get("SyncFinished");
+            } else if (progress.getTargetHeight() > 0) {
+                return SwingUtil.formatPercentage(
+                        (double) progress.getCurrentHeight() / (double) progress.getTargetHeight() * 100d);
+            } else {
+                return GUIMessages.get("SyncStopped");
+            }
+        }
     }
 }

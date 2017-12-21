@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.semux.core.Block;
+import org.semux.core.SyncManager;
 import org.semux.gui.Action;
 import org.semux.gui.AddressBook;
 import org.semux.net.Peer;
@@ -28,6 +29,8 @@ import org.semux.util.ByteArray;
 public class WalletModel {
 
     private List<ActionListener> listeners = new CopyOnWriteArrayList<>();
+
+    private SyncManager.Progress syncProgress;
 
     private Block latestBlock;
 
@@ -60,6 +63,25 @@ public class WalletModel {
      */
     public void addListener(ActionListener listener) {
         listeners.add(listener);
+    }
+
+    /**
+     * Getter for property ${@link #syncProgress}.
+     *
+     * @return Value to set for property ${@link #syncProgress}.
+     */
+    public SyncManager.Progress getSyncProgress() {
+        return syncProgress;
+    }
+
+    /**
+     * Setter for property ${@link #syncProgress}.
+     *
+     * @param syncProgress
+     *            Value to set for property ${@link #syncProgress}.
+     */
+    public void setSyncProgress(SyncManager.Progress syncProgress) {
+        this.syncProgress = syncProgress;
     }
 
     /**

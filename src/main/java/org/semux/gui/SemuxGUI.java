@@ -257,6 +257,7 @@ public class SemuxGUI extends Launcher {
         DelegateState ds = chain.getDelegateState();
 
         // update latest block and coinbase delegate status
+        model.setSyncProgress(kernel.getSyncManager().getProgress());
         model.setLatestBlock(block);
         model.setDelegate(ds.getDelegateByAddress(kernel.getCoinbase().toAddress()) != null);
 
