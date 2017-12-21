@@ -56,40 +56,40 @@ import org.slf4j.LoggerFactory;
 public class SemuxBFT implements Consensus {
     static final Logger logger = LoggerFactory.getLogger(SemuxBFT.class);
 
-    private Kernel kernel;
-    private Config config;
+    protected Kernel kernel;
+    protected Config config;
 
-    private Blockchain chain;
-    private ChannelManager channelMgr;
-    private PendingManager pendingMgr;
-    private SyncManager sync;
+    protected Blockchain chain;
+    protected ChannelManager channelMgr;
+    protected PendingManager pendingMgr;
+    protected SyncManager sync;
 
-    private EdDSA coinbase;
+    protected EdDSA coinbase;
 
-    private AccountState accountState;
-    private DelegateState delegateState;
+    protected AccountState accountState;
+    protected DelegateState delegateState;
 
-    private Timer timer;
-    private Broadcaster broadcaster;
-    private BlockingQueue<Event> events = new LinkedBlockingQueue<>();
+    protected Timer timer;
+    protected Broadcaster broadcaster;
+    protected BlockingQueue<Event> events = new LinkedBlockingQueue<>();
 
-    private volatile Status status;
-    private volatile State state;
+    protected volatile Status status;
+    protected volatile State state;
 
-    private long height;
-    private int view;
-    private Proof proof;
-    private Proposal proposal;
+    protected long height;
+    protected int view;
+    protected Proof proof;
+    protected Proposal proposal;
 
-    private Map<ByteArray, Block> validBlocks = new LRUMap<>(8);
+    protected Map<ByteArray, Block> validBlocks = new LRUMap<>(8);
 
-    private volatile List<String> validators;
-    private volatile List<Channel> activeValidators;
-    private volatile long lastUpdate;
+    protected volatile List<String> validators;
+    protected volatile List<Channel> activeValidators;
+    protected volatile long lastUpdate;
 
-    private VoteSet validateVotes;
-    private VoteSet precommitVotes;
-    private VoteSet commitVotes;
+    protected VoteSet validateVotes;
+    protected VoteSet precommitVotes;
+    protected VoteSet commitVotes;
 
     public SemuxBFT(Kernel kernel) {
         this.kernel = kernel;
@@ -115,7 +115,7 @@ public class SemuxBFT implements Consensus {
      * Pause the consensus, and do synchronization.
      * 
      */
-    private void sync(long target) {
+    protected void sync(long target) {
         if (status == Status.RUNNING) {
             // change status
             status = Status.SYNCING;
@@ -140,7 +140,7 @@ public class SemuxBFT implements Consensus {
     /**
      * Main loop that processes all the BFT events.
      */
-    private void eventLoop() {
+    protected void eventLoop() {
         while (!Thread.currentThread().isInterrupted() && status != Status.STOPPED) {
             try {
                 Event ev = events.take();
