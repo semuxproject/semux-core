@@ -75,14 +75,7 @@ public class HomePanel extends JPanel implements ActionListener {
         overview.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
                 GUIMessages.get("Overview"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        overview.setLayout(new GridLayout(8, 2, 0, 0));
-
-        JLabel syncProgressLabel = new JLabel(GUIMessages.get("SyncProgress") + ":");
-        overview.add(syncProgressLabel);
-
-        syncProgress = new JLabel("");
-        syncProgress.setName("syncProgress");
-        overview.add(syncProgress);
+        overview.setLayout(new GridLayout(7, 2, 0, 0));
 
         JLabel labelBlockNum = new JLabel(GUIMessages.get("BlockNum") + ":");
         overview.add(labelBlockNum);
@@ -129,6 +122,11 @@ public class HomePanel extends JPanel implements ActionListener {
         JLabel lblPeers = new JLabel(GUIMessages.get("Peers") + ":");
         peers = new JLabel("");
 
+        JLabel syncProgressLabel = new JLabel(GUIMessages.get("SyncProgress") + ":");
+        overview.add(syncProgressLabel);
+        syncProgress = new JLabel("");
+        syncProgress.setName("syncProgress");
+
         // setup transactions panel
         transactions = new JPanel();
         transactions.setBorder(new TitledBorder(
@@ -144,8 +142,12 @@ public class HomePanel extends JPanel implements ActionListener {
                         .addGroup(groupLayout.createSequentialGroup()
                             .addContainerGap()
                             .addComponent(lblPeers)
+                            .addPreferredGap(ComponentPlacement.RELATED)
+                            .addComponent(peers)
                             .addPreferredGap(ComponentPlacement.UNRELATED)
-                            .addComponent(peers))
+                            .addComponent(syncProgressLabel)
+                            .addPreferredGap(ComponentPlacement.RELATED)
+                            .addComponent(syncProgress))
                         .addComponent(overview, GroupLayout.PREFERRED_SIZE, 324, GroupLayout.PREFERRED_SIZE))
                     .addGap(18)
                     .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE))
@@ -160,7 +162,10 @@ public class HomePanel extends JPanel implements ActionListener {
                             .addPreferredGap(ComponentPlacement.RELATED, 353, Short.MAX_VALUE)
                             .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                                 .addComponent(lblPeers)
-                                .addComponent(peers))
+                                .addComponent(peers)
+                                .addComponent(syncProgressLabel)
+                                .addComponent(syncProgress))
+
                             .addPreferredGap(ComponentPlacement.RELATED)))
                     .addGap(0))
         );
@@ -285,7 +290,7 @@ public class HomePanel extends JPanel implements ActionListener {
         }
 
         public static String format(SyncManager.Progress progress) {
-            if (progress.getTargetHeight() > 0) {
+            if (progress != null && progress.getTargetHeight() > 0) {
                 return SwingUtil.formatPercentage(
                         (double) progress.getCurrentHeight() / (double) progress.getTargetHeight() * 100d);
             } else {

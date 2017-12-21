@@ -401,7 +401,7 @@ public class SemuxSync implements SyncManager {
 
     @Override
     public SemuxSyncProgress getProgress() {
-        return new SemuxSyncProgress(chain.getLatestBlockNumber(), target.get());
+        return new SemuxSyncProgress(chain.getLatestBlockNumber() + 1, target.get());
     }
 
     public static class SemuxSyncProgress implements SyncManager.Progress {
