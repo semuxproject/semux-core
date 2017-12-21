@@ -290,7 +290,11 @@ public class HomePanel extends JPanel implements ActionListener {
         }
 
         public static String format(SyncManager.Progress progress) {
-            if (progress != null && progress.getTargetHeight() > 0) {
+            if (progress == null) {
+                return GUIMessages.get("SyncStopped");
+            } else if (progress.getCurrentHeight() > 0 && progress.getCurrentHeight() == progress.getTargetHeight()) {
+                return GUIMessages.get("SyncFinished");
+            } else if (progress.getTargetHeight() > 0) {
                 return SwingUtil.formatPercentage(
                         (double) progress.getCurrentHeight() / (double) progress.getTargetHeight() * 100d);
             } else {

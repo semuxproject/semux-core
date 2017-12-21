@@ -52,10 +52,12 @@ public class HomePanelTest {
 
     @Test
     public void testProgressFormatter() {
-        assertEquals("100.0 %", HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(100L, 100L)));
+        assertEquals(GUIMessages.get("SyncFinished"),
+                HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(100L, 100L)));
         assertEquals("12.3 %", HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(1234L, 10000L)));
         assertEquals("0.0 %", HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(0L, 10000L)));
-        assertEquals(GUIMessages.get("SyncStopped"), HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(100L, 0L)));
+        assertEquals(GUIMessages.get("SyncStopped"),
+                HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(100L, 0L)));
         assertEquals(GUIMessages.get("SyncStopped"), HomePanel.SyncProgressFormatter.format(null));
     }
 }
