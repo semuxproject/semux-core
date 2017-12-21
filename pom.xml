@@ -153,31 +153,31 @@
                                 <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis"/>
                                 <fixcrlf srcdir="${dist.base}/windows" includes="LICENSE*" eol="dos" eof="asis"/>
 
-                                <!-- unix build (executable jar) -->
-                                <copy todir="${dist.base}/unix">
+                                <!-- linux build (executable jar) -->
+                                <copy todir="${dist.base}/linux">
                                     <fileset dir="${project.basedir}">
                                         <include name="config/**"/>
                                         <include name="LICENSE*"/>
                                     </fileset>
                                 </copy>
                                 <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar"
-                                      tofile="${dist.base}/unix/semux.jar"/>
+                                      tofile="${dist.base}/linux/semux.jar"/>
                                 <copy file="${project.basedir}/scripts/semux-cli.sh"
-                                      tofile="${dist.base}/unix/semux-cli.sh"/>
+                                      tofile="${dist.base}/linux/semux-cli.sh"/>
                                 <copy file="${project.basedir}/scripts/semux-gui.sh"
-                                      tofile="${dist.base}/unix/semux-gui.sh"/>
+                                      tofile="${dist.base}/linux/semux-gui.sh"/>
                                 <copy file="${project.basedir}/src/main/resources/logback.xml"
-                                      tofile="${dist.base}/unix/config/logback.xml"/> />
+                                      tofile="${dist.base}/linux/config/logback.xml"/> />
 
-                                <!-- unix build (executable jar) -->
+                                <!-- linux build (executable jar) -->
                                 <copy todir="${dist.base}/macos">
-                                    <fileset dir="${dist.base}/unix"/>
+                                    <fileset dir="${dist.base}/linux"/>
                                 </copy>
 
                                 <!-- add execute permission -->
                                 <chmod file="${dist.base}/windows/semux.exe" perm="755"/>
-                                <chmod file="${dist.base}/unix/semux.jar" perm="755"/>
-                                <chmod file="${dist.base}/unix/semux*.sh" perm="755"/>
+                                <chmod file="${dist.base}/linux/semux.jar" perm="755"/>
+                                <chmod file="${dist.base}/linux/semux*.sh" perm="755"/>
                                 <chmod file="${dist.base}/macos/semux.jar" perm="755"/>
                                 <chmod file="${dist.base}/macos/semux*.sh" perm="755"/>
                             </target>
