@@ -22,6 +22,7 @@ import org.semux.consensus.SemuxSync;
 import org.semux.core.Block;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletModel;
+import org.semux.message.GUIMessages;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HomePanelTest {
@@ -54,7 +55,7 @@ public class HomePanelTest {
         assertEquals("100.0 %", HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(100L, 100L)));
         assertEquals("12.3 %", HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(1234L, 10000L)));
         assertEquals("0.0 %", HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(0L, 10000L)));
-        assertEquals("-", HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(100L, 0L)));
-        assertEquals("-", HomePanel.SyncProgressFormatter.format(null));
+        assertEquals(GUIMessages.get("SyncStopped"), HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(100L, 0L)));
+        assertEquals(GUIMessages.get("SyncStopped"), HomePanel.SyncProgressFormatter.format(null));
     }
 }

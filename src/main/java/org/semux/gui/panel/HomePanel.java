@@ -294,7 +294,7 @@ public class HomePanel extends JPanel implements ActionListener {
                 return SwingUtil.formatPercentage(
                         (double) progress.getCurrentHeight() / (double) progress.getTargetHeight() * 100d);
             } else {
-                return "-";
+                return GUIMessages.get("SyncStopped");
             }
         }
     }
