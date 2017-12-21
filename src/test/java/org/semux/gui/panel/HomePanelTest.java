@@ -32,9 +32,12 @@ public class HomePanelTest {
 
     @Test
     public void testSyncProgress100() {
+        // mock progress
+        SemuxSync.SemuxSyncProgress progress = new SemuxSync.SemuxSyncProgress(100L, 100L);
+
         // mock walletModel
         when(walletModel.getLatestBlock()).thenReturn(mock(Block.class));
-        when(walletModel.getSyncProgress()).thenReturn(new SemuxSync.SemuxSyncProgress(100L, 100L));
+        when(walletModel.getSyncProgress()).thenReturn(progress);
 
         // mock kernel
         KernelMock kernelMock = spy(new KernelMock());
@@ -45,7 +48,7 @@ public class HomePanelTest {
         window.show();
 
         window.requireVisible();
-        window.label("syncProgress").requireText(SwingUtil.formatPercentage(100d));
+        window.label("syncProgress").requireText(HomePanel.SyncProgressFormatter.format(progress));
 
         window.cleanUp();
     }
