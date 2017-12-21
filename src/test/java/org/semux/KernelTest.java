@@ -7,8 +7,6 @@
 package org.semux;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
@@ -30,16 +28,12 @@ public class KernelTest {
 
         // start kernel
         kernel.start();
-        await().until(kernel::isRunning);
-
-        assertTrue(kernel.getNodeManager().isRunning());
-        assertTrue(kernel.getPendingManager().isRunning());
-
-        assertTrue(kernel.getApi().isRunning());
-        assertTrue(kernel.getP2p().isRunning());
-
-        assertTrue(kernel.getConsensus().isRunning());
-        assertFalse(kernel.getSyncManager().isRunning());
+        await().until(() -> kernel.getNodeManager().isRunning() &&
+                kernel.getPendingManager().isRunning() &&
+                kernel.getApi().isRunning() &&
+                kernel.getP2p().isRunning() &&
+                kernel.getConsensus().isRunning() &&
+                !kernel.getSyncManager().isRunning());
 
         // stop kernel
         kernel.stop();
