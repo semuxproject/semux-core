@@ -9,6 +9,8 @@ package org.semux.core;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.semux.core.PendingManager.ALLOWED_TIME_DRIFT;
+import static org.semux.core.TransactionResult.Error.INVALID_TIMESTAMP;
 
 import java.util.Arrays;
 import java.util.List;
@@ -123,21 +125,33 @@ public class PendingManagerTest {
         long now = System.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
-        Transaction tx3 = new Transaction(type, to, value, fee, nonce + 2, now - TimeUnit.HOURS.toMillis(2) + 1,
+        Transaction tx3 = new Transaction(type, to, value, fee, nonce + 2,
+                now - TimeUnit.HOURS.toMillis(2) + TimeUnit.SECONDS.toMillis(1),
                 Bytes.EMPTY_BYTES).sign(key);
         pendingMgr.addTransaction(tx3);
         Transaction tx2 = new Transaction(type, to, value, fee, nonce + 1, now, Bytes.EMPTY_BYTES).sign(key);
         pendingMgr.addTransaction(tx2);
 
-        Thread.sleep(100);
+        TimeUnit.SECONDS.sleep(1);
         assertEquals(0, pendingMgr.getTransactions().size());
 
         Transaction tx = new Transaction(type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
         pendingMgr.addTransaction(tx);
 
-        Thread.sleep(100);
+        TimeUnit.SECONDS.sleep(1);
         List<PendingManager.PendingTransaction> txs = pendingMgr.getTransactions();
         assertEquals(3, txs.size());
+    }
+
+    @Test
+    public void testTimestampError() {
+        long now = System.currentTimeMillis();
+        long nonce = accountState.getAccount(from).getNonce();
+
+        Transaction tx3 = new Transaction(type, to, value, fee, nonce, now - ALLOWED_TIME_DRIFT - 1,
+                Bytes.EMPTY_BYTES).sign(key);
+        PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx3);
+        assertEquals(INVALID_TIMESTAMP, result.error);
     }
 
     @Test

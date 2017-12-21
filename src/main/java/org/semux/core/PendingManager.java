@@ -54,6 +54,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         }
     };
 
+    public static final long ALLOWED_TIME_DRIFT = TimeUnit.HOURS.toMillis(2);
     private static final int QUEUE_MAX_SIZE = 64 * 1024;
     private static final int POOL_MAX_SIZE = 8 * 1024;
     private static final int DELAYED_MAX_SIZE = 16 * 1024;
@@ -308,14 +309,18 @@ public class PendingManager implements Runnable, BlockchainListener {
         // NOTE: assume transaction format is valid
 
         int cnt = 0;
-        while (tx != null && tx.getNonce() == getNonce(tx.getFrom())) {
+        long now = System.currentTimeMillis();
 
-            // check transaction timestamp
-            long now = System.currentTimeMillis();
-            long twoHours = TimeUnit.HOURS.toMillis(2);
-            if (tx.getTimestamp() < now - twoHours || tx.getTimestamp() > now + twoHours) {
-                return new ProcessTransactionResult(cnt, TransactionResult.Error.INVALID_TIMESTAMP);
-            }
+        // check transaction timestamp if this is a fresh transaction:
+        // a time drift of 2 hours is allowed
+        if (tx.getTimestamp() < now - ALLOWED_TIME_DRIFT || tx.getTimestamp() > now + ALLOWED_TIME_DRIFT) {
+            return new ProcessTransactionResult(cnt, TransactionResult.Error.INVALID_TIMESTAMP);
+        }
+
+        // Check transaction nonce: pending transactions must be executed sequentially
+        // by nonce in ascending order. In case of a nonce jump, the transaction is
+        // delayed for the next event loop of PendingManager.
+        while (tx != null && tx.getNonce() == getNonce(tx.getFrom())) {
 
             // execute transactions
             AccountState as = pendingAS.track();
@@ -327,7 +332,8 @@ public class PendingManager implements Runnable, BlockchainListener {
                 as.commit();
                 ds.commit();
 
-                // add transaction to pool
+                // Add the successfully processed transaction into the pool of transactions
+                // which are ready to be proposed to the network.
                 PendingTransaction pendingTransaction = new PendingTransaction(tx, result);
                 transactions.add(pendingTransaction);
                 pool.put(createKey(tx), pendingTransaction);
@@ -353,7 +359,9 @@ public class PendingManager implements Runnable, BlockchainListener {
             tx = delayed.get(createKey(tx.getFrom(), getNonce(tx.getFrom())));
         }
 
-        // add to cache
+        // Delay the transaction for the next event loop of PendingManager. The delayed
+        // transaction is expected to be processed once PendingManager has received all
+        // of its preceding transactions from the same address.
         if (tx != null && tx.getNonce() > getNonce(tx.getFrom())) {
             delayed.put(createKey(tx), tx);
         }
