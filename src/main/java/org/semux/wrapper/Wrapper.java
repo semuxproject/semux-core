@@ -35,6 +35,8 @@ public class Wrapper {
 
     final static Logger logger = LoggerFactory.getLogger(Wrapper.class);
 
+    public static final long MINIMUM_HEAP_SIZE_MB = 128L;
+
     enum Mode {
         GUI, CLI
     }
@@ -70,6 +72,7 @@ public class Wrapper {
         final Pattern xmxPattern = Pattern.compile("^-Xmx");
         if (Stream.of(jvmOptions).noneMatch(s -> xmxPattern.matcher(s).find())) {
             long toAllocateMB = (long) ((double) SystemUtil.getAvailableMemorySize() / 1024 / 1024 * 0.8);
+            toAllocateMB = Math.max(toAllocateMB, MINIMUM_HEAP_SIZE_MB);
             allocatedJvmOptions.add(String.format("-Xmx%dM", toAllocateMB));
             logger.debug("Allocating {} MB of memory as maximum heap size", toAllocateMB);
         }
