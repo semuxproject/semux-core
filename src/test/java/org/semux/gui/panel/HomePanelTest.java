@@ -20,7 +20,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.KernelMock;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Block;
-import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GUIMessages;
 

@@ -23,9 +23,9 @@ public class Channel {
 
     private boolean isInbound;
     private InetSocketAddress remoteAddress;
+    private Peer remotePeer;
 
     private MessageQueue msgQueue;
-    private Peer remotePeer;
 
     /**
      * Creates a new channel instance.
@@ -46,9 +46,9 @@ public class Channel {
     public void init(ChannelPipeline pipe, boolean isInbound, InetSocketAddress remoteAddress, Kernel kernel) {
         this.isInbound = isInbound;
         this.remoteAddress = remoteAddress;
+        this.remotePeer = null;
 
         this.msgQueue = new MessageQueue(kernel.getConfig());
-        this.remotePeer = null;
 
         // register channel handlers
         pipe.addLast("readTimeoutHandler",
@@ -115,7 +115,7 @@ public class Channel {
     /**
      * When peer disconnects.
      */
-    public void onDisconnect() {
+    public void onInactive() {
         this.remotePeer = null;
     }
 

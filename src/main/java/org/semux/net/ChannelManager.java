@@ -7,8 +7,10 @@
 package org.semux.net;
 
 import java.net.InetSocketAddress;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,22 +25,33 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Channel Manager.
+ * 
+ * TODO: investigate handshake re-initialization.
  */
 public class ChannelManager {
 
     private static final Logger logger = LoggerFactory.getLogger(ChannelManager.class);
 
-    private Map<InetSocketAddress, Channel> channels = new HashMap<>();
-    private Map<String, Channel> activeChannels = new HashMap<>();
+    /**
+     * All channels, indexed by the <code>remoteAddress (ip + port)</code>, not
+     * necessarily the listening address.
+     */
+    protected Map<InetSocketAddress, Channel> channels = Collections.synchronizedMap(new HashMap<>());
+    protected Map<String, Channel> activeChannels = Collections.synchronizedMap(new HashMap<>());
 
-    private final SemuxIpFilter ipFilter;
+    protected final SemuxIpFilter ipFilter;
 
     public ChannelManager(Kernel kernel) {
-        ipFilter = (new SemuxIpFilter.Loader())
-                .load(Paths.get(kernel.getConfig().dataDir().getAbsolutePath(), Constants.CONFIG_DIR, "ipfilter.json"))
-                .orElse(null);
+        Path path = Paths.get(kernel.getConfig().dataDir().getAbsolutePath(), Constants.CONFIG_DIR, "ipfilter.json");
+
+        ipFilter = (new SemuxIpFilter.Loader()).load(path).orElse(null);
     }
 
+    /**
+     * Returns the IP filter if enabled.
+     * 
+     * @return
+     */
     public SemuxIpFilter getIpFilter() {
         return ipFilter;
     }
@@ -59,7 +72,7 @@ public class ChannelManager {
      * @param address
      * @return
      */
-    public synchronized boolean isConnected(InetSocketAddress address) {
+    public boolean isConnected(InetSocketAddress address) {
         return channels.containsKey(address);
     }
 
@@ -69,10 +82,12 @@ public class ChannelManager {
      * @param ip
      * @return
      */
-    public synchronized boolean isActiveIP(String ip) {
-        for (Channel c : activeChannels.values()) {
-            if (c.getRemoteIp().equals(ip)) {
-                return true;
+    public boolean isActiveIP(String ip) {
+        synchronized (activeChannels) {
+            for (Channel c : activeChannels.values()) {
+                if (c.getRemoteIp().equals(ip)) {
+                    return true;
+                }
             }
         }
 
@@ -85,7 +100,7 @@ public class ChannelManager {
      * @param peerId
      * @return
      */
-    public synchronized boolean isActivePeer(String peerId) {
+    public boolean isActivePeer(String peerId) {
         return activeChannels.containsKey(peerId);
     }
 
@@ -94,7 +109,7 @@ public class ChannelManager {
      * 
      * @return
      */
-    public synchronized int size() {
+    public int size() {
         return channels.size();
     }
 
@@ -104,7 +119,7 @@ public class ChannelManager {
      * @param ch
      *            channel instance
      */
-    public synchronized void add(Channel ch) {
+    public void add(Channel ch) {
         logger.debug("Channel added: remoteAddress = {}:{}", ch.getRemoteIp(), ch.getRemotePort());
 
         channels.put(ch.getRemoteAddress(), ch);
@@ -116,13 +131,13 @@ public class ChannelManager {
      * @param ch
      *            channel instance
      */
-    public synchronized void remove(Channel ch) {
+    public void remove(Channel ch) {
         logger.debug("Channel removed: remoteAddress = {}:{}", ch.getRemoteIp(), ch.getRemotePort());
 
         channels.remove(ch.getRemoteAddress());
         if (ch.isActive()) {
             activeChannels.remove(ch.getRemotePeer().getPeerId());
-            ch.onDisconnect();
+            ch.onInactive();
         }
     }
 
@@ -132,7 +147,7 @@ public class ChannelManager {
      * @param channel
      * @param peer
      */
-    public synchronized void onChannelActive(Channel channel, Peer peer) {
+    public void onChannelActive(Channel channel, Peer peer) {
         channel.onActive(peer);
         activeChannels.put(peer.getPeerId(), channel);
     }
@@ -142,10 +157,13 @@ public class ChannelManager {
      * 
      * @return
      */
-    public synchronized List<Peer> getActivePeers() {
+    public List<Peer> getActivePeers() {
         List<Peer> list = new ArrayList<>();
-        for (Channel c : activeChannels.values()) {
-            list.add(c.getRemotePeer());
+
+        synchronized (activeChannels) {
+            for (Channel c : activeChannels.values()) {
+                list.add(c.getRemotePeer());
+            }
         }
 
         return list;
@@ -156,12 +174,14 @@ public class ChannelManager {
      * 
      * @return
      */
-    public synchronized Set<InetSocketAddress> getActiveAddresses() {
+    public Set<InetSocketAddress> getActiveAddresses() {
         Set<InetSocketAddress> set = new HashSet<>();
 
-        for (Channel c : activeChannels.values()) {
-            Peer p = c.getRemotePeer();
-            set.add(new InetSocketAddress(p.getIp(), p.getPort()));
+        synchronized (activeChannels) {
+            for (Channel c : activeChannels.values()) {
+                Peer p = c.getRemotePeer();
+                set.add(new InetSocketAddress(p.getIp(), p.getPort()));
+            }
         }
 
         return set;
@@ -172,9 +192,12 @@ public class ChannelManager {
      * 
      * @return
      */
-    public synchronized List<Channel> getActiveChannels() {
+    public List<Channel> getActiveChannels() {
         List<Channel> list = new ArrayList<>();
-        list.addAll(activeChannels.values());
+
+        synchronized (activeChannels) {
+            list.addAll(activeChannels.values());
+        }
 
         return list;
     }
@@ -186,11 +209,14 @@ public class ChannelManager {
      *            peerId filter
      * @return
      */
-    public synchronized List<Channel> getActiveChannels(List<String> peerIds) {
+    public List<Channel> getActiveChannels(List<String> peerIds) {
         List<Channel> list = new ArrayList<>();
-        for (String peerId : peerIds) {
-            if (activeChannels.containsKey(peerId)) {
-                list.add(activeChannels.get(peerId));
+
+        synchronized (activeChannels) {
+            for (String peerId : peerIds) {
+                if (activeChannels.containsKey(peerId)) {
+                    list.add(activeChannels.get(peerId));
+                }
             }
         }
 
@@ -202,11 +228,14 @@ public class ChannelManager {
      * 
      * @return
      */
-    public synchronized List<Channel> getIdleChannels() {
+    public List<Channel> getIdleChannels() {
         List<Channel> list = new ArrayList<>();
-        for (Channel c : activeChannels.values()) {
-            if (c.getMessageQueue().isIdle()) {
-                list.add(c);
+
+        synchronized (activeChannels) {
+            for (Channel c : activeChannels.values()) {
+                if (c.getMessageQueue().isIdle()) {
+                    list.add(c);
+                }
             }
         }
 
