@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static org.semux.wrapper.Wrapper.MINIMUM_HEAP_SIZE_MB;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,11 +46,21 @@ public class WrapperTest {
                                         SemuxGUI.class.getCanonicalName() },
                                 null },
                         { new String[] { "--gui" },
-                                new String[] { getJavaBinPath(), "-Xmx80M", "-cp", "semux.jar",
+                                new String[] { getJavaBinPath(), "-Xmx1600M", "-cp", "semux.jar",
                                         SemuxGUI.class.getCanonicalName() },
-                                100L * 1024 * 1024 },
-                        { new String[] { "--cli" }, new String[] { getJavaBinPath(), "-Xmx80M", "-cp", "semux.jar",
-                                SemuxCLI.class.getCanonicalName() }, 100L * 1024 * 1024 } });
+                                2000L * 1024 * 1024 },
+                        { new String[] { "--cli" }, new String[] { getJavaBinPath(), "-Xmx1600M", "-cp", "semux.jar",
+                                SemuxCLI.class.getCanonicalName() }, 2000L * 1024 * 1024 },
+                        { new String[] { "--gui" },
+                                new String[] { getJavaBinPath(), String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB), "-cp",
+                                        "semux.jar",
+                                        SemuxGUI.class.getCanonicalName() },
+                                MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 },
+                        { new String[] { "--cli" },
+                                new String[] { getJavaBinPath(), String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB), "-cp",
+                                        "semux.jar",
+                                        SemuxCLI.class.getCanonicalName() },
+                                MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 } });
     }
 
     String[] inputArgs, javaArgs;

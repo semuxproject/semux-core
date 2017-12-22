@@ -35,6 +35,8 @@ public class Wrapper {
 
     final static Logger logger = LoggerFactory.getLogger(Wrapper.class);
 
+    public static final long MINIMUM_HEAP_SIZE_MB = 1024L;
+
     enum Mode {
         GUI, CLI
     }
@@ -70,6 +72,12 @@ public class Wrapper {
         final Pattern xmxPattern = Pattern.compile("^-Xmx");
         if (Stream.of(jvmOptions).noneMatch(s -> xmxPattern.matcher(s).find())) {
             long toAllocateMB = (long) ((double) SystemUtil.getAvailableMemorySize() / 1024 / 1024 * 0.8);
+            if (toAllocateMB < MINIMUM_HEAP_SIZE_MB) {
+                toAllocateMB = MINIMUM_HEAP_SIZE_MB;
+                logger.warn(
+                        "The available memory space on your system is less than the minimum requirement of {}M. This may result in low performance or a crash of semux wallet.",
+                        MINIMUM_HEAP_SIZE_MB);
+            }
             allocatedJvmOptions.add(String.format("-Xmx%dM", toAllocateMB));
             logger.debug("Allocating {} MB of memory as maximum heap size", toAllocateMB);
         }
