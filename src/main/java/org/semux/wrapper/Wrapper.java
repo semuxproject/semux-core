@@ -35,7 +35,7 @@ public class Wrapper {
 
     final static Logger logger = LoggerFactory.getLogger(Wrapper.class);
 
-    public static final long MINIMUM_HEAP_SIZE_MB = 128L;
+    public static final long MINIMUM_HEAP_SIZE_MB = 1024L;
 
     enum Mode {
         GUI, CLI
