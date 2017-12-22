@@ -41,10 +41,14 @@ import org.semux.gui.model.WalletModel;
 import org.semux.message.GUIMessages;
 import org.semux.util.Bytes;
 import org.semux.util.exception.UnreachableException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SendPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
+
+    private static Logger logger = LoggerFactory.getLogger(SendPanel.class);
 
     private JFrame frame;
     private transient WalletModel model;
@@ -259,18 +263,17 @@ public class SendPanel extends JPanel implements ActionListener {
                 byte[] to = Hex.decode0x(getToText());
 
                 if (acc == null) {
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
+                    showErrorDialog(GUIMessages.get("SelectAccount"));
                 } else if (value <= 0L) {
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("EnterValidValue"));
+                    showErrorDialog(GUIMessages.get("EnterValidValue"));
                 } else if (fee < config.minTransactionFee()) {
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionFeeTooLow"));
+                    showErrorDialog(GUIMessages.get("TransactionFeeTooLow"));
                 } else if (value + fee > acc.getAvailable()) {
-                    JOptionPane.showMessageDialog(this,
-                            GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
+                    showErrorDialog(GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
                 } else if (to.length != EdDSA.ADDRESS_LEN) {
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidReceivingAddress"));
-                } else if (Bytes.of(data).length > 128) {
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("InvalidData", 128));
+                    showErrorDialog(GUIMessages.get("InvalidReceivingAddress"));
+                } else if (Bytes.of(data).length > config.maxTransferDataSize()) {
+                    showErrorDialog(GUIMessages.get("InvalidData", config.maxTransferDataSize()));
                 } else {
                     int ret = JOptionPane.showConfirmDialog(this,
                             GUIMessages.get("TransferInfo", SwingUtil.formatValue(value), Hex.encode0x(to)),
@@ -291,7 +294,8 @@ public class SendPanel extends JPanel implements ActionListener {
                     sendTransaction(pendingMgr, tx);
                 }
             } catch (ParseException ex) {
-                JOptionPane.showMessageDialog(this, "Exception: " + ex.getMessage());
+                logger.error("Exception: " + ex.getMessage(), ex);
+                showErrorDialog("Exception: " + ex.getMessage());
             }
             break;
         case CLEAR:
@@ -307,12 +311,25 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     private void sendTransaction(PendingManager pendingMgr, Transaction tx) {
-        if (pendingMgr.addTransactionSync(tx)) {
-            JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionSent", 30));
+        PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
+        if (result.error == null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    GUIMessages.get("TransactionSent", 30),
+                    GUIMessages.get("SuccessDialogTitle"),
+                    JOptionPane.INFORMATION_MESSAGE);
             clear();
         } else {
-            JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionFailed"));
+            showErrorDialog(GUIMessages.get("TransactionFailed", result.error.toString()));
         }
+    }
+
+    private void showErrorDialog(String message) {
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                GUIMessages.get("ErrorDialogTitle"),
+                JOptionPane.ERROR_MESSAGE);
     }
 
     private WalletAccount getSelectedAccount() {

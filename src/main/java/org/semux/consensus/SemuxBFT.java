@@ -13,9 +13,9 @@ import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.map.LRUMap;
-import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.config.Constants;
@@ -694,12 +694,18 @@ public class SemuxBFT implements Consensus {
         long t1 = System.currentTimeMillis();
 
         // fetch pending transactions
-        Pair<List<Transaction>, List<TransactionResult>> pending = pendingMgr
-                .getTransactionsAndResults(config.maxBlockSize());
+        final List<PendingManager.PendingTransaction> pending = pendingMgr
+                .getPendingTransactions(config.maxBlockSize());
+        final List<Transaction> pendingTxs = pending.stream()
+                .map(tx -> tx.transaction)
+                .collect(Collectors.toList());
+        final List<TransactionResult> pendingResults = pending.stream()
+                .map(tx -> tx.transactionResult)
+                .collect(Collectors.toList());
 
         // compute roots
-        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(pending.getLeft());
-        byte[] resultsRoot = MerkleUtil.computeResultsRoot(pending.getRight());
+        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(pendingTxs);
+        byte[] resultsRoot = MerkleUtil.computeResultsRoot(pendingResults);
         byte[] stateRoot = Bytes.EMPTY_HASH;
 
         // construct block
@@ -709,10 +715,10 @@ public class SemuxBFT implements Consensus {
         byte[] data = {};
         BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,
                 resultsRoot, stateRoot, data);
-        Block block = new Block(header, pending.getLeft(), pending.getRight());
+        Block block = new Block(header, pendingTxs, pendingResults);
 
         long t2 = System.currentTimeMillis();
-        logger.debug("Block creation: # txs = {}, time = {} ms", pending.getLeft().size(), t2 - t1);
+        logger.debug("Block creation: # txs = {}, time = {} ms", pendingTxs.size(), t2 - t1);
 
         return block;
     }

@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.map.LRUMap;
-import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.core.state.AccountState;
@@ -55,6 +54,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         }
     };
 
+    public static final long ALLOWED_TIME_DRIFT = TimeUnit.HOURS.toMillis(2);
     private static final int QUEUE_MAX_SIZE = 64 * 1024;
     private static final int POOL_MAX_SIZE = 8 * 1024;
     private static final int DELAYED_MAX_SIZE = 16 * 1024;
@@ -75,9 +75,8 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Transaction pool.
      */
-    private Map<ByteArray, Transaction> pool = new HashMap<>();
-    private List<Transaction> transactions = new ArrayList<>();
-    private List<TransactionResult> results = new ArrayList<>();
+    private Map<ByteArray, PendingTransaction> pool = new HashMap<>();
+    private List<PendingTransaction> transactions = new ArrayList<>();
 
     // NOTE: make sure access to the LRUMap<> are synchronized.
     private Map<ByteArray, Transaction> delayed = new LRUMap<>(DELAYED_MAX_SIZE);
@@ -168,11 +167,13 @@ public class PendingManager implements Runnable, BlockchainListener {
      * Adds a transaction to the pool.
      * 
      * @param tx
-     * @return true if the transaction is successfully added to the pool, otherwise
-     *         false
+     *            a ${@link Transaction} object to be added
+     * @return a ${@link ProcessTransactionResult} object
      */
-    public synchronized boolean addTransactionSync(Transaction tx) {
-        return tx.validate() && processTransaction(tx, true) >= 1;
+    public synchronized ProcessTransactionResult addTransactionSync(Transaction tx) {
+        return tx.validate() ? //
+                processTransaction(tx, true) : //
+                new ProcessTransactionResult(0, TransactionResult.Error.INVALID_FORMAT);
     }
 
     /**
@@ -191,33 +192,28 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @param limit
      * @return
      */
-    public synchronized Pair<List<Transaction>, List<TransactionResult>> getTransactionsAndResults(int limit) {
-        List<Transaction> txs = new ArrayList<>();
-        List<TransactionResult> res = new ArrayList<>();
+    public synchronized List<PendingTransaction> getPendingTransactions(int limit) {
+        List<PendingTransaction> txs = new ArrayList<>();
 
         if (limit == -1) {
             // returns all transactions if there is no limit
             txs.addAll(transactions);
-            res.addAll(results);
         } else {
-            Iterator<Transaction> itTransaction = transactions.iterator();
-            Iterator<TransactionResult> itResult = results.iterator();
+            Iterator<PendingTransaction> it = transactions.iterator();
 
             int size = 0;
-            while (itTransaction.hasNext() && itResult.hasNext()) {
-                Transaction tx = itTransaction.next();
-                TransactionResult txResult = itResult.next();
+            while (it.hasNext()) {
+                PendingTransaction tx = it.next();
 
-                if (size + tx.size() > limit) {
+                if (size + tx.transaction.size() > limit) {
                     break;
                 } else {
                     txs.add(tx);
-                    res.add(txResult);
                 }
             }
         }
 
-        return Pair.of(txs, res);
+        return txs;
     }
 
     /**
@@ -226,8 +222,8 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @param limit
      * @return
      */
-    public synchronized List<Transaction> getTransactions(int limit) {
-        return getTransactionsAndResults(limit).getLeft();
+    public synchronized List<PendingTransaction> getTransactions(int limit) {
+        return getPendingTransactions(limit);
     }
 
     /**
@@ -235,8 +231,8 @@ public class PendingManager implements Runnable, BlockchainListener {
      * 
      * @return
      */
-    public synchronized List<Transaction> getTransactions() {
-        return getTransactionsAndResults(-1).getLeft();
+    public synchronized List<PendingTransaction> getTransactions() {
+        return getPendingTransactions(-1);
     }
 
     /**
@@ -244,16 +240,15 @@ public class PendingManager implements Runnable, BlockchainListener {
      * 
      * @return
      */
-    public synchronized List<Transaction> clear() {
+    public synchronized List<PendingTransaction> clear() {
         // reset state
         pendingAS = chain.getAccountState().track();
         pendingDS = chain.getDelegateState().track();
 
         // clear transaction pool
-        List<Transaction> txs = new ArrayList<>(transactions);
+        List<PendingTransaction> txs = new ArrayList<>(transactions);
         pool.clear();
         transactions.clear();
-        results.clear();
 
         return txs;
     }
@@ -264,12 +259,12 @@ public class PendingManager implements Runnable, BlockchainListener {
             long t1 = System.currentTimeMillis();
 
             // clear transaction pool
-            List<Transaction> txs = clear();
+            List<PendingTransaction> txs = clear();
 
             // update pending state
             long accepted = 0;
-            for (Transaction tx : txs) {
-                accepted += processTransaction(tx, false);
+            for (PendingTransaction tx : txs) {
+                accepted += processTransaction(tx.transaction, false).accepted;
             }
 
             long t2 = System.currentTimeMillis();
@@ -290,7 +285,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                 continue;
             }
 
-            if (tx.validate() && processTransaction(tx, true) >= 1) {
+            if (tx.validate() && processTransaction(tx, true).accepted >= 1) {
                 // exit after one success transaction
                 return;
             }
@@ -306,21 +301,26 @@ public class PendingManager implements Runnable, BlockchainListener {
      *            transaction
      * @param relay
      *            whether to relay the transaction if success
-     * @return the number of success transactions processed
+     * @return the number of success transactions processed and the error that
+     *         interrupted the process
      */
-    protected int processTransaction(Transaction tx, boolean relay) {
+    protected ProcessTransactionResult processTransaction(Transaction tx, boolean relay) {
 
         // NOTE: assume transaction format is valid
 
         int cnt = 0;
-        while (tx != null && tx.getNonce() == getNonce(tx.getFrom())) {
+        long now = System.currentTimeMillis();
 
-            // check transaction timestamp
-            long now = System.currentTimeMillis();
-            long twoHours = TimeUnit.HOURS.toMillis(2);
-            if (tx.getTimestamp() < now - twoHours || tx.getTimestamp() > now + twoHours) {
-                return 0;
-            }
+        // check transaction timestamp if this is a fresh transaction:
+        // a time drift of 2 hours is allowed
+        if (tx.getTimestamp() < now - ALLOWED_TIME_DRIFT || tx.getTimestamp() > now + ALLOWED_TIME_DRIFT) {
+            return new ProcessTransactionResult(cnt, TransactionResult.Error.INVALID_TIMESTAMP);
+        }
+
+        // Check transaction nonce: pending transactions must be executed sequentially
+        // by nonce in ascending order. In case of a nonce jump, the transaction is
+        // delayed for the next event loop of PendingManager.
+        while (tx != null && tx.getNonce() == getNonce(tx.getFrom())) {
 
             // execute transactions
             AccountState as = pendingAS.track();
@@ -332,10 +332,11 @@ public class PendingManager implements Runnable, BlockchainListener {
                 as.commit();
                 ds.commit();
 
-                // add transaction to pool
-                pool.put(createKey(tx), tx);
-                transactions.add(tx);
-                results.add(result);
+                // Add the successfully processed transaction into the pool of transactions
+                // which are ready to be proposed to the network.
+                PendingTransaction pendingTransaction = new PendingTransaction(tx, result);
+                transactions.add(pendingTransaction);
+                pool.put(createKey(tx), pendingTransaction);
                 cnt++;
 
                 // relay transaction
@@ -352,18 +353,20 @@ public class PendingManager implements Runnable, BlockchainListener {
                 }
             } else {
                 // exit immediately if invalid
-                return cnt;
+                return new ProcessTransactionResult(cnt, result.getError());
             }
 
             tx = delayed.get(createKey(tx.getFrom(), getNonce(tx.getFrom())));
         }
 
-        // add to cache
+        // Delay the transaction for the next event loop of PendingManager. The delayed
+        // transaction is expected to be processed once PendingManager has received all
+        // of its preceding transactions from the same address.
         if (tx != null && tx.getNonce() > getNonce(tx.getFrom())) {
             delayed.put(createKey(tx), tx);
         }
 
-        return cnt;
+        return new ProcessTransactionResult(cnt);
     }
 
     private ByteArray createKey(Transaction tx) {
@@ -372,5 +375,42 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     private ByteArray createKey(byte[] acc, long nonce) {
         return ByteArray.of(Bytes.merge(acc, Bytes.of(nonce)));
+    }
+
+    /**
+     * This object represents a transaction and its execution result against a
+     * snapshot of local state that is not yet confirmed by the network.
+     */
+    public static class PendingTransaction {
+
+        public final Transaction transaction;
+
+        public final TransactionResult transactionResult;
+
+        private PendingTransaction(Transaction transaction, TransactionResult transactionResult) {
+            this.transaction = transaction;
+            this.transactionResult = transactionResult;
+        }
+    }
+
+    /**
+     * This object represents the number of accepted transactions and the cause of
+     * rejection by ${@link PendingManager}.
+     */
+    public static class ProcessTransactionResult {
+
+        public final int accepted;
+
+        public final TransactionResult.Error error;
+
+        public ProcessTransactionResult(int accepted, TransactionResult.Error error) {
+            this.accepted = accepted;
+            this.error = error;
+        }
+
+        public ProcessTransactionResult(int accepted) {
+            this.accepted = accepted;
+            this.error = null;
+        }
     }
 }

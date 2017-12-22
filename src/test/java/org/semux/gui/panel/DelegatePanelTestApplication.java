@@ -15,11 +15,13 @@ public class DelegatePanelTestApplication extends BaseTestApplication {
 
     private static final long serialVersionUID = 1L;
 
+    SemuxGUI gui;
+
     DelegatesPanel delegatesPanel;
 
-    DelegatePanelTestApplication(WalletModel walletModel) {
+    DelegatePanelTestApplication(WalletModel walletModel, KernelMock kernelMock) {
         super();
-        SemuxGUI gui = new SemuxGUI(walletModel, new KernelMock());
+        gui = new SemuxGUI(walletModel, kernelMock);
         delegatesPanel = new DelegatesPanel(gui, this);
         getContentPane().add(delegatesPanel);
     }

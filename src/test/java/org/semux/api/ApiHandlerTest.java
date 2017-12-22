@@ -50,6 +50,7 @@ import org.semux.api.response.SendTransactionResponse;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
 import org.semux.core.Genesis.Premine;
+import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
@@ -392,10 +393,10 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         Thread.sleep(200);
 
-        List<Transaction> list = pendingMgr.getTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txHash));
-        assertEquals(list.get(list.size() - 1).getType(), TransactionType.TRANSFER);
+        assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), Hex.decode0x(response.txHash));
+        assertEquals(list.get(list.size() - 1).transaction.getType(), TransactionType.TRANSFER);
     }
 
     @Test
@@ -408,10 +409,10 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         Thread.sleep(200);
 
-        List<Transaction> list = pendingMgr.getTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txHash));
-        assertEquals(list.get(list.size() - 1).getType(), TransactionType.DELEGATE);
+        assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), Hex.decode0x(response.txHash));
+        assertEquals(list.get(list.size() - 1).transaction.getType(), TransactionType.DELEGATE);
     }
 
     @Test
@@ -427,10 +428,10 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         Thread.sleep(200);
 
-        List<Transaction> list = pendingMgr.getTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(0).getHash(), Hex.decode0x(response.txHash));
-        assertEquals(TransactionType.VOTE, list.get(0).getType());
+        assertArrayEquals(list.get(0).transaction.getHash(), Hex.decode0x(response.txHash));
+        assertEquals(TransactionType.VOTE, list.get(0).transaction.getType());
     }
 
     @Test
@@ -451,9 +452,9 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         Thread.sleep(200);
 
-        List<Transaction> list = pendingMgr.getTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), Hex.decode0x(response.txHash));
-        assertEquals(TransactionType.UNVOTE, list.get(list.size() - 1).getType());
+        assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), Hex.decode0x(response.txHash));
+        assertEquals(TransactionType.UNVOTE, list.get(list.size() - 1).transaction.getType());
     }
 }
