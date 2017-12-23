@@ -208,6 +208,9 @@ public class Kernel {
         for (NetworkIF net : hal.getNetworkIFs()) {
             logger.info("Network: name = {}, ip = [{}]", net.getDisplayName(), String.join(",", net.getIPv4addr()));
         }
+
+        // java version
+        logger.info("Java: version = {}", Runtime.class.getPackage().getImplementationVersion());
     }
 
     /**
