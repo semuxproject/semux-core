@@ -34,6 +34,7 @@ import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
 import org.semux.net.PeerServer;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -94,9 +95,16 @@ public class Kernel {
         // ====================================
         // initialization
         // ====================================
+        long mb = 1024L * 1024L;
         logger.info(config.getClientId());
-        logger.info("System booting up: network = [{}, {}], coinbase = {}", config.networkId(), config.networkVersion(),
+        logger.info("System booting up: networkId = {}, networkVersion = {}, coinbase = {}", config.networkId(),
+                config.networkVersion(),
                 coinbase);
+        logger.info("CPU cores = {}, free memory = {} MB, free disk = {} MB, xmx = {} MB", //
+                SystemUtil.getNumberOfProceessors(), //
+                SystemUtil.getAvailableMemorySize() / mb, //
+                config.dataDir().getFreeSpace() / mb, //
+                Runtime.getRuntime().maxMemory() / mb);
 
         dbFactory = new LevelDBFactory(config.dataDir());
         chain = new BlockchainImpl(config, dbFactory);
@@ -180,7 +188,7 @@ public class Kernel {
      * Stops the kernel.
      */
     public synchronized void stop() {
-        // set the flag first to sop the GUI from refreshing
+        // set the flag first to stop the GUI from refreshing
         if (isRunning.compareAndSet(true, false)) {
 
             // stop consensus

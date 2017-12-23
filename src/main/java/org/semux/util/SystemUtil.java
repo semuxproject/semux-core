@@ -196,7 +196,16 @@ public class SystemUtil {
     }
 
     /**
-     * Retrieves available physical memory size in bytes
+     * Returns the number of processors.
+     * 
+     * @return
+     */
+    public static int getNumberOfProceessors() {
+        return Runtime.getRuntime().availableProcessors();
+    }
+
+    /**
+     * Returns the available physical memory size in bytes
      * 
      * @return
      */
