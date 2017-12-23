@@ -171,55 +171,13 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
         switch (action) {
         case CREATE_ACCOUNT:
-            backupFile = null;
-            repeatField.setVisible(true);
-            lblRepeat.setVisible(true);
+            createAccount();
             break;
         case RECOVER_ACCOUNTS:
-            JFileChooser chooser = new JFileChooser();
-            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            chooser.setFileFilter(new FileNameExtensionFilter(GUIMessages.get("WalletBinaryFormat"), "data"));
-            int ret = chooser.showOpenDialog(this);
-            if (ret == JFileChooser.APPROVE_OPTION) {
-                backupFile = chooser.getSelectedFile();
-                repeatField.setVisible(false);
-                lblRepeat.setVisible(false);
-            } else {
-                btnCreate.setSelected(true);
-            }
+            recoverAccounts();
             break;
         case OK:
-            String password = new String(passwordField.getPassword());
-            String repeat = new String(repeatField.getPassword());
-            if (repeatField.isVisible() && !password.equals(repeat)) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("RepeatPasswordError"));
-                break;
-            }
-            if (!wallet.unlock(password)) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("UnlockFailed"));
-                break;
-            }
-
-            if (backupFile == null) {
-                EdDSA key = new EdDSA();
-                wallet.addAccount(key);
-                wallet.flush();
-
-                done();
-            } else {
-                Wallet w = new Wallet(backupFile);
-
-                if (!w.unlock(password)) {
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("BackupUnlockFailed"));
-                } else if (w.size() == 0) {
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("NoAccountFound"));
-                } else {
-                    wallet.addAccounts(w.getAccounts());
-                    wallet.flush();
-
-                    done();
-                }
-            }
+            ok();
             break;
         case CANCEL:
             SystemUtil.exitAsync(0);
@@ -229,23 +187,92 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         }
     }
 
+    /**
+     * Waits the welcome frame to be finished.
+     */
     public void join() {
         synchronized (this) {
             while (!done) {
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt(); // https://stackoverflow.com/a/4906814/670662
+                    Thread.currentThread().interrupt();
                     SystemUtil.exitAsync(0);
                 }
             }
         }
     }
 
-    private void done() {
+    /**
+     * Set the <code>done</code> flag to be true and notify all waiting threads.
+     */
+    protected void done() {
         synchronized (this) {
             done = true;
             notifyAll();
+        }
+    }
+
+    /**
+     * When the CREATE_ACCOUNT option is selected.
+     */
+    protected void createAccount() {
+        backupFile = null;
+        repeatField.setVisible(true);
+        lblRepeat.setVisible(true);
+    }
+
+    /**
+     * When the RECOVER_ACCOUNTS option is selected.
+     */
+    protected void recoverAccounts() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.setFileFilter(new FileNameExtensionFilter(GUIMessages.get("WalletBinaryFormat"), "data"));
+        int ret = chooser.showOpenDialog(this);
+        if (ret == JFileChooser.APPROVE_OPTION) {
+            backupFile = chooser.getSelectedFile();
+            repeatField.setVisible(false);
+            lblRepeat.setVisible(false);
+        } else {
+            btnCreate.setSelected(true);
+        }
+    }
+
+    /**
+     * When the OK button is clicked.
+     */
+    protected void ok() {
+        String password = new String(passwordField.getPassword());
+        String repeat = new String(repeatField.getPassword());
+        if (repeatField.isVisible() && !password.equals(repeat)) {
+            JOptionPane.showMessageDialog(this, GUIMessages.get("RepeatPasswordError"));
+            return;
+        }
+        if (!wallet.unlock(password)) {
+            JOptionPane.showMessageDialog(this, GUIMessages.get("UnlockFailed"));
+            return;
+        }
+
+        if (backupFile == null) {
+            EdDSA key = new EdDSA();
+            wallet.addAccount(key);
+            wallet.flush();
+
+            done();
+        } else {
+            Wallet w = new Wallet(backupFile);
+
+            if (!w.unlock(password)) {
+                JOptionPane.showMessageDialog(this, GUIMessages.get("BackupUnlockFailed"));
+            } else if (w.size() == 0) {
+                JOptionPane.showMessageDialog(this, GUIMessages.get("NoAccountFound"));
+            } else {
+                wallet.addAccounts(w.getAccounts());
+                wallet.flush();
+
+                done();
+            }
         }
     }
 }

@@ -41,11 +41,14 @@ import org.semux.message.GUIMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.exception.UnreachableException;
 
+/**
+ * Transactions panel displays all transactio from/to accounts of the wallet.
+ */
 public class TransactionsPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { GUIMessages.get("Type"), GUIMessages.get("FromTo"),
+    private static final String[] columnNames = { GUIMessages.get("Type"), GUIMessages.get("FromTo"),
             GUIMessages.get("Value"), GUIMessages.get("Time") };
 
     private transient SemuxGUI gui;
@@ -101,7 +104,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         refresh();
     }
 
-    class TransactionsTableModel extends AbstractTableModel {
+    protected class TransactionsTableModel extends AbstractTableModel {
 
         private static final long serialVersionUID = 1L;
 
@@ -171,11 +174,9 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         }
     }
 
-    private Transaction getSelectedTransaction() {
-        int row = table.getSelectedRow();
-        return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
-    }
-
+    /**
+     * Refreshes this panel.
+     */
     private void refresh() {
         List<Transaction> transactions = new ArrayList<>();
 
@@ -205,5 +206,15 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 }
             }
         }
+    }
+
+    /**
+     * Returns the selected transaction.
+     * 
+     * @return
+     */
+    protected Transaction getSelectedTransaction() {
+        int row = table.getSelectedRow();
+        return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
     }
 }

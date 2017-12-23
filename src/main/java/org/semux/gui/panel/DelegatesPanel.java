@@ -62,7 +62,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { GUIMessages.get("Rank"), GUIMessages.get("Name"),
+    private static final String[] columnNames = { GUIMessages.get("Rank"), GUIMessages.get("Name"),
             GUIMessages.get("Address"), GUIMessages.get("Votes"), GUIMessages.get("VotesFromMe"),
             GUIMessages.get("Status"), GUIMessages.get("Rate") };
 
@@ -73,21 +73,6 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private JTable table;
     private DelegatesTableModel tableModel;
-
-    class Item {
-        WalletAccount account;
-        String name;
-
-        public Item(WalletAccount a, int idx) {
-            this.account = a;
-            this.name = GUIMessages.get("AccountNumShort", idx) + ", " + SwingUtil.formatValue(account.getAvailable());
-        }
-
-        @Override
-        public String toString() {
-            return this.name;
-        }
-    }
 
     JComboBox<Item> from;
 
@@ -584,6 +569,21 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textVote.setText("");
         textUnvote.setText("");
         textName.setText("");
+    }
+
+    protected static class Item {
+        WalletAccount account;
+        String name;
+
+        public Item(WalletAccount a, int idx) {
+            this.account = a;
+            this.name = GUIMessages.get("AccountNumShort", idx) + ", " + SwingUtil.formatValue(account.getAvailable());
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
     }
 
 }

@@ -39,11 +39,11 @@ public abstract class Launcher {
      * Creates an instance of {@link Config} based on the given `--network` option.
      * <p>
      * Defaults to MainNet.
-     * 
+     *
      * @return the configuration
      */
     public Config getConfig() {
-        switch (network) {
+        switch (getNetwork()) {
         case TESTNET:
             return new TestNetConfig(getDataDir());
         case DEVNET:
@@ -53,55 +53,119 @@ public abstract class Launcher {
         }
     }
 
+    /**
+     * Returns the network.
+     *
+     * @return
+     */
+    public String getNetwork() {
+        return network;
+    }
+
+    /**
+     * Returns the data directory.
+     *
+     * @return
+     */
+    public String getDataDir() {
+        return dataDir;
+    }
+
+    /**
+     * Returns the coinbase.
+     *
+     * @return
+     */
+    public int getCoinbase() {
+        return coinbase;
+    }
+
+    /**
+     * Returns the provided password if any.
+     *
+     * @return
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Parses options from the given arguments.
+     *
+     * @param args
+     * @return
+     * @throws ParseException
+     */
     protected CommandLine parseOptions(String[] args) throws ParseException {
         CommandLineParser parser = new DefaultParser();
         return parser.parse(getOptions(), args);
     }
 
+    /**
+     * Set up customized logger configuration.
+     *
+     * @param args
+     * @throws ParseException
+     */
     protected void setupLogger(String[] args) throws ParseException {
         CommandLine cmd = parseOptions(args);
-        LoggerConfigurator.configure(new File(
-                cmd.hasOption(SemuxOption.DATA_DIR.name()) ? cmd.getOptionValue(SemuxOption.DATA_DIR.name())
+        LoggerConfigurator.configure(
+                new File(cmd.hasOption(SemuxOption.DATA_DIR.name()) ? cmd.getOptionValue(SemuxOption.DATA_DIR.name())
                         : Constants.DEFAULT_DATA_DIR));
     }
 
-    protected void addOption(Option option) {
-        options.addOption(option);
-    }
-
+    /**
+     * Returns all supported options.
+     *
+     * @return
+     */
     protected Options getOptions() {
         return options;
     }
 
-    public String getNetwork() {
-        return network;
+    /**
+     * Adds a supported option.
+     *
+     * @param option
+     */
+    protected void addOption(Option option) {
+        options.addOption(option);
     }
 
+    /**
+     * Sets the network.
+     *
+     * @param network
+     */
     protected void setNetwork(String network) {
         this.network = network;
     }
 
-    public int getCoinbase() {
-        return coinbase;
+    /**
+     * Sets the data directory.
+     *
+     * @param dataDir
+     */
+    protected void setDataDir(String dataDir) {
+        this.dataDir = dataDir;
     }
 
+    /**
+     * Sets the coinbase.
+     *
+     * @param coinbase
+     */
     protected void setCoinbase(int coinbase) {
         this.coinbase = coinbase;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
+    /**
+     * Sets the password.
+     *
+     * @param password
+     */
     protected void setPassword(String password) {
         this.password = password;
     }
 
-    public String getDataDir() {
-        return dataDir;
-    }
-
-    protected void setDataDir(String dataDir) {
-        this.dataDir = dataDir;
-    }
 }

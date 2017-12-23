@@ -131,7 +131,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
         JButton btnAddressBook = new JButton(GUIMessages.get("AddressBook"));
         btnAddressBook.addActionListener(this);
-        btnAddressBook.setActionCommand(Action.SHOW_ADDRESSBOOK.name());
+        btnAddressBook.setActionCommand(Action.SHOW_ADDRESS_BOOK.name());
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -256,7 +256,7 @@ public class SendPanel extends JPanel implements ActionListener {
         case CLEAR:
             clear();
             break;
-        case SHOW_ADDRESSBOOK:
+        case SHOW_ADDRESS_BOOK:
             showAddressBook();
             break;
         default:

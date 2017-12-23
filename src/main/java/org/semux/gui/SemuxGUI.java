@@ -66,7 +66,6 @@ public class SemuxGUI extends Launcher {
     private static final int TRANSACTION_LIMIT = 1024; // per account
 
     private Wallet wallet;
-
     private WalletModel model;
 
     private Kernel kernel;
@@ -89,33 +88,53 @@ public class SemuxGUI extends Launcher {
      * Creates a new Semux GUI instance.
      */
     public SemuxGUI() {
-        Option dataDirOption = Option.builder()
-                .longOpt(SemuxOption.DATA_DIR.toString())
-                .desc(CLIMessages.get("SpecifyDataDir")).hasArg(true)
-                .numberOfArgs(1).optionalArg(false).argName("path").type(String.class)
-                .build();
+        Option dataDirOption = Option.builder().longOpt(SemuxOption.DATA_DIR.toString())
+                .desc(CLIMessages.get("SpecifyDataDir")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("path")
+                .type(String.class).build();
         addOption(dataDirOption);
 
-        Option networkOption = Option.builder()
-                .longOpt(SemuxOption.NETWORK.toString()).desc(CLIMessages.get("SpecifyNetwork")).hasArg(true)
-                .numberOfArgs(1).optionalArg(false).argName("network").type(String.class)
-                .build();
+        Option networkOption = Option.builder().longOpt(SemuxOption.NETWORK.toString())
+                .desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1).optionalArg(false)
+                .argName("network").type(String.class).build();
         addOption(networkOption);
     }
 
+    /**
+     * Creates a GUI instance with the given model and kernel, for test purpose
+     * only.
+     *
+     * @param model
+     * @param kernel
+     */
     public SemuxGUI(WalletModel model, Kernel kernel) {
         this.model = model;
         this.kernel = kernel;
     }
 
+    /**
+     * Returns the kernel instance.
+     *
+     * @return
+     */
     public Kernel getKernel() {
         return kernel;
     }
 
+    /**
+     * Returns the model.
+     *
+     * @return
+     */
     public WalletModel getModel() {
         return model;
     }
 
+    /**
+     * Starts GUI with the given command line arguments.
+     *
+     * @param args
+     * @throws ParseException
+     */
     public void start(String[] args) throws ParseException {
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(getOptions(), args);
@@ -128,42 +147,53 @@ public class SemuxGUI extends Launcher {
             setNetwork(cmd.getOptionValue(SemuxOption.NETWORK.toString()));
         }
 
-        start();
-    }
-
-    protected void start() {
+        // create a wallet instance.
         wallet = new Wallet(new File(getDataDir(), "wallet.data"));
         model = new WalletModel(new AddressBook(new File(getDataDir(), "addressbook.json")));
 
         if (!wallet.exists()) {
             showWelcome();
         } else {
-            for (int i = 0;; i++) {
-                InputDialog dialog = new InputDialog(null, i == 0 ? GUIMessages.get("EnterPassword") + ":"
-                        : GUIMessages.get("WrongPasswordPleaseTryAgain") + ":", true);
-                String pwd = dialog.getInput();
-
-                if (pwd == null) {
-                    SystemUtil.exitAsync(-1);
-                } else if (wallet.unlock(pwd)) {
-                    break;
-                }
-            }
-            showMain();
+            showUnlock();
         }
     }
 
+    /**
+     * Shows the welcome frame.
+     */
     public void showWelcome() {
         // start welcome frame
         WelcomeFrame frame = new WelcomeFrame(wallet);
         frame.setVisible(true);
+
+        // wait until done
         frame.join();
         frame.dispose();
 
-        showMain();
+        setupCoinbase();
     }
 
-    public void showMain() {
+    /**
+     * Shows the unlock frame, which reads user-entered password and tries to unlock
+     * the wallet.
+     */
+    public void showUnlock() {
+        for (int i = 0;; i++) {
+            InputDialog dialog = new InputDialog(null, i == 0 ? GUIMessages.get("EnterPassword") + ":"
+                    : GUIMessages.get("WrongPasswordPleaseTryAgain") + ":", true);
+            String pwd = dialog.getInput();
+
+            if (pwd == null) {
+                SystemUtil.exitAsync(-1);
+            } else if (wallet.unlock(pwd)) {
+                break;
+            }
+        }
+
+        setupCoinbase();
+    }
+
+    public void setupCoinbase() {
         if (wallet.size() > 1) {
             String message = GUIMessages.get("AccountSelection");
             List<Object> options = new ArrayList<>();
@@ -172,22 +202,39 @@ public class SemuxGUI extends Launcher {
                 options.add(Hex.PREF + list.get(i).toAddressString() + ", " + GUIMessages.get("AccountNumShort", i));
             }
 
+            // show select dialog
             SelectDialog dialog = new SelectDialog(null, message, options);
-            setCoinbase(dialog.getSelectedIndex());
-            if (getCoinbase() == -1) {
+            int index = dialog.getSelectedIndex();
+
+            if (index == -1) {
                 SystemUtil.exitAsync(0);
             } else {
-                model.setCoinbase(getCoinbase());
+                // use the selected account as coinbase.
+                setCoinbase(index);
+                model.setCoinbase(index);
             }
         } else if (wallet.size() == 0) {
             wallet.addAccount(new EdDSA());
             wallet.flush();
+
+            // use the first account as coinbase.
+            setCoinbase(0);
+            model.setCoinbase(0);
         }
 
+        startKernelAndMain();
+    }
+
+    /**
+     * Starts the kernel and shows main frame.
+     */
+    public void startKernelAndMain() {
         // start kernel
         kernel = new Kernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
         kernel.start();
-        onBlockAdded(kernel.getBlockchain().getLatestBlock());
+
+        // initialize the model with latest block
+        processBlock(kernel.getBlockchain().getLatestBlock());
 
         // start main frame
         EventQueue.invokeLater(() -> {
@@ -196,62 +243,75 @@ public class SemuxGUI extends Launcher {
         });
 
         // start data refresh
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(3000L);
-                } catch (InterruptedException e) {
-                    logger.info("Data refresh interrupted, exiting");
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-
-                // stops if kernel stops
-                if (!kernel.isRunning()) {
-                    break;
-                }
-
-                // necessary because when kernel exists, the GUI component is not closed.
-                ReadLock lock = kernel.getStateLock().readLock();
-                lock.lock();
-                onBlockAdded(kernel.getBlockchain().getLatestBlock());
-                lock.unlock();
-            }
-
-            logger.info("Data refresh stopped");
-        }, "gui-data").start();
+        new Thread(this::updateModel, "gui-data").start();
 
         // start version check
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(5L * 60L * 1000L);
-
-                    URL url = new URL("http://api.semux.org");
-                    URLConnection con = url.openConnection();
-                    con.addRequestProperty("User-Agent", Constants.DEFAULT_USER_AGENT);
-                    con.setConnectTimeout(Constants.DEFAULT_CONNECT_TIMEOUT);
-                    con.setReadTimeout(Constants.DEFAULT_READ_TIMEOUT);
-
-                    ObjectMapper mapper = new ObjectMapper();
-                    JsonNode node = mapper.readTree(con.getInputStream());
-                    String v = node.get("minVersion").asText();
-
-                    if (SystemUtil.compareVersion(Constants.CLIENT_VERSION, v) < 0) {
-                        JOptionPane.showMessageDialog(null, GUIMessages.get("WalletNeedToBeUpgraded"));
-                        SystemUtil.exitAsync(-1);
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                } catch (IOException e) {
-                    logger.info("Failed to retrieve latest version");
-                }
-            }
-        }, "gui-version").start();
+        new Thread(this::checkVersion, "gui-version").start();
     }
 
-    private void onBlockAdded(Block block) {
+    /**
+     * Checks the client version.
+     */
+    protected void checkVersion() {
+        while (true) {
+            try {
+                Thread.sleep(5L * 60L * 1000L);
+
+                URL url = new URL("http://api.semux.org");
+                URLConnection con = url.openConnection();
+                con.addRequestProperty("User-Agent", Constants.DEFAULT_USER_AGENT);
+                con.setConnectTimeout(Constants.DEFAULT_CONNECT_TIMEOUT);
+                con.setReadTimeout(Constants.DEFAULT_READ_TIMEOUT);
+
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode node = mapper.readTree(con.getInputStream());
+                String v = node.get("minVersion").asText();
+
+                if (SystemUtil.compareVersion(Constants.CLIENT_VERSION, v) < 0) {
+                    JOptionPane.showMessageDialog(null, GUIMessages.get("WalletNeedToBeUpgraded"));
+                    SystemUtil.exitAsync(-1);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            } catch (IOException e) {
+                logger.info("Failed to retrieve latest version");
+            }
+        }
+    }
+
+    /**
+     * Updates the model.
+     */
+    protected void updateModel() {
+        while (true) {
+            try {
+                Thread.sleep(3000L);
+            } catch (InterruptedException e) {
+                logger.info("Data refresh interrupted, exiting");
+                Thread.currentThread().interrupt();
+                break;
+            }
+
+            // stops if kernel stops
+            if (!kernel.isRunning()) {
+                break;
+            }
+
+            // necessary because when kernel exists, the GUI component is not closed.
+            ReadLock lock = kernel.getStateLock().readLock();
+            lock.lock();
+            processBlock(kernel.getBlockchain().getLatestBlock());
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Handles a new block.
+     *
+     * @param block
+     */
+    protected void processBlock(Block block) {
         Blockchain chain = kernel.getBlockchain();
         AccountState as = chain.getAccountState();
         DelegateState ds = chain.getDelegateState();
@@ -301,7 +361,10 @@ public class SemuxGUI extends Launcher {
         model.fireUpdateEvent();
     }
 
-    public static void setupLookAndFeel() {
+    /**
+     * Set up the Swing look and feel.
+     */
+    protected static void setupLookAndFeel() {
         try {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Semux");

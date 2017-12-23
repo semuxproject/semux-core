@@ -98,100 +98,133 @@ public class MenuBar extends JMenuBar implements ActionListener {
         Action action = Action.valueOf(e.getActionCommand());
 
         switch (action) {
-        case RECOVER_ACCOUNTS: {
-            JFileChooser chooser = new JFileChooser();
-            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            chooser.setFileFilter(new FileNameExtensionFilter(GUIMessages.get("WalletBinaryFormat"), "data"));
-
-            int ret = chooser.showOpenDialog(frame);
-            if (ret == JFileChooser.APPROVE_OPTION) {
-                File file = chooser.getSelectedFile();
-                String password = new InputDialog(frame, GUIMessages.get("EnterPassword"), true).getInput();
-
-                if (password != null) {
-                    Wallet w = new Wallet(file);
-                    if (!w.unlock(password)) {
-                        JOptionPane.showMessageDialog(frame, GUIMessages.get("UnlockFailed"));
-                        break;
-                    }
-
-                    Wallet wallet = gui.getKernel().getWallet();
-                    int n = wallet.addAccounts(w.getAccounts());
-                    wallet.flush();
-                    JOptionPane.showMessageDialog(frame, GUIMessages.get("ImportSuccess", n));
-                    gui.getModel().fireUpdateEvent();
-                }
-            }
-
-            break;
-        }
-        case BACKUP_WALLET: {
-            JFileChooser chooser = new JFileChooser();
-            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            chooser.setSelectedFile(new File("wallet.data"));
-            chooser.setFileFilter(new FileNameExtensionFilter(GUIMessages.get("WalletBinaryFormat"), "data"));
-
-            int ret = chooser.showSaveDialog(frame);
-            if (ret == JFileChooser.APPROVE_OPTION) {
-                File dst = chooser.getSelectedFile();
-                if (dst.exists()) {
-                    int answer = JOptionPane.showConfirmDialog(frame,
-                            GUIMessages.get("BackupFileExists", dst.getName()));
-                    if (answer != JOptionPane.OK_OPTION) {
-                        return;
-                    }
-                }
-                File src = gui.getKernel().getWallet().getFile();
-                try {
-                    Files.copy(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    JOptionPane.showMessageDialog(frame, GUIMessages.get("WalletSavedAt", dst.getAbsolutePath()));
-                } catch (IOException ex) {
-                    logger.warn("Failed to save backup file", ex);
-                    JOptionPane.showMessageDialog(frame, GUIMessages.get("SaveBackupFailed"));
-                }
-            }
-            break;
-        }
-        case IMPORT_PRIVATE_KEY: {
-            InputDialog dialog = new InputDialog(frame, GUIMessages.get("EnterPrivateKey"), false);
-            String pk = dialog.getInput();
-            if (pk != null) {
-                try {
-                    Wallet wallet = gui.getKernel().getWallet();
-                    EdDSA account = new EdDSA(Hex.decode0x(pk));
-                    if (wallet.addAccount(account)) {
-                        wallet.flush();
-                        JOptionPane.showMessageDialog(frame, GUIMessages.get("PrivateKeyImportSuccess"));
-                        gui.getModel().fireUpdateEvent();
-                    } else {
-                        JOptionPane.showMessageDialog(frame, GUIMessages.get("PrivateKeyAlreadyExists"));
-                    }
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(frame, GUIMessages.get("PrivateKeyImportFailed"));
-                }
-            }
-            break;
-        }
-        case EXPORT_PRIVATE_KEY: {
-            ExportPrivateKeyDialog d = new ExportPrivateKeyDialog(gui, frame);
-            d.setVisible(true);
-            break;
-        }
-        case CHANGE_PASSWORD: {
-            ChangePasswordDialog d = new ChangePasswordDialog(gui, frame);
-            d.setVisible(true);
-            break;
-        }
-        case EXIT: {
+        case EXIT:
             SystemUtil.exitAsync(0);
             break;
-        }
-        case ABOUT: {
-            JOptionPane.showMessageDialog(frame, gui.getKernel().getConfig().getClientId());
+        case RECOVER_ACCOUNTS:
+            recoverAccounts();
             break;
-        }
+        case BACKUP_WALLET:
+            backupWallet();
+            break;
+        case IMPORT_PRIVATE_KEY:
+            importPrivateKey();
+            break;
+        case EXPORT_PRIVATE_KEY:
+            exportPrivateKey();
+            break;
+        case CHANGE_PASSWORD:
+            changePassword();
+            break;
+        case ABOUT:
+            about();
+            break;
         default:
             break;
         }
+    }
+
+    /**
+     * Recovers accounts from backup file.
+     */
+    protected void recoverAccounts() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.setFileFilter(new FileNameExtensionFilter(GUIMessages.get("WalletBinaryFormat"), "data"));
+
+        int ret = chooser.showOpenDialog(frame);
+        if (ret == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            String password = new InputDialog(frame, GUIMessages.get("EnterPassword"), true).getInput();
+
+            if (password != null) {
+                Wallet w = new Wallet(file);
+                if (!w.unlock(password)) {
+                    JOptionPane.showMessageDialog(frame, GUIMessages.get("UnlockFailed"));
+                    return;
+                }
+
+                Wallet wallet = gui.getKernel().getWallet();
+                int n = wallet.addAccounts(w.getAccounts());
+                wallet.flush();
+                JOptionPane.showMessageDialog(frame, GUIMessages.get("ImportSuccess", n));
+                gui.getModel().fireUpdateEvent();
+            }
+        }
+    }
+
+    /**
+     * Backup the wallet.
+     */
+    protected void backupWallet() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.setSelectedFile(new File("wallet.data"));
+        chooser.setFileFilter(new FileNameExtensionFilter(GUIMessages.get("WalletBinaryFormat"), "data"));
+
+        int ret = chooser.showSaveDialog(frame);
+        if (ret == JFileChooser.APPROVE_OPTION) {
+            File dst = chooser.getSelectedFile();
+            if (dst.exists()) {
+                int answer = JOptionPane.showConfirmDialog(frame, GUIMessages.get("BackupFileExists", dst.getName()));
+                if (answer != JOptionPane.OK_OPTION) {
+                    return;
+                }
+            }
+            File src = gui.getKernel().getWallet().getFile();
+            try {
+                Files.copy(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                JOptionPane.showMessageDialog(frame, GUIMessages.get("WalletSavedAt", dst.getAbsolutePath()));
+            } catch (IOException ex) {
+                logger.warn("Failed to save backup file", ex);
+                JOptionPane.showMessageDialog(frame, GUIMessages.get("SaveBackupFailed"));
+            }
+        }
+    }
+
+    /**
+     * Imports private key into this wallet.
+     */
+    protected void importPrivateKey() {
+        InputDialog dialog = new InputDialog(frame, GUIMessages.get("EnterPrivateKey"), false);
+        String pk = dialog.getInput();
+        if (pk != null) {
+            try {
+                Wallet wallet = gui.getKernel().getWallet();
+                EdDSA account = new EdDSA(Hex.decode0x(pk));
+                if (wallet.addAccount(account)) {
+                    wallet.flush();
+                    JOptionPane.showMessageDialog(frame, GUIMessages.get("PrivateKeyImportSuccess"));
+                    gui.getModel().fireUpdateEvent();
+                } else {
+                    JOptionPane.showMessageDialog(frame, GUIMessages.get("PrivateKeyAlreadyExists"));
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, GUIMessages.get("PrivateKeyImportFailed"));
+            }
+        }
+    }
+
+    /**
+     * Shows the export private key dialog.
+     */
+    protected void exportPrivateKey() {
+        ExportPrivateKeyDialog d = new ExportPrivateKeyDialog(gui, frame);
+        d.setVisible(true);
+    }
+
+    /**
+     * Shows the change password dialog.
+     */
+    protected void changePassword() {
+        ChangePasswordDialog d = new ChangePasswordDialog(gui, frame);
+        d.setVisible(true);
+    }
+
+    /**
+     * Shows the about dialog.
+     */
+    protected void about() {
+        JOptionPane.showMessageDialog(frame, gui.getKernel().getConfig().getClientId());
     }
 }

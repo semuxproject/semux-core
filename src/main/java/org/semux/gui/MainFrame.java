@@ -171,18 +171,18 @@ public class MainFrame extends JFrame implements ActionListener {
         w.lock();
 
         lockGlassPane.setVisible(true);
-        btnLock.setText("Unlock");
+        btnLock.setText(GUIMessages.get("Lock"));
     }
 
     /**
-     * Unlocks the wallet.
+     * Tries to unlock the wallet with the given password.
      */
     protected boolean unlock(String password) {
         Wallet w = kernel.getWallet();
 
         if (password != null && w.unlock(password)) {
             lockGlassPane.setVisible(false);
-            btnLock.setText("lock");
+            btnLock.setText(GUIMessages.get("Unlock"));
             return true;
         }
 
@@ -194,7 +194,13 @@ public class MainFrame extends JFrame implements ActionListener {
     private static final Border BORDER_FOCUS = new CompoundBorder(new LineBorder(new Color(51, 153, 255)),
             new EmptyBorder(0, 5, 0, 10));
 
-    private void select(JPanel panel, JButton button) {
+    /**
+     * Selects an tabbed panel to display.
+     *
+     * @param panel
+     * @param button
+     */
+    protected void select(JPanel panel, JButton button) {
         if (activeButton != null) {
             activeButton.setBorder(BORDER_NORMAL);
         }
@@ -208,7 +214,15 @@ public class MainFrame extends JFrame implements ActionListener {
         activePanel.repaint();
     }
 
-    private JButton createButton(String name, String icon, Action action) {
+    /**
+     * Creates a button in the tool bar.
+     *
+     * @param name
+     * @param icon
+     * @param action
+     * @return
+     */
+    protected JButton createButton(String name, String icon, Action action) {
         JButton btn = new JButton(name);
         btn.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
         btn.setActionCommand(action.name());
@@ -221,7 +235,10 @@ public class MainFrame extends JFrame implements ActionListener {
         return btn;
     }
 
-    private class LockGlassPane extends JPanel {
+    /**
+     * A gray overlay which shows on top of the GUI to prevent user actions.
+     */
+    protected class LockGlassPane extends JPanel {
 
         private static final long serialVersionUID = 1L;
 

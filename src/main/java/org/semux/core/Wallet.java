@@ -100,7 +100,7 @@ public class Wallet {
     }
 
     /**
-     * Returns whether the wallet file exists.
+     * Returns whether the wallet file exists and non-empty.
      * 
      * @return
      */

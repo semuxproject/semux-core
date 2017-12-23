@@ -79,16 +79,6 @@ public class AddressBook {
     }
 
     /**
-     * Returns an {@link Entry} by address.
-     * 
-     * @param address
-     * @return An {@link Entry} if exists, otherwise null
-     */
-    public Entry getByAddress(String address) {
-        throw new UnsupportedOperationException("Query by address is not yet supported");
-    }
-
-    /**
      * Removes an entry from the address book
      *
      * @param name
@@ -114,7 +104,7 @@ public class AddressBook {
      * @return
      */
     private ConcurrentHashMap<String, String> load() {
-        if (file.length() > 0) {
+        if (file.length() > 0) { // file exists and non-empty
             try {
                 return new ObjectMapper().readValue(file, new TypeReference<ConcurrentHashMap<String, String>>() {
                 });
@@ -132,7 +122,7 @@ public class AddressBook {
         try {
             new ObjectMapper().writeValue(file, database);
         } catch (IOException e) {
-            logger.error("Failed to retrieve or access address book", e);
+            logger.error("Failed to persist address book", e);
         }
     }
 

@@ -43,9 +43,9 @@ import org.semux.util.exception.UnreachableException;
 
 public class HomePanel extends JPanel implements ActionListener {
 
-    private static final int NUMBER_OF_TRANSACTIONS = 6;
-
     private static final long serialVersionUID = 1L;
+
+    private static final int NUMBER_OF_TRANSACTIONS = 6;
 
     private static final EnumSet<TransactionType> FEDERATED_TRANSACTION_TYPES = EnumSet.of(TransactionType.COINBASE,
             TransactionType.TRANSFER);
@@ -244,7 +244,10 @@ public class HomePanel extends JPanel implements ActionListener {
         }
     }
 
-    private void refresh() {
+    /**
+     * Refreshes this panel.
+     */
+    protected void refresh() {
         Block block = model.getLatestBlock();
         this.syncProgress.setText(SyncProgressFormatter.format(model.getSyncProgress()));
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
