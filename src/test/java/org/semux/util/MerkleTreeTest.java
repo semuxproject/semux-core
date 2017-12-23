@@ -62,7 +62,7 @@ public class MerkleTreeTest {
     @Test
     public void testThreeElements() {
         byte[] hash12 = Hash.h256(hash1, hash2);
-        byte[] hash33 = Hash.h256(hash3, hash3);
+        byte[] hash33 = hash3;
         byte[] hash1233 = Hash.h256(hash12, hash33);
 
         MerkleTree tree = new MerkleTree(Arrays.asList(hash1, hash2, hash3));

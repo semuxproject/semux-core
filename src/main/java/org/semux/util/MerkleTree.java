@@ -12,7 +12,7 @@ import java.util.List;
 import org.semux.crypto.Hash;
 
 /**
- * Simple implementation of the Merkle tree. TODO: CVE-2012-2459
+ * Simple implementation of the Merkle tree.
  *
  */
 public class MerkleTree {
@@ -90,16 +90,14 @@ public class MerkleTree {
         while (nodes.size() > 1) {
             List<Node> list = new ArrayList<>();
 
-            // duplicate the last element when the number of elements is odd.
-            if (nodes.size() % 2 != 0) {
-                // shallow copy
-                nodes.add(new Node(nodes.get(nodes.size() - 1).value));
-            }
-
-            for (int i = 0; i < nodes.size() - 1; i += 2) {
+            for (int i = 0; i < nodes.size(); i += 2) {
                 Node left = nodes.get(i);
-                Node right = nodes.get(i + 1);
-                list.add(new Node(Hash.h256(left.value, right.value), left, right));
+                if (i + 1 < nodes.size()) {
+                    Node right = nodes.get(i + 1);
+                    list.add(new Node(Hash.h256(left.value, right.value), left, right));
+                } else {
+                    list.add(new Node(left.value, left, null));
+                }
             }
 
             levels++;
