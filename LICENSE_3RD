@@ -3,38 +3,38 @@ distributed with this software.
 
 
 Logback:
-	https://logback.qos.ch/
-	Copyright (C) 1999-2017, QOS.ch. All rights reserved.
-	Eclipse Public License - v 1.0
+    https://logback.qos.ch/
+    Copyright (C) 1999-2017, QOS.ch. All rights reserved.
+    Eclipse Public License - v 1.0
 
 Jackson:
-	https://github.com/FasterXML/jackson
-	Apache License, Version 2.0
+    https://github.com/FasterXML/jackson
+    Apache License, Version 2.0
 
 Caffeine:
-	https://github.com/ben-manes/caffeine
-	Apache License, Version 2.0
+    https://github.com/ben-manes/caffeine
+    Apache License, Version 2.0
 
 Java SemVer:
-	https://github.com/zafarkhaja/jsemver
-	Copyright 2012-2014 Zafar Khaja <zafarkhaja@gmail.com>.
-	MIT License
+    https://github.com/zafarkhaja/jsemver
+    Copyright 2012-2014 Zafar Khaja <zafarkhaja@gmail.com>.
+    MIT License
 
 ZXing:
-	https://github.com/zxing/zxing
-	Apache License, Version 2.0
+    https://github.com/zxing/zxing
+    Apache License, Version 2.0
 
 Apache Commons:
-	https://commons.apache.org/
-	Apache License, Version 2.0
+    https://commons.apache.org/
+    Apache License, Version 2.0
 
 Netty:
-	https://netty.io/
-	Apache License, Version 2.0
+    https://netty.io/
+    Apache License, Version 2.0
 
 Snappy Java:
     https://github.com/xerial/snappy-java
-	Apache License, Version 2.0
+    Apache License, Version 2.0
 
 Oshi:
     https://github.com/oshi/oshi
@@ -49,26 +49,26 @@ ThreeTen Backport
     BSD 3-Clause License
 
 EdDSA-Java:
-	https://github.com/str4d/ed25519-java
-	CC0 1.0 Universal
+    https://github.com/str4d/ed25519-java
+    CC0 1.0 Universal
 
 weupnp:
-	http://bitletorg.github.io/weupnp/
-	GNU Lesser General Public License v3.0
+    http://bitletorg.github.io/weupnp/
+    GNU Lesser General Public License v3.0
 
 Bouncy Castle:
-	https://www.bouncycastle.org/
-	Copyright (c) 2000 - 2017 The Legion of the Bouncy Castle Inc.
-	Bouncy Castle License
+    https://www.bouncycastle.org/
+    Copyright (c) 2000 - 2017 The Legion of the Bouncy Castle Inc.
+    Bouncy Castle License
 
 LevelDB JNI:
-	Copyright (c) 2011 FuseSource Corp. All rights reserved.
-	BSD 3-Clause License
+    Copyright (c) 2011 FuseSource Corp. All rights reserved.
+    BSD 3-Clause License
 
 SLF4J:
-	Copyright (c) 2004-2017 QOS.ch
-	https://www.slf4j.org/
-	MIT License
+    Copyright (c) 2004-2017 QOS.ch
+    https://www.slf4j.org/
+    MIT License
 
 
 ================================================================================
