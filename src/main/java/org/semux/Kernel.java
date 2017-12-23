@@ -34,10 +34,18 @@ import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
 import org.semux.net.PeerServer;
-import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
+
+import oshi.SystemInfo;
+import oshi.hardware.CentralProcessor;
+import oshi.hardware.ComputerSystem;
+import oshi.hardware.GlobalMemory;
+import oshi.hardware.HWDiskStore;
+import oshi.hardware.HardwareAbstractionLayer;
+import oshi.hardware.NetworkIF;
+import oshi.software.os.OperatingSystem;
 
 /**
  * Kernel holds references to each individual components.
@@ -95,16 +103,11 @@ public class Kernel {
         // ====================================
         // initialization
         // ====================================
-        long mb = 1024L * 1024L;
         logger.info(config.getClientId());
         logger.info("System booting up: networkId = {}, networkVersion = {}, coinbase = {}", config.networkId(),
                 config.networkVersion(),
                 coinbase);
-        logger.info("CPU cores = {}, free memory = {} MB, free disk = {} MB, xmx = {} MB", //
-                SystemUtil.getNumberOfProceessors(), //
-                SystemUtil.getAvailableMemorySize() / mb, //
-                config.dataDir().getFreeSpace() / mb, //
-                Runtime.getRuntime().maxMemory() / mb);
+        printSystemInfo();
 
         dbFactory = new LevelDBFactory(config.dataDir());
         chain = new BlockchainImpl(config, dbFactory);
@@ -161,6 +164,46 @@ public class Kernel {
 
         // set flag
         isRunning.set(true);
+    }
+
+    /**
+     * Prints system info.
+     */
+    protected void printSystemInfo() {
+        SystemInfo si = new SystemInfo();
+        HardwareAbstractionLayer hal = si.getHardware();
+
+        // computer system
+        ComputerSystem cs = hal.getComputerSystem();
+        logger.info("Computer: manufacturer = {}, model = {}", cs.getManufacturer(), cs.getModel());
+
+        // operating system
+        OperatingSystem os = si.getOperatingSystem();
+        logger.info("OS: name = {}", os);
+
+        // cpu
+        CentralProcessor cp = hal.getProcessor();
+        logger.info("CPU: processor = {}, cores = {} / {}", cp, cp.getPhysicalProcessorCount(),
+                cp.getLogicalProcessorCount());
+
+        // memory
+        GlobalMemory m = hal.getMemory();
+        long mb = 1024L * 1024L;
+        logger.info("Memory: total = {} MB, available = {} MB, swap total = {} MB, swap available = {} MB", //
+                m.getTotal() / mb, //
+                m.getAvailable() / mb, //
+                m.getSwapTotal() / mb, //
+                (m.getSwapTotal() - m.getSwapUsed()) / mb);
+
+        // disk
+        for (HWDiskStore disk : hal.getDiskStores()) {
+            logger.info("Disk: name = {}, size = {} MB", disk.getName(), disk.getSize() / mb);
+        }
+
+        // network
+        for (NetworkIF net : hal.getNetworkIFs()) {
+            logger.info("Network: name = {}, ip = [{}]", net.getDisplayName(), String.join(",", net.getIPv4addr()));
+        }
     }
 
     /**

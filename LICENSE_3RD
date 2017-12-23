@@ -4,7 +4,7 @@ distributed with this software.
 
 Logback:
 	https://logback.qos.ch/
-	Copyright (C) 1999-2017, QOS.ch. All rights reserved. 
+	Copyright (C) 1999-2017, QOS.ch. All rights reserved.
 	Eclipse Public License - v 1.0
 
 Jackson:
@@ -35,6 +35,18 @@ Netty:
 Snappy Java:
     https://github.com/xerial/snappy-java
 	Apache License, Version 2.0
+
+Oshi:
+    https://github.com/oshi/oshi
+    Eclipse Public License - v 1.0
+
+JNA:
+    https://github.com/java-native-access/jna
+    Apache License, Version 2.0
+
+ThreeTen Backport
+    http://www.threeten.org/threetenbp/
+    BSD 3-Clause License
 
 EdDSA-Java:
 	https://github.com/str4d/ed25519-java

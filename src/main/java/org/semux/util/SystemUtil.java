@@ -7,13 +7,9 @@
 package org.semux.util;
 
 import java.io.Console;
-import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Scanner;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +21,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.resolver.dns.DnsNameResolver;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
 import io.netty.resolver.dns.SequentialDnsServerAddressStreamProvider;
+import oshi.SystemInfo;
 
 public class SystemUtil {
     private static final Logger logger = LoggerFactory.getLogger(SystemUtil.class);
@@ -210,15 +207,8 @@ public class SystemUtil {
      * @return
      */
     public static long getAvailableMemorySize() {
-        // NOTE: This following tweak is platform-dependent.
-        try {
-            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-            ObjectName name = new ObjectName("java.lang", "type", "OperatingSystem");
-            return (Long) server.getAttribute(name, "FreePhysicalMemorySize");
-        } catch (Exception e) {
-            logger.info("Failed to get free memory size", e);
-            return 0xffffffffL;
-        }
+        SystemInfo systemInfo = new SystemInfo();
+        return systemInfo.getHardware().getMemory().getAvailable();
     }
 
     /**
