@@ -296,6 +296,14 @@
             <version>4.1.13.Final</version>
         </dependency>
 
+        <!-- Snappy Java -->
+        <dependency>
+            <groupId>org.xerial.snappy</groupId>
+            <artifactId>snappy-java</artifactId>
+            <version>1.1.7.1</version>
+        </dependency>
+
+
         <!-- Apache commons -->
         <dependency>
             <groupId>org.apache.commons</groupId>

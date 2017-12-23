@@ -32,6 +32,10 @@ Netty:
 	https://netty.io/
 	Apache License, Version 2.0
 
+Snappy Java:
+    https://github.com/xerial/snappy-java
+	Apache License, Version 2.0
+
 EdDSA-Java:
 	https://github.com/str4d/ed25519-java
 	CC0 1.0 Universal
