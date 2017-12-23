@@ -51,6 +51,10 @@ import oshi.software.os.OperatingSystem;
  * Kernel holds references to each individual components.
  */
 public class Kernel {
+    static {
+        System.setProperty("jna.nosys", "true");
+    }
+
     protected static final Logger logger = LoggerFactory.getLogger(Kernel.class);
 
     protected final AtomicBoolean isRunning = new AtomicBoolean(false);
