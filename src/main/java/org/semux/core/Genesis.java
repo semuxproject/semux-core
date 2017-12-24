@@ -96,9 +96,14 @@ public class Genesis extends Block {
      */
     public static Genesis load(File dataDir) {
         try {
+            File file = Paths.get(dataDir.getAbsolutePath(), Constants.CONFIG_DIR, GENESIS_FILE).toFile();
+
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(Paths.get(dataDir.getAbsolutePath(), Constants.CONFIG_DIR, GENESIS_FILE).toFile(),
-                    Genesis.class);
+            if (file.exists()) {
+                return mapper.readValue(file, Genesis.class);
+            } else {
+                return mapper.readValue(Genesis.class.getResourceAsStream("/genesis.json"), Genesis.class);
+            }
         } catch (IOException e) {
             logger.error("Failed to load genesis file", e);
             SystemUtil.exitAsync(-1);

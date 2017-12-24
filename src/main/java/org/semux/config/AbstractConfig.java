@@ -325,9 +325,14 @@ public abstract class AbstractConfig implements Config {
 
     protected void init() {
         File f = new File(dataDir, Constants.CONFIG_DIR + File.separator + CONFIG_FILE);
-        Properties props = new Properties();
+        if (!f.exists()) {
+            // exit if the config file does not exist
+            return;
+        }
 
         try (FileInputStream in = new FileInputStream(f)) {
+
+            Properties props = new Properties();
             props.load(in);
 
             for (Object k : props.keySet()) {
