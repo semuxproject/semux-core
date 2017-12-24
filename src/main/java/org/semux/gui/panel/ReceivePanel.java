@@ -98,14 +98,17 @@ public class ReceivePanel extends JPanel implements ActionListener {
         qr.setIcon(SwingUtil.emptyImage(200, 200));
         qr.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        JButton btnCopyAddress = SwingUtil.createDefaultButton(GUIMessages.get("CopyAddress"), this,
-                Action.COPY_ADDRESS);
+        JButton btnCopyAddress = SwingUtil
+                .createDefaultButton(GUIMessages.get("CopyAddress"), this, Action.COPY_ADDRESS);
+        btnCopyAddress.setName("btnCopyAddress");
 
-        JButton buttonNewAccount = SwingUtil.createDefaultButton(GUIMessages.get("NewAccount"), this,
-                Action.NEW_ACCOUNT);
+        JButton buttonNewAccount = SwingUtil
+                .createDefaultButton(GUIMessages.get("NewAccount"), this, Action.NEW_ACCOUNT);
+        buttonNewAccount.setName("buttonNewAccount");
 
-        JButton btnDeleteAddress = SwingUtil.createDefaultButton(GUIMessages.get("DeleteAccount"), this,
-                Action.DELETE_ACCOUNT);
+        JButton btnDeleteAddress = SwingUtil
+                .createDefaultButton(GUIMessages.get("DeleteAccount"), this, Action.DELETE_ACCOUNT);
+        btnDeleteAddress.setName("btnDeleteAddress");
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -203,75 +206,29 @@ public class ReceivePanel extends JPanel implements ActionListener {
         Action action = Action.valueOf(e.getActionCommand());
 
         switch (action) {
-        case REFRESH: {
+        case REFRESH:
             refresh();
             break;
-        }
-        case SELECT_ACCOUNT: {
-            try {
-                WalletAccount acc = getSelectedAccount();
-                if (acc != null) {
-                    BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getKey().toAddressString(), 200);
-                    qr.setIcon(new ImageIcon(bi));
-                }
-            } catch (QRCodeException exception) {
-                logger.error("Unable to generate QR code", exception);
-            }
+        case SELECT_ACCOUNT:
+            selectAccount();
             break;
-        }
-        case COPY_ADDRESS: {
-            WalletAccount acc = getSelectedAccount();
-            if (acc == null) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
-            } else {
-                String address = Hex.PREF + acc.getKey().toAddressString();
-                StringSelection stringSelection = new StringSelection(address);
-                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                clipboard.setContents(stringSelection, null);
-
-                JOptionPane.showMessageDialog(this, GUIMessages.get("AddressCopied", address));
-            }
+        case COPY_ADDRESS:
+            copyAddress();
             break;
-        }
-        case NEW_ACCOUNT: {
-            EdDSA key = new EdDSA();
-
-            Wallet wallet = kernel.getWallet();
-            wallet.addAccount(key);
-            wallet.flush();
-
-            // fire update event
-            model.fireUpdateEvent();
-
-            JOptionPane.showMessageDialog(this, GUIMessages.get("NewAccountCreated"));
+        case NEW_ACCOUNT:
+            newAccount();
             break;
-        }
-        case DELETE_ACCOUNT: {
-            WalletAccount acc = getSelectedAccount();
-            if (acc == null) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
-            } else {
-                int ret = JOptionPane.showConfirmDialog(this, GUIMessages.get("ConfirmDeleteAccount"),
-                        GUIMessages.get("DeleteAccount"), JOptionPane.YES_NO_OPTION);
-
-                if (ret == JOptionPane.OK_OPTION) {
-                    Wallet wallet = kernel.getWallet();
-                    wallet.deleteAccount(acc.getKey());
-                    wallet.flush();
-
-                    // fire update event
-                    model.fireUpdateEvent();
-
-                    JOptionPane.showMessageDialog(this, GUIMessages.get("AccountDeleted"));
-                }
-            }
+        case DELETE_ACCOUNT:
+            deleteAccount();
             break;
-        }
         default:
             throw new UnreachableException();
         }
     }
 
+    /**
+     * Processes the REFRESH event.
+     */
     protected void refresh() {
         List<WalletAccount> accounts = model.getAccounts();
 
@@ -293,6 +250,84 @@ public class ReceivePanel extends JPanel implements ActionListener {
         }
     }
 
+    /**
+     * Processes the SELECT_ACCOUNT event.
+     */
+    protected void selectAccount() {
+        try {
+            WalletAccount acc = getSelectedAccount();
+            if (acc != null) {
+                BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getKey().toAddressString(), 200);
+                qr.setIcon(new ImageIcon(bi));
+            }
+        } catch (QRCodeException exception) {
+            logger.error("Unable to generate QR code", exception);
+        }
+    }
+
+    /**
+     * Processes the COPY_ADDRESS event
+     */
+    protected void copyAddress() {
+        WalletAccount acc = getSelectedAccount();
+        if (acc == null) {
+            JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
+        } else {
+            String address = Hex.PREF + acc.getKey().toAddressString();
+            StringSelection stringSelection = new StringSelection(address);
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(stringSelection, null);
+
+            JOptionPane.showMessageDialog(this, GUIMessages.get("AddressCopied", address));
+        }
+    }
+
+    /**
+     * Processes the NEW_ACCOUNT event.
+     */
+    protected void newAccount() {
+        EdDSA key = new EdDSA();
+
+        Wallet wallet = kernel.getWallet();
+        wallet.addAccount(key);
+        wallet.flush();
+
+        // fire update event
+        model.fireUpdateEvent();
+
+        JOptionPane.showMessageDialog(this, GUIMessages.get("NewAccountCreated"));
+    }
+
+    /**
+     * Processes the DELETE_ACCOUNT event.
+     */
+    protected void deleteAccount() {
+        WalletAccount acc = getSelectedAccount();
+        if (acc == null) {
+            JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
+        } else {
+            int ret = JOptionPane
+                    .showConfirmDialog(this, GUIMessages.get("ConfirmDeleteAccount"), GUIMessages.get("DeleteAccount"),
+                            JOptionPane.YES_NO_OPTION);
+
+            if (ret == JOptionPane.OK_OPTION) {
+                Wallet wallet = kernel.getWallet();
+                wallet.deleteAccount(acc.getKey());
+                wallet.flush();
+
+                // fire update event
+                model.fireUpdateEvent();
+
+                JOptionPane.showMessageDialog(this, GUIMessages.get("AccountDeleted"));
+            }
+        }
+    }
+
+    /**
+     * Returns the selected account.
+     *
+     * @return
+     */
     protected WalletAccount getSelectedAccount() {
         int row = table.getSelectedRow();
         return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
