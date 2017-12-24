@@ -272,12 +272,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         }
     }
 
-    private WalletAccount getSelectedAccount() {
-        int row = table.getSelectedRow();
-        return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
-    }
-
-    private void refresh() {
+    protected void refresh() {
         List<WalletAccount> accounts = model.getAccounts();
 
         /*
@@ -297,4 +292,10 @@ public class ReceivePanel extends JPanel implements ActionListener {
             table.setRowSelectionInterval(0, 0);
         }
     }
+
+    protected WalletAccount getSelectedAccount() {
+        int row = table.getSelectedRow();
+        return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
+    }
+
 }

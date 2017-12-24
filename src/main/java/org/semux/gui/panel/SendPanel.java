@@ -374,25 +374,6 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     /**
-     * Represents an item in the account drop list.
-     */
-    protected static class Item {
-        WalletAccount account;
-        String name;
-
-        public Item(WalletAccount a, int idx) {
-            this.account = a;
-            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + GUIMessages.get("AccountNumShort", idx)
-                    + ", " + SwingUtil.formatValue(account.getAvailable());
-        }
-
-        @Override
-        public String toString() {
-            return this.name;
-        }
-    }
-
-    /**
      * Adds a transaction to the pending manager.
      * 
      * @param pendingMgr
@@ -423,5 +404,24 @@ public class SendPanel extends JPanel implements ActionListener {
                 message,
                 GUIMessages.get("ErrorDialogTitle"),
                 JOptionPane.ERROR_MESSAGE);
+    }
+
+    /**
+     * Represents an item in the account drop list.
+     */
+    protected static class Item {
+        WalletAccount account;
+        String name;
+
+        public Item(WalletAccount a, int idx) {
+            this.account = a;
+            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + GUIMessages.get("AccountNumShort", idx)
+                    + ", " + SwingUtil.formatValue(account.getAvailable());
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
     }
 }

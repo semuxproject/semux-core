@@ -62,10 +62,6 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] columnNames = { GUIMessages.get("Rank"), GUIMessages.get("Name"),
-            GUIMessages.get("Address"), GUIMessages.get("Votes"), GUIMessages.get("VotesFromMe"),
-            GUIMessages.get("Status"), GUIMessages.get("Rate") };
-
     private transient WalletModel model;
 
     private transient Kernel kernel;
@@ -139,8 +135,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         JPanel delegateRegistrationPanel = new JPanel();
         delegateRegistrationPanel.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        JLabel label = new JLabel(GUIMessages.get("DelegateRegistrationNoteHtml",
-                SwingUtil.formatValue(config.minDelegateFee()), SwingUtil.formatValue(config.minTransactionFee())));
+        JLabel label = new JLabel(GUIMessages
+                .get("DelegateRegistrationNoteHtml", SwingUtil.formatValue(config.minDelegateFee()),
+                        SwingUtil.formatValue(config.minTransactionFee())));
         label.setForeground(Color.DARK_GRAY);
 
         from = new JComboBox<>();
@@ -237,8 +234,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         votePanel.setLayout(groupLayout2);
         // @formatter:on
 
-        JButton btnDelegate = SwingUtil.createDefaultButton(GUIMessages.get("RegisterAsDelegate"), this,
-                Action.DELEGATE);
+        JButton btnDelegate = SwingUtil
+                .createDefaultButton(GUIMessages.get("RegisterAsDelegate"), this, Action.DELEGATE);
         btnDelegate.setName("btnDelegate");
         btnDelegate.setToolTipText(
                 GUIMessages.get("RegisterAsDelegateToolTip", SwingUtil.formatValue(config.minDelegateFee())));
@@ -278,9 +275,13 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         refreshDelegates();
     }
 
-    private class DelegatesTableModel extends AbstractTableModel {
+    class DelegatesTableModel extends AbstractTableModel {
 
         private static final long serialVersionUID = 1L;
+
+        private final String[] columnNames = { GUIMessages.get("Rank"), GUIMessages.get("Name"),
+                GUIMessages.get("Address"), GUIMessages.get("Votes"), GUIMessages.get("VotesFromMe"),
+                GUIMessages.get("Status"), GUIMessages.get("Rate") };
 
         private transient List<WalletDelegate> delegates;
 
@@ -346,150 +347,29 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         Action action = Action.valueOf(e.getActionCommand());
 
         switch (action) {
-        case REFRESH: {
+        case REFRESH:
             refreshAccounts();
             refreshDelegates();
             break;
-        }
-        case SELECT_ACCOUNT: {
+        case SELECT_ACCOUNT:
             refreshDelegates();
             break;
-        }
         case VOTE:
-        case UNVOTE: {
-            WalletAccount a = getSelectedAccount();
-            WalletDelegate d = getSelectedDelegate();
-            String v = action.equals(Action.VOTE) ? textVote.getText() : textUnvote.getText();
-            long value;
-            try {
-                value = SwingUtil.parseValue(v);
-            } catch (ParseException ex) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("EnterValidNumberOfVotes"));
-                break;
-            }
-            long fee = config.minTransactionFee();
-
-            if (a == null) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
-            } else if (d == null) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("SelectDelegate"));
-            } else if (value <= 0) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("EnterValidNumberOfVotes"));
-            } else {
-                if (action == Action.VOTE) {
-                    if (value + fee > a.getAvailable()) {
-                        JOptionPane.showMessageDialog(this,
-                                GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
-                        break;
-                    }
-
-                    if (a.getAvailable() - fee - value < fee) {
-                        int ret = JOptionPane.showConfirmDialog(this, GUIMessages.get("NotEnoughBalanceToUnvote"),
-                                GUIMessages.get("ConfirmDelegateRegistration"), JOptionPane.YES_NO_OPTION);
-                        if (ret != JOptionPane.YES_OPTION) {
-                            break;
-                        }
-                    }
-                } else if (fee > a.getAvailable()) {
-                    JOptionPane.showMessageDialog(this,
-                            GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(fee)));
-                    break;
-                }
-
-                PendingManager pendingMgr = kernel.getPendingManager();
-
-                TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
-                byte[] fromAddress = a.getKey().toAddress();
-                byte[] toAddress = d.getAddress();
-                long nonce = pendingMgr.getNonce(fromAddress);
-                long timestamp = System.currentTimeMillis();
-                byte[] data = {};
-                Transaction tx = new Transaction(type, toAddress, value, fee, nonce, timestamp, data);
-                tx.sign(a.getKey());
-
-                sendTransaction(pendingMgr, tx);
-            }
+        case UNVOTE:
+            voteOrUnvote(action);
             break;
-        }
-        case DELEGATE: {
-            WalletAccount a = getSelectedAccount();
-            String name = textName.getText();
-            if (a == null) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
-            } else if (!name.matches("[_a-z0-9]{4,16}")) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("AccountNameError"));
-            } else if (a.getAvailable() < config.minDelegateFee() + config.minTransactionFee()) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("InsufficientFunds",
-                        SwingUtil.formatValue(config.minDelegateFee() + config.minTransactionFee())));
-            } else {
-                // confirm system requirements
-                if ((config.networkId() == Constants.MAIN_NET_ID && !SystemUtil.bench()) &&
-                        JOptionPane.showConfirmDialog(
-                                this,
-                                GUIMessages.get("ComputerNotQualified"),
-                                GUIMessages.get("ConfirmDelegateRegistration"),
-                                JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
-                    break;
-                }
-
-                // confirm burning amount
-                if (JOptionPane.showConfirmDialog(this,
-                        GUIMessages.get("DelegateRegistrationInfo", SwingUtil.formatValue(config.minDelegateFee())),
-                        GUIMessages.get("ConfirmDelegateRegistration"),
-                        JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
-                    break;
-                }
-
-                PendingManager pendingMgr = kernel.getPendingManager();
-
-                TransactionType type = TransactionType.DELEGATE;
-                byte[] fromAddress = a.getKey().toAddress();
-                long value = config.minDelegateFee();
-                long fee = config.minTransactionFee();
-                long nonce = pendingMgr.getNonce(fromAddress);
-                long timestamp = System.currentTimeMillis();
-                byte[] data = Bytes.of(name);
-                Transaction tx = new Transaction(type, fromAddress, value, fee, nonce, timestamp, data);
-                tx.sign(a.getKey());
-
-                sendTransaction(pendingMgr, tx);
-            }
+        case DELEGATE:
+            delegate();
             break;
-        }
         default:
             throw new UnreachableException();
         }
     }
 
-    private void sendTransaction(PendingManager pendingMgr, Transaction tx) {
-        PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
-        if (result.error == null) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    GUIMessages.get("TransactionSent", 30),
-                    GUIMessages.get("SuccessDialogTitle"),
-                    JOptionPane.INFORMATION_MESSAGE);
-            clear();
-        } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    GUIMessages.get("TransactionFailed", result.error.toString()),
-                    GUIMessages.get("ErrorDialogTitle"),
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private WalletAccount getSelectedAccount() {
-        int idx = from.getSelectedIndex();
-        return (idx == -1) ? null : model.getAccounts().get(idx);
-    }
-
-    private WalletDelegate getSelectedDelegate() {
-        int row = table.getSelectedRow();
-        return (row == -1) ? null : tableModel.getRow(table.convertRowIndexToModel(row));
-    }
-
-    private void refreshAccounts() {
+    /**
+     * Refreshes account list.
+     */
+    protected void refreshAccounts() {
         List<WalletAccount> list = model.getAccounts();
 
         /*
@@ -519,7 +399,10 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         }
     }
 
-    private void refreshDelegates() {
+    /**
+     * Refreshes delegate list.
+     */
+    protected void refreshDelegates() {
         List<WalletDelegate> delegates = model.getDelegates();
         delegates.sort((d1, d2) -> {
             int c = Long.compare(d2.getVotes(), d1.getVotes());
@@ -558,19 +441,172 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         }
     }
 
-    private void updateSelectedDelegateLabel() {
+    /**
+     * Handles vote or unvote.
+     * 
+     * @param action
+     */
+    protected void voteOrUnvote(Action action) {
+        WalletAccount a = getSelectedAccount();
+        WalletDelegate d = getSelectedDelegate();
+        String v = action.equals(Action.VOTE) ? textVote.getText() : textUnvote.getText();
+        long value;
+        try {
+            value = SwingUtil.parseValue(v);
+        } catch (ParseException ex) {
+            JOptionPane.showMessageDialog(this, GUIMessages.get("EnterValidNumberOfVotes"));
+            return;
+        }
+        long fee = config.minTransactionFee();
+
+        if (a == null) {
+            JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
+        } else if (d == null) {
+            JOptionPane.showMessageDialog(this, GUIMessages.get("SelectDelegate"));
+        } else if (value <= 0) {
+            JOptionPane.showMessageDialog(this, GUIMessages.get("EnterValidNumberOfVotes"));
+        } else {
+            if (action == Action.VOTE) {
+                if (value + fee > a.getAvailable()) {
+                    JOptionPane.showMessageDialog(this,
+                            GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
+                    return;
+                }
+
+                if (a.getAvailable() - fee - value < fee) {
+                    int ret = JOptionPane.showConfirmDialog(this, GUIMessages.get("NotEnoughBalanceToUnvote"),
+                            GUIMessages.get("ConfirmDelegateRegistration"), JOptionPane.YES_NO_OPTION);
+                    if (ret != JOptionPane.YES_OPTION) {
+                        return;
+                    }
+                }
+            } else if (fee > a.getAvailable()) {
+                JOptionPane
+                        .showMessageDialog(this, GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(fee)));
+                return;
+            }
+
+            PendingManager pendingMgr = kernel.getPendingManager();
+
+            TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
+            byte[] fromAddress = a.getKey().toAddress();
+            byte[] toAddress = d.getAddress();
+            long nonce = pendingMgr.getNonce(fromAddress);
+            long timestamp = System.currentTimeMillis();
+            byte[] data = {};
+            Transaction tx = new Transaction(type, toAddress, value, fee, nonce, timestamp, data);
+            tx.sign(a.getKey());
+
+            sendTransaction(pendingMgr, tx);
+        }
+    }
+
+    /**
+     * Handles delegate registration.
+     */
+    protected void delegate() {
+        WalletAccount a = getSelectedAccount();
+        String name = textName.getText();
+        if (a == null) {
+            JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
+        } else if (!name.matches("[_a-z0-9]{4,16}")) {
+            JOptionPane.showMessageDialog(this, GUIMessages.get("AccountNameError"));
+        } else if (a.getAvailable() < config.minDelegateFee() + config.minTransactionFee()) {
+            JOptionPane.showMessageDialog(this, GUIMessages.get("InsufficientFunds",
+                    SwingUtil.formatValue(config.minDelegateFee() + config.minTransactionFee())));
+        } else {
+            // confirm system requirements
+            if ((config.networkId() == Constants.MAIN_NET_ID && !SystemUtil.bench()) && JOptionPane
+                    .showConfirmDialog(this, GUIMessages.get("ComputerNotQualified"),
+                            GUIMessages.get("ConfirmDelegateRegistration"),
+                            JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
+                return;
+            }
+
+            // confirm burning amount
+            if (JOptionPane.showConfirmDialog(this,
+                    GUIMessages.get("DelegateRegistrationInfo", SwingUtil.formatValue(config.minDelegateFee())),
+                    GUIMessages.get("ConfirmDelegateRegistration"),
+                    JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
+                return;
+            }
+
+            PendingManager pendingMgr = kernel.getPendingManager();
+
+            TransactionType type = TransactionType.DELEGATE;
+            byte[] fromAddress = a.getKey().toAddress();
+            long value = config.minDelegateFee();
+            long fee = config.minTransactionFee();
+            long nonce = pendingMgr.getNonce(fromAddress);
+            long timestamp = System.currentTimeMillis();
+            byte[] data = Bytes.of(name);
+            Transaction tx = new Transaction(type, fromAddress, value, fee, nonce, timestamp, data);
+            tx.sign(a.getKey());
+
+            sendTransaction(pendingMgr, tx);
+        }
+    }
+
+    /**
+     * Adds a transaction to the pending manager.
+     * 
+     * @param pendingMgr
+     * @param tx
+     */
+    protected void sendTransaction(PendingManager pendingMgr, Transaction tx) {
+        PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
+        if (result.error == null) {
+            JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionSent", 30),
+                    GUIMessages.get("SuccessDialogTitle"), JOptionPane.INFORMATION_MESSAGE);
+            clear();
+        } else {
+            JOptionPane.showMessageDialog(this, GUIMessages.get("TransactionFailed", result.error.toString()),
+                    GUIMessages.get("ErrorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Updates the selected delegate label.
+     */
+    protected void updateSelectedDelegateLabel() {
         Delegate d = getSelectedDelegate();
         if (d != null) {
             labelSelectedDelegate.setText(GUIMessages.get("SelectedDelegate", d.getNameString()));
         }
     }
 
-    private void clear() {
+    /**
+     * Returns the selected account.
+     * 
+     * @return
+     */
+    protected WalletAccount getSelectedAccount() {
+        int idx = from.getSelectedIndex();
+        return (idx == -1) ? null : model.getAccounts().get(idx);
+    }
+
+    /**
+     * Returns the selected delegate.
+     * 
+     * @return
+     */
+    protected WalletDelegate getSelectedDelegate() {
+        int row = table.getSelectedRow();
+        return (row == -1) ? null : tableModel.getRow(table.convertRowIndexToModel(row));
+    }
+
+    /**
+     * Clears all input fields
+     */
+    protected void clear() {
         textVote.setText("");
         textUnvote.setText("");
         textName.setText("");
     }
 
+    /**
+     * Represents an item in the account drop list.
+     */
     protected static class Item {
         WalletAccount account;
         String name;

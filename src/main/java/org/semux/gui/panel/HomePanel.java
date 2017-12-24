@@ -287,7 +287,10 @@ public class HomePanel extends JPanel implements ActionListener {
         transactions.revalidate();
     }
 
-    public static class SyncProgressFormatter {
+    /**
+     * Syncing progress formatter.
+     */
+    protected static class SyncProgressFormatter {
 
         private SyncProgressFormatter() {
         }

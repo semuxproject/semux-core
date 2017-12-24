@@ -104,7 +104,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         refresh();
     }
 
-    protected class TransactionsTableModel extends AbstractTableModel {
+    class TransactionsTableModel extends AbstractTableModel {
 
         private static final long serialVersionUID = 1L;
 
@@ -177,7 +177,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     /**
      * Refreshes this panel.
      */
-    private void refresh() {
+    protected void refresh() {
         List<Transaction> transactions = new ArrayList<>();
 
         Set<ByteArray> hashes = new HashSet<>();
