@@ -55,7 +55,7 @@ public class PeerClientTest {
         KernelMock kernel2 = kernelRule2.getKernel();
         SemuxChannelInitializer ci = new SemuxChannelInitializer(kernelRule2.getKernel(), remoteAddress);
         PeerClient client = kernelRule2.getKernel().getClient();
-        client.connectAsync(remoteAddress, ci).sync();
+        client.connect(remoteAddress, ci).sync();
 
         // waiting for the HELLO message to be sent
         Thread.sleep(1000);

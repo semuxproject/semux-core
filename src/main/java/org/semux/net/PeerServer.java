@@ -85,8 +85,11 @@ public class PeerServer {
             try {
                 channel.close().sync();
 
-                bossGroup.shutdownGracefully();
                 workerGroup.shutdownGracefully();
+                bossGroup.shutdownGracefully();
+
+                // workerGroup.terminationFuture().sync();
+                // bossGroup.terminationFuture().sync();
 
                 channel = null;
             } catch (Exception e) {

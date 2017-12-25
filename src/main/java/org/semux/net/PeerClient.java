@@ -9,7 +9,6 @@ package org.semux.net;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -65,19 +64,11 @@ public class PeerClient {
      * @param coinbase
      */
     public PeerClient(Config config, EdDSA coinbase) {
-        Optional<String> declaredIp = config.p2pDeclaredIp();
-        if (declaredIp.isPresent()) {
-            this.ip = declaredIp.get();
-            logger.info("Use declared IP address: {}", ip);
-        } else {
-            this.ip = SystemUtil.getIp();
-            logger.info("Use detected IP address: {}", ip);
+        this(config.p2pDeclaredIp().orElse(SystemUtil.getIp()), config.p2pListenPort(), coinbase);
+
+        if (!config.p2pDeclaredIp().isPresent()) {
             startIpRefresh();
         }
-        this.port = config.p2pListenPort();
-        this.coinbase = coinbase;
-
-        this.workerGroup = new NioEventLoopGroup(0, factory);
     }
 
     /**
@@ -99,6 +90,8 @@ public class PeerClient {
      * Keeps updating public IP address.
      */
     protected void startIpRefresh() {
+        logger.info("Starting IP refresh thread");
+
         ipRefreshFuture = timer.scheduleAtFixedRate(() -> {
             String newIp = SystemUtil.getIp();
             try {
@@ -150,32 +143,12 @@ public class PeerClient {
     }
 
     /**
-     * Connects to a remote peer.
-     * 
-     * @param remoteAddress
-     */
-    public void connect(InetSocketAddress remoteAddress, SemuxChannelInitializer ci) {
-        try {
-            ChannelFuture f = connectAsync(remoteAddress, ci);
-
-            f.sync();
-
-            // Wait until the connection is closed.
-            f.channel().closeFuture().sync();
-
-            logger.debug("Connection is closed: {}", remoteAddress);
-        } catch (Exception e) {
-            logger.info("Unable to connect: {}", remoteAddress);
-        }
-    }
-
-    /**
      * Connects to a remote peer asynchronously.
      * 
      * @param remoteAddress
      * @return
      */
-    public ChannelFuture connectAsync(InetSocketAddress remoteAddress, SemuxChannelInitializer ci) {
+    public ChannelFuture connect(InetSocketAddress remoteAddress, SemuxChannelInitializer ci) {
         Bootstrap b = new Bootstrap();
         b.group(workerGroup);
         b.channel(NioSocketChannel.class);
@@ -195,8 +168,10 @@ public class PeerClient {
      */
     public void close() {
         logger.info("Shutting down PeerClient");
+
         workerGroup.shutdownGracefully();
-        workerGroup.terminationFuture().syncUninterruptibly();
+
+        // workerGroup.terminationFuture().sync();
 
         if (ipRefreshFuture != null) {
             ipRefreshFuture.cancel(true);

@@ -8,6 +8,8 @@ package org.semux.util;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,20 +36,13 @@ public class ApiClientTest {
     }
 
     @Test
-    public void testRequest() {
+    public void testRequest() throws IOException {
         String cmd = "get_block";
 
-        System.err.println("kernel1");
         ApiClient apiClient = kernelRule.getKernel().getApiClient();
-        System.err.println("kernel2");
-        try {
-            String response = apiClient.request(cmd, "number", 0);
+        String response = apiClient.request(cmd, "number", 0);
 
-            assertTrue(response.contains("\"success\":true"));
-            assertTrue(response.contains("result"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        System.err.println("kernel3");
+        assertTrue(response.contains("\"success\":true"));
+        assertTrue(response.contains("result"));
     }
 }

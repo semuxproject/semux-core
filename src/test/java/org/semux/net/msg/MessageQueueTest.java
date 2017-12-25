@@ -61,7 +61,7 @@ public class MessageQueueTest {
         KernelMock kernel2 = kernelRule2.getKernel();
         SemuxChannelInitializer ci = new SemuxChannelInitializer(kernelRule2.getKernel(), remoteAddress);
         PeerClient client = kernelRule2.getKernel().getClient();
-        client.connectAsync(remoteAddress, ci).sync();
+        client.connect(remoteAddress, ci).sync();
 
         while (kernel2.getChannelManager().getActiveChannels().isEmpty()) {
             Thread.sleep(100);

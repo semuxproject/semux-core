@@ -96,8 +96,12 @@ public class SemuxAPI {
         if (isRunning() && channel.isOpen()) {
             try {
                 channel.close().sync();
+
                 workerGroup.shutdownGracefully();
                 bossGroup.shutdownGracefully();
+
+                // workerGroup.terminationFuture().sync();
+                // bossGroup.terminationFuture().sync();
 
                 channel = null;
             } catch (Exception e) {

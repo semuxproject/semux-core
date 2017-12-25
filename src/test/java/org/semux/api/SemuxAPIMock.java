@@ -24,7 +24,9 @@ public class SemuxAPIMock {
 
     private KernelMock kernel;
     private SemuxAPI server;
+
     private DBFactory dbFactory;
+    private PeerClient client;
 
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
@@ -37,10 +39,12 @@ public class SemuxAPIMock {
             Config config = kernel.getConfig();
 
             dbFactory = new LevelDBFactory(config.dataDir());
+            client = new PeerClient(config.p2pListenIp(), config.p2pListenPort(), kernel.getCoinbase());
+
             kernel.setBlockchain(new BlockchainImpl(config, dbFactory));
             kernel.setChannelManager(new ChannelManager(kernel));
             kernel.setPendingManager(new PendingManager(kernel));
-            kernel.setClient(new PeerClient(config.p2pListenIp(), config.p2pListenPort(), kernel.getCoinbase()));
+            kernel.setClient(client);
             kernel.setNodeManager(new NodeManager(kernel));
 
             server = new SemuxAPI(kernel);
@@ -51,6 +55,8 @@ public class SemuxAPIMock {
     public synchronized void stop() {
         if (isRunning.compareAndSet(true, false)) {
             server.stop();
+
+            client.close();
 
             for (DBName name : DBName.values()) {
                 KVDB db = dbFactory.getDB(name);

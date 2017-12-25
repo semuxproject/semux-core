@@ -192,7 +192,7 @@ public class NodeManager {
                     && (l == null || l + RECONNECT_WAIT < now)) {
 
                 SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, addr);
-                client.connectAsync(addr, ci);
+                client.connect(addr, ci);
                 lastConnect.put(addr, now);
                 break;
             }
