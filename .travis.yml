@@ -25,7 +25,7 @@ matrix:
 
     # macOS Testing
     - os: osx
-      osx_image: xcode9.1
+      osx_image: xcode9.2
       script:
         - mvn test
 
