@@ -17,16 +17,18 @@ import java.util.Scanner;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
+import org.semux.rules.KernelRule;
 import org.semux.util.BasicAuth;
 
 import io.netty.handler.codec.http.HttpHeaders;
 
 public class HttpHandlerTest {
 
-    private static String ip = "127.0.0.1";
-    private static int port = 15171;
+    @Rule
+    public KernelRule kernelRule = new KernelRule(51610, 51710);
 
     private String uri = null;
     private Map<String, String> params = null;
@@ -34,13 +36,24 @@ public class HttpHandlerTest {
 
     private KernelMock kernel;
     private SemuxAPI server;
+
+    private String ip;
+    private int port;
     private String auth;
 
     @Before
     public void setup() {
-        kernel = new KernelMock();
+        kernel = kernelRule.getKernel();
         server = new SemuxAPI(kernel);
+
+        ip = kernel.getConfig().apiListenIp();
+        port = kernel.getConfig().apiListenPort();
         auth = BasicAuth.generateAuth(kernel.getConfig().apiUsername(), kernel.getConfig().apiPassword());
+    }
+
+    @After
+    public void teardown() {
+        server.stop();
     }
 
     private void startServer(HttpChannelInitializer httpChannelInitializer) {
@@ -115,10 +128,5 @@ public class HttpHandlerTest {
         assertEquals("b", params.get("a"));
         assertEquals("f", params.get("e"));
         assertEquals("d", headers.get("c"));
-    }
-
-    @After
-    public void teardown() {
-        server.stop();
     }
 }

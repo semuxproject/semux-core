@@ -77,7 +77,7 @@ public class SemuxIpFilterLoaderTest {
         }
 
         SemuxIpFilter.Loader loader = new SemuxIpFilter.Loader();
-        SemuxIpFilter semuxIpFilter = loader.load(jsonFile.toPath()).get();
+        SemuxIpFilter semuxIpFilter = loader.load(jsonFile.toPath());
         List<FilterRule> loadedRules = semuxIpFilter.getRules();
         assertTrue(loadedRules.size() == rules.size());
         for (int i = 0; i < loadedRules.size(); i++) {

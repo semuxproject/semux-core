@@ -13,15 +13,16 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.semux.crypto.Hex;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
 
 /**
@@ -30,13 +31,10 @@ import org.semux.util.Bytes;
 @RunWith(Parameterized.class)
 public class ApiHandlerErrorTest extends ApiHandlerTestBase {
 
-    @ClassRule
-    public static TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
-
-    @ClassRule
-    public static ApiServerRule apiServerRule = new ApiServerRule(temporaryDBFactory);
-
     private static final String WALLET_ADDRESS_PLACEHOLDER = "[wallet]";
+
+    @Rule
+    public KernelRule kernelRule = new KernelRule(51610, 51710);
 
     @Parameters(name = "request(\"{0}\")")
     public static Collection<Object[]> data() {
@@ -88,9 +86,16 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
 
     @Before
     public void setUp() {
-        api = apiServerRule.getApi();
+        api = new SemuxAPIMock(kernelRule.getKernel());
+        api.start();
+
         wallet = api.getKernel().getWallet();
         config = api.getKernel().getConfig();
+    }
+
+    @After
+    public void teardown() {
+        api.stop();
     }
 
     @Test

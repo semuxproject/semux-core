@@ -9,8 +9,9 @@ package org.semux.bench;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.semux.Kernel;
-import org.semux.KernelMock;
+import org.semux.config.Config;
+import org.semux.config.Constants;
+import org.semux.config.DevNetConfig;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Genesis;
@@ -27,8 +28,8 @@ import org.slf4j.LoggerFactory;
 public class CorePerformance {
     private static final Logger logger = LoggerFactory.getLogger(CorePerformance.class);
 
-    private static Kernel kernel = new KernelMock();
-    private static EdDSA key = kernel.getCoinbase();
+    private static Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
+    private static EdDSA key = new EdDSA();
 
     public static Block testBlockCreation() {
         long t1 = System.nanoTime();
@@ -36,11 +37,11 @@ public class CorePerformance {
         List<Transaction> txs = new ArrayList<>();
         List<TransactionResult> res = new ArrayList<>();
 
-        for (int i = 0; i < kernel.getConfig().maxBlockSize(); i++) {
+        for (int i = 0; i < config.maxBlockSize(); i++) {
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
             long value = 1;
-            long fee = kernel.getConfig().minTransactionFee();
+            long fee = config.minTransactionFee();
             long nonce = 1 + i;
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.random(128);
@@ -65,7 +66,7 @@ public class CorePerformance {
         Block block = new Block(header, txs, res);
 
         List<Signature> votes = new ArrayList<>();
-        for (int i = 0; i < kernel.getConfig().getNumberOfValidators(1000000L); i++) {
+        for (int i = 0; i < config.getNumberOfValidators(1000000L); i++) {
             votes.add(new EdDSA().sign(Bytes.EMPTY_BYTES));
         }
         block.setView(1);
@@ -81,7 +82,7 @@ public class CorePerformance {
     }
 
     public static void testBlockValidation(Block block) {
-        Genesis gen = Genesis.load(kernel.getConfig().dataDir());
+        Genesis gen = Genesis.load(config.dataDir());
 
         long t1 = System.nanoTime();
         Block.validateHeader(gen.getHeader(), block.getHeader());
@@ -99,7 +100,7 @@ public class CorePerformance {
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
         long value = 1;
-        long fee = kernel.getConfig().minTransactionFee();
+        long fee = config.minTransactionFee();
         long nonce = 1;
         long timestamp = System.currentTimeMillis();
         byte[] data = {};

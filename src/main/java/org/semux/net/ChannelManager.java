@@ -42,7 +42,7 @@ public class ChannelManager {
     public ChannelManager(Kernel kernel) {
         Path path = Paths.get(kernel.getConfig().dataDir().getAbsolutePath(), Constants.CONFIG_DIR, "ipfilter.json");
 
-        ipFilter = (new SemuxIpFilter.Loader()).load(path).orElse(null);
+        ipFilter = (new SemuxIpFilter.Loader()).load(path);
     }
 
     /**

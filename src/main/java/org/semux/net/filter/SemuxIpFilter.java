@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.netty.handler.ipfilter.IpFilterRuleType;
@@ -221,26 +220,18 @@ public class SemuxIpFilter {
      */
     public static final class Loader {
 
-        public Optional<SemuxIpFilter> load(Path ipFilterJsonPath) {
+        public SemuxIpFilter load(Path path) {
             try {
-                if (!ipFilterJsonPath.toFile().exists()) {
-                    logger.info("{} doesn't exist, skip loading", ipFilterJsonPath);
-                    return Optional.empty();
+                if (path.toFile().exists()) {
+                    return new ObjectMapper().readValue(path.toFile(),
+                            SemuxIpFilter.class);
+                } else {
+                    return new SemuxIpFilter();
                 }
-
-                SemuxIpFilter semuxIpFilter = new ObjectMapper().readValue(ipFilterJsonPath.toFile(),
-                        SemuxIpFilter.class);
-                if (semuxIpFilter == null) {
-                    throw new ParseException("failed to parse ipfilter json");
-                }
-
-                return Optional.of(semuxIpFilter);
-            } catch (JsonProcessingException e) {
-                throw new ParseException("failed to parse ipfilter json", e);
             } catch (IOException e) {
-                logger.error("failed to load ipfilter json file", e);
-                return Optional.empty();
+                throw new ParseException(e);
             }
+
         }
     }
 }

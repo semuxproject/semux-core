@@ -21,7 +21,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Constants;
 import org.semux.config.MainNetConfig;
-import org.semux.integration.KernelTestRule;
+import org.semux.rules.KernelRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ public class SemuxBFTTest {
     private static final Logger logger = LoggerFactory.getLogger(SemuxBFTTest.class);
 
     @Rule
-    public KernelTestRule kernel = new KernelTestRule(51610, 51710);
+    public KernelRule kernel = new KernelRule(51610, 51710);
 
     @Test
     public void testIsPrimary() {

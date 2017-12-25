@@ -6,8 +6,6 @@
  */
 package org.semux.gui.panel;
 
-import static org.mockito.Mockito.spy;
-
 import org.semux.KernelMock;
 import org.semux.gui.BaseTestApplication;
 import org.semux.gui.SemuxGUI;
@@ -19,15 +17,8 @@ public class SendPanelTestApplication extends BaseTestApplication {
 
     SendPanel sendPanel;
 
-    KernelMock kernelMock;
-
-    SendPanelTestApplication(WalletModel walletModel) {
+    SendPanelTestApplication(WalletModel walletModel, KernelMock kernelMock) {
         super();
-
-        // mock kernel
-        kernelMock = spy(new KernelMock());
-
-        // create gui
         SemuxGUI gui = new SemuxGUI(walletModel, kernelMock);
         sendPanel = new SendPanel(gui, this);
         getContentPane().add(sendPanel);

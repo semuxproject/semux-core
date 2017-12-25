@@ -60,7 +60,7 @@ import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.rules.KernelRule;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
@@ -70,14 +70,13 @@ import net.bytebuddy.utility.RandomString;
 public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Rule
-    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
-
-    @Rule
-    public ApiServerRule apiServerRule = new ApiServerRule(temporaryDBFactory);
+    public KernelRule kernelRule = new KernelRule(51610, 51710);
 
     @Before
     public void setUp() {
-        api = apiServerRule.getApi();
+        api = new SemuxAPIMock(kernelRule.getKernel());
+        api.start();
+
         config = api.getKernel().getConfig();
         wallet = api.getKernel().getWallet();
 
@@ -88,6 +87,11 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         pendingMgr = api.getKernel().getPendingManager();
         nodeMgr = api.getKernel().getNodeManager();
         channelMgr = api.getKernel().getChannelManager();
+    }
+
+    @After
+    public void teardown() {
+        api.stop();
     }
 
     @After

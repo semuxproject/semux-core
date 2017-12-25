@@ -10,6 +10,7 @@ import static org.assertj.swing.core.matcher.JButtonMatcher.withText;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +26,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.semux.KernelMock;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
@@ -32,14 +34,21 @@ import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
-import org.semux.gui.WalletRule;
+import org.semux.gui.WalletModelRule;
 import org.semux.message.GUIMessages;
+import org.semux.rules.KernelRule;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SendPanelTest {
 
     @Rule
-    public WalletRule walletRule = new WalletRule(1000, 1000);
+    public KernelRule kernelRule1 = new KernelRule(51610, 51710);
+
+    @Rule
+    public WalletModelRule walletRule = new WalletModelRule(1000, 1000);
+
+    @Mock
+    PendingManager pendingManager;
 
     @Captor
     ArgumentCaptor<Transaction> transactionArgumentCaptor = ArgumentCaptor.forClass(Transaction.class);
@@ -48,10 +57,9 @@ public class SendPanelTest {
 
     FrameFixture window;
 
-    @Mock
-    PendingManager pendingManager;
-
     EdDSA recipient;
+
+    KernelMock kernelMock;
 
     @Before
     public void setUp() {
@@ -82,7 +90,7 @@ public class SendPanelTest {
         assertEquals(TransactionType.TRANSFER, tx.getType());
         assertArrayEquals(recipient.toAddress(), tx.getTo());
         assertEquals(100 * Unit.SEM, tx.getValue());
-        assertEquals(application.kernelMock.getConfig().minTransactionFee(), tx.getFee());
+        assertEquals(kernelMock.getConfig().minTransactionFee(), tx.getFee());
     }
 
     @Test
@@ -93,12 +101,13 @@ public class SendPanelTest {
     }
 
     private void testSend(int toSendSEM, PendingManager.ProcessTransactionResult mockResult) {
-        application = GuiActionRunner.execute(() -> new SendPanelTestApplication(walletRule.walletModel));
+        kernelMock = spy(kernelRule1.getKernel());
+        application = GuiActionRunner.execute(() -> new SendPanelTestApplication(walletRule.walletModel, kernelMock));
 
         // mock pending manager
         when(pendingManager.getNonce(any())).thenReturn(RandomUtils.nextLong());
         when(pendingManager.addTransactionSync(any())).thenReturn(mockResult);
-        when(application.kernelMock.getPendingManager()).thenReturn(pendingManager);
+        when(kernelMock.getPendingManager()).thenReturn(pendingManager);
 
         // create window
         window = new FrameFixture(application);

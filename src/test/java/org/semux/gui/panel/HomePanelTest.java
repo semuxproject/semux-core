@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -22,9 +23,13 @@ import org.semux.consensus.SemuxSync;
 import org.semux.core.Block;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GUIMessages;
+import org.semux.rules.KernelRule;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HomePanelTest {
+
+    @Rule
+    public KernelRule kernelRule1 = new KernelRule(51610, 51710);
 
     @Mock
     WalletModel walletModel;
@@ -39,7 +44,7 @@ public class HomePanelTest {
         when(walletModel.getSyncProgress()).thenReturn(progress);
 
         // mock kernel
-        KernelMock kernelMock = spy(new KernelMock());
+        KernelMock kernelMock = spy(kernelRule1.getKernel());
         HomePanelTestApplication application = GuiActionRunner
                 .execute(() -> new HomePanelTestApplication(walletModel, kernelMock));
 

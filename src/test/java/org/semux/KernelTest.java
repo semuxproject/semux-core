@@ -8,32 +8,27 @@ package org.semux;
 
 import static org.awaitility.Awaitility.await;
 
-import java.io.IOException;
-
 import org.junit.Rule;
 import org.junit.Test;
-import org.semux.integration.KernelTestRule;
+import org.semux.rules.KernelRule;
 
 public class KernelTest {
 
     @Rule
-    public KernelTestRule kernelRule = new KernelTestRule(15160, 15170);
-
-    public KernelTest() throws IOException {
-    }
+    public KernelRule kernelRule = new KernelRule(15160, 15170);
 
     @Test
     public void testStart() {
-        Kernel kernel = kernelRule.getKernelMock();
+        Kernel kernel = kernelRule.getKernel();
 
         // start kernel
         kernel.start();
-        await().until(() -> kernel.getNodeManager().isRunning() &&
-                kernel.getPendingManager().isRunning() &&
-                kernel.getApi().isRunning() &&
-                kernel.getP2p().isRunning() &&
-                kernel.getConsensus().isRunning() &&
-                !kernel.getSyncManager().isRunning());
+        await().until(() -> kernel.getNodeManager().isRunning() //
+                && kernel.getPendingManager().isRunning() //
+                && kernel.getApi().isRunning() //
+                && kernel.getP2p().isRunning() //
+                && kernel.getConsensus().isRunning() //
+                && !kernel.getSyncManager().isRunning());
 
         // stop kernel
         kernel.stop();

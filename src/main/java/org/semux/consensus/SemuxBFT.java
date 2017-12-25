@@ -175,6 +175,7 @@ public class SemuxBFT implements Consensus {
                     break;
                 }
             } catch (InterruptedException e) {
+                logger.info("Consensus got interrupted");
                 Thread.currentThread().interrupt();
                 break;
             } catch (Exception e) {

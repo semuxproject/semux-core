@@ -24,8 +24,9 @@ import org.junit.Test;
 import org.semux.KernelMock;
 import org.semux.core.state.AccountState;
 import org.semux.crypto.EdDSA;
+import org.semux.db.LevelDB.LevelDBFactory;
 import org.semux.net.ChannelManager;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.rules.KernelRule;
 import org.semux.util.ArrayUtil;
 import org.semux.util.Bytes;
 
@@ -44,13 +45,13 @@ public class PendingManagerTest {
     private static long fee;
 
     @ClassRule
-    public static TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+    public static KernelRule kernelRule = new KernelRule(51610, 51710);
 
     @BeforeClass
     public static void setup() {
-        kernel = new KernelMock();
+        kernel = kernelRule.getKernel();
 
-        kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), temporaryDBFactory));
+        kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new LevelDBFactory(kernel.getConfig().dataDir())));
         kernel.setChannelManager(new ChannelManager(kernel));
 
         accountState = kernel.getBlockchain().getAccountState();

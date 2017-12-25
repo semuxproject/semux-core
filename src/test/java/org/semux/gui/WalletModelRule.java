@@ -21,7 +21,7 @@ import org.semux.crypto.EdDSA;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
 
-public class WalletRule extends ExternalResource {
+public class WalletModelRule extends ExternalResource {
 
     public final EdDSA key;
 
@@ -35,7 +35,7 @@ public class WalletRule extends ExternalResource {
 
     final int lockedSEM;
 
-    public WalletRule(int availableSEM, int lockedSEM) {
+    public WalletModelRule(int availableSEM, int lockedSEM) {
         this.key = new EdDSA();
         this.availableSEM = availableSEM;
         this.lockedSEM = lockedSEM;

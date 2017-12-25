@@ -38,8 +38,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public abstract class ApiHandlerTestBase {
 
     protected SemuxAPIMock api;
-    protected static Config config;
+
+    protected Config config;
     protected Wallet wallet;
+
     protected Blockchain chain;
     protected AccountState accountState;
     protected DelegateState delegateState;
@@ -47,19 +49,22 @@ public abstract class ApiHandlerTestBase {
     protected NodeManager nodeMgr;
     protected ChannelManager channelMgr;
 
-    protected static <T extends ApiHandlerResponse> T request(String uri, Class<T> clazz) throws IOException {
-        URL u = new URL("http://" + ApiServerRule.API_IP + ":" + ApiServerRule.API_PORT + uri);
-        HttpURLConnection con = (HttpURLConnection) u.openConnection();
+    protected <T extends ApiHandlerResponse> T request(String uri, Class<T> clazz) throws IOException {
+        URL u = new URL("http://" + api.getKernel().getConfig().apiListenIp() + ":"
+                + api.getKernel().getConfig().apiListenPort() + uri);
 
+        HttpURLConnection con = (HttpURLConnection) u.openConnection();
         con.setRequestProperty("Authorization", BasicAuth.generateAuth(config.apiUsername(), config.apiPassword()));
 
         InputStream inputStream = con.getResponseCode() < 400 ? con.getInputStream() : con.getErrorStream();
         return new ObjectMapper().readValue(inputStream, clazz);
     }
 
-    protected static <T extends ApiHandlerResponse> T postRequest(String uri, String body, Class<T> clazz)
+    protected <T extends ApiHandlerResponse> T postRequest(String uri, String body, Class<T> clazz)
             throws IOException {
-        URL u = new URL("http://" + ApiServerRule.API_IP + ":" + ApiServerRule.API_PORT + uri);
+        URL u = new URL("http://" + api.getKernel().getConfig().apiListenIp() + ":"
+                + api.getKernel().getConfig().apiListenPort() + uri);
+
         HttpURLConnection con = (HttpURLConnection) u.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("Authorization", BasicAuth.generateAuth(config.apiUsername(), config.apiPassword()));

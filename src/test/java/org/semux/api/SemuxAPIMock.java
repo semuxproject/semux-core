@@ -10,10 +10,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Assert;
 import org.semux.KernelMock;
-import org.semux.config.Constants;
+import org.semux.config.Config;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
-import org.semux.db.DBFactory;
+import org.semux.db.LevelDB.LevelDBFactory;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
@@ -25,24 +25,24 @@ public class SemuxAPIMock {
 
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
-    private DBFactory dbFactory;
-
-    public SemuxAPIMock(DBFactory dbFactory) {
-        this.dbFactory = dbFactory;
+    public SemuxAPIMock(KernelMock kernel) {
+        this.kernel = kernel;
     }
 
-    public synchronized void start(String ip, int port) {
+    public synchronized void start() {
         if (isRunning.compareAndSet(false, true)) {
             new Thread(() -> {
-                kernel = new KernelMock();
-                kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), dbFactory));
+                Config config = kernel.getConfig();
+
+                kernel.setBlockchain(
+                        new BlockchainImpl(config, new LevelDBFactory(config.dataDir())));
                 kernel.setChannelManager(new ChannelManager(kernel));
                 kernel.setPendingManager(new PendingManager(kernel));
-                kernel.setClient(new PeerClient("127.0.0.1", Constants.DEFAULT_P2P_PORT, kernel.getCoinbase()));
+                kernel.setClient(new PeerClient(config.p2pListenIp(), config.p2pListenPort(), kernel.getCoinbase()));
                 kernel.setNodeManager(new NodeManager(kernel));
 
                 server = new SemuxAPI(kernel);
-                server.start(ip, port);
+                server.start(config.apiListenIp(), config.apiListenPort());
             }, "api").start();
 
             long timestamp = System.currentTimeMillis();

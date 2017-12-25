@@ -14,6 +14,7 @@ import java.util.Arrays;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -25,9 +26,13 @@ import org.semux.crypto.Hex;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GUIMessages;
+import org.semux.rules.KernelRule;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReceivePanelTest {
+
+    @Rule
+    public KernelRule kernelRule1 = new KernelRule(51610, 51710);
 
     @Mock
     WalletModel walletModel;
@@ -52,7 +57,7 @@ public class ReceivePanelTest {
         when(walletModel.getAccounts()).thenReturn(Arrays.asList(acc1, acc2));
 
         // mock kernel
-        KernelMock kernelMock = spy(new KernelMock());
+        KernelMock kernelMock = spy(kernelRule1.getKernel());
         ReceivePanelTestApplication application = GuiActionRunner
                 .execute(() -> new ReceivePanelTestApplication(walletModel, kernelMock));
 

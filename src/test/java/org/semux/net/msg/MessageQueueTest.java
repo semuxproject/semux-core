@@ -16,59 +16,57 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
-import org.semux.consensus.SemuxBFT;
-import org.semux.consensus.SemuxSync;
-import org.semux.core.BlockchainImpl;
-import org.semux.core.PendingManager;
-import org.semux.crypto.EdDSA;
 import org.semux.net.Channel;
-import org.semux.net.ChannelManager;
-import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
 import org.semux.net.PeerServerMock;
 import org.semux.net.SemuxChannelInitializer;
 import org.semux.net.msg.p2p.PingMessage;
 import org.semux.net.msg.p2p.PongMessage;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.rules.KernelRule;
 
 public class MessageQueueTest {
 
-    private static final String P2P_IP = "127.0.0.1";
-    private static final int P2P_PORT = 15161;
-
-    private PeerServerMock server;
+    private PeerServerMock server1;
+    private PeerServerMock server2;
 
     @Rule
-    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+    public KernelRule kernelRule1 = new KernelRule(51610, 51710);
+
+    @Rule
+    public KernelRule kernelRule2 = new KernelRule(51620, 51720);
 
     @Before
     public void setup() {
-        server = new PeerServerMock(temporaryDBFactory);
-        server.start(P2P_IP, P2P_PORT);
-        assertTrue(server.getServer().isRunning());
+        server1 = new PeerServerMock(kernelRule1.getKernel());
+        server1.start();
+        assertTrue(server1.getServer().isRunning());
+    }
+
+    @After
+    public void teardown() {
+        if (server1 != null) {
+            server1.stop();
+        }
+        if (server2 != null) {
+            server2.stop();
+        }
     }
 
     private Channel connect() throws InterruptedException {
-        EdDSA key = new EdDSA();
-        PeerClient client = new PeerClient(P2P_IP, P2P_PORT + 1, key);
+        server2 = new PeerServerMock(kernelRule2.getKernel());
+        server2.start();
 
-        KernelMock kernel = new KernelMock();
-        kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), temporaryDBFactory));
-        kernel.setClient(client);
-        kernel.setChannelManager(new ChannelManager(kernel));
-        kernel.setPendingManager(new PendingManager(kernel));
-        kernel.setNodeManager(new NodeManager(kernel));
-        kernel.setConsensus(new SemuxBFT(kernel));
-        kernel.setSyncManager(new SemuxSync(kernel));
-
-        InetSocketAddress remoteAddress = new InetSocketAddress(P2P_IP, P2P_PORT);
-        SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, remoteAddress);
+        KernelMock kernel2 = kernelRule2.getKernel();
+        InetSocketAddress remoteAddress = new InetSocketAddress("127.0.0.1",
+                kernelRule1.getKernel().getConfig().p2pListenPort());
+        SemuxChannelInitializer ci = new SemuxChannelInitializer(kernelRule2.getKernel(), remoteAddress);
+        PeerClient client = kernelRule2.getKernel().getClient();
         client.connectAsync(remoteAddress, ci).sync();
 
-        while (kernel.getChannelManager().getActiveChannels().isEmpty()) {
+        while (kernel2.getChannelManager().getActiveChannels().isEmpty()) {
             Thread.sleep(100);
         }
-        return kernel.getChannelManager().getActiveChannels().get(0);
+        return kernel2.getChannelManager().getActiveChannels().get(0);
     }
 
     @Test
@@ -77,7 +75,7 @@ public class MessageQueueTest {
 
         PingMessage msg = new PingMessage();
         assertTrue(ch.getMessageQueue().sendMessage(msg));
-        for (int i = 0; i < server.getKernel().getConfig().netMaxMessageQueueSize() * 2; i++) {
+        for (int i = 0; i < server1.getKernel().getConfig().netMaxMessageQueueSize() * 2; i++) {
             ch.getMessageQueue().sendMessage(msg);
         }
         assertFalse(ch.getMessageQueue().sendMessage(msg));
@@ -108,10 +106,5 @@ public class MessageQueueTest {
         Thread.sleep(200);
         assertTrue(ch.getMessageQueue().isIdle());
         assertTrue(ch.isActive());
-    }
-
-    @After
-    public void teardown() {
-        server.stop();
     }
 }

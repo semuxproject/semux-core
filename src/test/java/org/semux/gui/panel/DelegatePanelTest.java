@@ -39,9 +39,10 @@ import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
-import org.semux.gui.WalletRule;
+import org.semux.gui.WalletModelRule;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.message.GUIMessages;
+import org.semux.rules.KernelRule;
 
 import junit.framework.TestCase;
 
@@ -49,7 +50,10 @@ import junit.framework.TestCase;
 public class DelegatePanelTest {
 
     @Rule
-    public WalletRule walletRule = new WalletRule(10000, 0);
+    public KernelRule kernelRule1 = new KernelRule(51610, 51710);
+
+    @Rule
+    public WalletModelRule walletRule = new WalletModelRule(10000, 0);
 
     @Captor
     ArgumentCaptor<Transaction> transactionArgumentCaptor = ArgumentCaptor.forClass(Transaction.class);
@@ -105,7 +109,7 @@ public class DelegatePanelTest {
         when(walletRule.walletModel.getDelegates()).thenReturn(walletDelegates);
 
         // mock kernel
-        kernelMock = spy(new KernelMock());
+        kernelMock = spy(kernelRule1.getKernel());
         when(delegateState.getVote(any(), any())).thenReturn(0L);
         when(blockchain.getDelegateState()).thenReturn(delegateState);
         when(blockchain.getValidatorStats(delegate1.getAddress())).thenReturn(delegateStats1);

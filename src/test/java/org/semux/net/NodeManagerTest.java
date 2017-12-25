@@ -12,24 +12,41 @@ import static org.junit.Assert.assertTrue;
 import java.net.InetSocketAddress;
 import java.util.Set;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
 import org.semux.config.Constants;
-import org.semux.consensus.SemuxBFT;
-import org.semux.consensus.SemuxSync;
-import org.semux.core.BlockchainImpl;
-import org.semux.core.PendingManager;
-import org.semux.crypto.EdDSA;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.rules.KernelRule;
 
 public class NodeManagerTest {
 
-    private static final String P2P_IP = "127.0.0.1";
-    private static final int P2P_PORT = 15161;
+    private PeerServerMock server1;
+    private PeerServerMock server2;
 
     @Rule
-    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+    public KernelRule kernelRule1 = new KernelRule(51610, 51710);
+
+    @Rule
+    public KernelRule kernelRule2 = new KernelRule(51620, 51720);
+
+    @Before
+    public void setup() {
+        server1 = new PeerServerMock(kernelRule1.getKernel());
+        server1.start();
+        assertTrue(server1.getServer().isRunning());
+    }
+
+    @After
+    public void teardown() {
+        if (server1 != null) {
+            server1.stop();
+        }
+        if (server2 != null) {
+            server2.stop();
+        }
+    }
 
     @Test
     public void testGetSeedNodes() {
@@ -48,31 +65,15 @@ public class NodeManagerTest {
 
     @Test
     public void testConnect() throws InterruptedException {
-        // start server
-        PeerServerMock ps = new PeerServerMock(temporaryDBFactory);
-        ps.start(P2P_IP, P2P_PORT);
+        server2 = new PeerServerMock(kernelRule2.getKernel());
+        server2.start();
 
-        try {
-            EdDSA key = new EdDSA();
-            PeerClient client = new PeerClient(P2P_IP, P2P_PORT + 1, key);
+        KernelMock kernel2 = kernelRule2.getKernel();
+        NodeManager nodeMgr = kernel2.getNodeManager();
+        nodeMgr.addNode(new InetSocketAddress("127.0.0.1", server1.getKernel().getConfig().p2pListenPort()));
+        nodeMgr.doConnect();
 
-            KernelMock kernel = new KernelMock();
-            kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), temporaryDBFactory));
-            kernel.setClient(client);
-            kernel.setChannelManager(new ChannelManager(kernel));
-            kernel.setPendingManager(new PendingManager(kernel));
-            kernel.setNodeManager(new NodeManager(kernel));
-            kernel.setConsensus(new SemuxBFT(kernel));
-            kernel.setSyncManager(new SemuxSync(kernel));
-
-            NodeManager nodeMgr = kernel.getNodeManager();
-            nodeMgr.addNode(new InetSocketAddress(P2P_IP, P2P_PORT));
-            nodeMgr.doConnect();
-
-            Thread.sleep(500);
-            assertFalse(kernel.getChannelManager().getActivePeers().isEmpty());
-        } finally {
-            ps.stop();
-        }
+        Thread.sleep(500);
+        assertFalse(kernel2.getChannelManager().getActivePeers().isEmpty());
     }
 }

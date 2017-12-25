@@ -9,47 +9,40 @@ package org.semux.util;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.semux.api.SemuxAPIMock;
-import org.semux.config.Config;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.rules.KernelRule;
 
 public class ApiClientTest {
 
     @ClassRule
-    public static TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+    public static KernelRule kernelRule = new KernelRule(51610, 51710);
 
-    private static final String API_IP = "127.0.0.1";
-    private static final int API_PORT = 15171;
+    private SemuxAPIMock api;
 
-    private static SemuxAPIMock api;
+    @Before
+    public void setup() {
+        api = new SemuxAPIMock(kernelRule.getKernel());
+        api.start();
+    }
 
-    @BeforeClass
-    public static void setup() {
-        api = new SemuxAPIMock(temporaryDBFactory);
-        api.start(API_IP, API_PORT);
+    @After
+    public void teardown() {
+        api.stop();
     }
 
     @Test
     public void testRequest() throws IOException {
         String cmd = "get_block";
 
-        Config config = api.getKernel().getConfig();
-        ApiClient api = new ApiClient(new InetSocketAddress(API_IP, API_PORT), config.apiUsername(),
-                config.apiPassword());
-        String response = api.request(cmd, "number", 0);
+        ApiClient apiClient = kernelRule.getKernel().getApiClient();
+        String response = apiClient.request(cmd, "number", 0);
 
         assertTrue(response.contains("\"success\":true"));
         assertTrue(response.contains("result"));
-    }
-
-    @AfterClass
-    public static void teardown() throws IOException {
-        api.stop();
     }
 }

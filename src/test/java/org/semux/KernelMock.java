@@ -6,81 +6,114 @@
  */
 package org.semux;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import org.semux.config.Config;
-import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
 import org.semux.consensus.SemuxBFT;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.Wallet;
-import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.EdDSA;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
 import org.semux.util.ApiClient;
 
+/**
+ * This kernel mock inheritate the {@link Kernel} and adds a bunch of setters of
+ * the components.
+ */
 public class KernelMock extends Kernel {
 
-    private static final String password = "password";
-
-    // TODO: disable this constructor, use the KernelRule by cryptokat
-    public KernelMock() {
-        super(null, null, null);
-        try {
-            this.config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
-            this.wallet = new Wallet(File.createTempFile("wallet", ".data"));
-            this.wallet.unlock(password);
-            for (int i = 0; i < 10; i++) {
-                this.wallet.addAccount(new EdDSA());
-            }
-            this.coinbase = wallet.getAccount(0);
-        } catch (WalletLockedException | IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
+    /**
+     * Creates a kernel mock with the given configuration, wallet and coinbase.
+     * 
+     * @param config
+     * @param wallet
+     * @param coinbase
+     */
     public KernelMock(Config config, Wallet wallet, EdDSA coinbase) {
         super(config, wallet, coinbase);
     }
 
+    /**
+     * Sets the blockchain instance.
+     * 
+     * @param chain
+     */
     public void setBlockchain(Blockchain chain) {
         this.chain = chain;
     }
 
+    /**
+     * Sets the peer client instance.
+     * 
+     * @param client
+     */
     public void setClient(PeerClient client) {
         this.client = client;
     }
 
+    /**
+     * Sets the pending manager instance.
+     * 
+     * @param pendingMgr
+     */
     public void setPendingManager(PendingManager pendingMgr) {
         this.pendingMgr = pendingMgr;
     }
 
+    /**
+     * Sets the channel manager instance.
+     * 
+     * @param channelMgr
+     */
     public void setChannelManager(ChannelManager channelMgr) {
         this.channelMgr = channelMgr;
     }
 
+    /**
+     * Sets the node manager instance.
+     * 
+     * @param nodeMgr
+     */
     public void setNodeManager(NodeManager nodeMgr) {
         this.nodeMgr = nodeMgr;
     }
 
+    /**
+     * Sets the sync manager instance.
+     * 
+     * @param sync
+     */
     public void setSyncManager(SemuxSync sync) {
         this.sync = sync;
     }
 
+    /**
+     * Sets the consensus instance.
+     * 
+     * @param cons
+     */
     public void setConsensus(SemuxBFT cons) {
         this.cons = cons;
     }
 
+    /**
+     * Sets the configuration instance.
+     * 
+     * @param config
+     */
     public void setConfig(Config config) {
         this.config = config;
     }
 
+    /**
+     * Sets the coinbase.
+     * 
+     * @param coinbase
+     */
     public void setCoinbase(EdDSA coinbase) {
         this.coinbase = coinbase;
     }
@@ -91,7 +124,8 @@ public class KernelMock extends Kernel {
      * @return an {@link ApiClient} instance
      */
     public ApiClient getApiClient() {
-        return new ApiClient(new InetSocketAddress(this.getConfig().apiListenIp(), this.getConfig().apiListenPort()),
-                this.getConfig().apiUsername(), this.getConfig().apiPassword());
+        Config config = getConfig();
+        return new ApiClient(new InetSocketAddress(config.apiListenIp(), config.apiListenPort()),
+                config.apiUsername(), config.apiPassword());
     }
 }

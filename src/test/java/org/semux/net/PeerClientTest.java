@@ -7,62 +7,62 @@
 package org.semux.net;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.net.InetSocketAddress;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
-import org.semux.consensus.SemuxBFT;
-import org.semux.consensus.SemuxSync;
-import org.semux.core.BlockchainImpl;
-import org.semux.core.PendingManager;
-import org.semux.crypto.EdDSA;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.rules.KernelRule;
 
 public class PeerClientTest {
 
-    private static final String P2P_IP = "127.0.0.1";
-    private static final int P2P_PORT = 15161;
+    private PeerServerMock server1;
+    private PeerServerMock server2;
 
     @Rule
-    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+    public KernelRule kernelRule1 = new KernelRule(51610, 51710);
+
+    @Rule
+    public KernelRule kernelRule2 = new KernelRule(51620, 51720);
+
+    @Before
+    public void setup() {
+        server1 = new PeerServerMock(kernelRule1.getKernel());
+        server1.start();
+        assertTrue(server1.getServer().isRunning());
+    }
+
+    @After
+    public void teardown() {
+        if (server1 != null) {
+            server1.stop();
+        }
+        if (server2 != null) {
+            server2.stop();
+        }
+    }
 
     @Test
     public void testConnect() throws InterruptedException {
+        server2 = new PeerServerMock(kernelRule2.getKernel());
+        server2.start();
 
-        PeerServerMock ps = new PeerServerMock(temporaryDBFactory);
-        ps.start(P2P_IP, P2P_PORT);
-        assertTrue(ps.getServer().isRunning());
+        KernelMock kernel2 = kernelRule2.getKernel();
+        InetSocketAddress remoteAddress = new InetSocketAddress(kernelRule1.getKernel().getConfig().p2pListenIp(),
+                kernelRule1.getKernel().getConfig().p2pListenPort());
+        SemuxChannelInitializer ci = new SemuxChannelInitializer(kernelRule2.getKernel(), remoteAddress);
+        PeerClient client = kernelRule2.getKernel().getClient();
+        client.connectAsync(remoteAddress, ci).sync();
 
-        try {
-            EdDSA key = new EdDSA();
-            PeerClient client = new PeerClient(P2P_IP, P2P_PORT + 1, key);
+        // waiting for the HELLO message to be sent
+        Thread.sleep(1000);
+        assertEquals(1, kernel2.getChannelManager().getActivePeers().size());
 
-            KernelMock kernel = new KernelMock();
-            kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), temporaryDBFactory));
-            kernel.setClient(client);
-            kernel.setChannelManager(new ChannelManager(kernel));
-            kernel.setPendingManager(new PendingManager(kernel));
-            kernel.setNodeManager(new NodeManager(kernel));
-            kernel.setConsensus(new SemuxBFT(kernel));
-            kernel.setSyncManager(new SemuxSync(kernel));
-
-            InetSocketAddress remoteAddress = new InetSocketAddress(P2P_IP, P2P_PORT);
-            SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, remoteAddress);
-            client.connectAsync(remoteAddress, ci).sync();
-
-            // waiting for the HELLO message to be sent
-            Thread.sleep(1000);
-            assertEquals(1, kernel.getChannelManager().getActivePeers().size());
-
-            client.close();
-            assertEquals(0, kernel.getChannelManager().getActivePeers().size());
-        } finally {
-            ps.stop();
-            assertFalse(ps.getServer().isRunning());
-        }
+        client.close();
+        assertEquals(0, kernel2.getChannelManager().getActivePeers().size());
     }
 }

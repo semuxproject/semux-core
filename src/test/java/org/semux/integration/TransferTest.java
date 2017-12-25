@@ -44,6 +44,7 @@ import org.semux.core.Genesis;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
 import org.semux.net.NodeManager;
+import org.semux.rules.KernelRule;
 import org.semux.util.ApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,13 +62,13 @@ public class TransferTest {
     private static final long PREMINE = 1000000;
 
     @Rule
-    KernelTestRule kernelValidatorRule = new KernelTestRule(51610, 51710);
+    KernelRule kernelValidatorRule = new KernelRule(51610, 51710);
 
     @Rule
-    KernelTestRule kernelSenderRule = new KernelTestRule(51620, 51720);
+    KernelRule kernelSenderRule = new KernelRule(51620, 51720);
 
     @Rule
-    KernelTestRule kernelReceiverRule = new KernelTestRule(51630, 51730);
+    KernelRule kernelReceiverRule = new KernelRule(51630, 51730);
 
     /**
      * The kernel that is solely responsible of forging blocks
@@ -84,15 +85,15 @@ public class TransferTest {
      */
     public KernelMock kernelReceiver;
 
-    public TransferTest() throws IOException {
-    }
-
     @Before
     public void setUp() throws Exception {
         // prepare kernels
-        kernelValidator = kernelValidatorRule.getKernelMock();
-        kernelPremine = kernelSenderRule.getKernelMock();
-        kernelReceiver = kernelReceiverRule.getKernelMock();
+        kernelValidatorRule.speedUpCosnensus();
+        kernelSenderRule.speedUpCosnensus();
+        kernelReceiverRule.speedUpCosnensus();
+        kernelValidator = kernelValidatorRule.getKernel();
+        kernelPremine = kernelSenderRule.getKernel();
+        kernelReceiver = kernelReceiverRule.getKernel();
 
         // mock genesis.json
         Genesis genesis = mockGenesis();
@@ -136,12 +137,12 @@ public class TransferTest {
     @Test
     public void testTransfer() throws IOException {
         // wait
-        await().until(() -> kernelValidator.isRunning());
-        await().until(() -> kernelPremine.isRunning());
-        await().until(() -> kernelReceiver.isRunning());
+        await().until(() -> kernelValidator.isRunning()
+                && kernelPremine.isRunning()
+                && kernelReceiver.isRunning()
+                && kernelPremine.getApi().isRunning());
 
-        // make transfer_many request from kernelPremine to kernelReceiver1 and
-        // kernelReceiver2
+        // make transfer transaction
         final long value = 1000 * Unit.SEM;
         final long fee = kernelPremine.getConfig().minTransactionFee() * 2;
         HashMap<String, Object> params = new HashMap<>();
@@ -155,10 +156,7 @@ public class TransferTest {
         });
         assertEquals("true", result.get("success"));
 
-        // wait until both of kernelReceiver1 and kernelReceiver2 have received the
-        // transaction.
-        // (2x transaction value + 2x min transaction fee) should be deducted from
-        // kernelPremine's account
+        // wait for transaction processing
         logger.info("Waiting for the transaction to be processed...");
         await().until(availableOf(kernelPremine), equalTo(PREMINE * Unit.SEM - value - fee));
         await().until(availableOf(kernelReceiver), equalTo(value));
@@ -209,8 +207,13 @@ public class TransferTest {
         HashMap<String, String> delegates = new HashMap<>();
         delegates.put("delegate", delegateAddress);
 
-        return Genesis.jsonCreator(0, "0x0000000000000000000000000000000000000000",
-                "0x0000000000000000000000000000000000000000000000000000000000000000", 1504742400000L, "semux", premines,
-                delegates, new HashMap<>());
+        return Genesis.jsonCreator(0, //
+                "0x0000000000000000000000000000000000000000", //
+                "0x0000000000000000000000000000000000000000000000000000000000000000", //
+                1504742400000L, //
+                "semux", //
+                premines, //
+                delegates, //
+                new HashMap<>());
     }
 }
