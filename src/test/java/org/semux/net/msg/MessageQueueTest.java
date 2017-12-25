@@ -39,7 +39,6 @@ public class MessageQueueTest {
     public void setup() {
         server1 = new PeerServerMock(kernelRule1.getKernel());
         server1.start();
-        assertTrue(server1.getServer().isRunning());
     }
 
     @After
@@ -56,9 +55,10 @@ public class MessageQueueTest {
         server2 = new PeerServerMock(kernelRule2.getKernel());
         server2.start();
 
-        KernelMock kernel2 = kernelRule2.getKernel();
-        InetSocketAddress remoteAddress = new InetSocketAddress("127.0.0.1",
+        InetSocketAddress remoteAddress = new InetSocketAddress(kernelRule1.getKernel().getConfig().p2pListenIp(),
                 kernelRule1.getKernel().getConfig().p2pListenPort());
+
+        KernelMock kernel2 = kernelRule2.getKernel();
         SemuxChannelInitializer ci = new SemuxChannelInitializer(kernelRule2.getKernel(), remoteAddress);
         PeerClient client = kernelRule2.getKernel().getClient();
         client.connectAsync(remoteAddress, ci).sync();

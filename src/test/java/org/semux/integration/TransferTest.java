@@ -23,9 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
-import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -107,10 +106,6 @@ public class TransferTest {
         mockStatic(NodeManager.class);
         when(NodeManager.getSeedNodes(Constants.DEV_NET_ID)).thenReturn(nodes);
 
-        // configure Awaitility
-        Awaitility.setDefaultPollInterval(Duration.ONE_SECOND);
-        Awaitility.setDefaultTimeout(Duration.ONE_MINUTE);
-
         // start kernels
         kernelValidator.start();
         kernelPremine.start();
@@ -158,8 +153,9 @@ public class TransferTest {
 
         // wait for transaction processing
         logger.info("Waiting for the transaction to be processed...");
-        await().until(availableOf(kernelPremine), equalTo(PREMINE * Unit.SEM - value - fee));
-        await().until(availableOf(kernelReceiver), equalTo(value));
+        await().atMost(60, TimeUnit.SECONDS).until(availableOf(kernelPremine),
+                equalTo(PREMINE * Unit.SEM - value - fee));
+        await().atMost(60, TimeUnit.SECONDS).until(availableOf(kernelReceiver), equalTo(value));
 
         // assert that the transaction has been recorded across nodes
         assertTransferTransaction(kernelPremine);

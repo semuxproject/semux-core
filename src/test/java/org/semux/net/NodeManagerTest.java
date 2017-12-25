@@ -35,7 +35,6 @@ public class NodeManagerTest {
     public void setup() {
         server1 = new PeerServerMock(kernelRule1.getKernel());
         server1.start();
-        assertTrue(server1.getServer().isRunning());
     }
 
     @After

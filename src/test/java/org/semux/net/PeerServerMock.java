@@ -6,9 +6,10 @@
  */
 package org.semux.net;
 
+import static org.awaitility.Awaitility.await;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Assert;
 import org.semux.Kernel;
 import org.semux.KernelMock;
 import org.semux.config.Config;
@@ -31,37 +32,25 @@ public class PeerServerMock {
 
     public synchronized void start() {
         if (isRunning.compareAndSet(false, true)) {
+            Config config = kernel.getConfig();
+
+            kernel.setBlockchain(
+                    new BlockchainImpl(config, new LevelDBFactory(config.dataDir())));
+            kernel.setClient(new PeerClient(config.p2pListenIp(), config.p2pListenPort(), kernel.getCoinbase()));
+            kernel.setChannelManager(new ChannelManager(kernel));
+            kernel.setPendingManager(new PendingManager(kernel));
+            kernel.setNodeManager(new NodeManager(kernel));
+
+            kernel.setConsensus(new SemuxBFT(kernel));
+            kernel.setSyncManager(new SemuxSync(kernel));
+
+            // start peer server
+            server = new PeerServer(kernel);
             new Thread(() -> {
-                Config config = kernel.getConfig();
-
-                kernel.setBlockchain(
-                        new BlockchainImpl(config, new LevelDBFactory(config.dataDir())));
-                kernel.setClient(new PeerClient("127.0.0.1", config.p2pListenPort(), kernel.getCoinbase()));
-                kernel.setChannelManager(new ChannelManager(kernel));
-                kernel.setPendingManager(new PendingManager(kernel));
-                kernel.setNodeManager(new NodeManager(kernel));
-
-                kernel.setConsensus(new SemuxBFT(kernel));
-                kernel.setSyncManager(new SemuxSync(kernel));
-
-                server = new PeerServer(kernel);
                 server.start(config.p2pListenIp(), config.p2pListenPort());
             }, "p2p").start();
 
-            long timestamp = System.currentTimeMillis();
-            while (System.currentTimeMillis() - timestamp < 30000) {
-                if (server == null || !server.isRunning()) {
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                } else {
-                    return;
-                }
-            }
-
-            Assert.fail("Failed to start server");
+            await().until(() -> server.isRunning());
         }
     }
 
@@ -69,20 +58,7 @@ public class PeerServerMock {
         if (isRunning.compareAndSet(true, false)) {
             server.stop();
 
-            long timestamp = System.currentTimeMillis();
-            while (System.currentTimeMillis() - timestamp < 30000) {
-                if (server.isRunning()) {
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                } else {
-                    return;
-                }
-            }
-
-            Assert.fail("Failed to stop server");
+            await().until(() -> !server.isRunning());
         }
     }
 

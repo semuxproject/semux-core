@@ -20,8 +20,6 @@ import org.semux.config.DevNetConfig;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
-import org.semux.db.DBFactory;
-import org.semux.db.LevelDB.LevelDBFactory;
 import org.semux.util.Bytes;
 
 /**
@@ -69,9 +67,9 @@ public class KernelRule extends TemporaryFolder {
     protected Config mockConfig(int p2pPort, int apiPort) {
         Config config = spy(new DevNetConfig(getRoot().getAbsolutePath()));
 
-        when(config.p2pListenPort()).thenReturn(p2pPort);
-        when(config.p2pListenIp()).thenReturn("127.0.0.1");
         when(config.p2pDeclaredIp()).thenReturn(Optional.of("127.0.0.1"));
+        when(config.p2pListenIp()).thenReturn("127.0.0.1");
+        when(config.p2pListenPort()).thenReturn(p2pPort);
         when(config.apiListenIp()).thenReturn("127.0.0.1");
         when(config.apiListenPort()).thenReturn(apiPort);
         when(config.apiEnabled()).thenReturn(true);
@@ -97,15 +95,6 @@ public class KernelRule extends TemporaryFolder {
      */
     public KernelMock getKernel() {
         return kernel;
-    }
-
-    /**
-     * Returns the database factory.
-     * 
-     * @return
-     */
-    public DBFactory getDatabaseFactory() {
-        return new LevelDBFactory(getRoot());
     }
 
     /**
