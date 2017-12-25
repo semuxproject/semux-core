@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 HOST=127.0.0.1
 PORT=5161

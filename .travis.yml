@@ -23,6 +23,12 @@ matrix:
       script:
         - mvn test
 
+    # macOS Testing
+    - os: osx
+      osx_image: xcode9.1
+      script:
+        - mvn test
+
     # Docker build
     - language: none
       os: linux
@@ -34,16 +40,10 @@ matrix:
         - docker run -d -p 5161:5161 semux:latest --password=""
         - timeout 10 .travis/test_docker.sh
         - docker kill $(docker ps -q)
-
-    # OSX Testing
-    - os: osx
-      osx_image: xcode9.1
-      script:
-        - mvn test
 cache:
   directories:
   - .autoconf
   - $HOME/.m2
 before_install:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then source .travis/start_xvfb.sh; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then .travis/install-osx-jdk8.sh; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then source .travis/linux_start_xvfb.sh; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then .travis/macos_install_jdk8.sh; fi
