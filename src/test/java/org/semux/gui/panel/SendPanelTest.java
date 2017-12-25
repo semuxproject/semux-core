@@ -72,14 +72,17 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
     @Test
     @GUITest
     @RunsInEDT
-    public void testSendSuccessfully() {
+    public void testSendSuccessfully() throws InterruptedException {
         testSend(100, new PendingManager.ProcessTransactionResult(1));
 
         // 1. a confirmation dialog should be displayed
-        window.dialog().requireVisible().button(withText("Yes")).requireVisible().click();
+        window.dialog().requireVisible().moveToFront();
+        assertEquals(GUIMessages.get("ConfirmTransfer"), window.dialog().target().getTitle());
 
         // 2. filled transaction should be sent to PendingManager once "Yes" button is
         // clicked
+        window.button(withText("Yes")).requireEnabled().requireVisible().click();
+        window.dialog().requireVisible();
         assertEquals(GUIMessages.get("SuccessDialogTitle"), window.dialog().target().getTitle());
         verify(pendingManager).addTransactionSync(transactionArgumentCaptor.capture());
 
@@ -94,7 +97,7 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
     @Test
     @GUITest
     @RunsInEDT
-    public void testSendFailure() {
+    public void testSendFailure() throws InterruptedException {
         testSend(10000, new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
         window.dialog().requireVisible();
         assertEquals(GUIMessages.get("ErrorDialogTitle"), window.dialog().target().getTitle());
@@ -114,8 +117,10 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
         window.show().requireVisible().moveTo(new Point(0, 0)).moveToFront();
 
         // fill form
-        window.textBox("toText").requireEditable().setText(Hex.encode0x(recipient.toAddress()));
-        window.textBox("amountText").requireEditable().setText(String.valueOf(toSendSEM));
+        window.textBox("toText").requireEditable().setText(Hex.encode0x(recipient.toAddress()))
+                .requireText(Hex.encode0x(recipient.toAddress()));
+        window.textBox("amountText").requireEditable().setText(String.valueOf(toSendSEM))
+                .requireText(String.valueOf(toSendSEM));
         window.button("sendButton").requireVisible().click();
     }
 }
