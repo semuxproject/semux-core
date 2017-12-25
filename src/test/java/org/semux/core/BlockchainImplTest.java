@@ -53,7 +53,7 @@ public class BlockchainImplTest {
     private TransactionResult res = new TransactionResult(true);
 
     @Before
-    public void setup() {
+    public void setUp() {
         config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
         chain = new BlockchainImpl(config, temporaryDBFactory);
     }

@@ -69,6 +69,7 @@ public class SendPanelTest {
     @After
     public void tearDown() {
         window.cleanUp();
+        application.dispose();
     }
 
     @Test

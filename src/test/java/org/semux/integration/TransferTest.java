@@ -6,6 +6,7 @@
  */
 package org.semux.integration;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
@@ -23,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
@@ -113,7 +113,7 @@ public class TransferTest {
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         // stop kernels
         kernelValidator.stop();
         kernelPremine.stop();
@@ -134,10 +134,9 @@ public class TransferTest {
         // wait
         await().until(() -> kernelValidator.isRunning()
                 && kernelPremine.isRunning()
-                && kernelReceiver.isRunning()
-                && kernelPremine.getApi().isRunning());
+                && kernelReceiver.isRunning());
 
-        // make transfer transaction
+        // make transaction
         final long value = 1000 * Unit.SEM;
         final long fee = kernelPremine.getConfig().minTransactionFee() * 2;
         HashMap<String, Object> params = new HashMap<>();
@@ -145,6 +144,8 @@ public class TransferTest {
         params.put("to", addressStringOf(kernelReceiver));
         params.put("value", String.valueOf(value));
         params.put("fee", String.valueOf(fee));
+
+        // request
         logger.info("Making transfer request", params);
         String response = kernelPremine.getApiClient().request("transfer", params);
         Map<String, String> result = new ObjectMapper().readValue(response, new TypeReference<Map<String, String>>() {
@@ -153,9 +154,9 @@ public class TransferTest {
 
         // wait for transaction processing
         logger.info("Waiting for the transaction to be processed...");
-        await().atMost(60, TimeUnit.SECONDS).until(availableOf(kernelPremine),
+        await().pollInterval(1, SECONDS).atMost(60, SECONDS).until(availableOf(kernelPremine),
                 equalTo(PREMINE * Unit.SEM - value - fee));
-        await().atMost(60, TimeUnit.SECONDS).until(availableOf(kernelReceiver), equalTo(value));
+        await().pollInterval(1, SECONDS).atMost(60, SECONDS).until(availableOf(kernelReceiver), equalTo(value));
 
         // assert that the transaction has been recorded across nodes
         assertTransferTransaction(kernelPremine);
@@ -173,7 +174,6 @@ public class TransferTest {
             ApiClient apiClient = kernelMock.getApiClient();
             GetAccountResponse response = new ObjectMapper().readValue(
                     apiClient.request("get_account", "address", addressStringOf(kernelMock)), GetAccountResponse.class);
-            logger.info("Available of {} = {}", addressStringOf(kernelMock), response.account.available);
             return response.account.available;
         };
     }

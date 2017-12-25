@@ -8,41 +8,46 @@ package org.semux.util;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-
 import org.junit.After;
 import org.junit.Before;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.semux.api.SemuxAPIMock;
 import org.semux.rules.KernelRule;
 
 public class ApiClientTest {
 
-    @ClassRule
-    public static KernelRule kernelRule = new KernelRule(51610, 51710);
+    @Rule
+    public KernelRule kernelRule = new KernelRule(51610, 51710);
 
     private SemuxAPIMock api;
 
     @Before
-    public void setup() {
+    public void setUp() {
         api = new SemuxAPIMock(kernelRule.getKernel());
         api.start();
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         api.stop();
     }
 
     @Test
-    public void testRequest() throws IOException {
+    public void testRequest() {
         String cmd = "get_block";
 
+        System.err.println("kernel1");
         ApiClient apiClient = kernelRule.getKernel().getApiClient();
-        String response = apiClient.request(cmd, "number", 0);
+        System.err.println("kernel2");
+        try {
+            String response = apiClient.request(cmd, "number", 0);
 
-        assertTrue(response.contains("\"success\":true"));
-        assertTrue(response.contains("result"));
+            assertTrue(response.contains("\"success\":true"));
+            assertTrue(response.contains("result"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.err.println("kernel3");
     }
 }

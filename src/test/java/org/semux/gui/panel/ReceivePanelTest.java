@@ -37,13 +37,14 @@ public class ReceivePanelTest {
     @Mock
     WalletModel walletModel;
 
+    ReceivePanelTestApplication application;
+
     FrameFixture window;
 
     @After
-    public void teardown() {
-        if (window != null) {
-            window.cleanUp();
-        }
+    public void tearDown() {
+        window.cleanUp();
+        application.dispose();
     }
 
     @Test
@@ -58,8 +59,7 @@ public class ReceivePanelTest {
 
         // mock kernel
         KernelMock kernelMock = spy(kernelRule1.getKernel());
-        ReceivePanelTestApplication application = GuiActionRunner
-                .execute(() -> new ReceivePanelTestApplication(walletModel, kernelMock));
+        application = GuiActionRunner.execute(() -> new ReceivePanelTestApplication(walletModel, kernelMock));
 
         window = new FrameFixture(application);
         window.show();

@@ -35,7 +35,7 @@ public class AddressBookTest {
     private AddressBook ab;
 
     @Before
-    public void setup() {
+    public void setUp() {
         ab = new AddressBook(new File("addressbook.json"));
     }
 
@@ -124,7 +124,7 @@ public class AddressBookTest {
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         ab.clear();
     }
 }

@@ -137,14 +137,14 @@ public class Kernel {
         // start p2p module
         // ====================================
         p2p = new PeerServer(this);
-        new Thread(p2p::start, "p2p").start();
+        p2p.start();
 
         // ====================================
         // start API module
         // ====================================
         api = new SemuxAPI(this);
         if (config.apiEnabled()) {
-            new Thread(api::start, "api").start();
+            api.start();
         }
 
         // ====================================

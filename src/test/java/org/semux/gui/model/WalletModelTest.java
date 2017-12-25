@@ -46,7 +46,7 @@ public class WalletModelTest {
     private WalletModel model;
 
     @Before
-    public void setup() throws IOException {
+    public void setUp() throws IOException {
         file = File.createTempFile("addressbook", ".json");
         addressBook = new AddressBook(file);
         model = spy(new WalletModel(addressBook));
@@ -139,7 +139,7 @@ public class WalletModelTest {
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         file.delete();
     }
 }

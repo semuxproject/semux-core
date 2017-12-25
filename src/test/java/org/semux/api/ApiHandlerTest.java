@@ -90,15 +90,8 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         api.stop();
-    }
-
-    @After
-    public void tearDown() throws IOException {
-        if (wallet.exists()) {
-            wallet.delete();
-        }
     }
 
     @Test

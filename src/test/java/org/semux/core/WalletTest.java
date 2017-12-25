@@ -30,7 +30,7 @@ public class WalletTest {
     private Wallet wallet;
 
     @Before
-    public void setup() {
+    public void setUp() {
         try {
             file = File.createTempFile("wallet", ".data");
             pwd = "password";
@@ -157,7 +157,7 @@ public class WalletTest {
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         file.delete();
     }
 }

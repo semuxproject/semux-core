@@ -8,7 +8,6 @@ package org.semux.api;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -50,20 +49,17 @@ public abstract class ApiHandlerTestBase {
     protected ChannelManager channelMgr;
 
     protected <T extends ApiHandlerResponse> T request(String uri, Class<T> clazz) throws IOException {
-        URL u = new URL("http://" + api.getKernel().getConfig().apiListenIp() + ":"
-                + api.getKernel().getConfig().apiListenPort() + uri);
+        URL u = new URL("http://" + config.apiListenIp() + ":" + config.apiListenPort() + uri);
 
         HttpURLConnection con = (HttpURLConnection) u.openConnection();
         con.setRequestProperty("Authorization", BasicAuth.generateAuth(config.apiUsername(), config.apiPassword()));
 
-        InputStream inputStream = con.getResponseCode() < 400 ? con.getInputStream() : con.getErrorStream();
-        return new ObjectMapper().readValue(inputStream, clazz);
+        return new ObjectMapper().readValue(con.getInputStream(), clazz);
     }
 
     protected <T extends ApiHandlerResponse> T postRequest(String uri, String body, Class<T> clazz)
             throws IOException {
-        URL u = new URL("http://" + api.getKernel().getConfig().apiListenIp() + ":"
-                + api.getKernel().getConfig().apiListenPort() + uri);
+        URL u = new URL("http://" + config.apiListenIp() + ":" + config.apiListenPort() + uri);
 
         HttpURLConnection con = (HttpURLConnection) u.openConnection();
         con.setRequestMethod("POST");
@@ -78,8 +74,7 @@ public abstract class ApiHandlerTestBase {
         bufferedWriter.close();
         os.close();
 
-        InputStream inputStream = con.getResponseCode() < 400 ? con.getInputStream() : con.getErrorStream();
-        return new ObjectMapper().readValue(inputStream, clazz);
+        return new ObjectMapper().readValue(con.getInputStream(), clazz);
     }
 
     protected Block createBlock(Blockchain chain, List<Transaction> transactions, List<TransactionResult> results) {
@@ -110,9 +105,6 @@ public abstract class ApiHandlerTestBase {
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
 
-        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
-        tx.sign(key);
-
-        return tx;
+        return new Transaction(type, to, value, fee, nonce, timestamp, data).sign(key);
     }
 }

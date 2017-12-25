@@ -17,7 +17,7 @@ import org.junit.Test;
 public class SwingUtilTest {
 
     @Before
-    public void setup() {
+    public void setUp() {
         Locale.setDefault(new Locale("us", "US"));
     }
 

@@ -6,14 +6,15 @@
  */
 package org.semux.api;
 
-import static org.awaitility.Awaitility.await;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.semux.KernelMock;
 import org.semux.config.Config;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
+import org.semux.db.DBFactory;
+import org.semux.db.DBName;
+import org.semux.db.KVDB;
 import org.semux.db.LevelDB.LevelDBFactory;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
@@ -23,6 +24,7 @@ public class SemuxAPIMock {
 
     private KernelMock kernel;
     private SemuxAPI server;
+    private DBFactory dbFactory;
 
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
@@ -34,19 +36,15 @@ public class SemuxAPIMock {
         if (isRunning.compareAndSet(false, true)) {
             Config config = kernel.getConfig();
 
-            kernel.setBlockchain(
-                    new BlockchainImpl(config, new LevelDBFactory(config.dataDir())));
+            dbFactory = new LevelDBFactory(config.dataDir());
+            kernel.setBlockchain(new BlockchainImpl(config, dbFactory));
             kernel.setChannelManager(new ChannelManager(kernel));
             kernel.setPendingManager(new PendingManager(kernel));
             kernel.setClient(new PeerClient(config.p2pListenIp(), config.p2pListenPort(), kernel.getCoinbase()));
             kernel.setNodeManager(new NodeManager(kernel));
 
             server = new SemuxAPI(kernel);
-            new Thread(() -> {
-                server.start(config.apiListenIp(), config.apiListenPort());
-            }, "api").start();
-
-            await().until(() -> server.isRunning());
+            server.start(config.apiListenIp(), config.apiListenPort());
         }
     }
 
@@ -54,7 +52,10 @@ public class SemuxAPIMock {
         if (isRunning.compareAndSet(true, false)) {
             server.stop();
 
-            await().until(() -> !server.isRunning());
+            for (DBName name : DBName.values()) {
+                KVDB db = dbFactory.getDB(name);
+                db.close();
+            }
         }
     }
 

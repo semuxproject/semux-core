@@ -15,10 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.DefaultMessageSizeEstimator;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LoggingHandler;
@@ -40,12 +39,10 @@ public class PeerServer {
     };
 
     protected Kernel kernel;
+    protected Channel channel;
 
-    protected boolean isRunning;
-
-    protected EventLoopGroup bossGroup;
-    protected EventLoopGroup workerGroup;
-    protected ChannelFuture channelFuture;
+    private NioEventLoopGroup bossGroup;
+    private NioEventLoopGroup workerGroup;
 
     public PeerServer(Kernel kernel) {
         this.kernel = kernel;
@@ -60,10 +57,10 @@ public class PeerServer {
             return;
         }
 
-        bossGroup = new NioEventLoopGroup(1, factory);
-        workerGroup = new NioEventLoopGroup(0, factory);
-
         try {
+            bossGroup = new NioEventLoopGroup(1, factory);
+            workerGroup = new NioEventLoopGroup(0, factory);
+
             ServerBootstrap b = new ServerBootstrap();
 
             b.group(bossGroup, workerGroup);
@@ -77,33 +74,29 @@ public class PeerServer {
             b.childHandler(new SemuxChannelInitializer(kernel, null));
 
             logger.info("Starting peer server: address = {}:{}", ip, port);
-            channelFuture = b.bind(ip, port).sync();
-            logger.debug("Binding was successful");
-
-            isRunning = true;
-            channelFuture.channel().closeFuture().sync();
-            logger.info("PeerServer shut down");
-
+            channel = b.bind(ip, port).sync().channel();
         } catch (Exception e) {
             logger.error("Failed to start peer server", e);
-        } finally {
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
-            isRunning = false;
         }
     }
 
     public void stop() {
-        if (isRunning() && channelFuture != null && channelFuture.channel().isOpen()) {
+        if (isRunning() && channel.isOpen()) {
             try {
-                channelFuture.channel().close().sync();
+                channel.close().sync();
+
+                bossGroup.shutdownGracefully();
+                workerGroup.shutdownGracefully();
+
+                channel = null;
             } catch (Exception e) {
                 logger.error("Failed to close channel", e);
             }
+            logger.info("PeerServer shut down");
         }
     }
 
     public boolean isRunning() {
-        return isRunning;
+        return channel != null;
     }
 }

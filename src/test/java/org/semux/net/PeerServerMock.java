@@ -6,8 +6,6 @@
  */
 package org.semux.net;
 
-import static org.awaitility.Awaitility.await;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.semux.Kernel;
@@ -17,12 +15,16 @@ import org.semux.consensus.SemuxBFT;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
+import org.semux.db.DBFactory;
+import org.semux.db.DBName;
+import org.semux.db.KVDB;
 import org.semux.db.LevelDB.LevelDBFactory;
 
 public class PeerServerMock {
 
     private KernelMock kernel;
     private PeerServer server;
+    private DBFactory dbFactory;
 
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
@@ -34,8 +36,8 @@ public class PeerServerMock {
         if (isRunning.compareAndSet(false, true)) {
             Config config = kernel.getConfig();
 
-            kernel.setBlockchain(
-                    new BlockchainImpl(config, new LevelDBFactory(config.dataDir())));
+            dbFactory = new LevelDBFactory(config.dataDir());
+            kernel.setBlockchain(new BlockchainImpl(config, dbFactory));
             kernel.setClient(new PeerClient(config.p2pListenIp(), config.p2pListenPort(), kernel.getCoinbase()));
             kernel.setChannelManager(new ChannelManager(kernel));
             kernel.setPendingManager(new PendingManager(kernel));
@@ -46,11 +48,7 @@ public class PeerServerMock {
 
             // start peer server
             server = new PeerServer(kernel);
-            new Thread(() -> {
-                server.start(config.p2pListenIp(), config.p2pListenPort());
-            }, "p2p").start();
-
-            await().until(() -> server.isRunning());
+            server.start(config.p2pListenIp(), config.p2pListenPort());
         }
     }
 
@@ -58,7 +56,10 @@ public class PeerServerMock {
         if (isRunning.compareAndSet(true, false)) {
             server.stop();
 
-            await().until(() -> !server.isRunning());
+            for (DBName name : DBName.values()) {
+                KVDB db = dbFactory.getDB(name);
+                db.close();
+            }
         }
     }
 

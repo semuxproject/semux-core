@@ -37,12 +37,12 @@ public class LevelDBTest {
     private LevelDB db;
 
     @Before
-    public void setup() {
+    public void setUp() {
         db = new LevelDB(new File(Constants.DEFAULT_DATA_DIR, Constants.DATABASE_DIR + File.separator + "test"));
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         db.destroy();
     }
 

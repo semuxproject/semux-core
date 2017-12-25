@@ -17,9 +17,4 @@ public class BaseTestApplication extends JFrame {
         setTitle(getClass().getCanonicalName());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
-
-    public BaseTestApplication(String name) {
-        this();
-        setName(name);
-    }
 }

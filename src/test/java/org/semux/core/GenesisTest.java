@@ -30,7 +30,7 @@ public class GenesisTest {
     Genesis genesis;
 
     @Before
-    public void setup() {
+    public void setUp() {
         genesis = Genesis.load(new File(Constants.DEFAULT_DATA_DIR));
     }
 

@@ -32,13 +32,13 @@ public class NodeManagerTest {
     public KernelRule kernelRule2 = new KernelRule(51620, 51720);
 
     @Before
-    public void setup() {
+    public void setUp() {
         server1 = new PeerServerMock(kernelRule1.getKernel());
         server1.start();
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         if (server1 != null) {
             server1.stop();
         }

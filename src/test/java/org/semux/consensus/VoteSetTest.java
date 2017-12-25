@@ -32,7 +32,7 @@ public class VoteSetTest {
     private VoteSet vs = null;
 
     @Before
-    public void setup() {
+    public void setUp() {
         List<String> list = new ArrayList<>();
         list.add(v1.toAddressString());
         list.add(v2.toAddressString());

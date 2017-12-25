@@ -70,6 +70,7 @@ public class IOUtilTest {
 
         FileInputStream in = new FileInputStream(f1);
         assertThat(IOUtil.readStreamAsString(in), equalTo("abc"));
+        in.close();
     }
 
     @After

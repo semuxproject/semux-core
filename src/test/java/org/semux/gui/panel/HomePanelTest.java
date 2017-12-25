@@ -55,6 +55,7 @@ public class HomePanelTest {
         window.label("syncProgress").requireText(HomePanel.SyncProgressFormatter.format(progress));
 
         window.cleanUp();
+        application.dispose();
     }
 
     @Test

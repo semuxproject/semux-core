@@ -27,7 +27,7 @@ public class IOUtil {
     }
 
     /**
-     * Reads stream into byte array, and close it afterwards.
+     * Reads the given input stream into byte array.
      * 
      * @param in
      * @return
@@ -40,13 +40,12 @@ public class IOUtil {
         for (int c; (c = bin.read()) != -1;) {
             buf.write(c);
         }
-        bin.close();
 
         return buf.toByteArray();
     }
 
     /**
-     * Reads stream a string, and close it afterwards.
+     * Reads the given input stream as a string.
      * 
      * @param in
      * @return

@@ -926,7 +926,7 @@ public class SemuxBFT implements Consensus {
 
         public synchronized void start() {
             if (t == null) {
-                t = new Thread(this, "cons-broadcaster");
+                t = new Thread(this, "cons-relay");
                 t.start();
             }
         }

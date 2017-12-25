@@ -71,13 +71,13 @@ public class SemuxCLITest {
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
     @Before
-    public void setup() {
+    public void setUp() {
         LoggingAppender.clear();
         LoggingAppender.prepare(Level.INFO, SemuxCLI.class, LoggerFactory.getLogger(SemuxCLI.class));
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         LoggingAppender.prepare(Level.OFF, null, null);
     }
 

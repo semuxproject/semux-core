@@ -33,7 +33,7 @@ public class AccountStateTest {
     public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
 
     @Before
-    public void setup() {
+    public void setUp() {
         chain = new BlockchainImpl(new DevNetConfig(Constants.DEFAULT_DATA_DIR), temporaryDBFactory);
         state = chain.getAccountState();
     }

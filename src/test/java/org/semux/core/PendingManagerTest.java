@@ -48,7 +48,7 @@ public class PendingManagerTest {
     public static KernelRule kernelRule = new KernelRule(51610, 51710);
 
     @BeforeClass
-    public static void setup() {
+    public static void setUp() {
         kernel = kernelRule.getKernel();
 
         kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new LevelDBFactory(kernel.getConfig().dataDir())));

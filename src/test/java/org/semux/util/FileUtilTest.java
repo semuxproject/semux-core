@@ -20,7 +20,7 @@ public class FileUtilTest {
     private static final File dir = new File("test");
 
     @BeforeClass
-    public static void setup() throws IOException {
+    public static void setUp() throws IOException {
         dir.mkdirs();
         new File(dir, "file").createNewFile();
     }
@@ -32,7 +32,7 @@ public class FileUtilTest {
     }
 
     @AfterClass
-    public static void teardown() {
+    public static void tearDown() {
         dir.delete();
     }
 }

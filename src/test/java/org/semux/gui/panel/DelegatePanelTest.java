@@ -58,6 +58,8 @@ public class DelegatePanelTest {
     @Captor
     ArgumentCaptor<Transaction> transactionArgumentCaptor = ArgumentCaptor.forClass(Transaction.class);
 
+    DelegatePanelTestApplication application;
+
     FrameFixture window;
 
     List<WalletDelegate> walletDelegates;
@@ -120,13 +122,14 @@ public class DelegatePanelTest {
     @After
     public void tearDown() {
         window.cleanUp();
+        application.dispose();
         Mockito.reset(kernelMock);
     }
 
     @Test
     public void testSelectDelegate() {
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
-        DelegatePanelTestApplication application = GuiActionRunner
+        application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
         window = new FrameFixture(application);
         window.show();
@@ -168,7 +171,7 @@ public class DelegatePanelTest {
         when(pendingManager.getNonce(any())).thenReturn(RandomUtils.nextLong());
         when(pendingManager.addTransactionSync(any())).thenReturn(mockResult);
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
-        DelegatePanelTestApplication application = GuiActionRunner
+        application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
         window = new FrameFixture(application);
         window.show();
@@ -215,7 +218,7 @@ public class DelegatePanelTest {
         when(pendingManager.getNonce(any())).thenReturn(RandomUtils.nextLong());
         when(pendingManager.addTransactionSync(any())).thenReturn(mockResult);
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
-        DelegatePanelTestApplication application = GuiActionRunner
+        application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
         window = new FrameFixture(application);
         window.show();

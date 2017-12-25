@@ -42,7 +42,7 @@ public class HttpHandlerTest {
     private String auth;
 
     @Before
-    public void setup() {
+    public void setUp() {
         kernel = kernelRule.getKernel();
         server = new SemuxAPI(kernel);
 
@@ -52,7 +52,7 @@ public class HttpHandlerTest {
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         server.stop();
     }
 

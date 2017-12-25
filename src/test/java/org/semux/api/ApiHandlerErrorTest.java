@@ -77,10 +77,6 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
         });
     }
 
-    private static String randomHex() {
-        return Hex.encode0x(Bytes.random(20));
-    }
-
     @Parameter
     public String uri;
 
@@ -94,7 +90,7 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         api.stop();
     }
 
@@ -107,5 +103,9 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
         assertNotNull(response.message);
 
         System.out.println(response.message);
+    }
+
+    private static String randomHex() {
+        return Hex.encode0x(Bytes.random(20));
     }
 }

@@ -7,16 +7,14 @@
 package org.semux.api;
 
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.Kernel;
-import org.semux.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
+import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -41,21 +39,20 @@ public class SemuxAPI {
     };
 
     private Kernel kernel;
-    private Config config;
+    private Channel channel;
 
-    private ChannelFuture channelFuture;
-    private AtomicBoolean isRunning = new AtomicBoolean(false);
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
 
     public SemuxAPI(Kernel kernel) {
         this.kernel = kernel;
-        this.config = kernel.getConfig();
     }
 
     /**
      * Starts API server with configured binding address.
      */
     public void start() {
-        start(config.apiListenIp(), config.apiListenPort(), new SemuxAPIHttpChannelInitializer());
+        start(kernel.getConfig().apiListenIp(), kernel.getConfig().apiListenPort());
     }
 
     /**
@@ -77,26 +74,18 @@ public class SemuxAPI {
      * @param httpChannelInitializer
      */
     public void start(String ip, int port, HttpChannelInitializer httpChannelInitializer) {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1, factory);
-        EventLoopGroup workerGroup = new NioEventLoopGroup(0, factory);
         try {
+            bossGroup = new NioEventLoopGroup(1, factory);
+            workerGroup = new NioEventLoopGroup(0, factory);
+
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO)).childHandler(httpChannelInitializer);
 
             logger.info("Starting API server: address = {}:{}", ip, port);
-            channelFuture = b.bind(ip, port).sync();
-
-            isRunning.set(true);
-            channelFuture.channel().closeFuture().sync();
-            logger.info("API server shut down");
-
+            channel = b.bind(ip, port).sync().channel();
         } catch (Exception e) {
             logger.error("Failed to start API server", e);
-        } finally {
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
-            isRunning.set(false);
         }
     }
 
@@ -104,12 +93,17 @@ public class SemuxAPI {
      * Stops the API server if started.
      */
     public void stop() {
-        if (isRunning() && channelFuture != null && channelFuture.channel().isOpen()) {
+        if (isRunning() && channel.isOpen()) {
             try {
-                channelFuture.channel().close().sync();
+                channel.close().sync();
+                workerGroup.shutdownGracefully();
+                bossGroup.shutdownGracefully();
+
+                channel = null;
             } catch (Exception e) {
                 logger.error("Failed to close channel", e);
             }
+            logger.info("API server shut down");
         }
     }
 
@@ -119,7 +113,7 @@ public class SemuxAPI {
      * @return
      */
     public boolean isRunning() {
-        return isRunning.get();
+        return channel != null;
     }
 
     /**
@@ -129,7 +123,7 @@ public class SemuxAPI {
 
         @Override
         public HttpHandler initHandler() {
-            return new HttpHandler(config, new ApiHandlerImpl(kernel));
+            return new HttpHandler(kernel.getConfig(), new ApiHandlerImpl(kernel));
         }
     }
 }
