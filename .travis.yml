@@ -50,6 +50,7 @@ cache:
   directories:
     - .autoconf
     - $HOME/.m2
+    - $HOME/Library/Caches/Homebrew
 before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then source .travis/linux_start_xvfb.sh; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then .travis/macos_install_jdk8.sh; fi

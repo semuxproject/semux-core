@@ -74,7 +74,8 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
         window = new FrameFixture(robot(), application);
         window.show().requireVisible().moveTo(new Point(0, 0)).moveToFront();
 
-        window.table().requireVisible().selectRows(1).requireSelectedRows(1);
+        window.table().cell(Hex.PREF + key2.toAddressString()).requireNotEditable().click();
+        window.table().requireSelectedRows(1);
         window.button("btnCopyAddress").requireVisible().click();
         assertEquals(Hex.PREF + key2.toAddressString(),
                 Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor));
