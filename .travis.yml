@@ -40,6 +40,13 @@ matrix:
         - docker run -d -p 5161:5161 semux:latest --password=""
         - timeout 10 .travis/docker_test_build.sh
         - docker kill $(docker ps -q)
+
+    # OSX Testing
+    - os: osx
+      osx_image: xcode9.2
+      script:
+        - mvn test
+
 cache:
   directories:
     - .autoconf
