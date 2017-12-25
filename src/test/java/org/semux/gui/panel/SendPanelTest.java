@@ -75,13 +75,11 @@ public class SendPanelTest {
     public void testSendSuccessfully() {
         testSend(100, new PendingManager.ProcessTransactionResult(1));
 
-        // a confirmation dialog should be displayed
-        window.dialog().requireVisible();
-        window.dialog().button(withText("Yes")).requireVisible();
+        // 1. a confirmation dialog should be displayed
+        window.dialog().requireVisible().button(withText("Yes")).requireVisible().click();
 
-        // filled transaction should be sent to PendingManager once "Yes" button is
+        // 2. filled transaction should be sent to PendingManager once "Yes" button is
         // clicked
-        window.dialog().button(withText("Yes")).click();
         assertEquals(GUIMessages.get("SuccessDialogTitle"), window.dialog().target().getTitle());
         verify(pendingManager).addTransactionSync(transactionArgumentCaptor.capture());
 
@@ -114,8 +112,9 @@ public class SendPanelTest {
         window.show();
 
         // fill form
-        window.textBox("toText").setText(Hex.encode0x(recipient.toAddress()));
-        window.textBox("amountText").setText(String.valueOf(toSendSEM));
-        window.button("sendButton").click();
+        window.requireVisible();
+        window.textBox("toText").requireEditable().setText(Hex.encode0x(recipient.toAddress()));
+        window.textBox("amountText").requireEditable().setText(String.valueOf(toSendSEM));
+        window.button("sendButton").requireVisible().click();
     }
 }
