@@ -14,11 +14,14 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.awt.Point;
+
 import org.apache.commons.lang3.RandomUtils;
+import org.assertj.swing.annotation.GUITest;
+import org.assertj.swing.annotation.RunsInEDT;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
-import org.junit.After;
-import org.junit.Before;
+import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +42,7 @@ import org.semux.message.GUIMessages;
 import org.semux.rules.KernelRule;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SendPanelTest {
+public class SendPanelTest extends AssertJSwingJUnitTestCase {
 
     @Rule
     public KernelRule kernelRule1 = new KernelRule(51610, 51710);
@@ -61,18 +64,14 @@ public class SendPanelTest {
 
     KernelMock kernelMock;
 
-    @Before
-    public void setUp() {
+    @Override
+    protected void onSetUp() {
         recipient = new EdDSA();
     }
 
-    @After
-    public void tearDown() {
-        window.cleanUp();
-        application.dispose();
-    }
-
     @Test
+    @GUITest
+    @RunsInEDT
     public void testSendSuccessfully() {
         testSend(100, new PendingManager.ProcessTransactionResult(1));
 
@@ -93,6 +92,8 @@ public class SendPanelTest {
     }
 
     @Test
+    @GUITest
+    @RunsInEDT
     public void testSendFailure() {
         testSend(10000, new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
         window.dialog().requireVisible();
@@ -109,11 +110,10 @@ public class SendPanelTest {
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
 
         // create window
-        window = new FrameFixture(application);
-        window.show();
+        window = new FrameFixture(robot(), application);
+        window.show().requireVisible().moveTo(new Point(0, 0)).moveToFront();
 
         // fill form
-        window.requireVisible();
         window.textBox("toText").requireEditable().setText(Hex.encode0x(recipient.toAddress()));
         window.textBox("amountText").requireEditable().setText(String.valueOf(toSendSEM));
         window.button("sendButton").requireVisible().click();

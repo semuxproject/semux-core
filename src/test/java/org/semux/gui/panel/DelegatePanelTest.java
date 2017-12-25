@@ -14,14 +14,16 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.assertj.swing.annotation.GUITest;
+import org.assertj.swing.annotation.RunsInEDT;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
-import org.junit.After;
-import org.junit.Before;
+import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +49,7 @@ import org.semux.rules.KernelRule;
 import junit.framework.TestCase;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DelegatePanelTest {
+public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
 
     @Rule
     public KernelRule kernelRule1 = new KernelRule(51610, 51710);
@@ -91,8 +93,10 @@ public class DelegatePanelTest {
 
     KernelMock kernelMock;
 
-    @Before
-    public void setUp() {
+    DelegatePanelTestApplication application;
+
+    @Override
+    public void onSetUp() {
         // mock delegates
         walletDelegates = new ArrayList<>();
 
@@ -119,20 +123,20 @@ public class DelegatePanelTest {
         when(kernelMock.getBlockchain()).thenReturn(blockchain);
     }
 
-    @After
-    public void tearDown() {
-        window.cleanUp();
-        application.dispose();
+    @Override
+    public void onTearDown() {
         Mockito.reset(kernelMock);
     }
 
     @Test
+    @GUITest
+    @RunsInEDT
     public void testSelectDelegate() {
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
         application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
-        window = new FrameFixture(application);
-        window.show().requireVisible();
+        window = new FrameFixture(robot(), application);
+        window.show().requireVisible().moveTo(new Point(0, 0)).moveToFront();
 
         // the initial label of selected delegate should be PleaseSelectDelegate
         window.label("SelectedDelegateLabel").requireText(GUIMessages.get("PleaseSelectDelegate"));
@@ -151,6 +155,8 @@ public class DelegatePanelTest {
     }
 
     @Test
+    @GUITest
+    @RunsInEDT
     public void testVoteSuccess() {
         testVote(new PendingManager.ProcessTransactionResult(1));
 
@@ -159,6 +165,8 @@ public class DelegatePanelTest {
     }
 
     @Test
+    @GUITest
+    @RunsInEDT
     public void testVoteFailure() {
         testVote(new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
 
@@ -173,8 +181,8 @@ public class DelegatePanelTest {
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
         application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
-        window = new FrameFixture(application);
-        window.show();
+        window = new FrameFixture(robot(), application);
+        window.show().requireVisible().moveTo(new Point(0, 0)).moveToFront();
 
         // the initial label of selected delegate should be PleaseSelectDelegate
         window.label("SelectedDelegateLabel").requireText(GUIMessages.get("PleaseSelectDelegate"));
@@ -190,6 +198,8 @@ public class DelegatePanelTest {
     }
 
     @Test
+    @GUITest
+    @RunsInEDT
     public void testDelegateSuccess() {
         testDelegate(new PendingManager.ProcessTransactionResult(1));
 
@@ -206,6 +216,8 @@ public class DelegatePanelTest {
     }
 
     @Test
+    @GUITest
+    @RunsInEDT
     public void testDelegateFailure() {
         testDelegate(new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
 
@@ -220,8 +232,8 @@ public class DelegatePanelTest {
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
         application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
-        window = new FrameFixture(application);
-        window.show().requireVisible();
+        window = new FrameFixture(robot(), application);
+        window.show().requireVisible().moveTo(new Point(0, 0)).moveToFront();
 
         // fills delegate name
         window.textBox("textName").requireEditable().setText("test_delegate");
