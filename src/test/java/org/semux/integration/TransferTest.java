@@ -134,11 +134,13 @@ public class TransferTest {
         // wait
         await().until(() -> kernelValidator.isRunning()
                 && kernelPremine.isRunning()
-                && kernelReceiver.isRunning());
+                && kernelReceiver.isRunning()
+                && kernelPremine.getChannelManager().getActivePeers().size() > 0 // ensure there are active peers
+                && kernelPremine.getApi().isRunning());
 
         // make transaction
         final long value = 1000 * Unit.SEM;
-        final long fee = kernelPremine.getConfig().minTransactionFee() * 2;
+        final long fee = kernelPremine.getConfig().minTransactionFee();
         HashMap<String, Object> params = new HashMap<>();
         params.put("from", addressStringOf(kernelPremine));
         params.put("to", addressStringOf(kernelReceiver));

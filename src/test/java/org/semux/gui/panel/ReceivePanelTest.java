@@ -62,14 +62,11 @@ public class ReceivePanelTest {
         application = GuiActionRunner.execute(() -> new ReceivePanelTestApplication(walletModel, kernelMock));
 
         window = new FrameFixture(application);
-        window.show();
-        window.requireVisible();
+        window.show().requireVisible();
 
         window.table().selectRows(1);
-        window.button("btnCopyAddress").click();
-        window.dialog().requireVisible();
-
-        window.dialog().optionPane()
+        window.button("btnCopyAddress").requireVisible().click();
+        window.dialog().requireVisible().optionPane()
                 .requireMessage(GUIMessages.get("AddressCopied", Hex.PREF + key2.toAddressString()));
     }
 }

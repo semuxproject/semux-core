@@ -132,19 +132,19 @@ public class DelegatePanelTest {
         application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
         window = new FrameFixture(application);
-        window.show();
+        window.show().requireVisible();
 
         // the initial label of selected delegate should be PleaseSelectDelegate
         window.label("SelectedDelegateLabel").requireText(GUIMessages.get("PleaseSelectDelegate"));
 
         // click on the first delegate
-        window.table("DelegatesTable").cell("delegate 1").click();
+        window.table("DelegatesTable").cell("delegate 1").requireNotEditable().click();
 
         // the label of selected delegate should display the first delegate's name
         window.label("SelectedDelegateLabel").requireText(GUIMessages.get("SelectedDelegate", "delegate 1"));
 
         // click on the second delegate
-        window.table("DelegatesTable").cell("delegate 2").click();
+        window.table("DelegatesTable").cell("delegate 2").requireNotEditable().click();
 
         // the label of selected delegate should display the second delegate's name
         window.label("SelectedDelegateLabel").requireText(GUIMessages.get("SelectedDelegate", "delegate 2"));
@@ -180,13 +180,13 @@ public class DelegatePanelTest {
         window.label("SelectedDelegateLabel").requireText(GUIMessages.get("PleaseSelectDelegate"));
 
         // click on the first delegate
-        window.table("DelegatesTable").cell("delegate 1").click();
+        window.table("DelegatesTable").cell("delegate 1").requireNotEditable().click();
 
         // fills number of votes
-        window.textBox("textVote").setText("10");
+        window.textBox("textVote").requireEditable().setText("10");
 
         // click vote button
-        window.button("btnVote").click();
+        window.button("btnVote").requireVisible().click();
     }
 
     @Test
@@ -221,15 +221,15 @@ public class DelegatePanelTest {
         application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
         window = new FrameFixture(application);
-        window.show();
+        window.show().requireVisible();
 
         // fills delegate name
-        window.textBox("textName").setText("test_delegate");
+        window.textBox("textName").requireEditable().setText("test_delegate");
 
         // click register button
-        window.button("btnDelegate").click();
+        window.button("btnDelegate").requireVisible().click();
 
         // confirm
-        window.dialog().button(withText("Yes")).click();
+        window.dialog().requireVisible().button(withText("Yes")).requireVisible().click();
     }
 }
