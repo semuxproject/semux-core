@@ -129,7 +129,6 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @GUITest
     @RunsInEDT
     public void testSelectDelegate() {
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
@@ -155,7 +154,6 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @GUITest
     @RunsInEDT
     public void testVoteSuccess() {
         testVote(new PendingManager.ProcessTransactionResult(1));
@@ -165,7 +163,6 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @GUITest
     @RunsInEDT
     public void testVoteFailure() {
         testVote(new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
@@ -198,7 +195,6 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @GUITest
     @RunsInEDT
     public void testDelegateSuccess() {
         testDelegate(new PendingManager.ProcessTransactionResult(1));
@@ -216,7 +212,6 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @GUITest
     @RunsInEDT
     public void testDelegateFailure() {
         testDelegate(new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));

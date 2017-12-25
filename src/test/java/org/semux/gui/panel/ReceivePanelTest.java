@@ -57,7 +57,6 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @GUITest
     @RunsInEDT
     public void testCopyAddress() throws IOException, UnsupportedFlavorException {
         EdDSA key1 = new EdDSA();

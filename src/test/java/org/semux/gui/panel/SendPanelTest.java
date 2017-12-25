@@ -70,7 +70,6 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @GUITest
     @RunsInEDT
     public void testSendSuccessfully() throws InterruptedException {
         testSend(100, new PendingManager.ProcessTransactionResult(1));
@@ -95,7 +94,6 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @GUITest
     @RunsInEDT
     public void testSendFailure() throws InterruptedException {
         testSend(10000, new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));

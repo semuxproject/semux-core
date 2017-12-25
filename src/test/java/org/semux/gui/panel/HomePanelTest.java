@@ -40,7 +40,6 @@ public class HomePanelTest extends AssertJSwingJUnitTestCase {
     WalletModel walletModel;
 
     @Test
-    @GUITest
     @RunsInEDT
     public void testSyncProgress100() {
         // mock progress
@@ -66,7 +65,6 @@ public class HomePanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @GUITest
     @RunsInEDT
     public void testProgressFormatter() {
         assertEquals(GUIMessages.get("SyncFinished"),
