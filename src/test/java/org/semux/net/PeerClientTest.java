@@ -6,7 +6,7 @@
  */
 package org.semux.net;
 
-import static org.junit.Assert.assertEquals;
+import static org.awaitility.Awaitility.await;
 
 import java.net.InetSocketAddress;
 
@@ -58,10 +58,9 @@ public class PeerClientTest {
         client.connect(remoteAddress, ci).sync();
 
         // waiting for the HELLO message to be sent
-        Thread.sleep(1000);
-        assertEquals(1, kernel2.getChannelManager().getActivePeers().size());
+        await().until(() -> 1 == kernel2.getChannelManager().getActivePeers().size());
 
         client.close();
-        assertEquals(0, kernel2.getChannelManager().getActivePeers().size());
+        await().until(() -> 0 == kernel2.getChannelManager().getActivePeers().size());
     }
 }
