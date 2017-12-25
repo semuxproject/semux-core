@@ -46,3 +46,4 @@ cache:
   - $HOME/.m2
 before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then source .travis/start_xvfb.sh; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then .travis/install-osx-jdk8.sh; fi
