@@ -8,14 +8,12 @@ package org.semux.consensus;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.map.LRUMap;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.config.Constants;
@@ -53,6 +51,9 @@ import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
 public class SemuxBFT implements Consensus {
     static final Logger logger = LoggerFactory.getLogger(SemuxBFT.class);
 
@@ -81,7 +82,7 @@ public class SemuxBFT implements Consensus {
     protected Proof proof;
     protected Proposal proposal;
 
-    protected Map<ByteArray, Block> validBlocks = new LRUMap<>(8);
+    protected Cache<ByteArray, Block> validBlocks = Caffeine.newBuilder().maximumSize(8).build();
 
     protected volatile List<String> validators;
     protected volatile List<Channel> activeValidators;
@@ -379,11 +380,9 @@ public class SemuxBFT implements Consensus {
                 precommitVotes, commitVotes);
 
         Optional<byte[]> blockHash = precommitVotes.anyApproved();
-        if (blockHash.isPresent() && validBlocks.containsKey(ByteArray.of(blockHash.get()))) {
-            // [1] get the raw block
-            Block block = validBlocks.get(ByteArray.of(blockHash.get()));
-
-            // [2] update view and votes
+        Block block;
+        if (blockHash.isPresent() && (block = validBlocks.getIfPresent(ByteArray.of(blockHash.get()))) != null) {
+            // [1] update view and votes
             List<Signature> votes = new ArrayList<>();
             for (Vote vote : precommitVotes.getApprovals(blockHash.get())) {
                 votes.add(vote.getSignature());
@@ -391,7 +390,7 @@ public class SemuxBFT implements Consensus {
             block.setView(view);
             block.setVotes(votes);
 
-            // [3] add the block to chain
+            // [2] add the block to chain
             logger.info(block.toString());
             applyBlock(block);
         } else {

@@ -21,12 +21,14 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.collections4.map.LRUMap;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 public class NodeManager {
 
@@ -54,7 +56,7 @@ public class NodeManager {
     private PeerClient client;
 
     private Queue<InetSocketAddress> queue;
-    private LRUMap<InetSocketAddress, Long> lastConnect; // not thread-safe
+    private Cache<InetSocketAddress, Long> lastConnect;
 
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> connectFuture;
@@ -75,7 +77,7 @@ public class NodeManager {
         this.client = kernel.getClient();
 
         this.queue = new ConcurrentLinkedQueue<>();
-        this.lastConnect = new LRUMap<>(LRU_CACHE_SIZE);
+        this.lastConnect = Caffeine.newBuilder().maximumSize(LRU_CACHE_SIZE).build();
 
         this.exec = Executors.newSingleThreadScheduledExecutor(factory);
     }
@@ -184,7 +186,7 @@ public class NodeManager {
         InetSocketAddress addr;
 
         while ((addr = queue.poll()) != null && channelMgr.size() < config.netMaxOutboundConnections()) {
-            Long l = lastConnect.get(addr);
+            Long l = lastConnect.getIfPresent(addr);
             long now = System.currentTimeMillis();
 
             if (!new InetSocketAddress(client.getIp(), client.getPort()).equals(addr)//

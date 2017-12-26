@@ -10,16 +10,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.collections4.map.LRUMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
@@ -29,7 +30,9 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
     private static final Logger logger = LoggerFactory.getLogger(SemuxMessageHandler.class);
 
     private static final int MAX_PACKETS = 16;
-    protected final Map<Integer, Pair<List<Frame>, AtomicInteger>> incompletePackets = new LRUMap<>(MAX_PACKETS);
+
+    private final Cache<Integer, Pair<List<Frame>, AtomicInteger>> incompletePackets = Caffeine.newBuilder()
+            .maximumSize(MAX_PACKETS).build();
 
     private Config config;
 
@@ -80,7 +83,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
         } else {
             synchronized (incompletePackets) {
                 int packetId = frame.getPacketId();
-                Pair<List<Frame>, AtomicInteger> pair = incompletePackets.get(packetId);
+                Pair<List<Frame>, AtomicInteger> pair = incompletePackets.getIfPresent(packetId);
                 if (pair == null) {
                     int packetSize = frame.getPacketSize();
                     if (packetSize < 0 || packetSize > config.netMaxPacketSize()) {
@@ -104,10 +107,10 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
                     }
 
                     // remove complete packets from cache
-                    incompletePackets.remove(packetId);
+                    incompletePackets.invalidate(packetId);
                 } else if (remaining < 0) {
                     logger.debug("Corrupted packet, packetId: {}", packetId);
-                    incompletePackets.remove(packetId);
+                    incompletePackets.invalidate(packetId);
                 }
             }
         }

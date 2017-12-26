@@ -19,7 +19,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.collections4.map.LRUMap;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.core.state.AccountState;
@@ -32,6 +31,9 @@ import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * Pending manager maintains all unconfirmed transactions, either from kernel or
@@ -78,9 +80,11 @@ public class PendingManager implements Runnable, BlockchainListener {
     private Map<ByteArray, PendingTransaction> pool = new HashMap<>();
     private List<PendingTransaction> transactions = new ArrayList<>();
 
-    // NOTE: make sure access to the LRUMap<> are synchronized.
-    private Map<ByteArray, Transaction> delayed = new LRUMap<>(DELAYED_MAX_SIZE);
-    private Map<ByteArray, ?> processed = new LRUMap<>(PROCESSED_MAX_SIZE);
+    /**
+     * Transaction cache.
+     */
+    private Cache<ByteArray, Transaction> delayed = Caffeine.newBuilder().maximumSize(DELAYED_MAX_SIZE).build();
+    private Cache<ByteArray, Transaction> processed = Caffeine.newBuilder().maximumSize(PROCESSED_MAX_SIZE).build();
 
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> validateFuture;
@@ -153,7 +157,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     /**
      * Adds a transaction to the queue, which will be validated later by the
-     * background worker.
+     * background worker. Transaction may get rejected if the queue is full.
      * 
      * @param tx
      */
@@ -164,11 +168,11 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Adds a transaction to the pool.
+     * Adds a transaction to the pool and waits until it's done.
      * 
      * @param tx
-     *            a ${@link Transaction} object to be added
-     * @return a ${@link ProcessTransactionResult} object
+     *            The transaction
+     * @return The processing result
      */
     public synchronized ProcessTransactionResult addTransactionSync(Transaction tx) {
         return tx.validate() ? //
@@ -217,7 +221,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Returns a limited number of transactions in the pool.
+     * Returns transactions in the pool, with the given total size limit.
      * 
      * @param limit
      * @return
@@ -236,11 +240,11 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Clear all pending transactions
+     * Resets the pending state and returns all pending transactions.
      * 
      * @return
      */
-    public synchronized List<PendingTransaction> clear() {
+    public synchronized List<PendingTransaction> reset() {
         // reset state
         pendingAS = chain.getAccountState().track();
         pendingDS = chain.getDelegateState().track();
@@ -259,7 +263,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             long t1 = System.currentTimeMillis();
 
             // clear transaction pool
-            List<PendingTransaction> txs = clear();
+            List<PendingTransaction> txs = reset();
 
             // update pending state
             long accepted = 0;
@@ -279,9 +283,10 @@ public class PendingManager implements Runnable, BlockchainListener {
         while (pool.size() < POOL_MAX_SIZE //
                 && (tx = queue.poll()) != null //
                 && tx.getFee() >= config.minTransactionFee()) {
-            // filter by cache
+
+            // reject already executed transactions
             ByteArray key = ByteArray.of(tx.getHash());
-            if (processed.containsKey(key)) {
+            if (processed.getIfPresent(key) != null) {
                 continue;
             }
 
@@ -356,7 +361,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                 return new ProcessTransactionResult(cnt, result.getError());
             }
 
-            tx = delayed.get(createKey(tx.getFrom(), getNonce(tx.getFrom())));
+            tx = delayed.getIfPresent(createKey(tx.getFrom(), getNonce(tx.getFrom())));
         }
 
         // Delay the transaction for the next event loop of PendingManager. The delayed
