@@ -72,9 +72,10 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
         table.cell(Hex.PREF + key2.toAddressString()).click();
         table.requireSelectedRows(1);
         window.button("btnCopyAddress").requireVisible().click();
-        assertEquals(Hex.PREF + key2.toAddressString(), GuiActionRunner
-                .execute(() -> Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor)));
         window.optionPane(Timeout.timeout(1000)).requireVisible()
                 .requireMessage(GUIMessages.get("AddressCopied", Hex.PREF + key2.toAddressString()));
+
+        assertEquals(Hex.PREF + key2.toAddressString(), GuiActionRunner
+                .execute(() -> Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor)));
     }
 }

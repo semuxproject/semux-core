@@ -8,6 +8,7 @@ package org.semux.util;
 
 import java.io.BufferedReader;
 import java.io.Console;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.URL;
@@ -110,10 +111,11 @@ public class SystemUtil {
                 if (ip.matches("(\\d{1,3}\\.){3}\\d{1,3}")) {
                     return ip;
                 }
-            } catch (Exception e) {
-                logger.error("Failed to retrieve your IP address from ipify.org");
+            } catch (IOException e) {
+                // do nothing
             }
         }
+        logger.error("Failed to retrieve your IP address");
 
         try {
             return InetAddress.getLocalHost().getHostAddress();

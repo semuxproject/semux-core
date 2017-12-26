@@ -77,7 +77,6 @@ public class TransactionExecutor {
                 continue;
             }
 
-            // TODO: use enum to represent error
             switch (tx.getType()) {
             case TRANSFER: {
                 if (data.length > config.maxTransferDataSize()) {
