@@ -61,7 +61,6 @@
                             <exclude>junit:*</exclude>
                             <exclude>org.powermock:*</exclude>
                             <exclude>com.github.stefanbirkner:system-rules</exclude>
-                            <exclude>uk.org.lidalia:slf4j-test</exclude>
                             <exclude>org.assertj:*</exclude>
                         </excludes>
                     </artifactSet>
