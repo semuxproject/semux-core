@@ -260,10 +260,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.20.1</version>
                 <configuration>
-                    <!-- do not reuse forks of JVM in order to avoid random fails on travis -->
+                    <!-- do not reuse JVM instances -->
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
-                    <rerunFailingTestsCount>1</rerunFailingTestsCount>
+                    <!-- allow flaky tests -->
+                    <rerunFailingTestsCount>2</rerunFailingTestsCount>
                 </configuration>
             </plugin>
         </plugins>
