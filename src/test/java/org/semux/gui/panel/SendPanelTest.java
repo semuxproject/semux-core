@@ -6,7 +6,6 @@
  */
 package org.semux.gui.panel;
 
-import static org.assertj.swing.core.matcher.JButtonMatcher.withText;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,10 +14,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.assertj.swing.annotation.RunsInEDT;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
+import org.assertj.swing.timing.Timeout;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,17 +72,17 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @RunsInEDT
-    public void testSendSuccessfully() throws InterruptedException {
+    public void testSendSuccessfully() {
         testSend(100, new PendingManager.ProcessTransactionResult(1));
 
         // 1. a confirmation dialog should be displayed
-        window.optionPane().requireTitle(GUIMessages.get("ConfirmTransfer")).requireVisible()
-                .button(withText("Yes")).requireVisible().click();
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ConfirmTransfer")).requireVisible()
+                .yesButton().requireVisible().click();
 
         // 2. filled transaction should be sent to PendingManager once "Yes" button is
         // clicked
-        window.optionPane().requireTitle(GUIMessages.get("SuccessDialogTitle")).requireVisible();
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("SuccessDialogTitle")).requireVisible()
+                .okButton().requireVisible().click();
         verify(pendingManager).addTransactionSync(transactionArgumentCaptor.capture());
 
         // verify transaction
@@ -95,10 +94,9 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @RunsInEDT
-    public void testSendFailure() throws InterruptedException {
+    public void testSendFailure() {
         testSend(10000, new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
-        window.optionPane().requireTitle(GUIMessages.get("ErrorDialogTitle"));
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ErrorDialogTitle"));
     }
 
     private void testSend(int toSendSEM, PendingManager.ProcessTransactionResult mockResult) {

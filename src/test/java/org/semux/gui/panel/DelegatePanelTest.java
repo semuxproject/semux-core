@@ -16,10 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.assertj.swing.annotation.RunsInEDT;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
+import org.assertj.swing.timing.Timeout;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -125,7 +125,6 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @RunsInEDT
     public void testSelectDelegate() {
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
         application = GuiActionRunner
@@ -150,17 +149,15 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @RunsInEDT
     public void testVoteSuccess() {
         testVote(new PendingManager.ProcessTransactionResult(1));
-        window.optionPane().requireTitle(GUIMessages.get("SuccessDialogTitle")).requireVisible();
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("SuccessDialogTitle")).requireVisible();
     }
 
     @Test
-    @RunsInEDT
     public void testVoteFailure() {
         testVote(new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
-        window.optionPane().requireTitle(GUIMessages.get("ErrorDialogTitle")).requireVisible();
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ErrorDialogTitle")).requireVisible();
     }
 
     private void testVote(PendingManager.ProcessTransactionResult mockResult) {
@@ -187,10 +184,9 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @RunsInEDT
     public void testDelegateSuccess() {
         testDelegate(new PendingManager.ProcessTransactionResult(1));
-        window.optionPane().requireTitle(GUIMessages.get("SuccessDialogTitle")).requireVisible();
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("SuccessDialogTitle")).requireVisible();
 
         // verify added transaction
         verify(pendingManager).addTransactionSync(transactionArgumentCaptor.capture());
@@ -202,10 +198,9 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @RunsInEDT
     public void testDelegateFailure() {
         testDelegate(new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
-        window.optionPane().requireTitle(GUIMessages.get("ErrorDialogTitle")).requireVisible();
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ErrorDialogTitle")).requireVisible();
     }
 
     private void testDelegate(PendingManager.ProcessTransactionResult mockResult) {
@@ -225,7 +220,8 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         window.button("btnDelegate").requireVisible().click();
 
         // confirm
-        window.optionPane().requireTitle(GUIMessages.get("ConfirmDelegateRegistration")).requireVisible()
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ConfirmDelegateRegistration"))
+                .requireVisible()
                 .yesButton().requireVisible().click();
     }
 }

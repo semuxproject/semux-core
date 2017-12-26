@@ -263,6 +263,7 @@
                     <!-- do not reuse forks of JVM in order to avoid random fails on travis -->
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
+                    <rerunFailingTestsCount>1</rerunFailingTestsCount>
                 </configuration>
             </plugin>
         </plugins>

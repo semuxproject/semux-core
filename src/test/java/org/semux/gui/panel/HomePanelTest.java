@@ -11,7 +11,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import org.assertj.swing.annotation.RunsInEDT;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
@@ -37,7 +36,6 @@ public class HomePanelTest extends AssertJSwingJUnitTestCase {
     WalletModel walletModel;
 
     @Test
-    @RunsInEDT
     public void testSyncProgress100() {
         // mock progress
         SemuxSync.SemuxSyncProgress progress = new SemuxSync.SemuxSyncProgress(100L, 100L);
@@ -62,7 +60,6 @@ public class HomePanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @RunsInEDT
     public void testProgressFormatter() {
         assertEquals(GUIMessages.get("SyncFinished"),
                 HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(100L, 100L)));

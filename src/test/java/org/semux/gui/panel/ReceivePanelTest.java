@@ -12,15 +12,13 @@ import static org.mockito.Mockito.when;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import java.util.Arrays;
 
-import org.assertj.swing.annotation.RunsInEDT;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JTableFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
+import org.assertj.swing.timing.Timeout;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,8 +51,7 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    @RunsInEDT
-    public void testCopyAddress() throws IOException, UnsupportedFlavorException, InterruptedException {
+    public void testCopyAddress() {
         EdDSA key1 = new EdDSA();
         EdDSA key2 = new EdDSA();
         WalletAccount acc1 = new WalletAccount(key1, new Account(key1.toAddress(), 1, 1, 1));
@@ -76,7 +73,7 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
         window.button("btnCopyAddress").requireVisible().click();
         assertEquals(Hex.PREF + key2.toAddressString(), GuiActionRunner
                 .execute(() -> Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor)));
-        window.optionPane().requireVisible()
+        window.optionPane(Timeout.timeout(1000)).requireVisible()
                 .requireMessage(GUIMessages.get("AddressCopied", Hex.PREF + key2.toAddressString()));
     }
 }
