@@ -6,53 +6,47 @@
  */
 package org.semux.bench;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
 import org.semux.api.SemuxAPIMock;
 import org.semux.config.Config;
-import org.semux.core.Wallet;
-import org.semux.crypto.EdDSA;
 import org.semux.rules.KernelRule;
 import org.semux.util.ApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * TODO: investigate, significant performance decrease noticed.
+ */
 public class APIPerformance {
     private static final Logger logger = LoggerFactory.getLogger(APIPerformance.class);
 
-    private static int REPEAT = 1000;
+    @Rule
+    public KernelRule kernelRule = new KernelRule(51610, 51710);
 
-    @ClassRule
-    private static KernelRule kernelRule = new KernelRule(51610, 51710);
-
-    public static void testBasic() throws IOException {
-        Wallet wallet = new Wallet(new File("wallet_test.data"));
-        wallet.unlock("passw0rd");
-        wallet.addAccount(new EdDSA());
-
+    @Test
+    public void testBasic() throws IOException {
         SemuxAPIMock api = new SemuxAPIMock(kernelRule.getKernel());
         api.start();
 
         try {
+            int repeat = 1000;
+
             Config config = api.getKernel().getConfig();
             long t1 = System.nanoTime();
-            for (int i = 0; i < REPEAT; i++) {
+            for (int i = 0; i < repeat; i++) {
                 ApiClient a = new ApiClient(new InetSocketAddress(config.apiListenIp(), config.apiListenPort()),
                         config.apiUsername(),
                         config.apiPassword());
                 a.request("get_info");
             }
             long t2 = System.nanoTime();
-            logger.info("Perf_api_basic: " + (t2 - t1) / 1_000 / REPEAT + " μs/time");
+            logger.info("Perf_api_basic: " + (t2 - t1) / 1_000 / repeat + " μs/time");
         } finally {
             api.stop();
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        testBasic();
     }
 }

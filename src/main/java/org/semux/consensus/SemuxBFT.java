@@ -696,7 +696,7 @@ public class SemuxBFT implements Consensus {
 
         // fetch pending transactions
         final List<PendingManager.PendingTransaction> pending = pendingMgr
-                .getPendingTransactions(config.maxBlockSize());
+                .getPendingTransactions(config.maxBlockTransactionsSize());
         final List<Transaction> pendingTxs = pending.stream()
                 .map(tx -> tx.transaction)
                 .collect(Collectors.toList());
@@ -743,7 +743,7 @@ public class SemuxBFT implements Consensus {
 
         // [2] check transactions and results (skipped)
         if (!Block.validateTransactions(header, transactions)
-                || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockSize()) {
+                || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
             logger.debug("Invalid block transactions");
             return false;
         }

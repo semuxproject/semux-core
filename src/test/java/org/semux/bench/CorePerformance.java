@@ -37,7 +37,8 @@ public class CorePerformance {
         List<Transaction> txs = new ArrayList<>();
         List<TransactionResult> res = new ArrayList<>();
 
-        for (int i = 0; i < config.maxBlockSize(); i++) {
+        int total = 0;
+        for (int i = 0;; i++) {
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
             long value = 1;
@@ -45,11 +46,15 @@ public class CorePerformance {
             long nonce = 1 + i;
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.random(128);
-            Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
-            tx.sign(key);
+            Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(key);
+
+            if (total + tx.size() > config.maxBlockTransactionsSize()) {
+                break;
+            }
 
             txs.add(tx);
             res.add(new TransactionResult(true));
+            total += tx.size();
         }
 
         long number = 1;
@@ -73,10 +78,12 @@ public class CorePerformance {
         block.setVotes(votes);
 
         long t2 = System.nanoTime();
+        logger.info("block # of txs: {}", block.getTransactions().size());
         logger.info("block header size: {} B", block.toBytesHeader().length);
         logger.info("block transaction size: {} KB", block.toBytesTransactions().length / 1024);
         logger.info("block results size: {} KB", block.toBytesResults().length / 1024);
         logger.info("block votes size: {} KB", block.toBytesVotes().length / 1024);
+        logger.info("block total size: {} KB", block.size() / 1024);
         logger.info("Perf_block_creation: {} ms", (t2 - t1) / 1_000_000);
         return block;
     }

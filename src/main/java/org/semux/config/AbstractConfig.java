@@ -174,7 +174,7 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public int maxBlockSize() {
+    public int maxBlockTransactionsSize() {
         return maxBlockSize;
     }
 

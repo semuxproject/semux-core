@@ -44,11 +44,11 @@ public interface Config {
     short networkVersion();
 
     /**
-     * Returns the max block size in bytes.
+     * Returns the max transaction total size in bytes.
      * 
      * @return
      */
-    int maxBlockSize();
+    int maxBlockTransactionsSize();
 
     /**
      * Returns the max data size for transaction

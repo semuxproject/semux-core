@@ -8,7 +8,6 @@ package org.semux.bench;
 
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hash;
-import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,16 +68,13 @@ public class CryptoPerformance {
             byte[] hash = Hash.h256(data);
             byte[] sig = eckey.sign(hash).toBytes();
 
-            long usedMemoryBefore = SystemUtil.getUsedHeapSize();
             long t1 = System.nanoTime();
             for (int i = 0; i < REPEAT; i++) {
                 EdDSA.verify(hash, sig);
             }
             long t2 = System.nanoTime();
-            long usedMemoryAfter = SystemUtil.getUsedHeapSize();
 
-            logger.info("Perf_verify_{}k: {} μs/time, {} bytes", size / 1024, (t2 - t1) / 1_000 / REPEAT,
-                    usedMemoryAfter - usedMemoryBefore);
+            logger.info("Perf_verify_{}k: {} μs/time", size / 1024, (t2 - t1) / 1_000 / REPEAT);
         }
     }
 

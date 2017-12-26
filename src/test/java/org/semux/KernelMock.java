@@ -21,7 +21,7 @@ import org.semux.net.PeerClient;
 import org.semux.util.ApiClient;
 
 /**
- * This kernel mock inheritate the {@link Kernel} and adds a bunch of setters of
+ * This kernel mock extends the {@link Kernel} by adding a bunch of setters of
  * the components.
  */
 public class KernelMock extends Kernel {

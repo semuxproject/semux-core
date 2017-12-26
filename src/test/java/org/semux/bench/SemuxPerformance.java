@@ -59,8 +59,8 @@ public class SemuxPerformance {
 
     public static void main(String[] args) throws Exception {
         address = SystemUtil.readPassword("Please enter your wallet address: ");
-        username = SystemUtil.readPassword("Please enter your username: ");
-        password = SystemUtil.readPassword();
+        username = SystemUtil.readPassword("Please enter your API username: ");
+        password = SystemUtil.readPassword("Please enter your API password: ");
 
         while (true) {
             System.out.print("# transactions to send: ");
