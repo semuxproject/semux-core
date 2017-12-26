@@ -6,9 +6,7 @@
  */
 package org.semux.gui.panel;
 
-import static org.assertj.swing.core.matcher.JButtonMatcher.withText;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -20,8 +18,8 @@ import java.util.List;
 import org.apache.commons.lang3.RandomUtils;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
-import org.junit.After;
-import org.junit.Before;
+import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
+import org.assertj.swing.timing.Timeout;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +45,7 @@ import org.semux.rules.KernelRule;
 import junit.framework.TestCase;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DelegatePanelTest {
+public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
 
     @Rule
     public KernelRule kernelRule1 = new KernelRule(51610, 51710);
@@ -91,8 +89,8 @@ public class DelegatePanelTest {
 
     KernelMock kernelMock;
 
-    @Before
-    public void setUp() {
+    @Override
+    public void onSetUp() {
         // mock delegates
         walletDelegates = new ArrayList<>();
 
@@ -119,10 +117,8 @@ public class DelegatePanelTest {
         when(kernelMock.getBlockchain()).thenReturn(blockchain);
     }
 
-    @After
-    public void tearDown() {
-        window.cleanUp();
-        application.dispose();
+    @Override
+    public void onTearDown() {
         Mockito.reset(kernelMock);
     }
 
@@ -131,8 +127,8 @@ public class DelegatePanelTest {
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
         application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
-        window = new FrameFixture(application);
-        window.show().requireVisible();
+        window = new FrameFixture(robot(), application);
+        window.show().requireVisible().moveToFront();
 
         // the initial label of selected delegate should be PleaseSelectDelegate
         window.label("SelectedDelegateLabel").requireText(GUIMessages.get("PleaseSelectDelegate"));
@@ -153,17 +149,13 @@ public class DelegatePanelTest {
     @Test
     public void testVoteSuccess() {
         testVote(new PendingManager.ProcessTransactionResult(1));
-
-        window.dialog().requireVisible();
-        assertEquals(GUIMessages.get("SuccessDialogTitle"), window.dialog().target().getTitle());
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("SuccessDialogTitle")).requireVisible();
     }
 
     @Test
     public void testVoteFailure() {
         testVote(new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
-
-        window.dialog().requireVisible();
-        assertEquals(GUIMessages.get("ErrorDialogTitle"), window.dialog().target().getTitle());
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ErrorDialogTitle")).requireVisible();
     }
 
     private void testVote(PendingManager.ProcessTransactionResult mockResult) {
@@ -173,8 +165,8 @@ public class DelegatePanelTest {
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
         application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
-        window = new FrameFixture(application);
-        window.show();
+        window = new FrameFixture(robot(), application);
+        window.show().requireVisible().moveToFront();
 
         // the initial label of selected delegate should be PleaseSelectDelegate
         window.label("SelectedDelegateLabel").requireText(GUIMessages.get("PleaseSelectDelegate"));
@@ -192,9 +184,7 @@ public class DelegatePanelTest {
     @Test
     public void testDelegateSuccess() {
         testDelegate(new PendingManager.ProcessTransactionResult(1));
-
-        window.dialog().requireVisible();
-        assertEquals(GUIMessages.get("SuccessDialogTitle"), window.dialog().target().getTitle());
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("SuccessDialogTitle")).requireVisible();
 
         // verify added transaction
         verify(pendingManager).addTransactionSync(transactionArgumentCaptor.capture());
@@ -208,9 +198,7 @@ public class DelegatePanelTest {
     @Test
     public void testDelegateFailure() {
         testDelegate(new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
-
-        window.dialog().requireVisible();
-        assertEquals(GUIMessages.get("ErrorDialogTitle"), window.dialog().target().getTitle());
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ErrorDialogTitle")).requireVisible();
     }
 
     private void testDelegate(PendingManager.ProcessTransactionResult mockResult) {
@@ -220,8 +208,8 @@ public class DelegatePanelTest {
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
         application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
-        window = new FrameFixture(application);
-        window.show().requireVisible();
+        window = new FrameFixture(robot(), application);
+        window.show().requireVisible().moveToFront();
 
         // fills delegate name
         window.textBox("textName").requireEditable().setText("test_delegate");
@@ -230,6 +218,8 @@ public class DelegatePanelTest {
         window.button("btnDelegate").requireVisible().click();
 
         // confirm
-        window.dialog().requireVisible().button(withText("Yes")).requireVisible().click();
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ConfirmDelegateRegistration"))
+                .requireVisible()
+                .yesButton().requireVisible().click();
     }
 }

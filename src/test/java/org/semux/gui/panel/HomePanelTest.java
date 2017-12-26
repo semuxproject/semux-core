@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
+import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +27,7 @@ import org.semux.message.GUIMessages;
 import org.semux.rules.KernelRule;
 
 @RunWith(MockitoJUnitRunner.class)
-public class HomePanelTest {
+public class HomePanelTest extends AssertJSwingJUnitTestCase {
 
     @Rule
     public KernelRule kernelRule1 = new KernelRule(51610, 51710);
@@ -48,8 +49,8 @@ public class HomePanelTest {
         HomePanelTestApplication application = GuiActionRunner
                 .execute(() -> new HomePanelTestApplication(walletModel, kernelMock));
 
-        FrameFixture window = new FrameFixture(application);
-        window.show();
+        FrameFixture window = new FrameFixture(robot(), application);
+        window.show().requireVisible().moveToFront();
 
         window.requireVisible();
         window.label("syncProgress").requireText(HomePanel.SyncProgressFormatter.format(progress));
@@ -67,5 +68,10 @@ public class HomePanelTest {
         assertEquals(GUIMessages.get("SyncStopped"),
                 HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(100L, 0L)));
         assertEquals(GUIMessages.get("SyncStopped"), HomePanel.SyncProgressFormatter.format(null));
+    }
+
+    @Override
+    protected void onSetUp() {
+
     }
 }

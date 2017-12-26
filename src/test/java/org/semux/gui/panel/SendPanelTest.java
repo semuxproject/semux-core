@@ -6,7 +6,6 @@
  */
 package org.semux.gui.panel;
 
-import static org.assertj.swing.core.matcher.JButtonMatcher.withText;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,14 +16,15 @@ import static org.mockito.Mockito.when;
 import org.apache.commons.lang3.RandomUtils;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
-import org.junit.After;
-import org.junit.Before;
+import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
+import org.assertj.swing.timing.Timeout;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.KernelMock;
 import org.semux.core.PendingManager;
@@ -39,7 +39,7 @@ import org.semux.message.GUIMessages;
 import org.semux.rules.KernelRule;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SendPanelTest {
+public class SendPanelTest extends AssertJSwingJUnitTestCase {
 
     @Rule
     public KernelRule kernelRule1 = new KernelRule(51610, 51710);
@@ -61,15 +61,14 @@ public class SendPanelTest {
 
     KernelMock kernelMock;
 
-    @Before
-    public void setUp() {
+    @Override
+    protected void onSetUp() {
         recipient = new EdDSA();
     }
 
-    @After
-    public void tearDown() {
-        window.cleanUp();
-        application.dispose();
+    @Override
+    protected void onTearDown() {
+        Mockito.reset(kernelMock);
     }
 
     @Test
@@ -77,11 +76,13 @@ public class SendPanelTest {
         testSend(100, new PendingManager.ProcessTransactionResult(1));
 
         // 1. a confirmation dialog should be displayed
-        window.dialog().requireVisible().button(withText("Yes")).requireVisible().click();
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ConfirmTransfer")).requireVisible()
+                .yesButton().requireVisible().click();
 
         // 2. filled transaction should be sent to PendingManager once "Yes" button is
         // clicked
-        assertEquals(GUIMessages.get("SuccessDialogTitle"), window.dialog().target().getTitle());
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("SuccessDialogTitle")).requireVisible()
+                .okButton().requireVisible().click();
         verify(pendingManager).addTransactionSync(transactionArgumentCaptor.capture());
 
         // verify transaction
@@ -95,8 +96,7 @@ public class SendPanelTest {
     @Test
     public void testSendFailure() {
         testSend(10000, new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
-        window.dialog().requireVisible();
-        assertEquals(GUIMessages.get("ErrorDialogTitle"), window.dialog().target().getTitle());
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ErrorDialogTitle"));
     }
 
     private void testSend(int toSendSEM, PendingManager.ProcessTransactionResult mockResult) {
@@ -109,13 +109,14 @@ public class SendPanelTest {
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
 
         // create window
-        window = new FrameFixture(application);
-        window.show();
+        window = new FrameFixture(robot(), application);
+        window.show().requireVisible().moveToFront();
 
         // fill form
-        window.requireVisible();
-        window.textBox("toText").requireEditable().setText(Hex.encode0x(recipient.toAddress()));
-        window.textBox("amountText").requireEditable().setText(String.valueOf(toSendSEM));
+        window.textBox("toText").requireVisible().requireEditable().setText(Hex.encode0x(recipient.toAddress()))
+                .requireText(Hex.encode0x(recipient.toAddress()));
+        window.textBox("amountText").requireVisible().requireEditable().setText(String.valueOf(toSendSEM))
+                .requireText(String.valueOf(toSendSEM));
         window.button("sendButton").requireVisible().click();
     }
 }

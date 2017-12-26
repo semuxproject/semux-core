@@ -6,14 +6,19 @@
  */
 package org.semux.gui.panel;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
 import java.util.Arrays;
 
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
-import org.junit.After;
+import org.assertj.swing.fixture.JTableFixture;
+import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
+import org.assertj.swing.timing.Timeout;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +34,7 @@ import org.semux.message.GUIMessages;
 import org.semux.rules.KernelRule;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ReceivePanelTest {
+public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
 
     @Rule
     public KernelRule kernelRule1 = new KernelRule(51610, 51710);
@@ -41,10 +46,9 @@ public class ReceivePanelTest {
 
     FrameFixture window;
 
-    @After
-    public void tearDown() {
-        window.cleanUp();
-        application.dispose();
+    @Override
+    protected void onSetUp() {
+
     }
 
     @Test
@@ -61,12 +65,16 @@ public class ReceivePanelTest {
         KernelMock kernelMock = spy(kernelRule1.getKernel());
         application = GuiActionRunner.execute(() -> new ReceivePanelTestApplication(walletModel, kernelMock));
 
-        window = new FrameFixture(application);
-        window.show().requireVisible();
+        window = new FrameFixture(robot(), application);
+        window.show().requireVisible().moveToFront();
 
-        window.table().selectRows(1);
+        JTableFixture table = window.table("accountsTable").requireVisible().requireRowCount(2);
+        table.cell(Hex.PREF + key2.toAddressString()).click();
+        table.requireSelectedRows(1);
         window.button("btnCopyAddress").requireVisible().click();
-        window.dialog().requireVisible().optionPane()
+        assertEquals(Hex.PREF + key2.toAddressString(), GuiActionRunner
+                .execute(() -> Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor)));
+        window.optionPane(Timeout.timeout(1000)).requireVisible()
                 .requireMessage(GUIMessages.get("AddressCopied", Hex.PREF + key2.toAddressString()));
     }
 }
