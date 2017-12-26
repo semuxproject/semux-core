@@ -55,6 +55,7 @@ public class KernelRule extends TemporaryFolder {
         for (int i = 0; i < 10; i++) {
             wallet.addAccount(new EdDSA());
         }
+        wallet.flush();
         EdDSA coinbase = wallet.getAccount(0);
         this.kernel = new KernelMock(config, wallet, coinbase);
     }

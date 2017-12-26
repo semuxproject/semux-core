@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -65,10 +66,8 @@ public class SemuxGUI extends Launcher {
 
     private static final int TRANSACTION_LIMIT = 1024; // per account
 
-    private Wallet wallet;
-    private WalletModel model;
-
-    private Kernel kernel;
+    protected WalletModel model;
+    protected Kernel kernel;
 
     public static void main(String[] args) {
         try {
@@ -148,20 +147,19 @@ public class SemuxGUI extends Launcher {
         }
 
         // create a wallet instance.
-        wallet = new Wallet(new File(getDataDir(), "wallet.data"));
-        model = new WalletModel(new AddressBook(new File(getDataDir(), "addressbook.json")));
+        Wallet wallet = new Wallet(new File(getDataDir(), "wallet.data"));
 
         if (!wallet.exists()) {
-            showWelcome();
+            showWelcome(wallet);
         } else {
-            showUnlock();
+            showUnlock(wallet);
         }
     }
 
     /**
      * Shows the welcome frame.
      */
-    public void showWelcome() {
+    public void showWelcome(Wallet wallet) {
         // start welcome frame
         WelcomeFrame frame = new WelcomeFrame(wallet);
         frame.setVisible(true);
@@ -170,14 +168,14 @@ public class SemuxGUI extends Launcher {
         frame.join();
         frame.dispose();
 
-        setupCoinbase();
+        setupCoinbase(wallet);
     }
 
     /**
      * Shows the unlock frame, which reads user-entered password and tries to unlock
      * the wallet.
      */
-    public void showUnlock() {
+    public void showUnlock(Wallet wallet) {
         for (int i = 0;; i++) {
             InputDialog dialog = new InputDialog(null, i == 0 ? GUIMessages.get("EnterPassword") + ":"
                     : GUIMessages.get("WrongPasswordPleaseTryAgain") + ":", true);
@@ -190,10 +188,14 @@ public class SemuxGUI extends Launcher {
             }
         }
 
-        setupCoinbase();
+        setupCoinbase(wallet);
     }
 
-    public void setupCoinbase() {
+    /**
+     * Select an account as coinbase if the wallet is not empty; or create a new
+     * account and use it as coinbase.
+     */
+    public void setupCoinbase(Wallet wallet) {
         if (wallet.size() > 1) {
             String message = GUIMessages.get("AccountSelection");
             List<Object> options = new ArrayList<>();
@@ -203,8 +205,7 @@ public class SemuxGUI extends Launcher {
             }
 
             // show select dialog
-            SelectDialog dialog = new SelectDialog(null, message, options);
-            int index = dialog.getSelectedIndex();
+            int index = showSelectDialog(null, message, options);
 
             if (index == -1) {
                 SystemUtil.exitAsync(0);
@@ -222,14 +223,15 @@ public class SemuxGUI extends Launcher {
             model.setCoinbase(0);
         }
 
-        startKernelAndMain();
+        startKernelAndMain(wallet);
     }
 
     /**
      * Starts the kernel and shows main frame.
      */
-    public void startKernelAndMain() {
+    public void startKernelAndMain(Wallet wallet) {
         // start kernel
+        model = new WalletModel(new AddressBook(new File(getDataDir(), "addressbook.json")));
         kernel = new Kernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
         kernel.start();
 
@@ -250,38 +252,27 @@ public class SemuxGUI extends Launcher {
     }
 
     /**
-     * Checks the client version.
+     * Starts the version check loop.
      */
     protected void checkVersion() {
         while (true) {
             try {
                 Thread.sleep(5L * 60L * 1000L);
 
-                URL url = new URL("http://api.semux.org");
-                URLConnection con = url.openConnection();
-                con.addRequestProperty("User-Agent", Constants.DEFAULT_USER_AGENT);
-                con.setConnectTimeout(Constants.DEFAULT_CONNECT_TIMEOUT);
-                con.setReadTimeout(Constants.DEFAULT_READ_TIMEOUT);
-
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode node = mapper.readTree(con.getInputStream());
-                String v = node.get("minVersion").asText();
-
-                if (SystemUtil.compareVersion(Constants.CLIENT_VERSION, v) < 0) {
+                String v = getMinVersion();
+                if (v != null && SystemUtil.compareVersion(Constants.CLIENT_VERSION, v) < 0) {
                     JOptionPane.showMessageDialog(null, GUIMessages.get("WalletNeedToBeUpgraded"));
                     SystemUtil.exitAsync(-1);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
-            } catch (IOException e) {
-                logger.info("Failed to retrieve latest version");
             }
         }
     }
 
     /**
-     * Updates the model.
+     * Starts the model update loop.
      */
     protected void updateModel() {
         while (true) {
@@ -322,9 +313,9 @@ public class SemuxGUI extends Launcher {
         model.setDelegate(ds.getDelegateByAddress(kernel.getCoinbase().toAddress()) != null);
 
         // refresh accounts
-        if (wallet.isUnlocked()) {
+        if (kernel.getWallet().isUnlocked()) {
             List<WalletAccount> accounts = new ArrayList<>();
-            for (EdDSA key : wallet.getAccounts()) {
+            for (EdDSA key : kernel.getWallet().getAccounts()) {
                 Account a = as.getAccount(key.toAddress());
                 WalletAccount wa = new WalletAccount(key, a);
                 accounts.add(wa);
@@ -373,5 +364,32 @@ public class SemuxGUI extends Launcher {
                 | UnsupportedLookAndFeelException e) {
             // do nothing
         }
+    }
+
+    /**
+     * Returns the min version of semux wallet.
+     *
+     * @return
+     */
+    protected String getMinVersion() {
+        try {
+            URL url = new URL("http://api.semux.org");
+            URLConnection con = url.openConnection();
+            con.addRequestProperty("User-Agent", Constants.DEFAULT_USER_AGENT);
+            con.setConnectTimeout(Constants.DEFAULT_CONNECT_TIMEOUT);
+            con.setReadTimeout(Constants.DEFAULT_READ_TIMEOUT);
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(con.getInputStream());
+            return node.get("minVersion").asText();
+        } catch (IOException e) {
+            logger.info("Failed to fetch minVersion", e);
+        }
+        return null;
+    }
+
+    protected int showSelectDialog(JFrame parent, String message, List<Object> options) {
+        SelectDialog dialog = new SelectDialog(parent, message, options);
+        return dialog.getSelectedIndex();
     }
 }
