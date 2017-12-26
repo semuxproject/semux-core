@@ -79,6 +79,8 @@ public class PeerClient {
      * @param coinbase
      */
     public PeerClient(String ip, int port, EdDSA coinbase) {
+        logger.info("Use IP address: {}", ip);
+
         this.ip = ip;
         this.port = port;
         this.coinbase = coinbase;
