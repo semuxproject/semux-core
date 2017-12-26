@@ -212,7 +212,6 @@ public class SemuxGUI extends Launcher {
             } else {
                 // use the selected account as coinbase.
                 setCoinbase(index);
-                model.setCoinbase(index);
             }
         } else if (wallet.size() == 0) {
             wallet.addAccount(new EdDSA());
@@ -220,7 +219,6 @@ public class SemuxGUI extends Launcher {
 
             // use the first account as coinbase.
             setCoinbase(0);
-            model.setCoinbase(0);
         }
 
         startKernelAndMain(wallet);
@@ -230,8 +228,11 @@ public class SemuxGUI extends Launcher {
      * Starts the kernel and shows main frame.
      */
     public void startKernelAndMain(Wallet wallet) {
-        // start kernel
+        // set up model
         model = new WalletModel(new AddressBook(new File(getDataDir(), "addressbook.json")));
+        model.setCoinbase(getCoinbase());
+
+        // set up kernel
         kernel = new Kernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
         kernel.start();
 

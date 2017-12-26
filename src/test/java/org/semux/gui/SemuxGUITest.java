@@ -73,7 +73,6 @@ public class SemuxGUITest {
 
         // verify
         assertThat(gui.getCoinbase()).isEqualTo(3);
-        assertThat(gui.getModel().getCoinbase()).isEqualTo(3);
     }
 
     @Test
