@@ -10,20 +10,16 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import java.awt.Point;
 import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.Arrays;
 
-import org.apache.commons.io.IOUtils;
-import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.annotation.RunsInEDT;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
+import org.assertj.swing.fixture.JTableFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Rule;
 import org.junit.Test;
@@ -58,7 +54,7 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
 
     @Test
     @RunsInEDT
-    public void testCopyAddress() throws IOException, UnsupportedFlavorException {
+    public void testCopyAddress() throws IOException, UnsupportedFlavorException, InterruptedException {
         EdDSA key1 = new EdDSA();
         EdDSA key2 = new EdDSA();
         WalletAccount acc1 = new WalletAccount(key1, new Account(key1.toAddress(), 1, 1, 1));
@@ -72,14 +68,15 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
         application = GuiActionRunner.execute(() -> new ReceivePanelTestApplication(walletModel, kernelMock));
 
         window = new FrameFixture(robot(), application);
-        window.show().requireVisible().moveTo(new Point(0, 0)).moveToFront();
+        window.show().requireVisible().moveToFront();
 
-        window.table().cell(Hex.PREF + key2.toAddressString()).requireNotEditable().click();
-        window.table().requireSelectedRows(1);
+        JTableFixture table = window.table("accountsTable").requireVisible().requireRowCount(2);
+        table.cell(Hex.PREF + key2.toAddressString()).click();
+        table.requireSelectedRows(1);
         window.button("btnCopyAddress").requireVisible().click();
-        assertEquals(Hex.PREF + key2.toAddressString(),
-                Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor));
-        window.dialog().requireVisible().optionPane()
+        assertEquals(Hex.PREF + key2.toAddressString(), GuiActionRunner
+                .execute(() -> Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor)));
+        window.optionPane().requireVisible()
                 .requireMessage(GUIMessages.get("AddressCopied", Hex.PREF + key2.toAddressString()));
     }
 }

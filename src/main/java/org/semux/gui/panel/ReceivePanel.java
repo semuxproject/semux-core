@@ -73,6 +73,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
         tableModel = new ReceiveTableModel();
         table = new JTable(tableModel);
+        table.setName("accountsTable");
         table.setBackground(Color.WHITE);
         table.setFillsViewportHeight(true);
         table.setGridColor(Color.LIGHT_GRAY);

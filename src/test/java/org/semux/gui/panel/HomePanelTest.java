@@ -11,9 +11,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import java.awt.Point;
-
-import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.annotation.RunsInEDT;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
@@ -55,7 +52,7 @@ public class HomePanelTest extends AssertJSwingJUnitTestCase {
                 .execute(() -> new HomePanelTestApplication(walletModel, kernelMock));
 
         FrameFixture window = new FrameFixture(robot(), application);
-        window.show().requireVisible().moveTo(new Point(0, 0)).moveToFront();
+        window.show().requireVisible().moveToFront();
 
         window.requireVisible();
         window.label("syncProgress").requireText(HomePanel.SyncProgressFormatter.format(progress));

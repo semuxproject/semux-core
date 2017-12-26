@@ -6,20 +6,16 @@
  */
 package org.semux.gui.panel;
 
-import static org.assertj.swing.core.matcher.JButtonMatcher.withText;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.annotation.RunsInEDT;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
@@ -135,7 +131,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
         window = new FrameFixture(robot(), application);
-        window.show().requireVisible().moveTo(new Point(0, 0)).moveToFront();
+        window.show().requireVisible().moveToFront();
 
         // the initial label of selected delegate should be PleaseSelectDelegate
         window.label("SelectedDelegateLabel").requireText(GUIMessages.get("PleaseSelectDelegate"));
@@ -157,18 +153,14 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     @RunsInEDT
     public void testVoteSuccess() {
         testVote(new PendingManager.ProcessTransactionResult(1));
-
-        window.dialog().requireVisible();
-        assertEquals(GUIMessages.get("SuccessDialogTitle"), window.dialog().target().getTitle());
+        window.optionPane().requireTitle(GUIMessages.get("SuccessDialogTitle")).requireVisible();
     }
 
     @Test
     @RunsInEDT
     public void testVoteFailure() {
         testVote(new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
-
-        window.dialog().requireVisible();
-        assertEquals(GUIMessages.get("ErrorDialogTitle"), window.dialog().target().getTitle());
+        window.optionPane().requireTitle(GUIMessages.get("ErrorDialogTitle")).requireVisible();
     }
 
     private void testVote(PendingManager.ProcessTransactionResult mockResult) {
@@ -179,7 +171,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
         window = new FrameFixture(robot(), application);
-        window.show().requireVisible().moveTo(new Point(0, 0)).moveToFront();
+        window.show().requireVisible().moveToFront();
 
         // the initial label of selected delegate should be PleaseSelectDelegate
         window.label("SelectedDelegateLabel").requireText(GUIMessages.get("PleaseSelectDelegate"));
@@ -198,9 +190,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     @RunsInEDT
     public void testDelegateSuccess() {
         testDelegate(new PendingManager.ProcessTransactionResult(1));
-
-        window.dialog().requireVisible();
-        assertEquals(GUIMessages.get("SuccessDialogTitle"), window.dialog().target().getTitle());
+        window.optionPane().requireTitle(GUIMessages.get("SuccessDialogTitle")).requireVisible();
 
         // verify added transaction
         verify(pendingManager).addTransactionSync(transactionArgumentCaptor.capture());
@@ -215,9 +205,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     @RunsInEDT
     public void testDelegateFailure() {
         testDelegate(new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
-
-        window.dialog().requireVisible();
-        assertEquals(GUIMessages.get("ErrorDialogTitle"), window.dialog().target().getTitle());
+        window.optionPane().requireTitle(GUIMessages.get("ErrorDialogTitle")).requireVisible();
     }
 
     private void testDelegate(PendingManager.ProcessTransactionResult mockResult) {
@@ -228,7 +216,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         application = GuiActionRunner
                 .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
         window = new FrameFixture(robot(), application);
-        window.show().requireVisible().moveTo(new Point(0, 0)).moveToFront();
+        window.show().requireVisible().moveToFront();
 
         // fills delegate name
         window.textBox("textName").requireEditable().setText("test_delegate");
@@ -237,6 +225,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         window.button("btnDelegate").requireVisible().click();
 
         // confirm
-        window.dialog().requireVisible().button(withText("Yes")).requireVisible().click();
+        window.optionPane().requireTitle(GUIMessages.get("ConfirmDelegateRegistration")).requireVisible()
+                .yesButton().requireVisible().click();
     }
 }

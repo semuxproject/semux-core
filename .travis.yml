@@ -8,7 +8,7 @@ matrix:
       script:
         - mvn license:check
         - mvn formatter:validate
-        - mvn cobertura:cobertura
+        - mvn -Djava.awt.headless=false cobertura:cobertura
       after_success:
         - mvn coveralls:report
 
@@ -16,12 +16,8 @@ matrix:
     - os: linux
       sudo: false
       jdk: oraclejdk8
-      addons:
-        apt:
-          packages:
-            - oracle-java8-installer
       script:
-        - mvn test
+        - mvn -Djava.awt.headless=false test
 
     # macOS tests
     - os: osx
