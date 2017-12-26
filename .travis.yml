@@ -23,7 +23,7 @@ matrix:
     - os: osx
       osx_image: xcode9.2
       script:
-        - mvn test
+        - mvn -Djava.awt.headless=false test
 
     # Docker tests
     - language: none
@@ -36,12 +36,6 @@ matrix:
         - docker run -d -p 5161:5161 semux:latest --password=""
         - timeout 10 .travis/docker_test_build.sh
         - docker kill $(docker ps -q)
-
-    # OSX Testing
-    - os: osx
-      osx_image: xcode9.2
-      script:
-        - mvn -Djava.awt.headless=false test
 cache:
   directories:
     - .autoconf
