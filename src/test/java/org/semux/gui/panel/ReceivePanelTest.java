@@ -46,7 +46,8 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
 
     FrameFixture window;
 
-    @Override protected void onSetUp() {
+    @Override
+    protected void onSetUp() {
 
     }
 

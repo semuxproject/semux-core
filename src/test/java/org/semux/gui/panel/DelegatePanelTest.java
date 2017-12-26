@@ -89,8 +89,6 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
 
     KernelMock kernelMock;
 
-    DelegatePanelTestApplication application;
-
     @Override
     public void onSetUp() {
         // mock delegates
