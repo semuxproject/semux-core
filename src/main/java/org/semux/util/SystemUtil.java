@@ -24,6 +24,12 @@ import io.netty.resolver.dns.SequentialDnsServerAddressStreamProvider;
 import oshi.SystemInfo;
 
 public class SystemUtil {
+
+    // Fix JNA issue: There is an incompatible JNA native library installed
+    static {
+        System.setProperty("jna.nosys", "true");
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(SystemUtil.class);
 
     public static final Scanner SCANNER = new Scanner(System.in);

@@ -51,6 +51,8 @@ import oshi.software.os.OperatingSystem;
  * Kernel holds references to each individual components.
  */
 public class Kernel {
+
+    // Fix JNA issue: There is an incompatible JNA native library installed
     static {
         System.setProperty("jna.nosys", "true");
     }
