@@ -4,13 +4,13 @@
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%-5level [%d{MM-dd HH:mm:ss}] %-16logger{0} %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%-5level] %-15logger{0} %msg%n</pattern>
         </encoder>
     </appender>
     
     <appender name="TEST" class="org.semux.LoggingAppender">
         <encoder>
-            <pattern>%-5level [%d{MM-dd HH:mm:ss}] %-16logger{0} %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%-5level] %-15logger{0} %msg%n</pattern>
         </encoder>
     </appender>
 

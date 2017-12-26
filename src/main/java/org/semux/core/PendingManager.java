@@ -57,6 +57,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     };
 
     public static final long ALLOWED_TIME_DRIFT = TimeUnit.HOURS.toMillis(2);
+
     private static final int QUEUE_MAX_SIZE = 64 * 1024;
     private static final int POOL_MAX_SIZE = 8 * 1024;
     private static final int DELAYED_MAX_SIZE = 16 * 1024;
@@ -295,7 +296,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                 return;
             }
 
-            processed.put(key, null);
+            processed.put(key, tx);
         }
     }
 
