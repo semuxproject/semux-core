@@ -11,12 +11,14 @@ import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
+import org.semux.crypto.Hash;
 import org.semux.util.BasicAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,9 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
     private Config config;
     private ApiHandler apiHandler;
 
+    private byte[] authUserHash;
+    private byte[] authPassHash;
+
     private boolean keepAlive;
     private String uri;
     private Map<String, List<String>> params;
@@ -66,6 +71,9 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
     public HttpHandler(Config config, ApiHandler apiHandler) {
         this.config = config;
+        authUserHash = Hash.h256(config.apiUsername().getBytes());
+        authPassHash = Hash.h256(config.apiPassword().getBytes());
+
         this.apiHandler = apiHandler;
     }
 
@@ -113,7 +121,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 // trailing headers are ignored
 
                 // basic authentication
-                if (!checkBasicAuth(headers, config.apiUsername(), config.apiPassword())) {
+                if (!checkBasicAuth(headers)) {
                     FullHttpResponse resp = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
 
                     resp.headers().set(HttpHeaderNames.WWW_AUTHENTICATE, "Basic realm=\"Semux RESTful API\"");
@@ -185,10 +193,12 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
         status = null;
     }
 
-    private boolean checkBasicAuth(HttpHeaders headers, String username, String password) {
+    private boolean checkBasicAuth(HttpHeaders headers) {
         Pair<String, String> auth = BasicAuth.parseAuth(headers.get(HttpHeaderNames.AUTHORIZATION));
 
-        return auth != null && username.equals(auth.getKey()) && password.equals(auth.getValue());
+        return auth != null && //
+            Arrays.equals(Hash.h256(auth.getKey().getBytes()), authUserHash) && //
+            Arrays.equals(Hash.h256(auth.getValue().getBytes()), authPassHash);
     }
 
     private boolean writeResponse(ChannelHandlerContext ctx, HttpResponseStatus status, String responseBody) {
