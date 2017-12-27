@@ -264,7 +264,7 @@ public class SwingUtil {
         NumberFormat format = NumberFormat.getInstance();
         ParsePosition position = new ParsePosition(0);
         Number number = format.parse(str, position);
-        if (position.getIndex() != str.length()) {
+        if (position.getIndex() != str.length() || number == null) {
             throw new ParseException("Failed to parse number: " + str, position.getIndex());
         }
         return number;

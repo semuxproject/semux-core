@@ -12,9 +12,14 @@ import java.text.ParseException;
 import java.util.Locale;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class SwingUtilTest {
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -31,6 +36,18 @@ public class SwingUtilTest {
     @Test
     public void testParseNumber() throws ParseException {
         assertEquals(12345678.12, SwingUtil.parseNumber("12,345,678.12").doubleValue(), 10e-9);
+    }
+
+    @Test
+    public void testParseNumberEmpty() throws ParseException {
+        expectedException.expect(ParseException.class);
+        SwingUtil.parseNumber("");
+    }
+
+    @Test
+    public void testParseTimestampEmpty() throws ParseException {
+        expectedException.expect(ParseException.class);
+        SwingUtil.parseTimestamp("");
     }
 
     @Test
