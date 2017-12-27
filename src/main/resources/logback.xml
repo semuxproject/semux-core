@@ -2,7 +2,7 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%-5level] %-15logger{0} %msg%n</pattern>
+            <pattern>%date{HH:mm:ss.SSS} %-8([%level]) %-16logger{0} %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -11,7 +11,7 @@
         <append>true</append>
         <immediateFlush>true</immediateFlush>
         <encoder>
-            <pattern>%d{yy-MM-dd HH:mm:ss} [%-5level] %-15logger{0} %msg%n</pattern>
+            <pattern>%date{yy-MM-dd HH:mm:ss} %-8([%level]) %-16logger{0} %msg%n</pattern>
         </encoder>
     </appender>
 

@@ -256,7 +256,7 @@ public class SemuxGUI extends Launcher {
      * Starts the version check loop.
      */
     protected void checkVersion() {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
                 Thread.sleep(5L * 60L * 1000L);
 
@@ -276,7 +276,7 @@ public class SemuxGUI extends Launcher {
      * Starts the model update loop.
      */
     protected void updateModel() {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
                 Thread.sleep(3000L);
             } catch (InterruptedException e) {

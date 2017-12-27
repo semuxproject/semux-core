@@ -1,4 +1,4 @@
-FROM openjdk:8u151-jre-alpine
+FROM openjdk:8-jre-alpine
 
 ARG SEMUXVER="1.0.0-rc.4"
 
