@@ -25,8 +25,8 @@ import org.semux.util.MerkleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CorePerformance {
-    private static final Logger logger = LoggerFactory.getLogger(CorePerformance.class);
+public class BlockchainPerformance {
+    private static final Logger logger = LoggerFactory.getLogger(BlockchainPerformance.class);
 
     private static Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
     private static EdDSA key = new EdDSA();
@@ -45,7 +45,7 @@ public class CorePerformance {
             long fee = config.minTransactionFee();
             long nonce = 1 + i;
             long timestamp = System.currentTimeMillis();
-            byte[] data = Bytes.random(128);
+            byte[] data = Bytes.EMPTY_BYTES;
             Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(key);
 
             if (total + tx.size() > config.maxBlockTransactionsSize()) {
