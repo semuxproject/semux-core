@@ -11,16 +11,23 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.rules.TemporaryFolder;
 import org.semux.KernelMock;
 import org.semux.config.Config;
 import org.semux.config.DevNetConfig;
+import org.semux.core.Block;
+import org.semux.core.BlockHeader;
+import org.semux.core.Transaction;
+import org.semux.core.TransactionResult;
 import org.semux.core.Wallet;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
+import org.semux.util.MerkleUtil;
 
 /**
  * A kernel rule creates a temporary folder as the data directory. Ten accounts
@@ -111,5 +118,38 @@ public class KernelRule extends TemporaryFolder {
         when(config.bftPreCommitTimeout()).thenReturn(1000L);
         when(config.bftCommitTimeout()).thenReturn(1000L);
         when(config.bftFinalizeTimeout()).thenReturn(1000L);
+    }
+
+    /**
+     * Helper method to create a testing block.
+     *
+     * @param txs
+     *            list of transaction
+     * @return created block
+     */
+    public Block createBlock(List<Transaction> txs) {
+        List<TransactionResult> res = txs.stream().map(tx -> new TransactionResult(true)).collect(Collectors.toList());
+
+        long number = getKernel().getBlockchain().getLatestBlock().getNumber() + 1;
+        EdDSA key = new EdDSA();
+        byte[] coinbase = key.toAddress();
+        byte[] prevHash = getKernel().getBlockchain().getLatestBlock().getHash();
+        long timestamp = System.currentTimeMillis();
+        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(txs);
+        byte[] resultsRoot = MerkleUtil.computeResultsRoot(res);
+        byte[] stateRoot = Bytes.EMPTY_HASH;
+        byte[] data = {};
+
+        BlockHeader header = new BlockHeader(
+                number,
+                coinbase,
+                prevHash,
+                timestamp,
+                transactionsRoot,
+                resultsRoot,
+                stateRoot,
+                data);
+
+        return new Block(header, txs, res);
     }
 }

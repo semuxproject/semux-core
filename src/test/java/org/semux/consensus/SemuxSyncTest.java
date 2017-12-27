@@ -6,37 +6,25 @@
  */
 package org.semux.consensus;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.semux.config.Constants;
-import org.semux.config.MainNetConfig;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
+import org.semux.core.state.AccountState;
+import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.rules.KernelRule;
 import org.semux.rules.TemporaryDBRule;
 import org.semux.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class SemuxBFTTest {
-
-    private static final Logger logger = LoggerFactory.getLogger(SemuxBFTTest.class);
+public class SemuxSyncTest {
 
     @Rule
     public KernelRule kernelRule = new KernelRule(51610, 51710);
@@ -44,37 +32,6 @@ public class SemuxBFTTest {
     @Rule
     public TemporaryDBRule temporaryDBRule = new TemporaryDBRule();
 
-    @Test
-    public void testIsPrimary() {
-        List<String> validators = Arrays.asList("a", "b", "c", "d");
-        int blocks = 1000;
-        int repeat = 0;
-        int last = -1;
-
-        SemuxBFT bft = mock(SemuxBFT.class);
-        bft.config = new MainNetConfig(Constants.DEFAULT_DATA_DIR);
-        bft.validators = validators;
-        when(bft.isPrimary(anyLong(), anyInt(), anyString())).thenCallRealMethod();
-
-        Random r = new Random(System.nanoTime());
-        for (int i = 0; i < blocks; i++) {
-            int view = r.nextInt(2);
-            for (int j = 0; j < validators.size(); j++) {
-                if (bft.isPrimary(i, view, validators.get(j))) {
-                    if (j == last) {
-                        repeat++;
-                    }
-                    last = j;
-                }
-            }
-        }
-        logger.info("Consecutive validator probability: {}/{}", repeat, blocks);
-        assertEquals(1.0 / validators.size(), (double) repeat / blocks, 0.05);
-    }
-
-    /**
-     * https://github.com/bitcoin/bips/blob/master/bip-0030.mediawiki
-     */
     @Test
     public void testDuplicatedTransaction() {
         // mock blockchain with a single transaction
@@ -92,12 +49,15 @@ public class SemuxBFTTest {
         kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from.toAddress(), 1000 * Unit.SEM);
         Block block1 = kernelRule.createBlock(Arrays.asList(tx));
         kernelRule.getKernel().getBlockchain().addBlock(block1);
-        SemuxBFT semuxBFT = new SemuxBFT(kernelRule.getKernel());
+        SemuxSync semuxSync = new SemuxSync(kernelRule.getKernel());
 
         // create a duplicated tx in the second block
         Block block2 = kernelRule.createBlock(Arrays.asList(tx));
 
         // the block should be rejected because of the duplicated tx
-        assertFalse(semuxBFT.validateBlock(block2.getHeader(), block2.getTransactions()));
+        AccountState as = kernelRule.getKernel().getBlockchain().getAccountState().track();
+        DelegateState ds = kernelRule.getKernel().getBlockchain().getDelegateState().track();
+        assertFalse(semuxSync.validateBlock(block2, as, ds));
     }
+
 }
