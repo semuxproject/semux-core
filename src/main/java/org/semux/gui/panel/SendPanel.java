@@ -30,6 +30,7 @@ import org.semux.config.Config;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
+import org.semux.crypto.CryptoException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
@@ -339,9 +340,8 @@ public class SendPanel extends JPanel implements ActionListener {
                     sendTransaction(pendingMgr, tx);
                 }
             }
-        } catch (ParseException ex) {
-            logger.error("Exception: " + ex.getMessage(), ex);
-            showErrorDialog("Exception: " + ex.getMessage());
+        } catch (ParseException | CryptoException ex) {
+            showErrorDialog(GUIMessages.get("EnterValidValue"));
         }
     }
 
