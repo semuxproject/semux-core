@@ -27,6 +27,11 @@
         </license>
     </licenses>
 
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/semuxproject/semux/issues</url>
+    </issueManagement>
+
     <build>
         <plugins>
             <!-- compile -->
@@ -62,6 +67,11 @@
                             <exclude>org.powermock:*</exclude>
                             <exclude>com.github.stefanbirkner:system-rules</exclude>
                             <exclude>org.assertj:*</exclude>
+                            <exclude>org.awaitility:*</exclude>
+                            <exclude>org.easytesting:*</exclude>
+                            <exclude>net.bytebuddy:*</exclude>
+                            <exclude>org.hamcrest:*</exclude>
+                            <exclude>org.mockito:*</exclude>
                         </excludes>
                     </artifactSet>
                     <transformers>
@@ -267,6 +277,110 @@
                     <rerunFailingTestsCount>2</rerunFailingTestsCount>
                 </configuration>
             </plugin>
+
+            <!-- Verify the dependency chain: see https://github.com/gary-rowe/BitcoinjEnforcerRules for more information on this. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M1</version>
+                <executions>
+                    <execution>
+                        <id>enforce</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <DependencyConvergence/>
+                                <digestRule implementation="uk.co.froot.maven.enforcer.DigestRule">
+                                    <!-- Create a snapshot to build the list of URNs below -->
+                                    <buildSnapshot>true</buildSnapshot>
+
+                                    <!-- List of required hashes -->
+                                    <!-- Format is URN of groupId:artifactId:version:type:classifier:scope:hash -->
+                                    <!-- classifier is "null" if not present -->
+                                    <urns>
+                                        <urn>ch.qos.logback:logback-classic:1.2.3:jar:null:compile:7c4f3c474fb2c041d8028740440937705ebb473a</urn>
+                                        <urn>ch.qos.logback:logback-core:1.2.3:jar:null:compile:864344400c3d4d92dfeb0a305dc87d953677c03c</urn>
+                                        <urn>com.akathist.maven.plugins.launch4j:launch4j-maven-plugin:1.7.21:maven-plugin:null:runtime:58402e775916bc8824e257c8d87ad6c8064663a5</urn>
+                                        <urn>com.fasterxml.jackson.core:jackson-annotations:2.9.0:jar:null:compile:07c10d545325e3a6e72e06381afe469fd40eb701</urn>
+                                        <urn>com.fasterxml.jackson.core:jackson-core:2.9.2:jar:null:compile:aed20e50152a2f19adc1995c8d8f307c7efa414d</urn>
+                                        <urn>com.fasterxml.jackson.core:jackson-databind:2.9.2:jar:null:compile:1d8d8cb7cf26920ba57fb61fa56da88cc123b21f</urn>
+                                        <urn>com.github.ben-manes.caffeine:caffeine:2.6.0:jar:null:compile:6d06cbc2eb7238ee49cc7f557a0acfaad00ec431</urn>
+                                        <urn>com.github.oshi:oshi-core:3.4.4:jar:null:compile:f1aa8e053d26f49b909a845745018c57fe9d7a74</urn>
+                                        <urn>com.github.stefanbirkner:system-rules:1.16.0:jar:null:test:1bec4d14816e23a1715d5c55db36919b5a529a4f</urn>
+                                        <urn>com.github.zafarkhaja:java-semver:0.9.0:jar:null:compile:59a83ca73c72a5e25b3f0b1bb305230a11000329</urn>
+                                        <urn>com.google.zxing:core:3.3.0:jar:null:compile:73c49077166faa4c3c0059c5f583d1d7bd1475fe</urn>
+                                        <urn>com.mycila:license-maven-plugin:3.0:maven-plugin:null:runtime:6e6175f847574fd15c644a69b540e279ea5d173f</urn>
+                                        <urn>commons-beanutils:commons-beanutils:1.9.2:jar:null:compile:7a87d845ad3a155297e8f67d9008f4c1e5656b71</urn>
+                                        <urn>commons-cli:commons-cli:1.4:jar:null:compile:c51c00206bb913cd8612b24abd9fa98ae89719b1</urn>
+                                        <urn>commons-digester:commons-digester:1.8.1:jar:null:compile:3dec9b9c7ea9342d4dbe8c38560080d85b44a015</urn>
+                                        <urn>commons-io:commons-io:2.6:jar:null:test:815893df5f31da2ece4040fe0a12fd44b577afaf</urn>
+                                        <urn>commons-logging:commons-logging:1.2:jar:null:compile:4bfc12adfe4842bf07b657f0369c4cb522955686</urn>
+                                        <urn>commons-validator:commons-validator:1.6:jar:null:compile:e989d1e87cdd60575df0765ed5bac65c905d7908</urn>
+                                        <urn>dnsjava:dnsjava:2.1.8:jar:null:compile:eed8a2cbf56cc60d07a189a429ead3067564193c</urn>
+                                        <urn>io.netty:netty-all:4.1.13.Final:jar:null:compile:e1f2d1ee50626697d3ea73a11f1c7301e8589ef8</urn>
+                                        <urn>junit:junit:4.11:jar:null:test:4e031bb61df09069aeb2bffb4019e7a5034a4ee0</urn>
+                                        <urn>net.bytebuddy:byte-buddy-agent:1.6.14:jar:null:test:ba1e5ba3a84fb2fbf2f4de9138df19665eec4d59</urn>
+                                        <urn>net.bytebuddy:byte-buddy:1.6.14:jar:null:test:871c3e49dc6183d0d361601c2f1d11abb1a6b48c</urn>
+                                        <urn>net.i2p.crypto:eddsa:0.2.0:jar:null:compile:0856a92559c4daf744cb27c93cd8b7eb1f8c4780</urn>
+                                        <urn>net.java.dev.jna:jna-platform:4.5.0:jar:null:compile:00ab163522ed76eb01c8c9a750dedacb134fc8c0</urn>
+                                        <urn>net.java.dev.jna:jna:4.5.0:jar:null:compile:55b548d3195efc5280bf1c3f17b49659c54dee40</urn>
+                                        <urn>net.revelc.code.formatter:formatter-maven-plugin:2.7.0:maven-plugin:null:runtime:001126378253588ea5a042d41714432033ca17a3</urn>
+                                        <urn>org.apache.commons:commons-collections4:4.1:jar:null:compile:a4cf4688fe1c7e3a63aa636cc96d013af537768e</urn>
+                                        <urn>org.apache.commons:commons-lang3:3.6:jar:null:compile:9d28a6b23650e8a7e9063c04588ace6cf7012c17</urn>
+                                        <urn>org.apache.maven.plugins:maven-antrun-plugin:1.8:maven-plugin:null:runtime:0d02c0af622aa6a0c86e81c519299e888e0a32a3</urn>
+                                        <urn>org.apache.maven.plugins:maven-clean-plugin:3.0.0:maven-plugin:null:runtime:6653cb054e6b81705e383fbcced26c92802e40ae</urn>
+                                        <urn>org.apache.maven.plugins:maven-compiler-plugin:3.7.0:maven-plugin:null:runtime:a3229c9aae47047e3a177ecfd4afa10fb5512d4e</urn>
+                                        <urn>org.apache.maven.plugins:maven-deploy-plugin:2.7:maven-plugin:null:runtime:6dadfb75679ca010b41286794f737088ebfe12fd</urn>
+                                        <urn>org.apache.maven.plugins:maven-enforcer-plugin:3.0.0-M1:maven-plugin:null:runtime:02b46cf923a7f5c75ffae61cedff103e0def3560</urn>
+                                        <urn>org.apache.maven.plugins:maven-install-plugin:2.4:maven-plugin:null:runtime:9d1316166fe4c313f56276935e08df11f45267c2</urn>
+                                        <urn>org.apache.maven.plugins:maven-jar-plugin:2.4:maven-plugin:null:runtime:e3200bcf357b5c5e26df072d27df160546bb079a</urn>
+                                        <urn>org.apache.maven.plugins:maven-resources-plugin:2.3:maven-plugin:null:runtime:648f725a387d5b38c86d5837b8c2cf456f8d93c7</urn>
+                                        <urn>org.apache.maven.plugins:maven-shade-plugin:3.1.0:maven-plugin:null:runtime:c08cd5163a49e31f6e28d6f8bb153013a2a2de79</urn>
+                                        <urn>org.apache.maven.plugins:maven-site-plugin:3.3:maven-plugin:null:runtime:77ba1752b1ac4c4339d6f11554800960a56a4ae1</urn>
+                                        <urn>org.apache.maven.plugins:maven-surefire-plugin:2.20.1:maven-plugin:null:runtime:5f3f8f23a8c3525e64b06310b54a2f080690eb59</urn>
+                                        <urn>org.assertj:assertj-core:3.8.0:jar:null:test:b209d90ff2e279bee3e02547ee7b11349c52d0e3</urn>
+                                        <urn>org.assertj:assertj-swing-junit:3.8.0:jar:null:test:51a93135b0edac8f92cd67bceea6efa2e2dfa870</urn>
+                                        <urn>org.assertj:assertj-swing:3.8.0:jar:null:test:43e985f95237bf9c5fbfa21230f30cc5e859a4fb</urn>
+                                        <urn>org.awaitility:awaitility:3.0.0:jar:null:test:7e6b79f2b1e57eaa967b229791f31ca55aea668a</urn>
+                                        <urn>org.bitlet:weupnp:0.1.4:jar:null:compile:b99cd791ede89b7c17426e6c51a0f171dc925def</urn>
+                                        <urn>org.bouncycastle:bcprov-jdk15on:1.57:jar:null:compile:f66a135611d42c992e5745788c3f94eb06464537</urn>
+                                        <urn>org.codehaus.mojo:cobertura-maven-plugin:2.7:maven-plugin:null:runtime:0d49d827220fc4282babb85fb3b9970ffdb99aff</urn>
+                                        <urn>org.easytesting:fest-reflect:1.4.1:jar:null:test:2b92d5275e92a49e16c7ce6bd7e46b9080db0530</urn>
+                                        <urn>org.easytesting:fest-util:1.2.5:jar:null:test:c4a8d7305b23b8d043be12c979813b096df11f44</urn>
+                                        <urn>org.eluder.coveralls:coveralls-maven-plugin:4.3.0:maven-plugin:null:runtime:2f9f6bdef5dd1d863730a134a8f1280337440c46</urn>
+                                        <urn>org.fusesource.leveldbjni:leveldbjni-all:1.8:jar:null:compile:707350a2eeb1fa2ed77a32ddb3893ed308e941db</urn>
+                                        <urn>org.hamcrest:hamcrest-core:1.3:jar:null:test:42a25dc3219429f0e5d060061f71acb49bf010a0</urn>
+                                        <urn>org.hamcrest:hamcrest-library:1.3:jar:null:test:4785a3c21320980282f9f33d0d1264a69040538f</urn>
+                                        <urn>org.javassist:javassist:3.21.0-GA:jar:null:test:598244f595db5c5fb713731eddbb1c91a58d959b</urn>
+                                        <urn>org.mockito:mockito-core:2.8.9:jar:null:test:1afb35b2d77d40567756c379e54c18da3574a96e</urn>
+                                        <urn>org.objenesis:objenesis:2.6:jar:null:test:639033469776fd37c08358c6b92a4761feb2af4b</urn>
+                                        <urn>org.powermock:powermock-api-mockito-common:1.7.3:jar:null:test:54c112a921efad764eef571a1cf5b465d110c7df</urn>
+                                        <urn>org.powermock:powermock-api-mockito2:1.7.3:jar:null:test:0d505af2c1dcf0aa357bf66d5c206d7b6e512e42</urn>
+                                        <urn>org.powermock:powermock-api-support:1.7.3:jar:null:test:8f5b46fa56773007430bd0347af9fe72f8acb4c4</urn>
+                                        <urn>org.powermock:powermock-core:1.7.3:jar:null:test:73cd1fff8c9685be1ff2f369b561546e7549e003</urn>
+                                        <urn>org.powermock:powermock-module-junit4-common:1.7.3:jar:null:test:7287dd56b2b907a15aa2b6a0f1ddb2dd52cf388f</urn>
+                                        <urn>org.powermock:powermock-module-junit4:1.7.3:jar:null:test:f25cd17a4d7acba1a591beaecd99fad844875cc6</urn>
+                                        <urn>org.powermock:powermock-reflect:1.7.3:jar:null:test:f3d3c696a9977094c796dc8ffd174f828f3410e8</urn>
+                                        <urn>org.slf4j:slf4j-api:1.7.25:jar:null:compile:da76ca59f6a57ee3102f8f9bd9cee742973efa8a</urn>
+                                        <urn>org.threeten:threetenbp:1.3.6:jar:null:compile:89dcc04a7e028c3c963413a71f950703cf51f057</urn>
+                                        <urn>org.xerial.snappy:snappy-java:1.1.7.1:jar:null:compile:d5190b41f3de61e3b83d692322d58630252bc8c3</urn>
+                                    </urns>
+                                </digestRule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>uk.co.froot.maven.enforcer</groupId>
+                        <artifactId>digest-enforcer-rules</artifactId>
+                        <version>0.0.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
 
@@ -338,6 +452,21 @@
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
             <version>1.6</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>commons-cli</groupId>
@@ -362,12 +491,6 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.9.2</version>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>2.9.2</version>
-        </dependency>
-
 
         <!-- dnsjava -->
         <dependency>
@@ -415,7 +538,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -441,18 +564,40 @@
             <artifactId>assertj-swing-junit</artifactId>
             <version>3.8.0</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
             <version>1.7.3</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.objenesis</groupId>
+                    <artifactId>objenesis</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito2</artifactId>
             <version>1.7.3</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.objenesis</groupId>
+                    <artifactId>objenesis</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.github.stefanbirkner</groupId>
@@ -464,6 +609,18 @@
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>3.0.0</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.objenesis</groupId>
+                    <artifactId>objenesis</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.objenesis</groupId>
+            <artifactId>objenesis</artifactId>
+            <version>2.6</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
