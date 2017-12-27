@@ -42,14 +42,10 @@ import org.semux.gui.model.WalletModel;
 import org.semux.message.GUIMessages;
 import org.semux.util.Bytes;
 import org.semux.util.exception.UnreachableException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SendPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
-
-    private static Logger logger = LoggerFactory.getLogger(SendPanel.class);
 
     private JFrame frame;
     private transient WalletModel model;

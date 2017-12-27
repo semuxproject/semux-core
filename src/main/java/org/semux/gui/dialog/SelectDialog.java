@@ -126,7 +126,12 @@ public class SelectDialog extends JDialog implements ActionListener {
         }
     }
 
-    public int getSelectedIndex() {
+    /**
+     * Shows this dialog and waits until it's done.
+     * 
+     * @return the input or null
+     */
+    public int showAndGet() {
         this.setVisible(true);
         return selected;
     }

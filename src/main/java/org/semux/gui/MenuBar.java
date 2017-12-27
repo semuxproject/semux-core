@@ -135,11 +135,11 @@ public class MenuBar extends JMenuBar implements ActionListener {
         int ret = chooser.showOpenDialog(frame);
         if (ret == JFileChooser.APPROVE_OPTION) {
             File file = chooser.getSelectedFile();
-            String password = new InputDialog(frame, GUIMessages.get("EnterPassword"), true).getInput();
+            String pwd = new InputDialog(frame, GUIMessages.get("EnterPassword"), true).showAndGet();
 
-            if (password != null) {
+            if (pwd != null) {
                 Wallet w = new Wallet(file);
-                if (!w.unlock(password)) {
+                if (!w.unlock(pwd)) {
                     JOptionPane.showMessageDialog(frame, GUIMessages.get("UnlockFailed"));
                     return;
                 }
@@ -186,8 +186,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * Imports private key into this wallet.
      */
     protected void importPrivateKey() {
-        InputDialog dialog = new InputDialog(frame, GUIMessages.get("EnterPrivateKey"), false);
-        String pk = dialog.getInput();
+        String pk = new InputDialog(frame, GUIMessages.get("EnterPrivateKey"), false).showAndGet();
         if (pk != null) {
             try {
                 Wallet wallet = gui.getKernel().getWallet();

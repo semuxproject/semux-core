@@ -246,10 +246,10 @@ public class MainFrame extends JFrame implements ActionListener {
             this.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    InputDialog dialog = new InputDialog(MainFrame.this, GUIMessages.get("EnterPassword") + ":", true);
-                    String pwd = dialog.getInput();
+                    String pwd = new InputDialog(MainFrame.this, GUIMessages.get("EnterPassword") + ":", true)
+                            .showAndGet();
 
-                    if (!unlock(pwd)) {
+                    if (pwd != null && !unlock(pwd)) {
                         JOptionPane.showMessageDialog(MainFrame.this, GUIMessages.get("IncorrectPassword"));
                     }
                 }

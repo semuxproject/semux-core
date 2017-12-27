@@ -179,7 +179,7 @@ public class SemuxGUI extends Launcher {
         for (int i = 0;; i++) {
             InputDialog dialog = new InputDialog(null, i == 0 ? GUIMessages.get("EnterPassword") + ":"
                     : GUIMessages.get("WrongPasswordPleaseTryAgain") + ":", true);
-            String pwd = dialog.getInput();
+            String pwd = dialog.showAndGet();
 
             if (pwd == null) {
                 SystemUtil.exitAsync(-1);
@@ -390,7 +390,6 @@ public class SemuxGUI extends Launcher {
     }
 
     protected int showSelectDialog(JFrame parent, String message, List<Object> options) {
-        SelectDialog dialog = new SelectDialog(parent, message, options);
-        return dialog.getSelectedIndex();
+        return new SelectDialog(parent, message, options).showAndGet();
     }
 }

@@ -112,8 +112,15 @@ public class InputDialog extends JDialog implements ActionListener {
         }
     }
 
-    public String getInput() {
+    /**
+     * Shows this dialog and waits until it's done.
+     * 
+     * @return the input or null
+     */
+    public String showAndGet() {
+        // show the dialog
         this.setVisible(true);
+
         return text;
     }
 }

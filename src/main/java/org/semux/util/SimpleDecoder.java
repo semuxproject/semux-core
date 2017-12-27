@@ -60,15 +60,11 @@ public class SimpleDecoder {
         return in[index++] << 24 | (in[index++] & 0xFF) << 16 | (in[index++] & 0xFF) << 8 | (in[index++] & 0xFF);
     }
 
-    private long uintToLong(int i) {
-        return i & 0x00000000ffffffffL;
-    }
-
     public long readLong() {
         int i1 = readInt();
         int i2 = readInt();
 
-        return (uintToLong(i1) << 32) | uintToLong(i2);
+        return (unsignedInt(i1) << 32) | unsignedInt(i2);
     }
 
     public byte[] readBytes() {
@@ -99,5 +95,16 @@ public class SimpleDecoder {
 
     public int getReadIndex() {
         return index;
+    }
+
+    /**
+     * Re-interprets an integer as unsigned integer.
+     * 
+     * @param i
+     *            an integer
+     * @return the unsigned value, represented in long
+     */
+    protected long unsignedInt(int i) {
+        return i & 0x00000000ffffffffL;
     }
 }
