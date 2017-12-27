@@ -197,8 +197,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
         Pair<String, String> auth = BasicAuth.parseAuth(headers.get(HttpHeaderNames.AUTHORIZATION));
 
         return auth != null && //
-            Arrays.equals(Hash.h256(auth.getKey().getBytes()), authUserHash) && //
-            Arrays.equals(Hash.h256(auth.getValue().getBytes()), authPassHash);
+                Arrays.equals(Hash.h256(auth.getKey().getBytes()), authUserHash) && //
+                Arrays.equals(Hash.h256(auth.getValue().getBytes()), authPassHash);
     }
 
     private boolean writeResponse(ChannelHandlerContext ctx, HttpResponseStatus status, String responseBody) {
