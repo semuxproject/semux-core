@@ -99,7 +99,13 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
         window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ErrorDialogTitle"));
     }
 
-    private void testSend(int toSendSEM, PendingManager.ProcessTransactionResult mockResult) {
+    @Test
+    public void testSendFailureInvalidInput() {
+        testSend(null, null);
+        window.optionPane(Timeout.timeout(1000)).requireVisible().requireMessage(GUIMessages.get("EnterValidValue"));
+    }
+
+    private void testSend(Integer toSendSEM, PendingManager.ProcessTransactionResult mockResult) {
         kernelMock = spy(kernelRule1.getKernel());
         application = GuiActionRunner.execute(() -> new SendPanelTestApplication(walletRule.walletModel, kernelMock));
 
@@ -115,8 +121,9 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
         // fill form
         window.textBox("toText").requireVisible().requireEditable().setText(Hex.encode0x(recipient.toAddress()))
                 .requireText(Hex.encode0x(recipient.toAddress()));
-        window.textBox("amountText").requireVisible().requireEditable().setText(String.valueOf(toSendSEM))
-                .requireText(String.valueOf(toSendSEM));
+        window.textBox("amountText").requireVisible().requireEditable()
+                .setText(toSendSEM == null ? "" : String.valueOf(toSendSEM))
+                .requireText(toSendSEM == null ? "" : String.valueOf(toSendSEM));
         window.button("sendButton").requireVisible().click();
     }
 }
