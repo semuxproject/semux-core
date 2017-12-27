@@ -8,6 +8,7 @@ package org.semux.core;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -134,6 +135,16 @@ public class BlockchainImplTest {
         assertTrue(t.getValue() == value);
         assertTrue(t.getNonce() == nonce);
         assertTrue(t.getTimestamp() == timestamp);
+    }
+
+    @Test
+    public void testHasTransaction() {
+        assertFalse(chain.hasTransaction(tx.getHash()));
+
+        Block newBlock = createBlock(1);
+        chain.addBlock(newBlock);
+
+        assertTrue(chain.hasTransaction(tx.getHash()));
     }
 
     @Test
