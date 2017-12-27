@@ -344,8 +344,9 @@ public class SemuxSync implements SyncManager {
             logger.debug("Invalid results");
             return false;
         }
+
         if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
-            logger.debug("Duplicated transaction detected");
+            logger.warn("Duplicated transaction hash is not allowed");
             return false;
         }
 
@@ -359,6 +360,15 @@ public class SemuxSync implements SyncManager {
         }
 
         // [4] evaluate votes
+        if (!validateBlockVotes(block)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected boolean validateBlockVotes(Block block) {
+        // check 2/3 rule of pBFT
         List<String> validators = chain.getValidators();
         int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
         if (block.getVotes().size() < twoThirds) {
@@ -366,6 +376,7 @@ public class SemuxSync implements SyncManager {
             return false;
         }
 
+        // check vote signatures
         Set<String> set = new HashSet<>(validators);
         Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
                 block.getHash());

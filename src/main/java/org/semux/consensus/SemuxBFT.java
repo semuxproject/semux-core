@@ -747,7 +747,7 @@ public class SemuxBFT implements Consensus {
             return false;
         }
         if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
-            logger.debug("Duplicated transaction detected");
+            logger.warn("Duplicated transaction hash is not allowed");
             return false;
         }
 
