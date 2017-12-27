@@ -43,11 +43,11 @@ public class MainNetConfigTest {
             int n = config.getNumberOfValidators(i);
             if (n != last) {
                 assertTrue(n > last && (n - last == 1 || last == 0));
-                logger.info("block = {}, validators = {}", i, n);
+                logger.info("block # = {}, validators = {}", i, n);
                 last = n;
             }
         }
 
-        assertEquals(64, last);
+        assertEquals(100, last);
     }
 }

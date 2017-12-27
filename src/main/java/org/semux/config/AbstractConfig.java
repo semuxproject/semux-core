@@ -41,7 +41,7 @@ public abstract class AbstractConfig implements Config {
     protected short networkVersion;
 
     protected int maxBlockTransactionsSize = 1 * 1024 * 1024;
-    protected long minTransactionFee = 20L * Unit.MILLI_SEM;
+    protected long minTransactionFee = 10L * Unit.MILLI_SEM;
     protected long minDelegateBurnAmount = 1000L * Unit.SEM;
     protected long mandatoryUpgrade = Constants.BLOCKS_PER_DAY * 60L;
 
@@ -114,8 +114,8 @@ public abstract class AbstractConfig implements Config {
 
     @Override
     public long getBlockReward(long number) {
-        if (number <= 75_000_000L) {
-            return 1 * Unit.SEM;
+        if (number <= 25_000_000L) {
+            return 3L * Unit.SEM;
         } else {
             return 0;
         }
@@ -123,17 +123,17 @@ public abstract class AbstractConfig implements Config {
 
     @Override
     public long getValidatorUpdateInterval() {
-        return 64L * 2L;
+        return 200L;
     }
 
     @Override
     public int getNumberOfValidators(long number) {
-        long step = 2L * 60L * 2L;
+        long step = 2L * 60L * 2L; // two hours
 
-        if (number < 48L * step) {
+        if (number < 84L * step) {
             return 16 + (int) (number / step);
         } else {
-            return 64;
+            return 100;
         }
     }
 
