@@ -9,6 +9,8 @@ package org.semux.core;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.semux.core.PendingManager.ALLOWED_TIME_DRIFT;
 import static org.semux.core.TransactionResult.Error.INVALID_TIMESTAMP;
 
@@ -21,6 +23,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.semux.KernelMock;
 import org.semux.core.state.AccountState;
 import org.semux.crypto.EdDSA;
@@ -93,12 +96,28 @@ public class PendingManagerTest {
     }
 
     @Test
-    public void testAddTransactionSyncError() {
+    public void testAddTransactionSyncErrorInvalidFormat() {
         Transaction tx = new Transaction(type, to, value, fee, 0, 0, Bytes.EMPTY_BYTES).sign(key);
         PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
         assertEquals(0, pendingMgr.getTransactions().size());
         assertNotNull(result.error);
         assertEquals(TransactionResult.Error.INVALID_FORMAT, result.error);
+    }
+
+    @Test
+    public void testAddTransactionSyncErrorDuplicatedHash() {
+        Transaction tx = new Transaction(type, to, value, fee, 0, System.currentTimeMillis(), Bytes.EMPTY_BYTES)
+                .sign(key);
+
+        kernel.setBlockchain(spy(kernel.getBlockchain()));
+        doReturn(true).when(kernel.getBlockchain()).hasTransaction(tx.getHash());
+
+        PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
+        assertEquals(0, pendingMgr.getTransactions().size());
+        assertNotNull(result.error);
+        assertEquals(TransactionResult.Error.DUPLICATED_HASH, result.error);
+
+        Mockito.reset(kernel.getBlockchain());
     }
 
     @Test
