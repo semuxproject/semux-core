@@ -10,12 +10,24 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.semux.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HashTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(HashTest.class);
 
     private String msg = "test";
     private String msgBlake2b = "928b20366943e2afd11ebc0eae2e53a93bf177a4fcf35bcc64d503704e65e202";
     private String msgH160 = "86e8402b7615f07a2acb2ef1f4a54d323bbede77";
+
+    @Test
+    public void testEmptyHash() {
+        byte[] x = new byte[0];
+        byte[] hash = Hash.h256(x);
+
+        logger.info("Hash of empty byte array = {}", Hex.encode(hash));
+    }
 
     @Test
     public void testH256() {
