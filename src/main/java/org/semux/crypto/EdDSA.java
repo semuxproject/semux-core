@@ -209,8 +209,7 @@ public class EdDSA {
      * 
      */
     public static class Signature {
-        // TODO: remove the extra 12 bytes
-        public static final int SIGNATURE_LEN = 96 + 12;
+        public static final int LENGTH = 96;
 
         private static final byte[] X509 = Hex.decode("302a300506032b6570032100");
         private static final int S_LEN = 64;
@@ -275,7 +274,7 @@ public class EdDSA {
          * @return
          */
         public byte[] toBytes() {
-            return Bytes.merge(s, X509, a);
+            return Bytes.merge(s, a);
         }
 
         /**
@@ -285,12 +284,12 @@ public class EdDSA {
          * @return a {@link Signature} if success,or null
          */
         public static Signature fromBytes(byte[] bytes) {
-            if (bytes == null || bytes.length != SIGNATURE_LEN) {
+            if (bytes == null || bytes.length != LENGTH) {
                 return null;
             }
 
             byte[] s = Arrays.copyOfRange(bytes, 0, S_LEN);
-            byte[] a = Arrays.copyOfRange(bytes, SIGNATURE_LEN - A_LEN, SIGNATURE_LEN);
+            byte[] a = Arrays.copyOfRange(bytes, LENGTH - A_LEN, LENGTH);
 
             return new Signature(s, a);
         }

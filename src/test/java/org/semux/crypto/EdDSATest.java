@@ -96,7 +96,7 @@ public class EdDSATest {
         byte[] hash = Hash.h256(data);
         byte[] sig = key.sign(hash).toBytes();
 
-        assertEquals(Signature.SIGNATURE_LEN, sig.length);
+        assertEquals(Signature.LENGTH, sig.length);
         assertTrue(EdDSA.verify(hash, sig));
         assertArrayEquals(key.getPublicKey(), Signature.fromBytes(sig).getPublicKey());
         assertArrayEquals(key.toAddress(), Signature.fromBytes(sig).getAddress());
@@ -119,6 +119,7 @@ public class EdDSATest {
         byte[] hash = Hash.h256(data);
 
         assertFalse(EdDSA.verify(hash, Bytes.random(20)));
+        assertFalse(EdDSA.verify(hash, Bytes.random(Signature.LENGTH)));
         assertFalse(EdDSA.verify(hash, Bytes.random(200)));
     }
 
