@@ -23,6 +23,32 @@ import org.semux.util.Bytes;
  */
 public class TransactionExecutor {
 
+    private static final boolean[] valid = new boolean[256];
+    static {
+        for (byte b : Bytes.of("abcdefghijklmnopqrstuvwxyz0123456789_")) {
+            valid[b & 0xff] = true;
+        }
+    }
+
+    /**
+     * Validate delegate name.
+     * 
+     * @param data
+     */
+    public static boolean validateDelegateName(byte[] data) {
+        if (data.length < 3 || data.length > 16) {
+            return false;
+        }
+
+        for (byte b : data) {
+            if (!valid[b & 0xff]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private Config config;
 
     /**
@@ -98,17 +124,17 @@ public class TransactionExecutor {
                 break;
             }
             case DELEGATE: {
-                if (!Bytes.toString(data).matches("[_a-z0-9]{4,16}")) {
+                if (!validateDelegateName(data)) {
                     result.setError(Error.INVALID_DELEGATE_NAME);
                     break;
                 }
                 if (value < config.minDelegateBurnAmount()) {
-                    result.setError(Error.INVALID_FEE);
+                    result.setError(Error.INVALID_DELEGATE_BURN_AMOUNT);
                     break;
                 }
 
                 if (fee <= available && value <= available && value + fee <= available) {
-                    if (Arrays.equals(from, to) && ds.register(to, data)) {
+                    if (Arrays.equals(Bytes.EMPTY_ADDRESS, to) && ds.register(from, data)) {
 
                         as.adjustAvailable(from, -value - fee);
 

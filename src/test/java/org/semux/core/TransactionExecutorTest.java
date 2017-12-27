@@ -105,19 +105,19 @@ public class TransactionExecutorTest {
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
 
-        // register delegate (from != to, random name)
+        // register delegate (to != EMPTY_ADDRESS, random name)
         Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(delegate);
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isSuccess());
 
-        // register delegate (from == to, random name)
-        tx = new Transaction(type, from, value, fee, nonce, timestamp, data).sign(delegate);
+        // register delegate (to == EMPTY_ADDRESS, random name)
+        tx = new Transaction(type, Bytes.EMPTY_ADDRESS, value, fee, nonce, timestamp, data).sign(delegate);
         result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isSuccess());
 
-        // register delegate (from == to, normal name) and commit
+        // register delegate (to == EMPTY_ADDRESS, normal name) and commit
         data = Bytes.of("test");
-        tx = new Transaction(type, from, value, fee, nonce, timestamp, data).sign(delegate);
+        tx = new Transaction(type, Bytes.EMPTY_ADDRESS, value, fee, nonce, timestamp, data).sign(delegate);
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isSuccess());
         assertEquals(available - config.minDelegateBurnAmount() - fee,
@@ -196,5 +196,23 @@ public class TransactionExecutorTest {
         assertEquals(available + value - fee, as.getAccount(voter.toAddress()).getAvailable());
         assertEquals(0, as.getAccount(voter.toAddress()).getLocked());
         assertEquals(0, ds.getDelegateByAddress(delegate.toAddress()).getVotes());
+    }
+
+    @Test
+    public void testValidateDelegateName() {
+        assertFalse(TransactionExecutor.validateDelegateName(Bytes.random(2)));
+        assertFalse(TransactionExecutor.validateDelegateName(Bytes.random(17)));
+        assertFalse(TransactionExecutor.validateDelegateName(new byte[] { 0x11, 0x22, 0x33 }));
+
+        int[][] ranges = { { 'a', 'z' }, { '0', '9' }, { '_', '_' } };
+        for (int[] range : ranges) {
+            for (int i = range[0]; i <= range[1]; i++) {
+                byte[] data = new byte[3];
+                data[0] = (byte) i;
+                data[1] = (byte) i;
+                data[2] = (byte) i;
+                assertTrue(TransactionExecutor.validateDelegateName(data));
+            }
+        }
     }
 }

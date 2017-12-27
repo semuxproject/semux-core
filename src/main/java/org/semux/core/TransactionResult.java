@@ -72,6 +72,11 @@ public class TransactionResult {
         INVALID_DELEGATE_NAME,
 
         /**
+         * Invalid delegate burn amount.
+         */
+        INVALID_DELEGATE_BURN_AMOUNT,
+
+        /**
          * Transaction failed.
          */
         FAILED

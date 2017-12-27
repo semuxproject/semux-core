@@ -59,7 +59,7 @@ public interface Config {
     int maxTransactionDataSize(TransactionType type);
 
     /**
-     * Returns the min fee for the given transaction type.
+     * Returns the min transaction fee.
      * 
      * @return
      */

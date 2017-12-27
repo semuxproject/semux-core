@@ -148,7 +148,7 @@ public class TransactionBuilder {
 
         // DELEGATE transaction has fixed receiver and value
         if (type == TransactionType.DELEGATE) {
-            to = account.toAddress();
+            to = Bytes.EMPTY_ADDRESS;
             value = kernel.getConfig().minDelegateBurnAmount();
         }
 

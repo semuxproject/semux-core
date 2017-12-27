@@ -41,6 +41,7 @@ import org.semux.gui.WalletModelRule;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.message.GUIMessages;
 import org.semux.rules.KernelRule;
+import org.semux.util.Bytes;
 
 import junit.framework.TestCase;
 
@@ -190,7 +191,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         verify(pendingManager).addTransactionSync(transactionArgumentCaptor.capture());
         Transaction tx = transactionArgumentCaptor.getValue();
         TestCase.assertEquals(TransactionType.DELEGATE, tx.getType());
-        assertArrayEquals(walletRule.key.toAddress(), tx.getTo());
+        assertArrayEquals(Bytes.EMPTY_ADDRESS, tx.getTo());
         TestCase.assertEquals(kernelMock.getConfig().minDelegateBurnAmount(), tx.getValue());
         TestCase.assertEquals(kernelMock.getConfig().minTransactionFee(), tx.getFee());
     }

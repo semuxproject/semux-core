@@ -509,7 +509,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         String name = textName.getText();
         if (a == null) {
             JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
-        } else if (!name.matches("[_a-z0-9]{4,16}")) {
+        } else if (!name.matches("[_a-z0-9]{3,16}")) {
             JOptionPane.showMessageDialog(this, GUIMessages.get("AccountNameError"));
         } else if (a.getAvailable() < config.minDelegateBurnAmount() + config.minTransactionFee()) {
             JOptionPane.showMessageDialog(this, GUIMessages.get("InsufficientFunds",
@@ -534,14 +534,13 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             PendingManager pendingMgr = kernel.getPendingManager();
 
             TransactionType type = TransactionType.DELEGATE;
-            byte[] fromAddress = a.getKey().toAddress();
+            byte[] to = Bytes.EMPTY_ADDRESS;
             long value = config.minDelegateBurnAmount();
             long fee = config.minTransactionFee();
-            long nonce = pendingMgr.getNonce(fromAddress);
+            long nonce = pendingMgr.getNonce(a.getAddress());
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.of(name);
-            Transaction tx = new Transaction(type, fromAddress, value, fee, nonce, timestamp, data);
-            tx.sign(a.getKey());
+            Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(a.getKey());
 
             sendTransaction(pendingMgr, tx);
         }

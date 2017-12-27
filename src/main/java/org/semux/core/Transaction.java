@@ -116,7 +116,7 @@ public class Transaction implements Callable<Boolean> {
      * @return true if success, otherwise false
      */
     public boolean validate() {
-        return hash != null && hash.length == 32 //
+        return hash != null && hash.length == Hash.HASH_LEN //
                 && type != null //
                 && to != null && to.length == EdDSA.ADDRESS_LEN //
                 && value >= 0 //
