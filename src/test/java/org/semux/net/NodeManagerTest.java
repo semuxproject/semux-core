@@ -50,7 +50,7 @@ public class NodeManagerTest {
     @Test
     public void testGetSeedNodes() {
         // Seed nodes for main net
-        Set<InetSocketAddress> peers = NodeManager.getSeedNodes(Constants.MAIN_NET_ID);
+        Set<NodeManager.Node> peers = NodeManager.getSeedNodes(Constants.MAIN_NET_ID);
         assertFalse(peers.isEmpty());
 
         // Seed nodes for test net
@@ -69,7 +69,7 @@ public class NodeManagerTest {
 
         KernelMock kernel2 = kernelRule2.getKernel();
         NodeManager nodeMgr = kernel2.getNodeManager();
-        nodeMgr.addNode(new InetSocketAddress("127.0.0.1", server1.getKernel().getConfig().p2pListenPort()));
+        nodeMgr.addNode(new NodeManager.Node("127.0.0.1", server1.getKernel().getConfig().p2pListenPort()));
         nodeMgr.doConnect();
 
         Thread.sleep(500);

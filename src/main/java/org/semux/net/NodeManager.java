@@ -11,9 +11,8 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -21,6 +20,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.config.Constants;
@@ -48,6 +48,7 @@ public class NodeManager {
 
     private static final int LRU_CACHE_SIZE = 1024;
     private static final long RECONNECT_WAIT = 2L * 60L * 1000L;
+    private static final long MAX_QUEUE_SIZE = 1024;
 
     private Kernel kernel;
     private Config config;
@@ -55,7 +56,11 @@ public class NodeManager {
     private ChannelManager channelMgr;
     private PeerClient client;
 
-    private Queue<InetSocketAddress> queue;
+    /**
+     * Randomly sorted set of nodes to be connected
+     */
+    private ConcurrentSkipListSet<Node> queue;
+
     private Cache<InetSocketAddress, Long> lastConnect;
 
     private ScheduledExecutorService exec;
@@ -76,7 +81,7 @@ public class NodeManager {
         this.channelMgr = kernel.getChannelManager();
         this.client = kernel.getClient();
 
-        this.queue = new ConcurrentLinkedQueue<>();
+        this.queue = new ConcurrentSkipListSet<>();
         this.lastConnect = Caffeine.newBuilder().maximumSize(LRU_CACHE_SIZE).build();
 
         this.exec = Executors.newSingleThreadScheduledExecutor(factory);
@@ -124,8 +129,10 @@ public class NodeManager {
      * 
      * @param node
      */
-    public void addNode(InetSocketAddress node) {
-        queue.add(node);
+    public void addNode(Node node) {
+        if (queueSize() < MAX_QUEUE_SIZE) {
+            queue.add(node);
+        }
     }
 
     /**
@@ -133,8 +140,10 @@ public class NodeManager {
      * 
      * @param nodes
      */
-    public void addNodes(Collection<InetSocketAddress> nodes) {
-        queue.addAll(nodes);
+    public void addNodes(Collection<Node> nodes) {
+        if (queueSize() < MAX_QUEUE_SIZE) {
+            queue.addAll(nodes);
+        }
     }
 
     /**
@@ -152,8 +161,8 @@ public class NodeManager {
      * @param networkId
      * @return
      */
-    public static Set<InetSocketAddress> getSeedNodes(byte networkId) {
-        Set<InetSocketAddress> nodes = new HashSet<>();
+    public static Set<Node> getSeedNodes(byte networkId) {
+        Set<Node> nodes = new HashSet<>();
 
         try {
             String name;
@@ -169,7 +178,7 @@ public class NodeManager {
             }
 
             for (InetAddress a : InetAddress.getAllByName(name)) {
-                nodes.add(new InetSocketAddress(a, Constants.DEFAULT_P2P_PORT));
+                nodes.add(new Node(new InetSocketAddress(a, Constants.DEFAULT_P2P_PORT)));
             }
         } catch (UnknownHostException e) {
             logger.info("Failed to get bootstrapping nodes by dns");
@@ -185,7 +194,7 @@ public class NodeManager {
         Set<InetSocketAddress> activeAddresses = channelMgr.getActiveAddresses();
         InetSocketAddress addr;
 
-        while ((addr = queue.poll()) != null && channelMgr.size() < config.netMaxOutboundConnections()) {
+        while ((addr = queue.pollFirst()) != null && channelMgr.size() < config.netMaxOutboundConnections()) {
             Long l = lastConnect.getIfPresent(addr);
             long now = System.currentTimeMillis();
 
@@ -206,5 +215,39 @@ public class NodeManager {
      */
     protected void doFetch() {
         addNodes(getSeedNodes(config.networkId()));
+    }
+
+    /**
+     * This class represents a node which can be sorted randomly.
+     */
+    public static class Node extends InetSocketAddress implements Comparable<Node> {
+
+        private static final long serialVersionUID = -4786696870969905624L;
+
+        /**
+         * a random number
+         */
+        private int rand = RandomUtils.nextInt();
+
+        public Node(InetSocketAddress address) {
+            super(address.getAddress(), address.getPort());
+        }
+
+        public Node(String hostname, int port) {
+            super(hostname, port);
+        }
+
+        public Node(InetAddress addr, int port) {
+            super(addr, port);
+        }
+
+        @Override
+        public int compareTo(Node o) {
+            if (equals(o)) {
+                return 0;
+            } else {
+                return rand < o.rand ? -1 : 1;
+            }
+        }
     }
 }

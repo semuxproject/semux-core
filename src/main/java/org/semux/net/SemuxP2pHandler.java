@@ -6,12 +6,15 @@
  */
 package org.semux.net;
 
+import static org.semux.net.msg.p2p.NodesMessage.MAX_NODES;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.semux.Kernel;
 import org.semux.config.Config;
@@ -215,7 +218,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             break;
         }
         case GET_NODES: {
-            NodesMessage nodesMsg = new NodesMessage(channelMgr.getActiveAddresses());
+            NodesMessage nodesMsg = new NodesMessage(
+                    channelMgr.getActiveAddresses().stream().limit(MAX_NODES).map(NodeManager.Node::new).collect(
+                            Collectors.toSet()));
             msgQueue.sendMessage(nodesMsg);
             break;
         }

@@ -7,7 +7,6 @@
 package org.semux.api;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -47,6 +46,7 @@ import org.semux.core.state.Delegate;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
+import org.semux.net.NodeManager;
 import org.semux.util.exception.UnreachableException;
 
 import io.netty.handler.codec.http.HttpHeaders;
@@ -199,7 +199,7 @@ public class ApiHandlerImpl implements ApiHandler {
      *            node parameter of /add_node API
      * @return validated hostname and port number
      */
-    private InetSocketAddress validateAddNodeParameter(String node) {
+    private NodeManager.Node validateAddNodeParameter(String node) {
         if (node == null || node.length() == 0) {
             throw new IllegalArgumentException("Parameter `node` can't be empty");
         }
@@ -210,8 +210,10 @@ public class ApiHandlerImpl implements ApiHandler {
         }
 
         try {
-            return new InetSocketAddress(InetAddress.getByName(matcher.group("host")),
-                    Integer.parseInt(matcher.group("port")));
+            return new NodeManager.Node( //
+                    InetAddress.getByName(matcher.group("host")), //
+                    Integer.parseInt(matcher.group("port")) //
+            ); //
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException(e.getMessage(), e);
         }

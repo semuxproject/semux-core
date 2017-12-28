@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.semux.net.NodeManager;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
 import org.semux.util.SimpleDecoder;
@@ -17,14 +18,20 @@ import org.semux.util.SimpleEncoder;
 
 public class NodesMessage extends Message {
 
-    private Set<InetSocketAddress> nodes;
+    public static final int MAX_NODES = 128;
+
+    private Set<NodeManager.Node> nodes;
+
+    public NodesMessage() {
+        super(MessageCode.NODES, null);
+    }
 
     /**
      * Create a NODES message.
      * 
      * @param nodes
      */
-    public NodesMessage(Set<InetSocketAddress> nodes) {
+    public NodesMessage(Set<NodeManager.Node> nodes) {
         super(MessageCode.NODES, null);
 
         this.nodes = nodes;
@@ -50,15 +57,15 @@ public class NodesMessage extends Message {
 
         nodes = new HashSet<>();
         SimpleDecoder dec = new SimpleDecoder(encoded);
-        int n = dec.readInt();
+        int n = Math.min(dec.readInt(), MAX_NODES);
         for (int i = 0; i < n; i++) {
             String host = dec.readString();
             int port = dec.readInt();
-            nodes.add(new InetSocketAddress(host, port));
+            nodes.add(new NodeManager.Node(host, port));
         }
     }
 
-    public Set<InetSocketAddress> getNodes() {
+    public Set<NodeManager.Node> getNodes() {
         return nodes;
     }
 

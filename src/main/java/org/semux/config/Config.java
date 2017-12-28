@@ -7,11 +7,11 @@
 package org.semux.config;
 
 import java.io.File;
-import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.semux.net.NodeManager;
 import org.semux.net.msg.MessageCode;
 
 /**
@@ -147,7 +147,7 @@ public interface Config {
      * 
      * @return
      */
-    Set<InetSocketAddress> p2pSeedNodes();
+    Set<NodeManager.Node> p2pSeedNodes();
 
     // =========================
     // Network
