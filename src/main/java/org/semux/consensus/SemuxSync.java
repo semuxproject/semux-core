@@ -316,10 +316,16 @@ public class SemuxSync implements SyncManager {
      * @param block
      * @return
      */
-    private boolean validateApplyBlock(Block block) {
+    protected boolean validateApplyBlock(Block block) {
+        AccountState as = chain.getAccountState().track();
+        DelegateState ds = chain.getDelegateState().track();
+
+        return validateBlock(block, as, ds) && applyBlock(block, as, ds);
+    }
+
+    protected boolean validateBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot) {
         BlockHeader header = block.getHeader();
         List<Transaction> transactions = block.getTransactions();
-        long number = header.getNumber();
 
         // [1] check block header
         Block latest = chain.getLatestBlock();
@@ -339,18 +345,30 @@ public class SemuxSync implements SyncManager {
             return false;
         }
 
-        AccountState as = chain.getAccountState().track();
-        DelegateState ds = chain.getDelegateState().track();
+        if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
+            logger.warn("Duplicated transaction hash is not allowed");
+            return false;
+        }
+
         TransactionExecutor transactionExecutor = new TransactionExecutor(config);
 
         // [3] evaluate transactions
-        List<TransactionResult> results = transactionExecutor.execute(transactions, as, ds);
+        List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot);
         if (!Block.validateResults(header, results)) {
             logger.debug("Invalid transactions");
             return false;
         }
 
         // [4] evaluate votes
+        if (!validateBlockVotes(block)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected boolean validateBlockVotes(Block block) {
+        // check 2/3 rule of pBFT
         List<String> validators = chain.getValidators();
         int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
         if (block.getVotes().size() < twoThirds) {
@@ -358,8 +376,10 @@ public class SemuxSync implements SyncManager {
             return false;
         }
 
+        // check vote signatures
         Set<String> set = new HashSet<>(validators);
-        Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, number, block.getView(), block.getHash());
+        Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
+                block.getHash());
         byte[] encoded = vote.getEncoded();
         for (Signature sig : block.getVotes()) {
             String a = Hex.encode(sig.getAddress());
@@ -370,18 +390,22 @@ public class SemuxSync implements SyncManager {
             }
         }
 
+        return true;
+    }
+
+    protected boolean applyBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot) {
         // [5] apply block reward and tx fees
-        long reward = config.getBlockReward(number);
+        long reward = config.getBlockReward(block.getNumber());
         for (Transaction tx : block.getTransactions()) {
             reward += tx.getFee();
         }
         if (reward > 0) {
-            as.adjustAvailable(block.getCoinbase(), reward);
+            asSnapshot.adjustAvailable(block.getCoinbase(), reward);
         }
 
         // [6] commit the updates
-        as.commit();
-        ds.commit();
+        asSnapshot.commit();
+        dsSnapshot.commit();
 
         WriteLock writeLock = kernel.getStateLock().writeLock();
         writeLock.lock();

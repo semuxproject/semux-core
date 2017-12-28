@@ -91,6 +91,14 @@ public interface Blockchain {
     Transaction getTransaction(byte[] hash);
 
     /**
+     * Returns whether the transaction is in the blockchain.
+     *
+     * @param hash
+     * @return
+     */
+    boolean hasTransaction(byte[] hash);
+
+    /**
      * Returns transaction result.
      * 
      * @param hash

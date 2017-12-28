@@ -20,11 +20,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.Kernel;
-import org.semux.config.Config;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.net.Channel;
-import org.semux.net.ChannelManager;
 import org.semux.net.msg.p2p.TransactionMessage;
 import org.semux.util.ArrayUtil;
 import org.semux.util.ByteArray;
@@ -63,10 +61,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     private static final int DELAYED_MAX_SIZE = 16 * 1024;
     private static final int PROCESSED_MAX_SIZE = 16 * 1024;
 
-    private Config config;
-
-    private Blockchain chain;
-    private ChannelManager channelMgr;
+    private Kernel kernel;
     private AccountState pendingAS;
     private DelegateState pendingDS;
 
@@ -96,13 +91,10 @@ public class PendingManager implements Runnable, BlockchainListener {
      * Creates a pending manager.
      */
     public PendingManager(Kernel kernel) {
-        this.config = kernel.getConfig();
+        this.kernel = kernel;
 
-        this.chain = kernel.getBlockchain();
-        this.channelMgr = kernel.getChannelManager();
-
-        this.pendingAS = chain.getAccountState().track();
-        this.pendingDS = chain.getDelegateState().track();
+        this.pendingAS = kernel.getBlockchain().getAccountState().track();
+        this.pendingDS = kernel.getBlockchain().getDelegateState().track();
 
         this.exec = Executors.newSingleThreadScheduledExecutor(factory);
     }
@@ -119,7 +111,7 @@ public class PendingManager implements Runnable, BlockchainListener {
              */
             this.validateFuture = exec.scheduleAtFixedRate(this, 2, 2, TimeUnit.MILLISECONDS);
 
-            this.chain.addListener(this);
+            kernel.getBlockchain().addListener(this);
 
             logger.debug("Pending manager started");
             this.isRunning = true;
@@ -248,8 +240,8 @@ public class PendingManager implements Runnable, BlockchainListener {
      */
     public synchronized List<PendingTransaction> reset() {
         // reset state
-        pendingAS = chain.getAccountState().track();
-        pendingDS = chain.getDelegateState().track();
+        pendingAS = kernel.getBlockchain().getAccountState().track();
+        pendingDS = kernel.getBlockchain().getDelegateState().track();
 
         // clear transaction pool
         List<PendingTransaction> txs = new ArrayList<>(transactions);
@@ -284,7 +276,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         while (pool.size() < POOL_MAX_SIZE //
                 && (tx = queue.poll()) != null //
-                && tx.getFee() >= config.minTransactionFee()) {
+                && tx.getFee() >= kernel.getConfig().minTransactionFee()) {
 
             // reject already executed transactions
             ByteArray key = ByteArray.of(tx.getHash());
@@ -318,6 +310,11 @@ public class PendingManager implements Runnable, BlockchainListener {
         int cnt = 0;
         long now = System.currentTimeMillis();
 
+        // reject transactions with a duplicated tx hash
+        if (kernel.getBlockchain().hasTransaction(tx.getHash())) {
+            return new ProcessTransactionResult(0, TransactionResult.Error.DUPLICATED_HASH);
+        }
+
         // check transaction timestamp if this is a fresh transaction:
         // a time drift of 2 hours is allowed
         if (tx.getTimestamp() < now - ALLOWED_TIME_DRIFT || tx.getTimestamp() > now + ALLOWED_TIME_DRIFT) {
@@ -332,7 +329,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             // execute transactions
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
-            TransactionResult result = new TransactionExecutor(config).execute(tx, as, ds);
+            TransactionResult result = new TransactionExecutor(kernel.getConfig()).execute(tx, as, ds);
 
             if (result.isSuccess()) {
                 // commit state updates
@@ -348,10 +345,10 @@ public class PendingManager implements Runnable, BlockchainListener {
 
                 // relay transaction
                 if (relay) {
-                    List<Channel> channels = channelMgr.getActiveChannels();
+                    List<Channel> channels = kernel.getChannelManager().getActiveChannels();
                     TransactionMessage msg = new TransactionMessage(tx);
                     int[] indices = ArrayUtil.permutation(channels.size());
-                    for (int i = 0; i < indices.length && i < config.netRelayRedundancy(); i++) {
+                    for (int i = 0; i < indices.length && i < kernel.getConfig().netRelayRedundancy(); i++) {
                         Channel c = channels.get(indices[i]);
                         if (c.isActive()) {
                             c.getMessageQueue().sendMessage(msg);

@@ -746,6 +746,10 @@ public class SemuxBFT implements Consensus {
             logger.debug("Invalid block transactions");
             return false;
         }
+        if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
+            logger.warn("Duplicated transaction hash is not allowed");
+            return false;
+        }
 
         AccountState as = accountState.track();
         DelegateState ds = delegateState.track();

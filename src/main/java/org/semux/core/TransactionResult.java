@@ -26,6 +26,11 @@ public class TransactionResult {
         INVALID_FORMAT,
 
         /**
+         * The transaction hash is duplicated.
+         */
+        DUPLICATED_HASH,
+
+        /**
          * The transaction timestamp is incorrect. See
          * {@link PendingManager#processTransaction(Transaction, boolean)}.
          */
