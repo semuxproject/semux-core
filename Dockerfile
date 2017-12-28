@@ -1,6 +1,6 @@
 FROM openjdk:8-jre-alpine
 
-ARG SEMUXVER="1.0.0-rc.4"
+ARG SEMUXVER="1.0.0-rc.5"
 
 RUN echo $SEMUXVER
 
