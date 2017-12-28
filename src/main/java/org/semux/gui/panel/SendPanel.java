@@ -317,8 +317,9 @@ public class SendPanel extends JPanel implements ActionListener {
                 showErrorDialog(GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
             } else if (to.length != EdDSA.ADDRESS_LEN) {
                 showErrorDialog(GUIMessages.get("InvalidReceivingAddress"));
-            } else if (Bytes.of(data).length > config.maxTransferDataSize()) {
-                showErrorDialog(GUIMessages.get("InvalidData", config.maxTransferDataSize()));
+            } else if (Bytes.of(data).length > config.maxTransactionDataSize(TransactionType.TRANSFER)) {
+                showErrorDialog(
+                        GUIMessages.get("InvalidData", config.maxTransactionDataSize(TransactionType.TRANSFER)));
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
                         GUIMessages.get("TransferInfo", SwingUtil.formatValue(value), Hex.encode0x(to)),

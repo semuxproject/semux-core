@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.semux.core.TransactionType;
 import org.semux.net.msg.MessageCode;
 
 /**
@@ -44,32 +45,32 @@ public interface Config {
     short networkVersion();
 
     /**
-     * Returns the max transaction total size in bytes.
+     * Returns the max total size of all transactions in a block.
      * 
      * @return
      */
     int maxBlockTransactionsSize();
 
     /**
-     * Returns the max data size for transaction
+     * Returns the max data size for the given transaction type.
      * 
      * @return
      */
-    int maxTransferDataSize();
+    int maxTransactionDataSize(TransactionType type);
 
     /**
-     * Returns the min transaction fee.
+     * Returns the min fee for the given transaction type.
      * 
      * @return
      */
     long minTransactionFee();
 
     /**
-     * Returns the min delegate fee.
+     * Returns the min amount of value burned when registering as a delegate.
      * 
      * @return
      */
-    long minDelegateFee();
+    long minDelegateBurnAmount();
 
     /**
      * Returns the block number before which this client needs to be upgraded.

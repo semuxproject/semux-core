@@ -99,7 +99,7 @@ public class TransactionExecutorTest {
         TransactionType type = TransactionType.DELEGATE;
         byte[] from = delegate.toAddress();
         byte[] to = Bytes.random(20);
-        long value = config.minDelegateFee();
+        long value = config.minDelegateBurnAmount();
         long fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
@@ -120,7 +120,8 @@ public class TransactionExecutorTest {
         tx = new Transaction(type, from, value, fee, nonce, timestamp, data).sign(delegate);
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isSuccess());
-        assertEquals(available - config.minDelegateFee() - fee, as.getAccount(delegate.toAddress()).getAvailable());
+        assertEquals(available - config.minDelegateBurnAmount() - fee,
+                as.getAccount(delegate.toAddress()).getAvailable());
         assertArrayEquals(delegate.toAddress(), ds.getDelegateByName(data).getAddress());
         assertArrayEquals(data, ds.getDelegateByAddress(delegate.toAddress()).getName());
     }

@@ -54,6 +54,7 @@ public class TransactionExecutor {
             TransactionResult result = new TransactionResult(false);
             results.add(result);
 
+            TransactionType type = tx.getType();
             byte[] from = tx.getFrom();
             byte[] to = tx.getTo();
             long value = tx.getValue();
@@ -71,19 +72,20 @@ public class TransactionExecutor {
                 continue;
             }
 
-            // check transaction fee
+            // check fee
             if (fee < config.minTransactionFee()) {
                 result.setError(Error.INVALID_FEE);
                 continue;
             }
 
-            switch (tx.getType()) {
-            case TRANSFER: {
-                if (data.length > config.maxTransferDataSize()) {
-                    result.setError(Error.INVALID_DATA_LENGTH);
-                    break;
-                }
+            // check data length
+            if (data.length > config.maxTransactionDataSize(type)) {
+                result.setError(Error.INVALID_DATA_LENGTH);
+                continue;
+            }
 
+            switch (type) {
+            case TRANSFER: {
                 if (fee <= available && value <= available && value + fee <= available) {
 
                     as.adjustAvailable(from, -value - fee);
@@ -96,11 +98,11 @@ public class TransactionExecutor {
                 break;
             }
             case DELEGATE: {
-                if (data.length > 16 || !Bytes.toString(data).matches("[_a-z0-9]{4,16}")) {
+                if (!Bytes.toString(data).matches("[_a-z0-9]{4,16}")) {
                     result.setError(Error.INVALID_DELEGATE_NAME);
                     break;
                 }
-                if (value < config.minDelegateFee()) {
+                if (value < config.minDelegateBurnAmount()) {
                     result.setError(Error.INVALID_FEE);
                     break;
                 }
@@ -120,11 +122,6 @@ public class TransactionExecutor {
                 break;
             }
             case VOTE: {
-                if (data.length > 0) {
-                    result.setError(Error.INVALID_DATA_LENGTH);
-                    break;
-                }
-
                 if (fee <= available && value <= available && value + fee <= available) {
                     if (ds.vote(from, to, value)) {
 
@@ -141,11 +138,6 @@ public class TransactionExecutor {
                 break;
             }
             case UNVOTE: {
-                if (data.length > 0) {
-                    result.setError(Error.INVALID_DATA_LENGTH);
-                    break;
-                }
-
                 if (fee <= available && value <= locked) {
                     if (ds.unvote(from, to, value)) {
 

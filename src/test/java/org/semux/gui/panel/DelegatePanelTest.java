@@ -191,7 +191,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         Transaction tx = transactionArgumentCaptor.getValue();
         TestCase.assertEquals(TransactionType.DELEGATE, tx.getType());
         assertArrayEquals(walletRule.key.toAddress(), tx.getTo());
-        TestCase.assertEquals(kernelMock.getConfig().minDelegateFee(), tx.getValue());
+        TestCase.assertEquals(kernelMock.getConfig().minDelegateBurnAmount(), tx.getValue());
         TestCase.assertEquals(kernelMock.getConfig().minTransactionFee(), tx.getFee());
     }
 

@@ -22,8 +22,7 @@ public class Hash {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    private Hash() {
-    }
+    public static final int HASH_LEN = 32;
 
     /**
      * Generate the 256-bit hash.
@@ -70,4 +69,8 @@ public class Hash {
         digest.doFinal(out, 0);
         return out;
     }
+
+    private Hash() {
+    }
+
 }

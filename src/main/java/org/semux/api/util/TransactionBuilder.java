@@ -149,7 +149,7 @@ public class TransactionBuilder {
         // DELEGATE transaction has fixed receiver and value
         if (type == TransactionType.DELEGATE) {
             to = account.toAddress();
-            value = kernel.getConfig().minDelegateFee();
+            value = kernel.getConfig().minDelegateBurnAmount();
         }
 
         return new Transaction(type, to, value, fee, nonce, timestamp, data).sign(account);

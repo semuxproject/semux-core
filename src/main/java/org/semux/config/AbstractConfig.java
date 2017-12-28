@@ -16,12 +16,14 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
+import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hash;
 import org.semux.net.msg.MessageCode;
 import org.semux.util.Bytes;
 import org.semux.util.StringUtil;
 import org.semux.util.SystemUtil;
+import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +40,9 @@ public abstract class AbstractConfig implements Config {
     protected byte networkId;
     protected short networkVersion;
 
-    protected int maxBlockSize = 2 * 1024 * 1024;
-    protected int maxTransferDataSize = 128;
-    protected long minTransactionFee = 50L * Unit.MILLI_SEM;
-    protected long minDelegateFee = 1000L * Unit.SEM;
+    protected int maxBlockTransactionsSize = 1 * 1024 * 1024;
+    protected long minTransactionFee = 20L * Unit.MILLI_SEM;
+    protected long minDelegateBurnAmount = 1000L * Unit.SEM;
     protected long mandatoryUpgrade = Constants.BLOCKS_PER_DAY * 60L;
 
     // =========================
@@ -164,23 +165,43 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
+    public int maxBlockTransactionsSize() {
+        return maxBlockTransactionsSize;
+    }
+
+    @Override
+    public int maxTransactionDataSize(TransactionType type) {
+        switch (type) {
+        case COINBASE:
+            return 0; // not required
+
+        case TRANSFER:
+            return 128; // for memo
+
+        case DELEGATE:
+            return 16; // for name
+
+        case UNVOTE:
+        case VOTE:
+            return 0; // not required
+
+        case CREATE:
+        case CALL:
+            return 64 * 1024; // for dapps
+
+        default:
+            throw new UnreachableException();
+        }
+    }
+
+    @Override
     public long minTransactionFee() {
         return minTransactionFee;
     }
 
     @Override
-    public long minDelegateFee() {
-        return minDelegateFee;
-    }
-
-    @Override
-    public int maxBlockTransactionsSize() {
-        return maxBlockSize;
-    }
-
-    @Override
-    public int maxTransferDataSize() {
-        return maxTransferDataSize;
+    public long minDelegateBurnAmount() {
+        return minDelegateBurnAmount;
     }
 
     @Override

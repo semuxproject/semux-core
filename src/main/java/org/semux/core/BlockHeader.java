@@ -6,8 +6,11 @@
  */
 package org.semux.core;
 
+import static org.semux.crypto.Hash.HASH_LEN;
+
 import java.util.Arrays;
 
+import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
@@ -15,6 +18,8 @@ import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
 public class BlockHeader {
+
+    public static final int MAX_DATA_SIZE = 32;
 
     private byte[] hash;
 
@@ -99,15 +104,15 @@ public class BlockHeader {
      * @return true if success, otherwise false
      */
     public boolean validate() {
-        return hash != null && hash.length == 32 //
+        return hash != null && hash.length == HASH_LEN //
                 && number >= 0 //
-                && coinbase != null && coinbase.length == 20 //
-                && parentHash != null && parentHash.length == 32 //
+                && coinbase != null && coinbase.length == EdDSA.ADDRESS_LEN //
+                && parentHash != null && parentHash.length == HASH_LEN //
                 && timestamp >= 0 //
-                && transactionsRoot != null && transactionsRoot.length == 32 //
-                && resultsRoot != null && resultsRoot.length == 32 //
+                && transactionsRoot != null && transactionsRoot.length == HASH_LEN //
+                && resultsRoot != null && resultsRoot.length == HASH_LEN //
                 && stateRoot != null && Arrays.equals(Bytes.EMPTY_HASH, stateRoot) // RESERVED FOR VM
-                && data != null && data.length <= 128 //
+                && data != null && data.length <= MAX_DATA_SIZE //
                 && encoded != null //
                 && Arrays.equals(Hash.h256(encoded), hash);
     }

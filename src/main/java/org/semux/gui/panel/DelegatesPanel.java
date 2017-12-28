@@ -136,7 +136,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         delegateRegistrationPanel.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         JLabel label = new JLabel(GUIMessages
-                .get("DelegateRegistrationNoteHtml", SwingUtil.formatValue(config.minDelegateFee()),
+                .get("DelegateRegistrationNoteHtml", SwingUtil.formatValue(config.minDelegateBurnAmount()),
                         SwingUtil.formatValue(config.minTransactionFee())));
         label.setForeground(Color.DARK_GRAY);
 
@@ -238,7 +238,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 .createDefaultButton(GUIMessages.get("RegisterAsDelegate"), this, Action.DELEGATE);
         btnDelegate.setName("btnDelegate");
         btnDelegate.setToolTipText(
-                GUIMessages.get("RegisterAsDelegateToolTip", SwingUtil.formatValue(config.minDelegateFee())));
+                GUIMessages.get("RegisterAsDelegateToolTip", SwingUtil.formatValue(config.minDelegateBurnAmount())));
 
         textName = SwingUtil.textFieldWithCopyPastePopup();
 
@@ -511,9 +511,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
         } else if (!name.matches("[_a-z0-9]{4,16}")) {
             JOptionPane.showMessageDialog(this, GUIMessages.get("AccountNameError"));
-        } else if (a.getAvailable() < config.minDelegateFee() + config.minTransactionFee()) {
+        } else if (a.getAvailable() < config.minDelegateBurnAmount() + config.minTransactionFee()) {
             JOptionPane.showMessageDialog(this, GUIMessages.get("InsufficientFunds",
-                    SwingUtil.formatValue(config.minDelegateFee() + config.minTransactionFee())));
+                    SwingUtil.formatValue(config.minDelegateBurnAmount() + config.minTransactionFee())));
         } else {
             // confirm system requirements
             if ((config.networkId() == Constants.MAIN_NET_ID && !SystemUtil.bench()) && JOptionPane
@@ -525,7 +525,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
             // confirm burning amount
             if (JOptionPane.showConfirmDialog(this,
-                    GUIMessages.get("DelegateRegistrationInfo", SwingUtil.formatValue(config.minDelegateFee())),
+                    GUIMessages.get("DelegateRegistrationInfo", SwingUtil.formatValue(config.minDelegateBurnAmount())),
                     GUIMessages.get("ConfirmDelegateRegistration"),
                     JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
                 return;
@@ -535,7 +535,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
             TransactionType type = TransactionType.DELEGATE;
             byte[] fromAddress = a.getKey().toAddress();
-            long value = config.minDelegateFee();
+            long value = config.minDelegateBurnAmount();
             long fee = config.minTransactionFee();
             long nonce = pendingMgr.getNonce(fromAddress);
             long timestamp = System.currentTimeMillis();
