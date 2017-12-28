@@ -11,7 +11,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -197,8 +197,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
         Pair<String, String> auth = BasicAuth.parseAuth(headers.get(HttpHeaderNames.AUTHORIZATION));
 
         return auth != null && //
-                Arrays.equals(Hash.h256(auth.getKey().getBytes()), authUserHash) && //
-                Arrays.equals(Hash.h256(auth.getValue().getBytes()), authPassHash);
+                MessageDigest.isEqual(Hash.h256(auth.getKey().getBytes()), authUserHash) && //
+                MessageDigest.isEqual(Hash.h256(auth.getValue().getBytes()), authPassHash);
     }
 
     private boolean writeResponse(ChannelHandlerContext ctx, HttpResponseStatus status, String responseBody) {
