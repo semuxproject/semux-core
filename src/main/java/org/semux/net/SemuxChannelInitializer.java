@@ -69,7 +69,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
             }
 
             // limit the size of receiving buffer
-            int bufferSize = Frame.HEADER_SIZE + kernel.getConfig().netMaxFrameSize();
+            int bufferSize = Frame.HEADER_SIZE + kernel.getConfig().netMaxFrameBodySize();
             ch.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(bufferSize));
             ch.config().setOption(ChannelOption.SO_RCVBUF, bufferSize);
             ch.config().setOption(ChannelOption.SO_BACKLOG, 1024);

@@ -29,64 +29,62 @@ public class SemuxFrameHandler extends ByteToMessageCodec<Frame> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Frame frame, ByteBuf out) throws Exception {
+        // check version
+        if (frame.getVersion() != Frame.VERSION) {
+            logger.error("Invalid frame version: {}", frame.getVersion());
+            return;
+        }
+
+        // check body size
+        int bodySize = frame.getBodySize();
+        if (bodySize < 0 || bodySize > config.netMaxFrameBodySize()) {
+            logger.error("Invalid frame body size: {}", bodySize);
+            return;
+        }
+
+        // create a buffer
+        ByteBuf buf = out.alloc().buffer(Frame.HEADER_SIZE + bodySize);
+        frame.writeHeader(buf);
+        buf.writeBytes(frame.getBody());
+
         // NOTE: write() operation does not flush automatically
 
-        ByteBuf buf = out.alloc().buffer(Frame.HEADER_SIZE + frame.getSize());
-
-        int index = buf.writerIndex();
-        buf.writeInt(frame.getSize());
-        buf.writeByte(frame.getType());
-        buf.writeByte(frame.getNetwork());
-        buf.writeInt(frame.getPacketId());
-        buf.writeInt(frame.getPacketSize());
-
-        buf.writerIndex(index + Frame.HEADER_SIZE);
-        buf.writeBytes(frame.getPayload());
-
+        // write to context
         ctx.write(buf);
     }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        if (in.readableBytes() < 4) {
+        if (in.readableBytes() < Frame.HEADER_SIZE) {
             return;
         }
 
-        // Read the size of this frame
-        int index = in.readerIndex();
-        int size = in.readInt();
-        in.readerIndex(index);
+        // read frame header
+        int readerIndex = in.readerIndex();
+        Frame frame = Frame.readHeader(in);
 
-        if (size < 0 || size > config.netMaxFrameSize()) {
-            throw new IOException("Invalid frame size: " + size);
+        // check version
+        if (frame.getVersion() != Frame.VERSION) {
+            throw new IOException("Invalid frame version: " + frame.getVersion());
         }
 
-        if (in.readableBytes() >= Frame.HEADER_SIZE + size) {
-            size = in.readInt();
-            byte type = in.readByte();
-            byte network = in.readByte();
-            int packetId = in.readInt();
-            int packetSize = in.readInt();
+        // check body size
+        int bodySize = frame.getBodySize();
+        if (bodySize < 0 || bodySize > config.netMaxFrameBodySize()) {
+            throw new IOException("Invalid frame body size: " + bodySize);
+        }
 
-            in.readerIndex(index + Frame.HEADER_SIZE);
-            byte[] payload = new byte[size];
-            in.readBytes(payload);
+        if (in.readableBytes() < bodySize) {
+            // reset reader index if not available
+            in.readerIndex(readerIndex);
+        } else {
+            // read body
+            byte[] body = new byte[bodySize];
+            in.readBytes(body);
+            frame.setBody(body);
 
-            Frame frame = new Frame(size, type, network, packetId, packetSize, payload);
-
-            /*
-             * If the peer is not in our network, drop connection immediately.
-             */
-            if (network != config.networkId()) {
-                ctx.close();
-                return;
-            }
-
-            if (size < 0 || type < 0 || packetId < 0 || packetSize < 0) {
-                logger.debug("Invalid frame: {}", frame);
-            } else {
-                out.add(frame);
-            }
+            // deliver
+            out.add(frame);
         }
     }
 }

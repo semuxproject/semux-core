@@ -57,9 +57,9 @@ public abstract class AbstractConfig implements Config {
     // Network
     // =========================
     protected int netMaxOutboundConnections = 128;
-    protected int netMaxInboundConnections = 256;
+    protected int netMaxInboundConnections = 512;
     protected int netMaxMessageQueueSize = 4096;
-    protected int netMaxFrameSize = 128 * 1024;
+    protected int netMaxFrameBodySize = 128 * 1024;
     protected int netMaxPacketSize = 8 * 1024 * 1024;
     protected int netRelayRedundancy = 16;
     protected int netHandshakeExpiry = 5 * 60 * 1000;
@@ -245,8 +245,8 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public int netMaxFrameSize() {
-        return netMaxFrameSize;
+    public int netMaxFrameBodySize() {
+        return netMaxFrameBodySize;
     }
 
     @Override

@@ -45,7 +45,8 @@ public interface Config {
     short networkVersion();
 
     /**
-     * Returns the max total size of all transactions in a block.
+     * Returns the max total size of all transactions in a block, encoding overhead
+     * not counted.
      * 
      * @return
      */
@@ -175,14 +176,14 @@ public interface Config {
     int netMaxMessageQueueSize();
 
     /**
-     * Returns the max frame size in bytes.
+     * Returns the max size of frame body, in bytes.
      * 
      * @return
      */
-    int netMaxFrameSize();
+    int netMaxFrameBodySize();
 
     /**
-     * Returns the max packet size in bytes.
+     * Returns the max size of packet, in bytes.
      * 
      * @return
      */

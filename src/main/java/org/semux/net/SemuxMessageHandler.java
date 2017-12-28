@@ -48,39 +48,32 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Message msg, List<Object> out) throws Exception {
-        byte[] encoded = msg.getEncoded();
-        int packetId = count.incrementAndGet() % Integer.MAX_VALUE;
-        int packetSize = encoded.length;
-        byte type = msg.getCode().toByte();
-        byte network = config.networkId();
+        byte[] data = msg.getEncoded();
+
+        // TODO: compress data
+
+        byte packetType = msg.getCode().toByte();
+        int packetId = count.incrementAndGet();
+        int packetSize = data.length;
 
         if (packetSize > config.netMaxPacketSize()) {
             logger.error("Invalid packet size, max = {}, actual = {}", config.netMaxPacketSize(), packetSize);
             return;
         }
 
-        int limit = config.netMaxFrameSize();
-        int total = (encoded.length - 1) / limit + 1;
+        int limit = config.netMaxFrameBodySize();
+        int total = (data.length - 1) / limit + 1;
         for (int i = 0; i < total; i++) {
-            byte[] payload = new byte[(i < total - 1) ? limit : encoded.length % limit];
-            System.arraycopy(encoded, i * limit, payload, 0, payload.length);
+            byte[] body = new byte[(i < total - 1) ? limit : data.length % limit];
+            System.arraycopy(data, i * limit, body, 0, body.length);
 
-            Frame f = new Frame(payload.length, type, network, packetId, packetSize, payload);
-            out.add(f);
+            out.add(new Frame(Frame.VERSION, Frame.COMPRESS_NONE, packetType, packetId, packetSize, body.length, body));
         }
     }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, Frame frame, List<Object> out) throws Exception {
-        if (frame.isSingleFrame()) {
-            Message msg = decodeMessage(Collections.singletonList(frame));
-
-            if (msg == null) {
-                logger.debug("Failed to decode packet into message: {}", frame);
-            } else {
-                out.add(msg);
-            }
-        } else {
+        if (frame.isChunked()) {
             synchronized (incompletePackets) {
                 int packetId = frame.getPacketId();
                 Pair<List<Frame>, AtomicInteger> pair = incompletePackets.getIfPresent(packetId);
@@ -96,42 +89,58 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
                 }
 
                 pair.getLeft().add(frame);
-                int remaining = pair.getRight().addAndGet(-frame.getSize());
+                int remaining = pair.getRight().addAndGet(-frame.getBodySize());
                 if (remaining == 0) {
                     Message msg = decodeMessage(pair.getLeft());
 
                     if (msg == null) {
-                        logger.debug("Failed to decode packets into message, 1st/{}: {}", pair.getLeft().size(), frame);
+                        throw new IOException("Failed to decode packet: pid = " + frame.getPacketId());
                     } else {
                         out.add(msg);
                     }
 
                     // remove complete packets from cache
                     incompletePackets.invalidate(packetId);
+
                 } else if (remaining < 0) {
-                    logger.debug("Corrupted packet, packetId: {}", packetId);
-                    incompletePackets.invalidate(packetId);
+                    throw new IOException("Packet remaining size went to negative");
                 }
+            }
+        } else {
+            Message msg = decodeMessage(Collections.singletonList(frame));
+
+            if (msg == null) {
+                throw new IOException("Failed to decode packet: pid = " + frame.getPacketId());
+            } else {
+                out.add(msg);
             }
         }
     }
 
-    private Message decodeMessage(List<Frame> frames) {
+    /**
+     * Decode message from the frames.
+     * 
+     * @param frames
+     * @return
+     */
+    protected Message decodeMessage(List<Frame> frames) {
         if (frames == null || frames.isEmpty()) {
             return null;
         }
         Frame head = frames.get(0);
 
-        byte type = head.getType();
+        byte packetType = head.getPacketType();
         int packetSize = head.getPacketSize();
 
-        byte[] buffer = new byte[packetSize];
+        byte[] data = new byte[packetSize];
         int pos = 0;
         for (Frame frame : frames) {
-            System.arraycopy(frame.getPayload(), 0, buffer, pos, frame.getSize());
-            pos += frame.getSize();
+            System.arraycopy(frame.getBody(), 0, data, pos, frame.getBodySize());
+            pos += frame.getBodySize();
         }
 
-        return messageFactory.create(type, buffer);
+        // TODO: uncompress data
+
+        return messageFactory.create(packetType, data);
     }
 }
