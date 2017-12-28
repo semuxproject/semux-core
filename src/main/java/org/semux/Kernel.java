@@ -8,12 +8,14 @@ package org.semux;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
 import org.semux.api.SemuxAPI;
@@ -59,7 +61,12 @@ public class Kernel {
 
     protected static final Logger logger = LoggerFactory.getLogger(Kernel.class);
 
-    protected final AtomicBoolean isRunning = new AtomicBoolean(false);
+    public enum State {
+        STOPPED, BOOTING, RUNNING, STOPPING
+    }
+
+    protected State state = State.STOPPED;
+    protected List<Pair<String, Runnable>> shutdownHooks = new CopyOnWriteArrayList<>();
 
     protected ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
     protected Config config = null;
@@ -102,8 +109,10 @@ public class Kernel {
      * Start the kernel.
      */
     public synchronized void start() {
-        if (isRunning.get()) {
+        if (state != State.STOPPED) {
             return;
+        } else {
+            state = State.BOOTING;
         }
 
         // ====================================
@@ -168,8 +177,7 @@ public class Kernel {
         // ====================================
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "shutdown-hook"));
 
-        // set flag
-        isRunning.set(true);
+        state = State.RUNNING;
     }
 
     /**
@@ -240,49 +248,73 @@ public class Kernel {
      * Stops the kernel.
      */
     public synchronized void stop() {
-        // set the flag first to stop the GUI from refreshing
-        if (isRunning.compareAndSet(true, false)) {
-
-            // stop consensus
-            try {
-                sync.stop();
-                cons.stop();
-
-                // make sure consensus thread is fully stopped
-                consThread.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                logger.error("Failed to stop sync/consensus properly");
-            }
-
-            // stop API and p2p
-            api.stop();
-            p2p.stop();
-
-            // stop pending manager and node manager
-            pendingMgr.stop();
-            nodeMgr.stop();
-
-            // close client
-            client.close();
-
-            // make sure no thread is reading/writing the state
-            ReentrantReadWriteLock.WriteLock lock = stateLock.writeLock();
-            lock.lock();
-            for (DBName name : DBName.values()) {
-                dbFactory.getDB(name).close();
-            }
-            lock.unlock();
+        if (state != State.RUNNING) {
+            return;
+        } else {
+            state = State.STOPPING;
         }
+
+        // shutdown hooks
+        for (Pair<String, Runnable> r : shutdownHooks) {
+            try {
+                logger.info("Shutting down {}", r.getLeft());
+                r.getRight().run();
+            } catch (Exception e) {
+                logger.info("Failed to shutdown {}", r.getLeft(), e);
+            }
+        }
+
+        // stop consensus
+        try {
+            sync.stop();
+            cons.stop();
+
+            // make sure consensus thread is fully stopped
+            consThread.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Failed to stop sync/consensus properly");
+        }
+
+        // stop API and p2p
+        api.stop();
+        p2p.stop();
+
+        // stop pending manager and node manager
+        pendingMgr.stop();
+        nodeMgr.stop();
+
+        // close client
+        client.close();
+
+        // make sure no thread is reading/writing the state
+        ReentrantReadWriteLock.WriteLock lock = stateLock.writeLock();
+        lock.lock();
+        for (DBName name : DBName.values()) {
+            dbFactory.getDB(name).close();
+        }
+        lock.unlock();
+
+        state = State.STOPPED;
     }
 
     /**
-     * Returns whether the kernel is running
+     * Registers a shutdown hook.
+     * 
+     * @param name
+     * @param runnable
+     */
+    public void reigsterShutdownHook(String name, Runnable runnable) {
+        shutdownHooks.add(Pair.of(name, runnable));
+    }
+
+    /**
+     * Returns the kernel state.
      *
      * @return
      */
-    public boolean isRunning() {
-        return isRunning.get();
+    public State state() {
+        return state;
     }
 
     /**

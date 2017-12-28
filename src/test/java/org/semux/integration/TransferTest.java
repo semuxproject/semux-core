@@ -34,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.IntegrationTest;
+import org.semux.Kernel.State;
 import org.semux.KernelMock;
 import org.semux.api.response.GetAccountResponse;
 import org.semux.api.response.GetAccountTransactionsResponse;
@@ -132,11 +133,10 @@ public class TransferTest {
     @Test
     public void testTransfer() throws IOException {
         // wait
-        await().until(() -> kernelValidator.isRunning()
-                && kernelPremine.isRunning()
-                && kernelReceiver.isRunning()
-                && kernelPremine.getChannelManager().getActivePeers().size() > 0 // ensure there are active peers
-                && kernelPremine.getApi().isRunning());
+        await().until(() -> kernelValidator.state() == State.RUNNING
+                && kernelPremine.state() == State.RUNNING
+                && kernelReceiver.state() == State.RUNNING
+                && kernelPremine.getChannelManager().getActivePeers().size() > 0); // ensure there are active peers
 
         // make transaction
         final long value = 1000 * Unit.SEM;
