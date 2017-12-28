@@ -80,7 +80,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 JTable sourceTable = (JTable) me.getSource();
                 Point p = me.getPoint();
                 int row = sourceTable.rowAtPoint(p);
-                if (me.getClickCount() == 2) {
+                if (me.getClickCount() == 2 && row != -1) {
                     Transaction tx = tableModel.getRow(sourceTable.convertRowIndexToModel(row));
                     if (tx != null) {
                         TransactionDialog dialog = new TransactionDialog(frame, tx);

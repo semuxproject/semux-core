@@ -108,7 +108,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 JTable sourceTable = (JTable) me.getSource();
                 Point p = me.getPoint();
                 int row = sourceTable.rowAtPoint(p);
-                if (me.getClickCount() == 2) {
+                if (me.getClickCount() == 2 && row != -1) {
                     WalletDelegate d = tableModel.getRow(sourceTable.convertRowIndexToModel(row));
                     if (d != null) {
                         DelegateDialog dialog = new DelegateDialog(gui, frame, d);
