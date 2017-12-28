@@ -277,20 +277,10 @@ public class SemuxGUI extends Launcher {
         }
 
         // stop data refresh thread
-        try {
-            dataThread.interrupt();
-            dataThread.join();
-        } catch (InterruptedException e) {
-            logger.info("Failed to stop GUI data thread");
-        }
+        dataThread.interrupt();
 
         // stop main thread
-        try {
-            versionThread.interrupt();
-            versionThread.join();
-        } catch (InterruptedException e) {
-            logger.info("Failed to stop GUI version thread");
-        }
+        versionThread.interrupt();
 
         // close window
         main.dispose();
