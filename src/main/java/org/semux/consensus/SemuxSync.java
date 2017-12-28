@@ -98,8 +98,11 @@ public class SemuxSync implements SyncManager {
     private Map<Long, Long> toComplete = new HashMap<>();
     private TreeSet<Pair<Block, Channel>> toProcess = new TreeSet<>(
             Comparator.comparingLong(o -> o.getKey().getNumber()));
-    private AtomicLong target = new AtomicLong();
     private final Object lock = new Object();
+
+    // current and target heights
+    private AtomicLong current = new AtomicLong();
+    private AtomicLong target = new AtomicLong();
 
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
@@ -124,6 +127,7 @@ public class SemuxSync implements SyncManager {
                 toComplete.clear();
                 toProcess.clear();
 
+                current.set(chain.getLatestBlockNumber() + 1);
                 target.set(targetHeight);
                 for (long i = chain.getLatestBlockNumber() + 1; i < target.get(); i++) {
                     toDownload.add(i);
@@ -420,12 +424,13 @@ public class SemuxSync implements SyncManager {
             writeLock.unlock();
         }
 
+        current.set(block.getNumber());
         return true;
     }
 
     @Override
     public SemuxSyncProgress getProgress() {
-        return new SemuxSyncProgress(chain.getLatestBlockNumber() + 1, target.get());
+        return new SemuxSyncProgress(current.get(), target.get());
     }
 
     public static class SemuxSyncProgress implements SyncManager.Progress {
