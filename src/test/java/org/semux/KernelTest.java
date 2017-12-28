@@ -10,6 +10,7 @@ import static org.awaitility.Awaitility.await;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.semux.Kernel.State;
 import org.semux.rules.KernelRule;
 
 public class KernelTest {
@@ -32,7 +33,7 @@ public class KernelTest {
 
         // stop kernel
         kernel.stop();
-        await().until(() -> !kernel.isRunning() //
+        await().until(() -> kernel.state == State.STOPPED//
                 && !kernel.getNodeManager().isRunning() //
                 && !kernel.getPendingManager().isRunning() //
                 && !kernel.getApi().isRunning() //

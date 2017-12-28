@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -69,6 +68,11 @@ public class SemuxGUI extends Launcher {
     protected WalletModel model;
     protected Kernel kernel;
 
+    protected boolean isRunning;
+    protected JFrame main;
+    protected Thread dataThread;
+    protected Thread versionThread;
+
     public static void main(String[] args) {
         try {
             setupLookAndFeel();
@@ -78,6 +82,7 @@ public class SemuxGUI extends Launcher {
             gui.setupLogger(args);
             // start
             gui.start(args);
+
         } catch (ParseException e) {
             JOptionPane.showMessageDialog(null, "Filed to parse the parameters: " + e.getMessage());
         }
@@ -227,7 +232,11 @@ public class SemuxGUI extends Launcher {
     /**
      * Starts the kernel and shows main frame.
      */
-    public void startKernelAndMain(Wallet wallet) {
+    public synchronized void startKernelAndMain(Wallet wallet) {
+        if (isRunning) {
+            return;
+        }
+
         // set up model
         model = new WalletModel(new AddressBook(new File(getDataDir(), "addressbook.json")));
         model.setCoinbase(getCoinbase());
@@ -241,15 +250,52 @@ public class SemuxGUI extends Launcher {
 
         // start main frame
         EventQueue.invokeLater(() -> {
-            MainFrame frame = new MainFrame(this);
-            frame.setVisible(true);
+            main = new MainFrame(this);
+            main.setVisible(true);
         });
 
         // start data refresh
-        new Thread(this::updateModel, "gui-data").start();
+        dataThread = new Thread(this::updateModel, "gui-data");
+        dataThread.start();
 
         // start version check
-        new Thread(this::checkVersion, "gui-version").start();
+        versionThread = new Thread(this::checkVersion, "gui-version");
+        versionThread.start();
+
+        // register shutdown hook
+        kernel.reigsterShutdownHook("GUI", this::stop);
+
+        isRunning = true;
+    }
+
+    /**
+     * Disposes the GUI and release any open resources.
+     */
+    public synchronized void stop() {
+        if (!isRunning) {
+            return;
+        }
+
+        // stop data refresh thread
+        try {
+            dataThread.interrupt();
+            dataThread.join();
+        } catch (InterruptedException e) {
+            logger.info("Failed to stop GUI data thread");
+        }
+
+        // stop main thread
+        try {
+            versionThread.interrupt();
+            versionThread.join();
+        } catch (InterruptedException e) {
+            logger.info("Failed to stop GUI version thread");
+        }
+
+        // close window
+        main.dispose();
+
+        isRunning = false;
     }
 
     /**
@@ -260,6 +306,7 @@ public class SemuxGUI extends Launcher {
             try {
                 Thread.sleep(5L * 60L * 1000L);
 
+                // compare version
                 String v = getMinVersion();
                 if (v != null && SystemUtil.compareVersion(Constants.CLIENT_VERSION, v) < 0) {
                     JOptionPane.showMessageDialog(null, GUIMessages.get("WalletNeedToBeUpgraded"));
@@ -278,23 +325,15 @@ public class SemuxGUI extends Launcher {
     protected void updateModel() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Thread.sleep(3000L);
+                Thread.sleep(3L * 1000L);
+
+                // process latest block
+                processBlock(kernel.getBlockchain().getLatestBlock());
             } catch (InterruptedException e) {
                 logger.info("Data refresh interrupted, exiting");
                 Thread.currentThread().interrupt();
                 break;
             }
-
-            // stops if kernel stops
-            if (!kernel.isRunning()) {
-                break;
-            }
-
-            // necessary because when kernel exists, the GUI component is not closed.
-            ReadLock lock = kernel.getStateLock().readLock();
-            lock.lock();
-            processBlock(kernel.getBlockchain().getLatestBlock());
-            lock.unlock();
         }
     }
 
