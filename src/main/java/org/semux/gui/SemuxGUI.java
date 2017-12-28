@@ -282,9 +282,6 @@ public class SemuxGUI extends Launcher {
         // stop main thread
         versionThread.interrupt();
 
-        // close window
-        main.dispose();
-
         isRunning = false;
     }
 
