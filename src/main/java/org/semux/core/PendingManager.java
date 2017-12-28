@@ -214,6 +214,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                     break;
                 } else {
                     txs.add(tx);
+                    size += tx.transaction.size();
                 }
             }
         }
