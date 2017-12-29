@@ -15,10 +15,9 @@ public class GetVoteResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final Long vote;
 
-    public GetVoteResponse( //
-            @JsonProperty("success") Boolean success, //
-            @JsonProperty("result") Long vote //
-    ) {
+    public GetVoteResponse(
+            @JsonProperty("success") Boolean success,
+            @JsonProperty("result") Long vote) {
         super(success, null);
         this.vote = vote;
     }

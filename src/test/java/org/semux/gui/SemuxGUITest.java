@@ -45,9 +45,9 @@ public class SemuxGUITest {
         Mockito.doNothing().when(gui).showUnlock(any());
         Mockito.doNothing().when(gui).showWelcome(any());
 
-        String[] args = new String[] { //
-                "--datadir", kernelRule.getKernel().getConfig().dataDir().getAbsolutePath(), //
-                "--network", "mainnet" //
+        String[] args = new String[] {
+                "--datadir", kernelRule.getKernel().getConfig().dataDir().getAbsolutePath(),
+                "--network", "mainnet"
         };
         gui.start(args);
 

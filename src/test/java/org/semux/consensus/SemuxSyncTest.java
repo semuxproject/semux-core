@@ -45,14 +45,13 @@ public class SemuxSyncTest {
         EdDSA from1 = new EdDSA();
         long time = System.currentTimeMillis();
         Transaction tx1 = new Transaction(
-                TransactionType.TRANSFER, //
-                to.toAddress(), //
-                10 * Unit.SEM, //
-                kernelRule.getKernel().getConfig().minTransactionFee(), //
-                0, //
-                time, //
-                Bytes.EMPTY_BYTES //
-        ).sign(from1);
+                TransactionType.TRANSFER,
+                to.toAddress(),
+                10 * Unit.SEM,
+                kernelRule.getKernel().getConfig().minTransactionFee(),
+                0,
+                time,
+                Bytes.EMPTY_BYTES).sign(from1);
         kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
         kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), 1000 * Unit.SEM);
         Block block1 = kernelRule.createBlock(Arrays.asList(tx1));
@@ -65,14 +64,13 @@ public class SemuxSyncTest {
         EdDSA from2 = new EdDSA();
         kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from2.toAddress(), 1000 * Unit.SEM);
         Transaction tx2 = new Transaction(
-                TransactionType.TRANSFER, //
-                to.toAddress(), //
-                10 * Unit.SEM, //
-                kernelRule.getKernel().getConfig().minTransactionFee(), //
-                0, //
-                time, //
-                Bytes.EMPTY_BYTES //
-        ).sign(from2);
+                TransactionType.TRANSFER,
+                to.toAddress(),
+                10 * Unit.SEM,
+                kernelRule.getKernel().getConfig().minTransactionFee(),
+                0,
+                time,
+                Bytes.EMPTY_BYTES).sign(from2);
         Block block2 = kernelRule.createBlock(Arrays.asList(tx2));
 
         // this test case is valid if and only if tx1 and tx2 have the same tx hash

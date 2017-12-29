@@ -51,11 +51,11 @@ public class Peer {
     }
 
     public boolean validate() {
-        return ip != null && ip.length() <= 128 //
-                && port >= 0 //
-                && networkVersion >= 0 //
-                && clientId != null && clientId.length() < 128 //
-                && peerId != null && peerId.length() == 40 //
+        return ip != null && ip.length() <= 128
+                && port >= 0
+                && networkVersion >= 0
+                && clientId != null && clientId.length() < 128
+                && peerId != null && peerId.length() == 40
                 && latestBlockNumber >= 0;
     }
 

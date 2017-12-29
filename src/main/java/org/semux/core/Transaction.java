@@ -116,19 +116,19 @@ public class Transaction implements Callable<Boolean> {
      * @return true if success, otherwise false
      */
     public boolean validate() {
-        return hash != null && hash.length == 32 //
-                && type != null //
-                && to != null && to.length == EdDSA.ADDRESS_LEN //
-                && value >= 0 //
-                && fee >= 0 //
-                && nonce >= 0 //
-                && timestamp > 0 //
-                && data != null //
-                && encoded != null //
-                && signature != null //
+        return hash != null && hash.length == 32
+                && type != null
+                && to != null && to.length == EdDSA.ADDRESS_LEN
+                && value >= 0
+                && fee >= 0
+                && nonce >= 0
+                && timestamp > 0
+                && data != null
+                && encoded != null
+                && signature != null
 
-                && Arrays.equals(Hash.h256(encoded), hash) //
-                && EdDSA.verify(hash, signature); //
+                && Arrays.equals(Hash.h256(encoded), hash)
+                && EdDSA.verify(hash, signature);
     }
 
     /**

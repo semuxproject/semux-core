@@ -138,9 +138,9 @@ public class Block {
      * @return
      */
     public static boolean validateHeader(BlockHeader previous, BlockHeader header) {
-        return header != null && header.validate() //
-                && header.getNumber() == previous.getNumber() + 1 //
-                && Arrays.equals(header.getParentHash(), previous.getHash()) //
+        return header != null && header.validate()
+                && header.getNumber() == previous.getNumber() + 1
+                && Arrays.equals(header.getParentHash(), previous.getHash())
                 && header.getTimestamp() > previous.getTimestamp();
     }
 

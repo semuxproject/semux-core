@@ -191,8 +191,8 @@ public class NodeManager {
             Long l = lastConnect.getIfPresent(addr);
             long now = System.currentTimeMillis();
 
-            if (!new InetSocketAddress(client.getIp(), client.getPort()).equals(addr)//
-                    && !activeAddresses.contains(addr) //
+            if (!new InetSocketAddress(client.getIp(), client.getPort()).equals(addr)
+                    && !activeAddresses.contains(addr)
                     && (l == null || l + RECONNECT_WAIT < now)) {
 
                 SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, addr);

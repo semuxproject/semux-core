@@ -284,7 +284,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      * @return
      */
     private boolean isValid(HelloMessage msg) {
-        return msg.validate(config) //
+        return msg.validate(config)
                 && (config.networkId() == Constants.DEV_NET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
     }
 
@@ -294,7 +294,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      * @return
      */
     private boolean isValid(WorldMessage msg) {
-        return msg.validate(config) //
+        return msg.validate(config)
                 && (config.networkId() == Constants.DEV_NET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
     }
 

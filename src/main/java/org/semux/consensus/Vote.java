@@ -80,11 +80,11 @@ public class Vote {
      * @return
      */
     public boolean validate() {
-        return type != null //
-                && height > 0 //
-                && view >= 0 //
-                && blockHash != null && blockHash.length == 32 //
-                && encoded != null //
+        return type != null
+                && height > 0
+                && view >= 0
+                && blockHash != null && blockHash.length == 32
+                && encoded != null
                 && signature != null && EdDSA.verify(encoded, signature);
     }
 

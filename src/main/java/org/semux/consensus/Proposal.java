@@ -81,13 +81,13 @@ public class Proposal {
      * @return true if success, otherwise false
      */
     public boolean validate() {
-        return getHeight() > 0//
-                && getView() >= 0 //
-                && proof != null //
-                && blockHeader != null //
-                && transactions != null //
-                && proof.getHeight() == blockHeader.getNumber() //
-                && encoded != null//
+        return getHeight() > 0
+                && getView() >= 0
+                && proof != null
+                && blockHeader != null
+                && transactions != null
+                && proof.getHeight() == blockHeader.getNumber()
+                && encoded != null
                 && signature != null && EdDSA.verify(encoded, signature);
     }
 

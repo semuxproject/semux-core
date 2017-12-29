@@ -168,9 +168,8 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @return The processing result
      */
     public synchronized ProcessTransactionResult addTransactionSync(Transaction tx) {
-        return tx.validate() ? //
-                processTransaction(tx, true) : //
-                new ProcessTransactionResult(0, TransactionResult.Error.INVALID_FORMAT);
+        return tx.validate() ? processTransaction(tx, true)
+                : new ProcessTransactionResult(0, TransactionResult.Error.INVALID_FORMAT);
     }
 
     /**
@@ -274,8 +273,8 @@ public class PendingManager implements Runnable, BlockchainListener {
     public synchronized void run() {
         Transaction tx;
 
-        while (pool.size() < POOL_MAX_SIZE //
-                && (tx = queue.poll()) != null //
+        while (pool.size() < POOL_MAX_SIZE
+                && (tx = queue.poll()) != null
                 && tx.getFee() >= kernel.getConfig().minTransactionFee()) {
 
             // reject already executed transactions

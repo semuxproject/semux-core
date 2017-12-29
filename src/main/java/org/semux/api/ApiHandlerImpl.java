@@ -171,9 +171,9 @@ public class ApiHandlerImpl implements ApiHandler {
      * @return
      */
     private ApiHandlerResponse getPeers() {
-        return new GetPeersResponse(true, //
-                kernel.getChannelManager().getActivePeers().parallelStream() //
-                        .map(GetPeersResponse.Result::new) //
+        return new GetPeersResponse(true,
+                kernel.getChannelManager().getActivePeers().parallelStream()
+                        .map(GetPeersResponse.Result::new)
                         .collect(Collectors.toList()));
     }
 
@@ -249,10 +249,10 @@ public class ApiHandlerImpl implements ApiHandler {
      * @return
      */
     private ApiHandlerResponse getPendingTransactions() {
-        return new GetPendingTransactionsResponse(true, //
-                kernel.getPendingManager().getTransactions().parallelStream() //
-                        .map(pendingTransaction -> pendingTransaction.transaction) //
-                        .map(GetTransactionResponse.Result::new) //
+        return new GetPendingTransactionsResponse(true,
+                kernel.getPendingManager().getTransactions().parallelStream()
+                        .map(pendingTransaction -> pendingTransaction.transaction)
+                        .map(GetTransactionResponse.Result::new)
                         .collect(Collectors.toList()));
     }
 
@@ -293,8 +293,8 @@ public class ApiHandlerImpl implements ApiHandler {
         }
 
         return new GetAccountTransactionsResponse(true,
-                kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream() //
-                        .map(GetTransactionResponse.Result::new) //
+                kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream()
+                        .map(GetTransactionResponse.Result::new)
                         .collect(Collectors.toList()));
     }
 
@@ -545,8 +545,8 @@ public class ApiHandlerImpl implements ApiHandler {
      * @return
      */
     private ApiHandlerResponse listAccounts() {
-        return new ListAccountsResponse(true, kernel.getWallet().getAccounts().parallelStream() //
-                .map(acc -> Hex.PREF + acc.toAddressString()) //
+        return new ListAccountsResponse(true, kernel.getWallet().getAccounts().parallelStream()
+                .map(acc -> Hex.PREF + acc.toAddressString())
                 .collect(Collectors.toList()));
     }
 
@@ -608,11 +608,11 @@ public class ApiHandlerImpl implements ApiHandler {
 
         // [3] build and send the transaction to PendingManager
         try {
-            TransactionBuilder transactionBuilder = new TransactionBuilder(kernel, type) //
-                    .withFrom(params.get("from")) //
-                    .withTo(params.get("to")) //
-                    .withValue(params.get("value")) //
-                    .withFee(params.get("fee")) //
+            TransactionBuilder transactionBuilder = new TransactionBuilder(kernel, type)
+                    .withFrom(params.get("from"))
+                    .withTo(params.get("to"))
+                    .withValue(params.get("value"))
+                    .withFee(params.get("fee"))
                     .withData(params.get("data"));
 
             Transaction tx = transactionBuilder.build();

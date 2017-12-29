@@ -63,12 +63,11 @@ public abstract class AbstractConfig implements Config {
     protected int netRelayRedundancy = 16;
     protected int netHandshakeExpiry = 5 * 60 * 1000;
     protected int netChannelIdleTimeout = 2 * 60 * 1000;
-    protected Set<MessageCode> netPrioritizedMessages = new HashSet<>(Arrays.asList( //
-            MessageCode.BFT_NEW_HEIGHT, //
-            MessageCode.BFT_NEW_VIEW, //
-            MessageCode.BFT_PROPOSAL, //
-            MessageCode.BFT_VOTE //
-    ));
+    protected Set<MessageCode> netPrioritizedMessages = new HashSet<>(Arrays.asList(
+            MessageCode.BFT_NEW_HEIGHT,
+            MessageCode.BFT_NEW_VIEW,
+            MessageCode.BFT_PROPOSAL,
+            MessageCode.BFT_VOTE));
 
     // =========================
     // API

@@ -17,10 +17,9 @@ public class GetDelegatesResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final List<GetDelegateResponse.Result> delegateResults;
 
-    public GetDelegatesResponse( //
-            @JsonProperty("success") Boolean success, //
-            @JsonProperty("result") List<GetDelegateResponse.Result> delegateResults //
-    ) {
+    public GetDelegatesResponse(
+            @JsonProperty("success") Boolean success,
+            @JsonProperty("result") List<GetDelegateResponse.Result> delegateResults) {
         super(success, null);
         this.delegateResults = delegateResults;
     }

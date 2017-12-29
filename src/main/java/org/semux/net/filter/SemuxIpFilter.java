@@ -152,9 +152,8 @@ public class SemuxIpFilter {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public static SemuxIpFilter jsonCreator( //
-            @JsonProperty(value = "rules", required = true //
-            ) List<FilterRule> rules) {
+    public static SemuxIpFilter jsonCreator(
+            @JsonProperty(value = "rules", required = true) List<FilterRule> rules) {
         return new SemuxIpFilter(rules);
     }
 
