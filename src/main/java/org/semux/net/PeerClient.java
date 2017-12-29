@@ -64,7 +64,8 @@ public class PeerClient {
      * @param coinbase
      */
     public PeerClient(Config config, EdDSA coinbase) {
-        this(config.p2pDeclaredIp().orElse(SystemUtil.getIp()), config.p2pListenPort(), coinbase);
+        this(config.p2pDeclaredIp().orElse(InetAddress.getLoopbackAddress().getHostAddress()), config.p2pListenPort(),
+                coinbase);
 
         if (!config.p2pDeclaredIp().isPresent()) {
             startIpRefresh();
@@ -98,14 +99,14 @@ public class PeerClient {
             String newIp = SystemUtil.getIp();
             try {
                 if (!ip.equals(newIp) && !InetAddress.getByName(newIp).isSiteLocalAddress()) {
-                    logger.info("Noticed IP change: {} => {}", ip, newIp);
+                    logger.info("New IP address detected: {} => {}", ip, newIp);
                     ip = newIp;
                 }
             } catch (UnknownHostException e) {
                 logger.error("The fetched IP address is invalid: {}", newIp);
             }
 
-        }, 15, 30, TimeUnit.SECONDS);
+        }, 0, 30, TimeUnit.SECONDS);
     }
 
     /**

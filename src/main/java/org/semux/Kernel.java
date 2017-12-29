@@ -220,7 +220,8 @@ public class Kernel {
         }
 
         // java version
-        logger.info("Java: version = {}", Runtime.class.getPackage().getImplementationVersion());
+        logger.info("Java: version = {}, xms = {} MB", System.getProperty("java.version"),
+                Runtime.getRuntime().maxMemory() / mb);
     }
 
     /**
