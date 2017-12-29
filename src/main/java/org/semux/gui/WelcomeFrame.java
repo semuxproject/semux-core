@@ -39,9 +39,9 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private JPasswordField passwordField;
-    private JPasswordField repeatField;
-    private JLabel lblRepeat;
+    private JPasswordField txtPassword;
+    private JPasswordField txtPasswordRepeat;
+    private JLabel lblPasswordRepeat;
     private JRadioButton btnCreate;
     private JRadioButton btnImport;
 
@@ -77,6 +77,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         ButtonGroup buttonGroup = new ButtonGroup();
 
         btnCreate = new JRadioButton(GUIMessages.get("CreateNewAccount"));
+        btnCreate.setName("btnCreate");
         btnCreate.setSelected(true);
         btnCreate.setBackground(color);
         btnCreate.setActionCommand(Action.CREATE_ACCOUNT.name());
@@ -85,6 +86,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         panel.add(btnCreate);
 
         btnImport = new JRadioButton(GUIMessages.get("ImportAccountsFromBackupFile"));
+        btnImport.setName("btnImport");
         btnImport.setBackground(color);
         btnImport.setActionCommand(Action.RECOVER_ACCOUNTS.name());
         btnImport.addActionListener(this);
@@ -93,19 +95,23 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
         // create buttons
         JButton btnCancel = SwingUtil.createDefaultButton(GUIMessages.get("Cancel"), this, Action.CANCEL);
+        btnCancel.setName("btnCancel");
 
         JButton btnNext = SwingUtil.createDefaultButton(GUIMessages.get("Next"), this, Action.OK);
+        btnNext.setName("btnNext");
         btnNext.setSelected(true);
 
         JLabel lblPassword = new JLabel(GUIMessages.get("Password") + ":");
-        passwordField = new JPasswordField();
-        passwordField.setActionCommand(Action.OK.name());
-        passwordField.addActionListener(this);
+        txtPassword = new JPasswordField();
+        txtPassword.setName("txtPassword");
+        txtPassword.setActionCommand(Action.OK.name());
+        txtPassword.addActionListener(this);
 
-        lblRepeat = new JLabel(GUIMessages.get("RepeatPassword") + ":");
-        repeatField = new JPasswordField();
-        repeatField.setActionCommand(Action.OK.name());
-        repeatField.addActionListener(this);
+        lblPasswordRepeat = new JLabel(GUIMessages.get("RepeatPassword") + ":");
+        txtPasswordRepeat = new JPasswordField();
+        txtPasswordRepeat.setName("txtPasswordRepeat");
+        txtPasswordRepeat.setActionCommand(Action.OK.name());
+        txtPasswordRepeat.addActionListener(this);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this.getContentPane());
@@ -123,15 +129,15 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                             .addComponent(banner, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE)
                             .addGap(18)
                             .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                                .addComponent(lblRepeat)
+                                .addComponent(lblPasswordRepeat)
                                 .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                                         .addComponent(panel, GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
                                         .addComponent(lblPassword)
                                         .addComponent(description, GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE))
                                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
-                                        .addComponent(repeatField, Alignment.LEADING)
-                                        .addComponent(passwordField, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE))))))
+                                        .addComponent(txtPasswordRepeat, Alignment.LEADING)
+                                        .addComponent(txtPassword, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE))))))
                     .addGap(32))
         );
         groupLayout.setVerticalGroup(
@@ -146,11 +152,11 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                             .addGap(20)
                             .addComponent(lblPassword)
                             .addPreferredGap(ComponentPlacement.RELATED)
-                            .addComponent(passwordField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtPassword, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(ComponentPlacement.UNRELATED)
-                            .addComponent(lblRepeat)
+                            .addComponent(lblPasswordRepeat)
                             .addPreferredGap(ComponentPlacement.RELATED)
-                            .addComponent(repeatField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txtPasswordRepeat, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
                         .addGroup(groupLayout.createSequentialGroup()
                             .addGap(10)
                             .addComponent(banner, GroupLayout.PREFERRED_SIZE, 293, GroupLayout.PREFERRED_SIZE)))
@@ -217,9 +223,10 @@ public class WelcomeFrame extends JFrame implements ActionListener {
      * When the CREATE_ACCOUNT option is selected.
      */
     protected void createAccount() {
-        backupFile = null;
-        repeatField.setVisible(true);
-        lblRepeat.setVisible(true);
+        setBackupFile(null);
+
+        txtPasswordRepeat.setVisible(true);
+        lblPasswordRepeat.setVisible(true);
     }
 
     /**
@@ -231,9 +238,9 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         chooser.setFileFilter(new FileNameExtensionFilter(GUIMessages.get("WalletBinaryFormat"), "data"));
         int ret = chooser.showOpenDialog(this);
         if (ret == JFileChooser.APPROVE_OPTION) {
-            backupFile = chooser.getSelectedFile();
-            repeatField.setVisible(false);
-            lblRepeat.setVisible(false);
+            setBackupFile(chooser.getSelectedFile());
+            txtPasswordRepeat.setVisible(false);
+            lblPasswordRepeat.setVisible(false);
         } else {
             btnCreate.setSelected(true);
         }
@@ -243,9 +250,9 @@ public class WelcomeFrame extends JFrame implements ActionListener {
      * When the OK button is clicked.
      */
     protected void ok() {
-        String password = new String(passwordField.getPassword());
-        String repeat = new String(repeatField.getPassword());
-        if (repeatField.isVisible() && !password.equals(repeat)) {
+        String password = new String(txtPassword.getPassword());
+        String passwordRepeat = new String(txtPasswordRepeat.getPassword());
+        if (txtPasswordRepeat.isVisible() && !password.equals(passwordRepeat)) {
             JOptionPane.showMessageDialog(this, GUIMessages.get("RepeatPasswordError"));
             return;
         }
@@ -254,14 +261,14 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             return;
         }
 
-        if (backupFile == null) {
+        if (getBackupFile() == null) {
             EdDSA key = new EdDSA();
             wallet.addAccount(key);
             wallet.flush();
 
             done();
         } else {
-            Wallet w = new Wallet(backupFile);
+            Wallet w = new Wallet(getBackupFile());
 
             if (!w.unlock(password)) {
                 JOptionPane.showMessageDialog(this, GUIMessages.get("BackupUnlockFailed"));
@@ -274,5 +281,13 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                 done();
             }
         }
+    }
+
+    protected void setBackupFile(File file) {
+        backupFile = file;
+    }
+
+    protected File getBackupFile() {
+        return backupFile;
     }
 }

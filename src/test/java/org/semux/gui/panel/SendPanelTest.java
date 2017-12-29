@@ -119,11 +119,11 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
         window.show().requireVisible().moveToFront();
 
         // fill form
-        window.textBox("toText").requireVisible().requireEditable().setText(Hex.encode0x(recipient.toAddress()))
+        window.textBox("txtTo").requireVisible().requireEditable().setText(Hex.encode0x(recipient.toAddress()))
                 .requireText(Hex.encode0x(recipient.toAddress()));
-        window.textBox("amountText").requireVisible().requireEditable()
+        window.textBox("txtAmount").requireVisible().requireEditable()
                 .setText(toSendSEM == null ? "" : String.valueOf(toSendSEM))
                 .requireText(toSendSEM == null ? "" : String.valueOf(toSendSEM));
-        window.button("sendButton").requireVisible().click();
+        window.button("btnSend").requireVisible().click();
     }
 }

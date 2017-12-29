@@ -54,7 +54,7 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    public void testCopyAddress() {
+    public void testTransactions() {
         EdDSA key = new EdDSA();
         WalletAccount acc = spy(new WalletAccount(key, new Account(key.toAddress(), 1, 1, 1)));
 
