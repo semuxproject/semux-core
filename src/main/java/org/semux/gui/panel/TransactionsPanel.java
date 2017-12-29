@@ -66,6 +66,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         tableModel = new TransactionsTableModel();
         table = new JTable(tableModel);
+        table.setName("transactionsTable");
         table.setBackground(Color.WHITE);
         table.setFillsViewportHeight(true);
         table.setGridColor(Color.LIGHT_GRAY);
