@@ -110,17 +110,17 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
         switch (action) {
         case OK: {
             String oldPassword = new String(oldPasswordField.getPassword());
-            String password = new String(passwordField.getPassword());
-            String repeat = new String(repeatField.getPassword());
+            String newPassword = new String(passwordField.getPassword());
+            String newPasswordRepeat = new String(repeatField.getPassword());
 
             Wallet wallet = gui.getKernel().getWallet();
 
-            if (!password.equals(repeat)) {
+            if (!newPassword.equals(newPasswordRepeat)) {
                 JOptionPane.showMessageDialog(this, GUIMessages.get("RepeatPasswordError"));
-            } else if (!wallet.getPassword().equals(oldPassword)) {
+            } else if (!wallet.unlock(oldPassword)) {
                 JOptionPane.showMessageDialog(this, GUIMessages.get("IncorrectPassword"));
             } else {
-                wallet.changePassword(password);
+                wallet.changePassword(newPassword);
                 wallet.flush();
                 JOptionPane.showMessageDialog(this, GUIMessages.get("PasswordChanged"));
                 this.dispose();

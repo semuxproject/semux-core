@@ -128,6 +128,10 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * Recovers accounts from backup file.
      */
     protected void recoverAccounts() {
+        if (showErroIfLocked()) {
+            return;
+        }
+
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setFileFilter(new FileNameExtensionFilter(GUIMessages.get("WalletBinaryFormat"), "data"));
@@ -157,6 +161,10 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * Backup the wallet.
      */
     protected void backupWallet() {
+        if (showErroIfLocked()) {
+            return;
+        }
+
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setSelectedFile(new File("wallet.data"));
@@ -186,6 +194,10 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * Imports private key into this wallet.
      */
     protected void importPrivateKey() {
+        if (showErroIfLocked()) {
+            return;
+        }
+
         String pk = new InputDialog(frame, GUIMessages.get("EnterPrivateKey"), false).showAndGet();
         if (pk != null) {
             try {
@@ -208,6 +220,10 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * Shows the export private key dialog.
      */
     protected void exportPrivateKey() {
+        if (showErroIfLocked()) {
+            return;
+        }
+
         ExportPrivateKeyDialog d = new ExportPrivateKeyDialog(gui, frame);
         d.setVisible(true);
     }
@@ -216,6 +232,10 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * Shows the change password dialog.
      */
     protected void changePassword() {
+        if (showErroIfLocked()) {
+            return;
+        }
+
         ChangePasswordDialog d = new ChangePasswordDialog(gui, frame);
         d.setVisible(true);
     }
@@ -225,5 +245,21 @@ public class MenuBar extends JMenuBar implements ActionListener {
      */
     protected void about() {
         JOptionPane.showMessageDialog(frame, gui.getKernel().getConfig().getClientId());
+    }
+
+    /**
+     * Displays an error message if the wallet is locked.
+     * 
+     * @return whether the wallet is locked
+     */
+    protected boolean showErroIfLocked() {
+        Wallet wallet = gui.getKernel().getWallet();
+
+        if (wallet.isLocked()) {
+            JOptionPane.showMessageDialog(frame, GUIMessages.get("WalletLocked"));
+            return true;
+        }
+
+        return false;
     }
 }

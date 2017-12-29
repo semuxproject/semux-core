@@ -39,7 +39,7 @@ public class Wallet {
     private final List<EdDSA> accounts = Collections.synchronizedList(new ArrayList<>());
 
     /**
-     * Create a new wallet instance.
+     * Creates a new wallet instance.
      * 
      * @param file
      *            the wallet file
@@ -49,7 +49,32 @@ public class Wallet {
     }
 
     /**
-     * Unlock this wallet.
+     * Returns whether the wallet file exists and non-empty.
+     * 
+     * @return
+     */
+    public boolean exists() {
+        return file.length() > 0;
+    }
+
+    /**
+     * Deletes the wallet file.
+     */
+    public void delete() throws IOException {
+        Files.delete(file.toPath());
+    }
+
+    /**
+     * Returns the file where the wallet is persisted.
+     * 
+     * @return
+     */
+    public File getFile() {
+        return file;
+    }
+
+    /**
+     * Unlocks this wallet.
      * 
      * @param password
      *            the wallet password
@@ -95,24 +120,9 @@ public class Wallet {
      * Locks the wallet.
      */
     public void lock() {
-        accounts.clear();
         password = null;
-    }
 
-    /**
-     * Returns whether the wallet file exists and non-empty.
-     * 
-     * @return
-     */
-    public boolean exists() {
-        return file.length() > 0;
-    }
-
-    /**
-     * Delete the wallet file.
-     */
-    public void delete() throws IOException {
-        Files.delete(file.toPath());
+        accounts.clear();
     }
 
     /**
@@ -134,25 +144,7 @@ public class Wallet {
     }
 
     /**
-     * Get the number of accounts in the wallet.
-     * 
-     * @return
-     */
-    public int size() {
-        return accounts.size();
-    }
-
-    /**
-     * Returns the file where the wallet is persisted.
-     * 
-     * @return
-     */
-    public File getFile() {
-        return file;
-    }
-
-    /**
-     * Get the password.
+     * Returns the password.
      * 
      * @return
      * @throws WalletLockedException
@@ -164,7 +156,19 @@ public class Wallet {
     }
 
     /**
-     * Get a copy of the accounts inside this wallet.
+     * Returns the number of accounts in the wallet.
+     * 
+     * @return
+     * @throws WalletLockedException
+     */
+    public int size() {
+        requireUnlocked();
+
+        return accounts.size();
+    }
+
+    /**
+     * Returns a copy of the accounts inside this wallet.
      * 
      * @return a list of accounts
      * @throws WalletLockedException
@@ -178,7 +182,7 @@ public class Wallet {
     }
 
     /**
-     * Set the accounts inside this wallet.
+     * Sets the accounts inside this wallet.
      * 
      * DANGER: this method will remove all accounts in this wallet.
      * 
@@ -194,7 +198,7 @@ public class Wallet {
     }
 
     /**
-     * Get account by index.
+     * Returns account by index.
      * 
      * @param idx
      *            account index, starting from 0
@@ -208,7 +212,7 @@ public class Wallet {
     }
 
     /**
-     * Get account by address.
+     * Returns account by address.
      * 
      * @param address
      * @return
@@ -230,7 +234,7 @@ public class Wallet {
     }
 
     /**
-     * Add a new account to the wallet.
+     * Adds a new account to the wallet.
      * 
      * NOTE: you need to call {@link #flush()} to update the wallet on disk.
      * 
@@ -257,7 +261,7 @@ public class Wallet {
     }
 
     /**
-     * Add a list of accounts to the wallet.
+     * Adds a list of accounts to the wallet.
      * 
      * NOTE: you need to call {@link #flush()} to update the wallet on disk.
      *
@@ -266,6 +270,8 @@ public class Wallet {
      * 
      */
     public int addAccounts(List<EdDSA> accounts) throws WalletLockedException {
+        requireUnlocked();
+
         int n = 0;
         for (EdDSA acc : accounts) {
             n += addAccount(acc) ? 1 : 0;
@@ -274,7 +280,7 @@ public class Wallet {
     }
 
     /**
-     * Delete an account in the wallet.
+     * Deletes an account in the wallet.
      * 
      * NOTE: you need to call {@link #flush()} to update the wallet on disk.
      * 
@@ -301,7 +307,7 @@ public class Wallet {
     }
 
     /**
-     * Change the password of the wallet.
+     * Changes the password of the wallet.
      * 
      * NOTE: you need to call {@link #flush()} to update the wallet on disk.
      * 
@@ -320,7 +326,7 @@ public class Wallet {
     }
 
     /**
-     * Flush this wallet into the disk.
+     * Flushes this wallet into the disk.
      *
      * @return true if the wallet has been flushed into disk successfully, otherwise
      *         false
