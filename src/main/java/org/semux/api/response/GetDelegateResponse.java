@@ -9,6 +9,7 @@ package org.semux.api.response;
 import org.semux.api.ApiHandlerResponse;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.state.Delegate;
+import org.semux.crypto.Hex;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -48,8 +49,13 @@ public class GetDelegateResponse extends ApiHandlerResponse {
         public final Long turnsMissed;
 
         public Result(BlockchainImpl.ValidatorStats validatorStats, Delegate delegate) {
-            this(delegate.getAddressString(), delegate.getNameString(), delegate.getRegisteredAt(), delegate.getVotes(),
-                    validatorStats.getBlocksForged(), validatorStats.getTurnsHit(), validatorStats.getTurnsMissed());
+            this(Hex.PREF + delegate.getAddressString(),
+                    delegate.getNameString(),
+                    delegate.getRegisteredAt(),
+                    delegate.getVotes(),
+                    validatorStats.getBlocksForged(),
+                    validatorStats.getTurnsHit(),
+                    validatorStats.getTurnsMissed());
         }
 
         public Result(

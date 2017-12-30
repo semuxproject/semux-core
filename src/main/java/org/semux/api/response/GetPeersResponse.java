@@ -67,8 +67,13 @@ public class GetPeersResponse extends ApiHandlerResponse {
         }
 
         public Result(Peer peer) {
-            this(peer.getIp(), peer.getPort(), peer.getNetworkVersion(), peer.getClientId(),
-                    Hex.PREF + peer.getPeerId(), peer.getLatestBlockNumber(), peer.getLatency());
+            this(peer.getIp(),
+                    peer.getPort(),
+                    peer.getNetworkVersion(),
+                    peer.getClientId(),
+                    Hex.PREF + peer.getPeerId(),
+                    peer.getLatestBlockNumber(),
+                    peer.getLatency());
         }
     }
 }

@@ -45,7 +45,10 @@ public class GetAccountResponse extends ApiHandlerResponse {
         }
 
         public Result(Account account) {
-            this(Hex.encode0x(account.getAddress()), account.getAvailable(), account.getLocked(), account.getNonce());
+            this(Hex.encode0x(account.getAddress()),
+                    account.getAvailable(),
+                    account.getLocked(),
+                    account.getNonce());
         }
     }
 }
