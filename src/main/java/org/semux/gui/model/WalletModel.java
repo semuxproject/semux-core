@@ -45,9 +45,6 @@ public class WalletModel {
 
     private AddressBook addressBook;
 
-    public WalletModel() {
-    }
-
     /**
      * Fires an model update event.
      */
