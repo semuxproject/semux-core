@@ -48,6 +48,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
         this.add(menuFile);
 
         JMenuItem itemExit = new JMenuItem(GUIMessages.get("Exit"));
+        itemExit.setName("itemExit");
         itemExit.setActionCommand(Action.EXIT.name());
         itemExit.addActionListener(this);
         menuFile.add(itemExit);
@@ -55,31 +56,36 @@ public class MenuBar extends JMenuBar implements ActionListener {
         JMenu menuWallet = new JMenu(GUIMessages.get("Wallet"));
         this.add(menuWallet);
 
-        JMenuItem itemChangePwd = new JMenuItem(GUIMessages.get("ChangePassword"));
-        itemChangePwd.setActionCommand(Action.CHANGE_PASSWORD.name());
-        itemChangePwd.addActionListener(this);
-        menuWallet.add(itemChangePwd);
+        JMenuItem itemChangePassword = new JMenuItem(GUIMessages.get("ChangePassword"));
+        itemChangePassword.setName("itemChangePassword");
+        itemChangePassword.setActionCommand(Action.CHANGE_PASSWORD.name());
+        itemChangePassword.addActionListener(this);
+        menuWallet.add(itemChangePassword);
 
         menuWallet.addSeparator();
 
-        JMenuItem itemImport = new JMenuItem(GUIMessages.get("RecoverWallet"));
-        itemImport.setActionCommand(Action.RECOVER_ACCOUNTS.name());
-        itemImport.addActionListener(this);
-        menuWallet.add(itemImport);
+        JMenuItem itemRecover = new JMenuItem(GUIMessages.get("RecoverWallet"));
+        itemRecover.setName("itemRecover");
+        itemRecover.setActionCommand(Action.RECOVER_ACCOUNTS.name());
+        itemRecover.addActionListener(this);
+        menuWallet.add(itemRecover);
 
-        JMenuItem itemBackup = new JMenuItem(GUIMessages.get("BackupWallet"));
-        itemBackup.setActionCommand(Action.BACKUP_WALLET.name());
-        itemBackup.addActionListener(this);
-        menuWallet.add(itemBackup);
+        JMenuItem itemBackupWallet = new JMenuItem(GUIMessages.get("BackupWallet"));
+        itemBackupWallet.setName("itemBackupWallet");
+        itemBackupWallet.setActionCommand(Action.BACKUP_WALLET.name());
+        itemBackupWallet.addActionListener(this);
+        menuWallet.add(itemBackupWallet);
 
         menuWallet.addSeparator();
 
         JMenuItem itemImportPrivateKey = new JMenuItem(GUIMessages.get("ImportPrivateKey"));
+        itemImportPrivateKey.setName("itemImportPrivateKey");
         itemImportPrivateKey.setActionCommand(Action.IMPORT_PRIVATE_KEY.name());
         itemImportPrivateKey.addActionListener(this);
         menuWallet.add(itemImportPrivateKey);
 
         JMenuItem itemExportPrivateKey = new JMenuItem(GUIMessages.get("ExportPrivateKey"));
+        itemExportPrivateKey.setName("itemExportPrivateKey");
         itemExportPrivateKey.setActionCommand(Action.EXPORT_PRIVATE_KEY.name());
         itemExportPrivateKey.addActionListener(this);
         menuWallet.add(itemExportPrivateKey);
@@ -88,6 +94,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
         this.add(menuHelp);
 
         JMenuItem itemAbout = new JMenuItem(GUIMessages.get("About"));
+        itemAbout.setName("itemAbout");
         itemAbout.setActionCommand(Action.ABOUT.name());
         itemAbout.addActionListener(this);
         menuHelp.add(itemAbout);
@@ -122,6 +129,18 @@ public class MenuBar extends JMenuBar implements ActionListener {
         default:
             break;
         }
+    }
+
+    /**
+     * Shows the change password dialog.
+     */
+    protected void changePassword() {
+        if (showErroIfLocked()) {
+            return;
+        }
+
+        ChangePasswordDialog d = new ChangePasswordDialog(gui, frame);
+        d.setVisible(true);
     }
 
     /**
@@ -225,18 +244,6 @@ public class MenuBar extends JMenuBar implements ActionListener {
         }
 
         ExportPrivateKeyDialog d = new ExportPrivateKeyDialog(gui, frame);
-        d.setVisible(true);
-    }
-
-    /**
-     * Shows the change password dialog.
-     */
-    protected void changePassword() {
-        if (showErroIfLocked()) {
-            return;
-        }
-
-        ChangePasswordDialog d = new ChangePasswordDialog(gui, frame);
         d.setVisible(true);
     }
 
