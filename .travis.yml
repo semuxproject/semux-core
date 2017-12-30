@@ -8,7 +8,7 @@ matrix:
       script:
         - mvn license:check
         - mvn formatter:validate
-        - mvn -Djava.awt.headless=false cobertura:cobertura
+        - mvn cobertura:cobertura
       after_success:
         - mvn coveralls:report
 
@@ -17,13 +17,13 @@ matrix:
       sudo: false
       jdk: oraclejdk8
       script:
-        - mvn -Djava.awt.headless=false test
+        - mvn test
 
     # macOS tests
     - os: osx
       osx_image: xcode9.2
       script:
-        - mvn -Djava.awt.headless=false test
+        - mvn test
 
     # Docker tests
     - language: none

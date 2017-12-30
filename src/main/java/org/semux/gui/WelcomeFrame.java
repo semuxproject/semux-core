@@ -238,9 +238,9 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         chooser.setFileFilter(new FileNameExtensionFilter(GUIMessages.get("WalletBinaryFormat"), "data"));
         int ret = chooser.showOpenDialog(this);
         if (ret == JFileChooser.APPROVE_OPTION) {
-            setBackupFile(chooser.getSelectedFile());
             txtPasswordRepeat.setVisible(false);
             lblPasswordRepeat.setVisible(false);
+            setBackupFile(chooser.getSelectedFile());
         } else {
             btnCreate.setSelected(true);
         }
@@ -271,7 +271,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             Wallet w = new Wallet(getBackupFile());
 
             if (!w.unlock(password)) {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("BackupUnlockFailed"));
+                JOptionPane.showMessageDialog(this, GUIMessages.get("UnlockFailed"));
             } else if (w.size() == 0) {
                 JOptionPane.showMessageDialog(this, GUIMessages.get("NoAccountFound"));
             } else {

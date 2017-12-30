@@ -72,7 +72,6 @@ public class WelcomeFrameTest extends AssertJSwingJUnitTestCase {
 
     @Test
     public void testImport() throws IOException {
-
         // mock a wallet
         String password = "abc";
         Wallet w = new Wallet(File.createTempFile("wallet2", ".data"));
@@ -85,10 +84,13 @@ public class WelcomeFrameTest extends AssertJSwingJUnitTestCase {
 
         // select a file
         window.fileChooser().selectFile(w.getFile()).click().approve();
-        frame.setBackupFile(w.getFile()); // FIXME: selectFile() is not working
+
+        // FIXME: selectFile() is not working
+        await().until(() -> frame.getBackupFile() != null);
+        frame.setBackupFile(w.getFile());
 
         // enter password
-        window.textBox("txtPassword").focus().requireEditable().setText(password);
+        window.textBox("txtPassword").requireEditable().setText(password);
 
         // import
         window.button("btnNext").click();
