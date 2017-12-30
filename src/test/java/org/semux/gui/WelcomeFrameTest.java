@@ -84,16 +84,17 @@ public class WelcomeFrameTest extends AssertJSwingJUnitTestCase {
         window.radioButton("btnImport").requireVisible().click();
 
         // select a file
-        window.fileChooser().requireVisible().selectFile(w.getFile()).click().approve();
+        window.fileChooser().selectFile(w.getFile()).click().approve();
+        frame.setBackupFile(w.getFile()); // FIXME: selectFile() is not working
 
         // enter password
-        window.textBox("txtPassword").requireEditable().setText(password);
+        window.textBox("txtPassword").focus().requireEditable().setText(password);
 
         // import
         window.button("btnNext").click();
 
         // assertions
-        await().forever().until(() -> wallet.exists());
+        await().until(() -> wallet.exists());
         assertTrue(wallet.isUnlocked());
         assertEquals(1, wallet.size());
         assertEquals(password, wallet.getPassword());

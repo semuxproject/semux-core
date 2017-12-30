@@ -17,11 +17,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.EdDSA;
+import org.semux.crypto.Hash;
+import org.semux.crypto.Hex;
 
 public class WalletTest {
 
@@ -154,6 +157,27 @@ public class WalletTest {
         wallet.flush();
         wallet.lock();
         wallet.deleteAccount(key);
+    }
+
+    @Test
+    public void testImport() throws IOException {
+        File tmp = File.createTempFile("wallet", ".data");
+        try {
+            String[] names = { "backup_from_linux", "backup_from_macos", "backup_from_windows", };
+            String[] addresses = {
+                    "83b9e57d516fa79df1e33e9056a77703937a6825",
+                    "9f1add63c9ef9e9ca7ba60d6a34ab2372f7ce6e9",
+                    "e8146fc7e810c25ab87331b5190d23ef424a6557"
+            };
+            for (int i = 0; i < names.length; i++) {
+                FileUtils.copyInputStreamToFile(WalletTest.class.getResourceAsStream("/wallet/" + names[i]), tmp);
+                Wallet w = new Wallet(tmp);
+                w.unlock("password");
+                assertEquals(addresses[i], Hex.encode(Hash.h160(w.getAccount(0).getPublicKey())));
+            }
+        } finally {
+            tmp.delete();
+        }
     }
 
     @After
