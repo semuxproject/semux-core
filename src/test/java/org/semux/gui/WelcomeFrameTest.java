@@ -79,15 +79,11 @@ public class WelcomeFrameTest extends AssertJSwingJUnitTestCase {
         w.addAccount(new EdDSA());
         w.flush();
 
-        // click import radio button
-        window.radioButton("btnImport").requireVisible().click();
-
-        // select a file
-        window.fileChooser().selectFile(w.getFile()).click().approve();
-
         // FIXME: selectFile() is not working
-        await().until(() -> frame.getBackupFile() != null);
-        frame.setBackupFile(w.getFile());
+        // window.radioButton("btnImport").requireVisible().click();
+        // window.fileChooser().selectFile(w.getFile()).click().approve();
+
+        GuiActionRunner.execute(() -> frame.selectRecover(w.getFile()));
 
         // enter password
         window.textBox("txtPassword").requireEditable().setText(password);

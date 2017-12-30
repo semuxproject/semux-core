@@ -43,7 +43,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
     private JPasswordField txtPasswordRepeat;
     private JLabel lblPasswordRepeat;
     private JRadioButton btnCreate;
-    private JRadioButton btnImport;
+    private JRadioButton btnRecover;
 
     private transient Wallet wallet;
 
@@ -85,13 +85,13 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         buttonGroup.add(btnCreate);
         panel.add(btnCreate);
 
-        btnImport = new JRadioButton(GUIMessages.get("ImportAccountsFromBackupFile"));
-        btnImport.setName("btnImport");
-        btnImport.setBackground(color);
-        btnImport.setActionCommand(Action.RECOVER_ACCOUNTS.name());
-        btnImport.addActionListener(this);
-        buttonGroup.add(btnImport);
-        panel.add(btnImport);
+        btnRecover = new JRadioButton(GUIMessages.get("ImportAccountsFromBackupFile"));
+        btnRecover.setName("btnRecover");
+        btnRecover.setBackground(color);
+        btnRecover.setActionCommand(Action.RECOVER_ACCOUNTS.name());
+        btnRecover.addActionListener(this);
+        buttonGroup.add(btnRecover);
+        panel.add(btnRecover);
 
         // create buttons
         JButton btnCancel = SwingUtil.createDefaultButton(GUIMessages.get("Cancel"), this, Action.CANCEL);
@@ -223,10 +223,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
      * When the CREATE_ACCOUNT option is selected.
      */
     protected void createAccount() {
-        setBackupFile(null);
-
-        txtPasswordRepeat.setVisible(true);
-        lblPasswordRepeat.setVisible(true);
+        selectCreate();
     }
 
     /**
@@ -238,9 +235,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         chooser.setFileFilter(new FileNameExtensionFilter(GUIMessages.get("WalletBinaryFormat"), "data"));
         int ret = chooser.showOpenDialog(this);
         if (ret == JFileChooser.APPROVE_OPTION) {
-            txtPasswordRepeat.setVisible(false);
-            lblPasswordRepeat.setVisible(false);
-            setBackupFile(chooser.getSelectedFile());
+            selectRecover(chooser.getSelectedFile());
         } else {
             btnCreate.setSelected(true);
         }
@@ -252,7 +247,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
     protected void ok() {
         String password = new String(txtPassword.getPassword());
         String passwordRepeat = new String(txtPasswordRepeat.getPassword());
-        if (txtPasswordRepeat.isVisible() && !password.equals(passwordRepeat)) {
+        if (isCreate() && !password.equals(passwordRepeat)) {
             JOptionPane.showMessageDialog(this, GUIMessages.get("RepeatPasswordError"));
             return;
         }
@@ -261,14 +256,14 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             return;
         }
 
-        if (getBackupFile() == null) {
+        if (isCreate()) {
             EdDSA key = new EdDSA();
             wallet.addAccount(key);
             wallet.flush();
 
             done();
         } else {
-            Wallet w = new Wallet(getBackupFile());
+            Wallet w = new Wallet(backupFile);
 
             if (!w.unlock(password)) {
                 JOptionPane.showMessageDialog(this, GUIMessages.get("UnlockFailed"));
@@ -283,11 +278,26 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         }
     }
 
-    protected void setBackupFile(File file) {
-        backupFile = file;
+    protected boolean isCreate() {
+        return backupFile == null;
     }
 
-    protected File getBackupFile() {
-        return backupFile;
+    protected void selectCreate() {
+        backupFile = null;
+
+        txtPasswordRepeat.setVisible(true);
+        lblPasswordRepeat.setVisible(true);
+        btnCreate.setSelected(true);
+    }
+
+    protected void selectRecover(File file) {
+        if (file == null) {
+            throw new IllegalArgumentException("Selected file can't be null");
+        }
+        backupFile = file;
+
+        txtPasswordRepeat.setVisible(false);
+        lblPasswordRepeat.setVisible(false);
+        btnRecover.setSelected(true);
     }
 }
