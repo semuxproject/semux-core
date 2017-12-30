@@ -17,7 +17,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,21 +34,20 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.semux.core.Block;
 import org.semux.crypto.EdDSA;
-import org.semux.gui.AddressBook;
 import org.semux.net.Peer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WalletModelTest {
 
-    private File file;
-    private AddressBook addressBook;
     private WalletModel model;
 
     @Before
     public void setUp() throws IOException {
-        file = File.createTempFile("addressbook", ".json");
-        addressBook = new AddressBook(file);
-        model = spy(new WalletModel(addressBook));
+        model = spy(new WalletModel());
+    }
+
+    @After
+    public void tearDown() {
     }
 
     @Test
@@ -136,10 +134,5 @@ public class WalletModelTest {
         assertEquals(0, model.getTotalLocked());
         model.setAccounts(Arrays.asList(wa1, wa2));
         assertEquals(3, model.getTotalLocked());
-    }
-
-    @After
-    public void tearDown() {
-        file.delete();
     }
 }

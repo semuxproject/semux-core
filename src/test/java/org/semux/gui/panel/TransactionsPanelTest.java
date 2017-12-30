@@ -32,6 +32,7 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.EdDSA;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
+import org.semux.message.GUIMessages;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
 
@@ -65,6 +66,7 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
                 0,
                 System.currentTimeMillis(),
                 Bytes.EMPTY_BYTES);
+        tx.sign(new EdDSA());
         acc.setTransactions(Collections.singletonList(tx));
 
         // mock walletModel
@@ -83,5 +85,9 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
         window.show().requireVisible().moveToFront();
 
         assertEquals(1, window.table("transactionsTable").rowCount());
+
+        window.table("transactionsTable").cell(TransactionType.TRANSFER.name()).doubleClick();
+        window.dialog().requireVisible();
+        assertEquals(GUIMessages.get("Transaction"), window.dialog().target().getTitle());
     }
 }

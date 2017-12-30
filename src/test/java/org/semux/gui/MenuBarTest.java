@@ -41,6 +41,8 @@ public class MenuBarTest extends AssertJSwingJUnitTestCase {
     protected void onSetUp() {
         frame = GuiActionRunner.execute(() -> new MenuBarTestApplication(walletModel, kernelRule.getKernel()));
 
+        // IMPORTANT: note the call to 'robot()'
+        // we must use the Robot from AssertJSwingJUnitTestCase
         window = new FrameFixture(robot(), frame);
         window.show(); // shows the frame to test
     }
