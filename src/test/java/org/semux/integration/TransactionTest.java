@@ -18,7 +18,6 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -95,8 +94,8 @@ public class TransactionTest {
         when(Genesis.load(any())).thenReturn(genesis);
 
         // mock seed nodes
-        Set<InetSocketAddress> nodes = new HashSet<>();
-        nodes.add(new InetSocketAddress(InetAddress.getByName(kernel1.getConfig().p2pListenIp()),
+        Set<NodeManager.Node> nodes = new HashSet<>();
+        nodes.add(new NodeManager.Node(InetAddress.getByName(kernel1.getConfig().p2pListenIp()),
                 kernel1.getConfig().p2pListenPort()));
         mockStatic(NodeManager.class);
         when(NodeManager.getSeedNodes(Constants.DEV_NET_ID)).thenReturn(nodes);

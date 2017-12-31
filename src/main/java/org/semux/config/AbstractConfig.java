@@ -8,7 +8,6 @@ package org.semux.config;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +18,7 @@ import java.util.Set;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hash;
+import org.semux.net.NodeManager;
 import org.semux.net.msg.MessageCode;
 import org.semux.util.Bytes;
 import org.semux.util.StringUtil;
@@ -51,7 +51,7 @@ public abstract class AbstractConfig implements Config {
     protected String p2pDeclaredIp = null;
     protected String p2pListenIp = "0.0.0.0";
     protected int p2pListenPort = Constants.DEFAULT_P2P_PORT;
-    protected Set<InetSocketAddress> p2pSeedNodes = new HashSet<>();
+    protected Set<NodeManager.Node> p2pSeedNodes = new HashSet<>();
 
     // =========================
     // Network
@@ -224,7 +224,7 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public Set<InetSocketAddress> p2pSeedNodes() {
+    public Set<NodeManager.Node> p2pSeedNodes() {
         return p2pSeedNodes;
     }
 
@@ -373,9 +373,9 @@ public abstract class AbstractConfig implements Config {
                     for (String node : nodes) {
                         String[] tokens = node.trim().split(":");
                         if (tokens.length == 2) {
-                            p2pSeedNodes.add(new InetSocketAddress(tokens[0], Integer.parseInt(tokens[1])));
+                            p2pSeedNodes.add(new NodeManager.Node(tokens[0], Integer.parseInt(tokens[1])));
                         } else {
-                            p2pSeedNodes.add(new InetSocketAddress(tokens[0], Constants.DEFAULT_P2P_PORT));
+                            p2pSeedNodes.add(new NodeManager.Node(tokens[0], Constants.DEFAULT_P2P_PORT));
                         }
                     }
                     break;

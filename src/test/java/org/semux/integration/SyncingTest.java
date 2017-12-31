@@ -15,7 +15,6 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,12 +81,12 @@ public class SyncingTest {
         when(Genesis.load(any())).thenReturn(genesis);
 
         // mock seed nodes
-        Set<InetSocketAddress> nodes = new HashSet<>();
-        nodes.add(new InetSocketAddress(InetAddress.getByName(kernel1.getConfig().p2pListenIp()),
+        Set<NodeManager.Node> nodes = new HashSet<>();
+        nodes.add(new NodeManager.Node(InetAddress.getByName(kernel1.getConfig().p2pListenIp()),
                 kernel1.getConfig().p2pListenPort()));
-        nodes.add(new InetSocketAddress(InetAddress.getByName(kernel2.getConfig().p2pListenIp()),
+        nodes.add(new NodeManager.Node(InetAddress.getByName(kernel2.getConfig().p2pListenIp()),
                 kernel2.getConfig().p2pListenPort()));
-        nodes.add(new InetSocketAddress(InetAddress.getByName(kernel3.getConfig().p2pListenIp()),
+        nodes.add(new NodeManager.Node(InetAddress.getByName(kernel3.getConfig().p2pListenIp()),
                 kernel3.getConfig().p2pListenPort()));
         mockStatic(NodeManager.class);
         when(NodeManager.getSeedNodes(Constants.DEV_NET_ID)).thenReturn(nodes);
