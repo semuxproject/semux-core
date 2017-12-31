@@ -104,16 +104,16 @@ public class BlockHeader {
      * @return true if success, otherwise false
      */
     public boolean validate() {
-        return hash != null && hash.length == HASH_LEN //
-                && number >= 0 //
-                && coinbase != null && coinbase.length == EdDSA.ADDRESS_LEN //
-                && parentHash != null && parentHash.length == HASH_LEN //
-                && timestamp >= 0 //
-                && transactionsRoot != null && transactionsRoot.length == HASH_LEN //
-                && resultsRoot != null && resultsRoot.length == HASH_LEN //
+        return hash != null && hash.length == HASH_LEN
+                && number >= 0
+                && coinbase != null && coinbase.length == EdDSA.ADDRESS_LEN
+                && parentHash != null && parentHash.length == HASH_LEN
+                && timestamp >= 0
+                && transactionsRoot != null && transactionsRoot.length == HASH_LEN
+                && resultsRoot != null && resultsRoot.length == HASH_LEN
                 && stateRoot != null && Arrays.equals(Bytes.EMPTY_HASH, stateRoot) // RESERVED FOR VM
-                && data != null && data.length <= MAX_DATA_SIZE //
-                && encoded != null //
+                && data != null && data.length <= MAX_DATA_SIZE
+                && encoded != null
                 && Arrays.equals(Hash.h256(encoded), hash);
     }
 
