@@ -43,9 +43,9 @@ import org.semux.rules.KernelRule;
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class })
-public class SyncTest {
+public class SyncingTest {
 
-    private static final long PREMINE = 100L * Unit.SEM;
+    private static final long PREMINE = 5000L * Unit.SEM;
 
     @Rule
     KernelRule kernelRule1 = new KernelRule(51610, 51710);
@@ -100,9 +100,9 @@ public class SyncTest {
 
         // wait for kernels
         await().atMost(20, SECONDS).until(() -> kernel1.state() == State.RUNNING
-                && kernel1.state() == State.RUNNING
                 && kernel2.state() == State.RUNNING
                 && kernel3.state() == State.RUNNING
+                && kernel4.state() == State.RUNNING
                 && kernel4.getChannelManager().getActivePeers().size() >= 3);
     }
 
@@ -117,7 +117,7 @@ public class SyncTest {
 
     @Test
     public void testSync() throws IOException {
-        int n = 3;
+        int n = 2;
 
         // validators has forged the n-th block
         await().atMost(60, SECONDS).until(() -> kernel1.getBlockchain().getLatestBlockNumber() >= n
