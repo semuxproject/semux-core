@@ -11,9 +11,11 @@ import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 
 import org.semux.config.Constants;
 import org.slf4j.Logger;
@@ -21,6 +23,11 @@ import org.slf4j.LoggerFactory;
 
 import com.github.zafarkhaja.semver.Version;
 
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.resolver.dns.DnsNameResolver;
+import io.netty.resolver.dns.DnsNameResolverBuilder;
+import io.netty.resolver.dns.SequentialDnsServerAddressStreamProvider;
 import oshi.SystemInfo;
 
 public class SystemUtil {
@@ -89,38 +96,50 @@ public class SystemUtil {
      * @return an IP address if available, otherwise local address
      */
     public static String getIp() {
-        final String[] providers = {
-                "http://api.ipify.org",
-                "http://checkip.amazonaws.com/",
-                "http://api.semux.org/ip"
-        };
-
-        for (String provider : providers) {
-            try {
-                URL url = new URL(provider);
-                URLConnection con = url.openConnection();
-                con.addRequestProperty("User-Agent", Constants.DEFAULT_USER_AGENT);
-                con.setConnectTimeout(Constants.DEFAULT_CONNECT_TIMEOUT);
-                con.setReadTimeout(Constants.DEFAULT_READ_TIMEOUT);
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                String ip = reader.readLine().trim();
-                reader.close();
-
-                // only IPv4 is supported currently
-                if (ip.matches("(\\d{1,3}\\.){3}\\d{1,3}")) {
-                    return ip;
-                }
-            } catch (IOException e) {
-                // do nothing
-            }
+        // [1] fetch IP address from OpenDNS. This works for socks5 proxy users.
+        try {
+            DnsNameResolver nameResolver = new DnsNameResolverBuilder(new NioEventLoopGroup().next())
+                    .channelType(NioDatagramChannel.class)
+                    .queryTimeoutMillis(1000)
+                    .nameServerProvider(new SequentialDnsServerAddressStreamProvider(
+                            new InetSocketAddress("208.67.222.222", 53),
+                            new InetSocketAddress("208.67.220.220", 53),
+                            new InetSocketAddress("208.67.222.220", 53),
+                            new InetSocketAddress("208.67.220.222", 53)))
+                    .build();
+            return nameResolver.resolve("myip.opendns.com").await().get().getHostAddress();
+        } catch (ExecutionException e) {
+            // do nothing
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
-        logger.error("Failed to retrieve your IP address");
+        logger.error("Failed to retrieve your IP address from OpenDNS");
 
+        // [2] fetch IP address from Amazon AWS. This works for public Wi-Fi users.
+        try {
+            URL url = new URL("http://checkip.amazonaws.com/");
+            URLConnection con = url.openConnection();
+            con.addRequestProperty("User-Agent", Constants.DEFAULT_USER_AGENT);
+            con.setConnectTimeout(Constants.DEFAULT_CONNECT_TIMEOUT);
+            con.setReadTimeout(Constants.DEFAULT_READ_TIMEOUT);
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String ip = reader.readLine().trim();
+            reader.close();
+
+            // only IPv4 is supported currently
+            if (ip.matches("(\\d{1,3}\\.){3}\\d{1,3}")) {
+                return ip;
+            }
+        } catch (IOException e) {
+            // do nothing
+        }
+        logger.error("Failed to retrieve your IP address from Amazon AWS");
+
+        // [3] Use local address as failover
         try {
             return InetAddress.getLocalHost().getHostAddress();
         } catch (Exception e) {
-            // last chance
             return InetAddress.getLoopbackAddress().getHostAddress();
         }
     }
