@@ -171,7 +171,7 @@ public class MainFrame extends JFrame implements ActionListener {
         w.lock();
 
         lockGlassPane.setVisible(true);
-        btnLock.setText(GUIMessages.get("Lock"));
+        btnLock.setText(GUIMessages.get("Unlock"));
     }
 
     /**
@@ -182,7 +182,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
         if (password != null && w.unlock(password)) {
             lockGlassPane.setVisible(false);
-            btnLock.setText(GUIMessages.get("Unlock"));
+            btnLock.setText(GUIMessages.get("Lock"));
             return true;
         }
 
