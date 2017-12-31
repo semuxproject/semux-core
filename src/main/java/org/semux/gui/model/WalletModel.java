@@ -45,10 +45,6 @@ public class WalletModel {
 
     private AddressBook addressBook;
 
-    public WalletModel(AddressBook addressBook) {
-        this.addressBook = addressBook;
-    }
-
     /**
      * Fires an model update event.
      */
@@ -162,6 +158,15 @@ public class WalletModel {
             sum += acc.getLocked();
         }
         return sum;
+    }
+
+    /**
+     * Sets the address book.
+     * 
+     * @param addressBook
+     */
+    public void setAddressBook(AddressBook addressBook) {
+        this.addressBook = addressBook;
     }
 
     /**

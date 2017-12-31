@@ -40,7 +40,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Create a new transaction.
-     * 
+     *
      * @param type
      * @param to
      * @param value
@@ -72,7 +72,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Create a transaction from raw bytes
-     * 
+     *
      * @param hash
      * @param encoded
      * @param signature
@@ -95,7 +95,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Sign this transaction.
-     * 
+     *
      * @param key
      * @return
      */
@@ -107,12 +107,12 @@ public class Transaction implements Callable<Boolean> {
     /**
      * <p>
      * Validate transaction format and signature. </>
-     * 
+     *
      * <p>
      * NOTE: this method does not check transaction validity over the state. Use
      * {@link TransactionExecutor} for that purpose
      * </p>
-     * 
+     *
      * @return true if success, otherwise false
      */
     public boolean validate() {
@@ -133,7 +133,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Returns the transaction hash.
-     * 
+     *
      * @return
      */
     public byte[] getHash() {
@@ -142,7 +142,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Returns the transaction type.
-     * 
+     *
      * @return
      */
     public TransactionType getType() {
@@ -151,7 +151,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Parses the from address from signature.
-     * 
+     *
      * @return an {@link Address} if the signature is success, otherwise null
      */
     public byte[] getFrom() {
@@ -169,7 +169,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Returns the value.
-     * 
+     *
      * @return
      */
     public long getValue() {
@@ -178,7 +178,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Returns the transaction fee.
-     * 
+     *
      * @return
      */
     public long getFee() {
@@ -187,7 +187,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Returns the nonce.
-     * 
+     *
      * @return
      */
     public long getNonce() {
@@ -196,7 +196,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Returns the timestamp.
-     * 
+     *
      * @return
      */
     public long getTimestamp() {
@@ -205,7 +205,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Returns the extra data.
-     * 
+     *
      * @return
      */
     public byte[] getData() {
@@ -214,7 +214,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Returns the signature.
-     * 
+     *
      * @return
      */
     public Signature getSignature() {
@@ -223,7 +223,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Converts into a byte array.
-     * 
+     *
      * @return
      */
     public byte[] toBytes() {
@@ -246,7 +246,7 @@ public class Transaction implements Callable<Boolean> {
 
     /**
      * Parses from a byte array.
-     * 
+     *
      * @param bytes
      * @return
      */

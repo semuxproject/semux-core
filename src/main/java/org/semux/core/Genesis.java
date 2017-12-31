@@ -59,16 +59,15 @@ public class Genesis extends Block {
     }
 
     @JsonCreator
-    public static Genesis jsonCreator( //
-            @JsonProperty("number") long number, //
-            @JsonProperty("coinbase") String coinbase, //
-            @JsonProperty("parentHash") String parentHash, //
-            @JsonProperty("timestamp") long timestamp, //
-            @JsonProperty("data") String data, //
-            @JsonProperty("premine") List<Premine> premineList, //
-            @JsonProperty("delegates") Map<String, String> delegates, //
-            @JsonProperty("config") Map<String, Object> config //
-    ) {
+    public static Genesis jsonCreator(
+            @JsonProperty("number") long number,
+            @JsonProperty("coinbase") String coinbase,
+            @JsonProperty("parentHash") String parentHash,
+            @JsonProperty("timestamp") long timestamp,
+            @JsonProperty("data") String data,
+            @JsonProperty("premine") List<Premine> premineList,
+            @JsonProperty("delegates") Map<String, String> delegates,
+            @JsonProperty("config") Map<String, Object> config) {
 
         // load premines
         Map<ByteArray, Premine> premineMap = new HashMap<>();

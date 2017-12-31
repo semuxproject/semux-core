@@ -15,11 +15,10 @@ public class DoTransactionResponse extends ApiHandlerResponse {
     @JsonProperty("result")
     public final String txHash;
 
-    public DoTransactionResponse( //
-            @JsonProperty("success") Boolean success, //
-            @JsonProperty("message") String message, //
-            @JsonProperty("result") String txHash //
-    ) {
+    public DoTransactionResponse(
+            @JsonProperty("success") Boolean success,
+            @JsonProperty("message") String message,
+            @JsonProperty("result") String txHash) {
         super(success, message);
         this.txHash = txHash;
     }

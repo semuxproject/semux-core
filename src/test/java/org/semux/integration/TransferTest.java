@@ -10,6 +10,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -21,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -36,6 +36,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.IntegrationTest;
 import org.semux.Kernel.State;
 import org.semux.KernelMock;
+import org.semux.api.response.DoTransactionResponse;
 import org.semux.api.response.GetAccountResponse;
 import org.semux.api.response.GetAccountTransactionsResponse;
 import org.semux.api.response.GetTransactionResponse;
@@ -49,7 +50,6 @@ import org.semux.util.ApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Category(IntegrationTest.class)
@@ -111,6 +111,13 @@ public class TransferTest {
         kernelValidator.start();
         kernelPremine.start();
         kernelReceiver.start();
+
+        // wait for kernels
+        await().atMost(20, SECONDS).until(() -> kernelValidator.state() == State.RUNNING
+                && kernelPremine.state() == State.RUNNING
+                && kernelReceiver.state() == State.RUNNING
+                // until the other two kernels connects
+                && kernelValidator.getChannelManager().getActivePeers().size() >= 2);
     }
 
     @After
@@ -132,12 +139,6 @@ public class TransferTest {
      */
     @Test
     public void testTransfer() throws IOException {
-        // wait
-        await().until(() -> kernelValidator.state() == State.RUNNING
-                && kernelPremine.state() == State.RUNNING
-                && kernelReceiver.state() == State.RUNNING
-                && kernelPremine.getChannelManager().getActivePeers().size() > 0); // ensure there are active peers
-
         // make transaction
         final long value = 1000 * Unit.SEM;
         final long fee = kernelPremine.getConfig().minTransactionFee();
@@ -147,18 +148,17 @@ public class TransferTest {
         params.put("value", String.valueOf(value));
         params.put("fee", String.valueOf(fee));
 
-        // request
+        // make a transaction request
         logger.info("Making transfer request", params);
-        String response = kernelPremine.getApiClient().request("transfer", params);
-        Map<String, String> result = new ObjectMapper().readValue(response, new TypeReference<Map<String, String>>() {
-        });
-        assertEquals("true", result.get("success"));
+        DoTransactionResponse response = new ObjectMapper().readValue(
+                kernelPremine.getApiClient().request("transfer", params),
+                DoTransactionResponse.class);
+        assertTrue(response.success);
 
         // wait for transaction processing
         logger.info("Waiting for the transaction to be processed...");
-        await().pollInterval(1, SECONDS).atMost(60, SECONDS).until(availableOf(kernelPremine),
-                equalTo(PREMINE * Unit.SEM - value - fee));
-        await().pollInterval(1, SECONDS).atMost(60, SECONDS).until(availableOf(kernelReceiver), equalTo(value));
+        await().atMost(20, SECONDS).until(availableOf(kernelPremine), equalTo(PREMINE * Unit.SEM - value - fee));
+        await().atMost(20, SECONDS).until(availableOf(kernelReceiver), equalTo(value));
 
         // assert that the transaction has been recorded across nodes
         assertTransferTransaction(kernelPremine);
@@ -174,17 +174,25 @@ public class TransferTest {
     private Callable<Long> availableOf(KernelMock kernelMock) {
         return () -> {
             ApiClient apiClient = kernelMock.getApiClient();
+
             GetAccountResponse response = new ObjectMapper().readValue(
-                    apiClient.request("get_account", "address", addressStringOf(kernelMock)), GetAccountResponse.class);
+                    apiClient.request("get_account", "address", addressStringOf(kernelMock)),
+                    GetAccountResponse.class);
+
             return response.account.available;
         };
     }
 
     private GetTransactionResponse.Result getTransactionResultOf(KernelMock kernelMock, int n) throws IOException {
         ApiClient apiClient = kernelMock.getApiClient();
-        GetAccountTransactionsResponse response = new ObjectMapper()
-                .readValue(apiClient.request("get_account_transactions", "address", addressStringOf(kernelMock), "from",
-                        String.valueOf(n), "to", String.valueOf(n + 1)), GetAccountTransactionsResponse.class);
+
+        GetAccountTransactionsResponse response = new ObjectMapper().readValue(
+                apiClient.request("get_account_transactions",
+                        "address", addressStringOf(kernelMock),
+                        "from", String.valueOf(n),
+                        "to", String.valueOf(n + 1)),
+                GetAccountTransactionsResponse.class);
+
         return response.transactions.get(0);
     }
 
@@ -205,13 +213,14 @@ public class TransferTest {
         HashMap<String, String> delegates = new HashMap<>();
         delegates.put("delegate", delegateAddress);
 
-        return Genesis.jsonCreator(0, //
-                "0x0000000000000000000000000000000000000000", //
-                "0x0000000000000000000000000000000000000000000000000000000000000000", //
-                1504742400000L, //
-                "semux", //
-                premines, //
-                delegates, //
+        // mock genesis
+        return Genesis.jsonCreator(0,
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
+                1504742400000L,
+                "semux",
+                premines,
+                delegates,
                 new HashMap<>());
     }
 }

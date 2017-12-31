@@ -459,7 +459,7 @@ public class SemuxBFT implements Consensus {
         if (p.getHeight() == height // at the same height
                 && (p.getView() == view && proposal == null && (state == State.NEW_HEIGHT || state == State.PROPOSE) // expecting
                         || p.getView() > view && state != State.COMMIT && state != State.FINALIZE) // larger view
-                && isPrimary(p.getHeight(), p.getView(), Hex.encode(p.getSignature().getAddress()))) {//
+                && isPrimary(p.getHeight(), p.getView(), Hex.encode(p.getSignature().getAddress()))) {
 
             // check proof-of-unlock
             if (p.getView() != 0) {
@@ -490,9 +490,9 @@ public class SemuxBFT implements Consensus {
     protected void onVote(Vote v) {
         logger.trace("On vote: {}", v);
 
-        if (v.getHeight() == height //
-                && v.getView() == view //
-                && isFromValidator(v.getSignature()) //
+        if (v.getHeight() == height
+                && v.getView() == view
+                && isFromValidator(v.getSignature())
                 && v.validate()) {
             boolean added = false;
 

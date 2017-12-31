@@ -72,9 +72,9 @@ public class WorldMessage extends Message {
      * @return true if success, otherwise false
      */
     public boolean validate(Config config) {
-        if (peer != null && peer.validate() //
-                && Math.abs(System.currentTimeMillis() - timestamp) <= config.netHandshakeExpiry() //
-                && signature != null //
+        if (peer != null && peer.validate()
+                && Math.abs(System.currentTimeMillis() - timestamp) <= config.netHandshakeExpiry()
+                && signature != null
                 && peer.getPeerId().equals(Hex.encode(signature.getAddress()))) {
 
             SimpleEncoder enc = new SimpleEncoder();

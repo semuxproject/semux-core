@@ -148,7 +148,8 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         switch (msg.getCode()) {
         /* p2p */
         case DISCONNECT: {
-            logger.info("Received DISCONNECT msg, reason = {}", ((DisconnectMessage) msg).getReason());
+            logger.info("Received DISCONNECT message: reason = {}, remoteIP = {}",
+                    ((DisconnectMessage) msg).getReason(), channel.getRemoteIp());
             stopTimers();
             ctx.close();
             break;
@@ -284,7 +285,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      * @return
      */
     private boolean isValid(HelloMessage msg) {
-        return msg.validate(config) //
+        return msg.validate(config)
                 && (config.networkId() == Constants.DEV_NET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
     }
 
@@ -294,7 +295,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      * @return
      */
     private boolean isValid(WorldMessage msg) {
-        return msg.validate(config) //
+        return msg.validate(config)
                 && (config.networkId() == Constants.DEV_NET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
     }
 

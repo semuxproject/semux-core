@@ -53,11 +53,11 @@ public class SendPanel extends JPanel implements ActionListener {
     private transient Kernel kernel;
     private transient Config config;
 
-    private JComboBox<Item> fromComboBox;
-    private JTextField toText;
-    private JTextField amountText;
-    private JTextField feeText;
-    private JTextField dataText;
+    private JComboBox<Item> selectFrom;
+    private JTextField txtTo;
+    private JTextField txtAmount;
+    private JTextField txtFee;
+    private JTextField txtData;
 
     public SendPanel(SemuxGUI gui, JFrame frame) {
         this.model = gui.getModel();
@@ -73,60 +73,64 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblFrom = new JLabel(GUIMessages.get("From") + ":");
         lblFrom.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        fromComboBox = new JComboBox<>();
-        fromComboBox.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        selectFrom = new JComboBox<>();
+        selectFrom.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
 
         JLabel lblTo = new JLabel(GUIMessages.get("To") + ":");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        toText = SwingUtil.textFieldWithCopyPastePopup();
-        toText.setName("toText");
-        toText.setColumns(24);
-        toText.setActionCommand(Action.SEND.name());
-        toText.addActionListener(this);
+        txtTo = SwingUtil.textFieldWithCopyPastePopup();
+        txtTo.setName("txtTo");
+        txtTo.setColumns(24);
+        txtTo.setActionCommand(Action.SEND.name());
+        txtTo.addActionListener(this);
 
         JLabel lblAmount = new JLabel(GUIMessages.get("Amount") + ":");
         lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        amountText = SwingUtil.textFieldWithCopyPastePopup();
-        amountText.setName("amountText");
-        amountText.setColumns(10);
-        amountText.setActionCommand(Action.SEND.name());
-        amountText.addActionListener(this);
+        txtAmount = SwingUtil.textFieldWithCopyPastePopup();
+        txtAmount.setName("txtAmount");
+        txtAmount.setColumns(10);
+        txtAmount.setActionCommand(Action.SEND.name());
+        txtAmount.addActionListener(this);
 
         JLabel lblFee = new JLabel(GUIMessages.get("Fee") + ":");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
         lblFee.setToolTipText(GUIMessages.get("FeeTip", SwingUtil.formatValue(config.minTransactionFee())));
 
-        feeText = SwingUtil.textFieldWithCopyPastePopup();
-        feeText.setColumns(10);
-        feeText.setActionCommand(Action.SEND.name());
-        feeText.addActionListener(this);
+        txtFee = SwingUtil.textFieldWithCopyPastePopup();
+        txtFee.setName("txtFee");
+        txtFee.setColumns(10);
+        txtFee.setActionCommand(Action.SEND.name());
+        txtFee.addActionListener(this);
 
         JLabel lblData = new JLabel(GUIMessages.get("Data") + ":");
         lblData.setHorizontalAlignment(SwingConstants.RIGHT);
         lblData.setToolTipText(GUIMessages.get("DataTip"));
 
-        dataText = SwingUtil.textFieldWithCopyPastePopup();
-        dataText.setColumns(10);
-        dataText.setActionCommand(Action.SEND.name());
-        dataText.addActionListener(this);
-        dataText.setToolTipText(GUIMessages.get("DataTip"));
+        txtData = SwingUtil.textFieldWithCopyPastePopup();
+        txtData.setName("txtData");
+        txtData.setColumns(10);
+        txtData.setActionCommand(Action.SEND.name());
+        txtData.addActionListener(this);
+        txtData.setToolTipText(GUIMessages.get("DataTip"));
 
         JLabel lblSem1 = new JLabel("SEM");
 
         JLabel lblSem2 = new JLabel("SEM");
 
         JButton btnSend = new JButton(GUIMessages.get("Send"));
-        btnSend.setName("sendButton");
+        btnSend.setName("btnSend");
         btnSend.addActionListener(this);
         btnSend.setActionCommand(Action.SEND.name());
 
         JButton btnClear = new JButton(GUIMessages.get("Clear"));
+        btnClear.setName("btnClear");
         btnClear.addActionListener(this);
         btnClear.setActionCommand(Action.CLEAR.name());
 
         JButton btnAddressBook = new JButton(GUIMessages.get("AddressBook"));
+        btnAddressBook.setName("btnAddressBook");
         btnAddressBook.addActionListener(this);
         btnAddressBook.setActionCommand(Action.SHOW_ADDRESS_BOOK.name());
 
@@ -153,13 +157,13 @@ public class SendPanel extends JPanel implements ActionListener {
                             .addContainerGap())
                         .addGroup(groupLayout.createSequentialGroup()
                             .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                                .addComponent(toText, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
-                                .addComponent(fromComboBox, 0, 306, Short.MAX_VALUE)
+                                .addComponent(txtTo, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                                .addComponent(selectFrom, 0, 306, Short.MAX_VALUE)
                                 .addGroup(groupLayout.createSequentialGroup()
                                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
-                                        .addComponent(amountText, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
-                                        .addComponent(feeText)
-                                        .addComponent(dataText))
+                                        .addComponent(txtAmount, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
+                                        .addComponent(txtFee)
+                                        .addComponent(txtData))
                                     .addGap(12)
                                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
                                         .addComponent(lblSem1)
@@ -172,25 +176,25 @@ public class SendPanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblFrom)
-                        .addComponent(fromComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(selectFrom, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblTo)
-                        .addComponent(toText, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtTo, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblAmount)
-                        .addComponent(amountText, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtAmount, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblSem1))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblFee)
-                        .addComponent(feeText, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtFee, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblSem2))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblData)
-                        .addComponent(dataText, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtData, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(btnAddressBook)
@@ -208,35 +212,35 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     public String getToText() {
-        return toText.getText().trim();
+        return txtTo.getText().trim();
     }
 
     public void setToText(byte[] address) {
-        toText.setText(Hex.encode(address));
+        txtTo.setText(Hex.encode(address));
     }
 
     public long getAmountText() throws ParseException {
-        return SwingUtil.parseValue(amountText.getText().trim());
+        return SwingUtil.parseValue(txtAmount.getText().trim());
     }
 
     public void setAmountText(long a) {
-        amountText.setText(SwingUtil.formatValue(a, false));
+        txtAmount.setText(SwingUtil.formatValue(a, false));
     }
 
     public long getFeeText() throws ParseException {
-        return SwingUtil.parseValue(feeText.getText().trim());
+        return SwingUtil.parseValue(txtFee.getText().trim());
     }
 
     public void setFeeText(long f) {
-        feeText.setText(SwingUtil.formatValue(f, false));
+        txtFee.setText(SwingUtil.formatValue(f, false));
     }
 
     public String getDataText() {
-        return dataText.getText().trim();
+        return txtData.getText().trim();
     }
 
     public void setDataText(String dataText) {
-        toText.setText(dataText.trim());
+        txtTo.setText(dataText.trim());
     }
 
     @Override
@@ -270,15 +274,15 @@ public class SendPanel extends JPanel implements ActionListener {
         /*
          * update account list.
          */
-        Object selected = fromComboBox.getSelectedItem();
+        Object selected = selectFrom.getSelectedItem();
         String address = null;
         if (selected != null && selected instanceof Item) {
             address = ((Item) selected).account.getKey().toAddressString();
         }
 
-        fromComboBox.removeAllItems();
+        selectFrom.removeAllItems();
         for (int i = 0; i < list.size(); i++) {
-            fromComboBox.addItem(new Item(list.get(i), i));
+            selectFrom.addItem(new Item(list.get(i), i));
         }
 
         if (address == null) {
@@ -288,7 +292,7 @@ public class SendPanel extends JPanel implements ActionListener {
         for (int i = 0; i < list.size(); i++) {
             String addr = list.get(i).getKey().toAddressString();
             if (addr.equals(address)) {
-                fromComboBox.setSelectedIndex(i);
+                selectFrom.setSelectedIndex(i);
                 break;
             }
         }
@@ -366,7 +370,7 @@ public class SendPanel extends JPanel implements ActionListener {
      * @return
      */
     protected WalletAccount getSelectedAccount() {
-        int idx = fromComboBox.getSelectedIndex();
+        int idx = selectFrom.getSelectedIndex();
         return (idx == -1) ? null : model.getAccounts().get(idx);
     }
 

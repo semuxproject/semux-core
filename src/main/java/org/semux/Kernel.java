@@ -203,10 +203,10 @@ public class Kernel {
         // memory
         GlobalMemory m = hal.getMemory();
         long mb = 1024L * 1024L;
-        logger.info("Memory: total = {} MB, available = {} MB, swap total = {} MB, swap available = {} MB", //
-                m.getTotal() / mb, //
-                m.getAvailable() / mb, //
-                m.getSwapTotal() / mb, //
+        logger.info("Memory: total = {} MB, available = {} MB, swap total = {} MB, swap available = {} MB",
+                m.getTotal() / mb,
+                m.getAvailable() / mb,
+                m.getSwapTotal() / mb,
                 (m.getSwapTotal() - m.getSwapUsed()) / mb);
 
         // disk
@@ -220,7 +220,8 @@ public class Kernel {
         }
 
         // java version
-        logger.info("Java: version = {}", Runtime.class.getPackage().getImplementationVersion());
+        logger.info("Java: version = {}, xms = {} MB", System.getProperty("java.version"),
+                Runtime.getRuntime().maxMemory() / mb);
     }
 
     /**

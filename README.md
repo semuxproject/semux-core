@@ -4,6 +4,8 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/y0kgfqch4u79er1k?svg=true)](https://ci.appveyor.com/project/semux/semux)
 [![Coverage Status](https://coveralls.io/repos/github/semuxproject/semux/badge.svg?branch=develop)](https://coveralls.io/github/semuxproject/semux)
 [![Scrutinizer-CI Status](https://scrutinizer-ci.com/g/semuxproject/semux/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/semuxproject/semux/)
+[![Crowdin](https://d322cqt584bo4o.cloudfront.net/semux/localized.svg)](https://crowdin.com/project/semux)
+
 
 ## What is Semux
 
@@ -42,8 +44,6 @@ If you found a bug, please submit it to [issues](https://github.com/semuxproject
 
 
 ## Wallet Localization
-
-[![Crowdin](https://d322cqt584bo4o.cloudfront.net/semux/localized.svg)](https://crowdin.com/project/semux)
 
 If you want to add new language, review/update existing translation or help to finish specific translations, you can join and do that by following link:
 https://crowdin.com/project/semux

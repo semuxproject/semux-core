@@ -89,8 +89,10 @@ public class NodeManager {
         if (!isRunning) {
             addNodes(config.p2pSeedNodes());
 
+            // every 0.5 seconds
             connectFuture = exec.scheduleAtFixedRate(this::doConnect, 100, 500, TimeUnit.MILLISECONDS);
-            seedingFuture = exec.scheduleAtFixedRate(this::doFetch, 0, 3, TimeUnit.MINUTES);
+            // every 120 seconds, delayed by 10 seconds (public IP lookup)
+            seedingFuture = exec.scheduleAtFixedRate(this::doFetch, 10, 120, TimeUnit.SECONDS);
 
             isRunning = true;
             logger.info("Node manager started");
@@ -189,8 +191,8 @@ public class NodeManager {
             Long l = lastConnect.getIfPresent(addr);
             long now = System.currentTimeMillis();
 
-            if (!new InetSocketAddress(client.getIp(), client.getPort()).equals(addr)//
-                    && !activeAddresses.contains(addr) //
+            if (!new InetSocketAddress(client.getIp(), client.getPort()).equals(addr)
+                    && !activeAddresses.contains(addr)
                     && (l == null || l + RECONNECT_WAIT < now)) {
 
                 SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, addr);

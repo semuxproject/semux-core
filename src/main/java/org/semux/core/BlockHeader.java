@@ -43,7 +43,7 @@ public class BlockHeader {
 
     /**
      * Creates an instance of block header.
-     * 
+     *
      * @param number
      * @param coinbase
      * @param prevHash
@@ -78,7 +78,7 @@ public class BlockHeader {
 
     /**
      * Parses block header from byte arrays.
-     * 
+     *
      * @param hash
      * @param encoded
      */

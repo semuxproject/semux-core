@@ -24,21 +24,21 @@ public class KernelTest {
 
         // start kernel
         kernel.start();
-        await().until(() -> kernel.getNodeManager().isRunning() //
-                && kernel.getPendingManager().isRunning() //
-                && kernel.getApi().isRunning() //
-                && kernel.getP2p().isRunning() //
-                && kernel.getConsensus().isRunning() //
+        await().until(() -> kernel.getNodeManager().isRunning()
+                && kernel.getPendingManager().isRunning()
+                && kernel.getApi().isRunning()
+                && kernel.getP2p().isRunning()
+                && kernel.getConsensus().isRunning()
                 && !kernel.getSyncManager().isRunning());
 
         // stop kernel
         kernel.stop();
-        await().until(() -> kernel.state == State.STOPPED//
-                && !kernel.getNodeManager().isRunning() //
-                && !kernel.getPendingManager().isRunning() //
-                && !kernel.getApi().isRunning() //
-                && !kernel.getP2p().isRunning() //
-                && !kernel.getConsensus().isRunning() //
+        await().until(() -> kernel.state == State.STOPPED
+                && !kernel.getNodeManager().isRunning()
+                && !kernel.getPendingManager().isRunning()
+                && !kernel.getApi().isRunning()
+                && !kernel.getP2p().isRunning()
+                && !kernel.getConsensus().isRunning()
                 && !kernel.getSyncManager().isRunning());
     }
 }

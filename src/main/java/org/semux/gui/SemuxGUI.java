@@ -238,7 +238,8 @@ public class SemuxGUI extends Launcher {
         }
 
         // set up model
-        model = new WalletModel(new AddressBook(new File(getDataDir(), "addressbook.json")));
+        model = new WalletModel();
+        model.setAddressBook(new AddressBook(new File(getDataDir(), "addressbook.json")));
         model.setCoinbase(getCoinbase());
 
         // set up kernel

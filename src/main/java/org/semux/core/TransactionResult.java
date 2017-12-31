@@ -131,8 +131,8 @@ public class TransactionResult {
      * @return
      */
     public boolean validate() {
-        return success //
-                && returns != null //
+        return success
+                && returns != null
                 && logs != null; // RESERVED FOR VM
     }
 

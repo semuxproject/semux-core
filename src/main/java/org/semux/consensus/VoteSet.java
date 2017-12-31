@@ -67,12 +67,12 @@ public class VoteSet {
     public boolean addVote(Vote vote) {
         Signature sig = vote.getSignature();
 
-        if (vote.getType() == type && //
-                vote.getHeight() == height //
-                && vote.getView() == view //
-                && vote.getBlockHash() != null //
-                && vote.validate() //
-                && sig != null //
+        if (vote.getType() == type &&
+                vote.getHeight() == height
+                && vote.getView() == view
+                && vote.getBlockHash() != null
+                && vote.validate()
+                && sig != null
                 && validators.contains(Hex.encode(sig.getAddress()))) {
             String peerId = Hex.encode(sig.getAddress());
 

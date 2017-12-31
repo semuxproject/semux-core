@@ -17,7 +17,7 @@ import org.semux.util.Bytes;
 
 public class TransactionMessageTest {
     @Test
-    public void TestIsValid() {
+    public void testSerialization() {
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
         long value = 2;
