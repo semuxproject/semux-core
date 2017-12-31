@@ -134,6 +134,37 @@
                 </executions>
             </plugin>
 
+            <!-- build OSX executable -->
+            <plugin>
+                <groupId>sh.tak.appbundler</groupId>
+                <artifactId>appbundle-maven-plugin</artifactId>
+                <version>1.2.0</version>
+                <configuration>
+                    <mainClass>org.semux.gui.SemuxGUI</mainClass>
+                    <!-- scrutinizer doesn't like to build OSX DMGs uncomment for build. -->
+                    <!--<generateDiskImageFile>true</generateDiskImageFile>-->
+                    <jvmVersion>1.8</jvmVersion>
+                    <iconFile>logo.icns</iconFile>
+                    <additionalResources>
+                        <additionalResource>
+                            <includes>
+                                <include>config/**</include>
+                                <include>LICENSE*</include>
+                            </includes>
+                            <directory>${project.basedir}</directory>
+                        </additionalResource>
+                    </additionalResources>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- prepare distribution -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -178,17 +209,20 @@
                                 <copy file="${project.basedir}/src/main/resources/logback.xml"
                                       tofile="${dist.base}/linux/config/logback.xml"/> />
 
-                                <!-- linux build (executable jar) -->
+                                <!-- osx build (dmg) -->
+                                <!-- will work with above 'generateDiskImageFile' uncommented - for now just get clean build -->
+                                <!--<copy file="${project.basedir}/target/semux-${project.version}.dmg"-->
+                                      <!--tofile="${dist.base}/macos/semux.dmg"/>-->
                                 <copy todir="${dist.base}/macos">
-                                    <fileset dir="${dist.base}/linux"/>
+                                    <fileset dir="${project.basedir}/target/semux-${project.version}">
+                                    </fileset>
                                 </copy>
 
                                 <!-- add execute permission -->
                                 <chmod file="${dist.base}/windows/semux.exe" perm="755"/>
                                 <chmod file="${dist.base}/linux/semux.jar" perm="755"/>
                                 <chmod file="${dist.base}/linux/semux*.sh" perm="755"/>
-                                <chmod file="${dist.base}/macos/semux.jar" perm="755"/>
-                                <chmod file="${dist.base}/macos/semux*.sh" perm="755"/>
+                                <chmod file="${dist.base}/macos/semux.app/Contents/MacOS/JavaAppLauncher" perm="755"/>
                             </target>
                         </configuration>
                         <goals>
