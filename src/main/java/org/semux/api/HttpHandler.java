@@ -18,8 +18,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
-import org.semux.crypto.Hash;
 import org.semux.util.BasicAuth;
+import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,9 +57,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
     private Config config;
     private ApiHandler apiHandler;
 
-    private byte[] authUserHash;
-    private byte[] authPassHash;
-
     private boolean keepAlive;
     private String uri;
     private Map<String, List<String>> params;
@@ -71,9 +68,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
     public HttpHandler(Config config, ApiHandler apiHandler) {
         this.config = config;
-        authUserHash = Hash.h256(config.apiUsername().getBytes());
-        authPassHash = Hash.h256(config.apiPassword().getBytes());
-
         this.apiHandler = apiHandler;
     }
 
@@ -196,9 +190,9 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
     private boolean checkBasicAuth(HttpHeaders headers) {
         Pair<String, String> auth = BasicAuth.parseAuth(headers.get(HttpHeaderNames.AUTHORIZATION));
 
-        return auth != null && //
-                MessageDigest.isEqual(Hash.h256(auth.getKey().getBytes()), authUserHash) && //
-                MessageDigest.isEqual(Hash.h256(auth.getValue().getBytes()), authPassHash);
+        return auth != null
+                && MessageDigest.isEqual(Bytes.of(auth.getLeft()), Bytes.of(config.apiUsername()))
+                && MessageDigest.isEqual(Bytes.of(auth.getRight()), Bytes.of(config.apiPassword()));
     }
 
     private boolean writeResponse(ChannelHandlerContext ctx, HttpResponseStatus status, String responseBody) {
