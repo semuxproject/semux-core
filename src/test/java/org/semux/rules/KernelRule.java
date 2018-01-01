@@ -73,6 +73,7 @@ public class KernelRule extends TemporaryFolder {
 
     @Override
     protected void after() {
+        kernel.stop();
         delete();
     }
 

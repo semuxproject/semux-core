@@ -83,6 +83,14 @@ public interface Blockchain {
     BlockHeader getBlockHeader(byte[] hash);
 
     /**
+     * Returns whether the block is existing.
+     *
+     * @param number
+     * @return
+     */
+    boolean hasBlock(long number);
+
+    /**
      * Returns transaction by its hash.
      * 
      * @param hash

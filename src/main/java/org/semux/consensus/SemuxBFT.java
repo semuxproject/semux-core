@@ -92,6 +92,12 @@ public class SemuxBFT implements Consensus {
     protected VoteSet precommitVotes;
     protected VoteSet commitVotes;
 
+    /**
+     * A NEW_HEIGHT message is accepted only if 2/3 validators have a height that is
+     * within the deviation.
+     */
+    private static final long MAX_NEW_HEIGHT_DEVIATION = 100L;
+
     public SemuxBFT(Kernel kernel) {
         this.kernel = kernel;
         this.config = kernel.getConfig();
@@ -415,21 +421,30 @@ public class SemuxBFT implements Consensus {
         enterPropose();
     }
 
-    protected void onNewHeight(long h) {
-        logger.trace("On new_height: {}", h);
+    /**
+     * Synchronization will be started if the new height is greater than 2/3 of
+     * active validators' latest block number and within the defined maximum
+     * deviation of ${@value MAX_NEW_HEIGHT_DEVIATION}
+     * 
+     * @param newHeight
+     *            new height
+     */
+    protected void onNewHeight(long newHeight) {
+        logger.trace("On new_height: {}", newHeight);
 
-        if (h > height && activeValidators != null) {
+        if (newHeight > height && activeValidators != null) {
             long latestBlockNum = chain.getLatestBlockNumber();
 
-            int count = 0;
-            for (Channel c : activeValidators) {
-                if (c.isActive()) {
-                    count += c.getRemotePeer().getLatestBlockNumber() > latestBlockNum ? 1 : 0;
-                }
-            }
+            int count = activeValidators.stream()
+                    .mapToInt(c -> c.isActive() && c.getRemotePeer().getLatestBlockNumber() > latestBlockNum && //
+                            Math.abs(newHeight - c.getRemotePeer().getLatestBlockNumber()) <= MAX_NEW_HEIGHT_DEVIATION //
+                                    ? 1 //
+                                    : 0 //
+                    )
+                    .sum();
 
             if (count >= (int) Math.ceil(activeValidators.size() * 2.0 / 3.0)) {
-                sync(h);
+                sync(newHeight);
             }
         }
     }

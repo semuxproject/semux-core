@@ -17,9 +17,12 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.config.Constants;
 import org.semux.config.MainNetConfig;
 import org.semux.core.Block;
@@ -28,12 +31,15 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.EdDSA;
+import org.semux.net.Channel;
+import org.semux.net.Peer;
 import org.semux.rules.KernelRule;
 import org.semux.rules.TemporaryDBRule;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RunWith(MockitoJUnitRunner.class)
 public class SemuxBFTTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxBFTTest.class);
@@ -116,5 +122,26 @@ public class SemuxBFTTest {
 
         // the block should be rejected because of the duplicated tx
         assertFalse(semuxBFT.validateBlock(block2.getHeader(), block2.getTransactions()));
+    }
+
+    @Test
+    public void testOnLargeNewHeight() throws InterruptedException {
+        kernelRule.getKernel().start();
+
+        // mock consensus
+        SemuxBFT semuxBFT = (SemuxBFT) kernelRule.getKernel().getConsensus();
+        Channel mockChannel = mock(Channel.class);
+        Peer mockPeer = mock(Peer.class);
+        when(mockPeer.getLatestBlockNumber()).thenReturn(100L);
+        when(mockChannel.getRemotePeer()).thenReturn(mockPeer);
+        when(mockChannel.isActive()).thenReturn(true);
+        semuxBFT.activeValidators = Arrays.asList(mockChannel);
+
+        new Thread(() -> semuxBFT.onNewHeight(1_000_000L)).start();
+        TimeUnit.MILLISECONDS.sleep(500);
+        assertFalse(
+                "synchronization should not be started when there is a NEW_HEIGHT message with a height that is greatly larger than other validators' latest block number",
+                kernelRule.getKernel().getSyncManager().isRunning() //
+        );
     }
 }
