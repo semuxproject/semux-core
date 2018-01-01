@@ -211,8 +211,6 @@
 
                                 <!-- osx build (dmg) -->
                                 <!-- will work with above 'generateDiskImageFile' uncommented - for now just get clean build -->
-                                <!--<copy file="${project.basedir}/target/semux-${project.version}.dmg"-->
-                                      <!--tofile="${dist.base}/macos/semux.dmg"/>-->
                                 <copy todir="${dist.base}/macos">
                                     <fileset dir="${project.basedir}/target/semux-${project.version}">
                                     </fileset>
