@@ -6,11 +6,10 @@
  */
 package org.semux.net.msg.p2p;
 
-import java.net.InetSocketAddress;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.semux.net.NodeManager;
+import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
 import org.semux.util.SimpleDecoder;
@@ -18,29 +17,25 @@ import org.semux.util.SimpleEncoder;
 
 public class NodesMessage extends Message {
 
-    public static final int MAX_NODES = 128;
+    public static final int MAX_NODES = 256;
 
-    private Set<NodeManager.Node> nodes;
-
-    public NodesMessage() {
-        super(MessageCode.NODES, null);
-    }
+    private List<Node> nodes;
 
     /**
      * Create a NODES message.
      * 
      * @param nodes
      */
-    public NodesMessage(Set<NodeManager.Node> nodes) {
+    public NodesMessage(List<Node> nodes) {
         super(MessageCode.NODES, null);
 
         this.nodes = nodes;
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeInt(nodes.size());
-        for (InetSocketAddress a : nodes) {
-            enc.writeString(a.getAddress().getHostAddress());
-            enc.writeInt(a.getPort());
+        for (Node n : nodes) {
+            enc.writeString(n.getIp());
+            enc.writeInt(n.getPort());
         }
         this.encoded = enc.toBytes();
     }
@@ -55,17 +50,21 @@ public class NodesMessage extends Message {
 
         this.encoded = encoded;
 
-        nodes = new HashSet<>();
+        nodes = new ArrayList<>();
         SimpleDecoder dec = new SimpleDecoder(encoded);
-        int n = Math.min(dec.readInt(), MAX_NODES);
+        int n = dec.readInt();
         for (int i = 0; i < n; i++) {
             String host = dec.readString();
             int port = dec.readInt();
-            nodes.add(new NodeManager.Node(host, port));
+            nodes.add(new Node(host, port));
         }
     }
 
-    public Set<NodeManager.Node> getNodes() {
+    public boolean validate() {
+        return nodes != null && nodes.size() <= MAX_NODES;
+    }
+
+    public List<Node> getNodes() {
         return nodes;
     }
 

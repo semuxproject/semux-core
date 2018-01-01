@@ -17,7 +17,6 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -48,6 +47,7 @@ import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
 import org.semux.net.NodeManager;
+import org.semux.net.NodeManager.Node;
 import org.semux.rules.KernelRule;
 import org.semux.util.ApiClient;
 import org.semux.util.Bytes;
@@ -94,9 +94,8 @@ public class TransactionTest {
         when(Genesis.load(any())).thenReturn(genesis);
 
         // mock seed nodes
-        Set<NodeManager.Node> nodes = new HashSet<>();
-        nodes.add(new NodeManager.Node(InetAddress.getByName(kernel1.getConfig().p2pListenIp()),
-                kernel1.getConfig().p2pListenPort()));
+        Set<Node> nodes = new HashSet<>();
+        nodes.add(new Node(kernel1.getConfig().p2pListenIp(), kernel1.getConfig().p2pListenPort()));
         mockStatic(NodeManager.class);
         when(NodeManager.getSeedNodes(Constants.DEV_NET_ID)).thenReturn(nodes);
 

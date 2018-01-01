@@ -43,7 +43,7 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
                 { "/add_node" },
                 { "/add_node?node=I_am_not_a_node" },
                 { "/add_node?node=127.0.0.1:65536" },
-                { "/add_node?node=.com:5161" },
+                // { "/add_node?node=.com:5161" },
                 { "/add_to_blacklist" },
                 { "/add_to_blacklist?ip=I_am_not_an_IP" },
                 { "/add_to_whitelist" },

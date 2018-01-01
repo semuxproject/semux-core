@@ -11,8 +11,9 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -20,7 +21,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.config.Constants;
@@ -46,9 +46,9 @@ public class NodeManager {
     private static final String DNS_SEED_MAINNET = "mainnet.semux.org";
     private static final String DNS_SEED_TESTNET = "testnet.semux.org";
 
+    private static final long MAX_QUEUE_SIZE = 1024;
     private static final int LRU_CACHE_SIZE = 1024;
     private static final long RECONNECT_WAIT = 2L * 60L * 1000L;
-    private static final long MAX_QUEUE_SIZE = 1024;
 
     private Kernel kernel;
     private Config config;
@@ -56,12 +56,9 @@ public class NodeManager {
     private ChannelManager channelMgr;
     private PeerClient client;
 
-    /**
-     * Randomly sorted set of nodes to be connected
-     */
-    private ConcurrentSkipListSet<Node> queue;
+    private Queue<Node> queue = new ConcurrentLinkedQueue<>();
 
-    private Cache<InetSocketAddress, Long> lastConnect;
+    private Cache<Node, Long> lastConnect = Caffeine.newBuilder().maximumSize(LRU_CACHE_SIZE).build();
 
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> connectFuture;
@@ -80,9 +77,6 @@ public class NodeManager {
 
         this.channelMgr = kernel.getChannelManager();
         this.client = kernel.getClient();
-
-        this.queue = new ConcurrentSkipListSet<>();
-        this.lastConnect = Caffeine.newBuilder().maximumSize(LRU_CACHE_SIZE).build();
 
         this.exec = Executors.newSingleThreadScheduledExecutor(factory);
     }
@@ -180,7 +174,7 @@ public class NodeManager {
             }
 
             for (InetAddress a : InetAddress.getAllByName(name)) {
-                nodes.add(new Node(new InetSocketAddress(a, Constants.DEFAULT_P2P_PORT)));
+                nodes.add(new Node(a, Constants.DEFAULT_P2P_PORT));
             }
         } catch (UnknownHostException e) {
             logger.info("Failed to get bootstrapping nodes by dns");
@@ -194,19 +188,19 @@ public class NodeManager {
      */
     protected void doConnect() {
         Set<InetSocketAddress> activeAddresses = channelMgr.getActiveAddresses();
-        InetSocketAddress addr;
+        Node node;
 
-        while ((addr = queue.pollFirst()) != null && channelMgr.size() < config.netMaxOutboundConnections()) {
-            Long l = lastConnect.getIfPresent(addr);
+        while ((node = queue.poll()) != null && channelMgr.size() < config.netMaxOutboundConnections()) {
+            Long lastTouch = lastConnect.getIfPresent(node);
             long now = System.currentTimeMillis();
 
-            if (!new InetSocketAddress(client.getIp(), client.getPort()).equals(addr)
-                    && !activeAddresses.contains(addr)
-                    && (l == null || l + RECONNECT_WAIT < now)) {
+            if (!client.getNode().equals(node)
+                    && !activeAddresses.contains(node.toAddress())
+                    && (lastTouch == null || lastTouch + RECONNECT_WAIT < now)) {
 
-                SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, addr);
-                client.connect(addr, ci);
-                lastConnect.put(addr, now);
+                SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, node);
+                client.connect(node, ci);
+                lastConnect.put(node, now);
                 break;
             }
         }
@@ -220,36 +214,83 @@ public class NodeManager {
     }
 
     /**
-     * This class represents a node which can be sorted randomly.
+     * Represents a node in the semux network.
      */
-    public static class Node extends InetSocketAddress implements Comparable<Node> {
+    public static class Node {
 
-        private static final long serialVersionUID = -4786696870969905624L;
+        private InetSocketAddress address;
 
         /**
-         * a random number
+         * Construct a node with the given socket address.
+         * 
+         * @param address
          */
-        private int rand = RandomUtils.nextInt();
-
         public Node(InetSocketAddress address) {
-            super(address.getAddress(), address.getPort());
+            this.address = address;
         }
 
-        public Node(String hostname, int port) {
-            super(hostname, port);
+        /**
+         * Construct a node with the given IP address and port.
+         * 
+         * @param ip
+         * @param port
+         */
+        public Node(InetAddress ip, int port) {
+            this(new InetSocketAddress(ip, port));
         }
 
-        public Node(InetAddress addr, int port) {
-            super(addr, port);
+        /**
+         * Construct a node with the given IP address and port.
+         * 
+         * @param ip
+         *            IP address, or hostname (not encouraged to use)
+         * @param port
+         *            port number
+         */
+        public Node(String ip, int port) {
+            this(new InetSocketAddress(ip, port));
+        }
+
+        /**
+         * Returns the IP address.
+         * 
+         * @return
+         */
+        public String getIp() {
+            return address.getAddress().getHostAddress();
+        }
+
+        /**
+         * Returns the port number
+         * 
+         * @return
+         */
+        public int getPort() {
+            return address.getPort();
+        }
+
+        /**
+         * Converts into a socket address.
+         * 
+         * @return
+         */
+        public InetSocketAddress toAddress() {
+            return address;
         }
 
         @Override
-        public int compareTo(Node o) {
-            if (equals(o)) {
-                return 0;
-            } else {
-                return rand < o.rand ? -1 : 1;
-            }
+        public int hashCode() {
+            return address.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof Node && address.equals(((Node) o).toAddress());
+        }
+
+        @Override
+        public String toString() {
+            return getIp() + ":" + getPort();
         }
     }
 }

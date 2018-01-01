@@ -25,6 +25,7 @@ import org.semux.core.Blockchain;
 import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
+import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageQueue;
 import org.semux.net.msg.MessageRT;
@@ -219,15 +220,18 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             break;
         }
         case GET_NODES: {
-            NodesMessage nodesMsg = new NodesMessage(
-                    channelMgr.getActiveAddresses().stream().limit(MAX_NODES).map(NodeManager.Node::new).collect(
-                            Collectors.toSet()));
+            NodesMessage nodesMsg = new NodesMessage(channelMgr.getActiveAddresses()
+                    .stream().limit(MAX_NODES).map(Node::new)
+                    .collect(Collectors.toList()));
             msgQueue.sendMessage(nodesMsg);
             break;
         }
         case NODES: {
+            // TODO: record how frequent this message is being used, ban if necessary
             NodesMessage nodesMsg = (NodesMessage) msg;
-            nodeMgr.addNodes(nodesMsg.getNodes());
+            if (nodesMsg.validate()) {
+                nodeMgr.addNodes(nodesMsg.getNodes());
+            }
             break;
         }
         case TRANSACTION: {

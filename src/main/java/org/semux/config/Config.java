@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.semux.core.TransactionType;
-import org.semux.net.NodeManager;
+import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
 
 /**
@@ -149,7 +149,7 @@ public interface Config {
      *
      * @return
      */
-    Set<NodeManager.Node> p2pSeedNodes();
+    Set<Node> p2pSeedNodes();
 
     // =========================
     // Network

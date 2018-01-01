@@ -14,7 +14,6 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,6 +36,7 @@ import org.semux.core.Block;
 import org.semux.core.Genesis;
 import org.semux.core.Unit;
 import org.semux.net.NodeManager;
+import org.semux.net.NodeManager.Node;
 import org.semux.rules.KernelRule;
 
 @Category(IntegrationTest.class)
@@ -81,13 +81,10 @@ public class SyncingTest {
         when(Genesis.load(any())).thenReturn(genesis);
 
         // mock seed nodes
-        Set<NodeManager.Node> nodes = new HashSet<>();
-        nodes.add(new NodeManager.Node(InetAddress.getByName(kernel1.getConfig().p2pListenIp()),
-                kernel1.getConfig().p2pListenPort()));
-        nodes.add(new NodeManager.Node(InetAddress.getByName(kernel2.getConfig().p2pListenIp()),
-                kernel2.getConfig().p2pListenPort()));
-        nodes.add(new NodeManager.Node(InetAddress.getByName(kernel3.getConfig().p2pListenIp()),
-                kernel3.getConfig().p2pListenPort()));
+        Set<Node> nodes = new HashSet<>();
+        nodes.add(new Node(kernel1.getConfig().p2pListenIp(), kernel1.getConfig().p2pListenPort()));
+        nodes.add(new Node(kernel2.getConfig().p2pListenIp(), kernel2.getConfig().p2pListenPort()));
+        nodes.add(new Node(kernel3.getConfig().p2pListenIp(), kernel3.getConfig().p2pListenPort()));
         mockStatic(NodeManager.class);
         when(NodeManager.getSeedNodes(Constants.DEV_NET_ID)).thenReturn(nodes);
 

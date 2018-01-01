@@ -17,6 +17,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
 import org.semux.config.Constants;
+import org.semux.net.NodeManager.Node;
 import org.semux.rules.KernelRule;
 
 public class NodeManagerTest {
@@ -49,7 +50,7 @@ public class NodeManagerTest {
     @Test
     public void testGetSeedNodes() {
         // Seed nodes for main net
-        Set<NodeManager.Node> peers = NodeManager.getSeedNodes(Constants.MAIN_NET_ID);
+        Set<Node> peers = NodeManager.getSeedNodes(Constants.MAIN_NET_ID);
         assertFalse(peers.isEmpty());
 
         // Seed nodes for test net
@@ -68,7 +69,7 @@ public class NodeManagerTest {
 
         KernelMock kernel2 = kernelRule2.getKernel();
         NodeManager nodeMgr = kernel2.getNodeManager();
-        nodeMgr.addNode(new NodeManager.Node("127.0.0.1", server1.getKernel().getConfig().p2pListenPort()));
+        nodeMgr.addNode(new Node("127.0.0.1", server1.getKernel().getConfig().p2pListenPort()));
         nodeMgr.doConnect();
 
         Thread.sleep(500);
