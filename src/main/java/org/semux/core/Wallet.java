@@ -85,10 +85,6 @@ public class Wallet {
             throw new IllegalArgumentException("Password can not be null");
         }
 
-        if (isUnlocked()) {
-            return true;
-        }
-
         try {
             byte[] key = Hash.h256(Bytes.of(password));
 
