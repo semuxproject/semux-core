@@ -12,6 +12,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doCallRealMethod;
@@ -365,6 +366,29 @@ public class SemuxCLITest {
         // verification
         verify(wallet).changePassword("newpassword");
         verify(wallet).flush();
+    }
+
+    @Test
+    public void testChangePasswordIncorrectConfirmation() throws ParseException {
+        SemuxCLI semuxCLI = spy(new SemuxCLI());
+
+        // mock wallet
+        Wallet wallet = mock(Wallet.class);
+        when(wallet.unlock("oldpassword")).thenReturn(true);
+        when(wallet.flush()).thenReturn(true);
+        when(semuxCLI.loadWallet()).thenReturn(wallet);
+
+        // mock SystemUtil
+        mockStatic(SystemUtil.class);
+        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        Mockito.when(SystemUtil.readPassword(anyString())).thenReturn("newpassword").thenReturn("newpasswordconfirm");
+
+        // execution
+        semuxCLI.changePassword();
+
+        // verification
+        verify(wallet, never()).changePassword("newpassword");
+        verify(wallet, never()).flush();
     }
 
     @Test

@@ -225,11 +225,20 @@ public class SemuxCLI extends Launcher {
 
         try {
             String newPassword = SystemUtil.readPassword(CLIMessages.get("EnterNewPassword"));
+            String newPasswordRe = SystemUtil.readPassword(CLIMessages.get("ReEnterNewPassword"));
+
+            if (!newPassword.equals(newPasswordRe)) {
+                logger.error(CLIMessages.get("ReEnterNewPasswordIncorrect"));
+                SystemUtil.exit(1);
+                return;
+            }
+
             wallet.changePassword(newPassword);
             Boolean isFlushed = wallet.flush();
             if (!isFlushed) {
                 logger.error(CLIMessages.get("WalletFileCannotBeUpdated"));
                 SystemUtil.exit(1);
+                return;
             }
 
             logger.info(CLIMessages.get("PasswordChangedSuccessfully"));
