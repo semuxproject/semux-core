@@ -160,8 +160,8 @@ public class NodeManager {
     public static Set<Node> getSeedNodes(byte networkId) {
         Set<Node> nodes = new HashSet<>();
 
+        String name = null;
         try {
-            String name;
             switch (networkId) {
             case Constants.MAIN_NET_ID:
                 name = DNS_SEED_MAINNET;
@@ -177,7 +177,7 @@ public class NodeManager {
                 nodes.add(new Node(a, Constants.DEFAULT_P2P_PORT));
             }
         } catch (UnknownHostException e) {
-            logger.info("Failed to get bootstrapping nodes by dns");
+            logger.info("Failed to get seed nodes from {}", name);
         }
 
         return nodes;
