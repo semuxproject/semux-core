@@ -240,7 +240,7 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     public void setDataText(String dataText) {
-        txtTo.setText(dataText.trim());
+        txtData.setText(dataText.trim());
     }
 
     @Override

@@ -411,7 +411,7 @@ public class SemuxGUI extends Launcher {
             JsonNode node = mapper.readTree(con.getInputStream());
             return node.get("minVersion").asText();
         } catch (IOException e) {
-            logger.info("Failed to fetch minVersion", e);
+            logger.info("Failed to fetch version info");
         }
         return null;
     }
