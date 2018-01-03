@@ -428,11 +428,12 @@ public class SemuxBFT implements Consensus {
     protected void onNewHeight(long newHeight) {
         logger.trace("On new_height: {}", newHeight);
 
+        updateValidators();
         if (newHeight > height && activeValidators != null && !activeValidators.isEmpty()) {
             OptionalLong targetOptional = activeValidators.stream()
                     .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber())
                     .sorted()
-                    .limit((int) Math.floor(activeValidators.size() * 2.0 / 3.0))
+                    .limit(Math.max((int) Math.floor(activeValidators.size() * 2.0 / 3.0), 1))
                     .max();
 
             if (targetOptional.isPresent() && targetOptional.getAsLong() > height) {
