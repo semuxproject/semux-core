@@ -35,8 +35,8 @@ public class AddAddressDialog extends JDialog implements ActionListener {
         super(addressBookDialog, GUIMessages.get("AddAddress"));
         this.addressBookDialog = addressBookDialog;
 
-        JLabel lblName = new JLabel("Name");
-        JLabel lblAddress = new JLabel("Address");
+        JLabel lblName = new JLabel(GUIMessages.get("Name"));
+        JLabel lblAddress = new JLabel(GUIMessages.get("Address"));
 
         name = new JTextField();
         address = new JTextField();
