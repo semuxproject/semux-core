@@ -168,7 +168,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @return The processing result
      */
     public synchronized ProcessTransactionResult addTransactionSync(Transaction tx) {
-        return tx.validate() ? processTransaction(tx, true)
+        return tx.validate(kernel.getConfig().networkId()) ? processTransaction(tx, true)
                 : new ProcessTransactionResult(0, TransactionResult.Error.INVALID_FORMAT);
     }
 
@@ -283,7 +283,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                 continue;
             }
 
-            if (tx.validate() && processTransaction(tx, true).accepted >= 1) {
+            if (tx.validate(kernel.getConfig().networkId()) && processTransaction(tx, true).accepted >= 1) {
                 // exit after one success transaction
                 return;
             }

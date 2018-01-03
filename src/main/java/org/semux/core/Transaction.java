@@ -7,7 +7,6 @@
 package org.semux.core;
 
 import java.util.Arrays;
-import java.util.concurrent.Callable;
 
 import org.semux.crypto.EdDSA;
 import org.semux.crypto.EdDSA.Signature;
@@ -17,7 +16,9 @@ import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 import org.xbill.DNS.Address;
 
-public class Transaction implements Callable<Boolean> {
+public class Transaction {
+
+    private final byte networkId;
 
     private final TransactionType type;
 
@@ -41,6 +42,7 @@ public class Transaction implements Callable<Boolean> {
     /**
      * Create a new transaction.
      *
+     * @param networkId
      * @param type
      * @param to
      * @param value
@@ -49,7 +51,9 @@ public class Transaction implements Callable<Boolean> {
      * @param timestamp
      * @param data
      */
-    public Transaction(TransactionType type, byte[] to, long value, long fee, long nonce, long timestamp, byte[] data) {
+    public Transaction(byte networkId, TransactionType type, byte[] to, long value, long fee, long nonce,
+            long timestamp, byte[] data) {
+        this.networkId = networkId;
         this.type = type;
         this.to = to;
         this.value = value;
@@ -59,6 +63,7 @@ public class Transaction implements Callable<Boolean> {
         this.data = data;
 
         SimpleEncoder enc = new SimpleEncoder();
+        enc.writeByte(networkId);
         enc.writeByte(type.toByte());
         enc.writeBytes(to);
         enc.writeLong(value);
@@ -81,6 +86,7 @@ public class Transaction implements Callable<Boolean> {
         this.hash = hash;
 
         SimpleDecoder dec = new SimpleDecoder(encoded);
+        this.networkId = dec.readByte();
         this.type = TransactionType.of(dec.readByte());
         this.to = dec.readBytes();
         this.value = dec.readLong();
@@ -113,10 +119,12 @@ public class Transaction implements Callable<Boolean> {
      * {@link TransactionExecutor} for that purpose
      * </p>
      *
+     * @param network
      * @return true if success, otherwise false
      */
-    public boolean validate() {
+    public boolean validate(byte network) {
         return hash != null && hash.length == Hash.HASH_LEN
+                && networkId == network
                 && type != null
                 && to != null && to.length == EdDSA.ADDRESS_LEN
                 && value >= 0
@@ -129,6 +137,15 @@ public class Transaction implements Callable<Boolean> {
 
                 && Arrays.equals(Hash.h256(encoded), hash)
                 && EdDSA.verify(hash, signature);
+    }
+
+    /**
+     * Returns the transaction network id.
+     * 
+     * @return
+     */
+    public byte getNetworkId() {
+        return networkId;
     }
 
     /**
@@ -236,15 +253,6 @@ public class Transaction implements Callable<Boolean> {
     }
 
     /**
-     * Size of the transaction in bytes
-     *
-     * @return Size of the transaction in bytes
-     */
-    public int size() {
-        return toBytes().length;
-    }
-
-    /**
      * Parses from a byte array.
      *
      * @param bytes
@@ -259,15 +267,19 @@ public class Transaction implements Callable<Boolean> {
         return new Transaction(hash, encoded, signature);
     }
 
+    /**
+     * Returns size of the transaction in bytes
+     *
+     * @return size in bytes
+     */
+    public int size() {
+        return toBytes().length;
+    }
+
     @Override
     public String toString() {
         return "Transaction [type=" + type + ", from=" + Hex.encode(getFrom()) + ", to=" + Hex.encode(to) + ", value="
                 + value + ", fee=" + fee + ", nonce=" + nonce + ", timestamp=" + timestamp + ", data="
                 + Hex.encode(data) + ", hash=" + Hex.encode(hash) + "]";
-    }
-
-    @Override
-    public Boolean call() throws Exception {
-        return validate();
     }
 }

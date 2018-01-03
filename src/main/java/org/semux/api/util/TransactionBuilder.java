@@ -152,6 +152,7 @@ public class TransactionBuilder {
             value = kernel.getConfig().minDelegateBurnAmount();
         }
 
-        return new Transaction(type, to, value, fee, nonce, timestamp, data).sign(account);
+        return new Transaction(kernel.getConfig().networkId(), type, to, value, fee, nonce, timestamp, data)
+                .sign(account);
     }
 }

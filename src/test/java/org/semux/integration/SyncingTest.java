@@ -128,7 +128,8 @@ public class SyncingTest {
             Block block = kernel4.getBlockchain().getBlock(i);
             Block previousBlock = kernel4.getBlockchain().getBlock(i - 1);
             assertTrue(Block.validateHeader(previousBlock.getHeader(), block.getHeader()));
-            assertTrue(Block.validateTransactions(previousBlock.getHeader(), block.getTransactions()));
+            assertTrue(Block.validateTransactions(previousBlock.getHeader(), block.getTransactions(),
+                    kernel4.getConfig().networkId()));
             assertTrue(Block.validateResults(previousBlock.getHeader(), block.getResults()));
 
             assertTrue(block.getVotes().size() >= 3 * 2 / 3);

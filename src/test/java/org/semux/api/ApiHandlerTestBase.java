@@ -97,6 +97,7 @@ public abstract class ApiHandlerTestBase {
     protected Transaction createTransaction() {
         EdDSA key = new EdDSA();
 
+        byte networkId = config.networkId();
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = key.toAddress();
         long value = 0;
@@ -105,6 +106,6 @@ public abstract class ApiHandlerTestBase {
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
 
-        return new Transaction(type, to, value, fee, nonce, timestamp, data).sign(key);
+        return new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(key);
     }
 }

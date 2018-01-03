@@ -488,13 +488,14 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
             PendingManager pendingMgr = kernel.getPendingManager();
 
+            byte networkId = kernel.getConfig().networkId();
             TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
             byte[] fromAddress = a.getKey().toAddress();
             byte[] toAddress = d.getAddress();
             long nonce = pendingMgr.getNonce(fromAddress);
             long timestamp = System.currentTimeMillis();
             byte[] data = {};
-            Transaction tx = new Transaction(type, toAddress, value, fee, nonce, timestamp, data);
+            Transaction tx = new Transaction(networkId, type, toAddress, value, fee, nonce, timestamp, data);
             tx.sign(a.getKey());
 
             sendTransaction(pendingMgr, tx);
@@ -533,6 +534,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
             PendingManager pendingMgr = kernel.getPendingManager();
 
+            byte networkId = kernel.getConfig().networkId();
             TransactionType type = TransactionType.DELEGATE;
             byte[] to = Bytes.EMPTY_ADDRESS;
             long value = config.minDelegateBurnAmount();
@@ -540,7 +542,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             long nonce = pendingMgr.getNonce(a.getAddress());
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.of(name);
-            Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(a.getKey());
+            Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(a.getKey());
 
             sendTransaction(pendingMgr, tx);
         }

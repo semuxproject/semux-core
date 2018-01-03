@@ -66,14 +66,14 @@ public class CorePerformanceTest {
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.random(16);
 
-            Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+            Transaction tx = new Transaction(Constants.DEV_NET_ID, type, to, value, fee, nonce, timestamp, data);
             tx.sign(key);
             txs.add(tx);
         }
 
         long t1 = System.nanoTime();
         for (Transaction tx : txs) {
-            assertTrue(tx.validate());
+            assertTrue(tx.validate(Constants.DEV_NET_ID));
         }
         long t2 = System.nanoTime();
         logger.info("Perf_transaction_1: {} μs/tx", (t2 - t1) / 1_000 / repeat);

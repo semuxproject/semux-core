@@ -331,11 +331,12 @@ public class SendPanel extends JPanel implements ActionListener {
                 if (ret == JOptionPane.YES_OPTION) {
                     PendingManager pendingMgr = kernel.getPendingManager();
 
+                    byte networkId = kernel.getConfig().networkId();
                     TransactionType type = TransactionType.TRANSFER;
                     byte[] from = acc.getKey().toAddress();
                     long nonce = pendingMgr.getNonce(from);
                     long timestamp = System.currentTimeMillis();
-                    Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, Bytes.of(data));
+                    Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, Bytes.of(data));
                     tx.sign(acc.getKey());
 
                     sendTransaction(pendingMgr, tx);

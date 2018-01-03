@@ -10,6 +10,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
+import org.semux.config.Constants;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.EdDSA;
@@ -18,6 +19,7 @@ import org.semux.util.Bytes;
 public class TransactionMessageTest {
     @Test
     public void testSerialization() {
+        byte networkId = Constants.DEV_NET_ID;
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
         long value = 2;
@@ -26,7 +28,7 @@ public class TransactionMessageTest {
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.of("data");
 
-        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data);
         tx.sign(new EdDSA());
 
         TransactionMessage msg = new TransactionMessage(tx);

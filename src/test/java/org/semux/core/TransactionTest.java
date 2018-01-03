@@ -28,6 +28,7 @@ public class TransactionTest {
     private Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
     private EdDSA key = new EdDSA();
 
+    private byte networkId = Constants.DEV_NET_ID;
     private TransactionType type = TransactionType.TRANSFER;
     private byte[] to = Bytes.random(20);
     private long value = 2;
@@ -38,18 +39,18 @@ public class TransactionTest {
 
     @Test
     public void testNew() {
-        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data);
         assertNotNull(tx.getHash());
         assertNull(tx.getSignature());
         tx.sign(key);
-        assertTrue(tx.validate());
+        assertTrue(tx.validate(networkId));
 
         testFields(tx);
     }
 
     @Test
     public void testSerialization() {
-        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data);
         tx.sign(key);
 
         testFields(Transaction.fromBytes(tx.toBytes()));
@@ -57,7 +58,8 @@ public class TransactionTest {
 
     @Test
     public void testTransactionSize() {
-        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, Bytes.random(128)).sign(key);
+        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, Bytes.random(128))
+                .sign(key);
         byte[] bytes = tx.toBytes();
 
         logger.info("tx size: {} B, {} GB per 1M txs", bytes.length, 1000000.0 * bytes.length / 1024 / 1024 / 1024);

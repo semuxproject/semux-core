@@ -9,12 +9,6 @@ package org.semux.core;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.crypto.EdDSA.Signature;
@@ -27,18 +21,6 @@ import org.semux.util.SimpleEncoder;
  * Represents a block in the blockchain.
  */
 public class Block {
-
-    private static final ThreadFactory factory = new ThreadFactory() {
-        AtomicInteger cnt = new AtomicInteger(0);
-
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(r, "block-" + cnt.getAndIncrement());
-        }
-    };
-
-    private static final int CORES = Runtime.getRuntime().availableProcessors();
-    private static final ExecutorService exec = Executors.newFixedThreadPool(CORES, factory);
 
     /**
      * The block header.
@@ -151,16 +133,10 @@ public class Block {
      * @param transactions
      * @return
      */
-    public static boolean validateTransactions(BlockHeader header, List<Transaction> transactions) {
+    public static boolean validateTransactions(BlockHeader header, List<Transaction> transactions, byte networkId) {
         // validate transactions
-        try {
-            List<Future<Boolean>> list = exec.invokeAll(transactions);
-            for (Future<Boolean> f : list) {
-                if (!f.get()) {
-                    return false;
-                }
-            }
-        } catch (InterruptedException | ExecutionException e) {
+        boolean valid = transactions.parallelStream().allMatch((tx) -> tx.validate(networkId));
+        if (!valid) {
             return false;
         }
 

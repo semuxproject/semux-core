@@ -39,6 +39,7 @@ public class BlockchainPerformance {
 
         int total = 0;
         for (int i = 0;; i++) {
+            byte networkId = config.networkId();
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
             long value = 1;
@@ -46,7 +47,7 @@ public class BlockchainPerformance {
             long nonce = 1 + i;
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.EMPTY_BYTES;
-            Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data).sign(key);
+            Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(key);
 
             if (total + tx.size() > config.maxBlockTransactionsSize()) {
                 break;
@@ -93,7 +94,7 @@ public class BlockchainPerformance {
 
         long t1 = System.nanoTime();
         Block.validateHeader(gen.getHeader(), block.getHeader());
-        Block.validateTransactions(gen.getHeader(), block.getTransactions());
+        Block.validateTransactions(gen.getHeader(), block.getTransactions(), config.networkId());
         Block.validateResults(gen.getHeader(), block.getResults());
         // block votes validation skipped
         long t2 = System.nanoTime();
@@ -104,6 +105,7 @@ public class BlockchainPerformance {
     public static void testTransactionValidation() {
         EdDSA key = new EdDSA();
 
+        byte networkId = config.networkId();
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
         long value = 1;
@@ -111,13 +113,13 @@ public class BlockchainPerformance {
         long nonce = 1;
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
-        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data);
         tx.sign(key);
 
         int repeat = 1000;
         long t1 = System.nanoTime();
         for (int i = 0; i < repeat; i++) {
-            tx.validate();
+            tx.validate(networkId);
         }
         long t2 = System.nanoTime();
         logger.info("Perf_transaction_size: {} B", tx.toBytes().length);

@@ -285,8 +285,15 @@ public class BlockchainImpl implements Blockchain {
 
         if (number != genesis.getNumber()) {
             // [4] coinbase transaction
-            Transaction tx = new Transaction(TransactionType.COINBASE, block.getCoinbase(), reward, 0,
-                    block.getNumber(), block.getTimestamp(), Bytes.EMPTY_BYTES).sign(new EdDSA());
+            Transaction tx = new Transaction(config.networkId(),
+                    TransactionType.COINBASE,
+                    block.getCoinbase(),
+                    reward,
+                    0,
+                    block.getNumber(),
+                    block.getTimestamp(),
+                    Bytes.EMPTY_BYTES);
+            tx.sign(new EdDSA());
             indexDB.put(Bytes.merge(TYPE_TRANSACTION_HASH, tx.getHash()), tx.toBytes());
             addTransactionToAccount(tx, block.getCoinbase());
 

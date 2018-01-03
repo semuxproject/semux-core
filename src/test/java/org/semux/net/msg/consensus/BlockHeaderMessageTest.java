@@ -13,7 +13,6 @@ import java.util.Collections;
 import org.junit.Test;
 import org.semux.core.BlockHeader;
 import org.semux.crypto.EdDSA;
-import org.semux.net.msg.consensus.BlockHeaderMessage;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
