@@ -6,6 +6,7 @@
  */
 package org.semux.gui.dialog;
 
+import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -32,7 +33,7 @@ public class AddAddressDialog extends JDialog implements ActionListener {
     private JTextField address;
 
     public AddAddressDialog(AddressBookDialog addressBookDialog) {
-        super(addressBookDialog, GUIMessages.get("AddAddress"));
+        super(addressBookDialog, GUIMessages.get("AddAddress"), Dialog.ModalityType.TOOLKIT_MODAL);
         this.addressBookDialog = addressBookDialog;
 
         JLabel lblName = new JLabel("Name");
