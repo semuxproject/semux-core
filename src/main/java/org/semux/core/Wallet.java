@@ -33,6 +33,9 @@ public class Wallet {
 
     private static final int VERSION = 1;
 
+    // variable-length quantity is disabled for compatibility
+    private static final boolean VLQ = false;
+
     private File file;
     private String password;
 
@@ -94,9 +97,9 @@ public class Wallet {
                 int total = dec.readInt();
 
                 for (int i = 0; i < total; i++) {
-                    byte[] iv = dec.readBytes();
-                    byte[] publicKey = dec.readBytes();
-                    byte[] privateKey = AES.decrypt(dec.readBytes(), key, iv);
+                    byte[] iv = dec.readBytes(VLQ);
+                    byte[] publicKey = dec.readBytes(VLQ);
+                    byte[] privateKey = AES.decrypt(dec.readBytes(VLQ), key, iv);
 
                     accounts.add(new EdDSA(privateKey, publicKey));
                 }
@@ -342,9 +345,9 @@ public class Wallet {
                 for (EdDSA a : accounts) {
                     byte[] iv = Bytes.random(16);
 
-                    enc.writeBytes(iv);
-                    enc.writeBytes(a.getPublicKey());
-                    enc.writeBytes(AES.encrypt(a.getPrivateKey(), key, iv));
+                    enc.writeBytes(iv, VLQ);
+                    enc.writeBytes(a.getPublicKey(), VLQ);
+                    enc.writeBytes(AES.encrypt(a.getPrivateKey(), key, iv), VLQ);
                 }
             }
 

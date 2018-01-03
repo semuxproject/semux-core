@@ -99,6 +99,21 @@ public class WalletTest {
     }
 
     @Test
+    public void testFlush2() throws IOException {
+        File f = File.createTempFile("wallet", ".data");
+        Wallet w = new Wallet(f);
+
+        w.unlock(pwd);
+        EdDSA key = new EdDSA();
+        w.addAccount(key);
+        w.flush();
+
+        Wallet w2 = new Wallet(f);
+        w2.unlock(pwd);
+        assertEquals(key.toAddressString(), w2.getAccount(0).toAddressString());
+    }
+
+    @Test
     public void testChangePassword() {
         String pwd2 = "passw0rd2";
 

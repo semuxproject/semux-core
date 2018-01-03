@@ -14,17 +14,17 @@ import org.semux.util.exception.SimpleEncoderException;
 public class SimpleEncoder {
     private ByteArrayOutputStream out;
 
-    public SimpleEncoder() {
-        this.out = new ByteArrayOutputStream();
-    }
-
     public SimpleEncoder(byte[] toAppend) {
-        this();
+        this.out = new ByteArrayOutputStream();
         try {
             out.write(toAppend);
         } catch (IOException e) {
             throw new SimpleEncoderException(e);
         }
+    }
+
+    public SimpleEncoder() {
+        this(Bytes.EMPTY_BYTES);
     }
 
     public void writeBoolean(boolean b) {
@@ -55,8 +55,13 @@ public class SimpleEncoder {
         writeInt(i2);
     }
 
-    public void writeBytes(byte[] bytes) {
-        writeInt(bytes.length);
+    public void writeBytes(byte[] bytes, boolean vlq) {
+        if (vlq) {
+            writeSize(bytes.length);
+        } else {
+            writeInt(bytes.length);
+        }
+
         try {
             out.write(bytes);
         } catch (IOException e) {
@@ -64,13 +69,12 @@ public class SimpleEncoder {
         }
     }
 
+    public void writeBytes(byte[] bytes) {
+        writeBytes(bytes, true);
+    }
+
     public void writeString(String s) {
-        writeInt(s.length());
-        try {
-            out.write(Bytes.of(s));
-        } catch (IOException e) {
-            throw new SimpleEncoderException(e);
-        }
+        writeBytes(Bytes.of(s));
     }
 
     public byte[] toBytes() {
@@ -79,5 +83,35 @@ public class SimpleEncoder {
 
     public int getWriteIndex() {
         return out.size();
+    }
+
+    /**
+     * Writes a size into the output byte array.
+     * 
+     * @param size
+     * @throws IllegalArgumentException
+     *             when the input size is negative
+     */
+    protected void writeSize(int size) {
+        if (size < 0) {
+            throw new IllegalArgumentException("Size can't be negative: " + size);
+        } else if (size > 0x0FFFFFFF) {
+            throw new IllegalArgumentException("Size can't be larger than 0x0FFFFFFF: " + size);
+        }
+
+        int[] buf = new int[4];
+        int i = buf.length;
+        do {
+            buf[--i] = size & 0x7f;
+            size >>>= 7;
+        } while (size > 0);
+
+        while (i < buf.length) {
+            if (i != buf.length - 1) {
+                out.write((byte) (buf[i++] | 0x80));
+            } else {
+                out.write((byte) buf[i++]);
+            }
+        }
     }
 }
