@@ -221,6 +221,7 @@ public class SwingUtil {
      */
     public static JTextField textFieldWithCopyPastePopup() {
         JTextField textField = new JTextField();
+        textField.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         addTextContextMenu(textField, Arrays.asList(COPY, PASTE, CUT));
         return textField;
     }
