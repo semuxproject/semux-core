@@ -136,7 +136,7 @@ public class MessageQueue {
         int maxQueueSize = config.netMaxMessageQueueSize();
         if (requests.size() >= maxQueueSize || responses.size() >= maxQueueSize
                 || prioritizedResponses.size() >= maxQueueSize) {
-            disconnect(ReasonCode.BAD_PEER);
+            disconnect(ReasonCode.MESSAGE_QUEUE_FULL);
             return false;
         }
 

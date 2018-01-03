@@ -164,13 +164,16 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
             ReasonCode error = null;
             if (!isSupported(peer.getNetworkVersion())) {
-                error = ReasonCode.BAD_PROTOCOL;
+                error = ReasonCode.INCOMPATIBLE_PROTOCOL;
+
             } else if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isActivePeer(peer.getPeerId())) {
-                error = ReasonCode.DUPLICATE_PEER_ID;
+                error = ReasonCode.DUPLICATED_PEER_ID;
+
             } else if (chain.getValidators().contains(peer.getPeerId()) // validator
                     && channelMgr.isActiveIP(channel.getRemoteIp()) // connected
                     && config.networkId() == Constants.MAIN_NET_ID) { // main net
-                error = ReasonCode.BAD_PEER;
+                error = ReasonCode.VALIDATOR_IP_LIMITED;
+
             } else if (!isValid(helloMsg)) {
                 error = ReasonCode.INVALID_HANDSHAKE;
             }
@@ -328,6 +331,8 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
             // set indicator
             isHandshakeDone = true;
+        } else {
+            msgQueue.disconnect(ReasonCode.HANDSHAKE_EXISTS);
         }
     }
 

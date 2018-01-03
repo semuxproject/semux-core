@@ -590,7 +590,7 @@ public class SemuxBFT implements Consensus {
                     events.add(new Event(Event.Type.PROPOSAL, m.getProposal()));
                 } else {
                     logger.debug("Invalid proposal from {}", channel.getRemotePeer().getPeerId());
-                    channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
+                    channel.getMessageQueue().disconnect(ReasonCode.BAD_PEER);
                 }
             }
             break;
@@ -604,7 +604,7 @@ public class SemuxBFT implements Consensus {
                     events.add(new Event(Event.Type.VOTE, vote));
                 } else {
                     logger.debug("Invalid vote from {}", channel.getRemotePeer().getPeerId());
-                    channel.getMessageQueue().disconnect(ReasonCode.CONSENSUS_ERROR);
+                    channel.getMessageQueue().disconnect(ReasonCode.BAD_PEER);
                 }
             }
             break;

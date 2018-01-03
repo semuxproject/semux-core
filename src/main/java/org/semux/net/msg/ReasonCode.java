@@ -16,7 +16,7 @@ public enum ReasonCode {
     /**
      * [0x01] Incompatible protocol.
      */
-    BAD_PROTOCOL(0x01),
+    INCOMPATIBLE_PROTOCOL(0x01),
 
     /**
      * [0x02] Too many active peers.
@@ -29,19 +29,29 @@ public enum ReasonCode {
     INVALID_HANDSHAKE(0x03),
 
     /**
-     * [0x04] Duplicate peerId.
+     * [0x04] Duplicated peerId.
      */
-    DUPLICATE_PEER_ID(0x04),
+    DUPLICATED_PEER_ID(0x04),
 
     /**
-     * [0x05] Bad peer.
+     * [0x05] Message queue full.
      */
-    BAD_PEER(0x05),
+    MESSAGE_QUEUE_FULL(0x05),
 
     /**
-     * [0x06] Consensus error.
+     * [0x06] IP address is used for another validator.
      */
-    CONSENSUS_ERROR(0x06);
+    VALIDATOR_IP_LIMITED(0x06),
+
+    /**
+     * [0x07]
+     */
+    HANDSHAKE_EXISTS(0x07),
+
+    /**
+     * [0x08] Bad peer, typically due to invalid behavior.
+     */
+    BAD_PEER(0x08);
 
     private int code;
 
