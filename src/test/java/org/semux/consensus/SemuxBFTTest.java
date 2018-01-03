@@ -6,6 +6,7 @@
  */
 package org.semux.consensus;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -17,7 +18,6 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -130,18 +130,24 @@ public class SemuxBFTTest {
 
         // mock consensus
         SemuxBFT semuxBFT = (SemuxBFT) kernelRule.getKernel().getConsensus();
+        semuxBFT.activeValidators = Arrays.asList(
+                mockValidator(10L),
+                mockValidator(Long.MAX_VALUE),
+                mockValidator(100L));
+
+        // start semuxBFT
+        new Thread(() -> semuxBFT.onNewHeight(Long.MAX_VALUE)).start();
+
+        // 2/3th validator's height should be set as sync target
+        await().until(() -> kernelRule.getKernel().getSyncManager().isRunning());
+        assertEquals(100L, kernelRule.getKernel().getSyncManager().getProgress().getTargetHeight());
+    }
+
+    private Channel mockValidator(long latestBlockNumber) {
         Channel mockChannel = mock(Channel.class);
         Peer mockPeer = mock(Peer.class);
-        when(mockPeer.getLatestBlockNumber()).thenReturn(100L);
+        when(mockPeer.getLatestBlockNumber()).thenReturn(latestBlockNumber);
         when(mockChannel.getRemotePeer()).thenReturn(mockPeer);
-        when(mockChannel.isActive()).thenReturn(true);
-        semuxBFT.activeValidators = Arrays.asList(mockChannel);
-
-        new Thread(() -> semuxBFT.onNewHeight(1_000_000L)).start();
-        TimeUnit.MILLISECONDS.sleep(500);
-        assertFalse(
-                "synchronization should not be started when there is a NEW_HEIGHT message with a height that is greatly larger than other validators' latest block number",
-                kernelRule.getKernel().getSyncManager().isRunning() //
-        );
+        return mockChannel;
     }
 }

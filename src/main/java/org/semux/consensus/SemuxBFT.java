@@ -9,6 +9,7 @@ package org.semux.consensus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -91,12 +92,6 @@ public class SemuxBFT implements Consensus {
     protected VoteSet validateVotes;
     protected VoteSet precommitVotes;
     protected VoteSet commitVotes;
-
-    /**
-     * A NEW_HEIGHT message is accepted only if 2/3 validators have a height that is
-     * within the deviation.
-     */
-    private static final long MAX_NEW_HEIGHT_DEVIATION = 100L;
 
     public SemuxBFT(Kernel kernel) {
         this.kernel = kernel;
@@ -422,9 +417,10 @@ public class SemuxBFT implements Consensus {
     }
 
     /**
-     * Synchronization will be started if the new height is greater than 2/3 of
-     * active validators' latest block number and within the defined maximum
-     * deviation of ${@value MAX_NEW_HEIGHT_DEVIATION}
+     * Synchronization will be started if the 2/3th validator's height (sorted by
+     * latest block number) is greater than local height. This avoids a
+     * vulnerability that malicious validators might announce an extremely large
+     * height in order to hang sync process of peers.
      * 
      * @param newHeight
      *            new height
@@ -432,19 +428,15 @@ public class SemuxBFT implements Consensus {
     protected void onNewHeight(long newHeight) {
         logger.trace("On new_height: {}", newHeight);
 
-        if (newHeight > height && activeValidators != null) {
-            long latestBlockNum = chain.getLatestBlockNumber();
+        if (newHeight > height && activeValidators != null && !activeValidators.isEmpty()) {
+            OptionalLong targetOptional = activeValidators.stream()
+                    .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber())
+                    .sorted()
+                    .limit((int) Math.floor(activeValidators.size() * 2.0 / 3.0))
+                    .max();
 
-            int count = activeValidators.stream()
-                    .mapToInt(c -> c.isActive() && c.getRemotePeer().getLatestBlockNumber() > latestBlockNum && //
-                            Math.abs(newHeight - c.getRemotePeer().getLatestBlockNumber()) <= MAX_NEW_HEIGHT_DEVIATION //
-                                    ? 1 //
-                                    : 0 //
-                    )
-                    .sum();
-
-            if (count >= (int) Math.ceil(activeValidators.size() * 2.0 / 3.0)) {
-                sync(newHeight);
+            if (targetOptional.isPresent() && targetOptional.getAsLong() > height) {
+                sync(targetOptional.getAsLong());
             }
         }
     }
