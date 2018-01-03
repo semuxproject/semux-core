@@ -6,10 +6,11 @@
  */
 package org.semux.gui.dialog;
 
+import static org.semux.core.TransactionType.TRANSFER;
+
 import java.time.Instant;
 
 import org.assertj.swing.edt.GuiActionRunner;
-import org.assertj.swing.finder.DialogFinder;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
@@ -40,20 +41,16 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
     public void testDisplayTransferTransaction() {
         kernelRule1.getKernel().start();
 
-        final EdDSA from = new EdDSA();
-        final EdDSA to = new EdDSA();
-        final long value = 1000 * Unit.SEM;
-        final long fee = (long) (0.05 * Unit.SEM);
-        final long now = Instant.now().toEpochMilli();
-        final byte[] data = new String("some data").getBytes();
-        Transaction tx = new Transaction(
-                TransactionType.TRANSFER,
-                to.toAddress(),
-                value,
-                fee,
-                0,
-                now,
-                data).sign(from);
+        TransactionType type = TRANSFER;
+        EdDSA from = new EdDSA();
+        EdDSA to = new EdDSA();
+        long value = 1000 * Unit.SEM;
+        long fee = (long) (0.05 * Unit.SEM);
+        long nonce = 0L;
+        long now = Instant.now().toEpochMilli();
+        byte[] data = "some data".getBytes();
+        Transaction tx = new Transaction(kernelRule1.getKernel().getConfig().networkId(), type, to.toAddress(), value,
+                fee, nonce, now, data).sign(from);
 
         TransactionDialogTestApplication application = GuiActionRunner
                 .execute(() -> new TransactionDialogTestApplication(walletModel, tx, kernelRule1.getKernel()));
