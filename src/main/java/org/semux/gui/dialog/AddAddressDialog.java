@@ -39,8 +39,8 @@ public class AddAddressDialog extends JDialog implements ActionListener {
         JLabel lblName = new JLabel("Name");
         JLabel lblAddress = new JLabel("Address");
 
-        name = new JTextField();
-        address = new JTextField();
+        name = SwingUtil.textFieldWithCopyPastePopup();
+        address = SwingUtil.textFieldWithCopyPastePopup();
 
         JButton btnCancel = SwingUtil.createDefaultButton(GUIMessages.get("Cancel"), this, Action.CANCEL);
         JButton btnOk = SwingUtil.createDefaultButton(GUIMessages.get("OK"), this, Action.OK);
