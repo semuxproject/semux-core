@@ -166,8 +166,13 @@ public class SemuxCLI extends Launcher {
     }
 
     protected void start() {
-        Wallet wallet = loadAndUnlockWallet();
+        // load wallet file
+        Wallet wallet = loadWallet().exists() ? loadAndUnlockWallet() : createNewWallet();
+        if (wallet == null) {
+            return;
+        }
 
+        // create a new account if the wallet is empty
         List<EdDSA> accounts = wallet.getAccounts();
         if (accounts.isEmpty()) {
             EdDSA key = new EdDSA();
@@ -224,12 +229,8 @@ public class SemuxCLI extends Launcher {
         Wallet wallet = loadAndUnlockWallet();
 
         try {
-            String newPassword = SystemUtil.readPassword(CLIMessages.get("EnterNewPassword"));
-            String newPasswordRe = SystemUtil.readPassword(CLIMessages.get("ReEnterNewPassword"));
-
-            if (!newPassword.equals(newPasswordRe)) {
-                logger.error(CLIMessages.get("ReEnterNewPasswordIncorrect"));
-                SystemUtil.exit(1);
+            String newPassword = readNewPassword();
+            if (newPassword == null) {
                 return;
             }
 
@@ -245,6 +246,24 @@ public class SemuxCLI extends Launcher {
         } catch (WalletLockedException exception) {
             logger.error(exception.getMessage());
         }
+    }
+
+    /**
+     * Read a new password from input and require confirmation
+     * 
+     * @return new password, or null if the confirmation failed
+     */
+    private String readNewPassword() {
+        String newPassword = SystemUtil.readPassword(CLIMessages.get("EnterNewPassword"));
+        String newPasswordRe = SystemUtil.readPassword(CLIMessages.get("ReEnterNewPassword"));
+
+        if (!newPassword.equals(newPasswordRe)) {
+            logger.error(CLIMessages.get("ReEnterNewPasswordIncorrect"));
+            SystemUtil.exit(1);
+            return null;
+        }
+
+        return newPassword;
     }
 
     protected void dumpPrivateKey(String address) {
@@ -299,6 +318,28 @@ public class SemuxCLI extends Launcher {
         Wallet wallet = loadWallet();
         if (!wallet.unlock(getPassword())) {
             SystemUtil.exit(-1);
+        }
+
+        return wallet;
+    }
+
+    /**
+     * Create a new wallet with a new password from input and save the wallet file
+     * to disk
+     * 
+     * @return created new wallet, or null if it failed to create the wallet
+     */
+    protected Wallet createNewWallet() {
+        String newPassword = readNewPassword();
+        if (newPassword == null) {
+            return null;
+        }
+
+        Wallet wallet = loadWallet();
+        if (!wallet.unlock(newPassword) || !wallet.flush()) {
+            logger.error("CreateNewWalletError");
+            SystemUtil.exit(-1);
+            return null;
         }
 
         return wallet;

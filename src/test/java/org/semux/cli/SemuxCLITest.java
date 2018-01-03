@@ -12,6 +12,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -121,14 +122,14 @@ public class SemuxCLITest {
         Wallet wallet = mock(Wallet.class);
         when(wallet.unlock("oldpassword")).thenReturn(true);
         when(wallet.getAccounts()).thenReturn(accounts);
+        when(wallet.exists()).thenReturn(true);
         when(semuxCLI.loadWallet()).thenReturn(wallet);
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(SystemUtil.readPassword(any())).thenReturn("password");
         when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
         when(SystemUtil.getOsArch()).thenReturn("amd64");
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
         doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
         semuxCLI.start(new String[] { "--network", "mainnet" });
 
@@ -149,6 +150,7 @@ public class SemuxCLITest {
         Wallet wallet = mock(Wallet.class);
         when(wallet.unlock("oldpassword")).thenReturn(true);
         when(wallet.getAccounts()).thenReturn(accounts);
+        when(wallet.exists()).thenReturn(true);
         when(semuxCLI.loadWallet()).thenReturn(wallet);
 
         // mock SystemUtil
@@ -178,6 +180,7 @@ public class SemuxCLITest {
         Wallet wallet = mock(Wallet.class);
         when(wallet.unlock("oldpassword")).thenReturn(true);
         when(wallet.getAccounts()).thenReturn(accounts);
+        when(wallet.exists()).thenReturn(true);
         when(semuxCLI.loadWallet()).thenReturn(wallet);
 
         // mock SystemUtil
@@ -207,6 +210,7 @@ public class SemuxCLITest {
         Wallet wallet = mock(Wallet.class);
         when(wallet.unlock("oldpassword")).thenReturn(true);
         when(wallet.getAccounts()).thenReturn(accounts);
+        when(wallet.exists()).thenReturn(true);
         when(semuxCLI.loadWallet()).thenReturn(wallet);
 
         // mock SystemUtil
@@ -228,6 +232,7 @@ public class SemuxCLITest {
 
         // mock wallet
         Wallet wallet = mock(Wallet.class);
+        when(wallet.exists()).thenReturn(false);
         when(wallet.unlock("oldpassword")).thenReturn(true);
         doReturn(new ArrayList<EdDSA>(), // returns empty wallet
                 Collections.singletonList(new EdDSA()) // returns wallet with a newly created account
@@ -245,7 +250,7 @@ public class SemuxCLITest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(SystemUtil.readPassword(any())).thenReturn("oldpassword");
         when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
         when(SystemUtil.getOsArch()).thenReturn("amd64");
 
@@ -256,7 +261,7 @@ public class SemuxCLITest {
         verify(wallet).unlock("oldpassword");
         verify(wallet, times(2)).getAccounts();
         verify(wallet).addAccount(any(EdDSA.class));
-        verify(wallet).flush();
+        verify(wallet, atLeastOnce()).flush();
 
         // verifies that kernel starts
         verify(semuxCLI).startKernel(any(), any(), any());
@@ -264,6 +269,32 @@ public class SemuxCLITest {
         // assert outputs
         List<LoggingEvent> logs = LoggingAppender.events();
         assertThat(logs, hasItem(info(CLIMessages.get("NewAccountCreatedForAddress", newAccount.toAddressString()))));
+    }
+
+    @Test
+    public void testStartKernelWithEmptyWalletInvalidNewPassword() {
+        SemuxCLI semuxCLI = spy(new SemuxCLI());
+
+        // mock wallet
+        Wallet wallet = mock(Wallet.class);
+        when(wallet.exists()).thenReturn(false);
+
+        // mock CLI
+        when(semuxCLI.loadWallet()).thenReturn(wallet);
+        doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
+
+        // mock SystemUtil
+        mockStatic(SystemUtil.class);
+        when(SystemUtil.readPassword(any())).thenReturn("a password").thenReturn("b password");
+
+        // execution
+        semuxCLI.start();
+
+        // the kernel should not be started
+        verify(semuxCLI, never()).startKernel(any(), any(), any());
+
+        // the wallet should not be saved
+        verify(wallet, never()).flush();
     }
 
     @Test
