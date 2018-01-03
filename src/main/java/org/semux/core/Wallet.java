@@ -77,7 +77,8 @@ public class Wallet {
     }
 
     /**
-     * Unlocks this wallet.
+     * Unlocks this wallet. If the wallet is unlocked, this method will reset the
+     * account list on a successful trial.
      * 
      * @param password
      *            the wallet password
@@ -94,14 +95,20 @@ public class Wallet {
             if (exists()) {
                 SimpleDecoder dec = new SimpleDecoder(IOUtil.readFile(file));
                 dec.readInt(); // version
-                int total = dec.readInt();
+                int total = dec.readInt(); // size
 
+                List<EdDSA> list = new ArrayList<>();
                 for (int i = 0; i < total; i++) {
                     byte[] iv = dec.readBytes(VLQ);
                     byte[] publicKey = dec.readBytes(VLQ);
                     byte[] privateKey = AES.decrypt(dec.readBytes(VLQ), key, iv);
 
-                    accounts.add(new EdDSA(privateKey, publicKey));
+                    list.add(new EdDSA(privateKey, publicKey));
+                }
+
+                synchronized (accounts) {
+                    accounts.clear();
+                    accounts.addAll(list);
                 }
             }
             this.password = password;
