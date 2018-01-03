@@ -6,9 +6,9 @@
  */
 package org.semux.gui;
 
-import static org.semux.gui.SwingUtil.TextContextMenuItem.COPY;
-import static org.semux.gui.SwingUtil.TextContextMenuItem.CUT;
-import static org.semux.gui.SwingUtil.TextContextMenuItem.PASTE;
+import static org.semux.gui.TextContextMenuItem.COPY;
+import static org.semux.gui.TextContextMenuItem.CUT;
+import static org.semux.gui.TextContextMenuItem.PASTE;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -43,8 +43,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
-import javax.swing.text.DefaultEditorKit;
-import javax.swing.text.TextAction;
 
 import org.semux.core.Transaction;
 import org.semux.core.Unit;
@@ -53,7 +51,6 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.gui.exception.QRCodeException;
 import org.semux.message.GUIMessages;
-import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -197,35 +194,6 @@ public class SwingUtil {
             return image;
         } catch (WriterException e) {
             throw new QRCodeException(e);
-        }
-    }
-
-    enum TextContextMenuItem {
-        CUT, COPY, PASTE;
-
-        public TextAction toAction() {
-            switch (this) {
-            case CUT:
-                return new DefaultEditorKit.CutAction();
-            case COPY:
-                return new DefaultEditorKit.CopyAction();
-            case PASTE:
-                return new DefaultEditorKit.PasteAction();
-            }
-            throw new UnreachableException();
-        }
-
-        @Override
-        public String toString() {
-            switch (this) {
-            case CUT:
-                return GUIMessages.get("Cut");
-            case COPY:
-                return GUIMessages.get("Copy");
-            case PASTE:
-                return GUIMessages.get("Paste");
-            }
-            throw new UnreachableException();
         }
     }
 
