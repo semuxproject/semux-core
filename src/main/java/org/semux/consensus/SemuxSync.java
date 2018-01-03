@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
@@ -211,17 +212,6 @@ public class SemuxSync implements SyncManager {
             return;
         }
 
-        List<Channel> channels = channelMgr.getIdleChannels();
-        logger.trace("Idle peers = {}", channels.size());
-
-        // quit if no idle channels.
-        if (channels.isEmpty()) {
-            return;
-        }
-
-        // pick a random channel
-        Channel c = channels.get(random.nextInt(channels.size()));
-
         synchronized (lock) {
             // filter all expired tasks
             long now = System.currentTimeMillis();
@@ -236,23 +226,37 @@ public class SemuxSync implements SyncManager {
                 }
             }
 
-            // quite if no more tasks
-            if (toDownload.isEmpty()) {
-                return;
-            }
-            Long task = toDownload.first();
-
             // quit if too many unfinished jobs
             if (toComplete.size() > MAX_UNFINISHED_JOBS) {
                 logger.trace("Max unfinished jobs reached");
                 return;
             }
 
+            // quit if no more tasks
+            if (toDownload.isEmpty()) {
+                return;
+            }
+            Long task = toDownload.first();
+
             // quit if too many pending blocks
             if (toProcess.size() > MAX_PENDING_BLOCKS && task > toProcess.first().getKey().getNumber()) {
                 logger.trace("Pending block queue is full");
                 return;
             }
+
+            // get idle channels
+            List<Channel> channels = channelMgr.getIdleChannels().stream()
+                    .filter(channel -> channel.getRemotePeer().getLatestBlockNumber() >= task)
+                    .collect(Collectors.toList());
+            logger.trace("Idle peers = {}", channels.size());
+
+            // quit if no idle channels.
+            if (channels.isEmpty()) {
+                return;
+            }
+
+            // pick a random channel
+            Channel c = channels.get(random.nextInt(channels.size()));
 
             // request the block
             if (c.getRemotePeer().getLatestBlockNumber() >= task) {
