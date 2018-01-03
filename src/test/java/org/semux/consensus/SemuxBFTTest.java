@@ -12,7 +12,10 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -125,15 +128,18 @@ public class SemuxBFTTest {
     }
 
     @Test
-    public void testOnLargeNewHeight() throws InterruptedException {
+    public void testOnLargeNewHeight() {
         kernelRule.getKernel().start();
 
         // mock consensus
-        SemuxBFT semuxBFT = (SemuxBFT) kernelRule.getKernel().getConsensus();
+        SemuxBFT semuxBFT = spy((SemuxBFT) kernelRule.getKernel().getConsensus());
+        doNothing().when(semuxBFT).updateValidators();
+        doCallRealMethod().when(semuxBFT).onNewHeight(anyLong());
         semuxBFT.activeValidators = Arrays.asList(
                 mockValidator(10L),
                 mockValidator(Long.MAX_VALUE),
                 mockValidator(100L));
+        kernelRule.getKernel().setConsensus(semuxBFT);
 
         // start semuxBFT
         new Thread(() -> semuxBFT.onNewHeight(Long.MAX_VALUE)).start();
