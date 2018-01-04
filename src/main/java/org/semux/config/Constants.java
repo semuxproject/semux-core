@@ -17,16 +17,19 @@ public class Constants {
      * Main network ID.
      */
     public static final byte MAIN_NET_ID = 0;
+    public static final short MAIN_NET_VERSION = 0;
 
     /**
      * Test network ID.
      */
     public static final byte TEST_NET_ID = 1;
+    public static final short TEST_NET_VERSION = 0;
 
     /**
      * Dev network ID.
      */
     public static final byte DEV_NET_ID = 2;
+    public static final short DEV_NET_VERSION = 0;
 
     /**
      * Name of this client.
@@ -36,7 +39,7 @@ public class Constants {
     /**
      * Version of this client.
      */
-    public static final String CLIENT_VERSION = "1.0.0-rc.5";
+    public static final String CLIENT_VERSION = "1.0.0";
 
     /**
      * Algorithm name for the 256-bit hash.

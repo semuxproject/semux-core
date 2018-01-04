@@ -9,6 +9,6 @@ package org.semux.config;
 public class DevNetConfig extends AbstractConfig {
 
     public DevNetConfig(String dataDir) {
-        super(dataDir, Constants.DEV_NET_ID, (short) 0);
+        super(dataDir, Constants.DEV_NET_ID, Constants.DEV_NET_VERSION);
     }
 }
