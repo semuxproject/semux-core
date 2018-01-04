@@ -22,6 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.KernelMock;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Block;
+import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GUIMessages;
 import org.semux.rules.KernelRule;
@@ -63,8 +64,10 @@ public class HomePanelTest extends AssertJSwingJUnitTestCase {
     public void testProgressFormatter() {
         assertEquals(GUIMessages.get("SyncFinished"),
                 HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(100L, 100L)));
-        assertEquals("12.3 %", HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(1234L, 10000L)));
-        assertEquals("0.0 %", HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(0L, 10000L)));
+        assertEquals(SwingUtil.formatPercentage(12.3),
+                HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(1234L, 10000L)));
+        assertEquals(SwingUtil.formatPercentage(0),
+                HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(0L, 10000L)));
         assertEquals(GUIMessages.get("SyncStopped"),
                 HomePanel.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(100L, 0L)));
         assertEquals(GUIMessages.get("SyncStopped"), HomePanel.SyncProgressFormatter.format(null));
