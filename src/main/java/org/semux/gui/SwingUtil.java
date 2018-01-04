@@ -161,10 +161,11 @@ public class SwingUtil {
      * Generate an QR image for the given text.
      * 
      * @param text
-     * @param size
+     * @param width
+     * @param height
      * @return
      */
-    public static BufferedImage generateQR(String text, int size) throws QRCodeException {
+    public static BufferedImage generateQR(String text, int width, int height) throws QRCodeException {
         try {
             Map<EncodeHintType, Object> hintMap = new EnumMap<>(EncodeHintType.class);
             hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
@@ -172,9 +173,7 @@ public class SwingUtil {
             hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
 
             QRCodeWriter writer = new QRCodeWriter();
-            BitMatrix matrix = writer.encode(text, BarcodeFormat.QR_CODE, size, size, hintMap);
-            int width = matrix.getWidth();
-            int height = matrix.getHeight();
+            BitMatrix matrix = writer.encode(text, BarcodeFormat.QR_CODE, width, height, hintMap);
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             image.createGraphics();
 

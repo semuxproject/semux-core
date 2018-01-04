@@ -57,6 +57,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
     private static String[] columnNames = { GUIMessages.get("Num"), GUIMessages.get("Address"),
             GUIMessages.get("Available"), GUIMessages.get("Locked") };
 
+    private static final int QR_SIZE = 200;
+
     private transient WalletModel model;
 
     private transient Kernel kernel;
@@ -96,7 +98,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         qr = new JLabel("");
-        qr.setIcon(SwingUtil.emptyImage(200, 200));
+        qr.setIcon(SwingUtil.emptyImage(QR_SIZE, QR_SIZE));
         qr.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         JButton btnCopyAddress = SwingUtil
@@ -249,6 +251,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
         } else if (!accounts.isEmpty()) {
             table.setRowSelectionInterval(0, 0);
         }
+
+        selectAccount();
     }
 
     /**
@@ -257,9 +261,12 @@ public class ReceivePanel extends JPanel implements ActionListener {
     protected void selectAccount() {
         try {
             WalletAccount acc = getSelectedAccount();
+
             if (acc != null) {
-                BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getKey().toAddressString(), 200);
+                BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getKey().toAddressString(), QR_SIZE, QR_SIZE);
                 qr.setIcon(new ImageIcon(bi));
+            } else {
+                qr.setIcon(SwingUtil.emptyImage(QR_SIZE, QR_SIZE));
             }
         } catch (QRCodeException exception) {
             logger.error("Unable to generate QR code", exception);
