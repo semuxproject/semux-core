@@ -59,6 +59,8 @@ public class SendPanel extends JPanel implements ActionListener {
     private JTextField txtFee;
     private JTextField txtData;
 
+    private AddressBookDialog addressBookDialog;
+
     public SendPanel(SemuxGUI gui, JFrame frame) {
         this.model = gui.getModel();
         this.model.addListener(this);
@@ -361,8 +363,11 @@ public class SendPanel extends JPanel implements ActionListener {
      * Shows the address book.
      */
     protected void showAddressBook() {
-        AddressBookDialog dialog = new AddressBookDialog(frame, model);
-        dialog.setVisible(true);
+        if (addressBookDialog == null) {
+            addressBookDialog = new AddressBookDialog(frame, model);
+        }
+
+        addressBookDialog.setVisible(true);
     }
 
     /**
