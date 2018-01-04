@@ -6,6 +6,8 @@
  */
 package org.semux.gui.dialog;
 
+import java.awt.Dialog;
+
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JDialog;
@@ -26,6 +28,8 @@ public class DelegateDialog extends JDialog {
     private static final long serialVersionUID = 1L;
 
     public DelegateDialog(SemuxGUI gui, JFrame parent, WalletDelegate d) {
+        super(null, GUIMessages.get("Delegate"), Dialog.ModalityType.MODELESS);
+        setName("DelegateDialog");
         Block block = gui.getKernel().getBlockchain().getBlock(d.getRegisteredAt());
 
         JLabel lblName = new JLabel(GUIMessages.get("Name") + ":");
@@ -42,6 +46,7 @@ public class DelegateDialog extends JDialog {
         JTextArea address = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(d.getAddress()));
         JLabel registeredAt = new JLabel(SwingUtil.formatTimestamp(block.getTimestamp()));
         JLabel votes = new JLabel(SwingUtil.formatVote(d.getVotes()));
+        votes.setName("votes");
         JLabel votesFromMe = new JLabel(SwingUtil.formatVote(d.getVotesFromMe()));
         JLabel numOfBlocksForged = new JLabel(SwingUtil.formatNumber(d.getNumberOfBlocksForged()));
         JLabel numOfTurnsHit = new JLabel(SwingUtil.formatNumber(d.getNumberOfTurnsHit()));

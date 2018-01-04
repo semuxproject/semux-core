@@ -6,6 +6,8 @@
  */
 package org.semux.gui.dialog;
 
+import java.awt.Dialog;
+
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JDialog;
@@ -24,6 +26,8 @@ public class TransactionDialog extends JDialog {
     private static final long serialVersionUID = 1L;
 
     public TransactionDialog(JFrame parent, Transaction tx) {
+        super(null, GUIMessages.get("Transaction"), Dialog.ModalityType.MODELESS);
+        setName("TransactionDialog");
 
         JLabel lblHash = new JLabel(GUIMessages.get("Hash") + ":");
         JLabel lblType = new JLabel(GUIMessages.get("Type") + ":");
@@ -36,14 +40,23 @@ public class TransactionDialog extends JDialog {
         JLabel lblData = new JLabel(GUIMessages.get("Data") + ":");
 
         JTextArea hash = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(tx.getHash()));
+        hash.setName("hashText");
         JLabel type = new JLabel(tx.getType().name());
+        type.setName("typeText");
         JTextArea from = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(tx.getFrom()));
+        from.setName("fromText");
         JTextArea to = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(tx.getTo()));
+        to.setName("toText");
         JLabel value = new JLabel(SwingUtil.formatValue((tx.getValue())));
+        value.setName("valueText");
         JLabel fee = new JLabel(SwingUtil.formatValue((tx.getFee())));
+        fee.setName("feeText");
         JLabel nonce = new JLabel(SwingUtil.formatNumber(tx.getNonce()));
+        nonce.setName("nonceText");
         JLabel timestamp = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
+        timestamp.setName("timestampText");
         JTextArea data = new JTextArea(Hex.encode0x(tx.getData()));
+        data.setName("dataText");
         data.setEditable(false);
 
         // @formatter:off

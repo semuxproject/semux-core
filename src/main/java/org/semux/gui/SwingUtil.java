@@ -6,6 +6,10 @@
  */
 package org.semux.gui;
 
+import static org.semux.gui.TextContextMenuItem.COPY;
+import static org.semux.gui.TextContextMenuItem.CUT;
+import static org.semux.gui.TextContextMenuItem.PASTE;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -19,9 +23,11 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,7 +43,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
-import javax.swing.text.DefaultEditorKit;
 
 import org.semux.core.Transaction;
 import org.semux.core.Unit;
@@ -197,17 +202,15 @@ public class SwingUtil {
      * 
      * @param comp
      */
-    public static void addCopyPastePopup(JComponent comp) {
+    public static void addTextContextMenu(JComponent comp, List<TextContextMenuItem> textContextMenuItems) {
         JPopupMenu popup = new JPopupMenu();
-        JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
-        item.setText(GUIMessages.get("Cut"));
-        popup.add(item);
-        item = new JMenuItem(new DefaultEditorKit.CopyAction());
-        item.setText(GUIMessages.get("Copy"));
-        popup.add(item);
-        item = new JMenuItem(new DefaultEditorKit.PasteAction());
-        item.setText(GUIMessages.get("Paste"));
-        popup.add(item);
+
+        for (TextContextMenuItem textContextMenuItem : textContextMenuItems) {
+            JMenuItem menuItem = new JMenuItem(textContextMenuItem.toAction());
+            menuItem.setText(textContextMenuItem.toString());
+            popup.add(menuItem);
+        }
+
         comp.setComponentPopupMenu(popup);
     }
 
@@ -218,12 +221,13 @@ public class SwingUtil {
      */
     public static JTextField textFieldWithCopyPastePopup() {
         JTextField textField = new JTextField();
-        addCopyPastePopup(textField);
+        textField.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        addTextContextMenu(textField, Arrays.asList(COPY, PASTE, CUT));
         return textField;
     }
 
     /**
-     * Generates a selectable text area.
+     * Generates a readonly selectable text area.
      * 
      * @param txt
      * @return
@@ -234,7 +238,7 @@ public class SwingUtil {
         c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         c.setEditable(false);
 
-        addCopyPastePopup(c);
+        addTextContextMenu(c, Arrays.asList(COPY));
         return c;
     }
 
