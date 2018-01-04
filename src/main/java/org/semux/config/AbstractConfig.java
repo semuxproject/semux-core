@@ -371,11 +371,13 @@ public abstract class AbstractConfig implements Config {
                 case "p2p.seedNodes":
                     String[] nodes = props.getProperty(name).split(",");
                     for (String node : nodes) {
-                        String[] tokens = node.trim().split(":");
-                        if (tokens.length == 2) {
-                            p2pSeedNodes.add(new Node(tokens[0], Integer.parseInt(tokens[1])));
-                        } else {
-                            p2pSeedNodes.add(new Node(tokens[0], Constants.DEFAULT_P2P_PORT));
+                        if (!node.trim().isEmpty()) {
+                            String[] tokens = node.trim().split(":");
+                            if (tokens.length == 2) {
+                                p2pSeedNodes.add(new Node(tokens[0], Integer.parseInt(tokens[1])));
+                            } else {
+                                p2pSeedNodes.add(new Node(tokens[0], Constants.DEFAULT_P2P_PORT));
+                            }
                         }
                     }
                     break;
