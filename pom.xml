@@ -288,6 +288,7 @@
                 <version>2.7.0</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
+                    <lineEnding>LF</lineEnding>
                     <configFile>${project.basedir}/misc/eclipse/formatter.xml</configFile>
                     <directories>
                         <directory>${project.build.sourceDirectory}</directory>
