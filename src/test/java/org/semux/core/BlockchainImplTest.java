@@ -219,6 +219,23 @@ public class BlockchainImplTest {
     }
 
     @Test
+    public void testGetTransactionsSelfTx() {
+        Transaction selfTx = new Transaction(networkId, TransactionType.TRANSFER, key.toAddress(), value, fee, nonce,
+                timestamp, data).sign(key);
+        Block block = createBlock(
+                1,
+                Collections.singletonList(selfTx),
+                Collections.singletonList(res));
+
+        chain.addBlock(block);
+
+        // there should be only 1 transaction added into index database
+        List<Transaction> list = chain.getTransactions(key.toAddress(), 0, 1024);
+        assertEquals(1, list.size());
+        assertArrayEquals(selfTx.getHash(), list.get(0).getHash());
+    }
+
+    @Test
     public void testValidatorStates() {
         byte[] address = Bytes.random(20);
 

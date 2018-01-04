@@ -7,6 +7,7 @@
 package org.semux.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -280,7 +281,9 @@ public class BlockchainImpl implements Blockchain {
 
             // [3] update transaction_by_account index
             addTransactionToAccount(tx, tx.getFrom());
-            addTransactionToAccount(tx, tx.getTo());
+            if (!Arrays.equals(tx.getFrom(), tx.getTo())) {
+                addTransactionToAccount(tx, tx.getTo());
+            }
         }
 
         if (number != genesis.getNumber()) {
