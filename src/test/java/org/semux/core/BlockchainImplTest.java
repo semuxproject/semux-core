@@ -97,6 +97,13 @@ public class BlockchainImplTest {
     }
 
     @Test
+    public void testHasBlock() {
+        assertFalse(chain.hasBlock(-1));
+        assertTrue(chain.hasBlock(0));
+        assertFalse(chain.hasBlock(1));
+    }
+
+    @Test
     public void testGetBlockNumber() {
         long number = 1;
         Block newBlock = createBlock(number);

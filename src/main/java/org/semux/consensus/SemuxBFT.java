@@ -9,6 +9,7 @@ package org.semux.consensus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -415,21 +416,41 @@ public class SemuxBFT implements Consensus {
         enterPropose();
     }
 
-    protected void onNewHeight(long h) {
-        logger.trace("On new_height: {}", h);
+    /**
+     * Synchronization will be started if the 2/3th active validator's height
+     * (sorted by latest block number) is greater than local height. This avoids a
+     * vulnerability that malicious validators might announce an extremely large
+     * height in order to hang sync process of peers.
+     * 
+     * @param newHeight
+     *            new height
+     */
+    protected void onNewHeight(long newHeight) {
+        // Get the latest status of local blockchain and active validators.
+        // We don't call updateValidators() here in order to avoid affecting block
+        // proposal.
+        Long currentHeight = chain.getLatestBlockNumber();
+        List<String> currentValidators = chain.getValidators();
+        List<Channel> currentActiveValidators = channelMgr.getActiveChannels(currentValidators);
 
-        if (h > height && activeValidators != null) {
-            long latestBlockNum = chain.getLatestBlockNumber();
+        logger.trace(
+                "On new_height: {}, current height = {}, validators = {}, active validators = {}",
+                newHeight,
+                currentHeight,
+                currentValidators.size(),
+                currentActiveValidators.size());
 
-            int count = 0;
-            for (Channel c : activeValidators) {
-                if (c.isActive()) {
-                    count += c.getRemotePeer().getLatestBlockNumber() > latestBlockNum ? 1 : 0;
-                }
-            }
+        if (newHeight > currentHeight && !currentActiveValidators.isEmpty()) {
+            // Pick 2/3th active validator's height as sync target. The sync will not be
+            // started if there are less than 2 active validators.
+            OptionalLong targetOptional = currentActiveValidators.stream()
+                    .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber() + 1)
+                    .sorted()
+                    .limit((int) Math.floor(currentActiveValidators.size() * 2.0 / 3.0))
+                    .max();
 
-            if (count >= (int) Math.ceil(activeValidators.size() * 2.0 / 3.0)) {
-                sync(h);
+            if (targetOptional.isPresent() && targetOptional.getAsLong() > currentHeight) {
+                sync(targetOptional.getAsLong());
             }
         }
     }

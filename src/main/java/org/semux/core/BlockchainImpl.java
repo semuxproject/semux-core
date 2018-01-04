@@ -186,6 +186,11 @@ public class BlockchainImpl implements Blockchain {
     }
 
     @Override
+    public boolean hasBlock(long number) {
+        return blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number))) != null;
+    }
+
+    @Override
     public Transaction getTransaction(byte[] hash) {
         byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash));
         if (bytes != null) {

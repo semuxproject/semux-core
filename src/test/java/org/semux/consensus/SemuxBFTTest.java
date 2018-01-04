@@ -6,12 +6,16 @@
  */
 package org.semux.consensus;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -20,6 +24,8 @@ import java.util.Random;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.config.Constants;
 import org.semux.config.MainNetConfig;
 import org.semux.core.Block;
@@ -28,12 +34,15 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.EdDSA;
+import org.semux.net.Channel;
+import org.semux.net.Peer;
 import org.semux.rules.KernelRule;
 import org.semux.rules.TemporaryDBRule;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RunWith(MockitoJUnitRunner.class)
 public class SemuxBFTTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxBFTTest.class);
@@ -116,5 +125,35 @@ public class SemuxBFTTest {
 
         // the block should be rejected because of the duplicated tx
         assertFalse(semuxBFT.validateBlock(block2.getHeader(), block2.getTransactions()));
+    }
+
+    @Test
+    public void testOnLargeNewHeight() {
+        kernelRule.getKernel().start();
+
+        // mock consensus
+        SemuxBFT semuxBFT = spy((SemuxBFT) kernelRule.getKernel().getConsensus());
+        doNothing().when(semuxBFT).updateValidators();
+        doCallRealMethod().when(semuxBFT).onNewHeight(anyLong());
+        semuxBFT.activeValidators = Arrays.asList(
+                mockValidator(10L),
+                mockValidator(Long.MAX_VALUE),
+                mockValidator(100L));
+        kernelRule.getKernel().setConsensus(semuxBFT);
+
+        // start semuxBFT
+        new Thread(() -> semuxBFT.onNewHeight(Long.MAX_VALUE)).start();
+
+        // 2/3th validator's height should be set as sync target
+        await().until(() -> kernelRule.getKernel().getSyncManager().isRunning());
+        assertEquals(100L, kernelRule.getKernel().getSyncManager().getProgress().getTargetHeight());
+    }
+
+    private Channel mockValidator(long latestBlockNumber) {
+        Channel mockChannel = mock(Channel.class);
+        Peer mockPeer = mock(Peer.class);
+        when(mockPeer.getLatestBlockNumber()).thenReturn(latestBlockNumber);
+        when(mockChannel.getRemotePeer()).thenReturn(mockPeer);
+        return mockChannel;
     }
 }
