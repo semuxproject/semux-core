@@ -66,27 +66,33 @@ public class TransactionTest {
     private static final long PREMINE = 5000L * Unit.SEM;
 
     @Rule
-    KernelRule kernelRule1 = new KernelRule(51610, 51710);
+    KernelRule kernelRuleValidator1 = new KernelRule(51610, 51710);
 
     @Rule
-    KernelRule kernelRule2 = new KernelRule(51620, 51720);
+    KernelRule kernelRuleValidator2 = new KernelRule(51620, 51720);
 
     @Rule
-    KernelRule kernelRule3 = new KernelRule(51630, 51730);
+    KernelRule kernelRulePremine = new KernelRule(51630, 51730);
 
-    public KernelMock kernel1; // validator node
-    public KernelMock kernel2; // normal node with balance
-    public KernelMock kernel3; // normal node with no balance
+    @Rule
+    KernelRule kernelRuleReceiver = new KernelRule(51640, 51740);
+
+    public KernelMock kernelValidator1; // validator node
+    public KernelMock kernelValidator2; // validator node
+    public KernelMock kernelPremine; // normal node with balance
+    public KernelMock kernelReceiver; // normal node with no balance
 
     @Before
     public void setUp() throws Exception {
         // prepare kernels
-        kernelRule1.speedUpCosnensus();
-        kernelRule2.speedUpCosnensus();
-        kernelRule3.speedUpCosnensus();
-        kernel1 = kernelRule1.getKernel();
-        kernel2 = kernelRule2.getKernel();
-        kernel3 = kernelRule3.getKernel();
+        kernelRuleValidator1.speedUpCosnensus();
+        kernelRuleValidator2.speedUpCosnensus();
+        kernelRulePremine.speedUpCosnensus();
+        kernelRuleReceiver.speedUpCosnensus();
+        kernelValidator1 = kernelRuleValidator1.getKernel();
+        kernelValidator2 = kernelRuleValidator2.getKernel();
+        kernelPremine = kernelRulePremine.getKernel();
+        kernelReceiver = kernelRuleReceiver.getKernel();
 
         // mock genesis.json
         Genesis genesis = mockGenesis();
@@ -95,93 +101,99 @@ public class TransactionTest {
 
         // mock seed nodes
         Set<Node> nodes = new HashSet<>();
-        nodes.add(new Node(kernel1.getConfig().p2pListenIp(), kernel1.getConfig().p2pListenPort()));
+        nodes.add(new Node(kernelValidator1.getConfig().p2pListenIp(), kernelValidator1.getConfig().p2pListenPort()));
+        nodes.add(new Node(kernelValidator2.getConfig().p2pListenIp(), kernelValidator2.getConfig().p2pListenPort()));
         mockStatic(NodeManager.class);
         when(NodeManager.getSeedNodes(Constants.DEV_NET_ID)).thenReturn(nodes);
 
         // start kernels
-        kernel1.start();
-        kernel2.start();
-        kernel3.start();
+        kernelValidator1.start();
+        kernelValidator2.start();
+        kernelPremine.start();
+        kernelReceiver.start();
 
         // wait for kernels
-        await().atMost(20, SECONDS).until(() -> kernel1.state() == State.RUNNING
-                && kernel2.state() == State.RUNNING
-                && kernel3.state() == State.RUNNING
-                && kernel3.getChannelManager().getActivePeers().size() >= 2);
+        await().atMost(20, SECONDS).until(() -> kernelValidator1.state() == State.RUNNING
+                && kernelValidator2.state() == State.RUNNING
+                && kernelPremine.state() == State.RUNNING
+                && kernelReceiver.state() == State.RUNNING
+                && kernelReceiver.getChannelManager().getActivePeers().size() >= 2);
     }
 
     @After
     public void tearDown() {
         // stop kernels
-        kernel1.stop();
-        kernel2.stop();
-        kernel3.stop();
+        kernelValidator1.stop();
+        kernelValidator2.stop();
+        kernelPremine.stop();
+        kernelReceiver.stop();
     }
 
     @Test
     public void testTransfer() throws IOException {
         final long value = 1000 * Unit.SEM;
-        final long fee = kernel2.getConfig().minTransactionFee();
+        final long fee = kernelPremine.getConfig().minTransactionFee();
 
         // prepare transaction
         HashMap<String, Object> params = new HashMap<>();
-        params.put("from", coinbaseOf(kernel2));
-        params.put("to", coinbaseOf(kernel3));
+        params.put("from", coinbaseOf(kernelPremine));
+        params.put("to", coinbaseOf(kernelReceiver));
         params.put("value", String.valueOf(value));
         params.put("fee", String.valueOf(fee));
 
         // send transaction
         logger.info("Making transfer request", params);
         DoTransactionResponse response = new ObjectMapper().readValue(
-                kernel2.getApiClient().request("transfer", params),
+                kernelPremine.getApiClient().request("transfer", params),
                 DoTransactionResponse.class);
         assertTrue(response.success);
 
         // wait for transaction to be processed
         logger.info("Waiting for the transaction to be processed...");
-        await().atMost(20, SECONDS).until(availableOf(kernel2, coinbaseOf(kernel2)),
+        await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
                 equalTo(PREMINE * Unit.SEM - value - fee));
-        await().atMost(20, SECONDS).until(availableOf(kernel3, coinbaseOf(kernel3)),
+        await().atMost(20, SECONDS).until(availableOf(kernelReceiver, coinbaseOf(kernelReceiver)),
                 equalTo(value));
 
         // assert that the transaction has been recorded across nodes
-        assertTransaction(kernel2, coinbaseOf(kernel2),
-                TransactionType.TRANSFER, coinbaseOf(kernel2), coinbaseOf(kernel3), value, fee, Bytes.EMPTY_BYTES);
-        assertTransaction(kernel3, coinbaseOf(kernel3),
-                TransactionType.TRANSFER, coinbaseOf(kernel2), coinbaseOf(kernel3), value, fee, Bytes.EMPTY_BYTES);
+        assertTransaction(kernelPremine, coinbaseOf(kernelPremine),
+                TransactionType.TRANSFER, coinbaseOf(kernelPremine), coinbaseOf(kernelReceiver), value, fee,
+                Bytes.EMPTY_BYTES);
+        assertTransaction(kernelReceiver, coinbaseOf(kernelReceiver),
+                TransactionType.TRANSFER, coinbaseOf(kernelPremine), coinbaseOf(kernelReceiver), value, fee,
+                Bytes.EMPTY_BYTES);
 
         // assert the state
-        List<Delegate> delegates = kernel2.getBlockchain().getDelegateState().getDelegates();
-        assertThat(delegates).anySatisfy((d) -> Arrays.equals(d.getAddress(), coinbaseOf(kernel2)));
+        List<Delegate> delegates = kernelPremine.getBlockchain().getDelegateState().getDelegates();
+        assertThat(delegates).anySatisfy((d) -> Arrays.equals(d.getAddress(), coinbaseOf(kernelPremine)));
     }
 
     @Test
     public void testDelegate() throws IOException {
-        final long fee = kernel2.getConfig().minTransactionFee();
+        final long fee = kernelPremine.getConfig().minTransactionFee();
 
         // prepare transaction
         HashMap<String, Object> params = new HashMap<>();
-        params.put("from", coinbaseOf(kernel2));
+        params.put("from", coinbaseOf(kernelPremine));
         params.put("fee", fee);
         params.put("data", Bytes.of("test"));
 
         // send transaction
         logger.info("Making delegate request", params);
         DoTransactionResponse response = new ObjectMapper().readValue(
-                kernel2.getApiClient().request("delegate", params),
+                kernelPremine.getApiClient().request("delegate", params),
                 DoTransactionResponse.class);
         assertTrue(response.success);
 
         // wait for transaction processing
         logger.info("Waiting for the transaction to be processed...");
-        await().atMost(20, SECONDS).until(availableOf(kernel2, coinbaseOf(kernel2)),
-                equalTo(PREMINE * Unit.SEM - kernel2.getConfig().minDelegateBurnAmount() - fee));
+        await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
+                equalTo(PREMINE * Unit.SEM - kernelPremine.getConfig().minDelegateBurnAmount() - fee));
 
         // // assert that the transaction has been recorded across nodes
-        assertTransaction(kernel2, coinbaseOf(kernel2),
-                TransactionType.DELEGATE, coinbaseOf(kernel2), Bytes.EMPTY_ADDRESS,
-                kernel2.getConfig().minDelegateBurnAmount(), fee, Bytes.of("test"));
+        assertTransaction(kernelPremine, coinbaseOf(kernelPremine),
+                TransactionType.DELEGATE, coinbaseOf(kernelPremine), Bytes.EMPTY_ADDRESS,
+                kernelPremine.getConfig().minDelegateBurnAmount(), fee, Bytes.of("test"));
     }
 
     /**
@@ -264,19 +276,20 @@ public class TransactionTest {
     }
 
     /**
-     * Mocks a genesis instance where kernel1 is the only validator and kernel2 has
-     * some premined balance.
+     * Mocks a genesis instance where kernelValidator1 and kernelValidator2 are
+     * validators and kernelPremine has some premined balance.
      * 
      * @return
      */
     private Genesis mockGenesis() {
         // mock premine
         List<Genesis.Premine> premines = new ArrayList<>();
-        premines.add(new Genesis.Premine(kernel2.getCoinbase().toAddress(), PREMINE, ""));
+        premines.add(new Genesis.Premine(kernelPremine.getCoinbase().toAddress(), PREMINE, ""));
 
         // mock delegates
         HashMap<String, String> delegates = new HashMap<>();
-        delegates.put("delegate1", kernel1.getCoinbase().toAddressString());
+        delegates.put("kernelValidator1", kernelValidator1.getCoinbase().toAddressString());
+        delegates.put("kernelValidator2", kernelValidator2.getCoinbase().toAddressString());
 
         // mock genesis
         return Genesis.jsonCreator(0,

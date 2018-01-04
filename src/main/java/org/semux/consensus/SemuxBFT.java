@@ -417,8 +417,8 @@ public class SemuxBFT implements Consensus {
     }
 
     /**
-     * Synchronization will be started if the 2/3th validator's height (sorted by
-     * latest block number) is greater than local height. This avoids a
+     * Synchronization will be started if the 2/3th active validator's height
+     * (sorted by latest block number) is greater than local height. This avoids a
      * vulnerability that malicious validators might announce an extremely large
      * height in order to hang sync process of peers.
      * 
@@ -426,17 +426,30 @@ public class SemuxBFT implements Consensus {
      *            new height
      */
     protected void onNewHeight(long newHeight) {
-        logger.trace("On new_height: {}", newHeight);
+        // Get the latest status of local blockchain and active validators.
+        // We don't call updateValidators() here in order to avoid affecting block
+        // proposal.
+        Long currentHeight = chain.getLatestBlockNumber();
+        List<String> currentValidators = chain.getValidators();
+        List<Channel> currentActiveValidators = channelMgr.getActiveChannels(currentValidators);
 
-        updateValidators();
-        if (newHeight > height && activeValidators != null && !activeValidators.isEmpty()) {
-            OptionalLong targetOptional = activeValidators.stream()
-                    .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber())
+        logger.trace(
+                "On new_height: {}, current height = {}, validators = {}, active validators = {}",
+                newHeight,
+                currentHeight,
+                currentValidators.size(),
+                currentActiveValidators.size());
+
+        if (newHeight > currentHeight && !currentActiveValidators.isEmpty()) {
+            // Pick 2/3th active validator's height as sync target. The sync will not be
+            // started if there are less than 2 active validators.
+            OptionalLong targetOptional = currentActiveValidators.stream()
+                    .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber() + 1)
                     .sorted()
-                    .limit(Math.max((int) Math.floor(activeValidators.size() * 2.0 / 3.0), 1))
+                    .limit((int) Math.floor(currentActiveValidators.size() * 2.0 / 3.0))
                     .max();
 
-            if (targetOptional.isPresent() && targetOptional.getAsLong() > height) {
+            if (targetOptional.isPresent() && targetOptional.getAsLong() > currentHeight) {
                 sync(targetOptional.getAsLong());
             }
         }
