@@ -232,7 +232,7 @@ public class SwingUtil {
      * @param txt
      * @return
      */
-    public static JTextArea textAreaWithCopyPastePopup(String txt) {
+    public static JTextArea textAreaWithCopyPopup(String txt) {
         JTextArea c = new JTextArea(txt);
         c.setBackground(null);
         c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));

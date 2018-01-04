@@ -39,13 +39,13 @@ public class TransactionDialog extends JDialog {
         JLabel lblTimestamp = new JLabel(GUIMessages.get("Timestamp") + ":");
         JLabel lblData = new JLabel(GUIMessages.get("Data") + ":");
 
-        JTextArea hash = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(tx.getHash()));
+        JTextArea hash = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getHash()));
         hash.setName("hashText");
         JLabel type = new JLabel(tx.getType().name());
         type.setName("typeText");
-        JTextArea from = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(tx.getFrom()));
+        JTextArea from = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getFrom()));
         from.setName("fromText");
-        JTextArea to = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(tx.getTo()));
+        JTextArea to = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getTo()));
         to.setName("toText");
         JLabel value = new JLabel(SwingUtil.formatValue((tx.getValue())));
         value.setName("valueText");

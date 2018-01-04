@@ -42,8 +42,8 @@ public class DelegateDialog extends JDialog {
         JLabel lblNumOfTurnsMissed = new JLabel(GUIMessages.get("NumTurnsMissed") + ":");
         JLabel lblRate = new JLabel(GUIMessages.get("Rate") + ":");
 
-        JTextArea name = SwingUtil.textAreaWithCopyPastePopup(d.getNameString());
-        JTextArea address = SwingUtil.textAreaWithCopyPastePopup(Hex.encode0x(d.getAddress()));
+        JTextArea name = SwingUtil.textAreaWithCopyPopup(d.getNameString());
+        JTextArea address = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(d.getAddress()));
         JLabel registeredAt = new JLabel(SwingUtil.formatTimestamp(block.getTimestamp()));
         JLabel votes = new JLabel(SwingUtil.formatVote(d.getVotes()));
         votes.setName("votes");
