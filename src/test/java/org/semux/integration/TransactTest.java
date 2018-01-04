@@ -59,9 +59,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class })
-public class TransactionTest {
+public class TransactTest {
 
-    private static Logger logger = LoggerFactory.getLogger(TransactionTest.class);
+    private static Logger logger = LoggerFactory.getLogger(TransactTest.class);
 
     private static final long PREMINE = 5000L * Unit.SEM;
 

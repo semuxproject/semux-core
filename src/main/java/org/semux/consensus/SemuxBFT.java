@@ -429,7 +429,7 @@ public class SemuxBFT implements Consensus {
         // Get the latest status of local blockchain and active validators.
         // We don't call updateValidators() here in order to avoid affecting block
         // proposal.
-        Long currentHeight = chain.getLatestBlockNumber();
+        Long currentHeight = chain.getLatestBlockNumber() + 1;
         List<String> currentValidators = chain.getValidators();
         List<Channel> currentActiveValidators = channelMgr.getActiveChannels(currentValidators);
 
