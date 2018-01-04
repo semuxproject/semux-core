@@ -35,48 +35,62 @@ public class SemuxBFTOnNewHeightTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 // 0 validator
-                { Arrays.asList(), null },
+                { 10L, 0L, Arrays.asList(), null },
                 // 1 validator
-                { Arrays.asList(
+                { 10L, 0L, Arrays.asList(
                         mockValidator(10L)), null },
                 // 2 validators
-                { Arrays.asList(
+                { 100L, 0L, Arrays.asList(
                         mockValidator(10L),
                         mockValidator(100L)), 11L },
+                // 2 validators, same height
+                { 100L, 99L, Arrays.asList(
+                        mockValidator(10L),
+                        mockValidator(100L)), null },
+                // 2 validators, greater height
+                { 100L, 101L, Arrays.asList(
+                        mockValidator(10L),
+                        mockValidator(100L)), null },
                 // 3 validators
-                { Arrays.asList(
+                { 1000L, 0L, Arrays.asList(
                         mockValidator(10L),
                         mockValidator(100L),
                         mockValidator(1000L)), 101L },
                 // 4 validators
-                { Arrays.asList(
+                { 10000L, 0L, Arrays.asList(
                         mockValidator(10L),
                         mockValidator(100L),
                         mockValidator(1000L),
                         mockValidator(10000L)), 101L },
                 // 5 validators
-                { Arrays.asList(
+                { 1000000L, 0L, Arrays.asList(
                         mockValidator(10L),
                         mockValidator(100L),
                         mockValidator(1000L),
                         mockValidator(10000L),
                         mockValidator(100000L)), 1001L },
                 // Malicious validator with large height
-                { Arrays.asList(
+                { Long.MAX_VALUE, 0L, Arrays.asList(
                         mockValidator(10L),
                         mockValidator(Long.MAX_VALUE),
                         mockValidator(100L)), 101L },
                 // 100 validators with height from 1 ~ 100
-                { LongStream.range(1L, 100L).mapToObj(SemuxBFTOnNewHeightTest::mockValidator)
+                { 100L, 0L, LongStream.range(1L, 100L).mapToObj(SemuxBFTOnNewHeightTest::mockValidator)
                         .collect(Collectors.toList()), 67L }
         });
     }
+
+    private Long newHeight;
+
+    private Long chainLatestBlockNumber;
 
     private List<Channel> validators;
 
     private Long target;
 
-    public SemuxBFTOnNewHeightTest(List<Channel> validators, Long target) {
+    public SemuxBFTOnNewHeightTest(long newHeight, long chainLatestBlockNumber, List<Channel> validators, Long target) {
+        this.newHeight = newHeight;
+        this.chainLatestBlockNumber = chainLatestBlockNumber;
         this.validators = validators;
         this.target = target;
     }
@@ -87,6 +101,8 @@ public class SemuxBFTOnNewHeightTest {
         SemuxBFT semuxBFT = mock(SemuxBFT.class);
 
         semuxBFT.chain = mock(Blockchain.class);
+        when(semuxBFT.chain.getLatestBlockNumber()).thenReturn(chainLatestBlockNumber);
+
         semuxBFT.channelMgr = mock(ChannelManager.class);
 
         when(semuxBFT.channelMgr.getActiveChannels(any())).thenReturn(validators);
@@ -94,9 +110,7 @@ public class SemuxBFTOnNewHeightTest {
         doCallRealMethod().when(semuxBFT).onNewHeight(anyLong());
 
         // start semuxBFT
-        // the height property from BFT_NEW_HEIGHT message should not imply the actual
-        // sync target
-        semuxBFT.onNewHeight(Long.MAX_VALUE);
+        semuxBFT.onNewHeight(newHeight);
 
         if (target != null) {
             verify(semuxBFT).sync(target);
