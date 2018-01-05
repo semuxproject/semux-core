@@ -58,6 +58,7 @@ public abstract class AbstractConfig implements Config {
     // =========================
     protected int netMaxOutboundConnections = 128;
     protected int netMaxInboundConnections = 512;
+    protected int netMaxInboundConnectionsPerIp = 5;
     protected int netMaxMessageQueueSize = 4096;
     protected int netMaxFrameBodySize = 128 * 1024;
     protected int netMaxPacketSize = 8 * 1024 * 1024;
@@ -239,6 +240,11 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
+    public int netMaxInboundConnectionsPerIp() {
+        return netMaxInboundConnectionsPerIp;
+    }
+
+    @Override
     public int netMaxMessageQueueSize() {
         return netMaxMessageQueueSize;
     }
@@ -384,6 +390,9 @@ public abstract class AbstractConfig implements Config {
 
                 case "net.maxInboundConnections":
                     netMaxInboundConnections = Integer.parseInt(props.getProperty(name));
+                    break;
+                case "net.maxInboundConnectionsPerIp":
+                    netMaxInboundConnectionsPerIp = Integer.parseInt(props.getProperty(name));
                     break;
                 case "net.maxOutboundConnections":
                     netMaxInboundConnections = Integer.parseInt(props.getProperty(name));

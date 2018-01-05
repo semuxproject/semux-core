@@ -10,5 +10,6 @@ public class DevNetConfig extends AbstractConfig {
 
     public DevNetConfig(String dataDir) {
         super(dataDir, Constants.DEV_NET_ID, Constants.DEV_NET_VERSION);
+        this.netMaxInboundConnectionsPerIp = Integer.MAX_VALUE;
     }
 }
