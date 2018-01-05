@@ -12,6 +12,7 @@ import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
+import org.semux.crypto.EdDSA;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
 
@@ -29,10 +30,12 @@ public class MainFrameTest extends AssertJSwingJUnitTestCase {
     protected void onSetUp() {
         kernelRule.openBlockchain();
 
+        EdDSA coinbase = new EdDSA();
         WalletModel model = new WalletModel();
         KernelMock kernel = kernelRule.getKernel();
         gui = new SemuxGUI(model, kernel);
         model.setLatestBlock(kernel.getBlockchain().getLatestBlock());
+        model.setCoinbase(coinbase);
 
         frame = GuiActionRunner.execute(() -> new MainFrame(gui));
 

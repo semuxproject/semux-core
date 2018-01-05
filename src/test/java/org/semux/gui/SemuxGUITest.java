@@ -24,6 +24,7 @@ import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Wallet;
+import org.semux.crypto.EdDSA;
 import org.semux.db.LevelDB;
 import org.semux.gui.model.WalletModel;
 import org.semux.net.ChannelManager;
@@ -117,7 +118,6 @@ public class SemuxGUITest {
         assertThat(model.getDelegates().size()).isEqualTo(chain.getDelegateState().getDelegates().size());
         assertThat(model.getTotalAvailable()).isEqualTo(0);
         assertThat(model.getTotalLocked()).isEqualTo(0);
-        assertThat(model.getCoinbase()).isEqualTo(0);
         assertThat(model.getAddressBook()).isEqualTo(addressBook);
         assertThat(model.getActivePeers().size()).isEqualTo(channelMgr.getActivePeers().size());
         assertThat(model.getSyncProgress()).isEqualToComparingFieldByField(syncMgr.getProgress());
