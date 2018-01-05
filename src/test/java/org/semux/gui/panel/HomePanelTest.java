@@ -22,6 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.KernelMock;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Block;
+import org.semux.crypto.EdDSA;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GUIMessages;
@@ -43,6 +44,7 @@ public class HomePanelTest extends AssertJSwingJUnitTestCase {
 
         // mock walletModel
         when(walletModel.getLatestBlock()).thenReturn(mock(Block.class));
+        when(walletModel.getCoinbase()).thenReturn(new EdDSA());
         when(walletModel.getSyncProgress()).thenReturn(progress);
 
         // mock kernel
