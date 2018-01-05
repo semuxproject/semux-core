@@ -429,7 +429,7 @@ public class SemuxBFT implements Consensus {
         // Get the latest status of local blockchain and active validators.
         // We don't call updateValidators() here in order to avoid affecting block
         // proposal.
-        Long currentHeight = chain.getLatestBlockNumber() + 1;
+        Long currentHeight = chain.getLatestBlockNumber();
         List<String> currentValidators = chain.getValidators();
         List<Channel> currentActiveValidators = channelMgr.getActiveChannels(currentValidators);
 
@@ -444,13 +444,13 @@ public class SemuxBFT implements Consensus {
             // Pick 2/3th active validator's height as sync target. The sync will not be
             // started if there are less than 2 active validators.
             OptionalLong targetOptional = currentActiveValidators.stream()
-                    .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber() + 1)
+                    .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber())
                     .sorted()
                     .limit((int) Math.floor(currentActiveValidators.size() * 2.0 / 3.0))
                     .max();
 
             if (targetOptional.isPresent() && targetOptional.getAsLong() > currentHeight) {
-                sync(targetOptional.getAsLong());
+                sync(targetOptional.getAsLong() + 1);
             }
         }
     }
