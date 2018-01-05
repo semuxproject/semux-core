@@ -24,7 +24,6 @@ import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Wallet;
-import org.semux.crypto.EdDSA;
 import org.semux.db.LevelDB;
 import org.semux.gui.model.WalletModel;
 import org.semux.net.ChannelManager;
