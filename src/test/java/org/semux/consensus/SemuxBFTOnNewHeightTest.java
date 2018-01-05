@@ -14,6 +14,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -75,7 +76,7 @@ public class SemuxBFTOnNewHeightTest {
                 // Malicious validator with large height
                 { Long.MAX_VALUE, 0L, Arrays.asList(
                         mockValidator(10L),
-                        mockValidator(Long.MAX_VALUE),
+                        mockValidator(Long.MAX_VALUE - 1),
                         mockValidator(100L)), 101L },
                 // 100 validators with height from 1 ~ 100
                 { 100L, 0L, LongStream.range(1L, 100L).mapToObj(SemuxBFTOnNewHeightTest::mockValidator)
@@ -85,16 +86,16 @@ public class SemuxBFTOnNewHeightTest {
 
     private Long newHeight;
 
-    private Long chainLatestBlockNumber;
+    private Long height;
 
-    private List<Channel> validators;
+    private List<Channel> activeValidators;
 
     private Long target;
 
-    public SemuxBFTOnNewHeightTest(long newHeight, long chainLatestBlockNumber, List<Channel> validators, Long target) {
+    public SemuxBFTOnNewHeightTest(long newHeight, long height, List<Channel> activeValidators, Long target) {
         this.newHeight = newHeight;
-        this.chainLatestBlockNumber = chainLatestBlockNumber;
-        this.validators = validators;
+        this.height = height;
+        this.activeValidators = activeValidators;
         this.target = target;
     }
 
@@ -104,11 +105,11 @@ public class SemuxBFTOnNewHeightTest {
         SemuxBFT semuxBFT = mock(SemuxBFT.class);
 
         semuxBFT.chain = mock(Blockchain.class);
-        when(semuxBFT.chain.getLatestBlockNumber()).thenReturn(chainLatestBlockNumber);
+        semuxBFT.height = height;
+        semuxBFT.validators = new ArrayList<>();
 
         semuxBFT.channelMgr = mock(ChannelManager.class);
-
-        when(semuxBFT.channelMgr.getActiveChannels(any())).thenReturn(validators);
+        when(semuxBFT.channelMgr.getActiveChannels(any())).thenReturn(activeValidators);
 
         doCallRealMethod().when(semuxBFT).onNewHeight(anyLong());
 

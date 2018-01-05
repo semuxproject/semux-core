@@ -426,31 +426,20 @@ public class SemuxBFT implements Consensus {
      *            new height
      */
     protected void onNewHeight(long newHeight) {
-        // Get the latest status of local blockchain and active validators.
-        // We don't call updateValidators() here in order to avoid affecting block
-        // proposal.
-        Long currentHeight = chain.getLatestBlockNumber();
-        List<String> currentValidators = chain.getValidators();
-        List<Channel> currentActiveValidators = channelMgr.getActiveChannels(currentValidators);
+        if (newHeight > height) {
+            // update active validators (potential overhead)
+            activeValidators = channelMgr.getActiveChannels(validators);
 
-        logger.trace(
-                "On new_height: {}, current height = {}, validators = {}, active validators = {}",
-                newHeight,
-                currentHeight,
-                currentValidators.size(),
-                currentActiveValidators.size());
-
-        if (newHeight > currentHeight && !currentActiveValidators.isEmpty()) {
             // Pick 2/3th active validator's height as sync target. The sync will not be
             // started if there are less than 2 active validators.
-            OptionalLong targetOptional = currentActiveValidators.stream()
-                    .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber())
+            OptionalLong target = activeValidators.stream()
+                    .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber() + 1)
                     .sorted()
-                    .limit((int) Math.floor(currentActiveValidators.size() * 2.0 / 3.0))
+                    .limit((int) Math.floor(activeValidators.size() * 2.0 / 3.0))
                     .max();
 
-            if (targetOptional.isPresent() && targetOptional.getAsLong() > currentHeight) {
-                sync(targetOptional.getAsLong() + 1);
+            if (target.isPresent() && target.getAsLong() > height) {
+                sync(target.getAsLong());
             }
         }
     }
