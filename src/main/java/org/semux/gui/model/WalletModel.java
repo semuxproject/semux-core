@@ -17,6 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.semux.core.Block;
 import org.semux.core.SyncManager;
+import org.semux.crypto.EdDSA;
 import org.semux.gui.Action;
 import org.semux.gui.AddressBook;
 import org.semux.net.Peer;
@@ -34,7 +35,7 @@ public class WalletModel {
 
     private Block latestBlock;
 
-    private int coinbase;
+    private EdDSA coinbase;
     private boolean isDelegate;
 
     private volatile Map<ByteArray, Integer> accountNo = new HashMap<>();
@@ -103,7 +104,7 @@ public class WalletModel {
      * 
      * @return
      */
-    public int getCoinbase() {
+    public EdDSA getCoinbase() {
         return coinbase;
     }
 
@@ -112,7 +113,7 @@ public class WalletModel {
      * 
      * @param coinbase
      */
-    public void setCoinbase(int coinbase) {
+    public void setCoinbase(EdDSA coinbase) {
         this.coinbase = coinbase;
     }
 

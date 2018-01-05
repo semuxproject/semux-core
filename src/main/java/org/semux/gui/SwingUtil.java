@@ -502,4 +502,15 @@ public class SwingUtil {
 
         return d == null ? Optional.empty() : Optional.of(d.getNameString());
     }
+
+    /**
+     * Returns a short version of address.
+     * 
+     * @param address
+     * @return
+     */
+    public static String shortAddress(byte[] address) {
+        return Hex.PREF + Hex.encode(Arrays.copyOfRange(address, 0, 2)) + "..."
+                + Hex.encode(Arrays.copyOfRange(address, address.length - 2, address.length));
+    }
 }

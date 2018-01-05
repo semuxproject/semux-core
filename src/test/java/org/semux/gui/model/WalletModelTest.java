@@ -9,6 +9,7 @@ package org.semux.gui.model;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -71,9 +72,11 @@ public class WalletModelTest {
 
     @Test
     public void testCoinbase() {
-        assertEquals(0, model.getCoinbase());
-        model.setCoinbase(1);
-        assertEquals(1, model.getCoinbase());
+        EdDSA key = new EdDSA();
+
+        assertNull(model.getCoinbase());
+        model.setCoinbase(key);
+        assertEquals(key.toAddressString(), model.getCoinbase().toAddressString());
     }
 
     @Test
