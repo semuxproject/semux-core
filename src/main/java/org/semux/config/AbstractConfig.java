@@ -18,6 +18,7 @@ import java.util.Set;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hash;
+import org.semux.gui.SemuxGUI;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
 import org.semux.util.Bytes;
@@ -144,8 +145,12 @@ public abstract class AbstractConfig implements Config {
 
     @Override
     public String getClientId() {
-        return String.format("%s/v%s/%s/%s", Constants.CLIENT_NAME, Constants.CLIENT_VERSION,
-                SystemUtil.getOsName().toString(), SystemUtil.getOsArch());
+        return String.format("%s/v%s-%s/%s/%s",
+                Constants.CLIENT_NAME,
+                Constants.CLIENT_VERSION,
+                SemuxGUI.class.getPackage().getImplementationVersion(),
+                SystemUtil.getOsName().toString(),
+                SystemUtil.getOsArch());
     }
 
     @Override
