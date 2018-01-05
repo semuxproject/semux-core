@@ -111,6 +111,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <abbrevLength>7</abbrevLength>
                     <verbose>true</verbose>
                     <skipPoms>false</skipPoms>
                 </configuration>

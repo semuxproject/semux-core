@@ -1,6 +1,8 @@
 #!/bin/sh
 
+commit=`git rev-parse --short=7 HEAD`
 version=`cat pom.xml | grep '^    <version>.*</version>$' | awk -F'[><]' '{print $3}'`
+version="$version-$commit"
 name=semux
 
 # change work directory
