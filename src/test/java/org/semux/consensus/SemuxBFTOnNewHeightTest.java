@@ -41,11 +41,14 @@ public class SemuxBFTOnNewHeightTest {
                         mockValidator(10L)), null },
                 // 2 validators
                 { 100L, 0L, Arrays.asList(
-                        mockValidator(10L),
-                        mockValidator(100L)), 11L },
-                // 2 validators, same height
+                        mockValidator(100L),
+                        mockValidator(100L)), 101L },
                 { 100L, 99L, Arrays.asList(
-                        mockValidator(10L),
+                        mockValidator(100L),
+                        mockValidator(100L)), 101L },
+                // 2 validators, same height
+                { 100L, 100L, Arrays.asList(
+                        mockValidator(100L),
                         mockValidator(100L)), null },
                 // 2 validators, greater height
                 { 100L, 101L, Arrays.asList(
