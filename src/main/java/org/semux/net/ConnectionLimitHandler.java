@@ -23,7 +23,7 @@ public class ConnectionLimitHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectionLimitHandler.class);
 
-    private static final ConcurrentHashMap<InetAddress, AtomicLong> connectionCount = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, AtomicLong> connectionCount = new ConcurrentHashMap<>();
 
     private final long maxInboundConnectionsPerIp;
 
@@ -39,10 +39,10 @@ public class ConnectionLimitHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        InetAddress address = ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress();
+        String address = ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress().getHostAddress();
         if (connectionCount.computeIfAbsent(address, k -> new AtomicLong(0))
                 .incrementAndGet() > maxInboundConnectionsPerIp) {
-            logger.warn("Too many connections from {}, closing the connection...", address.getHostAddress());
+            logger.warn("Too many connections from {}, closing the connection...", address);
             ctx.close();
         }
     }
@@ -51,7 +51,7 @@ public class ConnectionLimitHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
 
-        InetAddress address = ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress();
+        String address = ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress().getHostAddress();
         connectionCount.computeIfPresent(address, (inetAddress, atomicLong) -> {
             atomicLong.decrementAndGet();
             return atomicLong;
@@ -65,7 +65,7 @@ public class ConnectionLimitHandler extends ChannelInboundHandlerAdapter {
      *            an IP address
      * @return current connection count
      */
-    public static long getConnectionsCount(InetAddress address) {
+    public static long getConnectionsCount(String address) {
         return connectionCount.getOrDefault(address, new AtomicLong(0L)).get();
     }
 

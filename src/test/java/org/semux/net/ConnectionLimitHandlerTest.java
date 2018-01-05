@@ -42,7 +42,7 @@ public class ConnectionLimitHandlerTest {
                 verify(channelHandlerContext, never()).close();
             }
         }
-        assertEquals(loops, ConnectionLimitHandler.getConnectionsCount(InetAddress.getByName("127.0.0.1")));
+        assertEquals(loops, ConnectionLimitHandler.getConnectionsCount("127.0.0.1"));
 
         // close connections
         for (int i = 1; i <= loops; i++) {
@@ -50,7 +50,7 @@ public class ConnectionLimitHandlerTest {
             ChannelHandlerContext channelHandlerContext = mockChannelContext("127.0.0.1", 12345 + i);
             handler.channelInactive(channelHandlerContext);
         }
-        assertEquals(0, ConnectionLimitHandler.getConnectionsCount(InetAddress.getByName("127.0.0.1")));
+        assertEquals(0, ConnectionLimitHandler.getConnectionsCount("127.0.0.1"));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class ConnectionLimitHandlerTest {
         executorService.shutdown();
         executorService.awaitTermination(10, TimeUnit.SECONDS);
 
-        assertEquals(limit, ConnectionLimitHandler.getConnectionsCount(InetAddress.getByName("127.0.0.1")));
+        assertEquals(limit, ConnectionLimitHandler.getConnectionsCount("127.0.0.1"));
     }
 
     private ChannelHandlerContext mockChannelContext(String ip, int port) {
