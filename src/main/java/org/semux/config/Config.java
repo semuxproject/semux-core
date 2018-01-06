@@ -67,6 +67,14 @@ public interface Config {
     long minTransactionFee();
 
     /**
+     * Returns the maximum allowed time drift between transaction timestamp and
+     * local clock. See ${@link org.semux.core.PendingManager#processTransaction}
+     *
+     * @return
+     */
+    long maxTransactionTimeDrift();
+
+    /**
      * Returns the min amount of value burned when registering as a delegate.
      *
      * @return
@@ -309,6 +317,13 @@ public interface Config {
      * @return
      */
     long bftFinalizeTimeout();
+
+    /**
+     * Returns the maximum time drift of a block time in the future.
+     *
+     * @return
+     */
+    long maxBlockTimeDrift();
 
     // =========================
     // Virtual machine

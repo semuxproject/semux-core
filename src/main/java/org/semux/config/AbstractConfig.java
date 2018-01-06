@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
@@ -43,6 +44,7 @@ public abstract class AbstractConfig implements Config {
 
     protected int maxBlockTransactionsSize = 1 * 1024 * 1024;
     protected long minTransactionFee = 10L * Unit.MILLI_SEM;
+    protected long maxTransactionTimeDrift = TimeUnit.HOURS.toMillis(2);
     protected long minDelegateBurnAmount = 1000L * Unit.SEM;
     protected long mandatoryUpgrade = Constants.BLOCKS_PER_DAY * 60L;
 
@@ -90,6 +92,7 @@ public abstract class AbstractConfig implements Config {
     protected long bftPreCommitTimeout = 6000L;
     protected long bftCommitTimeout = 3000L;
     protected long bftFinalizeTimeout = 3000L;
+    protected long maxBlockTimeDrift = TimeUnit.MINUTES.toMillis(15);
 
     // =========================
     // Virtual machine
@@ -202,6 +205,11 @@ public abstract class AbstractConfig implements Config {
     @Override
     public long minTransactionFee() {
         return minTransactionFee;
+    }
+
+    @Override
+    public long maxTransactionTimeDrift() {
+        return maxTransactionTimeDrift;
     }
 
     @Override
@@ -337,6 +345,11 @@ public abstract class AbstractConfig implements Config {
     @Override
     public long bftFinalizeTimeout() {
         return bftFinalizeTimeout;
+    }
+
+    @Override
+    public long maxBlockTimeDrift() {
+        return maxBlockTimeDrift;
     }
 
     @Override
