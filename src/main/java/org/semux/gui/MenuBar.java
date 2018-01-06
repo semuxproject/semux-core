@@ -6,10 +6,13 @@
  */
 package org.semux.gui;
 
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
@@ -36,6 +39,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(MenuBar.class);
+    public static final String HELP_URL = "https://github.com/semuxproject/semux/wiki";
 
     private transient SemuxGUI gui;
     private JFrame frame;
@@ -98,6 +102,12 @@ public class MenuBar extends JMenuBar implements ActionListener {
         itemAbout.setActionCommand(Action.ABOUT.name());
         itemAbout.addActionListener(this);
         menuHelp.add(itemAbout);
+
+        JMenuItem itemHelp = new JMenuItem(GUIMessages.get("Help"));
+        itemHelp.setName("itemHelp");
+        itemHelp.setActionCommand(Action.HELP.name());
+        itemHelp.addActionListener(this);
+        menuHelp.add(itemHelp);
     }
 
     @Override
@@ -125,6 +135,9 @@ public class MenuBar extends JMenuBar implements ActionListener {
             break;
         case ABOUT:
             about();
+            break;
+        case HELP:
+            help();
             break;
         default:
             break;
@@ -252,6 +265,16 @@ public class MenuBar extends JMenuBar implements ActionListener {
      */
     protected void about() {
         JOptionPane.showMessageDialog(frame, gui.getKernel().getConfig().getClientId());
+    }
+
+    private void help() {
+        if (Desktop.isDesktopSupported()) {
+            try {
+                Desktop.getDesktop().browse(new URI(HELP_URL));
+            } catch (IOException | URISyntaxException e) {
+                logger.error("Unable to parse help url " + HELP_URL);
+            }
+        }
     }
 
     /**
