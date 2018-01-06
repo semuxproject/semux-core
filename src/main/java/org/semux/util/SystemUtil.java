@@ -97,8 +97,9 @@ public class SystemUtil {
      */
     public static String getIp() {
         // [1] fetch IP address from OpenDNS. This works for socks5 proxy users.
+        NioEventLoopGroup ev = new NioEventLoopGroup(1);
         try {
-            DnsNameResolver nameResolver = new DnsNameResolverBuilder(new NioEventLoopGroup().next())
+            DnsNameResolver nameResolver = new DnsNameResolverBuilder(ev.next())
                     .channelType(NioDatagramChannel.class)
                     .queryTimeoutMillis(1000)
                     .nameServerProvider(new SequentialDnsServerAddressStreamProvider(
@@ -112,6 +113,8 @@ public class SystemUtil {
             // do nothing
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        } finally {
+            ev.shutdownGracefully();
         }
         logger.error("Failed to retrieve your IP address from OpenDNS");
 
