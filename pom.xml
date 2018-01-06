@@ -12,6 +12,8 @@
         <dist.phase>install</dist.phase>
         <dist.base>${project.basedir}/dist</dist.base>
         <dist.windowsExecutableVersion>1.0.0.0</dist.windowsExecutableVersion>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <organization>
@@ -39,13 +41,26 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
             </plugin>
 
             <!-- build fat jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <archive>
+                        <index>true</index>
+                        <manifestEntries>
+                            <Main-Class>org.semux.gui.SemuxGUI</Main-Class>
+                            <Implementation-Version>${git.commit.id.abbrev}</Implementation-Version>
+                            <X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
+                            <X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -82,9 +97,40 @@
                             <resource>LICENSE</resource>
                         </transformer>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>org.semux.gui.SemuxGUI</mainClass>
+                            <manifestEntries>
+                                <Main-Class>org.semux.gui.SemuxGUI</Main-Class>
+                                <Implementation-Version>${git.commit.id.abbrev}</Implementation-Version>
+                                <X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
+                                <X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
+                            </manifestEntries>
                         </transformer>
                     </transformers>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.2.4</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>validate-the-git-infos</id>
+                        <goals>
+                            <goal>validateRevision</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <abbrevLength>7</abbrevLength>
+                    <verbose>true</verbose>
+                    <skipPoms>false</skipPoms>
                 </configuration>
             </plugin>
 
@@ -145,6 +191,7 @@
                     <!-- scrutinizer doesn't like to build OSX DMGs uncomment for build. -->
                     <!--<generateDiskImageFile>true</generateDiskImageFile>-->
                     <jvmVersion>1.8</jvmVersion>
+                    <version>${project.version}-${git.commit.id.abbrev}</version>
                     <iconFile>logo.icns</iconFile>
                     <additionalResources>
                         <additionalResource>
@@ -371,7 +418,7 @@
                                         <urn>org.apache.maven.plugins:maven-deploy-plugin:2.7:maven-plugin:null:runtime:6dadfb75679ca010b41286794f737088ebfe12fd</urn>
                                         <urn>org.apache.maven.plugins:maven-enforcer-plugin:3.0.0-M1:maven-plugin:null:runtime:02b46cf923a7f5c75ffae61cedff103e0def3560</urn>
                                         <urn>org.apache.maven.plugins:maven-install-plugin:2.4:maven-plugin:null:runtime:9d1316166fe4c313f56276935e08df11f45267c2</urn>
-                                        <urn>org.apache.maven.plugins:maven-jar-plugin:2.4:maven-plugin:null:runtime:e3200bcf357b5c5e26df072d27df160546bb079a</urn>
+                                        <urn>org.apache.maven.plugins:maven-jar-plugin:3.0.2:maven-plugin:null:runtime:5518cc6a2ed1b1ec52419fa0e18f7e42b6279cb9</urn>
                                         <urn>org.apache.maven.plugins:maven-resources-plugin:2.3:maven-plugin:null:runtime:648f725a387d5b38c86d5837b8c2cf456f8d93c7</urn>
                                         <urn>org.apache.maven.plugins:maven-shade-plugin:3.1.0:maven-plugin:null:runtime:c08cd5163a49e31f6e28d6f8bb153013a2a2de79</urn>
                                         <urn>org.apache.maven.plugins:maven-site-plugin:3.3:maven-plugin:null:runtime:77ba1752b1ac4c4339d6f11554800960a56a4ae1</urn>
@@ -402,6 +449,8 @@
                                         <urn>org.slf4j:slf4j-api:1.7.25:jar:null:compile:da76ca59f6a57ee3102f8f9bd9cee742973efa8a</urn>
                                         <urn>org.threeten:threetenbp:1.3.6:jar:null:compile:89dcc04a7e028c3c963413a71f950703cf51f057</urn>
                                         <urn>org.xerial.snappy:snappy-java:1.1.7.1:jar:null:compile:d5190b41f3de61e3b83d692322d58630252bc8c3</urn>
+                                        <urn>pl.project13.maven:git-commit-id-plugin:2.2.4:maven-plugin:null:runtime:43a0dc1d02821c51847d587ecc4a6943086b884c</urn>
+                                        <urn>sh.tak.appbundler:appbundle-maven-plugin:1.2.0:maven-plugin:null:runtime:75a9e8c2adc7203b9b443b4547570da25c619f0d</urn>
                                     </urns>
                                 </digestRule>
                             </rules>
