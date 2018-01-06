@@ -315,8 +315,9 @@ public class PendingManager implements Runnable, BlockchainListener {
         }
 
         // check transaction timestamp if this is a fresh transaction:
-        // a time drift of 2 hours is allowed
-        if (tx.getTimestamp() < now - ALLOWED_TIME_DRIFT || tx.getTimestamp() > now + ALLOWED_TIME_DRIFT) {
+        // a time drift of 2 hours is allowed by default
+        if (tx.getTimestamp() < now - kernel.getConfig().maxTransactionTimeDrift()
+                || tx.getTimestamp() > now + kernel.getConfig().maxTransactionTimeDrift()) {
             return new ProcessTransactionResult(cnt, TransactionResult.Error.INVALID_TIMESTAMP);
         }
 

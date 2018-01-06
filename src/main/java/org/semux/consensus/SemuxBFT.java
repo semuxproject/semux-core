@@ -750,6 +750,11 @@ public class SemuxBFT implements Consensus {
             return false;
         }
 
+        if (header.getTimestamp() - System.currentTimeMillis() > config.maxBlockTimeDrift()) {
+            logger.warn("A block in the future is not allowed");
+            return false;
+        }
+
         // [2] check transactions and results (skipped)
         if (!Block.validateTransactions(header, transactions, config.networkId())
                 || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
