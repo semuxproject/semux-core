@@ -169,6 +169,13 @@ public interface Config {
     int netMaxInboundConnections();
 
     /**
+     * Returns the max number of inbound connections of each unique IP.
+     *
+     * @return
+     */
+    int netMaxInboundConnectionsPerIp();
+
+    /**
      * Returns the max message queue size.
      *
      * @return

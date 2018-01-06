@@ -53,6 +53,10 @@ public class Channel {
         this.msgQueue = new MessageQueue(kernel.getConfig());
 
         // register channel handlers
+        if (isInbound) {
+            pipe.addLast("inboundLimitHandler",
+                    new ConnectionLimitHandler(kernel.getConfig().netMaxInboundConnectionsPerIp()));
+        }
         pipe.addLast("readTimeoutHandler",
                 new ReadTimeoutHandler(kernel.getConfig().netChannelIdleTimeout(), TimeUnit.MILLISECONDS));
         pipe.addLast("frameHandler", new SemuxFrameHandler(kernel.getConfig()));
