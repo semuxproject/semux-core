@@ -13,6 +13,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,15 +83,20 @@ public class ConnectionTest {
     @Test
     public void testConnectionLimit() throws IOException, InterruptedException {
         // create 100 idle connections to the P2P server
+        final int connections = 100;
         Collection<Callable<Void>> threads = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(100);
-        for (int i = 1; i <= 100; i++) {
+        List<Socket> sockets = new ArrayList<>(); // keep reference to created sockets
+        for (int i = 1; i <= connections; i++) {
             threads.add(() -> {
+                Socket socket = new Socket();
+                sockets.add(socket);
                 try {
-                    new Socket(
-                            kernelRule1.getKernel().getConfig().p2pListenIp(),
-                            kernelRule1.getKernel().getConfig().p2pListenPort());
-                } catch (IOException e) {
+                    socket.connect(
+                            new InetSocketAddress(kernelRule1.getKernel().getConfig().p2pListenIp(),
+                                    kernelRule1.getKernel().getConfig().p2pListenPort()),
+                            100);
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 return null;
