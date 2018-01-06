@@ -67,6 +67,8 @@ public class SwingUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SwingUtil.class);
 
+    private static final int DECIMALS = 3;
+
     private SwingUtil() {
     }
 
@@ -306,7 +308,7 @@ public class SwingUtil {
      * @return
      */
     public static String formatValue(long nano, boolean withUnit) {
-        return formatNumber(nano / (double) Unit.SEM, 2) + (withUnit ? " SEM" : "");
+        return formatNumber(nano / (double) Unit.SEM, DECIMALS) + (withUnit ? " SEM" : "");
     }
 
     /**
