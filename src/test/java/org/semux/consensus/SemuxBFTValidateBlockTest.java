@@ -43,7 +43,7 @@ public class SemuxBFTValidateBlockTest {
         return Arrays.asList(new Object[][] {
                 {
                         "block in the future",
-                        (Callable) () -> {
+                        (Callable<?>) () -> {
                             mockStatic(Block.class);
                             when(Block.validateHeader(any(), any())).thenReturn(true);
                             return null;

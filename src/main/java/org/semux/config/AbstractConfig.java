@@ -92,7 +92,7 @@ public abstract class AbstractConfig implements Config {
     protected long bftPreCommitTimeout = 6000L;
     protected long bftCommitTimeout = 3000L;
     protected long bftFinalizeTimeout = 3000L;
-    protected long maxBlockTimeDrift = TimeUnit.MINUTES.toMillis(15);
+    protected long maxBlockTimeDrift = TimeUnit.SECONDS.toMillis(30);
 
     // =========================
     // Virtual machine
