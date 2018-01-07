@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.List;
 
+import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
@@ -21,7 +22,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
@@ -58,6 +61,8 @@ public class SendPanel extends JPanel implements ActionListener {
     private JTextField txtAmount;
     private JTextField txtFee;
     private JTextField txtData;
+    private JRadioButton rdbtnText;
+    private JRadioButton rdbtnHex;
 
     private AddressBookDialog addressBookDialog;
 
@@ -136,6 +141,13 @@ public class SendPanel extends JPanel implements ActionListener {
         btnAddressBook.addActionListener(this);
         btnAddressBook.setActionCommand(Action.SHOW_ADDRESS_BOOK.name());
 
+        rdbtnText = new JRadioButton("Text");
+        rdbtnText.setSelected(true);
+        rdbtnHex = new JRadioButton("Hex");
+        ButtonGroup btnGroupDataType = new ButtonGroup();
+        btnGroupDataType.add(rdbtnText);
+        btnGroupDataType.add(rdbtnHex);
+
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
         groupLayout.setHorizontalGroup(
@@ -143,8 +155,8 @@ public class SendPanel extends JPanel implements ActionListener {
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGap(62)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                        .addComponent(lblTo)
                         .addComponent(lblFrom)
+                        .addComponent(lblTo)
                         .addComponent(lblAmount)
                         .addComponent(lblFee)
                         .addComponent(lblData))
@@ -153,23 +165,30 @@ public class SendPanel extends JPanel implements ActionListener {
                         .addGroup(groupLayout.createSequentialGroup()
                             .addComponent(btnClear)
                             .addGap(10)
-                            .addComponent(btnSend)
-                            .addGap(10)
-                            .addComponent(btnAddressBook)
-                            .addContainerGap())
+                            .addComponent(btnSend))
                         .addGroup(groupLayout.createSequentialGroup()
                             .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                                .addComponent(txtTo, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
-                                .addComponent(selectFrom, 0, 306, Short.MAX_VALUE)
+                                .addComponent(selectFrom, 0, 400, Short.MAX_VALUE)
                                 .addGroup(groupLayout.createSequentialGroup()
                                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
                                         .addComponent(txtAmount, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
                                         .addComponent(txtFee)
                                         .addComponent(txtData))
-                                    .addGap(12)
-                                    .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                                        .addComponent(lblSem1)
-                                        .addComponent(lblSem2))))
+                                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                        .addGroup(groupLayout.createSequentialGroup()
+                                            .addGap(12)
+                                            .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+                                                .addComponent(lblSem1)
+                                                .addComponent(lblSem2)))
+                                        .addGroup(groupLayout.createSequentialGroup()
+                                            .addPreferredGap(ComponentPlacement.RELATED)
+                                            .addComponent(rdbtnText)
+                                            .addPreferredGap(ComponentPlacement.RELATED)
+                                            .addComponent(rdbtnHex))))
+                                .addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+                                    .addComponent(txtTo, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                                    .addGap(18)
+                                    .addComponent(btnAddressBook)))
                             .addGap(59))))
         );
         groupLayout.setVerticalGroup(
@@ -182,7 +201,8 @@ public class SendPanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblTo)
-                        .addComponent(txtTo, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtTo, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnAddressBook))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblAmount)
@@ -196,15 +216,14 @@ public class SendPanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblData)
-                        .addComponent(txtData, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtData, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(rdbtnText)
+                        .addComponent(rdbtnHex))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(btnAddressBook)
                         .addComponent(btnSend)
                         .addComponent(btnClear))
-                    .addGap(18)
-                    .addContainerGap(158, Short.MAX_VALUE))
-                
+                    .addContainerGap(30, Short.MAX_VALUE))
         );
         setLayout(groupLayout);
         // @formatter:on
@@ -333,12 +352,14 @@ public class SendPanel extends JPanel implements ActionListener {
                 if (ret == JOptionPane.YES_OPTION) {
                     PendingManager pendingMgr = kernel.getPendingManager();
 
+                    byte[] rawData = rdbtnText.isSelected() ? Bytes.of(data) : Hex.decode0x(data);
+
                     byte networkId = kernel.getConfig().networkId();
                     TransactionType type = TransactionType.TRANSFER;
                     byte[] from = acc.getKey().toAddress();
                     long nonce = pendingMgr.getNonce(from);
                     long timestamp = System.currentTimeMillis();
-                    Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, Bytes.of(data));
+                    Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, rawData);
                     tx.sign(acc.getKey());
 
                     sendTransaction(pendingMgr, tx);
