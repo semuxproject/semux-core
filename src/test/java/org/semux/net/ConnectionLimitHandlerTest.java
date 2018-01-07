@@ -7,6 +7,8 @@
 package org.semux.net;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -28,7 +30,7 @@ public class ConnectionLimitHandlerTest {
 
     @Test
     public void testInboundExceedingLimit() throws Exception {
-        final long limit = 5, loops = 100;
+        final int limit = 5, loops = 100;
 
         // create connections
         for (int i = 1; i <= loops; i++) {
@@ -43,6 +45,7 @@ public class ConnectionLimitHandlerTest {
             }
         }
         assertEquals(loops, ConnectionLimitHandler.getConnectionsCount(InetAddress.getByName("127.0.0.1")));
+        assertTrue(ConnectionLimitHandler.containsAddress(InetAddress.getByName("127.0.0.1")));
 
         // close connections
         for (int i = 1; i <= loops; i++) {
@@ -51,18 +54,22 @@ public class ConnectionLimitHandlerTest {
             handler.channelInactive(channelHandlerContext);
         }
         assertEquals(0, ConnectionLimitHandler.getConnectionsCount(InetAddress.getByName("127.0.0.1")));
+
+        // ensure that the address has been removed from the hash map
+        assertFalse(ConnectionLimitHandler.containsAddress(InetAddress.getByName("127.0.0.1")));
     }
 
     @Test
     public void testInboundExceedingLimitAsync() throws Exception {
-        final long limit = 5, loops = 100;
+        final int limit = 5, loops = 100;
 
-        ExecutorService executorService = Executors.newFixedThreadPool(100);
+        ExecutorService executorServiceActive = Executors.newFixedThreadPool(100);
+        ExecutorService executorServiceInactive = Executors.newFixedThreadPool(100);
 
         // create connections
         for (int i = 1; i <= loops; i++) {
             final int j = i;
-            executorService.execute(new Thread(() -> {
+            executorServiceActive.submit(new Thread(() -> {
                 ConnectionLimitHandler handler = new ConnectionLimitHandler(limit);
                 ChannelHandlerContext channelHandlerContext = mockChannelContext("127.0.0.1", 12345 + j);
                 try {
@@ -72,12 +79,14 @@ public class ConnectionLimitHandlerTest {
                 }
             }));
         }
+        executorServiceActive.shutdown();
+        executorServiceActive.awaitTermination(5, TimeUnit.SECONDS);
 
         // close connections
         for (int i = 1; i <= loops - limit; i++) {
             final int j = i;
             final ConnectionLimitHandler handler = new ConnectionLimitHandler(limit);
-            executorService.execute(new Thread(() -> {
+            executorServiceInactive.submit(new Thread(() -> {
                 ChannelHandlerContext channelHandlerContext = mockChannelContext("127.0.0.1", 12345 + j);
                 try {
                     handler.channelInactive(channelHandlerContext);
@@ -86,8 +95,8 @@ public class ConnectionLimitHandlerTest {
                 }
             }));
         }
-        executorService.shutdown();
-        executorService.awaitTermination(10, TimeUnit.SECONDS);
+        executorServiceInactive.shutdown();
+        executorServiceInactive.awaitTermination(5, TimeUnit.SECONDS);
 
         assertEquals(limit, ConnectionLimitHandler.getConnectionsCount(InetAddress.getByName("127.0.0.1")));
     }
