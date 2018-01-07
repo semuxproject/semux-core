@@ -10,6 +10,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -41,6 +42,7 @@ import org.semux.api.response.GetLatestBlockResponse;
 import org.semux.api.response.GetPeersResponse;
 import org.semux.api.response.GetPendingTransactionsResponse;
 import org.semux.api.response.GetRootResponse;
+import org.semux.api.response.GetTransactionLimitsResponse;
 import org.semux.api.response.GetTransactionResponse;
 import org.semux.api.response.GetValidatorsResponse;
 import org.semux.api.response.GetVoteResponse;
@@ -376,6 +378,23 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         CreateAccountResponse response = request(uri, CreateAccountResponse.class);
         assertTrue(response.success);
         assertEquals(size + 1, wallet.getAccounts().size());
+    }
+
+    @Test
+    public void testGetTransactionLimits() throws IOException {
+        for (TransactionType type : TransactionType.values()) {
+            String uri = "/get_transaction_limits?type=" + type.toString();
+            GetTransactionLimitsResponse response = request(uri, GetTransactionLimitsResponse.class);
+            assertTrue(response.success);
+            assertEquals(config.maxTransactionDataSize(type), response.result.maxTransactionDataSize.intValue());
+            assertEquals(config.minTransactionFee(), response.result.minTransactionFee.longValue());
+
+            if (type.equals(TransactionType.DELEGATE)) {
+                assertEquals(config.minDelegateBurnAmount(), response.result.minDelegateBurnAmount.longValue());
+            } else {
+                assertNull(response.result.minDelegateBurnAmount);
+            }
+        }
     }
 
     @Test

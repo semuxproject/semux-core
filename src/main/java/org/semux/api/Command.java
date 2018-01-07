@@ -130,6 +130,11 @@ public enum Command {
     CREATE_ACCOUNT,
 
     /**
+     * Get transaction limits.
+     */
+    GET_TRANSACTION_LIMITS,
+
+    /**
      * Balance transfer.
      */
     TRANSFER,
