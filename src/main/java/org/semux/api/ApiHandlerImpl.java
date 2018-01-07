@@ -7,6 +7,7 @@
 package org.semux.api;
 
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +28,7 @@ import org.semux.api.response.GetLatestBlockResponse;
 import org.semux.api.response.GetPeersResponse;
 import org.semux.api.response.GetPendingTransactionsResponse;
 import org.semux.api.response.GetRootResponse;
+import org.semux.api.response.GetTransactionLimitsResponse;
 import org.semux.api.response.GetTransactionResponse;
 import org.semux.api.response.GetValidatorsResponse;
 import org.semux.api.response.GetVoteResponse;
@@ -140,6 +142,9 @@ public class ApiHandlerImpl implements ApiHandler {
 
             case CREATE_ACCOUNT:
                 return createAccount();
+
+            case GET_TRANSACTION_LIMITS:
+                return getTransactionLimits(params);
 
             case TRANSFER:
             case DELEGATE:
@@ -557,6 +562,24 @@ public class ApiHandlerImpl implements ApiHandler {
             return new CreateAccountResponse(true, Hex.PREF + key.toAddressString());
         } catch (WalletLockedException e) {
             return failure(e.getMessage());
+        }
+    }
+
+    /**
+     * GET /get_transaction_limits
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse getTransactionLimits(Map<String, String> params) {
+        try {
+            return new GetTransactionLimitsResponse(kernel, TransactionType.valueOf(params.get("type")));
+        } catch (NullPointerException | IllegalArgumentException e) {
+            return failure(String.format(
+                    "Invalid transaction type. (must be one of %s)",
+                    Arrays.stream(TransactionType.values())
+                            .map(TransactionType::toString)
+                            .collect(Collectors.joining(","))));
         }
     }
 

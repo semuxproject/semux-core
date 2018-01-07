@@ -86,6 +86,8 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
                         "10", "_") }, // non-hexadecimal data
                 { format("/transfer?from=%s&to=%s&value=%s&fee=%s&data=%s", ADDRESS_PLACEHOLDER, randomHex(), "10",
                         "10", randomHex()) }, // hexadecimal data
+                { "/get_transaction_limits" },
+                { "/get_transaction_limits?type=XXX" },
         });
     }
 
