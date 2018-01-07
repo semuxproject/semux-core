@@ -6,11 +6,14 @@
  */
 package org.semux.api.response;
 
+import static org.semux.core.TransactionType.DELEGATE;
+
 import org.semux.Kernel;
 import org.semux.api.ApiHandlerResponse;
 import org.semux.core.TransactionType;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GetTransactionLimitsResponse extends ApiHandlerResponse {
@@ -22,7 +25,8 @@ public class GetTransactionLimitsResponse extends ApiHandlerResponse {
         super(true, null);
         this.result = new Result(
                 kernel.getConfig().maxTransactionDataSize(transactionType),
-                kernel.getConfig().minTransactionFee());
+                kernel.getConfig().minTransactionFee(),
+                transactionType.equals(DELEGATE) ? kernel.getConfig().minDelegateBurnAmount() : null);
     }
 
     @JsonCreator
@@ -36,17 +40,23 @@ public class GetTransactionLimitsResponse extends ApiHandlerResponse {
     public static class Result {
 
         @JsonProperty("maxTransactionDataSize")
-        public final int maxTransactionDataSize;
+        public final Integer maxTransactionDataSize;
 
         @JsonProperty("minTransactionFee")
-        public final long minTransactionFee;
+        public final Long minTransactionFee;
+
+        @JsonProperty("minDelegateBurnAmount")
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        public final Long minDelegateBurnAmount;
 
         @JsonCreator
         public Result(
-                @JsonProperty("maxTransactionDataSize") int maxTransactionDataSize,
-                @JsonProperty("minTransactionFee") long minTransactionFee) {
+                @JsonProperty("maxTransactionDataSize") Integer maxTransactionDataSize,
+                @JsonProperty("minTransactionFee") Long minTransactionFee,
+                @JsonProperty("minDelegateBurnAmount") Long minDelegateBurnAmount) {
             this.maxTransactionDataSize = maxTransactionDataSize;
             this.minTransactionFee = minTransactionFee;
+            this.minDelegateBurnAmount = minDelegateBurnAmount;
         }
     }
 }

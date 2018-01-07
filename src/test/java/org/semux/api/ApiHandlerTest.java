@@ -10,6 +10,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -385,8 +386,14 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
             String uri = "/get_transaction_limits?type=" + type.toString();
             GetTransactionLimitsResponse response = request(uri, GetTransactionLimitsResponse.class);
             assertTrue(response.success);
-            assertEquals(config.maxTransactionDataSize(type), response.result.maxTransactionDataSize);
-            assertEquals(config.minTransactionFee(), response.result.minTransactionFee);
+            assertEquals(config.maxTransactionDataSize(type), response.result.maxTransactionDataSize.intValue());
+            assertEquals(config.minTransactionFee(), response.result.minTransactionFee.longValue());
+
+            if (type.equals(TransactionType.DELEGATE)) {
+                assertEquals(config.minDelegateBurnAmount(), response.result.minDelegateBurnAmount.longValue());
+            } else {
+                assertNull(response.result.minDelegateBurnAmount);
+            }
         }
     }
 
