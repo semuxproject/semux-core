@@ -9,6 +9,7 @@ package org.semux.cli;
 import java.io.File;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -50,6 +51,8 @@ public class SemuxCLI extends Launcher {
      * Creates a new Semux CLI instance.
      */
     public SemuxCLI() {
+        Locale.setDefault(getConfig().locale());
+
         Option helpOption = Option.builder()
                 .longOpt(SemuxOption.HELP.toString())
                 .desc(CLIMessages.get("PrintHelp"))
