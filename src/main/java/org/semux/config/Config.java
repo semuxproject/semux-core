@@ -8,6 +8,7 @@ package org.semux.config;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -349,4 +350,15 @@ public interface Config {
      * @return
      */
     int vmInitialHeapSize();
+
+    // =========================
+    // UI
+    // =========================
+
+    /**
+     * Returns the localization of UI
+     *
+     * @return
+     */
+    Locale locale();
 }

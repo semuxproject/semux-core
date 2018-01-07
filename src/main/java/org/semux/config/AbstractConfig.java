@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -100,6 +101,11 @@ public abstract class AbstractConfig implements Config {
     protected boolean vmEnabled = false;
     protected int vmMaxStackSize = 1024;
     protected int vmInitHeapSize = 128;
+
+    // =========================
+    // UI
+    // =========================
+    protected Locale locale = Locale.getDefault();
 
     /**
      * Create an {@link AbstractConfig} instance.
@@ -367,6 +373,11 @@ public abstract class AbstractConfig implements Config {
         return vmInitHeapSize;
     }
 
+    @Override
+    public Locale locale() {
+        return locale;
+    }
+
     protected void init() {
         File f = new File(dataDir, Constants.CONFIG_DIR + File.separator + CONFIG_FILE);
         if (!f.exists()) {
@@ -440,6 +451,14 @@ public abstract class AbstractConfig implements Config {
                 case "api.password":
                     apiPassword = props.getProperty(name);
                     break;
+                case "ui.locale": {
+                    // ui.locale must be in format of en_US ([language]_[country])
+                    String[] localeComponents = props.getProperty(name).trim().split("_");
+                    if (localeComponents.length == 2) {
+                        locale = new Locale(localeComponents[0], localeComponents[1]);
+                    }
+                    break;
+                }
                 default:
                     logger.error("Unsupported option: {} = {}", name, props.getProperty(name));
                     break;
