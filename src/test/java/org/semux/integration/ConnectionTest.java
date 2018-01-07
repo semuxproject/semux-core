@@ -7,12 +7,14 @@
 package org.semux.integration;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ import org.semux.IntegrationTest;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.core.Genesis;
+import org.semux.net.ConnectionLimitHandler;
 import org.semux.net.NodeManager;
 import org.semux.rules.KernelRule;
 
@@ -108,6 +111,20 @@ public class ConnectionTest {
 
         // the number of connections should be capped to netMaxInboundConnectionsPerIp
         assertEquals(netMaxInboundConnectionsPerIp, kernelRule1.getKernel().getChannelManager().size());
+
+        // close all connections
+        sockets.parallelStream().forEach(socket -> {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        // ensure that all connections have been removed from the channel manager
+        await().until(() -> sockets.parallelStream().allMatch(Socket::isClosed));
+        await().until(() -> kernelRule1.getKernel().getChannelManager().size() == 0);
+        assertFalse(ConnectionLimitHandler.containsAddress(InetAddress.getByName("127.0.0.1")));
     }
 
     private Genesis mockGenesis() {
