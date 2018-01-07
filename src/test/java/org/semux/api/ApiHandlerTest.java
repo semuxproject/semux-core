@@ -387,7 +387,6 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
             assertTrue(response.success);
             assertEquals(config.maxTransactionDataSize(type), response.result.maxTransactionDataSize);
             assertEquals(config.minTransactionFee(), response.result.minTransactionFee);
-            assertEquals(config.minDelegateBurnAmount(), response.result.minDelegateBurnAmount);
         }
     }
 

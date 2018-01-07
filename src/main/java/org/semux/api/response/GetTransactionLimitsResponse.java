@@ -22,8 +22,7 @@ public class GetTransactionLimitsResponse extends ApiHandlerResponse {
         super(true, null);
         this.result = new Result(
                 kernel.getConfig().maxTransactionDataSize(transactionType),
-                kernel.getConfig().minTransactionFee(),
-                kernel.getConfig().minDelegateBurnAmount());
+                kernel.getConfig().minTransactionFee());
     }
 
     @JsonCreator
@@ -42,17 +41,12 @@ public class GetTransactionLimitsResponse extends ApiHandlerResponse {
         @JsonProperty("minTransactionFee")
         public final long minTransactionFee;
 
-        @JsonProperty("minDelegateBurnAmount")
-        public final long minDelegateBurnAmount;
-
         @JsonCreator
         public Result(
                 @JsonProperty("maxTransactionDataSize") int maxTransactionDataSize,
-                @JsonProperty("minTransactionFee") long minTransactionFee,
-                @JsonProperty("minDelegateBurnAmount") long minDelegateBurnAmount) {
+                @JsonProperty("minTransactionFee") long minTransactionFee) {
             this.maxTransactionDataSize = maxTransactionDataSize;
             this.minTransactionFee = minTransactionFee;
-            this.minDelegateBurnAmount = minDelegateBurnAmount;
         }
     }
 }
