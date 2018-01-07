@@ -9,7 +9,6 @@ package org.semux.cli;
 import java.io.File;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
-import java.util.Locale;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
