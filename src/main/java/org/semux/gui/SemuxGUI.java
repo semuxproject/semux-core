@@ -93,7 +93,7 @@ public class SemuxGUI extends Launcher {
      * Creates a new Semux GUI instance.
      */
     public SemuxGUI() {
-        Locale.setDefault(getConfig().locale());
+        SystemUtil.setLocale(getConfig().locale());
 
         Option dataDirOption = Option.builder().longOpt(SemuxOption.DATA_DIR.toString())
                 .desc(CLIMessages.get("SpecifyDataDir")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("path")
@@ -114,7 +114,7 @@ public class SemuxGUI extends Launcher {
      * @param kernel
      */
     public SemuxGUI(WalletModel model, Kernel kernel) {
-        Locale.setDefault(getConfig().locale());
+        SystemUtil.setLocale(getConfig().locale());
 
         this.model = model;
         this.kernel = kernel;

@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
@@ -259,6 +260,22 @@ public class SystemUtil {
     public static long getUsedHeapSize() {
         Runtime runtime = Runtime.getRuntime();
         return runtime.totalMemory() - runtime.freeMemory();
+    }
+
+    /**
+     * Change localization.
+     *
+     * @param locale
+     *            the target localization.
+     */
+    public static void setLocale(Locale locale) {
+        try {
+            if (!Locale.getDefault().equals(locale)) {
+                Locale.setDefault(locale);
+            }
+        } catch (SecurityException e) {
+            logger.error("Unable to change localization.", e);
+        }
     }
 
     private SystemUtil() {

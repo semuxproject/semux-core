@@ -51,7 +51,7 @@ public class SemuxCLI extends Launcher {
      * Creates a new Semux CLI instance.
      */
     public SemuxCLI() {
-        Locale.setDefault(getConfig().locale());
+        SystemUtil.setLocale(getConfig().locale());
 
         Option helpOption = Option.builder()
                 .longOpt(SemuxOption.HELP.toString())
