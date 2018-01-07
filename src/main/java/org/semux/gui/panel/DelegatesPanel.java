@@ -70,7 +70,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private JTable table;
     private DelegatesTableModel tableModel;
 
-    JComboBox<Item> from;
+    JComboBox<Item> selectFrom;
 
     private JTextField textVote;
     private JTextField textUnvote;
@@ -140,9 +140,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                         SwingUtil.formatValue(config.minTransactionFee())));
         label.setForeground(Color.DARK_GRAY);
 
-        from = new JComboBox<>();
-        from.setActionCommand(Action.SELECT_ACCOUNT.name());
-        from.addActionListener(this);
+        selectFrom = new JComboBox<>();
+        selectFrom.setActionCommand(Action.SELECT_ACCOUNT.name());
+        selectFrom.addActionListener(this);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -153,14 +153,14 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
                         .addComponent(votePanel, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
-                        .addComponent(from, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                        .addComponent(selectFrom, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
                         .addComponent(label, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
                         .addComponent(delegateRegistrationPanel, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addComponent(from, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(selectFrom, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
                     .addComponent(votePanel, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
@@ -372,29 +372,35 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     protected void refreshAccounts() {
         List<WalletAccount> list = model.getAccounts();
 
-        /*
-         * update account list.
-         */
-        Object selected = from.getSelectedItem();
-        String address = null;
-        if (selected != null && selected instanceof Item) {
-            address = ((Item) selected).account.getKey().toAddressString();
+        // quit if no update
+        boolean match = selectFrom.getItemCount() == list.size();
+        if (match) {
+            for (int i = 0; i < list.size(); i++) {
+                if (!Arrays.equals(selectFrom.getItemAt(i).account.getAddress(), list.get(i).getAddress())) {
+                    match = false;
+                    break;
+                }
+            }
         }
 
-        from.removeAllItems();
-        for (int i = 0; i < list.size(); i++) {
-            from.addItem(new Item(list.get(i), i));
-        }
+        if (!match) {
+            // record selected account
+            Item selected = (Item) selectFrom.getSelectedItem();
 
-        if (address == null) {
-            return;
-        }
+            // update account list
+            selectFrom.removeAllItems();
+            for (int i = 0; i < list.size(); i++) {
+                selectFrom.addItem(new Item(list.get(i), i));
+            }
 
-        for (int i = 0; i < list.size(); i++) {
-            String a = list.get(i).getKey().toAddressString();
-            if (a.equals(address)) {
-                from.setSelectedIndex(i);
-                break;
+            // recover selected account
+            if (selected != null) {
+                for (int i = 0; i < list.size(); i++) {
+                    if (Arrays.equals(list.get(i).getAddress(), selected.account.getAddress())) {
+                        selectFrom.setSelectedIndex(i);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -582,7 +588,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
      * @return
      */
     protected WalletAccount getSelectedAccount() {
-        int idx = from.getSelectedIndex();
+        int idx = selectFrom.getSelectedIndex();
         return (idx == -1) ? null : model.getAccounts().get(idx);
     }
 

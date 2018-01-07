@@ -11,6 +11,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.ButtonGroup;
@@ -141,9 +142,9 @@ public class SendPanel extends JPanel implements ActionListener {
         btnAddressBook.addActionListener(this);
         btnAddressBook.setActionCommand(Action.SHOW_ADDRESS_BOOK.name());
 
-        rdbtnText = new JRadioButton("Text");
+        rdbtnText = new JRadioButton(GUIMessages.get("Text"));
         rdbtnText.setSelected(true);
-        rdbtnHex = new JRadioButton("Hex");
+        rdbtnHex = new JRadioButton(GUIMessages.get("Hex"));
         ButtonGroup btnGroupDataType = new ButtonGroup();
         btnGroupDataType.add(rdbtnText);
         btnGroupDataType.add(rdbtnHex);
@@ -292,29 +293,35 @@ public class SendPanel extends JPanel implements ActionListener {
     protected void refresh() {
         List<WalletAccount> list = model.getAccounts();
 
-        /*
-         * update account list.
-         */
-        Object selected = selectFrom.getSelectedItem();
-        String address = null;
-        if (selected != null && selected instanceof Item) {
-            address = ((Item) selected).account.getKey().toAddressString();
+        // quit if no update
+        boolean match = selectFrom.getItemCount() == list.size();
+        if (match) {
+            for (int i = 0; i < list.size(); i++) {
+                if (!Arrays.equals(selectFrom.getItemAt(i).account.getAddress(), list.get(i).getAddress())) {
+                    match = false;
+                    break;
+                }
+            }
         }
 
-        selectFrom.removeAllItems();
-        for (int i = 0; i < list.size(); i++) {
-            selectFrom.addItem(new Item(list.get(i), i));
-        }
+        if (!match) {
+            // record selected account
+            Item selected = (Item) selectFrom.getSelectedItem();
 
-        if (address == null) {
-            return;
-        }
+            // update account list
+            selectFrom.removeAllItems();
+            for (int i = 0; i < list.size(); i++) {
+                selectFrom.addItem(new Item(list.get(i), i));
+            }
 
-        for (int i = 0; i < list.size(); i++) {
-            String addr = list.get(i).getKey().toAddressString();
-            if (addr.equals(address)) {
-                selectFrom.setSelectedIndex(i);
-                break;
+            // recover selected account
+            if (selected != null) {
+                for (int i = 0; i < list.size(); i++) {
+                    if (Arrays.equals(list.get(i).getAddress(), selected.account.getAddress())) {
+                        selectFrom.setSelectedIndex(i);
+                        break;
+                    }
+                }
             }
         }
     }
