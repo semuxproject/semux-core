@@ -23,7 +23,7 @@ import org.semux.net.PeerClient;
 public class SemuxAPIMock {
 
     private KernelMock kernel;
-    private SemuxAPI server;
+    private SemuxApiService server;
 
     private DBFactory dbFactory;
     private PeerClient client;
@@ -47,7 +47,7 @@ public class SemuxAPIMock {
             kernel.setClient(client);
             kernel.setNodeManager(new NodeManager(kernel));
 
-            server = new SemuxAPI(kernel);
+            server = new SemuxApiService(kernel);
             server.start(config.apiListenIp(), config.apiListenPort());
         }
     }

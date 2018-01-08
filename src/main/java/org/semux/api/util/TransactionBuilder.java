@@ -112,7 +112,7 @@ public class TransactionBuilder {
         try {
             value = Long.parseLong(valueStr);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Parameter `value` is not a valida number");
+            throw new IllegalArgumentException("Parameter `value` is not a valid number");
         }
 
         return this;

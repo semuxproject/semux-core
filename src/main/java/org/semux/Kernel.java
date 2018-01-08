@@ -18,7 +18,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
-import org.semux.api.SemuxAPI;
+import org.semux.api.SemuxApiService;
 import org.semux.config.Config;
 import org.semux.consensus.SemuxBFT;
 import org.semux.consensus.SemuxSync;
@@ -83,7 +83,7 @@ public class Kernel {
     protected NodeManager nodeMgr;
 
     protected PeerServer p2p;
-    protected SemuxAPI api;
+    protected SemuxApiService api;
 
     protected Thread consThread;
     protected SemuxSync sync;
@@ -153,7 +153,7 @@ public class Kernel {
         // ====================================
         // start API module
         // ====================================
-        api = new SemuxAPI(this);
+        api = new SemuxApiService(this);
         if (config.apiEnabled()) {
             api.start();
         }
@@ -422,7 +422,7 @@ public class Kernel {
      *
      * @return API server
      */
-    public SemuxAPI getApi() {
+    public SemuxApiService getApi() {
         return api;
     }
 

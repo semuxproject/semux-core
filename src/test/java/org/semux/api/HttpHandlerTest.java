@@ -35,7 +35,7 @@ public class HttpHandlerTest {
     private HttpHeaders headers = null;
 
     private KernelMock kernel;
-    private SemuxAPI server;
+    private SemuxApiService server;
 
     private String ip;
     private int port;
@@ -44,7 +44,7 @@ public class HttpHandlerTest {
     @Before
     public void setUp() {
         kernel = kernelRule.getKernel();
-        server = new SemuxAPI(kernel);
+        server = new SemuxApiService(kernel);
 
         ip = kernel.getConfig().apiListenIp();
         port = kernel.getConfig().apiListenPort();

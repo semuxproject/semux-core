@@ -1,133 +1,62 @@
-/**
- * Copyright (c) 2017 The Semux Developers
- *
- * Distributed under the MIT software license, see the accompanying file
- * LICENSE or https://opensource.org/licenses/mit-license.php
- */
 package org.semux.api;
 
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.semux.Kernel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 
 /**
- * Semux API launcher
- *
+ * Interface for calling from REST API or command terminal.
  */
-public class SemuxAPI {
+public interface SemuxApi {
+    ApiHandlerResponse getInfo();
 
-    private static final Logger logger = LoggerFactory.getLogger(SemuxAPI.class);
+    ApiHandlerResponse getPeers();
 
-    private static final ThreadFactory factory = new ThreadFactory() {
-        AtomicInteger cnt = new AtomicInteger(0);
+    ApiHandlerResponse addNode(String node);
 
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(r, "api-" + cnt.getAndIncrement());
-        }
-    };
+    ApiHandlerResponse addToBlacklist(String ipAddress);
 
-    private Kernel kernel;
-    private Channel channel;
+    ApiHandlerResponse addToWhitelist(String ipAddress);
 
-    private EventLoopGroup bossGroup;
-    private EventLoopGroup workerGroup;
+    ApiHandlerResponse getLatestBlockNumber();
 
-    public SemuxAPI(Kernel kernel) {
-        this.kernel = kernel;
-    }
+    ApiHandlerResponse getLatestBlock();
 
-    /**
-     * Starts API server with configured binding address.
-     */
-    public void start() {
-        start(kernel.getConfig().apiListenIp(), kernel.getConfig().apiListenPort());
-    }
+    ApiHandlerResponse getBlock(long blockNum);
 
-    /**
-     * Starts API server at the given binding IP and port.
-     *
-     * @param ip
-     * @param port
-     */
-    public void start(String ip, int port) {
-        start(ip, port, new SemuxAPIHttpChannelInitializer());
-    }
+    ApiHandlerResponse getBlock(String hash);
 
-    /**
-     * Starts API server at the given binding IP and port, with the specified
-     * channel initializer.
-     * 
-     * @param ip
-     * @param port
-     * @param httpChannelInitializer
-     */
-    public void start(String ip, int port, HttpChannelInitializer httpChannelInitializer) {
-        try {
-            bossGroup = new NioEventLoopGroup(1, factory);
-            workerGroup = new NioEventLoopGroup(0, factory);
+    ApiHandlerResponse getPendingTransactions();
 
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                    .handler(new LoggingHandler(LogLevel.INFO)).childHandler(httpChannelInitializer);
+    ApiHandlerResponse getAccountTransactions(String address, String from, String to);
 
-            logger.info("Starting API server: address = {}:{}", ip, port);
-            channel = b.bind(ip, port).sync().channel();
-        } catch (Exception e) {
-            logger.error("Failed to start API server", e);
-        }
-    }
+    ApiHandlerResponse getTransaction(String hash);
 
-    /**
-     * Stops the API server if started.
-     */
-    public void stop() {
-        if (isRunning() && channel.isOpen()) {
-            try {
-                channel.close().sync();
+    ApiHandlerResponse sendTransaction(String raw);
 
-                workerGroup.shutdownGracefully();
-                bossGroup.shutdownGracefully();
+    ApiHandlerResponse getAccount(String address);
 
-                // workerGroup.terminationFuture().sync();
-                // bossGroup.terminationFuture().sync();
+    ApiHandlerResponse getDelegate(String delegate);
 
-                channel = null;
-            } catch (Exception e) {
-                logger.error("Failed to close channel", e);
-            }
-            logger.info("API server shut down");
-        }
-    }
+    ApiHandlerResponse getDelegates();
 
-    /**
-     * Returns whether the API server is running or not.
-     * 
-     * @return
-     */
-    public boolean isRunning() {
-        return channel != null;
-    }
+    ApiHandlerResponse getValidators();
 
-    /**
-     * The default channel initializer using {@link ApiHandlerImpl}.
-     */
-    private class SemuxAPIHttpChannelInitializer extends HttpChannelInitializer {
+    ApiHandlerResponse getVotes(String delegate, String voterAddress);
 
-        @Override
-        public HttpHandler initHandler() {
-            return new HttpHandler(kernel.getConfig(), new ApiHandlerImpl(kernel));
-        }
-    }
+    ApiHandlerResponse getVotes(String delegate);
+
+    ApiHandlerResponse listAccounts();
+
+    ApiHandlerResponse createAccount();
+
+    ApiHandlerResponse transfer(String amountToSend, String from, String to, String fee, String data);
+
+    ApiHandlerResponse registerDelegate(String fromAddress, String fee, String delegateName);
+
+    ApiHandlerResponse vote(String from, String to, String value, String fee);
+
+    ApiHandlerResponse unvote(String from, String to, String value, String fee);
+
+    ApiHandlerResponse failure(String message);
+
+    ApiHandlerResponse getTransactionLimits(String type);
+
 }
