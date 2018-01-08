@@ -4,7 +4,7 @@ package org.semux.api;
 /**
  * Interface for calling from REST API or command terminal.
  */
-public interface SemuxApi {
+public interface SemuxAPI {
     ApiHandlerResponse getInfo();
 
     ApiHandlerResponse getPeers();

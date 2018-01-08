@@ -21,7 +21,7 @@ import org.semux.util.exception.UnreachableException;
 public class ApiHandlerImpl implements ApiHandler {
 
     private final Kernel kernel;
-    private final SemuxApi semuxApi;
+    private final SemuxAPI semuxApi;
 
     /**
      * Creates an API handler.
@@ -41,7 +41,7 @@ public class ApiHandlerImpl implements ApiHandler {
 
         Command cmd = Command.of(uri.substring(1));
         if (cmd == null) {
-            return failure("Invalid request: uri = " + uri);
+            return semuxApi.failure("Invalid request: uri = " + uri);
         }
 
         try {
@@ -119,7 +119,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 throw new UnreachableException();
             }
         } catch (Exception e) {
-            return failure("Failed to process your request: " + e.getMessage());
+            return semuxApi.failure("Failed to process your request: " + e.getMessage());
         }
     }
 
@@ -364,7 +364,7 @@ public class ApiHandlerImpl implements ApiHandler {
     private ApiHandlerResponse doTransaction(Command cmd, Map<String, String> params) {
         // [1] check if kernel.getWallet().is unlocked
         if (!kernel.getWallet().isUnlocked()) {
-            return failure("Wallet is locked");
+            return semuxApi.failure("Wallet is locked");
         }
 
         String from = params.get("from");
@@ -384,17 +384,7 @@ public class ApiHandlerImpl implements ApiHandler {
         case UNVOTE:
             return semuxApi.unvote(from,to,value,fee);
         default:
-            return failure("Unsupported transaction type: " + cmd.toString());
+            return semuxApi.failure("Unsupported transaction type: " + cmd.toString());
         }
-    }
-
-    /**
-     * Construct a failure response.
-     *
-     * @param message
-     * @return
-     */
-    private ApiHandlerResponse failure(String message) {
-        return new ApiHandlerResponse(false, message);
     }
 }

@@ -44,7 +44,7 @@ import org.semux.net.NodeManager;
 
 /**
  */
-public class SemuxApiImpl implements SemuxApi {
+public class SemuxApiImpl implements SemuxAPI {
     private Kernel kernel;
 
     public SemuxApiImpl(Kernel kernel) {
@@ -76,7 +76,7 @@ public class SemuxApiImpl implements SemuxApi {
     }
 
     public ApiHandlerResponse failure(String message) {
-        return null;
+        return new ApiHandlerResponse(false, message);
     }
 
     @Override
