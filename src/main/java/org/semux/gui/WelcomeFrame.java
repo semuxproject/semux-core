@@ -34,10 +34,14 @@ import org.semux.crypto.EdDSA;
 import org.semux.message.GUIMessages;
 import org.semux.util.SystemUtil;
 import org.semux.util.exception.UnreachableException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WelcomeFrame extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LoggerFactory.getLogger(WelcomeFrame.class);
 
     private JPasswordField txtPassword;
     private JPasswordField txtPasswordRepeat;
@@ -251,14 +255,19 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             JOptionPane.showMessageDialog(this, GUIMessages.get("RepeatPasswordError"));
             return;
         }
-        if (!wallet.unlock(password)) {
-            JOptionPane.showMessageDialog(this, GUIMessages.get("UnlockFailed"));
-            return;
+
+        // paranoid check
+        if (wallet.exists()) {
+            logger.error("Wallet already exists!");
+            SystemUtil.exitAsync(1);
+        } else if (wallet.isUnlocked()) {
+            logger.error("Wallet already unlocked!");
+            SystemUtil.exitAsync(1);
         }
 
         if (isCreate()) {
-            EdDSA key = new EdDSA();
-            wallet.addAccount(key);
+            wallet.unlock(password);
+            wallet.addAccount(new EdDSA());
             wallet.flush();
 
             done();
@@ -270,6 +279,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             } else if (w.size() == 0) {
                 JOptionPane.showMessageDialog(this, GUIMessages.get("NoAccountFound"));
             } else {
+                wallet.unlock(password);
                 wallet.addAccounts(w.getAccounts());
                 wallet.flush();
 
