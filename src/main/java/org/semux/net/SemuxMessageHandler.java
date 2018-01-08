@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
 import org.semux.net.msg.Message;
+import org.semux.net.msg.MessageException;
 import org.semux.net.msg.MessageFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,29 +92,16 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
                 pair.getLeft().add(frame);
                 int remaining = pair.getRight().addAndGet(-frame.getBodySize());
                 if (remaining == 0) {
-                    Message msg = decodeMessage(pair.getLeft());
-
-                    if (msg == null) {
-                        throw new IOException("Failed to decode packet: pid = " + frame.getPacketId());
-                    } else {
-                        out.add(msg);
-                    }
+                    out.add(decodeMessage(pair.getLeft()));
 
                     // remove complete packets from cache
                     incompletePackets.invalidate(packetId);
-
                 } else if (remaining < 0) {
                     throw new IOException("Packet remaining size went to negative");
                 }
             }
         } else {
-            Message msg = decodeMessage(Collections.singletonList(frame));
-
-            if (msg == null) {
-                throw new IOException("Failed to decode packet: pid = " + frame.getPacketId());
-            } else {
-                out.add(msg);
-            }
+            out.add(decodeMessage(Collections.singletonList(frame)));
         }
     }
 
@@ -122,8 +110,9 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
      * 
      * @param frames
      * @return
+     * @throws MessageException
      */
-    protected Message decodeMessage(List<Frame> frames) {
+    protected Message decodeMessage(List<Frame> frames) throws MessageException {
         if (frames == null || frames.isEmpty()) {
             return null;
         }

@@ -6,6 +6,7 @@
  */
 package org.semux.net.msg;
 
+import org.semux.crypto.Hex;
 import org.semux.net.msg.consensus.BFTNewHeightMessage;
 import org.semux.net.msg.consensus.BFTNewViewMessage;
 import org.semux.net.msg.consensus.BFTProposalMessage;
@@ -22,11 +23,10 @@ import org.semux.net.msg.p2p.PingMessage;
 import org.semux.net.msg.p2p.PongMessage;
 import org.semux.net.msg.p2p.TransactionMessage;
 import org.semux.net.msg.p2p.WorldMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.semux.util.Bytes;
+import org.semux.util.exception.UnreachableException;
 
 public class MessageFactory {
-    private static final Logger logger = LoggerFactory.getLogger(MessageFactory.class);
 
     /**
      * Decode a raw message.
@@ -34,15 +34,17 @@ public class MessageFactory {
      * @param code
      * @param encoded
      * @return
+     * @throws MessageException
+     *             if the message is undecodable
      */
-    public Message create(byte code, byte[] encoded) {
-        try {
-            MessageCode c = MessageCode.of(code);
-            if (c == null) {
-                logger.warn("Unknown message code: {}", code);
-                return null;
-            }
+    public Message create(byte code, byte[] encoded) throws MessageException {
 
+        MessageCode c = MessageCode.of(code);
+        if (c == null) {
+            throw new MessageException("Invalid message code: " + Hex.encode0x(Bytes.of(code)));
+        }
+
+        try {
             switch (c) {
             case DISCONNECT:
                 return new DisconnectMessage(encoded);
@@ -78,11 +80,12 @@ public class MessageFactory {
                 return new BFTProposalMessage(encoded);
             case BFT_VOTE:
                 return new BFTVoteMessage(encoded);
+
+            default:
+                throw new UnreachableException();
             }
         } catch (Exception e) {
-            logger.warn("Failed to parse encoded message data", e);
+            throw new MessageException("Failed to decode message", e);
         }
-
-        return null;
     }
 }
