@@ -5,7 +5,7 @@
     "timestamp": 1504742400000,
     "data": "semux",
     "premine": [
-        { 
+        {
             "address": "0xd00e49d3c1624aa90d7c6587688a53818aeae649",
             "amount": 5000000,
             "note": "founder"

@@ -6,15 +6,13 @@
  */
 package org.semux.core;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.semux.config.Constants;
 import org.semux.crypto.Hex;
 import org.semux.util.ByteArray;
 import org.semux.util.ByteArray.ByteArrayKeyDeserializer;
@@ -31,8 +29,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 public class Genesis extends Block {
 
     private static final Logger logger = LoggerFactory.getLogger(Genesis.class);
-
-    private static final String GENESIS_FILE = "genesis.json";
 
     @JsonDeserialize(keyUsing = ByteArrayKeyDeserializer.class)
     private Map<ByteArray, Premine> premines;
@@ -93,21 +89,19 @@ public class Genesis extends Block {
      * 
      * @return
      */
-    public static Genesis load(File dataDir) {
+    public static Genesis load(String name) {
         try {
-            File file = Paths.get(dataDir.getAbsolutePath(), Constants.CONFIG_DIR, GENESIS_FILE).toFile();
+            InputStream in = Genesis.class.getResourceAsStream("/genesis/" + name + ".json");
 
-            ObjectMapper mapper = new ObjectMapper();
-            if (file.exists()) {
-                return mapper.readValue(file, Genesis.class);
-            } else {
-                return mapper.readValue(Genesis.class.getResourceAsStream("/genesis.json"), Genesis.class);
+            if (in != null) {
+                return new ObjectMapper().readValue(in, Genesis.class);
             }
         } catch (IOException e) {
             logger.error("Failed to load genesis file", e);
-            SystemUtil.exitAsync(-1);
-            return null;
         }
+
+        SystemUtil.exitAsync(-1);
+        return null;
     }
 
     /**

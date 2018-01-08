@@ -114,12 +114,12 @@ public class BlockchainImplTest {
 
     @Test
     public void testGetGenesis() {
-        assertArrayEquals(Genesis.load(config.dataDir()).getHash(), chain.getGenesis().getHash());
+        assertArrayEquals(Genesis.load(Constants.NETWORKS[networkId]).getHash(), chain.getGenesis().getHash());
     }
 
     @Test
     public void testGetBlockHeader() {
-        assertArrayEquals(Genesis.load(config.dataDir()).getHash(), chain.getBlockHeader(0).getHash());
+        assertArrayEquals(Genesis.load(Constants.NETWORKS[networkId]).getHash(), chain.getBlockHeader(0).getHash());
 
         long number = 1;
         Block newBlock = createBlock(number);

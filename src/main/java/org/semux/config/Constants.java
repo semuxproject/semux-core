@@ -31,6 +31,8 @@ public class Constants {
     public static final byte DEV_NET_ID = 2;
     public static final short DEV_NET_VERSION = 0;
 
+    public static final String[] NETWORKS = { "mainnet", "testnet", "devnet" };
+
     /**
      * Name of this client.
      */

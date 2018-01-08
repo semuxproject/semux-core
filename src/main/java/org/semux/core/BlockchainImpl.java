@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
+import org.semux.config.Constants;
 import org.semux.core.Genesis.Premine;
 import org.semux.core.exception.BlockchainException;
 import org.semux.core.state.AccountState;
@@ -103,7 +104,7 @@ public class BlockchainImpl implements Blockchain {
         this.accountState = new AccountStateImpl(factory.getDB(DBName.ACCOUNT));
         this.delegateState = new DelegateStateImpl(this, factory.getDB(DBName.DELEGATE), factory.getDB(DBName.VOTE));
 
-        this.genesis = Genesis.load(config.dataDir());
+        this.genesis = Genesis.load(Constants.NETWORKS[config.networkId()]);
 
         byte[] number = indexDB.get(Bytes.of(TYPE_LATEST_BLOCK_NUMBER));
         if (number == null) {

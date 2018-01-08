@@ -52,7 +52,7 @@ public class BlockTest {
 
     @Test
     public void testGenesis() {
-        Block block = Genesis.load(config.dataDir());
+        Block block = Genesis.load(Constants.NETWORKS[config.networkId()]);
         assertTrue(block.getHeader().validate());
     }
 
