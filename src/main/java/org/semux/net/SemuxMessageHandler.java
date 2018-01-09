@@ -53,11 +53,11 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
     @Override
     protected void encode(ChannelHandlerContext ctx, Message msg, List<Object> out) throws Exception {
         byte[] data = msg.getEncoded();
-        byte[] dataEncoded = data;
+        byte[] dataCompressed = data;
 
         switch (COMPRESS_TYPE) {
         case Frame.COMPRESS_SNAPPY:
-            dataEncoded = Snappy.compress(data);
+            dataCompressed = Snappy.compress(data);
             break;
         case Frame.COMPRESS_NONE:
             break;
@@ -68,18 +68,18 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
 
         byte packetType = msg.getCode().toByte();
         int packetId = count.incrementAndGet();
-        int packetSize = dataEncoded.length;
+        int packetSize = dataCompressed.length;
 
-        if (data.length > config.netMaxPacketSize() || dataEncoded.length > config.netMaxPacketSize()) {
+        if (data.length > config.netMaxPacketSize() || dataCompressed.length > config.netMaxPacketSize()) {
             logger.error("Invalid packet size, max = {}, actual = {}", config.netMaxPacketSize(), packetSize);
             return;
         }
 
         int limit = config.netMaxFrameBodySize();
-        int total = (dataEncoded.length - 1) / limit + 1;
+        int total = (dataCompressed.length - 1) / limit + 1;
         for (int i = 0; i < total; i++) {
-            byte[] body = new byte[(i < total - 1) ? limit : dataEncoded.length % limit];
-            System.arraycopy(dataEncoded, i * limit, body, 0, body.length);
+            byte[] body = new byte[(i < total - 1) ? limit : dataCompressed.length % limit];
+            System.arraycopy(dataCompressed, i * limit, body, 0, body.length);
 
             out.add(new Frame(Frame.VERSION, COMPRESS_TYPE, packetType, packetId, packetSize, body.length, body));
         }
