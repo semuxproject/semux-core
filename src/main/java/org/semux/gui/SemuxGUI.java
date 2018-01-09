@@ -268,7 +268,7 @@ public class SemuxGUI extends Launcher {
         versionThread.start();
 
         // register shutdown hook
-        kernel.reigsterShutdownHook("GUI", this::stop);
+        kernel.registerShutdownHook("GUI", this::stop);
 
         isRunning = true;
     }

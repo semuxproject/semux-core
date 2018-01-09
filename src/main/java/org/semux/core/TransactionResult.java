@@ -21,7 +21,7 @@ public class TransactionResult {
      */
     public enum Error {
         /**
-         * The transaction format is invalid. See {@link Transaction#validate()}
+         * The transaction format is invalid. See {@link Transaction#validate(byte)}
          */
         INVALID_FORMAT,
 
