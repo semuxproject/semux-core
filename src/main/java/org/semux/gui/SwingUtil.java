@@ -24,6 +24,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
@@ -239,7 +240,7 @@ public class SwingUtil {
         c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         c.setEditable(false);
 
-        addTextContextMenu(c, Arrays.asList(COPY));
+        addTextContextMenu(c, Collections.singletonList(COPY));
         return c;
     }
 

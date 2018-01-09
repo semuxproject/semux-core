@@ -148,7 +148,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * Shows the change password dialog.
      */
     protected void changePassword() {
-        if (showErroIfLocked()) {
+        if (showErrorIfLocked()) {
             return;
         }
 
@@ -160,7 +160,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * Recovers accounts from backup file.
      */
     protected void recoverAccounts() {
-        if (showErroIfLocked()) {
+        if (showErrorIfLocked()) {
             return;
         }
 
@@ -193,7 +193,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * Backup the wallet.
      */
     protected void backupWallet() {
-        if (showErroIfLocked()) {
+        if (showErrorIfLocked()) {
             return;
         }
 
@@ -226,7 +226,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * Imports private key into this wallet.
      */
     protected void importPrivateKey() {
-        if (showErroIfLocked()) {
+        if (showErrorIfLocked()) {
             return;
         }
 
@@ -252,7 +252,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * Shows the export private key dialog.
      */
     protected void exportPrivateKey() {
-        if (showErroIfLocked()) {
+        if (showErrorIfLocked()) {
             return;
         }
 
@@ -282,7 +282,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * 
      * @return whether the wallet is locked
      */
-    protected boolean showErroIfLocked() {
+    protected boolean showErrorIfLocked() {
         Wallet wallet = gui.getKernel().getWallet();
 
         if (wallet.isLocked()) {

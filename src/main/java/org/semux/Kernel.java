@@ -305,7 +305,7 @@ public class Kernel {
      * @param name
      * @param runnable
      */
-    public void reigsterShutdownHook(String name, Runnable runnable) {
+    public void registerShutdownHook(String name, Runnable runnable) {
         shutdownHooks.add(Pair.of(name, runnable));
     }
 
