@@ -62,7 +62,7 @@ public class NodeManager {
 
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> connectFuture;
-    private ScheduledFuture<?> seedingFuture;
+    private ScheduledFuture<?> fetchFuture;
 
     private volatile boolean isRunning;
 
@@ -91,7 +91,7 @@ public class NodeManager {
             // every 0.5 seconds
             connectFuture = exec.scheduleAtFixedRate(this::doConnect, 100, 500, TimeUnit.MILLISECONDS);
             // every 120 seconds, delayed by 10 seconds (public IP lookup)
-            seedingFuture = exec.scheduleAtFixedRate(this::doFetch, 10, 120, TimeUnit.SECONDS);
+            fetchFuture = exec.scheduleAtFixedRate(this::doFetch, 5, 100, TimeUnit.SECONDS);
 
             isRunning = true;
             logger.info("Node manager started");
@@ -104,7 +104,7 @@ public class NodeManager {
     public synchronized void stop() {
         if (isRunning) {
             connectFuture.cancel(true);
-            seedingFuture.cancel(false);
+            fetchFuture.cancel(false);
 
             isRunning = false;
             logger.info("Node manager stopped");
