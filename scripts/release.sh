@@ -19,24 +19,24 @@ WINDIST=${name}-windows-${version}
 WINBALL=${WINDIST}.zip
 mv windows ${WINDIST}
 zip -r ${WINBALL} ${WINDIST} || exit
-sha1sum ${WINBALL} > ${WINDIST}.sha1
-sha1sum --check ${WINDIST}.sha1
+sha256sum ${WINBALL} > ${WINDIST}.sha256
+sha256sum --check ${WINDIST}.sha256
 
 # Linux
 LINUXDIST=${name}-linux-${version}
 LINUXBALL=${name}-linux-${version}.tar.gz
 mv linux ${LINUXDIST}
 tar -czvf ${LINUXBALL} ${LINUXDIST} || exit
-sha1sum ${LINUXBALL} > ${LINUXDIST}.sha1
-sha1sum --check ${LINUXDIST}.sha1
+sha256sum ${LINUXBALL} > ${LINUXDIST}.sha256
+sha256sum --check ${LINUXDIST}.sha256
 
 # macOS
 MACDIST=${name}-macos-${version}
 MACBALL=${name}-macos-${version}.tar.gz
 mv macos ${MACDIST}
 tar -czvf ${MACBALL} ${MACDIST} || exit
-sha1sum ${MACBALL} > ${MACDIST}.sha1
-sha1sum --check ${MACDIST}.sha1
+sha256sum ${MACBALL} > ${MACDIST}.sha256
+sha256sum --check ${MACDIST}.sha256
 
 # clean
 rm -r ${name}-windows-${version}
