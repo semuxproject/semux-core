@@ -486,10 +486,18 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                         return;
                     }
                 }
-            } else if (fee > a.getAvailable()) {
-                JOptionPane
-                        .showMessageDialog(this, GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(fee)));
-                return;
+            } else {
+                if (fee > a.getAvailable()) {
+                    JOptionPane.showMessageDialog(this,
+                            GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(fee)));
+                    return;
+                }
+
+                if (value > a.getLocked()) {
+                    JOptionPane.showMessageDialog(this,
+                            GUIMessages.get("InsufficientLockedFunds", SwingUtil.formatValue(value)));
+                    return;
+                }
             }
 
             PendingManager pendingMgr = kernel.getPendingManager();
