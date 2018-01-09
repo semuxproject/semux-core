@@ -19,6 +19,7 @@ import org.semux.net.msg.MessageException;
 import org.semux.net.msg.MessageFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xerial.snappy.Snappy;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -31,6 +32,8 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
     private static final Logger logger = LoggerFactory.getLogger(SemuxMessageHandler.class);
 
     private static final int MAX_PACKETS = 16;
+
+    private static final byte COMPRESS_TYPE = Frame.COMPRESS_SNAPPY;
 
     private final Cache<Integer, Pair<List<Frame>, AtomicInteger>> incompletePackets = Caffeine.newBuilder()
             .maximumSize(MAX_PACKETS).build();
@@ -50,25 +53,35 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
     @Override
     protected void encode(ChannelHandlerContext ctx, Message msg, List<Object> out) throws Exception {
         byte[] data = msg.getEncoded();
+        byte[] dataEncoded = data;
 
-        // TODO: compress data
+        switch (COMPRESS_TYPE) {
+        case Frame.COMPRESS_SNAPPY:
+            dataEncoded = Snappy.compress(data);
+            break;
+        case Frame.COMPRESS_NONE:
+            break;
+        default:
+            logger.error("Unsupported compress type: " + COMPRESS_TYPE);
+            return;
+        }
 
         byte packetType = msg.getCode().toByte();
         int packetId = count.incrementAndGet();
-        int packetSize = data.length;
+        int packetSize = dataEncoded.length;
 
-        if (packetSize > config.netMaxPacketSize()) {
+        if (data.length > config.netMaxPacketSize() || dataEncoded.length > config.netMaxPacketSize()) {
             logger.error("Invalid packet size, max = {}, actual = {}", config.netMaxPacketSize(), packetSize);
             return;
         }
 
         int limit = config.netMaxFrameBodySize();
-        int total = (data.length - 1) / limit + 1;
+        int total = (dataEncoded.length - 1) / limit + 1;
         for (int i = 0; i < total; i++) {
-            byte[] body = new byte[(i < total - 1) ? limit : data.length % limit];
-            System.arraycopy(data, i * limit, body, 0, body.length);
+            byte[] body = new byte[(i < total - 1) ? limit : dataEncoded.length % limit];
+            System.arraycopy(dataEncoded, i * limit, body, 0, body.length);
 
-            out.add(new Frame(Frame.VERSION, Frame.COMPRESS_NONE, packetType, packetId, packetSize, body.length, body));
+            out.add(new Frame(Frame.VERSION, COMPRESS_TYPE, packetType, packetId, packetSize, body.length, body));
         }
     }
 
@@ -114,7 +127,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
      */
     protected Message decodeMessage(List<Frame> frames) throws MessageException {
         if (frames == null || frames.isEmpty()) {
-            return null;
+            throw new MessageException("Frames can't be null or empty");
         }
         Frame head = frames.get(0);
 
@@ -128,7 +141,24 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
             pos += frame.getBodySize();
         }
 
-        // TODO: uncompress data
+        switch (head.getCompressType()) {
+        case Frame.COMPRESS_SNAPPY:
+            try {
+                // check uncompressed length to avoid OOM vulnerability
+                int length = Snappy.uncompressedLength(data);
+                if (length > config.netMaxPacketSize()) {
+                    throw new MessageException("Uncompressed data length is too big: " + length);
+                }
+                data = Snappy.uncompress(data);
+            } catch (IOException e) {
+                throw new MessageException(e);
+            }
+            break;
+        case Frame.COMPRESS_NONE:
+            break;
+        default:
+            throw new MessageException("Unsupported compress type: " + head.getCompressType());
+        }
 
         return messageFactory.create(packetType, data);
     }
