@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
 import org.semux.util.BasicAuth;
@@ -53,6 +55,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
     private static final int MAX_BODY_SIZE = 512 * 1024; // 512KB
     private static final Charset CHARSET = CharsetUtil.UTF_8;
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     private Config config;
     private ApiHandler apiHandler;
@@ -164,7 +167,14 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 }
 
                 // write response
-                if (!writeResponse(ctx, status, response.serialize())) {
+                String responseString;
+                try {
+                    responseString = objectMapper.writeValueAsString(response);
+                } catch (JsonProcessingException e) {
+                    responseString = "{\"success\":false,\"message\":\"Internal server error\"}";
+                }
+
+                if (!writeResponse(ctx, status, responseString)) {
                     // if keep-alive is off, close the connection after flushing
                     ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
                 }

@@ -33,12 +33,4 @@ public class ApiHandlerResponse {
         this.success = success;
         this.message = message;
     }
-
-    public String serialize() {
-        try {
-            return new ObjectMapper().writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            return "{\"success\":false,\"message\":\"Internal server error\"}";
-        }
-    }
 }
