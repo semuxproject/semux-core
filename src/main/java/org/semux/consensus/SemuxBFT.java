@@ -55,6 +55,33 @@ import org.slf4j.LoggerFactory;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
+/**
+ * Implements Semux BFT engine based on single-thread event model. States are
+ * maintained in the engine and are updated only by the event loop.
+ * <p>
+ * Asides the main event hub, there are complementary threads:
+ * <code>timer</code> and <code>broadcaster</code>. The <code>timer</code>
+ * thread emits a TIMEOUT event when the internal timer times out. The
+ * <code>broadcaster</code> thread is responsible for relaying BFT messages to
+ * peers.
+ * <p>
+ * The BFT engine may be one of the following status:
+ * <ul>
+ * <li><code>STOPPED</code>: not started</li>
+ * <li><code>SYNCING</code>: waiting for syncing</li>
+ * <li><code>RUNNING</code>: working</li>
+ * </ul>
+ * <p>
+ * It is also a state machine; the possible states include:
+ * <ul>
+ * <li><code>NEW_HEIGHT</code>: the initial state when started</li>
+ * <li><code>PROPOSE</code>: gossip block proposal</li>
+ * <li><code>VALIDATE</code>: gossip VALIDATE votes between validators</li>
+ * <li><code>PRE_COMMIT</code>: gossip PRE_COMMIT votes between validators</li>
+ * <li><code>COMMIT</code>: after receiving 2/3+ PRE_COMMIT votes</li>
+ * <li><code>FINALIZE</code>: fianlize a block</li>
+ * </ul>
+ */
 public class SemuxBFT implements Consensus {
     static final Logger logger = LoggerFactory.getLogger(SemuxBFT.class);
 
@@ -75,8 +102,8 @@ public class SemuxBFT implements Consensus {
     protected Broadcaster broadcaster;
     protected BlockingQueue<Event> events = new LinkedBlockingQueue<>();
 
-    protected volatile Status status;
-    protected volatile State state;
+    protected Status status;
+    protected State state;
 
     protected long height;
     protected int view;
@@ -85,9 +112,9 @@ public class SemuxBFT implements Consensus {
 
     protected Cache<ByteArray, Block> validBlocks = Caffeine.newBuilder().maximumSize(8).build();
 
-    protected volatile List<String> validators;
-    protected volatile List<Channel> activeValidators;
-    protected volatile long lastUpdate;
+    protected List<String> validators;
+    protected List<Channel> activeValidators;
+    protected long lastUpdate;
 
     protected VoteSet validateVotes;
     protected VoteSet precommitVotes;
