@@ -10,10 +10,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashSet;
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -56,7 +56,7 @@ public class NodeManager {
     private ChannelManager channelMgr;
     private PeerClient client;
 
-    private Queue<Node> queue = new ConcurrentLinkedQueue<>();
+    private Deque<Node> deque = new ConcurrentLinkedDeque<>();
 
     private Cache<Node, Long> lastConnect = Caffeine.newBuilder().maximumSize(LRU_CACHE_SIZE).build();
 
@@ -126,8 +126,9 @@ public class NodeManager {
      * @param node
      */
     public void addNode(Node node) {
-        if (queueSize() < MAX_QUEUE_SIZE) {
-            queue.add(node);
+        deque.addFirst(node);
+        while (queueSize() > MAX_QUEUE_SIZE) {
+            deque.removeLast();
         }
     }
 
@@ -137,8 +138,8 @@ public class NodeManager {
      * @param nodes
      */
     public void addNodes(Collection<Node> nodes) {
-        if (queueSize() < MAX_QUEUE_SIZE) {
-            queue.addAll(nodes);
+        for (Node node : nodes) {
+            addNode(node);
         }
     }
 
@@ -148,7 +149,7 @@ public class NodeManager {
      * @return
      */
     public int queueSize() {
-        return queue.size();
+        return deque.size();
     }
 
     /**
@@ -190,7 +191,7 @@ public class NodeManager {
         Set<InetSocketAddress> activeAddresses = channelMgr.getActiveAddresses();
         Node node;
 
-        while ((node = queue.poll()) != null && channelMgr.size() < config.netMaxOutboundConnections()) {
+        while ((node = deque.pollFirst()) != null && channelMgr.size() < config.netMaxOutboundConnections()) {
             Long lastTouch = lastConnect.getIfPresent(node);
             long now = System.currentTimeMillis();
 
