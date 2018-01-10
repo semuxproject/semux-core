@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.KernelMock;
 import org.semux.core.Blockchain;
+import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
@@ -77,9 +78,11 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
         KernelMock kernelMock = spy(kernelRule.getKernel());
         Blockchain chain = mock(Blockchain.class);
         DelegateState ds = mock(DelegateState.class);
+        PendingManager pendingManager = mock(PendingManager.class);
         when(ds.getDelegateByAddress(any())).thenReturn(null);
         when(chain.getDelegateState()).thenReturn(ds);
         when(kernelMock.getBlockchain()).thenReturn(chain);
+        when(kernelMock.getPendingManager()).thenReturn(pendingManager);
         application = GuiActionRunner.execute(() -> new TransactionsPanelTestApplication(walletModel, kernelMock));
 
         window = new FrameFixture(robot(), application);
