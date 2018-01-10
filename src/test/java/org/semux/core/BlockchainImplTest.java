@@ -41,7 +41,7 @@ public class BlockchainImplTest {
     private byte[] coinbase = Bytes.random(30);
     private byte[] prevHash = Bytes.random(32);
 
-    private byte networkId = Constants.DEV_NET_ID;
+    private byte networkId = Constants.DEVNET_ID;
     private EdDSA key = new EdDSA();
     private byte[] from = key.toAddress();
     private byte[] to = Bytes.random(20);

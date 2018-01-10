@@ -35,7 +35,7 @@ public class BlockTest {
     private long timestamp = System.currentTimeMillis();
     private byte[] data = Bytes.of("data");
 
-    private Transaction tx = new Transaction(Constants.DEV_NET_ID, TransactionType.TRANSFER, Bytes.random(20), 0,
+    private Transaction tx = new Transaction(Constants.DEVNET_ID, TransactionType.TRANSFER, Bytes.random(20), 0,
             config.minTransactionFee(),
             1, System.currentTimeMillis(), Bytes.EMPTY_BYTES).sign(new EdDSA());
     private TransactionResult res = new TransactionResult(true);
@@ -114,7 +114,7 @@ public class BlockTest {
                 resultsRoot, stateRoot, data);
 
         assertTrue(Block.validateHeader(previousHeader, header));
-        assertTrue(Block.validateTransactions(previousHeader, transactions, Constants.DEV_NET_ID));
+        assertTrue(Block.validateTransactions(previousHeader, transactions, Constants.DEVNET_ID));
         assertTrue(Block.validateResults(previousHeader, results));
     }
 }

@@ -32,7 +32,7 @@ public class ProposalTest {
 
     @Test
     public void testBasics() {
-        byte networkId = Constants.DEV_NET_ID;
+        byte networkId = Constants.DEVNET_ID;
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
         long value = 2;

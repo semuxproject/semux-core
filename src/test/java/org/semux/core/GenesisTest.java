@@ -30,7 +30,7 @@ public class GenesisTest {
 
     @Before
     public void setUp() {
-        genesis = Genesis.load(Constants.NETWORKS[Constants.MAIN_NET_ID]);
+        genesis = Genesis.load(Constants.NETWORKS[Constants.MAINNET_ID]);
     }
 
     @Test

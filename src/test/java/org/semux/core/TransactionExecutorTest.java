@@ -56,7 +56,7 @@ public class TransactionExecutorTest {
     public void testTransfer() {
         EdDSA key = new EdDSA();
 
-        byte networkId = Constants.DEV_NET_ID;
+        byte networkId = Constants.DEVNET_ID;
         TransactionType type = TransactionType.TRANSFER;
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
@@ -97,7 +97,7 @@ public class TransactionExecutorTest {
         long available = 2000 * Unit.SEM;
         as.adjustAvailable(delegate.toAddress(), available);
 
-        byte networkId = Constants.DEV_NET_ID;
+        byte networkId = Constants.DEVNET_ID;
         TransactionType type = TransactionType.DELEGATE;
         byte[] from = delegate.toAddress();
         byte[] to = Bytes.random(20);
@@ -136,7 +136,7 @@ public class TransactionExecutorTest {
         long available = 100 * Unit.SEM;
         as.adjustAvailable(voter.toAddress(), available);
 
-        byte networkId = Constants.DEV_NET_ID;
+        byte networkId = Constants.DEVNET_ID;
         TransactionType type = TransactionType.VOTE;
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
@@ -171,7 +171,7 @@ public class TransactionExecutorTest {
 
         ds.register(delegate.toAddress(), Bytes.of("delegate"));
 
-        byte networkId = Constants.DEV_NET_ID;
+        byte networkId = Constants.DEVNET_ID;
         TransactionType type = TransactionType.UNVOTE;
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();

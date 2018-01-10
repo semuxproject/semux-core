@@ -104,7 +104,7 @@ public class TransactTest {
         nodes.add(new Node(kernelValidator1.getConfig().p2pListenIp(), kernelValidator1.getConfig().p2pListenPort()));
         nodes.add(new Node(kernelValidator2.getConfig().p2pListenIp(), kernelValidator2.getConfig().p2pListenPort()));
         mockStatic(NodeManager.class);
-        when(NodeManager.getSeedNodes(Constants.DEV_NET_ID)).thenReturn(nodes);
+        when(NodeManager.getSeedNodes(Constants.DEVNET_ID)).thenReturn(nodes);
 
         // start kernels
         kernelValidator1.start();

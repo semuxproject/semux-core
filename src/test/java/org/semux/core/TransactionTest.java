@@ -28,7 +28,7 @@ public class TransactionTest {
     private Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
     private EdDSA key = new EdDSA();
 
-    private byte networkId = Constants.DEV_NET_ID;
+    private byte networkId = Constants.DEVNET_ID;
     private TransactionType type = TransactionType.TRANSFER;
     private byte[] to = Bytes.random(20);
     private long value = 2;

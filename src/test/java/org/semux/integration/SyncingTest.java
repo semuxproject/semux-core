@@ -86,7 +86,7 @@ public class SyncingTest {
         nodes.add(new Node(kernel2.getConfig().p2pListenIp(), kernel2.getConfig().p2pListenPort()));
         nodes.add(new Node(kernel3.getConfig().p2pListenIp(), kernel3.getConfig().p2pListenPort()));
         mockStatic(NodeManager.class);
-        when(NodeManager.getSeedNodes(Constants.DEV_NET_ID)).thenReturn(nodes);
+        when(NodeManager.getSeedNodes(Constants.DEVNET_ID)).thenReturn(nodes);
 
         // start kernels
         kernel1.start();

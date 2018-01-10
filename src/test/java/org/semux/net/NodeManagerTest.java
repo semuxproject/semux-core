@@ -50,15 +50,15 @@ public class NodeManagerTest {
     @Test
     public void testGetSeedNodes() {
         // Seed nodes for main net
-        Set<Node> peers = NodeManager.getSeedNodes(Constants.MAIN_NET_ID);
+        Set<Node> peers = NodeManager.getSeedNodes(Constants.MAINNET_ID);
         assertFalse(peers.isEmpty());
 
         // Seed nodes for test net
-        peers = NodeManager.getSeedNodes(Constants.TEST_NET_ID);
+        peers = NodeManager.getSeedNodes(Constants.TESTNET_ID);
         assertFalse(peers.isEmpty());
 
         // Seed nodes for dev net
-        peers = NodeManager.getSeedNodes(Constants.DEV_NET_ID);
+        peers = NodeManager.getSeedNodes(Constants.DEVNET_ID);
         assertTrue(peers.isEmpty());
     }
 

@@ -276,7 +276,7 @@ public class SemuxBFT implements Consensus {
 
         logger.info("Entered new_height: height = {}, # validators = {}", height, validators.size());
         if (isValidator()) {
-            if (this.config.networkId() == Constants.MAIN_NET_ID && !SystemUtil.bench()) {
+            if (this.config.networkId() == Constants.MAINNET_ID && !SystemUtil.bench()) {
                 logger.error("You need to upgrade your computer to join the BFT consensus!");
                 SystemUtil.exitAsync(-1);
             }

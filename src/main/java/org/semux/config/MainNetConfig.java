@@ -9,6 +9,6 @@ package org.semux.config;
 public class MainNetConfig extends AbstractConfig {
 
     public MainNetConfig(String dataDir) {
-        super(dataDir, Constants.MAIN_NET_ID, Constants.MAIN_NET_VERSION);
+        super(dataDir, Constants.MAINNET_ID, Constants.MAINNET_VERSION);
     }
 }

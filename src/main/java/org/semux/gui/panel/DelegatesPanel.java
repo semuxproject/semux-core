@@ -531,7 +531,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     SwingUtil.formatValue(config.minDelegateBurnAmount() + config.minTransactionFee())));
         } else {
             // confirm system requirements
-            if ((config.networkId() == Constants.MAIN_NET_ID && !SystemUtil.bench()) && JOptionPane
+            if ((config.networkId() == Constants.MAINNET_ID && !SystemUtil.bench()) && JOptionPane
                     .showConfirmDialog(this, GUIMessages.get("ComputerNotQualified"),
                             GUIMessages.get("ConfirmDelegateRegistration"),
                             JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {

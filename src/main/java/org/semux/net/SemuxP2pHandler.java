@@ -171,7 +171,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
             } else if (chain.getValidators().contains(peer.getPeerId()) // validator
                     && channelMgr.isActiveIP(channel.getRemoteIp()) // connected
-                    && config.networkId() == Constants.MAIN_NET_ID) { // main net
+                    && config.networkId() == Constants.MAINNET_ID) { // main net
                 error = ReasonCode.VALIDATOR_IP_LIMITED;
 
             } else if (!isValid(helloMsg)) {
@@ -298,7 +298,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      */
     private boolean isValid(HelloMessage msg) {
         return msg.validate(config)
-                && (config.networkId() == Constants.DEV_NET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
+                && (config.networkId() == Constants.DEVNET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
     }
 
     /**
@@ -308,7 +308,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      */
     private boolean isValid(WorldMessage msg) {
         return msg.validate(config)
-                && (config.networkId() == Constants.DEV_NET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
+                && (config.networkId() == Constants.DEVNET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
     }
 
     /**

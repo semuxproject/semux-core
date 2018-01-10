@@ -21,7 +21,6 @@ import org.semux.core.state.AccountStateImpl;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.core.state.DelegateStateImpl;
-import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.db.DBFactory;
 import org.semux.db.DBName;
@@ -302,7 +301,7 @@ public class BlockchainImpl implements Blockchain {
                     block.getNumber(),
                     block.getTimestamp(),
                     Bytes.EMPTY_BYTES);
-            tx.sign(new EdDSA());
+            tx.sign(Constants.COINBASE_KEY);
             indexDB.put(Bytes.merge(TYPE_TRANSACTION_HASH, tx.getHash()), tx.toBytes());
             addTransactionToAccount(tx, block.getCoinbase());
 

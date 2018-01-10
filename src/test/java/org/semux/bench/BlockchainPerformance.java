@@ -90,7 +90,7 @@ public class BlockchainPerformance {
     }
 
     public static void testBlockValidation(Block block) {
-        Genesis gen = Genesis.load(Constants.NETWORKS[Constants.DEV_NET_ID]);
+        Genesis gen = Genesis.load(Constants.NETWORKS[Constants.DEVNET_ID]);
 
         long t1 = System.nanoTime();
         Block.validateHeader(gen.getHeader(), block.getHeader());

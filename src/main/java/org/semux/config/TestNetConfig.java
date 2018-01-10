@@ -9,6 +9,6 @@ package org.semux.config;
 public class TestNetConfig extends AbstractConfig {
 
     public TestNetConfig(String dataDir) {
-        super(dataDir, Constants.TEST_NET_ID, Constants.TEST_NET_VERSION);
+        super(dataDir, Constants.TESTNET_ID, Constants.TESTNET_VERSION);
     }
 }

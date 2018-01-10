@@ -164,10 +164,10 @@ public class NodeManager {
         String name = null;
         try {
             switch (networkId) {
-            case Constants.MAIN_NET_ID:
+            case Constants.MAINNET_ID:
                 name = DNS_SEED_MAINNET;
                 break;
-            case Constants.TEST_NET_ID:
+            case Constants.TESTNET_ID:
                 name = DNS_SEED_TESTNET;
                 break;
             default:

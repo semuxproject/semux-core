@@ -80,10 +80,24 @@ public class EdDSA {
     }
 
     /**
+     * Creates an ED25519 key pair with a specified private key
+     *
+     * @param privateKey
+     *            the private key in "PKCS#8" format
+     * @throws InvalidKeySpecException
+     */
+    public EdDSA(byte[] privateKey) throws InvalidKeySpecException {
+        this.sk = new EdDSAPrivateKey(new PKCS8EncodedKeySpec(privateKey));
+        this.pk = new EdDSAPublicKey(new EdDSAPublicKeySpec(sk.getA(), sk.getParams()));
+    }
+
+    /**
      * Creates an ED25519 key pair with the specified public and private keys.
      * 
      * @param privateKey
+     *            the private key in "PKCS#8" format
      * @param publicKey
+     *            the public key in "X.509" format, for verification purpose only
      * 
      * @throws InvalidKeySpecException
      */
@@ -91,19 +105,8 @@ public class EdDSA {
         this(privateKey);
 
         if (!Arrays.equals(getPublicKey(), publicKey)) {
-            throw new InvalidKeySpecException("Public key private does not match!");
+            throw new InvalidKeySpecException("Public key and private key do not match!");
         }
-    }
-
-    /**
-     * Creates an ED25519 key pair with a specified private key
-     *
-     * @param privateKey
-     * @throws InvalidKeySpecException
-     */
-    public EdDSA(byte[] privateKey) throws InvalidKeySpecException {
-        this.sk = new EdDSAPrivateKey(new PKCS8EncodedKeySpec(privateKey));
-        this.pk = new EdDSAPublicKey(new EdDSAPublicKeySpec(sk.getA(), sk.getParams()));
     }
 
     /**

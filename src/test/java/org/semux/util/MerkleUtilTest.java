@@ -24,7 +24,7 @@ import org.semux.crypto.Hash;
 public class MerkleUtilTest {
     @Test
     public void testComputeTransactionsRoot() {
-        byte networkId = Constants.DEV_NET_ID;
+        byte networkId = Constants.DEVNET_ID;
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
         long value = 1 * Unit.SEM;

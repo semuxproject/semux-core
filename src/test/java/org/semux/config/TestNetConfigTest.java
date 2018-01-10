@@ -15,7 +15,7 @@ public class TestNetConfigTest {
     @Test
     public void testNetworkId() {
         Config config = new TestNetConfig(Constants.DEFAULT_DATA_DIR);
-        assertEquals(Constants.TEST_NET_ID, config.networkId());
+        assertEquals(Constants.TESTNET_ID, config.networkId());
     }
 
 }
