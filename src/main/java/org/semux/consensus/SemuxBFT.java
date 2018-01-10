@@ -79,7 +79,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  * <li><code>VALIDATE</code>: gossip VALIDATE votes between validators</li>
  * <li><code>PRE_COMMIT</code>: gossip PRE_COMMIT votes between validators</li>
  * <li><code>COMMIT</code>: after receiving 2/3+ PRE_COMMIT votes</li>
- * <li><code>FINALIZE</code>: fianlize a block</li>
+ * <li><code>FINALIZE</code>: finalize a block</li>
  * </ul>
  */
 public class SemuxBFT implements Consensus {

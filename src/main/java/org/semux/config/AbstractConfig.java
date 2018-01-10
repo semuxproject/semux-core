@@ -43,7 +43,7 @@ public abstract class AbstractConfig implements Config {
     protected byte networkId;
     protected short networkVersion;
 
-    protected int maxBlockTransactionsSize = 1 * 1024 * 1024;
+    protected int maxBlockTransactionsSize = 1024 * 1024;
     protected long minTransactionFee = 5L * Unit.MILLI_SEM;
     protected long maxTransactionTimeDrift = TimeUnit.HOURS.toMillis(2);
     protected long minDelegateBurnAmount = 1000L * Unit.SEM;

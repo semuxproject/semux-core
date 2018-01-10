@@ -238,7 +238,7 @@ public class SystemUtil {
      * 
      * @return
      */
-    public static int getNumberOfProceessors() {
+    public static int getNumberOfProcessors() {
         return Runtime.getRuntime().availableProcessors();
     }
 

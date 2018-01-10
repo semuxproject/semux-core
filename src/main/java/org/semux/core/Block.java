@@ -381,7 +381,7 @@ public class Block {
      * @param r
      *            Serialized transaction results
      * @param v
-     *            Serailized votes
+     *            Serialized votes
      * @return
      */
     public static Block fromBytes(byte[] h, byte[] t, byte[] r, byte[] v) {

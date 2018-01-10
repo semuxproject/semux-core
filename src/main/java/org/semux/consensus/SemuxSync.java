@@ -399,11 +399,7 @@ public class SemuxSync implements SyncManager {
         }
 
         // [4] evaluate votes
-        if (!validateBlockVotes(block)) {
-            return false;
-        }
-
-        return true;
+        return validateBlockVotes(block);
     }
 
     protected boolean validateBlockVotes(Block block) {

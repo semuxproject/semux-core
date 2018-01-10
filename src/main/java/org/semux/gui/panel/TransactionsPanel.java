@@ -42,7 +42,7 @@ import org.semux.util.ByteArray;
 import org.semux.util.exception.UnreachableException;
 
 /**
- * Transactions panel displays all transactio from/to accounts of the wallet.
+ * Transactions panel displays all transaction from/to accounts of the wallet.
  */
 public class TransactionsPanel extends JPanel implements ActionListener {
 
