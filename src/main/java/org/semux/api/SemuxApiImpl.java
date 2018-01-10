@@ -369,6 +369,7 @@ public class SemuxApiImpl implements SemuxApi {
         return doTransaction(type, from, to, value, fee, null);
     }
 
+    @Override
     public ApiHandlerResponse getTransactionLimits(String type) {
         try {
             return new GetTransactionLimitsResponse(kernel, TransactionType.valueOf(type));
