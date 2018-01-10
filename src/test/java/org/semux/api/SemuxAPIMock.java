@@ -9,6 +9,7 @@ package org.semux.api;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.semux.KernelMock;
+import org.semux.api.http.SemuxApiService;
 import org.semux.config.Config;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;

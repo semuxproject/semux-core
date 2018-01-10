@@ -4,12 +4,13 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api;
+package org.semux.api.http;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.Kernel;
+import org.semux.api.ApiHandlerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

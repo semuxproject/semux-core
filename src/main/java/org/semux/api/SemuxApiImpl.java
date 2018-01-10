@@ -42,14 +42,16 @@ import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
 import org.semux.net.NodeManager;
 
-/**
- */
-public class SemuxApiImpl implements SemuxAPI {
+public class SemuxApiImpl implements SemuxApi {
     private Kernel kernel;
 
     public SemuxApiImpl(Kernel kernel) {
-
         this.kernel = kernel;
+    }
+
+    @Override
+    public ApiHandlerResponse failure(String message) {
+        return new ApiHandlerResponse(false, message);
     }
 
     @Override
@@ -73,10 +75,6 @@ public class SemuxApiImpl implements SemuxAPI {
         } catch (IllegalArgumentException e) {
             return failure(e.getMessage());
         }
-    }
-
-    public ApiHandlerResponse failure(String message) {
-        return new ApiHandlerResponse(false, message);
     }
 
     @Override
@@ -342,13 +340,74 @@ public class SemuxApiImpl implements SemuxAPI {
     }
 
     @Override
-    public ApiHandlerResponse transfer(String amountToSend, String from, String to, String fee, String data) {
+    public ApiHandlerResponse transfer(String from, String to, String value, String fee, String data) {
         TransactionType type = TransactionType.TRANSFER;
-        return doTransaction(type, amountToSend, from, to, fee, data);
+        return doTransaction(type, from, to, value, fee, data);
     }
 
-    private ApiHandlerResponse doTransaction(TransactionType type, String value, String from, String to, String fee, String data) {
-        // [3] build and send the transaction to PendingManager
+    @Override
+    public ApiHandlerResponse registerDelegate(String from, String fee, String delegateName) {
+        TransactionType type = TransactionType.DELEGATE;
+        return doTransaction(type, from, null, null, fee, delegateName);
+    }
+
+    @Override
+    public ApiHandlerResponse vote(String from, String to, String value, String fee) {
+        TransactionType type = TransactionType.VOTE;
+        return doTransaction(type, from, to, value, fee, null);
+    }
+
+    @Override
+    public ApiHandlerResponse unvote(String from, String to, String value, String fee) {
+        TransactionType type = TransactionType.UNVOTE;
+        return doTransaction(type, from, to, value, fee, null);
+    }
+
+    @Override
+    public ApiHandlerResponse getTransactionLimits(String type) {
+        try {
+            return new GetTransactionLimitsResponse(kernel, TransactionType.valueOf(type));
+        } catch (NullPointerException | IllegalArgumentException e) {
+            return failure(String.format("Invalid transaction type. (must be one of %s)",
+                    Arrays.stream(TransactionType.values())
+                            .map(TransactionType::toString)
+                            .collect(Collectors.joining(","))));
+        }
+    }
+
+    /**
+     * Validates node parameter of /add_node API
+     *
+     * @param node
+     *            node parameter of /add_node API
+     * @return validated hostname and port number
+     */
+    protected NodeManager.Node validateAddNodeParameter(String node) {
+        if (node == null || node.length() == 0) {
+            throw new IllegalArgumentException("Parameter `node` can't be empty");
+        }
+
+        Matcher matcher = Pattern.compile("^(?<host>.+?):(?<port>\\d+)$").matcher(node.trim());
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Parameter `node` must in format of `host:port`");
+        }
+
+        return new NodeManager.Node(matcher.group("host"), Integer.parseInt(matcher.group("port")));
+    }
+
+    /**
+     * Processes a transaction.
+     * 
+     * @param type
+     * @param from
+     * @param to
+     * @param value
+     * @param fee
+     * @param data
+     * @return
+     */
+    protected ApiHandlerResponse doTransaction(TransactionType type, String from, String to, String value, String fee,
+            String data) {
         try {
             TransactionBuilder transactionBuilder = new TransactionBuilder(kernel, type)
                     .withFrom(from)
@@ -369,54 +428,4 @@ public class SemuxApiImpl implements SemuxAPI {
             return failure(ex.getMessage());
         }
     }
-
-    @Override
-    public ApiHandlerResponse registerDelegate(String fromAddress, String fee, String delegateName) {
-        TransactionType type = TransactionType.DELEGATE;
-        return doTransaction(type, null, fromAddress, null, fee, delegateName);
-    }
-
-    @Override
-    public ApiHandlerResponse vote(String from, String to, String value, String fee) {
-        TransactionType type = TransactionType.VOTE;
-        return doTransaction(type, value, from, to, fee, null);
-    }
-
-    @Override
-    public ApiHandlerResponse unvote(String from, String to, String value, String fee) {
-        TransactionType type = TransactionType.VOTE;
-        return doTransaction(type, value, from, to, fee, null);
-    }
-
-    public ApiHandlerResponse getTransactionLimits(String type) {
-        try {
-            return new GetTransactionLimitsResponse(kernel, TransactionType.valueOf(type));
-        } catch (NullPointerException | IllegalArgumentException e) {
-            return failure(String.format(
-                    "Invalid transaction type. (must be one of %s)",
-                    Arrays.stream(TransactionType.values())
-                            .map(TransactionType::toString)
-                            .collect(Collectors.joining(","))));
-        }
-    }
-
-    /**
-     * Validate node parameter of /add_node API
-     *
-     * @param node node parameter of /add_node API
-     * @return validated hostname and port number
-     */
-    private NodeManager.Node validateAddNodeParameter(String node) {
-        if (node == null || node.length() == 0) {
-            throw new IllegalArgumentException("Parameter `node` can't be empty");
-        }
-
-        Matcher matcher = Pattern.compile("^(?<host>.+?):(?<port>\\d+)$").matcher(node.trim());
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Parameter `node` must in format of `host:port`");
-        }
-
-        return new NodeManager.Node(matcher.group("host"), Integer.parseInt(matcher.group("port")));
-    }
-
 }

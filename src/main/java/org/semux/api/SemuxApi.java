@@ -1,10 +1,12 @@
 package org.semux.api;
 
-
 /**
  * Interface for calling from REST API or command terminal.
  */
-public interface SemuxAPI {
+public interface SemuxApi {
+
+    ApiHandlerResponse failure(String message);
+
     ApiHandlerResponse getInfo();
 
     ApiHandlerResponse getPeers();
@@ -47,15 +49,13 @@ public interface SemuxAPI {
 
     ApiHandlerResponse createAccount();
 
-    ApiHandlerResponse transfer(String amountToSend, String from, String to, String fee, String data);
+    ApiHandlerResponse transfer(String from, String to, String value, String fee, String data);
 
     ApiHandlerResponse registerDelegate(String fromAddress, String fee, String delegateName);
 
     ApiHandlerResponse vote(String from, String to, String value, String fee);
 
     ApiHandlerResponse unvote(String from, String to, String value, String fee);
-
-    ApiHandlerResponse failure(String message);
 
     ApiHandlerResponse getTransactionLimits(String type);
 

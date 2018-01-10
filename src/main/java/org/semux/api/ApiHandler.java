@@ -25,5 +25,4 @@ public interface ApiHandler {
      * @return
      */
     ApiHandlerResponse service(String uri, Map<String, String> params, HttpHeaders headers);
-
 }
