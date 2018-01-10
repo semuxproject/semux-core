@@ -39,7 +39,7 @@ public class TransactionDialog extends JDialog {
         JLabel lblNonce = new JLabel(GUIMessages.get("Nonce") + ":");
         JLabel lblTimestamp = new JLabel(GUIMessages.get("Timestamp") + ":");
         JLabel lblData = new JLabel(GUIMessages.get("Data") + ":");
-        JLabel lblDataHex = new JLabel(GUIMessages.get("DataHex") + ":");
+        JLabel lblDataDecoded = new JLabel(GUIMessages.get("DataDecoded") + ":");
 
         JTextArea hash = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getHash()));
         hash.setName("hashText");
@@ -57,12 +57,14 @@ public class TransactionDialog extends JDialog {
         nonce.setName("nonceText");
         JLabel timestamp = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
         timestamp.setName("timestampText");
-        JTextArea data = new JTextArea(Bytes.toString(tx.getData()));
+
+        JTextArea data = new JTextArea(Hex.encode0x(tx.getData()));
         data.setName("dataText");
         data.setEditable(false);
-        JTextArea dataHex = new JTextArea(Hex.encode0x(tx.getData()));
-        dataHex.setName("dataTextHex");
-        dataHex.setEditable(false);
+
+        JTextArea dataDecoded = new JTextArea(Bytes.toString(tx.getData()));
+        dataDecoded.setName("dataDecodedText");
+        dataDecoded.setEditable(false);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());
@@ -71,7 +73,7 @@ public class TransactionDialog extends JDialog {
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGap(42)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                        .addComponent(lblDataHex)
+                        .addComponent(lblDataDecoded)
                         .addComponent(lblData)
                         .addComponent(lblTimestamp)
                         .addComponent(lblNonce)
@@ -92,7 +94,7 @@ public class TransactionDialog extends JDialog {
                         .addComponent(nonce)
                         .addComponent(timestamp)
                         .addComponent(data, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(dataHex, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(dataDecoded, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap(19, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
@@ -132,14 +134,12 @@ public class TransactionDialog extends JDialog {
                         .addComponent(timestamp))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(lblDataHex)
-                        .addComponent(dataHex, GroupLayout.PREFERRED_SIZE, 93, GroupLayout.PREFERRED_SIZE)
-                        )
+                        .addComponent(lblData)
+                        .addComponent(data, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(lblData)
-                        .addComponent(data, GroupLayout.PREFERRED_SIZE, 93, GroupLayout.PREFERRED_SIZE)
-                        )
+                        .addComponent(lblDataDecoded)
+                        .addComponent(dataDecoded, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap(20, Short.MAX_VALUE))
         );
         getContentPane().setLayout(groupLayout);
