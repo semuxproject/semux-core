@@ -27,6 +27,7 @@ import org.semux.crypto.Hex;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
+import org.semux.util.Bytes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
@@ -66,7 +67,8 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
         dialog.label("feeText").requireVisible().requireText(SwingUtil.formatValue(fee));
         dialog.label("nonceText").requireVisible().requireText("0");
         dialog.label("timestampText").requireVisible().requireText(SwingUtil.formatTimestamp(now));
-        dialog.textBox("dataText").requireVisible().requireText(Hex.encode0x(data));
+        dialog.textBox("dataText").requireVisible().requireText(Bytes.toString(data));
+        dialog.textBox("dataTextHex").requireVisible().requireText(Hex.encode0x(data));
     }
 
     @Override
