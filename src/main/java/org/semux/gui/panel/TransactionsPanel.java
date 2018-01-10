@@ -6,10 +6,7 @@
  */
 package org.semux.gui.panel;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -21,15 +18,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.gui.Action;
 import org.semux.gui.SemuxGUI;
@@ -49,7 +44,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     private static final long serialVersionUID = 1L;
 
     private static final String[] columnNames = { GUIMessages.get("Type"), GUIMessages.get("FromTo"),
-            GUIMessages.get("Value"), GUIMessages.get("Time") };
+            GUIMessages.get("Value"), GUIMessages.get("Time"), GUIMessages.get("Status") };
 
     private transient SemuxGUI gui;
     private transient WalletModel model;
@@ -72,8 +67,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(25);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 800, 0.1, 0.55, 0.15, 0.2);
-        SwingUtil.setColumnAlignments(table, false, false, true, true);
+        SwingUtil.setColumnWidths(table, 800, 0.1, 0.4, 0.15, 0.2, 0.15);
+        SwingUtil.setColumnAlignments(table, false, false, true, true, false);
 
         table.addMouseListener(new MouseAdapter() {
             @Override
@@ -109,20 +104,20 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         private static final long serialVersionUID = 1L;
 
-        private transient List<Transaction> transactions;
+        private transient List<StatusTransaction> transactions;
 
         public TransactionsTableModel() {
             this.transactions = Collections.emptyList();
         }
 
-        public void setData(List<Transaction> transactions) {
+        public void setData(List<StatusTransaction> transactions) {
             this.transactions = transactions;
             this.fireTableDataChanged();
         }
 
         public Transaction getRow(int row) {
             if (row >= 0 && row < transactions.size()) {
-                return transactions.get(row);
+                return transactions.get(row).getTransaction();
             }
 
             return null;
@@ -145,17 +140,19 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         @Override
         public Object getValueAt(int row, int column) {
-            Transaction tx = transactions.get(row);
+            StatusTransaction tx = transactions.get(row);
 
             switch (column) {
             case 0:
-                return tx.getType().name();
+                return tx.getTransaction().getType().name();
             case 1:
-                return SwingUtil.getTransactionDescription(gui, tx);
+                return SwingUtil.getTransactionDescription(gui, tx.getTransaction());
             case 2:
-                return SwingUtil.formatValue(tx.getValue());
+                return SwingUtil.formatValue(tx.getTransaction().getValue());
             case 3:
-                return SwingUtil.formatTimestamp(tx.getTimestamp());
+                return SwingUtil.formatTimestamp(tx.getTransaction().getTimestamp());
+            case 4:
+                return tx.getStatus();
             default:
                 return null;
             }
@@ -179,19 +176,28 @@ public class TransactionsPanel extends JPanel implements ActionListener {
      * Refreshes this panel.
      */
     protected void refresh() {
-        List<Transaction> transactions = new ArrayList<>();
+        List<StatusTransaction> transactions = new ArrayList<>();
+
+        // add any pending transactions
+        PendingManager pendingMgr = gui.getKernel().getPendingManager();
+        List<PendingManager.PendingTransaction> pendingTransactions = pendingMgr.getTransactions();
+
+        for (PendingManager.PendingTransaction pendingTransaction : pendingTransactions) {
+            transactions.add(new StatusTransaction(pendingTransaction.transaction, GUIMessages.get("Pending")));
+        }
 
         Set<ByteArray> hashes = new HashSet<>();
         for (WalletAccount acc : model.getAccounts()) {
             for (Transaction tx : acc.getTransactions()) {
                 ByteArray key = ByteArray.of(tx.getHash());
                 if (!hashes.contains(key)) {
-                    transactions.add(tx);
+                    transactions.add(new StatusTransaction(tx, GUIMessages.get("Completed")));
                     hashes.add(key);
                 }
             }
         }
-        transactions.sort((tx1, tx2) -> Long.compare(tx2.getTimestamp(), tx1.getTimestamp()));
+        transactions.sort(
+                (tx1, tx2) -> Long.compare(tx2.getTransaction().getTimestamp(), tx1.getTransaction().getTimestamp()));
 
         /*
          * update table model
@@ -201,7 +207,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         if (tx != null) {
             for (int i = 0; i < transactions.size(); i++) {
-                if (Arrays.equals(tx.getHash(), transactions.get(i).getHash())) {
+                if (Arrays.equals(tx.getHash(), transactions.get(i).getTransaction().getHash())) {
                     table.setRowSelectionInterval(table.convertRowIndexToView(i), table.convertRowIndexToView(i));
                     break;
                 }
@@ -217,5 +223,24 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     protected Transaction getSelectedTransaction() {
         int row = table.getSelectedRow();
         return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
+    }
+
+    private class StatusTransaction {
+        private String status;
+        private Transaction transaction;
+
+        public StatusTransaction(Transaction transaction, String status) {
+
+            this.transaction = transaction;
+            this.status = status;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public Transaction getTransaction() {
+            return transaction;
+        }
     }
 }
