@@ -43,6 +43,51 @@
                 <version>3.7.0</version>
             </plugin>
 
+            <!-- build swagger document -->
+            <plugin>
+                <groupId>com.github.kongchen</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <version>3.1.6</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <apiSources>
+                        <apiSource>
+                            <info>
+                                <title>Semux</title>
+                                <version>${project.version}</version>
+                                <contact>
+                                    <url>https://semux.org</url>
+                                </contact>
+                                <license>
+                                    <name>MIT License</name>
+                                    <url>https://opensource.org/licenses/mit-license.php</url>
+                                </license>
+                            </info>
+                            <securityDefinitions>
+                                <securityDefinition>
+                                    <name>basicAuth</name>
+                                    <type>basic</type>
+                                </securityDefinition>
+                            </securityDefinitions>
+                            <schemes>
+                                <scheme>http</scheme>
+                            </schemes>
+                            <locations>
+                                <location>org.semux.api.SemuxAPI</location>
+                            </locations>
+                            <swaggerDirectory>target/swagger-ui</swaggerDirectory>
+                        </apiSource>
+                    </apiSources>
+                </configuration>
+            </plugin>
+
             <!-- build fat jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -389,10 +434,13 @@
                                         <urn>com.fasterxml.jackson.core:jackson-annotations:2.9.0:jar:null:compile:07c10d545325e3a6e72e06381afe469fd40eb701</urn>
                                         <urn>com.fasterxml.jackson.core:jackson-core:2.9.2:jar:null:compile:aed20e50152a2f19adc1995c8d8f307c7efa414d</urn>
                                         <urn>com.fasterxml.jackson.core:jackson-databind:2.9.2:jar:null:compile:1d8d8cb7cf26920ba57fb61fa56da88cc123b21f</urn>
+                                        <urn>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.9:jar:null:compile:607f3253c20267e385c85f60c859760a73a29e37</urn>
                                         <urn>com.github.ben-manes.caffeine:caffeine:2.6.0:jar:null:compile:6d06cbc2eb7238ee49cc7f557a0acfaad00ec431</urn>
+                                        <urn>com.github.kongchen:swagger-maven-plugin:3.1.6:maven-plugin:null:runtime:4c733e81674312c7794a4180095c9053baf900d5</urn>
                                         <urn>com.github.oshi:oshi-core:3.4.4:jar:null:compile:f1aa8e053d26f49b909a845745018c57fe9d7a74</urn>
                                         <urn>com.github.stefanbirkner:system-rules:1.16.0:jar:null:test:1bec4d14816e23a1715d5c55db36919b5a529a4f</urn>
                                         <urn>com.github.zafarkhaja:java-semver:0.9.0:jar:null:compile:59a83ca73c72a5e25b3f0b1bb305230a11000329</urn>
+                                        <urn>com.google.guava:guava:20.0:jar:null:compile:89507701249388e1ed5ddcf8c41f4ce1be7831ef</urn>
                                         <urn>com.google.zxing:core:3.3.0:jar:null:compile:73c49077166faa4c3c0059c5f583d1d7bd1475fe</urn>
                                         <urn>com.mycila:license-maven-plugin:3.0:maven-plugin:null:runtime:6e6175f847574fd15c644a69b540e279ea5d173f</urn>
                                         <urn>commons-beanutils:commons-beanutils:1.9.2:jar:null:compile:7a87d845ad3a155297e8f67d9008f4c1e5656b71</urn>
@@ -403,6 +451,11 @@
                                         <urn>commons-validator:commons-validator:1.6:jar:null:compile:e989d1e87cdd60575df0765ed5bac65c905d7908</urn>
                                         <urn>dnsjava:dnsjava:2.1.8:jar:null:compile:eed8a2cbf56cc60d07a189a429ead3067564193c</urn>
                                         <urn>io.netty:netty-all:4.1.13.Final:jar:null:compile:e1f2d1ee50626697d3ea73a11f1c7301e8589ef8</urn>
+                                        <urn>io.swagger:swagger-annotations:1.5.17:jar:null:compile:1d8fcae3968a14b550e80fcebf5744da608902a0</urn>
+                                        <urn>io.swagger:swagger-core:1.5.17:jar:null:compile:527636afc525df6ba1329f894df3880e69444170</urn>
+                                        <urn>io.swagger:swagger-models:1.5.17:jar:null:compile:8e03ed429bdfbddff22a286aff9a45a675597275</urn>
+                                        <urn>javax.validation:validation-api:1.1.0.Final:jar:null:compile:8613ae82954779d518631e05daa73a6a954817d5</urn>
+                                        <urn>javax.ws.rs:javax.ws.rs-api:2.0:jar:null:compile:61f0983eb190954ccdede31e786a9e0bd9767c4a</urn>
                                         <urn>junit:junit:4.11:jar:null:test:4e031bb61df09069aeb2bffb4019e7a5034a4ee0</urn>
                                         <urn>net.bytebuddy:byte-buddy-agent:1.6.14:jar:null:test:ba1e5ba3a84fb2fbf2f4de9138df19665eec4d59</urn>
                                         <urn>net.bytebuddy:byte-buddy:1.6.14:jar:null:test:871c3e49dc6183d0d361601c2f1d11abb1a6b48c</urn>
@@ -449,6 +502,7 @@
                                         <urn>org.slf4j:slf4j-api:1.7.25:jar:null:compile:da76ca59f6a57ee3102f8f9bd9cee742973efa8a</urn>
                                         <urn>org.threeten:threetenbp:1.3.6:jar:null:compile:89dcc04a7e028c3c963413a71f950703cf51f057</urn>
                                         <urn>org.xerial.snappy:snappy-java:1.1.7.1:jar:null:compile:d5190b41f3de61e3b83d692322d58630252bc8c3</urn>
+                                        <urn>org.yaml:snakeyaml:1.17:jar:null:compile:7a27ea250c5130b2922b86dea63cbb1cc10a660c</urn>
                                         <urn>pl.project13.maven:git-commit-id-plugin:2.2.4:maven-plugin:null:runtime:43a0dc1d02821c51847d587ecc4a6943086b884c</urn>
                                         <urn>sh.tak.appbundler:appbundle-maven-plugin:1.2.0:maven-plugin:null:runtime:75a9e8c2adc7203b9b443b4547570da25c619f0d</urn>
                                     </urns>
@@ -469,6 +523,47 @@
     </build>
 
     <dependencies>
+        <!-- swagger API -->
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+            <version>1.5.17</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-lang3</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.dataformat</groupId>
+                    <artifactId>jackson-dataformat-yaml</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.5.17</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- SLF4J logging framework -->
         <dependency>
             <groupId>org.slf4j</groupId>

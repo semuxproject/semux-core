@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2017 The Semux Developers
+ *
+ * Distributed under the MIT software license, see the accompanying file
+ * LICENSE or https://opensource.org/licenses/mit-license.php
+ */
 package org.semux.api;
 
 import java.net.UnknownHostException;
@@ -119,7 +125,7 @@ public class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public ApiHandlerResponse getBlock(long blockNum) {
+    public ApiHandlerResponse getBlock(Long blockNum) {
         Block block = kernel.getBlockchain().getBlock(blockNum);
 
         if (block == null) {
@@ -363,7 +369,6 @@ public class SemuxApiImpl implements SemuxApi {
         return doTransaction(type, from, to, value, fee, null);
     }
 
-    @Override
     public ApiHandlerResponse getTransactionLimits(String type) {
         try {
             return new GetTransactionLimitsResponse(kernel, TransactionType.valueOf(type));
@@ -397,7 +402,7 @@ public class SemuxApiImpl implements SemuxApi {
 
     /**
      * Processes a transaction.
-     * 
+     *
      * @param type
      * @param from
      * @param to
