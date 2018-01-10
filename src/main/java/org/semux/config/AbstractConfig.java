@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hash;
-import org.semux.gui.SemuxGUI;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
 import org.semux.util.Bytes;
@@ -158,7 +157,7 @@ public abstract class AbstractConfig implements Config {
         return String.format("%s/v%s-%s/%s/%s",
                 Constants.CLIENT_NAME,
                 Constants.CLIENT_VERSION,
-                SemuxGUI.class.getPackage().getImplementationVersion(),
+                SystemUtil.getImplementationVersion(),
                 SystemUtil.getOsName().toString(),
                 SystemUtil.getOsArch());
     }

@@ -19,6 +19,7 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
 import org.semux.config.Constants;
+import org.semux.gui.SemuxGUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -276,6 +277,18 @@ public class SystemUtil {
         } catch (SecurityException e) {
             logger.error("Unable to change localization.", e);
         }
+    }
+
+    /**
+     * Returns the implementation version.
+     * 
+     * @return
+     */
+    public static Object getImplementationVersion() {
+        // this doesn't work with Java 9 and above
+        String version = SemuxGUI.class.getPackage().getImplementationVersion();
+
+        return version == null ? "unknown" : version;
     }
 
     private SystemUtil() {
