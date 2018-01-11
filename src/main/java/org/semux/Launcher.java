@@ -109,9 +109,11 @@ public abstract class Launcher {
      */
     protected void setupLogger(String[] args) throws ParseException {
         CommandLine cmd = parseOptions(args);
-        LoggerConfigurator.configure(
-                new File(cmd.hasOption(SemuxOption.DATA_DIR.name()) ? cmd.getOptionValue(SemuxOption.DATA_DIR.name())
-                        : Constants.DEFAULT_DATA_DIR));
+        String dataDir = cmd.hasOption(SemuxOption.DATA_DIR.name()) ? cmd.getOptionValue(SemuxOption.DATA_DIR.name())
+                : Constants.DEFAULT_DATA_DIR;
+
+        System.setProperty("logger.file", dataDir + File.pathSeparator + "debug.log");
+        LoggerConfigurator.configure(new File(dataDir));
     }
 
     /**

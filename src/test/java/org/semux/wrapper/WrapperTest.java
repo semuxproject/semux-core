@@ -42,23 +42,23 @@ public class WrapperTest {
         return Arrays
                 .asList(new Object[][] {
                         { new String[] { "--gui", "--jvmoptions", "-Xmx1G -Xms1G" },
-                                new String[] { getJavaBinPath(), "-Xmx1G", "-Xms1G", "-cp", "semux.jar",
+                                new String[] { getJavaBinPath(), "-Xmx1G", "-Xms1G", "-cp", "classpath",
                                         SemuxGUI.class.getCanonicalName() },
                                 null },
                         { new String[] { "--gui" },
-                                new String[] { getJavaBinPath(), "-Xmx1600M", "-cp", "semux.jar",
+                                new String[] { getJavaBinPath(), "-Xmx1600M", "-cp", "classpath",
                                         SemuxGUI.class.getCanonicalName() },
                                 2000L * 1024 * 1024 },
-                        { new String[] { "--cli" }, new String[] { getJavaBinPath(), "-Xmx1600M", "-cp", "semux.jar",
+                        { new String[] { "--cli" }, new String[] { getJavaBinPath(), "-Xmx1600M", "-cp", "classpath",
                                 SemuxCLI.class.getCanonicalName() }, 2000L * 1024 * 1024 },
                         { new String[] { "--gui" },
                                 new String[] { getJavaBinPath(), String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB), "-cp",
-                                        "semux.jar",
+                                        "classpath",
                                         SemuxGUI.class.getCanonicalName() },
                                 MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 },
                         { new String[] { "--cli" },
                                 new String[] { getJavaBinPath(), String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB), "-cp",
-                                        "semux.jar",
+                                        "classpath",
                                         SemuxCLI.class.getCanonicalName() },
                                 MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 } });
     }
@@ -93,6 +93,11 @@ public class WrapperTest {
         Wrapper.main(inputArgs);
 
         // verify
+        for (int i = 0; i < javaArgs.length; i++) {
+            if ("classpath".equals(javaArgs[i])) {
+                javaArgs[i] = Wrapper.getClassPath();
+            }
+        }
         verify(processBuilderMock).command(javaArgs);
         verifyStatic(SystemUtil.class);
         SystemUtil.exit(0);

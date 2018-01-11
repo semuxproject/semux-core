@@ -235,8 +235,6 @@
                                 </copy>
                                 <copy file="${project.basedir}/misc/launch4j/semux.l4j.ini"
                                       tofile="${dist.base}/windows/semux.l4j.ini"/>
-                                <copy file="${project.basedir}/src/main/resources/logback.xml"
-                                      tofile="${dist.base}/windows/config/logback.xml"/> />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis"/>
                                 <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis"/>
                                 <fixcrlf srcdir="${dist.base}/windows" includes="LICENSE*" eol="dos" eof="asis"/>
@@ -254,16 +252,12 @@
                                       tofile="${dist.base}/linux/semux-cli.sh"/>
                                 <copy file="${project.basedir}/scripts/semux-gui.sh"
                                       tofile="${dist.base}/linux/semux-gui.sh"/>
-                                <copy file="${project.basedir}/src/main/resources/logback.xml"
-                                      tofile="${dist.base}/linux/config/logback.xml"/> />
 
                                 <!-- macos build (dmg) -->
                                 <copy todir="${dist.base}/macos">
                                     <fileset dir="${project.basedir}/target/semux-${project.version}">
                                     </fileset>
                                 </copy>
-                                <copy file="${project.basedir}/src/main/resources/logback.xml"
-                                      tofile="${dist.base}/macos/config/logback.xml"/> />
 
                                 <!-- add execute permission -->
                                 <chmod file="${dist.base}/windows/semux.exe" perm="755"/>

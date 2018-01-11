@@ -10,21 +10,20 @@ import static java.util.Arrays.asList;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.semux.cli.SemuxCLI;
-import org.semux.config.Constants;
 import org.semux.gui.SemuxGUI;
-import org.semux.log.LoggerConfigurator;
 import org.semux.util.SystemUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is a process wrapper mainly created for dynamic allocation of the
@@ -33,15 +32,13 @@ import org.slf4j.LoggerFactory;
  */
 public class Wrapper {
 
-    final static Logger logger = LoggerFactory.getLogger(Wrapper.class);
-
-    public static final long MINIMUM_HEAP_SIZE_MB = 1024L;
+    public static final long MINIMUM_HEAP_SIZE_MB = 512L;
 
     enum Mode {
         GUI, CLI
     }
 
-    private static Class<?> getModeClass(Mode mode) {
+    protected static Class<?> getModeClass(Mode mode) {
         switch (mode) {
         case CLI:
             return SemuxCLI.class;
@@ -54,9 +51,16 @@ public class Wrapper {
         }
     }
 
+    protected static String getClassPath() {
+        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+
+        URL[] urls = ((URLClassLoader) classLoader).getURLs();
+
+        return Stream.of(urls).map(u -> u.getFile())
+                .collect(Collectors.joining(Character.toString(File.pathSeparatorChar)));
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException, ParseException {
-        // TODO: use specified data directory
-        LoggerConfigurator.configure(new File(Constants.DEFAULT_DATA_DIR));
         WrapperCLIParser wrapperCLIParser = new WrapperCLIParser(args);
         Wrapper wrapper = new Wrapper();
         String[] jvmOptions = wrapper.allocateHeapSize(wrapperCLIParser.jvmOptions);
@@ -70,16 +74,10 @@ public class Wrapper {
         // dynamically specify maximum heap size according to available physical memory
         // if Xmx is not specified in jvmoptions
         final Pattern xmxPattern = Pattern.compile("^-Xmx");
+
         if (Stream.of(jvmOptions).noneMatch(s -> xmxPattern.matcher(s).find())) {
-            long toAllocateMB = (long) ((double) SystemUtil.getAvailableMemorySize() / 1024 / 1024 * 0.8);
-            if (toAllocateMB < MINIMUM_HEAP_SIZE_MB) {
-                toAllocateMB = MINIMUM_HEAP_SIZE_MB;
-                logger.warn(
-                        "The available memory space on your system is less than the minimum requirement of {}M. This may result in low performance or a crash of semux wallet.",
-                        MINIMUM_HEAP_SIZE_MB);
-            }
-            allocatedJvmOptions.add(String.format("-Xmx%dM", toAllocateMB));
-            logger.debug("Allocating {} MB of memory as maximum heap size", toAllocateMB);
+            long toAllocateMB = SystemUtil.getAvailableMemorySize() / 1024 / 1024 * 8 / 10;
+            allocatedJvmOptions.add(String.format("-Xmx%dM", Math.max(toAllocateMB, MINIMUM_HEAP_SIZE_MB)));
         }
 
         return allocatedJvmOptions.toArray(new String[allocatedJvmOptions.size()]);
@@ -90,14 +88,12 @@ public class Wrapper {
         Path javaBin = Paths.get(javaHome, "bin", "java");
         String[] args1 = ArrayUtils.addAll(
                 ArrayUtils.addAll(new String[] { javaBin.toAbsolutePath().toString() }, jvmOptions),
-                ArrayUtils.addAll(new String[] { "-cp", "semux.jar", getModeClass(mode).getCanonicalName() }, args));
+                ArrayUtils.addAll(new String[] { "-cp", getClassPath(), getModeClass(mode).getCanonicalName() }, args));
 
         return startProcess(args1);
     }
 
     protected int startProcess(String[] args) throws IOException, InterruptedException {
-        logger.debug(String.join(" ", args));
-
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command(args);
         processBuilder.inheritIO();

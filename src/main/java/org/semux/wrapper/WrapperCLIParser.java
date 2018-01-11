@@ -13,12 +13,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class WrapperCLIParser {
-
-    final static Logger logger = LoggerFactory.getLogger(WrapperCLIParser.class);
 
     final Wrapper.Mode mode;
 
@@ -35,17 +31,26 @@ class WrapperCLIParser {
         this.remainingArgs = commandLine.getArgs();
     }
 
+    /**
+     * Parses the `--jvm-options` option.
+     * 
+     * @param commandLine
+     * @return
+     */
     protected String[] parseJvmOptions(CommandLine commandLine) {
-        String jvmOptionsString = "";
         if (commandLine.hasOption("jvmoptions")) {
-            jvmOptionsString = commandLine.getOptionValue("jvmoptions").trim();
+            return commandLine.getOptionValue("jvmoptions").trim().split(" ");
         } else {
-            logger.debug("Specify --jvmoptions for additional JVM options");
+            return new String[0];
         }
-
-        return jvmOptionsString.length() > 0 ? jvmOptionsString.split(" ") : new String[] {};
     }
 
+    /**
+     * Parses the running mode, either `--gui` or `--cli`.
+     * 
+     * @param commandLine
+     * @return
+     */
     protected Wrapper.Mode parseMode(CommandLine commandLine) {
         if (commandLine.hasOption("gui")) {
             return Wrapper.Mode.GUI;
@@ -56,6 +61,11 @@ class WrapperCLIParser {
         }
     }
 
+    /**
+     * Constructs the allowed options.
+     * 
+     * @return
+     */
     protected Options buildOptions() {
         Options options = new Options();
 
