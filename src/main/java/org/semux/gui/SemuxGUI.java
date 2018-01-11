@@ -22,14 +22,9 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
 import org.semux.Launcher;
-import org.semux.cli.SemuxOption;
 import org.semux.config.Constants;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
@@ -46,7 +41,6 @@ import org.semux.gui.dialog.SelectDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
-import org.semux.message.CLIMessages;
 import org.semux.message.GUIMessages;
 import org.semux.net.Peer;
 import org.semux.util.SystemUtil;
@@ -93,16 +87,6 @@ public class SemuxGUI extends Launcher {
      */
     public SemuxGUI() {
         SystemUtil.setLocale(getConfig().locale());
-
-        Option dataDirOption = Option.builder().longOpt(SemuxOption.DATA_DIR.toString())
-                .desc(CLIMessages.get("SpecifyDataDir")).hasArg(true).numberOfArgs(1).optionalArg(false).argName("path")
-                .type(String.class).build();
-        addOption(dataDirOption);
-
-        Option networkOption = Option.builder().longOpt(SemuxOption.NETWORK.toString())
-                .desc(CLIMessages.get("SpecifyNetwork")).hasArg(true).numberOfArgs(1).optionalArg(false)
-                .argName("network").type(String.class).build();
-        addOption(networkOption);
     }
 
     /**
@@ -144,16 +128,8 @@ public class SemuxGUI extends Launcher {
      * @throws ParseException
      */
     public void start(String[] args) throws ParseException {
-        CommandLineParser parser = new DefaultParser();
-        CommandLine cmd = parser.parse(getOptions(), args);
-
-        if (cmd.hasOption(SemuxOption.DATA_DIR.toString())) {
-            setDataDir(cmd.getOptionValue(SemuxOption.DATA_DIR.toString()));
-        }
-
-        if (cmd.hasOption(SemuxOption.NETWORK.toString())) {
-            setNetwork(cmd.getOptionValue(SemuxOption.NETWORK.toString()));
-        }
+        // parse options
+        parseOptions(args);
 
         // create a wallet instance.
         Wallet wallet = new Wallet(new File(getDataDir(), "wallet.data"));

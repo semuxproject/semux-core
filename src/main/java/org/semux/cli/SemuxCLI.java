@@ -75,24 +75,11 @@ public class SemuxCLI extends Launcher {
                 .longOpt(SemuxOption.CHANGE_PASSWORD.toString()).desc(CLIMessages.get("ChangeWalletPassword")).build();
         addOption(changePasswordOption);
 
-        Option dataDirOption = Option.builder()
-                .longOpt(SemuxOption.DATA_DIR.toString())
-                .desc(CLIMessages.get("SpecifyDataDir"))
-                .hasArg(true).numberOfArgs(1).optionalArg(false).argName("path").type(String.class)
-                .build();
-        addOption(dataDirOption);
-
         Option coinbaseOption = Option.builder()
                 .longOpt(SemuxOption.COINBASE.toString()).desc(CLIMessages.get("SpecifyCoinbase"))
                 .hasArg(true).numberOfArgs(1).optionalArg(false).argName("index").type(Number.class)
                 .build();
         addOption(coinbaseOption);
-
-        Option networkOption = Option.builder()
-                .longOpt(SemuxOption.NETWORK.toString()).desc(CLIMessages.get("SpecifyNetwork"))
-                .hasArg(true).numberOfArgs(1).optionalArg(false).argName("name").type(String.class)
-                .build();
-        addOption(networkOption);
 
         Option passwordOption = Option.builder()
                 .longOpt(SemuxOption.PASSWORD.toString()).desc(CLIMessages.get("WalletPassword"))
@@ -117,18 +104,11 @@ public class SemuxCLI extends Launcher {
     }
 
     public void start(String[] args) throws ParseException {
+        // parse options
         CommandLine cmd = parseOptions(args);
-
-        if (cmd.hasOption(SemuxOption.DATA_DIR.toString())) {
-            setDataDir(cmd.getOptionValue(SemuxOption.DATA_DIR.toString()));
-        }
 
         if (cmd.hasOption(SemuxOption.COINBASE.toString())) {
             setCoinbase(((Number) cmd.getParsedOptionValue(SemuxOption.COINBASE.toString())).intValue());
-        }
-
-        if (cmd.hasOption(SemuxOption.NETWORK.toString())) {
-            setNetwork(cmd.getOptionValue(SemuxOption.NETWORK.toString()));
         }
 
         if (cmd.hasOption(SemuxOption.PASSWORD.toString())) {

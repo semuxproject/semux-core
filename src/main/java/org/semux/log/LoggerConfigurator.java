@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
-import ch.qos.logback.core.util.StatusPrinter;
 
 /**
  * The configurator will try to load logback.xml from config directory at
@@ -35,15 +34,14 @@ public class LoggerConfigurator {
         if (file.exists()) {
             LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
             try {
+                context.reset(); // Call context.reset() to clear default configuration
+                context.putProperty("logger.file", new File(dataDir, "debug.log").getAbsolutePath());
+
                 JoranConfigurator configurator = new JoranConfigurator();
                 configurator.setContext(context);
-                context.reset(); // Call context.reset() to clear default configuration
                 configurator.doConfigure(file);
             } catch (JoranException je) {
-                System.err.format(
-                        "Failed to load %s. The xml file is either corrupted or invalid. Try to fix the xml file or replace it with the factory default.%n",
-                        file.getAbsolutePath());
-                StatusPrinter.printInCaseOfErrorsOrWarnings(context);
+                System.err.format("The logback configure file is invalid: %s", file.getAbsolutePath());
                 SystemUtil.exit(-1);
             }
         }
