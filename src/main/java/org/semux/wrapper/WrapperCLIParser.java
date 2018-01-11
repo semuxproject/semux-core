@@ -46,19 +46,13 @@ class WrapperCLIParser {
     }
 
     /**
-     * Parses the running mode, either `--gui` or `--cli`.
+     * Parses the running mode, either `--gui` or `--cli`, defaults to GUI.
      * 
      * @param commandLine
      * @return
      */
     protected Wrapper.Mode parseMode(CommandLine commandLine) {
-        if (commandLine.hasOption("gui")) {
-            return Wrapper.Mode.GUI;
-        } else if (commandLine.hasOption("cli")) {
-            return Wrapper.Mode.CLI;
-        } else {
-            throw new WrapperException("Either --gui or --cli has to be specified");
-        }
+        return commandLine.hasOption("cli") ? Wrapper.Mode.CLI : Wrapper.Mode.GUI;
     }
 
     /**
