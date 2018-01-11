@@ -125,7 +125,7 @@ public class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public ApiHandlerResponse getBlock(long blockNum) {
+    public ApiHandlerResponse getBlock(Long blockNum) {
         Block block = kernel.getBlockchain().getBlock(blockNum);
 
         if (block == null) {
@@ -403,7 +403,7 @@ public class SemuxApiImpl implements SemuxApi {
 
     /**
      * Processes a transaction.
-     * 
+     *
      * @param type
      * @param from
      * @param to
