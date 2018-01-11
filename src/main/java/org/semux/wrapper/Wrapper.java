@@ -8,15 +8,11 @@ package org.semux.wrapper;
 
 import static java.util.Arrays.asList;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.cli.ParseException;
@@ -27,8 +23,11 @@ import org.semux.util.SystemUtil;
 
 /**
  * This is a process wrapper mainly created for dynamic allocation of the
- * maximum heap size of Semux JVM. The wrapper dynamically allocates 80% of
- * available physical memory to Semux JVM if -Xmx option is not specified.
+ * maximum heap size of JVM. The wrapper sets the -Xmx to 80% of available
+ * physical memory if the -Xmx option is not specified.
+ * 
+ * NOTE: this wrapper assumes a semux.jar file at the working directory and only
+ * works with Semux Linux distribution only, currently.
  */
 public class Wrapper {
 
@@ -49,15 +48,6 @@ public class Wrapper {
         default:
             throw new WrapperException("Selected mode is not supported");
         }
-    }
-
-    protected static String getClassPath() {
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-
-        URL[] urls = ((URLClassLoader) classLoader).getURLs();
-
-        return Stream.of(urls).map(u -> u.getFile())
-                .collect(Collectors.joining(Character.toString(File.pathSeparatorChar)));
     }
 
     public static void main(String[] args) throws IOException, InterruptedException, ParseException {
@@ -88,7 +78,7 @@ public class Wrapper {
         Path javaBin = Paths.get(javaHome, "bin", "java");
         String[] args1 = ArrayUtils.addAll(
                 ArrayUtils.addAll(new String[] { javaBin.toAbsolutePath().toString() }, jvmOptions),
-                ArrayUtils.addAll(new String[] { "-cp", getClassPath(), getModeClass(mode).getCanonicalName() }, args));
+                ArrayUtils.addAll(new String[] { "-cp", "semux.jar", getModeClass(mode).getCanonicalName() }, args));
 
         return startProcess(args1);
     }
