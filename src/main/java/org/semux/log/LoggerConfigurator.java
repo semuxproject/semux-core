@@ -24,6 +24,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 public class LoggerConfigurator {
 
     public static final String LOGBACK_XML = "logback.xml";
+    public static final String DEBUG_LOG = "debug.log";
 
     private LoggerConfigurator() {
     }
@@ -34,8 +35,8 @@ public class LoggerConfigurator {
         if (file.exists()) {
             LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
             try {
-                context.reset(); // Call context.reset() to clear default configuration
-                context.putProperty("logger.file", new File(dataDir, "debug.log").getAbsolutePath());
+                context.reset();
+                context.putProperty("log.file", new File(dataDir, DEBUG_LOG).getAbsolutePath());
 
                 JoranConfigurator configurator = new JoranConfigurator();
                 configurator.setContext(context);

@@ -39,10 +39,13 @@ class WrapperCLIParser {
      */
     protected String[] parseJvmOptions(CommandLine commandLine) {
         if (commandLine.hasOption("jvmoptions")) {
-            return commandLine.getOptionValue("jvmoptions").trim().split(" ");
-        } else {
-            return new String[0];
+            String option = commandLine.getOptionValue("jvmoptions");
+            if (!option.isEmpty()) {
+                return option.split(" ");
+            }
         }
+
+        return new String[0];
     }
 
     /**
@@ -66,7 +69,7 @@ class WrapperCLIParser {
         options.addOption(Option.builder().longOpt("jvmoptions").hasArg(true).type(String.class).build());
 
         OptionGroup modeOption = new OptionGroup();
-        modeOption.setRequired(true);
+        modeOption.setRequired(false);
         Option guiMode = Option.builder().longOpt("gui").hasArg(false).build();
         modeOption.addOption(guiMode);
         Option cliMode = Option.builder().longOpt("cli").hasArg(false).build();

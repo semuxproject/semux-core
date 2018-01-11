@@ -7,9 +7,9 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>${logger.file}</file>
+        <file>${log.file}</file>
         <append>true</append>
-        <immediateFlush>false</immediateFlush>
+        <immediateFlush>true</immediateFlush>
         <encoder>
             <pattern>%date{yy-MM-dd HH:mm:ss} %-8([%level]) %-16logger{0} %msg%n</pattern>
         </encoder>
