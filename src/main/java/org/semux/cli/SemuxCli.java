@@ -35,7 +35,6 @@ public class SemuxCli extends Launcher {
     private static final Logger logger = LoggerFactory.getLogger(SemuxCli.class);
 
     public static void main(String[] args) {
-
         try {
             SemuxCli cli = new SemuxCli();
             // set up logger

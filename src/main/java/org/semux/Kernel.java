@@ -16,6 +16,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
 import org.semux.api.http.SemuxApiService;
@@ -295,6 +296,9 @@ public class Kernel {
             dbFactory.getDB(name).close();
         }
         lock.unlock();
+
+        // shutdown log4j
+        LogManager.shutdown();
 
         state = State.STOPPED;
     }

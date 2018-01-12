@@ -20,7 +20,7 @@ import org.semux.config.Constants;
  */
 public class LoggerConfigurator {
 
-    public static final String LOGBACK_XML = "log4j2.xml";
+    public static final String CONFIG_XML = "log4j2.xml";
     public static final String DEBUG_LOG = "debug.log";
 
     private LoggerConfigurator() {
@@ -45,6 +45,6 @@ public class LoggerConfigurator {
     }
 
     protected static File getConfigurationFile(File dataDir) {
-        return new File(dataDir, Constants.CONFIG_DIR + File.separator + LOGBACK_XML);
+        return new File(dataDir, Constants.CONFIG_DIR + File.separator + CONFIG_XML);
     }
 }

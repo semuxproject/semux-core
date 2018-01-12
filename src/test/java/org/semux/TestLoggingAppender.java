@@ -23,7 +23,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 /**
- * Dummy SLF4J appender that collects all logging events into a list, for
+ * Dummy log4j2 appender that collects all logging events into a list, for
  * testing purpose only.
  *
  */
@@ -67,7 +67,7 @@ public final class TestLoggingAppender extends AbstractAppender {
 
     @Override
     public void append(LogEvent e) {
-        if (e.getLevel().isMoreSpecificThan(testLevel)) {
+        if (e.getLevel().intLevel() >= testLevel.intLevel()) {
             events.add(new LogEventMini(e));
         }
     }

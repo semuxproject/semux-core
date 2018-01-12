@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,6 +53,8 @@ public class LoggerConfiguratorTest {
             mockConfigFile.delete();
             mockConfigFile = null;
         }
+
+        ((LoggerContext) LogManager.getContext(false)).reconfigure();
     }
 
     @Test
@@ -95,8 +98,6 @@ public class LoggerConfiguratorTest {
         spy(LoggerConfigurator.class);
         when(LoggerConfigurator.getConfigurationFile(dataDir)).thenReturn(mockConfigFile);
 
-        // expect system exit
-        // exit.expectSystemExitWithStatus(-1);
         systemErrRule.enableLog();
 
         // execution
@@ -111,14 +112,15 @@ public class LoggerConfiguratorTest {
     }
 
     private void mockConfigFile(String content) throws IOException {
-        mockConfigFile = File.createTempFile(LoggerConfiguratorTest.class.getSimpleName(), "log4j2.xml");
+        mockConfigFile = File.createTempFile(LoggerConfiguratorTest.class.getSimpleName(),
+                LoggerConfigurator.CONFIG_XML);
         FileWriter fileWriter = new FileWriter(mockConfigFile);
         fileWriter.write(content);
         fileWriter.close();
     }
 
     private String getFactoryDefaultConfig() {
-        InputStream in = getClass().getResourceAsStream("/" + LoggerConfigurator.LOGBACK_XML);
+        InputStream in = getClass().getResourceAsStream("/" + LoggerConfigurator.CONFIG_XML);
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         return reader.lines().collect(Collectors.joining("\n"));
     }
