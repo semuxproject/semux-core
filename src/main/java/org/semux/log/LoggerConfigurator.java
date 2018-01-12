@@ -8,22 +8,19 @@ package org.semux.log;
 
 import java.io.File;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.status.StatusLogger;
 import org.semux.config.Constants;
-import org.semux.util.SystemUtil;
-import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
 
 /**
- * The configurator will try to load logback.xml from config directory at
- * runtime. If logback.xml doesn't exist in user's config directory, the factory
- * default of src/main/resources/logback.xml will be used.
+ * The configurator will try to load log4j2.xml from config directory at
+ * runtime. If log4j2.xml doesn't exist in user's config directory, the factory
+ * default of src/main/resources/log4j2.xml will be used.
  */
 public class LoggerConfigurator {
 
-    public static final String LOGBACK_XML = "logback.xml";
+    public static final String LOGBACK_XML = "log4j2.xml";
     public static final String DEBUG_LOG = "debug.log";
 
     private LoggerConfigurator() {
@@ -33,18 +30,16 @@ public class LoggerConfigurator {
         File file = getConfigurationFile(dataDir);
 
         if (file.exists()) {
-            LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-            try {
-                context.reset();
-                context.putProperty("log.file", new File(dataDir, DEBUG_LOG).getAbsolutePath());
-
-                JoranConfigurator configurator = new JoranConfigurator();
-                configurator.setContext(context);
-                configurator.doConfigure(file);
-            } catch (JoranException je) {
-                System.err.format("The logback configure file is invalid: %s", file.getAbsolutePath());
-                SystemUtil.exit(-1);
+            final LoggerContext context = (LoggerContext) LogManager.getContext(false);
+            context.setConfigLocation(file.toURI());
+            if (System.getProperty("log.file") == null) {
+                System.setProperty("log.file", new File(dataDir, DEBUG_LOG).getAbsolutePath());
             }
+            context.reconfigure();
+            context.updateLoggers();
+        } else {
+            StatusLogger.getLogger().error("Logger config file {} doesn't exist, using the factory default",
+                    file.getAbsolutePath());
         }
     }
 

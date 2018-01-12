@@ -37,6 +37,9 @@ public class SystemUtil {
     // Fix JNA issue: There is an incompatible JNA native library installed
     static {
         System.setProperty("jna.nosys", "true");
+
+        // Disable auto-registered shutdown hook
+        System.setProperty("log4j.shutdownHookEnabled", "false");
     }
 
     private static final Logger logger = LoggerFactory.getLogger(SystemUtil.class);

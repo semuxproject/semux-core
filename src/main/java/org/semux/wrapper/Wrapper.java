@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -48,26 +50,48 @@ public class Wrapper {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException, ParseException {
+
         WrapperCLIParser wrapperCLIParser = new WrapperCLIParser(args);
         Wrapper wrapper = new Wrapper();
-        String[] jvmOptions = wrapper.allocateHeapSize(wrapperCLIParser.jvmOptions);
+        String[] jvmOptions = wrapper.addDefaultJvmOptions(wrapperCLIParser.jvmOptions);
         int exitValue = wrapper.exec(wrapperCLIParser.mode, jvmOptions, wrapperCLIParser.remainingArgs);
         SystemUtil.exit(exitValue);
     }
 
-    protected String[] allocateHeapSize(String[] jvmOptions) {
+    protected String[] addDefaultJvmOptions(final String[] jvmOptions) {
         ArrayList<String> allocatedJvmOptions = new ArrayList<>(asList(jvmOptions));
+
+        // add non-existing options
+        getDefaultJvmOptionSuppliers()
+                .entrySet()
+                .stream()
+                .filter(e -> Stream.of(jvmOptions).noneMatch(s -> e.getKey().matcher(s).find()))
+                .forEach(e -> allocatedJvmOptions.add(e.getValue().get()));
+
+        return allocatedJvmOptions.toArray(new String[allocatedJvmOptions.size()]);
+    }
+
+    private static HashMap<Pattern, Supplier<String>> getDefaultJvmOptionSuppliers() {
+        final HashMap<Pattern, Supplier<String>> optSuppliers = new HashMap<>();
 
         // dynamically specify maximum heap size according to available physical memory
         // if Xmx is not specified in jvmoptions
-        final Pattern xmxPattern = Pattern.compile("^-Xmx");
+        optSuppliers.put(
+                Pattern.compile("^-Xmx"),
+                () -> String.format("-Xmx%dM", SystemUtil.getAvailableMemorySize() / 1024 / 1024 * 8 / 10));
 
-        if (Stream.of(jvmOptions).noneMatch(s -> xmxPattern.matcher(s).find())) {
-            long toAllocateMB = SystemUtil.getAvailableMemorySize() / 1024 / 1024 * 8 / 10;
-            allocatedJvmOptions.add(String.format("-Xmx%dM", Math.max(toAllocateMB, MINIMUM_HEAP_SIZE_MB)));
-        }
+        // Log4j2 default options
+        optSuppliers.put(
+                Pattern.compile("^-Dlog4j2\\.garbagefreeThreadContextMap"),
+                () -> "-Dlog4j2.garbagefreeThreadContextMap=true");
+        optSuppliers.put(
+                Pattern.compile("^-Dlog4j2\\.shutdownHookEnabled"),
+                () -> "-Dlog4j2.shutdownHookEnabled=false");
+        optSuppliers.put(
+                Pattern.compile("^-Dlog4j2\\.disableJmx"),
+                () -> "-Dlog4j2.disableJmx=true");
 
-        return allocatedJvmOptions.toArray(new String[allocatedJvmOptions.size()]);
+        return optSuppliers;
     }
 
     protected int exec(Mode mode, String[] jvmOptions, String[] args) throws IOException, InterruptedException {

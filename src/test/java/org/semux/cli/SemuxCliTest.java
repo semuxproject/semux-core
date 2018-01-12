@@ -23,7 +23,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
-import static org.semux.LoggingAppender.info;
+import static org.semux.TestLoggingAppender.info;
 
 import java.security.KeyPair;
 import java.util.ArrayList;
@@ -31,8 +31,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.cli.ParseException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.Logger;
 import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
@@ -40,10 +44,11 @@ import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.Kernel;
-import org.semux.LoggingAppender;
+import org.semux.TestLoggingAppender;
 import org.semux.config.DevnetConfig;
 import org.semux.config.MainnetConfig;
 import org.semux.config.TestnetConfig;
@@ -53,14 +58,12 @@ import org.semux.crypto.Key;
 import org.semux.message.CliMessages;
 import org.semux.util.SystemUtil;
 import org.semux.util.SystemUtil.OsName;
-import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.LoggingEvent;
 import net.i2p.crypto.eddsa.KeyPairGenerator;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ SystemUtil.class, Kernel.class, SemuxCli.class })
+@PowerMockIgnore("javax.management.*")
 public class SemuxCliTest {
 
     @Rule
@@ -72,15 +75,16 @@ public class SemuxCliTest {
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
-    @Before
-    public void setUp() {
-        LoggingAppender.clear();
-        LoggingAppender.prepare(Level.INFO, SemuxCli.class, LoggerFactory.getLogger(SemuxCli.class));
+    @BeforeClass
+    public static void beforeClass() {
+        TestLoggingAppender.prepare(Level.INFO);
+        Logger logger = (Logger) LogManager.getLogger(SemuxCli.class);
+        logger.addAppender(TestLoggingAppender.createAppender("TestLoggingAppender", null, null, null));
     }
 
     @After
     public void tearDown() {
-        LoggingAppender.prepare(Level.OFF, null, null);
+        TestLoggingAppender.clear();
     }
 
     @Test
@@ -267,7 +271,7 @@ public class SemuxCliTest {
         verify(semuxCLI).startKernel(any(), any(), any());
 
         // assert outputs
-        List<LoggingEvent> logs = LoggingAppender.events();
+        List<LogEvent> logs = TestLoggingAppender.events();
         assertThat(logs, hasItem(info(CliMessages.get("NewAccountCreatedForAddress", newAccount.toAddressString()))));
     }
 
@@ -340,7 +344,7 @@ public class SemuxCliTest {
         verify(wallet).flush();
 
         // assert outputs
-        List<LoggingEvent> logs = LoggingAppender.events();
+        List<LogEvent> logs = TestLoggingAppender.events();
         assertThat(logs, hasItem(info(CliMessages.get("NewAccountCreatedForAddress", newAccount.toAddressString()))));
         assertThat(logs, hasItem(info(CliMessages.get("PublicKey", Hex.encode(newAccount.getPublicKey())))));
         assertThat(logs, hasItem(info(CliMessages.get("PrivateKey", Hex.encode(newAccount.getPrivateKey())))));
@@ -372,7 +376,7 @@ public class SemuxCliTest {
         verify(wallet).getAccounts();
 
         // assert outputs
-        List<LoggingEvent> logs = LoggingAppender.events();
+        List<LogEvent> logs = TestLoggingAppender.events();
         assertThat(logs, hasItem(info(CliMessages.get("ListAccountItem", 0, account.toAddressString()))));
     }
 
@@ -554,7 +558,7 @@ public class SemuxCliTest {
         semuxCLI.importPrivateKey(key);
 
         // assertions
-        List<LoggingEvent> logs = LoggingAppender.events();
+        List<LogEvent> logs = TestLoggingAppender.events();
         assertThat(logs, hasItem(info(CliMessages.get("PrivateKeyImportedSuccessfully"))));
         assertThat(logs, hasItem(info(CliMessages.get("Address", "0680a919c78faa59b127014b6181979ae0a62dbd"))));
         assertThat(logs, hasItem(info(CliMessages.get("PrivateKey", key))));
