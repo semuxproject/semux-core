@@ -18,7 +18,6 @@ import java.util.Arrays;
 
 import javax.swing.*;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -36,10 +35,10 @@ import org.semux.message.GUIMessages;
 public class ConsoleDialog extends JDialog implements ActionListener {
 
     public static final String HELP = "help";
-    private SemuxGUI gui;
+    private transient SemuxGUI gui;
+    private transient SemuxApi api;
     private JTextArea console;
     private JTextField input;
-    private SemuxApi api;
     private ObjectMapper mapper = new ObjectMapper();
 
     public ConsoleDialog(SemuxGUI gui, JFrame parent) {
