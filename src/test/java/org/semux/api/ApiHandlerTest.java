@@ -49,6 +49,7 @@ import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
+import org.semux.api.response.Types;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
 import org.semux.core.Genesis.Premine;
@@ -131,12 +132,12 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         GetPeersResponse response = request("/get_peers", GetPeersResponse.class);
         assertTrue(response.success);
-        List<GetPeersResponse.PeerResult> result = response.peers;
+        List<Types.PeerType> result = response.peers;
 
         assertNotNull(result);
         assertEquals(peers.size(), result.size());
         for (int i = 0; i < peers.size(); i++) {
-            GetPeersResponse.PeerResult peerJson = result.get(i);
+            Types.PeerType peerJson = result.get(i);
             Peer peer = peers.get(i);
             assertEquals(peer.getIp(), peerJson.ip);
             assertEquals(peer.getPort(), peerJson.port.intValue());
@@ -215,7 +216,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         GetLatestBlockResponse response = request(uri, GetLatestBlockResponse.class);
         assertTrue(response.success);
 
-        GetBlockResponse.BlockResult blockJson = response.block;
+        Types.BlockType blockJson = response.block;
         assertEquals(Hex.encode0x(genesisBlock.getHash()), blockJson.hash);
         assertEquals(genesisBlock.getNumber(), blockJson.number.longValue());
         assertEquals(Hex.encode0x(genesisBlock.getCoinbase()), blockJson.coinbase);

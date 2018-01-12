@@ -27,6 +27,7 @@ import org.semux.api.response.GetPendingTransactionsResponse;
 import org.semux.api.response.GetTransactionLimitsResponse;
 import org.semux.api.response.GetTransactionResponse;
 import org.semux.api.response.GetValidatorsResponse;
+import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
@@ -64,7 +65,7 @@ public interface SemuxApi {
 
     @GET
     @Path("add_node")
-    @ApiOperation(value = "Add node", notes = "Adds a node to connect.", response = AddNodeResponse.class)
+    @ApiOperation(value = "Add node", notes = "Adds a node to node manager.", response = AddNodeResponse.class)
     @Produces(JSON)
     ApiHandlerResponse addNode(@QueryParam("node") String node);
 
@@ -125,7 +126,7 @@ public interface SemuxApi {
 
     @GET
     @Path("send_transaction")
-    @ApiOperation(value = "Send a raw transaction", notes = "Broadcast a raw transaction to the network.", response = SendTransactionResponse.class)
+    @ApiOperation(value = "Send a raw transaction", notes = "Broadcasts a raw transaction to the network.", response = SendTransactionResponse.class)
     @Produces(JSON)
     ApiHandlerResponse sendTransaction(@QueryParam("raw") String raw);
 
@@ -154,14 +155,14 @@ public interface SemuxApi {
     ApiHandlerResponse getValidators();
 
     @GET
-    @Path("get_votes")
-    @ApiOperation(value = "Get votes", notes = "Returns a voter one voter has given to a delegate.", response = GetVotesResponse.class)
+    @Path("get_vote")
+    @ApiOperation(value = "Get vote", notes = "Returns the vote from a voter to a delegate.", response = GetVoteResponse.class)
     @Produces(JSON)
     ApiHandlerResponse getVotes(@QueryParam("delegate") String delegate, @QueryParam("voter") String voterAddress);
 
     @GET
     @Path("get_votes")
-    @ApiOperation(value = "Get votes", notes = "Returns all votes of a delegate", response = GetVotesResponse.class)
+    @ApiOperation(value = "Get votes", notes = "Returns all the votes to a delegate", response = GetVotesResponse.class)
     @Produces(JSON)
     ApiHandlerResponse getVotes(@QueryParam("delegate") String delegate);
 
