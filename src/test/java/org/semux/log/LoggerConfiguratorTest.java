@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,8 +52,6 @@ public class LoggerConfiguratorTest {
             mockConfigFile.delete();
             mockConfigFile = null;
         }
-
-        ((LoggerContext) LogManager.getContext(false)).reconfigure();
     }
 
     @Test
@@ -98,6 +95,7 @@ public class LoggerConfiguratorTest {
         spy(LoggerConfigurator.class);
         when(LoggerConfigurator.getConfigurationFile(dataDir)).thenReturn(mockConfigFile);
 
+        exit.expectSystemExitWithStatus(1);
         systemErrRule.enableLog();
 
         // execution
