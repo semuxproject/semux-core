@@ -80,7 +80,7 @@
                                 <scheme>http</scheme>
                             </schemes>
                             <locations>
-                                <location>org.semux.api.SemuxAPI</location>
+                                <location>org.semux.api.SemuxApi</location>
                             </locations>
                             <swaggerDirectory>target/swagger-ui</swaggerDirectory>
                         </apiSource>
