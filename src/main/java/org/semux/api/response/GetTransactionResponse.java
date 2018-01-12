@@ -18,16 +18,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class GetTransactionResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final Result transaction;
+    public final TransactionResult transaction;
 
     public GetTransactionResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Result transaction) {
+            @JsonProperty("result") TransactionResult transaction) {
         super(success, null);
         this.transaction = transaction;
     }
 
-    public static class Result {
+    public static class TransactionResult {
 
         @JsonProperty("hash")
         public final String hash;
@@ -59,7 +59,7 @@ public class GetTransactionResponse extends ApiHandlerResponse {
         @JsonProperty("data")
         public final String data;
 
-        public Result(
+        public TransactionResult(
                 @JsonProperty("hash") String hash,
                 @JsonProperty("type") String type,
                 @JsonProperty("from") String from,
@@ -82,7 +82,7 @@ public class GetTransactionResponse extends ApiHandlerResponse {
             this.data = data;
         }
 
-        public Result(Transaction tx) {
+        public TransactionResult(Transaction tx) {
             this(Hex.encode0x(tx.getHash()),
                     tx.getType().toString(),
                     Hex.encode0x(tx.getFrom()),

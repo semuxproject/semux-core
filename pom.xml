@@ -61,9 +61,11 @@
                         <apiSource>
                             <info>
                                 <title>Semux</title>
+                                <description>${project.description}</description>
                                 <version>${project.version}</version>
                                 <contact>
-                                    <url>https://semux.org</url>
+                                    <name>${project.organization.name}</name>
+                                    <url>${project.organization.url}</url>
                                 </contact>
                                 <license>
                                     <name>MIT License</name>

@@ -19,11 +19,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class GetTransactionLimitsResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final Result result;
+    public final TransactionLimitsResult transactionLimits;
 
     public GetTransactionLimitsResponse(Kernel kernel, TransactionType transactionType) {
         super(true, null);
-        this.result = new Result(
+        this.transactionLimits = new TransactionLimitsResult(
                 kernel.getConfig().maxTransactionDataSize(transactionType),
                 kernel.getConfig().minTransactionFee(),
                 transactionType.equals(DELEGATE) ? kernel.getConfig().minDelegateBurnAmount() : null);
@@ -32,12 +32,12 @@ public class GetTransactionLimitsResponse extends ApiHandlerResponse {
     @JsonCreator
     public GetTransactionLimitsResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Result result) {
+            @JsonProperty("result") TransactionLimitsResult result) {
         super(success, null);
-        this.result = result;
+        this.transactionLimits = result;
     }
 
-    public static class Result {
+    public static class TransactionLimitsResult {
 
         @JsonProperty("maxTransactionDataSize")
         public final Integer maxTransactionDataSize;
@@ -50,7 +50,7 @@ public class GetTransactionLimitsResponse extends ApiHandlerResponse {
         public final Long minDelegateBurnAmount;
 
         @JsonCreator
-        public Result(
+        public TransactionLimitsResult(
                 @JsonProperty("maxTransactionDataSize") Integer maxTransactionDataSize,
                 @JsonProperty("minTransactionFee") Long minTransactionFee,
                 @JsonProperty("minDelegateBurnAmount") Long minDelegateBurnAmount) {

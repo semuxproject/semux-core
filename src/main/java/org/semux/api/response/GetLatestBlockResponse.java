@@ -13,11 +13,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class GetLatestBlockResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final GetBlockResponse.Result block;
+    public final GetBlockResponse.BlockResult block;
 
     public GetLatestBlockResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") GetBlockResponse.Result block) {
+            @JsonProperty("result") GetBlockResponse.BlockResult block) {
         super(success, null);
         this.block = block;
     }

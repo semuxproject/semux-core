@@ -62,14 +62,14 @@ public class SemuxApiImpl implements SemuxApi {
 
     @Override
     public ApiHandlerResponse getInfo() {
-        return new GetInfoResponse(true, new GetInfoResponse.Result(kernel));
+        return new GetInfoResponse(true, new GetInfoResponse.InfoResult(kernel));
     }
 
     @Override
     public ApiHandlerResponse getPeers() {
         return new GetPeersResponse(true,
                 kernel.getChannelManager().getActivePeers().parallelStream()
-                        .map(GetPeersResponse.Result::new)
+                        .map(GetPeersResponse.PeerResult::new)
                         .collect(Collectors.toList()));
     }
 
@@ -121,7 +121,8 @@ public class SemuxApiImpl implements SemuxApi {
 
     @Override
     public ApiHandlerResponse getLatestBlock() {
-        return new GetLatestBlockResponse(true, new GetBlockResponse.Result(kernel.getBlockchain().getLatestBlock()));
+        return new GetLatestBlockResponse(true,
+                new GetBlockResponse.BlockResult(kernel.getBlockchain().getLatestBlock()));
     }
 
     @Override
@@ -132,7 +133,7 @@ public class SemuxApiImpl implements SemuxApi {
             return failure("The requested block was not found");
         }
 
-        return new GetBlockResponse(true, new GetBlockResponse.Result(block));
+        return new GetBlockResponse(true, new GetBlockResponse.BlockResult(block));
     }
 
     @Override
@@ -145,7 +146,7 @@ public class SemuxApiImpl implements SemuxApi {
             return failure("The requested block was not found");
         }
 
-        return new GetBlockResponse(true, new GetBlockResponse.Result(block));
+        return new GetBlockResponse(true, new GetBlockResponse.BlockResult(block));
     }
 
     @Override
@@ -153,7 +154,7 @@ public class SemuxApiImpl implements SemuxApi {
         return new GetPendingTransactionsResponse(true,
                 kernel.getPendingManager().getTransactions().parallelStream()
                         .map(pendingTransaction -> pendingTransaction.transaction)
-                        .map(GetTransactionResponse.Result::new)
+                        .map(GetTransactionResponse.TransactionResult::new)
                         .collect(Collectors.toList()));
     }
 
@@ -186,7 +187,7 @@ public class SemuxApiImpl implements SemuxApi {
         }
         return new GetAccountTransactionsResponse(true,
                 kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream()
-                        .map(GetTransactionResponse.Result::new)
+                        .map(GetTransactionResponse.TransactionResult::new)
                         .collect(Collectors.toList()));
     }
 
@@ -208,7 +209,7 @@ public class SemuxApiImpl implements SemuxApi {
             return failure("The request transaction was not found");
         }
 
-        return new GetTransactionResponse(true, new GetTransactionResponse.Result(transaction));
+        return new GetTransactionResponse(true, new GetTransactionResponse.TransactionResult(transaction));
     }
 
     @Override
@@ -239,7 +240,7 @@ public class SemuxApiImpl implements SemuxApi {
         }
 
         Account account = kernel.getBlockchain().getAccountState().getAccount(addressBytes);
-        return new GetAccountResponse(true, new GetAccountResponse.Result(account));
+        return new GetAccountResponse(true, new GetAccountResponse.AccountResult(account));
     }
 
     @Override
@@ -262,14 +263,14 @@ public class SemuxApiImpl implements SemuxApi {
 
         BlockchainImpl.ValidatorStats validatorStats = kernel.getBlockchain().getValidatorStats(addressBytes);
 
-        return new GetDelegateResponse(true, new GetDelegateResponse.Result(validatorStats, delegate));
+        return new GetDelegateResponse(true, new GetDelegateResponse.DelegateResult(validatorStats, delegate));
     }
 
     @Override
     public ApiHandlerResponse getDelegates() {
         return new GetDelegatesResponse(true,
                 kernel.getBlockchain().getDelegateState().getDelegates().parallelStream()
-                        .map(delegate -> new GetDelegateResponse.Result(
+                        .map(delegate -> new GetDelegateResponse.DelegateResult(
                                 kernel.getBlockchain().getValidatorStats(delegate.getAddress()), delegate))
                         .collect(Collectors.toList()));
     }

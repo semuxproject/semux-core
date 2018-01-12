@@ -17,16 +17,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class GetPeersResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final List<Result> peers;
+    public final List<PeerResult> peers;
 
     public GetPeersResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") List<Result> peers) {
+            @JsonProperty("result") List<PeerResult> peers) {
         super(success, null);
         this.peers = peers;
     }
 
-    public static class Result {
+    public static class PeerResult {
 
         @JsonProperty("ip")
         public final String ip;
@@ -49,7 +49,7 @@ public class GetPeersResponse extends ApiHandlerResponse {
         @JsonProperty("latency")
         public final Long latency;
 
-        public Result(
+        public PeerResult(
                 @JsonProperty("ip") String ip,
                 @JsonProperty("port") int port,
                 @JsonProperty("networkVersion") short networkVersion,
@@ -66,7 +66,7 @@ public class GetPeersResponse extends ApiHandlerResponse {
             this.latency = latency;
         }
 
-        public Result(Peer peer) {
+        public PeerResult(Peer peer) {
             this(peer.getIp(),
                     peer.getPort(),
                     peer.getNetworkVersion(),

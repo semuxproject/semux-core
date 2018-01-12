@@ -15,16 +15,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class GetInfoResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final Result info;
+    public final InfoResult info;
 
     public GetInfoResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Result info) {
+            @JsonProperty("result") InfoResult info) {
         super(success, null);
         this.info = info;
     }
 
-    public static class Result {
+    public static class InfoResult {
         @JsonProperty("clientId")
         public final String clientId;
 
@@ -43,7 +43,7 @@ public class GetInfoResponse extends ApiHandlerResponse {
         @JsonProperty("pendingTransactions")
         public final Number pendingTransactions;
 
-        public Result(
+        public InfoResult(
                 @JsonProperty("clientId") String clientId,
                 @JsonProperty("coinbase") String coinbase,
                 @JsonProperty("latestBlockNumber") Number latestBlockNumber,
@@ -58,7 +58,7 @@ public class GetInfoResponse extends ApiHandlerResponse {
             this.pendingTransactions = pendingTransactions;
         }
 
-        public Result(Kernel kernel) {
+        public InfoResult(Kernel kernel) {
             this(kernel.getConfig().getClientId(),
                     Hex.PREF + kernel.getCoinbase(),
                     kernel.getBlockchain().getLatestBlockNumber(),

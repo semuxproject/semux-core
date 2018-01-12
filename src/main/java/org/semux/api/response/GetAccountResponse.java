@@ -16,16 +16,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class GetAccountResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final Result account;
+    public final AccountResult account;
 
     public GetAccountResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Result account) {
+            @JsonProperty("result") AccountResult account) {
         super(success, null);
         this.account = account;
     }
 
-    public static class Result {
+    public static class AccountResult {
 
         public final String address;
         public final long available;
@@ -33,7 +33,7 @@ public class GetAccountResponse extends ApiHandlerResponse {
         public final long nonce;
 
         @JsonCreator
-        public Result(
+        public AccountResult(
                 @JsonProperty("address") String address,
                 @JsonProperty("available") long available,
                 @JsonProperty("locked") long locked,
@@ -44,7 +44,7 @@ public class GetAccountResponse extends ApiHandlerResponse {
             this.nonce = nonce;
         }
 
-        public Result(Account account) {
+        public AccountResult(Account account) {
             this(Hex.encode0x(account.getAddress()),
                     account.getAvailable(),
                     account.getLocked(),

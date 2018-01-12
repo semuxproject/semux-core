@@ -129,12 +129,12 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         GetPeersResponse response = request("/get_peers", GetPeersResponse.class);
         assertTrue(response.success);
-        List<GetPeersResponse.Result> result = response.peers;
+        List<GetPeersResponse.PeerResult> result = response.peers;
 
         assertNotNull(result);
         assertEquals(peers.size(), result.size());
         for (int i = 0; i < peers.size(); i++) {
-            GetPeersResponse.Result peerJson = result.get(i);
+            GetPeersResponse.PeerResult peerJson = result.get(i);
             Peer peer = peers.get(i);
             assertEquals(peer.getIp(), peerJson.ip);
             assertEquals(peer.getPort(), peerJson.port.intValue());
@@ -213,7 +213,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         GetLatestBlockResponse response = request(uri, GetLatestBlockResponse.class);
         assertTrue(response.success);
 
-        GetBlockResponse.Result blockJson = response.block;
+        GetBlockResponse.BlockResult blockJson = response.block;
         assertEquals(Hex.encode0x(genesisBlock.getHash()), blockJson.hash);
         assertEquals(genesisBlock.getNumber(), blockJson.number.longValue());
         assertEquals(Hex.encode0x(genesisBlock.getCoinbase()), blockJson.coinbase);
@@ -313,7 +313,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         String uri = "/get_delegate?address=" + Hex.encode(entry.getValue());
         GetDelegateResponse response = request(uri, GetDelegateResponse.class);
         assertTrue(response.success);
-        assertEquals(entry.getKey(), response.delegateResult.name);
+        assertEquals(entry.getKey(), response.delegate.name);
     }
 
     @Test
@@ -321,7 +321,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         String uri = "/get_delegates";
         GetDelegatesResponse response = request(uri, GetDelegatesResponse.class);
         assertTrue(response.success);
-        assertTrue(response.delegateResults.size() > 0);
+        assertTrue(response.delegates.size() > 0);
     }
 
     @Test
@@ -386,13 +386,15 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
             String uri = "/get_transaction_limits?type=" + type.toString();
             GetTransactionLimitsResponse response = request(uri, GetTransactionLimitsResponse.class);
             assertTrue(response.success);
-            assertEquals(config.maxTransactionDataSize(type), response.result.maxTransactionDataSize.intValue());
-            assertEquals(config.minTransactionFee(), response.result.minTransactionFee.longValue());
+            assertEquals(config.maxTransactionDataSize(type),
+                    response.transactionLimits.maxTransactionDataSize.intValue());
+            assertEquals(config.minTransactionFee(), response.transactionLimits.minTransactionFee.longValue());
 
             if (type.equals(TransactionType.DELEGATE)) {
-                assertEquals(config.minDelegateBurnAmount(), response.result.minDelegateBurnAmount.longValue());
+                assertEquals(config.minDelegateBurnAmount(),
+                        response.transactionLimits.minDelegateBurnAmount.longValue());
             } else {
-                assertNull(response.result.minDelegateBurnAmount);
+                assertNull(response.transactionLimits.minDelegateBurnAmount);
             }
         }
     }

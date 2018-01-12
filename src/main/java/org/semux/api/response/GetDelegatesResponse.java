@@ -15,12 +15,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class GetDelegatesResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final List<GetDelegateResponse.Result> delegateResults;
+    public final List<GetDelegateResponse.DelegateResult> delegates;
 
     public GetDelegatesResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") List<GetDelegateResponse.Result> delegateResults) {
+            @JsonProperty("result") List<GetDelegateResponse.DelegateResult> delegates) {
         super(success, null);
-        this.delegateResults = delegateResults;
+        this.delegates = delegates;
     }
 }

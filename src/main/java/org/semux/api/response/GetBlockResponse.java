@@ -19,16 +19,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class GetBlockResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final Result block;
+    public final BlockResult block;
 
     public GetBlockResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Result block) {
+            @JsonProperty("result") BlockResult block) {
         super(success, null);
         this.block = block;
     }
 
-    public static class Result {
+    public static class BlockResult {
 
         @JsonProperty("hash")
         public final String hash;
@@ -64,9 +64,9 @@ public class GetBlockResponse extends ApiHandlerResponse {
         public final String data;
 
         @JsonProperty("transactions")
-        public final List<GetTransactionResponse.Result> transactions;
+        public final List<GetTransactionResponse.TransactionResult> transactions;
 
-        public Result(
+        public BlockResult(
                 @JsonProperty("hash") String hash,
                 @JsonProperty("number") Long number,
                 @JsonProperty("view") Integer view,
@@ -78,7 +78,7 @@ public class GetBlockResponse extends ApiHandlerResponse {
                 @JsonProperty("resultsRoot") String resultsRoot,
                 @JsonProperty("stateRoot") String stateRoot,
                 @JsonProperty("data") String data,
-                @JsonProperty("transactions") List<GetTransactionResponse.Result> transactions) {
+                @JsonProperty("transactions") List<GetTransactionResponse.TransactionResult> transactions) {
             this.hash = hash;
             this.number = number;
             this.view = view;
@@ -93,7 +93,7 @@ public class GetBlockResponse extends ApiHandlerResponse {
             this.transactions = transactions;
         }
 
-        public Result(Block block) {
+        public BlockResult(Block block) {
             this(Hex.encode0x(block.getHash()),
                     block.getNumber(),
                     block.getView(),
@@ -106,7 +106,7 @@ public class GetBlockResponse extends ApiHandlerResponse {
                     Hex.encode0x(block.getStateRoot()),
                     Hex.encode0x(block.getData()),
                     block.getTransactions().stream()
-                            .map(GetTransactionResponse.Result::new)
+                            .map(GetTransactionResponse.TransactionResult::new)
                             .collect(Collectors.toList()));
         }
     }

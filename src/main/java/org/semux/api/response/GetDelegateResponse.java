@@ -16,16 +16,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class GetDelegateResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final Result delegateResult;
+    public final DelegateResult delegate;
 
     public GetDelegateResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Result delegateResult) {
+            @JsonProperty("result") DelegateResult delegate) {
         super(success, null);
-        this.delegateResult = delegateResult;
+        this.delegate = delegate;
     }
 
-    public static class Result {
+    public static class DelegateResult {
 
         @JsonProperty("address")
         public final String address;
@@ -48,7 +48,7 @@ public class GetDelegateResponse extends ApiHandlerResponse {
         @JsonProperty("turnsMissed")
         public final Long turnsMissed;
 
-        public Result(BlockchainImpl.ValidatorStats validatorStats, Delegate delegate) {
+        public DelegateResult(BlockchainImpl.ValidatorStats validatorStats, Delegate delegate) {
             this(Hex.PREF + delegate.getAddressString(),
                     delegate.getNameString(),
                     delegate.getRegisteredAt(),
@@ -58,7 +58,7 @@ public class GetDelegateResponse extends ApiHandlerResponse {
                     validatorStats.getTurnsMissed());
         }
 
-        public Result(
+        public DelegateResult(
                 @JsonProperty("address") String address,
                 @JsonProperty("name") String name,
                 @JsonProperty("registeredAt") Long registeredAt,

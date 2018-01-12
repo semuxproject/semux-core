@@ -9,18 +9,18 @@ package org.semux.api.response;
 import java.util.List;
 
 import org.semux.api.ApiHandlerResponse;
-import org.semux.api.response.GetTransactionResponse.Result;
+import org.semux.api.response.GetTransactionResponse.TransactionResult;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GetPendingTransactionsResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final List<Result> pendingTransactions;
+    public final List<TransactionResult> pendingTransactions;
 
     public GetPendingTransactionsResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") List<Result> pendingTransactions) {
+            @JsonProperty("result") List<TransactionResult> pendingTransactions) {
         super(success, null);
         this.pendingTransactions = pendingTransactions;
     }
