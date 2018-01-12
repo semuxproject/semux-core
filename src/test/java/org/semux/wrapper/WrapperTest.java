@@ -24,6 +24,7 @@ import java.util.Collection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.PowerMockRunnerDelegate;
@@ -35,6 +36,7 @@ import org.semux.util.SystemUtil.OsName;
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(Parameterized.class)
 @PrepareForTest({ ProcessBuilder.class, Process.class, Wrapper.class, SystemUtil.class })
+@PowerMockIgnore("javax.management.*")
 public class WrapperTest {
 
     @Parameterized.Parameters
@@ -46,6 +48,9 @@ public class WrapperTest {
                                         getJavaBinPath(),
                                         "-cp", null,
                                         "-Xmx1G", "-Xms1G",
+                                        "-Dlog4j2.garbagefreeThreadContextMap=true",
+                                        "-Dlog4j2.shutdownHookEnabled=false",
+                                        "-Dlog4j2.disableJmx=true",
                                         SemuxGui.class.getCanonicalName() },
                                 null },
 
@@ -54,6 +59,9 @@ public class WrapperTest {
                                         getJavaBinPath(),
                                         "-cp", null,
                                         "-Xmx1600M",
+                                        "-Dlog4j2.garbagefreeThreadContextMap=true",
+                                        "-Dlog4j2.shutdownHookEnabled=false",
+                                        "-Dlog4j2.disableJmx=true",
                                         SemuxGui.class.getCanonicalName() },
                                 2000L * 1024 * 1024 },
 
@@ -61,6 +69,9 @@ public class WrapperTest {
                                 getJavaBinPath(),
                                 "-cp", null,
                                 "-Xmx1600M",
+                                "-Dlog4j2.garbagefreeThreadContextMap=true",
+                                "-Dlog4j2.shutdownHookEnabled=false",
+                                "-Dlog4j2.disableJmx=true",
                                 SemuxCli.class.getCanonicalName() },
                                 2000L * 1024 * 1024 },
 
@@ -69,6 +80,9 @@ public class WrapperTest {
                                         getJavaBinPath(),
                                         "-cp", null,
                                         String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB),
+                                        "-Dlog4j2.garbagefreeThreadContextMap=true",
+                                        "-Dlog4j2.shutdownHookEnabled=false",
+                                        "-Dlog4j2.disableJmx=true",
                                         SemuxGui.class.getCanonicalName() },
                                 MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 },
 
@@ -77,6 +91,9 @@ public class WrapperTest {
                                         getJavaBinPath(),
                                         "-cp", null,
                                         String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB),
+                                        "-Dlog4j2.garbagefreeThreadContextMap=true",
+                                        "-Dlog4j2.shutdownHookEnabled=false",
+                                        "-Dlog4j2.disableJmx=true",
                                         SemuxCli.class.getCanonicalName() },
                                 MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 } });
     }
