@@ -8,12 +8,9 @@ package org.semux.api;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
 import org.semux.api.response.AddNodeResponse;
 import org.semux.api.response.CreateAccountResponse;
 import org.semux.api.response.DoTransactionResponse;
@@ -34,6 +31,10 @@ import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
+
 /**
  * Interface defining Semux API
  */
@@ -43,9 +44,11 @@ import org.semux.api.response.SendTransactionResponse;
 })
 public interface SemuxApi {
 
+    // TODO: add query parameter descriptions.
+
     String JSON = "application/json";
 
-    ApiHandlerResponse failure(@PathParam("message") String message);
+    ApiHandlerResponse failure(@QueryParam("message") String message);
 
     @GET
     @Path("get_info")
@@ -63,19 +66,19 @@ public interface SemuxApi {
     @Path("add_node")
     @ApiOperation(value = "Add node", notes = "Adds a node to connect.", response = AddNodeResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse addNode(@PathParam("node") String node);
+    ApiHandlerResponse addNode(@QueryParam("node") String node);
 
     @GET
     @Path("add_to_blacklist")
     @ApiOperation(value = "Add to blacklist", notes = "Adds an IP address to blacklist.", response = ApiHandlerResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse addToBlacklist(@PathParam("ip") String ipAddress);
+    ApiHandlerResponse addToBlacklist(@QueryParam("ip") String ipAddress);
 
     @GET
     @Path("add_to_whitelist")
     @ApiOperation(value = "Add to Whitelist", notes = "Adds an IP address to whitelist.", response = ApiHandlerResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse addToWhitelist(@PathParam("ip") String ipAddress);
+    ApiHandlerResponse addToWhitelist(@QueryParam("ip") String ipAddress);
 
     @GET
     @Path("get_latest_block_number")
@@ -93,13 +96,13 @@ public interface SemuxApi {
     @Path("get_block")
     @ApiOperation(value = "Get block", notes = "Returns a block.", response = GetBlockResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse getBlock(@PathParam("number") Long blockNum);
+    ApiHandlerResponse getBlock(@QueryParam("number") Long blockNum);
 
     @GET
     @Path("get_block")
     @ApiOperation(value = "Get block", notes = "Returns a block.", response = GetBlockResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse getBlock(@PathParam("hash") String hash);
+    ApiHandlerResponse getBlock(@QueryParam("hash") String hash);
 
     @GET
     @Path("get_pending_transactions")
@@ -111,32 +114,32 @@ public interface SemuxApi {
     @Path("get_account_transactions")
     @ApiOperation(value = "Get account transactions", notes = "Returns transactions from/to an account.", response = GetAccountTransactionsResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse getAccountTransactions(@PathParam("address") String address, @PathParam("from") String from,
-            @PathParam("to") String to);
+    ApiHandlerResponse getAccountTransactions(@QueryParam("address") String address, @QueryParam("from") String from,
+            @QueryParam("to") String to);
 
     @GET
     @Path("get_transaction")
     @ApiOperation(value = "Get transaction", notes = "Returns a transactions if exists.", response = GetTransactionResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse getTransaction(@PathParam("hash") String hash);
+    ApiHandlerResponse getTransaction(@QueryParam("hash") String hash);
 
     @GET
     @Path("send_transaction")
     @ApiOperation(value = "Send a raw transaction", notes = "Broadcast a raw transaction to the network.", response = SendTransactionResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse sendTransaction(@PathParam("raw") String raw);
+    ApiHandlerResponse sendTransaction(@QueryParam("raw") String raw);
 
     @GET
     @Path("get_account")
     @ApiOperation(value = "Get account", notes = "Returns an account.", response = GetAccountResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse getAccount(@PathParam("address") String address);
+    ApiHandlerResponse getAccount(@QueryParam("address") String address);
 
     @GET
     @Path("get_delegate")
     @ApiOperation(value = "Get a delegate", notes = "Returns a delegate.", response = GetDelegateResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse getDelegate(@PathParam("address") String delegate);
+    ApiHandlerResponse getDelegate(@QueryParam("address") String delegate);
 
     @GET
     @Path("get_delegates")
@@ -154,13 +157,13 @@ public interface SemuxApi {
     @Path("get_votes")
     @ApiOperation(value = "Get votes", notes = "Returns a voter one voter has given to a delegate.", response = GetVotesResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse getVotes(@PathParam("delegate") String delegate, @PathParam("voter") String voterAddress);
+    ApiHandlerResponse getVotes(@QueryParam("delegate") String delegate, @QueryParam("voter") String voterAddress);
 
     @GET
     @Path("get_votes")
     @ApiOperation(value = "Get votes", notes = "Returns all votes of a delegate", response = GetVotesResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse getVotes(@PathParam("delegate") String delegate);
+    ApiHandlerResponse getVotes(@QueryParam("delegate") String delegate);
 
     @GET
     @Path("list_accounts")
@@ -178,34 +181,34 @@ public interface SemuxApi {
     @Path("transfer")
     @ApiOperation(value = "Transfer coins", notes = "Transfers coins to another address.", response = DoTransactionResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse transfer(@PathParam("value") String amountToSend, @PathParam("from") String from,
-            @PathParam("to") String to, @PathParam("fee") String fee, @PathParam("data") String data);
+    ApiHandlerResponse transfer(@QueryParam("value") String amountToSend, @QueryParam("from") String from,
+            @QueryParam("to") String to, @QueryParam("fee") String fee, @QueryParam("data") String data);
 
     @GET
     @Path("delegate")
     @ApiOperation(value = "Register delegate", notes = "Registers as a delegate", response = DoTransactionResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse registerDelegate(@PathParam("from") String fromAddress, @PathParam("fee") String fee,
-            @PathParam("data") String delegateName);
+    ApiHandlerResponse registerDelegate(@QueryParam("from") String fromAddress, @QueryParam("fee") String fee,
+            @QueryParam("data") String delegateName);
 
     @GET
     @Path("vote")
     @ApiOperation(value = "Vote", notes = "Votes for a delegate.", response = DoTransactionResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse vote(@PathParam("from") String from, @PathParam("to") String to,
-            @PathParam("value") String value, @PathParam("fee") String fee);
+    ApiHandlerResponse vote(@QueryParam("from") String from, @QueryParam("to") String to,
+            @QueryParam("value") String value, @QueryParam("fee") String fee);
 
     @GET
     @Path("unvote")
     @ApiOperation(value = "Unvote", notes = "Unvotes for a delegate.", response = DoTransactionResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse unvote(@PathParam("from") String from, @PathParam("to") String to,
-            @PathParam("value") String value, @PathParam("fee") String fee);
+    ApiHandlerResponse unvote(@QueryParam("from") String from, @QueryParam("to") String to,
+            @QueryParam("value") String value, @QueryParam("fee") String fee);
 
     @GET
     @Path("get_transaction_limits")
     @ApiOperation(value = "Get transaction limits", notes = "Get minimum fee and maximum size.", response = GetTransactionLimitsResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse getTransactionLimits(@PathParam("type") String type);
+    ApiHandlerResponse getTransactionLimits(@QueryParam("type") String type);
 
 }
