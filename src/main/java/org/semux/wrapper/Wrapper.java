@@ -76,11 +76,14 @@ public class Wrapper {
     protected int exec(Mode mode, String[] jvmOptions, String[] args) throws IOException, InterruptedException {
         String javaHome = System.getProperty("java.home");
         Path javaBin = Paths.get(javaHome, "bin", "java");
-        String[] args1 = ArrayUtils.addAll(
-                ArrayUtils.addAll(new String[] { javaBin.toAbsolutePath().toString() }, jvmOptions),
-                ArrayUtils.addAll(new String[] { "-cp", "semux.jar", getModeClass(mode).getCanonicalName() }, args));
 
-        return startProcess(args1);
+        String classpath = System.getProperty("java.class.path");
+
+        String[] newArgs = ArrayUtils.addAll(
+                ArrayUtils.addAll(new String[] { javaBin.toAbsolutePath().toString(), "-cp", classpath }, jvmOptions),
+                ArrayUtils.addAll(new String[] { getModeClass(mode).getCanonicalName() }, args));
+
+        return startProcess(newArgs);
     }
 
     protected int startProcess(String[] args) throws IOException, InterruptedException {

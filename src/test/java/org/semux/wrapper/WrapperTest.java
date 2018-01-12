@@ -42,23 +42,41 @@ public class WrapperTest {
         return Arrays
                 .asList(new Object[][] {
                         { new String[] { "--gui", "--jvmoptions", "-Xmx1G -Xms1G" },
-                                new String[] { getJavaBinPath(), "-Xmx1G", "-Xms1G", "-cp", "semux.jar",
+                                new String[] {
+                                        getJavaBinPath(),
+                                        "-cp", null,
+                                        "-Xmx1G", "-Xms1G",
                                         SemuxGUI.class.getCanonicalName() },
                                 null },
+
                         { new String[] { "--gui" },
-                                new String[] { getJavaBinPath(), "-Xmx1600M", "-cp", "semux.jar",
+                                new String[] {
+                                        getJavaBinPath(),
+                                        "-cp", null,
+                                        "-Xmx1600M",
                                         SemuxGUI.class.getCanonicalName() },
                                 2000L * 1024 * 1024 },
-                        { new String[] { "--cli" }, new String[] { getJavaBinPath(), "-Xmx1600M", "-cp", "semux.jar",
-                                SemuxCLI.class.getCanonicalName() }, 2000L * 1024 * 1024 },
+
+                        { new String[] { "--cli" }, new String[] {
+                                getJavaBinPath(),
+                                "-cp", null,
+                                "-Xmx1600M",
+                                SemuxCLI.class.getCanonicalName() },
+                                2000L * 1024 * 1024 },
+
                         { new String[] { "--gui" },
-                                new String[] { getJavaBinPath(), String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB), "-cp",
-                                        "semux.jar",
+                                new String[] {
+                                        getJavaBinPath(),
+                                        "-cp", null,
+                                        String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB),
                                         SemuxGUI.class.getCanonicalName() },
                                 MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 },
+
                         { new String[] { "--cli" },
-                                new String[] { getJavaBinPath(), String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB), "-cp",
-                                        "semux.jar",
+                                new String[] {
+                                        getJavaBinPath(),
+                                        "-cp", null,
+                                        String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB),
                                         SemuxCLI.class.getCanonicalName() },
                                 MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 } });
     }
@@ -93,6 +111,7 @@ public class WrapperTest {
         Wrapper.main(inputArgs);
 
         // verify
+        javaArgs[2] = System.getProperty("java.class.path"); // Read classpath from the JVM fork (test)
         verify(processBuilderMock).command(javaArgs);
         verifyStatic(SystemUtil.class);
         SystemUtil.exit(0);
