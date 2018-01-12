@@ -32,24 +32,24 @@ public class GetInfoResponse extends ApiHandlerResponse {
         public final String coinbase;
 
         @JsonProperty("latestBlockNumber")
-        public final Number latestBlockNumber;
+        public final Long latestBlockNumber;
 
         @JsonProperty("latestBlockHash")
         public final String latestBlockHash;
 
         @JsonProperty("activePeers")
-        public final Number activePeers;
+        public final Integer activePeers;
 
         @JsonProperty("pendingTransactions")
-        public final Number pendingTransactions;
+        public final Integer pendingTransactions;
 
         public InfoResult(
                 @JsonProperty("clientId") String clientId,
                 @JsonProperty("coinbase") String coinbase,
-                @JsonProperty("latestBlockNumber") Number latestBlockNumber,
+                @JsonProperty("latestBlockNumber") Long latestBlockNumber,
                 @JsonProperty("latestBlockHash") String latestBlockHash,
-                @JsonProperty("activePeers") Number activePeers,
-                @JsonProperty("pendingTransactions") Number pendingTransactions) {
+                @JsonProperty("activePeers") Integer activePeers,
+                @JsonProperty("pendingTransactions") Integer pendingTransactions) {
             this.clientId = clientId;
             this.coinbase = coinbase;
             this.latestBlockNumber = latestBlockNumber;

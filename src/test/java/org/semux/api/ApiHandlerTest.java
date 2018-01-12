@@ -116,7 +116,9 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         GetInfoResponse response = request(uri, GetInfoResponse.class);
         assertTrue(response.success);
         assertNotNull(response.info);
-        assertEquals(0, response.info.latestBlockNumber);
+        assertEquals(Long.valueOf(0), response.info.latestBlockNumber);
+        assertEquals(Integer.valueOf(0), response.info.activePeers);
+        assertEquals(Integer.valueOf(0), response.info.pendingTransactions);
     }
 
     @Test
