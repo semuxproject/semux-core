@@ -113,7 +113,7 @@ public class KernelRule extends TemporaryFolder {
     /**
      * Speed up the consensus.
      */
-    public void speedUpCosnensus() throws IOException {
+    public void speedUpConsensus() throws IOException {
         Config config = kernel.getConfig();
 
         // speed up consensus

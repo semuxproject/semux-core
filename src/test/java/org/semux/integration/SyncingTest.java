@@ -66,10 +66,10 @@ public class SyncingTest {
     @Before
     public void setUp() throws Exception {
         // prepare kernels
-        kernelRule1.speedUpCosnensus();
-        kernelRule2.speedUpCosnensus();
-        kernelRule3.speedUpCosnensus();
-        kernelRule4.speedUpCosnensus();
+        kernelRule1.speedUpConsensus();
+        kernelRule2.speedUpConsensus();
+        kernelRule3.speedUpConsensus();
+        kernelRule4.speedUpConsensus();
         kernel1 = kernelRule1.getKernel();
         kernel2 = kernelRule2.getKernel();
         kernel3 = kernelRule3.getKernel();

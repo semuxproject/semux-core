@@ -85,10 +85,10 @@ public class TransactTest {
     @Before
     public void setUp() throws Exception {
         // prepare kernels
-        kernelRuleValidator1.speedUpCosnensus();
-        kernelRuleValidator2.speedUpCosnensus();
-        kernelRulePremine.speedUpCosnensus();
-        kernelRuleReceiver.speedUpCosnensus();
+        kernelRuleValidator1.speedUpConsensus();
+        kernelRuleValidator2.speedUpConsensus();
+        kernelRulePremine.speedUpConsensus();
+        kernelRuleReceiver.speedUpConsensus();
         kernelValidator1 = kernelRuleValidator1.getKernel();
         kernelValidator2 = kernelRuleValidator2.getKernel();
         kernelPremine = kernelRulePremine.getKernel();
