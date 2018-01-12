@@ -69,7 +69,6 @@ public class SemuxGui extends Launcher {
 
     public static void main(String[] args) {
 
-
         try {
             setupLookAndFeel();
 

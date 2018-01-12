@@ -30,11 +30,12 @@ public class LoggerConfigurator {
         File file = getConfigurationFile(dataDir);
 
         if (file.exists()) {
-            final LoggerContext context = (LoggerContext) LogManager.getContext(false);
-            context.setConfigLocation(file.toURI());
             if (System.getProperty("log.file") == null) {
                 System.setProperty("log.file", new File(dataDir, DEBUG_LOG).getAbsolutePath());
             }
+
+            final LoggerContext context = (LoggerContext) LogManager.getContext(false);
+            context.setConfigLocation(file.toURI());
             context.reconfigure();
             context.updateLoggers();
         } else {

@@ -11,6 +11,7 @@
         </File>
         <Async name="Async">
             <AppenderRef ref="File" />
+            <AppenderRef ref="Console"/>
             <LinkedTransferQueue />
         </Async>
     </Appenders>
@@ -27,7 +28,6 @@
         <Logger name="oshi" level="INFO" />
         
         <Root level="INFO">
-            <AppenderRef ref="Console"/>
             <AppenderRef ref="Async"/>
         </Root>
     </Loggers>
