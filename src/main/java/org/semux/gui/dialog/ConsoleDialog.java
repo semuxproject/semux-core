@@ -24,6 +24,7 @@ import javax.ws.rs.QueryParam;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import io.swagger.annotations.ApiOperation;
 import org.semux.api.ApiHandlerResponse;
 import org.semux.api.SemuxApi;
 import org.semux.api.SemuxApiImpl;
@@ -161,6 +162,12 @@ public class ConsoleDialog extends JDialog implements ActionListener {
             }
             builder.append(">");
 
+        }
+
+        ApiOperation operation = method.getAnnotation(ApiOperation.class);
+        if(operation != null)
+        {
+            builder.append("\n\t").append(operation.notes()).append("\n");
         }
         builder.append("\n");
         return builder.toString();
