@@ -283,7 +283,7 @@ public class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public ApiHandlerResponse getVotes(String delegate, String voter) {
+    public ApiHandlerResponse getVote(String delegate, String voter) {
         byte[] voterBytes;
         byte[] delegateBytes;
 

@@ -305,7 +305,7 @@ public class ApiHandlerImpl implements ApiHandler {
     private ApiHandlerResponse getVote(Map<String, String> params) {
         String voter = params.get("voter");
         String delegate = params.get("delegate");
-        return semuxApi.getVotes(delegate, voter);
+        return semuxApi.getVote(delegate, voter);
     }
 
     /**

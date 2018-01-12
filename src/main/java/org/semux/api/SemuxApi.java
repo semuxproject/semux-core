@@ -158,7 +158,7 @@ public interface SemuxApi {
     @Path("get_vote")
     @ApiOperation(value = "Get vote", notes = "Returns the vote from a voter to a delegate.", response = GetVoteResponse.class)
     @Produces(JSON)
-    ApiHandlerResponse getVotes(@QueryParam("delegate") String delegate, @QueryParam("voter") String voterAddress);
+    ApiHandlerResponse getVote(@QueryParam("delegate") String delegate, @QueryParam("voter") String voterAddress);
 
     @GET
     @Path("get_votes")
