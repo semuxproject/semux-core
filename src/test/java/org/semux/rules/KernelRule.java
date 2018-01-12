@@ -6,6 +6,7 @@
  */
 package org.semux.rules;
 
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -22,6 +23,7 @@ import org.semux.config.DevNetConfig;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.Wallet;
@@ -69,6 +71,7 @@ public class KernelRule extends TemporaryFolder {
         wallet.flush();
         EdDSA coinbase = wallet.getAccount(0);
         this.kernel = new KernelMock(config, wallet, coinbase);
+        this.kernel.setPendingManager(mock(PendingManager.class));
     }
 
     @Override

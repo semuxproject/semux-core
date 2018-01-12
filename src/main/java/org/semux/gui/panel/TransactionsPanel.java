@@ -74,7 +74,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         table.setRowHeight(25);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
         SwingUtil.setColumnWidths(table, 800, 0.1, 0.4, 0.15, 0.2, 0.15);
-        SwingUtil.setColumnAlignments(table, false, false, true, true, false);
+        SwingUtil.setColumnAlignments(table, false, false, true, true, true);
 
         table.addMouseListener(new MouseAdapter() {
             @Override
