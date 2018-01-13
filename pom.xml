@@ -423,8 +423,6 @@
                                     <!-- Format is URN of groupId:artifactId:version:type:classifier:scope:hash -->
                                     <!-- classifier is "null" if not present -->
                                     <urns>
-                                        <urn>ch.qos.logback:logback-classic:1.2.3:jar:null:compile:7c4f3c474fb2c041d8028740440937705ebb473a</urn>
-                                        <urn>ch.qos.logback:logback-core:1.2.3:jar:null:compile:864344400c3d4d92dfeb0a305dc87d953677c03c</urn>
                                         <urn>com.akathist.maven.plugins.launch4j:launch4j-maven-plugin:1.7.21:maven-plugin:null:runtime:58402e775916bc8824e257c8d87ad6c8064663a5</urn>
                                         <urn>com.fasterxml.jackson.core:jackson-annotations:2.9.0:jar:null:compile:07c10d545325e3a6e72e06381afe469fd40eb701</urn>
                                         <urn>com.fasterxml.jackson.core:jackson-core:2.9.2:jar:null:compile:aed20e50152a2f19adc1995c8d8f307c7efa414d</urn>
@@ -455,6 +453,9 @@
                                         <urn>net.revelc.code.formatter:formatter-maven-plugin:2.7.0:maven-plugin:null:runtime:001126378253588ea5a042d41714432033ca17a3</urn>
                                         <urn>org.apache.commons:commons-collections4:4.1:jar:null:compile:a4cf4688fe1c7e3a63aa636cc96d013af537768e</urn>
                                         <urn>org.apache.commons:commons-lang3:3.6:jar:null:compile:9d28a6b23650e8a7e9063c04588ace6cf7012c17</urn>
+                                        <urn>org.apache.logging.log4j:log4j-api:2.10.0:jar:null:compile:fec5797a55b786184a537abd39c3fa1449d752d6</urn>
+                                        <urn>org.apache.logging.log4j:log4j-core:2.10.0:jar:null:compile:c90b597163cd28ab6d9687edd53db601b6ea75a1</urn>
+                                        <urn>org.apache.logging.log4j:log4j-slf4j-impl:2.10.0:jar:null:compile:8e4e0a30736175e31c7f714d95032c1734cfbdea</urn>
                                         <urn>org.apache.maven.plugins:maven-antrun-plugin:1.8:maven-plugin:null:runtime:0d02c0af622aa6a0c86e81c519299e888e0a32a3</urn>
                                         <urn>org.apache.maven.plugins:maven-clean-plugin:3.0.0:maven-plugin:null:runtime:6653cb054e6b81705e383fbcced26c92802e40ae</urn>
                                         <urn>org.apache.maven.plugins:maven-compiler-plugin:3.7.0:maven-plugin:null:runtime:a3229c9aae47047e3a177ecfd4afa10fb5512d4e</urn>
@@ -489,7 +490,7 @@
                                         <urn>org.powermock:powermock-module-junit4-common:1.7.3:jar:null:test:7287dd56b2b907a15aa2b6a0f1ddb2dd52cf388f</urn>
                                         <urn>org.powermock:powermock-module-junit4:1.7.3:jar:null:test:f25cd17a4d7acba1a591beaecd99fad844875cc6</urn>
                                         <urn>org.powermock:powermock-reflect:1.7.3:jar:null:test:f3d3c696a9977094c796dc8ffd174f828f3410e8</urn>
-                                        <urn>org.slf4j:slf4j-api:1.7.25:jar:null:compile:da76ca59f6a57ee3102f8f9bd9cee742973efa8a</urn>
+                                        <urn>org.slf4j:slf4j-api:1.8.0-beta0:jar:null:compile:f90ef27de5a997d30c169cb706835e32d724ca96</urn>
                                         <urn>org.threeten:threetenbp:1.3.6:jar:null:compile:89dcc04a7e028c3c963413a71f950703cf51f057</urn>
                                         <urn>org.xerial.snappy:snappy-java:1.1.7.1:jar:null:compile:d5190b41f3de61e3b83d692322d58630252bc8c3</urn>
                                         <urn>pl.project13.maven:git-commit-id-plugin:2.2.4:maven-plugin:null:runtime:43a0dc1d02821c51847d587ecc4a6943086b884c</urn>
@@ -526,21 +527,33 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- SLF4J logging framework -->
+        <!-- Logging framework -->
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
+            <version>1.8.0-beta0</version>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.2.3</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.10.0</version>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.10.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Bouncy Castle -->
@@ -576,6 +589,12 @@
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
             <version>3.4.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Apache commons -->
