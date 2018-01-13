@@ -358,6 +358,7 @@ public class Wallet {
                 }
             }
 
+            file.getParentFile().mkdirs();
             IOUtil.writeToFile(enc.toBytes(), file);
             return true;
         } catch (CryptoException e) {

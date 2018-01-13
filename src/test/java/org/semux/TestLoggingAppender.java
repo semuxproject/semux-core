@@ -33,7 +33,6 @@ public final class TestLoggingAppender extends AbstractAppender {
     private static List<LogEvent> events = new ArrayList<>();
 
     private static Level testLevel = Level.OFF;
-    private static Class<?> testClass = null;
 
     protected TestLoggingAppender(String name, Filter filter,
             Layout<? extends Serializable> layout) {
@@ -93,6 +92,8 @@ public final class TestLoggingAppender extends AbstractAppender {
      *
      */
     public static class LogEventMini extends AbstractLogEvent {
+        private static final long serialVersionUID = 1L;
+
         private Level level;
         private String formattedMessage;
 
@@ -133,7 +134,7 @@ public final class TestLoggingAppender extends AbstractAppender {
     @PluginFactory
     public static TestLoggingAppender createAppender(
             @PluginAttribute("name") String name,
-            @PluginElement("Layout") Layout layout,
+            @PluginElement("Layout") Layout<?> layout,
             @PluginElement("Filter") final Filter filter,
             @PluginAttribute("otherAttribute") String otherAttribute) {
         if (name == null) {

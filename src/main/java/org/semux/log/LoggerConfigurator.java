@@ -53,9 +53,6 @@ public class LoggerConfigurator {
 
             // remove configuration error listener
             StatusLogger.getLogger().removeListener(errorStatusListener);
-        } else {
-            StatusLogger.getLogger().warn("Logger config file {} doesn't exist, using the factory default",
-                    file.getAbsolutePath());
         }
     }
 

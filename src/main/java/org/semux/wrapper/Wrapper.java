@@ -20,10 +20,9 @@ import java.util.stream.Stream;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.semux.cli.SemuxCli;
 import org.semux.gui.SemuxGui;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.semux.util.SystemUtil;
 
 /**
@@ -74,24 +73,24 @@ public class Wrapper {
         return allocatedJvmOptions.toArray(new String[allocatedJvmOptions.size()]);
     }
 
-    private static List<Pair<Pattern, Supplier<String>>> getDefaultJvmOptionSuppliers() {
+    private static List<ImmutablePair<Pattern, Supplier<String>>> getDefaultJvmOptionSuppliers() {
         return Arrays.asList(
                 // dynamically specify maximum heap size according to available physical memory
                 // if Xmx is not specified in jvmoptions
-                new ImmutablePair<>(
+                ImmutablePair.of(
                         Pattern.compile("^-Xmx"),
                         () -> String.format("-Xmx%dM",
                                 Math.max(SystemUtil.getAvailableMemorySize() / 1024 / 1024 * 8 / 10,
                                         MINIMUM_HEAP_SIZE_MB))),
 
                 // Log4j2 default options
-                new ImmutablePair<>(
+                ImmutablePair.of(
                         Pattern.compile("^-Dlog4j2\\.garbagefreeThreadContextMap"),
                         () -> "-Dlog4j2.garbagefreeThreadContextMap=true"),
-                new ImmutablePair<>(
+                ImmutablePair.of(
                         Pattern.compile("^-Dlog4j2\\.shutdownHookEnabled"),
                         () -> "-Dlog4j2.shutdownHookEnabled=false"),
-                new ImmutablePair<>(
+                ImmutablePair.of(
                         Pattern.compile("^-Dlog4j2\\.disableJmx"),
                         () -> "-Dlog4j2.disableJmx=true"));
     }

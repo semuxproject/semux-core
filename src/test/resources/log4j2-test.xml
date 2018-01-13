@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN">
+<!DOCTYPE Configuration>
+<Configuration status="WARN" shutdownHook="disable">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%date{HH:mm:ss.SSS} %highlight{%-8level} %-16logger{0} %msg%n"/>
