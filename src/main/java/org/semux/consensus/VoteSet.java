@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.semux.crypto.Key.Signature;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key.Signature;
 import org.semux.util.ByteArray;
 
 /**

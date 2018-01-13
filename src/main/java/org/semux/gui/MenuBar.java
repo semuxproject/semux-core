@@ -25,8 +25,8 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.semux.core.Wallet;
-import org.semux.crypto.Key;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.gui.dialog.ChangePasswordDialog;
 import org.semux.gui.dialog.ExportPrivateKeyDialog;
 import org.semux.gui.dialog.InputDialog;

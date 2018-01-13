@@ -6,10 +6,12 @@
  */
 package org.semux.config;
 
+import org.semux.Network;
+
 public class DevnetConfig extends AbstractConfig {
 
     public DevnetConfig(String dataDir) {
-        super(dataDir, Constants.DEVNET_ID, Constants.DEVNET_VERSION);
+        super(dataDir, Network.DEVNET, Constants.DEVNET_VERSION);
         this.netMaxInboundConnectionsPerIp = Integer.MAX_VALUE;
     }
 }

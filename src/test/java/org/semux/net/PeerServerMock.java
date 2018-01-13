@@ -15,9 +15,9 @@ import org.semux.consensus.SemuxBft;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
+import org.semux.db.Db;
 import org.semux.db.DbFactory;
 import org.semux.db.DbName;
-import org.semux.db.Db;
 import org.semux.db.LevelDb.LevelDbFactory;
 
 public class PeerServerMock {

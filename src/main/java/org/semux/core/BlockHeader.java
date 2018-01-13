@@ -10,9 +10,9 @@ import static org.semux.crypto.Hash.HASH_LEN;
 
 import java.util.Arrays;
 
-import org.semux.crypto.Key;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;

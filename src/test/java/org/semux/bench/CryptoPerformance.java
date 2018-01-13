@@ -6,8 +6,8 @@
  */
 package org.semux.bench;
 
-import org.semux.crypto.Key;
 import org.semux.crypto.Hash;
+import org.semux.crypto.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

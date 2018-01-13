@@ -31,7 +31,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.IntegrationTest;
 import org.semux.Kernel.State;
 import org.semux.KernelMock;
-import org.semux.config.Constants;
+import org.semux.Network;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
 import org.semux.core.Unit;
@@ -86,7 +86,7 @@ public class SyncingTest {
         nodes.add(new Node(kernel2.getConfig().p2pListenIp(), kernel2.getConfig().p2pListenPort()));
         nodes.add(new Node(kernel3.getConfig().p2pListenIp(), kernel3.getConfig().p2pListenPort()));
         mockStatic(NodeManager.class);
-        when(NodeManager.getSeedNodes(Constants.DEVNET_ID)).thenReturn(nodes);
+        when(NodeManager.getSeedNodes(Network.DEVNET)).thenReturn(nodes);
 
         // start kernels
         kernel1.start();
@@ -129,7 +129,7 @@ public class SyncingTest {
             Block previousBlock = kernel4.getBlockchain().getBlock(i - 1);
             assertTrue(Block.validateHeader(previousBlock.getHeader(), block.getHeader()));
             assertTrue(Block.validateTransactions(previousBlock.getHeader(), block.getTransactions(),
-                    kernel4.getConfig().networkId()));
+                    kernel4.getConfig().network()));
             assertTrue(Block.validateResults(previousBlock.getHeader(), block.getResults()));
 
             assertTrue(block.getVotes().size() >= 3 * 2 / 3);

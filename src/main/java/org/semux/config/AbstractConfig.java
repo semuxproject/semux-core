@@ -17,6 +17,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.semux.Network;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hash;
@@ -39,7 +40,7 @@ public abstract class AbstractConfig implements Config {
     // General
     // =========================
     protected File dataDir;
-    protected byte networkId;
+    protected Network network;
     protected short networkVersion;
 
     protected int maxBlockTransactionsSize = 1024 * 1024;
@@ -110,12 +111,12 @@ public abstract class AbstractConfig implements Config {
      * Create an {@link AbstractConfig} instance.
      *
      * @param dataDir
-     * @param networkId
+     * @param network
      * @param networkVersion
      */
-    protected AbstractConfig(String dataDir, byte networkId, short networkVersion) {
+    protected AbstractConfig(String dataDir, Network network, short networkVersion) {
         this.dataDir = new File(dataDir);
-        this.networkId = networkId;
+        this.network = network;
         this.networkVersion = networkVersion;
 
         init();
@@ -168,8 +169,8 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public byte networkId() {
-        return networkId;
+    public Network network() {
+        return network;
     }
 
     @Override

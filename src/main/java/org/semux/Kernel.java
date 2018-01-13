@@ -119,7 +119,7 @@ public class Kernel {
         // initialization
         // ====================================
         logger.info(config.getClientId());
-        logger.info("System booting up: networkId = {}, networkVersion = {}, coinbase = {}", config.networkId(),
+        logger.info("System booting up: network = {}, networkVersion = {}, coinbase = {}", config.network(),
                 config.networkVersion(),
                 coinbase);
         printSystemInfo();

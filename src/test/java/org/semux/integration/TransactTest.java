@@ -36,11 +36,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.IntegrationTest;
 import org.semux.Kernel.State;
 import org.semux.KernelMock;
+import org.semux.Network;
 import org.semux.api.response.DoTransactionResponse;
 import org.semux.api.response.GetAccountResponse;
 import org.semux.api.response.GetAccountTransactionsResponse;
 import org.semux.api.response.Types;
-import org.semux.config.Constants;
 import org.semux.core.Genesis;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
@@ -104,7 +104,7 @@ public class TransactTest {
         nodes.add(new Node(kernelValidator1.getConfig().p2pListenIp(), kernelValidator1.getConfig().p2pListenPort()));
         nodes.add(new Node(kernelValidator2.getConfig().p2pListenIp(), kernelValidator2.getConfig().p2pListenPort()));
         mockStatic(NodeManager.class);
-        when(NodeManager.getSeedNodes(Constants.DEVNET_ID)).thenReturn(nodes);
+        when(NodeManager.getSeedNodes(Network.DEVNET)).thenReturn(nodes);
 
         // start kernels
         kernelValidator1.start();

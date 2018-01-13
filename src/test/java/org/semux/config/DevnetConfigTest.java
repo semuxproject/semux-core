@@ -9,13 +9,14 @@ package org.semux.config;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.semux.Network;
 
 public class DevnetConfigTest {
 
     @Test
     public void testNetworkId() {
         Config config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
-        assertEquals(Constants.DEVNET_ID, config.networkId());
+        assertEquals(Network.DEVNET, config.network());
     }
 
 }

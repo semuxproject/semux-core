@@ -22,9 +22,9 @@ import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.core.state.DelegateStateImpl;
 import org.semux.crypto.Hex;
+import org.semux.db.Db;
 import org.semux.db.DbFactory;
 import org.semux.db.DbName;
-import org.semux.db.Db;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
@@ -103,7 +103,7 @@ public class BlockchainImpl implements Blockchain {
         this.accountState = new AccountStateImpl(factory.getDB(DbName.ACCOUNT));
         this.delegateState = new DelegateStateImpl(this, factory.getDB(DbName.DELEGATE), factory.getDB(DbName.VOTE));
 
-        this.genesis = Genesis.load(Constants.NETWORKS[config.networkId()]);
+        this.genesis = Genesis.load(config.network());
 
         byte[] number = indexDB.get(Bytes.of(TYPE_LATEST_BLOCK_NUMBER));
         if (number == null) {
@@ -293,7 +293,7 @@ public class BlockchainImpl implements Blockchain {
 
         if (number != genesis.getNumber()) {
             // [4] coinbase transaction
-            Transaction tx = new Transaction(config.networkId(),
+            Transaction tx = new Transaction(config.network(),
                     TransactionType.COINBASE,
                     block.getCoinbase(),
                     reward,

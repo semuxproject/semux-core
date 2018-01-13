@@ -17,8 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.semux.Kernel;
+import org.semux.Network;
 import org.semux.config.Config;
-import org.semux.config.Constants;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -171,7 +171,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
             } else if (chain.getValidators().contains(peer.getPeerId()) // validator
                     && channelMgr.isActiveIP(channel.getRemoteIp()) // connected
-                    && config.networkId() == Constants.MAINNET_ID) { // main net
+                    && config.network() == Network.MAINNET) { // main net
                 error = ReasonCode.VALIDATOR_IP_LIMITED;
 
             } else if (!isValid(helloMsg)) {
@@ -298,7 +298,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      */
     private boolean isValid(HelloMessage msg) {
         return msg.validate(config)
-                && (config.networkId() == Constants.DEVNET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
+                && (config.network() == Network.DEVNET || channel.getRemoteIp().equals(msg.getPeer().getIp()));
     }
 
     /**
@@ -308,7 +308,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      */
     private boolean isValid(WorldMessage msg) {
         return msg.validate(config)
-                && (config.networkId() == Constants.DEVNET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
+                && (config.network() == Network.DEVNET || channel.getRemoteIp().equals(msg.getPeer().getIp()));
     }
 
     /**

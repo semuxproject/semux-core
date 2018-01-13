@@ -14,6 +14,7 @@ import java.util.Random;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
@@ -66,14 +67,14 @@ public class CorePerformanceTest {
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.random(16);
 
-            Transaction tx = new Transaction(Constants.DEVNET_ID, type, to, value, fee, nonce, timestamp, data);
+            Transaction tx = new Transaction(Network.DEVNET, type, to, value, fee, nonce, timestamp, data);
             tx.sign(key);
             txs.add(tx);
         }
 
         long t1 = System.nanoTime();
         for (Transaction tx : txs) {
-            assertTrue(tx.validate(Constants.DEVNET_ID));
+            assertTrue(tx.validate(Network.DEVNET));
         }
         long t2 = System.nanoTime();
         logger.info("Perf_transaction_1: {} μs/tx", (t2 - t1) / 1_000 / repeat);

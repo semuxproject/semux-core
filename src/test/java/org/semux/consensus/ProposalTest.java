@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
-import org.semux.config.Constants;
+import org.semux.Network;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Transaction;
@@ -32,7 +32,7 @@ public class ProposalTest {
 
     @Test
     public void testBasics() {
-        byte networkId = Constants.DEVNET_ID;
+        Network network = Network.DEVNET;
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
         long value = 2;
@@ -41,7 +41,7 @@ public class ProposalTest {
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.of("data");
 
-        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
         tx.sign(new Key());
         TransactionResult res = new TransactionResult(true);
 

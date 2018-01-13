@@ -9,6 +9,7 @@ package org.semux.bench;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
@@ -39,7 +40,7 @@ public class BlockchainPerformance {
 
         int total = 0;
         for (int i = 0;; i++) {
-            byte networkId = config.networkId();
+            Network network = config.network();
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
             long value = 1;
@@ -47,7 +48,7 @@ public class BlockchainPerformance {
             long nonce = 1 + i;
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.EMPTY_BYTES;
-            Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(key);
+            Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(key);
 
             if (total + tx.size() > config.maxBlockTransactionsSize()) {
                 break;
@@ -90,11 +91,11 @@ public class BlockchainPerformance {
     }
 
     public static void testBlockValidation(Block block) {
-        Genesis gen = Genesis.load(Constants.NETWORKS[Constants.DEVNET_ID]);
+        Genesis gen = Genesis.load(Network.DEVNET);
 
         long t1 = System.nanoTime();
         Block.validateHeader(gen.getHeader(), block.getHeader());
-        Block.validateTransactions(gen.getHeader(), block.getTransactions(), config.networkId());
+        Block.validateTransactions(gen.getHeader(), block.getTransactions(), config.network());
         Block.validateResults(gen.getHeader(), block.getResults());
         // block votes validation skipped
         long t2 = System.nanoTime();
@@ -105,7 +106,7 @@ public class BlockchainPerformance {
     public static void testTransactionValidation() {
         Key key = new Key();
 
-        byte networkId = config.networkId();
+        Network network = config.network();
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
         long value = 1;
@@ -113,13 +114,13 @@ public class BlockchainPerformance {
         long nonce = 1;
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
-        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
         tx.sign(key);
 
         int repeat = 1000;
         long t1 = System.nanoTime();
         for (int i = 0; i < repeat; i++) {
-            tx.validate(networkId);
+            tx.validate(network);
         }
         long t2 = System.nanoTime();
         logger.info("Perf_transaction_size: {} B", tx.toBytes().length);

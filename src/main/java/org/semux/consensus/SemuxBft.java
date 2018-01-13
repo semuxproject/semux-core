@@ -16,8 +16,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.stream.Collectors;
 
 import org.semux.Kernel;
+import org.semux.Network;
 import org.semux.config.Config;
-import org.semux.config.Constants;
 import org.semux.consensus.SemuxBft.Event.Type;
 import org.semux.consensus.exception.SemuxBftException;
 import org.semux.core.Block;
@@ -31,10 +31,10 @@ import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.Key;
-import org.semux.crypto.Key.Signature;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
+import org.semux.crypto.Key.Signature;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
@@ -276,7 +276,7 @@ public class SemuxBft implements Consensus {
 
         logger.info("Entered new_height: height = {}, # validators = {}", height, validators.size());
         if (isValidator()) {
-            if (this.config.networkId() == Constants.MAINNET_ID && !SystemUtil.bench()) {
+            if (this.config.network() == Network.MAINNET && !SystemUtil.bench()) {
                 logger.error("You need to upgrade your computer to join the BFT consensus!");
                 SystemUtil.exitAsync(-1);
             }
@@ -783,7 +783,7 @@ public class SemuxBft implements Consensus {
         }
 
         // [2] check transactions and results (skipped)
-        if (!Block.validateTransactions(header, transactions, config.networkId())
+        if (!Block.validateTransactions(header, transactions, config.network())
                 || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
             logger.debug("Invalid block transactions");
             return false;

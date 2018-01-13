@@ -13,18 +13,18 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Test;
-import org.semux.config.Constants;
+import org.semux.Network;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
-import org.semux.crypto.Key;
 import org.semux.crypto.Hash;
+import org.semux.crypto.Key;
 
 public class MerkleUtilTest {
     @Test
     public void testComputeTransactionsRoot() {
-        byte networkId = Constants.DEVNET_ID;
+        Network network = Network.DEVNET;
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
         long value = 1 * Unit.SEM;
@@ -32,8 +32,8 @@ public class MerkleUtilTest {
         long nonce = 1;
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(128);
-        Transaction tx1 = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(new Key());
-        Transaction tx2 = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(new Key());
+        Transaction tx1 = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(new Key());
+        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(new Key());
         byte[] b1 = tx1.getHash();
         byte[] b2 = tx2.getHash();
         byte[] root = new MerkleTree(Arrays.asList(b1, b2)).getRootHash();

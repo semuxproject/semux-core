@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
@@ -35,7 +36,7 @@ public class BlockTest {
     private long timestamp = System.currentTimeMillis();
     private byte[] data = Bytes.of("data");
 
-    private Transaction tx = new Transaction(Constants.DEVNET_ID, TransactionType.TRANSFER, Bytes.random(20), 0,
+    private Transaction tx = new Transaction(Network.DEVNET, TransactionType.TRANSFER, Bytes.random(20), 0,
             config.minTransactionFee(),
             1, System.currentTimeMillis(), Bytes.EMPTY_BYTES).sign(new Key());
     private TransactionResult res = new TransactionResult(true);
@@ -52,7 +53,7 @@ public class BlockTest {
 
     @Test
     public void testGenesis() {
-        Block block = Genesis.load(Constants.NETWORKS[config.networkId()]);
+        Block block = Genesis.load(config.network());
         assertTrue(block.getHeader().validate());
     }
 
@@ -114,7 +115,7 @@ public class BlockTest {
                 resultsRoot, stateRoot, data);
 
         assertTrue(Block.validateHeader(previousHeader, header));
-        assertTrue(Block.validateTransactions(previousHeader, transactions, Constants.DEVNET_ID));
+        assertTrue(Block.validateTransactions(previousHeader, transactions, Network.DEVNET));
         assertTrue(Block.validateResults(previousHeader, results));
     }
 }

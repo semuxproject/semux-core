@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.semux.Network;
 import org.semux.core.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ public class MainnetConfigTest {
     @Before
     public void testLoad() {
         config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
-        assertEquals(Constants.MAINNET_ID, config.networkId());
+        assertEquals(Network.MAINNET, config.network());
     }
 
     @Test

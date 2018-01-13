@@ -36,8 +36,8 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.semux.Kernel;
+import org.semux.Network;
 import org.semux.config.Config;
-import org.semux.config.Constants;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.PendingManager;
@@ -502,14 +502,14 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
             PendingManager pendingMgr = kernel.getPendingManager();
 
-            byte networkId = kernel.getConfig().networkId();
+            Network network = kernel.getConfig().network();
             TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
             byte[] fromAddress = a.getKey().toAddress();
             byte[] toAddress = d.getAddress();
             long nonce = pendingMgr.getNonce(fromAddress);
             long timestamp = System.currentTimeMillis();
             byte[] data = {};
-            Transaction tx = new Transaction(networkId, type, toAddress, value, fee, nonce, timestamp, data);
+            Transaction tx = new Transaction(network, type, toAddress, value, fee, nonce, timestamp, data);
             tx.sign(a.getKey());
 
             sendTransaction(pendingMgr, tx);
@@ -531,7 +531,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     SwingUtil.formatValue(config.minDelegateBurnAmount() + config.minTransactionFee())));
         } else {
             // confirm system requirements
-            if ((config.networkId() == Constants.MAINNET_ID && !SystemUtil.bench()) && JOptionPane
+            if ((config.network() == Network.MAINNET && !SystemUtil.bench()) && JOptionPane
                     .showConfirmDialog(this, GuiMessages.get("ComputerNotQualified"),
                             GuiMessages.get("ConfirmDelegateRegistration"),
                             JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
@@ -548,7 +548,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
             PendingManager pendingMgr = kernel.getPendingManager();
 
-            byte networkId = kernel.getConfig().networkId();
+            Network network = kernel.getConfig().network();
             TransactionType type = TransactionType.DELEGATE;
             byte[] to = Bytes.EMPTY_ADDRESS;
             long value = config.minDelegateBurnAmount();
@@ -556,7 +556,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             long nonce = pendingMgr.getNonce(a.getAddress());
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.of(name);
-            Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(a.getKey());
+            Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(a.getKey());
 
             sendTransaction(pendingMgr, tx);
         }

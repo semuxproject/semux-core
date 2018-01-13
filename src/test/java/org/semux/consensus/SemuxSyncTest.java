@@ -45,7 +45,7 @@ public class SemuxSyncTest {
         Key from1 = new Key();
         long time = System.currentTimeMillis();
         Transaction tx1 = new Transaction(
-                kernelRule.getKernel().getConfig().networkId(),
+                kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
                 to.toAddress(),
                 10 * Unit.SEM,
@@ -65,7 +65,7 @@ public class SemuxSyncTest {
         Key from2 = new Key();
         kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from2.toAddress(), 1000 * Unit.SEM);
         Transaction tx2 = new Transaction(
-                kernelRule.getKernel().getConfig().networkId(),
+                kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
                 to.toAddress(),
                 10 * Unit.SEM,

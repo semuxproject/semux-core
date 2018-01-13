@@ -7,9 +7,9 @@
 package org.semux.net.msg.p2p;
 
 import org.semux.config.Config;
+import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
-import org.semux.crypto.Hex;
 import org.semux.net.Peer;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;

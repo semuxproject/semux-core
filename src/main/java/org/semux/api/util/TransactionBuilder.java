@@ -10,8 +10,8 @@ import org.semux.Kernel;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.CryptoException;
-import org.semux.crypto.Key;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.util.Bytes;
 
 /**
@@ -152,7 +152,7 @@ public class TransactionBuilder {
             value = kernel.getConfig().minDelegateBurnAmount();
         }
 
-        return new Transaction(kernel.getConfig().networkId(), type, to, value, fee, nonce, timestamp, data)
+        return new Transaction(kernel.getConfig().network(), type, to, value, fee, nonce, timestamp, data)
                 .sign(account);
     }
 }

@@ -8,10 +8,11 @@ package org.semux.core;
 
 import java.util.Arrays;
 
-import org.semux.crypto.Key;
-import org.semux.crypto.Key.Signature;
+import org.semux.Network;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
+import org.semux.crypto.Key.Signature;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 import org.xbill.DNS.Address;
@@ -42,7 +43,7 @@ public class Transaction {
     /**
      * Create a new transaction.
      *
-     * @param networkId
+     * @param network
      * @param type
      * @param to
      * @param value
@@ -51,9 +52,9 @@ public class Transaction {
      * @param timestamp
      * @param data
      */
-    public Transaction(byte networkId, TransactionType type, byte[] to, long value, long fee, long nonce,
+    public Transaction(Network network, TransactionType type, byte[] to, long value, long fee, long nonce,
             long timestamp, byte[] data) {
-        this.networkId = networkId;
+        this.networkId = network.id();
         this.type = type;
         this.to = to;
         this.value = value;
@@ -122,9 +123,9 @@ public class Transaction {
      * @param network
      * @return true if success, otherwise false
      */
-    public boolean validate(byte network) {
+    public boolean validate(Network network) {
         return hash != null && hash.length == Hash.HASH_LEN
-                && networkId == network
+                && networkId == network.id()
                 && type != null
                 && to != null && to.length == Key.ADDRESS_LEN
                 && value >= 0

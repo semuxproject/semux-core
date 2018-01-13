@@ -22,9 +22,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semux.core.exception.WalletLockedException;
-import org.semux.crypto.Key;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 
 public class WalletTest {
 

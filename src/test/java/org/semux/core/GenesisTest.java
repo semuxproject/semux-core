@@ -15,7 +15,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.semux.config.Constants;
+import org.semux.Network;
 import org.semux.core.Genesis.Premine;
 import org.semux.crypto.Hex;
 import org.semux.util.ByteArray;
@@ -30,7 +30,7 @@ public class GenesisTest {
 
     @Before
     public void setUp() {
-        genesis = Genesis.load(Constants.NETWORKS[Constants.MAINNET_ID]);
+        genesis = Genesis.load(Network.MAINNET);
     }
 
     @Test

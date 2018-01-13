@@ -30,13 +30,14 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 import org.semux.Kernel;
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.CryptoException;
-import org.semux.crypto.Key;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.gui.Action;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
@@ -361,12 +362,12 @@ public class SendPanel extends JPanel implements ActionListener {
 
                     byte[] rawData = rdbtnText.isSelected() ? Bytes.of(data) : Hex.decode0x(data);
 
-                    byte networkId = kernel.getConfig().networkId();
+                    Network network = kernel.getConfig().network();
                     TransactionType type = TransactionType.TRANSFER;
                     byte[] from = acc.getKey().toAddress();
                     long nonce = pendingMgr.getNonce(from);
                     long timestamp = System.currentTimeMillis();
-                    Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, rawData);
+                    Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, rawData);
                     tx.sign(acc.getKey());
 
                     sendTransaction(pendingMgr, tx);

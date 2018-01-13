@@ -11,9 +11,9 @@ import java.util.EnumMap;
 
 import org.junit.rules.TemporaryFolder;
 import org.semux.config.Constants;
+import org.semux.db.Db;
 import org.semux.db.DbFactory;
 import org.semux.db.DbName;
-import org.semux.db.Db;
 import org.semux.db.LevelDb;
 
 public class TemporaryDbRule extends TemporaryFolder implements DbFactory {
