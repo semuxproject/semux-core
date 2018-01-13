@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.semux</groupId>
     <artifactId>semux</artifactId>
@@ -235,7 +235,7 @@
                 <configuration>
                     <mainClass>org.semux.wrapper.Wrapper</mainClass>
                     <workingDirectory>$APP_ROOT/..</workingDirectory>
-                    <!--<generateDiskImageFile>true</generateDiskImageFile>-->
+                    <!-- <generateDiskImageFile>true</generateDiskImageFile> -->
                     <jvmVersion>1.8</jvmVersion>
                     <version>${project.version}-${git.commit.id.abbrev}</version>
                     <iconFile>logo.icns</iconFile>
@@ -272,44 +272,36 @@
                                 <!-- windows build -->
                                 <copy todir="${dist.base}/windows">
                                     <fileset dir="${project.basedir}">
-                                        <include name="config/**"/>
-                                        <include name="LICENSE*"/>
+                                        <include name="config/**" />
+                                        <include name="LICENSE*" />
                                     </fileset>
                                     <fileset dir="${project.basedir}/target">
-                                        <include name="semux.exe"/>
+                                        <include name="semux.exe" />
                                     </fileset>
                                 </copy>
-                                <copy file="${project.basedir}/misc/launch4j/semux.l4j.ini"
-                                      tofile="${dist.base}/windows/semux.l4j.ini"/>
-                                <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis"/>
-                                <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis"/>
-                                <fixcrlf srcdir="${dist.base}/windows" includes="LICENSE*" eol="dos" eof="asis"/>
+                                <copy file="${project.basedir}/misc/launch4j/semux.l4j.ini" tofile="${dist.base}/windows/semux.l4j.ini" />
+                                <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis" />
+                                <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis" />
+                                <fixcrlf srcdir="${dist.base}/windows" includes="LICENSE*" eol="dos" eof="asis" />
 
                                 <!-- linux build (executable jar) -->
                                 <copy todir="${dist.base}/linux">
                                     <fileset dir="${project.basedir}">
-                                        <include name="config/**"/>
-                                        <include name="LICENSE*"/>
+                                        <include name="config/**" />
+                                        <include name="LICENSE*" />
                                     </fileset>
                                 </copy>
-                                <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar"
-                                      tofile="${dist.base}/linux/semux.jar"/>
-                                <copy file="${project.basedir}/scripts/semux-cli.sh"
-                                      tofile="${dist.base}/linux/semux-cli.sh"/>
-                                <copy file="${project.basedir}/scripts/semux-gui.sh"
-                                      tofile="${dist.base}/linux/semux-gui.sh"/>
+                                <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar" tofile="${dist.base}/linux/semux.jar" />
+                                <copy file="${project.basedir}/scripts/semux-cli.sh" tofile="${dist.base}/linux/semux-cli.sh" />
+                                <copy file="${project.basedir}/scripts/semux-gui.sh" tofile="${dist.base}/linux/semux-gui.sh" />
+                                <chmod file="${dist.base}/linux/semux.jar" perm="755" />
+                                <chmod file="${dist.base}/linux/semux*.sh" perm="755" />
 
-                                <!-- macos build (dmg) -->
+                                <!-- macos build -->
+                                <!-- use fat jar because .app bundle is not production ready -->
                                 <copy todir="${dist.base}/macos">
-                                    <fileset dir="${project.basedir}/target/semux-${project.version}">
-                                    </fileset>
+                                    <fileset dir="${dist.base}/linux"></fileset>
                                 </copy>
-
-                                <!-- add execute permission -->
-                                <chmod file="${dist.base}/windows/semux.exe" perm="755"/>
-                                <chmod file="${dist.base}/linux/semux.jar" perm="755"/>
-                                <chmod file="${dist.base}/linux/semux*.sh" perm="755"/>
-                                <chmod file="${dist.base}/macos/semux.app/Contents/MacOS/JavaAppLauncher" perm="755"/>
                             </target>
                         </configuration>
                         <goals>
@@ -351,7 +343,7 @@
                     <instrumentation>
                         <ignoreTrivial>true</ignoreTrivial>
                     </instrumentation>
-                    <check/>
+                    <check />
                 </configuration>
             </plugin>
 
@@ -400,7 +392,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Verify the dependency chain: see https://github.com/gary-rowe/BitcoinjEnforcerRules for more information on this. -->
+            <!-- verify the dependency chain -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -414,7 +406,7 @@
                         </goals>
                         <configuration>
                             <rules>
-                                <DependencyConvergence/>
+                                <DependencyConvergence />
                                 <digestRule implementation="uk.co.froot.maven.enforcer.DigestRule">
                                     <!-- Create a snapshot to build the list of URNs below -->
                                     <buildSnapshot>true</buildSnapshot>
@@ -528,7 +520,6 @@
         </dependency>
 
         <!-- Logging framework -->
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
