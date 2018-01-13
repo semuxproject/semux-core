@@ -10,10 +10,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashSet;
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -46,6 +46,7 @@ public class NodeManager {
     private static final String DNS_SEED_MAINNET = "mainnet.semux.org";
     private static final String DNS_SEED_TESTNET = "testnet.semux.org";
 
+    private static final long MAX_QUEUE_SIZE = 1024;
     private static final int LRU_CACHE_SIZE = 1024;
     private static final long RECONNECT_WAIT = 2L * 60L * 1000L;
 
@@ -55,12 +56,13 @@ public class NodeManager {
     private ChannelManager channelMgr;
     private PeerClient client;
 
-    private Queue<InetSocketAddress> queue;
-    private Cache<InetSocketAddress, Long> lastConnect;
+    private Deque<Node> deque = new ConcurrentLinkedDeque<>();
+
+    private Cache<Node, Long> lastConnect = Caffeine.newBuilder().maximumSize(LRU_CACHE_SIZE).build();
 
     private ScheduledExecutorService exec;
     private ScheduledFuture<?> connectFuture;
-    private ScheduledFuture<?> seedingFuture;
+    private ScheduledFuture<?> fetchFuture;
 
     private volatile boolean isRunning;
 
@@ -76,9 +78,6 @@ public class NodeManager {
         this.channelMgr = kernel.getChannelManager();
         this.client = kernel.getClient();
 
-        this.queue = new ConcurrentLinkedQueue<>();
-        this.lastConnect = Caffeine.newBuilder().maximumSize(LRU_CACHE_SIZE).build();
-
         this.exec = Executors.newSingleThreadScheduledExecutor(factory);
     }
 
@@ -92,7 +91,7 @@ public class NodeManager {
             // every 0.5 seconds
             connectFuture = exec.scheduleAtFixedRate(this::doConnect, 100, 500, TimeUnit.MILLISECONDS);
             // every 120 seconds, delayed by 10 seconds (public IP lookup)
-            seedingFuture = exec.scheduleAtFixedRate(this::doFetch, 10, 120, TimeUnit.SECONDS);
+            fetchFuture = exec.scheduleAtFixedRate(this::doFetch, 5, 100, TimeUnit.SECONDS);
 
             isRunning = true;
             logger.info("Node manager started");
@@ -105,7 +104,7 @@ public class NodeManager {
     public synchronized void stop() {
         if (isRunning) {
             connectFuture.cancel(true);
-            seedingFuture.cancel(false);
+            fetchFuture.cancel(false);
 
             isRunning = false;
             logger.info("Node manager stopped");
@@ -126,8 +125,11 @@ public class NodeManager {
      * 
      * @param node
      */
-    public void addNode(InetSocketAddress node) {
-        queue.add(node);
+    public void addNode(Node node) {
+        deque.addFirst(node);
+        while (queueSize() > MAX_QUEUE_SIZE) {
+            deque.removeLast();
+        }
     }
 
     /**
@@ -135,8 +137,10 @@ public class NodeManager {
      * 
      * @param nodes
      */
-    public void addNodes(Collection<InetSocketAddress> nodes) {
-        queue.addAll(nodes);
+    public void addNodes(Collection<Node> nodes) {
+        for (Node node : nodes) {
+            addNode(node);
+        }
     }
 
     /**
@@ -145,7 +149,7 @@ public class NodeManager {
      * @return
      */
     public int queueSize() {
-        return queue.size();
+        return deque.size();
     }
 
     /**
@@ -154,16 +158,16 @@ public class NodeManager {
      * @param networkId
      * @return
      */
-    public static Set<InetSocketAddress> getSeedNodes(byte networkId) {
-        Set<InetSocketAddress> nodes = new HashSet<>();
+    public static Set<Node> getSeedNodes(byte networkId) {
+        Set<Node> nodes = new HashSet<>();
 
+        String name = null;
         try {
-            String name;
             switch (networkId) {
-            case Constants.MAIN_NET_ID:
+            case Constants.MAINNET_ID:
                 name = DNS_SEED_MAINNET;
                 break;
-            case Constants.TEST_NET_ID:
+            case Constants.TESTNET_ID:
                 name = DNS_SEED_TESTNET;
                 break;
             default:
@@ -171,10 +175,10 @@ public class NodeManager {
             }
 
             for (InetAddress a : InetAddress.getAllByName(name)) {
-                nodes.add(new InetSocketAddress(a, Constants.DEFAULT_P2P_PORT));
+                nodes.add(new Node(a, Constants.DEFAULT_P2P_PORT));
             }
         } catch (UnknownHostException e) {
-            logger.info("Failed to get bootstrapping nodes by dns");
+            logger.info("Failed to get seed nodes from {}", name);
         }
 
         return nodes;
@@ -185,19 +189,19 @@ public class NodeManager {
      */
     protected void doConnect() {
         Set<InetSocketAddress> activeAddresses = channelMgr.getActiveAddresses();
-        InetSocketAddress addr;
+        Node node;
 
-        while ((addr = queue.poll()) != null && channelMgr.size() < config.netMaxOutboundConnections()) {
-            Long l = lastConnect.getIfPresent(addr);
+        while ((node = deque.pollFirst()) != null && channelMgr.size() < config.netMaxOutboundConnections()) {
+            Long lastTouch = lastConnect.getIfPresent(node);
             long now = System.currentTimeMillis();
 
-            if (!new InetSocketAddress(client.getIp(), client.getPort()).equals(addr)
-                    && !activeAddresses.contains(addr)
-                    && (l == null || l + RECONNECT_WAIT < now)) {
+            if (!client.getNode().equals(node)
+                    && !activeAddresses.contains(node.toAddress())
+                    && (lastTouch == null || lastTouch + RECONNECT_WAIT < now)) {
 
-                SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, addr);
-                client.connect(addr, ci);
-                lastConnect.put(addr, now);
+                SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, node);
+                client.connect(node, ci);
+                lastConnect.put(node, now);
                 break;
             }
         }
@@ -208,5 +212,86 @@ public class NodeManager {
      */
     protected void doFetch() {
         addNodes(getSeedNodes(config.networkId()));
+    }
+
+    /**
+     * Represents a node in the semux network.
+     */
+    public static class Node {
+
+        private InetSocketAddress address;
+
+        /**
+         * Construct a node with the given socket address.
+         * 
+         * @param address
+         */
+        public Node(InetSocketAddress address) {
+            this.address = address;
+        }
+
+        /**
+         * Construct a node with the given IP address and port.
+         * 
+         * @param ip
+         * @param port
+         */
+        public Node(InetAddress ip, int port) {
+            this(new InetSocketAddress(ip, port));
+        }
+
+        /**
+         * Construct a node with the given IP address and port.
+         * 
+         * @param ip
+         *            IP address, or hostname (not encouraged to use)
+         * @param port
+         *            port number
+         */
+        public Node(String ip, int port) {
+            this(new InetSocketAddress(ip, port));
+        }
+
+        /**
+         * Returns the IP address.
+         * 
+         * @return
+         */
+        public String getIp() {
+            return address.getAddress().getHostAddress();
+        }
+
+        /**
+         * Returns the port number
+         * 
+         * @return
+         */
+        public int getPort() {
+            return address.getPort();
+        }
+
+        /**
+         * Converts into a socket address.
+         * 
+         * @return
+         */
+        public InetSocketAddress toAddress() {
+            return address;
+        }
+
+        @Override
+        public int hashCode() {
+            return address.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof Node && address.equals(((Node) o).toAddress());
+        }
+
+        @Override
+        public String toString() {
+            return getIp() + ":" + getPort();
+        }
     }
 }

@@ -7,7 +7,6 @@
 package org.semux.net;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -18,7 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
+import org.semux.net.NodeManager.Node;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +53,7 @@ public class PeerClient {
 
     private String ip;
     private int port;
-    private EdDSA coinbase;
+    private Key coinbase;
 
     private EventLoopGroup workerGroup;
 
@@ -63,7 +63,7 @@ public class PeerClient {
      * @param config
      * @param coinbase
      */
-    public PeerClient(Config config, EdDSA coinbase) {
+    public PeerClient(Config config, Key coinbase) {
         this(config.p2pDeclaredIp().orElse(InetAddress.getLoopbackAddress().getHostAddress()), config.p2pListenPort(),
                 coinbase);
 
@@ -79,7 +79,7 @@ public class PeerClient {
      * @param port
      * @param coinbase
      */
-    public PeerClient(String ip, int port, EdDSA coinbase) {
+    public PeerClient(String ip, int port, Key coinbase) {
         logger.info("Use IP address: {}", ip);
 
         this.ip = ip;
@@ -107,6 +107,15 @@ public class PeerClient {
             }
 
         }, 0, 30, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Returns this node.
+     * 
+     * @return
+     */
+    public Node getNode() {
+        return new Node(ip, port);
     }
 
     /**
@@ -141,17 +150,17 @@ public class PeerClient {
      * 
      * @return
      */
-    public EdDSA getCoinbase() {
+    public Key getCoinbase() {
         return coinbase;
     }
 
     /**
      * Connects to a remote peer asynchronously.
      * 
-     * @param remoteAddress
+     * @param remoteNode
      * @return
      */
-    public ChannelFuture connect(InetSocketAddress remoteAddress, SemuxChannelInitializer ci) {
+    public ChannelFuture connect(Node remoteNode, SemuxChannelInitializer ci) {
         Bootstrap b = new Bootstrap();
         b.group(workerGroup);
         b.channel(NioSocketChannel.class);
@@ -159,7 +168,7 @@ public class PeerClient {
         b.option(ChannelOption.SO_KEEPALIVE, true);
         b.option(ChannelOption.MESSAGE_SIZE_ESTIMATOR, DefaultMessageSizeEstimator.DEFAULT);
         b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Constants.DEFAULT_CONNECT_TIMEOUT);
-        b.remoteAddress(remoteAddress);
+        b.remoteAddress(remoteNode.toAddress());
 
         b.handler(ci);
 

@@ -36,7 +36,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 /**
  * Pending manager maintains all unconfirmed transactions, either from kernel or
  * network. All transactions are evaluated and propagated to peers if success.
- * 
+ *
  * TODO: sort transaction queue by fee, and other metrics
  *
  */
@@ -132,7 +132,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     /**
      * Returns whether the pending manager is running or not.
-     * 
+     *
      * @return
      */
     public synchronized boolean isRunning() {
@@ -141,7 +141,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     /**
      * Returns a copy of the queue, for test purpose only.
-     * 
+     *
      * @return
      */
     public synchronized List<Transaction> getQueue() {
@@ -151,7 +151,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Adds a transaction to the queue, which will be validated later by the
      * background worker. Transaction may get rejected if the queue is full.
-     * 
+     *
      * @param tx
      */
     public synchronized void addTransaction(Transaction tx) {
@@ -162,19 +162,19 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     /**
      * Adds a transaction to the pool and waits until it's done.
-     * 
+     *
      * @param tx
      *            The transaction
      * @return The processing result
      */
     public synchronized ProcessTransactionResult addTransactionSync(Transaction tx) {
-        return tx.validate() ? processTransaction(tx, true)
+        return tx.validate(kernel.getConfig().networkId()) ? processTransaction(tx, true)
                 : new ProcessTransactionResult(0, TransactionResult.Error.INVALID_FORMAT);
     }
 
     /**
      * Returns the nonce of an account based on the pending state.
-     * 
+     *
      * @param address
      * @return
      */
@@ -184,7 +184,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     /**
      * Returns pending transactions and corresponding results.
-     * 
+     *
      * @param limit
      * @return
      */
@@ -215,7 +215,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     /**
      * Returns transactions in the pool, with the given total size limit.
-     * 
+     *
      * @param limit
      * @return
      */
@@ -225,7 +225,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     /**
      * Returns all transactions in the pool.
-     * 
+     *
      * @return
      */
     public synchronized List<PendingTransaction> getTransactions() {
@@ -234,7 +234,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     /**
      * Resets the pending state and returns all pending transactions.
-     * 
+     *
      * @return
      */
     public synchronized List<PendingTransaction> reset() {
@@ -283,7 +283,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                 continue;
             }
 
-            if (tx.validate() && processTransaction(tx, true).accepted >= 1) {
+            if (tx.validate(kernel.getConfig().networkId()) && processTransaction(tx, true).accepted >= 1) {
                 // exit after one success transaction
                 return;
             }
@@ -294,7 +294,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     /**
      * Validates the given transaction and add to pool if success.
-     * 
+     *
      * @param tx
      *            transaction
      * @param relay
@@ -315,8 +315,9 @@ public class PendingManager implements Runnable, BlockchainListener {
         }
 
         // check transaction timestamp if this is a fresh transaction:
-        // a time drift of 2 hours is allowed
-        if (tx.getTimestamp() < now - ALLOWED_TIME_DRIFT || tx.getTimestamp() > now + ALLOWED_TIME_DRIFT) {
+        // a time drift of 2 hours is allowed by default
+        if (tx.getTimestamp() < now - kernel.getConfig().maxTransactionTimeDrift()
+                || tx.getTimestamp() > now + kernel.getConfig().maxTransactionTimeDrift()) {
             return new ProcessTransactionResult(cnt, TransactionResult.Error.INVALID_TIMESTAMP);
         }
 

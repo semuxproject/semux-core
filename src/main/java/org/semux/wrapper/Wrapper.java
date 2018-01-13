@@ -8,7 +8,6 @@ package org.semux.wrapper;
 
 import static java.util.Arrays.asList;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,36 +17,30 @@ import java.util.stream.Stream;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
-import org.semux.cli.SemuxCLI;
-import org.semux.config.Constants;
-import org.semux.gui.SemuxGUI;
-import org.semux.log.LoggerConfigurator;
+import org.semux.cli.SemuxCli;
+import org.semux.gui.SemuxGui;
 import org.semux.util.SystemUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is a process wrapper mainly created for dynamic allocation of the
- * maximum heap size of Semux JVM. The wrapper dynamically allocates 80% of
- * available physical memory to Semux JVM if -Xmx option is not specified.
+ * maximum heap size of JVM. The wrapper sets the -Xmx to 80% of available
+ * physical memory if the -Xmx option is not specified.
  */
 public class Wrapper {
 
-    final static Logger logger = LoggerFactory.getLogger(Wrapper.class);
-
-    public static final long MINIMUM_HEAP_SIZE_MB = 1024L;
+    public static final long MINIMUM_HEAP_SIZE_MB = 512L;
 
     enum Mode {
         GUI, CLI
     }
 
-    private static Class<?> getModeClass(Mode mode) {
+    protected static Class<?> getModeClass(Mode mode) {
         switch (mode) {
         case CLI:
-            return SemuxCLI.class;
+            return SemuxCli.class;
 
         case GUI:
-            return SemuxGUI.class;
+            return SemuxGui.class;
 
         default:
             throw new WrapperException("Selected mode is not supported");
@@ -55,8 +48,6 @@ public class Wrapper {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException, ParseException {
-        // TODO: use specified data directory
-        LoggerConfigurator.configure(new File(Constants.DEFAULT_DATA_DIR));
         WrapperCLIParser wrapperCLIParser = new WrapperCLIParser(args);
         Wrapper wrapper = new Wrapper();
         String[] jvmOptions = wrapper.allocateHeapSize(wrapperCLIParser.jvmOptions);
@@ -70,16 +61,10 @@ public class Wrapper {
         // dynamically specify maximum heap size according to available physical memory
         // if Xmx is not specified in jvmoptions
         final Pattern xmxPattern = Pattern.compile("^-Xmx");
+
         if (Stream.of(jvmOptions).noneMatch(s -> xmxPattern.matcher(s).find())) {
-            long toAllocateMB = (long) ((double) SystemUtil.getAvailableMemorySize() / 1024 / 1024 * 0.8);
-            if (toAllocateMB < MINIMUM_HEAP_SIZE_MB) {
-                toAllocateMB = MINIMUM_HEAP_SIZE_MB;
-                logger.warn(
-                        "The available memory space on your system is less than the minimum requirement of {}M. This may result in low performance or a crash of semux wallet.",
-                        MINIMUM_HEAP_SIZE_MB);
-            }
-            allocatedJvmOptions.add(String.format("-Xmx%dM", toAllocateMB));
-            logger.debug("Allocating {} MB of memory as maximum heap size", toAllocateMB);
+            long toAllocateMB = SystemUtil.getAvailableMemorySize() / 1024 / 1024 * 8 / 10;
+            allocatedJvmOptions.add(String.format("-Xmx%dM", Math.max(toAllocateMB, MINIMUM_HEAP_SIZE_MB)));
         }
 
         return allocatedJvmOptions.toArray(new String[allocatedJvmOptions.size()]);
@@ -88,16 +73,17 @@ public class Wrapper {
     protected int exec(Mode mode, String[] jvmOptions, String[] args) throws IOException, InterruptedException {
         String javaHome = System.getProperty("java.home");
         Path javaBin = Paths.get(javaHome, "bin", "java");
-        String[] args1 = ArrayUtils.addAll(
-                ArrayUtils.addAll(new String[] { javaBin.toAbsolutePath().toString() }, jvmOptions),
-                ArrayUtils.addAll(new String[] { "-cp", "semux.jar", getModeClass(mode).getCanonicalName() }, args));
 
-        return startProcess(args1);
+        String classpath = System.getProperty("java.class.path");
+
+        String[] newArgs = ArrayUtils.addAll(
+                ArrayUtils.addAll(new String[] { javaBin.toAbsolutePath().toString(), "-cp", classpath }, jvmOptions),
+                ArrayUtils.addAll(new String[] { getModeClass(mode).getCanonicalName() }, args));
+
+        return startProcess(newArgs);
     }
 
     protected int startProcess(String[] args) throws IOException, InterruptedException {
-        logger.debug(String.join(" ", args));
-
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command(args);
         processBuilder.inheritIO();

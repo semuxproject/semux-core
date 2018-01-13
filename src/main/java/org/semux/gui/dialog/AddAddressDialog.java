@@ -6,6 +6,7 @@
  */
 package org.semux.gui.dialog;
 
+import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -19,7 +20,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.util.exception.UnreachableException;
 
 public class AddAddressDialog extends JDialog implements ActionListener {
@@ -32,17 +33,17 @@ public class AddAddressDialog extends JDialog implements ActionListener {
     private JTextField address;
 
     public AddAddressDialog(AddressBookDialog addressBookDialog) {
-        super(addressBookDialog, GUIMessages.get("AddAddress"));
+        super(addressBookDialog, GuiMessages.get("AddAddress"), Dialog.ModalityType.TOOLKIT_MODAL);
         this.addressBookDialog = addressBookDialog;
 
-        JLabel lblName = new JLabel("Name");
-        JLabel lblAddress = new JLabel("Address");
+        JLabel lblName = new JLabel(GuiMessages.get("Name"));
+        JLabel lblAddress = new JLabel(GuiMessages.get("Address"));
 
-        name = new JTextField();
-        address = new JTextField();
+        name = SwingUtil.textFieldWithCopyPastePopup();
+        address = SwingUtil.textFieldWithCopyPastePopup();
 
-        JButton btnCancel = SwingUtil.createDefaultButton(GUIMessages.get("Cancel"), this, Action.CANCEL);
-        JButton btnOk = SwingUtil.createDefaultButton(GUIMessages.get("OK"), this, Action.OK);
+        JButton btnCancel = SwingUtil.createDefaultButton(GuiMessages.get("Cancel"), this, Action.CANCEL);
+        JButton btnOk = SwingUtil.createDefaultButton(GuiMessages.get("OK"), this, Action.OK);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());

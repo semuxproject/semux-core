@@ -9,14 +9,13 @@ package org.semux.net.msg;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.net.InetSocketAddress;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
 import org.semux.net.Channel;
+import org.semux.net.NodeManager.Node;
 import org.semux.net.PeerClient;
 import org.semux.net.PeerServerMock;
 import org.semux.net.SemuxChannelInitializer;
@@ -55,13 +54,13 @@ public class MessageQueueTest {
         server2 = new PeerServerMock(kernelRule2.getKernel());
         server2.start();
 
-        InetSocketAddress remoteAddress = new InetSocketAddress(kernelRule1.getKernel().getConfig().p2pListenIp(),
+        Node remoteNode = new Node(kernelRule1.getKernel().getConfig().p2pListenIp(),
                 kernelRule1.getKernel().getConfig().p2pListenPort());
 
         KernelMock kernel2 = kernelRule2.getKernel();
-        SemuxChannelInitializer ci = new SemuxChannelInitializer(kernelRule2.getKernel(), remoteAddress);
+        SemuxChannelInitializer ci = new SemuxChannelInitializer(kernelRule2.getKernel(), remoteNode);
         PeerClient client = kernelRule2.getKernel().getClient();
-        client.connect(remoteAddress, ci).sync();
+        client.connect(remoteNode, ci).sync();
 
         while (kernel2.getChannelManager().getActiveChannels().isEmpty()) {
             Thread.sleep(100);

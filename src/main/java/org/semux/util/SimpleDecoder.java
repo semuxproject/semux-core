@@ -8,7 +8,7 @@ package org.semux.util;
 
 import java.io.UnsupportedEncodingException;
 
-import org.semux.util.exception.SimpleDecoderException;
+import org.semux.util.exception.SimpleCodecException;
 
 public class SimpleDecoder {
     private static final String ENCODING = "UTF-8";
@@ -31,13 +31,6 @@ public class SimpleDecoder {
         this.from = from;
         this.to = to;
         this.index = from;
-    }
-
-    private void require(int n) {
-        if (to - index < n) {
-            String msg = String.format("input [%d, %d], require: [%d %d]", from, to, index, index + n);
-            throw new IndexOutOfBoundsException(msg);
-        }
     }
 
     public boolean readBoolean() {
@@ -67,8 +60,8 @@ public class SimpleDecoder {
         return (unsignedInt(i1) << 32) | unsignedInt(i2);
     }
 
-    public byte[] readBytes() {
-        int len = readInt();
+    public byte[] readBytes(boolean vlq) {
+        int len = vlq ? readSize() : readInt();
 
         require(len);
         byte[] buf = new byte[len];
@@ -78,23 +71,51 @@ public class SimpleDecoder {
         return buf;
     }
 
+    public byte[] readBytes() {
+        return readBytes(true);
+    }
+
     public String readString() {
-        int len = readInt();
-
-        require(len);
-        byte[] buf = new byte[len];
-        System.arraycopy(in, index, buf, 0, len);
-        index += len;
-
         try {
-            return new String(buf, ENCODING);
+            return new String(readBytes(), ENCODING);
         } catch (UnsupportedEncodingException e) {
-            throw new SimpleDecoderException(e);
+            throw new SimpleCodecException(e);
         }
     }
 
     public int getReadIndex() {
         return index;
+    }
+
+    /**
+     * Reads size from the input.
+     * 
+     * @return
+     */
+    protected int readSize() {
+        int size = 0;
+        for (int i = 0; i < 4; i++) {
+            require(1);
+            byte b = in[index++];
+
+            size = (size << 7) | (b & 0x7F);
+            if ((b & 0x80) == 0) {
+                break;
+            }
+        }
+        return size;
+    }
+
+    /**
+     * Checks if the required bytes is satisfied.
+     * 
+     * @param n
+     */
+    protected void require(int n) {
+        if (to - index < n) {
+            String msg = String.format("input [%d, %d], require: [%d %d]", from, to, index, index + n);
+            throw new IndexOutOfBoundsException(msg);
+        }
     }
 
     /**

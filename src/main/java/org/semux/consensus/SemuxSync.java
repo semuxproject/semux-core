@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
@@ -41,8 +42,8 @@ import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.EdDSA;
-import org.semux.crypto.EdDSA.Signature;
+import org.semux.crypto.Key;
+import org.semux.crypto.Key.Signature;
 import org.semux.crypto.Hex;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
@@ -79,10 +80,11 @@ public class SemuxSync implements SyncManager {
     private static final ScheduledExecutorService timer1 = Executors.newSingleThreadScheduledExecutor(factory);
     private static final ScheduledExecutorService timer2 = Executors.newSingleThreadScheduledExecutor(factory);
 
-    private static final long MAX_DOWNLOAD_TIME = 10L * 1000L; // 30 seconds
+    private static final long MAX_DOWNLOAD_TIME = 10L * 1000L; // 10 seconds
 
     private static final int MAX_UNFINISHED_JOBS = 16;
 
+    private static final int MAX_QUEUED_BLOCKS = 8192;
     private static final int MAX_PENDING_BLOCKS = 512;
 
     private static final Random random = new Random();
@@ -94,6 +96,7 @@ public class SemuxSync implements SyncManager {
     private ChannelManager channelMgr;
 
     // task queues
+    private AtomicLong latestQueuedTask = new AtomicLong();
     private TreeSet<Long> toDownload = new TreeSet<>();
     private Map<Long, Long> toComplete = new HashMap<>();
     private TreeSet<Pair<Block, Channel>> toProcess = new TreeSet<>(
@@ -129,9 +132,8 @@ public class SemuxSync implements SyncManager {
 
                 current.set(chain.getLatestBlockNumber() + 1);
                 target.set(targetHeight);
-                for (long i = chain.getLatestBlockNumber() + 1; i < target.get(); i++) {
-                    toDownload.add(i);
-                }
+                latestQueuedTask.set(chain.getLatestBlockNumber());
+                growToDownloadQueue();
             }
 
             // [2] start tasks
@@ -184,12 +186,12 @@ public class SemuxSync implements SyncManager {
         case BLOCK: {
             BlockMessage blockMsg = (BlockMessage) msg;
             Block block = blockMsg.getBlock();
-            if (block != null) {
-                synchronized (lock) {
-                    toDownload.remove(block.getNumber());
-                    toComplete.remove(block.getNumber());
-                    toProcess.add(Pair.of(block, channel));
+            synchronized (lock) {
+                if (toDownload.remove(block.getNumber())) {
+                    growToDownloadQueue();
                 }
+                toComplete.remove(block.getNumber());
+                toProcess.add(Pair.of(block, channel));
             }
             break;
         }
@@ -208,17 +210,6 @@ public class SemuxSync implements SyncManager {
             return;
         }
 
-        List<Channel> channels = channelMgr.getIdleChannels();
-        logger.trace("Idle peers = {}", channels.size());
-
-        // quit if no idle channels.
-        if (channels.isEmpty()) {
-            return;
-        }
-
-        // pick a random channel
-        Channel c = channels.get(random.nextInt(channels.size()));
-
         synchronized (lock) {
             // filter all expired tasks
             long now = System.currentTimeMillis();
@@ -233,17 +224,17 @@ public class SemuxSync implements SyncManager {
                 }
             }
 
-            // quite if no more tasks
-            if (toDownload.isEmpty()) {
-                return;
-            }
-            Long task = toDownload.first();
-
             // quit if too many unfinished jobs
             if (toComplete.size() > MAX_UNFINISHED_JOBS) {
                 logger.trace("Max unfinished jobs reached");
                 return;
             }
+
+            // quit if no more tasks
+            if (toDownload.isEmpty()) {
+                return;
+            }
+            Long task = toDownload.first();
 
             // quit if too many pending blocks
             if (toProcess.size() > MAX_PENDING_BLOCKS && task > toProcess.first().getKey().getNumber()) {
@@ -251,13 +242,52 @@ public class SemuxSync implements SyncManager {
                 return;
             }
 
+            // get idle channels
+            List<Channel> channels = channelMgr.getIdleChannels().stream()
+                    .filter(channel -> channel.getRemotePeer().getLatestBlockNumber() >= task)
+                    .collect(Collectors.toList());
+            logger.trace("Idle peers = {}", channels.size());
+
+            // quit if no idle channels.
+            if (channels.isEmpty()) {
+                return;
+            }
+
+            // pick a random channel
+            Channel c = channels.get(random.nextInt(channels.size()));
+
             // request the block
             if (c.getRemotePeer().getLatestBlockNumber() >= task) {
                 logger.debug("Request block #{} from channel = {}", task, c.getId());
                 c.getMessageQueue().sendMessage(new GetBlockMessage(task));
 
-                toDownload.remove(task);
+                if (toDownload.remove(task)) {
+                    growToDownloadQueue();
+                }
                 toComplete.put(task, System.currentTimeMillis());
+            }
+        }
+    }
+
+    /**
+     * Queue new tasks sequentially starting from
+     * ${@link SemuxSync#latestQueuedTask} until the size of
+     * ${@link SemuxSync#toDownload} queue is greater than or equal to
+     * ${@value MAX_QUEUED_BLOCKS}
+     */
+    private void growToDownloadQueue() {
+        // To avoid overhead, this method doesn't add new tasks before the queue is less
+        // than half-filled
+        if (toDownload.size() >= MAX_QUEUED_BLOCKS / 2) {
+            return;
+        }
+
+        for (long task = latestQueuedTask.get() + 1; //
+                task < target.get() && toDownload.size() < MAX_QUEUED_BLOCKS; //
+                task++) {
+            latestQueuedTask.accumulateAndGet(task, (prev, next) -> next > prev ? next : prev);
+            if (!chain.hasBlock(task)) {
+                toDownload.add(task);
             }
         }
     }
@@ -296,7 +326,9 @@ public class SemuxSync implements SyncManager {
 
             if (validateApplyBlock(pair.getKey())) {
                 synchronized (lock) {
-                    toDownload.remove(pair.getKey().getNumber());
+                    if (toDownload.remove(pair.getKey().getNumber())) {
+                        growToDownloadQueue();
+                    }
                     toComplete.remove(pair.getKey().getNumber());
                 }
             } else {
@@ -339,7 +371,7 @@ public class SemuxSync implements SyncManager {
         }
 
         // [2] check transactions and results
-        if (!Block.validateTransactions(header, transactions)
+        if (!Block.validateTransactions(header, transactions, config.networkId())
                 || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
             logger.debug("Invalid block transactions");
             return false;
@@ -364,11 +396,7 @@ public class SemuxSync implements SyncManager {
         }
 
         // [4] evaluate votes
-        if (!validateBlockVotes(block)) {
-            return false;
-        }
-
-        return true;
+        return validateBlockVotes(block);
     }
 
     protected boolean validateBlockVotes(Block block) {
@@ -388,7 +416,7 @@ public class SemuxSync implements SyncManager {
         for (Signature sig : block.getVotes()) {
             String a = Hex.encode(sig.getAddress());
 
-            if (!set.contains(a) || !EdDSA.verify(encoded, sig)) {
+            if (!set.contains(a) || !Key.verify(encoded, sig)) {
                 logger.debug("Invalid BFT vote: signer = {}", a);
                 return false;
             }

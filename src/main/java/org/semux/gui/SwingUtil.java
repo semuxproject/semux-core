@@ -6,6 +6,10 @@
  */
 package org.semux.gui;
 
+import static org.semux.gui.TextContextMenuItem.COPY;
+import static org.semux.gui.TextContextMenuItem.CUT;
+import static org.semux.gui.TextContextMenuItem.PASTE;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -19,9 +23,12 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,15 +44,13 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
-import javax.swing.text.DefaultEditorKit;
 
 import org.semux.core.Transaction;
 import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
-import org.semux.gui.exception.QRCodeException;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +66,8 @@ import io.netty.util.internal.StringUtil;
 public class SwingUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SwingUtil.class);
+
+    private static final int DECIMALS = 3;
 
     private SwingUtil() {
     }
@@ -156,40 +163,36 @@ public class SwingUtil {
      * Generate an QR image for the given text.
      * 
      * @param text
-     * @param size
+     * @param width
+     * @param height
      * @return
+     * @throws WriterException
      */
-    public static BufferedImage generateQR(String text, int size) throws QRCodeException {
-        try {
-            Map<EncodeHintType, Object> hintMap = new EnumMap<>(EncodeHintType.class);
-            hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
-            hintMap.put(EncodeHintType.MARGIN, 2);
-            hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+    public static BufferedImage createQrImage(String text, int width, int height) throws WriterException {
+        Map<EncodeHintType, Object> hintMap = new EnumMap<>(EncodeHintType.class);
+        hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+        hintMap.put(EncodeHintType.MARGIN, 2);
+        hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
 
-            QRCodeWriter writer = new QRCodeWriter();
-            BitMatrix matrix = writer.encode(text, BarcodeFormat.QR_CODE, size, size, hintMap);
-            int width = matrix.getWidth();
-            int height = matrix.getHeight();
-            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            image.createGraphics();
+        QRCodeWriter writer = new QRCodeWriter();
+        BitMatrix matrix = writer.encode(text, BarcodeFormat.QR_CODE, width, height, hintMap);
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        image.createGraphics();
 
-            Graphics2D graphics = (Graphics2D) image.getGraphics();
-            graphics.setColor(Color.WHITE);
-            graphics.fillRect(0, 0, width, height);
-            graphics.setColor(Color.BLACK);
+        Graphics2D graphics = (Graphics2D) image.getGraphics();
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(0, 0, width, height);
+        graphics.setColor(Color.BLACK);
 
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < width; j++) {
-                    if (matrix.get(i, j)) {
-                        graphics.fillRect(i, j, 1, 1);
-                    }
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < width; j++) {
+                if (matrix.get(i, j)) {
+                    graphics.fillRect(i, j, 1, 1);
                 }
             }
-
-            return image;
-        } catch (WriterException e) {
-            throw new QRCodeException(e);
         }
+
+        return image;
     }
 
     /**
@@ -197,17 +200,15 @@ public class SwingUtil {
      * 
      * @param comp
      */
-    public static void addCopyPastePopup(JComponent comp) {
+    public static void addTextContextMenu(JComponent comp, List<TextContextMenuItem> textContextMenuItems) {
         JPopupMenu popup = new JPopupMenu();
-        JMenuItem item = new JMenuItem(new DefaultEditorKit.CutAction());
-        item.setText(GUIMessages.get("Cut"));
-        popup.add(item);
-        item = new JMenuItem(new DefaultEditorKit.CopyAction());
-        item.setText(GUIMessages.get("Copy"));
-        popup.add(item);
-        item = new JMenuItem(new DefaultEditorKit.PasteAction());
-        item.setText(GUIMessages.get("Paste"));
-        popup.add(item);
+
+        for (TextContextMenuItem textContextMenuItem : textContextMenuItems) {
+            JMenuItem menuItem = new JMenuItem(textContextMenuItem.toAction());
+            menuItem.setText(textContextMenuItem.toString());
+            popup.add(menuItem);
+        }
+
         comp.setComponentPopupMenu(popup);
     }
 
@@ -218,23 +219,24 @@ public class SwingUtil {
      */
     public static JTextField textFieldWithCopyPastePopup() {
         JTextField textField = new JTextField();
-        addCopyPastePopup(textField);
+        textField.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        addTextContextMenu(textField, Arrays.asList(COPY, PASTE, CUT));
         return textField;
     }
 
     /**
-     * Generates a selectable text area.
+     * Generates a readonly selectable text area.
      * 
      * @param txt
      * @return
      */
-    public static JTextArea textAreaWithCopyPastePopup(String txt) {
+    public static JTextArea textAreaWithCopyPopup(String txt) {
         JTextArea c = new JTextArea(txt);
         c.setBackground(null);
         c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         c.setEditable(false);
 
-        addCopyPastePopup(c);
+        addTextContextMenu(c, Collections.singletonList(COPY));
         return c;
     }
 
@@ -303,7 +305,7 @@ public class SwingUtil {
      * @return
      */
     public static String formatValue(long nano, boolean withUnit) {
-        return formatNumber(nano / (double) Unit.SEM, 2) + (withUnit ? " SEM" : "");
+        return formatNumber(nano / (double) Unit.SEM, DECIMALS) + (withUnit ? " SEM" : "");
     }
 
     /**
@@ -444,17 +446,17 @@ public class SwingUtil {
      * @param tx
      * @return
      */
-    public static String getTransactionDescription(SemuxGUI gui, Transaction tx) {
+    public static String getTransactionDescription(SemuxGui gui, Transaction tx) {
         switch (tx.getType()) {
         case COINBASE:
-            return GUIMessages.get("BlockReward") + " => "
-                    + getDelegateName(gui, tx.getTo()).orElse(GUIMessages.get("UnknownDelegate"));
+            return GuiMessages.get("BlockReward") + " => "
+                    + getDelegateName(gui, tx.getTo()).orElse(GuiMessages.get("UnknownDelegate"));
         case VOTE:
         case UNVOTE:
         case TRANSFER:
             return getTransactionRecipientsDescription(gui, tx);
         case DELEGATE:
-            return GUIMessages.get("DelegateRegistration");
+            return GuiMessages.get("DelegateRegistration");
         default:
             return StringUtil.EMPTY_STRING;
         }
@@ -466,7 +468,7 @@ public class SwingUtil {
      * @param tx
      * @return description of transaction with one or multiple recipients
      */
-    private static String getTransactionRecipientsDescription(SemuxGUI gui, Transaction tx) {
+    private static String getTransactionRecipientsDescription(SemuxGui gui, Transaction tx) {
         return getAddressAlias(gui, tx.getFrom()) + " => " + getAddressAlias(gui, tx.getTo());
     }
 
@@ -477,14 +479,14 @@ public class SwingUtil {
      * @param address
      * @return
      */
-    private static String getAddressAlias(SemuxGUI gui, byte[] address) {
+    private static String getAddressAlias(SemuxGui gui, byte[] address) {
         Optional<String> name = getDelegateName(gui, address);
         if (name.isPresent()) {
             return name.get();
         }
 
         int n = gui.getModel().getAccountNumber(address);
-        return n == -1 ? Hex.encode0x(address) : GUIMessages.get("AccountNum", n);
+        return n == -1 ? Hex.encode0x(address) : GuiMessages.get("AccountNum", n);
     }
 
     /**
@@ -493,10 +495,21 @@ public class SwingUtil {
      * @param address
      * @return
      */
-    public static Optional<String> getDelegateName(SemuxGUI gui, byte[] address) {
+    public static Optional<String> getDelegateName(SemuxGui gui, byte[] address) {
         DelegateState ds = gui.getKernel().getBlockchain().getDelegateState();
         Delegate d = ds.getDelegateByAddress(address);
 
         return d == null ? Optional.empty() : Optional.of(d.getNameString());
+    }
+
+    /**
+     * Returns a short version of address.
+     * 
+     * @param address
+     * @return
+     */
+    public static String shortAddress(byte[] address) {
+        return Hex.PREF + Hex.encode(Arrays.copyOfRange(address, 0, 2)) + "..."
+                + Hex.encode(Arrays.copyOfRange(address, address.length - 2, address.length));
     }
 }

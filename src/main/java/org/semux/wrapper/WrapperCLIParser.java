@@ -13,12 +13,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class WrapperCLIParser {
-
-    final static Logger logger = LoggerFactory.getLogger(WrapperCLIParser.class);
 
     final Wrapper.Mode mode;
 
@@ -35,34 +31,45 @@ class WrapperCLIParser {
         this.remainingArgs = commandLine.getArgs();
     }
 
+    /**
+     * Parses the `--jvm-options` option.
+     * 
+     * @param commandLine
+     * @return
+     */
     protected String[] parseJvmOptions(CommandLine commandLine) {
-        String jvmOptionsString = "";
         if (commandLine.hasOption("jvmoptions")) {
-            jvmOptionsString = commandLine.getOptionValue("jvmoptions").trim();
-        } else {
-            logger.debug("Specify --jvmoptions for additional JVM options");
+            String option = commandLine.getOptionValue("jvmoptions");
+            if (!option.isEmpty()) {
+                return option.split(" ");
+            }
         }
 
-        return jvmOptionsString.length() > 0 ? jvmOptionsString.split(" ") : new String[] {};
+        return new String[0];
     }
 
+    /**
+     * Parses the running mode, either `--gui` or `--cli`, defaults to GUI.
+     * 
+     * @param commandLine
+     * @return
+     */
     protected Wrapper.Mode parseMode(CommandLine commandLine) {
-        if (commandLine.hasOption("gui")) {
-            return Wrapper.Mode.GUI;
-        } else if (commandLine.hasOption("cli")) {
-            return Wrapper.Mode.CLI;
-        } else {
-            throw new WrapperException("Either --gui or --cli has to be specified");
-        }
+        return commandLine.hasOption("cli") ? Wrapper.Mode.CLI : Wrapper.Mode.GUI;
     }
 
+    /**
+     * Constructs the allowed options.
+     * 
+     * @return
+     */
     protected Options buildOptions() {
         Options options = new Options();
 
         options.addOption(Option.builder().longOpt("jvmoptions").hasArg(true).type(String.class).build());
 
         OptionGroup modeOption = new OptionGroup();
-        modeOption.setRequired(true);
+        modeOption.setRequired(false);
         Option guiMode = Option.builder().longOpt("gui").hasArg(false).build();
         modeOption.addOption(guiMode);
         Option cliMode = Option.builder().longOpt("cli").hasArg(false).build();

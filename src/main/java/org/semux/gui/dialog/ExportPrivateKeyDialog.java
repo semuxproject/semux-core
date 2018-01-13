@@ -8,6 +8,7 @@ package org.semux.gui.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -26,19 +27,20 @@ import javax.swing.JTable;
 import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
-import org.semux.gui.SemuxGUI;
+import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.util.exception.UnreachableException;
 
 public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "#", GUIMessages.get("Address"), GUIMessages.get("PrivateKey") };
+    private static String[] columnNames = { "#", GuiMessages.get("Address"), GuiMessages.get("PrivateKey") };
     private JTable table;
 
-    public ExportPrivateKeyDialog(SemuxGUI gui, JFrame parent) {
+    public ExportPrivateKeyDialog(SemuxGui gui, JFrame parent) {
+        super(null, GuiMessages.get("ExportPrivateKey"), Dialog.ModalityType.MODELESS);
         Wallet wallet = gui.getKernel().getWallet();
 
         Object[][] data = new Object[wallet.size()][];
@@ -60,7 +62,7 @@ public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
 
         JPanel panel = new JPanel();
         getContentPane().add(panel, BorderLayout.SOUTH);
-        JButton btnCopy = SwingUtil.createDefaultButton(GUIMessages.get("CopyPrivateKey"), this,
+        JButton btnCopy = SwingUtil.createDefaultButton(GuiMessages.get("CopyPrivateKey"), this,
                 Action.COPY_PRIVATE_KEY);
         panel.add(btnCopy);
 
@@ -69,7 +71,7 @@ public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
         getContentPane().add(scrollPane, BorderLayout.CENTER);
         scrollPane.setViewportView(table);
 
-        this.setTitle(GUIMessages.get("ExportPrivateKey"));
+        this.setTitle(GuiMessages.get("ExportPrivateKey"));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();
@@ -90,9 +92,9 @@ public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
                 Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
                 cb.setContents(new StringSelection(privateKey), null);
 
-                JOptionPane.showMessageDialog(this, GUIMessages.get("PrivateKeyCopied", privateKey));
+                JOptionPane.showMessageDialog(this, GuiMessages.get("PrivateKeyCopied", privateKey));
             } else {
-                JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
+                JOptionPane.showMessageDialog(this, GuiMessages.get("SelectAccount"));
             }
             break;
         default:

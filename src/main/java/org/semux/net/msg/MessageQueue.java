@@ -38,16 +38,15 @@ public class MessageQueue {
         }
     });
 
-    private Queue<MessageRT> requests = new ConcurrentLinkedQueue<>();
-    private Queue<MessageRT> responses = new ConcurrentLinkedQueue<>();
-    private Queue<MessageRT> prioritizedResponses = new ConcurrentLinkedQueue<>();
+    private Config config;
 
-    private ChannelHandlerContext ctx = null;
+    private Queue<MessageWrapper> requests = new ConcurrentLinkedQueue<>();
+    private Queue<MessageWrapper> responses = new ConcurrentLinkedQueue<>();
+    private Queue<MessageWrapper> prioritizedResponses = new ConcurrentLinkedQueue<>();
 
-    private org.semux.config.Config config;
-
+    private ChannelHandlerContext ctx;
     private ScheduledFuture<?> timerTask;
-    private volatile boolean isRunning;
+    private boolean initialized;
 
     /**
      * Create a message queue with the specified maximum queue size.
@@ -59,12 +58,12 @@ public class MessageQueue {
     }
 
     /**
-     * Bind this message queue to a channel, and start scheduled sending.
+     * Activates this message queue and binds it to the channel.
      *
      * @param ctx
      */
-    public void activate(ChannelHandlerContext ctx) {
-        if (!isRunning) {
+    public synchronized void activate(ChannelHandlerContext ctx) {
+        if (!initialized) {
             this.ctx = ctx;
             this.timerTask = timer.scheduleAtFixedRate(() -> {
                 try {
@@ -74,54 +73,46 @@ public class MessageQueue {
                 }
             }, 1, 1, TimeUnit.MILLISECONDS);
 
-            this.isRunning = true;
+            initialized = true;
         }
     }
 
     /**
-     * close this message queue.
+     * Deactivates this message queue.
      */
-    public void close() {
-        if (isRunning) {
+    public synchronized void deactivate() {
+        if (initialized) {
             this.timerTask.cancel(false);
 
-            this.isRunning = false;
+            initialized = false;
         }
     }
 
     /**
-     * Check if this message queue is idle.
+     * Returns if this message queue is idle.
      *
-     * @return true if both request and response queues are empty, otherwise false
+     * @return true if request/response queues are empty, otherwise false
      */
     public boolean isIdle() {
         return requests.isEmpty() && responses.isEmpty() && prioritizedResponses.isEmpty();
     }
 
     /**
-     * Disconnect aggressively.
+     * Disconnects aggressively.
      *
      * @param code
      */
     public void disconnect(ReasonCode code) {
         logger.debug("Disconnect: reason = {}", code);
 
-        // Turn off message queue, and stop sending/receiving messages immediately.
-        close();
+        deactivate();
 
-        // Send reason code and flush all enqueued message (to avoid
-        // ClosedChannelException)
-        try {
-            ctx.writeAndFlush(new DisconnectMessage(code)).await(10_000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // https://stackoverflow.com/a/4906814/670662
-        } finally {
-            ctx.close();
-        }
+        ctx.writeAndFlush(new DisconnectMessage(code));
+        ctx.close();
     }
 
     /**
-     * Add a message to the sending queue.
+     * Adds a message to the sending queue.
      *
      * @param msg
      *            the message to be sent
@@ -129,37 +120,38 @@ public class MessageQueue {
      *         false
      */
     public boolean sendMessage(Message msg) {
-        if (!isRunning) {
+        // not atomic or synchronized
+        if (!initialized) {
             return false;
         }
 
         int maxQueueSize = config.netMaxMessageQueueSize();
         if (requests.size() >= maxQueueSize || responses.size() >= maxQueueSize
                 || prioritizedResponses.size() >= maxQueueSize) {
-            disconnect(ReasonCode.BAD_PEER);
+            disconnect(ReasonCode.MESSAGE_QUEUE_FULL);
             return false;
         }
 
         if (msg.getResponseMessageClass() != null) {
-            requests.add(new MessageRT(msg));
+            requests.add(new MessageWrapper(msg));
         } else {
             if (config.netPrioritizedMessages().contains(msg.getCode())) {
-                prioritizedResponses.add(new MessageRT(msg));
+                prioritizedResponses.add(new MessageWrapper(msg));
             } else {
-                responses.add(new MessageRT(msg));
+                responses.add(new MessageWrapper(msg));
             }
         }
         return true;
     }
 
     /**
-     * Notify this message queue that a new message has been received.
+     * Notifies this message queue that a new message has been received.
      *
      * @param msg
      */
-    public MessageRT receivedMessage(Message msg) {
+    public MessageWrapper onMessageReceived(Message msg) {
         if (requests.peek() != null) {
-            MessageRT mr = requests.peek();
+            MessageWrapper mr = requests.peek();
             Message m = mr.getMessage();
 
             if (m.getResponseMessageClass() != null && msg.getClass() == m.getResponseMessageClass()) {
@@ -171,24 +163,24 @@ public class MessageQueue {
         return null;
     }
 
-    private void nudgeQueue() {
+    protected void nudgeQueue() {
         removeAnsweredMessage(requests.peek());
 
         // send responses
-        MessageRT msg = prioritizedResponses.poll();
+        MessageWrapper msg = prioritizedResponses.poll();
         sendToWire(msg == null ? responses.poll() : msg);
 
         // send requests
         sendToWire(requests.peek());
     }
 
-    private void removeAnsweredMessage(MessageRT mr) {
+    protected void removeAnsweredMessage(MessageWrapper mr) {
         if (mr != null && mr.isAnswered()) {
             requests.remove();
         }
     }
 
-    private void sendToWire(MessageRT mr) {
+    protected void sendToWire(MessageWrapper mr) {
 
         if (mr != null && mr.getRetries() == 0) {
             Message msg = mr.getMessage();

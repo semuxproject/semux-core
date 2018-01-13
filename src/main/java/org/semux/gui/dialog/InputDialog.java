@@ -21,7 +21,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.util.exception.UnreachableException;
 
 public class InputDialog extends JDialog implements ActionListener {
@@ -32,7 +32,7 @@ public class InputDialog extends JDialog implements ActionListener {
     private String text;
 
     public InputDialog(JFrame parent, String message, boolean isPassword) {
-        super(parent, GUIMessages.get("Input"));
+        super(parent, GuiMessages.get("Input"));
 
         JLabel labelLogo = new JLabel("");
         labelLogo.setIcon(SwingUtil.loadImage("logo", 96, 96));
@@ -42,10 +42,10 @@ public class InputDialog extends JDialog implements ActionListener {
         textField.setActionCommand(Action.OK.name());
         textField.addActionListener(this);
 
-        JButton btnOk = SwingUtil.createDefaultButton(GUIMessages.get("OK"), this, Action.OK);
+        JButton btnOk = SwingUtil.createDefaultButton(GuiMessages.get("OK"), this, Action.OK);
         btnOk.setSelected(true);
 
-        JButton btnCancel = SwingUtil.createDefaultButton(GUIMessages.get("Cancel"), this, Action.CANCEL);
+        JButton btnCancel = SwingUtil.createDefaultButton(GuiMessages.get("Cancel"), this, Action.CANCEL);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());

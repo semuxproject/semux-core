@@ -7,11 +7,13 @@
 package org.semux.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
+import org.semux.config.Constants;
 import org.semux.core.Genesis.Premine;
 import org.semux.core.exception.BlockchainException;
 import org.semux.core.state.AccountState;
@@ -19,11 +21,10 @@ import org.semux.core.state.AccountStateImpl;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.core.state.DelegateStateImpl;
-import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
-import org.semux.db.DBFactory;
-import org.semux.db.DBName;
-import org.semux.db.KVDB;
+import org.semux.db.DbFactory;
+import org.semux.db.DbName;
+import org.semux.db.Db;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
@@ -77,8 +78,8 @@ public class BlockchainImpl implements Blockchain {
 
     private Config config;
 
-    private KVDB indexDB;
-    private KVDB blockDB;
+    private Db indexDB;
+    private Db blockDB;
 
     private AccountState accountState;
     private DelegateState delegateState;
@@ -93,16 +94,16 @@ public class BlockchainImpl implements Blockchain {
      * 
      * @param factory
      */
-    public BlockchainImpl(Config config, DBFactory factory) {
+    public BlockchainImpl(Config config, DbFactory factory) {
         this.config = config;
 
-        this.indexDB = factory.getDB(DBName.INDEX);
-        this.blockDB = factory.getDB(DBName.BLOCK);
+        this.indexDB = factory.getDB(DbName.INDEX);
+        this.blockDB = factory.getDB(DbName.BLOCK);
 
-        this.accountState = new AccountStateImpl(factory.getDB(DBName.ACCOUNT));
-        this.delegateState = new DelegateStateImpl(this, factory.getDB(DBName.DELEGATE), factory.getDB(DBName.VOTE));
+        this.accountState = new AccountStateImpl(factory.getDB(DbName.ACCOUNT));
+        this.delegateState = new DelegateStateImpl(this, factory.getDB(DbName.DELEGATE), factory.getDB(DbName.VOTE));
 
-        this.genesis = Genesis.load(config.dataDir());
+        this.genesis = Genesis.load(Constants.NETWORKS[config.networkId()]);
 
         byte[] number = indexDB.get(Bytes.of(TYPE_LATEST_BLOCK_NUMBER));
         if (number == null) {
@@ -182,6 +183,11 @@ public class BlockchainImpl implements Blockchain {
     public BlockHeader getBlockHeader(byte[] hash) {
         long number = getBlockNumber(hash);
         return (number == -1) ? null : getBlockHeader(number);
+    }
+
+    @Override
+    public boolean hasBlock(long number) {
+        return blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number))) != null;
     }
 
     @Override
@@ -280,13 +286,22 @@ public class BlockchainImpl implements Blockchain {
 
             // [3] update transaction_by_account index
             addTransactionToAccount(tx, tx.getFrom());
-            addTransactionToAccount(tx, tx.getTo());
+            if (!Arrays.equals(tx.getFrom(), tx.getTo())) {
+                addTransactionToAccount(tx, tx.getTo());
+            }
         }
 
         if (number != genesis.getNumber()) {
             // [4] coinbase transaction
-            Transaction tx = new Transaction(TransactionType.COINBASE, block.getCoinbase(), reward, 0,
-                    block.getNumber(), block.getTimestamp(), Bytes.EMPTY_BYTES).sign(new EdDSA());
+            Transaction tx = new Transaction(config.networkId(),
+                    TransactionType.COINBASE,
+                    block.getCoinbase(),
+                    reward,
+                    0,
+                    block.getNumber(),
+                    block.getTimestamp(),
+                    Bytes.EMPTY_BYTES);
+            tx.sign(Constants.COINBASE_KEY);
             indexDB.put(Bytes.merge(TYPE_TRANSACTION_HASH, tx.getHash()), tx.toBytes());
             addTransactionToAccount(tx, block.getCoinbase());
 

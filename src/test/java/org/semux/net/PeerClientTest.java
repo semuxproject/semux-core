@@ -8,13 +8,12 @@ package org.semux.net;
 
 import static org.awaitility.Awaitility.await;
 
-import java.net.InetSocketAddress;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
+import org.semux.net.NodeManager.Node;
 import org.semux.rules.KernelRule;
 
 public class PeerClientTest {
@@ -49,13 +48,13 @@ public class PeerClientTest {
         server2 = new PeerServerMock(kernelRule2.getKernel());
         server2.start();
 
-        InetSocketAddress remoteAddress = new InetSocketAddress(kernelRule1.getKernel().getConfig().p2pListenIp(),
+        Node remoteNode = new Node(kernelRule1.getKernel().getConfig().p2pListenIp(),
                 kernelRule1.getKernel().getConfig().p2pListenPort());
 
         KernelMock kernel2 = kernelRule2.getKernel();
-        SemuxChannelInitializer ci = new SemuxChannelInitializer(kernelRule2.getKernel(), remoteAddress);
+        SemuxChannelInitializer ci = new SemuxChannelInitializer(kernelRule2.getKernel(), remoteNode);
         PeerClient client = kernelRule2.getKernel().getClient();
-        client.connect(remoteAddress, ci).sync();
+        client.connect(remoteNode, ci).sync();
 
         // waiting for the HELLO message to be sent
         await().until(() -> 1 == kernel2.getChannelManager().getActivePeers().size());

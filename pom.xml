@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.semux</groupId>
     <artifactId>semux</artifactId>
-    <version>1.0.0-rc.5</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
     <description>Semux is an experimental high-performance blockchain platform that powers decentralized application.</description>
 
@@ -12,6 +12,8 @@
         <dist.phase>install</dist.phase>
         <dist.base>${project.basedir}/dist</dist.base>
         <dist.windowsExecutableVersion>1.0.0.0</dist.windowsExecutableVersion>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <organization>
@@ -39,13 +41,73 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
+            </plugin>
+
+            <!-- build swagger document -->
+            <plugin>
+                <groupId>com.github.kongchen</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <version>3.1.6</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <apiSources>
+                        <apiSource>
+                            <info>
+                                <title>Semux</title>
+                                <description>${project.description}</description>
+                                <version>${project.version}</version>
+                                <contact>
+                                    <name>${project.organization.name}</name>
+                                    <url>${project.organization.url}</url>
+                                </contact>
+                                <license>
+                                    <name>MIT License</name>
+                                    <url>https://opensource.org/licenses/mit-license.php</url>
+                                </license>
+                            </info>
+                            <securityDefinitions>
+                                <securityDefinition>
+                                    <name>basicAuth</name>
+                                    <type>basic</type>
+                                </securityDefinition>
+                            </securityDefinitions>
+                            <schemes>
+                                <scheme>http</scheme>
+                            </schemes>
+                            <locations>
+                                <location>org.semux.api.SemuxApi</location>
+                            </locations>
+                            <swaggerDirectory>target/swagger-ui</swaggerDirectory>
+                        </apiSource>
+                    </apiSources>
                 </configuration>
             </plugin>
 
             <!-- build fat jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <archive>
+                        <index>true</index>
+                        <manifestEntries>
+                            <Main-Class>org.semux.wrapper.Wrapper</Main-Class>
+                            <Implementation-Version>${git.commit.id.abbrev}</Implementation-Version>
+                            <X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
+                            <X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -82,13 +144,44 @@
                             <resource>LICENSE</resource>
                         </transformer>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>org.semux.gui.SemuxGUI</mainClass>
+                            <manifestEntries>
+                                <Main-Class>org.semux.wrapper.Wrapper</Main-Class>
+                                <Implementation-Version>${git.commit.id.abbrev}</Implementation-Version>
+                                <X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
+                                <X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
+                            </manifestEntries>
                         </transformer>
                     </transformers>
                 </configuration>
             </plugin>
 
-            <!-- build windows executable -->
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.2.4</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>validate-the-git-infos</id>
+                        <goals>
+                            <goal>validateRevision</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <abbrevLength>7</abbrevLength>
+                    <verbose>true</verbose>
+                    <skipPoms>false</skipPoms>
+                </configuration>
+            </plugin>
+
+            <!-- build windows executable (currently GUI mode only) -->
             <plugin>
                 <groupId>com.akathist.maven.plugins.launch4j</groupId>
                 <artifactId>launch4j-maven-plugin</artifactId>
@@ -106,7 +199,7 @@
                             <outfile>${project.build.directory}/semux.exe</outfile>
                             <downloadUrl>http://java.com/download</downloadUrl>
                             <classPath>
-                                <mainClass>org.semux.gui.SemuxGUI</mainClass>
+                                <mainClass>org.semux.gui.SemuxGui</mainClass>
                                 <preCp>anything</preCp>
                             </classPath>
                             <icon>src/main/resources/org/semux/gui/logo.ico</icon>
@@ -134,6 +227,38 @@
                 </executions>
             </plugin>
 
+            <!-- build macos executable -->
+            <plugin>
+                <groupId>sh.tak.appbundler</groupId>
+                <artifactId>appbundle-maven-plugin</artifactId>
+                <version>1.2.0</version>
+                <configuration>
+                    <mainClass>org.semux.wrapper.Wrapper</mainClass>
+                    <workingDirectory>$APP_ROOT/..</workingDirectory>
+                    <!--<generateDiskImageFile>true</generateDiskImageFile>-->
+                    <jvmVersion>1.8</jvmVersion>
+                    <version>${project.version}-${git.commit.id.abbrev}</version>
+                    <iconFile>logo.icns</iconFile>
+                    <additionalResources>
+                        <additionalResource>
+                            <includes>
+                                <include>config/**</include>
+                                <include>LICENSE*</include>
+                            </includes>
+                            <directory>${project.basedir}</directory>
+                        </additionalResource>
+                    </additionalResources>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- prepare distribution -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -156,8 +281,6 @@
                                 </copy>
                                 <copy file="${project.basedir}/misc/launch4j/semux.l4j.ini"
                                       tofile="${dist.base}/windows/semux.l4j.ini"/>
-                                <copy file="${project.basedir}/src/main/resources/logback.xml"
-                                      tofile="${dist.base}/windows/config/logback.xml"/> />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis"/>
                                 <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis"/>
                                 <fixcrlf srcdir="${dist.base}/windows" includes="LICENSE*" eol="dos" eof="asis"/>
@@ -175,20 +298,18 @@
                                       tofile="${dist.base}/linux/semux-cli.sh"/>
                                 <copy file="${project.basedir}/scripts/semux-gui.sh"
                                       tofile="${dist.base}/linux/semux-gui.sh"/>
-                                <copy file="${project.basedir}/src/main/resources/logback.xml"
-                                      tofile="${dist.base}/linux/config/logback.xml"/> />
 
-                                <!-- linux build (executable jar) -->
+                                <!-- macos build (dmg) -->
                                 <copy todir="${dist.base}/macos">
-                                    <fileset dir="${dist.base}/linux"/>
+                                    <fileset dir="${project.basedir}/target/semux-${project.version}">
+                                    </fileset>
                                 </copy>
 
                                 <!-- add execute permission -->
                                 <chmod file="${dist.base}/windows/semux.exe" perm="755"/>
                                 <chmod file="${dist.base}/linux/semux.jar" perm="755"/>
                                 <chmod file="${dist.base}/linux/semux*.sh" perm="755"/>
-                                <chmod file="${dist.base}/macos/semux.jar" perm="755"/>
-                                <chmod file="${dist.base}/macos/semux*.sh" perm="755"/>
+                                <chmod file="${dist.base}/macos/semux.app/Contents/MacOS/JavaAppLauncher" perm="755"/>
                             </target>
                         </configuration>
                         <goals>
@@ -256,6 +377,7 @@
                 <version>2.7.0</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
+                    <lineEnding>LF</lineEnding>
                     <configFile>${project.basedir}/misc/eclipse/formatter.xml</configFile>
                     <directories>
                         <directory>${project.build.sourceDirectory}</directory>
@@ -308,6 +430,7 @@
                                         <urn>com.fasterxml.jackson.core:jackson-core:2.9.2:jar:null:compile:aed20e50152a2f19adc1995c8d8f307c7efa414d</urn>
                                         <urn>com.fasterxml.jackson.core:jackson-databind:2.9.2:jar:null:compile:1d8d8cb7cf26920ba57fb61fa56da88cc123b21f</urn>
                                         <urn>com.github.ben-manes.caffeine:caffeine:2.6.0:jar:null:compile:6d06cbc2eb7238ee49cc7f557a0acfaad00ec431</urn>
+                                        <urn>com.github.kongchen:swagger-maven-plugin:3.1.6:maven-plugin:null:runtime:4c733e81674312c7794a4180095c9053baf900d5</urn>
                                         <urn>com.github.oshi:oshi-core:3.4.4:jar:null:compile:f1aa8e053d26f49b909a845745018c57fe9d7a74</urn>
                                         <urn>com.github.stefanbirkner:system-rules:1.16.0:jar:null:test:1bec4d14816e23a1715d5c55db36919b5a529a4f</urn>
                                         <urn>com.github.zafarkhaja:java-semver:0.9.0:jar:null:compile:59a83ca73c72a5e25b3f0b1bb305230a11000329</urn>
@@ -321,6 +444,8 @@
                                         <urn>commons-validator:commons-validator:1.6:jar:null:compile:e989d1e87cdd60575df0765ed5bac65c905d7908</urn>
                                         <urn>dnsjava:dnsjava:2.1.8:jar:null:compile:eed8a2cbf56cc60d07a189a429ead3067564193c</urn>
                                         <urn>io.netty:netty-all:4.1.13.Final:jar:null:compile:e1f2d1ee50626697d3ea73a11f1c7301e8589ef8</urn>
+                                        <urn>io.swagger:swagger-annotations:1.5.17:jar:null:compile:1d8fcae3968a14b550e80fcebf5744da608902a0</urn>
+                                        <urn>javax.ws.rs:javax.ws.rs-api:2.0:jar:null:compile:61f0983eb190954ccdede31e786a9e0bd9767c4a</urn>
                                         <urn>junit:junit:4.11:jar:null:test:4e031bb61df09069aeb2bffb4019e7a5034a4ee0</urn>
                                         <urn>net.bytebuddy:byte-buddy-agent:1.6.14:jar:null:test:ba1e5ba3a84fb2fbf2f4de9138df19665eec4d59</urn>
                                         <urn>net.bytebuddy:byte-buddy:1.6.14:jar:null:test:871c3e49dc6183d0d361601c2f1d11abb1a6b48c</urn>
@@ -336,7 +461,7 @@
                                         <urn>org.apache.maven.plugins:maven-deploy-plugin:2.7:maven-plugin:null:runtime:6dadfb75679ca010b41286794f737088ebfe12fd</urn>
                                         <urn>org.apache.maven.plugins:maven-enforcer-plugin:3.0.0-M1:maven-plugin:null:runtime:02b46cf923a7f5c75ffae61cedff103e0def3560</urn>
                                         <urn>org.apache.maven.plugins:maven-install-plugin:2.4:maven-plugin:null:runtime:9d1316166fe4c313f56276935e08df11f45267c2</urn>
-                                        <urn>org.apache.maven.plugins:maven-jar-plugin:2.4:maven-plugin:null:runtime:e3200bcf357b5c5e26df072d27df160546bb079a</urn>
+                                        <urn>org.apache.maven.plugins:maven-jar-plugin:3.0.2:maven-plugin:null:runtime:5518cc6a2ed1b1ec52419fa0e18f7e42b6279cb9</urn>
                                         <urn>org.apache.maven.plugins:maven-resources-plugin:2.3:maven-plugin:null:runtime:648f725a387d5b38c86d5837b8c2cf456f8d93c7</urn>
                                         <urn>org.apache.maven.plugins:maven-shade-plugin:3.1.0:maven-plugin:null:runtime:c08cd5163a49e31f6e28d6f8bb153013a2a2de79</urn>
                                         <urn>org.apache.maven.plugins:maven-site-plugin:3.3:maven-plugin:null:runtime:77ba1752b1ac4c4339d6f11554800960a56a4ae1</urn>
@@ -367,6 +492,8 @@
                                         <urn>org.slf4j:slf4j-api:1.7.25:jar:null:compile:da76ca59f6a57ee3102f8f9bd9cee742973efa8a</urn>
                                         <urn>org.threeten:threetenbp:1.3.6:jar:null:compile:89dcc04a7e028c3c963413a71f950703cf51f057</urn>
                                         <urn>org.xerial.snappy:snappy-java:1.1.7.1:jar:null:compile:d5190b41f3de61e3b83d692322d58630252bc8c3</urn>
+                                        <urn>pl.project13.maven:git-commit-id-plugin:2.2.4:maven-plugin:null:runtime:43a0dc1d02821c51847d587ecc4a6943086b884c</urn>
+                                        <urn>sh.tak.appbundler:appbundle-maven-plugin:1.2.0:maven-plugin:null:runtime:75a9e8c2adc7203b9b443b4547570da25c619f0d</urn>
                                     </urns>
                                 </digestRule>
                             </rules>
@@ -385,6 +512,20 @@
     </build>
 
     <dependencies>
+        <!-- swagger API -->
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.5.17</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- SLF4J logging framework -->
         <dependency>
             <groupId>org.slf4j</groupId>

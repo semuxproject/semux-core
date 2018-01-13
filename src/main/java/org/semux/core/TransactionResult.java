@@ -21,7 +21,7 @@ public class TransactionResult {
      */
     public enum Error {
         /**
-         * The transaction format is invalid. See {@link Transaction#validate()}
+         * The transaction format is invalid. See {@link Transaction#validate(byte)}
          */
         INVALID_FORMAT,
 
@@ -70,6 +70,11 @@ public class TransactionResult {
          * Invalid delegate name.
          */
         INVALID_DELEGATE_NAME,
+
+        /**
+         * Invalid delegate burn amount.
+         */
+        INVALID_DELEGATE_BURN_AMOUNT,
 
         /**
          * Transaction failed.

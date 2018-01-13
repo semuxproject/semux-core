@@ -14,10 +14,12 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
 import org.semux.config.Constants;
+import org.semux.gui.SemuxGui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,7 +150,22 @@ public class SystemUtil {
     }
 
     /**
-     * Reads a password from console with a customized message.
+     * Reads a line from the console.
+     * 
+     * @param prompt
+     * @return
+     */
+    public static String readLine(String prompt) {
+        if (prompt != null) {
+            System.out.print(prompt);
+            System.out.flush();
+        }
+
+        return SCANNER.nextLine();
+    }
+
+    /**
+     * Reads a password from the console.
      *
      * @param prompt
      *            A message to display before reading password
@@ -158,8 +175,10 @@ public class SystemUtil {
         Console console = System.console();
 
         if (console == null) {
-            System.out.print(prompt);
-            System.out.flush();
+            if (prompt != null) {
+                System.out.print(prompt);
+                System.out.flush();
+            }
 
             return SCANNER.nextLine();
         }
@@ -168,7 +187,7 @@ public class SystemUtil {
     }
 
     /**
-     * Reads a password from console.
+     * Reads a password from the console.
      *
      * @return
      */
@@ -177,7 +196,7 @@ public class SystemUtil {
     }
 
     /**
-     * Compare two version strings.
+     * Compares two version strings.
      * 
      * @param v1
      * @param v2
@@ -215,7 +234,6 @@ public class SystemUtil {
         }
 
         return true;
-
     }
 
     /**
@@ -237,7 +255,7 @@ public class SystemUtil {
      * 
      * @return
      */
-    public static int getNumberOfProceessors() {
+    public static int getNumberOfProcessors() {
         return Runtime.getRuntime().availableProcessors();
     }
 
@@ -259,6 +277,34 @@ public class SystemUtil {
     public static long getUsedHeapSize() {
         Runtime runtime = Runtime.getRuntime();
         return runtime.totalMemory() - runtime.freeMemory();
+    }
+
+    /**
+     * Change localization.
+     *
+     * @param locale
+     *            the target localization.
+     */
+    public static void setLocale(Locale locale) {
+        try {
+            if (!Locale.getDefault().equals(locale)) {
+                Locale.setDefault(locale);
+            }
+        } catch (SecurityException e) {
+            logger.error("Unable to change localization.", e);
+        }
+    }
+
+    /**
+     * Returns the implementation version.
+     * 
+     * @return
+     */
+    public static Object getImplementationVersion() {
+        // this doesn't work with Java 9 and above
+        String version = SemuxGui.class.getPackage().getImplementationVersion();
+
+        return version == null ? "unknown" : version;
     }
 
     private SystemUtil() {

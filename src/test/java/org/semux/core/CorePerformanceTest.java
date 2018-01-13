@@ -16,10 +16,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
+import org.semux.config.DevnetConfig;
 import org.semux.core.state.Delegate;
-import org.semux.crypto.EdDSA;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.crypto.Key;
+import org.semux.rules.TemporaryDbRule;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +27,11 @@ import org.slf4j.LoggerFactory;
 public class CorePerformanceTest {
 
     @Rule
-    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+    public TemporaryDbRule temporaryDBFactory = new TemporaryDbRule();
 
     private static final Logger logger = LoggerFactory.getLogger(CorePerformanceTest.class);
 
-    private Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
+    private Config config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
 
     @Test
     public void testSortDelegate() {
@@ -56,7 +56,7 @@ public class CorePerformanceTest {
         int repeat = 1000;
 
         for (int i = 0; i < repeat; i++) {
-            EdDSA key = new EdDSA();
+            Key key = new Key();
 
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
@@ -66,14 +66,14 @@ public class CorePerformanceTest {
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.random(16);
 
-            Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+            Transaction tx = new Transaction(Constants.DEVNET_ID, type, to, value, fee, nonce, timestamp, data);
             tx.sign(key);
             txs.add(tx);
         }
 
         long t1 = System.nanoTime();
         for (Transaction tx : txs) {
-            assertTrue(tx.validate());
+            assertTrue(tx.validate(Constants.DEVNET_ID));
         }
         long t2 = System.nanoTime();
         logger.info("Perf_transaction_1: {} μs/tx", (t2 - t1) / 1_000 / repeat);

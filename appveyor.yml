@@ -1,6 +1,7 @@
 version: "{build} ({branch})"
 
-shallow_clone: true
+shallow_clone: false
+clone_depth: 1
 clone_folder: C:\projects\semux
 
 environment:

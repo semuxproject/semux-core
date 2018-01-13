@@ -7,8 +7,8 @@
 package org.semux.net.msg.p2p;
 
 import org.semux.config.Config;
-import org.semux.crypto.EdDSA;
-import org.semux.crypto.EdDSA.Signature;
+import org.semux.crypto.Key;
+import org.semux.crypto.Key.Signature;
 import org.semux.crypto.Hex;
 import org.semux.net.Peer;
 import org.semux.net.msg.Message;
@@ -28,7 +28,7 @@ public class HelloMessage extends Message {
      * @param peer
      * @param coinbase
      */
-    public HelloMessage(Peer peer, EdDSA coinbase) {
+    public HelloMessage(Peer peer, Key coinbase) {
         super(MessageCode.HELLO, WorldMessage.class);
 
         this.peer = peer;
@@ -81,7 +81,7 @@ public class HelloMessage extends Message {
             enc.writeBytes(peer.toBytes());
             enc.writeLong(timestamp);
 
-            return EdDSA.verify(enc.toBytes(), signature);
+            return Key.verify(enc.toBytes(), signature);
         } else {
             return false;
         }

@@ -27,6 +27,8 @@ public class Channel {
 
     private MessageQueue msgQueue;
 
+    private boolean isActive;
+
     /**
      * Creates a new channel instance.
      * 
@@ -51,6 +53,10 @@ public class Channel {
         this.msgQueue = new MessageQueue(kernel.getConfig());
 
         // register channel handlers
+        if (isInbound) {
+            pipe.addLast("inboundLimitHandler",
+                    new ConnectionLimitHandler(kernel.getConfig().netMaxInboundConnectionsPerIp()));
+        }
         pipe.addLast("readTimeoutHandler",
                 new ReadTimeoutHandler(kernel.getConfig().netChannelIdleTimeout(), TimeUnit.MILLISECONDS));
         pipe.addLast("frameHandler", new SemuxFrameHandler(kernel.getConfig()));
@@ -100,7 +106,7 @@ public class Channel {
      * @return
      */
     public boolean isActive() {
-        return remotePeer != null;
+        return isActive;
     }
 
     /**
@@ -110,13 +116,20 @@ public class Channel {
      */
     public void onActive(Peer remotePeer) {
         this.remotePeer = remotePeer;
+        this.isActive = true;
     }
 
     /**
      * When peer disconnects.
      */
     public void onInactive() {
-        this.remotePeer = null;
+        /*
+         * Remote peer is not reset because other thread may still hold a reference to
+         * this channel
+         */
+        // this.remotePeer = null;
+
+        this.isActive = false;
     }
 
     /**

@@ -9,7 +9,6 @@ package org.semux.net.msg.consensus;
 import org.semux.core.BlockHeader;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
-import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
@@ -23,7 +22,7 @@ public class BlockHeaderMessage extends Message {
         this.header = header;
 
         SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBytes(header == null ? Bytes.EMPTY_BYTES : header.toBytes());
+        enc.writeBytes(header.toBytes());
         this.encoded = enc.toBytes();
     }
 
@@ -34,7 +33,7 @@ public class BlockHeaderMessage extends Message {
 
         SimpleDecoder dec = new SimpleDecoder(encoded);
         byte[] bytes = dec.readBytes();
-        this.header = (bytes.length == 0) ? null : BlockHeader.fromBytes(bytes);
+        this.header = BlockHeader.fromBytes(bytes);
     }
 
     public BlockHeader getHeader() {

@@ -43,7 +43,7 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
                 { "/add_node" },
                 { "/add_node?node=I_am_not_a_node" },
                 { "/add_node?node=127.0.0.1:65536" },
-                { "/add_node?node=.com:5161" },
+                // { "/add_node?node=.com:5161" },
                 { "/add_to_blacklist" },
                 { "/add_to_blacklist?ip=I_am_not_an_IP" },
                 { "/add_to_whitelist" },
@@ -86,6 +86,8 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
                         "10", "_") }, // non-hexadecimal data
                 { format("/transfer?from=%s&to=%s&value=%s&fee=%s&data=%s", ADDRESS_PLACEHOLDER, randomHex(), "10",
                         "10", randomHex()) }, // hexadecimal data
+                { "/get_transaction_limits" },
+                { "/get_transaction_limits?type=XXX" },
         });
     }
 
@@ -94,7 +96,7 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
 
     @Before
     public void setUp() {
-        api = new SemuxAPIMock(kernelRule.getKernel());
+        api = new SemuxApiMock(kernelRule.getKernel());
         api.start();
 
         wallet = api.getKernel().getWallet();

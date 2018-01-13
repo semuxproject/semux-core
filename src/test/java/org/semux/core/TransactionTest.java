@@ -15,8 +15,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
-import org.semux.crypto.EdDSA;
+import org.semux.config.DevnetConfig;
+import org.semux.crypto.Key;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +25,10 @@ public class TransactionTest {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionTest.class);
 
-    private Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
-    private EdDSA key = new EdDSA();
+    private Config config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
+    private Key key = new Key();
 
+    private byte networkId = Constants.DEVNET_ID;
     private TransactionType type = TransactionType.TRANSFER;
     private byte[] to = Bytes.random(20);
     private long value = 2;
@@ -38,18 +39,18 @@ public class TransactionTest {
 
     @Test
     public void testNew() {
-        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data);
         assertNotNull(tx.getHash());
         assertNull(tx.getSignature());
         tx.sign(key);
-        assertTrue(tx.validate());
+        assertTrue(tx.validate(networkId));
 
         testFields(tx);
     }
 
     @Test
     public void testSerialization() {
-        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data);
         tx.sign(key);
 
         testFields(Transaction.fromBytes(tx.toBytes()));
@@ -57,7 +58,8 @@ public class TransactionTest {
 
     @Test
     public void testTransactionSize() {
-        Transaction tx = new Transaction(type, to, value, fee, nonce, timestamp, Bytes.random(128)).sign(key);
+        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, Bytes.random(128))
+                .sign(key);
         byte[] bytes = tx.toBytes();
 
         logger.info("tx size: {} B, {} GB per 1M txs", bytes.length, 1000000.0 * bytes.length / 1024 / 1024 / 1024);

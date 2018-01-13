@@ -39,7 +39,7 @@ public class BasicAuth {
     }
 
     /**
-     * Generate the AUTHORIZATION header.
+     * Generates the AUTHORIZATION header.
      * 
      * @param username
      * @param password

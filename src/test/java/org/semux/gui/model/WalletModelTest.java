@@ -9,6 +9,7 @@ package org.semux.gui.model;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -33,7 +34,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.semux.core.Block;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.net.Peer;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -71,9 +72,11 @@ public class WalletModelTest {
 
     @Test
     public void testCoinbase() {
-        assertEquals(0, model.getCoinbase());
-        model.setCoinbase(1);
-        assertEquals(1, model.getCoinbase());
+        Key key = new Key();
+
+        assertNull(model.getCoinbase());
+        model.setCoinbase(key);
+        assertEquals(key.toAddressString(), model.getCoinbase().toAddressString());
     }
 
     @Test
@@ -110,9 +113,9 @@ public class WalletModelTest {
     public void testTotalAvailable() {
         WalletAccount wa1 = mock(WalletAccount.class);
         WalletAccount wa2 = mock(WalletAccount.class);
-        when(wa1.getKey()).thenReturn(new EdDSA());
+        when(wa1.getKey()).thenReturn(new Key());
         when(wa1.getAvailable()).thenReturn(1L);
-        when(wa2.getKey()).thenReturn(new EdDSA());
+        when(wa2.getKey()).thenReturn(new Key());
         when(wa2.getAvailable()).thenReturn(2L);
 
         assertEquals(0, model.getTotalAvailable());
@@ -126,9 +129,9 @@ public class WalletModelTest {
     public void testTotalLocked() {
         WalletAccount wa1 = mock(WalletAccount.class);
         WalletAccount wa2 = mock(WalletAccount.class);
-        when(wa1.getKey()).thenReturn(new EdDSA());
+        when(wa1.getKey()).thenReturn(new Key());
         when(wa1.getLocked()).thenReturn(1L);
-        when(wa2.getKey()).thenReturn(new EdDSA());
+        when(wa2.getKey()).thenReturn(new Key());
         when(wa2.getLocked()).thenReturn(2L);
 
         assertEquals(0, model.getTotalLocked());

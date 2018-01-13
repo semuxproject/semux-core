@@ -23,6 +23,32 @@ import org.semux.util.Bytes;
  */
 public class TransactionExecutor {
 
+    private static final boolean[] valid = new boolean[256];
+    static {
+        for (byte b : Bytes.of("abcdefghijklmnopqrstuvwxyz0123456789_")) {
+            valid[b & 0xff] = true;
+        }
+    }
+
+    /**
+     * Validate delegate name.
+     * 
+     * @param data
+     */
+    public static boolean validateDelegateName(byte[] data) {
+        if (data.length < 3 || data.length > 16) {
+            return false;
+        }
+
+        for (byte b : data) {
+            if (!valid[b & 0xff]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private Config config;
 
     /**
@@ -54,6 +80,7 @@ public class TransactionExecutor {
             TransactionResult result = new TransactionResult(false);
             results.add(result);
 
+            TransactionType type = tx.getType();
             byte[] from = tx.getFrom();
             byte[] to = tx.getTo();
             long value = tx.getValue();
@@ -71,19 +98,20 @@ public class TransactionExecutor {
                 continue;
             }
 
-            // check transaction fee
+            // check fee
             if (fee < config.minTransactionFee()) {
                 result.setError(Error.INVALID_FEE);
                 continue;
             }
 
-            switch (tx.getType()) {
-            case TRANSFER: {
-                if (data.length > config.maxTransferDataSize()) {
-                    result.setError(Error.INVALID_DATA_LENGTH);
-                    break;
-                }
+            // check data length
+            if (data.length > config.maxTransactionDataSize(type)) {
+                result.setError(Error.INVALID_DATA_LENGTH);
+                continue;
+            }
 
+            switch (type) {
+            case TRANSFER: {
                 if (fee <= available && value <= available && value + fee <= available) {
 
                     as.adjustAvailable(from, -value - fee);
@@ -96,17 +124,17 @@ public class TransactionExecutor {
                 break;
             }
             case DELEGATE: {
-                if (data.length > 16 || !Bytes.toString(data).matches("[_a-z0-9]{4,16}")) {
+                if (!validateDelegateName(data)) {
                     result.setError(Error.INVALID_DELEGATE_NAME);
                     break;
                 }
-                if (value < config.minDelegateFee()) {
-                    result.setError(Error.INVALID_FEE);
+                if (value < config.minDelegateBurnAmount()) {
+                    result.setError(Error.INVALID_DELEGATE_BURN_AMOUNT);
                     break;
                 }
 
                 if (fee <= available && value <= available && value + fee <= available) {
-                    if (Arrays.equals(from, to) && ds.register(to, data)) {
+                    if (Arrays.equals(Bytes.EMPTY_ADDRESS, to) && ds.register(from, data)) {
 
                         as.adjustAvailable(from, -value - fee);
 
@@ -120,11 +148,6 @@ public class TransactionExecutor {
                 break;
             }
             case VOTE: {
-                if (data.length > 0) {
-                    result.setError(Error.INVALID_DATA_LENGTH);
-                    break;
-                }
-
                 if (fee <= available && value <= available && value + fee <= available) {
                     if (ds.vote(from, to, value)) {
 
@@ -141,11 +164,6 @@ public class TransactionExecutor {
                 break;
             }
             case UNVOTE: {
-                if (data.length > 0) {
-                    result.setError(Error.INVALID_DATA_LENGTH);
-                    break;
-                }
-
                 if (fee <= available && value <= locked) {
                     if (ds.unvote(from, to, value)) {
 

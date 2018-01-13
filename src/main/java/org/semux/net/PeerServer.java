@@ -91,6 +91,8 @@ public class PeerServer {
                 // workerGroup.terminationFuture().sync();
                 // bossGroup.terminationFuture().sync();
 
+                ConnectionLimitHandler.reset();
+
                 channel = null;
             } catch (Exception e) {
                 logger.error("Failed to close channel", e);

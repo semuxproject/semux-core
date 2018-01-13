@@ -10,7 +10,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -31,7 +30,7 @@ public class GenesisTest {
 
     @Before
     public void setUp() {
-        genesis = Genesis.load(new File(Constants.DEFAULT_DATA_DIR));
+        genesis = Genesis.load(Constants.NETWORKS[Constants.MAINNET_ID]);
     }
 
     @Test

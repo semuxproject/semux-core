@@ -15,12 +15,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
+import org.semux.config.DevnetConfig;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis.Premine;
 import org.semux.core.Unit;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.rules.TemporaryDbRule;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
@@ -30,11 +30,11 @@ public class AccountStateTest {
     private AccountState state;
 
     @Rule
-    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+    public TemporaryDbRule temporaryDBFactory = new TemporaryDbRule();
 
     @Before
     public void setUp() {
-        chain = new BlockchainImpl(new DevNetConfig(Constants.DEFAULT_DATA_DIR), temporaryDBFactory);
+        chain = new BlockchainImpl(new DevnetConfig(Constants.DEFAULT_DATA_DIR), temporaryDBFactory);
         state = chain.getAccountState();
     }
 

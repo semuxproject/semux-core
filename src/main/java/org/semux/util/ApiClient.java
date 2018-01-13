@@ -39,13 +39,19 @@ public class ApiClient {
     }
 
     /**
-     * Sends a request. <br>
-     * <br>
-     * NOTE: Byte array parameters will be automatically converted into its Hex
-     * representation.
-     *
+     * Sends a request to the API server. This method automatically handles
+     * parameter types:
+     * <p>
+     * <ul>
+     * <li>Basic type values will be converted into its string representation</li>
+     * <li>Byte arrays will be converted into its hex representation</li>
+     * <li>Objects will be converted into its <code>toString()</code> response</li>
+     * </ul>
+     * 
      * @param cmd
+     *            the command
      * @param params
+     *            the input parameters
      * @return
      * @throws IOException
      */

@@ -10,6 +10,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.semux.crypto.Hex;
 
 public class SimpleDecoderTest {
 
@@ -60,5 +61,22 @@ public class SimpleDecoderTest {
         assertEquals(long2, dec.readLong());
         assertArrayEquals(bytes2, dec.readBytes());
         assertEquals(string2, dec.readString());
+    }
+
+    @Test
+    public void testSizeEncoding() {
+        int[] sizes = { 0x00, 0x7F, 0x80, 0x2000, 0x3FFF, 0x4000, 0x1FFFFF, 0x200000, 0x08000000, 0x0fffffff };
+        SimpleEncoder enc = new SimpleEncoder();
+        for (int size : sizes) {
+            enc.writeSize(size);
+        }
+        byte[] bytes = enc.toBytes();
+        assertEquals("007F8100C000FF7F818000FFFF7F81808000C0808000FFFFFF7F", Hex.encode(bytes).toUpperCase());
+
+        SimpleDecoder dec = new SimpleDecoder(bytes);
+        for (int i = 0; i < sizes.length; i++) {
+            assertEquals(sizes[i], dec.readSize());
+        }
+        assertEquals(bytes.length, dec.getReadIndex());
     }
 }

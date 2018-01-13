@@ -1,17 +1,11 @@
 <!DOCTYPE configuration>
 <configuration>
+
+    <!-- This is the default Logback configuration, which only enables the console appender -->
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%date{HH:mm:ss.SSS} %-8([%level]) %-16logger{0} %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>debug.log</file>
-        <append>true</append>
-        <immediateFlush>true</immediateFlush>
-        <encoder>
-            <pattern>%date{yy-MM-dd HH:mm:ss} %-8([%level]) %-16logger{0} %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -28,6 +22,5 @@
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
     </root>
 </configuration>

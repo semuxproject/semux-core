@@ -36,11 +36,12 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.gui.WalletModelRule;
 import org.semux.gui.model.WalletDelegate;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.rules.KernelRule;
+import org.semux.util.Bytes;
 
 import junit.framework.TestCase;
 
@@ -68,7 +69,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     @Mock
     private DelegateState delegateState;
 
-    private EdDSA delegateAccount1;
+    private Key delegateAccount1;
 
     @Mock
     private WalletDelegate delegate1;
@@ -76,7 +77,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     @Mock
     private BlockchainImpl.ValidatorStats delegateStats1;
 
-    private EdDSA delegateAccount2;
+    private Key delegateAccount2;
 
     @Mock
     private WalletDelegate delegate2;
@@ -94,13 +95,13 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         // mock delegates
         walletDelegates = new ArrayList<>();
 
-        delegateAccount1 = new EdDSA();
+        delegateAccount1 = new Key();
         when(delegate1.getNameString()).thenReturn("delegate 1");
         when(delegate1.getAddressString()).thenReturn(delegateAccount1.toAddressString());
         when(delegate1.getAddress()).thenReturn(delegateAccount1.toAddress());
         walletDelegates.add(delegate1);
 
-        delegateAccount2 = new EdDSA();
+        delegateAccount2 = new Key();
         when(delegate2.getNameString()).thenReturn("delegate 2");
         when(delegate2.getAddressString()).thenReturn(delegateAccount2.toAddressString());
         when(delegate2.getAddress()).thenReturn(delegateAccount2.toAddress());
@@ -131,31 +132,31 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         window.show().requireVisible().moveToFront();
 
         // the initial label of selected delegate should be PleaseSelectDelegate
-        window.label("SelectedDelegateLabel").requireText(GUIMessages.get("PleaseSelectDelegate"));
+        window.label("SelectedDelegateLabel").requireText(GuiMessages.get("PleaseSelectDelegate"));
 
         // click on the first delegate
         window.table("DelegatesTable").cell("delegate 1").requireNotEditable().click();
 
         // the label of selected delegate should display the first delegate's name
-        window.label("SelectedDelegateLabel").requireText(GUIMessages.get("SelectedDelegate", "delegate 1"));
+        window.label("SelectedDelegateLabel").requireText(GuiMessages.get("SelectedDelegate", "delegate 1"));
 
         // click on the second delegate
         window.table("DelegatesTable").cell("delegate 2").requireNotEditable().click();
 
         // the label of selected delegate should display the second delegate's name
-        window.label("SelectedDelegateLabel").requireText(GUIMessages.get("SelectedDelegate", "delegate 2"));
+        window.label("SelectedDelegateLabel").requireText(GuiMessages.get("SelectedDelegate", "delegate 2"));
     }
 
     @Test
     public void testVoteSuccess() {
         testVote(new PendingManager.ProcessTransactionResult(1));
-        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("SuccessDialogTitle")).requireVisible();
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GuiMessages.get("SuccessDialogTitle")).requireVisible();
     }
 
     @Test
     public void testVoteFailure() {
         testVote(new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
-        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ErrorDialogTitle")).requireVisible();
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GuiMessages.get("ErrorDialogTitle")).requireVisible();
     }
 
     private void testVote(PendingManager.ProcessTransactionResult mockResult) {
@@ -169,7 +170,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         window.show().requireVisible().moveToFront();
 
         // the initial label of selected delegate should be PleaseSelectDelegate
-        window.label("SelectedDelegateLabel").requireText(GUIMessages.get("PleaseSelectDelegate"));
+        window.label("SelectedDelegateLabel").requireText(GuiMessages.get("PleaseSelectDelegate"));
 
         // click on the first delegate
         window.table("DelegatesTable").cell("delegate 1").requireNotEditable().click();
@@ -184,21 +185,21 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testDelegateSuccess() {
         testDelegate(new PendingManager.ProcessTransactionResult(1));
-        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("SuccessDialogTitle")).requireVisible();
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GuiMessages.get("SuccessDialogTitle")).requireVisible();
 
         // verify added transaction
         verify(pendingManager).addTransactionSync(transactionArgumentCaptor.capture());
         Transaction tx = transactionArgumentCaptor.getValue();
         TestCase.assertEquals(TransactionType.DELEGATE, tx.getType());
-        assertArrayEquals(walletRule.key.toAddress(), tx.getTo());
-        TestCase.assertEquals(kernelMock.getConfig().minDelegateFee(), tx.getValue());
+        assertArrayEquals(Bytes.EMPTY_ADDRESS, tx.getTo());
+        TestCase.assertEquals(kernelMock.getConfig().minDelegateBurnAmount(), tx.getValue());
         TestCase.assertEquals(kernelMock.getConfig().minTransactionFee(), tx.getFee());
     }
 
     @Test
     public void testDelegateFailure() {
         testDelegate(new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
-        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ErrorDialogTitle")).requireVisible();
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GuiMessages.get("ErrorDialogTitle")).requireVisible();
     }
 
     private void testDelegate(PendingManager.ProcessTransactionResult mockResult) {
@@ -218,7 +219,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         window.button("btnDelegate").requireVisible().click();
 
         // confirm
-        window.optionPane(Timeout.timeout(1000)).requireTitle(GUIMessages.get("ConfirmDelegateRegistration"))
+        window.optionPane(Timeout.timeout(1000)).requireTitle(GuiMessages.get("ConfirmDelegateRegistration"))
                 .requireVisible()
                 .yesButton().requireVisible().click();
     }

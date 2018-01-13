@@ -34,6 +34,8 @@ public class Bytes {
 
     /**
      * Empty 256-bit hash.
+     * <p>
+     * Note: this is not the hash of empty byte array.
      */
     public static final byte[] EMPTY_HASH = new byte[32];
 

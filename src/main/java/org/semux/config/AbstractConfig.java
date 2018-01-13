@@ -8,20 +8,24 @@ package org.semux.config;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hash;
+import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
 import org.semux.util.Bytes;
 import org.semux.util.StringUtil;
 import org.semux.util.SystemUtil;
+import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +42,10 @@ public abstract class AbstractConfig implements Config {
     protected byte networkId;
     protected short networkVersion;
 
-    protected int maxBlockSize = 2 * 1024 * 1024;
-    protected int maxTransferDataSize = 128;
-    protected long minTransactionFee = 50L * Unit.MILLI_SEM;
-    protected long minDelegateFee = 1000L * Unit.SEM;
+    protected int maxBlockTransactionsSize = 1024 * 1024;
+    protected long minTransactionFee = 5L * Unit.MILLI_SEM;
+    protected long maxTransactionTimeDrift = TimeUnit.HOURS.toMillis(2);
+    protected long minDelegateBurnAmount = 1000L * Unit.SEM;
     protected long mandatoryUpgrade = Constants.BLOCKS_PER_DAY * 60L;
 
     // =========================
@@ -50,15 +54,16 @@ public abstract class AbstractConfig implements Config {
     protected String p2pDeclaredIp = null;
     protected String p2pListenIp = "0.0.0.0";
     protected int p2pListenPort = Constants.DEFAULT_P2P_PORT;
-    protected Set<InetSocketAddress> p2pSeedNodes = new HashSet<>();
+    protected Set<Node> p2pSeedNodes = new HashSet<>();
 
     // =========================
     // Network
     // =========================
     protected int netMaxOutboundConnections = 128;
-    protected int netMaxInboundConnections = 256;
+    protected int netMaxInboundConnections = 512;
+    protected int netMaxInboundConnectionsPerIp = 5;
     protected int netMaxMessageQueueSize = 4096;
-    protected int netMaxFrameSize = 128 * 1024;
+    protected int netMaxFrameBodySize = 128 * 1024;
     protected int netMaxPacketSize = 8 * 1024 * 1024;
     protected int netRelayRedundancy = 16;
     protected int netHandshakeExpiry = 5 * 60 * 1000;
@@ -87,6 +92,7 @@ public abstract class AbstractConfig implements Config {
     protected long bftPreCommitTimeout = 6000L;
     protected long bftCommitTimeout = 3000L;
     protected long bftFinalizeTimeout = 3000L;
+    protected long maxBlockTimeDrift = TimeUnit.SECONDS.toMillis(30);
 
     // =========================
     // Virtual machine
@@ -95,9 +101,14 @@ public abstract class AbstractConfig implements Config {
     protected int vmMaxStackSize = 1024;
     protected int vmInitHeapSize = 128;
 
+    // =========================
+    // UI
+    // =========================
+    protected Locale locale = Locale.getDefault();
+
     /**
      * Create an {@link AbstractConfig} instance.
-     * 
+     *
      * @param dataDir
      * @param networkId
      * @param networkVersion
@@ -112,8 +123,8 @@ public abstract class AbstractConfig implements Config {
 
     @Override
     public long getBlockReward(long number) {
-        if (number <= 75_000_000L) {
-            return 1 * Unit.SEM;
+        if (number <= 25_000_000L) {
+            return 3L * Unit.SEM;
         } else {
             return 0;
         }
@@ -121,17 +132,17 @@ public abstract class AbstractConfig implements Config {
 
     @Override
     public long getValidatorUpdateInterval() {
-        return 64L * 2L;
+        return 200L;
     }
 
     @Override
     public int getNumberOfValidators(long number) {
-        long step = 2L * 60L * 2L;
+        long step = 2L * 60L * 2L; // two hours
 
-        if (number < 48L * step) {
+        if (number < 84L * step) {
             return 16 + (int) (number / step);
         } else {
-            return 64;
+            return 100;
         }
     }
 
@@ -143,8 +154,12 @@ public abstract class AbstractConfig implements Config {
 
     @Override
     public String getClientId() {
-        return String.format("%s/v%s/%s/%s", Constants.CLIENT_NAME, Constants.CLIENT_VERSION,
-                SystemUtil.getOsName().toString(), SystemUtil.getOsArch());
+        return String.format("%s/v%s-%s/%s/%s",
+                Constants.CLIENT_NAME,
+                Constants.CLIENT_VERSION,
+                SystemUtil.getImplementationVersion(),
+                SystemUtil.getOsName().toString(),
+                SystemUtil.getOsArch());
     }
 
     @Override
@@ -163,23 +178,48 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
+    public int maxBlockTransactionsSize() {
+        return maxBlockTransactionsSize;
+    }
+
+    @Override
+    public int maxTransactionDataSize(TransactionType type) {
+        switch (type) {
+        case COINBASE:
+            return 0; // not required
+
+        case TRANSFER:
+            return 128; // for memo
+
+        case DELEGATE:
+            return 16; // for name
+
+        case UNVOTE:
+        case VOTE:
+            return 0; // not required
+
+        case CREATE:
+        case CALL:
+            return 64 * 1024; // for dapps
+
+        default:
+            throw new UnreachableException();
+        }
+    }
+
+    @Override
     public long minTransactionFee() {
         return minTransactionFee;
     }
 
     @Override
-    public long minDelegateFee() {
-        return minDelegateFee;
+    public long maxTransactionTimeDrift() {
+        return maxTransactionTimeDrift;
     }
 
     @Override
-    public int maxBlockTransactionsSize() {
-        return maxBlockSize;
-    }
-
-    @Override
-    public int maxTransferDataSize() {
-        return maxTransferDataSize;
+    public long minDelegateBurnAmount() {
+        return minDelegateBurnAmount;
     }
 
     @Override
@@ -203,7 +243,7 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public Set<InetSocketAddress> p2pSeedNodes() {
+    public Set<Node> p2pSeedNodes() {
         return p2pSeedNodes;
     }
 
@@ -218,13 +258,18 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
+    public int netMaxInboundConnectionsPerIp() {
+        return netMaxInboundConnectionsPerIp;
+    }
+
+    @Override
     public int netMaxMessageQueueSize() {
         return netMaxMessageQueueSize;
     }
 
     @Override
-    public int netMaxFrameSize() {
-        return netMaxFrameSize;
+    public int netMaxFrameBodySize() {
+        return netMaxFrameBodySize;
     }
 
     @Override
@@ -308,6 +353,11 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
+    public long maxBlockTimeDrift() {
+        return maxBlockTimeDrift;
+    }
+
+    @Override
     public boolean vmEnabled() {
         return vmEnabled;
     }
@@ -320,6 +370,11 @@ public abstract class AbstractConfig implements Config {
     @Override
     public int vmInitialHeapSize() {
         return vmInitHeapSize;
+    }
+
+    @Override
+    public Locale locale() {
+        return locale;
     }
 
     protected void init() {
@@ -350,17 +405,22 @@ public abstract class AbstractConfig implements Config {
                 case "p2p.seedNodes":
                     String[] nodes = props.getProperty(name).split(",");
                     for (String node : nodes) {
-                        String[] tokens = node.trim().split(":");
-                        if (tokens.length == 2) {
-                            p2pSeedNodes.add(new InetSocketAddress(tokens[0], Integer.parseInt(tokens[1])));
-                        } else {
-                            p2pSeedNodes.add(new InetSocketAddress(tokens[0], Constants.DEFAULT_P2P_PORT));
+                        if (!node.trim().isEmpty()) {
+                            String[] tokens = node.trim().split(":");
+                            if (tokens.length == 2) {
+                                p2pSeedNodes.add(new Node(tokens[0], Integer.parseInt(tokens[1])));
+                            } else {
+                                p2pSeedNodes.add(new Node(tokens[0], Constants.DEFAULT_P2P_PORT));
+                            }
                         }
                     }
                     break;
 
                 case "net.maxInboundConnections":
                     netMaxInboundConnections = Integer.parseInt(props.getProperty(name));
+                    break;
+                case "net.maxInboundConnectionsPerIp":
+                    netMaxInboundConnectionsPerIp = Integer.parseInt(props.getProperty(name));
                     break;
                 case "net.maxOutboundConnections":
                     netMaxInboundConnections = Integer.parseInt(props.getProperty(name));
@@ -390,6 +450,14 @@ public abstract class AbstractConfig implements Config {
                 case "api.password":
                     apiPassword = props.getProperty(name);
                     break;
+                case "ui.locale": {
+                    // ui.locale must be in format of en_US ([language]_[country])
+                    String[] localeComponents = props.getProperty(name).trim().split("_");
+                    if (localeComponents.length == 2) {
+                        locale = new Locale(localeComponents[0], localeComponents[1]);
+                    }
+                    break;
+                }
                 default:
                     logger.error("Unsupported option: {} = {}", name, props.getProperty(name));
                     break;

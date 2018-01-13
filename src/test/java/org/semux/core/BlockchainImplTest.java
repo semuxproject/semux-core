@@ -23,17 +23,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
+import org.semux.config.DevnetConfig;
 import org.semux.core.BlockchainImpl.StatsType;
-import org.semux.crypto.EdDSA;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.crypto.Key;
+import org.semux.rules.TemporaryDbRule;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
 public class BlockchainImplTest {
 
     @Rule
-    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+    public TemporaryDbRule temporaryDBFactory = new TemporaryDbRule();
 
     private Config config;
     private BlockchainImpl chain;
@@ -41,7 +41,8 @@ public class BlockchainImplTest {
     private byte[] coinbase = Bytes.random(30);
     private byte[] prevHash = Bytes.random(32);
 
-    private EdDSA key = new EdDSA();
+    private byte networkId = Constants.DEVNET_ID;
+    private Key key = new Key();
     private byte[] from = key.toAddress();
     private byte[] to = Bytes.random(20);
     private long value = 20;
@@ -49,13 +50,14 @@ public class BlockchainImplTest {
     private long nonce = 12345;
     private byte[] data = Bytes.of("test");
     private long timestamp = System.currentTimeMillis() - 60 * 1000;
-    private Transaction tx = new Transaction(TransactionType.TRANSFER, to, value, fee, nonce, timestamp, data)
-            .sign(key);
+    private Transaction tx = new Transaction(networkId, TransactionType.TRANSFER, to, value, fee, nonce, timestamp,
+            data)
+                    .sign(key);
     private TransactionResult res = new TransactionResult(true);
 
     @Before
     public void setUp() {
-        config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
         chain = new BlockchainImpl(config, temporaryDBFactory);
     }
 
@@ -95,6 +97,13 @@ public class BlockchainImplTest {
     }
 
     @Test
+    public void testHasBlock() {
+        assertFalse(chain.hasBlock(-1));
+        assertTrue(chain.hasBlock(0));
+        assertFalse(chain.hasBlock(1));
+    }
+
+    @Test
     public void testGetBlockNumber() {
         long number = 1;
         Block newBlock = createBlock(number);
@@ -105,12 +114,12 @@ public class BlockchainImplTest {
 
     @Test
     public void testGetGenesis() {
-        assertArrayEquals(Genesis.load(config.dataDir()).getHash(), chain.getGenesis().getHash());
+        assertArrayEquals(Genesis.load(Constants.NETWORKS[networkId]).getHash(), chain.getGenesis().getHash());
     }
 
     @Test
     public void testGetBlockHeader() {
-        assertArrayEquals(Genesis.load(config.dataDir()).getHash(), chain.getBlockHeader(0).getHash());
+        assertArrayEquals(Genesis.load(Constants.NETWORKS[networkId]).getHash(), chain.getBlockHeader(0).getHash());
 
         long number = 1;
         Block newBlock = createBlock(number);
@@ -214,6 +223,23 @@ public class BlockchainImplTest {
         list = chain.getTransactions(to, 0, 1024);
         assertEquals(1, list.size());
         assertArrayEquals(tx.getHash(), list.get(0).getHash());
+    }
+
+    @Test
+    public void testGetTransactionsSelfTx() {
+        Transaction selfTx = new Transaction(networkId, TransactionType.TRANSFER, key.toAddress(), value, fee, nonce,
+                timestamp, data).sign(key);
+        Block block = createBlock(
+                1,
+                Collections.singletonList(selfTx),
+                Collections.singletonList(res));
+
+        chain.addBlock(block);
+
+        // there should be only 1 transaction added into index database
+        List<Transaction> list = chain.getTransactions(key.toAddress(), 0, 1024);
+        assertEquals(1, list.size());
+        assertArrayEquals(selfTx.getHash(), list.get(0).getHash());
     }
 
     @Test

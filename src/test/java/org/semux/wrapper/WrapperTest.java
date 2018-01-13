@@ -27,8 +27,8 @@ import org.junit.runners.Parameterized;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.PowerMockRunnerDelegate;
-import org.semux.cli.SemuxCLI;
-import org.semux.gui.SemuxGUI;
+import org.semux.cli.SemuxCli;
+import org.semux.gui.SemuxGui;
 import org.semux.util.SystemUtil;
 import org.semux.util.SystemUtil.OsName;
 
@@ -42,24 +42,42 @@ public class WrapperTest {
         return Arrays
                 .asList(new Object[][] {
                         { new String[] { "--gui", "--jvmoptions", "-Xmx1G -Xms1G" },
-                                new String[] { getJavaBinPath(), "-Xmx1G", "-Xms1G", "-cp", "semux.jar",
-                                        SemuxGUI.class.getCanonicalName() },
+                                new String[] {
+                                        getJavaBinPath(),
+                                        "-cp", null,
+                                        "-Xmx1G", "-Xms1G",
+                                        SemuxGui.class.getCanonicalName() },
                                 null },
+
                         { new String[] { "--gui" },
-                                new String[] { getJavaBinPath(), "-Xmx1600M", "-cp", "semux.jar",
-                                        SemuxGUI.class.getCanonicalName() },
+                                new String[] {
+                                        getJavaBinPath(),
+                                        "-cp", null,
+                                        "-Xmx1600M",
+                                        SemuxGui.class.getCanonicalName() },
                                 2000L * 1024 * 1024 },
-                        { new String[] { "--cli" }, new String[] { getJavaBinPath(), "-Xmx1600M", "-cp", "semux.jar",
-                                SemuxCLI.class.getCanonicalName() }, 2000L * 1024 * 1024 },
+
+                        { new String[] { "--cli" }, new String[] {
+                                getJavaBinPath(),
+                                "-cp", null,
+                                "-Xmx1600M",
+                                SemuxCli.class.getCanonicalName() },
+                                2000L * 1024 * 1024 },
+
                         { new String[] { "--gui" },
-                                new String[] { getJavaBinPath(), String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB), "-cp",
-                                        "semux.jar",
-                                        SemuxGUI.class.getCanonicalName() },
+                                new String[] {
+                                        getJavaBinPath(),
+                                        "-cp", null,
+                                        String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB),
+                                        SemuxGui.class.getCanonicalName() },
                                 MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 },
+
                         { new String[] { "--cli" },
-                                new String[] { getJavaBinPath(), String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB), "-cp",
-                                        "semux.jar",
-                                        SemuxCLI.class.getCanonicalName() },
+                                new String[] {
+                                        getJavaBinPath(),
+                                        "-cp", null,
+                                        String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB),
+                                        SemuxCli.class.getCanonicalName() },
                                 MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 } });
     }
 
@@ -93,6 +111,7 @@ public class WrapperTest {
         Wrapper.main(inputArgs);
 
         // verify
+        javaArgs[2] = System.getProperty("java.class.path"); // Read classpath from the JVM fork (test)
         verify(processBuilderMock).command(javaArgs);
         verifyStatic(SystemUtil.class);
         SystemUtil.exit(0);

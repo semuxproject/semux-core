@@ -9,6 +9,7 @@ package org.semux.net;
 import java.net.InetSocketAddress;
 
 import org.semux.Kernel;
+import org.semux.net.NodeManager.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
     private Kernel kernel;
     private ChannelManager channelMgr;
 
-    private InetSocketAddress remoteAddress;
+    private Node remoteNode;
     private boolean discoveryMode;
 
     /**
@@ -32,27 +33,27 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
      * 
      * @param kernel
      *            the kernel instance
-     * @param remoteAddress
-     *            the address of the remote peer, or null if in server mode
+     * @param remoteNode
+     *            the remote node to connect, or null if in server mode
      * @param discoveryMode
      *            whether in discovery mode or not
      */
-    public SemuxChannelInitializer(Kernel kernel, InetSocketAddress remoteAddress, boolean discoveryMode) {
+    public SemuxChannelInitializer(Kernel kernel, Node remoteNode, boolean discoveryMode) {
         this.kernel = kernel;
         this.channelMgr = kernel.getChannelManager();
 
-        this.remoteAddress = remoteAddress;
+        this.remoteNode = remoteNode;
         this.discoveryMode = discoveryMode;
     }
 
-    public SemuxChannelInitializer(Kernel kernel, InetSocketAddress remoteAddress) {
-        this(kernel, remoteAddress, false);
+    public SemuxChannelInitializer(Kernel kernel, Node remoteNode) {
+        this(kernel, remoteNode, false);
     }
 
     @Override
     public void initChannel(NioSocketChannel ch) throws Exception {
         try {
-            InetSocketAddress address = isServerMode() ? ch.remoteAddress() : remoteAddress;
+            InetSocketAddress address = isServerMode() ? ch.remoteAddress() : remoteNode.toAddress();
             logger.debug("New {} channel: remoteAddress = {}:{}", isServerMode() ? "inbound" : "outbound",
                     address.getAddress().getHostAddress(), address.getPort());
 
@@ -69,7 +70,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
             }
 
             // limit the size of receiving buffer
-            int bufferSize = Frame.HEADER_SIZE + kernel.getConfig().netMaxFrameSize();
+            int bufferSize = Frame.HEADER_SIZE + kernel.getConfig().netMaxFrameBodySize();
             ch.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(bufferSize));
             ch.config().setOption(ChannelOption.SO_RCVBUF, bufferSize);
             ch.config().setOption(ChannelOption.SO_BACKLOG, 1024);
@@ -91,7 +92,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
      * @return
      */
     public boolean isServerMode() {
-        return remoteAddress == null;
+        return remoteNode == null;
     }
 
     /**

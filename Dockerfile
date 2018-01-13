@@ -1,16 +1,15 @@
 FROM openjdk:8-jre-alpine
 
-ARG SEMUXVER="1.0.0-rc.5"
-
-RUN echo $SEMUXVER
+WORKDIR /
 
 RUN apk --no-cache add curl
-WORKDIR /
-RUN TARBALL=semux-linux-${SEMUXVER}.tar.gz && \
-    curl -LO https://github.com/semuxproject/semux/releases/download/v${SEMUXVER}/${TARBALL} && \
+
+RUN LINK=`curl -s https://api.github.com/repos/semuxproject/semux/releases | grep -o "https://.*semux-linux.*.tar.gz"` && \
+    TARBALL=`echo ${LINK} | grep -o "semux-linux.*.tar.gz"` && \
+    curl -LO ${LINK} && \
     mkdir -p /semux && \
     tar -xzf ${TARBALL} -C /semux --strip-components=1 && \
-    rm /${TARBALL}
+    rm ${TARBALL}
 
 EXPOSE 5161
 

@@ -6,12 +6,15 @@
  */
 package org.semux.net;
 
+import static org.semux.net.msg.p2p.NodesMessage.MAX_NODES;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.semux.Kernel;
 import org.semux.config.Config;
@@ -22,15 +25,16 @@ import org.semux.core.Blockchain;
 import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
+import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageQueue;
-import org.semux.net.msg.MessageRT;
+import org.semux.net.msg.MessageWrapper;
 import org.semux.net.msg.ReasonCode;
-import org.semux.net.msg.consensus.BFTNewHeightMessage;
 import org.semux.net.msg.consensus.BlockHeaderMessage;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.GetBlockHeaderMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
+import org.semux.net.msg.consensus.NewHeightMessage;
 import org.semux.net.msg.p2p.DisconnectMessage;
 import org.semux.net.msg.p2p.GetNodesMessage;
 import org.semux.net.msg.p2p.HelloMessage;
@@ -143,7 +147,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     public void channelRead0(final ChannelHandlerContext ctx, Message msg) throws InterruptedException {
         logger.trace("Received message: {}", msg);
-        MessageRT mr = msgQueue.receivedMessage(msg);
+        MessageWrapper mr = msgQueue.onMessageReceived(msg);
 
         switch (msg.getCode()) {
         /* p2p */
@@ -160,13 +164,16 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
             ReasonCode error = null;
             if (!isSupported(peer.getNetworkVersion())) {
-                error = ReasonCode.BAD_PROTOCOL;
+                error = ReasonCode.INCOMPATIBLE_PROTOCOL;
+
             } else if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isActivePeer(peer.getPeerId())) {
-                error = ReasonCode.DUPLICATE_PEER_ID;
+                error = ReasonCode.DUPLICATED_PEER_ID;
+
             } else if (chain.getValidators().contains(peer.getPeerId()) // validator
                     && channelMgr.isActiveIP(channel.getRemoteIp()) // connected
-                    && config.networkId() == Constants.MAIN_NET_ID) { // main net
-                error = ReasonCode.BAD_PEER;
+                    && config.networkId() == Constants.MAINNET_ID) { // main net
+                error = ReasonCode.VALIDATOR_IP_LIMITED;
+
             } else if (!isValid(helloMsg)) {
                 error = ReasonCode.INVALID_HANDSHAKE;
             }
@@ -216,13 +223,18 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             break;
         }
         case GET_NODES: {
-            NodesMessage nodesMsg = new NodesMessage(channelMgr.getActiveAddresses());
+            NodesMessage nodesMsg = new NodesMessage(channelMgr.getActiveAddresses()
+                    .stream().limit(MAX_NODES).map(Node::new)
+                    .collect(Collectors.toList()));
             msgQueue.sendMessage(nodesMsg);
             break;
         }
         case NODES: {
+            // TODO: record how frequent this message is being used, ban if necessary
             NodesMessage nodesMsg = (NodesMessage) msg;
-            nodeMgr.addNodes(nodesMsg.getNodes());
+            if (nodesMsg.validate()) {
+                nodeMgr.addNodes(nodesMsg.getNodes());
+            }
             break;
         }
         case TRANSACTION: {
@@ -286,7 +298,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      */
     private boolean isValid(HelloMessage msg) {
         return msg.validate(config)
-                && (config.networkId() == Constants.DEV_NET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
+                && (config.networkId() == Constants.DEVNET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
     }
 
     /**
@@ -296,7 +308,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      */
     private boolean isValid(WorldMessage msg) {
         return msg.validate(config)
-                && (config.networkId() == Constants.DEV_NET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
+                && (config.networkId() == Constants.DEVNET_ID || channel.getRemoteIp().equals(msg.getPeer().getIp()));
     }
 
     /**
@@ -307,7 +319,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private void onHandshakeDone(Peer peer) {
         if (!isHandshakeDone) {
             // notify consensus about peer height
-            consensus.onMessage(channel, new BFTNewHeightMessage(peer.getLatestBlockNumber() + 1));
+            consensus.onMessage(channel, new NewHeightMessage(peer.getLatestBlockNumber() + 1));
 
             // start peers exchange
             getNodes = exec.scheduleAtFixedRate(() -> msgQueue.sendMessage(new GetNodesMessage()),
@@ -319,6 +331,8 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
             // set indicator
             isHandshakeDone = true;
+        } else {
+            msgQueue.disconnect(ReasonCode.HANDSHAKE_EXISTS);
         }
     }
 
@@ -346,6 +360,6 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             pingPong = null;
         }
 
-        msgQueue.close();
+        msgQueue.deactivate();
     }
 }

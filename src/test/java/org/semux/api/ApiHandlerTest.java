@@ -10,6 +10,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -41,12 +42,14 @@ import org.semux.api.response.GetLatestBlockResponse;
 import org.semux.api.response.GetPeersResponse;
 import org.semux.api.response.GetPendingTransactionsResponse;
 import org.semux.api.response.GetRootResponse;
+import org.semux.api.response.GetTransactionLimitsResponse;
 import org.semux.api.response.GetTransactionResponse;
 import org.semux.api.response.GetValidatorsResponse;
 import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
+import org.semux.api.response.Types;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
 import org.semux.core.Genesis.Premine;
@@ -56,7 +59,7 @@ import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.crypto.Hex;
 import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
@@ -74,7 +77,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Before
     public void setUp() {
-        api = new SemuxAPIMock(kernelRule.getKernel());
+        api = new SemuxApiMock(kernelRule.getKernel());
         api.start();
 
         config = api.getKernel().getConfig();
@@ -114,7 +117,9 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         GetInfoResponse response = request(uri, GetInfoResponse.class);
         assertTrue(response.success);
         assertNotNull(response.info);
-        assertEquals(0, response.info.latestBlockNumber);
+        assertEquals(Long.valueOf(0), response.info.latestBlockNumber);
+        assertEquals(Integer.valueOf(0), response.info.activePeers);
+        assertEquals(Integer.valueOf(0), response.info.pendingTransactions);
     }
 
     @Test
@@ -127,12 +132,12 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         GetPeersResponse response = request("/get_peers", GetPeersResponse.class);
         assertTrue(response.success);
-        List<GetPeersResponse.Result> result = response.peers;
+        List<Types.PeerType> result = response.peers;
 
         assertNotNull(result);
         assertEquals(peers.size(), result.size());
         for (int i = 0; i < peers.size(); i++) {
-            GetPeersResponse.Result peerJson = result.get(i);
+            Types.PeerType peerJson = result.get(i);
             Peer peer = peers.get(i);
             assertEquals(peer.getIp(), peerJson.ip);
             assertEquals(peer.getPort(), peerJson.port.intValue());
@@ -211,7 +216,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         GetLatestBlockResponse response = request(uri, GetLatestBlockResponse.class);
         assertTrue(response.success);
 
-        GetBlockResponse.Result blockJson = response.block;
+        Types.BlockType blockJson = response.block;
         assertEquals(Hex.encode0x(genesisBlock.getHash()), blockJson.hash);
         assertEquals(genesisBlock.getNumber(), blockJson.number.longValue());
         assertEquals(Hex.encode0x(genesisBlock.getCoinbase()), blockJson.coinbase);
@@ -311,7 +316,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         String uri = "/get_delegate?address=" + Hex.encode(entry.getValue());
         GetDelegateResponse response = request(uri, GetDelegateResponse.class);
         assertTrue(response.success);
-        assertEquals(entry.getKey(), response.delegateResult.name);
+        assertEquals(entry.getKey(), response.delegate.name);
     }
 
     @Test
@@ -319,7 +324,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         String uri = "/get_delegates";
         GetDelegatesResponse response = request(uri, GetDelegatesResponse.class);
         assertTrue(response.success);
-        assertTrue(response.delegateResults.size() > 0);
+        assertTrue(response.delegates.size() > 0);
     }
 
     @Test
@@ -332,8 +337,8 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testGetVote() throws IOException {
-        EdDSA key = new EdDSA();
-        EdDSA key2 = new EdDSA();
+        Key key = new Key();
+        Key key2 = new Key();
         DelegateState ds = chain.getDelegateState();
         ds.register(key2.toAddress(), Bytes.of("test"));
         ds.vote(key.toAddress(), key2.toAddress(), 200L);
@@ -346,8 +351,8 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testGetVotes() throws IOException {
-        EdDSA voterKey = new EdDSA();
-        EdDSA delegateKey = new EdDSA();
+        Key voterKey = new Key();
+        Key delegateKey = new Key();
         DelegateState ds = chain.getDelegateState();
         assertTrue(ds.register(delegateKey.toAddress(), Bytes.of("test")));
         assertTrue(ds.vote(voterKey.toAddress(), delegateKey.toAddress(), 200L));
@@ -379,8 +384,27 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
     }
 
     @Test
+    public void testGetTransactionLimits() throws IOException {
+        for (TransactionType type : TransactionType.values()) {
+            String uri = "/get_transaction_limits?type=" + type.toString();
+            GetTransactionLimitsResponse response = request(uri, GetTransactionLimitsResponse.class);
+            assertTrue(response.success);
+            assertEquals(config.maxTransactionDataSize(type),
+                    response.transactionLimits.maxTransactionDataSize.intValue());
+            assertEquals(config.minTransactionFee(), response.transactionLimits.minTransactionFee.longValue());
+
+            if (type.equals(TransactionType.DELEGATE)) {
+                assertEquals(config.minDelegateBurnAmount(),
+                        response.transactionLimits.minDelegateBurnAmount.longValue());
+            } else {
+                assertNull(response.transactionLimits.minDelegateBurnAmount);
+            }
+        }
+    }
+
+    @Test
     public void testTransfer() throws IOException, InterruptedException {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
         String uri = "/transfer?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + key.toAddressString()
                 + "&value=1000000000&fee=" + config.minTransactionFee() + "&data="
                 + Hex.encode(Bytes.of("test_transfer"));
@@ -414,7 +438,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testVote() throws IOException, InterruptedException {
-        EdDSA delegate = new EdDSA();
+        Key delegate = new Key();
         delegateState.register(delegate.toAddress(), Bytes.of("test_vote"));
 
         String uri = "/vote?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + delegate.toAddressString()
@@ -433,7 +457,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testUnvote() throws IOException, InterruptedException {
-        EdDSA delegate = new EdDSA();
+        Key delegate = new Key();
         delegateState.register(delegate.toAddress(), Bytes.of("test_unvote"));
 
         long amount = 1000000000;

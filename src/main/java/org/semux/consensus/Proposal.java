@@ -12,8 +12,8 @@ import java.util.List;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Transaction;
-import org.semux.crypto.EdDSA;
-import org.semux.crypto.EdDSA.Signature;
+import org.semux.crypto.Key;
+import org.semux.crypto.Key.Signature;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
@@ -61,7 +61,7 @@ public class Proposal {
      * @param key
      * @return
      */
-    public Proposal sign(EdDSA key) {
+    public Proposal sign(Key key) {
         this.signature = key.sign(encoded);
         return this;
     }
@@ -75,7 +75,7 @@ public class Proposal {
      * NOTE: this method will NOT validate the proposed block, nor the proof, nor
      * the transactions inside the block. Use
      * {@link Block#validateHeader(BlockHeader, BlockHeader)} and
-     * {@link Block#validateTransactions(BlockHeader, List)} for that purpose.
+     * {@link Block#validateTransactions(BlockHeader, List, byte)} for that purpose.
      * </p>
      * 
      * @return true if success, otherwise false
@@ -88,7 +88,7 @@ public class Proposal {
                 && transactions != null
                 && proof.getHeight() == blockHeader.getNumber()
                 && encoded != null
-                && signature != null && EdDSA.verify(encoded, signature);
+                && signature != null && Key.verify(encoded, signature);
     }
 
     public Proof getProof() {

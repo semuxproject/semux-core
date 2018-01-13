@@ -6,8 +6,8 @@
  */
 package org.semux.consensus;
 
-import org.semux.crypto.EdDSA;
-import org.semux.crypto.EdDSA.Signature;
+import org.semux.crypto.Key;
+import org.semux.crypto.Key.Signature;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
@@ -69,7 +69,7 @@ public class Vote {
      * @param key
      * @return
      */
-    public Vote sign(EdDSA key) {
+    public Vote sign(Key key) {
         this.signature = key.sign(encoded);
         return this;
     }
@@ -85,7 +85,7 @@ public class Vote {
                 && view >= 0
                 && blockHash != null && blockHash.length == 32
                 && encoded != null
-                && signature != null && EdDSA.verify(encoded, signature);
+                && signature != null && Key.verify(encoded, signature);
     }
 
     public VoteType getType() {

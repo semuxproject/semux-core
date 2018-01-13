@@ -1,0 +1,33 @@
+{
+    "number": 0,
+    "coinbase": "0x0000000000000000000000000000000000000000",
+    "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "timestamp": 1504742400000,
+    "data": "semux",
+    "premine": [
+        {
+            "address": "0xd00e49d3c1624aa90d7c6587688a53818aeae649",
+            "amount": 5000000,
+            "note": "founder"
+        },
+        {
+            "address": "0x8e1ef4f810a84bea2fbf1e5f4afd8d0774ab0038",
+            "amount": 10000000,
+            "note": "development, marketing, promotion, bounties"
+        },
+        {
+            "address": "0xc2ed00c8e05a2296ab3be4a0accb89b648bc71df",
+            "amount": 10000000,
+            "note": "community distribution"
+        }
+    ],
+    "delegates": {
+        "semux1": "0xc583b6ad1d1cccfc00ae9113db6408f022822b20",
+        "semux2": "0xc5f32c2231ff2b60cdfa9c0d3a9c2e71774de472",
+        "semux3": "0x4908d29be8cc537386cd888dc9336aa7808c6ccc",
+        "semux4": "0xa46caf85690c5d340e1256902317efb488da858d"
+    },
+    "config": {
+        
+    }
+}

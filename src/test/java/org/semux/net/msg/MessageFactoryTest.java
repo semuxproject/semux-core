@@ -6,15 +6,13 @@
  */
 package org.semux.net.msg;
 
-import static org.junit.Assert.assertNull;
-
 import org.junit.Test;
 
 public class MessageFactoryTest {
 
-    @Test
-    public void testNonExist() {
-        MessageFactory mf = new MessageFactory();
-        assertNull(mf.create((byte) 0xff, new byte[1]));
+    @Test(expected = MessageException.class)
+    public void testNonExist() throws MessageException {
+        MessageFactory factory = new MessageFactory();
+        factory.create((byte) 0xff, new byte[1]);
     }
 }

@@ -20,12 +20,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
+import org.semux.config.DevnetConfig;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Unit;
-import org.semux.crypto.EdDSA;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.crypto.Key;
+import org.semux.rules.TemporaryDbRule;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
@@ -36,11 +36,11 @@ public class DelegateStateTest {
     Map<String, byte[]> delegates;
 
     @Rule
-    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+    public TemporaryDbRule temporaryDBFactory = new TemporaryDbRule();
 
     @Before
     public void init() {
-        chain = new BlockchainImpl(new DevNetConfig(Constants.DEFAULT_DATA_DIR), temporaryDBFactory);
+        chain = new BlockchainImpl(new DevnetConfig(Constants.DEFAULT_DATA_DIR), temporaryDBFactory);
         ds = chain.getDelegateState();
         delegates = chain.getGenesis().getDelegates();
     }
@@ -61,18 +61,18 @@ public class DelegateStateTest {
 
     @Test
     public void testVoteWithoutRegistration() {
-        EdDSA delegate = new EdDSA();
-        EdDSA voter = new EdDSA();
+        Key delegate = new Key();
+        Key voter = new Key();
 
         assertFalse(ds.vote(voter.toAddress(), delegate.toAddress(), 1));
     }
 
     @Test
     public void testVoteOneDelegate() {
-        byte[] delegate = new EdDSA().toAddress();
+        byte[] delegate = new Key().toAddress();
         byte[] delegateName = Bytes.of("delegate");
 
-        byte[] voter = new EdDSA().toAddress();
+        byte[] voter = new Key().toAddress();
 
         assertTrue(ds.register(delegate, delegateName));
         for (int i = 0; i < 1000; i++) {
@@ -92,10 +92,10 @@ public class DelegateStateTest {
         byte[] delegate = null;
         byte[] delegateName = null;
 
-        byte[] voter = new EdDSA().toAddress();
+        byte[] voter = new Key().toAddress();
 
         for (int i = 0; i < 200; i++) {
-            delegate = new EdDSA().toAddress();
+            delegate = new Key().toAddress();
             delegateName = Bytes.of("delegate" + i);
             assertTrue(ds.register(delegate, delegateName));
             assertTrue(ds.vote(voter, delegate, i));
@@ -111,8 +111,8 @@ public class DelegateStateTest {
 
     @Test
     public void testUnvote() {
-        byte[] voter = new EdDSA().toAddress();
-        byte[] delegate = new EdDSA().toAddress();
+        byte[] voter = new Key().toAddress();
+        byte[] delegate = new Key().toAddress();
         long value = 2 * Unit.SEM;
 
         ds.register(delegate, Bytes.of("test"));
@@ -123,8 +123,8 @@ public class DelegateStateTest {
 
     @Test
     public void testGetVote() {
-        byte[] voter = new EdDSA().toAddress();
-        byte[] delegate = new EdDSA().toAddress();
+        byte[] voter = new Key().toAddress();
+        byte[] delegate = new Key().toAddress();
         long value = 2 * Unit.SEM;
 
         ds.register(delegate, Bytes.of("test"));
@@ -138,10 +138,10 @@ public class DelegateStateTest {
 
     @Test
     public void testGetVotes() {
-        EdDSA delegateKey = new EdDSA();
-        EdDSA voterKey1 = new EdDSA();
+        Key delegateKey = new Key();
+        Key voterKey1 = new Key();
         long value1 = 1 * Unit.SEM;
-        EdDSA voterKey2 = new EdDSA();
+        Key voterKey2 = new Key();
         long value2 = 2 * Unit.SEM;
 
         ds.register(delegateKey.toAddress(), Bytes.of("test"));

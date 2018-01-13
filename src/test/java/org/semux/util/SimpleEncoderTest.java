@@ -20,6 +20,6 @@ public class SimpleEncoderTest {
         SimpleEncoder enc = new SimpleEncoder(append);
         enc.writeString("s");
 
-        assertThat(enc.toBytes(), equalTo(Bytes.merge(append, Bytes.of(1), Bytes.of("s"))));
+        assertThat(enc.toBytes(), equalTo(Bytes.merge(append, Bytes.of((byte) 1), Bytes.of("s"))));
     }
 }

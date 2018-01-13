@@ -16,9 +16,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.semux.core.exception.WalletLockedException;
-import org.semux.crypto.AES;
+import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.crypto.Hash;
 import org.semux.util.Bytes;
 import org.semux.util.IOUtil;
@@ -33,10 +33,13 @@ public class Wallet {
 
     private static final int VERSION = 1;
 
+    // variable-length quantity is disabled for compatibility
+    private static final boolean VLQ = false;
+
     private File file;
     private String password;
 
-    private final List<EdDSA> accounts = Collections.synchronizedList(new ArrayList<>());
+    private final List<Key> accounts = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Creates a new wallet instance.
@@ -74,7 +77,8 @@ public class Wallet {
     }
 
     /**
-     * Unlocks this wallet.
+     * Unlocks this wallet. If the wallet is unlocked, this method will reset the
+     * account list on a successful trial.
      * 
      * @param password
      *            the wallet password
@@ -85,24 +89,26 @@ public class Wallet {
             throw new IllegalArgumentException("Password can not be null");
         }
 
-        if (isUnlocked()) {
-            return true;
-        }
-
         try {
             byte[] key = Hash.h256(Bytes.of(password));
 
             if (exists()) {
                 SimpleDecoder dec = new SimpleDecoder(IOUtil.readFile(file));
                 dec.readInt(); // version
-                int total = dec.readInt();
+                int total = dec.readInt(); // size
 
+                List<Key> list = new ArrayList<>();
                 for (int i = 0; i < total; i++) {
-                    byte[] iv = dec.readBytes();
-                    byte[] publicKey = dec.readBytes();
-                    byte[] privateKey = AES.decrypt(dec.readBytes(), key, iv);
+                    byte[] iv = dec.readBytes(VLQ);
+                    byte[] publicKey = dec.readBytes(VLQ);
+                    byte[] privateKey = Aes.decrypt(dec.readBytes(VLQ), key, iv);
 
-                    accounts.add(new EdDSA(privateKey, publicKey));
+                    list.add(new Key(privateKey, publicKey));
+                }
+
+                synchronized (accounts) {
+                    accounts.clear();
+                    accounts.addAll(list);
                 }
             }
             this.password = password;
@@ -173,7 +179,7 @@ public class Wallet {
      * @return a list of accounts
      * @throws WalletLockedException
      */
-    public List<EdDSA> getAccounts() throws WalletLockedException {
+    public List<Key> getAccounts() throws WalletLockedException {
         requireUnlocked();
 
         synchronized (accounts) {
@@ -188,7 +194,7 @@ public class Wallet {
      * 
      * @param list
      */
-    public void setAccounts(List<EdDSA> list) throws WalletLockedException {
+    public void setAccounts(List<Key> list) throws WalletLockedException {
         requireUnlocked();
 
         synchronized (accounts) {
@@ -205,7 +211,7 @@ public class Wallet {
      * @return
      * @throws WalletLockedException
      */
-    public EdDSA getAccount(int idx) throws WalletLockedException {
+    public Key getAccount(int idx) throws WalletLockedException {
         requireUnlocked();
 
         return accounts.get(idx);
@@ -218,12 +224,12 @@ public class Wallet {
      * @return
      * @throws WalletLockedException
      */
-    public EdDSA getAccount(byte[] address) throws WalletLockedException {
+    public Key getAccount(byte[] address) throws WalletLockedException {
         requireUnlocked();
 
         // TODO: optimize account query
         synchronized (accounts) {
-            for (EdDSA key : accounts) {
+            for (Key key : accounts) {
                 if (Arrays.equals(key.toAddress(), address)) {
                     return key;
                 }
@@ -244,12 +250,12 @@ public class Wallet {
      * @throws WalletLockedException
      * 
      */
-    public boolean addAccount(EdDSA newKey) throws WalletLockedException {
+    public boolean addAccount(Key newKey) throws WalletLockedException {
         requireUnlocked();
 
         // TODO: optimize duplicates check
         synchronized (accounts) {
-            for (EdDSA key : accounts) {
+            for (Key key : accounts) {
                 if (Arrays.equals(key.getPublicKey(), newKey.getPublicKey())) {
                     return false;
                 }
@@ -269,11 +275,11 @@ public class Wallet {
      * @throws WalletLockedException
      * 
      */
-    public int addAccounts(List<EdDSA> accounts) throws WalletLockedException {
+    public int addAccounts(List<Key> accounts) throws WalletLockedException {
         requireUnlocked();
 
         int n = 0;
-        for (EdDSA acc : accounts) {
+        for (Key acc : accounts) {
             n += addAccount(acc) ? 1 : 0;
         }
         return n;
@@ -290,12 +296,12 @@ public class Wallet {
      * @throws WalletLockedException
      * 
      */
-    public boolean deleteAccount(EdDSA key) throws WalletLockedException {
+    public boolean deleteAccount(Key key) throws WalletLockedException {
         requireUnlocked();
 
         // TODO: optimize duplicates check
         synchronized (accounts) {
-            for (EdDSA k : accounts) {
+            for (Key k : accounts) {
                 if (Arrays.equals(k.getPublicKey(), key.getPublicKey())) {
                     accounts.remove(key);
                     return true;
@@ -343,12 +349,12 @@ public class Wallet {
             enc.writeInt(accounts.size());
 
             synchronized (accounts) {
-                for (EdDSA a : accounts) {
+                for (Key a : accounts) {
                     byte[] iv = Bytes.random(16);
 
-                    enc.writeBytes(iv);
-                    enc.writeBytes(a.getPublicKey());
-                    enc.writeBytes(AES.encrypt(a.getPrivateKey(), key, iv));
+                    enc.writeBytes(iv, VLQ);
+                    enc.writeBytes(a.getPublicKey(), VLQ);
+                    enc.writeBytes(Aes.encrypt(a.getPrivateKey(), key, iv), VLQ);
                 }
             }
 

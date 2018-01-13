@@ -15,7 +15,7 @@ To format your code, please run the following command:
 mvn formatter:format license:format
 ```
 
-An [Eclipse Java formatter](https://raw.githubusercontent.com/semuxproject/semux/master/misc/eclipse/formatter.xml) is also provided.
+For IDE users, [Eclipse Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/eclpse/guide.md) and [IntelliJ IDEA Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/intellij/guide.md) are also provided.
 
 ## Contributor workflow
 
@@ -27,17 +27,24 @@ To contribute a patch, the workflow is as follows:
 
 In general [commits should be atomic](https://en.wikipedia.org/wiki/Atomic_commit#Atomic_commit_convention) and diffs should be easy to read. For this reason do not mix any formatting fixes or code moves with actual code changes.
 
-Commit messages should be verbose by default consisting of a short subject line (**imperative present tense, capitalized, max 50 characters**), a blank line and detailed explanatory text as separate paragraph(s), unless the title alone is self-explanatory in which case a single title line is sufficient. Commit messages should be helpful to people reading your code in the future, so explain the reasoning for your decisions. Further explanation [here](https://github.com/agis/git-style-guides).
+Commit messages should be verbose by default consisting of a short subject line (**imperative present tense, max 50 characters, prefixed by component**), a blank line and detailed explanatory text as separate paragraph(s), unless the title alone is self-explanatory in which case a single title line is sufficient. Commit messages should be helpful to people reading your code in the future, so explain the reasoning for your decisions. Further explanation [here](https://github.com/agis/git-style-guide). Example:
 
-If a particular commit references another issue, please add the reference. For example: `refs #1234` or `fixes #4321`. Using the `fixes` or `closes` keywords will cause the corresponding issue to be closed when the pull request is merged.
+```
+Component: short summary of changes
 
-Please refer to the [Git manual](https://git-scm.com/doc) for more information about Git.
+More detailed explanatory text, if necessary. Wrap it to
+72 characters. In some contexts, the first
+line is treated as the subject of an email and the rest of
+the text as the body.  The blank line separating the
+summary from the body is critical.
 
-  - Push changes to your fork
-  - Create pull request
+Further paragraphs come after blank lines.
 
-The title of the pull request should be prefixed by the component or area that
-the pull request affects. Valid areas as:
+Resolves: #56, #78
+See also: #12, #34
+```
+
+The title of the pull request should be prefixed by the component or area that the pull request affects. Valid areas as:
 
   - **API** for changes to the RESTful API code
   - **CLI** for changes to the wallet CLI code
@@ -61,9 +68,9 @@ the pull request affects. Valid areas as:
 
 Examples:
 ```
-Consensus: Adjust the BFT timeout parameters
-P2P: Increase the max allowed connections
-Trivial: Fix typo in Semux.java
+Consensus: adjust the BFT timeout parameters
+P2P: increase the max allowed connections
+Trivial: fix typo in Semux.java
 ```
 
 If a pull request is not to be considered for merging (yet), please prefix the title with [WIP] or use [Tasks Lists](https://help.github.com/articles/basic-writing-and-formatting-syntax/#task-lists) in the body of the pull request to indicate tasks are pending.

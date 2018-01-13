@@ -32,32 +32,32 @@ import javax.swing.table.TableRowSorter;
 
 import org.semux.core.Transaction;
 import org.semux.gui.Action;
-import org.semux.gui.SemuxGUI;
+import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.TransactionDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.exception.UnreachableException;
 
 /**
- * Transactions panel displays all transactio from/to accounts of the wallet.
+ * Transactions panel displays all transaction from/to accounts of the wallet.
  */
 public class TransactionsPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] columnNames = { GUIMessages.get("Type"), GUIMessages.get("FromTo"),
-            GUIMessages.get("Value"), GUIMessages.get("Time") };
+    private static final String[] columnNames = { GuiMessages.get("Type"), GuiMessages.get("FromTo"),
+            GuiMessages.get("Value"), GuiMessages.get("Time") };
 
-    private transient SemuxGUI gui;
+    private transient SemuxGui gui;
     private transient WalletModel model;
 
     private JTable table;
     private TransactionsTableModel tableModel;
 
-    public TransactionsPanel(SemuxGUI gui, JFrame frame) {
+    public TransactionsPanel(SemuxGui gui, JFrame frame) {
         this.gui = gui;
         this.model = gui.getModel();
         this.model.addListener(this);
