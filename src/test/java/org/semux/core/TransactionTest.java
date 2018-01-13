@@ -15,8 +15,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
-import org.semux.crypto.EdDSA;
+import org.semux.config.DevnetConfig;
+import org.semux.crypto.Key;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +25,8 @@ public class TransactionTest {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionTest.class);
 
-    private Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
-    private EdDSA key = new EdDSA();
+    private Config config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
+    private Key key = new Key();
 
     private byte networkId = Constants.DEVNET_ID;
     private TransactionType type = TransactionType.TRANSFER;

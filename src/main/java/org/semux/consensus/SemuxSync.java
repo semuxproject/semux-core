@@ -42,8 +42,8 @@ import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.EdDSA;
-import org.semux.crypto.EdDSA.Signature;
+import org.semux.crypto.Key;
+import org.semux.crypto.Key.Signature;
 import org.semux.crypto.Hex;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
@@ -186,14 +186,12 @@ public class SemuxSync implements SyncManager {
         case BLOCK: {
             BlockMessage blockMsg = (BlockMessage) msg;
             Block block = blockMsg.getBlock();
-            if (block != null) {
-                synchronized (lock) {
-                    if (toDownload.remove(block.getNumber())) {
-                        growToDownloadQueue();
-                    }
-                    toComplete.remove(block.getNumber());
-                    toProcess.add(Pair.of(block, channel));
+            synchronized (lock) {
+                if (toDownload.remove(block.getNumber())) {
+                    growToDownloadQueue();
                 }
+                toComplete.remove(block.getNumber());
+                toProcess.add(Pair.of(block, channel));
             }
             break;
         }
@@ -286,8 +284,7 @@ public class SemuxSync implements SyncManager {
 
         for (long task = latestQueuedTask.get() + 1; //
                 task < target.get() && toDownload.size() < MAX_QUEUED_BLOCKS; //
-                task++ //
-                ) {
+                task++) {
             latestQueuedTask.accumulateAndGet(task, (prev, next) -> next > prev ? next : prev);
             if (!chain.hasBlock(task)) {
                 toDownload.add(task);
@@ -419,7 +416,7 @@ public class SemuxSync implements SyncManager {
         for (Signature sig : block.getVotes()) {
             String a = Hex.encode(sig.getAddress());
 
-            if (!set.contains(a) || !EdDSA.verify(encoded, sig)) {
+            if (!set.contains(a) || !Key.verify(encoded, sig)) {
                 logger.debug("Invalid BFT vote: signer = {}", a);
                 return false;
             }

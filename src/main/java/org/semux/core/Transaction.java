@@ -8,8 +8,8 @@ package org.semux.core;
 
 import java.util.Arrays;
 
-import org.semux.crypto.EdDSA;
-import org.semux.crypto.EdDSA.Signature;
+import org.semux.crypto.Key;
+import org.semux.crypto.Key.Signature;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.util.SimpleDecoder;
@@ -105,7 +105,7 @@ public class Transaction {
      * @param key
      * @return
      */
-    public Transaction sign(EdDSA key) {
+    public Transaction sign(Key key) {
         this.signature = key.sign(this.hash);
         return this;
     }
@@ -126,7 +126,7 @@ public class Transaction {
         return hash != null && hash.length == Hash.HASH_LEN
                 && networkId == network
                 && type != null
-                && to != null && to.length == EdDSA.ADDRESS_LEN
+                && to != null && to.length == Key.ADDRESS_LEN
                 && value >= 0
                 && fee >= 0
                 && nonce >= 0
@@ -136,7 +136,7 @@ public class Transaction {
                 && signature != null
 
                 && Arrays.equals(Hash.h256(encoded), hash)
-                && EdDSA.verify(hash, signature);
+                && Key.verify(hash, signature);
     }
 
     /**

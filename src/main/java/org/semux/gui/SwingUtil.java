@@ -50,8 +50,7 @@ import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
-import org.semux.gui.exception.QRCodeException;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -167,36 +166,33 @@ public class SwingUtil {
      * @param width
      * @param height
      * @return
+     * @throws WriterException
      */
-    public static BufferedImage generateQR(String text, int width, int height) throws QRCodeException {
-        try {
-            Map<EncodeHintType, Object> hintMap = new EnumMap<>(EncodeHintType.class);
-            hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
-            hintMap.put(EncodeHintType.MARGIN, 2);
-            hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+    public static BufferedImage createQrImage(String text, int width, int height) throws WriterException {
+        Map<EncodeHintType, Object> hintMap = new EnumMap<>(EncodeHintType.class);
+        hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+        hintMap.put(EncodeHintType.MARGIN, 2);
+        hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
 
-            QRCodeWriter writer = new QRCodeWriter();
-            BitMatrix matrix = writer.encode(text, BarcodeFormat.QR_CODE, width, height, hintMap);
-            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            image.createGraphics();
+        QRCodeWriter writer = new QRCodeWriter();
+        BitMatrix matrix = writer.encode(text, BarcodeFormat.QR_CODE, width, height, hintMap);
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        image.createGraphics();
 
-            Graphics2D graphics = (Graphics2D) image.getGraphics();
-            graphics.setColor(Color.WHITE);
-            graphics.fillRect(0, 0, width, height);
-            graphics.setColor(Color.BLACK);
+        Graphics2D graphics = (Graphics2D) image.getGraphics();
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(0, 0, width, height);
+        graphics.setColor(Color.BLACK);
 
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < width; j++) {
-                    if (matrix.get(i, j)) {
-                        graphics.fillRect(i, j, 1, 1);
-                    }
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < width; j++) {
+                if (matrix.get(i, j)) {
+                    graphics.fillRect(i, j, 1, 1);
                 }
             }
-
-            return image;
-        } catch (WriterException e) {
-            throw new QRCodeException(e);
         }
+
+        return image;
     }
 
     /**
@@ -450,17 +446,17 @@ public class SwingUtil {
      * @param tx
      * @return
      */
-    public static String getTransactionDescription(SemuxGUI gui, Transaction tx) {
+    public static String getTransactionDescription(SemuxGui gui, Transaction tx) {
         switch (tx.getType()) {
         case COINBASE:
-            return GUIMessages.get("BlockReward") + " => "
-                    + getDelegateName(gui, tx.getTo()).orElse(GUIMessages.get("UnknownDelegate"));
+            return GuiMessages.get("BlockReward") + " => "
+                    + getDelegateName(gui, tx.getTo()).orElse(GuiMessages.get("UnknownDelegate"));
         case VOTE:
         case UNVOTE:
         case TRANSFER:
             return getTransactionRecipientsDescription(gui, tx);
         case DELEGATE:
-            return GUIMessages.get("DelegateRegistration");
+            return GuiMessages.get("DelegateRegistration");
         default:
             return StringUtil.EMPTY_STRING;
         }
@@ -472,7 +468,7 @@ public class SwingUtil {
      * @param tx
      * @return description of transaction with one or multiple recipients
      */
-    private static String getTransactionRecipientsDescription(SemuxGUI gui, Transaction tx) {
+    private static String getTransactionRecipientsDescription(SemuxGui gui, Transaction tx) {
         return getAddressAlias(gui, tx.getFrom()) + " => " + getAddressAlias(gui, tx.getTo());
     }
 
@@ -483,14 +479,14 @@ public class SwingUtil {
      * @param address
      * @return
      */
-    private static String getAddressAlias(SemuxGUI gui, byte[] address) {
+    private static String getAddressAlias(SemuxGui gui, byte[] address) {
         Optional<String> name = getDelegateName(gui, address);
         if (name.isPresent()) {
             return name.get();
         }
 
         int n = gui.getModel().getAccountNumber(address);
-        return n == -1 ? Hex.encode0x(address) : GUIMessages.get("AccountNum", n);
+        return n == -1 ? Hex.encode0x(address) : GuiMessages.get("AccountNum", n);
     }
 
     /**
@@ -499,7 +495,7 @@ public class SwingUtil {
      * @param address
      * @return
      */
-    public static Optional<String> getDelegateName(SemuxGUI gui, byte[] address) {
+    public static Optional<String> getDelegateName(SemuxGui gui, byte[] address) {
         DelegateState ds = gui.getKernel().getBlockchain().getDelegateState();
         Delegate d = ds.getDelegateByAddress(address);
 

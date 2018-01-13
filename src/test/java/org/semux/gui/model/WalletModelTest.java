@@ -34,7 +34,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.semux.core.Block;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.net.Peer;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -72,7 +72,7 @@ public class WalletModelTest {
 
     @Test
     public void testCoinbase() {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
 
         assertNull(model.getCoinbase());
         model.setCoinbase(key);
@@ -113,9 +113,9 @@ public class WalletModelTest {
     public void testTotalAvailable() {
         WalletAccount wa1 = mock(WalletAccount.class);
         WalletAccount wa2 = mock(WalletAccount.class);
-        when(wa1.getKey()).thenReturn(new EdDSA());
+        when(wa1.getKey()).thenReturn(new Key());
         when(wa1.getAvailable()).thenReturn(1L);
-        when(wa2.getKey()).thenReturn(new EdDSA());
+        when(wa2.getKey()).thenReturn(new Key());
         when(wa2.getAvailable()).thenReturn(2L);
 
         assertEquals(0, model.getTotalAvailable());
@@ -129,9 +129,9 @@ public class WalletModelTest {
     public void testTotalLocked() {
         WalletAccount wa1 = mock(WalletAccount.class);
         WalletAccount wa2 = mock(WalletAccount.class);
-        when(wa1.getKey()).thenReturn(new EdDSA());
+        when(wa1.getKey()).thenReturn(new Key());
         when(wa1.getLocked()).thenReturn(1L);
-        when(wa2.getKey()).thenReturn(new EdDSA());
+        when(wa2.getKey()).thenReturn(new Key());
         when(wa2.getLocked()).thenReturn(2L);
 
         assertEquals(0, model.getTotalLocked());

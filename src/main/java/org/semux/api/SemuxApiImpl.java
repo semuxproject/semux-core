@@ -45,7 +45,7 @@ import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.CryptoException;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.crypto.Hex;
 import org.semux.net.NodeManager;
 
@@ -338,7 +338,7 @@ public class SemuxApiImpl implements SemuxApi {
     @Override
     public ApiHandlerResponse createAccount() {
         try {
-            EdDSA key = new EdDSA();
+            Key key = new Key();
             kernel.getWallet().addAccount(key);
             kernel.getWallet().flush();
             return new CreateAccountResponse(true, Hex.PREF + key.toAddressString());

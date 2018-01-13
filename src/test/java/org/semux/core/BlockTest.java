@@ -18,16 +18,16 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
-import org.semux.crypto.EdDSA;
-import org.semux.crypto.EdDSA.Signature;
+import org.semux.config.DevnetConfig;
+import org.semux.crypto.Key;
+import org.semux.crypto.Key.Signature;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SimpleDecoder;
 
 public class BlockTest {
 
-    private Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
+    private Config config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
 
     private long number = 5;
     private byte[] coinbase = Bytes.random(20);
@@ -37,7 +37,7 @@ public class BlockTest {
 
     private Transaction tx = new Transaction(Constants.DEVNET_ID, TransactionType.TRANSFER, Bytes.random(20), 0,
             config.minTransactionFee(),
-            1, System.currentTimeMillis(), Bytes.EMPTY_BYTES).sign(new EdDSA());
+            1, System.currentTimeMillis(), Bytes.EMPTY_BYTES).sign(new Key());
     private TransactionResult res = new TransactionResult(true);
     private List<Transaction> transactions = Collections.singletonList(tx);
     private List<TransactionResult> results = Collections.singletonList(res);

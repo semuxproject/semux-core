@@ -16,13 +16,13 @@ import java.util.Collections;
 
 import org.junit.Test;
 import org.semux.core.state.Account;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 
 public class WalletAccountTest {
 
     @Test
     public void testKey() {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
         Account acc = new Account(key.toAddress(), 1, 2, 3);
         WalletAccount wa = new WalletAccount(key, acc);
 
@@ -38,15 +38,15 @@ public class WalletAccountTest {
 
         assertEquals(key, wa.getKey());
 
-        EdDSA key2 = new EdDSA();
+        Key key2 = new Key();
         wa.setKey(key2);
         assertEquals(key2, wa.getKey());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testMismatch() {
-        EdDSA key = new EdDSA();
-        Account acc = new Account(new EdDSA().toAddress(), 1, 2, 3);
+        Key key = new Key();
+        Account acc = new Account(new Key().toAddress(), 1, 2, 3);
         new WalletAccount(key, acc);
     }
 

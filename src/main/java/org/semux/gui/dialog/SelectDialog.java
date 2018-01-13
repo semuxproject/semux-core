@@ -24,7 +24,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.util.exception.UnreachableException;
 
 public class SelectDialog extends JDialog implements ActionListener {
@@ -35,17 +35,17 @@ public class SelectDialog extends JDialog implements ActionListener {
     private int selected = -1;
 
     public SelectDialog(JFrame parent, String message, List<?> options) {
-        super(parent, GUIMessages.get("Select"));
+        super(parent, GuiMessages.get("Select"));
 
         JLabel labelLogo = new JLabel("");
         labelLogo.setIcon(SwingUtil.loadImage("logo", 96, 96));
 
         JLabel lblMessage = new JLabel(message);
 
-        JButton btnOk = SwingUtil.createDefaultButton(GUIMessages.get("OK"), this, Action.OK);
+        JButton btnOk = SwingUtil.createDefaultButton(GuiMessages.get("OK"), this, Action.OK);
         btnOk.setSelected(true);
 
-        JButton btnCancel = SwingUtil.createDefaultButton(GUIMessages.get("Cancel"), this, Action.CANCEL);
+        JButton btnCancel = SwingUtil.createDefaultButton(GuiMessages.get("Cancel"), this, Action.CANCEL);
 
         comboBox = new JComboBox<>();
         comboBox.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));

@@ -8,20 +8,20 @@ package org.semux.gui.panel;
 
 import org.semux.KernelMock;
 import org.semux.gui.BaseTestApplication;
-import org.semux.gui.SemuxGUI;
+import org.semux.gui.SemuxGui;
 import org.semux.gui.model.WalletModel;
 
 public class DelegatePanelTestApplication extends BaseTestApplication {
 
     private static final long serialVersionUID = 1L;
 
-    SemuxGUI gui;
+    SemuxGui gui;
 
     DelegatesPanel delegatesPanel;
 
     DelegatePanelTestApplication(WalletModel walletModel, KernelMock kernelMock) {
         super();
-        gui = new SemuxGUI(walletModel, kernelMock);
+        gui = new SemuxGui(walletModel, kernelMock);
         delegatesPanel = new DelegatesPanel(gui, this);
         getContentPane().add(delegatesPanel);
     }

@@ -11,15 +11,15 @@ import java.util.List;
 
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
+import org.semux.config.DevnetConfig;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Genesis;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
-import org.semux.crypto.EdDSA;
-import org.semux.crypto.EdDSA.Signature;
+import org.semux.crypto.Key;
+import org.semux.crypto.Key.Signature;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.slf4j.Logger;
@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 public class BlockchainPerformance {
     private static final Logger logger = LoggerFactory.getLogger(BlockchainPerformance.class);
 
-    private static Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
-    private static EdDSA key = new EdDSA();
+    private static Config config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
+    private static Key key = new Key();
 
     public static Block testBlockCreation() {
         long t1 = System.nanoTime();
@@ -73,7 +73,7 @@ public class BlockchainPerformance {
 
         List<Signature> votes = new ArrayList<>();
         for (int i = 0; i < config.getNumberOfValidators(1000000L); i++) {
-            votes.add(new EdDSA().sign(Bytes.EMPTY_BYTES));
+            votes.add(new Key().sign(Bytes.EMPTY_BYTES));
         }
         block.setView(1);
         block.setVotes(votes);
@@ -103,7 +103,7 @@ public class BlockchainPerformance {
     }
 
     public static void testTransactionValidation() {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
 
         byte networkId = config.networkId();
         TransactionType type = TransactionType.TRANSFER;

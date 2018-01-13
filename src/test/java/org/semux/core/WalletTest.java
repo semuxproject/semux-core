@@ -22,7 +22,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semux.core.exception.WalletLockedException;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 
@@ -43,7 +43,7 @@ public class WalletTest {
 
         wallet = new Wallet(file);
         wallet.unlock(pwd);
-        wallet.setAccounts(Collections.singletonList(new EdDSA()));
+        wallet.setAccounts(Collections.singletonList(new Key()));
         wallet.flush();
         wallet.lock();
     }
@@ -78,8 +78,8 @@ public class WalletTest {
         wallet.unlock(pwd);
         wallet.setAccounts(Collections.emptyList());
 
-        EdDSA key1 = new EdDSA();
-        EdDSA key2 = new EdDSA();
+        Key key1 = new Key();
+        Key key2 = new Key();
         wallet.addAccounts(Arrays.asList(key1, key2));
 
         assertThat(wallet.getAccounts(), contains(key1, key2));
@@ -104,7 +104,7 @@ public class WalletTest {
         Wallet w = new Wallet(f);
 
         w.unlock(pwd);
-        EdDSA key = new EdDSA();
+        Key key = new Key();
         w.addAccount(key);
         w.flush();
 
@@ -131,11 +131,11 @@ public class WalletTest {
         wallet.unlock(pwd);
         // add n new accounts;
         for (int i = 0; i < 10; i++) {
-            EdDSA key = new EdDSA();
+            Key key = new Key();
             wallet.addAccount(key);
         }
         wallet.flush();
-        EdDSA key = new EdDSA();
+        Key key = new Key();
         assertFalse(wallet.deleteAccount(key));
     }
 
@@ -143,13 +143,13 @@ public class WalletTest {
     public void testDeleteAccountExist() {
         wallet.unlock(pwd);
         for (int i = 0; i < 3; i++) {
-            EdDSA k = new EdDSA();
+            Key k = new Key();
             wallet.addAccount(k);
         }
-        EdDSA key = new EdDSA();
+        Key key = new Key();
         wallet.addAccount(key);
         for (int i = 0; i < 7; i++) {
-            EdDSA k = new EdDSA();
+            Key k = new Key();
             wallet.addAccount(k);
         }
         wallet.flush();
@@ -160,13 +160,13 @@ public class WalletTest {
     public void testDeleteWalletNotUnlock() {
         wallet.unlock(pwd);
         for (int i = 0; i < 4; i++) {
-            EdDSA k = new EdDSA();
+            Key k = new Key();
             wallet.addAccount(k);
         }
-        EdDSA key = new EdDSA();
+        Key key = new Key();
         wallet.addAccount(key);
         for (int i = 0; i < 6; i++) {
-            EdDSA k = new EdDSA();
+            Key k = new Key();
             wallet.addAccount(k);
         }
         wallet.flush();

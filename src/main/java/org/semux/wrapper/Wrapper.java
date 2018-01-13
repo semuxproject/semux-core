@@ -17,17 +17,14 @@ import java.util.stream.Stream;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
-import org.semux.cli.SemuxCLI;
-import org.semux.gui.SemuxGUI;
+import org.semux.cli.SemuxCli;
+import org.semux.gui.SemuxGui;
 import org.semux.util.SystemUtil;
 
 /**
  * This is a process wrapper mainly created for dynamic allocation of the
  * maximum heap size of JVM. The wrapper sets the -Xmx to 80% of available
  * physical memory if the -Xmx option is not specified.
- * 
- * NOTE: this wrapper assumes a semux.jar file at the working directory and only
- * works with Semux Linux distribution only, currently.
  */
 public class Wrapper {
 
@@ -40,10 +37,10 @@ public class Wrapper {
     protected static Class<?> getModeClass(Mode mode) {
         switch (mode) {
         case CLI:
-            return SemuxCLI.class;
+            return SemuxCli.class;
 
         case GUI:
-            return SemuxGUI.class;
+            return SemuxGui.class;
 
         default:
             throw new WrapperException("Selected mode is not supported");

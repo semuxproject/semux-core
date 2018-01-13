@@ -25,7 +25,7 @@ import org.semux.core.TransactionType;
 import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.util.BasicAuth;
@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class ApiHandlerTestBase {
 
-    protected SemuxAPIMock api;
+    protected SemuxApiMock api;
 
     protected Config config;
     protected Wallet wallet;
@@ -78,7 +78,7 @@ public abstract class ApiHandlerTestBase {
     }
 
     protected Block createBlock(Blockchain chain, List<Transaction> transactions, List<TransactionResult> results) {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
 
         long number = chain.getLatestBlockNumber() + 1;
         byte[] coinbase = key.toAddress();
@@ -95,7 +95,7 @@ public abstract class ApiHandlerTestBase {
     }
 
     protected Transaction createTransaction() {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
 
         byte networkId = config.networkId();
         TransactionType type = TransactionType.TRANSFER;

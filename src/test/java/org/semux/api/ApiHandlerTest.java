@@ -59,7 +59,7 @@ import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.crypto.Hex;
 import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
@@ -77,7 +77,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Before
     public void setUp() {
-        api = new SemuxAPIMock(kernelRule.getKernel());
+        api = new SemuxApiMock(kernelRule.getKernel());
         api.start();
 
         config = api.getKernel().getConfig();
@@ -337,8 +337,8 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testGetVote() throws IOException {
-        EdDSA key = new EdDSA();
-        EdDSA key2 = new EdDSA();
+        Key key = new Key();
+        Key key2 = new Key();
         DelegateState ds = chain.getDelegateState();
         ds.register(key2.toAddress(), Bytes.of("test"));
         ds.vote(key.toAddress(), key2.toAddress(), 200L);
@@ -351,8 +351,8 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testGetVotes() throws IOException {
-        EdDSA voterKey = new EdDSA();
-        EdDSA delegateKey = new EdDSA();
+        Key voterKey = new Key();
+        Key delegateKey = new Key();
         DelegateState ds = chain.getDelegateState();
         assertTrue(ds.register(delegateKey.toAddress(), Bytes.of("test")));
         assertTrue(ds.vote(voterKey.toAddress(), delegateKey.toAddress(), 200L));
@@ -404,7 +404,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testTransfer() throws IOException, InterruptedException {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
         String uri = "/transfer?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + key.toAddressString()
                 + "&value=1000000000&fee=" + config.minTransactionFee() + "&data="
                 + Hex.encode(Bytes.of("test_transfer"));
@@ -438,7 +438,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testVote() throws IOException, InterruptedException {
-        EdDSA delegate = new EdDSA();
+        Key delegate = new Key();
         delegateState.register(delegate.toAddress(), Bytes.of("test_vote"));
 
         String uri = "/vote?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + delegate.toAddressString()
@@ -457,7 +457,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testUnvote() throws IOException, InterruptedException {
-        EdDSA delegate = new EdDSA();
+        Key delegate = new Key();
         delegateState.register(delegate.toAddress(), Bytes.of("test_unvote"));
 
         long amount = 1000000000;

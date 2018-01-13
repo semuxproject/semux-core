@@ -23,9 +23,6 @@ import java.util.List;
 
 public class IOUtil {
 
-    private IOUtil() {
-    }
-
     /**
      * Reads the given input stream into byte array.
      * 
@@ -156,5 +153,8 @@ public class IOUtil {
         if (replaceExisting || !dst.exists()) {
             Files.copy(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
+    }
+
+    private IOUtil() {
     }
 }

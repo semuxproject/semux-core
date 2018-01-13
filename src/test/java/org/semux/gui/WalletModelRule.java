@@ -17,13 +17,13 @@ import org.junit.rules.ExternalResource;
 import org.mockito.Mockito;
 import org.semux.core.Unit;
 import org.semux.core.state.Account;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
 
 public class WalletModelRule extends ExternalResource {
 
-    public final EdDSA key;
+    public final Key key;
 
     public Account account;
 
@@ -36,7 +36,7 @@ public class WalletModelRule extends ExternalResource {
     final int lockedSEM;
 
     public WalletModelRule(int availableSEM, int lockedSEM) {
-        this.key = new EdDSA();
+        this.key = new Key();
         this.availableSEM = availableSEM;
         this.lockedSEM = lockedSEM;
     }

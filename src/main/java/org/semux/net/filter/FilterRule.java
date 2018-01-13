@@ -24,7 +24,7 @@ import io.netty.handler.ipfilter.IpSubnetFilterRule;
 
 /**
  * FilterRule is a proxy class of {@link IpSubnetFilterRule} and
- * {@link IpSingleFilterRule}
+ * {@link SingleIpFilterRule}
  */
 public class FilterRule implements IpFilterRule {
 
@@ -47,7 +47,7 @@ public class FilterRule implements IpFilterRule {
      * The following cases are handled:
      * <ul>
      * <li>CIDR Notation: {@link IpSubnetFilterRule}</li>
-     * <li>IP Address: {@link IpSingleFilterRule}</li>
+     * <li>IP Address: {@link SingleIpFilterRule}</li>
      * </ul>
      * 
      * @param address
@@ -73,7 +73,7 @@ public class FilterRule implements IpFilterRule {
             int cidrPrefix = Integer.parseInt(matcher.group("cidrPrefix"));
             ipFilterRule = new IpSubnetFilterRule(address, cidrPrefix, ruleType);
         } else {
-            ipFilterRule = new IpSingleFilterRule(address, ruleType);
+            ipFilterRule = new SingleIpFilterRule(address, ruleType);
         }
     }
 

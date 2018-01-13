@@ -18,7 +18,7 @@ import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.crypto.Hash;
 
 public class MerkleUtilTest {
@@ -32,8 +32,8 @@ public class MerkleUtilTest {
         long nonce = 1;
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(128);
-        Transaction tx1 = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(new EdDSA());
-        Transaction tx2 = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(new EdDSA());
+        Transaction tx1 = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(new Key());
+        Transaction tx2 = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(new Key());
         byte[] b1 = tx1.getHash();
         byte[] b2 = tx2.getHash();
         byte[] root = new MerkleTree(Arrays.asList(b1, b2)).getRootHash();

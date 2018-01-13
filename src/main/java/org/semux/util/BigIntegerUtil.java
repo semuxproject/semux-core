@@ -10,9 +10,6 @@ import java.math.BigInteger;
 
 public class BigIntegerUtil {
 
-    private BigIntegerUtil() {
-    }
-
     /**
      * Returns if the big integer is zero.
      * 
@@ -118,5 +115,8 @@ public class BigIntegerUtil {
      */
     public static BigInteger min(BigInteger v1, BigInteger v2) {
         return v1.compareTo(v2) < 0 ? v1 : v2;
+    }
+
+    private BigIntegerUtil() {
     }
 }

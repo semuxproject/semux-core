@@ -16,17 +16,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
+import org.semux.config.DevnetConfig;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.EdDSA;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.crypto.Key;
+import org.semux.rules.TemporaryDbRule;
 import org.semux.util.Bytes;
 
 public class TransactionExecutorTest {
 
     @Rule
-    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+    public TemporaryDbRule temporaryDBFactory = new TemporaryDbRule();
 
     private Config config;
     private Blockchain chain;
@@ -36,7 +36,7 @@ public class TransactionExecutorTest {
 
     @Before
     public void prepare() {
-        config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
         chain = new BlockchainImpl(config, temporaryDBFactory);
         as = chain.getAccountState();
         ds = chain.getDelegateState();
@@ -54,7 +54,7 @@ public class TransactionExecutorTest {
 
     @Test
     public void testTransfer() {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
 
         byte networkId = Constants.DEVNET_ID;
         TransactionType type = TransactionType.TRANSFER;
@@ -92,7 +92,7 @@ public class TransactionExecutorTest {
 
     @Test
     public void testDelegate() {
-        EdDSA delegate = new EdDSA();
+        Key delegate = new Key();
 
         long available = 2000 * Unit.SEM;
         as.adjustAvailable(delegate.toAddress(), available);
@@ -130,8 +130,8 @@ public class TransactionExecutorTest {
 
     @Test
     public void testVote() {
-        EdDSA voter = new EdDSA();
-        EdDSA delegate = new EdDSA();
+        Key voter = new Key();
+        Key delegate = new Key();
 
         long available = 100 * Unit.SEM;
         as.adjustAvailable(voter.toAddress(), available);
@@ -163,8 +163,8 @@ public class TransactionExecutorTest {
 
     @Test
     public void testUnvote() {
-        EdDSA voter = new EdDSA();
-        EdDSA delegate = new EdDSA();
+        Key voter = new Key();
+        Key delegate = new Key();
 
         long available = 100 * Unit.SEM;
         as.adjustAvailable(voter.toAddress(), available);

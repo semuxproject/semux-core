@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
@@ -36,7 +36,7 @@ public class DelegateDialogTest extends AssertJSwingJUnitTestCase {
 
     @Test
     public void testDisplayVotes() {
-        Delegate delegate = new Delegate(new EdDSA().toAddress(), new String("delegate1").getBytes(), 0L,
+        Delegate delegate = new Delegate(new Key().toAddress(), new String("delegate1").getBytes(), 0L,
                 123L * Unit.SEM);
         WalletDelegate walletDelegate = new WalletDelegate(delegate);
         when(walletModel.getDelegates()).thenReturn(Arrays.asList(walletDelegate));

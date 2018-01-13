@@ -6,16 +6,13 @@
  */
 package org.semux.net.msg.p2p;
 
-import java.net.InetSocketAddress;
-import java.util.Set;
-
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
 import org.semux.util.Bytes;
 
-public class GetNodesMessage extends Message {
+// NOTE: GetNodesMessage is encoded into a single empty frame.
 
-    private Set<InetSocketAddress> nodes;
+public class GetNodesMessage extends Message {
 
     /**
      * Create a GET_NODES message.
@@ -36,10 +33,6 @@ public class GetNodesMessage extends Message {
         super(MessageCode.GET_NODES, NodesMessage.class);
 
         this.encoded = encoded;
-    }
-
-    public Set<InetSocketAddress> getNodes() {
-        return nodes;
     }
 
     @Override

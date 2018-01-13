@@ -22,7 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.crypto.Hex;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletModel;
@@ -43,8 +43,8 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
         kernelRule1.getKernel().start();
 
         TransactionType type = TRANSFER;
-        EdDSA from = new EdDSA();
-        EdDSA to = new EdDSA();
+        Key from = new Key();
+        Key to = new Key();
         long value = 1000 * Unit.SEM;
         long fee = (long) (0.05 * Unit.SEM);
         long nonce = 0L;

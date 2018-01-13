@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.mockito.Mock;
 import org.semux.gui.model.WalletModel;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.rules.KernelRule;
 
 /**
@@ -57,7 +57,7 @@ public class MenuBarTest extends AssertJSwingJUnitTestCase {
         window.menuItem("itemChangePassword").click();
 
         window.dialog().requireVisible();
-        assertEquals(GUIMessages.get("ChangePassword"), window.dialog().target().getTitle());
+        assertEquals(GuiMessages.get("ChangePassword"), window.dialog().target().getTitle());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class MenuBarTest extends AssertJSwingJUnitTestCase {
         window.menuItem("itemExportPrivateKey").click();
 
         window.dialog().requireVisible();
-        assertEquals(GUIMessages.get("ExportPrivateKey"), window.dialog().target().getTitle());
+        assertEquals(GuiMessages.get("ExportPrivateKey"), window.dialog().target().getTitle());
 
         window.dialog().close();
     }

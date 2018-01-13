@@ -23,17 +23,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
+import org.semux.config.DevnetConfig;
 import org.semux.core.BlockchainImpl.StatsType;
-import org.semux.crypto.EdDSA;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.crypto.Key;
+import org.semux.rules.TemporaryDbRule;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
 public class BlockchainImplTest {
 
     @Rule
-    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+    public TemporaryDbRule temporaryDBFactory = new TemporaryDbRule();
 
     private Config config;
     private BlockchainImpl chain;
@@ -42,7 +42,7 @@ public class BlockchainImplTest {
     private byte[] prevHash = Bytes.random(32);
 
     private byte networkId = Constants.DEVNET_ID;
-    private EdDSA key = new EdDSA();
+    private Key key = new Key();
     private byte[] from = key.toAddress();
     private byte[] to = Bytes.random(20);
     private long value = 20;
@@ -57,7 +57,7 @@ public class BlockchainImplTest {
 
     @Before
     public void setUp() {
-        config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
         chain = new BlockchainImpl(config, temporaryDBFactory);
     }
 

@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.semux.config.Constants;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.util.Bytes;
 
 public class TransactionMessageTest {
@@ -29,7 +29,7 @@ public class TransactionMessageTest {
         byte[] data = Bytes.of("data");
 
         Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data);
-        tx.sign(new EdDSA());
+        tx.sign(new Key());
 
         TransactionMessage msg = new TransactionMessage(tx);
         TransactionMessage msg2 = new TransactionMessage(msg.getEncoded());

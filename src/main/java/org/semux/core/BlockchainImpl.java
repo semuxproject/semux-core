@@ -22,9 +22,9 @@ import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.core.state.DelegateStateImpl;
 import org.semux.crypto.Hex;
-import org.semux.db.DBFactory;
-import org.semux.db.DBName;
-import org.semux.db.KVDB;
+import org.semux.db.DbFactory;
+import org.semux.db.DbName;
+import org.semux.db.Db;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
@@ -78,8 +78,8 @@ public class BlockchainImpl implements Blockchain {
 
     private Config config;
 
-    private KVDB indexDB;
-    private KVDB blockDB;
+    private Db indexDB;
+    private Db blockDB;
 
     private AccountState accountState;
     private DelegateState delegateState;
@@ -94,14 +94,14 @@ public class BlockchainImpl implements Blockchain {
      * 
      * @param factory
      */
-    public BlockchainImpl(Config config, DBFactory factory) {
+    public BlockchainImpl(Config config, DbFactory factory) {
         this.config = config;
 
-        this.indexDB = factory.getDB(DBName.INDEX);
-        this.blockDB = factory.getDB(DBName.BLOCK);
+        this.indexDB = factory.getDB(DbName.INDEX);
+        this.blockDB = factory.getDB(DbName.BLOCK);
 
-        this.accountState = new AccountStateImpl(factory.getDB(DBName.ACCOUNT));
-        this.delegateState = new DelegateStateImpl(this, factory.getDB(DBName.DELEGATE), factory.getDB(DBName.VOTE));
+        this.accountState = new AccountStateImpl(factory.getDB(DbName.ACCOUNT));
+        this.delegateState = new DelegateStateImpl(this, factory.getDB(DbName.DELEGATE), factory.getDB(DbName.VOTE));
 
         this.genesis = Genesis.load(Constants.NETWORKS[config.networkId()]);
 

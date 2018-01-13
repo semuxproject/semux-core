@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.semux.crypto.EdDSA.Signature;
+import org.semux.crypto.Key.Signature;
 import org.semux.crypto.Hex;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SimpleDecoder;

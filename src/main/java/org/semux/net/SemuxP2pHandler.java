@@ -28,13 +28,13 @@ import org.semux.core.SyncManager;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageQueue;
-import org.semux.net.msg.MessageRT;
+import org.semux.net.msg.MessageWrapper;
 import org.semux.net.msg.ReasonCode;
-import org.semux.net.msg.consensus.BFTNewHeightMessage;
 import org.semux.net.msg.consensus.BlockHeaderMessage;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.GetBlockHeaderMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
+import org.semux.net.msg.consensus.NewHeightMessage;
 import org.semux.net.msg.p2p.DisconnectMessage;
 import org.semux.net.msg.p2p.GetNodesMessage;
 import org.semux.net.msg.p2p.HelloMessage;
@@ -147,7 +147,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     public void channelRead0(final ChannelHandlerContext ctx, Message msg) throws InterruptedException {
         logger.trace("Received message: {}", msg);
-        MessageRT mr = msgQueue.receivedMessage(msg);
+        MessageWrapper mr = msgQueue.onMessageReceived(msg);
 
         switch (msg.getCode()) {
         /* p2p */
@@ -319,7 +319,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private void onHandshakeDone(Peer peer) {
         if (!isHandshakeDone) {
             // notify consensus about peer height
-            consensus.onMessage(channel, new BFTNewHeightMessage(peer.getLatestBlockNumber() + 1));
+            consensus.onMessage(channel, new NewHeightMessage(peer.getLatestBlockNumber() + 1));
 
             // start peers exchange
             getNodes = exec.scheduleAtFixedRate(() -> msgQueue.sendMessage(new GetNodesMessage()),
@@ -360,6 +360,6 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             pingPong = null;
         }
 
-        msgQueue.close();
+        msgQueue.deactivate();
     }
 }

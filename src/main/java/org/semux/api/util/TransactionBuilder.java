@@ -10,7 +10,7 @@ import org.semux.Kernel;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.CryptoException;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
 
@@ -30,7 +30,7 @@ public class TransactionBuilder {
     /**
      * Transaction sender account
      */
-    private EdDSA account;
+    private Key account;
 
     /**
      * Transaction recipient address

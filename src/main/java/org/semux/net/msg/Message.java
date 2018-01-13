@@ -35,7 +35,6 @@ public abstract class Message {
      * @param responseMessageClass
      */
     public Message(MessageCode code, Class<?> responseMessageClass) {
-        super();
         this.code = code;
         this.responseMessageClass = responseMessageClass;
         this.encoded = Bytes.EMPTY_BYTES;

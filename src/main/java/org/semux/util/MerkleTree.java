@@ -13,7 +13,6 @@ import org.semux.crypto.Hash;
 
 /**
  * Simple implementation of the Merkle tree.
- *
  */
 public class MerkleTree {
 
@@ -55,7 +54,7 @@ public class MerkleTree {
     }
 
     /**
-     * Get the Merkle proof of the Nth element.
+     * Returns the Merkle proof of the Nth element.
      * 
      * @param i
      *            the element index, starting from zero.

@@ -12,10 +12,8 @@ import java.util.Date;
 
 public class TimeUtil {
 
-    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-
-    private TimeUtil() {
-    }
+    public static final String DEFAULT_DURATION_FORMAT = "%02d:%02d:%02d";
+    public static final String DEFAULT_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     /**
      * Returns a human-readable duration
@@ -26,7 +24,7 @@ public class TimeUtil {
      */
     public static String formatDuration(Duration duration) {
         long seconds = duration.getSeconds();
-        return String.format("%02d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, (seconds % 60));
+        return String.format(DEFAULT_DURATION_FORMAT, seconds / 3600, (seconds % 3600) / 60, (seconds % 60));
     }
 
     /**
@@ -36,6 +34,9 @@ public class TimeUtil {
      * @return formatted timestamp in yyyy-MM-dd HH:mm:ss
      */
     public static String formatTimestamp(Long timestamp) {
-        return new SimpleDateFormat(DATE_FORMAT).format(new Date(timestamp));
+        return new SimpleDateFormat(DEFAULT_TIMESTAMP_FORMAT).format(new Date(timestamp));
+    }
+
+    private TimeUtil() {
     }
 }

@@ -26,8 +26,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.semux.KernelMock;
 import org.semux.core.state.AccountState;
-import org.semux.crypto.EdDSA;
-import org.semux.db.LevelDB.LevelDBFactory;
+import org.semux.crypto.Key;
+import org.semux.db.LevelDb.LevelDbFactory;
 import org.semux.net.ChannelManager;
 import org.semux.rules.KernelRule;
 import org.semux.util.ArrayUtil;
@@ -40,11 +40,11 @@ public class PendingManagerTest {
 
     private static AccountState accountState;
 
-    private static EdDSA key = new EdDSA();
+    private static Key key = new Key();
     private static byte networkId;
     private static TransactionType type = TransactionType.TRANSFER;
     private static byte[] from = key.toAddress();
-    private static byte[] to = new EdDSA().toAddress();
+    private static byte[] to = new Key().toAddress();
     private static long value = 1 * Unit.MILLI_SEM;
     private static long fee;
 
@@ -55,7 +55,7 @@ public class PendingManagerTest {
     public static void setUp() {
         kernel = kernelRule.getKernel();
 
-        kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new LevelDBFactory(kernel.getConfig().dataDir())));
+        kernel.setBlockchain(new BlockchainImpl(kernel.getConfig(), new LevelDbFactory(kernel.getConfig().dataDir())));
         kernel.setChannelManager(new ChannelManager(kernel));
 
         accountState = kernel.getBlockchain().getAccountState();

@@ -8,7 +8,7 @@ package org.semux.gui.panel;
 
 import org.semux.KernelMock;
 import org.semux.gui.BaseTestApplication;
-import org.semux.gui.SemuxGUI;
+import org.semux.gui.SemuxGui;
 import org.semux.gui.model.WalletModel;
 
 public class ReceivePanelTestApplication extends BaseTestApplication {
@@ -19,7 +19,7 @@ public class ReceivePanelTestApplication extends BaseTestApplication {
 
     ReceivePanelTestApplication(WalletModel walletModel, KernelMock kernelMock) {
         super();
-        SemuxGUI gui = new SemuxGUI(walletModel, kernelMock);
+        SemuxGui gui = new SemuxGui(walletModel, kernelMock);
         receivePanel = new ReceivePanel(gui);
         getContentPane().add(receivePanel);
     }

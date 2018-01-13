@@ -17,11 +17,11 @@ import org.apache.commons.cli.ParseException;
 import org.semux.cli.SemuxOption;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
-import org.semux.config.MainNetConfig;
-import org.semux.config.TestNetConfig;
+import org.semux.config.DevnetConfig;
+import org.semux.config.MainnetConfig;
+import org.semux.config.TestnetConfig;
 import org.semux.log.LoggerConfigurator;
-import org.semux.message.CLIMessages;
+import org.semux.message.CliMessages;
 
 public abstract class Launcher {
 
@@ -40,13 +40,13 @@ public abstract class Launcher {
     public Launcher() {
         Option dataDirOption = Option.builder()
                 .longOpt(SemuxOption.DATA_DIR.toString())
-                .desc(CLIMessages.get("SpecifyDataDir"))
+                .desc(CliMessages.get("SpecifyDataDir"))
                 .hasArg(true).numberOfArgs(1).optionalArg(false).argName("path").type(String.class)
                 .build();
         addOption(dataDirOption);
 
         Option networkOption = Option.builder()
-                .longOpt(SemuxOption.NETWORK.toString()).desc(CLIMessages.get("SpecifyNetwork"))
+                .longOpt(SemuxOption.NETWORK.toString()).desc(CliMessages.get("SpecifyNetwork"))
                 .hasArg(true).numberOfArgs(1).optionalArg(false).argName("name").type(String.class)
                 .build();
         addOption(networkOption);
@@ -62,11 +62,11 @@ public abstract class Launcher {
     public Config getConfig() {
         switch (getNetwork()) {
         case TESTNET:
-            return new TestNetConfig(getDataDir());
+            return new TestnetConfig(getDataDir());
         case DEVNET:
-            return new DevNetConfig(getDataDir());
+            return new DevnetConfig(getDataDir());
         default:
-            return new MainNetConfig(getDataDir());
+            return new MainnetConfig(getDataDir());
         }
     }
 

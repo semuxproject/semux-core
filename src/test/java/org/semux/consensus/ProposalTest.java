@@ -24,7 +24,7 @@ import org.semux.core.BlockHeader;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
@@ -42,18 +42,18 @@ public class ProposalTest {
         byte[] data = Bytes.of("data");
 
         Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data);
-        tx.sign(new EdDSA());
+        tx.sign(new Key());
         TransactionResult res = new TransactionResult(true);
 
         long height = Long.MAX_VALUE;
         int view = Integer.MAX_VALUE;
         Block block = createBlock(height, Collections.singletonList(tx), Collections.singletonList(res));
         Vote vote = Vote.newReject(VoteType.VALIDATE, height, view - 1);
-        vote.sign(new EdDSA());
+        vote.sign(new Key());
 
         Proof proof = new Proof(height, view, Collections.singletonList(vote));
         Proposal p = new Proposal(proof, block.getHeader(), block.getTransactions());
-        EdDSA key = new EdDSA();
+        Key key = new Key();
         p.sign(key);
 
         assertThat(p.getTransactions(), contains(tx));
@@ -66,12 +66,12 @@ public class ProposalTest {
         int view = Integer.MAX_VALUE;
         Block block = createBlock(height, Collections.emptyList(), Collections.emptyList());
         Vote vote = Vote.newReject(VoteType.VALIDATE, height, view - 1);
-        vote.sign(new EdDSA());
+        vote.sign(new Key());
 
         Proof proof = new Proof(height, view, Collections.singletonList(vote));
         Proposal p = new Proposal(proof, block.getHeader(), block.getTransactions());
         assertFalse(p.validate());
-        p.sign(new EdDSA());
+        p.sign(new Key());
         assertTrue(p.validate());
 
         assertTrue(!p.toString().startsWith("java.lang.Object"));
@@ -86,7 +86,7 @@ public class ProposalTest {
     }
 
     private Block createBlock(long number, List<Transaction> txs, List<TransactionResult> res) {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
         byte[] coinbase = key.toAddress();
         byte[] prevHash = Bytes.EMPTY_HASH;
         long timestamp = System.currentTimeMillis();

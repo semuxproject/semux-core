@@ -18,16 +18,16 @@ import java.util.stream.Collectors;
 import org.junit.rules.TemporaryFolder;
 import org.semux.KernelMock;
 import org.semux.config.Config;
-import org.semux.config.DevNetConfig;
+import org.semux.config.DevnetConfig;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.Wallet;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.crypto.Hex;
-import org.semux.db.LevelDB.LevelDBFactory;
+import org.semux.db.LevelDb.LevelDbFactory;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
@@ -43,7 +43,7 @@ public class KernelRule extends TemporaryFolder {
     private String password;
     private KernelMock kernel;
 
-    private LevelDBFactory dbFactory;
+    private LevelDbFactory dbFactory;
 
     public KernelRule(int p2pPort, int apiPort) {
         super();
@@ -64,10 +64,10 @@ public class KernelRule extends TemporaryFolder {
         Wallet wallet = new Wallet(new File(getRoot(), "wallet.data"));
         wallet.unlock(password);
         for (int i = 0; i < 10; i++) {
-            wallet.addAccount(new EdDSA());
+            wallet.addAccount(new Key());
         }
         wallet.flush();
-        EdDSA coinbase = wallet.getAccount(0);
+        Key coinbase = wallet.getAccount(0);
         this.kernel = new KernelMock(config, wallet, coinbase);
     }
 
@@ -78,7 +78,7 @@ public class KernelRule extends TemporaryFolder {
     }
 
     protected Config mockConfig(int p2pPort, int apiPort) {
-        Config config = spy(new DevNetConfig(getRoot().getAbsolutePath()));
+        Config config = spy(new DevnetConfig(getRoot().getAbsolutePath()));
 
         when(config.p2pDeclaredIp()).thenReturn(Optional.of("127.0.0.1"));
         when(config.p2pListenIp()).thenReturn("127.0.0.1");
@@ -129,7 +129,7 @@ public class KernelRule extends TemporaryFolder {
      * Opens the database.
      */
     public void openBlockchain() {
-        dbFactory = new LevelDBFactory(kernel.getConfig().dataDir());
+        dbFactory = new LevelDbFactory(kernel.getConfig().dataDir());
         BlockchainImpl chain = new BlockchainImpl(kernel.getConfig(), dbFactory);
         kernel.setBlockchain(chain);
     }
@@ -152,7 +152,7 @@ public class KernelRule extends TemporaryFolder {
         List<TransactionResult> res = txs.stream().map(tx -> new TransactionResult(true)).collect(Collectors.toList());
 
         long number = getKernel().getBlockchain().getLatestBlock().getNumber() + 1;
-        EdDSA key = new EdDSA();
+        Key key = new Key();
         byte[] coinbase = key.toAddress();
         byte[] prevHash = getKernel().getBlockchain().getLatestBlock().getHash();
         long timestamp = System.currentTimeMillis();

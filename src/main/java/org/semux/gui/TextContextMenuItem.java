@@ -9,7 +9,7 @@ package org.semux.gui;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.TextAction;
 
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.util.exception.UnreachableException;
 
 /**
@@ -34,11 +34,11 @@ enum TextContextMenuItem {
     public String toString() {
         switch (this) {
         case CUT:
-            return GUIMessages.get("Cut");
+            return GuiMessages.get("Cut");
         case COPY:
-            return GUIMessages.get("Copy");
+            return GuiMessages.get("Copy");
         case PASTE:
-            return GUIMessages.get("Paste");
+            return GuiMessages.get("Paste");
         }
         throw new UnreachableException();
     }
