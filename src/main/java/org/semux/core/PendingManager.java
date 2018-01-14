@@ -56,10 +56,10 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     public static final long ALLOWED_TIME_DRIFT = TimeUnit.HOURS.toMillis(2);
 
-    private static final int QUEUE_MAX_SIZE = 64 * 1024;
-    private static final int POOL_MAX_SIZE = 8 * 1024;
-    private static final int DELAYED_MAX_SIZE = 16 * 1024;
-    private static final int PROCESSED_MAX_SIZE = 16 * 1024;
+    private static final int QUEUE_MAX_SIZE = 128 * 1024;
+    private static final int POOL_MAX_SIZE = 16 * 1024;
+    private static final int DELAYED_MAX_SIZE = 32 * 1024;
+    private static final int PROCESSED_MAX_SIZE = 32 * 1024;
 
     private Kernel kernel;
     private AccountState pendingAS;
