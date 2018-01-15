@@ -228,7 +228,7 @@ public class SystemUtil {
         }
 
         // check memory
-        if (rt.maxMemory() < 0.8 * 4 * 1024 * 1024 * 1024) {
+        if (rt.maxMemory() < 2 * 1024 * 1024 * 1024) {
             logger.info("Max allowed JVM heap memory size = {} MB", rt.maxMemory() / 1024 / 1024);
             return false;
         }

@@ -155,7 +155,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @param tx
      */
     public synchronized void addTransaction(Transaction tx) {
-        if (queue.size() < QUEUE_MAX_SIZE) {
+        if (queue.size() < QUEUE_MAX_SIZE && tx.validate(kernel.getConfig().network())) {
             queue.add(tx);
         }
     }
@@ -168,8 +168,11 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @return The processing result
      */
     public synchronized ProcessTransactionResult addTransactionSync(Transaction tx) {
-        return tx.validate(kernel.getConfig().network()) ? processTransaction(tx, true)
-                : new ProcessTransactionResult(0, TransactionResult.Error.INVALID_FORMAT);
+        if (/* queue/transactions limits are ignored */ tx.validate(kernel.getConfig().network())) {
+            return processTransaction(tx, true);
+        } else {
+            return new ProcessTransactionResult(0, TransactionResult.Error.INVALID_FORMAT);
+        }
     }
 
     /**
@@ -282,10 +285,10 @@ public class PendingManager implements Runnable, BlockchainListener {
             }
 
             // process the transaction
-            boolean accepted = tx.validate(kernel.getConfig().network()) && processTransaction(tx, true).accepted >= 1;
+            boolean accepted = processTransaction(tx, true).accepted >= 1;
             processed.put(key, tx);
 
-            // quite after one accepted transaction
+            // quit after one accepted transaction
             if (accepted) {
                 return;
             }
@@ -303,8 +306,6 @@ public class PendingManager implements Runnable, BlockchainListener {
      *         interrupted the process
      */
     protected ProcessTransactionResult processTransaction(Transaction tx, boolean relay) {
-
-        // NOTE: assume transaction format is valid
 
         int cnt = 0;
         long now = System.currentTimeMillis();
