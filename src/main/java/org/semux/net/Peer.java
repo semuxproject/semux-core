@@ -6,6 +6,8 @@
  */
 package org.semux.net;
 
+import static org.semux.net.Capability.MAX_NUMBER_OF_CAPABILITIES;
+
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
@@ -29,11 +31,6 @@ public class Peer {
      * Variables below are not persisted
      */
     private long latency;
-
-    /**
-     * The maximum number of capabilities a peer can support.
-     */
-    private static final int MAX_NUMBER_OF_CAPABILITIES = 128;
 
     /**
      * Set of capabilities the peer supports
@@ -70,7 +67,7 @@ public class Peer {
                 && clientId != null && clientId.length() < 128
                 && peerId != null && peerId.length() == 40
                 && latestBlockNumber >= 0
-                && capabilities != null;
+                && capabilities != null && capabilities.size() < MAX_NUMBER_OF_CAPABILITIES;
     }
 
     /**

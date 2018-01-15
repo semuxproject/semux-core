@@ -127,8 +127,8 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
     public void testGetPeers() throws IOException {
         channelMgr = spy(api.getKernel().getChannelManager());
         List<Peer> peers = Arrays.asList(
-                new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", 1, Capability.supported()),
-                new Peer("2.3.4.5", 5171, (short) 2, "client2", "peer2", 2, Capability.supported()));
+                new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", 1, Capability.SUPPORTED),
+                new Peer("2.3.4.5", 5171, (short) 2, "client2", "peer2", 2, Capability.SUPPORTED));
         when(channelMgr.getActivePeers()).thenReturn(peers);
         api.getKernel().setChannelManager(channelMgr);
 

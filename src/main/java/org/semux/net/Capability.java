@@ -28,13 +28,12 @@ public enum Capability {
     // TODO: DAPP
 
     /**
-     * Creates a ${@link CapabilitySet} contains the currently supported
-     * capabilities.
-     *
-     * @return a ${@link CapabilitySet} contains the currently supported
-     *         capabilities.
+     * The maximum number of capabilities that can be supported.
      */
-    public static CapabilitySet supported() {
-        return CapabilitySet.of(SEM);
-    }
+    public static final int MAX_NUMBER_OF_CAPABILITIES = 128;
+
+    /**
+     * Currently supported capabilities.
+     */
+    public static final CapabilitySet SUPPORTED = CapabilitySet.of(SEM);
 }

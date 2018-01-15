@@ -13,16 +13,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * An immutable set of capabilities.
+ */
 public class CapabilitySet {
 
-    /**
-     * A set of ${@link String} which represents the capabilities a ${@link Peer}
-     * supports.
-     */
-    private Set<String> capabilities;
+    private final Set<String> capabilities;
 
-    /** Do not instantiate CapabilitySet. */
-    private CapabilitySet() {
+    private CapabilitySet(Set<String> capabilities) {
+        this.capabilities = capabilities;
     }
 
     /**
@@ -31,9 +30,7 @@ public class CapabilitySet {
      * @return an empty and immutable ${@link CapabilitySet}
      */
     public static CapabilitySet emptySet() {
-        CapabilitySet capabilitySet = new CapabilitySet();
-        capabilitySet.capabilities = Collections.emptySet();
-        return capabilitySet;
+        return new CapabilitySet(Collections.emptySet());
     }
 
     /**
@@ -45,10 +42,8 @@ public class CapabilitySet {
      *         ${@link Capability}
      */
     public static CapabilitySet of(Capability... capabilityList) {
-        CapabilitySet capabilitySet = new CapabilitySet();
-        capabilitySet.capabilities = Arrays.stream(capabilityList).map(Capability::toString)
-                .collect(Collectors.toSet());
-        return capabilitySet;
+        return new CapabilitySet(Arrays.stream(capabilityList).map(Capability::toString)
+                .collect(Collectors.toSet()));
     }
 
     /**
@@ -60,9 +55,7 @@ public class CapabilitySet {
      *         ${@link String}.
      */
     public static CapabilitySet of(String... capabilityList) {
-        CapabilitySet capabilitySet = new CapabilitySet();
-        capabilitySet.capabilities = Arrays.stream(capabilityList).collect(Collectors.toSet());
-        return capabilitySet;
+        return new CapabilitySet(Arrays.stream(capabilityList).collect(Collectors.toSet()));
     }
 
     /**
