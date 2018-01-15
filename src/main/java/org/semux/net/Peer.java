@@ -31,16 +31,28 @@ public class Peer {
     private long latency;
 
     /**
+     * The maximum number of capabilities a peer can support.
+     */
+    private static final int MAX_NUMBER_OF_CAPABILITIES = 128;
+
+    /**
+     * Set of capabilities the peer supports
+     */
+    private CapabilitySet capabilities;
+
+    /**
      * Create a new Peer instance.
-     * 
+     *
      * @param ip
      * @param port
      * @param networkVersion
      * @param clientId
      * @param peerId
      * @param latestBlockNumber
+     * @param capabilities
      */
-    public Peer(String ip, int port, short networkVersion, String clientId, String peerId, long latestBlockNumber) {
+    public Peer(String ip, int port, short networkVersion, String clientId, String peerId, long latestBlockNumber,
+            CapabilitySet capabilities) {
         super();
         this.ip = ip;
         this.port = port;
@@ -48,6 +60,7 @@ public class Peer {
         this.latestBlockNumber = latestBlockNumber;
         this.networkVersion = networkVersion;
         this.clientId = clientId;
+        this.capabilities = capabilities;
     }
 
     public boolean validate() {
@@ -56,7 +69,8 @@ public class Peer {
                 && networkVersion >= 0
                 && clientId != null && clientId.length() < 128
                 && peerId != null && peerId.length() == 40
-                && latestBlockNumber >= 0;
+                && latestBlockNumber >= 0
+                && capabilities != null;
     }
 
     /**
@@ -141,6 +155,15 @@ public class Peer {
     }
 
     /**
+     * Getter for property 'capabilities'.
+     *
+     * @return Value for property 'capabilities'.
+     */
+    public CapabilitySet getCapabilities() {
+        return capabilities;
+    }
+
+    /**
      * Converts into a byte array.
      * 
      * @return
@@ -153,6 +176,12 @@ public class Peer {
         enc.writeString(clientId);
         enc.writeString(peerId);
         enc.writeLong(latestBlockNumber);
+
+        // encode capabilities
+        enc.writeInt(capabilities.size());
+        for (String capability : capabilities.toList()) {
+            enc.writeString(capability);
+        }
 
         return enc.toBytes();
     }
@@ -172,9 +201,17 @@ public class Peer {
         String peerId = dec.readString();
         long latestBlockNumber = dec.readLong();
 
-        return new Peer(ip, port, p2pVersion, clientId, peerId, latestBlockNumber);
+        // decode capabilities
+        final int numberOfCapabilities = Math.min(dec.readInt(), MAX_NUMBER_OF_CAPABILITIES);
+        String[] capabilityList = new String[numberOfCapabilities];
+        for (int i = 0; i < numberOfCapabilities; i++) {
+            capabilityList[i] = dec.readString();
+        }
+
+        return new Peer(ip, port, p2pVersion, clientId, peerId, latestBlockNumber, CapabilitySet.of(capabilityList));
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return getPeerId() + "@" + ip + ":" + port;

@@ -61,6 +61,7 @@ import org.semux.core.Unit;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.net.Capability;
 import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
 import org.semux.rules.KernelRule;
@@ -125,8 +126,9 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
     @Test
     public void testGetPeers() throws IOException {
         channelMgr = spy(api.getKernel().getChannelManager());
-        List<Peer> peers = Arrays.asList(new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", 1),
-                new Peer("2.3.4.5", 5171, (short) 2, "client2", "peer2", 2));
+        List<Peer> peers = Arrays.asList(
+                new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", 1, Capability.supported()),
+                new Peer("2.3.4.5", 5171, (short) 2, "client2", "peer2", 2, Capability.supported()));
         when(channelMgr.getActivePeers()).thenReturn(peers);
         api.getKernel().setChannelManager(channelMgr);
 

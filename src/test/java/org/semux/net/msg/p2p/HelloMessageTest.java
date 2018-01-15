@@ -14,6 +14,7 @@ import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
 import org.semux.crypto.Key;
+import org.semux.net.Capability;
 import org.semux.net.Peer;
 
 public class HelloMessageTest {
@@ -24,7 +25,8 @@ public class HelloMessageTest {
 
         Key key = new Key();
         String peerId = key.toAddressString();
-        Peer peer = new Peer("127.0.0.1", 5161, config.networkVersion(), config.getClientId(), peerId, 2);
+        Peer peer = new Peer("127.0.0.1", 5161, config.networkVersion(), config.getClientId(), peerId, 2,
+                Capability.supported());
 
         HelloMessage msg = new HelloMessage(peer, key);
         assertTrue(msg.validate(config));
