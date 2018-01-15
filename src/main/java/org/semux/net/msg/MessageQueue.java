@@ -94,7 +94,7 @@ public class MessageQueue {
      * @return true if request/response queues are empty, otherwise false
      */
     public boolean isIdle() {
-        return requests.isEmpty() && responses.isEmpty() && prioritizedResponses.isEmpty();
+        return size() == 0;
     }
 
     /**
@@ -126,8 +126,7 @@ public class MessageQueue {
         }
 
         int maxQueueSize = config.netMaxMessageQueueSize();
-        if (requests.size() >= maxQueueSize || responses.size() >= maxQueueSize
-                || prioritizedResponses.size() >= maxQueueSize) {
+        if (size() >= maxQueueSize) {
             disconnect(ReasonCode.MESSAGE_QUEUE_FULL);
             return false;
         }
@@ -151,16 +150,25 @@ public class MessageQueue {
      */
     public MessageWrapper onMessageReceived(Message msg) {
         if (requests.peek() != null) {
-            MessageWrapper mr = requests.peek();
-            Message m = mr.getMessage();
+            MessageWrapper mw = requests.peek();
+            Message m = mw.getMessage();
 
             if (m.getResponseMessageClass() != null && msg.getClass() == m.getResponseMessageClass()) {
-                mr.answer();
-                return mr;
+                mw.answer();
+                return mw;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Returns the number of messages in queue.
+     * 
+     * @return
+     */
+    public int size() {
+        return requests.size() + responses.size() + prioritizedResponses.size();
     }
 
     protected void nudgeQueue() {
@@ -174,23 +182,23 @@ public class MessageQueue {
         sendToWire(requests.peek());
     }
 
-    protected void removeAnsweredMessage(MessageWrapper mr) {
-        if (mr != null && mr.isAnswered()) {
+    protected void removeAnsweredMessage(MessageWrapper mw) {
+        if (mw != null && mw.isAnswered()) {
             requests.remove();
         }
     }
 
-    protected void sendToWire(MessageWrapper mr) {
+    protected void sendToWire(MessageWrapper mw) {
 
-        if (mr != null && mr.getRetries() == 0) {
-            Message msg = mr.getMessage();
+        if (mw != null && mw.getRetries() == 0) {
+            Message msg = mw.getMessage();
 
             logger.trace("Wiring message: {}", msg);
             ctx.writeAndFlush(msg).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 
             if (msg.getResponseMessageClass() != null) {
-                mr.increaseRetries();
-                mr.saveTime();
+                mw.increaseRetries();
+                mw.saveTime();
             }
         }
     }
