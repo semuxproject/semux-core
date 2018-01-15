@@ -67,7 +67,7 @@ public class Peer {
                 && clientId != null && clientId.length() < 128
                 && peerId != null && peerId.length() == 40
                 && latestBlockNumber >= 0
-                && capabilities != null && capabilities.size() < MAX_NUMBER_OF_CAPABILITIES;
+                && capabilities != null && capabilities.size() <= MAX_NUMBER_OF_CAPABILITIES;
     }
 
     /**
