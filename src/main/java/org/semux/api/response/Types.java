@@ -255,6 +255,9 @@ public class Types {
         @JsonProperty("latency")
         public final Long latency;
 
+        @JsonProperty("capabilities")
+        public final List<String> capabilities;
+
         public PeerType(
                 @JsonProperty("ip") String ip,
                 @JsonProperty("port") int port,
@@ -262,7 +265,8 @@ public class Types {
                 @JsonProperty("clientId") String clientId,
                 @JsonProperty("peerId") String peerId,
                 @JsonProperty("latestBlockNumber") long latestBlockNumber,
-                @JsonProperty("latency") long latency) {
+                @JsonProperty("latency") long latency,
+                @JsonProperty("capabilities") List<String> capabilities) {
             this.ip = ip;
             this.port = port;
             this.networkVersion = networkVersion;
@@ -270,6 +274,7 @@ public class Types {
             this.peerId = peerId;
             this.latestBlockNumber = latestBlockNumber;
             this.latency = latency;
+            this.capabilities = capabilities;
         }
 
         public PeerType(Peer peer) {
@@ -279,7 +284,8 @@ public class Types {
                     peer.getClientId(),
                     Hex.PREF + peer.getPeerId(),
                     peer.getLatestBlockNumber(),
-                    peer.getLatency());
+                    peer.getLatency(),
+                    peer.getCapabilities().toList());
         }
     }
 

@@ -148,6 +148,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
             assertEquals(Hex.PREF + peer.getPeerId(), peerJson.peerId);
             assertEquals(peer.getLatestBlockNumber(), peerJson.latestBlockNumber.longValue());
             assertEquals(peer.getLatency(), peerJson.latency.longValue());
+            assertEquals(peer.getCapabilities().toList(), peerJson.capabilities);
         }
     }
 
