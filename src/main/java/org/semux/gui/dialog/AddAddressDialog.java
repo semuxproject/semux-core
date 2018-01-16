@@ -15,9 +15,12 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
+import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
 import org.semux.message.GuiMessages;
@@ -101,9 +104,18 @@ public class AddAddressDialog extends JDialog implements ActionListener {
             String n = name.getText().trim();
             String a = address.getText().trim();
             if (!n.isEmpty() && !a.isEmpty()) {
-                addressBookDialog.getAddressBook().put(name.getText(), address.getText());
-                addressBookDialog.refresh();
-                this.dispose();
+                try {
+                    byte[] addr = Hex.decode0x(address.getText());
+                    if (addr.length != Key.ADDRESS_LEN) {
+                        JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidAddress"));
+                    } else {
+                        addressBookDialog.getAddressBook().put(name.getText(), address.getText());
+                        addressBookDialog.refresh();
+                        this.dispose();
+                    }
+                } catch (Exception e2) {
+                    JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidAddress"));
+                }
             }
             break;
         case CANCEL:
