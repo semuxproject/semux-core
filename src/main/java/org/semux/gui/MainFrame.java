@@ -11,12 +11,15 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -66,6 +69,25 @@ public class MainFrame extends JFrame implements ActionListener {
     private JButton activeButton;
 
     public MainFrame(SemuxGui gui) {
+        // ensure that all windows are released before it starts closing the Kernel
+        this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // stop GUI threads
+                gui.stop();
+
+                // destroy all frames
+                for (Frame frame : Frame.getFrames()) {
+                    frame.setVisible(false);
+                    frame.dispose();
+                }
+
+                // trigger the shutdown-hook of Kernel class then exits the process
+                System.exit(0);
+            }
+        });
+
         this.kernel = gui.getKernel();
 
         lockGlassPane = new LockGlassPane();
@@ -80,7 +102,6 @@ public class MainFrame extends JFrame implements ActionListener {
 
         // setup frame properties
         this.setTitle(GuiMessages.get("SemuxWallet"));
-        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.setMinimumSize(new Dimension(900, 600));
         SwingUtil.alignFrameToMiddle(this, 900, 600);
