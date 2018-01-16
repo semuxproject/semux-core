@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -259,6 +260,16 @@ public class SemuxGui extends Launcher {
 
         // stop main thread
         versionThread.interrupt();
+
+        // wait until all threads are stopped
+        while (dataThread.isAlive() || versionThread.isAlive()) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.error(e.getMessage(), e);
+            }
+        }
 
         isRunning = false;
     }
