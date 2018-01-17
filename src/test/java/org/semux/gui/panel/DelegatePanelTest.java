@@ -38,6 +38,7 @@ import org.semux.core.TransactionType;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Key;
 import org.semux.gui.WalletModelRule;
+import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.message.GuiMessages;
 import org.semux.rules.KernelRule;
@@ -52,7 +53,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     public KernelRule kernelRule1 = new KernelRule(51610, 51710);
 
     @Rule
-    public WalletModelRule walletRule = new WalletModelRule(10000, 0);
+    public WalletModelRule walletRule = new WalletModelRule(10000, 1);
 
     @Captor
     ArgumentCaptor<Transaction> transactionArgumentCaptor = ArgumentCaptor.forClass(Transaction.class);
@@ -159,6 +160,20 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         window.optionPane(Timeout.timeout(1000)).requireTitle(GuiMessages.get("ErrorDialogTitle")).requireVisible();
     }
 
+    @Test
+    public void testInsufficientLocked() {
+        testUnvote("10");
+        window.optionPane(Timeout.timeout(1000))
+                .requireMessage(GuiMessages.get("InsufficientLockedFunds", "10.000 SEM")).requireVisible();
+    }
+
+    @Test
+    public void testInsufficientVotesForDelegate() {
+        // try to unvote delegate 2
+        testUnvote("1");
+        window.optionPane(Timeout.timeout(1000)).requireMessage(GuiMessages.get("InsufficientVotes")).requireVisible();
+    }
+
     private void testVote(PendingManager.ProcessTransactionResult mockResult) {
         // mock pending manager
         when(pendingManager.getNonce(any())).thenReturn(RandomUtils.nextLong());
@@ -180,6 +195,26 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
 
         // click vote button
         window.button("btnVote").requireVisible().click();
+    }
+
+    private void testUnvote(String amount) {
+        when(kernelMock.getPendingManager()).thenReturn(pendingManager);
+        application = GuiActionRunner
+                .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
+        window = new FrameFixture(robot(), application);
+        window.show().requireVisible().moveToFront();
+
+        // the initial label of selected delegate should be PleaseSelectDelegate
+        window.label("SelectedDelegateLabel").requireText(GuiMessages.get("PleaseSelectDelegate"));
+
+        // click on the first delegate
+        window.table("DelegatesTable").cell("delegate 1").requireNotEditable().click();
+
+        // fills number of votes
+        window.textBox("textUnvote").requireEditable().setText(amount);
+
+        // click vote button
+        window.button("btnUnvote").requireVisible().click();
     }
 
     @Test

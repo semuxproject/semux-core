@@ -184,7 +184,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         btnVote.setName("btnVote");
 
         textUnvote = SwingUtil.textFieldWithCopyPastePopup();
-        textUnvote.setName("testUnvote");
+        textUnvote.setName("textUnvote");
         textUnvote.setToolTipText(GuiMessages.get("NumVotes"));
         textUnvote.setColumns(10);
         textUnvote.setActionCommand(Action.UNVOTE.name());
@@ -496,6 +496,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 if (value > a.getLocked()) {
                     JOptionPane.showMessageDialog(this,
                             GuiMessages.get("InsufficientLockedFunds", SwingUtil.formatValue(value)));
+                    return;
+                }
+
+                // check that user has voted more than amount to unvote
+                if (value > d.getVotesFromMe()) {
+                    JOptionPane.showMessageDialog(this, GuiMessages.get("InsufficientVotes"));
                     return;
                 }
             }
