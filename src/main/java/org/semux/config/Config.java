@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
+import org.semux.Network;
 import org.semux.core.TransactionType;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
@@ -32,11 +33,11 @@ public interface Config {
     File dataDir();
 
     /**
-     * Returns the network id.
+     * Returns the network.
      *
      * @return
      */
-    byte networkId();
+    Network network();
 
     /**
      * Returns the network id.

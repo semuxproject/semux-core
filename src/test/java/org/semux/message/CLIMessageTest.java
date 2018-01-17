@@ -16,11 +16,11 @@ public class CLIMessageTest {
 
     @Test
     public void testExists() {
-        assertNotNull(CLIMessages.get("Address"));
+        assertNotNull(CliMessages.get("Address"));
     }
 
     @Test(expected = MissingResourceException.class)
     public void testNotExists() {
-        assertNotNull(CLIMessages.get("NotExist"));
+        assertNotNull(CliMessages.get("NotExist"));
     }
 }

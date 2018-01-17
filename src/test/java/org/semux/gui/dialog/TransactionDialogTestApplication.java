@@ -9,20 +9,20 @@ package org.semux.gui.dialog;
 import org.semux.KernelMock;
 import org.semux.core.Transaction;
 import org.semux.gui.BaseTestApplication;
-import org.semux.gui.SemuxGUI;
+import org.semux.gui.SemuxGui;
 import org.semux.gui.model.WalletModel;
 
 public class TransactionDialogTestApplication extends BaseTestApplication {
 
     private static final long serialVersionUID = 1L;
 
-    SemuxGUI gui;
+    SemuxGui gui;
 
     TransactionDialog transactionDialog;
 
     TransactionDialogTestApplication(WalletModel walletModel, Transaction tx, KernelMock kernelMock) {
         super();
-        gui = new SemuxGUI(walletModel, kernelMock);
+        gui = new SemuxGui(walletModel, kernelMock);
         transactionDialog = new TransactionDialog(this, tx);
         transactionDialog.setVisible(true);
     }

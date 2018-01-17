@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.gui.AddressBook;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
@@ -37,7 +37,7 @@ public class AddressBookDialogTest extends AssertJSwingJUnitTestCase {
 
     @Test
     public void testListAddressBook() {
-        EdDSA account1 = new EdDSA(), account2 = new EdDSA();
+        Key account1 = new Key(), account2 = new Key();
         when(addressBook.list()).thenReturn(Arrays.asList(
                 new AddressBook.Entry("address1", account1.toAddressString()),
                 new AddressBook.Entry("address2", account2.toAddressString())));

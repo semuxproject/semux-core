@@ -7,14 +7,14 @@
 package org.semux.net.msg;
 
 import org.semux.crypto.Hex;
-import org.semux.net.msg.consensus.BFTNewHeightMessage;
-import org.semux.net.msg.consensus.BFTNewViewMessage;
-import org.semux.net.msg.consensus.BFTProposalMessage;
-import org.semux.net.msg.consensus.BFTVoteMessage;
 import org.semux.net.msg.consensus.BlockHeaderMessage;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.GetBlockHeaderMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
+import org.semux.net.msg.consensus.NewHeightMessage;
+import org.semux.net.msg.consensus.NewViewMessage;
+import org.semux.net.msg.consensus.ProposalMessage;
+import org.semux.net.msg.consensus.VoteMessage;
 import org.semux.net.msg.p2p.DisconnectMessage;
 import org.semux.net.msg.p2p.GetNodesMessage;
 import org.semux.net.msg.p2p.HelloMessage;
@@ -73,13 +73,13 @@ public class MessageFactory {
                 return new BlockHeaderMessage(encoded);
 
             case BFT_NEW_HEIGHT:
-                return new BFTNewHeightMessage(encoded);
+                return new NewHeightMessage(encoded);
             case BFT_NEW_VIEW:
-                return new BFTNewViewMessage(encoded);
+                return new NewViewMessage(encoded);
             case BFT_PROPOSAL:
-                return new BFTProposalMessage(encoded);
+                return new ProposalMessage(encoded);
             case BFT_VOTE:
-                return new BFTVoteMessage(encoded);
+                return new VoteMessage(encoded);
 
             default:
                 throw new UnreachableException();

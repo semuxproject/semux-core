@@ -3,9 +3,8 @@ distributed with this software.
 
 
 Logback:
-    https://logback.qos.ch/
-    Copyright (C) 1999-2017, QOS.ch. All rights reserved.
-    Eclipse Public License - v 1.0
+    https://logging.apache.org/log4j
+    Apache License, Version 2.0
 
 Jackson:
     https://github.com/FasterXML/jackson
@@ -38,7 +37,7 @@ Snappy Java:
 
 Oshi:
     https://github.com/oshi/oshi
-    Eclipse Public License - v 1.0
+    Eclipse Public License - v1.0
 
 JNA:
     https://github.com/java-native-access/jna
@@ -286,10 +285,10 @@ Apache License, Version 2.0
 
 
 ================================================================================
-Eclipse Public License - v 1.0
+Eclipse Public License - v1.0
 ================================================================================
 
-Eclipse Public License - v 1.0
+Eclipse Public License - v1.0
 
 THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE PUBLIC
 LICENSE ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM

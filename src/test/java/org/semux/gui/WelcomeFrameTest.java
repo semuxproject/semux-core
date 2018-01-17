@@ -18,7 +18,7 @@ import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Test;
 import org.semux.core.Wallet;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 
 public class WelcomeFrameTest extends AssertJSwingJUnitTestCase {
 
@@ -76,7 +76,7 @@ public class WelcomeFrameTest extends AssertJSwingJUnitTestCase {
         String password = "abc";
         Wallet w = new Wallet(File.createTempFile("wallet2", ".data"));
         w.unlock(password);
-        w.addAccount(new EdDSA());
+        w.addAccount(new Key());
         w.flush();
 
         // FIXME: selectFile() is not working

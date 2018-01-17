@@ -16,11 +16,11 @@ public class GUIMessageTest {
 
     @Test
     public void testExists() {
-        assertNotNull(GUIMessages.get("Address"));
+        assertNotNull(GuiMessages.get("Address"));
     }
 
     @Test(expected = MissingResourceException.class)
     public void testNotExists() {
-        assertNotNull(GUIMessages.get("NotExist"));
+        assertNotNull(GuiMessages.get("NotExist"));
     }
 }

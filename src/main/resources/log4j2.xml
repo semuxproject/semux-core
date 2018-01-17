@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configuration>
+<Configuration status="WARN" shutdownHook="disable">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %highlight{%-8level} %-16logger{0} %msg%n"/>
+        </Console>
+        <Async name="Async">
+            <AppenderRef ref="Console"/>
+            <LinkedTransferQueue />
+        </Async>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.semux.api" level="INFO" />
+        <Logger name="org.semux.core" level="INFO" />
+        <Logger name="org.semux.consensus" level="INFO" />
+        <Logger name="org.semux.db" level="INFO" />
+        <Logger name="org.semux.net" level="INFO" />
+        <Logger name="org.semux.vm" level="INFO" />
+        <Logger name="org.semux.wrapper" level="INFO" />
+
+        <Logger name="io.netty" level="ERROR" />
+        <Logger name="oshi" level="INFO" />
+
+        <Root level="INFO">
+            <AppenderRef ref="Async"/>
+        </Root>
+    </Loggers>
+</Configuration>

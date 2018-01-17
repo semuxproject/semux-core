@@ -18,29 +18,29 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.semux.core.Block;
 import org.semux.crypto.Hex;
-import org.semux.gui.SemuxGUI;
+import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletDelegate;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 
 public class DelegateDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    public DelegateDialog(SemuxGUI gui, JFrame parent, WalletDelegate d) {
-        super(null, GUIMessages.get("Delegate"), Dialog.ModalityType.MODELESS);
+    public DelegateDialog(SemuxGui gui, JFrame parent, WalletDelegate d) {
+        super(null, GuiMessages.get("Delegate"), Dialog.ModalityType.MODELESS);
         setName("DelegateDialog");
         Block block = gui.getKernel().getBlockchain().getBlock(d.getRegisteredAt());
 
-        JLabel lblName = new JLabel(GUIMessages.get("Name") + ":");
-        JLabel lblAddress = new JLabel(GUIMessages.get("Address") + ":");
-        JLabel lblRegisteredAt = new JLabel(GUIMessages.get("RegisteredAt") + ":");
-        JLabel lblVotes = new JLabel(GUIMessages.get("Votes") + ":");
-        JLabel lblVotesFromMe = new JLabel(GUIMessages.get("VotesFromMe") + ":");
-        JLabel lblNumOfBlocksForged = new JLabel(GUIMessages.get("NumBlocksForged") + ":");
-        JLabel lblNumOfTurnsHit = new JLabel(GUIMessages.get("NumTurnsHit") + ":");
-        JLabel lblNumOfTurnsMissed = new JLabel(GUIMessages.get("NumTurnsMissed") + ":");
-        JLabel lblRate = new JLabel(GUIMessages.get("Rate") + ":");
+        JLabel lblName = new JLabel(GuiMessages.get("Name") + ":");
+        JLabel lblAddress = new JLabel(GuiMessages.get("Address") + ":");
+        JLabel lblRegisteredAt = new JLabel(GuiMessages.get("RegisteredAt") + ":");
+        JLabel lblVotes = new JLabel(GuiMessages.get("Votes") + ":");
+        JLabel lblVotesFromMe = new JLabel(GuiMessages.get("VotesFromMe") + ":");
+        JLabel lblNumOfBlocksForged = new JLabel(GuiMessages.get("NumBlocksForged") + ":");
+        JLabel lblNumOfTurnsHit = new JLabel(GuiMessages.get("NumTurnsHit") + ":");
+        JLabel lblNumOfTurnsMissed = new JLabel(GuiMessages.get("NumTurnsMissed") + ":");
+        JLabel lblRate = new JLabel(GuiMessages.get("Rate") + ":");
 
         JTextArea name = SwingUtil.textAreaWithCopyPopup(d.getNameString());
         JTextArea address = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(d.getAddress()));
@@ -126,7 +126,7 @@ public class DelegateDialog extends JDialog {
         getContentPane().setLayout(groupLayout);
         // @formatter:on
 
-        this.setTitle(GUIMessages.get("Delegate"));
+        this.setTitle(GuiMessages.get("Delegate"));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();

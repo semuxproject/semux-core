@@ -15,7 +15,7 @@ public class CryptoExceptionTest {
 
     @Test(expected = CryptoException.class)
     public void testCryptoException() throws CryptoException {
-        AES.decrypt(Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES);
+        Aes.decrypt(Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES);
     }
 
     @Test

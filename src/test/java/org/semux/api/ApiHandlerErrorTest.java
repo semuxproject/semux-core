@@ -96,7 +96,7 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
 
     @Before
     public void setUp() {
-        api = new SemuxAPIMock(kernelRule.getKernel());
+        api = new SemuxApiMock(kernelRule.getKernel());
         api.start();
 
         wallet = api.getKernel().getWallet();

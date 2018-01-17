@@ -35,18 +35,19 @@ import javax.swing.table.TableRowSorter;
 
 import org.semux.Kernel;
 import org.semux.core.Wallet;
-import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.gui.Action;
-import org.semux.gui.SemuxGUI;
+import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
-import org.semux.gui.exception.QRCodeException;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.zxing.WriterException;
 
 public class ReceivePanel extends JPanel implements ActionListener {
 
@@ -54,8 +55,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ReceivePanel.class);
 
-    private static String[] columnNames = { GUIMessages.get("Num"), GUIMessages.get("Address"),
-            GUIMessages.get("Available"), GUIMessages.get("Locked") };
+    private static String[] columnNames = { GuiMessages.get("Num"), GuiMessages.get("Address"),
+            GuiMessages.get("Available"), GuiMessages.get("Locked") };
 
     private static final int QR_SIZE = 200;
 
@@ -67,7 +68,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
     private ReceiveTableModel tableModel;
     private JLabel qr;
 
-    public ReceivePanel(SemuxGUI gui) {
+    public ReceivePanel(SemuxGui gui) {
         this.model = gui.getModel();
         this.model.addListener(this);
 
@@ -102,15 +103,15 @@ public class ReceivePanel extends JPanel implements ActionListener {
         qr.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
         JButton btnCopyAddress = SwingUtil
-                .createDefaultButton(GUIMessages.get("CopyAddress"), this, Action.COPY_ADDRESS);
+                .createDefaultButton(GuiMessages.get("CopyAddress"), this, Action.COPY_ADDRESS);
         btnCopyAddress.setName("btnCopyAddress");
 
         JButton buttonNewAccount = SwingUtil
-                .createDefaultButton(GUIMessages.get("NewAccount"), this, Action.NEW_ACCOUNT);
+                .createDefaultButton(GuiMessages.get("NewAccount"), this, Action.NEW_ACCOUNT);
         buttonNewAccount.setName("buttonNewAccount");
 
         JButton btnDeleteAddress = SwingUtil
-                .createDefaultButton(GUIMessages.get("DeleteAccount"), this, Action.DELETE_ACCOUNT);
+                .createDefaultButton(GuiMessages.get("DeleteAccount"), this, Action.DELETE_ACCOUNT);
         btnDeleteAddress.setName("btnDeleteAddress");
 
         // @formatter:off
@@ -263,12 +264,13 @@ public class ReceivePanel extends JPanel implements ActionListener {
             WalletAccount acc = getSelectedAccount();
 
             if (acc != null) {
-                BufferedImage bi = SwingUtil.generateQR("semux://" + acc.getKey().toAddressString(), QR_SIZE, QR_SIZE);
+                BufferedImage bi = SwingUtil.createQrImage("semux://" + acc.getKey().toAddressString(), QR_SIZE,
+                        QR_SIZE);
                 qr.setIcon(new ImageIcon(bi));
             } else {
                 qr.setIcon(SwingUtil.emptyImage(QR_SIZE, QR_SIZE));
             }
-        } catch (QRCodeException exception) {
+        } catch (WriterException exception) {
             logger.error("Unable to generate QR code", exception);
         }
     }
@@ -279,14 +281,14 @@ public class ReceivePanel extends JPanel implements ActionListener {
     protected void copyAddress() {
         WalletAccount acc = getSelectedAccount();
         if (acc == null) {
-            JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
+            JOptionPane.showMessageDialog(this, GuiMessages.get("SelectAccount"));
         } else {
             String address = Hex.PREF + acc.getKey().toAddressString();
             StringSelection stringSelection = new StringSelection(address);
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, null);
 
-            JOptionPane.showMessageDialog(this, GUIMessages.get("AddressCopied", address));
+            JOptionPane.showMessageDialog(this, GuiMessages.get("AddressCopied", address));
         }
     }
 
@@ -294,7 +296,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
      * Processes the NEW_ACCOUNT event.
      */
     protected void newAccount() {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
 
         Wallet wallet = kernel.getWallet();
         wallet.addAccount(key);
@@ -303,7 +305,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         // fire update event
         model.fireUpdateEvent();
 
-        JOptionPane.showMessageDialog(this, GUIMessages.get("NewAccountCreated"));
+        JOptionPane.showMessageDialog(this, GuiMessages.get("NewAccountCreated"));
     }
 
     /**
@@ -312,10 +314,10 @@ public class ReceivePanel extends JPanel implements ActionListener {
     protected void deleteAccount() {
         WalletAccount acc = getSelectedAccount();
         if (acc == null) {
-            JOptionPane.showMessageDialog(this, GUIMessages.get("SelectAccount"));
+            JOptionPane.showMessageDialog(this, GuiMessages.get("SelectAccount"));
         } else {
             int ret = JOptionPane
-                    .showConfirmDialog(this, GUIMessages.get("ConfirmDeleteAccount"), GUIMessages.get("DeleteAccount"),
+                    .showConfirmDialog(this, GuiMessages.get("ConfirmDeleteAccount"), GuiMessages.get("DeleteAccount"),
                             JOptionPane.YES_NO_OPTION);
 
             if (ret == JOptionPane.OK_OPTION) {
@@ -326,7 +328,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
                 // fire update event
                 model.fireUpdateEvent();
 
-                JOptionPane.showMessageDialog(this, GUIMessages.get("AccountDeleted"));
+                JOptionPane.showMessageDialog(this, GuiMessages.get("AccountDeleted"));
             }
         }
     }

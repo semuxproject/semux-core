@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configuration>
+<Configuration status="WARN" shutdownHook="disable">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%date{HH:mm:ss.SSS} %highlight{%-8level} %-16logger{0} %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.semux.api" level="DEBUG" />
+        <Logger name="org.semux.core" level="DEBUG" />
+        <Logger name="org.semux.consensus" level="DEBUG" />
+        <Logger name="org.semux.db" level="DEBUG" />
+        <Logger name="org.semux.net" level="DEBUG" />
+        <Logger name="org.semux.vm" level="DEBUG" />
+        <Logger name="org.semux.wrapper" level="DEBUG" />
+
+        <Logger name="io.netty" level="ERROR" />
+        <Logger name="oshi" level="DEBUG" />
+        
+        <Root level="DEBUG">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

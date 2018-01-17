@@ -16,18 +16,19 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
-import org.semux.crypto.EdDSA;
-import org.semux.crypto.EdDSA.Signature;
+import org.semux.config.DevnetConfig;
+import org.semux.crypto.Key;
+import org.semux.crypto.Key.Signature;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SimpleDecoder;
 
 public class BlockTest {
 
-    private Config config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
+    private Config config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
 
     private long number = 5;
     private byte[] coinbase = Bytes.random(20);
@@ -35,9 +36,9 @@ public class BlockTest {
     private long timestamp = System.currentTimeMillis();
     private byte[] data = Bytes.of("data");
 
-    private Transaction tx = new Transaction(Constants.DEVNET_ID, TransactionType.TRANSFER, Bytes.random(20), 0,
+    private Transaction tx = new Transaction(Network.DEVNET, TransactionType.TRANSFER, Bytes.random(20), 0,
             config.minTransactionFee(),
-            1, System.currentTimeMillis(), Bytes.EMPTY_BYTES).sign(new EdDSA());
+            1, System.currentTimeMillis(), Bytes.EMPTY_BYTES).sign(new Key());
     private TransactionResult res = new TransactionResult(true);
     private List<Transaction> transactions = Collections.singletonList(tx);
     private List<TransactionResult> results = Collections.singletonList(res);
@@ -52,7 +53,7 @@ public class BlockTest {
 
     @Test
     public void testGenesis() {
-        Block block = Genesis.load(Constants.NETWORKS[config.networkId()]);
+        Block block = Genesis.load(config.network());
         assertTrue(block.getHeader().validate());
     }
 
@@ -114,7 +115,7 @@ public class BlockTest {
                 resultsRoot, stateRoot, data);
 
         assertTrue(Block.validateHeader(previousHeader, header));
-        assertTrue(Block.validateTransactions(previousHeader, transactions, Constants.DEVNET_ID));
+        assertTrue(Block.validateTransactions(previousHeader, transactions, Network.DEVNET));
         assertTrue(Block.validateResults(previousHeader, results));
     }
 }

@@ -31,16 +31,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.IntegrationTest;
 import org.semux.Kernel.State;
 import org.semux.KernelMock;
+import org.semux.Network;
 import org.semux.api.response.DoTransactionResponse;
 import org.semux.api.response.GetAccountResponse;
 import org.semux.api.response.GetAccountTransactionsResponse;
-import org.semux.api.response.GetTransactionResponse;
-import org.semux.config.Constants;
+import org.semux.api.response.Types;
 import org.semux.core.Genesis;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
@@ -59,6 +60,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class })
+@PowerMockIgnore("javax.management.*")
 public class TransactTest {
 
     private static Logger logger = LoggerFactory.getLogger(TransactTest.class);
@@ -85,10 +87,10 @@ public class TransactTest {
     @Before
     public void setUp() throws Exception {
         // prepare kernels
-        kernelRuleValidator1.speedUpCosnensus();
-        kernelRuleValidator2.speedUpCosnensus();
-        kernelRulePremine.speedUpCosnensus();
-        kernelRuleReceiver.speedUpCosnensus();
+        kernelRuleValidator1.speedUpConsensus();
+        kernelRuleValidator2.speedUpConsensus();
+        kernelRulePremine.speedUpConsensus();
+        kernelRuleReceiver.speedUpConsensus();
         kernelValidator1 = kernelRuleValidator1.getKernel();
         kernelValidator2 = kernelRuleValidator2.getKernel();
         kernelPremine = kernelRulePremine.getKernel();
@@ -104,7 +106,7 @@ public class TransactTest {
         nodes.add(new Node(kernelValidator1.getConfig().p2pListenIp(), kernelValidator1.getConfig().p2pListenPort()));
         nodes.add(new Node(kernelValidator2.getConfig().p2pListenIp(), kernelValidator2.getConfig().p2pListenPort()));
         mockStatic(NodeManager.class);
-        when(NodeManager.getSeedNodes(Constants.DEVNET_ID)).thenReturn(nodes);
+        when(NodeManager.getSeedNodes(Network.DEVNET)).thenReturn(nodes);
 
         // start kernels
         kernelValidator1.start();
@@ -213,7 +215,7 @@ public class TransactTest {
     private void assertTransaction(KernelMock kernel, byte[] address,
             TransactionType type, byte[] from, byte[] to, long value, long fee, byte[] data)
             throws IOException {
-        GetTransactionResponse.TransactionResult result = latestTransactionOf(kernel, address);
+        Types.TransactionType result = latestTransactionOf(kernel, address);
         assertEquals(type.name(), result.type);
         assertEquals(Hex.encode0x(from), result.from);
         assertEquals(Hex.encode0x(to), result.to);
@@ -251,7 +253,7 @@ public class TransactTest {
      * @return
      * @throws IOException
      */
-    private GetTransactionResponse.TransactionResult latestTransactionOf(KernelMock kernel, byte[] address)
+    private Types.TransactionType latestTransactionOf(KernelMock kernel, byte[] address)
             throws IOException {
         ApiClient apiClient = kernel.getApiClient();
 

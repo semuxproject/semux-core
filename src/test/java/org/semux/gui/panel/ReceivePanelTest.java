@@ -26,11 +26,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.KernelMock;
 import org.semux.core.state.Account;
-import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.rules.KernelRule;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -53,8 +53,8 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
 
     @Test
     public void testCopyAddress() {
-        EdDSA key1 = new EdDSA();
-        EdDSA key2 = new EdDSA();
+        Key key1 = new Key();
+        Key key2 = new Key();
         WalletAccount acc1 = new WalletAccount(key1, new Account(key1.toAddress(), 1, 1, 1));
         WalletAccount acc2 = new WalletAccount(key2, new Account(key2.toAddress(), 2, 2, 2));
 
@@ -73,7 +73,7 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
         table.requireSelectedRows(1);
         window.button("btnCopyAddress").requireVisible().click();
         window.optionPane(Timeout.timeout(1000)).requireVisible()
-                .requireMessage(GUIMessages.get("AddressCopied", Hex.PREF + key2.toAddressString()));
+                .requireMessage(GuiMessages.get("AddressCopied", Hex.PREF + key2.toAddressString()));
 
         assertEquals(Hex.PREF + key2.toAddressString(), GuiActionRunner
                 .execute(() -> Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor)));

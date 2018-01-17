@@ -32,11 +32,9 @@ Commit messages should be verbose by default consisting of a short subject line 
 ```
 Component: short summary of changes
 
-More detailed explanatory text, if necessary. Wrap it to
-72 characters. In some contexts, the first
-line is treated as the subject of an email and the rest of
-the text as the body.  The blank line separating the
-summary from the body is critical.
+More detailed explanatory text, if necessary. In some contexts, the first
+line is treated as the subject of an email and the rest of the text as the body.
+The blank line separating the summary from the body is critical.
 
 Further paragraphs come after blank lines.
 

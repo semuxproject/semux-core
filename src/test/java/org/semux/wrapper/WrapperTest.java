@@ -24,17 +24,19 @@ import java.util.Collection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.PowerMockRunnerDelegate;
-import org.semux.cli.SemuxCLI;
-import org.semux.gui.SemuxGUI;
+import org.semux.cli.SemuxCli;
+import org.semux.gui.SemuxGui;
 import org.semux.util.SystemUtil;
 import org.semux.util.SystemUtil.OsName;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(Parameterized.class)
 @PrepareForTest({ ProcessBuilder.class, Process.class, Wrapper.class, SystemUtil.class })
+@PowerMockIgnore("javax.management.*")
 public class WrapperTest {
 
     @Parameterized.Parameters
@@ -46,7 +48,10 @@ public class WrapperTest {
                                         getJavaBinPath(),
                                         "-cp", null,
                                         "-Xmx1G", "-Xms1G",
-                                        SemuxGUI.class.getCanonicalName() },
+                                        "-Dlog4j2.garbagefreeThreadContextMap=true",
+                                        "-Dlog4j2.shutdownHookEnabled=false",
+                                        "-Dlog4j2.disableJmx=true",
+                                        SemuxGui.class.getCanonicalName() },
                                 null },
 
                         { new String[] { "--gui" },
@@ -54,14 +59,20 @@ public class WrapperTest {
                                         getJavaBinPath(),
                                         "-cp", null,
                                         "-Xmx1600M",
-                                        SemuxGUI.class.getCanonicalName() },
+                                        "-Dlog4j2.garbagefreeThreadContextMap=true",
+                                        "-Dlog4j2.shutdownHookEnabled=false",
+                                        "-Dlog4j2.disableJmx=true",
+                                        SemuxGui.class.getCanonicalName() },
                                 2000L * 1024 * 1024 },
 
                         { new String[] { "--cli" }, new String[] {
                                 getJavaBinPath(),
                                 "-cp", null,
                                 "-Xmx1600M",
-                                SemuxCLI.class.getCanonicalName() },
+                                "-Dlog4j2.garbagefreeThreadContextMap=true",
+                                "-Dlog4j2.shutdownHookEnabled=false",
+                                "-Dlog4j2.disableJmx=true",
+                                SemuxCli.class.getCanonicalName() },
                                 2000L * 1024 * 1024 },
 
                         { new String[] { "--gui" },
@@ -69,7 +80,10 @@ public class WrapperTest {
                                         getJavaBinPath(),
                                         "-cp", null,
                                         String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB),
-                                        SemuxGUI.class.getCanonicalName() },
+                                        "-Dlog4j2.garbagefreeThreadContextMap=true",
+                                        "-Dlog4j2.shutdownHookEnabled=false",
+                                        "-Dlog4j2.disableJmx=true",
+                                        SemuxGui.class.getCanonicalName() },
                                 MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 },
 
                         { new String[] { "--cli" },
@@ -77,7 +91,10 @@ public class WrapperTest {
                                         getJavaBinPath(),
                                         "-cp", null,
                                         String.format("-Xmx%dM", MINIMUM_HEAP_SIZE_MB),
-                                        SemuxCLI.class.getCanonicalName() },
+                                        "-Dlog4j2.garbagefreeThreadContextMap=true",
+                                        "-Dlog4j2.shutdownHookEnabled=false",
+                                        "-Dlog4j2.disableJmx=true",
+                                        SemuxCli.class.getCanonicalName() },
                                 MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 } });
     }
 

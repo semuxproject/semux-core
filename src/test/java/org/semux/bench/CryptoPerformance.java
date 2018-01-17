@@ -6,8 +6,8 @@
  */
 package org.semux.bench;
 
-import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hash;
+import org.semux.crypto.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ public class CryptoPerformance {
 
     public static void testSign() {
         for (int size : DATA_SIZES) {
-            EdDSA eckey = new EdDSA();
+            Key eckey = new Key();
             byte[] data = new byte[size];
             byte[] hash = Hash.h256(data);
 
@@ -63,14 +63,14 @@ public class CryptoPerformance {
 
     public static void testVerify() {
         for (int size : DATA_SIZES) {
-            EdDSA eckey = new EdDSA();
+            Key eckey = new Key();
             byte[] data = new byte[size];
             byte[] hash = Hash.h256(data);
             byte[] sig = eckey.sign(hash).toBytes();
 
             long t1 = System.nanoTime();
             for (int i = 0; i < REPEAT; i++) {
-                EdDSA.verify(hash, sig);
+                Key.verify(hash, sig);
             }
             long t2 = System.nanoTime();
 

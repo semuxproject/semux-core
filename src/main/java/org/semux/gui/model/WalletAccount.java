@@ -12,13 +12,13 @@ import java.util.List;
 
 import org.semux.core.Transaction;
 import org.semux.core.state.Account;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 
 public class WalletAccount extends Account {
-    private EdDSA key;
+    private Key key;
     private List<Transaction> transactions = new ArrayList<>();
 
-    public WalletAccount(EdDSA key, Account acc) {
+    public WalletAccount(Key key, Account acc) {
         super(acc.getAddress(), acc.getAvailable(), acc.getLocked(), acc.getNonce());
         this.key = key;
 
@@ -27,11 +27,11 @@ public class WalletAccount extends Account {
         }
     }
 
-    public EdDSA getKey() {
+    public Key getKey() {
         return key;
     }
 
-    public void setKey(EdDSA key) {
+    public void setKey(Key key) {
         this.key = key;
     }
 

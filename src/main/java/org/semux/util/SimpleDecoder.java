@@ -8,7 +8,7 @@ package org.semux.util;
 
 import java.io.UnsupportedEncodingException;
 
-import org.semux.util.exception.SimpleDecoderException;
+import org.semux.util.exception.SimpleCodecException;
 
 public class SimpleDecoder {
     private static final String ENCODING = "UTF-8";
@@ -79,7 +79,7 @@ public class SimpleDecoder {
         try {
             return new String(readBytes(), ENCODING);
         } catch (UnsupportedEncodingException e) {
-            throw new SimpleDecoderException(e);
+            throw new SimpleCodecException(e);
         }
     }
 

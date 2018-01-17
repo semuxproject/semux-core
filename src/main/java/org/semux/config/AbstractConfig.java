@@ -17,6 +17,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.semux.Network;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hash;
@@ -39,14 +40,14 @@ public abstract class AbstractConfig implements Config {
     // General
     // =========================
     protected File dataDir;
-    protected byte networkId;
+    protected Network network;
     protected short networkVersion;
 
     protected int maxBlockTransactionsSize = 1024 * 1024;
     protected long minTransactionFee = 5L * Unit.MILLI_SEM;
     protected long maxTransactionTimeDrift = TimeUnit.HOURS.toMillis(2);
     protected long minDelegateBurnAmount = 1000L * Unit.SEM;
-    protected long mandatoryUpgrade = Constants.BLOCKS_PER_DAY * 60L;
+    protected long mandatoryUpgrade = Constants.BLOCKS_PER_DAY * 180L;
 
     // =========================
     // P2P
@@ -110,12 +111,12 @@ public abstract class AbstractConfig implements Config {
      * Create an {@link AbstractConfig} instance.
      *
      * @param dataDir
-     * @param networkId
+     * @param network
      * @param networkVersion
      */
-    protected AbstractConfig(String dataDir, byte networkId, short networkVersion) {
+    protected AbstractConfig(String dataDir, Network network, short networkVersion) {
         this.dataDir = new File(dataDir);
-        this.networkId = networkId;
+        this.network = network;
         this.networkVersion = networkVersion;
 
         init();
@@ -168,8 +169,8 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public byte networkId() {
-        return networkId;
+    public Network network() {
+        return network;
     }
 
     @Override
@@ -394,16 +395,16 @@ public abstract class AbstractConfig implements Config {
 
                 switch (name) {
                 case "p2p.declaredIp":
-                    p2pDeclaredIp = props.getProperty(name);
+                    p2pDeclaredIp = props.getProperty(name).trim();
                     break;
                 case "p2p.listenIp":
-                    p2pListenIp = props.getProperty(name);
+                    p2pListenIp = props.getProperty(name).trim();
                     break;
                 case "p2p.listenPort":
-                    p2pListenPort = Integer.parseInt(props.getProperty(name));
+                    p2pListenPort = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 case "p2p.seedNodes":
-                    String[] nodes = props.getProperty(name).split(",");
+                    String[] nodes = props.getProperty(name).trim().split(",");
                     for (String node : nodes) {
                         if (!node.trim().isEmpty()) {
                             String[] tokens = node.trim().split(":");
@@ -417,38 +418,38 @@ public abstract class AbstractConfig implements Config {
                     break;
 
                 case "net.maxInboundConnections":
-                    netMaxInboundConnections = Integer.parseInt(props.getProperty(name));
+                    netMaxInboundConnections = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 case "net.maxInboundConnectionsPerIp":
-                    netMaxInboundConnectionsPerIp = Integer.parseInt(props.getProperty(name));
+                    netMaxInboundConnectionsPerIp = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 case "net.maxOutboundConnections":
-                    netMaxInboundConnections = Integer.parseInt(props.getProperty(name));
+                    netMaxInboundConnections = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 case "net.maxMessageQueueSize":
-                    netMaxMessageQueueSize = Integer.parseInt(props.getProperty(name));
+                    netMaxMessageQueueSize = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 case "net.relayRedundancy":
-                    netRelayRedundancy = Integer.parseInt(props.getProperty(name));
+                    netRelayRedundancy = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 case "net.channelIdleTimeout":
-                    netChannelIdleTimeout = Integer.parseInt(props.getProperty(name));
+                    netChannelIdleTimeout = Integer.parseInt(props.getProperty(name).trim());
                     break;
 
                 case "api.enabled":
-                    apiEnabled = Boolean.parseBoolean(props.getProperty(name));
+                    apiEnabled = Boolean.parseBoolean(props.getProperty(name).trim());
                     break;
                 case "api.listenIp":
-                    apiListenIp = props.getProperty(name);
+                    apiListenIp = props.getProperty(name).trim();
                     break;
                 case "api.listenPort":
-                    apiListenPort = Integer.parseInt(props.getProperty(name));
+                    apiListenPort = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 case "api.username":
-                    apiUsername = props.getProperty(name);
+                    apiUsername = props.getProperty(name).trim();
                     break;
                 case "api.password":
-                    apiPassword = props.getProperty(name);
+                    apiPassword = props.getProperty(name).trim();
                     break;
                 case "ui.locale": {
                     // ui.locale must be in format of en_US ([language]_[country])

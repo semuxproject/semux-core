@@ -33,11 +33,11 @@ import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.gui.Action;
-import org.semux.gui.SemuxGUI;
+import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.exception.UnreachableException;
 
@@ -50,7 +50,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private static final EnumSet<TransactionType> FEDERATED_TRANSACTION_TYPES = EnumSet.of(TransactionType.COINBASE,
             TransactionType.TRANSFER);
 
-    private transient SemuxGUI gui;
+    private transient SemuxGui gui;
     private transient WalletModel model;
 
     private JLabel syncProgress;
@@ -65,7 +65,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private JPanel transactions;
     private JLabel peers;
 
-    public HomePanel(SemuxGUI gui) {
+    public HomePanel(SemuxGui gui) {
         this.gui = gui;
         this.model = gui.getModel();
         this.model.addListener(this);
@@ -74,55 +74,55 @@ public class HomePanel extends JPanel implements ActionListener {
         JPanel overview = new JPanel();
         overview.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
-                GUIMessages.get("Overview"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+                GuiMessages.get("Overview"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
         overview.setLayout(new GridLayout(7, 2, 0, 0));
 
-        JLabel labelBlockNum = new JLabel(GUIMessages.get("BlockNum") + ":");
+        JLabel labelBlockNum = new JLabel(GuiMessages.get("BlockNum") + ":");
         overview.add(labelBlockNum);
 
         blockNum = new JLabel("");
         overview.add(blockNum);
 
-        JLabel lblBlockTime = new JLabel(GUIMessages.get("BlockTime") + ":");
+        JLabel lblBlockTime = new JLabel(GuiMessages.get("BlockTime") + ":");
         overview.add(lblBlockTime);
 
         blockTime = new JLabel("");
         overview.add(blockTime);
 
-        JLabel labelCoinbase = new JLabel(GUIMessages.get("Coinbase") + ":");
+        JLabel labelCoinbase = new JLabel(GuiMessages.get("Coinbase") + ":");
         overview.add(labelCoinbase);
 
         coinbase = new JLabel("");
         overview.add(coinbase);
 
-        JLabel labelStatus = new JLabel(GUIMessages.get("Status") + ":");
+        JLabel labelStatus = new JLabel(GuiMessages.get("Status") + ":");
         overview.add(labelStatus);
 
         status = new JLabel("");
         overview.add(status);
 
-        JLabel labelAvailable = new JLabel(GUIMessages.get("Available") + ":");
+        JLabel labelAvailable = new JLabel(GuiMessages.get("Available") + ":");
         overview.add(labelAvailable);
 
         available = new JLabel("");
         overview.add(available);
 
-        JLabel labelLocked = new JLabel(GUIMessages.get("Locked") + ":");
+        JLabel labelLocked = new JLabel(GuiMessages.get("Locked") + ":");
         overview.add(labelLocked);
 
         locked = new JLabel("");
         overview.add(locked);
 
-        JLabel labelTotal = new JLabel(GUIMessages.get("TotalBalance") + ":");
+        JLabel labelTotal = new JLabel(GuiMessages.get("TotalBalance") + ":");
         overview.add(labelTotal);
 
         total = new JLabel("");
         overview.add(total);
 
-        JLabel lblPeers = new JLabel(GUIMessages.get("Peers") + ":");
+        JLabel lblPeers = new JLabel(GuiMessages.get("Peers") + ":");
         peers = new JLabel("");
 
-        JLabel syncProgressLabel = new JLabel(GUIMessages.get("SyncProgress") + ":");
+        JLabel syncProgressLabel = new JLabel(GuiMessages.get("SyncProgress") + ":");
         overview.add(syncProgressLabel);
         syncProgress = new JLabel("");
         syncProgress.setName("syncProgress");
@@ -131,7 +131,7 @@ public class HomePanel extends JPanel implements ActionListener {
         transactions = new JPanel();
         transactions.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
-                GUIMessages.get("Transactions"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+                GuiMessages.get("Transactions"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -253,7 +253,7 @@ public class HomePanel extends JPanel implements ActionListener {
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
         this.coinbase.setText(SwingUtil.shortAddress(model.getCoinbase().toAddress()));
-        this.status.setText(model.isDelegate() ? GUIMessages.get("Delegate") : GUIMessages.get("Normal"));
+        this.status.setText(model.isDelegate() ? GuiMessages.get("Delegate") : GuiMessages.get("Normal"));
         this.available.setText(SwingUtil.formatValue(model.getTotalAvailable()));
         this.locked.setText(SwingUtil.formatValue(model.getTotalLocked()));
         this.peers.setText(SwingUtil.formatNumber(model.getActivePeers().size()));
@@ -297,14 +297,14 @@ public class HomePanel extends JPanel implements ActionListener {
 
         public static String format(SyncManager.Progress progress) {
             if (progress == null) {
-                return GUIMessages.get("SyncStopped");
+                return GuiMessages.get("SyncStopped");
             } else if (progress.getCurrentHeight() > 0 && progress.getCurrentHeight() == progress.getTargetHeight()) {
-                return GUIMessages.get("SyncFinished");
+                return GuiMessages.get("SyncFinished");
             } else if (progress.getTargetHeight() > 0) {
                 return SwingUtil.formatPercentage(
                         (double) progress.getCurrentHeight() / (double) progress.getTargetHeight() * 100d);
             } else {
-                return GUIMessages.get("SyncStopped");
+                return GuiMessages.get("SyncStopped");
             }
         }
     }

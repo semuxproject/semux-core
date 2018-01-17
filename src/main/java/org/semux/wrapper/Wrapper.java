@@ -12,22 +12,23 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
-import org.semux.cli.SemuxCLI;
-import org.semux.gui.SemuxGUI;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.semux.cli.SemuxCli;
+import org.semux.gui.SemuxGui;
 import org.semux.util.SystemUtil;
 
 /**
  * This is a process wrapper mainly created for dynamic allocation of the
  * maximum heap size of JVM. The wrapper sets the -Xmx to 80% of available
  * physical memory if the -Xmx option is not specified.
- * 
- * NOTE: this wrapper assumes a semux.jar file at the working directory and only
- * works with Semux Linux distribution only, currently.
  */
 public class Wrapper {
 
@@ -40,10 +41,10 @@ public class Wrapper {
     protected static Class<?> getModeClass(Mode mode) {
         switch (mode) {
         case CLI:
-            return SemuxCLI.class;
+            return SemuxCli.class;
 
         case GUI:
-            return SemuxGUI.class;
+            return SemuxGui.class;
 
         default:
             throw new WrapperException("Selected mode is not supported");
@@ -51,26 +52,47 @@ public class Wrapper {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException, ParseException {
+
         WrapperCLIParser wrapperCLIParser = new WrapperCLIParser(args);
         Wrapper wrapper = new Wrapper();
-        String[] jvmOptions = wrapper.allocateHeapSize(wrapperCLIParser.jvmOptions);
+        String[] jvmOptions = wrapper.addDefaultJvmOptions(wrapperCLIParser.jvmOptions);
         int exitValue = wrapper.exec(wrapperCLIParser.mode, jvmOptions, wrapperCLIParser.remainingArgs);
         SystemUtil.exit(exitValue);
     }
 
-    protected String[] allocateHeapSize(String[] jvmOptions) {
+    protected String[] addDefaultJvmOptions(final String[] jvmOptions) {
         ArrayList<String> allocatedJvmOptions = new ArrayList<>(asList(jvmOptions));
 
-        // dynamically specify maximum heap size according to available physical memory
-        // if Xmx is not specified in jvmoptions
-        final Pattern xmxPattern = Pattern.compile("^-Xmx");
-
-        if (Stream.of(jvmOptions).noneMatch(s -> xmxPattern.matcher(s).find())) {
-            long toAllocateMB = SystemUtil.getAvailableMemorySize() / 1024 / 1024 * 8 / 10;
-            allocatedJvmOptions.add(String.format("-Xmx%dM", Math.max(toAllocateMB, MINIMUM_HEAP_SIZE_MB)));
-        }
+        // add non-existing options
+        getDefaultJvmOptionSuppliers()
+                .stream()
+                .sequential()
+                .filter(e -> Stream.of(jvmOptions).noneMatch(s -> e.getKey().matcher(s).find()))
+                .forEachOrdered(e -> allocatedJvmOptions.add(e.getValue().get()));
 
         return allocatedJvmOptions.toArray(new String[allocatedJvmOptions.size()]);
+    }
+
+    private static List<ImmutablePair<Pattern, Supplier<String>>> getDefaultJvmOptionSuppliers() {
+        return Arrays.asList(
+                // dynamically specify maximum heap size according to available physical memory
+                // if Xmx is not specified in jvmoptions
+                ImmutablePair.of(
+                        Pattern.compile("^-Xmx"),
+                        () -> String.format("-Xmx%dM",
+                                Math.max(SystemUtil.getAvailableMemorySize() / 1024 / 1024 * 8 / 10,
+                                        MINIMUM_HEAP_SIZE_MB))),
+
+                // Log4j2 default options
+                ImmutablePair.of(
+                        Pattern.compile("^-Dlog4j2\\.garbagefreeThreadContextMap"),
+                        () -> "-Dlog4j2.garbagefreeThreadContextMap=true"),
+                ImmutablePair.of(
+                        Pattern.compile("^-Dlog4j2\\.shutdownHookEnabled"),
+                        () -> "-Dlog4j2.shutdownHookEnabled=false"),
+                ImmutablePair.of(
+                        Pattern.compile("^-Dlog4j2\\.disableJmx"),
+                        () -> "-Dlog4j2.disableJmx=true"));
     }
 
     protected int exec(Mode mode, String[] jvmOptions, String[] args) throws IOException, InterruptedException {

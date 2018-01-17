@@ -49,6 +49,7 @@ import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
+import org.semux.api.response.Types;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
 import org.semux.core.Genesis.Premine;
@@ -58,8 +59,9 @@ import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
+import org.semux.net.Capability;
 import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
 import org.semux.rules.KernelRule;
@@ -76,7 +78,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Before
     public void setUp() {
-        api = new SemuxAPIMock(kernelRule.getKernel());
+        api = new SemuxApiMock(kernelRule.getKernel());
         api.start();
 
         config = api.getKernel().getConfig();
@@ -124,19 +126,20 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
     @Test
     public void testGetPeers() throws IOException {
         channelMgr = spy(api.getKernel().getChannelManager());
-        List<Peer> peers = Arrays.asList(new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", 1),
-                new Peer("2.3.4.5", 5171, (short) 2, "client2", "peer2", 2));
+        List<Peer> peers = Arrays.asList(
+                new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", 1, Capability.SUPPORTED),
+                new Peer("2.3.4.5", 5171, (short) 2, "client2", "peer2", 2, Capability.SUPPORTED));
         when(channelMgr.getActivePeers()).thenReturn(peers);
         api.getKernel().setChannelManager(channelMgr);
 
         GetPeersResponse response = request("/get_peers", GetPeersResponse.class);
         assertTrue(response.success);
-        List<GetPeersResponse.PeerResult> result = response.peers;
+        List<Types.PeerType> result = response.peers;
 
         assertNotNull(result);
         assertEquals(peers.size(), result.size());
         for (int i = 0; i < peers.size(); i++) {
-            GetPeersResponse.PeerResult peerJson = result.get(i);
+            Types.PeerType peerJson = result.get(i);
             Peer peer = peers.get(i);
             assertEquals(peer.getIp(), peerJson.ip);
             assertEquals(peer.getPort(), peerJson.port.intValue());
@@ -145,6 +148,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
             assertEquals(Hex.PREF + peer.getPeerId(), peerJson.peerId);
             assertEquals(peer.getLatestBlockNumber(), peerJson.latestBlockNumber.longValue());
             assertEquals(peer.getLatency(), peerJson.latency.longValue());
+            assertEquals(peer.getCapabilities().toList(), peerJson.capabilities);
         }
     }
 
@@ -215,7 +219,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         GetLatestBlockResponse response = request(uri, GetLatestBlockResponse.class);
         assertTrue(response.success);
 
-        GetBlockResponse.BlockResult blockJson = response.block;
+        Types.BlockType blockJson = response.block;
         assertEquals(Hex.encode0x(genesisBlock.getHash()), blockJson.hash);
         assertEquals(genesisBlock.getNumber(), blockJson.number.longValue());
         assertEquals(Hex.encode0x(genesisBlock.getCoinbase()), blockJson.coinbase);
@@ -336,8 +340,8 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testGetVote() throws IOException {
-        EdDSA key = new EdDSA();
-        EdDSA key2 = new EdDSA();
+        Key key = new Key();
+        Key key2 = new Key();
         DelegateState ds = chain.getDelegateState();
         ds.register(key2.toAddress(), Bytes.of("test"));
         ds.vote(key.toAddress(), key2.toAddress(), 200L);
@@ -350,8 +354,8 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testGetVotes() throws IOException {
-        EdDSA voterKey = new EdDSA();
-        EdDSA delegateKey = new EdDSA();
+        Key voterKey = new Key();
+        Key delegateKey = new Key();
         DelegateState ds = chain.getDelegateState();
         assertTrue(ds.register(delegateKey.toAddress(), Bytes.of("test")));
         assertTrue(ds.vote(voterKey.toAddress(), delegateKey.toAddress(), 200L));
@@ -403,7 +407,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testTransfer() throws IOException, InterruptedException {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
         String uri = "/transfer?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + key.toAddressString()
                 + "&value=1000000000&fee=" + config.minTransactionFee() + "&data="
                 + Hex.encode(Bytes.of("test_transfer"));
@@ -437,7 +441,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testVote() throws IOException, InterruptedException {
-        EdDSA delegate = new EdDSA();
+        Key delegate = new Key();
         delegateState.register(delegate.toAddress(), Bytes.of("test_vote"));
 
         String uri = "/vote?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + delegate.toAddressString()
@@ -456,7 +460,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testUnvote() throws IOException, InterruptedException {
-        EdDSA delegate = new EdDSA();
+        Key delegate = new Key();
         delegateState.register(delegate.toAddress(), Bytes.of("test_unvote"));
 
         long amount = 1000000000;

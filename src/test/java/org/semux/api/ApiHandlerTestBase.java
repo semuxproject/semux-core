@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
@@ -25,7 +26,7 @@ import org.semux.core.TransactionType;
 import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.util.BasicAuth;
@@ -36,7 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class ApiHandlerTestBase {
 
-    protected SemuxAPIMock api;
+    protected SemuxApiMock api;
 
     protected Config config;
     protected Wallet wallet;
@@ -78,7 +79,7 @@ public abstract class ApiHandlerTestBase {
     }
 
     protected Block createBlock(Blockchain chain, List<Transaction> transactions, List<TransactionResult> results) {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
 
         long number = chain.getLatestBlockNumber() + 1;
         byte[] coinbase = key.toAddress();
@@ -95,9 +96,9 @@ public abstract class ApiHandlerTestBase {
     }
 
     protected Transaction createTransaction() {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
 
-        byte networkId = config.networkId();
+        Network network = config.network();
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = key.toAddress();
         long value = 0;
@@ -106,6 +107,6 @@ public abstract class ApiHandlerTestBase {
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
 
-        return new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(key);
+        return new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(key);
     }
 }

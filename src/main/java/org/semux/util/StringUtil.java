@@ -8,9 +8,6 @@ package org.semux.util;
 
 public class StringUtil {
 
-    private StringUtil() {
-    }
-
     /**
      * Returns if the given string is null or empty.
      * 
@@ -19,5 +16,8 @@ public class StringUtil {
      */
     public static boolean isNullOrEmpty(String str) {
         return str == null || str.isEmpty();
+    }
+
+    private StringUtil() {
     }
 }

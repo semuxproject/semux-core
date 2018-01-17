@@ -14,7 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.semux.api.SemuxAPIMock;
+import org.semux.api.SemuxApiMock;
 import org.semux.rules.KernelRule;
 
 public class ApiClientTest {
@@ -22,11 +22,11 @@ public class ApiClientTest {
     @Rule
     public KernelRule kernelRule = new KernelRule(51610, 51710);
 
-    private SemuxAPIMock api;
+    private SemuxApiMock api;
 
     @Before
     public void setUp() {
-        api = new SemuxAPIMock(kernelRule.getKernel());
+        api = new SemuxApiMock(kernelRule.getKernel());
         api.start();
     }
 

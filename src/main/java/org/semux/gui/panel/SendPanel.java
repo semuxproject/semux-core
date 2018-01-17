@@ -30,20 +30,21 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 import org.semux.Kernel;
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.CryptoException;
-import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.gui.Action;
-import org.semux.gui.SemuxGUI;
+import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.AddressBookDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.util.Bytes;
 import org.semux.util.exception.UnreachableException;
 
@@ -67,7 +68,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private AddressBookDialog addressBookDialog;
 
-    public SendPanel(SemuxGUI gui, JFrame frame) {
+    public SendPanel(SemuxGui gui, JFrame frame) {
         this.model = gui.getModel();
         this.model.addListener(this);
 
@@ -78,13 +79,13 @@ public class SendPanel extends JPanel implements ActionListener {
 
         setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        JLabel lblFrom = new JLabel(GUIMessages.get("From") + ":");
+        JLabel lblFrom = new JLabel(GuiMessages.get("From") + ":");
         lblFrom.setHorizontalAlignment(SwingConstants.RIGHT);
 
         selectFrom = new JComboBox<>();
         selectFrom.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
 
-        JLabel lblTo = new JLabel(GUIMessages.get("To") + ":");
+        JLabel lblTo = new JLabel(GuiMessages.get("To") + ":");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
 
         txtTo = SwingUtil.textFieldWithCopyPastePopup();
@@ -93,7 +94,7 @@ public class SendPanel extends JPanel implements ActionListener {
         txtTo.setActionCommand(Action.SEND.name());
         txtTo.addActionListener(this);
 
-        JLabel lblAmount = new JLabel(GUIMessages.get("Amount") + ":");
+        JLabel lblAmount = new JLabel(GuiMessages.get("Amount") + ":");
         lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
         txtAmount = SwingUtil.textFieldWithCopyPastePopup();
@@ -102,9 +103,9 @@ public class SendPanel extends JPanel implements ActionListener {
         txtAmount.setActionCommand(Action.SEND.name());
         txtAmount.addActionListener(this);
 
-        JLabel lblFee = new JLabel(GUIMessages.get("Fee") + ":");
+        JLabel lblFee = new JLabel(GuiMessages.get("Fee") + ":");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblFee.setToolTipText(GUIMessages.get("FeeTip", SwingUtil.formatValue(config.minTransactionFee())));
+        lblFee.setToolTipText(GuiMessages.get("FeeTip", SwingUtil.formatValue(config.minTransactionFee())));
 
         txtFee = SwingUtil.textFieldWithCopyPastePopup();
         txtFee.setName("txtFee");
@@ -112,39 +113,39 @@ public class SendPanel extends JPanel implements ActionListener {
         txtFee.setActionCommand(Action.SEND.name());
         txtFee.addActionListener(this);
 
-        JLabel lblData = new JLabel(GUIMessages.get("Data") + ":");
+        JLabel lblData = new JLabel(GuiMessages.get("Data") + ":");
         lblData.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblData.setToolTipText(GUIMessages.get("DataTip"));
+        lblData.setToolTipText(GuiMessages.get("DataTip"));
 
         txtData = SwingUtil.textFieldWithCopyPastePopup();
         txtData.setName("txtData");
         txtData.setColumns(10);
         txtData.setActionCommand(Action.SEND.name());
         txtData.addActionListener(this);
-        txtData.setToolTipText(GUIMessages.get("DataTip"));
+        txtData.setToolTipText(GuiMessages.get("DataTip"));
 
         JLabel lblSem1 = new JLabel("SEM");
 
         JLabel lblSem2 = new JLabel("SEM");
 
-        JButton btnSend = new JButton(GUIMessages.get("Send"));
+        JButton btnSend = new JButton(GuiMessages.get("Send"));
         btnSend.setName("btnSend");
         btnSend.addActionListener(this);
         btnSend.setActionCommand(Action.SEND.name());
 
-        JButton btnClear = new JButton(GUIMessages.get("Clear"));
+        JButton btnClear = new JButton(GuiMessages.get("Clear"));
         btnClear.setName("btnClear");
         btnClear.addActionListener(this);
         btnClear.setActionCommand(Action.CLEAR.name());
 
-        JButton btnAddressBook = new JButton(GUIMessages.get("AddressBook"));
+        JButton btnAddressBook = new JButton(GuiMessages.get("AddressBook"));
         btnAddressBook.setName("btnAddressBook");
         btnAddressBook.addActionListener(this);
         btnAddressBook.setActionCommand(Action.SHOW_ADDRESS_BOOK.name());
 
-        rdbtnText = new JRadioButton(GUIMessages.get("Text"));
+        rdbtnText = new JRadioButton(GuiMessages.get("Text"));
         rdbtnText.setSelected(true);
-        rdbtnHex = new JRadioButton(GUIMessages.get("Hex"));
+        rdbtnHex = new JRadioButton(GuiMessages.get("Hex"));
         ButtonGroup btnGroupDataType = new ButtonGroup();
         btnGroupDataType.add(rdbtnText);
         btnGroupDataType.add(rdbtnHex);
@@ -340,40 +341,40 @@ public class SendPanel extends JPanel implements ActionListener {
             byte[] to = Hex.decode0x(getToText());
 
             if (acc == null) {
-                showErrorDialog(GUIMessages.get("SelectAccount"));
+                showErrorDialog(GuiMessages.get("SelectAccount"));
             } else if (value <= 0L) {
-                showErrorDialog(GUIMessages.get("EnterValidValue"));
+                showErrorDialog(GuiMessages.get("EnterValidValue"));
             } else if (fee < config.minTransactionFee()) {
-                showErrorDialog(GUIMessages.get("TransactionFeeTooLow"));
+                showErrorDialog(GuiMessages.get("TransactionFeeTooLow"));
             } else if (value + fee > acc.getAvailable()) {
-                showErrorDialog(GUIMessages.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
-            } else if (to.length != EdDSA.ADDRESS_LEN) {
-                showErrorDialog(GUIMessages.get("InvalidReceivingAddress"));
+                showErrorDialog(GuiMessages.get("InsufficientFunds", SwingUtil.formatValue(value + fee)));
+            } else if (to.length != Key.ADDRESS_LEN) {
+                showErrorDialog(GuiMessages.get("InvalidReceivingAddress"));
             } else if (Bytes.of(data).length > config.maxTransactionDataSize(TransactionType.TRANSFER)) {
                 showErrorDialog(
-                        GUIMessages.get("InvalidData", config.maxTransactionDataSize(TransactionType.TRANSFER)));
+                        GuiMessages.get("InvalidData", config.maxTransactionDataSize(TransactionType.TRANSFER)));
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
-                        GUIMessages.get("TransferInfo", SwingUtil.formatValue(value), Hex.encode0x(to)),
-                        GUIMessages.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
+                        GuiMessages.get("TransferInfo", SwingUtil.formatValue(value), Hex.encode0x(to)),
+                        GuiMessages.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
                 if (ret == JOptionPane.YES_OPTION) {
                     PendingManager pendingMgr = kernel.getPendingManager();
 
                     byte[] rawData = rdbtnText.isSelected() ? Bytes.of(data) : Hex.decode0x(data);
 
-                    byte networkId = kernel.getConfig().networkId();
+                    Network network = kernel.getConfig().network();
                     TransactionType type = TransactionType.TRANSFER;
                     byte[] from = acc.getKey().toAddress();
                     long nonce = pendingMgr.getNonce(from);
                     long timestamp = System.currentTimeMillis();
-                    Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, rawData);
+                    Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, rawData);
                     tx.sign(acc.getKey());
 
                     sendTransaction(pendingMgr, tx);
                 }
             }
         } catch (ParseException | CryptoException ex) {
-            showErrorDialog(GUIMessages.get("EnterValidValue"));
+            showErrorDialog(GuiMessages.get("EnterValidValue"));
         }
     }
 
@@ -419,12 +420,13 @@ public class SendPanel extends JPanel implements ActionListener {
         if (result.error == null) {
             JOptionPane.showMessageDialog(
                     this,
-                    GUIMessages.get("TransactionSent", 30),
-                    GUIMessages.get("SuccessDialogTitle"),
+                    GuiMessages.get("TransactionSent", 30),
+                    GuiMessages.get("SuccessDialogTitle"),
                     JOptionPane.INFORMATION_MESSAGE);
             clear();
+            model.fireUpdateEvent();
         } else {
-            showErrorDialog(GUIMessages.get("TransactionFailed", result.error.toString()));
+            showErrorDialog(GuiMessages.get("TransactionFailed", result.error.toString()));
         }
     }
 
@@ -437,7 +439,7 @@ public class SendPanel extends JPanel implements ActionListener {
         JOptionPane.showMessageDialog(
                 this,
                 message,
-                GUIMessages.get("ErrorDialogTitle"),
+                GuiMessages.get("ErrorDialogTitle"),
                 JOptionPane.ERROR_MESSAGE);
     }
 
@@ -450,7 +452,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
         public Item(WalletAccount a, int idx) {
             this.account = a;
-            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + GUIMessages.get("AccountNumShort", idx)
+            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + GuiMessages.get("AccountNumShort", idx)
                     + ", " + SwingUtil.formatValue(account.getAvailable());
         }
 

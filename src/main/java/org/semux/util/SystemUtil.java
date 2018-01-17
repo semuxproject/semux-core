@@ -19,7 +19,7 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
 import org.semux.config.Constants;
-import org.semux.gui.SemuxGUI;
+import org.semux.gui.SemuxGui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,7 +150,22 @@ public class SystemUtil {
     }
 
     /**
-     * Reads a password from console with a customized message.
+     * Reads a line from the console.
+     * 
+     * @param prompt
+     * @return
+     */
+    public static String readLine(String prompt) {
+        if (prompt != null) {
+            System.out.print(prompt);
+            System.out.flush();
+        }
+
+        return SCANNER.nextLine();
+    }
+
+    /**
+     * Reads a password from the console.
      *
      * @param prompt
      *            A message to display before reading password
@@ -160,8 +175,10 @@ public class SystemUtil {
         Console console = System.console();
 
         if (console == null) {
-            System.out.print(prompt);
-            System.out.flush();
+            if (prompt != null) {
+                System.out.print(prompt);
+                System.out.flush();
+            }
 
             return SCANNER.nextLine();
         }
@@ -170,7 +187,7 @@ public class SystemUtil {
     }
 
     /**
-     * Reads a password from console.
+     * Reads a password from the console.
      *
      * @return
      */
@@ -179,7 +196,7 @@ public class SystemUtil {
     }
 
     /**
-     * Compare two version strings.
+     * Compares two version strings.
      * 
      * @param v1
      * @param v2
@@ -211,13 +228,12 @@ public class SystemUtil {
         }
 
         // check memory
-        if (rt.maxMemory() < 0.8 * 4 * 1024 * 1024 * 1024) {
+        if (rt.maxMemory() < 2 * 1024 * 1024 * 1024) {
             logger.info("Max allowed JVM heap memory size = {} MB", rt.maxMemory() / 1024 / 1024);
             return false;
         }
 
         return true;
-
     }
 
     /**
@@ -286,7 +302,7 @@ public class SystemUtil {
      */
     public static Object getImplementationVersion() {
         // this doesn't work with Java 9 and above
-        String version = SemuxGUI.class.getPackage().getImplementationVersion();
+        String version = SemuxGui.class.getPackage().getImplementationVersion();
 
         return version == null ? "unknown" : version;
     }

@@ -15,13 +15,13 @@ public class MenuBarTestApplication extends BaseTestApplication {
 
     private static final long serialVersionUID = 1L;
 
-    SemuxGUI gui;
+    SemuxGui gui;
 
     MenuBar menuBar;
 
     MenuBarTestApplication(WalletModel walletModel, KernelMock kernelMock) {
         super();
-        gui = new SemuxGUI(walletModel, kernelMock);
+        gui = new SemuxGui(walletModel, kernelMock);
         menuBar = new MenuBar(gui, this);
         this.setJMenuBar(menuBar);
 

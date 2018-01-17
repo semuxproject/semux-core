@@ -21,19 +21,20 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
+import org.semux.config.DevnetConfig;
 import org.semux.core.BlockchainImpl.StatsType;
-import org.semux.crypto.EdDSA;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.crypto.Key;
+import org.semux.rules.TemporaryDbRule;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
 public class BlockchainImplTest {
 
     @Rule
-    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+    public TemporaryDbRule temporaryDBFactory = new TemporaryDbRule();
 
     private Config config;
     private BlockchainImpl chain;
@@ -41,8 +42,8 @@ public class BlockchainImplTest {
     private byte[] coinbase = Bytes.random(30);
     private byte[] prevHash = Bytes.random(32);
 
-    private byte networkId = Constants.DEVNET_ID;
-    private EdDSA key = new EdDSA();
+    private Network network = Network.DEVNET;
+    private Key key = new Key();
     private byte[] from = key.toAddress();
     private byte[] to = Bytes.random(20);
     private long value = 20;
@@ -50,14 +51,14 @@ public class BlockchainImplTest {
     private long nonce = 12345;
     private byte[] data = Bytes.of("test");
     private long timestamp = System.currentTimeMillis() - 60 * 1000;
-    private Transaction tx = new Transaction(networkId, TransactionType.TRANSFER, to, value, fee, nonce, timestamp,
+    private Transaction tx = new Transaction(network, TransactionType.TRANSFER, to, value, fee, nonce, timestamp,
             data)
                     .sign(key);
     private TransactionResult res = new TransactionResult(true);
 
     @Before
     public void setUp() {
-        config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
         chain = new BlockchainImpl(config, temporaryDBFactory);
     }
 
@@ -114,12 +115,12 @@ public class BlockchainImplTest {
 
     @Test
     public void testGetGenesis() {
-        assertArrayEquals(Genesis.load(Constants.NETWORKS[networkId]).getHash(), chain.getGenesis().getHash());
+        assertArrayEquals(Genesis.load(network).getHash(), chain.getGenesis().getHash());
     }
 
     @Test
     public void testGetBlockHeader() {
-        assertArrayEquals(Genesis.load(Constants.NETWORKS[networkId]).getHash(), chain.getBlockHeader(0).getHash());
+        assertArrayEquals(Genesis.load(network).getHash(), chain.getBlockHeader(0).getHash());
 
         long number = 1;
         Block newBlock = createBlock(number);
@@ -227,7 +228,7 @@ public class BlockchainImplTest {
 
     @Test
     public void testGetTransactionsSelfTx() {
-        Transaction selfTx = new Transaction(networkId, TransactionType.TRANSFER, key.toAddress(), value, fee, nonce,
+        Transaction selfTx = new Transaction(network, TransactionType.TRANSFER, key.toAddress(), value, fee, nonce,
                 timestamp, data).sign(key);
         Block block = createBlock(
                 1,

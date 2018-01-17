@@ -15,12 +15,15 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
+import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.util.exception.UnreachableException;
 
 public class AddAddressDialog extends JDialog implements ActionListener {
@@ -33,17 +36,17 @@ public class AddAddressDialog extends JDialog implements ActionListener {
     private JTextField address;
 
     public AddAddressDialog(AddressBookDialog addressBookDialog) {
-        super(addressBookDialog, GUIMessages.get("AddAddress"), Dialog.ModalityType.TOOLKIT_MODAL);
+        super(addressBookDialog, GuiMessages.get("AddAddress"), Dialog.ModalityType.TOOLKIT_MODAL);
         this.addressBookDialog = addressBookDialog;
 
-        JLabel lblName = new JLabel(GUIMessages.get("Name"));
-        JLabel lblAddress = new JLabel(GUIMessages.get("Address"));
+        JLabel lblName = new JLabel(GuiMessages.get("Name"));
+        JLabel lblAddress = new JLabel(GuiMessages.get("Address"));
 
         name = SwingUtil.textFieldWithCopyPastePopup();
         address = SwingUtil.textFieldWithCopyPastePopup();
 
-        JButton btnCancel = SwingUtil.createDefaultButton(GUIMessages.get("Cancel"), this, Action.CANCEL);
-        JButton btnOk = SwingUtil.createDefaultButton(GUIMessages.get("OK"), this, Action.OK);
+        JButton btnCancel = SwingUtil.createDefaultButton(GuiMessages.get("Cancel"), this, Action.CANCEL);
+        JButton btnOk = SwingUtil.createDefaultButton(GuiMessages.get("OK"), this, Action.OK);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());
@@ -101,9 +104,18 @@ public class AddAddressDialog extends JDialog implements ActionListener {
             String n = name.getText().trim();
             String a = address.getText().trim();
             if (!n.isEmpty() && !a.isEmpty()) {
-                addressBookDialog.getAddressBook().put(name.getText(), address.getText());
-                addressBookDialog.refresh();
-                this.dispose();
+                try {
+                    byte[] addr = Hex.decode0x(address.getText());
+                    if (addr.length != Key.ADDRESS_LEN) {
+                        JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidAddress"));
+                    } else {
+                        addressBookDialog.getAddressBook().put(name.getText(), address.getText());
+                        addressBookDialog.refresh();
+                        this.dispose();
+                    }
+                } catch (Exception e2) {
+                    JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidAddress"));
+                }
             }
             break;
         case CANCEL:

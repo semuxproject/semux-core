@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.semux.db.KVDB;
+import org.semux.db.Db;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
@@ -31,7 +31,7 @@ public class AccountStateImpl implements AccountState {
     protected static final byte TYPE_CODE = 1;
     protected static final byte TYPE_STORAGE = 2;
 
-    protected KVDB accountDB;
+    protected Db accountDB;
     protected AccountStateImpl prev;
 
     /**
@@ -44,7 +44,7 @@ public class AccountStateImpl implements AccountState {
      * 
      * @param accountDB
      */
-    public AccountStateImpl(KVDB accountDB) {
+    public AccountStateImpl(Db accountDB) {
         this.accountDB = accountDB;
     }
 
