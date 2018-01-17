@@ -15,7 +15,7 @@ To format your code, please run the following command:
 mvn formatter:format license:format
 ```
 
-For IDE users, [Eclipse Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/eclpse/guide.md) and [IntelliJ IDEA Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/intellij/guide.md) are also provided.
+For IDE users, [Eclipse Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/eclipse/guide.md) and [IntelliJ IDEA Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/intellij/guide.md) are also provided.
 
 ## Contributor workflow
 
