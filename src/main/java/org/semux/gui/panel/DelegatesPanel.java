@@ -92,7 +92,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(25);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 600, 0.07, 0.2, 0.25, 0.15, 0.15, 0.08, 0.1);
+        SwingUtil.setColumnWidths(table, 600, 0.05, 0.2, 0.25, 0.15, 0.15, 0.1, 0.1);
         SwingUtil.setColumnAlignments(table, false, false, false, true, true, true, true);
 
         table.getSelectionModel().addListSelectionListener(event -> {
@@ -333,7 +333,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             case 4:
                 return SwingUtil.formatVote(d.getVotesFromMe());
             case 5:
-                return d.isValidator(kernel) ? "V" : "S";
+                return d.isValidator(kernel) ? GuiMessages.get("Validator") : GuiMessages.get("Delegate");
             case 6:
                 return SwingUtil.formatPercentage(d.getRate());
             default:

@@ -42,6 +42,7 @@ import org.semux.gui.dialog.SelectDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
+import org.semux.gui.model.WalletModel.Status;
 import org.semux.message.GuiMessages;
 import org.semux.net.Peer;
 import org.semux.util.SystemUtil;
@@ -326,7 +327,12 @@ public class SemuxGui extends Launcher {
         // update latest block and coinbase delegate status
         model.setSyncProgress(kernel.getSyncManager().getProgress());
         model.setLatestBlock(block);
-        model.setDelegate(ds.getDelegateByAddress(kernel.getCoinbase().toAddress()) != null);
+
+        // update coinbase
+        boolean isDelegate = ds.getDelegateByAddress(kernel.getCoinbase().toAddress()) != null;
+        boolean isValidator = chain.getValidators().contains(kernel.getCoinbase().toAddressString());
+        model.setCoinbase(kernel.getCoinbase());
+        model.setStatus(isValidator ? Status.VALIDATOR : (isDelegate ? Status.DELEGATE : Status.NORMAL));
 
         // refresh accounts
         if (kernel.getWallet().isUnlocked()) {

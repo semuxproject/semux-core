@@ -36,7 +36,7 @@ public class WalletModel {
     private Block latestBlock;
 
     private Key coinbase;
-    private boolean isDelegate;
+    private Status status;
 
     private volatile Map<ByteArray, Integer> accountNo = new HashMap<>();
     private volatile List<WalletAccount> accounts = new ArrayList<>();
@@ -118,21 +118,21 @@ public class WalletModel {
     }
 
     /**
-     * Check if the coinbase account is a delegate.
+     * Returns the account status.
      * 
      * @return
      */
-    public boolean isDelegate() {
-        return isDelegate;
+    public Status getStatus() {
+        return status;
     }
 
     /**
-     * Set whether the coinbase account is a delegate.
+     * Sets the account status.
      * 
-     * @param isDelegate
+     * @param status
      */
-    public void setDelegate(boolean isDelegate) {
-        this.isDelegate = isDelegate;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     /**
@@ -220,5 +220,9 @@ public class WalletModel {
         for (ActionListener listener : listeners) {
             EventQueue.invokeLater(() -> listener.actionPerformed(new ActionEvent(this, 0, Action.REFRESH.name())));
         }
+    }
+
+    public static enum Status {
+        NORMAL, DELEGATE, VALIDATOR
     }
 }
