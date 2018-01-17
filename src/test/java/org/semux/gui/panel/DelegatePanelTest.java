@@ -38,7 +38,6 @@ import org.semux.core.TransactionType;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Key;
 import org.semux.gui.WalletModelRule;
-import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.message.GuiMessages;
 import org.semux.rules.KernelRule;

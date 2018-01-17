@@ -104,7 +104,7 @@ public class LevelDb implements Db {
      */
     protected void recover(Options options) {
         try {
-            logger.info("Database is corrupted, trying to repair");
+            logger.info("Database is corrupted, trying to repair...");
             factory.repair(file, options);
             logger.info("Repair done!");
         } catch (IOException ex) {

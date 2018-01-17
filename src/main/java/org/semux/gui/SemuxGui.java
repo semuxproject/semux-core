@@ -267,7 +267,7 @@ public class SemuxGui extends Launcher {
                 TimeUnit.MILLISECONDS.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                logger.error(e.getMessage(), e);
+                logger.error("Failed to stop data/version threads", e);
             }
         }
 
