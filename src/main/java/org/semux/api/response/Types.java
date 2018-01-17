@@ -6,8 +6,6 @@
  */
 package org.semux.api.response;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -338,9 +336,6 @@ public class Types {
         @JsonProperty("timestamp")
         public final Long timestamp;
 
-        @JsonProperty("date")
-        public final String date;
-
         @JsonProperty("data")
         public final String data;
 
@@ -353,7 +348,6 @@ public class Types {
                 @JsonProperty("fee") Long fee,
                 @JsonProperty("nonce") Long nonce,
                 @JsonProperty("timestamp") Long timestamp,
-                @JsonProperty("date") String date,
                 @JsonProperty("data") String data) {
             this.hash = hash;
             this.type = type;
@@ -363,7 +357,6 @@ public class Types {
             this.fee = fee;
             this.nonce = nonce;
             this.timestamp = timestamp;
-            this.date = date;
             this.data = data;
         }
 
@@ -376,7 +369,6 @@ public class Types {
                     tx.getFee(),
                     tx.getNonce(),
                     tx.getTimestamp(),
-                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(tx.getTimestamp())),
                     Hex.encode0x(tx.getData()));
         }
     }

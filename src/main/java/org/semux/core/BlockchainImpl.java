@@ -42,8 +42,8 @@ import org.slf4j.LoggerFactory;
  * [2, address] => [validator_stats]
  * 
  * [3, block_hash] => [block_number]
- * [4, transaction_hash] => [block_number, from, to]
- * [5, address, n] => [transaction] OR [transaction_hash]
+ * [4, transaction_hash] => [block_number, from, to] | [coinbase_transaction]
+ * [5, address, n] => [transaction_hash]
  * </pre>
  *
  * <pre>

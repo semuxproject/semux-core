@@ -17,7 +17,6 @@ import io.netty.handler.codec.http.HttpHeaders;
 /**
  * Semux RESTful API handler implementation.
  *
- * TODO: Auto-generate API docs
  */
 public class ApiHandlerImpl implements ApiHandler {
 
