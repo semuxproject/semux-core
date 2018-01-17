@@ -6,7 +6,7 @@
  */
 package org.semux.gui.model;
 
-import java.awt.EventQueue;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -186,6 +186,11 @@ public class WalletModel {
     public int getAccountNumber(byte[] address) {
         Integer n = accountNo.get(ByteArray.of(address));
         return n == null ? -1 : n;
+    }
+
+    public WalletAccount getAccount(byte[] address) {
+        int accountNum = getAccountNumber(address);
+        return accountNum >= 0 ? accounts.get(accountNum) : null;
     }
 
     public void setAccounts(List<WalletAccount> accounts) {

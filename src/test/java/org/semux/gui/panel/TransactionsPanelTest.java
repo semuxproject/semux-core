@@ -58,7 +58,7 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testTransactions() {
         Key key = new Key();
-        WalletAccount acc = spy(new WalletAccount(key, new Account(key.toAddress(), 1, 1, 1)));
+        WalletAccount acc = spy(new WalletAccount(key, new Account(key.toAddress(), 1, 1, 1), "a"));
 
         Transaction tx = new Transaction(kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,

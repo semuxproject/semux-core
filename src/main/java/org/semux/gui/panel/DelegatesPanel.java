@@ -380,6 +380,11 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     match = false;
                     break;
                 }
+                // check if name updated
+                if (!selectFrom.getItemAt(i).account.getName().equals(list.get(i).getName())) {
+                    match = false;
+                    break;
+                }
             }
         }
 
@@ -628,7 +633,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         public Item(WalletAccount a, int idx) {
             this.account = a;
-            this.name = GuiMessages.get("AccountNumShort", idx) + ", " + SwingUtil.formatValue(account.getAvailable());
+            this.name = a.getName() + ", " + SwingUtil.formatValue(account.getAvailable());
         }
 
         @Override

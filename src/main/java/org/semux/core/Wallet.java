@@ -6,20 +6,13 @@
  */
 package org.semux.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hash;
+import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.message.GuiMessages;
 import org.semux.util.Bytes;
 import org.semux.util.IOUtil;
 import org.semux.util.SimpleDecoder;
@@ -27,11 +20,22 @@ import org.semux.util.SimpleEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class Wallet {
 
     private static final Logger logger = LoggerFactory.getLogger(Wallet.class);
 
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     // variable-length quantity is disabled for compatibility
     private static final boolean VLQ = false;
@@ -40,6 +44,8 @@ public class Wallet {
     private String password;
 
     private final List<Key> accounts = Collections.synchronizedList(new ArrayList<>());
+    // store accountNames separate from crypto key.
+    private final Map<String, String> accountNames = new HashMap<>();
 
     /**
      * Creates a new wallet instance.
@@ -94,16 +100,17 @@ public class Wallet {
 
             if (exists()) {
                 SimpleDecoder dec = new SimpleDecoder(IOUtil.readFile(file));
-                dec.readInt(); // version
-                int total = dec.readInt(); // size
-
-                List<Key> list = new ArrayList<>();
-                for (int i = 0; i < total; i++) {
-                    byte[] iv = dec.readBytes(VLQ);
-                    byte[] publicKey = dec.readBytes(VLQ);
-                    byte[] privateKey = Aes.decrypt(dec.readBytes(VLQ), key, iv);
-
-                    list.add(new Key(privateKey, publicKey));
+                int version = dec.readInt(); // version
+                List<Key> list;
+                switch (version) {
+                case 1:
+                    list = readVersion1Wallet(key, dec);
+                    break;
+                case 2:
+                    list = readVersion2Wallet(key, dec);
+                    break;
+                default:
+                    throw new CryptoException("Unknown wallet version.");
                 }
 
                 synchronized (accounts) {
@@ -120,6 +127,41 @@ public class Wallet {
         }
 
         return false;
+    }
+
+    private List<Key> readVersion1Wallet(byte[] key, SimpleDecoder dec) throws InvalidKeySpecException {
+        List<Key> list = new ArrayList<>();
+        int total = dec.readInt(); // size
+
+        for (int i = 0; i < total; i++) {
+            byte[] iv = dec.readBytes(VLQ);
+            byte[] publicKey = dec.readBytes(VLQ);
+            byte[] privateKey = Aes.decrypt(dec.readBytes(VLQ), key, iv);
+
+            // default the name
+            String name = GuiMessages.get("AccountNumShort", i);
+            accountNames.put(Hex.encode(publicKey), name);
+
+            list.add(new Key(privateKey, publicKey));
+        }
+        return list;
+    }
+
+    private List<Key> readVersion2Wallet(byte[] key, SimpleDecoder dec) throws InvalidKeySpecException {
+        List<Key> list = new ArrayList<>();
+        int total = dec.readInt(); // size
+
+        for (int i = 0; i < total; i++) {
+            byte[] iv = dec.readBytes(VLQ);
+            byte[] publicKey = dec.readBytes(VLQ);
+            byte[] privateKey = Aes.decrypt(dec.readBytes(VLQ), key, iv);
+
+            String name = dec.readString();
+            accountNames.put(Hex.encode(publicKey), name);
+
+            list.add(new Key(privateKey, publicKey));
+        }
+        return list;
     }
 
     /**
@@ -199,7 +241,10 @@ public class Wallet {
 
         synchronized (accounts) {
             accounts.clear();
-            accounts.addAll(list);
+            for(Key key : list)
+            {
+                addAccount(key);
+            }
         }
     }
 
@@ -261,6 +306,7 @@ public class Wallet {
                 }
             }
 
+            accountNames.put(Hex.encode(newKey.getPublicKey()), GuiMessages.get("AccountNumShort", accounts.size()));
             accounts.add(newKey);
             return true;
         }
@@ -355,6 +401,8 @@ public class Wallet {
                     enc.writeBytes(iv, VLQ);
                     enc.writeBytes(a.getPublicKey(), VLQ);
                     enc.writeBytes(Aes.encrypt(a.getPrivateKey(), key, iv), VLQ);
+                    String name = getNameForAccount(a.getPublicKey());
+                    enc.writeString(name);
                 }
             }
 
@@ -375,4 +423,14 @@ public class Wallet {
             throw new WalletLockedException();
         }
     }
+
+    public void setNameForAccount(byte[] publicKey, String name) {
+        accountNames.put(Hex.encode(publicKey), name);
+        flush();
+    }
+
+    public String getNameForAccount(byte[] publicKey) {
+        return accountNames.get(Hex.encode(publicKey));
+    }
+
 }

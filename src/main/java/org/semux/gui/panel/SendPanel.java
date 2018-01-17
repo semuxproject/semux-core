@@ -302,6 +302,11 @@ public class SendPanel extends JPanel implements ActionListener {
                     match = false;
                     break;
                 }
+                // check if name updated
+                if (!selectFrom.getItemAt(i).account.getName().equals(list.get(i).getName())) {
+                    match = false;
+                    break;
+                }
             }
         }
 
@@ -452,7 +457,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
         public Item(WalletAccount a, int idx) {
             this.account = a;
-            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + GuiMessages.get("AccountNumShort", idx)
+            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + account.getName()
                     + ", " + SwingUtil.formatValue(account.getAvailable());
         }
 

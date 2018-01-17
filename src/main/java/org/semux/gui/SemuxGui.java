@@ -186,8 +186,8 @@ public class SemuxGui extends Launcher {
             String message = GuiMessages.get("AccountSelection");
             List<Object> options = new ArrayList<>();
             List<Key> list = wallet.getAccounts();
-            for (int i = 0; i < list.size(); i++) {
-                options.add(Hex.PREF + list.get(i).toAddressString() + ", " + GuiMessages.get("AccountNumShort", i));
+            for (Key key : list) {
+                options.add(Hex.PREF + key.toAddressString() + ", " + wallet.getNameForAccount(key.getPublicKey()));
             }
 
             // show select dialog
@@ -333,7 +333,8 @@ public class SemuxGui extends Launcher {
             List<WalletAccount> accounts = new ArrayList<>();
             for (Key key : kernel.getWallet().getAccounts()) {
                 Account a = as.getAccount(key.toAddress());
-                WalletAccount wa = new WalletAccount(key, a);
+                String name = kernel.getWallet().getNameForAccount(key.getPublicKey());
+                WalletAccount wa = new WalletAccount(key, a, name);
                 accounts.add(wa);
             }
             model.setAccounts(accounts);

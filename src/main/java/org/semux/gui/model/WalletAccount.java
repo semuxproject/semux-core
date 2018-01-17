@@ -16,11 +16,13 @@ import org.semux.crypto.Key;
 
 public class WalletAccount extends Account {
     private Key key;
+    private String name;
     private List<Transaction> transactions = new ArrayList<>();
 
-    public WalletAccount(Key key, Account acc) {
+    public WalletAccount(Key key, Account acc, String name) {
         super(acc.getAddress(), acc.getAvailable(), acc.getLocked(), acc.getNonce());
         this.key = key;
+        this.name = name;
 
         if (!Arrays.equals(key.toAddress(), acc.getAddress())) {
             throw new IllegalArgumentException("Key and account does not match");
@@ -41,6 +43,14 @@ public class WalletAccount extends Account {
 
     public void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

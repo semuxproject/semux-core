@@ -55,7 +55,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ReceivePanel.class);
 
-    private static String[] columnNames = { GuiMessages.get("Num"), GuiMessages.get("Address"),
+    private static String[] columnNames = { GuiMessages.get("Num"), GuiMessages.get("Name"), GuiMessages.get("Address"),
             GuiMessages.get("Available"), GuiMessages.get("Locked") };
 
     private static final int QR_SIZE = 200;
@@ -82,8 +82,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(25);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 600, 0.05, 0.55, 0.2, 0.2);
-        SwingUtil.setColumnAlignments(table, false, false, true, true);
+        SwingUtil.setColumnWidths(table, 600, 0.05, 0.1, 0.55, 0.15, 0.15);
+        SwingUtil.setColumnAlignments(table, false, false, false, true, true);
 
         table.getSelectionModel().addListSelectionListener(
                 ev -> actionPerformed(new ActionEvent(ReceivePanel.this, 0, Action.SELECT_ACCOUNT.name())));
@@ -91,8 +91,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
         // customized table sorter
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
         sorter.setComparator(0, SwingUtil.NUMBER_COMPARATOR);
-        sorter.setComparator(2, SwingUtil.VALUE_COMPARATOR);
         sorter.setComparator(3, SwingUtil.VALUE_COMPARATOR);
+        sorter.setComparator(4, SwingUtil.VALUE_COMPARATOR);
         table.setRowSorter(sorter);
 
         JScrollPane scrollPane = new JScrollPane(table);
@@ -110,6 +110,10 @@ public class ReceivePanel extends JPanel implements ActionListener {
                 .createDefaultButton(GuiMessages.get("NewAccount"), this, Action.NEW_ACCOUNT);
         buttonNewAccount.setName("buttonNewAccount");
 
+        JButton btnRenameAddress = SwingUtil
+                .createDefaultButton(GuiMessages.get("RenameAccount"), this, Action.RENAME_ACCOUNT);
+        btnRenameAddress.setName("btnRenameAddress");
+
         JButton btnDeleteAddress = SwingUtil
                 .createDefaultButton(GuiMessages.get("DeleteAccount"), this, Action.DELETE_ACCOUNT);
         btnDeleteAddress.setName("btnDeleteAddress");
@@ -124,22 +128,25 @@ public class ReceivePanel extends JPanel implements ActionListener {
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addComponent(buttonNewAccount, GroupLayout.PREFERRED_SIZE, 121, GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnCopyAddress)
+                        .addComponent(btnRenameAddress)
                         .addComponent(qr)
                         .addComponent(btnDeleteAddress)
                         ))
         );
         groupLayout.setVerticalGroup(
-            groupLayout.createParallelGroup(Alignment.LEADING)
-                .addGroup(groupLayout.createSequentialGroup()
-                    .addComponent(qr)
-                    .addGap(18)
-                    .addComponent(btnCopyAddress)
-                    .addGap(18)
-                    .addComponent(buttonNewAccount)
-                    .addGap(18)
-                    .addComponent(btnDeleteAddress)
-                    .addContainerGap(249, Short.MAX_VALUE))
-                .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE)
+                groupLayout.createParallelGroup(Alignment.LEADING)
+                        .addGroup(groupLayout.createSequentialGroup()
+                                .addComponent(qr)
+                                .addGap(18)
+                                .addComponent(btnCopyAddress)
+                                .addGap(18)
+                                .addComponent(btnRenameAddress)
+                                .addGap(18)
+                                .addComponent(buttonNewAccount)
+                                .addGap(18)
+                                .addComponent(btnDeleteAddress)
+                                .addContainerGap(249, Short.MAX_VALUE))
+                        .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE)
         );
         groupLayout.linkSize(SwingConstants.HORIZONTAL, btnCopyAddress, buttonNewAccount, btnDeleteAddress);
         setLayout(groupLayout);
@@ -194,10 +201,12 @@ public class ReceivePanel extends JPanel implements ActionListener {
             case 0:
                 return SwingUtil.formatNumber(row);
             case 1:
-                return Hex.PREF + acc.getKey().toAddressString();
+                return acc.getName();
             case 2:
-                return SwingUtil.formatValue(acc.getAvailable());
+                return Hex.PREF + acc.getKey().toAddressString();
             case 3:
+                return SwingUtil.formatValue(acc.getAvailable());
+            case 4:
                 return SwingUtil.formatValue(acc.getLocked());
             default:
                 return null;
@@ -224,6 +233,9 @@ public class ReceivePanel extends JPanel implements ActionListener {
             break;
         case DELETE_ACCOUNT:
             deleteAccount();
+            break;
+        case RENAME_ACCOUNT:
+            renameAccount();
             break;
         default:
             throw new UnreachableException();
@@ -289,6 +301,24 @@ public class ReceivePanel extends JPanel implements ActionListener {
             clipboard.setContents(stringSelection, null);
 
             JOptionPane.showMessageDialog(this, GuiMessages.get("AddressCopied", address));
+        }
+    }
+
+    /**
+     * Process the RENAME_ACCOUNT event
+     */
+    private void renameAccount() {
+        WalletAccount acc = getSelectedAccount();
+        if (acc == null) {
+            JOptionPane.showMessageDialog(this, GuiMessages.get("SelectAccount"));
+        } else {
+            String name = JOptionPane.showInputDialog(this, GuiMessages.get("Name"));
+            if (name != null) {
+                Wallet wallet = kernel.getWallet();
+                wallet.setNameForAccount(acc.getKey().getPublicKey(), name);
+                // fire update event
+                model.fireUpdateEvent();
+            }
         }
     }
 

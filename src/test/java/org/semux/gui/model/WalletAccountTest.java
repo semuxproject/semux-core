@@ -24,7 +24,7 @@ public class WalletAccountTest {
     public void testKey() {
         Key key = new Key();
         Account acc = new Account(key.toAddress(), 1, 2, 3);
-        WalletAccount wa = new WalletAccount(key, acc);
+        WalletAccount wa = new WalletAccount(key, acc, "test account");
 
         assertThat(wa.getAddress(), equalTo(key.toAddress()));
         assertThat(wa.getAvailable(), equalTo(1L));
@@ -47,7 +47,7 @@ public class WalletAccountTest {
     public void testMismatch() {
         Key key = new Key();
         Account acc = new Account(new Key().toAddress(), 1, 2, 3);
-        new WalletAccount(key, acc);
+        new WalletAccount(key, acc, "test account");
     }
 
 }

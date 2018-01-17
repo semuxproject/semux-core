@@ -50,7 +50,7 @@ public class WalletModelRule extends ExternalResource {
                 lockedSEM * Unit.SEM,
                 RandomUtils.nextInt(1, 100));
 
-        walletAccount = new WalletAccount(key, account);
+        walletAccount = new WalletAccount(key, account, "test account");
         List<WalletAccount> accountList = Collections.singletonList(walletAccount);
         walletModel = mock(WalletModel.class);
         when(walletModel.getAccounts()).thenReturn(accountList);
