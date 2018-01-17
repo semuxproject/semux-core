@@ -13,6 +13,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
@@ -58,7 +59,7 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testTransactions() {
         Key key = new Key();
-        WalletAccount acc = spy(new WalletAccount(key, new Account(key.toAddress(), 1, 1, 1), "a"));
+        WalletAccount acc = spy(new WalletAccount(key, new Account(key.toAddress(), 1, 1, 1), Optional.empty()));
 
         Transaction tx = new Transaction(kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,

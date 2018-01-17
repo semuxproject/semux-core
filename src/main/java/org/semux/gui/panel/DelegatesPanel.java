@@ -395,7 +395,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             // update account list
             selectFrom.removeAllItems();
             for (int i = 0; i < list.size(); i++) {
-                selectFrom.addItem(new Item(list.get(i), i));
+                selectFrom.addItem(new Item(list.get(i)));
             }
 
             // recover selected account
@@ -631,9 +631,10 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         WalletAccount account;
         String name;
 
-        public Item(WalletAccount a, int idx) {
+        public Item(WalletAccount a) {
             this.account = a;
-            this.name = a.getName() + ", " + SwingUtil.formatValue(account.getAvailable());
+            String name = a.getName().isPresent() ? a.getName().get() : SwingUtil.shortAddress(a.getAddress());
+            this.name = name + ", " + SwingUtil.formatValue(account.getAvailable());
         }
 
         @Override

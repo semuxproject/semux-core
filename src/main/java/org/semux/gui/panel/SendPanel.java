@@ -457,8 +457,9 @@ public class SendPanel extends JPanel implements ActionListener {
 
         public Item(WalletAccount a, int idx) {
             this.account = a;
-            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + account.getName()
-                    + ", " + SwingUtil.formatValue(account.getAvailable());
+            String accountAlias = account.getName().isPresent() ? account.getName().get() + ", ": "";
+            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + accountAlias
+                     + SwingUtil.formatValue(account.getAvailable());
         }
 
         @Override

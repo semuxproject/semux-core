@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Aes;
@@ -23,7 +24,6 @@ import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
-import org.semux.message.GuiMessages;
 import org.semux.util.Bytes;
 import org.semux.util.IOUtil;
 import org.semux.util.SimpleDecoder;
@@ -37,15 +37,15 @@ public class Wallet {
 
     private static final int VERSION = 2;
 
-    // variable-length quantity is disabled for compatibility
-    private static final boolean VLQ = false;
+    // variable-length quantity
+    private static final boolean VLQ = true;
 
     private File file;
     private String password;
 
     private final List<Key> accounts = Collections.synchronizedList(new ArrayList<>());
-    // store accountNames separate from crypto key.
-    private final Map<String, String> accountNames = new HashMap<>();
+    // store accountAliases separate from crypto key.
+    private final Map<String, String> accountAliases = new HashMap<>();
 
     /**
      * Creates a new wallet instance.
@@ -129,18 +129,17 @@ public class Wallet {
         return false;
     }
 
+    /**
+     * Version 1 wallets did not use VLQ, and did not have address-book
+     */
     private List<Key> readVersion1Wallet(byte[] key, SimpleDecoder dec) throws InvalidKeySpecException {
         List<Key> list = new ArrayList<>();
         int total = dec.readInt(); // size
 
         for (int i = 0; i < total; i++) {
-            byte[] iv = dec.readBytes(VLQ);
-            byte[] publicKey = dec.readBytes(VLQ);
-            byte[] privateKey = Aes.decrypt(dec.readBytes(VLQ), key, iv);
-
-            // default the name
-            String name = GuiMessages.get("AccountNumShort", i);
-            accountNames.put(Hex.encode(publicKey), name);
+            byte[] iv = dec.readBytes(false);
+            byte[] publicKey = dec.readBytes(false);
+            byte[] privateKey = Aes.decrypt(dec.readBytes(false), key, iv);
 
             list.add(new Key(privateKey, publicKey));
         }
@@ -156,10 +155,15 @@ public class Wallet {
             byte[] publicKey = dec.readBytes(VLQ);
             byte[] privateKey = Aes.decrypt(dec.readBytes(VLQ), key, iv);
 
-            String name = dec.readString();
-            accountNames.put(Hex.encode(publicKey), name);
-
             list.add(new Key(privateKey, publicKey));
+        }
+        // read the address book
+        int totalAddresses = dec.readInt();
+        for (int i = 0; i < totalAddresses; i++) {
+            byte[] address = dec.readBytes(VLQ);
+            String alias = dec.readString();
+            accountAliases.put(Hex.encode(address), alias);
+
         }
         return list;
     }
@@ -306,7 +310,6 @@ public class Wallet {
                 }
             }
 
-            accountNames.put(Hex.encode(newKey.getPublicKey()), GuiMessages.get("AccountNumShort", accounts.size()));
             accounts.add(newKey);
             return true;
         }
@@ -401,8 +404,13 @@ public class Wallet {
                     enc.writeBytes(iv, VLQ);
                     enc.writeBytes(a.getPublicKey(), VLQ);
                     enc.writeBytes(Aes.encrypt(a.getPrivateKey(), key, iv), VLQ);
-                    String name = getNameForAccount(a.getPublicKey());
-                    enc.writeString(name);
+                }
+
+                //write our address book out.
+                enc.writeInt(accountAliases.size());
+                for (Map.Entry<String, String> alias : accountAliases.entrySet()) {
+                    enc.writeBytes(Hex.decode(alias.getKey()), VLQ);
+                    enc.writeString(alias.getValue());
                 }
             }
 
@@ -425,12 +433,17 @@ public class Wallet {
     }
 
     public void setNameForAccount(byte[] publicKey, String name) {
-        accountNames.put(Hex.encode(publicKey), name);
+        accountAliases.put(Hex.encode(publicKey), name);
         flush();
     }
 
-    public String getNameForAccount(byte[] publicKey) {
-        return accountNames.get(Hex.encode(publicKey));
+    public Optional<String> getNameForAccount(byte[] publicKey) {
+        String name = accountAliases.get(Hex.encode(publicKey));
+        if (name == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(name);
+        }
     }
 
 }

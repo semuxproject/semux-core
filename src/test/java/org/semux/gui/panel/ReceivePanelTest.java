@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
@@ -56,8 +57,8 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
     public void testCopyAddress() {
         Key key1 = new Key();
         Key key2 = new Key();
-        WalletAccount acc1 = new WalletAccount(key1, new Account(key1.toAddress(), 1, 1, 1), "a");
-        WalletAccount acc2 = new WalletAccount(key2, new Account(key2.toAddress(), 2, 2, 2), "b");
+        WalletAccount acc1 = new WalletAccount(key1, new Account(key1.toAddress(), 1, 1, 1), Optional.empty());
+        WalletAccount acc2 = new WalletAccount(key2, new Account(key2.toAddress(), 2, 2, 2), Optional.empty());
 
         // mock walletModel
         when(walletModel.getAccounts()).thenReturn(Arrays.asList(acc1, acc2));
@@ -84,8 +85,8 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
     public void testRenameAddress() throws InterruptedException {
         Key key1 = new Key();
         Key key2 = new Key();
-        WalletAccount acc1 = new WalletAccount(key1, new Account(key1.toAddress(), 1, 1, 1), "a");
-        WalletAccount acc2 = new WalletAccount(key2, new Account(key2.toAddress(), 2, 2, 2), "b");
+        WalletAccount acc1 = new WalletAccount(key1, new Account(key1.toAddress(), 1, 1, 1), Optional.empty());
+        WalletAccount acc2 = new WalletAccount(key2, new Account(key2.toAddress(), 2, 2, 2), Optional.empty());
 
         // mock walletModel
         when(walletModel.getAccounts()).thenReturn(Arrays.asList(acc1, acc2));
@@ -107,6 +108,6 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
 
         optionPane.buttonWithText("OK").click();
 
-        assertEquals("c", kernelMock.getWallet().getNameForAccount(key2.getPublicKey()));
+        assertEquals("c", kernelMock.getWallet().getNameForAccount(key2.getPublicKey()).get());
     }
 }

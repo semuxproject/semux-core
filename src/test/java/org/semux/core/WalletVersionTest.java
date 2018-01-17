@@ -18,8 +18,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Tests ability to read old wallet versions
@@ -41,8 +43,8 @@ public class WalletVersionTest {
         assertEquals(accounts, readAccounts);
 
         // verify that it has 'name' set to default
-        String name = wallet.getNameForAccount(accounts.get(0).getPublicKey());
-        assertEquals("Acc #0", name);
+        Optional<String> name = wallet.getNameForAccount(accounts.get(0).getPublicKey());
+        assertFalse(name.isPresent());
     }
 
     private void writeVersion1Wallet(List<Key> accounts, File file, String password) throws IOException {

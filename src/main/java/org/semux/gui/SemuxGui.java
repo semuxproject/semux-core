@@ -6,7 +6,7 @@
  */
 package org.semux.gui;
 
-import java.awt.EventQueue;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -16,13 +16,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
 import org.semux.Launcher;
@@ -47,9 +47,6 @@ import org.semux.net.Peer;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Graphic user interface.
@@ -187,7 +184,8 @@ public class SemuxGui extends Launcher {
             List<Object> options = new ArrayList<>();
             List<Key> list = wallet.getAccounts();
             for (Key key : list) {
-                options.add(Hex.PREF + key.toAddressString() + ", " + wallet.getNameForAccount(key.getPublicKey()));
+                Optional<String> name = wallet.getNameForAccount(key.getPublicKey());
+                options.add(Hex.PREF + key.toAddressString() + (name.isPresent() ? ", " + name.get() : ""));
             }
 
             // show select dialog
@@ -333,7 +331,7 @@ public class SemuxGui extends Launcher {
             List<WalletAccount> accounts = new ArrayList<>();
             for (Key key : kernel.getWallet().getAccounts()) {
                 Account a = as.getAccount(key.toAddress());
-                String name = kernel.getWallet().getNameForAccount(key.getPublicKey());
+                Optional<String> name = kernel.getWallet().getNameForAccount(key.getPublicKey());
                 WalletAccount wa = new WalletAccount(key, a, name);
                 accounts.add(wa);
             }

@@ -487,7 +487,7 @@ public class SwingUtil {
         }
 
         WalletAccount account = gui.getModel().getAccount(address);
-        return account == null ? Hex.encode0x(address) : account.getName();
+        return account == null || !account.getName().isPresent() ? Hex.encode0x(address) : account.getName().get();
     }
 
     /**
