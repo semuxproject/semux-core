@@ -9,6 +9,7 @@ package org.semux.core;
 import java.util.Arrays;
 
 import org.semux.Network;
+import org.semux.config.Constants;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
@@ -137,7 +138,13 @@ public class Transaction {
                 && signature != null
 
                 && Arrays.equals(Hash.h256(encoded), hash)
-                && Key.verify(hash, signature);
+                && Key.verify(hash, signature)
+
+                // The coinbase key is publicly available. People can use it for transactions.
+                // It won't introduce any fundamental loss to the system but could potentially
+                // cause confusion for block explorer, and thus are prohibited.
+                && (type == TransactionType.COINBASE
+                        || !Arrays.equals(signature.getAddress(), Constants.COINBASE_KEY.toAddress()));
     }
 
     /**
