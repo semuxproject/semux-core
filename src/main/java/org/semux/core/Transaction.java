@@ -16,7 +16,6 @@ import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
-import org.xbill.DNS.Address;
 
 public class Transaction {
 

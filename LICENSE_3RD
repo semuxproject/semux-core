@@ -2,16 +2,25 @@ This is a list of the third party components used by the Semux code, and
 distributed with this software.
 
 
-Logback:
-    https://logging.apache.org/log4j
+Apache Commons:
+    https://commons.apache.org/
     Apache License, Version 2.0
 
-Jackson:
-    https://github.com/FasterXML/jackson
-    Apache License, Version 2.0
+Bouncy Castle:
+    https://www.bouncycastle.org/
+    Copyright (c) 2000 - 2017 The Legion of the Bouncy Castle Inc.
+    Bouncy Castle License
 
 Caffeine:
     https://github.com/ben-manes/caffeine
+    Apache License, Version 2.0
+
+EdDSA-Java:
+    https://github.com/str4d/ed25519-java
+    CC0 1.0 Universal
+
+Jackson:
+    https://github.com/FasterXML/jackson
     Apache License, Version 2.0
 
 Java SemVer:
@@ -19,65 +28,56 @@ Java SemVer:
     Copyright 2012-2014 Zafar Khaja <zafarkhaja@gmail.com>.
     MIT License
 
-ZXing:
-    https://github.com/zxing/zxing
+JAX-RS API
+    Copyright (c) 2011-2012 Oracle
+    http://jax-rs-spec.java.net
+    CDDL License Version 1.1
+
+JNA:
+    https://github.com/java-native-access/jna
     Apache License, Version 2.0
 
-Apache Commons:
-    https://commons.apache.org/
+LevelDB JNI:
+    Copyright (c) 2011 FuseSource Corp. All rights reserved.
+    BSD 3-Clause License
+
+Logback:
+    https://logging.apache.org/log4j
     Apache License, Version 2.0
 
 Netty:
     https://netty.io/
     Apache License, Version 2.0
 
-Snappy Java:
-    https://github.com/xerial/snappy-java
-    Apache License, Version 2.0
-
 Oshi:
     https://github.com/oshi/oshi
     Eclipse Public License - v1.0
-
-JNA:
-    https://github.com/java-native-access/jna
-    Apache License, Version 2.0
-
-ThreeTen Backport
-    http://www.threeten.org/threetenbp/
-    BSD 3-Clause License
-
-EdDSA-Java:
-    https://github.com/str4d/ed25519-java
-    CC0 1.0 Universal
-
-weupnp:
-    http://bitletorg.github.io/weupnp/
-    GNU Lesser General Public License v3.0
-
-Bouncy Castle:
-    https://www.bouncycastle.org/
-    Copyright (c) 2000 - 2017 The Legion of the Bouncy Castle Inc.
-    Bouncy Castle License
-
-LevelDB JNI:
-    Copyright (c) 2011 FuseSource Corp. All rights reserved.
-    BSD 3-Clause License
 
 SLF4J:
     Copyright (c) 2004-2017 QOS.ch
     https://www.slf4j.org/
     MIT License
 
+Snappy Java:
+    https://github.com/xerial/snappy-java
+    Apache License, Version 2.0
+
 Swagger Annotations
     Copyright 2016 SmartBear Software
     https://swagger.io/
     Apache License, Version 2.0
 
-JAX-RS API
-    Copyright (c) 2011-2012 Oracle
-    http://jax-rs-spec.java.net
-    CDDL License Version 1.1
+ThreeTen Backport
+    http://www.threeten.org/threetenbp/
+    BSD 3-Clause License
+
+weupnp:
+    http://bitletorg.github.io/weupnp/
+    GNU Lesser General Public License v3.0
+
+ZXing:
+    https://github.com/zxing/zxing
+    Apache License, Version 2.0
 
 ================================================================================
 MIT License
