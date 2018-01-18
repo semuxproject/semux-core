@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -172,6 +173,24 @@ public class WalletTest {
         wallet.flush();
         wallet.lock();
         wallet.deleteAccount(key);
+    }
+
+    @Test
+    public void testWalletNames() throws IOException {
+        File tmp = File.createTempFile("wallet", ".data");
+
+        Wallet wall = new Wallet(tmp);
+        wall.unlock(pwd);
+        Key k = new Key();
+
+        wall.addAccount(k);
+        wall.setAccountAlias(k.toAddress(),"name");
+        wall.flush();
+
+        wall = new Wallet(tmp);
+        wall.unlock(pwd);
+        Optional<String> name = wall.getAccountAlias(k.toAddress());
+        assertEquals("name", name.get());
     }
 
     @Test

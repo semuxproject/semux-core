@@ -134,39 +134,67 @@ public class Wallet {
      * Version 1 wallets did not use VLQ, and did not have address-book
      */
     private List<Key> readVersion1Wallet(byte[] key, SimpleDecoder dec) throws InvalidKeySpecException {
+        List<Key> list = readKeys(key, dec, false);
+        return list;
+    }
+
+    private List<Key> readVersion2Wallet(byte[] key, SimpleDecoder dec) throws InvalidKeySpecException {
+        List<Key> list = readKeys(key, dec, VLQ);
+        readAddressBook(dec);
+        return list;
+    }
+
+    /**
+     * Read keys from wallet
+     */
+    private List<Key> readKeys(byte[] key, SimpleDecoder dec, boolean vlq) throws InvalidKeySpecException {
         List<Key> list = new ArrayList<>();
         int total = dec.readInt(); // size
 
         for (int i = 0; i < total; i++) {
-            byte[] iv = dec.readBytes(false);
-            byte[] publicKey = dec.readBytes(false);
-            byte[] privateKey = Aes.decrypt(dec.readBytes(false), key, iv);
+            byte[] iv = dec.readBytes(vlq);
+            byte[] publicKey = dec.readBytes(vlq);
+            byte[] privateKey = Aes.decrypt(dec.readBytes(vlq), key, iv);
 
             list.add(new Key(privateKey, publicKey));
         }
         return list;
     }
 
-    private List<Key> readVersion2Wallet(byte[] key, SimpleDecoder dec) throws InvalidKeySpecException {
-        List<Key> list = new ArrayList<>();
-        int total = dec.readInt(); // size
+    private void writeKeys(byte[] key, SimpleEncoder enc) {
+        enc.writeInt(accounts.size());
+        for (Key a : accounts) {
+            byte[] iv = Bytes.random(16);
 
-        for (int i = 0; i < total; i++) {
-            byte[] iv = dec.readBytes(VLQ);
-            byte[] publicKey = dec.readBytes(VLQ);
-            byte[] privateKey = Aes.decrypt(dec.readBytes(VLQ), key, iv);
-
-            list.add(new Key(privateKey, publicKey));
+            enc.writeBytes(iv, VLQ);
+            enc.writeBytes(a.getPublicKey(), VLQ);
+            enc.writeBytes(Aes.encrypt(a.getPrivateKey(), key, iv), VLQ);
         }
+    }
+
+    /**
+     * Read the address book.
+     * 
+     * @param dec
+     *            SimpleDecoder
+     */
+    private void readAddressBook(SimpleDecoder dec) {
         // read the address book
         int totalAddresses = dec.readInt();
         for (int i = 0; i < totalAddresses; i++) {
             byte[] address = dec.readBytes(VLQ);
             String alias = dec.readString();
             addressAliases.put(ByteArray.of(address), alias);
-
         }
-        return list;
+    }
+
+    private void writeAddressBook(SimpleEncoder enc) {
+        // write our address book out.
+        enc.writeInt(addressAliases.size());
+        for (Map.Entry<ByteArray, String> alias : addressAliases.entrySet()) {
+            enc.writeBytes(alias.getKey().getData(), VLQ);
+            enc.writeString(alias.getValue());
+        }
     }
 
     /**
@@ -395,23 +423,12 @@ public class Wallet {
 
             SimpleEncoder enc = new SimpleEncoder();
             enc.writeInt(VERSION);
-            enc.writeInt(accounts.size());
 
             synchronized (accounts) {
-                for (Key a : accounts) {
-                    byte[] iv = Bytes.random(16);
-
-                    enc.writeBytes(iv, VLQ);
-                    enc.writeBytes(a.getPublicKey(), VLQ);
-                    enc.writeBytes(Aes.encrypt(a.getPrivateKey(), key, iv), VLQ);
-                }
-
-                // write our address book out.
-                enc.writeInt(addressAliases.size());
-                for (Map.Entry<ByteArray, String> alias : addressAliases.entrySet()) {
-                    enc.writeBytes(alias.getKey().getData(), VLQ);
-                    enc.writeString(alias.getValue());
-                }
+                writeKeys(key, enc);
+            }
+            synchronized (addressAliases) {
+                writeAddressBook(enc);
             }
 
             file.getParentFile().mkdirs();
