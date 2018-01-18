@@ -315,7 +315,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             String name = JOptionPane.showInputDialog(this, GuiMessages.get("Name"));
             if (name != null) {
                 Wallet wallet = kernel.getWallet();
-                wallet.setNameForAccount(acc.getKey().getPublicKey(), name);
+                wallet.setAccountAlias(acc.getKey().toAddressString(), name);
                 // fire update event
                 model.fireUpdateEvent();
             }

@@ -43,7 +43,7 @@ public class WalletVersionTest {
         assertEquals(accounts, readAccounts);
 
         // verify that it has 'name' set to default
-        Optional<String> name = wallet.getNameForAccount(accounts.get(0).getPublicKey());
+        Optional<String> name = wallet.getAccountAlias(accounts.get(0).getPublicKey());
         assertFalse(name.isPresent());
     }
 

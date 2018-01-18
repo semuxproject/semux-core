@@ -184,7 +184,7 @@ public class SemuxGui extends Launcher {
             List<Object> options = new ArrayList<>();
             List<Key> list = wallet.getAccounts();
             for (Key key : list) {
-                Optional<String> name = wallet.getNameForAccount(key.getPublicKey());
+                Optional<String> name = wallet.getAccountAlias(key.toAddress());
                 options.add(Hex.PREF + key.toAddressString() + (name.isPresent() ? ", " + name.get() : ""));
             }
 
@@ -218,7 +218,6 @@ public class SemuxGui extends Launcher {
 
         // set up model
         model = new WalletModel();
-        model.setAddressBook(new AddressBook(new File(getDataDir(), "addressbook.json")));
         model.setCoinbase(wallet.getAccount(getCoinbase()));
 
         // set up kernel
@@ -331,7 +330,7 @@ public class SemuxGui extends Launcher {
             List<WalletAccount> accounts = new ArrayList<>();
             for (Key key : kernel.getWallet().getAccounts()) {
                 Account a = as.getAccount(key.toAddress());
-                Optional<String> name = kernel.getWallet().getNameForAccount(key.getPublicKey());
+                Optional<String> name = kernel.getWallet().getAccountAlias(key.toAddress());
                 WalletAccount wa = new WalletAccount(key, a, name);
                 accounts.add(wa);
             }

@@ -19,7 +19,6 @@ import org.semux.core.Block;
 import org.semux.core.SyncManager;
 import org.semux.crypto.Key;
 import org.semux.gui.Action;
-import org.semux.gui.AddressBook;
 import org.semux.net.Peer;
 import org.semux.util.ByteArray;
 
@@ -43,8 +42,6 @@ public class WalletModel {
     private volatile List<WalletDelegate> delegates = new ArrayList<>();
 
     private Map<String, Peer> activePeers = new HashMap<>();
-
-    private AddressBook addressBook;
 
     /**
      * Fires an model update event.
@@ -159,24 +156,6 @@ public class WalletModel {
             sum += acc.getLocked();
         }
         return sum;
-    }
-
-    /**
-     * Sets the address book.
-     * 
-     * @param addressBook
-     */
-    public void setAddressBook(AddressBook addressBook) {
-        this.addressBook = addressBook;
-    }
-
-    /**
-     * Returns the address book.
-     * 
-     * @return
-     */
-    public AddressBook getAddressBook() {
-        return addressBook;
     }
 
     public List<WalletAccount> getAccounts() {

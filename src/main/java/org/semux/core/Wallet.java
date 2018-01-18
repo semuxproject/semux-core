@@ -24,6 +24,7 @@ import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.IOUtil;
 import org.semux.util.SimpleDecoder;
@@ -44,8 +45,8 @@ public class Wallet {
     private String password;
 
     private final List<Key> accounts = Collections.synchronizedList(new ArrayList<>());
-    // store accountAliases separate from crypto key.
-    private final Map<String, String> accountAliases = new HashMap<>();
+    // store addressAliases separate from crypto key.
+    private final Map<ByteArray, String> addressAliases = new HashMap<>();
 
     /**
      * Creates a new wallet instance.
@@ -162,7 +163,7 @@ public class Wallet {
         for (int i = 0; i < totalAddresses; i++) {
             byte[] address = dec.readBytes(VLQ);
             String alias = dec.readString();
-            accountAliases.put(Hex.encode(address), alias);
+            addressAliases.put(ByteArray.of(address), alias);
 
         }
         return list;
@@ -245,8 +246,7 @@ public class Wallet {
 
         synchronized (accounts) {
             accounts.clear();
-            for(Key key : list)
-            {
+            for (Key key : list) {
                 addAccount(key);
             }
         }
@@ -406,10 +406,10 @@ public class Wallet {
                     enc.writeBytes(Aes.encrypt(a.getPrivateKey(), key, iv), VLQ);
                 }
 
-                //write our address book out.
-                enc.writeInt(accountAliases.size());
-                for (Map.Entry<String, String> alias : accountAliases.entrySet()) {
-                    enc.writeBytes(Hex.decode(alias.getKey()), VLQ);
+                // write our address book out.
+                enc.writeInt(addressAliases.size());
+                for (Map.Entry<ByteArray, String> alias : addressAliases.entrySet()) {
+                    enc.writeBytes(alias.getKey().getData(), VLQ);
                     enc.writeString(alias.getValue());
                 }
             }
@@ -432,18 +432,31 @@ public class Wallet {
         }
     }
 
-    public void setNameForAccount(byte[] publicKey, String name) {
-        accountAliases.put(Hex.encode(publicKey), name);
+    public void setAccountAlias(byte[] address, String name) {
+        addressAliases.put(ByteArray.of(address), name);
         flush();
     }
 
-    public Optional<String> getNameForAccount(byte[] publicKey) {
-        String name = accountAliases.get(Hex.encode(publicKey));
+    public void setAccountAlias(String address, String name) {
+        setAccountAlias(Hex.decode0x(address), name);
+    }
+
+    public void removeAccountAlias(String address) {
+        addressAliases.remove(ByteArray.of(Hex.decode0x(address)));
+        flush();
+    }
+
+    public Optional<String> getAccountAlias(byte[] address) {
+        String name = addressAliases.get(ByteArray.of(address));
         if (name == null) {
             return Optional.empty();
         } else {
             return Optional.of(name);
         }
+    }
+
+    public Map<ByteArray, String> getAddressAliases() {
+        return addressAliases;
     }
 
 }

@@ -317,7 +317,7 @@ public class SendPanel extends JPanel implements ActionListener {
             // update account list
             selectFrom.removeAllItems();
             for (int i = 0; i < list.size(); i++) {
-                selectFrom.addItem(new Item(list.get(i), i));
+                selectFrom.addItem(new Item(list.get(i)));
             }
 
             // recover selected account
@@ -398,7 +398,7 @@ public class SendPanel extends JPanel implements ActionListener {
      */
     protected void showAddressBook() {
         if (addressBookDialog == null) {
-            addressBookDialog = new AddressBookDialog(frame, model);
+            addressBookDialog = new AddressBookDialog(frame, model, kernel.getWallet());
         }
 
         addressBookDialog.setVisible(true);
@@ -455,11 +455,11 @@ public class SendPanel extends JPanel implements ActionListener {
         WalletAccount account;
         String name;
 
-        public Item(WalletAccount a, int idx) {
+        public Item(WalletAccount a) {
             this.account = a;
-            String accountAlias = account.getName().isPresent() ? account.getName().get() + ", ": "";
+            String accountAlias = account.getName().isPresent() ? account.getName().get() + ", " : "";
             this.name = Hex.PREF + account.getKey().toAddressString() + ", " + accountAlias
-                     + SwingUtil.formatValue(account.getAvailable());
+                    + SwingUtil.formatValue(account.getAvailable());
         }
 
         @Override
