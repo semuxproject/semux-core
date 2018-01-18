@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
@@ -232,5 +233,17 @@ public class SemuxIpFilter {
             }
 
         }
+    }
+
+    public static final class Saver {
+
+        public void save(Path path, SemuxIpFilter ipFilter) {
+            try {
+                new ObjectMapper().writer(SerializationFeature.INDENT_OUTPUT).writeValue(path.toFile(), ipFilter);
+            } catch (IOException e) {
+                logger.error("Failed to save ip filter", e);
+            }
+        }
+
     }
 }
