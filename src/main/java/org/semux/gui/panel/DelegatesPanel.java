@@ -633,8 +633,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         public Item(WalletAccount a) {
             this.account = a;
-            String name = a.getName().isPresent() ? a.getName().get() : SwingUtil.shortAddress(a.getAddress());
-            this.name = name + ", " + SwingUtil.formatValue(account.getAvailable());
+            String addressName = a.getName().isPresent() ? a.getName().get() : SwingUtil.shortAddress(a.getAddress());
+            this.name = addressName + ", " + SwingUtil.formatValue(account.getAvailable());
         }
 
         @Override
