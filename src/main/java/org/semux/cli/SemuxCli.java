@@ -170,7 +170,12 @@ public class SemuxCli extends Launcher {
         }
 
         // start kernel
-        startKernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
+        try {
+            startKernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
+        } catch (Exception e) {
+            logger.error("Uncaught exception during kernel startup.", e);
+            SystemUtil.exitAsync(-1);
+        }
     }
 
     protected Kernel startKernel(Config config, Wallet wallet, Key coinbase) {

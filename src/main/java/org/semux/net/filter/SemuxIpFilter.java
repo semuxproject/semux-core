@@ -230,7 +230,6 @@ public class SemuxIpFilter {
             } catch (IOException e) {
                 throw new ParseException(e);
             }
-
         }
     }
 }
