@@ -16,6 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -64,6 +65,7 @@ import org.semux.crypto.Key;
 import org.semux.net.Capability;
 import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
+import org.semux.net.filter.SemuxIpFilter;
 import org.semux.rules.KernelRule;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
@@ -169,6 +171,10 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
         when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
         assertFalse(channelMgr.isAcceptable(inetSocketAddress));
+
+        // assert that ipfilter.json is persisted
+        File ipfilterJson = new File(config.configDir(), SemuxIpFilter.CONFIG_FILE);
+        assertTrue(ipfilterJson.exists());
     }
 
     @Test
@@ -183,6 +189,10 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
         when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
         assertTrue(channelMgr.isAcceptable(inetSocketAddress));
+
+        // assert that ipfilter.json is persisted
+        File ipfilterJson = new File(config.configDir(), SemuxIpFilter.CONFIG_FILE);
+        assertTrue(ipfilterJson.exists());
     }
 
     @Test

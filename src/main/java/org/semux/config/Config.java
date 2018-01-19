@@ -33,6 +33,13 @@ public interface Config {
     File dataDir();
 
     /**
+     * Returns the config directory.
+     *
+     * @return
+     */
+    File configDir();
+
+    /**
      * Returns the network.
      *
      * @return

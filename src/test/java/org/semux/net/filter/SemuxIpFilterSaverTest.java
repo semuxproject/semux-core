@@ -12,8 +12,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
@@ -32,22 +34,47 @@ public class SemuxIpFilterSaverTest extends SemuxIpFilterTestBase {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+    private static final String DEST_FILENAME = "ipfilter.json";
+
+    private static final Function<TemporaryFolder, File> writableFolderFactory = temporaryFolder -> {
+        try {
+            return temporaryFolder.newFolder();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    };
+
+    private static final Function<TemporaryFolder, File> readonlyFolderFactory = temporaryFolder -> {
+        try {
+            File folder = temporaryFolder.newFolder();
+            assert (folder.setWritable(false));
+            return folder;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    };
+
     @Parameterized.Parameters
     public static Collection<Object[]> data() throws UnknownHostException {
         return Arrays.asList(new Object[][] {
-                { getFile("empty.json"),
+                { writableFolderFactory,
+                        getFile("empty.json"),
                         new SemuxIpFilter.Builder()
                                 .build(),
                         null
                 },
-                { getFile("blacklist.json"),
+                { writableFolderFactory,
+                        getFile("blacklist.json"),
                         new SemuxIpFilter.Builder()
                                 .reject("1.2.3.4")
                                 .reject("5.6.7.8")
                                 .build(),
                         null
                 },
-                { getFile("whitelist.json"),
+                { writableFolderFactory,
+                        getFile("whitelist.json"),
                         new SemuxIpFilter.Builder()
                                 .accept("127.0.0.1/8")
                                 .accept("192.168.0.0/16")
@@ -55,8 +82,21 @@ public class SemuxIpFilterSaverTest extends SemuxIpFilterTestBase {
                                 .build(),
                         null
                 },
+
+                // read-only folder
+                { readonlyFolderFactory,
+                        getFile("empty.json"),
+                        new SemuxIpFilter.Builder()
+                                .build(),
+                        IOException.class
+                },
         });
     }
+
+    /**
+     * The destination folder
+     */
+    private Function<TemporaryFolder, File> folderSupplier;
 
     /**
      * Expectation
@@ -70,7 +110,9 @@ public class SemuxIpFilterSaverTest extends SemuxIpFilterTestBase {
 
     Class<? extends Throwable> exception;
 
-    public SemuxIpFilterSaverTest(File jsonFile, SemuxIpFilter ipFilter, Class<? extends Throwable> exception) {
+    public SemuxIpFilterSaverTest(Function<TemporaryFolder, File> folderSupplier, File jsonFile, SemuxIpFilter ipFilter,
+            Class<? extends Throwable> exception) {
+        this.folderSupplier = folderSupplier;
         this.jsonFile = jsonFile;
         this.ipFilter = ipFilter;
         this.exception = exception;
@@ -78,12 +120,14 @@ public class SemuxIpFilterSaverTest extends SemuxIpFilterTestBase {
 
     @Test
     public void testSave() throws IOException {
+        File folder = folderSupplier.apply(temporaryFolder);
+
         if (exception != null) {
             expectedException.expect(exception);
         }
 
         SemuxIpFilter.Saver saver = new SemuxIpFilter.Saver();
-        Path dest = temporaryFolder.newFile().toPath();
+        Path dest = Paths.get(folder.getAbsolutePath(), DEST_FILENAME);
         saver.save(dest, ipFilter);
 
         assertEquals(

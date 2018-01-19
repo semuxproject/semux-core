@@ -6,6 +6,7 @@
  */
 package org.semux.api;
 
+import java.io.File;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Map;
@@ -48,6 +49,7 @@ import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.net.NodeManager;
+import org.semux.net.filter.SemuxIpFilter;
 
 public class SemuxApiImpl implements SemuxApi {
     private Kernel kernel;
@@ -91,7 +93,9 @@ public class SemuxApiImpl implements SemuxApi {
                 return failure("Parameter `ip` can't be empty");
             }
 
-            kernel.getChannelManager().getIpFilter().blacklistIp(ip.trim());
+            SemuxIpFilter ipFilter = kernel.getChannelManager().getIpFilter();
+            ipFilter.blacklistIp(ip.trim());
+            ipFilter.persist(new File(kernel.getConfig().configDir(), SemuxIpFilter.CONFIG_FILE).toPath());
 
             return new ApiHandlerResponse(true, null);
         } catch (UnknownHostException | IllegalArgumentException ex) {
@@ -106,7 +110,9 @@ public class SemuxApiImpl implements SemuxApi {
                 return failure("Parameter `ip` can't be empty");
             }
 
-            kernel.getChannelManager().getIpFilter().whitelistIp(ip.trim());
+            SemuxIpFilter ipFilter = kernel.getChannelManager().getIpFilter();
+            ipFilter.whitelistIp(ip.trim());
+            ipFilter.persist(new File(kernel.getConfig().configDir(), SemuxIpFilter.CONFIG_FILE).toPath());
 
             return new ApiHandlerResponse(true, null);
         } catch (UnknownHostException | IllegalArgumentException ex) {
