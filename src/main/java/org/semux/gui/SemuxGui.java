@@ -208,7 +208,17 @@ public class SemuxGui extends Launcher {
             setCoinbase(0);
         }
 
-        startKernelAndMain(wallet);
+        try {
+            startKernelAndMain(wallet);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    e.getMessage(),
+                    GuiMessages.get("ErrorDialogTitle"),
+                    JOptionPane.ERROR_MESSAGE);
+            logger.error("Uncaught exception during kernel startup.", e);
+            SystemUtil.exitAsync(-1);
+        }
     }
 
     /**
