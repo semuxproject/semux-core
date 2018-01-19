@@ -11,6 +11,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -131,6 +132,17 @@ public class ChannelManager {
         if (ch.isActive()) {
             activeChannels.remove(ch.getRemotePeer().getPeerId());
             ch.onInactive();
+        }
+    }
+
+    /**
+     * Remove blacklisted channels.
+     */
+    public void removeBlacklistedChannels() {
+        for (Map.Entry<InetSocketAddress, Channel> channelEntry : channels.entrySet()) {
+            if (!isAcceptable(channelEntry.getValue().getRemoteAddress())) {
+                remove(channelEntry.getValue());
+            }
         }
     }
 

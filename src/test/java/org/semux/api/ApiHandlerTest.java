@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -63,6 +64,7 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.net.Capability;
+import org.semux.net.ChannelManager;
 import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
 import org.semux.net.filter.SemuxIpFilter;
@@ -164,8 +166,12 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testAddToBlacklist() throws IOException {
+        ChannelManager channelManagerSpy = spy(kernelRule.getKernel().getChannelManager());
+        kernelRule.getKernel().setChannelManager(channelManagerSpy);
+
         // blacklist 8.8.8.8
         assertTrue(request("/add_to_blacklist?ip=8.8.8.8", ApiHandlerResponse.class).success);
+        verify(channelManagerSpy).removeBlacklistedChannels();
 
         // assert that 8.8.8.8 is no longer acceptable
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
