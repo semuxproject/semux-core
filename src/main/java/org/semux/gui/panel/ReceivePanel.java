@@ -300,12 +300,17 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
         Wallet wallet = kernel.getWallet();
         wallet.addAccount(key);
-        wallet.flush();
+        boolean added = wallet.flush();
 
-        // fire update event
-        model.fireUpdateEvent();
+        if (added) {
+            // fire update event
+            model.fireUpdateEvent();
 
-        JOptionPane.showMessageDialog(this, GuiMessages.get("NewAccountCreated"));
+            JOptionPane.showMessageDialog(this, GuiMessages.get("NewAccountCreated"));
+        } else {
+            wallet.deleteAccount(key);
+            JOptionPane.showMessageDialog(this, GuiMessages.get("WalletSaveFailed"));
+        }
     }
 
     /**
