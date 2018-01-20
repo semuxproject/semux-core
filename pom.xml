@@ -302,6 +302,8 @@
                                 <copy todir="${dist.base}/macos">
                                     <fileset dir="${dist.base}/linux"></fileset>
                                 </copy>
+                                <chmod file="${dist.base}/macos/semux.jar" perm="755" />
+                                <chmod file="${dist.base}/macos/semux*.sh" perm="755" />
                             </target>
                         </configuration>
                         <goals>
