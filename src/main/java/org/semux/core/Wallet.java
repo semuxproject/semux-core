@@ -17,12 +17,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hash;
-import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
@@ -38,15 +38,12 @@ public class Wallet {
 
     private static final int VERSION = 2;
 
-    // variable-length quantity
-    private static final boolean VLQ = true;
-
     private File file;
     private String password;
 
     private final List<Key> accounts = Collections.synchronizedList(new ArrayList<>());
-    // store addressAliases separate from crypto key.
-    private final Map<ByteArray, String> addressAliases = new HashMap<>();
+
+    private final Map<ByteArray, String> addressAliases = new ConcurrentHashMap<>();
 
     /**
      * Creates a new wallet instance.
@@ -139,15 +136,21 @@ public class Wallet {
     }
 
     private List<Key> readVersion2Wallet(byte[] key, SimpleDecoder dec) throws InvalidKeySpecException {
-        List<Key> list = readKeys(key, dec, VLQ);
+        List<Key> list = readKeys(key, dec, true);
         readAddressBook(dec);
         return list;
     }
 
     /**
-     * Read keys from wallet
+     * Reads the account keys.
+     * 
+     * @param key
+     * @param dec
+     * @param vlq
+     * @return
+     * @throws InvalidKeySpecException
      */
-    private List<Key> readKeys(byte[] key, SimpleDecoder dec, boolean vlq) throws InvalidKeySpecException {
+    protected List<Key> readKeys(byte[] key, SimpleDecoder dec, boolean vlq) throws InvalidKeySpecException {
         List<Key> list = new ArrayList<>();
         int total = dec.readInt(); // size
 
@@ -161,39 +164,54 @@ public class Wallet {
         return list;
     }
 
-    private void writeKeys(byte[] key, SimpleEncoder enc) {
-        enc.writeInt(accounts.size());
-        for (Key a : accounts) {
-            byte[] iv = Bytes.random(16);
+    /**
+     * Writes the account keys.
+     * 
+     * @param key
+     * @param enc
+     */
+    protected void writeKeys(byte[] key, SimpleEncoder enc) {
+        synchronized (accounts) {
+            enc.writeInt(accounts.size());
+            for (Key a : accounts) {
+                byte[] iv = Bytes.random(16);
 
-            enc.writeBytes(iv, VLQ);
-            enc.writeBytes(a.getPublicKey(), VLQ);
-            enc.writeBytes(Aes.encrypt(a.getPrivateKey(), key, iv), VLQ);
+                enc.writeBytes(iv);
+                enc.writeBytes(a.getPublicKey());
+                enc.writeBytes(Aes.encrypt(a.getPrivateKey(), key, iv));
+            }
         }
     }
 
     /**
-     * Read the address book.
+     * Reads the address book.
      * 
      * @param dec
      *            SimpleDecoder
      */
-    private void readAddressBook(SimpleDecoder dec) {
+    protected void readAddressBook(SimpleDecoder dec) {
         // read the address book
         int totalAddresses = dec.readInt();
         for (int i = 0; i < totalAddresses; i++) {
-            byte[] address = dec.readBytes(VLQ);
+            byte[] address = dec.readBytes();
             String alias = dec.readString();
             addressAliases.put(ByteArray.of(address), alias);
         }
     }
 
-    private void writeAddressBook(SimpleEncoder enc) {
+    /**
+     * Writes the address book.
+     * 
+     * @param enc
+     */
+    protected void writeAddressBook(SimpleEncoder enc) {
         // write our address book out.
-        enc.writeInt(addressAliases.size());
-        for (Map.Entry<ByteArray, String> alias : addressAliases.entrySet()) {
-            enc.writeBytes(alias.getKey().getData(), VLQ);
-            enc.writeString(alias.getValue());
+        synchronized (addressAliases) {
+            enc.writeInt(addressAliases.size());
+            for (Map.Entry<ByteArray, String> alias : addressAliases.entrySet()) {
+                enc.writeBytes(alias.getKey().getData());
+                enc.writeString(alias.getValue());
+            }
         }
     }
 
@@ -204,6 +222,7 @@ public class Wallet {
         password = null;
 
         accounts.clear();
+        addressAliases.clear();
     }
 
     /**
@@ -272,11 +291,9 @@ public class Wallet {
     public void setAccounts(List<Key> list) throws WalletLockedException {
         requireUnlocked();
 
-        synchronized (accounts) {
-            accounts.clear();
-            for (Key key : list) {
-                addAccount(key);
-            }
+        accounts.clear();
+        for (Key key : list) {
+            addAccount(key);
         }
     }
 
@@ -424,12 +441,8 @@ public class Wallet {
             SimpleEncoder enc = new SimpleEncoder();
             enc.writeInt(VERSION);
 
-            synchronized (accounts) {
-                writeKeys(key, enc);
-            }
-            synchronized (addressAliases) {
-                writeAddressBook(enc);
-            }
+            writeKeys(key, enc);
+            writeAddressBook(enc);
 
             file.getParentFile().mkdirs();
             IOUtil.writeToFile(enc.toBytes(), file);
@@ -443,37 +456,57 @@ public class Wallet {
         return false;
     }
 
+    /**
+     * Returns the alias of the given address.
+     * 
+     * @param address
+     * @return
+     */
+    public Optional<String> getAddressAlias(byte[] address) throws WalletLockedException {
+        requireUnlocked();
+
+        return Optional.ofNullable(addressAliases.get(ByteArray.of(address)));
+    }
+
+    /**
+     * Sets the alias of an address.
+     * 
+     * @param address
+     * @param name
+     * @throws WalletLockedException
+     */
+    public void setAddressAlias(byte[] address, String name) throws WalletLockedException {
+        requireUnlocked();
+
+        addressAliases.put(ByteArray.of(address), name);
+    }
+
+    /**
+     * Returns the alias of an address.
+     * 
+     * @param address
+     * @throws WalletLockedException
+     */
+    public void removeAccountAlias(byte[] address) throws WalletLockedException {
+        requireUnlocked();
+
+        addressAliases.remove(ByteArray.of(address));
+    }
+
+    /**
+     * Returns all address aliases.
+     * 
+     * @return
+     */
+    public Map<ByteArray, String> getAddressAliases() throws WalletLockedException {
+        requireUnlocked();
+
+        return new HashMap<>(addressAliases);
+    }
+
     private void requireUnlocked() throws WalletLockedException {
         if (!isUnlocked()) {
             throw new WalletLockedException();
         }
     }
-
-    public void setAccountAlias(byte[] address, String name) {
-        addressAliases.put(ByteArray.of(address), name);
-        flush();
-    }
-
-    public void setAccountAlias(String address, String name) {
-        setAccountAlias(Hex.decode0x(address), name);
-    }
-
-    public void removeAccountAlias(String address) {
-        addressAliases.remove(ByteArray.of(Hex.decode0x(address)));
-        flush();
-    }
-
-    public Optional<String> getAccountAlias(byte[] address) {
-        String name = addressAliases.get(ByteArray.of(address));
-        if (name == null) {
-            return Optional.empty();
-        } else {
-            return Optional.of(name);
-        }
-    }
-
-    public Map<ByteArray, String> getAddressAliases() {
-        return addressAliases;
-    }
-
 }

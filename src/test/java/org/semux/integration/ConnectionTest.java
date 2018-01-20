@@ -15,11 +15,9 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketImpl;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,7 +44,6 @@ import org.semux.IntegrationTest;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.core.Genesis;
-import org.semux.net.ConnectionLimitHandler;
 import org.semux.net.NodeManager;
 import org.semux.rules.KernelRule;
 

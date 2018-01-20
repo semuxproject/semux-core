@@ -6,8 +6,6 @@
  */
 package org.semux.gui.dialog;
 
-import static org.mockito.Mockito.when;
-
 import java.util.List;
 
 import org.semux.KernelMock;
@@ -27,7 +25,10 @@ public class AddressBookDialogTestApplication extends BaseTestApplication {
     AddressBookDialogTestApplication(WalletModel walletModel, KernelMock kernelMock, List<AddressBookEntry> entries) {
         super();
         gui = new SemuxGui(walletModel, kernelMock);
+
         addressBookDialog = new AddressBookDialog(this, walletModel, gui.getKernel().getWallet()) {
+            private static final long serialVersionUID = 1L;
+
             @Override
             protected List<AddressBookEntry> getAddressBookEntries() {
                 return entries;

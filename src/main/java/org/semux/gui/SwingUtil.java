@@ -464,30 +464,53 @@ public class SwingUtil {
     }
 
     /**
-     *
+     * Returns the transaction description.
+     * 
      * @param gui
      * @param tx
      * @return description of transaction with one or multiple recipients
      */
     private static String getTransactionRecipientsDescription(SemuxGui gui, Transaction tx) {
-        return getAddressAlias(gui, tx.getFrom()) + " => " + getAddressAlias(gui, tx.getTo());
+        return getAddressAlias(gui, tx.getFrom()).orElse(Hex.encode0x(tx.getFrom()))
+                + " => "
+                + getAddressAlias(gui, tx.getTo()).orElse(Hex.encode0x(tx.getTo()));
     }
 
     /**
-     * Returns the name of an address.
+     * Returns the abbreviation of the given address.
+     * 
+     * @param address
+     * @return
+     */
+    public static String getAddressAbbr(byte[] address) {
+        return Hex.PREF + Hex.encode(Arrays.copyOfRange(address, 0, 2)) + "..."
+                + Hex.encode(Arrays.copyOfRange(address, address.length - 2, address.length));
+    }
+
+    /**
+     * Returns the alias of an address. This method will search the address in the
+     * following places (in order):
+     * <ul>
+     * <li>The delegate name database</li>
+     * <li>The wallet address aliase database</li>
+     * </ul>
      * 
      * @param gui
      * @param address
      * @return
      */
-    private static String getAddressAlias(SemuxGui gui, byte[] address) {
+    public static Optional<String> getAddressAlias(SemuxGui gui, byte[] address) {
         Optional<String> name = getDelegateName(gui, address);
         if (name.isPresent()) {
-            return name.get();
+            return name;
         }
 
         WalletAccount account = gui.getModel().getAccount(address);
-        return account == null || !account.getName().isPresent() ? Hex.encode0x(address) : account.getName().get();
+        if (account != null) {
+            return account.getName();
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -501,16 +524,5 @@ public class SwingUtil {
         Delegate d = ds.getDelegateByAddress(address);
 
         return d == null ? Optional.empty() : Optional.of(d.getNameString());
-    }
-
-    /**
-     * Returns a short version of address.
-     * 
-     * @param address
-     * @return
-     */
-    public static String shortAddress(byte[] address) {
-        return Hex.PREF + Hex.encode(Arrays.copyOfRange(address, 0, 2)) + "..."
-                + Hex.encode(Arrays.copyOfRange(address, address.length - 2, address.length));
     }
 }

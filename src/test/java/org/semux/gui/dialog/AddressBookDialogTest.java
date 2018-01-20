@@ -6,10 +6,7 @@
  */
 package org.semux.gui.dialog;
 
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.assertj.swing.edt.GuiActionRunner;

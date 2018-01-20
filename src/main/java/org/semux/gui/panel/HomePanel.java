@@ -253,7 +253,7 @@ public class HomePanel extends JPanel implements ActionListener {
         this.syncProgress.setText(SyncProgressFormatter.format(model.getSyncProgress()));
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
-        this.coinbase.setText(SwingUtil.shortAddress(model.getCoinbase().toAddress()));
+        this.coinbase.setText(SwingUtil.getAddressAbbr(model.getCoinbase().toAddress()));
         this.status.setText(model.getStatus() == Status.VALIDATOR ? GuiMessages.get("Validator")
                 : (model.getStatus() == Status.DELEGATE ? GuiMessages.get("Delegate") : GuiMessages.get("Normal")));
         this.available.setText(SwingUtil.formatValue(model.getTotalAvailable()));

@@ -58,7 +58,7 @@ public class SendPanel extends JPanel implements ActionListener {
     private transient Kernel kernel;
     private transient Config config;
 
-    private JComboBox<Item> selectFrom;
+    private JComboBox<AccountItem> selectFrom;
     private JTextField txtTo;
     private JTextField txtAmount;
     private JTextField txtFee;
@@ -312,12 +312,12 @@ public class SendPanel extends JPanel implements ActionListener {
 
         if (!match) {
             // record selected account
-            Item selected = (Item) selectFrom.getSelectedItem();
+            AccountItem selected = (AccountItem) selectFrom.getSelectedItem();
 
             // update account list
             selectFrom.removeAllItems();
             for (int i = 0; i < list.size(); i++) {
-                selectFrom.addItem(new Item(list.get(i)));
+                selectFrom.addItem(new AccountItem(list.get(i)));
             }
 
             // recover selected account
@@ -328,6 +328,11 @@ public class SendPanel extends JPanel implements ActionListener {
                         break;
                     }
                 }
+            }
+
+            // refresh address book dialog
+            if (addressBookDialog != null && addressBookDialog.isVisible()) {
+                addressBookDialog.refresh();
             }
         }
     }
@@ -451,15 +456,15 @@ public class SendPanel extends JPanel implements ActionListener {
     /**
      * Represents an item in the account drop list.
      */
-    protected static class Item {
+    protected static class AccountItem {
         WalletAccount account;
         String name;
 
-        public Item(WalletAccount a) {
+        public AccountItem(WalletAccount a) {
             this.account = a;
-            String accountAlias = account.getName().isPresent() ? account.getName().get() + ", " : "";
-            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + accountAlias
-                    + SwingUtil.formatValue(account.getAvailable());
+            this.name = Hex.PREF + account.getKey().toAddressString() + ", " // address
+                    + (account.getName().isPresent() ? account.getName().get() + ", " : "") // alias
+                    + SwingUtil.formatValue(account.getAvailable()); // available
         }
 
         @Override

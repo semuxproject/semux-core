@@ -108,6 +108,6 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
 
         optionPane.buttonWithText("OK").click();
 
-        assertEquals("c", kernelMock.getWallet().getAccountAlias(key2.toAddress()).get());
+        assertEquals("c", kernelMock.getWallet().getAddressAlias(key2.toAddress()).get());
     }
 }

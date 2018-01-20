@@ -37,7 +37,7 @@ public class WalletModel {
     private Key coinbase;
     private Status status;
 
-    private volatile Map<ByteArray, Integer> accountNo = new HashMap<>();
+    private volatile Map<ByteArray, Integer> accountsIndex = new HashMap<>();
     private volatile List<WalletAccount> accounts = new ArrayList<>();
     private volatile List<WalletDelegate> delegates = new ArrayList<>();
 
@@ -163,7 +163,7 @@ public class WalletModel {
     }
 
     public int getAccountNumber(byte[] address) {
-        Integer n = accountNo.get(ByteArray.of(address));
+        Integer n = accountsIndex.get(ByteArray.of(address));
         return n == null ? -1 : n;
     }
 
@@ -177,8 +177,8 @@ public class WalletModel {
         for (int i = 0; i < accounts.size(); i++) {
             map.put(ByteArray.of(accounts.get(i).getKey().toAddress()), i);
         }
-        this.accountNo = map;
         this.accounts = accounts;
+        this.accountsIndex = map;
     }
 
     public List<WalletDelegate> getDelegates() {

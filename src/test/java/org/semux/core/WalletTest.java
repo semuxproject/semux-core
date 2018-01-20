@@ -184,12 +184,12 @@ public class WalletTest {
         Key k = new Key();
 
         wall.addAccount(k);
-        wall.setAccountAlias(k.toAddress(),"name");
+        wall.setAddressAlias(k.toAddress(), "name");
         wall.flush();
 
         wall = new Wallet(tmp);
         wall.unlock(pwd);
-        Optional<String> name = wall.getAccountAlias(k.toAddress());
+        Optional<String> name = wall.getAddressAlias(k.toAddress());
         assertEquals("name", name.get());
     }
 

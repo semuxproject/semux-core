@@ -70,7 +70,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private JTable table;
     private DelegatesTableModel tableModel;
 
-    JComboBox<Item> selectFrom;
+    JComboBox<AccountItem> selectFrom;
 
     private JTextField textVote;
     private JTextField textUnvote;
@@ -390,12 +390,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         if (!match) {
             // record selected account
-            Item selected = (Item) selectFrom.getSelectedItem();
+            AccountItem selected = (AccountItem) selectFrom.getSelectedItem();
 
             // update account list
             selectFrom.removeAllItems();
             for (int i = 0; i < list.size(); i++) {
-                selectFrom.addItem(new Item(list.get(i)));
+                selectFrom.addItem(new AccountItem(list.get(i)));
             }
 
             // recover selected account
@@ -633,14 +633,14 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     /**
      * Represents an item in the account drop list.
      */
-    protected static class Item {
+    protected static class AccountItem {
         WalletAccount account;
         String name;
 
-        public Item(WalletAccount a) {
+        public AccountItem(WalletAccount a) {
             this.account = a;
-            String addressName = a.getName().isPresent() ? a.getName().get() : SwingUtil.shortAddress(a.getAddress());
-            this.name = addressName + ", " + SwingUtil.formatValue(account.getAvailable());
+            this.name = a.getName().orElse(SwingUtil.getAddressAbbr(a.getAddress())) + ", " // alias or abbreviation
+                    + SwingUtil.formatValue(account.getAvailable());
         }
 
         @Override
