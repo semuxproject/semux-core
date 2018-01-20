@@ -20,16 +20,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.table.AbstractTableModel;
 
 import org.semux.core.Wallet;
@@ -169,27 +166,16 @@ public class AddressBookDialog extends JDialog implements ActionListener {
             refresh();
             break;
         case ADD_ADDRESS:
-            JPanel panel = new JPanel();
-            JTextField name = new JTextField(48);
-            JTextField address = new JTextField(48);
-            panel.add(new JLabel(GuiMessages.get("Name")));
-            panel.add(name);
-            panel.add(Box.createHorizontalStrut(15)); // a spacer
-            panel.add(new JLabel(GuiMessages.get("Address")));
-            panel.add(address);
-
-            int result = JOptionPane.showConfirmDialog(null, panel,
-                    GuiMessages.get("AddAddress"), JOptionPane.OK_CANCEL_OPTION);
-            if (result == JOptionPane.OK_OPTION) {
-                String n = name.getText().trim();
-                String a = address.getText().trim();
-                if (!n.isEmpty() && !a.isEmpty()) {
+            String name = JOptionPane.showInputDialog(this, GuiMessages.get("Name"));
+            if (name != null) {
+                String address = JOptionPane.showInputDialog(this, GuiMessages.get("Address"));
+                if (address != null) {
                     try {
-                        byte[] addr = Hex.decode0x(address.getText());
+                        byte[] addr = Hex.decode0x(address.trim());
                         if (addr.length != Key.ADDRESS_LEN) {
                             JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidAddress"));
                         } else {
-                            wallet.setAddressAlias(addr, name.getText());
+                            wallet.setAddressAlias(addr, name.trim());
                             wallet.flush();
                             model.fireUpdateEvent();
                         }
@@ -243,9 +229,13 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
     protected List<AddressBookEntry> getAddressBookEntries() {
         List<AddressBookEntry> entries = new ArrayList<>();
-        for (Map.Entry<ByteArray, String> address : wallet.getAddressAliases().entrySet()) {
-            entries.add(new AddressBookEntry(address.getValue(), Hex.encode0x(address.getKey().getData())));
+
+        if (wallet.isUnlocked()) {
+            for (Map.Entry<ByteArray, String> address : wallet.getAddressAliases().entrySet()) {
+                entries.add(new AddressBookEntry(address.getValue(), Hex.encode0x(address.getKey().getData())));
+            }
         }
+
         return entries;
     }
 }

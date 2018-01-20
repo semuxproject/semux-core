@@ -329,11 +329,11 @@ public class SendPanel extends JPanel implements ActionListener {
                     }
                 }
             }
+        }
 
-            // refresh address book dialog
-            if (addressBookDialog != null && addressBookDialog.isVisible()) {
-                addressBookDialog.refresh();
-            }
+        // refresh address book dialog regardless
+        if (addressBookDialog != null) {
+            addressBookDialog.refresh();
         }
     }
 

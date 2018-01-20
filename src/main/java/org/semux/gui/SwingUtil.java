@@ -492,7 +492,8 @@ public class SwingUtil {
      * following places (in order):
      * <ul>
      * <li>The delegate name database</li>
-     * <li>The wallet address aliase database</li>
+     * <li>Address aliases from the wallet model (not from the wallet itself because
+     * it may get locked)</li>
      * </ul>
      * 
      * @param gui
