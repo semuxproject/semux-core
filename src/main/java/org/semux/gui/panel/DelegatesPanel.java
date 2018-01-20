@@ -141,6 +141,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         label.setForeground(Color.DARK_GRAY);
 
         selectFrom = new JComboBox<>();
+        selectFrom.setName("selectFrom");
         selectFrom.setActionCommand(Action.SELECT_ACCOUNT.name());
         selectFrom.addActionListener(this);
 
@@ -380,8 +381,15 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     match = false;
                     break;
                 }
+
                 // check if name updated
                 if (!selectFrom.getItemAt(i).account.getName().equals(list.get(i).getName())) {
+                    match = false;
+                    break;
+                }
+
+                // check if balance is updated
+                if (selectFrom.getItemAt(i).account.getAvailable() != list.get(i).getAvailable()) {
                     match = false;
                     break;
                 }
