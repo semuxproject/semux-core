@@ -209,7 +209,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
                     JOptionPane.showMessageDialog(this, GuiMessages.get("AddressCopied", entry.getAddress()));
                 } else {
-                    wallet.removeAccountAlias(Hex.decode0x(entry.getAddress()));
+                    wallet.removeAddressAlias(Hex.decode0x(entry.getAddress()));
                     wallet.flush();
                     model.fireUpdateEvent();
                 }

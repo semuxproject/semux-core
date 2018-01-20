@@ -338,7 +338,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
             JOptionPane.showMessageDialog(this, GuiMessages.get("NewAccountCreated"));
         } else {
-            wallet.deleteAccount(key);
+            wallet.removeAccount(key);
             JOptionPane.showMessageDialog(this, GuiMessages.get("WalletSaveFailed"));
         }
     }
@@ -357,7 +357,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
             if (ret == JOptionPane.OK_OPTION) {
                 Wallet wallet = kernel.getWallet();
-                wallet.deleteAccount(acc.getKey());
+                wallet.removeAccount(acc.getKey());
                 wallet.flush();
 
                 // fire update event

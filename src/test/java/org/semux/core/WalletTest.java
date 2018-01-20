@@ -137,7 +137,7 @@ public class WalletTest {
         }
         wallet.flush();
         Key key = new Key();
-        assertFalse(wallet.deleteAccount(key));
+        assertFalse(wallet.removeAccount(key));
     }
 
     @Test
@@ -154,7 +154,7 @@ public class WalletTest {
             wallet.addAccount(k);
         }
         wallet.flush();
-        assertTrue(wallet.deleteAccount(key));
+        assertTrue(wallet.removeAccount(key));
     }
 
     @Test(expected = WalletLockedException.class)
@@ -172,7 +172,7 @@ public class WalletTest {
         }
         wallet.flush();
         wallet.lock();
-        wallet.deleteAccount(key);
+        wallet.removeAccount(key);
     }
 
     @Test
