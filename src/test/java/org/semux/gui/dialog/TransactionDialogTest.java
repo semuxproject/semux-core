@@ -20,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.core.Transaction;
-import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
@@ -42,7 +41,6 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
     public void testDisplayTransferTransaction() {
         kernelRule1.getKernel().start();
 
-        TransactionType type = TRANSFER;
         Key from = new Key();
         Key to = new Key();
         long value = 1000 * Unit.SEM;
@@ -50,7 +48,7 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
         long nonce = 0L;
         long now = Instant.now().toEpochMilli();
         byte[] data = "some data".getBytes();
-        Transaction tx = new Transaction(kernelRule1.getKernel().getConfig().network(), type, to.toAddress(), value,
+        Transaction tx = new Transaction(kernelRule1.getKernel().getConfig().network(), TRANSFER, to.toAddress(), value,
                 fee, nonce, now, data).sign(from);
 
         TransactionDialogTestApplication application = GuiActionRunner

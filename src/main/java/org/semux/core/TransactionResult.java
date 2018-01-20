@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.semux.Network;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
@@ -21,7 +22,7 @@ public class TransactionResult {
      */
     public enum Error {
         /**
-         * The transaction format is invalid. See {@link Transaction#validate(byte)}
+         * The transaction format is invalid. See {@link Transaction#validate(Network)}
          */
         INVALID_FORMAT,
 

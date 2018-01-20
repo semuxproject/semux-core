@@ -176,7 +176,7 @@ public class Transaction {
     /**
      * Parses the from address from signature.
      *
-     * @return an {@link Address} if the signature is success, otherwise null
+     * @return an address if the signature is valid, otherwise null
      */
     public byte[] getFrom() {
         return (signature == null) ? null : signature.getAddress();

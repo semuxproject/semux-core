@@ -22,7 +22,7 @@ public class CompressPerformance {
 
     enum Mode {
         ALL_BLOCKS, BLOCKS_WITH_TX
-    };
+    }
 
     public static void main(String[] args) throws IOException {
         Config config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);

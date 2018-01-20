@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -36,10 +37,9 @@ public class SemuxBftOnNewHeightTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 // 0 validator
-                { 10L, 0L, Arrays.asList(), null },
+                { 10L, 0L, Collections.emptyList(), null },
                 // 1 validator
-                { 10L, 0L, Arrays.asList(
-                        mockValidator(10L)), null },
+                { 10L, 0L, Collections.singletonList(mockValidator(10L)), null },
                 // 2 validators
                 { 100L, 0L, Arrays.asList(
                         mockValidator(100L),

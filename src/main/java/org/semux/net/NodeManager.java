@@ -156,14 +156,14 @@ public class NodeManager {
     /**
      * Get seed nodes from DNS records.
      * 
-     * @param networkId
+     * @param network
      * @return
      */
     public static Set<Node> getSeedNodes(Network network) {
         Set<Node> nodes = new HashSet<>();
 
         try {
-            String name = null;
+            String name;
             switch (network) {
             case MAINNET:
                 name = DNS_SEED_MAINNET;

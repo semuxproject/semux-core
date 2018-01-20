@@ -7,11 +7,9 @@
 package org.semux.core;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -74,7 +72,6 @@ public class PendingManager implements Runnable, BlockchainListener {
      * Transaction pool.
      */
     private List<PendingTransaction> transactions = new ArrayList<>();
-    private Map<ByteArray, PendingTransaction> transactionsByHash = new HashMap<>();
 
     /**
      * Transaction cache.
@@ -247,7 +244,6 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         // clear transaction pool
         List<PendingTransaction> txs = new ArrayList<>(transactions);
-        transactionsByHash.clear();
         transactions.clear();
 
         return txs;
@@ -341,7 +337,6 @@ public class PendingManager implements Runnable, BlockchainListener {
                 // which are ready to be proposed to the network.
                 PendingTransaction pendingTransaction = new PendingTransaction(tx, result);
                 transactions.add(pendingTransaction);
-                transactionsByHash.put(createKey(tx), pendingTransaction);
                 cnt++;
 
                 // relay transaction

@@ -74,8 +74,8 @@ public class SimpleDecoderTest {
         assertEquals("007F8100C000FF7F818000FFFF7F81808000C0808000FFFFFF7F", Hex.encode(bytes).toUpperCase());
 
         SimpleDecoder dec = new SimpleDecoder(bytes);
-        for (int i = 0; i < sizes.length; i++) {
-            assertEquals(sizes[i], dec.readSize());
+        for (int size : sizes) {
+            assertEquals(size, dec.readSize());
         }
         assertEquals(bytes.length, dec.getReadIndex());
     }

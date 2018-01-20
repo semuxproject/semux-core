@@ -222,7 +222,7 @@ public class WalletModel {
         }
     }
 
-    public static enum Status {
+    public enum Status {
         NORMAL, DELEGATE, VALIDATOR
     }
 }
