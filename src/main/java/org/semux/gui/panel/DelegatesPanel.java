@@ -47,6 +47,7 @@ import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
+import org.semux.gui.PlaceHolder;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.DelegateDialog;
@@ -141,6 +142,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         label.setForeground(Color.DARK_GRAY);
 
         selectFrom = new JComboBox<>();
+        selectFrom.setName("selectFrom");
         selectFrom.setActionCommand(Action.SELECT_ACCOUNT.name());
         selectFrom.addActionListener(this);
 
@@ -179,6 +181,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textVote.setColumns(10);
         textVote.setActionCommand(Action.VOTE.name());
         textVote.addActionListener(this);
+        new PlaceHolder(GuiMessages.get("NumVotes"), textVote);
 
         JButton btnVote = SwingUtil.createDefaultButton(GuiMessages.get("Vote"), this, Action.VOTE);
         btnVote.setName("btnVote");
@@ -189,6 +192,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textUnvote.setColumns(10);
         textUnvote.setActionCommand(Action.UNVOTE.name());
         textUnvote.addActionListener(this);
+        new PlaceHolder(GuiMessages.get("NumVotes"), textUnvote);
 
         JButton btnUnvote = SwingUtil.createDefaultButton(GuiMessages.get("Unvote"), this, Action.UNVOTE);
         btnUnvote.setName("btnUnvote");
@@ -248,6 +252,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textName.setColumns(10);
         textName.setActionCommand(Action.DELEGATE.name());
         textName.addActionListener(this);
+
+        new PlaceHolder(GuiMessages.get("DelegateName"), textName);
 
         // @formatter:off
         GroupLayout groupLayout3 = new GroupLayout(delegateRegistrationPanel);
@@ -380,8 +386,15 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     match = false;
                     break;
                 }
+
                 // check if name updated
                 if (!selectFrom.getItemAt(i).account.getName().equals(list.get(i).getName())) {
+                    match = false;
+                    break;
+                }
+
+                // check if balance is updated
+                if (selectFrom.getItemAt(i).account.getAvailable() != list.get(i).getAvailable()) {
                     match = false;
                     break;
                 }
@@ -541,6 +554,27 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             JOptionPane.showMessageDialog(this, GuiMessages.get("InsufficientFunds",
                     SwingUtil.formatValue(config.minDelegateBurnAmount() + config.minTransactionFee())));
         } else {
+            // validate delegate address
+            DelegateState delegateState = kernel.getBlockchain().getDelegateState();
+            if (delegateState.getDelegateByAddress(a.getAddress()) != null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        GuiMessages.get("DelegateRegistrationDuplicatedAddress"),
+                        GuiMessages.get("ErrorDialogTitle"),
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // validate delegate name
+            if (delegateState.getDelegateByName(Bytes.of(name)) != null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        GuiMessages.get("DelegateRegistrationDuplicatedName"),
+                        GuiMessages.get("ErrorDialogTitle"),
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             // confirm system requirements
             if ((config.network() == Network.MAINNET && !SystemUtil.bench()) && JOptionPane
                     .showConfirmDialog(this, GuiMessages.get("ComputerNotQualified"),
