@@ -100,7 +100,7 @@ public class Wallet {
                 SimpleDecoder dec = new SimpleDecoder(IOUtil.readFile(file));
                 int version = dec.readInt(); // version
 
-                List<Key> newAccounts = new ArrayList<>();
+                List<Key> newAccounts;
                 Map<ByteArray, String> newAliases = new HashMap<>();
                 switch (version) {
                 case 1:
@@ -184,10 +184,10 @@ public class Wallet {
     protected Map<ByteArray, String> readAddressAliases(byte[] key, SimpleDecoder dec) {
         byte[] iv = dec.readBytes();
         byte[] aliasesEncrypted = dec.readBytes();
-        byte[] aliases = Aes.decrypt(aliasesEncrypted, key, iv);
+        byte[] aliasesRaw = Aes.decrypt(aliasesEncrypted, key, iv);
 
         Map<ByteArray, String> map = new HashMap<>();
-        SimpleDecoder d = new SimpleDecoder(aliases);
+        SimpleDecoder d = new SimpleDecoder(aliasesRaw);
         int totalAddresses = d.readInt();
         for (int i = 0; i < totalAddresses; i++) {
             byte[] address = d.readBytes();
@@ -203,7 +203,7 @@ public class Wallet {
      * 
      * @param enc
      */
-    protected void writeAddressBook(byte[] key, SimpleEncoder enc) {
+    protected void writeAddressAliases(byte[] key, SimpleEncoder enc) {
         SimpleEncoder e = new SimpleEncoder();
         synchronized (aliases) {
             e.writeInt(aliases.size());
@@ -214,7 +214,8 @@ public class Wallet {
         }
 
         byte[] iv = Bytes.random(16);
-        byte[] aliasesEncrypted = Aes.encrypt(e.toBytes(), key, iv);
+        byte[] aliasesRaw = e.toBytes();
+        byte[] aliasesEncrypted = Aes.encrypt(aliasesRaw, key, iv);
 
         enc.writeBytes(iv);
         enc.writeBytes(aliasesEncrypted);
@@ -447,7 +448,7 @@ public class Wallet {
             enc.writeInt(VERSION);
 
             writeAccounts(key, enc);
-            writeAddressBook(key, enc);
+            writeAddressAliases(key, enc);
 
             file.getParentFile().mkdirs();
             IOUtil.writeToFile(enc.toBytes(), file);

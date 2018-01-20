@@ -10,6 +10,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.awaitility.Awaitility.await;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -46,6 +47,8 @@ import org.semux.config.Config;
 import org.semux.core.Genesis;
 import org.semux.net.NodeManager;
 import org.semux.rules.KernelRule;
+import org.semux.util.SystemUtil;
+import org.semux.util.SystemUtil.OsName;
 
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
@@ -134,6 +137,9 @@ public class ConnectionTest {
 
     @Test
     public void testBlacklistIp() throws IOException, InterruptedException {
+        // FIXME: not working on macOS
+        assumeTrue(SystemUtil.getOsName() != OsName.MACOS);
+
         // create 5 idle connections to the P2P server from 127.0.1.1 ~ 127.0.5.1
         final int connections = 5;
         Collection<Callable<Void>> threads = new ArrayList<>();

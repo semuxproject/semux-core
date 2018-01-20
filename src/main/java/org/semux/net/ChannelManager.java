@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Channel Manager.
  * 
- * TODO: investigate handshake re-initialization.
  */
 public class ChannelManager {
 
