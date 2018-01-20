@@ -5,11 +5,13 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} %highlight{%-8level} %-16logger{0} %msg%n"/>
         </Console>
-        <File name="File" fileName="${sys:log.file}">
+        <RollingFile name="File" fileName="${sys:log.file}" filePattern="${sys:log.file}-%d{MM-dd-yyyy}.log.zip"
+                     ignoreExceptions="false">
             <append>true</append>
             <createOnDemand>true</createOnDemand>
             <PatternLayout pattern="%d{yyyy-MM-dd'T'HH:mm:ssZ} %-8level %-16logger{0} %msg%n"/>
-        </File>
+            <TimeBasedTriggeringPolicy/>
+        </RollingFile>
         <Async name="Async">
             <AppenderRef ref="File" />
             <AppenderRef ref="Console"/>
