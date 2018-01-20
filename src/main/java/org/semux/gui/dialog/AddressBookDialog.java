@@ -15,8 +15,10 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -27,12 +29,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import org.semux.core.Wallet;
+import org.semux.crypto.Hex;
 import org.semux.gui.Action;
-import org.semux.gui.AddressBook;
-import org.semux.gui.AddressBook.Entry;
+import org.semux.gui.AddressBookEntry;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GuiMessages;
+import org.semux.util.ByteArray;
 import org.semux.util.exception.UnreachableException;
 
 public class AddressBookDialog extends JDialog implements ActionListener {
@@ -43,13 +47,16 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
     private final transient WalletModel model;
 
+    private final transient Wallet wallet;
+
     private final JTable table;
     private final AddressTableModel tableModel;
 
-    public AddressBookDialog(JFrame parent, WalletModel model) {
+    public AddressBookDialog(JFrame parent, WalletModel model, Wallet wallet) {
         super(null, GuiMessages.get("AddressBook"), Dialog.ModalityType.MODELESS);
         setName("AddressBookDialog");
         this.model = model;
+        this.wallet = wallet;
 
         tableModel = new AddressTableModel();
         table = new JTable(tableModel);
@@ -89,21 +96,25 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         refresh();
     }
 
+    public Wallet getWallet() {
+        return wallet;
+    }
+
     class AddressTableModel extends AbstractTableModel {
         private static final long serialVersionUID = 1L;
 
-        private transient List<Entry> addresses;
+        private transient List<AddressBookEntry> addresses;
 
         AddressTableModel() {
             this.addresses = Collections.emptyList();
         }
 
-        void setData(List<Entry> addresses) {
+        void setData(List<AddressBookEntry> addresses) {
             this.addresses = addresses;
             this.fireTableDataChanged();
         }
 
-        Entry getRow(int row) {
+        AddressBookEntry getRow(int row) {
             if ((row >= 0) && (row < addresses.size())) {
                 return addresses.get(row);
             }
@@ -128,7 +139,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
         @Override
         public Object getValueAt(int row, int column) {
-            Entry entry = addresses.get(row);
+            AddressBookEntry entry = addresses.get(row);
 
             switch (column) {
             case 0:
@@ -141,7 +152,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         }
     }
 
-    private Entry getSelectedEntry() {
+    private AddressBookEntry getSelectedEntry() {
         int row = table.getSelectedRow();
         return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
     }
@@ -160,7 +171,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
             break;
         case COPY_ADDRESS:
         case DELETE_ADDRESS:
-            Entry entry = getSelectedEntry();
+            AddressBookEntry entry = getSelectedEntry();
             if (entry != null) {
                 if (action == Action.COPY_ADDRESS) {
                     Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -168,7 +179,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
                     JOptionPane.showMessageDialog(this, GuiMessages.get("AddressCopied", entry.getAddress()));
                 } else {
-                    getAddressBook().remove(entry.getName());
+                    wallet.removeAccountAlias(entry.getAddress());
                     refresh();
                 }
             } else {
@@ -180,17 +191,13 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         }
     }
 
-    protected AddressBook getAddressBook() {
-        return model.getAddressBook();
-    }
-
-    protected void refresh() {
-        List<Entry> list = getAddressBook().list();
+    public void refresh() {
+        List<AddressBookEntry> list = getAddressBookEntries();
 
         /*
          * update table model
          */
-        Entry e = getSelectedEntry();
+        AddressBookEntry e = getSelectedEntry();
         tableModel.setData(list);
 
         if (e != null) {
@@ -201,5 +208,13 @@ public class AddressBookDialog extends JDialog implements ActionListener {
                 }
             }
         }
+    }
+
+    protected List<AddressBookEntry> getAddressBookEntries() {
+        List<AddressBookEntry> entries = new ArrayList<>();
+        for (Map.Entry<ByteArray, String> address : wallet.getAddressAliases().entrySet()) {
+            entries.add(new AddressBookEntry(address.getValue(), Hex.encode0x(address.getKey().getData())));
+        }
+        return entries;
     }
 }

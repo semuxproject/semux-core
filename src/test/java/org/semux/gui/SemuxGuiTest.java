@@ -93,9 +93,7 @@ public class SemuxGuiTest {
     public void testProcessBlock() {
         KernelMock kernel = kernelRule.getKernel();
 
-        AddressBook addressBook = mock(AddressBook.class);
         WalletModel model = new WalletModel();
-        model.setAddressBook(addressBook);
 
         SemuxGui gui = new SemuxGui(model, kernel);
 
@@ -117,7 +115,6 @@ public class SemuxGuiTest {
         assertThat(model.getDelegates().size()).isEqualTo(chain.getDelegateState().getDelegates().size());
         assertThat(model.getTotalAvailable()).isEqualTo(0);
         assertThat(model.getTotalLocked()).isEqualTo(0);
-        assertThat(model.getAddressBook()).isEqualTo(addressBook);
         assertThat(model.getActivePeers().size()).isEqualTo(channelMgr.getActivePeers().size());
         assertThat(model.getSyncProgress()).isEqualToComparingFieldByField(syncMgr.getProgress());
     }

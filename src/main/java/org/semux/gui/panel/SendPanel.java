@@ -302,6 +302,11 @@ public class SendPanel extends JPanel implements ActionListener {
                     match = false;
                     break;
                 }
+                // check if name updated
+                if (!selectFrom.getItemAt(i).account.getName().equals(list.get(i).getName())) {
+                    match = false;
+                    break;
+                }
             }
         }
 
@@ -312,7 +317,7 @@ public class SendPanel extends JPanel implements ActionListener {
             // update account list
             selectFrom.removeAllItems();
             for (int i = 0; i < list.size(); i++) {
-                selectFrom.addItem(new Item(list.get(i), i));
+                selectFrom.addItem(new Item(list.get(i)));
             }
 
             // recover selected account
@@ -393,7 +398,7 @@ public class SendPanel extends JPanel implements ActionListener {
      */
     protected void showAddressBook() {
         if (addressBookDialog == null) {
-            addressBookDialog = new AddressBookDialog(frame, model);
+            addressBookDialog = new AddressBookDialog(frame, model, kernel.getWallet());
         }
 
         addressBookDialog.setVisible(true);
@@ -450,10 +455,11 @@ public class SendPanel extends JPanel implements ActionListener {
         WalletAccount account;
         String name;
 
-        public Item(WalletAccount a, int idx) {
+        public Item(WalletAccount a) {
             this.account = a;
-            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + GuiMessages.get("AccountNumShort", idx)
-                    + ", " + SwingUtil.formatValue(account.getAvailable());
+            String accountAlias = account.getName().isPresent() ? account.getName().get() + ", " : "";
+            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + accountAlias
+                    + SwingUtil.formatValue(account.getAvailable());
         }
 
         @Override

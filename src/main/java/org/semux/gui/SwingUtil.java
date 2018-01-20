@@ -50,6 +50,7 @@ import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
+import org.semux.gui.model.WalletAccount;
 import org.semux.message.GuiMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -485,8 +486,8 @@ public class SwingUtil {
             return name.get();
         }
 
-        int n = gui.getModel().getAccountNumber(address);
-        return n == -1 ? Hex.encode0x(address) : GuiMessages.get("AccountNum", n);
+        WalletAccount account = gui.getModel().getAccount(address);
+        return account == null || !account.getName().isPresent() ? Hex.encode0x(address) : account.getName().get();
     }
 
     /**

@@ -13,13 +13,18 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hash;
+import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.IOUtil;
 import org.semux.util.SimpleDecoder;
@@ -31,15 +36,17 @@ public class Wallet {
 
     private static final Logger logger = LoggerFactory.getLogger(Wallet.class);
 
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
-    // variable-length quantity is disabled for compatibility
-    private static final boolean VLQ = false;
+    // variable-length quantity
+    private static final boolean VLQ = true;
 
     private File file;
     private String password;
 
     private final List<Key> accounts = Collections.synchronizedList(new ArrayList<>());
+    // store addressAliases separate from crypto key.
+    private final Map<ByteArray, String> addressAliases = new HashMap<>();
 
     /**
      * Creates a new wallet instance.
@@ -94,16 +101,17 @@ public class Wallet {
 
             if (exists()) {
                 SimpleDecoder dec = new SimpleDecoder(IOUtil.readFile(file));
-                dec.readInt(); // version
-                int total = dec.readInt(); // size
-
-                List<Key> list = new ArrayList<>();
-                for (int i = 0; i < total; i++) {
-                    byte[] iv = dec.readBytes(VLQ);
-                    byte[] publicKey = dec.readBytes(VLQ);
-                    byte[] privateKey = Aes.decrypt(dec.readBytes(VLQ), key, iv);
-
-                    list.add(new Key(privateKey, publicKey));
+                int version = dec.readInt(); // version
+                List<Key> list;
+                switch (version) {
+                case 1:
+                    list = readVersion1Wallet(key, dec);
+                    break;
+                case 2:
+                    list = readVersion2Wallet(key, dec);
+                    break;
+                default:
+                    throw new CryptoException("Unknown wallet version.");
                 }
 
                 synchronized (accounts) {
@@ -120,6 +128,73 @@ public class Wallet {
         }
 
         return false;
+    }
+
+    /**
+     * Version 1 wallets did not use VLQ, and did not have address-book
+     */
+    private List<Key> readVersion1Wallet(byte[] key, SimpleDecoder dec) throws InvalidKeySpecException {
+        List<Key> list = readKeys(key, dec, false);
+        return list;
+    }
+
+    private List<Key> readVersion2Wallet(byte[] key, SimpleDecoder dec) throws InvalidKeySpecException {
+        List<Key> list = readKeys(key, dec, VLQ);
+        readAddressBook(dec);
+        return list;
+    }
+
+    /**
+     * Read keys from wallet
+     */
+    private List<Key> readKeys(byte[] key, SimpleDecoder dec, boolean vlq) throws InvalidKeySpecException {
+        List<Key> list = new ArrayList<>();
+        int total = dec.readInt(); // size
+
+        for (int i = 0; i < total; i++) {
+            byte[] iv = dec.readBytes(vlq);
+            byte[] publicKey = dec.readBytes(vlq);
+            byte[] privateKey = Aes.decrypt(dec.readBytes(vlq), key, iv);
+
+            list.add(new Key(privateKey, publicKey));
+        }
+        return list;
+    }
+
+    private void writeKeys(byte[] key, SimpleEncoder enc) {
+        enc.writeInt(accounts.size());
+        for (Key a : accounts) {
+            byte[] iv = Bytes.random(16);
+
+            enc.writeBytes(iv, VLQ);
+            enc.writeBytes(a.getPublicKey(), VLQ);
+            enc.writeBytes(Aes.encrypt(a.getPrivateKey(), key, iv), VLQ);
+        }
+    }
+
+    /**
+     * Read the address book.
+     * 
+     * @param dec
+     *            SimpleDecoder
+     */
+    private void readAddressBook(SimpleDecoder dec) {
+        // read the address book
+        int totalAddresses = dec.readInt();
+        for (int i = 0; i < totalAddresses; i++) {
+            byte[] address = dec.readBytes(VLQ);
+            String alias = dec.readString();
+            addressAliases.put(ByteArray.of(address), alias);
+        }
+    }
+
+    private void writeAddressBook(SimpleEncoder enc) {
+        // write our address book out.
+        enc.writeInt(addressAliases.size());
+        for (Map.Entry<ByteArray, String> alias : addressAliases.entrySet()) {
+            enc.writeBytes(alias.getKey().getData(), VLQ);
+            enc.writeString(alias.getValue());
+        }
     }
 
     /**
@@ -199,7 +274,9 @@ public class Wallet {
 
         synchronized (accounts) {
             accounts.clear();
-            accounts.addAll(list);
+            for (Key key : list) {
+                addAccount(key);
+            }
         }
     }
 
@@ -346,16 +423,12 @@ public class Wallet {
 
             SimpleEncoder enc = new SimpleEncoder();
             enc.writeInt(VERSION);
-            enc.writeInt(accounts.size());
 
             synchronized (accounts) {
-                for (Key a : accounts) {
-                    byte[] iv = Bytes.random(16);
-
-                    enc.writeBytes(iv, VLQ);
-                    enc.writeBytes(a.getPublicKey(), VLQ);
-                    enc.writeBytes(Aes.encrypt(a.getPrivateKey(), key, iv), VLQ);
-                }
+                writeKeys(key, enc);
+            }
+            synchronized (addressAliases) {
+                writeAddressBook(enc);
             }
 
             file.getParentFile().mkdirs();
@@ -375,4 +448,32 @@ public class Wallet {
             throw new WalletLockedException();
         }
     }
+
+    public void setAccountAlias(byte[] address, String name) {
+        addressAliases.put(ByteArray.of(address), name);
+        flush();
+    }
+
+    public void setAccountAlias(String address, String name) {
+        setAccountAlias(Hex.decode0x(address), name);
+    }
+
+    public void removeAccountAlias(String address) {
+        addressAliases.remove(ByteArray.of(Hex.decode0x(address)));
+        flush();
+    }
+
+    public Optional<String> getAccountAlias(byte[] address) {
+        String name = addressAliases.get(ByteArray.of(address));
+        if (name == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(name);
+        }
+    }
+
+    public Map<ByteArray, String> getAddressAliases() {
+        return addressAliases;
+    }
+
 }

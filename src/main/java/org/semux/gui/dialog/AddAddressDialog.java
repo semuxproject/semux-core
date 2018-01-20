@@ -109,7 +109,7 @@ public class AddAddressDialog extends JDialog implements ActionListener {
                     if (addr.length != Key.ADDRESS_LEN) {
                         JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidAddress"));
                     } else {
-                        addressBookDialog.getAddressBook().put(name.getText(), address.getText());
+                        addressBookDialog.getWallet().setAccountAlias(address.getText(), name.getText());
                         addressBookDialog.refresh();
                         this.dispose();
                     }

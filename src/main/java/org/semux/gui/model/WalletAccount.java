@@ -9,6 +9,7 @@ package org.semux.gui.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.semux.core.Transaction;
 import org.semux.core.state.Account;
@@ -16,11 +17,13 @@ import org.semux.crypto.Key;
 
 public class WalletAccount extends Account {
     private Key key;
+    private Optional<String> name;
     private List<Transaction> transactions = new ArrayList<>();
 
-    public WalletAccount(Key key, Account acc) {
+    public WalletAccount(Key key, Account acc, Optional<String> name) {
         super(acc.getAddress(), acc.getAvailable(), acc.getLocked(), acc.getNonce());
         this.key = key;
+        this.name = name;
 
         if (!Arrays.equals(key.toAddress(), acc.getAddress())) {
             throw new IllegalArgumentException("Key and account does not match");
@@ -41,6 +44,14 @@ public class WalletAccount extends Account {
 
     public void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
+    }
+
+    public Optional<String> getName() {
+        return name;
+    }
+
+    public void setName(Optional<String> name) {
+        this.name = name;
     }
 
     @Override

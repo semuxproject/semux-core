@@ -6,7 +6,7 @@
  */
 package org.semux.gui;
 
-import java.awt.EventQueue;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -16,13 +16,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
 import org.semux.Launcher;
@@ -48,9 +48,6 @@ import org.semux.net.Peer;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Graphic user interface.
@@ -187,8 +184,9 @@ public class SemuxGui extends Launcher {
             String message = GuiMessages.get("AccountSelection");
             List<Object> options = new ArrayList<>();
             List<Key> list = wallet.getAccounts();
-            for (int i = 0; i < list.size(); i++) {
-                options.add(Hex.PREF + list.get(i).toAddressString() + ", " + GuiMessages.get("AccountNumShort", i));
+            for (Key key : list) {
+                Optional<String> name = wallet.getAccountAlias(key.toAddress());
+                options.add(Hex.PREF + key.toAddressString() + (name.isPresent() ? ", " + name.get() : ""));
             }
 
             // show select dialog
@@ -231,7 +229,6 @@ public class SemuxGui extends Launcher {
 
         // set up model
         model = new WalletModel();
-        model.setAddressBook(new AddressBook(new File(getDataDir(), "addressbook.json")));
         model.setCoinbase(wallet.getAccount(getCoinbase()));
 
         // set up kernel
@@ -349,7 +346,8 @@ public class SemuxGui extends Launcher {
             List<WalletAccount> accounts = new ArrayList<>();
             for (Key key : kernel.getWallet().getAccounts()) {
                 Account a = as.getAccount(key.toAddress());
-                WalletAccount wa = new WalletAccount(key, a);
+                Optional<String> name = kernel.getWallet().getAccountAlias(key.toAddress());
+                WalletAccount wa = new WalletAccount(key, a, name);
                 accounts.add(wa);
             }
             model.setAccounts(accounts);

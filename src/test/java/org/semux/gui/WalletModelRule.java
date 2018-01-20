@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.rules.ExternalResource;
@@ -50,7 +51,7 @@ public class WalletModelRule extends ExternalResource {
                 lockedSEM * Unit.SEM,
                 RandomUtils.nextInt(1, 100));
 
-        walletAccount = new WalletAccount(key, account);
+        walletAccount = new WalletAccount(key, account, Optional.of("test account"));
         List<WalletAccount> accountList = Collections.singletonList(walletAccount);
         walletModel = mock(WalletModel.class);
         when(walletModel.getAccounts()).thenReturn(accountList);
