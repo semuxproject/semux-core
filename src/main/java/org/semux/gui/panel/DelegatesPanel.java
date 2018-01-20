@@ -541,6 +541,27 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             JOptionPane.showMessageDialog(this, GuiMessages.get("InsufficientFunds",
                     SwingUtil.formatValue(config.minDelegateBurnAmount() + config.minTransactionFee())));
         } else {
+            // validate delegate address
+            DelegateState delegateState = kernel.getBlockchain().getDelegateState();
+            if (delegateState.getDelegateByAddress(a.getAddress()) != null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        GuiMessages.get("DelegateRegistrationDuplicatedAddress"),
+                        GuiMessages.get("ErrorDialogTitle"),
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // validate delegate name
+            if (delegateState.getDelegateByName(Bytes.of(name)) != null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        GuiMessages.get("DelegateRegistrationDuplicatedName"),
+                        GuiMessages.get("ErrorDialogTitle"),
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             // confirm system requirements
             if ((config.network() == Network.MAINNET && !SystemUtil.bench()) && JOptionPane
                     .showConfirmDialog(this, GuiMessages.get("ComputerNotQualified"),
