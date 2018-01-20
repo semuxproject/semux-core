@@ -10,7 +10,6 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -26,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -47,8 +47,6 @@ import org.semux.config.Config;
 import org.semux.core.Genesis;
 import org.semux.net.NodeManager;
 import org.semux.rules.KernelRule;
-import org.semux.util.SystemUtil;
-import org.semux.util.SystemUtil.OsName;
 
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
@@ -87,11 +85,11 @@ public class ConnectionTest {
                 && kernelRule1.getKernel().getP2p().isRunning());
 
         // keep socket references
-        sockets = new ArrayList<>();
+        sockets = new CopyOnWriteArrayList<>();
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws InterruptedException {
         // close all connections
         sockets.parallelStream().filter(Objects::nonNull).forEach(socket -> {
             try {
@@ -104,6 +102,7 @@ public class ConnectionTest {
         kernelRule1.getKernel().stop();
         await().until(() -> kernelRule1.getKernel().state().equals(Kernel.State.STOPPED));
         serverThread.interrupt();
+        await().until(() -> !serverThread.isAlive());
     }
 
     @Test
@@ -137,22 +136,18 @@ public class ConnectionTest {
 
     @Test
     public void testBlacklistIp() throws IOException, InterruptedException {
-        // FIXME: not working on macOS
-        assumeTrue(SystemUtil.getOsName() != OsName.MACOS);
-
-        // create 5 idle connections to the P2P server from 127.0.1.1 ~ 127.0.5.1
-        final int connections = 5;
+        // create an idle connection
+        final int connections = 1;
         Collection<Callable<Void>> threads = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(connections);
-        List<InetSocketAddress> clientAddresses = new ArrayList<>();
+        final List<InetSocketAddress> clientAddresses = new CopyOnWriteArrayList<>();
         for (int i = 1; i <= connections; i++) {
-            final int j = i;
             threads.add(() -> {
-                Socket socket = new Socket();
-                socket.bind(new InetSocketAddress(String.format("127.0.%d.1", j), getFreePort()));
-                sockets.add(socket);
-                clientAddresses.add((InetSocketAddress) socket.getLocalSocketAddress());
                 try {
+                    Socket socket = new Socket();
+                    socket.bind(new InetSocketAddress("127.0.0.1", getFreePort()));
+                    sockets.add(socket);
+                    clientAddresses.add((InetSocketAddress) socket.getLocalSocketAddress());
                     socket.connect(
                             new InetSocketAddress(kernelRule1.getKernel().getConfig().p2pListenIp(),
                                     kernelRule1.getKernel().getConfig().p2pListenPort()),
@@ -170,8 +165,8 @@ public class ConnectionTest {
         // wait until all channels are connected
         assertEquals(connections, kernelRule1.getKernel().getChannelManager().size());
 
-        // blacklist 127.0.1.1
-        final String blacklistedIp = "127.0.1.1";
+        // blacklist 127.0.0.1
+        final String blacklistedIp = "127.0.0.1";
         kernelRule1.getKernel().getApiClient().request("add_to_blacklist", "ip", blacklistedIp);
 
         // all IPs should stay connected except for the blacklisted IP
