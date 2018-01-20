@@ -266,11 +266,14 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         }
 
         if (isCreate()) {
-            wallet.unlock(password);
-            wallet.addAccount(new Key());
-            wallet.flush();
-
-            done();
+            if (wallet.unlock(password)
+                    && wallet.addAccount(new Key())
+                    && wallet.flush()) {
+                done();
+            } else {
+                JOptionPane.showMessageDialog(this, GuiMessages.get("WalletSaveFailed"));
+                SystemUtil.exitAsync(-1);
+            }
         } else {
             Wallet w = new Wallet(backupFile);
 
@@ -279,11 +282,14 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             } else if (w.size() == 0) {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("NoAccountFound"));
             } else {
-                wallet.unlock(password);
-                wallet.addAccounts(w.getAccounts());
-                wallet.flush();
-
-                done();
+                if (wallet.unlock(password)
+                        && wallet.addAccounts(w.getAccounts()) > 0
+                        && wallet.flush()) {
+                    done();
+                } else {
+                    JOptionPane.showMessageDialog(this, GuiMessages.get("WalletSaveFailed"));
+                    SystemUtil.exitAsync(-1);
+                }
             }
         }
     }

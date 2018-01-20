@@ -125,8 +125,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
                         .addComponent(buttonNewAccount, GroupLayout.PREFERRED_SIZE, 121, GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnCopyAddress)
                         .addComponent(qr)
-                        .addComponent(btnDeleteAddress)
-                        ))
+                        .addComponent(btnDeleteAddress)))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
