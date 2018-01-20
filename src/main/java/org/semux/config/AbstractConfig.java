@@ -169,6 +169,11 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
+    public File configDir() {
+        return new File(dataDir, Constants.CONFIG_DIR);
+    }
+
+    @Override
     public Network network() {
         return network;
     }
@@ -379,7 +384,7 @@ public abstract class AbstractConfig implements Config {
     }
 
     protected void init() {
-        File f = new File(dataDir, Constants.CONFIG_DIR + File.separator + CONFIG_FILE);
+        File f = new File(configDir(), CONFIG_FILE);
         if (!f.exists()) {
             // exit if the config file does not exist
             return;

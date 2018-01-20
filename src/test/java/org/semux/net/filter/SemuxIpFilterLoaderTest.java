@@ -19,6 +19,7 @@ import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.semux.net.filter.exception.ParseException;
@@ -27,10 +28,13 @@ import io.netty.handler.ipfilter.IpFilterRule;
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
 @RunWith(Parameterized.class)
-public class SemuxIpFilterLoaderTest {
+public class SemuxIpFilterLoaderTest extends SemuxIpFilterTestBase {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
+
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() throws UnknownHostException {
@@ -64,10 +68,6 @@ public class SemuxIpFilterLoaderTest {
         this.jsonFile = jsonFile;
         this.rules = rules;
         this.exception = exception;
-    }
-
-    private static File getFile(String fileName) {
-        return new File(SemuxIpFilterLoaderTest.class.getResource("/ipfilter/" + fileName).getFile());
     }
 
     @Test
