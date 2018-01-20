@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
@@ -461,9 +462,11 @@ public class SendPanel extends JPanel implements ActionListener {
         String name;
 
         public AccountItem(WalletAccount a) {
+            Optional<String> alias = a.getName();
+
             this.account = a;
             this.name = Hex.PREF + account.getKey().toAddressString() + ", " // address
-                    + (account.getName().isPresent() ? account.getName().get() + ", " : "") // alias
+                    + (alias.isPresent() ? alias.get() + ", " : "") // alias
                     + SwingUtil.formatValue(account.getAvailable()); // available
         }
 
