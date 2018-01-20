@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -87,11 +88,11 @@ public class ConnectionTest {
                 && kernelRule1.getKernel().getP2p().isRunning());
 
         // keep socket references
-        sockets = new ArrayList<>();
+        sockets = new CopyOnWriteArrayList<>();
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws InterruptedException {
         // close all connections
         sockets.parallelStream().filter(Objects::nonNull).forEach(socket -> {
             try {
@@ -104,6 +105,7 @@ public class ConnectionTest {
         kernelRule1.getKernel().stop();
         await().until(() -> kernelRule1.getKernel().state().equals(Kernel.State.STOPPED));
         serverThread.interrupt();
+        await().until(() -> !serverThread.isAlive());
     }
 
     @Test
@@ -144,7 +146,7 @@ public class ConnectionTest {
         final int connections = 5;
         Collection<Callable<Void>> threads = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(connections);
-        List<InetSocketAddress> clientAddresses = new ArrayList<>();
+        final List<InetSocketAddress> clientAddresses = new CopyOnWriteArrayList<>();
         for (int i = 1; i <= connections; i++) {
             final int j = i;
             threads.add(() -> {
