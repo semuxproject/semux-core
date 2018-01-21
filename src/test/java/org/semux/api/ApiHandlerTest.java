@@ -286,6 +286,9 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         GetAccountTransactionsResponse response = request(uri, GetAccountTransactionsResponse.class);
         assertTrue(response.success);
         assertNotNull(response.transactions);
+        for (Types.TransactionType txType : response.transactions) {
+            assertEquals(block.getNumber(), txType.blockNumber.longValue());
+        }
     }
 
     @Test
@@ -299,6 +302,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         GetTransactionResponse response = request(uri, GetTransactionResponse.class);
         assertTrue(response.success);
         assertEquals(Hex.encode0x(tx.getHash()), response.transaction.hash);
+        assertEquals(block.getNumber(), response.transaction.blockNumber.longValue());
         assertNotNull(response.transaction.to);
     }
 

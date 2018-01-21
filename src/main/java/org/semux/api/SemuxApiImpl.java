@@ -162,7 +162,8 @@ public class SemuxApiImpl implements SemuxApi {
         return new GetPendingTransactionsResponse(true,
                 kernel.getPendingManager().getTransactions().parallelStream()
                         .map(pendingTransaction -> pendingTransaction.transaction)
-                        .map(Types.TransactionType::new)
+                        .map(tx -> new Types.TransactionType(
+                                kernel.getBlockchain().getTransactionBlockNumber(tx.getHash()), tx))
                         .collect(Collectors.toList()));
     }
 
@@ -195,7 +196,8 @@ public class SemuxApiImpl implements SemuxApi {
         }
         return new GetAccountTransactionsResponse(true,
                 kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream()
-                        .map(Types.TransactionType::new)
+                        .map(tx -> new Types.TransactionType(
+                                kernel.getBlockchain().getTransactionBlockNumber(tx.getHash()), tx))
                         .collect(Collectors.toList()));
     }
 
@@ -217,7 +219,9 @@ public class SemuxApiImpl implements SemuxApi {
             return failure("The request transaction was not found");
         }
 
-        return new GetTransactionResponse(true, new Types.TransactionType(transaction));
+        return new GetTransactionResponse(true, new Types.TransactionType(
+                kernel.getBlockchain().getTransactionBlockNumber(transaction.getHash()),
+                transaction));
     }
 
     @Override

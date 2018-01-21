@@ -130,7 +130,7 @@ public class Types {
                     Hex.encode0x(block.getStateRoot()),
                     Hex.encode0x(block.getData()),
                     block.getTransactions().stream()
-                            .map(Types.TransactionType::new)
+                            .map(tx -> new Types.TransactionType(block.getNumber(), tx))
                             .collect(Collectors.toList()));
         }
     }
@@ -312,6 +312,9 @@ public class Types {
 
     public static class TransactionType {
 
+        @JsonProperty("blockNumber")
+        public final Long blockNumber;
+
         @JsonProperty("hash")
         public final String hash;
 
@@ -340,6 +343,7 @@ public class Types {
         public final String data;
 
         public TransactionType(
+                @JsonProperty("blockNumber") Long blockNumber,
                 @JsonProperty("hash") String hash,
                 @JsonProperty("type") String type,
                 @JsonProperty("from") String from,
@@ -349,6 +353,7 @@ public class Types {
                 @JsonProperty("nonce") Long nonce,
                 @JsonProperty("timestamp") Long timestamp,
                 @JsonProperty("data") String data) {
+            this.blockNumber = blockNumber;
             this.hash = hash;
             this.type = type;
             this.from = from;
@@ -360,8 +365,9 @@ public class Types {
             this.data = data;
         }
 
-        public TransactionType(Transaction tx) {
-            this(Hex.encode0x(tx.getHash()),
+        public TransactionType(Long blockNumber, Transaction tx) {
+            this(blockNumber,
+                    Hex.encode0x(tx.getHash()),
                     tx.getType().toString(),
                     Hex.encode0x(tx.getFrom()),
                     Hex.encode0x(tx.getTo()),
