@@ -378,46 +378,21 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     protected void refreshAccounts() {
         List<WalletAccount> list = model.getAccounts();
 
-        // quit if no update
-        boolean match = selectFrom.getItemCount() == list.size();
-        if (match) {
-            for (int i = 0; i < list.size(); i++) {
-                if (!Arrays.equals(selectFrom.getItemAt(i).account.getAddress(), list.get(i).getAddress())) {
-                    match = false;
-                    break;
-                }
+        // record selected account
+        AccountItem selected = (AccountItem) selectFrom.getSelectedItem();
 
-                // check if name updated
-                if (!selectFrom.getItemAt(i).account.getName().equals(list.get(i).getName())) {
-                    match = false;
-                    break;
-                }
-
-                // check if balance is updated
-                if (selectFrom.getItemAt(i).account.getAvailable() != list.get(i).getAvailable()) {
-                    match = false;
-                    break;
-                }
-            }
+        // update account list
+        selectFrom.removeAllItems();
+        for (int i = 0; i < list.size(); i++) {
+            selectFrom.addItem(new AccountItem(list.get(i)));
         }
 
-        if (!match) {
-            // record selected account
-            AccountItem selected = (AccountItem) selectFrom.getSelectedItem();
-
-            // update account list
-            selectFrom.removeAllItems();
+        // recover selected account
+        if (selected != null) {
             for (int i = 0; i < list.size(); i++) {
-                selectFrom.addItem(new AccountItem(list.get(i)));
-            }
-
-            // recover selected account
-            if (selected != null) {
-                for (int i = 0; i < list.size(); i++) {
-                    if (Arrays.equals(list.get(i).getAddress(), selected.account.getAddress())) {
-                        selectFrom.setSelectedIndex(i);
-                        break;
-                    }
+                if (Arrays.equals(list.get(i).getAddress(), selected.account.getAddress())) {
+                    selectFrom.setSelectedIndex(i);
+                    break;
                 }
             }
         }

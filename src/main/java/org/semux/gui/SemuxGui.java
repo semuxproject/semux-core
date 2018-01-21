@@ -313,7 +313,7 @@ public class SemuxGui extends Launcher {
     protected void updateModel() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Thread.sleep(3L * 1000L);
+                Thread.sleep(10L * 1000L);
 
                 // process latest block
                 processBlock(kernel.getBlockchain().getLatestBlock());
