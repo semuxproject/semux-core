@@ -241,6 +241,11 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public long getTransactionBlockNumber(byte[] hash) {
+        Transaction tx = getTransaction(hash);
+        if (tx.getType() == TransactionType.COINBASE) {
+            return tx.getNonce();
+        }
+
         byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash));
         if (bytes != null) {
             SimpleDecoder dec = new SimpleDecoder(bytes);
