@@ -17,6 +17,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.text.DateFormat;
@@ -201,7 +202,7 @@ public class SwingUtil {
      * 
      * @param comp
      */
-    public static void addTextContextMenu(JComponent comp, List<TextContextMenuItem> textContextMenuItems) {
+    private static void addTextContextMenu(JComponent comp, List<TextContextMenuItem> textContextMenuItems) {
         JPopupMenu popup = new JPopupMenu();
 
         for (TextContextMenuItem textContextMenuItem : textContextMenuItems) {
@@ -214,6 +215,31 @@ public class SwingUtil {
     }
 
     /**
+     * Ensures that a text field gets focused when it's clicked. Credits to:
+     * https://stackoverflow.com/a/41965891/670662
+     *
+     * @param textField
+     */
+    private static void addTextMouseClickFocusListener(final JComponent textField) {
+        textField.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                textField.requestFocusInWindow();
+            }
+
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                textField.requestFocusInWindow();
+            }
+
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                textField.requestFocusInWindow();
+            }
+        });
+    }
+
+    /**
      * Generates a text field with copy-paste-cut popup menu.
      * 
      * @return
@@ -222,6 +248,7 @@ public class SwingUtil {
         JTextField textField = new JTextField();
         textField.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         addTextContextMenu(textField, Arrays.asList(COPY, PASTE, CUT));
+        addTextMouseClickFocusListener(textField);
         return textField;
     }
 
