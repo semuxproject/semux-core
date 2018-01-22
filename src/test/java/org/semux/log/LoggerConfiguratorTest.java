@@ -28,13 +28,11 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.config.Constants;
 
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
 public class LoggerConfiguratorTest {
 
     @Rule
