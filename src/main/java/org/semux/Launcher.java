@@ -20,8 +20,10 @@ import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
 import org.semux.config.MainnetConfig;
 import org.semux.config.TestnetConfig;
+import org.semux.exception.LauncherException;
 import org.semux.log.LoggerConfigurator;
 import org.semux.message.CliMessages;
+import org.semux.util.SystemUtil;
 
 public abstract class Launcher {
 
@@ -195,4 +197,18 @@ public abstract class Launcher {
         this.password = password;
     }
 
+    /**
+     * Check runtime prerequisite.
+     *
+     */
+    protected static void checkPrerequisite() {
+        switch (SystemUtil.getOsName()) {
+        case WINDOWS:
+            if (!SystemUtil.isWindowsVCRedist2010Installed()) {
+                throw new LauncherException("Microsoft Visual C++ 2010 Redistributable Package is not installed.");
+            }
+            break;
+        default:
+        }
+    }
 }

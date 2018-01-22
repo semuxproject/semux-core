@@ -38,6 +38,7 @@ import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.exception.LauncherException;
 import org.semux.gui.dialog.InputDialog;
 import org.semux.gui.dialog.SelectDialog;
 import org.semux.gui.model.WalletAccount;
@@ -74,14 +75,26 @@ public class SemuxGui extends Launcher {
         try {
             setupLookAndFeel();
 
+            checkPrerequisite();
+
             SemuxGui gui = new SemuxGui();
             // set up logger
             gui.setupLogger(args);
             // start
             gui.start(args);
 
+        } catch (LauncherException e) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    e.getMessage(),
+                    GuiMessages.get("ErrorDialogTitle"),
+                    JOptionPane.ERROR_MESSAGE);
         } catch (ParseException e) {
-            JOptionPane.showMessageDialog(null, "Filed to parse the parameters: " + e.getMessage());
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Filed to parse the parameters: " + e.getMessage(),
+                    GuiMessages.get("ErrorDialogTitle"),
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 

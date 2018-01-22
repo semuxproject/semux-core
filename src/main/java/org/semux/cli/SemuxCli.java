@@ -22,6 +22,7 @@ import org.semux.core.Wallet;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.exception.LauncherException;
 import org.semux.message.CliMessages;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ public class SemuxCli extends Launcher {
 
     public static void main(String[] args) {
         try {
+            checkPrerequisite();
+
             SemuxCli cli = new SemuxCli();
             // set up logger
             cli.setupLogger(args);
@@ -43,6 +46,8 @@ public class SemuxCli extends Launcher {
             cli.start(args);
         } catch (ParseException exception) {
             logger.error(CliMessages.get("ParsingFailed", exception.getMessage()));
+        } catch (LauncherException exception) {
+            logger.error(exception.getMessage());
         }
     }
 
