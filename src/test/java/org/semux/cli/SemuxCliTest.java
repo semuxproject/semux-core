@@ -23,6 +23,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static org.semux.TestLoggingAppender.err;
 import static org.semux.TestLoggingAppender.info;
 
 import java.security.KeyPair;
@@ -95,6 +96,26 @@ public class SemuxCliTest {
         SemuxCli.main(args);
 
         verify(semuxCLI).start(args);
+    }
+
+    @Test
+    public void testLoadAndUnlockWalletWithWrongPassword() {
+        SemuxCli semuxCLI = spy(new SemuxCli());
+
+        // mock wallet
+        Wallet wallet = mock(Wallet.class);
+        when(wallet.unlock(any())).thenReturn(false);
+        when(semuxCLI.loadWallet()).thenReturn(wallet);
+
+        // mock password
+        when(semuxCLI.getPassword()).thenReturn("password");
+
+        // execution
+        exit.expectSystemExitWithStatus(-1);
+        semuxCLI.loadAndUnlockWallet();
+
+        // assertion
+        assertThat(TestLoggingAppender.events(), hasItem(err(CliMessages.get("WrongPassword"))));
     }
 
     @Test

@@ -8,15 +8,11 @@ package org.semux;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
 import org.semux.api.http.SemuxApiService;
@@ -67,7 +63,6 @@ public class Kernel {
     }
 
     protected State state = State.STOPPED;
-    protected List<Pair<String, Runnable>> shutdownHooks = new CopyOnWriteArrayList<>();
 
     protected ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
     protected Config config = null;
@@ -176,7 +171,7 @@ public class Kernel {
         // ====================================
         // register shutdown hook
         // ====================================
-        Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "shutdown-hook"));
+        Launcher.registerShutdownHook("kernel", this::stop);
 
         state = State.RUNNING;
     }
@@ -256,16 +251,6 @@ public class Kernel {
             state = State.STOPPING;
         }
 
-        // shutdown hooks
-        for (Pair<String, Runnable> r : shutdownHooks) {
-            try {
-                logger.info("Shutting down {}", r.getLeft());
-                r.getRight().run();
-            } catch (Exception e) {
-                logger.info("Failed to shutdown {}", r.getLeft(), e);
-            }
-        }
-
         // stop consensus
         try {
             sync.stop();
@@ -297,20 +282,7 @@ public class Kernel {
         }
         lock.unlock();
 
-        // shutdown log4j
-        LogManager.shutdown();
-
         state = State.STOPPED;
-    }
-
-    /**
-     * Registers a shutdown hook.
-     * 
-     * @param name
-     * @param runnable
-     */
-    public void registerShutdownHook(String name, Runnable runnable) {
-        shutdownHooks.add(Pair.of(name, runnable));
     }
 
     /**

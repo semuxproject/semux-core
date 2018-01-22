@@ -167,6 +167,7 @@ public class SemuxCli extends Launcher {
         if (getCoinbase() < 0 || getCoinbase() >= accounts.size()) {
             logger.error(CliMessages.get("CoinbaseDoesNotExist"));
             SystemUtil.exit(-1);
+            return;
         }
 
         // start kernel
@@ -276,12 +277,14 @@ public class SemuxCli extends Launcher {
             if (!accountAdded) {
                 logger.error(CliMessages.get("PrivateKeyAlreadyInWallet"));
                 SystemUtil.exit(1);
+                return;
             }
 
             boolean walletFlushed = wallet.flush();
             if (!walletFlushed) {
                 logger.error(CliMessages.get("WalletFileCannotBeUpdated"));
                 SystemUtil.exit(2);
+                return;
             }
 
             logger.info(CliMessages.get("PrivateKeyImportedSuccessfully"));
