@@ -6,8 +6,6 @@
  */
 package org.semux.util;
 
-import static com.sun.jna.platform.win32.WinReg.HKEY_LOCAL_MACHINE;
-
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.IOException;
@@ -27,7 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.zafarkhaja.semver.Version;
+import com.sun.jna.Platform;
 import com.sun.jna.platform.win32.Advapi32Util;
+import com.sun.jna.platform.win32.Win32Exception;
+import com.sun.jna.platform.win32.WinNT;
+import com.sun.jna.platform.win32.WinReg;
 
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
@@ -322,14 +324,24 @@ public class SystemUtil {
             throw new UnreachableException();
         }
 
-        return Advapi32Util.registryGetIntValue(
-                HKEY_LOCAL_MACHINE,
-                "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\VC\\VCRedist\\x86",
-                "Installed") == 1
-                || Advapi32Util.registryGetIntValue(
-                        HKEY_LOCAL_MACHINE,
-                        "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\VisualStudio\\10.0\\VC\\VCRedist\\x64",
+        try {
+            if (Platform.is64Bit()) {
+                return Advapi32Util.registryGetIntValue(
+                        Advapi32Util.registryGetKey(
+                                WinReg.HKEY_LOCAL_MACHINE,
+                                "SOFTWARE\\Microsoft\\VisualStudio\\10.0\\VC\\VCRedist\\x64",
+                                WinNT.KEY_READ | WinNT.KEY_WOW64_32KEY).getValue(),
                         "Installed") == 1;
+            } else {
+                return Advapi32Util.registryGetIntValue(
+                        WinReg.HKEY_LOCAL_MACHINE,
+                        "SOFTWARE\\Microsoft\\VisualStudio\\10.0\\VC\\VCRedist\\x86",
+                        "Installed") == 1;
+            }
+        } catch (Win32Exception e) {
+            logger.error("Failed to read windows registry", e);
+            return false;
+        }
     }
 
     private SystemUtil() {
