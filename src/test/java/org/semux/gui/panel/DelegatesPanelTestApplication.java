@@ -11,7 +11,7 @@ import org.semux.gui.BaseTestApplication;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.model.WalletModel;
 
-public class DelegatePanelTestApplication extends BaseTestApplication {
+public class DelegatesPanelTestApplication extends BaseTestApplication {
 
     private static final long serialVersionUID = 1L;
 
@@ -19,7 +19,7 @@ public class DelegatePanelTestApplication extends BaseTestApplication {
 
     DelegatesPanel delegatesPanel;
 
-    DelegatePanelTestApplication(WalletModel walletModel, KernelMock kernelMock) {
+    DelegatesPanelTestApplication(WalletModel walletModel, KernelMock kernelMock) {
         super();
         gui = new SemuxGui(walletModel, kernelMock);
         delegatesPanel = new DelegatesPanel(gui, this);

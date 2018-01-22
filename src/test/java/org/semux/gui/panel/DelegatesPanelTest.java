@@ -48,7 +48,7 @@ import org.semux.util.Bytes;
 import junit.framework.TestCase;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
+public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
 
     @Rule
     public KernelRule kernelRule1 = new KernelRule(51610, 51710);
@@ -59,7 +59,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     @Captor
     ArgumentCaptor<Transaction> transactionArgumentCaptor = ArgumentCaptor.forClass(Transaction.class);
 
-    DelegatePanelTestApplication application;
+    DelegatesPanelTestApplication application;
 
     FrameFixture window;
 
@@ -133,7 +133,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     public void testSelectDelegate() {
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
         application = GuiActionRunner
-                .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
+                .execute(() -> new DelegatesPanelTestApplication(walletRule.walletModel, kernelMock));
         window = new FrameFixture(robot(), application);
         window.show().requireVisible().moveToFront();
 
@@ -185,7 +185,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         when(pendingManager.addTransactionSync(any())).thenReturn(mockResult);
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
         application = GuiActionRunner
-                .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
+                .execute(() -> new DelegatesPanelTestApplication(walletRule.walletModel, kernelMock));
         window = new FrameFixture(robot(), application);
         window.show().requireVisible().moveToFront();
 
@@ -205,7 +205,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
     private void testUnvote(String amount) {
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
         application = GuiActionRunner
-                .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
+                .execute(() -> new DelegatesPanelTestApplication(walletRule.walletModel, kernelMock));
         window = new FrameFixture(robot(), application);
         window.show().requireVisible().moveToFront();
 
@@ -264,7 +264,7 @@ public class DelegatePanelTest extends AssertJSwingJUnitTestCase {
         when(pendingManager.addTransactionSync(any())).thenReturn(mockResult);
         when(kernelMock.getPendingManager()).thenReturn(pendingManager);
         application = GuiActionRunner
-                .execute(() -> new DelegatePanelTestApplication(walletRule.walletModel, kernelMock));
+                .execute(() -> new DelegatesPanelTestApplication(walletRule.walletModel, kernelMock));
         window = new FrameFixture(robot(), application);
         window.show().requireVisible().moveToFront();
 
