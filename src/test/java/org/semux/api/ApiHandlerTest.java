@@ -51,7 +51,9 @@ import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
+import org.semux.api.response.SignMessageResponse;
 import org.semux.api.response.Types;
+import org.semux.api.response.VerifyMessageResponse;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
 import org.semux.core.Genesis.Premine;
@@ -125,6 +127,32 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         assertEquals(Long.valueOf(0), response.info.latestBlockNumber);
         assertEquals(Integer.valueOf(0), response.info.activePeers);
         assertEquals(Integer.valueOf(0), response.info.pendingTransactions);
+    }
+
+    @Test
+    public void testSignatures() throws IOException {
+
+        String address = wallet.getAccount(0).toAddressString();
+        String addressOther = wallet.getAccount(1).toAddressString();
+
+        String message = "helloworld";
+        String uri = "/sign_message?address=0x" + address + "&message=" + message;
+        SignMessageResponse response = request(uri, SignMessageResponse.class);
+        assertTrue(response.success);
+        String signature = response.signature;
+        uri = "/verify_message?address=" + address + "&message=" + message + "&signature=" + signature;
+        VerifyMessageResponse verifyMessageResponse = request(uri, VerifyMessageResponse.class);
+        assertTrue(verifyMessageResponse.success);
+
+        // verify no messing with fromaddress
+        uri = "/verify_message?address=" + addressOther + "&message=" + message + "&signature=" + signature;
+        verifyMessageResponse = request(uri, VerifyMessageResponse.class);
+        assertFalse(verifyMessageResponse.success);
+
+        // verify no messing with message
+        uri = "/verify_message?address=" + addressOther + "&message=" + message + "hi" + "&signature=" + signature;
+        verifyMessageResponse = request(uri, VerifyMessageResponse.class);
+        assertFalse(verifyMessageResponse.success);
     }
 
     @Test

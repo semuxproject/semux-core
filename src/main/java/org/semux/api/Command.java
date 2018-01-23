@@ -19,6 +19,11 @@ public enum Command {
      */
     GET_INFO,
 
+    /**
+     * Verify a message
+     */
+    VERIFY_MESSAGE,
+
     // =======================
     // network
     // =======================
@@ -143,6 +148,11 @@ public enum Command {
      * Register as a delegate.
      */
     DELEGATE,
+
+    /**
+     * Sign a message
+     */
+    SIGN_MESSAGE,
 
     /**
      * Vote for a delegate.
