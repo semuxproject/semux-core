@@ -252,7 +252,8 @@ public class SemuxApiImpl implements SemuxApi {
         }
 
         Account account = kernel.getBlockchain().getAccountState().getAccount(addressBytes);
-        return new GetAccountResponse(true, new Types.AccountType(account));
+        int transactionCount = kernel.getBlockchain().getTransactionCount(account.getAddress());
+        return new GetAccountResponse(true, new Types.AccountType(account, transactionCount));
     }
 
     @Override

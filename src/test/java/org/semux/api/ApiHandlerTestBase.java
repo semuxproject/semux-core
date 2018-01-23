@@ -96,17 +96,17 @@ public abstract class ApiHandlerTestBase {
     }
 
     protected Transaction createTransaction() {
-        Key key = new Key();
+        return createTransaction(new Key(), new Key(), 0);
+    }
 
+    protected Transaction createTransaction(Key from, Key to, long value) {
         Network network = config.network();
         TransactionType type = TransactionType.TRANSFER;
-        byte[] to = key.toAddress();
-        long value = 0;
         long fee = 0;
         long nonce = 1;
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
 
-        return new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(key);
+        return new Transaction(network, type, to.toAddress(), value, fee, nonce, timestamp, data).sign(from);
     }
 }
