@@ -55,7 +55,6 @@ import org.semux.crypto.Key;
 import org.semux.crypto.cache.PublicKeyCache;
 import org.semux.net.NodeManager;
 import org.semux.net.filter.SemuxIpFilter;
-import org.semux.util.Bytes;
 
 public class SemuxApiImpl implements SemuxApi {
     private Kernel kernel;

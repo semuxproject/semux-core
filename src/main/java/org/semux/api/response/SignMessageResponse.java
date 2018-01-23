@@ -6,8 +6,6 @@
  */
 package org.semux.api.response;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.semux.api.ApiHandlerResponse;
 
