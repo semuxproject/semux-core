@@ -8,6 +8,8 @@ package org.semux.exception;
 
 public class LauncherException extends RuntimeException {
 
+    private static final long serialVersionUID = 1L;
+
     public LauncherException() {
     }
 
