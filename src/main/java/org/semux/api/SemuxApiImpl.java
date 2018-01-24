@@ -435,14 +435,15 @@ public class SemuxApiImpl implements SemuxApi {
             byte[] signatureAddress = Hash.h160(pubKey.getEncoded());
             byte[] addressBytes = Hex.decode0x(address);
 
+            boolean isValidSignature = true;
             if (!Arrays.equals(signatureAddress, addressBytes)) {
-                return failure("Signature does not match provided address.");
+                isValidSignature = false;
             }
             if (!Key.verify(message.getBytes(), sig)) {
-                return failure("Signature does not match message.");
+                isValidSignature = false;
             }
 
-            return new VerifyMessageResponse(true);
+            return new VerifyMessageResponse(true, isValidSignature);
         } catch (NullPointerException | IllegalArgumentException e) {
             return failure(String.format("Invalid Signature"));
         }
