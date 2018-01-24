@@ -230,7 +230,9 @@ public class MenuBar extends JMenuBar implements ActionListener {
             return;
         }
 
-        String pk = new InputDialog(frame, GuiMessages.get("EnterPrivateKey"), false).showAndGet();
+        InputDialog inputDialog = new InputDialog(frame, GuiMessages.get("EnterPrivateKey"), false);
+        inputDialog.setTitle(GuiMessages.get("ImportPrivateKey"));
+        String pk = inputDialog.showAndGet();
         if (pk != null) {
             try {
                 Wallet wallet = gui.getKernel().getWallet();
