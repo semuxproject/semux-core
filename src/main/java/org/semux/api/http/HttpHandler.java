@@ -173,7 +173,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 // write response
                 String responseString;
                 try {
-                    if(prettyPrint) {
+                    if (prettyPrint) {
                         responseString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
                     } else {
                         responseString = objectMapper.writeValueAsString(response);
