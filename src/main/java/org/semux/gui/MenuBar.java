@@ -190,7 +190,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
                     byte[] address = alias.getKey().getData();
 
                     // don't override existing wallet's aliases.
-                    if (wallet.getAddressAlias(address) != null) {
+                    if (wallet.getAddressAlias(address) == null) {
                         wallet.setAddressAlias(address, alias.getValue());
                     }
                 }
