@@ -89,8 +89,8 @@ public class SemuxApiImpl implements SemuxApi {
     @Override
     public ApiHandlerResponse addToBlacklist(String ip) {
         try {
-            if (ip == null || ip.trim().length() == 0) {
-                return failure("Parameter `ip` can't be empty");
+            if (!isSet(ip)) {
+                return failure("Parameter `ip` is required");
             }
 
             SemuxIpFilter ipFilter = kernel.getChannelManager().getIpFilter();
@@ -104,10 +104,19 @@ public class SemuxApiImpl implements SemuxApi {
         }
     }
 
+    /**
+     * Whether a value is supplied
+     * @param value
+     * @return
+     */
+    private boolean isSet(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
+
     @Override
     public ApiHandlerResponse addToWhitelist(String ip) {
         try {
-            if (ip == null || ip.trim().length() == 0) {
+            if (!isSet(ip)) {
                 return failure("Parameter `ip` can't be empty");
             }
 
@@ -173,8 +182,14 @@ public class SemuxApiImpl implements SemuxApi {
         int fromInt;
         int toInt;
 
-        if (address == null) {
+        if (!isSet(address)) {
             return failure("Parameter `address` is required");
+        }
+        if (!isSet(from)) {
+            return failure("Parameter `from` is required");
+        }
+        if (!isSet(to)) {
+            return failure("Parameter `to` is required");
         }
 
         try {
@@ -203,8 +218,8 @@ public class SemuxApiImpl implements SemuxApi {
 
     @Override
     public ApiHandlerResponse getTransaction(String hash) {
-        if (hash == null) {
-            return failure("Parameter `hash` can't be null");
+        if (!isSet(hash)) {
+            return failure("Parameter `hash` is required");
         }
 
         byte[] hashBytes;
@@ -226,8 +241,8 @@ public class SemuxApiImpl implements SemuxApi {
 
     @Override
     public ApiHandlerResponse sendTransaction(String raw) {
-        if (raw == null) {
-            return failure("Parameter `raw` can't be null");
+        if (!isSet(raw)) {
+            return failure("Parameter `raw` is required");
         }
 
         try {
@@ -240,8 +255,8 @@ public class SemuxApiImpl implements SemuxApi {
 
     @Override
     public ApiHandlerResponse getAccount(String address) {
-        if (address == null) {
-            return failure("Parameter `address` can't be null");
+        if (!isSet(address)) {
+            return failure("Parameter `address` isRequired");
         }
 
         byte[] addressBytes;
@@ -258,8 +273,8 @@ public class SemuxApiImpl implements SemuxApi {
 
     @Override
     public ApiHandlerResponse getDelegate(String address) {
-        if (address == null) {
-            return failure("Parameter `address` can't be null");
+        if (!isSet(address)) {
+            return failure("Parameter `address` is required");
         }
 
         byte[] addressBytes;
@@ -299,7 +314,7 @@ public class SemuxApiImpl implements SemuxApi {
         byte[] voterBytes;
         byte[] delegateBytes;
 
-        if (voter == null) {
+        if (!isSet(voter)) {
             return failure("Parameter `voter` is required");
         }
 
@@ -309,7 +324,7 @@ public class SemuxApiImpl implements SemuxApi {
             return failure("Parameter `voter` is not a valid hexadecimal string");
         }
 
-        if (delegate == null) {
+        if (!isSet(delegate)) {
             return failure("Parameter `delegate` is required");
         }
 
@@ -324,8 +339,8 @@ public class SemuxApiImpl implements SemuxApi {
 
     @Override
     public ApiHandlerResponse getVotes(String delegate) {
-        if (delegate == null) {
-            return failure("Parameter `delegate` can't be null");
+        if (!isSet(delegate)) {
+            return failure("Parameter `delegate` is required");
         }
 
         byte[] delegateBytes;
@@ -403,8 +418,8 @@ public class SemuxApiImpl implements SemuxApi {
      * @return validated hostname and port number
      */
     protected NodeManager.Node validateAddNodeParameter(String node) {
-        if (node == null || node.length() == 0) {
-            throw new IllegalArgumentException("Parameter `node` can't be empty");
+        if (!isSet(node)) {
+            throw new IllegalArgumentException("Parameter `node` is required");
         }
 
         Matcher matcher = Pattern.compile("^(?<host>.+?):(?<port>\\d+)$").matcher(node.trim());
