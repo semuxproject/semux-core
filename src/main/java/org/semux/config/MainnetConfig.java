@@ -11,7 +11,7 @@ import static org.semux.net.Capability.SEM;
 import org.semux.Network;
 import org.semux.net.CapabilitySet;
 
-public class MainnetConfig extends AbstractConfig implements Config {
+public class MainnetConfig extends AbstractConfig {
 
     public MainnetConfig(String dataDir) {
         super(dataDir, Network.MAINNET, Constants.MAINNET_VERSION);
