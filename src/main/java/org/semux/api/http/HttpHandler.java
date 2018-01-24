@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.api.ApiHandler;
 import org.semux.api.ApiHandlerResponse;
@@ -75,6 +76,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
     public HttpHandler(Config config, ApiHandler apiHandler) {
         this.config = config;
         this.apiHandler = apiHandler;
+        //enable pretty-print
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     @Override
