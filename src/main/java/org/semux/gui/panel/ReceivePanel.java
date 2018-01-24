@@ -311,7 +311,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
         if (acc == null) {
             JOptionPane.showMessageDialog(this, GuiMessages.get("SelectAccount"));
         } else {
-            String name = JOptionPane.showInputDialog(this, GuiMessages.get("Name"));
+            String name = JOptionPane.showInputDialog(this, GuiMessages.get("Name"), GuiMessages.get("RenameAccount"),
+                    JOptionPane.QUESTION_MESSAGE);
             if (name != null) {
                 Wallet wallet = kernel.getWallet();
                 wallet.setAddressAlias(acc.getKey().toAddress(), name);
