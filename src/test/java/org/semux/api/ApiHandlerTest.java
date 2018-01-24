@@ -54,7 +54,6 @@ import org.semux.api.response.SendTransactionResponse;
 import org.semux.api.response.Types;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
-import org.semux.core.Genesis.Premine;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
@@ -69,7 +68,6 @@ import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
 import org.semux.net.filter.SemuxIpFilter;
 import org.semux.rules.KernelRule;
-import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
 import io.netty.handler.ipfilter.IpFilterRuleType;
@@ -322,13 +320,20 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testGetAccount() throws IOException {
-        Genesis gen = chain.getGenesis();
-        Entry<ByteArray, Premine> entry = gen.getPremines().entrySet().iterator().next();
+        // create an account
+        Key key = new Key();
+        accountState.adjustAvailable(key.toAddress(), 1000 * Unit.SEM);
+        chain.addBlock(createBlock(
+                chain,
+                Collections.singletonList(createTransaction(key, key, 0)),
+                Collections.singletonList(new TransactionResult(true))));
 
-        String uri = "/get_account?address=" + entry.getKey();
+        // request api endpoint
+        String uri = "/get_account?address=" + key.toAddressString();
         GetAccountResponse response = request(uri, GetAccountResponse.class);
         assertTrue(response.success);
-        assertEquals(entry.getValue().getAmount() * Unit.SEM, response.account.available);
+        assertEquals(1000 * Unit.SEM, response.account.available);
+        assertEquals(1, response.account.transactionCount);
     }
 
     @Test

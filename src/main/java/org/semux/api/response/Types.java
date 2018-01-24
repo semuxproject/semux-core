@@ -31,24 +31,28 @@ public class Types {
         public final long available;
         public final long locked;
         public final long nonce;
+        public final int transactionCount;
 
         @JsonCreator
         public AccountType(
                 @JsonProperty("address") String address,
                 @JsonProperty("available") long available,
                 @JsonProperty("locked") long locked,
-                @JsonProperty("nonce") long nonce) {
+                @JsonProperty("nonce") long nonce,
+                @JsonProperty("transactionCount") int transactionCount) {
             this.address = address;
             this.available = available;
             this.locked = locked;
             this.nonce = nonce;
+            this.transactionCount = transactionCount;
         }
 
-        public AccountType(Account account) {
+        public AccountType(Account account, int transactionCount) {
             this(Hex.encode0x(account.getAddress()),
                     account.getAvailable(),
                     account.getLocked(),
-                    account.getNonce());
+                    account.getNonce(),
+                    transactionCount);
         }
     }
 
