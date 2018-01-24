@@ -26,7 +26,7 @@ public class HelloMessageTest {
         Key key = new Key();
         String peerId = key.toAddressString();
         Peer peer = new Peer("127.0.0.1", 5161, config.networkVersion(), config.getClientId(), peerId, 2,
-                Capability.SUPPORTED);
+                config.capabilitySet());
 
         HelloMessage msg = new HelloMessage(peer, key);
         assertTrue(msg.validate(config));

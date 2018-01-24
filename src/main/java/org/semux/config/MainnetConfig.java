@@ -6,11 +6,19 @@
  */
 package org.semux.config;
 
-import org.semux.Network;
+import static org.semux.net.Capability.SEM;
 
-public class MainnetConfig extends AbstractConfig {
+import org.semux.Network;
+import org.semux.net.CapabilitySet;
+
+public class MainnetConfig extends AbstractConfig implements Config {
 
     public MainnetConfig(String dataDir) {
         super(dataDir, Network.MAINNET, Constants.MAINNET_VERSION);
+    }
+
+    @Override
+    public CapabilitySet capabilitySet() {
+        return CapabilitySet.of(SEM);
     }
 }

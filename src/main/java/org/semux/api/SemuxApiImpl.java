@@ -106,6 +106,7 @@ public class SemuxApiImpl implements SemuxApi {
 
     /**
      * Whether a value is supplied
+     * 
      * @param value
      * @return
      */

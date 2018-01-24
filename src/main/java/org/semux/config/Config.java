@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.semux.Network;
 import org.semux.core.TransactionType;
+import org.semux.net.CapabilitySet;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
 
@@ -137,6 +138,13 @@ public interface Config {
      * @return
      */
     String getClientId();
+
+    /**
+     * Returns the set of capability.
+     *
+     * @return
+     */
+    CapabilitySet capabilitySet();
 
     // =========================
     // P2P
