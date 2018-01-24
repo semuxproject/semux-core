@@ -454,7 +454,7 @@ public class Wallet {
             IOUtil.writeToFile(enc.toBytes(), file);
             return true;
         } catch (CryptoException e) {
-            logger.error("Failed to encrypt the  wallet");
+            logger.error("Failed to encrypt the wallet");
         } catch (IOException e) {
             logger.error("Failed to write wallet to disk", e);
         }
