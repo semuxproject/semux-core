@@ -76,8 +76,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
     public HttpHandler(Config config, ApiHandler apiHandler) {
         this.config = config;
         this.apiHandler = apiHandler;
-        //enable pretty-print
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     @Override
@@ -171,11 +169,16 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                     response = apiHandler.service(uri, map, headers);
                     status = HttpResponseStatus.OK;
                 }
+                boolean prettyPrint = Boolean.valueOf(map.get("pretty"));
 
                 // write response
                 String responseString;
                 try {
-                    responseString = objectMapper.writeValueAsString(response);
+                    if(prettyPrint) {
+                        responseString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
+                    } else {
+                        responseString = objectMapper.writeValueAsString(response);
+                    }
                 } catch (JsonProcessingException e) {
                     responseString = "{\"success\":false,\"message\":\"Internal server error\"}";
                 }
