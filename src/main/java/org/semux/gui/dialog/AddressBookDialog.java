@@ -29,6 +29,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import org.apache.commons.lang3.StringUtils;
 import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
@@ -167,9 +168,13 @@ public class AddressBookDialog extends JDialog implements ActionListener {
             break;
         case ADD_ADDRESS:
             String name = JOptionPane.showInputDialog(this, GuiMessages.get("Name"));
-            if (name != null) {
+            if (StringUtils.isEmpty(name)) {
+                JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidName"));
+            } else {
                 String address = JOptionPane.showInputDialog(this, GuiMessages.get("Address"));
-                if (address != null) {
+                if (StringUtils.isEmpty(address)) {
+                    JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidAddress"));
+                } else {
                     try {
                         byte[] addr = Hex.decode0x(address.trim());
                         if (addr.length != Key.ADDRESS_LEN) {
@@ -206,6 +211,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         default:
             throw new UnreachableException();
         }
+
     }
 
     public void refresh() {
