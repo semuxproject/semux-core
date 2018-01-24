@@ -256,7 +256,7 @@ public class SemuxApiImpl implements SemuxApi {
     @Override
     public ApiHandlerResponse getAccount(String address) {
         if (!isSet(address)) {
-            return failure("Parameter `address` isRequired");
+            return failure("Parameter `address` is required");
         }
 
         byte[] addressBytes;
