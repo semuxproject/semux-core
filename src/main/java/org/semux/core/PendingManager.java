@@ -264,7 +264,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             }
 
             long t2 = System.currentTimeMillis();
-            logger.debug("Pending tx evaluation: # txs = {} / {},  time =  {} ms", accepted, txs.size(), t2 - t1);
+            logger.debug("Pending tx evaluation: # txs = {} / {},  time = {} ms", accepted, txs.size(), t2 - t1);
         }
     }
 
