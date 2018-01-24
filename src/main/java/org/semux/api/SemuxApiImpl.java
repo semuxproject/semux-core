@@ -402,15 +402,25 @@ public class SemuxApiImpl implements SemuxApi {
     @Override
     public ApiHandlerResponse signMessage(String address, String message) {
         if (address == null) {
-            return failure("Parameter `address` can't be null");
+            return failure("Parameter `address` is required");
         }
         if (message == null) {
-            return failure("Parameter `message` can't be null");
+            return failure("Parameter `message` is required");
         }
         try {
-            byte[] addressBytes = Hex.decode0x(address);
+            byte[] addressBytes;
+            try {
+                addressBytes = Hex.decode0x(address);
+            } catch (CryptoException ex) {
+                return failure("Parameter `address` is not a valid hexadecimal string");
+            }
 
             Key account = kernel.getWallet().getAccount(addressBytes);
+
+            if (account == null) {
+                return failure(String.format("The provided address %s doesn't belong to the wallet", address));
+            }
+
             Key.Signature signedMessage = account.sign(message.getBytes());
             return new SignMessageResponse(true, Hex.encode0x(signedMessage.toBytes()));
         } catch (NullPointerException | IllegalArgumentException e) {
@@ -421,19 +431,25 @@ public class SemuxApiImpl implements SemuxApi {
     @Override
     public ApiHandlerResponse verifyMessage(String address, String message, String signature) {
         if (address == null) {
-            return failure("Parameter `address` can't be null");
+            return failure("Parameter `address` is required");
         }
         if (message == null) {
-            return failure("Parameter `message` can't be null");
+            return failure("Parameter `message` is required");
         }
         if (signature == null) {
-            return failure("Parameter `signature` can't be null");
+            return failure("Parameter `signature` is required");
         }
         try {
             Key.Signature sig = Key.Signature.fromBytes(Hex.decode0x(signature));
             EdDSAPublicKey pubKey = PublicKeyCache.computeIfAbsent(sig.getPublicKey());
             byte[] signatureAddress = Hash.h160(pubKey.getEncoded());
-            byte[] addressBytes = Hex.decode0x(address);
+
+            byte[] addressBytes;
+            try {
+                addressBytes = Hex.decode0x(address);
+            } catch (CryptoException ex) {
+                return failure("Parameter `address` is not a valid hexadecimal string");
+            }
 
             boolean isValidSignature = true;
             if (!Arrays.equals(signatureAddress, addressBytes)) {
