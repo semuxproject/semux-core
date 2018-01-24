@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -31,6 +32,7 @@ import org.semux.gui.dialog.ChangePasswordDialog;
 import org.semux.gui.dialog.ExportPrivateKeyDialog;
 import org.semux.gui.dialog.InputDialog;
 import org.semux.message.GuiMessages;
+import org.semux.util.ByteArray;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,6 +184,17 @@ public class MenuBar extends JMenuBar implements ActionListener {
 
                 Wallet wallet = gui.getKernel().getWallet();
                 int n = wallet.addAccounts(w.getAccounts());
+                // add address book entries
+                Map<ByteArray, String> importedAliases = w.getAddressAliases();
+                for (Map.Entry<ByteArray, String> alias : importedAliases.entrySet()) {
+                    byte[] address = alias.getKey().getData();
+
+                    // don't override existing wallet's aliases.
+                    if (wallet.getAddressAlias(address) != null) {
+                        wallet.setAddressAlias(address, alias.getValue());
+                    }
+                }
+
                 wallet.flush();
                 JOptionPane.showMessageDialog(frame, GuiMessages.get("ImportSuccess", n));
                 gui.getModel().fireUpdateEvent();
