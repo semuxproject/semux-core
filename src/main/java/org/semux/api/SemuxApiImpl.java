@@ -117,7 +117,7 @@ public class SemuxApiImpl implements SemuxApi {
     public ApiHandlerResponse addToWhitelist(String ip) {
         try {
             if (!isSet(ip)) {
-                return failure("Parameter `ip` can't be empty");
+                return failure("Parameter `ip` is required");
             }
 
             SemuxIpFilter ipFilter = kernel.getChannelManager().getIpFilter();
