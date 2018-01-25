@@ -16,6 +16,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
+import javax.swing.Icon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -264,7 +265,9 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * Shows the about dialog.
      */
     protected void about() {
-        JOptionPane.showMessageDialog(frame, gui.getKernel().getConfig().getClientId());
+        Icon icon = SwingUtil.loadImage("logo", 64, 64);
+        JOptionPane.showMessageDialog(frame, gui.getKernel().getConfig().getClientId(),
+                GuiMessages.get("About"), JOptionPane.INFORMATION_MESSAGE, icon);
     }
 
     private void help() {
