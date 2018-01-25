@@ -515,4 +515,31 @@ public class Wallet {
             throw new WalletLockedException();
         }
     }
+
+    /**
+     * Adds the addresses and aliases from another wallet
+     *
+     * @param w
+     * @return
+     */
+    public int addWallet(Wallet w) {
+        requireUnlocked();
+
+        // import addresses
+        int numImportedAddresses = addAccounts(w.getAccounts());
+
+        // add address book entries
+        Map<ByteArray, String> importedAliases = w.getAddressAliases();
+        for (Map.Entry<ByteArray, String> alias : importedAliases.entrySet()) {
+            byte[] address = alias.getKey().getData();
+
+            // don't override existing wallet's aliases.
+            if (!getAddressAlias(address).isPresent()) {
+                setAddressAlias(address, alias.getValue());
+            }
+        }
+
+        flush();
+        return numImportedAddresses;
+    }
 }

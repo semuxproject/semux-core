@@ -283,7 +283,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("NoAccountFound"));
             } else {
                 if (wallet.unlock(password)
-                        && wallet.addAccounts(w.getAccounts()) > 0
+                        && wallet.addWallet(w) > 0
                         && wallet.flush()) {
                     done();
                 } else {
