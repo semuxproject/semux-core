@@ -439,19 +439,15 @@ public class SemuxApiImpl implements SemuxApi {
         if (signature == null) {
             return failure("Parameter `signature` is required");
         }
+        boolean isValidSignature = true;
+
         try {
             Key.Signature sig = Key.Signature.fromBytes(Hex.decode0x(signature));
             EdDSAPublicKey pubKey = PublicKeyCache.computeIfAbsent(sig.getPublicKey());
             byte[] signatureAddress = Hash.h160(pubKey.getEncoded());
 
             byte[] addressBytes;
-            try {
-                addressBytes = Hex.decode0x(address);
-            } catch (CryptoException ex) {
-                return failure("Parameter `address` is not a valid hexadecimal string");
-            }
-
-            boolean isValidSignature = true;
+            addressBytes = Hex.decode0x(address);
             if (!Arrays.equals(signatureAddress, addressBytes)) {
                 isValidSignature = false;
             }
@@ -459,10 +455,10 @@ public class SemuxApiImpl implements SemuxApi {
                 isValidSignature = false;
             }
 
-            return new VerifyMessageResponse(true, isValidSignature);
-        } catch (NullPointerException | IllegalArgumentException e) {
-            return failure(String.format("Invalid Signature"));
+        } catch (NullPointerException | IllegalArgumentException | CryptoException e) {
+            isValidSignature = false;
         }
+        return new VerifyMessageResponse(true, isValidSignature);
     }
 
     /**
