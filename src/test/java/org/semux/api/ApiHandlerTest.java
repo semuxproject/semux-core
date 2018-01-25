@@ -143,16 +143,19 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         uri = "/verify_message?address=" + address + "&message=" + message + "&signature=" + signature;
         VerifyMessageResponse verifyMessageResponse = request(uri, VerifyMessageResponse.class);
         assertTrue(verifyMessageResponse.success);
+        assertTrue(verifyMessageResponse.validSignature);
 
         // verify no messing with fromaddress
         uri = "/verify_message?address=" + addressOther + "&message=" + message + "&signature=" + signature;
         verifyMessageResponse = request(uri, VerifyMessageResponse.class);
-        assertFalse(verifyMessageResponse.success);
+        assertTrue(verifyMessageResponse.success);
+        assertFalse(verifyMessageResponse.validSignature);
 
         // verify no messing with message
         uri = "/verify_message?address=" + addressOther + "&message=" + message + "hi" + "&signature=" + signature;
         verifyMessageResponse = request(uri, VerifyMessageResponse.class);
-        assertFalse(verifyMessageResponse.success);
+        assertTrue(verifyMessageResponse.success);
+        assertFalse(verifyMessageResponse.validSignature);
     }
 
     @Test
