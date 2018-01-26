@@ -6,11 +6,19 @@
  */
 package org.semux.config;
 
+import static org.semux.net.Capability.SEM_TESTNET;
+
 import org.semux.Network;
+import org.semux.net.CapabilitySet;
 
 public class TestnetConfig extends AbstractConfig {
 
     public TestnetConfig(String dataDir) {
         super(dataDir, Network.TESTNET, Constants.TESTNET_VERSION);
+    }
+
+    @Override
+    public CapabilitySet capabilitySet() {
+        return CapabilitySet.of(SEM_TESTNET);
     }
 }

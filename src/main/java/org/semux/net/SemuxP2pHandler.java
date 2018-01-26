@@ -122,7 +122,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         // send a HELLO message to initiate handshake
         if (!channel.isInbound()) {
             Peer peer = new Peer(client.getIp(), client.getPort(), config.networkVersion(), config.getClientId(),
-                    client.getPeerId(), chain.getLatestBlockNumber(), Capability.SUPPORTED);
+                    client.getPeerId(), chain.getLatestBlockNumber(), config.capabilitySet());
             HelloMessage msg = new HelloMessage(peer, client.getCoinbase());
             msgQueue.sendMessage(msg);
         }
@@ -163,7 +163,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             Peer peer = helloMsg.getPeer();
 
             ReasonCode error = null;
-            if (!isSupported(peer.getNetworkVersion()) || !peer.getCapabilities().isSupported(Capability.SEM)) {
+            if (!isSupported(peer)) {
                 error = ReasonCode.INCOMPATIBLE_PROTOCOL;
             } else if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isActivePeer(peer.getPeerId())) {
                 error = ReasonCode.DUPLICATED_PEER_ID;
@@ -183,7 +183,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
                 // reply with a WORLD message
                 peer = new Peer(client.getIp(), client.getPort(), config.networkVersion(), config.getClientId(),
-                        client.getPeerId(), chain.getLatestBlockNumber(), Capability.SUPPORTED);
+                        client.getPeerId(), chain.getLatestBlockNumber(), config.capabilitySet());
                 WorldMessage worldMsg = new WorldMessage(peer, client.getCoinbase());
                 msgQueue.sendMessage(worldMsg);
 
@@ -198,15 +198,21 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             // update peer state
             WorldMessage worldMsg = (WorldMessage) msg;
 
-            if (isValid(worldMsg)) {
-                Peer peer = worldMsg.getPeer();
-                channelMgr.onChannelActive(channel, peer);
-
-                // handshake done
-                onHandshakeDone(peer);
-            } else {
+            if (!isValid(worldMsg)) {
                 msgQueue.disconnect(ReasonCode.INVALID_HANDSHAKE);
+                break;
             }
+
+            if (!isSupported(worldMsg.getPeer())) {
+                msgQueue.disconnect(ReasonCode.INCOMPATIBLE_PROTOCOL);
+                break;
+            }
+
+            Peer peer = worldMsg.getPeer();
+            channelMgr.onChannelActive(channel, peer);
+
+            // handshake done
+            onHandshakeDone(peer);
             break;
         }
         case PING: {
@@ -338,11 +344,19 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     /**
      * Returns whether the p2p version is supported.
      *
-     * @param version
+     * @param peer
      * @return
      */
-    private boolean isSupported(short version) {
-        return config.networkVersion() == version;
+    private boolean isSupported(Peer peer) {
+        if (config.networkVersion() != peer.getNetworkVersion()) {
+            return false;
+        }
+
+        if (config.network() == Network.MAINNET) {
+            return peer.getCapabilities().isSupported(Capability.SEM);
+        } else {
+            return peer.getCapabilities().isSupported(Capability.SEM_TESTNET);
+        }
     }
 
     /**

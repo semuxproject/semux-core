@@ -6,12 +6,20 @@
  */
 package org.semux.config;
 
+import static org.semux.net.Capability.SEM_TESTNET;
+
 import org.semux.Network;
+import org.semux.net.CapabilitySet;
 
 public class DevnetConfig extends AbstractConfig {
 
     public DevnetConfig(String dataDir) {
         super(dataDir, Network.DEVNET, Constants.DEVNET_VERSION);
         this.netMaxInboundConnectionsPerIp = Integer.MAX_VALUE;
+    }
+
+    @Override
+    public CapabilitySet capabilitySet() {
+        return CapabilitySet.of(SEM_TESTNET);
     }
 }
