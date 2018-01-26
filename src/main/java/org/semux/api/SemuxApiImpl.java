@@ -14,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import org.semux.Kernel;
 import org.semux.api.response.AddNodeResponse;
 import org.semux.api.response.CreateAccountResponse;
@@ -35,7 +36,9 @@ import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
+import org.semux.api.response.SignMessageResponse;
 import org.semux.api.response.Types;
+import org.semux.api.response.VerifyMessageResponse;
 import org.semux.api.util.TransactionBuilder;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
@@ -46,8 +49,10 @@ import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.CryptoException;
+import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.crypto.cache.PublicKeyCache;
 import org.semux.net.NodeManager;
 import org.semux.net.filter.SemuxIpFilter;
 
@@ -409,6 +414,68 @@ public class SemuxApiImpl implements SemuxApi {
                             .map(TransactionType::toString)
                             .collect(Collectors.joining(","))));
         }
+    }
+
+    @Override
+    public ApiHandlerResponse signMessage(String address, String message) {
+        if (address == null) {
+            return failure("Parameter `address` is required");
+        }
+        if (message == null) {
+            return failure("Parameter `message` is required");
+        }
+        try {
+            byte[] addressBytes;
+            try {
+                addressBytes = Hex.decode0x(address);
+            } catch (CryptoException ex) {
+                return failure("Parameter `address` is not a valid hexadecimal string");
+            }
+
+            Key account = kernel.getWallet().getAccount(addressBytes);
+
+            if (account == null) {
+                return failure(String.format("The provided address %s doesn't belong to the wallet", address));
+            }
+
+            Key.Signature signedMessage = account.sign(message.getBytes());
+            return new SignMessageResponse(true, Hex.encode0x(signedMessage.toBytes()));
+        } catch (NullPointerException | IllegalArgumentException e) {
+            return failure("Invalid message");
+        }
+    }
+
+    @Override
+    public ApiHandlerResponse verifyMessage(String address, String message, String signature) {
+        if (address == null) {
+            return failure("Parameter `address` is required");
+        }
+        if (message == null) {
+            return failure("Parameter `message` is required");
+        }
+        if (signature == null) {
+            return failure("Parameter `signature` is required");
+        }
+        boolean isValidSignature = true;
+
+        try {
+            Key.Signature sig = Key.Signature.fromBytes(Hex.decode0x(signature));
+            EdDSAPublicKey pubKey = PublicKeyCache.computeIfAbsent(sig.getPublicKey());
+            byte[] signatureAddress = Hash.h160(pubKey.getEncoded());
+
+            byte[] addressBytes;
+            addressBytes = Hex.decode0x(address);
+            if (!Arrays.equals(signatureAddress, addressBytes)) {
+                isValidSignature = false;
+            }
+            if (!Key.verify(message.getBytes(), sig)) {
+                isValidSignature = false;
+            }
+
+        } catch (NullPointerException | IllegalArgumentException | CryptoException e) {
+            isValidSignature = false;
+        }
+        return new VerifyMessageResponse(true, isValidSignature);
     }
 
     /**

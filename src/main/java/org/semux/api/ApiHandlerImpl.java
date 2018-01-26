@@ -109,6 +109,12 @@ public class ApiHandlerImpl implements ApiHandler {
             case GET_TRANSACTION_LIMITS:
                 return getTransactionLimits(params);
 
+            case SIGN_MESSAGE:
+                return signMessage(params);
+
+            case VERIFY_MESSAGE:
+                return verifyMessage(params);
+
             case TRANSFER:
             case DELEGATE:
             case VOTE:
@@ -121,6 +127,26 @@ public class ApiHandlerImpl implements ApiHandler {
         } catch (Exception e) {
             return semuxApi.failure("Failed to process your request: " + e.getMessage());
         }
+    }
+
+    /**
+     * GET /verify_message?address&message&signature
+     * 
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse verifyMessage(Map<String, String> params) {
+        return semuxApi.verifyMessage(params.get("address"), params.get("message"), params.get("signature"));
+    }
+
+    /**
+     * GET /sign_message?address&message
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse signMessage(Map<String, String> params) {
+        return semuxApi.signMessage(params.get("address"), params.get("message"));
     }
 
     /**
