@@ -6,7 +6,7 @@
  */
 package org.semux.gui;
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -16,12 +16,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.semux.core.Wallet;
@@ -181,9 +176,14 @@ public class MenuBar extends JMenuBar implements ActionListener {
                 }
 
                 Wallet wallet = gui.getKernel().getWallet();
-                int n = wallet.addWallet(w);
 
-                JOptionPane.showMessageDialog(frame, GuiMessages.get("ImportSuccess", n));
+                int n = wallet.addWallet(w);
+                if (!wallet.flush()) {
+                    JOptionPane.showMessageDialog(frame, GuiMessages.get("WalletSaveFailed"));
+                } else {
+                    JOptionPane.showMessageDialog(frame, GuiMessages.get("ImportSuccess", n));
+                }
+
                 gui.getModel().fireUpdateEvent();
             }
         }
