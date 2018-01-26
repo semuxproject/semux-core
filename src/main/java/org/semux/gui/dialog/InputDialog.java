@@ -32,7 +32,7 @@ public class InputDialog extends JDialog implements ActionListener {
     private String text;
 
     public InputDialog(JFrame parent, String message, boolean isPassword) {
-        super(parent, GuiMessages.get("Input"));
+        super(parent, GuiMessages.get("Input"), java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
         JLabel labelLogo = new JLabel("");
         labelLogo.setIcon(SwingUtil.loadImage("logo", 96, 96));
