@@ -275,7 +275,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
             WalletAccount acc = getSelectedAccount();
 
             if (acc != null) {
-                BufferedImage bi = SwingUtil.createQrImage("semux://" + acc.getKey().toAddressString(), QR_SIZE,
+                BufferedImage bi = SwingUtil.createQrImage("semux://" + Hex.PREF + acc.getKey().toAddressString(),
+                        QR_SIZE,
                         QR_SIZE);
                 qr.setIcon(new ImageIcon(bi));
             } else {
