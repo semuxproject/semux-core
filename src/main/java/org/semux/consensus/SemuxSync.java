@@ -298,7 +298,7 @@ public class SemuxSync implements SyncManager {
         }
 
         long latest = chain.getLatestBlockNumber();
-        if (latest + 1 == target.get()) {
+        if (latest + 1 >= target.get()) {
             stop();
             return; // This is important because stop() only notify
         }
