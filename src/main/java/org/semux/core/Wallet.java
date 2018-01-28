@@ -24,6 +24,7 @@ import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Key;
+import org.semux.message.CliMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.IOUtil;
@@ -514,5 +515,31 @@ public class Wallet {
         if (!isUnlocked()) {
             throw new WalletLockedException();
         }
+    }
+
+    /**
+     * Adds the addresses and aliases from another wallet
+     *
+     * @param w
+     * @return
+     */
+    public int addWallet(Wallet w) {
+        requireUnlocked();
+
+        // import addresses
+        int numImportedAddresses = addAccounts(w.getAccounts());
+
+        // add address book entries
+        Map<ByteArray, String> importedAliases = w.getAddressAliases();
+        for (Map.Entry<ByteArray, String> alias : importedAliases.entrySet()) {
+            byte[] address = alias.getKey().getData();
+
+            // don't override existing wallet's aliases.
+            if (!getAddressAlias(address).isPresent()) {
+                setAddressAlias(address, alias.getValue());
+            }
+        }
+
+        return numImportedAddresses;
     }
 }

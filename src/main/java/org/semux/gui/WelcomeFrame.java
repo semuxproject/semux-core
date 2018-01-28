@@ -11,6 +11,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -283,7 +284,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("NoAccountFound"));
             } else {
                 if (wallet.unlock(password)
-                        && wallet.addAccounts(w.getAccounts()) > 0
+                        && wallet.addWallet(w) > 0
                         && wallet.flush()) {
                     done();
                 } else {

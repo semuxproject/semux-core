@@ -6,7 +6,7 @@
  */
 package org.semux.gui;
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -184,9 +184,14 @@ public class MenuBar extends JMenuBar implements ActionListener {
                 }
 
                 Wallet wallet = gui.getKernel().getWallet();
-                int n = wallet.addAccounts(w.getAccounts());
-                wallet.flush();
-                JOptionPane.showMessageDialog(frame, GuiMessages.get("ImportSuccess", n));
+
+                int n = wallet.addWallet(w);
+                if (!wallet.flush()) {
+                    JOptionPane.showMessageDialog(frame, GuiMessages.get("WalletSaveFailed"));
+                } else {
+                    JOptionPane.showMessageDialog(frame, GuiMessages.get("ImportSuccess", n));
+                }
+
                 gui.getModel().fireUpdateEvent();
             }
         }

@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -97,6 +98,43 @@ public class WalletTest {
 
         wallet.flush();
         assertTrue(file.length() < sz);
+    }
+
+    @Test
+    public void testAddWallet() throws IOException {
+
+        File f = File.createTempFile("wallet2", ".data");
+        Key key = new Key();
+
+        Wallet wallet1 = new Wallet(f);
+        wallet1.unlock(pwd);
+        wallet1.addAccount(key);
+        wallet1.setAddressAlias(key.toAddress(), "originalName");
+
+        try {
+            wallet.addWallet(wallet1);
+            fail("Wallet adding should require unlocking");
+        } catch (WalletLockedException e) {
+            // expected
+        }
+
+        wallet.unlock(pwd);
+        wallet.addWallet(wallet1);
+
+        assertTrue(wallet.getAccount(key.toAddress()) != null);
+        assertEquals("originalName", wallet.getAddressAlias(key.toAddress()).get());
+
+        // change the name in wallet
+        wallet.setAddressAlias(key.toAddress(), "newName");
+
+        Key key2 = new Key();
+        wallet1.addAccount(key2);
+
+        // import again and make sure name did not change, but new key was added
+        int added = wallet.addWallet(wallet1);
+        assertEquals(1, added);
+        assertTrue(wallet.getAccount(key2.toAddress()) != null);
+        assertEquals("newName", wallet.getAddressAlias(key.toAddress()).get());
     }
 
     @Test
