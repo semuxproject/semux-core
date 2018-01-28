@@ -9,6 +9,7 @@ package org.semux.gui;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -54,6 +55,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
 
         JMenuItem itemExit = new JMenuItem(GuiMessages.get("Exit"));
         itemExit.setName("itemExit");
+        itemExit.setMnemonic(KeyEvent.VK_X);
         itemExit.setActionCommand(Action.EXIT.name());
         itemExit.addActionListener(this);
         menuFile.add(itemExit);

@@ -16,6 +16,7 @@ import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -122,26 +123,32 @@ public class MainFrame extends JFrame implements ActionListener {
         Dimension gap = new Dimension(15, 0);
 
         btnHome = createButton(GuiMessages.get("Home"), "home", Action.SHOW_HOME);
+        btnHome.setMnemonic(KeyEvent.VK_H);
         toolBar.add(btnHome);
         toolBar.add(Box.createRigidArea(gap));
 
         btnSend = createButton(GuiMessages.get("Send"), "send", Action.SHOW_SEND);
+        btnSend.setMnemonic(KeyEvent.VK_S);
         toolBar.add(btnSend);
         toolBar.add(Box.createRigidArea(gap));
 
         btnReceive = createButton(GuiMessages.get("Receive"), "receive", Action.SHOW_RECEIVE);
+        btnReceive.setMnemonic(KeyEvent.VK_R);
         toolBar.add(btnReceive);
         toolBar.add(Box.createRigidArea(gap));
 
         btnTransactions = createButton(GuiMessages.get("Transactions"), "transactions", Action.SHOW_TRANSACTIONS);
+        btnTransactions.setMnemonic(KeyEvent.VK_T);
         toolBar.add(btnTransactions);
         toolBar.add(Box.createRigidArea(gap));
 
         btnDelegates = createButton(GuiMessages.get("Delegates"), "delegates", Action.SHOW_DELEGATES);
+        btnDelegates.setMnemonic(KeyEvent.VK_D);
         toolBar.add(btnDelegates);
         toolBar.add(Box.createRigidArea(gap));
 
         btnLock = createButton(GuiMessages.get("Lock"), "lock", Action.LOCK);
+        btnLock.setMnemonic(KeyEvent.VK_L);
         toolBar.add(btnLock);
 
         // setup tabs
