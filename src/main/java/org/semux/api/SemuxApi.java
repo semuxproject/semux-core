@@ -38,6 +38,7 @@ import org.semux.api.response.VerifyMessageResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 
 /**
@@ -48,8 +49,6 @@ import io.swagger.annotations.Authorization;
         @Authorization(value = "basicAuth")
 })
 public interface SemuxApi {
-
-    // TODO: add query parameter descriptions.
 
     ApiHandlerResponse failure(@QueryParam("message") String message);
 
@@ -69,19 +68,22 @@ public interface SemuxApi {
     @Path("add_node")
     @ApiOperation(value = "Add node", notes = "Adds a node to node manager.", response = AddNodeResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse addNode(@QueryParam("node") String node);
+    ApiHandlerResponse addNode(
+            @ApiParam(value = "Name of the node in host:port format", required = true) @QueryParam("node") String node);
 
     @GET
     @Path("add_to_blacklist")
     @ApiOperation(value = "Add to blacklist", notes = "Adds an IP address to blacklist.", response = ApiHandlerResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse addToBlacklist(@QueryParam("ip") String ipAddress);
+    ApiHandlerResponse addToBlacklist(
+            @ApiParam(value = "IP address", required = true) @QueryParam("ip") String ipAddress);
 
     @GET
     @Path("add_to_whitelist")
     @ApiOperation(value = "Add to Whitelist", notes = "Adds an IP address to whitelist.", response = ApiHandlerResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse addToWhitelist(@QueryParam("ip") String ipAddress);
+    ApiHandlerResponse addToWhitelist(
+            @ApiParam(value = "IP address", required = true) @QueryParam("ip") String ipAddress);
 
     @GET
     @Path("get_latest_block_number")
@@ -99,13 +101,13 @@ public interface SemuxApi {
     @Path("get_block")
     @ApiOperation(value = "Get block", notes = "Returns a block.", response = GetBlockResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse getBlock(@QueryParam("number") Long blockNum);
+    ApiHandlerResponse getBlock(@ApiParam(value = "Block number", required = true) @QueryParam("number") Long blockNum);
 
     @GET
     @Path("get_block")
     @ApiOperation(value = "Get block", notes = "Returns a block.", response = GetBlockResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse getBlock(@QueryParam("hash") String hash);
+    ApiHandlerResponse getBlock(@ApiParam(value = "Hash of block", required = true) @QueryParam("hash") String hash);
 
     @GET
     @Path("get_pending_transactions")
@@ -117,32 +119,38 @@ public interface SemuxApi {
     @Path("get_account_transactions")
     @ApiOperation(value = "Get account transactions", notes = "Returns transactions from/to an account.", response = GetAccountTransactionsResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse getAccountTransactions(@QueryParam("address") String address, @QueryParam("from") String from,
-            @QueryParam("to") String to);
+    ApiHandlerResponse getAccountTransactions(
+            @ApiParam(value = "Address of account", required = true) @QueryParam("address") String address,
+            @ApiParam(value = "Starting range of transactions", required = true) @QueryParam("from") String from,
+            @ApiParam(value = "Ending range of transactions", required = true) @QueryParam("to") String to);
 
     @GET
     @Path("get_transaction")
     @ApiOperation(value = "Get transaction", notes = "Returns a transactions if exists.", response = GetTransactionResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse getTransaction(@QueryParam("hash") String hash);
+    ApiHandlerResponse getTransaction(
+            @ApiParam(value = "Transaction hash", required = true) @QueryParam("hash") String hash);
 
     @GET
     @Path("send_transaction")
     @ApiOperation(value = "Send a raw transaction", notes = "Broadcasts a raw transaction to the network.", response = SendTransactionResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse sendTransaction(@QueryParam("raw") String raw);
+    ApiHandlerResponse sendTransaction(
+            @ApiParam(value = "Raw transaction", required = true) @QueryParam("raw") String raw);
 
     @GET
     @Path("get_account")
     @ApiOperation(value = "Get account", notes = "Returns an account.", response = GetAccountResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse getAccount(@QueryParam("address") String address);
+    ApiHandlerResponse getAccount(
+            @ApiParam(value = "Address of account", required = true) @QueryParam("address") String address);
 
     @GET
     @Path("get_delegate")
     @ApiOperation(value = "Get a delegate", notes = "Returns a delegate.", response = GetDelegateResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse getDelegate(@QueryParam("address") String delegate);
+    ApiHandlerResponse getDelegate(
+            @ApiParam(value = "Delegate address", required = true) @QueryParam("address") String delegate);
 
     @GET
     @Path("get_delegates")
@@ -160,13 +168,16 @@ public interface SemuxApi {
     @Path("get_vote")
     @ApiOperation(value = "Get vote", notes = "Returns the vote from a voter to a delegate.", response = GetVoteResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse getVote(@QueryParam("delegate") String delegate, @QueryParam("voter") String voterAddress);
+    ApiHandlerResponse getVote(
+            @ApiParam(value = "Delegate address", required = true) @QueryParam("delegate") String delegate,
+            @ApiParam(value = "Voter address", required = true) @QueryParam("voter") String voterAddress);
 
     @GET
     @Path("get_votes")
     @ApiOperation(value = "Get votes", notes = "Returns all the votes to a delegate", response = GetVotesResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse getVotes(@QueryParam("delegate") String delegate);
+    ApiHandlerResponse getVotes(
+            @ApiParam(value = "Delegate address", required = true) @QueryParam("delegate") String delegate);
 
     @GET
     @Path("list_accounts")
@@ -184,47 +195,62 @@ public interface SemuxApi {
     @Path("transfer")
     @ApiOperation(value = "Transfer coins", notes = "Transfers coins to another address.", response = DoTransactionResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse transfer(@QueryParam("value") String amountToSend, @QueryParam("from") String from,
-            @QueryParam("to") String to, @QueryParam("fee") String fee, @QueryParam("data") String data);
+    ApiHandlerResponse transfer(
+            @ApiParam(value = "Amount of SEM to transfer", required = true) @QueryParam("value") String amountToSend,
+            @ApiParam(value = "Sending address", required = true) @QueryParam("from") String from,
+            @ApiParam(value = "Receiving address", required = true) @QueryParam("to") String to,
+            @ApiParam(value = "Transaction fee", required = true) @QueryParam("fee") String fee,
+            @ApiParam(value = "Transaction data", required = true) @QueryParam("data") String data);
 
     @GET
     @Path("delegate")
     @ApiOperation(value = "Register delegate", notes = "Registers as a delegate", response = DoTransactionResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse registerDelegate(@QueryParam("from") String fromAddress, @QueryParam("fee") String fee,
-            @QueryParam("data") String delegateName);
+    ApiHandlerResponse registerDelegate(
+            @ApiParam(value = "Registering address", required = true) @QueryParam("from") String fromAddress,
+            @ApiParam(value = "Transaction fee", required = true) @QueryParam("fee") String fee,
+            @ApiParam(value = "Delegate name", required = true) @QueryParam("data") String delegateName);
 
     @GET
     @Path("vote")
     @ApiOperation(value = "Vote", notes = "Votes for a delegate.", response = DoTransactionResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse vote(@QueryParam("from") String from, @QueryParam("to") String to,
-            @QueryParam("value") String value, @QueryParam("fee") String fee);
+    ApiHandlerResponse vote(@ApiParam(value = "Voting address", required = true) @QueryParam("from") String from,
+            @ApiParam(value = "Delegate address", required = true) @QueryParam("to") String to,
+            @ApiParam(value = "Vote amount", required = true) @QueryParam("value") String value,
+            @ApiParam(value = "Transaction fee", required = true) @QueryParam("fee") String fee);
 
     @GET
     @Path("unvote")
     @ApiOperation(value = "Unvote", notes = "Unvotes for a delegate.", response = DoTransactionResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse unvote(@QueryParam("from") String from, @QueryParam("to") String to,
-            @QueryParam("value") String value, @QueryParam("fee") String fee);
+    ApiHandlerResponse unvote(@ApiParam(value = "Voting address", required = true) @QueryParam("from") String from,
+            @ApiParam(value = "Delegate address", required = true) @QueryParam("to") String to,
+            @ApiParam(value = "Vote amount", required = true) @QueryParam("value") String value,
+            @ApiParam(value = "Transaction fee", required = true) @QueryParam("fee") String fee);
 
     @GET
     @Path("get_transaction_limits")
     @ApiOperation(value = "Get transaction limits", notes = "Get minimum fee and maximum size.", response = GetTransactionLimitsResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse getTransactionLimits(@QueryParam("type") String type);
+    ApiHandlerResponse getTransactionLimits(
+            @ApiParam(value = "Type of transaction", required = true) @QueryParam("type") String type);
 
     @GET
     @Path("sign_message")
     @ApiOperation(value = "Sign a message", notes = "Sign a message.", response = SignMessageResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse signMessage(@QueryParam("address") String address, @QueryParam("message") String message);
+    ApiHandlerResponse signMessage(
+            @ApiParam(value = "Signing address", required = true) @QueryParam("address") String address,
+            @ApiParam(value = "Message to sign", required = true) @QueryParam("message") String message);
 
     @GET
     @Path("verify_message")
     @ApiOperation(value = "Verify a message", notes = "Verify a signed message.", response = VerifyMessageResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse verifyMessage(@QueryParam("address") String address, @QueryParam("message") String message,
-            @QueryParam("signature") String signature);
+    ApiHandlerResponse verifyMessage(
+            @ApiParam(value = "Address", required = true) @QueryParam("address") String address,
+            @ApiParam(value = "Message", required = true) @QueryParam("message") String message,
+            @ApiParam(value = "Signature to verify", required = true) @QueryParam("signature") String signature);
 
 }
