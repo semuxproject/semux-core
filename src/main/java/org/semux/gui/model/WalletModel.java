@@ -50,7 +50,7 @@ public class WalletModel {
     public void fireUpdateEvent() {
         updateView();
     }
-    
+
     /**
      * Fires an lock event.
      */
