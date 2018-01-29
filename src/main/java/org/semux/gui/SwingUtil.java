@@ -309,7 +309,7 @@ public class SwingUtil {
      */
     public static String formatNumber(Number number, int decimals) {
         NumberFormat format = NumberFormat.getInstance();
-        format.setMinimumFractionDigits(decimals);
+        format.setMinimumFractionDigits(0);
         format.setMaximumFractionDigits(decimals);
 
         return format.format(number);
@@ -402,7 +402,7 @@ public class SwingUtil {
      * @return
      */
     public static String formatVote(long vote) {
-        return formatNumber(vote / (double) Unit.SEM);
+        return formatValue(vote, false);
     }
 
     /**
