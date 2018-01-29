@@ -419,8 +419,8 @@
                                     <urns>
                                         <urn>com.akathist.maven.plugins.launch4j:launch4j-maven-plugin:1.7.21:maven-plugin:null:runtime:58402e775916bc8824e257c8d87ad6c8064663a5</urn>
                                         <urn>com.fasterxml.jackson.core:jackson-annotations:2.9.0:jar:null:compile:07c10d545325e3a6e72e06381afe469fd40eb701</urn>
-                                        <urn>com.fasterxml.jackson.core:jackson-core:2.9.2:jar:null:compile:aed20e50152a2f19adc1995c8d8f307c7efa414d</urn>
-                                        <urn>com.fasterxml.jackson.core:jackson-databind:2.9.2:jar:null:compile:1d8d8cb7cf26920ba57fb61fa56da88cc123b21f</urn>
+                                        <urn>com.fasterxml.jackson.core:jackson-core:2.9.4:jar:null:compile:a9a71ec1aa37da47db168fede9a4a5fb5e374320</urn>
+                                        <urn>com.fasterxml.jackson.core:jackson-databind:2.9.4:jar:null:compile:498bbc3b94f566982c7f7c6d4d303fce365529be</urn>
                                         <urn>com.github.ben-manes.caffeine:caffeine:2.6.0:jar:null:compile:6d06cbc2eb7238ee49cc7f557a0acfaad00ec431</urn>
                                         <urn>com.github.kongchen:swagger-maven-plugin:3.1.6:maven-plugin:null:runtime:4c733e81674312c7794a4180095c9053baf900d5</urn>
                                         <urn>com.github.oshi:oshi-core:3.4.4:jar:null:compile:f1aa8e053d26f49b909a845745018c57fe9d7a74</urn>
@@ -637,12 +637,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.9.2</version>
+            <version>2.9.4</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.2</version>
+            <version>2.9.4</version>
         </dependency>
 
         <!-- ED25519 -->
