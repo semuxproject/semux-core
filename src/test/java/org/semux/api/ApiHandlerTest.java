@@ -64,7 +64,6 @@ import org.semux.core.Unit;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
-import org.semux.net.Capability;
 import org.semux.net.ChannelManager;
 import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;

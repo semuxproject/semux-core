@@ -14,7 +14,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import org.semux.Kernel;
 import org.semux.api.response.AddNodeResponse;
 import org.semux.api.response.CreateAccountResponse;
@@ -55,6 +54,8 @@ import org.semux.crypto.Key;
 import org.semux.crypto.cache.PublicKeyCache;
 import org.semux.net.NodeManager;
 import org.semux.net.filter.SemuxIpFilter;
+
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public class SemuxApiImpl implements SemuxApi {
     private Kernel kernel;

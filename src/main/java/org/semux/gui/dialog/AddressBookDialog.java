@@ -10,11 +10,14 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -71,6 +74,23 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
         // auto sort
         table.setAutoCreateRowSorter(true);
+
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent me) {
+                JTable sourceTable = (JTable) me.getSource();
+                Point p = me.getPoint();
+                int row = sourceTable.rowAtPoint(p);
+                if (me.getClickCount() == 2 && row != -1) {
+                    AddressBookEntry entry = tableModel.getRow(sourceTable.convertRowIndexToModel(row));
+                    if (entry != null) {
+                        AddressBookEntryChangeDialog dialog = new AddressBookEntryChangeDialog(parent, entry, wallet,
+                                model);
+                        dialog.setVisible(true);
+                    }
+                }
+            }
+        });
 
         JPanel panel = new JPanel();
         getContentPane().add(panel, BorderLayout.SOUTH);

@@ -24,7 +24,6 @@ import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Key;
-import org.semux.message.CliMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.IOUtil;

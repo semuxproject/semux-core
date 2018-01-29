@@ -7,6 +7,7 @@
 package org.semux.gui.panel;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -44,8 +45,6 @@ import org.semux.gui.model.WalletDelegate;
 import org.semux.message.GuiMessages;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
-
-import junit.framework.TestCase;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
@@ -231,10 +230,10 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
         // verify added transaction
         verify(pendingManager).addTransactionSync(transactionArgumentCaptor.capture());
         Transaction tx = transactionArgumentCaptor.getValue();
-        TestCase.assertEquals(TransactionType.DELEGATE, tx.getType());
+        assertEquals(TransactionType.DELEGATE, tx.getType());
         assertArrayEquals(Bytes.EMPTY_ADDRESS, tx.getTo());
-        TestCase.assertEquals(kernelMock.getConfig().minDelegateBurnAmount(), tx.getValue());
-        TestCase.assertEquals(kernelMock.getConfig().minTransactionFee(), tx.getFee());
+        assertEquals(kernelMock.getConfig().minDelegateBurnAmount(), tx.getValue());
+        assertEquals(kernelMock.getConfig().minTransactionFee(), tx.getFee());
     }
 
     @Test
