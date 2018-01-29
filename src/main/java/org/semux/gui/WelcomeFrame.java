@@ -68,7 +68,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
         // create banner
         JLabel banner = new JLabel("");
-        banner.setIcon(SwingUtil.loadImage("banner", 125, 200));
+        banner.setIcon(SwingUtil.loadImage("banner", 125, 160));
 
         // create description
         JLabel description = new JLabel(GuiMessages.get("WelcomeDescriptionHtml"));
