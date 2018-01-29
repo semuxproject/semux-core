@@ -309,9 +309,8 @@ public class SwingUtil {
      */
     public static String formatNumber(Number number, int decimals) {
         NumberFormat format = NumberFormat.getInstance();
-        format.setMinimumFractionDigits(decimals);
-        format.setMaximumFractionDigits(decimals);
         format.setMinimumFractionDigits(0);
+        format.setMaximumFractionDigits(decimals);
 
         return format.format(number);
     }
