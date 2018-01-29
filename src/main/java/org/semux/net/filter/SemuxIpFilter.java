@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -9,6 +9,7 @@ package org.semux.net.filter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +23,14 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
 /**
  * SemuxIpFilter is responsible for matching IP address of incoming connection
  * against defined rules in ipconfig.json
- * 
+ *
  * <p>
  * Example Definition of Blacklisting IP Addresses:
  * <p>
@@ -65,6 +67,11 @@ import io.netty.handler.ipfilter.IpFilterRuleType;
 public class SemuxIpFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxIpFilter.class);
+
+    /**
+     * The default name of ipfilter config file.
+     */
+    public static final String CONFIG_FILE = "ipfilter.json";
 
     /**
      * CopyOnWriteArrayList allows APIs to update rules atomically without affecting
@@ -151,6 +158,16 @@ public class SemuxIpFilter {
         rules.clear();
     }
 
+    /**
+     * Persist rules into target path.
+     *
+     * @param path
+     *            the path where rules will be persisted at.
+     */
+    public void persist(Path path) {
+        new SemuxIpFilter.Saver().save(path, this);
+    }
+
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public static SemuxIpFilter jsonCreator(
             @JsonProperty(value = "rules", required = true) List<FilterRule> rules) {
@@ -161,17 +178,17 @@ public class SemuxIpFilter {
      * Builder is an object builder of SemuxIpFilter.
      * <p>
      * <blockquote>
-     * 
+     *
      * <pre>
      * SemuxIpFilter ipFilter = new Builder().accept("127.0.0.1").accept("192.168.0.0/16").reject("0.0.0.0/0").build();
      * </pre>
-     * 
+     *
      * </blockquote>
      * </p>
      * is equivalent to the definition of:
      * <p>
      * <blockquote>
-     * 
+     *
      * <pre>
      *     {
      *         "rules": [
@@ -181,7 +198,7 @@ public class SemuxIpFilter {
      *         ]
      *     }
      * </pre>
-     * 
+     *
      * </blockquote>
      * </p>
      */
@@ -214,8 +231,8 @@ public class SemuxIpFilter {
     }
 
     /**
-     * Loader is responsible for loading ipfilter.json file into an instance of
-     * SemuxIpFilter
+     * ${@link SemuxIpFilter.Loader} is responsible for loading ipfilter.json file
+     * into an instance of SemuxIpFilter.
      */
     public static final class Loader {
 
@@ -230,7 +247,26 @@ public class SemuxIpFilter {
             } catch (IOException e) {
                 throw new ParseException(e);
             }
-
         }
+    }
+
+    /**
+     * ${@link SemuxIpFilter.Saver} is responsible for persisting the state of a
+     * ${@link SemuxIpFilter} instance.
+     */
+    public static final class Saver {
+
+        public void save(Path path, SemuxIpFilter ipFilter) {
+            try {
+                if (!path.getParent().toFile().exists()) {
+                    Files.createDirectories(path.getParent());
+                }
+
+                new ObjectMapper().writer(SerializationFeature.INDENT_OUTPUT).writeValue(path.toFile(), ipFilter);
+            } catch (IOException e) {
+                logger.error("Failed to save ip filter", e);
+            }
+        }
+
     }
 }

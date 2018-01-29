@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -11,7 +11,7 @@ import org.semux.gui.BaseTestApplication;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.model.WalletModel;
 
-public class DelegatePanelTestApplication extends BaseTestApplication {
+public class DelegatesPanelTestApplication extends BaseTestApplication {
 
     private static final long serialVersionUID = 1L;
 
@@ -19,7 +19,7 @@ public class DelegatePanelTestApplication extends BaseTestApplication {
 
     DelegatesPanel delegatesPanel;
 
-    DelegatePanelTestApplication(WalletModel walletModel, KernelMock kernelMock) {
+    DelegatesPanelTestApplication(WalletModel walletModel, KernelMock kernelMock) {
         super();
         gui = new SemuxGui(walletModel, kernelMock);
         delegatesPanel = new DelegatesPanel(gui, this);

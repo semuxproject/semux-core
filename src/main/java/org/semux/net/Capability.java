@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -15,11 +15,16 @@ import org.semux.net.msg.ReasonCode;
 public enum Capability {
 
     /**
-     * A mandatory capability. One peer should be disconnected by
+     * A mandatory capability of Semux mainnet. One peer should be disconnected by
      * ${@link ReasonCode#INCOMPATIBLE_PROTOCOL} if the peer doesn't support this
      * capability.
      */
-    SEM;
+    SEM,
+
+    /**
+     * A mandatory capability of Semux testnet.
+     */
+    SEM_TESTNET;
 
     // TODO: BATCH_SYNC
 
@@ -31,9 +36,4 @@ public enum Capability {
      * The maximum number of capabilities that can be supported.
      */
     public static final int MAX_NUMBER_OF_CAPABILITIES = 128;
-
-    /**
-     * Currently supported capabilities.
-     */
-    public static final CapabilitySet SUPPORTED = CapabilitySet.of(SEM);
 }

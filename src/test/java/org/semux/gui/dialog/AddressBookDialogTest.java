@@ -1,14 +1,13 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 package org.semux.gui.dialog;
 
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
@@ -19,7 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.crypto.Key;
-import org.semux.gui.AddressBook;
+import org.semux.gui.AddressBookEntry;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
 
@@ -32,19 +31,16 @@ public class AddressBookDialogTest extends AssertJSwingJUnitTestCase {
     @Mock
     WalletModel walletModel;
 
-    @Mock
-    AddressBook addressBook;
-
     @Test
     public void testListAddressBook() {
         Key account1 = new Key(), account2 = new Key();
-        when(addressBook.list()).thenReturn(Arrays.asList(
-                new AddressBook.Entry("address1", account1.toAddressString()),
-                new AddressBook.Entry("address2", account2.toAddressString())));
-        when(walletModel.getAddressBook()).thenReturn(addressBook);
+
+        List<AddressBookEntry> entries = new ArrayList<>();
+        entries.add(new AddressBookEntry("address1", account1.toAddressString()));
+        entries.add(new AddressBookEntry("address2", account2.toAddressString()));
 
         AddressBookDialogTestApplication application = GuiActionRunner
-                .execute(() -> new AddressBookDialogTestApplication(walletModel, kernelRule1.getKernel()));
+                .execute(() -> new AddressBookDialogTestApplication(walletModel, kernelRule1.getKernel(), entries));
 
         FrameFixture window = new FrameFixture(robot(), application);
         window.show().requireVisible().moveToFront();

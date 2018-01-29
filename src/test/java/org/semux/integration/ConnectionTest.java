@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -8,20 +8,24 @@ package org.semux.integration;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -33,7 +37,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
@@ -41,20 +44,20 @@ import org.semux.IntegrationTest;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.core.Genesis;
-import org.semux.net.ConnectionLimitHandler;
 import org.semux.net.NodeManager;
 import org.semux.rules.KernelRule;
 
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class })
-@PowerMockIgnore("javax.management.*")
 public class ConnectionTest {
 
     @Rule
     KernelRule kernelRule1 = new KernelRule(51610, 51710);
 
     Thread serverThread;
+
+    List<Socket> sockets;
 
     private final int netMaxInboundConnectionsPerIp = 5;
 
@@ -78,25 +81,71 @@ public class ConnectionTest {
         // await until the P2P server has started
         await().until(() -> kernelRule1.getKernel().state() == Kernel.State.RUNNING
                 && kernelRule1.getKernel().getP2p().isRunning());
+
+        // keep socket references
+        sockets = new CopyOnWriteArrayList<>();
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws InterruptedException {
+        // close all connections
+        sockets.parallelStream().filter(Objects::nonNull).forEach(socket -> {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        kernelRule1.getKernel().stop();
+        await().until(() -> kernelRule1.getKernel().state().equals(Kernel.State.STOPPED));
         serverThread.interrupt();
+        await().until(() -> !serverThread.isAlive());
     }
 
     @Test
-    public void testConnectionLimit() throws IOException, InterruptedException {
+    public void testConnectionLimit() throws InterruptedException, UnknownHostException {
         // create 100 idle connections to the P2P server
         final int connections = 100;
         Collection<Callable<Void>> threads = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(100);
-        List<Socket> sockets = new ArrayList<>(); // keep reference to created sockets
         for (int i = 1; i <= connections; i++) {
             threads.add(() -> {
-                Socket socket = new Socket();
-                sockets.add(socket);
                 try {
+                    Socket socket = new Socket();
+                    socket.connect(
+                            new InetSocketAddress(kernelRule1.getKernel().getConfig().p2pListenIp(),
+                                    kernelRule1.getKernel().getConfig().p2pListenPort()),
+                            100);
+                    sockets.add(socket);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            });
+        }
+        List<Future<Void>> futures = executorService.invokeAll(threads);
+        await().until(() -> futures.stream().allMatch(Future::isDone));
+        TimeUnit.MILLISECONDS.sleep(500);
+
+        // the number of connections should be capped to netMaxInboundConnectionsPerIp
+        assertEquals(netMaxInboundConnectionsPerIp, kernelRule1.getKernel().getChannelManager().size());
+    }
+
+    @Test
+    public void testBlacklistIp() throws IOException, InterruptedException {
+        // create an idle connection
+        final int connections = 1;
+        Collection<Callable<Void>> threads = new ArrayList<>();
+        ExecutorService executorService = Executors.newFixedThreadPool(connections);
+        final List<InetSocketAddress> clientAddresses = new CopyOnWriteArrayList<>();
+        for (int i = 1; i <= connections; i++) {
+            threads.add(() -> {
+                try {
+                    Socket socket = new Socket();
+                    socket.bind(new InetSocketAddress("127.0.0.1", getFreePort()));
+                    sockets.add(socket);
+                    clientAddresses.add((InetSocketAddress) socket.getLocalSocketAddress());
                     socket.connect(
                             new InetSocketAddress(kernelRule1.getKernel().getConfig().p2pListenIp(),
                                     kernelRule1.getKernel().getConfig().p2pListenPort()),
@@ -111,22 +160,29 @@ public class ConnectionTest {
         await().until(() -> futures.stream().allMatch(Future::isDone));
         TimeUnit.MILLISECONDS.sleep(500);
 
-        // the number of connections should be capped to netMaxInboundConnectionsPerIp
-        assertEquals(netMaxInboundConnectionsPerIp, kernelRule1.getKernel().getChannelManager().size());
+        // wait until all channels are connected
+        assertEquals(connections, kernelRule1.getKernel().getChannelManager().size());
 
-        // close all connections
-        sockets.parallelStream().forEach(socket -> {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+        // blacklist 127.0.0.1
+        final String blacklistedIp = "127.0.0.1";
+        kernelRule1.getKernel().getApiClient().request("add_to_blacklist", "ip", blacklistedIp);
+
+        // all IPs should stay connected except for the blacklisted IP
+        await().until(() -> kernelRule1.getKernel().getChannelManager().size() == connections - 1);
+        for (InetSocketAddress clientAddress : clientAddresses) {
+            if (clientAddress.getHostString().equals(blacklistedIp)) {
+                assertFalse(kernelRule1.getKernel().getChannelManager().isConnected(clientAddress));
+            } else {
+                assertTrue(kernelRule1.getKernel().getChannelManager().isConnected(clientAddress));
             }
-        });
+        }
+    }
 
-        // ensure that all connections have been removed from the channel manager
-        await().until(() -> sockets.parallelStream().allMatch(Socket::isClosed));
-        await().until(() -> kernelRule1.getKernel().getChannelManager().size() == 0);
-        assertFalse(ConnectionLimitHandler.containsAddress(InetAddress.getByName("127.0.0.1")));
+    private int getFreePort() throws IOException {
+        ServerSocket serverSocket = new ServerSocket(0);
+        int port = serverSocket.getLocalPort();
+        serverSocket.close();
+        return port;
     }
 
     private Genesis mockGenesis() {

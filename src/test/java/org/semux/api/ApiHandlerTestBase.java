@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -96,17 +96,17 @@ public abstract class ApiHandlerTestBase {
     }
 
     protected Transaction createTransaction() {
-        Key key = new Key();
+        return createTransaction(new Key(), new Key(), 0);
+    }
 
+    protected Transaction createTransaction(Key from, Key to, long value) {
         Network network = config.network();
         TransactionType type = TransactionType.TRANSFER;
-        byte[] to = key.toAddress();
-        long value = 0;
         long fee = 0;
         long nonce = 1;
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
 
-        return new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(key);
+        return new Transaction(network, type, to.toAddress(), value, fee, nonce, timestamp, data).sign(from);
     }
 }

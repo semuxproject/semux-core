@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -156,14 +156,14 @@ public class NodeManager {
     /**
      * Get seed nodes from DNS records.
      * 
-     * @param networkId
+     * @param network
      * @return
      */
     public static Set<Node> getSeedNodes(Network network) {
         Set<Node> nodes = new HashSet<>();
 
         try {
-            String name = null;
+            String name;
             switch (network) {
             case MAINNET:
                 name = DNS_SEED_MAINNET;

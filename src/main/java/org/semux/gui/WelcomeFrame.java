@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -11,6 +11,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -266,11 +267,14 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         }
 
         if (isCreate()) {
-            wallet.unlock(password);
-            wallet.addAccount(new Key());
-            wallet.flush();
-
-            done();
+            if (wallet.unlock(password)
+                    && wallet.addAccount(new Key())
+                    && wallet.flush()) {
+                done();
+            } else {
+                JOptionPane.showMessageDialog(this, GuiMessages.get("WalletSaveFailed"));
+                SystemUtil.exitAsync(-1);
+            }
         } else {
             Wallet w = new Wallet(backupFile);
 
@@ -279,11 +283,14 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             } else if (w.size() == 0) {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("NoAccountFound"));
             } else {
-                wallet.unlock(password);
-                wallet.addAccounts(w.getAccounts());
-                wallet.flush();
-
-                done();
+                if (wallet.unlock(password)
+                        && wallet.addWallet(w) > 0
+                        && wallet.flush()) {
+                    done();
+                } else {
+                    JOptionPane.showMessageDialog(this, GuiMessages.get("WalletSaveFailed"));
+                    SystemUtil.exitAsync(-1);
+                }
             }
         }
     }

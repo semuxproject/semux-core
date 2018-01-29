@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -16,6 +16,7 @@ import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -103,8 +104,8 @@ public class MainFrame extends JFrame implements ActionListener {
         // setup frame properties
         this.setTitle(GuiMessages.get("SemuxWallet"));
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
-        this.setMinimumSize(new Dimension(900, 600));
-        SwingUtil.alignFrameToMiddle(this, 900, 600);
+        this.setMinimumSize(new Dimension(960, 600));
+        SwingUtil.alignFrameToMiddle(this, 960, 600);
 
         // setup menu bar
         JMenuBar menuBar = new MenuBar(gui, this);
@@ -122,26 +123,32 @@ public class MainFrame extends JFrame implements ActionListener {
         Dimension gap = new Dimension(15, 0);
 
         btnHome = createButton(GuiMessages.get("Home"), "home", Action.SHOW_HOME);
+        btnHome.setMnemonic(KeyEvent.VK_H);
         toolBar.add(btnHome);
         toolBar.add(Box.createRigidArea(gap));
 
         btnSend = createButton(GuiMessages.get("Send"), "send", Action.SHOW_SEND);
+        btnSend.setMnemonic(KeyEvent.VK_S);
         toolBar.add(btnSend);
         toolBar.add(Box.createRigidArea(gap));
 
         btnReceive = createButton(GuiMessages.get("Receive"), "receive", Action.SHOW_RECEIVE);
+        btnReceive.setMnemonic(KeyEvent.VK_R);
         toolBar.add(btnReceive);
         toolBar.add(Box.createRigidArea(gap));
 
         btnTransactions = createButton(GuiMessages.get("Transactions"), "transactions", Action.SHOW_TRANSACTIONS);
+        btnTransactions.setMnemonic(KeyEvent.VK_T);
         toolBar.add(btnTransactions);
         toolBar.add(Box.createRigidArea(gap));
 
         btnDelegates = createButton(GuiMessages.get("Delegates"), "delegates", Action.SHOW_DELEGATES);
+        btnDelegates.setMnemonic(KeyEvent.VK_D);
         toolBar.add(btnDelegates);
         toolBar.add(Box.createRigidArea(gap));
 
         btnLock = createButton(GuiMessages.get("Lock"), "lock", Action.LOCK);
+        btnLock.setMnemonic(KeyEvent.VK_L);
         toolBar.add(btnLock);
 
         // setup tabs

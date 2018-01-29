@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
@@ -37,11 +38,13 @@ import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.exception.LauncherException;
 import org.semux.gui.dialog.InputDialog;
 import org.semux.gui.dialog.SelectDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
+import org.semux.gui.model.WalletModel.Status;
 import org.semux.message.GuiMessages;
 import org.semux.net.Peer;
 import org.semux.util.SystemUtil;
@@ -72,14 +75,26 @@ public class SemuxGui extends Launcher {
         try {
             setupLookAndFeel();
 
+            checkPrerequisite();
+
             SemuxGui gui = new SemuxGui();
             // set up logger
             gui.setupLogger(args);
             // start
             gui.start(args);
 
+        } catch (LauncherException e) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    e.getMessage(),
+                    GuiMessages.get("ErrorDialogTitle"),
+                    JOptionPane.ERROR_MESSAGE);
         } catch (ParseException e) {
-            JOptionPane.showMessageDialog(null, "Filed to parse the parameters: " + e.getMessage());
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Filed to parse the parameters: " + e.getMessage(),
+                    GuiMessages.get("ErrorDialogTitle"),
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -186,8 +201,9 @@ public class SemuxGui extends Launcher {
             String message = GuiMessages.get("AccountSelection");
             List<Object> options = new ArrayList<>();
             List<Key> list = wallet.getAccounts();
-            for (int i = 0; i < list.size(); i++) {
-                options.add(Hex.PREF + list.get(i).toAddressString() + ", " + GuiMessages.get("AccountNumShort", i));
+            for (Key key : list) {
+                Optional<String> name = wallet.getAddressAlias(key.toAddress());
+                options.add(Hex.PREF + key.toAddressString() + (name.isPresent() ? ", " + name.get() : ""));
             }
 
             // show select dialog
@@ -207,7 +223,17 @@ public class SemuxGui extends Launcher {
             setCoinbase(0);
         }
 
-        startKernelAndMain(wallet);
+        try {
+            startKernelAndMain(wallet);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    e.getMessage(),
+                    GuiMessages.get("ErrorDialogTitle"),
+                    JOptionPane.ERROR_MESSAGE);
+            logger.error("Uncaught exception during kernel startup.", e);
+            SystemUtil.exitAsync(-1);
+        }
     }
 
     /**
@@ -220,7 +246,6 @@ public class SemuxGui extends Launcher {
 
         // set up model
         model = new WalletModel();
-        model.setAddressBook(new AddressBook(new File(getDataDir(), "addressbook.json")));
         model.setCoinbase(wallet.getAccount(getCoinbase()));
 
         // set up kernel
@@ -267,7 +292,7 @@ public class SemuxGui extends Launcher {
                 TimeUnit.MILLISECONDS.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                logger.error(e.getMessage(), e);
+                logger.error("Failed to stop data/version threads", e);
             }
         }
 
@@ -301,7 +326,7 @@ public class SemuxGui extends Launcher {
     protected void updateModel() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Thread.sleep(3L * 1000L);
+                Thread.sleep(10L * 1000L);
 
                 // process latest block
                 processBlock(kernel.getBlockchain().getLatestBlock());
@@ -326,14 +351,20 @@ public class SemuxGui extends Launcher {
         // update latest block and coinbase delegate status
         model.setSyncProgress(kernel.getSyncManager().getProgress());
         model.setLatestBlock(block);
-        model.setDelegate(ds.getDelegateByAddress(kernel.getCoinbase().toAddress()) != null);
+
+        // update coinbase
+        boolean isDelegate = ds.getDelegateByAddress(kernel.getCoinbase().toAddress()) != null;
+        boolean isValidator = chain.getValidators().contains(kernel.getCoinbase().toAddressString());
+        model.setCoinbase(kernel.getCoinbase());
+        model.setStatus(isValidator ? Status.VALIDATOR : (isDelegate ? Status.DELEGATE : Status.NORMAL));
 
         // refresh accounts
         if (kernel.getWallet().isUnlocked()) {
             List<WalletAccount> accounts = new ArrayList<>();
             for (Key key : kernel.getWallet().getAccounts()) {
                 Account a = as.getAccount(key.toAddress());
-                WalletAccount wa = new WalletAccount(key, a);
+                Optional<String> name = kernel.getWallet().getAddressAlias(key.toAddress());
+                WalletAccount wa = new WalletAccount(key, a, name);
                 accounts.add(wa);
             }
             model.setAccounts(accounts);

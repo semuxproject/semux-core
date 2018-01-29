@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -168,11 +168,16 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                     response = apiHandler.service(uri, map, headers);
                     status = HttpResponseStatus.OK;
                 }
+                boolean prettyPrint = Boolean.valueOf(map.get("pretty"));
 
                 // write response
                 String responseString;
                 try {
-                    responseString = objectMapper.writeValueAsString(response);
+                    if (prettyPrint) {
+                        responseString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
+                    } else {
+                        responseString = objectMapper.writeValueAsString(response);
+                    }
                 } catch (JsonProcessingException e) {
                     responseString = "{\"success\":false,\"message\":\"Internal server error\"}";
                 }

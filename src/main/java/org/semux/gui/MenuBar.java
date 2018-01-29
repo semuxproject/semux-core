@@ -1,14 +1,15 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 package org.semux.gui;
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -16,6 +17,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
+import javax.swing.Icon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -54,6 +56,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
 
         JMenuItem itemExit = new JMenuItem(GuiMessages.get("Exit"));
         itemExit.setName("itemExit");
+        itemExit.setMnemonic(KeyEvent.VK_X);
         itemExit.setActionCommand(Action.EXIT.name());
         itemExit.addActionListener(this);
         menuFile.add(itemExit);
@@ -191,9 +194,14 @@ public class MenuBar extends JMenuBar implements ActionListener {
                 }
 
                 Wallet wallet = gui.getKernel().getWallet();
-                int n = wallet.addAccounts(w.getAccounts());
-                wallet.flush();
-                JOptionPane.showMessageDialog(frame, GuiMessages.get("ImportSuccess", n));
+
+                int n = wallet.addWallet(w);
+                if (!wallet.flush()) {
+                    JOptionPane.showMessageDialog(frame, GuiMessages.get("WalletSaveFailed"));
+                } else {
+                    JOptionPane.showMessageDialog(frame, GuiMessages.get("ImportSuccess", n));
+                }
+
                 gui.getModel().fireUpdateEvent();
             }
         }
@@ -240,7 +248,9 @@ public class MenuBar extends JMenuBar implements ActionListener {
             return;
         }
 
-        String pk = new InputDialog(frame, GuiMessages.get("EnterPrivateKey"), false).showAndGet();
+        InputDialog inputDialog = new InputDialog(frame, GuiMessages.get("EnterPrivateKey"), false);
+        inputDialog.setTitle(GuiMessages.get("ImportPrivateKey"));
+        String pk = inputDialog.showAndGet();
         if (pk != null) {
             try {
                 Wallet wallet = gui.getKernel().getWallet();
@@ -274,7 +284,9 @@ public class MenuBar extends JMenuBar implements ActionListener {
      * Shows the about dialog.
      */
     protected void about() {
-        JOptionPane.showMessageDialog(frame, gui.getKernel().getConfig().getClientId());
+        Icon icon = SwingUtil.loadImage("logo", 64, 64);
+        JOptionPane.showMessageDialog(frame, gui.getKernel().getConfig().getClientId(),
+                GuiMessages.get("About"), JOptionPane.INFORMATION_MESSAGE, icon);
     }
 
     private void help() {

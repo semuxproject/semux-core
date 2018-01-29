@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -12,6 +12,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -55,7 +56,7 @@ public class SemuxSyncTest {
                 Bytes.EMPTY_BYTES).sign(from1);
         kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
         kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), 1000 * Unit.SEM);
-        Block block1 = kernelRule.createBlock(Arrays.asList(tx1));
+        Block block1 = kernelRule.createBlock(Collections.singletonList(tx1));
         kernelRule.getKernel().getBlockchain().addBlock(block1);
         SemuxSync semuxSync = spy(new SemuxSync(kernelRule.getKernel()));
         doReturn(true).when(semuxSync).validateBlockVotes(any()); // we don't care about votes here
@@ -73,7 +74,7 @@ public class SemuxSyncTest {
                 0,
                 time,
                 Bytes.EMPTY_BYTES).sign(from2);
-        Block block2 = kernelRule.createBlock(Arrays.asList(tx2));
+        Block block2 = kernelRule.createBlock(Collections.singletonList(tx2));
 
         // this test case is valid if and only if tx1 and tx2 have the same tx hash
         assert (Arrays.equals(tx1.getHash(), tx2.getHash()));

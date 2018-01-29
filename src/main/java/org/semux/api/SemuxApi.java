@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -33,6 +33,8 @@ import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
+import org.semux.api.response.SignMessageResponse;
+import org.semux.api.response.VerifyMessageResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -211,5 +213,18 @@ public interface SemuxApi {
     @ApiOperation(value = "Get transaction limits", notes = "Get minimum fee and maximum size.", response = GetTransactionLimitsResponse.class)
     @Produces(JSON_MIME)
     ApiHandlerResponse getTransactionLimits(@QueryParam("type") String type);
+
+    @GET
+    @Path("sign_message")
+    @ApiOperation(value = "Sign a message", notes = "Sign a message.", response = SignMessageResponse.class)
+    @Produces(JSON_MIME)
+    ApiHandlerResponse signMessage(@QueryParam("address") String address, @QueryParam("message") String message);
+
+    @GET
+    @Path("verify_message")
+    @ApiOperation(value = "Verify a message", notes = "Verify a signed message.", response = VerifyMessageResponse.class)
+    @Produces(JSON_MIME)
+    ApiHandlerResponse verifyMessage(@QueryParam("address") String address, @QueryParam("message") String message,
+            @QueryParam("signature") String signature);
 
 }

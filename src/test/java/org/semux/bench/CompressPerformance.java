@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -22,7 +22,7 @@ public class CompressPerformance {
 
     enum Mode {
         ALL_BLOCKS, BLOCKS_WITH_TX
-    };
+    }
 
     public static void main(String[] args) throws IOException {
         Config config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);

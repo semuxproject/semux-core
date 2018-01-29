@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -37,6 +37,7 @@ import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
+import org.semux.gui.model.WalletModel.Status;
 import org.semux.message.GuiMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.exception.UnreachableException;
@@ -252,8 +253,9 @@ public class HomePanel extends JPanel implements ActionListener {
         this.syncProgress.setText(SyncProgressFormatter.format(model.getSyncProgress()));
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
-        this.coinbase.setText(SwingUtil.shortAddress(model.getCoinbase().toAddress()));
-        this.status.setText(model.isDelegate() ? GuiMessages.get("Delegate") : GuiMessages.get("Normal"));
+        this.coinbase.setText(SwingUtil.getAddressAbbr(model.getCoinbase().toAddress()));
+        this.status.setText(model.getStatus() == Status.VALIDATOR ? GuiMessages.get("Validator")
+                : (model.getStatus() == Status.DELEGATE ? GuiMessages.get("Delegate") : GuiMessages.get("Normal")));
         this.available.setText(SwingUtil.formatValue(model.getTotalAvailable()));
         this.locked.setText(SwingUtil.formatValue(model.getTotalLocked()));
         this.peers.setText(SwingUtil.formatNumber(model.getActivePeers().size()));

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -177,6 +177,20 @@ public class BlockchainImplTest {
     }
 
     @Test
+    public void testGetCoinbaseTransactionBlockNumber() {
+        for (int i = 1; i <= 10; i++) {
+            byte[] coinbase = new Key().toAddress();
+            Block newBlock = createBlock(i, coinbase, Collections.emptyList(), Collections.emptyList());
+            chain.addBlock(newBlock);
+            List<Transaction> transactions = chain.getTransactions(coinbase, 0, 1);
+            assertEquals(1, transactions.size());
+            assertEquals(newBlock.getNumber(), transactions.get(0).getNonce());
+            assertEquals(TransactionType.COINBASE, transactions.get(0).getType());
+            assertEquals(newBlock.getNumber(), chain.getTransactionBlockNumber(transactions.get(0).getHash()));
+        }
+    }
+
+    @Test
     public void testGetTransactionCount() {
         assertNull(chain.getTransaction(tx.getHash()));
 
@@ -268,6 +282,11 @@ public class BlockchainImplTest {
     }
 
     private Block createBlock(long number, List<Transaction> transactions, List<TransactionResult> results) {
+        return createBlock(number, coinbase, transactions, results);
+    }
+
+    private Block createBlock(long number, byte[] coinbase, List<Transaction> transactions,
+            List<TransactionResult> results) {
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
         byte[] stateRoot = Bytes.EMPTY_HASH;

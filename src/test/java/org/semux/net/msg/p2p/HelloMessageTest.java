@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -26,7 +26,7 @@ public class HelloMessageTest {
         Key key = new Key();
         String peerId = key.toAddressString();
         Peer peer = new Peer("127.0.0.1", 5161, config.networkVersion(), config.getClientId(), peerId, 2,
-                Capability.SUPPORTED);
+                config.capabilitySet());
 
         HelloMessage msg = new HelloMessage(peer, key);
         assertTrue(msg.validate(config));

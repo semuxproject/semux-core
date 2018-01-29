@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -13,6 +13,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.semux.core.state.Account;
@@ -24,7 +25,7 @@ public class WalletAccountTest {
     public void testKey() {
         Key key = new Key();
         Account acc = new Account(key.toAddress(), 1, 2, 3);
-        WalletAccount wa = new WalletAccount(key, acc);
+        WalletAccount wa = new WalletAccount(key, acc, Optional.of("test account"));
 
         assertThat(wa.getAddress(), equalTo(key.toAddress()));
         assertThat(wa.getAvailable(), equalTo(1L));
@@ -47,7 +48,7 @@ public class WalletAccountTest {
     public void testMismatch() {
         Key key = new Key();
         Account acc = new Account(new Key().toAddress(), 1, 2, 3);
-        new WalletAccount(key, acc);
+        new WalletAccount(key, acc, Optional.of("test account"));
     }
 
 }

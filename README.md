@@ -31,8 +31,8 @@ git clone https://github.com/semuxproject/semux
 cd semux
 mvn install
 
-cd dist
-./unix/semux-cli.sh
+# run
+./dist/linux/semux-cli.sh
 ```
 
 

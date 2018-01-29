@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -31,7 +31,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.IntegrationTest;
@@ -41,6 +40,7 @@ import org.semux.Network;
 import org.semux.api.response.DoTransactionResponse;
 import org.semux.api.response.GetAccountResponse;
 import org.semux.api.response.GetAccountTransactionsResponse;
+import org.semux.api.response.GetDelegateResponse;
 import org.semux.api.response.Types;
 import org.semux.core.Genesis;
 import org.semux.core.TransactionType;
@@ -60,7 +60,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class })
-@PowerMockIgnore("javax.management.*")
 public class TransactTest {
 
     private static Logger logger = LoggerFactory.getLogger(TransactTest.class);
@@ -158,10 +157,10 @@ public class TransactTest {
                 equalTo(value));
 
         // assert that the transaction has been recorded across nodes
-        assertTransaction(kernelPremine, coinbaseOf(kernelPremine),
+        assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
                 TransactionType.TRANSFER, coinbaseOf(kernelPremine), coinbaseOf(kernelReceiver), value, fee,
                 Bytes.EMPTY_BYTES);
-        assertTransaction(kernelReceiver, coinbaseOf(kernelReceiver),
+        assertLatestTransaction(kernelReceiver, coinbaseOf(kernelReceiver),
                 TransactionType.TRANSFER, coinbaseOf(kernelPremine), coinbaseOf(kernelReceiver), value, fee,
                 Bytes.EMPTY_BYTES);
 
@@ -192,10 +191,71 @@ public class TransactTest {
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
                 equalTo(PREMINE * Unit.SEM - kernelPremine.getConfig().minDelegateBurnAmount() - fee));
 
-        // // assert that the transaction has been recorded across nodes
-        assertTransaction(kernelPremine, coinbaseOf(kernelPremine),
+        // assert that the transaction has been recorded across nodes
+        assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
                 TransactionType.DELEGATE, coinbaseOf(kernelPremine), Bytes.EMPTY_ADDRESS,
                 kernelPremine.getConfig().minDelegateBurnAmount(), fee, Bytes.of("test"));
+
+        // assert that the number of votes has been recorded into delegate state
+        assertDelegate(kernelPremine, kernelPremine.getCoinbase().toAddress(), 0L);
+    }
+
+    @Test
+    public void testVote() throws IOException {
+        final long fee = kernelPremine.getConfig().minTransactionFee();
+
+        // prepare transaction
+        final Long votes = 100 * Unit.SEM;
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("from", coinbaseOf(kernelPremine));
+        params.put("to", coinbaseOf(kernelValidator1));
+        params.put("value", votes);
+        params.put("fee", fee);
+
+        // send vote transaction
+        logger.info("Making vote request", params);
+        DoTransactionResponse voteResponse = new ObjectMapper().readValue(
+                kernelPremine.getApiClient().request("vote", params),
+                DoTransactionResponse.class);
+        assertTrue(voteResponse.success);
+
+        // wait for the vote transaction to be processed
+        logger.info("Waiting for the vote transaction to be processed...");
+        await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
+                equalTo(PREMINE * Unit.SEM - votes - fee));
+
+        // assert that the vote transaction has been recorded across nodes
+        assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
+                TransactionType.VOTE, coinbaseOf(kernelPremine), coinbaseOf(kernelValidator1),
+                votes, fee, Bytes.EMPTY_BYTES);
+
+        // assert that the number of votes has been recorded into the delegate state
+        assertDelegate(kernelValidator1, kernelValidator1.getCoinbase().toAddress(), votes);
+
+        // send unvote transaction
+        final Long unvotes = 50 * Unit.SEM;
+        logger.info("Making unvote request", params);
+        params.put("from", coinbaseOf(kernelPremine));
+        params.put("to", coinbaseOf(kernelValidator1));
+        params.put("value", unvotes);
+        params.put("fee", fee);
+        DoTransactionResponse unvoteResponse = new ObjectMapper().readValue(
+                kernelPremine.getApiClient().request("unvote", params),
+                DoTransactionResponse.class);
+        assertTrue(unvoteResponse.success);
+
+        // wait for the vote transaction to be processed
+        logger.info("Waiting for the unvote transaction to be processed...");
+        await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
+                equalTo(PREMINE * Unit.SEM - votes - fee + unvotes - fee));
+
+        // assert that the vote transaction has been recorded across nodes
+        assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
+                TransactionType.UNVOTE, coinbaseOf(kernelPremine), coinbaseOf(kernelValidator1),
+                unvotes, fee, Bytes.EMPTY_BYTES);
+
+        // assert that the number of votes has been recorded into the delegate state
+        assertDelegate(kernelValidator1, kernelValidator1.getCoinbase().toAddress(), votes - unvotes);
     }
 
     /**
@@ -212,7 +272,7 @@ public class TransactTest {
      * @param data
      * @throws IOException
      */
-    private void assertTransaction(KernelMock kernel, byte[] address,
+    private void assertLatestTransaction(KernelMock kernel, byte[] address,
             TransactionType type, byte[] from, byte[] to, long value, long fee, byte[] data)
             throws IOException {
         Types.TransactionType result = latestTransactionOf(kernel, address);
@@ -222,6 +282,24 @@ public class TransactTest {
         assertEquals((Long) value, result.value);
         assertEquals((Long) fee, result.fee);
         assertEquals(Hex.encode0x(data), result.data);
+    }
+
+    /**
+     * Assert that the address has be registered as a delegate.
+     *
+     * @param kernelMock
+     * @param address
+     * @param votes
+     * @throws IOException
+     */
+    private void assertDelegate(KernelMock kernelMock, byte[] address, Long votes) throws IOException {
+        GetDelegateResponse getDelegateResponse = new ObjectMapper().readValue(
+                kernelMock
+                        .getApiClient()
+                        .request("get_delegate", "address", Hex.encode0x(address)),
+                GetDelegateResponse.class);
+        assertTrue(getDelegateResponse.success);
+        assertEquals(votes, getDelegateResponse.delegate.votes);
     }
 
     /**

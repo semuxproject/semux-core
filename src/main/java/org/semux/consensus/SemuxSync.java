@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -298,7 +298,7 @@ public class SemuxSync implements SyncManager {
         }
 
         long latest = chain.getLatestBlockNumber();
-        if (latest + 1 == target.get()) {
+        if (latest + 1 >= target.get()) {
             stop();
             return; // This is important because stop() only notify
         }

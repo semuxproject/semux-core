@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -17,6 +17,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.text.DateFormat;
@@ -50,6 +51,7 @@ import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
+import org.semux.gui.model.WalletAccount;
 import org.semux.message.GuiMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -200,7 +202,7 @@ public class SwingUtil {
      * 
      * @param comp
      */
-    public static void addTextContextMenu(JComponent comp, List<TextContextMenuItem> textContextMenuItems) {
+    private static void addTextContextMenu(JComponent comp, List<TextContextMenuItem> textContextMenuItems) {
         JPopupMenu popup = new JPopupMenu();
 
         for (TextContextMenuItem textContextMenuItem : textContextMenuItems) {
@@ -213,6 +215,31 @@ public class SwingUtil {
     }
 
     /**
+     * Ensures that a text field gets focused when it's clicked. Credits to:
+     * https://stackoverflow.com/a/41965891/670662
+     *
+     * @param textField
+     */
+    private static void addTextMouseClickFocusListener(final JComponent textField) {
+        textField.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                textField.requestFocusInWindow();
+            }
+
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                textField.requestFocusInWindow();
+            }
+
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                textField.requestFocusInWindow();
+            }
+        });
+    }
+
+    /**
      * Generates a text field with copy-paste-cut popup menu.
      * 
      * @return
@@ -221,6 +248,7 @@ public class SwingUtil {
         JTextField textField = new JTextField();
         textField.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         addTextContextMenu(textField, Arrays.asList(COPY, PASTE, CUT));
+        addTextMouseClickFocusListener(textField);
         return textField;
     }
 
@@ -463,30 +491,54 @@ public class SwingUtil {
     }
 
     /**
-     *
+     * Returns the transaction description.
+     * 
      * @param gui
      * @param tx
      * @return description of transaction with one or multiple recipients
      */
     private static String getTransactionRecipientsDescription(SemuxGui gui, Transaction tx) {
-        return getAddressAlias(gui, tx.getFrom()) + " => " + getAddressAlias(gui, tx.getTo());
+        return getAddressAlias(gui, tx.getFrom()).orElse(getAddressAbbr(tx.getFrom()))
+                + " => "
+                + getAddressAlias(gui, tx.getTo()).orElse(getAddressAbbr(tx.getTo()));
     }
 
     /**
-     * Returns the name of an address.
+     * Returns the abbreviation of the given address.
+     * 
+     * @param address
+     * @return
+     */
+    public static String getAddressAbbr(byte[] address) {
+        return Hex.PREF + Hex.encode(Arrays.copyOfRange(address, 0, 2)) + "..."
+                + Hex.encode(Arrays.copyOfRange(address, address.length - 2, address.length));
+    }
+
+    /**
+     * Returns the alias of an address. This method will search the address in the
+     * following places (in order):
+     * <ul>
+     * <li>The delegate name database</li>
+     * <li>Address aliases from the wallet model (not from the wallet itself because
+     * it may get locked)</li>
+     * </ul>
      * 
      * @param gui
      * @param address
      * @return
      */
-    private static String getAddressAlias(SemuxGui gui, byte[] address) {
+    public static Optional<String> getAddressAlias(SemuxGui gui, byte[] address) {
         Optional<String> name = getDelegateName(gui, address);
         if (name.isPresent()) {
-            return name.get();
+            return name;
         }
 
-        int n = gui.getModel().getAccountNumber(address);
-        return n == -1 ? Hex.encode0x(address) : GuiMessages.get("AccountNum", n);
+        WalletAccount account = gui.getModel().getAccount(address);
+        if (account != null) {
+            return account.getName();
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -500,16 +552,5 @@ public class SwingUtil {
         Delegate d = ds.getDelegateByAddress(address);
 
         return d == null ? Optional.empty() : Optional.of(d.getNameString());
-    }
-
-    /**
-     * Returns a short version of address.
-     * 
-     * @param address
-     * @return
-     */
-    public static String shortAddress(byte[] address) {
-        return Hex.PREF + Hex.encode(Arrays.copyOfRange(address, 0, 2)) + "..."
-                + Hex.encode(Arrays.copyOfRange(address, address.length - 2, address.length));
     }
 }

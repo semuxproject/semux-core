@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -20,10 +20,16 @@ import java.util.concurrent.ExecutionException;
 
 import org.semux.config.Constants;
 import org.semux.gui.SemuxGui;
+import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.zafarkhaja.semver.Version;
+import com.sun.jna.Platform;
+import com.sun.jna.platform.win32.Advapi32Util;
+import com.sun.jna.platform.win32.Win32Exception;
+import com.sun.jna.platform.win32.WinNT;
+import com.sun.jna.platform.win32.WinReg;
 
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
@@ -228,7 +234,7 @@ public class SystemUtil {
         }
 
         // check memory
-        if (rt.maxMemory() < 2 * 1024 * 1024 * 1024) {
+        if (rt.maxMemory() < 2L * 1024L * 1024L * 1024L) {
             logger.info("Max allowed JVM heap memory size = {} MB", rt.maxMemory() / 1024 / 1024);
             return false;
         }
@@ -305,6 +311,37 @@ public class SystemUtil {
         String version = SemuxGui.class.getPackage().getImplementationVersion();
 
         return version == null ? "unknown" : version;
+    }
+
+    /**
+     * Returns whether Microsoft Visual C++ 2010 Redistributable Package is
+     * installed.
+     *
+     * @return
+     */
+    public static boolean isWindowsVCRedist2010Installed() {
+        if (SystemUtil.getOsName() != OsName.WINDOWS) {
+            throw new UnreachableException();
+        }
+
+        try {
+            if (Platform.is64Bit()) {
+                return Advapi32Util.registryGetIntValue(
+                        Advapi32Util.registryGetKey(
+                                WinReg.HKEY_LOCAL_MACHINE,
+                                "SOFTWARE\\Microsoft\\VisualStudio\\10.0\\VC\\VCRedist\\x64",
+                                WinNT.KEY_READ | WinNT.KEY_WOW64_32KEY).getValue(),
+                        "Installed") == 1;
+            } else {
+                return Advapi32Util.registryGetIntValue(
+                        WinReg.HKEY_LOCAL_MACHINE,
+                        "SOFTWARE\\Microsoft\\VisualStudio\\10.0\\VC\\VCRedist\\x86",
+                        "Installed") == 1;
+            }
+        } catch (Win32Exception e) {
+            logger.error("Failed to read windows registry", e);
+            return false;
+        }
     }
 
     private SystemUtil() {

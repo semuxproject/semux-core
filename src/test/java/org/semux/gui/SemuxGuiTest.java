@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -8,7 +8,6 @@ package org.semux.gui;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -93,9 +92,7 @@ public class SemuxGuiTest {
     public void testProcessBlock() {
         KernelMock kernel = kernelRule.getKernel();
 
-        AddressBook addressBook = mock(AddressBook.class);
         WalletModel model = new WalletModel();
-        model.setAddressBook(addressBook);
 
         SemuxGui gui = new SemuxGui(model, kernel);
 
@@ -117,7 +114,6 @@ public class SemuxGuiTest {
         assertThat(model.getDelegates().size()).isEqualTo(chain.getDelegateState().getDelegates().size());
         assertThat(model.getTotalAvailable()).isEqualTo(0);
         assertThat(model.getTotalLocked()).isEqualTo(0);
-        assertThat(model.getAddressBook()).isEqualTo(addressBook);
         assertThat(model.getActivePeers().size()).isEqualTo(channelMgr.getActivePeers().size());
         assertThat(model.getSyncProgress()).isEqualToComparingFieldByField(syncMgr.getProgress());
     }

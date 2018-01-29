@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -42,8 +42,8 @@ import org.slf4j.LoggerFactory;
  * [2, address] => [validator_stats]
  * 
  * [3, block_hash] => [block_number]
- * [4, transaction_hash] => [block_number, from, to]
- * [5, address, n] => [transaction] OR [transaction_hash]
+ * [4, transaction_hash] => [block_number, from, to] | [coinbase_transaction]
+ * [5, address, n] => [transaction_hash]
  * </pre>
  *
  * <pre>
@@ -241,6 +241,11 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public long getTransactionBlockNumber(byte[] hash) {
+        Transaction tx = getTransaction(hash);
+        if (tx.getType() == TransactionType.COINBASE) {
+            return tx.getNonce();
+        }
+
         byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash));
         if (bytes != null) {
             SimpleDecoder dec = new SimpleDecoder(bytes);

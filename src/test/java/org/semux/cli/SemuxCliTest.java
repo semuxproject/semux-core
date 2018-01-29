@@ -1,6 +1,6 @@
 /**
- * Copyright (c) 2017 The Semux Developers
- * 
+ * Copyright (c) 2017-2018 The Semux Developers
+ *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
@@ -23,6 +23,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static org.semux.TestLoggingAppender.err;
 import static org.semux.TestLoggingAppender.info;
 
 import java.security.KeyPair;
@@ -44,7 +45,6 @@ import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.Kernel;
@@ -63,7 +63,6 @@ import net.i2p.crypto.eddsa.KeyPairGenerator;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ SystemUtil.class, Kernel.class, SemuxCli.class })
-@PowerMockIgnore("javax.management.*")
 public class SemuxCliTest {
 
     @Rule
@@ -97,6 +96,26 @@ public class SemuxCliTest {
         SemuxCli.main(args);
 
         verify(semuxCLI).start(args);
+    }
+
+    @Test
+    public void testLoadAndUnlockWalletWithWrongPassword() {
+        SemuxCli semuxCLI = spy(new SemuxCli());
+
+        // mock wallet
+        Wallet wallet = mock(Wallet.class);
+        when(wallet.unlock(any())).thenReturn(false);
+        when(semuxCLI.loadWallet()).thenReturn(wallet);
+
+        // mock password
+        when(semuxCLI.getPassword()).thenReturn("password");
+
+        // execution
+        exit.expectSystemExitWithStatus(-1);
+        semuxCLI.loadAndUnlockWallet();
+
+        // assertion
+        assertThat(TestLoggingAppender.events(), hasItem(err(CliMessages.get("WrongPassword"))));
     }
 
     @Test

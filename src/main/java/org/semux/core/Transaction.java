@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -9,13 +9,13 @@ package org.semux.core;
 import java.util.Arrays;
 
 import org.semux.Network;
+import org.semux.config.Constants;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
-import org.xbill.DNS.Address;
 
 public class Transaction {
 
@@ -137,7 +137,13 @@ public class Transaction {
                 && signature != null
 
                 && Arrays.equals(Hash.h256(encoded), hash)
-                && Key.verify(hash, signature);
+                && Key.verify(hash, signature)
+
+                // The coinbase key is publicly available. People can use it for transactions.
+                // It won't introduce any fundamental loss to the system but could potentially
+                // cause confusion for block explorer, and thus are prohibited.
+                && (type == TransactionType.COINBASE
+                        || !Arrays.equals(signature.getAddress(), Constants.COINBASE_KEY.toAddress()));
     }
 
     /**
@@ -170,7 +176,7 @@ public class Transaction {
     /**
      * Parses the from address from signature.
      *
-     * @return an {@link Address} if the signature is success, otherwise null
+     * @return an address if the signature is valid, otherwise null
      */
     public byte[] getFrom() {
         return (signature == null) ? null : signature.getAddress();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -9,6 +9,7 @@ package org.semux.consensus;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.semux.Network;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Transaction;
@@ -75,7 +76,8 @@ public class Proposal {
      * NOTE: this method will NOT validate the proposed block, nor the proof, nor
      * the transactions inside the block. Use
      * {@link Block#validateHeader(BlockHeader, BlockHeader)} and
-     * {@link Block#validateTransactions(BlockHeader, List, byte)} for that purpose.
+     * {@link Block#validateTransactions(BlockHeader, List, Network)} for that
+     * purpose.
      * </p>
      * 
      * @return true if success, otherwise false

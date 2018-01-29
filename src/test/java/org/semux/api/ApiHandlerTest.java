@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -14,8 +14,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -49,10 +51,11 @@ import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
+import org.semux.api.response.SignMessageResponse;
 import org.semux.api.response.Types;
+import org.semux.api.response.VerifyMessageResponse;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
-import org.semux.core.Genesis.Premine;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
@@ -62,10 +65,11 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.net.Capability;
+import org.semux.net.ChannelManager;
 import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
+import org.semux.net.filter.SemuxIpFilter;
 import org.semux.rules.KernelRule;
-import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
 import io.netty.handler.ipfilter.IpFilterRuleType;
@@ -124,11 +128,40 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
     }
 
     @Test
+    public void testSignatures() throws IOException {
+
+        String address = wallet.getAccount(0).toAddressString();
+        String addressOther = wallet.getAccount(1).toAddressString();
+
+        String message = "helloworld";
+        String uri = "/sign_message?address=0x" + address + "&message=" + message;
+        SignMessageResponse response = request(uri, SignMessageResponse.class);
+        assertTrue(response.success);
+        String signature = response.signature;
+        uri = "/verify_message?address=" + address + "&message=" + message + "&signature=" + signature;
+        VerifyMessageResponse verifyMessageResponse = request(uri, VerifyMessageResponse.class);
+        assertTrue(verifyMessageResponse.success);
+        assertTrue(verifyMessageResponse.validSignature);
+
+        // verify no messing with fromaddress
+        uri = "/verify_message?address=" + addressOther + "&message=" + message + "&signature=" + signature;
+        verifyMessageResponse = request(uri, VerifyMessageResponse.class);
+        assertTrue(verifyMessageResponse.success);
+        assertFalse(verifyMessageResponse.validSignature);
+
+        // verify no messing with message
+        uri = "/verify_message?address=" + addressOther + "&message=" + message + "hi" + "&signature=" + signature;
+        verifyMessageResponse = request(uri, VerifyMessageResponse.class);
+        assertTrue(verifyMessageResponse.success);
+        assertFalse(verifyMessageResponse.validSignature);
+    }
+
+    @Test
     public void testGetPeers() throws IOException {
         channelMgr = spy(api.getKernel().getChannelManager());
         List<Peer> peers = Arrays.asList(
-                new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", 1, Capability.SUPPORTED),
-                new Peer("2.3.4.5", 5171, (short) 2, "client2", "peer2", 2, Capability.SUPPORTED));
+                new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", 1, config.capabilitySet()),
+                new Peer("2.3.4.5", 5171, (short) 2, "client2", "peer2", 2, config.capabilitySet()));
         when(channelMgr.getActivePeers()).thenReturn(peers);
         api.getKernel().setChannelManager(channelMgr);
 
@@ -162,13 +195,21 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testAddToBlacklist() throws IOException {
+        ChannelManager channelManagerSpy = spy(kernelRule.getKernel().getChannelManager());
+        kernelRule.getKernel().setChannelManager(channelManagerSpy);
+
         // blacklist 8.8.8.8
         assertTrue(request("/add_to_blacklist?ip=8.8.8.8", ApiHandlerResponse.class).success);
+        verify(channelManagerSpy).removeBlacklistedChannels();
 
         // assert that 8.8.8.8 is no longer acceptable
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
         when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
         assertFalse(channelMgr.isAcceptable(inetSocketAddress));
+
+        // assert that ipfilter.json is persisted
+        File ipfilterJson = new File(config.configDir(), SemuxIpFilter.CONFIG_FILE);
+        assertTrue(ipfilterJson.exists());
     }
 
     @Test
@@ -183,6 +224,10 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
         when(inetSocketAddress.getAddress()).thenReturn(InetAddress.getByName("8.8.8.8"));
         assertTrue(channelMgr.isAcceptable(inetSocketAddress));
+
+        // assert that ipfilter.json is persisted
+        File ipfilterJson = new File(config.configDir(), SemuxIpFilter.CONFIG_FILE);
+        assertTrue(ipfilterJson.exists());
     }
 
     @Test
@@ -270,6 +315,9 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         GetAccountTransactionsResponse response = request(uri, GetAccountTransactionsResponse.class);
         assertTrue(response.success);
         assertNotNull(response.transactions);
+        for (Types.TransactionType txType : response.transactions) {
+            assertEquals(block.getNumber(), txType.blockNumber.longValue());
+        }
     }
 
     @Test
@@ -283,6 +331,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         GetTransactionResponse response = request(uri, GetTransactionResponse.class);
         assertTrue(response.success);
         assertEquals(Hex.encode0x(tx.getHash()), response.transaction.hash);
+        assertEquals(block.getNumber(), response.transaction.blockNumber.longValue());
         assertNotNull(response.transaction.to);
     }
 
@@ -302,13 +351,20 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testGetAccount() throws IOException {
-        Genesis gen = chain.getGenesis();
-        Entry<ByteArray, Premine> entry = gen.getPremines().entrySet().iterator().next();
+        // create an account
+        Key key = new Key();
+        accountState.adjustAvailable(key.toAddress(), 1000 * Unit.SEM);
+        chain.addBlock(createBlock(
+                chain,
+                Collections.singletonList(createTransaction(key, key, 0)),
+                Collections.singletonList(new TransactionResult(true))));
 
-        String uri = "/get_account?address=" + entry.getKey();
+        // request api endpoint
+        String uri = "/get_account?address=" + key.toAddressString();
         GetAccountResponse response = request(uri, GetAccountResponse.class);
         assertTrue(response.success);
-        assertEquals(entry.getValue().getAmount() * Unit.SEM, response.account.available);
+        assertEquals(1000 * Unit.SEM, response.account.available);
+        assertEquals(1, response.account.transactionCount);
     }
 
     @Test

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -47,6 +47,7 @@ import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
+import org.semux.gui.PlaceHolder;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.dialog.DelegateDialog;
@@ -70,7 +71,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     private JTable table;
     private DelegatesTableModel tableModel;
 
-    JComboBox<Item> selectFrom;
+    JComboBox<AccountItem> selectFrom;
 
     private JTextField textVote;
     private JTextField textUnvote;
@@ -92,7 +93,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(25);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 600, 0.07, 0.2, 0.25, 0.15, 0.15, 0.08, 0.1);
+        SwingUtil.setColumnWidths(table, 600, 0.05, 0.2, 0.2, 0.15, 0.15, 0.15, 0.1);
         SwingUtil.setColumnAlignments(table, false, false, false, true, true, true, true);
 
         table.getSelectionModel().addListSelectionListener(event -> {
@@ -141,6 +142,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         label.setForeground(Color.DARK_GRAY);
 
         selectFrom = new JComboBox<>();
+        selectFrom.setName("selectFrom");
         selectFrom.setActionCommand(Action.SELECT_ACCOUNT.name());
         selectFrom.addActionListener(this);
 
@@ -179,16 +181,18 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textVote.setColumns(10);
         textVote.setActionCommand(Action.VOTE.name());
         textVote.addActionListener(this);
+        new PlaceHolder(GuiMessages.get("NumVotes"), textVote);
 
         JButton btnVote = SwingUtil.createDefaultButton(GuiMessages.get("Vote"), this, Action.VOTE);
         btnVote.setName("btnVote");
 
         textUnvote = SwingUtil.textFieldWithCopyPastePopup();
-        textUnvote.setName("testUnvote");
+        textUnvote.setName("textUnvote");
         textUnvote.setToolTipText(GuiMessages.get("NumVotes"));
         textUnvote.setColumns(10);
         textUnvote.setActionCommand(Action.UNVOTE.name());
         textUnvote.addActionListener(this);
+        new PlaceHolder(GuiMessages.get("NumVotes"), textUnvote);
 
         JButton btnUnvote = SwingUtil.createDefaultButton(GuiMessages.get("Unvote"), this, Action.UNVOTE);
         btnUnvote.setName("btnUnvote");
@@ -248,6 +252,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         textName.setColumns(10);
         textName.setActionCommand(Action.DELEGATE.name());
         textName.addActionListener(this);
+
+        new PlaceHolder(GuiMessages.get("DelegateName"), textName);
 
         // @formatter:off
         GroupLayout groupLayout3 = new GroupLayout(delegateRegistrationPanel);
@@ -333,7 +339,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             case 4:
                 return SwingUtil.formatVote(d.getVotesFromMe());
             case 5:
-                return d.isValidator(kernel) ? "V" : "S";
+                return d.isValidator(kernel) ? GuiMessages.get("Validator") : GuiMessages.get("Delegate");
             case 6:
                 return SwingUtil.formatPercentage(d.getRate());
             default:
@@ -372,34 +378,21 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     protected void refreshAccounts() {
         List<WalletAccount> list = model.getAccounts();
 
-        // quit if no update
-        boolean match = selectFrom.getItemCount() == list.size();
-        if (match) {
-            for (int i = 0; i < list.size(); i++) {
-                if (!Arrays.equals(selectFrom.getItemAt(i).account.getAddress(), list.get(i).getAddress())) {
-                    match = false;
-                    break;
-                }
-            }
+        // record selected account
+        AccountItem selected = (AccountItem) selectFrom.getSelectedItem();
+
+        // update account list
+        selectFrom.removeAllItems();
+        for (int i = 0; i < list.size(); i++) {
+            selectFrom.addItem(new AccountItem(list.get(i)));
         }
 
-        if (!match) {
-            // record selected account
-            Item selected = (Item) selectFrom.getSelectedItem();
-
-            // update account list
-            selectFrom.removeAllItems();
+        // recover selected account
+        if (selected != null) {
             for (int i = 0; i < list.size(); i++) {
-                selectFrom.addItem(new Item(list.get(i), i));
-            }
-
-            // recover selected account
-            if (selected != null) {
-                for (int i = 0; i < list.size(); i++) {
-                    if (Arrays.equals(list.get(i).getAddress(), selected.account.getAddress())) {
-                        selectFrom.setSelectedIndex(i);
-                        break;
-                    }
+                if (Arrays.equals(list.get(i).getAddress(), selected.account.getAddress())) {
+                    selectFrom.setSelectedIndex(i);
+                    break;
                 }
             }
         }
@@ -498,6 +491,12 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                             GuiMessages.get("InsufficientLockedFunds", SwingUtil.formatValue(value)));
                     return;
                 }
+
+                // check that user has voted more than amount to unvote
+                if (value > d.getVotesFromMe()) {
+                    JOptionPane.showMessageDialog(this, GuiMessages.get("InsufficientVotes"));
+                    return;
+                }
             }
 
             PendingManager pendingMgr = kernel.getPendingManager();
@@ -530,6 +529,27 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             JOptionPane.showMessageDialog(this, GuiMessages.get("InsufficientFunds",
                     SwingUtil.formatValue(config.minDelegateBurnAmount() + config.minTransactionFee())));
         } else {
+            // validate delegate address
+            DelegateState delegateState = kernel.getBlockchain().getDelegateState();
+            if (delegateState.getDelegateByAddress(a.getAddress()) != null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        GuiMessages.get("DelegateRegistrationDuplicatedAddress"),
+                        GuiMessages.get("ErrorDialogTitle"),
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // validate delegate name
+            if (delegateState.getDelegateByName(Bytes.of(name)) != null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        GuiMessages.get("DelegateRegistrationDuplicatedName"),
+                        GuiMessages.get("ErrorDialogTitle"),
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             // confirm system requirements
             if ((config.network() == Network.MAINNET && !SystemUtil.bench()) && JOptionPane
                     .showConfirmDialog(this, GuiMessages.get("ComputerNotQualified"),
@@ -622,13 +642,14 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     /**
      * Represents an item in the account drop list.
      */
-    protected static class Item {
+    protected static class AccountItem {
         WalletAccount account;
         String name;
 
-        public Item(WalletAccount a, int idx) {
+        public AccountItem(WalletAccount a) {
             this.account = a;
-            this.name = GuiMessages.get("AccountNumShort", idx) + ", " + SwingUtil.formatValue(account.getAvailable());
+            this.name = a.getName().orElse(SwingUtil.getAddressAbbr(a.getAddress())) + ", " // alias or abbreviation
+                    + SwingUtil.formatValue(account.getAvailable());
         }
 
         @Override

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -22,6 +22,7 @@ import org.semux.core.Wallet;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.exception.LauncherException;
 import org.semux.message.CliMessages;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ public class SemuxCli extends Launcher {
 
     public static void main(String[] args) {
         try {
+            checkPrerequisite();
+
             SemuxCli cli = new SemuxCli();
             // set up logger
             cli.setupLogger(args);
@@ -43,6 +46,8 @@ public class SemuxCli extends Launcher {
             cli.start(args);
         } catch (ParseException exception) {
             logger.error(CliMessages.get("ParsingFailed", exception.getMessage()));
+        } catch (LauncherException exception) {
+            logger.error(exception.getMessage());
         }
     }
 
@@ -167,10 +172,16 @@ public class SemuxCli extends Launcher {
         if (getCoinbase() < 0 || getCoinbase() >= accounts.size()) {
             logger.error(CliMessages.get("CoinbaseDoesNotExist"));
             SystemUtil.exit(-1);
+            return;
         }
 
         // start kernel
-        startKernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
+        try {
+            startKernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
+        } catch (Exception e) {
+            logger.error("Uncaught exception during kernel startup.", e);
+            SystemUtil.exitAsync(-1);
+        }
     }
 
     protected Kernel startKernel(Config config, Wallet wallet, Key coinbase) {
@@ -271,12 +282,14 @@ public class SemuxCli extends Launcher {
             if (!accountAdded) {
                 logger.error(CliMessages.get("PrivateKeyAlreadyInWallet"));
                 SystemUtil.exit(1);
+                return;
             }
 
             boolean walletFlushed = wallet.flush();
             if (!walletFlushed) {
                 logger.error(CliMessages.get("WalletFileCannotBeUpdated"));
                 SystemUtil.exit(2);
+                return;
             }
 
             logger.info(CliMessages.get("PrivateKeyImportedSuccessfully"));

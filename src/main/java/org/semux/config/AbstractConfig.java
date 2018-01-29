@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -166,6 +166,11 @@ public abstract class AbstractConfig implements Config {
     @Override
     public File dataDir() {
         return dataDir;
+    }
+
+    @Override
+    public File configDir() {
+        return new File(dataDir, Constants.CONFIG_DIR);
     }
 
     @Override
@@ -379,7 +384,7 @@ public abstract class AbstractConfig implements Config {
     }
 
     protected void init() {
-        File f = new File(dataDir, Constants.CONFIG_DIR + File.separator + CONFIG_FILE);
+        File f = new File(configDir(), CONFIG_FILE);
         if (!f.exists()) {
             // exit if the config file does not exist
             return;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
@@ -58,7 +59,7 @@ public class SendPanel extends JPanel implements ActionListener {
     private transient Kernel kernel;
     private transient Config config;
 
-    private JComboBox<Item> selectFrom;
+    private JComboBox<AccountItem> selectFrom;
     private JTextField txtTo;
     private JTextField txtAmount;
     private JTextField txtFee;
@@ -294,36 +295,28 @@ public class SendPanel extends JPanel implements ActionListener {
     protected void refresh() {
         List<WalletAccount> list = model.getAccounts();
 
-        // quit if no update
-        boolean match = selectFrom.getItemCount() == list.size();
-        if (match) {
+        // record selected account
+        AccountItem selected = (AccountItem) selectFrom.getSelectedItem();
+
+        // update account list
+        selectFrom.removeAllItems();
+        for (int i = 0; i < list.size(); i++) {
+            selectFrom.addItem(new AccountItem(list.get(i)));
+        }
+
+        // recover selected account
+        if (selected != null) {
             for (int i = 0; i < list.size(); i++) {
-                if (!Arrays.equals(selectFrom.getItemAt(i).account.getAddress(), list.get(i).getAddress())) {
-                    match = false;
+                if (Arrays.equals(list.get(i).getAddress(), selected.account.getAddress())) {
+                    selectFrom.setSelectedIndex(i);
                     break;
                 }
             }
         }
 
-        if (!match) {
-            // record selected account
-            Item selected = (Item) selectFrom.getSelectedItem();
-
-            // update account list
-            selectFrom.removeAllItems();
-            for (int i = 0; i < list.size(); i++) {
-                selectFrom.addItem(new Item(list.get(i), i));
-            }
-
-            // recover selected account
-            if (selected != null) {
-                for (int i = 0; i < list.size(); i++) {
-                    if (Arrays.equals(list.get(i).getAddress(), selected.account.getAddress())) {
-                        selectFrom.setSelectedIndex(i);
-                        break;
-                    }
-                }
-            }
+        // refresh address book dialog regardless
+        if (addressBookDialog != null) {
+            addressBookDialog.refresh();
         }
     }
 
@@ -393,7 +386,7 @@ public class SendPanel extends JPanel implements ActionListener {
      */
     protected void showAddressBook() {
         if (addressBookDialog == null) {
-            addressBookDialog = new AddressBookDialog(frame, model);
+            addressBookDialog = new AddressBookDialog(frame, model, kernel.getWallet());
         }
 
         addressBookDialog.setVisible(true);
@@ -446,14 +439,17 @@ public class SendPanel extends JPanel implements ActionListener {
     /**
      * Represents an item in the account drop list.
      */
-    protected static class Item {
+    protected static class AccountItem {
         WalletAccount account;
         String name;
 
-        public Item(WalletAccount a, int idx) {
+        public AccountItem(WalletAccount a) {
+            Optional<String> alias = a.getName();
+
             this.account = a;
-            this.name = Hex.PREF + account.getKey().toAddressString() + ", " + GuiMessages.get("AccountNumShort", idx)
-                    + ", " + SwingUtil.formatValue(account.getAvailable());
+            this.name = Hex.PREF + account.getKey().toAddressString() + ", " // address
+                    + (alias.isPresent() ? alias.get() + ", " : "") // alias
+                    + SwingUtil.formatValue(account.getAvailable()); // available
         }
 
         @Override

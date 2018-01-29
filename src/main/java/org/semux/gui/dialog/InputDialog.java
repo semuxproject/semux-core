@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -32,7 +32,7 @@ public class InputDialog extends JDialog implements ActionListener {
     private String text;
 
     public InputDialog(JFrame parent, String message, boolean isPassword) {
-        super(parent, GuiMessages.get("Input"));
+        super(parent, GuiMessages.get("Input"), java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
         JLabel labelLogo = new JLabel("");
         labelLogo.setIcon(SwingUtil.loadImage("logo", 96, 96));

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -34,10 +34,17 @@ public class FilterRule implements IpFilterRule {
     private static final InetAddressValidator inetAddressValidator = new InetAddressValidator();
 
     /**
+     * The raw address or CIDR notation in String
+     */
+    @JsonProperty("address")
+    private final String address;
+
+    /**
      * The actual instance of IpFilterRule to be matched against of.
      */
     private final IpFilterRule ipFilterRule;
 
+    @JsonProperty("type")
     private final IpFilterRuleType ruleType;
 
     /**
@@ -57,6 +64,7 @@ public class FilterRule implements IpFilterRule {
      * @throws UnknownHostException
      */
     public FilterRule(String address, IpFilterRuleType ruleType) throws UnknownHostException {
+        this.address = address;
         this.ruleType = ruleType;
 
         Matcher matcher = CIDR_PATTERN.matcher(address);
@@ -101,7 +109,8 @@ public class FilterRule implements IpFilterRule {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public static FilterRule jsonCreator(@JsonProperty(value = "type", required = true) String type,
+    public static FilterRule jsonCreator(
+            @JsonProperty(value = "type", required = true) String type,
             @JsonProperty(value = "address", required = true) String address) {
         try {
             return new FilterRule(address, IpFilterRuleType.valueOf(type));

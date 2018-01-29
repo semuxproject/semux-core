@@ -15,7 +15,7 @@ To format your code, please run the following command:
 mvn formatter:format license:format
 ```
 
-For IDE users, [Eclipse Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/eclpse/guide.md) and [IntelliJ IDEA Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/intellij/guide.md) are also provided.
+For IDE users, [Eclipse Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/eclipse/guide.md) and [IntelliJ IDEA Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/intellij/guide.md) are also provided.
 
 ## Contributor workflow
 
@@ -103,7 +103,7 @@ By contributing to this repository, you agree to license your work under the MIT
 
 ```
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -81,7 +81,17 @@ public final class TestLoggingAppender extends AbstractAppender {
         return log(Level.INFO, msg);
     }
 
-    protected static LogEvent log(Level lvl, String msg) {
+    /**
+     * Construct an ERROR {@link LogEvent}.
+     *
+     * @param msg
+     * @return
+     */
+    public static LogEvent err(String msg) {
+        return log(Level.ERROR, msg);
+    }
+
+    public static LogEvent log(Level lvl, String msg) {
         return new LogEventMini(lvl, msg);
     }
 
