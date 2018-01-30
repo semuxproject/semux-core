@@ -14,7 +14,6 @@ import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
 import org.semux.crypto.Key;
-import org.semux.net.Capability;
 import org.semux.net.Peer;
 
 public class WorldMessageTest {

@@ -387,7 +387,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         public final TransactionResult transactionResult;
 
-        private PendingTransaction(Transaction transaction, TransactionResult transactionResult) {
+        public PendingTransaction(Transaction transaction, TransactionResult transactionResult) {
             this.transaction = transaction;
             this.transactionResult = transactionResult;
         }
