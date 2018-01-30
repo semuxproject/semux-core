@@ -29,6 +29,7 @@ import org.semux.util.ByteArray;
 public class WalletModel {
 
     private List<ActionListener> listeners = new CopyOnWriteArrayList<>();
+    private List<ActionListener> lockableComponents = new CopyOnWriteArrayList<>();
 
     private SyncManager.Progress syncProgress;
 
@@ -51,12 +52,29 @@ public class WalletModel {
     }
 
     /**
+     * Fires an lock event.
+     */
+    public void fireLockEvent() {
+        lockView();
+    }
+
+    /**
      * Add a listener.
      * 
      * @param listener
      */
     public void addListener(ActionListener listener) {
         listeners.add(listener);
+    }
+
+    /**
+     * Add a component for locking.<br />
+     * This component has to provide Action.LOCK as ActionListener Event
+     * 
+     * @param listener
+     */
+    public void addLockable(ActionListener listener) {
+        lockableComponents.add(listener);
     }
 
     /**
@@ -203,6 +221,15 @@ public class WalletModel {
     protected void updateView() {
         for (ActionListener listener : listeners) {
             EventQueue.invokeLater(() -> listener.actionPerformed(new ActionEvent(this, 0, Action.REFRESH.name())));
+        }
+    }
+
+    /**
+     * Locks components.
+     */
+    protected void lockView() {
+        for (ActionListener listener : lockableComponents) {
+            EventQueue.invokeLater(() -> listener.actionPerformed(new ActionEvent(this, 0, Action.LOCK.name())));
         }
     }
 

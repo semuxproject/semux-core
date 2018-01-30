@@ -61,7 +61,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         setName("AddressBookDialog");
         this.model = model;
         this.wallet = wallet;
-
+        this.model.addLockable(this);
         tableModel = new AddressTableModel();
         table = new JTable(tableModel);
         table.setBackground(Color.WHITE);
@@ -227,6 +227,9 @@ public class AddressBookDialog extends JDialog implements ActionListener {
             } else {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("SelectAddress"));
             }
+            break;
+        case LOCK:
+            this.dispose();
             break;
         default:
             throw new UnreachableException();

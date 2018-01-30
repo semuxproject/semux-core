@@ -37,6 +37,7 @@ import javax.swing.border.LineBorder;
 import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.gui.dialog.InputDialog;
+import org.semux.gui.model.WalletModel;
 import org.semux.gui.panel.DelegatesPanel;
 import org.semux.gui.panel.HomePanel;
 import org.semux.gui.panel.ReceivePanel;
@@ -69,6 +70,8 @@ public class MainFrame extends JFrame implements ActionListener {
     private JPanel activePanel;
     private JButton activeButton;
 
+    private WalletModel model;
+
     public MainFrame(SemuxGui gui) {
         // ensure that all windows are released before it starts closing the Kernel
         this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -88,6 +91,7 @@ public class MainFrame extends JFrame implements ActionListener {
                 System.exit(0);
             }
         });
+        this.model = gui.getModel();
 
         this.kernel = gui.getKernel();
 
@@ -200,6 +204,7 @@ public class MainFrame extends JFrame implements ActionListener {
         w.lock();
 
         lockGlassPane.setVisible(true);
+        model.fireLockEvent();
         btnLock.setText(GuiMessages.get("Unlock"));
     }
 
