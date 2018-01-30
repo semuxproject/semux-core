@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,7 +42,7 @@ public class Wallet {
     private File file;
     private String password;
 
-    private final List<Key> accounts = Collections.synchronizedList(new ArrayList<>());
+    private final Map<ByteArray, Key> accounts = Collections.synchronizedMap(new LinkedHashMap<>());
 
     private final Map<ByteArray, String> aliases = new ConcurrentHashMap<>();
 
@@ -116,7 +117,9 @@ public class Wallet {
 
                 synchronized (accounts) {
                     accounts.clear();
-                    accounts.addAll(newAccounts);
+                    for (Key account : newAccounts) {
+                        accounts.put(ByteArray.of(account.toAddress()), account);
+                    }
                 }
                 synchronized (aliases) {
                     aliases.clear();
@@ -165,7 +168,7 @@ public class Wallet {
     protected void writeAccounts(byte[] key, SimpleEncoder enc) {
         synchronized (accounts) {
             enc.writeInt(accounts.size());
-            for (Key a : accounts) {
+            for (Key a : accounts.values()) {
                 byte[] iv = Bytes.random(16);
 
                 enc.writeBytes(iv);
@@ -283,7 +286,7 @@ public class Wallet {
         requireUnlocked();
 
         synchronized (accounts) {
-            return new ArrayList<>(accounts);
+            return new ArrayList<>(accounts.values());
         }
     }
 
@@ -314,7 +317,9 @@ public class Wallet {
     public Key getAccount(int idx) throws WalletLockedException {
         requireUnlocked();
 
-        return accounts.get(idx);
+        synchronized (accounts) {
+            return getAccounts().get(idx);
+        }
     }
 
     /**
@@ -327,16 +332,9 @@ public class Wallet {
     public Key getAccount(byte[] address) throws WalletLockedException {
         requireUnlocked();
 
-        // TODO: optimize account query
         synchronized (accounts) {
-            for (Key key : accounts) {
-                if (Arrays.equals(key.toAddress(), address)) {
-                    return key;
-                }
-            }
+            return accounts.get(ByteArray.of(address));
         }
-
-        return null;
     }
 
     /**
@@ -353,15 +351,13 @@ public class Wallet {
     public boolean addAccount(Key newKey) throws WalletLockedException {
         requireUnlocked();
 
-        // TODO: optimize duplicates check
         synchronized (accounts) {
-            for (Key key : accounts) {
-                if (Arrays.equals(key.getPublicKey(), newKey.getPublicKey())) {
-                    return false;
-                }
+            ByteArray to = ByteArray.of(newKey.toAddress());
+            if (accounts.containsKey(to)) {
+                return false;
             }
 
-            accounts.add(newKey);
+            accounts.put(to, newKey);
             return true;
         }
     }
@@ -399,16 +395,8 @@ public class Wallet {
     public boolean removeAccount(Key key) throws WalletLockedException {
         requireUnlocked();
 
-        // TODO: optimize duplicates check
         synchronized (accounts) {
-            for (Key k : accounts) {
-                if (Arrays.equals(k.getPublicKey(), key.getPublicKey())) {
-                    accounts.remove(key);
-                    return true;
-                }
-            }
-
-            return false;
+            return accounts.remove(ByteArray.of(key.toAddress())) != null;
         }
     }
 
