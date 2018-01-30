@@ -6,11 +6,13 @@
  */
 package org.semux.api;
 
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -64,7 +66,6 @@ import org.semux.core.Unit;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
-import org.semux.net.Capability;
 import org.semux.net.ChannelManager;
 import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
@@ -294,14 +295,17 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
     @Test
     public void testGetPendingTransactions() throws IOException {
         Transaction tx = createTransaction();
-        TransactionResult res = new TransactionResult(true);
-        Block block = createBlock(chain, Collections.singletonList(tx), Collections.singletonList(res));
-        chain.addBlock(block);
+        TransactionResult result = new TransactionResult(true);
+        PendingManager pendingManager = spy(kernelRule.getKernel().getPendingManager());
+        when(pendingManager.getTransactions()).thenReturn(
+                Collections.singletonList(new PendingManager.PendingTransaction(tx, result)));
+        kernelRule.getKernel().setPendingManager(pendingManager);
 
         String uri = "/get_pending_transactions";
         GetPendingTransactionsResponse response = request(uri, GetPendingTransactionsResponse.class);
         assertTrue(response.success);
         assertNotNull(response.pendingTransactions);
+        assertThat(response.pendingTransactions, hasSize(1));
     }
 
     @Test
