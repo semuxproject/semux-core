@@ -189,7 +189,8 @@ public interface SemuxApi {
     @Path("create_account")
     @ApiOperation(value = "Create account", notes = "Creates a new account.", response = CreateAccountResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse createAccount();
+    ApiHandlerResponse createAccount(
+            @ApiParam(value = "Assigned alias to the created account.", required = false) @QueryParam("name") String name);
 
     @GET
     @Path("transfer")

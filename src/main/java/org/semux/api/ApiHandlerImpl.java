@@ -104,7 +104,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 return listAccounts();
 
             case CREATE_ACCOUNT:
-                return createAccount();
+                return createAccount(params);
 
             case GET_TRANSACTION_LIMITS:
                 return getTransactionLimits(params);
@@ -358,8 +358,8 @@ public class ApiHandlerImpl implements ApiHandler {
      *
      * @return
      */
-    private ApiHandlerResponse createAccount() {
-        return semuxApi.createAccount();
+    private ApiHandlerResponse createAccount(Map<String, String> params) {
+        return semuxApi.createAccount(params.getOrDefault("name", null));
     }
 
     /**
