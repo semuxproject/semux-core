@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.junit.After;
 import org.junit.Before;
@@ -439,6 +440,18 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         CreateAccountResponse response = request(uri, CreateAccountResponse.class);
         assertTrue(response.success);
         assertEquals(size + 1, wallet.getAccounts().size());
+    }
+
+    @Test
+    public void testCreateAccountWithName() throws IOException {
+        int size = wallet.getAccounts().size();
+
+        String uri = "/create_account?name=test_name";
+        CreateAccountResponse response = request(uri, CreateAccountResponse.class);
+        assertTrue(response.success);
+        List<Key> accounts = wallet.getAccounts();
+        assertEquals(size + 1, accounts.size());
+        assertEquals(Optional.of("test_name"), wallet.getAddressAlias(accounts.get(size).toAddress()));
     }
 
     @Test

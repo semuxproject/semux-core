@@ -370,10 +370,18 @@ public class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public ApiHandlerResponse createAccount() {
+    public ApiHandlerResponse createAccount(String name) {
         try {
+            // create an account
             Key key = new Key();
             kernel.getWallet().addAccount(key);
+
+            // set alias of the address
+            if (isSet(name)) {
+                kernel.getWallet().setAddressAlias(key.toAddress(), name);
+            }
+
+            // save the account
             kernel.getWallet().flush();
             return new CreateAccountResponse(true, Hex.PREF + key.toAddressString());
         } catch (WalletLockedException e) {
