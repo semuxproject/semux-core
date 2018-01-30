@@ -37,9 +37,11 @@ import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
+import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Key;
+import org.semux.gui.SwingUtil;
 import org.semux.gui.WalletModelRule;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.message.GuiMessages;
@@ -168,7 +170,8 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
     public void testInsufficientLocked() {
         testUnvote("10");
         window.optionPane(Timeout.timeout(1000))
-                .requireMessage(GuiMessages.get("InsufficientLockedFunds", "10.000 SEM")).requireVisible();
+                .requireMessage(GuiMessages.get("InsufficientLockedFunds", SwingUtil.formatValue(10 * Unit.SEM)))
+                .requireVisible();
     }
 
     @Test
