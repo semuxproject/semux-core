@@ -178,8 +178,7 @@ public class SemuxApiImpl implements SemuxApi {
         return new GetPendingTransactionsResponse(true,
                 kernel.getPendingManager().getTransactions().parallelStream()
                         .map(pendingTransaction -> pendingTransaction.transaction)
-                        .map(tx -> new Types.TransactionType(
-                                kernel.getBlockchain().getTransactionBlockNumber(tx.getHash()), tx))
+                        .map(tx -> new Types.TransactionType(null, tx))
                         .collect(Collectors.toList()));
     }
 
