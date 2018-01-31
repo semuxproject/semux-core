@@ -8,6 +8,7 @@ package org.semux.core;
 
 import java.util.List;
 
+import org.semux.consensus.Fork;
 import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -186,4 +187,15 @@ public interface Blockchain {
      * @param listener
      */
     void addListener(BlockchainListener listener);
+
+    /**
+     * Checks whether a fork is activated at a certain blockchain height.
+     *
+     * @param number
+     *            The number of blockchain height to check.
+     * @param fork
+     *            An instance of ${@link Fork} to check.
+     * @return
+     */
+    boolean forkActivated(long number, Fork fork);
 }

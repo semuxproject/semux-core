@@ -13,6 +13,11 @@ import static org.semux.core.Amount.Unit.SEM;
 
 import java.util.stream.LongStream;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.semux.Network;
@@ -55,5 +60,21 @@ public class MainnetConfigTest {
         }
 
         assertEquals(100, last);
+    }
+
+    @Test
+    public void testPrimaryUniformDistDeterminism() {
+        List<String> validators = IntStream.range(1, 100).boxed().map(i -> String.format("v%d", i))
+                .collect(Collectors.toList());
+        int blocks = 1000;
+
+        MainnetConfig config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
+        for (int i = 0; i < blocks; i++) {
+            int view = RandomUtils.nextInt(0, 100); // fuzzy
+            String primary = config.getPrimaryValidator(validators, i, view, true);
+            for (int j = 0; j < 10; j++) {
+                assertEquals(primary, config.getPrimaryValidator(validators, i, view, true));
+            }
+        }
     }
 }

@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
 import org.semux.config.Constants;
+import org.semux.consensus.Fork;
 import org.semux.core.Genesis.Premine;
 import org.semux.core.exception.BlockchainException;
 import org.semux.core.state.AccountState;
@@ -88,6 +89,8 @@ public class BlockchainImpl implements Blockchain {
     private Block latestBlock;
 
     private final List<BlockchainListener> listeners = new ArrayList<>();
+
+    private boolean uniformDistributionActivated = false;
 
     /**
      * Create a blockchain instance.
@@ -259,6 +262,7 @@ public class BlockchainImpl implements Blockchain {
     public synchronized void addBlock(Block block) {
         long number = block.getNumber();
         byte[] hash = block.getHash();
+        activateForks(number);
 
         if (number != genesis.getNumber() && number != latestBlock.getNumber() + 1) {
             logger.error("Adding wrong block: number = {}, expected = {}", number, latestBlock.getNumber() + 1);
@@ -312,7 +316,7 @@ public class BlockchainImpl implements Blockchain {
 
             // [5] update validator statistics
             List<String> validators = getValidators();
-            String primary = config.getPrimaryValidator(validators, number, 0);
+            String primary = config.getPrimaryValidator(validators, number, 0, uniformDistributionActivated);
             adjustValidatorStats(block.getCoinbase(), StatsType.FORGED, 1);
             if (primary.equals(Hex.encode(block.getCoinbase()))) {
                 adjustValidatorStats(Hex.decode0x(primary), StatsType.HIT, 1);
@@ -332,6 +336,12 @@ public class BlockchainImpl implements Blockchain {
 
         for (BlockchainListener listener : listeners) {
             listener.onBlockAdded(block);
+        }
+    }
+
+    private void activateForks(long number) {
+        if (!uniformDistributionActivated) {
+            uniformDistributionActivated = forkActivated(number, Fork.UNIFORM_DISTRIBUTION);
         }
     }
 
@@ -532,5 +542,22 @@ public class BlockchainImpl implements Blockchain {
             long missed = dec.readLong();
             return new ValidatorStats(forged, hit, missed);
         }
+    }
+
+    @Override
+    public boolean forkActivated(long height, Fork fork) {
+        if (height <= 0) {
+            return false;
+        }
+
+        final long from = height - 1;
+        final long to = Math.max(from - fork.activationBlocksLookup + 1, 0);
+        long activatedBlocks = 0;
+
+        for (long i = from; i >= to; i--) {
+            activatedBlocks += getBlockHeader(i).hasDataBit(fork.forkBit) ? 1 : 0;
+        }
+
+        return activatedBlocks >= fork.activationBlocks;
     }
 }

@@ -129,9 +129,10 @@ public interface Config {
      * @param validators
      * @param height
      * @param view
+     * @param uniformDist
      * @return
      */
-    String getPrimaryValidator(List<String> validators, long height, int view);
+    String getPrimaryValidator(List<String> validators, long height, int view, boolean uniformDist);
 
     /**
      * Returns the client id.

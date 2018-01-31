@@ -12,6 +12,7 @@ import static org.semux.core.Amount.Unit.SEM;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.semux.Network;
 import org.semux.config.exception.ConfigException;
@@ -160,9 +162,25 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public String getPrimaryValidator(List<String> validators, long height, int view) {
-        byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
-        return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
+    public String getPrimaryValidator(List<String> validators, long height, int view, boolean uniformDist) {
+        if (uniformDist) {
+            long seed = new BigInteger(Bytes.merge(Bytes.of(height), Bytes.of(view))).longValue();
+            return validators.get(deterministicRandom(seed, validators.size()));
+        } else {
+            byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
+            return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
+        }
+    }
+
+    public static int deterministicRandom(long seed, long boundary) {
+        long oldSeed, nextSeed;
+        AtomicLong s = new AtomicLong(seed);
+        do {
+            oldSeed = s.get();
+            nextSeed = (oldSeed * 0x5DEECE66DL + 0xBL) & ((1L << 48) - 1);
+        } while (!s.compareAndSet(oldSeed, nextSeed));
+        int nextInt = (int) (nextSeed >>> (48 - 24));
+        return (int) (nextInt / (float) (1 << 24) * boundary);
     }
 
     @Override

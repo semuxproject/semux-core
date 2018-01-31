@@ -9,6 +9,7 @@ package org.semux.consensus;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -20,6 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,7 +56,8 @@ public class SemuxBftTest {
 
     @Test
     public void testIsPrimary() {
-        List<String> validators = Arrays.asList("a", "b", "c", "d");
+        List<String> validators = IntStream.range(1, 100).boxed().map(i -> String.format("v%d", i))
+                .collect(Collectors.toList());
         int blocks = 1000;
         int repeat = 0;
         int last = -1;
@@ -61,13 +65,42 @@ public class SemuxBftTest {
         SemuxBft bft = mock(SemuxBft.class);
         bft.config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
         bft.validators = validators;
-        when(bft.isPrimary(anyLong(), anyInt(), anyString())).thenCallRealMethod();
+        when(bft.isPrimary(anyLong(), anyInt(), anyString(), anyBoolean())).thenCallRealMethod();
 
         Random r = new Random(System.nanoTime());
         for (int i = 0; i < blocks; i++) {
             int view = r.nextInt(2);
             for (int j = 0; j < validators.size(); j++) {
-                if (bft.isPrimary(i, view, validators.get(j))) {
+                if (bft.isPrimary(i, view, validators.get(j), false)) {
+                    if (j == last) {
+                        repeat++;
+                    }
+                    last = j;
+                }
+            }
+        }
+        logger.info("Consecutive validator probability: {}/{}", repeat, blocks);
+        assertEquals(1.0 / validators.size(), (double) repeat / blocks, 0.05);
+    }
+
+    @Test
+    public void testIsPrimaryUniformDist() {
+        List<String> validators = IntStream.range(1, 100).boxed().map(i -> String.format("v%d", i))
+                .collect(Collectors.toList());
+        int blocks = 1000;
+        int repeat = 0;
+        int last = -1;
+
+        SemuxBft bft = mock(SemuxBft.class);
+        bft.config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
+        bft.validators = validators;
+        when(bft.isPrimary(anyLong(), anyInt(), anyString(), anyBoolean())).thenCallRealMethod();
+
+        Random r = new Random(System.nanoTime());
+        for (int i = 0; i < blocks; i++) {
+            int view = r.nextInt(2);
+            for (int j = 0; j < validators.size(); j++) {
+                if (bft.isPrimary(i, view, validators.get(j), true)) {
                     if (j == last) {
                         repeat++;
                     }
