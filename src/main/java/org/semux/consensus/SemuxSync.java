@@ -144,7 +144,7 @@ public class SemuxSync implements SyncManager {
             while (isRunning.get()) {
                 synchronized (isRunning) {
                     try {
-                        isRunning.wait();
+                        isRunning.wait(1000);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         logger.info("Sync manager got interrupted");
