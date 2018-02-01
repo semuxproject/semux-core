@@ -342,6 +342,9 @@ public class BlockchainImpl implements Blockchain {
     private void activateForks(long number) {
         if (!uniformDistributionActivated) {
             uniformDistributionActivated = forkActivated(number, Fork.UNIFORM_DISTRIBUTION);
+            if (uniformDistributionActivated) {
+                logger.info("Fork UNIFORM_DISTRIBUTION activated at block {}", number);
+            }
         }
     }
 
@@ -555,7 +558,7 @@ public class BlockchainImpl implements Blockchain {
         long activatedBlocks = 0;
 
         for (long i = from; i >= to; i--) {
-            activatedBlocks += getBlockHeader(i).hasDataBit(fork.forkBit) ? 1 : 0;
+            activatedBlocks += getBlockHeader(i).getDecodedData().forkActivated(fork) ? 1 : 0;
         }
 
         return activatedBlocks >= fork.activationBlocks;

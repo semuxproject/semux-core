@@ -10,7 +10,6 @@ import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sum;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -28,6 +27,7 @@ import org.semux.consensus.exception.SemuxBftException;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
+import org.semux.core.BlockHeaderData;
 import org.semux.core.Blockchain;
 import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
@@ -666,6 +666,9 @@ public class SemuxBft implements Consensus {
     protected void activateForks() {
         if (!uniformDistributionActivated) {
             uniformDistributionActivated = chain.forkActivated(height, Fork.UNIFORM_DISTRIBUTION);
+            if (uniformDistributionActivated) {
+                logger.info("Fork UNIFORM_DISTRIBUTION activated at height {}", height);
+            }
         }
     }
 
@@ -766,9 +769,7 @@ public class SemuxBft implements Consensus {
         long number = height;
         byte[] prevHash = chain.getBlockHeader(height - 1).getHash();
         long timestamp = System.currentTimeMillis();
-        BitSet forkBits = new BitSet();
-        forkBits.set(Fork.UNIFORM_DISTRIBUTION.forkBit);
-        byte[] data = forkBits.toByteArray();
+        byte[] data = new BlockHeaderData(Fork.UNIFORM_DISTRIBUTION.number).toBytes();
 
         BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,
                 resultsRoot, stateRoot, data);

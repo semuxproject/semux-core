@@ -9,7 +9,6 @@ package org.semux.core;
 import static org.semux.crypto.Hash.HASH_LEN;
 
 import java.util.Arrays;
-import java.util.BitSet;
 
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
@@ -118,10 +117,6 @@ public class BlockHeader {
                 && Arrays.equals(Hash.h256(encoded), hash);
     }
 
-    public boolean hasDataBit(int bit) {
-        return BitSet.valueOf(getData()).get(bit);
-    }
-
     public byte[] getHash() {
         return hash;
     }
@@ -156,6 +151,10 @@ public class BlockHeader {
 
     public byte[] getData() {
         return data;
+    }
+
+    public BlockHeaderData getDecodedData() {
+        return BlockHeaderData.fromBytes(data);
     }
 
     public byte[] toBytes() {

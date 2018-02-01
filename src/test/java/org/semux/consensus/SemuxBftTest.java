@@ -9,7 +9,6 @@ package org.semux.consensus;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -55,52 +54,43 @@ public class SemuxBftTest {
     public TemporaryDbRule temporaryDBRule = new TemporaryDbRule();
 
     @Test
-    public void testIsPrimary() {
+    public void testIsPrimaryH256() {
         List<String> validators = IntStream.range(1, 100).boxed().map(i -> String.format("v%d", i))
                 .collect(Collectors.toList());
-        int blocks = 1000;
-        int repeat = 0;
-        int last = -1;
 
         SemuxBft bft = mock(SemuxBft.class);
         bft.config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
         bft.validators = validators;
-        when(bft.isPrimary(anyLong(), anyInt(), anyString(), anyBoolean())).thenCallRealMethod();
+        bft.uniformDistributionActivated = false;
+        when(bft.isPrimary(anyLong(), anyInt(), anyString())).thenCallRealMethod();
 
-        Random r = new Random(System.nanoTime());
-        for (int i = 0; i < blocks; i++) {
-            int view = r.nextInt(2);
-            for (int j = 0; j < validators.size(); j++) {
-                if (bft.isPrimary(i, view, validators.get(j), false)) {
-                    if (j == last) {
-                        repeat++;
-                    }
-                    last = j;
-                }
-            }
-        }
-        logger.info("Consecutive validator probability: {}/{}", repeat, blocks);
-        assertEquals(1.0 / validators.size(), (double) repeat / blocks, 0.05);
+        testIsPrimaryConsecutiveValidatorProbability(bft);
     }
 
     @Test
     public void testIsPrimaryUniformDist() {
         List<String> validators = IntStream.range(1, 100).boxed().map(i -> String.format("v%d", i))
                 .collect(Collectors.toList());
-        int blocks = 1000;
-        int repeat = 0;
-        int last = -1;
 
         SemuxBft bft = mock(SemuxBft.class);
         bft.config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
         bft.validators = validators;
-        when(bft.isPrimary(anyLong(), anyInt(), anyString(), anyBoolean())).thenCallRealMethod();
+        bft.uniformDistributionActivated = true;
+        when(bft.isPrimary(anyLong(), anyInt(), anyString())).thenCallRealMethod();
+
+        testIsPrimaryConsecutiveValidatorProbability(bft);
+    }
+
+    private void testIsPrimaryConsecutiveValidatorProbability(SemuxBft bft) {
+        int blocks = 1000;
+        int repeat = 0;
+        int last = -1;
 
         Random r = new Random(System.nanoTime());
         for (int i = 0; i < blocks; i++) {
             int view = r.nextInt(2);
-            for (int j = 0; j < validators.size(); j++) {
-                if (bft.isPrimary(i, view, validators.get(j), true)) {
+            for (int j = 0; j < bft.validators.size(); j++) {
+                if (bft.isPrimary(i, view, bft.validators.get(j))) {
                     if (j == last) {
                         repeat++;
                     }
@@ -108,8 +98,9 @@ public class SemuxBftTest {
                 }
             }
         }
+
         logger.info("Consecutive validator probability: {}/{}", repeat, blocks);
-        assertEquals(1.0 / validators.size(), (double) repeat / blocks, 0.05);
+        assertEquals(1.0 / bft.validators.size(), (double) repeat / blocks, 0.05);
     }
 
     /**
