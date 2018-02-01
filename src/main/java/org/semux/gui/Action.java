@@ -65,6 +65,8 @@ public enum Action {
 
     ADD_ADDRESS,
 
+    EDIT_ADDRESS,
+
     DELETE_ADDRESS,
 
     IMPORT_PRIVATE_KEY,
