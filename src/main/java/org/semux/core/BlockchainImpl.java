@@ -14,7 +14,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.consensus.Fork;
+import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.Genesis.Premine;
 import org.semux.core.exception.BlockchainException;
 import org.semux.core.state.AccountState;
@@ -341,7 +341,7 @@ public class BlockchainImpl implements Blockchain {
 
     private void activateForks(long number) {
         if (!uniformDistributionActivated) {
-            uniformDistributionActivated = forkActivated(number, Fork.UNIFORM_DISTRIBUTION);
+            uniformDistributionActivated = forkActivated(number, ValidatorActivatedFork.UNIFORM_DISTRIBUTION);
             if (uniformDistributionActivated) {
                 logger.info("Fork UNIFORM_DISTRIBUTION activated at block {}", number);
             }
@@ -548,7 +548,7 @@ public class BlockchainImpl implements Blockchain {
     }
 
     @Override
-    public boolean forkActivated(long height, Fork fork) {
+    public boolean forkActivated(long height, ValidatorActivatedFork fork) {
         if (height <= 0) {
             return false;
         }
@@ -559,6 +559,11 @@ public class BlockchainImpl implements Blockchain {
 
         for (long i = from; i >= to; i--) {
             activatedBlocks += getBlockHeader(i).getDecodedData().forkActivated(fork) ? 1 : 0;
+        }
+
+        if (activatedBlocks > 0) {
+            logger.debug("Fork activation of {}: {} / {} in the past {} blocks", fork.name, activatedBlocks,
+                    fork.activationBlocks, fork.activationBlocksLookup);
         }
 
         return activatedBlocks >= fork.activationBlocks;

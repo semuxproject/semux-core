@@ -6,7 +6,7 @@
  */
 package org.semux.core;
 
-import org.semux.consensus.Fork;
+import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
@@ -31,7 +31,7 @@ public class BlockHeaderData {
         this.forkNumber = null;
     }
 
-    public boolean forkActivated(Fork fork) {
+    public boolean forkActivated(ValidatorActivatedFork fork) {
         return this.forkNumber != null && this.forkNumber >= fork.number;
     }
 
