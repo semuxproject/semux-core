@@ -164,18 +164,23 @@ public class TransactionExecutor {
                 break;
             }
             case UNVOTE: {
-                if (fee <= available && value <= locked) {
-                    if (ds.unvote(from, to, value)) {
+                if (available < fee) {
+                    result.setError(Error.INSUFFICIENT_AVAILABLE);
+                    break;
+                }
 
-                        as.adjustAvailable(from, value - fee);
-                        as.adjustLocked(from, -value);
-
-                        result.setSuccess(true);
-                    } else {
-                        result.setError(Error.FAILED);
-                    }
-                } else {
+                if (locked < value) {
                     result.setError(Error.INSUFFICIENT_LOCKED);
+                    break;
+                }
+
+                if (ds.unvote(from, to, value)) {
+                    as.adjustAvailable(from, value - fee);
+                    as.adjustLocked(from, -value);
+
+                    result.setSuccess(true);
+                } else {
+                    result.setError(Error.FAILED);
                 }
                 break;
             }

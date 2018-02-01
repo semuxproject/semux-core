@@ -10,6 +10,8 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.semux.core.TransactionResult.Error.INSUFFICIENT_AVAILABLE;
+import static org.semux.core.TransactionResult.Error.INSUFFICIENT_LOCKED;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -184,12 +186,13 @@ public class TransactionExecutorTest {
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(voter);
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isSuccess());
-
+        assertEquals(INSUFFICIENT_LOCKED, result.error);
         ds.vote(voter.toAddress(), delegate.toAddress(), value);
 
         // unvote (locked = 0)
         result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isSuccess());
+        assertEquals(INSUFFICIENT_LOCKED, result.error);
 
         as.adjustLocked(voter.toAddress(), value);
 
@@ -199,6 +202,31 @@ public class TransactionExecutorTest {
         assertEquals(available + value - fee, as.getAccount(voter.toAddress()).getAvailable());
         assertEquals(0, as.getAccount(voter.toAddress()).getLocked());
         assertEquals(0, ds.getDelegateByAddress(delegate.toAddress()).getVotes());
+    }
+
+    @Test
+    public void testUnvoteInsufficientFee() {
+        Key voter = new Key();
+        Key delegate = new Key();
+
+        as.adjustAvailable(voter.toAddress(), config.minTransactionFee() - 1);
+        ds.register(delegate.toAddress(), Bytes.of("delegate"));
+
+        TransactionType type = TransactionType.UNVOTE;
+        byte[] from = voter.toAddress();
+        byte[] to = delegate.toAddress();
+        long value = 100 * Unit.SEM;
+        long fee = config.minTransactionFee();
+        long nonce = as.getAccount(from).getNonce();
+        long timestamp = System.currentTimeMillis();
+        byte[] data = {};
+
+        // unvote (never voted before)
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(voter);
+
+        TransactionResult result = exec.execute(tx, as.track(), ds.track());
+        assertFalse(result.isSuccess());
+        assertEquals(INSUFFICIENT_AVAILABLE, result.error);
     }
 
     @Test
