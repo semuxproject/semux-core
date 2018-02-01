@@ -315,6 +315,7 @@ public class BlockchainImpl implements Blockchain {
             addTransactionToAccount(tx, block.getCoinbase());
 
             // [5] update validator statistics
+            // TODO: add a database migration to fix validator stats for previous versions
             List<String> validators = getValidators();
             String primary = config.getPrimaryValidator(validators, number, 0, uniformDistributionActivated);
             adjustValidatorStats(block.getCoinbase(), StatsType.FORGED, 1);
@@ -568,8 +569,8 @@ public class BlockchainImpl implements Blockchain {
 
         // TODO: Optimize the lookup of BlokchainImpl#forkActivated
         // The cost of this lookup is O(n * m) since it looks up previous m blocks for
-        // every call of addBlock prior to fork activation. This can probably be
-        // optimized using dynamic programming.
+        // every call of addBlock prior to fork activation. This could be optimized
+        // with dynamic programming.
         for (long i = from; i >= to; i--) {
             activatedBlocks += getBlockHeader(i).getDecodedData().forkActivated(fork) ? 1 : 0;
         }

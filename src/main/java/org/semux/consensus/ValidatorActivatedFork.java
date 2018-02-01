@@ -48,7 +48,7 @@ public class ValidatorActivatedFork {
      */
     public final long activationBlocksLookup;
 
-    public ValidatorActivatedFork(short number, String name, long activationBlocks, long activationBlocksLookup) {
+    private ValidatorActivatedFork(short number, String name, long activationBlocks, long activationBlocksLookup) {
         this.number = number;
         this.name = name;
         this.activationBlocks = activationBlocks;
