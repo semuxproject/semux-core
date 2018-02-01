@@ -10,18 +10,16 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -32,10 +30,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
-import org.apache.commons.lang3.StringUtils;
 import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
-import org.semux.crypto.Key;
 import org.semux.gui.Action;
 import org.semux.gui.AddressBookEntry;
 import org.semux.gui.SwingUtil;
@@ -58,10 +54,12 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
     public AddressBookDialog(JFrame parent, WalletModel model, Wallet wallet) {
         super(null, GuiMessages.get("AddressBook"), Dialog.ModalityType.MODELESS);
-        setName("AddressBookDialog");
+        this.setName("AddressBookDialog");
+
         this.model = model;
         this.wallet = wallet;
         this.model.addLockable(this);
+
         tableModel = new AddressTableModel();
         table = new JTable(tableModel);
         table.setBackground(Color.WHITE);
@@ -75,27 +73,12 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         // auto sort
         table.setAutoCreateRowSorter(true);
 
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent me) {
-                JTable sourceTable = (JTable) me.getSource();
-                Point p = me.getPoint();
-                int row = sourceTable.rowAtPoint(p);
-                if (me.getClickCount() == 2 && row != -1) {
-                    AddressBookEntry entry = tableModel.getRow(sourceTable.convertRowIndexToModel(row));
-                    if (entry != null) {
-                        AddressBookEntryChangeDialog dialog = new AddressBookEntryChangeDialog(parent, entry, wallet,
-                                model);
-                        dialog.setVisible(true);
-                    }
-                }
-            }
-        });
-
         JPanel panel = new JPanel();
         getContentPane().add(panel, BorderLayout.SOUTH);
         JButton btnNew = SwingUtil.createDefaultButton(GuiMessages.get("Add"), this, Action.ADD_ADDRESS);
         panel.add(btnNew);
+        JButton btnEdit = SwingUtil.createDefaultButton(GuiMessages.get("Edit"), this, Action.EDIT_ADDRESS);
+        panel.add(btnEdit);
         JButton btnCopy = SwingUtil.createDefaultButton(GuiMessages.get("Copy"), this, Action.COPY_ADDRESS);
         panel.add(btnCopy);
         JButton btnDelete = SwingUtil.createDefaultButton(GuiMessages.get("Delete"), this, Action.DELETE_ADDRESS);
@@ -186,30 +169,21 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         case REFRESH:
             refresh();
             break;
-        case ADD_ADDRESS:
-            String name = JOptionPane.showInputDialog(this, GuiMessages.get("Name"));
-            if (StringUtils.isEmpty(name)) {
-                JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidName"));
-            } else {
-                String address = JOptionPane.showInputDialog(this, GuiMessages.get("Address"));
-                if (StringUtils.isEmpty(address)) {
-                    JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidAddress"));
-                } else {
-                    try {
-                        byte[] addr = Hex.decode0x(address.trim());
-                        if (addr.length != Key.ADDRESS_LEN) {
-                            JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidAddress"));
-                        } else {
-                            wallet.setAddressAlias(addr, name.trim());
-                            wallet.flush();
-                            model.fireUpdateEvent();
-                        }
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidAddress"));
-                    }
-                }
-            }
+        case ADD_ADDRESS: {
+            AddressBookUpdateDialog dialog = new AddressBookUpdateDialog(this, Optional.empty(), wallet, model);
+            dialog.setVisible(true);
             break;
+        }
+        case EDIT_ADDRESS: {
+            AddressBookEntry entry = getSelectedEntry();
+            if (entry == null) {
+                JOptionPane.showMessageDialog(this, GuiMessages.get("SelectAddress"));
+                break;
+            }
+            AddressBookUpdateDialog dialog = new AddressBookUpdateDialog(this, Optional.of(entry), wallet, model);
+            dialog.setVisible(true);
+            break;
+        }
         case COPY_ADDRESS:
         case DELETE_ADDRESS:
             AddressBookEntry entry = getSelectedEntry();
@@ -234,7 +208,6 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         default:
             throw new UnreachableException();
         }
-
     }
 
     public void refresh() {
