@@ -319,9 +319,9 @@ public class SemuxBft implements Consensus {
         }
 
         logger.info("Entered propose: height = {}, view = {}, primary = {}, # connected validators = 1 + {}", height,
-                view, isPrimary(uniformDistributionActivated), activeValidators.size());
+                view, isPrimary(), activeValidators.size());
 
-        if (isPrimary(uniformDistributionActivated)) {
+        if (isPrimary()) {
             if (proposal == null) {
                 Block block = proposeBlock();
                 proposal = new Proposal(proof, block.getHeader(), block.getTransactions());
@@ -507,8 +507,7 @@ public class SemuxBft implements Consensus {
         if (p.getHeight() == height // at the same height
                 && (p.getView() == view && proposal == null && (state == State.NEW_HEIGHT || state == State.PROPOSE) // expecting
                         || p.getView() > view && state != State.COMMIT && state != State.FINALIZE) // larger view
-                && isPrimary(p.getHeight(), p.getView(), Hex.encode(p.getSignature().getAddress()),
-                        uniformDistributionActivated)) {
+                && isPrimary(p.getHeight(), p.getView(), Hex.encode(p.getSignature().getAddress()))) {
 
             // check proof-of-unlock
             if (p.getView() != 0) {
@@ -691,12 +690,10 @@ public class SemuxBft implements Consensus {
     /**
      * Check if this node is the primary validator for this view.
      *
-     * @param uniformDist
-     *
      * @return
      */
-    protected boolean isPrimary(boolean uniformDist) {
-        return isPrimary(height, view, coinbase.toAddressString(), uniformDist);
+    protected boolean isPrimary() {
+        return isPrimary(height, view, coinbase.toAddressString());
     }
 
     /**
@@ -709,11 +706,10 @@ public class SemuxBft implements Consensus {
      *            a specific view
      * @param peerId
      *            peer id
-     * @param uniformDist
      * @return
      */
-    protected boolean isPrimary(long height, int view, String peerId, boolean uniformDist) {
-        return config.getPrimaryValidator(validators, height, view, uniformDist).equals(peerId);
+    protected boolean isPrimary(long height, int view, String peerId) {
+        return config.getPrimaryValidator(validators, height, view, uniformDistributionActivated).equals(peerId);
     }
 
     /**
