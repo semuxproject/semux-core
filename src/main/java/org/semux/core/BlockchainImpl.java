@@ -547,6 +547,15 @@ public class BlockchainImpl implements Blockchain {
         }
     }
 
+    /**
+     * Checks if a fork is activated at a certain height of this blockchain.
+     *
+     * @param height
+     *            A blockchain height to check.
+     * @param fork
+     *            An instance of ${@link ValidatorActivatedFork} to check.
+     * @return
+     */
     @Override
     public boolean forkActivated(long height, ValidatorActivatedFork fork) {
         if (height <= 0) {
@@ -557,6 +566,10 @@ public class BlockchainImpl implements Blockchain {
         final long to = Math.max(from - fork.activationBlocksLookup + 1, 0);
         long activatedBlocks = 0;
 
+        // TODO: Optimize the lookup of BlokchainImpl#forkActivated
+        // The cost of this lookup is O(n * m) since it looks up previous m blocks for
+        // every call of addBlock prior to fork activation. This can probably be
+        // optimized using dynamic programming.
         for (long i = from; i >= to; i--) {
             activatedBlocks += getBlockHeader(i).getDecodedData().forkActivated(fork) ? 1 : 0;
         }
