@@ -61,12 +61,15 @@ public class BlockchainImpl implements Blockchain {
 
     private static final Logger logger = LoggerFactory.getLogger(BlockchainImpl.class);
 
+    protected static final int DATABASE_VERSION = 1;
+
     protected static final byte TYPE_LATEST_BLOCK_NUMBER = 0;
     protected static final byte TYPE_VALIDATORS = 1;
     protected static final byte TYPE_VALIDATOR_STATS = 2;
     protected static final byte TYPE_BLOCK_HASH = 3;
     protected static final byte TYPE_TRANSACTION_HASH = 4;
     protected static final byte TYPE_ACCOUNT_TRANSACTION = 5;
+    protected static final byte TYPE_DATABASE_VERSION = Integer.valueOf(999).byteValue();
 
     protected static final byte TYPE_BLOCK_HEADER = 0;
     protected static final byte TYPE_BLOCK_TRANSACTIONS = 1;
@@ -124,6 +127,9 @@ public class BlockchainImpl implements Blockchain {
 
             // add block
             addBlock(genesis);
+
+            // set database version
+            indexDB.put(getDatabaseVersionKey(), Bytes.of(DATABASE_VERSION));
         } else {
             latestBlock = getBlock(Bytes.toLong(number));
         }
@@ -490,6 +496,29 @@ public class BlockchainImpl implements Blockchain {
      */
     protected byte[] getNthTransactionIndexKey(byte[] address, int n) {
         return Bytes.merge(Bytes.of(TYPE_ACCOUNT_TRANSACTION), address, Bytes.of(n));
+    }
+
+    /**
+     * Returns the version of current database.
+     *
+     * @return
+     */
+    protected int getDatabaseVersion() {
+        byte[] versionBytes = indexDB.get(getDatabaseVersionKey());
+        if (versionBytes.length == 0) {
+            return 0;
+        } else {
+            return Bytes.toInt(versionBytes);
+        }
+    }
+
+    /**
+     * Returns the database key for #{@link #getDatabaseVersion}.
+     *
+     * @return
+     */
+    protected byte[] getDatabaseVersionKey() {
+        return Bytes.of(TYPE_DATABASE_VERSION);
     }
 
     /**
