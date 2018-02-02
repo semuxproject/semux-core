@@ -276,8 +276,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
             if (acc != null) {
                 BufferedImage bi = SwingUtil.createQrImage("semux://" + Hex.PREF + acc.getKey().toAddressString(),
-                        QR_SIZE,
-                        QR_SIZE);
+                        QR_SIZE, QR_SIZE);
                 qr.setIcon(new ImageIcon(bi));
             } else {
                 qr.setIcon(SwingUtil.emptyImage(QR_SIZE, QR_SIZE));
@@ -360,6 +359,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             if (ret == JOptionPane.OK_OPTION) {
                 Wallet wallet = kernel.getWallet();
                 wallet.removeAccount(acc.getKey());
+                wallet.removeAddressAlias(acc.getAddress());
                 wallet.flush();
 
                 // fire update event
