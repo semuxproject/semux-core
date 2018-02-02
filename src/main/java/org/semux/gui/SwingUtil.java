@@ -477,12 +477,11 @@ public class SwingUtil {
     public static String getTransactionDescription(SemuxGui gui, Transaction tx) {
         switch (tx.getType()) {
         case COINBASE:
-            return GuiMessages.get("BlockReward") + " => "
-                    + getDelegateName(gui, tx.getTo()).orElse(GuiMessages.get("UnknownDelegate"));
+            return GuiMessages.get("BlockReward") + " => " + describeAddress(gui, tx.getTo());
         case VOTE:
         case UNVOTE:
         case TRANSFER:
-            return getTransactionRecipientsDescription(gui, tx);
+            return describeAddress(gui, tx.getFrom()) + " => " + describeAddress(gui, tx.getTo());
         case DELEGATE:
             return GuiMessages.get("DelegateRegistration");
         default:
@@ -491,48 +490,25 @@ public class SwingUtil {
     }
 
     /**
-     * Returns the transaction description.
+     * Returns the alias, or delegate name, or abbreviation of an address.
      * 
      * @param gui
-     * @param tx
-     * @return description of transaction with one or multiple recipients
-     */
-    private static String getTransactionRecipientsDescription(SemuxGui gui, Transaction tx) {
-        return getAddressAlias(gui, tx.getFrom()).orElse(getAddressAbbr(tx.getFrom()))
-                + " => "
-                + getAddressAlias(gui, tx.getTo()).orElse(getAddressAbbr(tx.getTo()));
-    }
-
-    /**
-     * Returns the abbreviation of the given address.
-     * 
      * @param address
      * @return
      */
-    public static String getAddressAbbr(byte[] address) {
-        return Hex.PREF + Hex.encode(Arrays.copyOfRange(address, 0, 2)) + "..."
-                + Hex.encode(Arrays.copyOfRange(address, address.length - 2, address.length));
+    private static String describeAddress(SemuxGui gui, byte[] address) {
+        return getAddressAlias(gui, address)
+                .orElse(getAddressDelegateName(gui, address).orElse(getAddressAbbr(address)));
     }
 
     /**
-     * Returns the alias of an address. This method will search the address in the
-     * following places (in order):
-     * <ul>
-     * <li>The delegate name database</li>
-     * <li>Address aliases from the wallet model (not from the wallet itself because
-     * it may get locked)</li>
-     * </ul>
+     * Returns the alias of an address.
      * 
      * @param gui
      * @param address
      * @return
      */
     public static Optional<String> getAddressAlias(SemuxGui gui, byte[] address) {
-        Optional<String> name = getDelegateName(gui, address);
-        if (name.isPresent()) {
-            return name;
-        }
-
         WalletAccount account = gui.getModel().getAccount(address);
         if (account != null) {
             return account.getName();
@@ -547,10 +523,21 @@ public class SwingUtil {
      * @param address
      * @return
      */
-    public static Optional<String> getDelegateName(SemuxGui gui, byte[] address) {
+    public static Optional<String> getAddressDelegateName(SemuxGui gui, byte[] address) {
         DelegateState ds = gui.getKernel().getBlockchain().getDelegateState();
         Delegate d = ds.getDelegateByAddress(address);
 
         return d == null ? Optional.empty() : Optional.of(d.getNameString());
+    }
+
+    /**
+     * Returns the abbreviation of the given address.
+     * 
+     * @param address
+     * @return
+     */
+    public static String getAddressAbbr(byte[] address) {
+        return Hex.PREF + Hex.encode(Arrays.copyOfRange(address, 0, 2)) + "..."
+                + Hex.encode(Arrays.copyOfRange(address, address.length - 2, address.length));
     }
 }

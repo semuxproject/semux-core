@@ -200,7 +200,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
             case 0:
                 return SwingUtil.formatNumber(row);
             case 1:
-                return acc.getName().orElseGet(() -> "");
+                return acc.getName().orElse("");
             case 2:
                 return Hex.PREF + acc.getKey().toAddressString();
             case 3:
