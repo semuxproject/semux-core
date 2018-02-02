@@ -147,7 +147,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
                                 .addContainerGap(249, Short.MAX_VALUE))
                         .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE)
         );
-        groupLayout.linkSize(SwingConstants.HORIZONTAL, btnCopyAddress, buttonNewAccount, btnDeleteAddress);
+        groupLayout.linkSize(SwingConstants.HORIZONTAL, btnCopyAddress, btnRenameAddress, buttonNewAccount, btnDeleteAddress);
         setLayout(groupLayout);
         // @formatter:on
 
