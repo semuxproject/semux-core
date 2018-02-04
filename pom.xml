@@ -435,7 +435,7 @@
                                         <urn>commons-logging:commons-logging:1.2:jar:null:compile:4bfc12adfe4842bf07b657f0369c4cb522955686</urn>
                                         <urn>commons-validator:commons-validator:1.6:jar:null:compile:e989d1e87cdd60575df0765ed5bac65c905d7908</urn>
                                         <urn>dnsjava:dnsjava:2.1.8:jar:null:compile:eed8a2cbf56cc60d07a189a429ead3067564193c</urn>
-                                        <urn>io.netty:netty-all:4.1.13.Final:jar:null:compile:e1f2d1ee50626697d3ea73a11f1c7301e8589ef8</urn>
+                                        <urn>io.netty:netty-all:4.1.20.Final:jar:null:compile:441fe8e405d63c3bf3642006a34e3744e91c6d16</urn>
                                         <urn>io.swagger:swagger-annotations:1.5.17:jar:null:compile:1d8fcae3968a14b550e80fcebf5744da608902a0</urn>
                                         <urn>javax.ws.rs:javax.ws.rs-api:2.0:jar:null:compile:61f0983eb190954ccdede31e786a9e0bd9767c4a</urn>
                                         <urn>junit:junit:4.11:jar:null:test:4e031bb61df09069aeb2bffb4019e7a5034a4ee0</urn>
@@ -484,7 +484,7 @@
                                         <urn>org.powermock:powermock-module-junit4-common:1.7.3:jar:null:test:7287dd56b2b907a15aa2b6a0f1ddb2dd52cf388f</urn>
                                         <urn>org.powermock:powermock-module-junit4:1.7.3:jar:null:test:f25cd17a4d7acba1a591beaecd99fad844875cc6</urn>
                                         <urn>org.powermock:powermock-reflect:1.7.3:jar:null:test:f3d3c696a9977094c796dc8ffd174f828f3410e8</urn>
-                                        <urn>org.slf4j:slf4j-api:1.8.0-beta0:jar:null:compile:f90ef27de5a997d30c169cb706835e32d724ca96</urn>
+                                        <urn>org.slf4j:slf4j-api:1.8.0-beta1:jar:null:compile:5b73bc22c748b52670e573842f98f2c9fa81be15</urn>
                                         <urn>org.threeten:threetenbp:1.3.6:jar:null:compile:89dcc04a7e028c3c963413a71f950703cf51f057</urn>
                                         <urn>org.xerial.snappy:snappy-java:1.1.7.1:jar:null:compile:d5190b41f3de61e3b83d692322d58630252bc8c3</urn>
                                         <urn>pl.project13.maven:git-commit-id-plugin:2.2.4:maven-plugin:null:runtime:43a0dc1d02821c51847d587ecc4a6943086b884c</urn>
@@ -525,7 +525,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.8.0-beta0</version>
+            <version>1.8.0-beta1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -567,7 +567,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.13.Final</version>
+            <version>4.1.20.Final</version>
         </dependency>
 
         <!-- Snappy Java -->
