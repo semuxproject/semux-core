@@ -37,8 +37,6 @@ public enum Action {
 
     DELETE_ACCOUNT,
 
-    RENAME_ACCOUNT,
-
     VOTE,
 
     UNVOTE,

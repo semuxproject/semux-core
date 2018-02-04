@@ -39,6 +39,7 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.exception.LauncherException;
+import org.semux.gui.dialog.AddressBookDialog;
 import org.semux.gui.dialog.InputDialog;
 import org.semux.gui.dialog.SelectDialog;
 import org.semux.gui.model.WalletAccount;
@@ -65,6 +66,8 @@ public class SemuxGui extends Launcher {
 
     protected WalletModel model;
     protected Kernel kernel;
+
+    protected AddressBookDialog addressBookDialog;
 
     protected boolean isRunning;
     protected JFrame main;
@@ -135,6 +138,15 @@ public class SemuxGui extends Launcher {
      */
     public WalletModel getModel() {
         return model;
+    }
+
+    /**
+     * Returns the address book dialog.
+     * 
+     * @return
+     */
+    public AddressBookDialog getAddressBookDialog() {
+        return addressBookDialog;
     }
 
     /**
@@ -259,6 +271,11 @@ public class SemuxGui extends Launcher {
         EventQueue.invokeLater(() -> {
             main = new MainFrame(this);
             main.setVisible(true);
+
+            addressBookDialog = new AddressBookDialog(main, model, kernel.getWallet());
+            model.addListener((ev) -> {
+                addressBookDialog.refresh();
+            });
         });
 
         // start data refresh

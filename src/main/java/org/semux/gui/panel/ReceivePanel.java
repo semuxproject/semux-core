@@ -60,8 +60,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
     private static final int QR_SIZE = 200;
 
+    private transient SemuxGui gui;
     private transient WalletModel model;
-
     private transient Kernel kernel;
 
     private JTable table;
@@ -69,10 +69,11 @@ public class ReceivePanel extends JPanel implements ActionListener {
     private JLabel qr;
 
     public ReceivePanel(SemuxGui gui) {
+        this.gui = gui;
         this.model = gui.getModel();
-        this.model.addListener(this);
-
         this.kernel = gui.getKernel();
+
+        this.model.addListener(this);
 
         tableModel = new ReceiveTableModel();
         table = new JTable(tableModel);
@@ -110,13 +111,13 @@ public class ReceivePanel extends JPanel implements ActionListener {
                 .createDefaultButton(GuiMessages.get("NewAccount"), this, Action.NEW_ACCOUNT);
         buttonNewAccount.setName("buttonNewAccount");
 
-        JButton btnRenameAddress = SwingUtil
-                .createDefaultButton(GuiMessages.get("RenameAccount"), this, Action.RENAME_ACCOUNT);
-        btnRenameAddress.setName("btnRenameAddress");
-
         JButton btnDeleteAddress = SwingUtil
                 .createDefaultButton(GuiMessages.get("DeleteAccount"), this, Action.DELETE_ACCOUNT);
         btnDeleteAddress.setName("btnDeleteAddress");
+
+        JButton btnAddressBook = SwingUtil
+                .createDefaultButton(GuiMessages.get("AddressBook"), this, Action.SHOW_ADDRESS_BOOK);
+        btnAddressBook.setName("btnAddressBook");
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -126,11 +127,11 @@ public class ReceivePanel extends JPanel implements ActionListener {
                     .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 505, Short.MAX_VALUE)
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                        .addComponent(buttonNewAccount, GroupLayout.PREFERRED_SIZE, 121, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnAddressBook, GroupLayout.PREFERRED_SIZE, 121, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnDeleteAddress)
+                        .addComponent(buttonNewAccount)
                         .addComponent(btnCopyAddress)
-                        .addComponent(btnRenameAddress)
-                        .addComponent(qr)
-                        .addComponent(btnDeleteAddress)))
+                        .addComponent(qr)))
         );
         groupLayout.setVerticalGroup(
                 groupLayout.createParallelGroup(Alignment.LEADING)
@@ -139,15 +140,15 @@ public class ReceivePanel extends JPanel implements ActionListener {
                                 .addGap(18)
                                 .addComponent(btnCopyAddress)
                                 .addGap(18)
-                                .addComponent(btnRenameAddress)
-                                .addGap(18)
                                 .addComponent(buttonNewAccount)
                                 .addGap(18)
                                 .addComponent(btnDeleteAddress)
+                                .addGap(18)
+                                .addComponent(btnAddressBook)
                                 .addContainerGap(249, Short.MAX_VALUE))
                         .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE)
         );
-        groupLayout.linkSize(SwingConstants.HORIZONTAL, btnCopyAddress, btnRenameAddress, buttonNewAccount, btnDeleteAddress);
+        groupLayout.linkSize(SwingConstants.HORIZONTAL, btnCopyAddress, btnAddressBook, buttonNewAccount, btnDeleteAddress);
         setLayout(groupLayout);
         // @formatter:on
 
@@ -233,8 +234,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
         case DELETE_ACCOUNT:
             deleteAccount();
             break;
-        case RENAME_ACCOUNT:
-            renameAccount();
+        case SHOW_ADDRESS_BOOK:
+            showAddressBook();
             break;
         default:
             throw new UnreachableException();
@@ -306,21 +307,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
     /**
      * Process the RENAME_ACCOUNT event
      */
-    private void renameAccount() {
-        WalletAccount acc = getSelectedAccount();
-        if (acc == null) {
-            JOptionPane.showMessageDialog(this, GuiMessages.get("SelectAccount"));
-        } else {
-            String name = JOptionPane.showInputDialog(this, GuiMessages.get("Name"), GuiMessages.get("RenameAccount"),
-                    JOptionPane.QUESTION_MESSAGE);
-            if (name != null) {
-                Wallet wallet = kernel.getWallet();
-                wallet.setAddressAlias(acc.getKey().toAddress(), name);
-                wallet.flush();
-                // fire update event
-                model.fireUpdateEvent();
-            }
-        }
+    protected void showAddressBook() {
+        gui.getAddressBookDialog().setVisible(true);
     }
 
     /**
@@ -359,7 +347,6 @@ public class ReceivePanel extends JPanel implements ActionListener {
             if (ret == JOptionPane.OK_OPTION) {
                 Wallet wallet = kernel.getWallet();
                 wallet.removeAccount(acc.getKey());
-                wallet.removeAddressAlias(acc.getAddress());
                 wallet.flush();
 
                 // fire update event
