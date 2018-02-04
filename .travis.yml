@@ -12,10 +12,17 @@ matrix:
       after_success:
         - mvn coveralls:report
 
-    # Linux tests
+    # Linux tests (java 8)
     - os: linux
       sudo: false
       jdk: oraclejdk8
+      script:
+        - mvn test
+
+    # Linux tests (java 9)
+    - os: linux
+      sudo: false
+      jdk: oraclejdk9
       script:
         - mvn test
 
