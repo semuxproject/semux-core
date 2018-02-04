@@ -88,6 +88,13 @@
                         </apiSource>
                     </apiSources>
                 </configuration>
+                <dependencies>
+                  <dependency>
+                      <groupId>javax.xml.bind</groupId>
+                      <artifactId>jaxb-api</artifactId>
+                      <version>2.3.0</version>
+                  </dependency>
+                </dependencies>
             </plugin>
 
             <!-- build fat jar -->
@@ -407,6 +414,8 @@
                             <goal>enforce</goal>
                         </goals>
                         <configuration>
+                            <!-- It takes too long to verify the dependecies; do NOT skip when releasing -->
+                            <skip>true</skip>
                             <rules>
                                 <DependencyConvergence />
                                 <digestRule implementation="uk.co.froot.maven.enforcer.DigestRule">

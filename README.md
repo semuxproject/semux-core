@@ -26,7 +26,7 @@ More info can be found at our [Wiki page](https://github.com/semuxproject/semux/
 
 Prerequisites:
 ```
-Java SE Development Kit 8
+Java SE Development Kit 8/9
 Apache Maven 3.5.2
 ```
 
