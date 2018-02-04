@@ -16,25 +16,31 @@ More info can be found at our [Wiki page](https://github.com/semuxproject/semux/
 
 ## Get started
 
-1. Download and install [Java SE Runtime Environment 9](http://www.oracle.com/technetwork/java/javase/downloads/jre9-downloads-3848532.html).
-2. Download the [Latest Release](https://github.com/semuxproject/semux/releases) and unpack it to a desired directory.
-3. Run ``semux.exe`` if you're on Windows; run ``./semux-gui.sh`` or ``./semux-cli.sh`` if you're on Linux or macOS. Be sure that your system date and time is synchronized.
-4. *(Windows user) You may also need to install Microsoft Visual C++ 2010 Redistributable Package.*
-    - [32-bit](http://www.microsoft.com/en-us/download/details.aspx?id=5555)
-    - [64-bit](https://www.microsoft.com/en-us/download/details.aspx?id=14632)
+1. Download and install [Java SE Runtime Environment 9](http://www.oracle.com/technetwork/java/javase/downloads/jre9-downloads-3848532.html)
+2. *(Windows user) Download and install Microsoft Visual C++ 2010 Redistributable Package [32-bit](http://www.microsoft.com/en-us/download/details.aspx?id=5555) or [64-bit](https://www.microsoft.com/en-us/download/details.aspx?id=14632)*
+3. Download the [Latest Release](https://github.com/semuxproject/semux/releases) and unpack it to a desired directory.
+4. Run ``semux.exe`` if you're on Windows; run ``./semux-gui.sh`` or ``./semux-cli.sh`` if you're on Linux or macOS.
 
 
 ## Build from source
 
+Prerequisites:
+```
+Java SE Development Kit 8
+Apache Maven 3.5.2
+```
+
+Build:
 ```
 git clone https://github.com/semuxproject/semux
 cd semux
-mvn install
-
-# run
-./dist/linux/semux-cli.sh
+mvn install -DskipTests
 ```
 
+Run:
+```
+./dist/linux/semux-cli.sh
+```
 
 ## Contribute
 
