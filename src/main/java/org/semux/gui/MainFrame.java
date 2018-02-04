@@ -258,7 +258,6 @@ public class MainFrame extends JFrame implements ActionListener {
      */
     protected JButton createButton(String name, String icon, Action action) {
         JButton btn = new JButton(name);
-        btn.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
         btn.setActionCommand(action.name());
         btn.addActionListener(this);
         btn.setIcon(SwingUtil.loadImage(icon, 36, 36));
