@@ -120,6 +120,11 @@ public abstract class AbstractConfig implements Config {
     protected String uiUnit = "SEM";
     protected int uiFractionDigits = 9;
 
+    // =========================
+    // Forks
+    // =========================
+    protected boolean forkUniformDistributionEnabled = true;
+
     /**
      * Create an {@link AbstractConfig} instance.
      *
@@ -431,6 +436,11 @@ public abstract class AbstractConfig implements Config {
     @Override
     public int uiFractionDigits() {
         return uiFractionDigits;
+    }
+
+    @Override
+    public boolean forkUniformDistributionEnabled() {
+        return forkUniformDistributionEnabled;
     }
 
     protected void init() {

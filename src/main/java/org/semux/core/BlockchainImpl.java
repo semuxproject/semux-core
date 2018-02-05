@@ -347,7 +347,7 @@ public class BlockchainImpl implements Blockchain {
     }
 
     private void activateForks(long number) {
-        if (!uniformDistributionActivated) {
+        if (config.forkUniformDistributionEnabled() && !uniformDistributionActivated) {
             uniformDistributionActivated = forkActivated(number, ValidatorActivatedFork.UNIFORM_DISTRIBUTION);
             if (uniformDistributionActivated) {
                 logger.info("Fork UNIFORM_DISTRIBUTION activated at block {}", number);

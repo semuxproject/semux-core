@@ -407,4 +407,15 @@ public interface Config {
      * @return
      */
     int uiFractionDigits();
+
+    // =========================
+    // Forks
+    // =========================
+
+    /**
+     * Returns whether UNIFORM_DISTRIBUTION fork is enabled.
+     *
+     * @return
+     */
+    boolean forkUniformDistributionEnabled();
 }

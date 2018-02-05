@@ -664,7 +664,7 @@ public class SemuxBft implements Consensus {
     }
 
     protected void activateForks() {
-        if (!uniformDistributionActivated) {
+        if (config.forkUniformDistributionEnabled() && !uniformDistributionActivated) {
             uniformDistributionActivated = chain.forkActivated(height, ValidatorActivatedFork.UNIFORM_DISTRIBUTION);
             if (uniformDistributionActivated) {
                 logger.info("Fork UNIFORM_DISTRIBUTION activated at height {}", height);
@@ -769,7 +769,9 @@ public class SemuxBft implements Consensus {
         long number = height;
         byte[] prevHash = chain.getBlockHeader(height - 1).getHash();
         long timestamp = System.currentTimeMillis();
-        byte[] data = new BlockHeaderData(ValidatorActivatedFork.UNIFORM_DISTRIBUTION.number).toBytes();
+        byte[] data = config.forkUniformDistributionEnabled()
+                ? new BlockHeaderData(ValidatorActivatedFork.UNIFORM_DISTRIBUTION.number).toBytes()
+                : new byte[0];
 
         BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,
                 resultsRoot, stateRoot, data);
