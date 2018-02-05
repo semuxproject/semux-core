@@ -36,8 +36,8 @@ public class BlockHeaderData {
     }
 
     public byte[] toBytes() {
-        if (this == EMPTY_DATA || forkNumber == null) {
-            return new byte[] {};
+        if (equals(EMPTY_DATA) || forkNumber == null) {
+            return new SimpleEncoder().toBytes();
         } else {
             SimpleEncoder simpleEncoder = new SimpleEncoder();
             simpleEncoder.writeShort(forkNumber);

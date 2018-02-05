@@ -26,6 +26,7 @@ import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
+import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.BlockchainImpl.StatsType;
 import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDbRule;
@@ -181,7 +182,8 @@ public class BlockchainImplTest {
     public void testGetCoinbaseTransactionBlockNumber() {
         for (int i = 1; i <= 10; i++) {
             byte[] coinbase = new Key().toAddress();
-            Block newBlock = createBlock(i, coinbase, Collections.emptyList(), Collections.emptyList());
+            Block newBlock = createBlock(i, coinbase, Bytes.EMPTY_BYTES, Collections.emptyList(),
+                    Collections.emptyList());
             chain.addBlock(newBlock);
             List<Transaction> transactions = chain.getTransactions(coinbase, 0, 1);
             assertEquals(1, transactions.size());
@@ -278,20 +280,36 @@ public class BlockchainImplTest {
         assertEquals(2, chain.getValidatorStats(address).getTurnsMissed());
     }
 
+    @Test
+    public void testForkActivated() {
+        ValidatorActivatedFork fork = ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
+        for (int i = 1; i <= fork.activationBlocksLookup; i++) {
+            chain.addBlock(createBlock(i, coinbase, new BlockHeaderData(fork.number).toBytes(),
+                    Collections.singletonList(tx), Collections.singletonList(res)));
+        }
+
+        for (long i = 0; i <= fork.activationBlocks; i++) {
+            assertFalse(chain.forkActivated(i, ValidatorActivatedFork.UNIFORM_DISTRIBUTION));
+        }
+
+        for (long i = fork.activationBlocks + 1; i <= fork.activationBlocksLookup; i++) {
+            assertTrue(chain.forkActivated(i, ValidatorActivatedFork.UNIFORM_DISTRIBUTION));
+        }
+    }
+
     private Block createBlock(long number) {
         return createBlock(number, Collections.singletonList(tx), Collections.singletonList(res));
     }
 
     private Block createBlock(long number, List<Transaction> transactions, List<TransactionResult> results) {
-        return createBlock(number, coinbase, transactions, results);
+        return createBlock(number, coinbase, Bytes.of("test"), transactions, results);
     }
 
-    private Block createBlock(long number, byte[] coinbase, List<Transaction> transactions,
+    private Block createBlock(long number, byte[] coinbase, byte[] data, List<Transaction> transactions,
             List<TransactionResult> results) {
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
         byte[] stateRoot = Bytes.EMPTY_HASH;
-        byte[] data = Bytes.of("test");
         long timestamp = System.currentTimeMillis();
 
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,

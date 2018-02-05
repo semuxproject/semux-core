@@ -14,11 +14,11 @@ package org.semux.consensus;
 public class ValidatorActivatedFork {
 
     /**
-     * This soft fork introduces a uniformly-distributed hash function for choosing
+     * This soft fork introduces an uniformly-distributed hash function for choosing
      * primary validator. See: https://github.com/semuxproject/semux/issues/620
      */
     public static final ValidatorActivatedFork UNIFORM_DISTRIBUTION = new ValidatorActivatedFork((short) 1,
-            "UNIFORM_DISTRIBUTION", 2736, 2880);
+            "UNIFORM_DISTRIBUTION", 1900, 2000);
 
     /**
      * ${@link SemuxBft} will lookup for the
