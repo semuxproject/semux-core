@@ -67,6 +67,8 @@ public class SyncingTest {
     private KernelMock kernel3; // seed node
     private KernelMock kernel4; // normal node
 
+    Set<Node> nodes = new HashSet<>();
+
     @Before
     public void setUp() throws Exception {
         // prepare kernels
@@ -79,16 +81,7 @@ public class SyncingTest {
         kernel3 = kernelRule3.getKernel();
         kernel4 = kernelRule4.getKernel();
 
-        // mock genesis.json
-        Genesis genesis = mockGenesis();
-        mockStatic(Genesis.class);
-        when(Genesis.load(any())).thenReturn(genesis);
-
-        // mock seed nodes
-        Set<Node> nodes = new HashSet<>();
-        nodes.add(new Node(kernel1.getConfig().p2pListenIp(), kernel1.getConfig().p2pListenPort()));
-        nodes.add(new Node(kernel2.getConfig().p2pListenIp(), kernel2.getConfig().p2pListenPort()));
-        nodes.add(new Node(kernel3.getConfig().p2pListenIp(), kernel3.getConfig().p2pListenPort()));
+        beforeStart();
 
         // start kernels
         kernel1.start();
@@ -116,6 +109,18 @@ public class SyncingTest {
                 && kernel3.state() == State.RUNNING
                 && kernel4.state() == State.RUNNING
                 && kernel4.getChannelManager().getActivePeers().size() >= 3);
+    }
+
+    protected void beforeStart() {
+        // mock genesis.json
+        Genesis genesis = mockGenesis();
+        mockStatic(Genesis.class);
+        when(Genesis.load(any())).thenReturn(genesis);
+
+        // mock seed nodes
+        nodes.add(new Node(kernel1.getConfig().p2pListenIp(), kernel1.getConfig().p2pListenPort()));
+        nodes.add(new Node(kernel2.getConfig().p2pListenIp(), kernel2.getConfig().p2pListenPort()));
+        nodes.add(new Node(kernel3.getConfig().p2pListenIp(), kernel3.getConfig().p2pListenPort()));
     }
 
     @After
@@ -152,7 +157,7 @@ public class SyncingTest {
         }
     }
 
-    private Genesis mockGenesis() {
+    protected Genesis mockGenesis() {
         // mock premine
         List<Genesis.Premine> premines = new ArrayList<>();
         premines.add(new Genesis.Premine(kernel4.getCoinbase().toAddress(), PREMINE, ""));

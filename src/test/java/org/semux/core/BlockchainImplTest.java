@@ -22,6 +22,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.powermock.reflect.Whitebox;
 import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
@@ -295,6 +296,16 @@ public class BlockchainImplTest {
         for (long i = fork.activationBlocks + 1; i <= fork.activationBlocksLookup; i++) {
             assertTrue(chain.forkActivated(i, ValidatorActivatedFork.UNIFORM_DISTRIBUTION));
         }
+    }
+
+    @Test
+    public void testForkCompatibility() {
+        ValidatorActivatedFork fork = ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
+        Block block = createBlock(1, coinbase, new BlockHeaderData(fork.number).toBytes(),
+                Collections.singletonList(tx), Collections.singletonList(res));
+        Whitebox.setInternalState(config, "forkUniformDistributionEnabled", false);
+        chain = new BlockchainImpl(config, temporaryDBFactory);
+        chain.addBlock(block);
     }
 
     private Block createBlock(long number) {
