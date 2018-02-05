@@ -69,6 +69,10 @@ public class SyncingTest {
 
     Set<Node> nodes = new HashSet<>();
 
+    protected int targetHeight() {
+        return 2;
+    }
+
     @Before
     public void setUp() throws Exception {
         // prepare kernels
@@ -134,18 +138,16 @@ public class SyncingTest {
 
     @Test
     public void testSync() throws IOException {
-        int n = 2;
-
         // validators has forged the n-th block
-        await().atMost(60, SECONDS).until(() -> kernel1.getBlockchain().getLatestBlockNumber() >= n
-                && kernel2.getBlockchain().getLatestBlockNumber() >= n
-                && kernel3.getBlockchain().getLatestBlockNumber() >= n);
+        await().atMost(60, SECONDS).until(() -> kernel1.getBlockchain().getLatestBlockNumber() >= targetHeight()
+                && kernel2.getBlockchain().getLatestBlockNumber() >= targetHeight()
+                && kernel3.getBlockchain().getLatestBlockNumber() >= targetHeight());
 
         // normal node can sync to the same height
-        await().atMost(20, SECONDS).until(() -> kernel4.getBlockchain().getLatestBlockNumber() >= n);
+        await().atMost(20, SECONDS).until(() -> kernel4.getBlockchain().getLatestBlockNumber() >= targetHeight());
 
         // check block and votes
-        for (int i = 1; i <= n; i++) {
+        for (int i = 1; i <= targetHeight(); i++) {
             Block block = kernel4.getBlockchain().getBlock(i);
             Block previousBlock = kernel4.getBlockchain().getBlock(i - 1);
             assertTrue(Block.validateHeader(previousBlock.getHeader(), block.getHeader()));

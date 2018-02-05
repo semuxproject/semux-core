@@ -21,12 +21,19 @@ import org.semux.net.NodeManager;
 
 /**
  * The test ensures that a client that disabled the fork can still accept blocks
- * from validators who activated the forkm.
+ * from validators who activated the fork.
  */
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class, ValidatorActivatedFork.class })
-public class UniformDistributionForkCompatibilityTest extends SyncingTest {
+public class UniformDistributionForkSyncingCompatibilityTest extends SyncingTest {
+
+    @Override
+    protected int targetHeight() {
+        // it needs more blocks to cover the cases that validators disagree with each
+        // other
+        return 5;
+    }
 
     @Override
     public void beforeStart() {
@@ -40,9 +47,14 @@ public class UniformDistributionForkCompatibilityTest extends SyncingTest {
         setInternalState(fork, "activationBlocksLookup", 0);
         setInternalState(ValidatorActivatedFork.class, "UNIFORM_DISTRIBUTION", fork);
 
-        // disable the fork on kernel4
-        Config config = kernelRule4.getKernel().getConfig();
-        setInternalState(config, "forkUniformDistributionEnabled", false);
-        kernelRule4.getKernel().setConfig(config);
+        // disable the fork on kernel3 (validator)
+        Config config3 = kernelRule3.getKernel().getConfig();
+        setInternalState(config3, "forkUniformDistributionEnabled", false);
+        kernelRule3.getKernel().setConfig(config3);
+
+        // disable the fork on kernel4 (client)
+        Config config4 = kernelRule4.getKernel().getConfig();
+        setInternalState(config4, "forkUniformDistributionEnabled", false);
+        kernelRule4.getKernel().setConfig(config4);
     }
 }
