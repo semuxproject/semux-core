@@ -47,7 +47,7 @@ public class SystemUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemUtil.class);
 
-    public static final Scanner SCANNER = new Scanner(System.in);
+    public static final Scanner scanner = new Scanner(System.in);
 
     public enum OsName {
         WINDOWS("Windows"),
@@ -167,7 +167,7 @@ public class SystemUtil {
             System.out.flush();
         }
 
-        return SCANNER.nextLine();
+        return scanner.nextLine();
     }
 
     /**
@@ -186,7 +186,7 @@ public class SystemUtil {
                 System.out.flush();
             }
 
-            return SCANNER.nextLine();
+            return scanner.nextLine();
         }
 
         return new String(console.readPassword(prompt));
