@@ -11,7 +11,7 @@ package org.semux.consensus;
  * Activated Soft Fork (MASF) in Bitcoin. See:
  * https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki
  */
-public class ValidatorActivatedFork {
+public final class ValidatorActivatedFork {
 
     /**
      * This soft fork introduces an uniformly-distributed hash function for choosing

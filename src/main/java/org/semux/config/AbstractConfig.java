@@ -168,7 +168,7 @@ public abstract class AbstractConfig implements Config {
 
     @Override
     public String getPrimaryValidator(List<String> validators, long height, int view, boolean uniformDist) {
-        // TODO: add a checkpoint once UNIFORM_DISTRIBUTION is fully activated on the mainnet
+        // TODO: add a checkpoint once UNIFORM_DISTRIBUTION is fully activated
         if (uniformDist) {
             long seed = new BigInteger(Bytes.merge(Bytes.of(height), Bytes.of(view))).longValue();
             return validators.get(deterministicRandom(seed, validators.size()));

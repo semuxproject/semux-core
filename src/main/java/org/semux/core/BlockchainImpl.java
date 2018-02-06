@@ -8,7 +8,9 @@ package org.semux.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -93,6 +95,7 @@ public class BlockchainImpl implements Blockchain {
 
     private final List<BlockchainListener> listeners = new ArrayList<>();
 
+    private Map<ValidatorActivatedFork, ForkActivationMemory> forkActivationMemoryMap = new HashMap<>();
     private boolean uniformDistributionActivated = false;
 
     /**
@@ -346,10 +349,10 @@ public class BlockchainImpl implements Blockchain {
         }
     }
 
-    private void activateForks(long number) {
+    private synchronized void activateForks(long number) {
         if (config.forkUniformDistributionEnabled() && !uniformDistributionActivated) {
-            uniformDistributionActivated = forkActivated(number, ValidatorActivatedFork.UNIFORM_DISTRIBUTION);
-            if (uniformDistributionActivated) {
+            if (forkActivated(number, ValidatorActivatedFork.UNIFORM_DISTRIBUTION)) {
+                uniformDistributionActivated = true;
                 logger.info("Fork UNIFORM_DISTRIBUTION activated at block {}", number);
             }
         }
@@ -587,28 +590,81 @@ public class BlockchainImpl implements Blockchain {
      * @return
      */
     @Override
-    public boolean forkActivated(long height, ValidatorActivatedFork fork) {
+    public synchronized boolean forkActivated(long height, ValidatorActivatedFork fork) {
         if (height <= 0) {
             return false;
         }
 
-        final long from = height - 1;
-        final long to = Math.max(from - fork.activationBlocksLookup + 1, 0);
+        // sets boundaries:
+        // lookup from (height - 1)
+        // to (height - fork.activationBlocksLookup)
+        final long higherBound = height - 1;
+        final long lowerBound = Math.min(Math.max(height - fork.activationBlocksLookup, 0), higherBound);
         long activatedBlocks = 0;
 
-        // TODO: Optimize the lookup of BlokchainImpl#forkActivated
-        // The cost of this lookup is O(n * m) since it looks up previous m blocks for
-        // every call of addBlock prior to fork activation. This could be optimized
-        // with dynamic programming.
-        for (long i = from; i >= to; i--) {
-            activatedBlocks += getBlockHeader(i).getDecodedData().forkActivated(fork) ? 1 : 0;
+        // O(1) dynamic-programming lookup, see the definition of ForkActivationMemory
+        ForkActivationMemory forkActivationMemory = forkActivationMemoryMap.get(fork);
+        if (forkActivationMemory != null && forkActivationMemory.height == height - 1) {
+            activatedBlocks = forkActivationMemory.activatedBlocks -
+                    (forkActivationMemory.lowerBoundActivated && lowerBound > 0 ? 1 : 0) +
+                    (getBlockHeader(higherBound).getDecodedData().forkActivated(fork) ? 1 : 0);
+        } else {
+            // O(m) traversal lookup
+            for (long i = higherBound; i >= lowerBound; i--) {
+                activatedBlocks += getBlockHeader(i).getDecodedData().forkActivated(fork) ? 1 : 0;
+            }
         }
 
+        // memorizes
+        forkActivationMemoryMap.put(fork, new ForkActivationMemory(
+                height,
+                getBlockHeader(lowerBound).getDecodedData().forkActivated(fork),
+                activatedBlocks));
+
+        // returns
+        boolean activated = activatedBlocks >= fork.activationBlocks;
         if (activatedBlocks > 0) {
-            logger.debug("Fork activation of {}: {} / {} in the past {} blocks", fork.name, activatedBlocks,
-                    fork.activationBlocks, fork.activationBlocksLookup);
+            logger.debug("Fork activation of {}: {} / {} (activated = {}) in the past {} blocks", fork.name,
+                    activatedBlocks,
+                    fork.activationBlocks, activated, fork.activationBlocksLookup);
         }
 
-        return activatedBlocks >= fork.activationBlocks;
+        return activated;
+    }
+
+    /**
+     * <code>
+     * ForkActivationMemory[height].lowerBoundActivated =
+     *      forkActivated(height - ${@link ValidatorActivatedFork#activationBlocksLookup})
+     *
+     * ForkActivationMemory[height].activatedBlocks =
+     *      ForkActivationMemory[height - 1].activatedBlocks -
+     *      ForkActivationMemory[height - 1].lowerBoundActivated ? 1 : 0 +
+     *      forkActivated(height - 1) ? 1 : 0
+     * </code>
+     */
+    private class ForkActivationMemory {
+
+        /**
+         * Memorized height.
+         */
+        public final long height;
+
+        /**
+         * Whether the fork is activated at height
+         * <code>({@link this#height} -{@link ValidatorActivatedFork#activationBlocksLookup})</code>.
+         */
+        public final boolean lowerBoundActivated;
+
+        /**
+         * The number of activated blocks at the memorized height.
+         */
+        public final long activatedBlocks;
+
+        public ForkActivationMemory(long height, boolean lowerBoundActivated, long activatedBlocks) {
+            this.height = height;
+            this.lowerBoundActivated = lowerBoundActivated;
+            this.activatedBlocks = activatedBlocks;
+        }
     }
 }
