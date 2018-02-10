@@ -61,7 +61,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class })
-@PowerMockIgnore("jdk.internal.*")
+@PowerMockIgnore({ "jdk.internal.*", "javax.management.*" })
 public class TransactTest {
 
     private static Logger logger = LoggerFactory.getLogger(TransactTest.class);

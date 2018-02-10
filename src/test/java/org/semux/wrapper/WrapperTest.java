@@ -36,7 +36,7 @@ import org.semux.util.SystemUtil.OsName;
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(Parameterized.class)
 @PrepareForTest({ ProcessBuilder.class, Process.class, Wrapper.class, SystemUtil.class })
-@PowerMockIgnore("jdk.internal.*")
+@PowerMockIgnore({ "jdk.internal.*", "javax.management.*" })
 public class WrapperTest {
 
     @Parameterized.Parameters

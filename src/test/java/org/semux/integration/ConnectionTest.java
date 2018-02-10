@@ -51,7 +51,7 @@ import org.semux.rules.KernelRule;
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class })
-@PowerMockIgnore("jdk.internal.*")
+@PowerMockIgnore({ "jdk.internal.*", "javax.management.*" })
 public class ConnectionTest {
 
     @Rule

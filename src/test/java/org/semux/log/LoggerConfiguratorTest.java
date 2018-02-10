@@ -10,7 +10,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.spy;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,21 +27,19 @@ import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.config.Constants;
+import org.semux.util.SystemUtil;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({ "jdk.internal.*", "javax.management.*", "com.sun.*", "javax.xml.*", "org.xml.sax.*",
         "org.w3c.dom.*" })
+@PrepareForTest({ LoggerConfigurator.class, SystemUtil.class })
 public class LoggerConfiguratorTest {
-
-    @Rule
-    public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
     @Rule
     public final SystemErrRule systemErrRule = new SystemErrRule().enableLog();
@@ -56,8 +56,9 @@ public class LoggerConfiguratorTest {
     }
 
     @Test
-    @PrepareForTest(LoggerConfigurator.class)
     public void testConfigureFactoryDefault() {
+        mockStatic(SystemUtil.class);
+
         // when the user-defined config file doesn't exit
         spy(LoggerConfigurator.class);
         File nonExistFile = mock(File.class);
@@ -73,8 +74,9 @@ public class LoggerConfiguratorTest {
     }
 
     @Test
-    @PrepareForTest(LoggerConfigurator.class)
     public void testConfigureUserDefined() throws IOException {
+        mockStatic(SystemUtil.class);
+
         // mock user-defined config file configured as DEBUG
         String usedDefinedConfig = getFactoryDefaultConfig().replace("INFO", "ERROR");
         mockConfigFile(usedDefinedConfig);
@@ -89,14 +91,15 @@ public class LoggerConfiguratorTest {
     }
 
     @Test
-    @PrepareForTest(LoggerConfigurator.class)
     public void testConfigureUserDefinedError() throws IOException {
+        mockStatic(SystemUtil.class);
+
         // mock invalid config file
         mockConfigFile("I am not a XML file");
         spy(LoggerConfigurator.class);
         when(LoggerConfigurator.getConfigurationFile(dataDir)).thenReturn(mockConfigFile);
 
-        exit.expectSystemExitWithStatus(1);
+        verifyStatic(SystemUtil.class);
         systemErrRule.enableLog();
 
         // execution

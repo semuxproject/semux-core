@@ -64,7 +64,7 @@ import net.i2p.crypto.eddsa.KeyPairGenerator;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ SystemUtil.class, Kernel.class, SemuxCli.class })
-@PowerMockIgnore("jdk.internal.*")
+@PowerMockIgnore({ "jdk.internal.*", "javax.management.*" })
 public class SemuxCliTest {
 
     @Rule
