@@ -8,7 +8,7 @@ package org.semux.gui.dialog;
 
 import org.semux.KernelMock;
 import org.semux.gui.BaseTestApplication;
-import org.semux.gui.SemuxGUI;
+import org.semux.gui.SemuxGui;
 import org.semux.gui.model.WalletModel;
 
 /**
@@ -17,13 +17,13 @@ public class ConsoleDialogTestApplication extends BaseTestApplication {
 
     private static final long serialVersionUID = 1L;
 
-    SemuxGUI gui;
+    SemuxGui gui;
 
     ConsoleDialog consoleDialog;
 
     ConsoleDialogTestApplication(WalletModel walletModel, KernelMock kernelMock) {
         super();
-        gui = new SemuxGUI(walletModel, kernelMock);
+        gui = new SemuxGui(walletModel, kernelMock);
         consoleDialog = new ConsoleDialog(gui, this);
         consoleDialog.setVisible(true);
     }
