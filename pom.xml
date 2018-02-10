@@ -442,7 +442,7 @@
                                         <urn>commons-io:commons-io:2.6:jar:null:test:815893df5f31da2ece4040fe0a12fd44b577afaf</urn>
                                         <urn>commons-logging:commons-logging:1.2:jar:null:compile:4bfc12adfe4842bf07b657f0369c4cb522955686</urn>
                                         <urn>commons-validator:commons-validator:1.6:jar:null:compile:e989d1e87cdd60575df0765ed5bac65c905d7908</urn>
-                                        <urn>io.netty:netty-all:4.1.20.Final:jar:null:compile:441fe8e405d63c3bf3642006a34e3744e91c6d16</urn>
+                                        <urn>io.netty:netty-all:4.1.21.Final:jar:null:compile:d702a5858843dd83725ffcdfd6ed213ae22a8906</urn>
                                         <urn>io.swagger:swagger-annotations:1.5.18:jar:null:compile:f386aa7dc018534e6e05c40fff292e6cd9b9d8f8</urn>
                                         <urn>javax.ws.rs:javax.ws.rs-api:2.1:jar:null:compile:426a0862406536e690c7caa8bb6ed32191986fac</urn>
                                         <urn>junit:junit:4.12:jar:null:test:2973d150c0dc1fefe998f834810d68f278ea58ec</urn>
@@ -575,7 +575,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.20.Final</version>
+            <version>4.1.21.Final</version>
         </dependency>
 
         <!-- Snappy Java -->
