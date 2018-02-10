@@ -9,6 +9,7 @@ package org.semux.config;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -74,6 +75,8 @@ public abstract class AbstractConfig implements Config {
             MessageCode.BFT_NEW_VIEW,
             MessageCode.BFT_PROPOSAL,
             MessageCode.BFT_VOTE));
+    protected List<String> netDnsSeedsMainNet = Collections.singletonList("mainnet.semux.org");
+    protected List<String> netDnsSeedsTestNet = Collections.singletonList("testnet.semux.org");
 
     // =========================
     // API
@@ -304,6 +307,16 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
+    public List<String> netDnsSeedsMainNet() {
+        return netDnsSeedsMainNet;
+    }
+
+    @Override
+    public List<String> netDnsSeedsTestNet() {
+        return netDnsSeedsTestNet;
+    }
+
+    @Override
     public boolean apiEnabled() {
         return apiEnabled;
     }
@@ -439,6 +452,12 @@ public abstract class AbstractConfig implements Config {
                     break;
                 case "net.channelIdleTimeout":
                     netChannelIdleTimeout = Integer.parseInt(props.getProperty(name).trim());
+                    break;
+                case "net.dnsSeeds.mainNet":
+                    netDnsSeedsMainNet = Arrays.asList(props.getProperty(name).trim().split(","));
+                    break;
+                case "net.dnsSeeds.testNet":
+                    netDnsSeedsTestNet = Arrays.asList(props.getProperty(name).trim().split(","));
                     break;
 
                 case "api.enabled":
