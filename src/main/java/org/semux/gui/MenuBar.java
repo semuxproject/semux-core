@@ -107,13 +107,13 @@ public class MenuBar extends JMenuBar implements ActionListener {
         itemAbout.addActionListener(this);
         menuHelp.add(itemAbout);
 
-        JMenuItem itemConsole = new JMenuItem(GUIMessages.get("Console"));
+        JMenuItem itemConsole = new JMenuItem(GuiMessages.get("Console"));
         itemConsole.setName("itemConsole");
         itemConsole.setActionCommand(Action.CONSOLE.name());
         itemConsole.addActionListener(this);
         menuHelp.add(itemConsole);
 
-        JMenuItem itemHelp = new JMenuItem(GUIMessages.get("Help"));
+        JMenuItem itemHelp = new JMenuItem(GuiMessages.get("Help"));
         itemHelp.setName("itemHelp");
         itemHelp.setActionCommand(Action.HELP.name());
         itemHelp.addActionListener(this);

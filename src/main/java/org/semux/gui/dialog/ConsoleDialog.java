@@ -1,12 +1,13 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 package org.semux.gui.dialog;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -16,7 +17,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 
-import javax.swing.*;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
@@ -27,23 +32,23 @@ import io.swagger.annotations.ApiOperation;
 import org.semux.api.ApiHandlerResponse;
 import org.semux.api.SemuxApi;
 import org.semux.api.SemuxApiImpl;
-import org.semux.gui.SemuxGUI;
-import org.semux.message.GUIMessages;
+import org.semux.gui.SemuxGui;
+import org.semux.message.GuiMessages;
 
 /**
  */
 public class ConsoleDialog extends JDialog implements ActionListener {
 
     public static final String HELP = "help";
-    private transient SemuxGUI gui;
+    private transient SemuxGui gui;
     private transient SemuxApi api;
     private JTextArea console;
     private JTextField input;
     private ObjectMapper mapper = new ObjectMapper();
 
-    public ConsoleDialog(SemuxGUI gui, JFrame parent) {
+    public ConsoleDialog(SemuxGui gui, JFrame parent) {
 
-        super(null, GUIMessages.get("Console"), Dialog.ModalityType.MODELESS);
+        super(null, GuiMessages.get("Console"), Dialog.ModalityType.MODELESS);
         this.gui = gui;
 
         setName("Console");
@@ -67,7 +72,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         this.setLocationRelativeTo(parent);
         api = new SemuxApiImpl(gui.getKernel());
 
-        console.append(GUIMessages.get("ConsoleHelp", HELP));
+        console.append(GuiMessages.get("ConsoleHelp", HELP));
         addWindowListener(new WindowAdapter() {
             public void windowOpened(WindowEvent e) {
                 input.requestFocus();
@@ -122,9 +127,9 @@ public class ConsoleDialog extends JDialog implements ActionListener {
             console.append(mapper.writeValueAsString(response));
             console.append("\n");
         } catch (NoSuchMethodException e) {
-            console.append(GUIMessages.get("UnknownMethod", command));
+            console.append(GuiMessages.get("UnknownMethod", command));
         } catch (InvocationTargetException | IllegalAccessException | JsonProcessingException e) {
-            console.append(GUIMessages.get("MethodError", command));
+            console.append(GuiMessages.get("MethodError", command));
         }
     }
 

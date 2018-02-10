@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -18,7 +18,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.semux.gui.AddressBook;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
 
@@ -32,9 +31,6 @@ public class ConsoleDialogTest extends AssertJSwingJUnitTestCase {
 
     @Mock
     WalletModel walletModel;
-
-    @Mock
-    AddressBook addressBook;
 
     @Test
     public void testBasicUse() throws InterruptedException {
