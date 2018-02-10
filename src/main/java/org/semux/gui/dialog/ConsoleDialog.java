@@ -40,7 +40,6 @@ import org.semux.message.GuiMessages;
 public class ConsoleDialog extends JDialog implements ActionListener {
 
     public static final String HELP = "help";
-    private transient SemuxGui gui;
     private transient SemuxApi api;
     private JTextArea console;
     private JTextField input;
@@ -49,7 +48,6 @@ public class ConsoleDialog extends JDialog implements ActionListener {
     public ConsoleDialog(SemuxGui gui, JFrame parent) {
 
         super(null, GuiMessages.get("Console"), Dialog.ModalityType.MODELESS);
-        this.gui = gui;
 
         setName("Console");
 
@@ -158,6 +156,11 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         builder.append(method.getName());
         for (Parameter parameter : method.getParameters()) {
 
+            if (!parameter.getType().equals(String.class)) {
+                // we only currently support string types
+                return null;
+            }
+
             builder.append(" ");
             QueryParam param = parameter.getAnnotation(QueryParam.class);
             builder.append("<");
@@ -167,13 +170,13 @@ public class ConsoleDialog extends JDialog implements ActionListener {
                 builder.append(parameter.getName());
             }
             builder.append(">");
-
         }
 
         ApiOperation operation = method.getAnnotation(ApiOperation.class);
         if (operation != null) {
             builder.append("\n\t").append(operation.notes()).append("\n");
         }
+
         builder.append("\n");
         return builder.toString();
     }
