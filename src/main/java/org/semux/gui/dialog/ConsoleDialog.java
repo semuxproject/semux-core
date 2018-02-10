@@ -50,6 +50,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
         console = new JTextArea();
         console.setEditable(false);
+        console.setName("txtConsole");
 
         JScrollPane scroll = new JScrollPane(console);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -57,6 +58,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
         input = new JTextField();
         input.addActionListener(this);
+        input.setName("txtInput");
 
         getContentPane().add(scroll, BorderLayout.CENTER);
         getContentPane().add(input, BorderLayout.SOUTH);
@@ -164,8 +166,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         }
 
         ApiOperation operation = method.getAnnotation(ApiOperation.class);
-        if(operation != null)
-        {
+        if (operation != null) {
             builder.append("\n\t").append(operation.notes()).append("\n");
         }
         builder.append("\n");
