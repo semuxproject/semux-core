@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -11,8 +11,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.semux.crypto.EdDSA.Signature;
+import org.semux.Network;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key.Signature;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
@@ -131,11 +132,12 @@ public class Block {
      *
      * @param header
      * @param transactions
+     * @param network
      * @return
      */
-    public static boolean validateTransactions(BlockHeader header, List<Transaction> transactions, byte networkId) {
+    public static boolean validateTransactions(BlockHeader header, List<Transaction> transactions, Network network) {
         // validate transactions
-        boolean valid = transactions.parallelStream().allMatch((tx) -> tx.validate(networkId));
+        boolean valid = transactions.parallelStream().allMatch((tx) -> tx.validate(network));
         if (!valid) {
             return false;
         }

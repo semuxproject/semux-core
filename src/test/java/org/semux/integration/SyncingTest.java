@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -31,7 +31,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.IntegrationTest;
 import org.semux.Kernel.State;
 import org.semux.KernelMock;
-import org.semux.config.Constants;
+import org.semux.Network;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
 import org.semux.core.Unit;
@@ -66,10 +66,10 @@ public class SyncingTest {
     @Before
     public void setUp() throws Exception {
         // prepare kernels
-        kernelRule1.speedUpCosnensus();
-        kernelRule2.speedUpCosnensus();
-        kernelRule3.speedUpCosnensus();
-        kernelRule4.speedUpCosnensus();
+        kernelRule1.speedUpConsensus();
+        kernelRule2.speedUpConsensus();
+        kernelRule3.speedUpConsensus();
+        kernelRule4.speedUpConsensus();
         kernel1 = kernelRule1.getKernel();
         kernel2 = kernelRule2.getKernel();
         kernel3 = kernelRule3.getKernel();
@@ -86,7 +86,7 @@ public class SyncingTest {
         nodes.add(new Node(kernel2.getConfig().p2pListenIp(), kernel2.getConfig().p2pListenPort()));
         nodes.add(new Node(kernel3.getConfig().p2pListenIp(), kernel3.getConfig().p2pListenPort()));
         mockStatic(NodeManager.class);
-        when(NodeManager.getSeedNodes(Constants.DEVNET_ID)).thenReturn(nodes);
+        when(NodeManager.getSeedNodes(Network.DEVNET)).thenReturn(nodes);
 
         // start kernels
         kernel1.start();
@@ -129,7 +129,7 @@ public class SyncingTest {
             Block previousBlock = kernel4.getBlockchain().getBlock(i - 1);
             assertTrue(Block.validateHeader(previousBlock.getHeader(), block.getHeader()));
             assertTrue(Block.validateTransactions(previousBlock.getHeader(), block.getTransactions(),
-                    kernel4.getConfig().networkId()));
+                    kernel4.getConfig().network()));
             assertTrue(Block.validateResults(previousBlock.getHeader(), block.getResults()));
 
             assertTrue(block.getVotes().size() >= 3 * 2 / 3);

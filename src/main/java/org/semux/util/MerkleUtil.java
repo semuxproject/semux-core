@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -15,11 +15,8 @@ import org.semux.crypto.Hash;
 
 public class MerkleUtil {
 
-    private MerkleUtil() {
-    }
-
     /**
-     * Compute transactions merkle root.
+     * Compute the Merkle root of transactions.
      * 
      * @param txs
      *            transactions
@@ -34,7 +31,7 @@ public class MerkleUtil {
     }
 
     /**
-     * Compute results merkle root.
+     * Computes the Merkle root of results.
      * 
      * @param results
      *            transaction results
@@ -46,5 +43,8 @@ public class MerkleUtil {
             hashes.add(Hash.h256(tx.toBytes()));
         }
         return new MerkleTree(hashes).getRootHash();
+    }
+
+    private MerkleUtil() {
     }
 }

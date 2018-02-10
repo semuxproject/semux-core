@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -9,12 +9,12 @@ package org.semux;
 import java.net.InetSocketAddress;
 
 import org.semux.config.Config;
-import org.semux.consensus.SemuxBFT;
+import org.semux.consensus.SemuxBft;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.Wallet;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
@@ -33,7 +33,7 @@ public class KernelMock extends Kernel {
      * @param wallet
      * @param coinbase
      */
-    public KernelMock(Config config, Wallet wallet, EdDSA coinbase) {
+    public KernelMock(Config config, Wallet wallet, Key coinbase) {
         super(config, wallet, coinbase);
     }
 
@@ -96,7 +96,7 @@ public class KernelMock extends Kernel {
      * 
      * @param cons
      */
-    public void setConsensus(SemuxBFT cons) {
+    public void setConsensus(SemuxBft cons) {
         this.cons = cons;
     }
 
@@ -114,7 +114,7 @@ public class KernelMock extends Kernel {
      * 
      * @param coinbase
      */
-    public void setCoinbase(EdDSA coinbase) {
+    public void setCoinbase(Key coinbase) {
         this.coinbase = coinbase;
     }
 

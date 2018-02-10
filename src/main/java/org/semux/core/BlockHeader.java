@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -10,9 +10,9 @@ import static org.semux.crypto.Hash.HASH_LEN;
 
 import java.util.Arrays;
 
-import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
@@ -106,7 +106,7 @@ public class BlockHeader {
     public boolean validate() {
         return hash != null && hash.length == HASH_LEN
                 && number >= 0
-                && coinbase != null && coinbase.length == EdDSA.ADDRESS_LEN
+                && coinbase != null && coinbase.length == Key.ADDRESS_LEN
                 && parentHash != null && parentHash.length == HASH_LEN
                 && timestamp >= 0
                 && transactionsRoot != null && transactionsRoot.length == HASH_LEN

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -10,8 +10,8 @@ import org.semux.Kernel;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.CryptoException;
-import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.util.Bytes;
 
 /**
@@ -30,7 +30,7 @@ public class TransactionBuilder {
     /**
      * Transaction sender account
      */
-    private EdDSA account;
+    private Key account;
 
     /**
      * Transaction recipient address
@@ -152,7 +152,7 @@ public class TransactionBuilder {
             value = kernel.getConfig().minDelegateBurnAmount();
         }
 
-        return new Transaction(kernel.getConfig().networkId(), type, to, value, fee, nonce, timestamp, data)
+        return new Transaction(kernel.getConfig().network(), type, to, value, fee, nonce, timestamp, data)
                 .sign(account);
     }
 }

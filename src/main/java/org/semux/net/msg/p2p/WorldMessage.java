@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -7,9 +7,9 @@
 package org.semux.net.msg.p2p;
 
 import org.semux.config.Config;
-import org.semux.crypto.EdDSA;
-import org.semux.crypto.EdDSA.Signature;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
+import org.semux.crypto.Key.Signature;
 import org.semux.net.Peer;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
@@ -28,7 +28,7 @@ public class WorldMessage extends Message {
      * @param peer
      * @param coinbase
      */
-    public WorldMessage(Peer peer, EdDSA coinbase) {
+    public WorldMessage(Peer peer, Key coinbase) {
         super(MessageCode.WORLD, null);
 
         this.peer = peer;
@@ -81,7 +81,7 @@ public class WorldMessage extends Message {
             enc.writeBytes(peer.toBytes());
             enc.writeLong(timestamp);
 
-            return EdDSA.verify(enc.toBytes(), signature);
+            return Key.verify(enc.toBytes(), signature);
         } else {
             return false;
         }

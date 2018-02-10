@@ -15,7 +15,7 @@ To format your code, please run the following command:
 mvn formatter:format license:format
 ```
 
-For IDE users, [Eclipse Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/eclpse/guide.md) and [IntelliJ IDEA Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/intellij/guide.md) are also provided.
+For IDE users, [Eclipse Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/eclipse/guide.md) and [IntelliJ IDEA Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/intellij/guide.md) are also provided.
 
 ## Contributor workflow
 
@@ -32,11 +32,9 @@ Commit messages should be verbose by default consisting of a short subject line 
 ```
 Component: short summary of changes
 
-More detailed explanatory text, if necessary. Wrap it to
-72 characters. In some contexts, the first
-line is treated as the subject of an email and the rest of
-the text as the body.  The blank line separating the
-summary from the body is critical.
+More detailed explanatory text, if necessary. In some contexts, the first
+line is treated as the subject of an email and the rest of the text as the body.
+The blank line separating the summary from the body is critical.
 
 Further paragraphs come after blank lines.
 
@@ -105,7 +103,7 @@ By contributing to this repository, you agree to license your work under the MIT
 
 ```
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php

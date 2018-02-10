@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -96,7 +96,7 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
 
     @Before
     public void setUp() {
-        api = new SemuxAPIMock(kernelRule.getKernel());
+        api = new SemuxApiMock(kernelRule.getKernel());
         api.start();
 
         wallet = api.getKernel().getWallet();

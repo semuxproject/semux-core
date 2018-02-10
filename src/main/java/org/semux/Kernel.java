@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -8,19 +8,16 @@ package org.semux;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
 import org.semux.api.http.SemuxApiService;
 import org.semux.config.Config;
-import org.semux.consensus.SemuxBFT;
+import org.semux.consensus.SemuxBft;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
@@ -28,10 +25,10 @@ import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Wallet;
-import org.semux.crypto.EdDSA;
-import org.semux.db.DBFactory;
-import org.semux.db.DBName;
-import org.semux.db.LevelDB.LevelDBFactory;
+import org.semux.crypto.Key;
+import org.semux.db.DbFactory;
+import org.semux.db.DbName;
+import org.semux.db.LevelDb.LevelDbFactory;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
@@ -66,15 +63,14 @@ public class Kernel {
     }
 
     protected State state = State.STOPPED;
-    protected List<Pair<String, Runnable>> shutdownHooks = new CopyOnWriteArrayList<>();
 
     protected ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
     protected Config config = null;
 
     protected Wallet wallet;
-    protected EdDSA coinbase;
+    protected Key coinbase;
 
-    protected DBFactory dbFactory;
+    protected DbFactory dbFactory;
     protected Blockchain chain;
     protected PeerClient client;
 
@@ -87,7 +83,7 @@ public class Kernel {
 
     protected Thread consThread;
     protected SemuxSync sync;
-    protected SemuxBFT cons;
+    protected SemuxBft cons;
 
     /**
      * Creates a kernel instance and initializes it.
@@ -99,7 +95,7 @@ public class Kernel {
      * @param coinbase
      *            the coinbase key
      */
-    public Kernel(Config config, Wallet wallet, EdDSA coinbase) {
+    public Kernel(Config config, Wallet wallet, Key coinbase) {
         this.config = config;
         this.wallet = wallet;
         this.coinbase = coinbase;
@@ -119,12 +115,12 @@ public class Kernel {
         // initialization
         // ====================================
         logger.info(config.getClientId());
-        logger.info("System booting up: networkId = {}, networkVersion = {}, coinbase = {}", config.networkId(),
+        logger.info("System booting up: network = {}, networkVersion = {}, coinbase = {}", config.network(),
                 config.networkVersion(),
                 coinbase);
         printSystemInfo();
 
-        dbFactory = new LevelDBFactory(config.dataDir());
+        dbFactory = new LevelDbFactory(config.dataDir());
         chain = new BlockchainImpl(config, dbFactory);
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
@@ -162,7 +158,7 @@ public class Kernel {
         // start sync/consensus
         // ====================================
         sync = new SemuxSync(this);
-        cons = new SemuxBFT(this);
+        cons = new SemuxBft(this);
 
         consThread = new Thread(cons::start, "cons");
         consThread.start();
@@ -175,7 +171,7 @@ public class Kernel {
         // ====================================
         // register shutdown hook
         // ====================================
-        Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "shutdown-hook"));
+        Launcher.registerShutdownHook("kernel", this::stop);
 
         state = State.RUNNING;
     }
@@ -255,16 +251,6 @@ public class Kernel {
             state = State.STOPPING;
         }
 
-        // shutdown hooks
-        for (Pair<String, Runnable> r : shutdownHooks) {
-            try {
-                logger.info("Shutting down {}", r.getLeft());
-                r.getRight().run();
-            } catch (Exception e) {
-                logger.info("Failed to shutdown {}", r.getLeft(), e);
-            }
-        }
-
         // stop consensus
         try {
             sync.stop();
@@ -291,22 +277,12 @@ public class Kernel {
         // make sure no thread is reading/writing the state
         ReentrantReadWriteLock.WriteLock lock = stateLock.writeLock();
         lock.lock();
-        for (DBName name : DBName.values()) {
+        for (DbName name : DbName.values()) {
             dbFactory.getDB(name).close();
         }
         lock.unlock();
 
         state = State.STOPPED;
-    }
-
-    /**
-     * Registers a shutdown hook.
-     * 
-     * @param name
-     * @param runnable
-     */
-    public void registerShutdownHook(String name, Runnable runnable) {
-        shutdownHooks.add(Pair.of(name, runnable));
     }
 
     /**
@@ -332,7 +308,7 @@ public class Kernel {
      * 
      * @return
      */
-    public EdDSA getCoinbase() {
+    public Key getCoinbase() {
         return coinbase;
     }
 

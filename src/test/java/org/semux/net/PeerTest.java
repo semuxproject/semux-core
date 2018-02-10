@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -9,7 +9,7 @@ package org.semux.net;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 
 public class PeerTest {
 
@@ -19,10 +19,11 @@ public class PeerTest {
         int port = 1234;
         short p2pVersion = 2;
         String clientId = "client";
-        String peerId = new EdDSA().toAddressString();
+        String peerId = new Key().toAddressString();
         long latestBlockNumber = 1;
 
-        Peer peer = new Peer(ip, port, p2pVersion, clientId, peerId, latestBlockNumber);
+        Peer peer = new Peer(ip, port, p2pVersion, clientId, peerId, latestBlockNumber,
+                CapabilitySet.of(Capability.SEM));
         peer = Peer.fromBytes(peer.toBytes());
 
         assertEquals(ip, peer.getIp());
@@ -31,5 +32,6 @@ public class PeerTest {
         assertEquals(clientId, peer.getClientId());
         assertEquals(peerId, peer.getPeerId());
         assertEquals(latestBlockNumber, peer.getLatestBlockNumber());
+        assertEquals(CapabilitySet.of(Capability.SEM), peer.getCapabilities());
     }
 }

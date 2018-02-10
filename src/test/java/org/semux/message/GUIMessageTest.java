@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -16,11 +16,11 @@ public class GUIMessageTest {
 
     @Test
     public void testExists() {
-        assertNotNull(GUIMessages.get("Address"));
+        assertNotNull(GuiMessages.get("Address"));
     }
 
     @Test(expected = MissingResourceException.class)
     public void testNotExists() {
-        assertNotNull(GUIMessages.get("NotExist"));
+        assertNotNull(GuiMessages.get("NotExist"));
     }
 }

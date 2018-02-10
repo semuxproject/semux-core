@@ -1,11 +1,12 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 package org.semux.log;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -19,6 +20,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,12 +31,6 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.config.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.core.util.StatusPrinter;
 
 @RunWith(PowerMockRunner.class)
 public class LoggerConfiguratorTest {
@@ -53,8 +50,6 @@ public class LoggerConfiguratorTest {
             mockConfigFile.delete();
             mockConfigFile = null;
         }
-
-        ((LoggerContext) LoggerFactory.getILoggerFactory()).reset();
     }
 
     @Test
@@ -98,8 +93,7 @@ public class LoggerConfiguratorTest {
         spy(LoggerConfigurator.class);
         when(LoggerConfigurator.getConfigurationFile(dataDir)).thenReturn(mockConfigFile);
 
-        // expect system exit
-        exit.expectSystemExitWithStatus(-1);
+        exit.expectSystemExitWithStatus(1);
         systemErrRule.enableLog();
 
         // execution
@@ -110,20 +104,19 @@ public class LoggerConfiguratorTest {
     }
 
     private void assertRootLogLevel(Level level) {
-        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        StatusPrinter.printInCaseOfErrorsOrWarnings(context);
-        assertTrue(context.getLogger(Logger.ROOT_LOGGER_NAME).getLevel() == level);
+        assertEquals(level, LogManager.getRootLogger().getLevel());
     }
 
     private void mockConfigFile(String content) throws IOException {
-        mockConfigFile = File.createTempFile(LoggerConfiguratorTest.class.getSimpleName(), "logback.xml");
+        mockConfigFile = File.createTempFile(LoggerConfiguratorTest.class.getSimpleName(),
+                LoggerConfigurator.CONFIG_XML);
         FileWriter fileWriter = new FileWriter(mockConfigFile);
         fileWriter.write(content);
         fileWriter.close();
     }
 
     private String getFactoryDefaultConfig() {
-        InputStream in = getClass().getResourceAsStream("/" + LoggerConfigurator.LOGBACK_XML);
+        InputStream in = getClass().getResourceAsStream("/" + LoggerConfigurator.CONFIG_XML);
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         return reader.lines().collect(Collectors.joining("\n"));
     }

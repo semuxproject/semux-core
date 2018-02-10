@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -17,7 +17,6 @@ import io.netty.handler.codec.http.HttpHeaders;
 /**
  * Semux RESTful API handler implementation.
  *
- * TODO: Auto-generate API docs
  */
 public class ApiHandlerImpl implements ApiHandler {
 
@@ -110,6 +109,12 @@ public class ApiHandlerImpl implements ApiHandler {
             case GET_TRANSACTION_LIMITS:
                 return getTransactionLimits(params);
 
+            case SIGN_MESSAGE:
+                return signMessage(params);
+
+            case VERIFY_MESSAGE:
+                return verifyMessage(params);
+
             case TRANSFER:
             case DELEGATE:
             case VOTE:
@@ -122,6 +127,26 @@ public class ApiHandlerImpl implements ApiHandler {
         } catch (Exception e) {
             return semuxApi.failure("Failed to process your request: " + e.getMessage());
         }
+    }
+
+    /**
+     * GET /verify_message?address&message&signature
+     * 
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse verifyMessage(Map<String, String> params) {
+        return semuxApi.verifyMessage(params.get("address"), params.get("message"), params.get("signature"));
+    }
+
+    /**
+     * GET /sign_message?address&message
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse signMessage(Map<String, String> params) {
+        return semuxApi.signMessage(params.get("address"), params.get("message"));
     }
 
     /**
@@ -305,7 +330,7 @@ public class ApiHandlerImpl implements ApiHandler {
     private ApiHandlerResponse getVote(Map<String, String> params) {
         String voter = params.get("voter");
         String delegate = params.get("delegate");
-        return semuxApi.getVotes(delegate, voter);
+        return semuxApi.getVote(delegate, voter);
     }
 
     /**

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -8,7 +8,7 @@ package org.semux.gui.dialog;
 
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
@@ -20,10 +20,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
+import org.semux.util.Bytes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DelegateDialogTest extends AssertJSwingJUnitTestCase {
@@ -36,10 +37,10 @@ public class DelegateDialogTest extends AssertJSwingJUnitTestCase {
 
     @Test
     public void testDisplayVotes() {
-        Delegate delegate = new Delegate(new EdDSA().toAddress(), new String("delegate1").getBytes(), 0L,
+        Delegate delegate = new Delegate(new Key().toAddress(), Bytes.of("delegate1"), 0L,
                 123L * Unit.SEM);
         WalletDelegate walletDelegate = new WalletDelegate(delegate);
-        when(walletModel.getDelegates()).thenReturn(Arrays.asList(walletDelegate));
+        when(walletModel.getDelegates()).thenReturn(Collections.singletonList(walletDelegate));
 
         kernelRule1.getKernel().start();
 

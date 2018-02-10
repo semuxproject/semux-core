@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -9,10 +9,15 @@ package org.semux.config;
 import java.security.spec.InvalidKeySpecException;
 
 import org.semux.crypto.CryptoException;
-import org.semux.crypto.EdDSA;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 
 public class Constants {
+
+    /**
+     * JSON mime type string.
+     */
+    public static final String JSON_MIME = "application/json";
 
     /**
      * Default data directory.
@@ -20,24 +25,11 @@ public class Constants {
     public static final String DEFAULT_DATA_DIR = ".";
 
     /**
-     * Main network ID.
+     * Network versions.
      */
-    public static final byte MAINNET_ID = 0;
     public static final short MAINNET_VERSION = 0;
-
-    /**
-     * Test network ID.
-     */
-    public static final byte TESTNET_ID = 1;
     public static final short TESTNET_VERSION = 0;
-
-    /**
-     * Dev network ID.
-     */
-    public static final byte DEVNET_ID = 2;
     public static final short DEVNET_VERSION = 0;
-
-    public static final String[] NETWORKS = { "mainnet", "testnet", "devnet" };
 
     /**
      * Name of this client.
@@ -102,21 +94,21 @@ public class Constants {
     /**
      * The public-private key pair for signing coinbase transactions.
      */
-    public static final EdDSA COINBASE_KEY;
+    public static final Key COINBASE_KEY;
 
     /**
      * The public-private key pair of the genesis validator.
      */
-    public static final EdDSA DEVNET_KEY;
+    public static final Key DEVNET_KEY;
 
     static {
         try {
-            COINBASE_KEY = new EdDSA(Hex.decode0x(
+            COINBASE_KEY = new Key(Hex.decode0x(
                     "0x302e020100300506032b657004220420acdd12174cbc3fa6e4076cb1e270989cf4d47b0de8942c8542fe6a3bed34d7bf"));
-            DEVNET_KEY = new EdDSA(Hex.decode0x(
+            DEVNET_KEY = new Key(Hex.decode0x(
                     "0x302e020100300506032b657004220420acbd5f2cb2b6053f704376d12df99f2aa163d267a755c7f1d9fe55d2a2dc5405"));
-        } catch (InvalidKeySpecException | CryptoException e) {
-            throw new RuntimeException(e);
+        } catch (InvalidKeySpecException e) {
+            throw new CryptoException(e);
         }
     }
 

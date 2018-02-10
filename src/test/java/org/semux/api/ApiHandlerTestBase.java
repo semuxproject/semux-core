@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
@@ -25,7 +26,7 @@ import org.semux.core.TransactionType;
 import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.util.BasicAuth;
@@ -36,7 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class ApiHandlerTestBase {
 
-    protected SemuxAPIMock api;
+    protected SemuxApiMock api;
 
     protected Config config;
     protected Wallet wallet;
@@ -78,7 +79,7 @@ public abstract class ApiHandlerTestBase {
     }
 
     protected Block createBlock(Blockchain chain, List<Transaction> transactions, List<TransactionResult> results) {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
 
         long number = chain.getLatestBlockNumber() + 1;
         byte[] coinbase = key.toAddress();
@@ -95,17 +96,17 @@ public abstract class ApiHandlerTestBase {
     }
 
     protected Transaction createTransaction() {
-        EdDSA key = new EdDSA();
+        return createTransaction(new Key(), new Key(), 0);
+    }
 
-        byte networkId = config.networkId();
+    protected Transaction createTransaction(Key from, Key to, long value) {
+        Network network = config.network();
         TransactionType type = TransactionType.TRANSFER;
-        byte[] to = key.toAddress();
-        long value = 0;
         long fee = 0;
         long nonce = 1;
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
 
-        return new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(key);
+        return new Transaction(network, type, to.toAddress(), value, fee, nonce, timestamp, data).sign(from);
     }
 }

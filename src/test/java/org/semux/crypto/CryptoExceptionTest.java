@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -15,7 +15,7 @@ public class CryptoExceptionTest {
 
     @Test(expected = CryptoException.class)
     public void testCryptoException() throws CryptoException {
-        AES.decrypt(Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES);
+        Aes.decrypt(Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES);
     }
 
     @Test

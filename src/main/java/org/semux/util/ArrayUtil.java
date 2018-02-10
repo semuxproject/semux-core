@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -10,9 +10,6 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ArrayUtil {
-
-    private ArrayUtil() {
-    }
 
     /**
      * Generate a random permutation of [0...n)
@@ -45,5 +42,8 @@ public class ArrayUtil {
             arr[index] = arr[i];
             arr[i] = tmp;
         }
+    }
+
+    private ArrayUtil() {
     }
 }

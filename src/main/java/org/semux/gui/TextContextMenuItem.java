@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -9,7 +9,7 @@ package org.semux.gui;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.TextAction;
 
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.util.exception.UnreachableException;
 
 /**
@@ -34,11 +34,11 @@ enum TextContextMenuItem {
     public String toString() {
         switch (this) {
         case CUT:
-            return GUIMessages.get("Cut");
+            return GuiMessages.get("Cut");
         case COPY:
-            return GUIMessages.get("Copy");
+            return GuiMessages.get("Copy");
         case PASTE:
-            return GUIMessages.get("Paste");
+            return GuiMessages.get("Paste");
         }
         throw new UnreachableException();
     }

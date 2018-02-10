@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -15,11 +15,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class GetDelegatesResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final List<GetDelegateResponse.DelegateResult> delegates;
+    public final List<Types.DelegateType> delegates;
 
     public GetDelegatesResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") List<GetDelegateResponse.DelegateResult> delegates) {
+            @JsonProperty("result") List<Types.DelegateType> delegates) {
         super(success, null);
         this.delegates = delegates;
     }

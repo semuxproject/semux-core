@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
+import org.semux.config.DevnetConfig;
 import org.semux.core.Unit;
 import org.semux.util.ApiClient;
 import org.semux.util.Bytes;
@@ -29,7 +29,7 @@ public class SemuxPerformance {
     private static int tps = 500;
 
     public static void testTransfer(int n) throws IOException, InterruptedException {
-        DevNetConfig config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
+        DevnetConfig config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
 
         long t1 = System.currentTimeMillis();
         for (int i = 1; i <= n; i++) {
@@ -63,10 +63,7 @@ public class SemuxPerformance {
         password = SystemUtil.readPassword("Please enter your API password: ");
 
         while (true) {
-            System.out.print("# transactions to send: ");
-            System.out.flush();
-
-            int n = Integer.parseInt(SystemUtil.SCANNER.nextLine().replaceAll("[^\\d]", ""));
+            int n = Integer.parseInt(SystemUtil.readLine("# transactions to send: ").replaceAll("[^\\d]", ""));
             if (n > 0) {
                 testTransfer(n);
             } else {

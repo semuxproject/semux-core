@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -9,7 +9,7 @@ package org.semux.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import org.semux.util.exception.SimpleEncoderException;
+import org.semux.util.exception.SimpleCodecException;
 
 public class SimpleEncoder {
     private ByteArrayOutputStream out;
@@ -19,7 +19,7 @@ public class SimpleEncoder {
         try {
             out.write(toAppend);
         } catch (IOException e) {
-            throw new SimpleEncoderException(e);
+            throw new SimpleCodecException(e);
         }
     }
 
@@ -65,7 +65,7 @@ public class SimpleEncoder {
         try {
             out.write(bytes);
         } catch (IOException e) {
-            throw new SimpleEncoderException(e);
+            throw new SimpleCodecException(e);
         }
     }
 

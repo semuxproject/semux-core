@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -10,11 +10,11 @@ import java.io.IOException;
 
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.MainNetConfig;
+import org.semux.config.MainnetConfig;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
-import org.semux.db.LevelDB.LevelDBFactory;
+import org.semux.db.LevelDb.LevelDbFactory;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.xerial.snappy.Snappy;
 
@@ -22,12 +22,12 @@ public class CompressPerformance {
 
     enum Mode {
         ALL_BLOCKS, BLOCKS_WITH_TX
-    };
+    }
 
     public static void main(String[] args) throws IOException {
-        Config config = new MainNetConfig(Constants.DEFAULT_DATA_DIR);
+        Config config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
 
-        LevelDBFactory dbFactory = new LevelDBFactory(config.dataDir());
+        LevelDbFactory dbFactory = new LevelDbFactory(config.dataDir());
         Blockchain chain = new BlockchainImpl(config, dbFactory);
 
         for (Mode mode : Mode.values()) {

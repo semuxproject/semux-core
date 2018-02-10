@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Key;
 import org.semux.util.Bytes;
 
 public class VoteSetTest {
@@ -24,10 +24,10 @@ public class VoteSetTest {
     private long height = 1;
     private int view = 1;
 
-    private EdDSA v1 = new EdDSA();
-    private EdDSA v2 = new EdDSA();
-    private EdDSA v3 = new EdDSA();
-    private EdDSA v4 = new EdDSA();
+    private Key v1 = new Key();
+    private Key v2 = new Key();
+    private Key v3 = new Key();
+    private Key v4 = new Key();
 
     private VoteSet vs = null;
 
@@ -46,7 +46,7 @@ public class VoteSetTest {
     public void testAddVote() {
         Vote vote = Vote.newApprove(VoteType.VALIDATE, height, view, Bytes.EMPTY_HASH);
         assertFalse(vs.addVote(vote));
-        vote.sign(new EdDSA());
+        vote.sign(new Key());
         assertFalse(vs.addVote(vote));
         vote.sign(v1);
         assertTrue(vs.addVote(vote));

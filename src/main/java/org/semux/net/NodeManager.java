@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.Kernel;
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.slf4j.Logger;
@@ -155,19 +156,19 @@ public class NodeManager {
     /**
      * Get seed nodes from DNS records.
      * 
-     * @param networkId
+     * @param network
      * @return
      */
-    public static Set<Node> getSeedNodes(byte networkId) {
+    public static Set<Node> getSeedNodes(Network network) {
         Set<Node> nodes = new HashSet<>();
 
-        String name = null;
         try {
-            switch (networkId) {
-            case Constants.MAINNET_ID:
+            String name;
+            switch (network) {
+            case MAINNET:
                 name = DNS_SEED_MAINNET;
                 break;
-            case Constants.TESTNET_ID:
+            case TESTNET:
                 name = DNS_SEED_TESTNET;
                 break;
             default:
@@ -178,7 +179,7 @@ public class NodeManager {
                 nodes.add(new Node(a, Constants.DEFAULT_P2P_PORT));
             }
         } catch (UnknownHostException e) {
-            logger.info("Failed to get seed nodes from {}", name);
+            logger.info("Failed to get seed nodes from {}", network);
         }
 
         return nodes;
@@ -211,7 +212,7 @@ public class NodeManager {
      * Fetches seed nodes from DNS records or configuration.
      */
     protected void doFetch() {
-        addNodes(getSeedNodes(config.networkId()));
+        addNodes(getSeedNodes(config.network()));
     }
 
     /**

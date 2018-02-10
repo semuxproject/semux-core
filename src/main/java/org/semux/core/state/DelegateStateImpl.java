@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -15,7 +15,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.semux.core.Blockchain;
-import org.semux.db.KVDB;
+import org.semux.db.Db;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.ClosableIterator;
@@ -46,8 +46,8 @@ public class DelegateStateImpl implements DelegateState {
     private static final int ADDRESS_LEN = 20;
 
     protected Blockchain chain;
-    protected KVDB delegateDB;
-    protected KVDB voteDB;
+    protected Db delegateDB;
+    protected Db voteDB;
     protected DelegateStateImpl prev;
 
     /**
@@ -66,7 +66,7 @@ public class DelegateStateImpl implements DelegateState {
      * @param delegateDB
      * @param voteDB
      */
-    public DelegateStateImpl(Blockchain chain, KVDB delegateDB, KVDB voteDB) {
+    public DelegateStateImpl(Blockchain chain, Db delegateDB, Db voteDB) {
         this.chain = chain;
         this.delegateDB = delegateDB;
         this.voteDB = voteDB;

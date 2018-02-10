@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -12,7 +12,9 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
+import org.semux.Network;
 import org.semux.core.TransactionType;
+import org.semux.net.CapabilitySet;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
 
@@ -32,11 +34,18 @@ public interface Config {
     File dataDir();
 
     /**
-     * Returns the network id.
+     * Returns the config directory.
      *
      * @return
      */
-    byte networkId();
+    File configDir();
+
+    /**
+     * Returns the network.
+     *
+     * @return
+     */
+    Network network();
 
     /**
      * Returns the network id.
@@ -129,6 +138,13 @@ public interface Config {
      * @return
      */
     String getClientId();
+
+    /**
+     * Returns the set of capability.
+     *
+     * @return
+     */
+    CapabilitySet capabilitySet();
 
     // =========================
     // P2P

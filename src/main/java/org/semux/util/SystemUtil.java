@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -19,11 +19,17 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
 import org.semux.config.Constants;
-import org.semux.gui.SemuxGUI;
+import org.semux.gui.SemuxGui;
+import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.zafarkhaja.semver.Version;
+import com.sun.jna.Platform;
+import com.sun.jna.platform.win32.Advapi32Util;
+import com.sun.jna.platform.win32.Win32Exception;
+import com.sun.jna.platform.win32.WinNT;
+import com.sun.jna.platform.win32.WinReg;
 
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
@@ -150,7 +156,22 @@ public class SystemUtil {
     }
 
     /**
-     * Reads a password from console with a customized message.
+     * Reads a line from the console.
+     * 
+     * @param prompt
+     * @return
+     */
+    public static String readLine(String prompt) {
+        if (prompt != null) {
+            System.out.print(prompt);
+            System.out.flush();
+        }
+
+        return SCANNER.nextLine();
+    }
+
+    /**
+     * Reads a password from the console.
      *
      * @param prompt
      *            A message to display before reading password
@@ -160,8 +181,10 @@ public class SystemUtil {
         Console console = System.console();
 
         if (console == null) {
-            System.out.print(prompt);
-            System.out.flush();
+            if (prompt != null) {
+                System.out.print(prompt);
+                System.out.flush();
+            }
 
             return SCANNER.nextLine();
         }
@@ -170,7 +193,7 @@ public class SystemUtil {
     }
 
     /**
-     * Reads a password from console.
+     * Reads a password from the console.
      *
      * @return
      */
@@ -179,7 +202,7 @@ public class SystemUtil {
     }
 
     /**
-     * Compare two version strings.
+     * Compares two version strings.
      * 
      * @param v1
      * @param v2
@@ -211,13 +234,12 @@ public class SystemUtil {
         }
 
         // check memory
-        if (rt.maxMemory() < 0.8 * 4 * 1024 * 1024 * 1024) {
+        if (rt.maxMemory() < 2L * 1024L * 1024L * 1024L) {
             logger.info("Max allowed JVM heap memory size = {} MB", rt.maxMemory() / 1024 / 1024);
             return false;
         }
 
         return true;
-
     }
 
     /**
@@ -286,9 +308,40 @@ public class SystemUtil {
      */
     public static Object getImplementationVersion() {
         // this doesn't work with Java 9 and above
-        String version = SemuxGUI.class.getPackage().getImplementationVersion();
+        String version = SemuxGui.class.getPackage().getImplementationVersion();
 
         return version == null ? "unknown" : version;
+    }
+
+    /**
+     * Returns whether Microsoft Visual C++ 2010 Redistributable Package is
+     * installed.
+     *
+     * @return
+     */
+    public static boolean isWindowsVCRedist2010Installed() {
+        if (SystemUtil.getOsName() != OsName.WINDOWS) {
+            throw new UnreachableException();
+        }
+
+        try {
+            if (Platform.is64Bit()) {
+                return Advapi32Util.registryGetIntValue(
+                        Advapi32Util.registryGetKey(
+                                WinReg.HKEY_LOCAL_MACHINE,
+                                "SOFTWARE\\Microsoft\\VisualStudio\\10.0\\VC\\VCRedist\\x64",
+                                WinNT.KEY_READ | WinNT.KEY_WOW64_32KEY).getValue(),
+                        "Installed") == 1;
+            } else {
+                return Advapi32Util.registryGetIntValue(
+                        WinReg.HKEY_LOCAL_MACHINE,
+                        "SOFTWARE\\Microsoft\\VisualStudio\\10.0\\VC\\VCRedist\\x86",
+                        "Installed") == 1;
+            }
+        } catch (Win32Exception e) {
+            logger.error("Failed to read windows registry", e);
+            return false;
+        }
     }
 
     private SystemUtil() {

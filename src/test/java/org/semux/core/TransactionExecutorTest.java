@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -14,33 +14,36 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
+import org.semux.config.DevnetConfig;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.EdDSA;
-import org.semux.rules.TemporaryDBRule;
+import org.semux.crypto.Key;
+import org.semux.rules.TemporaryDbRule;
 import org.semux.util.Bytes;
 
 public class TransactionExecutorTest {
 
     @Rule
-    public TemporaryDBRule temporaryDBFactory = new TemporaryDBRule();
+    public TemporaryDbRule temporaryDBFactory = new TemporaryDbRule();
 
     private Config config;
     private Blockchain chain;
     private AccountState as;
     private DelegateState ds;
     private TransactionExecutor exec;
+    private Network network;
 
     @Before
     public void prepare() {
-        config = new DevNetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
         chain = new BlockchainImpl(config, temporaryDBFactory);
         as = chain.getAccountState();
         ds = chain.getDelegateState();
         exec = new TransactionExecutor(config);
+        network = config.network();
     }
 
     private TransactionResult executeAndCommit(TransactionExecutor exec, Transaction tx, AccountState as,
@@ -54,9 +57,8 @@ public class TransactionExecutorTest {
 
     @Test
     public void testTransfer() {
-        EdDSA key = new EdDSA();
+        Key key = new Key();
 
-        byte networkId = Constants.DEVNET_ID;
         TransactionType type = TransactionType.TRANSFER;
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
@@ -66,9 +68,9 @@ public class TransactionExecutorTest {
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
 
-        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
         tx.sign(key);
-        assertTrue(tx.validate(networkId));
+        assertTrue(tx.validate(network));
 
         // insufficient available
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
@@ -92,12 +94,11 @@ public class TransactionExecutorTest {
 
     @Test
     public void testDelegate() {
-        EdDSA delegate = new EdDSA();
+        Key delegate = new Key();
 
         long available = 2000 * Unit.SEM;
         as.adjustAvailable(delegate.toAddress(), available);
 
-        byte networkId = Constants.DEVNET_ID;
         TransactionType type = TransactionType.DELEGATE;
         byte[] from = delegate.toAddress();
         byte[] to = Bytes.random(20);
@@ -108,18 +109,18 @@ public class TransactionExecutorTest {
         byte[] data = Bytes.random(16);
 
         // register delegate (to != EMPTY_ADDRESS, random name)
-        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(delegate);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(delegate);
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isSuccess());
 
         // register delegate (to == EMPTY_ADDRESS, random name)
-        tx = new Transaction(networkId, type, Bytes.EMPTY_ADDRESS, value, fee, nonce, timestamp, data).sign(delegate);
+        tx = new Transaction(network, type, Bytes.EMPTY_ADDRESS, value, fee, nonce, timestamp, data).sign(delegate);
         result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isSuccess());
 
         // register delegate (to == EMPTY_ADDRESS, normal name) and commit
         data = Bytes.of("test");
-        tx = new Transaction(networkId, type, Bytes.EMPTY_ADDRESS, value, fee, nonce, timestamp, data).sign(delegate);
+        tx = new Transaction(network, type, Bytes.EMPTY_ADDRESS, value, fee, nonce, timestamp, data).sign(delegate);
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isSuccess());
         assertEquals(available - config.minDelegateBurnAmount() - fee,
@@ -130,13 +131,12 @@ public class TransactionExecutorTest {
 
     @Test
     public void testVote() {
-        EdDSA voter = new EdDSA();
-        EdDSA delegate = new EdDSA();
+        Key voter = new Key();
+        Key delegate = new Key();
 
         long available = 100 * Unit.SEM;
         as.adjustAvailable(voter.toAddress(), available);
 
-        byte networkId = Constants.DEVNET_ID;
         TransactionType type = TransactionType.VOTE;
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
@@ -147,7 +147,7 @@ public class TransactionExecutorTest {
         byte[] data = {};
 
         // vote for non-existing delegate
-        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(voter);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(voter);
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isSuccess());
 
@@ -163,15 +163,14 @@ public class TransactionExecutorTest {
 
     @Test
     public void testUnvote() {
-        EdDSA voter = new EdDSA();
-        EdDSA delegate = new EdDSA();
+        Key voter = new Key();
+        Key delegate = new Key();
 
         long available = 100 * Unit.SEM;
         as.adjustAvailable(voter.toAddress(), available);
 
         ds.register(delegate.toAddress(), Bytes.of("delegate"));
 
-        byte networkId = Constants.DEVNET_ID;
         TransactionType type = TransactionType.UNVOTE;
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
@@ -182,7 +181,7 @@ public class TransactionExecutorTest {
         byte[] data = {};
 
         // unvote (never voted before)
-        Transaction tx = new Transaction(networkId, type, to, value, fee, nonce, timestamp, data).sign(voter);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(voter);
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isSuccess());
 

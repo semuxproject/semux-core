@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -9,6 +9,7 @@ package org.semux.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -60,5 +61,11 @@ public class SystemUtilTest {
     @Test
     public void testBench() {
         logger.info("System benchmark result = {}", SystemUtil.bench());
+    }
+
+    @Test
+    public void testIsWindowsVCRedist2010Installed() {
+        assumeTrue(SystemUtil.getOsName() == SystemUtil.OsName.WINDOWS);
+        assertTrue(SystemUtil.isWindowsVCRedist2010Installed());
     }
 }

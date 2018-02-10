@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -9,9 +9,6 @@ package org.semux.util;
 import java.math.BigInteger;
 
 public class BigIntegerUtil {
-
-    private BigIntegerUtil() {
-    }
 
     /**
      * Returns if the big integer is zero.
@@ -118,5 +115,8 @@ public class BigIntegerUtil {
      */
     public static BigInteger min(BigInteger v1, BigInteger v2) {
         return v1.compareTo(v2) < 0 ? v1 : v2;
+    }
+
+    private BigIntegerUtil() {
     }
 }

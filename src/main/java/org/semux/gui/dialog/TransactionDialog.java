@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -19,7 +19,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import org.semux.core.Transaction;
 import org.semux.crypto.Hex;
 import org.semux.gui.SwingUtil;
-import org.semux.message.GUIMessages;
+import org.semux.message.GuiMessages;
 import org.semux.util.Bytes;
 
 public class TransactionDialog extends JDialog {
@@ -27,19 +27,19 @@ public class TransactionDialog extends JDialog {
     private static final long serialVersionUID = 1L;
 
     public TransactionDialog(JFrame parent, Transaction tx) {
-        super(null, GUIMessages.get("Transaction"), Dialog.ModalityType.MODELESS);
+        super(null, GuiMessages.get("Transaction"), Dialog.ModalityType.MODELESS);
         setName("TransactionDialog");
 
-        JLabel lblHash = new JLabel(GUIMessages.get("Hash") + ":");
-        JLabel lblType = new JLabel(GUIMessages.get("Type") + ":");
-        JLabel lblFrom = new JLabel(GUIMessages.get("From") + ":");
-        JLabel lblTo = new JLabel(GUIMessages.get("To") + ":");
-        JLabel lblValue = new JLabel(GUIMessages.get("Value") + ":");
-        JLabel lblFee = new JLabel(GUIMessages.get("Fee") + ":");
-        JLabel lblNonce = new JLabel(GUIMessages.get("Nonce") + ":");
-        JLabel lblTimestamp = new JLabel(GUIMessages.get("Timestamp") + ":");
-        JLabel lblData = new JLabel(GUIMessages.get("Data") + ":");
-        JLabel lblDataDecoded = new JLabel(GUIMessages.get("DataDecoded") + ":");
+        JLabel lblHash = new JLabel(GuiMessages.get("Hash") + ":");
+        JLabel lblType = new JLabel(GuiMessages.get("Type") + ":");
+        JLabel lblFrom = new JLabel(GuiMessages.get("From") + ":");
+        JLabel lblTo = new JLabel(GuiMessages.get("To") + ":");
+        JLabel lblValue = new JLabel(GuiMessages.get("Value") + ":");
+        JLabel lblFee = new JLabel(GuiMessages.get("Fee") + ":");
+        JLabel lblNonce = new JLabel(GuiMessages.get("Nonce") + ":");
+        JLabel lblTimestamp = new JLabel(GuiMessages.get("Timestamp") + ":");
+        JLabel lblData = new JLabel(GuiMessages.get("Data") + ":");
+        JLabel lblDataDecoded = new JLabel(GuiMessages.get("DataDecoded") + ":");
 
         JTextArea hash = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getHash()));
         hash.setName("hashText");
@@ -145,7 +145,7 @@ public class TransactionDialog extends JDialog {
         getContentPane().setLayout(groupLayout);
         // @formatter:on
 
-        this.setTitle(GUIMessages.get("Transaction"));
+        this.setTitle(GuiMessages.get("Transaction"));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         this.pack();

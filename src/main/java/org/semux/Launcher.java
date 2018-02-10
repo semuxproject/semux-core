@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -7,6 +7,9 @@
 package org.semux;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -14,20 +17,40 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
 import org.semux.cli.SemuxOption;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevNetConfig;
-import org.semux.config.MainNetConfig;
-import org.semux.config.TestNetConfig;
+import org.semux.config.DevnetConfig;
+import org.semux.config.MainnetConfig;
+import org.semux.config.TestnetConfig;
+import org.semux.exception.LauncherException;
 import org.semux.log.LoggerConfigurator;
-import org.semux.message.CLIMessages;
+import org.semux.message.CliMessages;
+import org.semux.util.SystemUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class Launcher {
+
+    private static final Logger logger = LoggerFactory.getLogger(Launcher.class);
 
     protected static final String DEVNET = "devnet";
     protected static final String TESTNET = "testnet";
     protected static final String MAINNET = "mainnet";
+
+    /**
+     * Here we make sure that all shutdown hooks will be executed in the order of
+     * registration. This is necessary to be manually maintained because
+     * ${@link Runtime#addShutdownHook(Thread)} starts shutdown hooks concurrently
+     * in unspecified order.
+     */
+    private static List<Pair<String, Runnable>> shutdownHooks = Collections.synchronizedList(new ArrayList<>());
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(Launcher::shutdownHook, "shutdown-hook"));
+    }
 
     private Options options = new Options();
 
@@ -40,13 +63,13 @@ public abstract class Launcher {
     public Launcher() {
         Option dataDirOption = Option.builder()
                 .longOpt(SemuxOption.DATA_DIR.toString())
-                .desc(CLIMessages.get("SpecifyDataDir"))
+                .desc(CliMessages.get("SpecifyDataDir"))
                 .hasArg(true).numberOfArgs(1).optionalArg(false).argName("path").type(String.class)
                 .build();
         addOption(dataDirOption);
 
         Option networkOption = Option.builder()
-                .longOpt(SemuxOption.NETWORK.toString()).desc(CLIMessages.get("SpecifyNetwork"))
+                .longOpt(SemuxOption.NETWORK.toString()).desc(CliMessages.get("SpecifyNetwork"))
                 .hasArg(true).numberOfArgs(1).optionalArg(false).argName("name").type(String.class)
                 .build();
         addOption(networkOption);
@@ -62,11 +85,11 @@ public abstract class Launcher {
     public Config getConfig() {
         switch (getNetwork()) {
         case TESTNET:
-            return new TestNetConfig(getDataDir());
+            return new TestnetConfig(getDataDir());
         case DEVNET:
-            return new DevNetConfig(getDataDir());
+            return new DevnetConfig(getDataDir());
         default:
-            return new MainNetConfig(getDataDir());
+            return new MainnetConfig(getDataDir());
         }
     }
 
@@ -195,4 +218,48 @@ public abstract class Launcher {
         this.password = password;
     }
 
+    /**
+     * Check runtime prerequisite.
+     *
+     */
+    protected static void checkPrerequisite() {
+        switch (SystemUtil.getOsName()) {
+        case WINDOWS:
+            if (!SystemUtil.isWindowsVCRedist2010Installed()) {
+                throw new LauncherException("Microsoft Visual C++ 2010 Redistributable Package is not installed.");
+            }
+            break;
+        default:
+        }
+    }
+
+    /**
+     * Registers a shutdown hook which will be executed in the order of
+     * registration.
+     *
+     * @param name
+     * @param runnable
+     */
+    public static synchronized void registerShutdownHook(String name, Runnable runnable) {
+        shutdownHooks.add(Pair.of(name, runnable));
+    }
+
+    /**
+     * Call registered shutdown hooks in the order of registration.
+     *
+     */
+    private static synchronized void shutdownHook() {
+        // shutdown hooks
+        for (Pair<String, Runnable> r : shutdownHooks) {
+            try {
+                logger.info("Shutting down {}", r.getLeft());
+                r.getRight().run();
+            } catch (Exception e) {
+                logger.info("Failed to shutdown {}", r.getLeft(), e);
+            }
+        }
+
+        // flush log4j async loggers
+        LogManager.shutdown();
+    }
 }

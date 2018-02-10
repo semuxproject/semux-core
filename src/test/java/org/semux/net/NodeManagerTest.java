@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
-import org.semux.config.Constants;
+import org.semux.Network;
 import org.semux.net.NodeManager.Node;
 import org.semux.rules.KernelRule;
 
@@ -50,15 +50,15 @@ public class NodeManagerTest {
     @Test
     public void testGetSeedNodes() {
         // Seed nodes for main net
-        Set<Node> peers = NodeManager.getSeedNodes(Constants.MAINNET_ID);
+        Set<Node> peers = NodeManager.getSeedNodes(Network.MAINNET);
         assertFalse(peers.isEmpty());
 
         // Seed nodes for test net
-        peers = NodeManager.getSeedNodes(Constants.TESTNET_ID);
+        peers = NodeManager.getSeedNodes(Network.TESTNET);
         assertFalse(peers.isEmpty());
 
         // Seed nodes for dev net
-        peers = NodeManager.getSeedNodes(Constants.DEVNET_ID);
+        peers = NodeManager.getSeedNodes(Network.DEVNET);
         assertTrue(peers.isEmpty());
     }
 

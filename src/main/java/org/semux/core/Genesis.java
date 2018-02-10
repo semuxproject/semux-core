@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.semux.Network;
 import org.semux.crypto.Hex;
 import org.semux.util.ByteArray;
 import org.semux.util.ByteArray.ByteArrayKeyDeserializer;
@@ -89,9 +90,9 @@ public class Genesis extends Block {
      * 
      * @return
      */
-    public static Genesis load(String name) {
+    public static Genesis load(Network network) {
         try {
-            InputStream in = Genesis.class.getResourceAsStream("/genesis/" + name + ".json");
+            InputStream in = Genesis.class.getResourceAsStream("/genesis/" + network.label() + ".json");
 
             if (in != null) {
                 return new ObjectMapper().readValue(in, Genesis.class);

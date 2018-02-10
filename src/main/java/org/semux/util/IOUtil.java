@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -22,9 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class IOUtil {
-
-    private IOUtil() {
-    }
 
     /**
      * Reads the given input stream into byte array.
@@ -156,5 +153,8 @@ public class IOUtil {
         if (replaceExisting || !dst.exists()) {
             Files.copy(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
+    }
+
+    private IOUtil() {
     }
 }

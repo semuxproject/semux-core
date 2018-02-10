@@ -1,11 +1,12 @@
 /**
- * Copyright (c) 2017 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 package org.semux.api;
 
+import java.io.File;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import org.semux.Kernel;
 import org.semux.api.response.AddNodeResponse;
 import org.semux.api.response.CreateAccountResponse;
@@ -34,6 +36,9 @@ import org.semux.api.response.GetVoteResponse;
 import org.semux.api.response.GetVotesResponse;
 import org.semux.api.response.ListAccountsResponse;
 import org.semux.api.response.SendTransactionResponse;
+import org.semux.api.response.SignMessageResponse;
+import org.semux.api.response.Types;
+import org.semux.api.response.VerifyMessageResponse;
 import org.semux.api.util.TransactionBuilder;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
@@ -44,9 +49,12 @@ import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.CryptoException;
-import org.semux.crypto.EdDSA;
+import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
+import org.semux.crypto.cache.PublicKeyCache;
 import org.semux.net.NodeManager;
+import org.semux.net.filter.SemuxIpFilter;
 
 public class SemuxApiImpl implements SemuxApi {
     private Kernel kernel;
@@ -62,14 +70,14 @@ public class SemuxApiImpl implements SemuxApi {
 
     @Override
     public ApiHandlerResponse getInfo() {
-        return new GetInfoResponse(true, new GetInfoResponse.InfoResult(kernel));
+        return new GetInfoResponse(true, new Types.InfoType(kernel));
     }
 
     @Override
     public ApiHandlerResponse getPeers() {
         return new GetPeersResponse(true,
                 kernel.getChannelManager().getActivePeers().parallelStream()
-                        .map(GetPeersResponse.PeerResult::new)
+                        .map(Types.PeerType::new)
                         .collect(Collectors.toList()));
     }
 
@@ -86,11 +94,14 @@ public class SemuxApiImpl implements SemuxApi {
     @Override
     public ApiHandlerResponse addToBlacklist(String ip) {
         try {
-            if (ip == null || ip.trim().length() == 0) {
-                return failure("Parameter `ip` can't be empty");
+            if (!isSet(ip)) {
+                return failure("Parameter `ip` is required");
             }
 
-            kernel.getChannelManager().getIpFilter().blacklistIp(ip.trim());
+            SemuxIpFilter ipFilter = kernel.getChannelManager().getIpFilter();
+            ipFilter.blacklistIp(ip.trim());
+            ipFilter.persist(new File(kernel.getConfig().configDir(), SemuxIpFilter.CONFIG_FILE).toPath());
+            kernel.getChannelManager().removeBlacklistedChannels();
 
             return new ApiHandlerResponse(true, null);
         } catch (UnknownHostException | IllegalArgumentException ex) {
@@ -98,14 +109,26 @@ public class SemuxApiImpl implements SemuxApi {
         }
     }
 
+    /**
+     * Whether a value is supplied
+     * 
+     * @param value
+     * @return
+     */
+    private boolean isSet(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
+
     @Override
     public ApiHandlerResponse addToWhitelist(String ip) {
         try {
-            if (ip == null || ip.trim().length() == 0) {
-                return failure("Parameter `ip` can't be empty");
+            if (!isSet(ip)) {
+                return failure("Parameter `ip` is required");
             }
 
-            kernel.getChannelManager().getIpFilter().whitelistIp(ip.trim());
+            SemuxIpFilter ipFilter = kernel.getChannelManager().getIpFilter();
+            ipFilter.whitelistIp(ip.trim());
+            ipFilter.persist(new File(kernel.getConfig().configDir(), SemuxIpFilter.CONFIG_FILE).toPath());
 
             return new ApiHandlerResponse(true, null);
         } catch (UnknownHostException | IllegalArgumentException ex) {
@@ -122,7 +145,7 @@ public class SemuxApiImpl implements SemuxApi {
     @Override
     public ApiHandlerResponse getLatestBlock() {
         return new GetLatestBlockResponse(true,
-                new GetBlockResponse.BlockResult(kernel.getBlockchain().getLatestBlock()));
+                new Types.BlockType(kernel.getBlockchain().getLatestBlock()));
     }
 
     @Override
@@ -133,7 +156,7 @@ public class SemuxApiImpl implements SemuxApi {
             return failure("The requested block was not found");
         }
 
-        return new GetBlockResponse(true, new GetBlockResponse.BlockResult(block));
+        return new GetBlockResponse(true, new Types.BlockType(block));
     }
 
     @Override
@@ -146,7 +169,7 @@ public class SemuxApiImpl implements SemuxApi {
             return failure("The requested block was not found");
         }
 
-        return new GetBlockResponse(true, new GetBlockResponse.BlockResult(block));
+        return new GetBlockResponse(true, new Types.BlockType(block));
     }
 
     @Override
@@ -154,7 +177,8 @@ public class SemuxApiImpl implements SemuxApi {
         return new GetPendingTransactionsResponse(true,
                 kernel.getPendingManager().getTransactions().parallelStream()
                         .map(pendingTransaction -> pendingTransaction.transaction)
-                        .map(GetTransactionResponse.TransactionResult::new)
+                        .map(tx -> new Types.TransactionType(
+                                kernel.getBlockchain().getTransactionBlockNumber(tx.getHash()), tx))
                         .collect(Collectors.toList()));
     }
 
@@ -164,8 +188,14 @@ public class SemuxApiImpl implements SemuxApi {
         int fromInt;
         int toInt;
 
-        if (address == null) {
+        if (!isSet(address)) {
             return failure("Parameter `address` is required");
+        }
+        if (!isSet(from)) {
+            return failure("Parameter `from` is required");
+        }
+        if (!isSet(to)) {
+            return failure("Parameter `to` is required");
         }
 
         try {
@@ -187,14 +217,15 @@ public class SemuxApiImpl implements SemuxApi {
         }
         return new GetAccountTransactionsResponse(true,
                 kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream()
-                        .map(GetTransactionResponse.TransactionResult::new)
+                        .map(tx -> new Types.TransactionType(
+                                kernel.getBlockchain().getTransactionBlockNumber(tx.getHash()), tx))
                         .collect(Collectors.toList()));
     }
 
     @Override
     public ApiHandlerResponse getTransaction(String hash) {
-        if (hash == null) {
-            return failure("Parameter `hash` can't be null");
+        if (!isSet(hash)) {
+            return failure("Parameter `hash` is required");
         }
 
         byte[] hashBytes;
@@ -209,13 +240,15 @@ public class SemuxApiImpl implements SemuxApi {
             return failure("The request transaction was not found");
         }
 
-        return new GetTransactionResponse(true, new GetTransactionResponse.TransactionResult(transaction));
+        return new GetTransactionResponse(true, new Types.TransactionType(
+                kernel.getBlockchain().getTransactionBlockNumber(transaction.getHash()),
+                transaction));
     }
 
     @Override
     public ApiHandlerResponse sendTransaction(String raw) {
-        if (raw == null) {
-            return failure("Parameter `raw` can't be null");
+        if (!isSet(raw)) {
+            return failure("Parameter `raw` is required");
         }
 
         try {
@@ -228,8 +261,8 @@ public class SemuxApiImpl implements SemuxApi {
 
     @Override
     public ApiHandlerResponse getAccount(String address) {
-        if (address == null) {
-            return failure("Parameter `address` can't be null");
+        if (!isSet(address)) {
+            return failure("Parameter `address` is required");
         }
 
         byte[] addressBytes;
@@ -240,13 +273,14 @@ public class SemuxApiImpl implements SemuxApi {
         }
 
         Account account = kernel.getBlockchain().getAccountState().getAccount(addressBytes);
-        return new GetAccountResponse(true, new GetAccountResponse.AccountResult(account));
+        int transactionCount = kernel.getBlockchain().getTransactionCount(account.getAddress());
+        return new GetAccountResponse(true, new Types.AccountType(account, transactionCount));
     }
 
     @Override
     public ApiHandlerResponse getDelegate(String address) {
-        if (address == null) {
-            return failure("Parameter `address` can't be null");
+        if (!isSet(address)) {
+            return failure("Parameter `address` is required");
         }
 
         byte[] addressBytes;
@@ -263,14 +297,14 @@ public class SemuxApiImpl implements SemuxApi {
 
         BlockchainImpl.ValidatorStats validatorStats = kernel.getBlockchain().getValidatorStats(addressBytes);
 
-        return new GetDelegateResponse(true, new GetDelegateResponse.DelegateResult(validatorStats, delegate));
+        return new GetDelegateResponse(true, new Types.DelegateType(validatorStats, delegate));
     }
 
     @Override
     public ApiHandlerResponse getDelegates() {
         return new GetDelegatesResponse(true,
                 kernel.getBlockchain().getDelegateState().getDelegates().parallelStream()
-                        .map(delegate -> new GetDelegateResponse.DelegateResult(
+                        .map(delegate -> new Types.DelegateType(
                                 kernel.getBlockchain().getValidatorStats(delegate.getAddress()), delegate))
                         .collect(Collectors.toList()));
     }
@@ -282,11 +316,11 @@ public class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public ApiHandlerResponse getVotes(String delegate, String voter) {
+    public ApiHandlerResponse getVote(String delegate, String voter) {
         byte[] voterBytes;
         byte[] delegateBytes;
 
-        if (voter == null) {
+        if (!isSet(voter)) {
             return failure("Parameter `voter` is required");
         }
 
@@ -296,7 +330,7 @@ public class SemuxApiImpl implements SemuxApi {
             return failure("Parameter `voter` is not a valid hexadecimal string");
         }
 
-        if (delegate == null) {
+        if (!isSet(delegate)) {
             return failure("Parameter `delegate` is required");
         }
 
@@ -311,8 +345,8 @@ public class SemuxApiImpl implements SemuxApi {
 
     @Override
     public ApiHandlerResponse getVotes(String delegate) {
-        if (delegate == null) {
-            return failure("Parameter `delegate` can't be null");
+        if (!isSet(delegate)) {
+            return failure("Parameter `delegate` is required");
         }
 
         byte[] delegateBytes;
@@ -337,7 +371,7 @@ public class SemuxApiImpl implements SemuxApi {
     @Override
     public ApiHandlerResponse createAccount() {
         try {
-            EdDSA key = new EdDSA();
+            Key key = new Key();
             kernel.getWallet().addAccount(key);
             kernel.getWallet().flush();
             return new CreateAccountResponse(true, Hex.PREF + key.toAddressString());
@@ -382,6 +416,68 @@ public class SemuxApiImpl implements SemuxApi {
         }
     }
 
+    @Override
+    public ApiHandlerResponse signMessage(String address, String message) {
+        if (address == null) {
+            return failure("Parameter `address` is required");
+        }
+        if (message == null) {
+            return failure("Parameter `message` is required");
+        }
+        try {
+            byte[] addressBytes;
+            try {
+                addressBytes = Hex.decode0x(address);
+            } catch (CryptoException ex) {
+                return failure("Parameter `address` is not a valid hexadecimal string");
+            }
+
+            Key account = kernel.getWallet().getAccount(addressBytes);
+
+            if (account == null) {
+                return failure(String.format("The provided address %s doesn't belong to the wallet", address));
+            }
+
+            Key.Signature signedMessage = account.sign(message.getBytes());
+            return new SignMessageResponse(true, Hex.encode0x(signedMessage.toBytes()));
+        } catch (NullPointerException | IllegalArgumentException e) {
+            return failure("Invalid message");
+        }
+    }
+
+    @Override
+    public ApiHandlerResponse verifyMessage(String address, String message, String signature) {
+        if (address == null) {
+            return failure("Parameter `address` is required");
+        }
+        if (message == null) {
+            return failure("Parameter `message` is required");
+        }
+        if (signature == null) {
+            return failure("Parameter `signature` is required");
+        }
+        boolean isValidSignature = true;
+
+        try {
+            Key.Signature sig = Key.Signature.fromBytes(Hex.decode0x(signature));
+            EdDSAPublicKey pubKey = PublicKeyCache.computeIfAbsent(sig.getPublicKey());
+            byte[] signatureAddress = Hash.h160(pubKey.getEncoded());
+
+            byte[] addressBytes;
+            addressBytes = Hex.decode0x(address);
+            if (!Arrays.equals(signatureAddress, addressBytes)) {
+                isValidSignature = false;
+            }
+            if (!Key.verify(message.getBytes(), sig)) {
+                isValidSignature = false;
+            }
+
+        } catch (NullPointerException | IllegalArgumentException | CryptoException e) {
+            isValidSignature = false;
+        }
+        return new VerifyMessageResponse(true, isValidSignature);
+    }
+
     /**
      * Validates node parameter of /add_node API
      *
@@ -390,8 +486,8 @@ public class SemuxApiImpl implements SemuxApi {
      * @return validated hostname and port number
      */
     protected NodeManager.Node validateAddNodeParameter(String node) {
-        if (node == null || node.length() == 0) {
-            throw new IllegalArgumentException("Parameter `node` can't be empty");
+        if (!isSet(node)) {
+            throw new IllegalArgumentException("Parameter `node` is required");
         }
 
         Matcher matcher = Pattern.compile("^(?<host>.+?):(?<port>\\d+)$").matcher(node.trim());
