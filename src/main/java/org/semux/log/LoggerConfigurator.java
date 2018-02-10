@@ -18,6 +18,7 @@ import org.apache.logging.log4j.status.StatusData;
 import org.apache.logging.log4j.status.StatusListener;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.semux.config.Constants;
+import org.semux.util.SystemUtil;
 import org.xml.sax.SAXException;
 
 /**
@@ -73,7 +74,7 @@ public class LoggerConfigurator {
             if (throwable instanceof SAXException
                     || throwable instanceof IOException
                     || throwable instanceof ParserConfigurationException) {
-                System.exit(1);
+                SystemUtil.exit(1);
             }
         }
 
