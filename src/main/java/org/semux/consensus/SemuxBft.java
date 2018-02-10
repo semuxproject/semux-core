@@ -453,7 +453,7 @@ public class SemuxBft implements Consensus {
      *            new height
      */
     protected void onNewHeight(long newHeight) {
-        if (newHeight > height) {
+        if (newHeight > height && state != State.FINALIZE) {
             // update active validators (potential overhead)
             activeValidators = channelMgr.getActiveChannels(validators);
 
