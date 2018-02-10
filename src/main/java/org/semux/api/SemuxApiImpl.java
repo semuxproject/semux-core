@@ -112,7 +112,7 @@ public class SemuxApiImpl implements SemuxApi {
 
     /**
      * Whether a value is supplied
-     * 
+     *
      * @param value
      * @return
      */
@@ -163,7 +163,13 @@ public class SemuxApiImpl implements SemuxApi {
     @Override
     public ApiHandlerResponse getBlock(String hashString) {
 
-        byte[] hash = Hex.decode0x(hashString);
+        byte[] hash;
+        try {
+            hash = Hex.decode0x(hashString);
+        } catch (CryptoException ex) {
+            return failure("Parameter `hash` is not a valid hexadecimal string");
+        }
+
         Block block = kernel.getBlockchain().getBlock(hash);
 
         if (block == null) {
