@@ -249,6 +249,20 @@ public interface Config {
      */
     Set<MessageCode> netPrioritizedMessages();
 
+    /**
+     * Returns a list of DNS seeds for main network
+     *
+     * @return
+     */
+    List<String> netDnsSeedsMainNet();
+
+    /**
+     * Returns a list of DNS seeds for test network
+     *
+     * @return
+     */
+    List<String> netDnsSeedsTestNet();
+
     // =========================
     // API
     // =========================

@@ -10,6 +10,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -29,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.IntegrationTest;
+import org.semux.Kernel;
 import org.semux.Kernel.State;
 import org.semux.KernelMock;
 import org.semux.Network;
@@ -37,6 +39,7 @@ import org.semux.core.Genesis;
 import org.semux.core.Unit;
 import org.semux.net.NodeManager;
 import org.semux.net.NodeManager.Node;
+import org.semux.net.SemuxChannelInitializer;
 import org.semux.rules.KernelRule;
 
 @Category(IntegrationTest.class)
@@ -85,14 +88,26 @@ public class SyncingTest {
         nodes.add(new Node(kernel1.getConfig().p2pListenIp(), kernel1.getConfig().p2pListenPort()));
         nodes.add(new Node(kernel2.getConfig().p2pListenIp(), kernel2.getConfig().p2pListenPort()));
         nodes.add(new Node(kernel3.getConfig().p2pListenIp(), kernel3.getConfig().p2pListenPort()));
-        mockStatic(NodeManager.class);
-        when(NodeManager.getSeedNodes(Network.DEVNET)).thenReturn(nodes);
 
         // start kernels
         kernel1.start();
         kernel2.start();
         kernel3.start();
         kernel4.start();
+
+        List<Kernel> kernels = new ArrayList<>();
+        kernels.add(kernel1);
+        kernels.add(kernel2);
+        kernels.add(kernel3);
+        kernels.add(kernel4);
+
+        // connect to each other
+        for (Kernel kernel : kernels) {
+            for (Node node : nodes) {
+                SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, node);
+                kernel.getClient().connect(node, ci);
+            }
+        }
 
         // wait for kernels
         await().atMost(20, SECONDS).until(() -> kernel1.state() == State.RUNNING

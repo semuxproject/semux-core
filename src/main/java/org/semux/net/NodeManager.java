@@ -12,6 +12,7 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
@@ -43,9 +44,6 @@ public class NodeManager {
             return new Thread(r, "node-" + cnt.getAndIncrement());
         }
     };
-
-    private static final String DNS_SEED_MAINNET = "mainnet.semux.org";
-    private static final String DNS_SEED_TESTNET = "testnet.semux.org";
 
     private static final long MAX_QUEUE_SIZE = 1024;
     private static final int LRU_CACHE_SIZE = 1024;
@@ -159,27 +157,29 @@ public class NodeManager {
      * @param network
      * @return
      */
-    public static Set<Node> getSeedNodes(Network network) {
+    public Set<Node> getSeedNodes(Network network) {
         Set<Node> nodes = new HashSet<>();
 
-        try {
-            String name;
-            switch (network) {
-            case MAINNET:
-                name = DNS_SEED_MAINNET;
-                break;
-            case TESTNET:
-                name = DNS_SEED_TESTNET;
-                break;
-            default:
-                return nodes;
-            }
+        List<String> names;
+        switch (network) {
+        case MAINNET:
+            names = kernel.getConfig().netDnsSeedsMainNet();
+            break;
+        case TESTNET:
+            names = kernel.getConfig().netDnsSeedsTestNet();
+            break;
+        default:
+            return nodes;
+        }
 
-            for (InetAddress a : InetAddress.getAllByName(name)) {
-                nodes.add(new Node(a, Constants.DEFAULT_P2P_PORT));
+        for (String name : names) {
+            try {
+                for (InetAddress a : InetAddress.getAllByName(name)) {
+                    nodes.add(new Node(a, Constants.DEFAULT_P2P_PORT));
+                }
+            } catch (UnknownHostException e) {
+                logger.info("Failed to get seed nodes from {}", name);
             }
-        } catch (UnknownHostException e) {
-            logger.info("Failed to get seed nodes from {}", network);
         }
 
         return nodes;
