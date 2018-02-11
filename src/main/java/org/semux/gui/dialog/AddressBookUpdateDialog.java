@@ -34,6 +34,7 @@ import org.semux.util.exception.UnreachableException;
 public class AddressBookUpdateDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
+    private static final int MAX_ADDRESS_NAME_LENGTH = 256;
 
     private transient Wallet wallet;
     private transient WalletModel model;
@@ -113,7 +114,7 @@ public class AddressBookUpdateDialog extends JDialog implements ActionListener {
             String name = nameText.getText().trim();
             String address = addressText.getText().trim();
 
-            if (StringUtils.isEmpty(name)) {
+            if (StringUtils.isEmpty(name) || name.length() > MAX_ADDRESS_NAME_LENGTH) {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidName"));
                 return;
             }
