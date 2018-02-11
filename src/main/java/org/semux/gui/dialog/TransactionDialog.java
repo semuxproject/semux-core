@@ -13,6 +13,7 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
@@ -58,13 +59,15 @@ public class TransactionDialog extends JDialog {
         JLabel timestamp = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
         timestamp.setName("timestampText");
 
-        JTextArea data = new JTextArea(Hex.encode0x(tx.getData()));
+        JTextArea data = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getData()));
         data.setName("dataText");
-        data.setEditable(false);
+        data.setLineWrap(true);
+        JScrollPane dataScroll = new JScrollPane(data);
 
-        JTextArea dataDecoded = new JTextArea(Bytes.toString(tx.getData()));
+        JTextArea dataDecoded = SwingUtil.textAreaWithCopyPopup(Bytes.toString(tx.getData()));
         dataDecoded.setName("dataDecodedText");
-        dataDecoded.setEditable(false);
+        dataDecoded.setLineWrap(true);
+        JScrollPane dataDecodedScroll = new JScrollPane(dataDecoded);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());
@@ -93,8 +96,8 @@ public class TransactionDialog extends JDialog {
                         .addComponent(fee)
                         .addComponent(nonce)
                         .addComponent(timestamp)
-                        .addComponent(data, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(dataDecoded, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(dataScroll, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(dataDecodedScroll, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap(19, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
@@ -135,11 +138,11 @@ public class TransactionDialog extends JDialog {
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblData)
-                        .addComponent(data, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(dataScroll, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblDataDecoded)
-                        .addComponent(dataDecoded, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(dataDecodedScroll, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap(20, Short.MAX_VALUE))
         );
         getContentPane().setLayout(groupLayout);
