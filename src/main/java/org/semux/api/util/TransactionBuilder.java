@@ -59,7 +59,7 @@ public class TransactionBuilder {
 
     public TransactionBuilder withFrom(String from) {
         if (from == null) {
-            throw new IllegalArgumentException("Parameter `from` can't be null");
+            throw new IllegalArgumentException("Parameter `from` is required");
         }
 
         try {
@@ -85,7 +85,7 @@ public class TransactionBuilder {
         }
 
         if (to == null) {
-            throw new IllegalArgumentException("Parameter `to` can't be null");
+            throw new IllegalArgumentException("Parameter `to` is required");
         }
 
         try {
