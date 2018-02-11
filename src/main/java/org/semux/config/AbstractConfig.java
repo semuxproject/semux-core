@@ -75,7 +75,7 @@ public abstract class AbstractConfig implements Config {
             MessageCode.BFT_NEW_VIEW,
             MessageCode.BFT_PROPOSAL,
             MessageCode.BFT_VOTE));
-    protected List<String> netDnsSeedsMainNet = Collections.singletonList("mainnet.semux.org");
+    protected List<String> netDnsSeedsMainNet = Collections.unmodifiableList(Arrays.asList("mainnet.semux.org","mainnet.semux.net"));
     protected List<String> netDnsSeedsTestNet = Collections.singletonList("testnet.semux.org");
 
     // =========================
