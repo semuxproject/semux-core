@@ -383,8 +383,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
         // update account list
         selectFrom.removeAllItems();
-        for (int i = 0; i < list.size(); i++) {
-            selectFrom.addItem(new AccountItem(list.get(i)));
+        for (WalletAccount aList : list) {
+            selectFrom.addItem(new AccountItem(aList));
         }
 
         // recover selected account

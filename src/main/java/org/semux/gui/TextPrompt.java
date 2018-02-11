@@ -34,7 +34,7 @@ public class TextPrompt extends JLabel
     private static final long serialVersionUID = -6095416841424024641L;
 
     public enum Show {
-        ALWAYS, FOCUS_GAINED, FOCUS_LOST;
+        ALWAYS, FOCUS_GAINED, FOCUS_LOST
     }
 
     private transient JTextComponent component;

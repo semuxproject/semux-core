@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -170,7 +169,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
             refresh();
             break;
         case ADD_ADDRESS: {
-            AddressBookUpdateDialog dialog = new AddressBookUpdateDialog(this, Optional.empty(), wallet, model);
+            AddressBookUpdateDialog dialog = new AddressBookUpdateDialog(this, null, wallet, model);
             dialog.setVisible(true);
             break;
         }
@@ -180,7 +179,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("SelectAddress"));
                 break;
             }
-            AddressBookUpdateDialog dialog = new AddressBookUpdateDialog(this, Optional.of(entry), wallet, model);
+            AddressBookUpdateDialog dialog = new AddressBookUpdateDialog(this, entry, wallet, model);
             dialog.setVisible(true);
             break;
         }

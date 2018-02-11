@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.PowerMockRunnerDelegate;
@@ -36,6 +37,7 @@ import org.semux.core.Transaction;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Block.class, System.class })
 @PowerMockRunnerDelegate(Parameterized.class)
+@PowerMockIgnore({ "jdk.internal.*", "javax.management.*" })
 public class SemuxBftValidateBlockTest {
 
     @Parameterized.Parameters(name = "{index}: {0}")

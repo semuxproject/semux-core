@@ -296,8 +296,8 @@ public class SendPanel extends JPanel implements ActionListener {
 
         // update account list
         selectFrom.removeAllItems();
-        for (int i = 0; i < list.size(); i++) {
-            selectFrom.addItem(new AccountItem(list.get(i)));
+        for (WalletAccount aList : list) {
+            selectFrom.addItem(new AccountItem(aList));
         }
 
         // recover selected account
@@ -435,7 +435,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
             this.account = a;
             this.name = Hex.PREF + account.getKey().toAddressString() + ", " // address
-                    + (alias.isPresent() ? alias.get() + ", " : "") // alias
+                    + (alias.map(s -> s + ", ").orElse("")) // alias
                     + SwingUtil.formatValue(account.getAvailable()); // available
         }
 
