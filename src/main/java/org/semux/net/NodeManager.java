@@ -21,6 +21,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import org.semux.Kernel;
 import org.semux.Network;
@@ -172,15 +173,17 @@ public class NodeManager {
             return nodes;
         }
 
-        for (String name : names) {
-            try {
-                for (InetAddress a : InetAddress.getAllByName(name)) {
-                    nodes.add(new Node(a, Constants.DEFAULT_P2P_PORT));
-                }
-            } catch (UnknownHostException e) {
-                logger.info("Failed to get seed nodes from {}", name);
-            }
-        }
+        names.parallelStream()
+                .map(name -> {
+                    try {
+                        return InetAddress.getAllByName(name);
+                    } catch (UnknownHostException e) {
+                        logger.warn("Failed to get seed nodes from {}", name);
+                        return new InetAddress[0];
+                    }
+                })
+                .flatMap(Stream::of)
+                .forEach(address -> nodes.add(new Node(address.getHostAddress(), Constants.DEFAULT_P2P_PORT)));
 
         return nodes;
     }
