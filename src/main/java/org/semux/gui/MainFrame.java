@@ -10,7 +10,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -258,7 +257,6 @@ public class MainFrame extends JFrame implements ActionListener {
      */
     protected JButton createButton(String name, String icon, Action action) {
         JButton btn = new JButton(name);
-        btn.setFont(new Font("Lucida Grande", Font.PLAIN, 14));
         btn.setActionCommand(action.name());
         btn.addActionListener(this);
         btn.setIcon(SwingUtil.loadImage(icon, 36, 36));

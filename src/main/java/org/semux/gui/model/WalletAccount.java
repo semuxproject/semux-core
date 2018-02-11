@@ -17,10 +17,10 @@ import org.semux.crypto.Key;
 
 public class WalletAccount extends Account {
     private Key key;
-    private Optional<String> name;
+    private String name;
     private List<Transaction> transactions = new ArrayList<>();
 
-    public WalletAccount(Key key, Account acc, Optional<String> name) {
+    public WalletAccount(Key key, Account acc, String name) {
         super(acc.getAddress(), acc.getAvailable(), acc.getLocked(), acc.getNonce());
         this.key = key;
         this.name = name;
@@ -47,10 +47,10 @@ public class WalletAccount extends Account {
     }
 
     public Optional<String> getName() {
-        return name;
+        return Optional.ofNullable(name);
     }
 
-    public void setName(Optional<String> name) {
+    public void setName(String name) {
         this.name = name;
     }
 
