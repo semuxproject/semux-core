@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.semux.Network;
 import org.semux.config.exception.ConfigException;
@@ -31,6 +30,7 @@ import org.semux.core.TransactionType;
 import org.semux.crypto.Hash;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
+import org.semux.util.BigIntegerUtil;
 import org.semux.util.Bytes;
 import org.semux.util.StringUtil;
 import org.semux.util.SystemUtil;
@@ -170,23 +170,13 @@ public abstract class AbstractConfig implements Config {
     public String getPrimaryValidator(List<String> validators, long height, int view, boolean uniformDist) {
         // TODO: add a checkpoint once UNIFORM_DISTRIBUTION is fully activated
         if (uniformDist) {
-            long seed = new BigInteger(Bytes.merge(Bytes.of(height), Bytes.of(view))).longValue();
-            return validators.get(deterministicRandom(seed, validators.size()));
+            BigInteger seed = BigInteger.valueOf(height).add(BigIntegerUtil.random(BigInteger.valueOf(view)));
+            BigInteger size = BigInteger.valueOf(validators.size());
+            return validators.get(BigIntegerUtil.random(seed).mod(size).intValue());
         } else {
             byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
             return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
         }
-    }
-
-    public static int deterministicRandom(long seed, long boundary) {
-        long oldSeed, nextSeed;
-        AtomicLong s = new AtomicLong(seed);
-        do {
-            oldSeed = s.get();
-            nextSeed = (oldSeed * 0x5DEECE66DL + 0xBL) & ((1L << 48) - 1);
-        } while (!s.compareAndSet(oldSeed, nextSeed));
-        int nextInt = (int) (nextSeed >>> (48 - 24));
-        return (int) (nextInt / (float) (1 << 24) * boundary);
     }
 
     @Override
