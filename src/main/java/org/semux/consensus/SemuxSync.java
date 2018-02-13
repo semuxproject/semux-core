@@ -461,7 +461,6 @@ public class SemuxSync implements SyncManager {
             writeLock.unlock();
         }
 
-        current.set(block.getNumber() + 1);
         return true;
     }
 

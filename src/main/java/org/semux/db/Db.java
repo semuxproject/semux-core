@@ -6,6 +6,7 @@
  */
 package org.semux.db;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -81,4 +82,11 @@ public interface Db {
      * 
      */
     void destroy();
+
+    /**
+     * Returns the data directory of this database.
+     *
+     * @return
+     */
+    Path getDataDir();
 }

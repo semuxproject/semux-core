@@ -195,6 +195,11 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
+    public File databaseDir() {
+        return new File(dataDir, Constants.DATABASE_DIR);
+    }
+
+    @Override
     public File configDir() {
         return new File(dataDir, Constants.CONFIG_DIR);
     }

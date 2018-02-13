@@ -12,8 +12,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Amount.Unit.SEM;
 
 import java.util.Arrays;
@@ -30,6 +32,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.config.Constants;
 import org.semux.config.MainnetConfig;
 import org.semux.core.Block;
+import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
@@ -61,7 +64,8 @@ public class SemuxBftTest {
         SemuxBft bft = mock(SemuxBft.class);
         bft.config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
         bft.validators = validators;
-        bft.uniformDistributionActivated = false;
+        bft.chain = mock(Blockchain.class);
+        when(bft.chain.forkActivated(anyLong(), eq(UNIFORM_DISTRIBUTION))).thenReturn(false);
         when(bft.isPrimary(anyLong(), anyInt(), anyString())).thenCallRealMethod();
 
         testIsPrimaryConsecutiveValidatorProbability(bft);
@@ -75,7 +79,8 @@ public class SemuxBftTest {
         SemuxBft bft = mock(SemuxBft.class);
         bft.config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
         bft.validators = validators;
-        bft.uniformDistributionActivated = true;
+        bft.chain = mock(Blockchain.class);
+        when(bft.chain.forkActivated(anyLong(), eq(UNIFORM_DISTRIBUTION))).thenReturn(true);
         when(bft.isPrimary(anyLong(), anyInt(), anyString())).thenCallRealMethod();
 
         testIsPrimaryConsecutiveValidatorProbability(bft);

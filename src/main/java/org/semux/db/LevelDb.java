@@ -10,6 +10,8 @@ import static org.fusesource.leveldbjni.JniDBFactory.factory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -22,7 +24,6 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
-import org.semux.config.Constants;
 import org.semux.db.exception.LevelDbException;
 import org.semux.util.ClosableIterator;
 import org.semux.util.FileUtil;
@@ -164,6 +165,11 @@ public class LevelDb implements Db {
     }
 
     @Override
+    public Path getDataDir() {
+        return file.toPath();
+    }
+
+    @Override
     public ClosableIterator<Entry<byte[], byte[]>> iterator() {
         return iterator(null);
     }
@@ -218,11 +224,11 @@ public class LevelDb implements Db {
             open();
         }
 
-        protected void open() {
+        @Override
+        public void open() {
             if (open.compareAndSet(false, true)) {
                 for (DbName name : DbName.values()) {
-                    File file = new File(dataDir,
-                            Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
+                    File file = Paths.get(dataDir.getAbsolutePath(), name.toString().toLowerCase()).toFile();
                     databases.put(name, new LevelDb(file));
                 }
             }
@@ -241,6 +247,11 @@ public class LevelDb implements Db {
                     db.close();
                 }
             }
+        }
+
+        @Override
+        public Path getDataDir() {
+            return dataDir.toPath();
         }
     }
 }

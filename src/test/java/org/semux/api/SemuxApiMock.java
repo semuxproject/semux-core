@@ -39,7 +39,7 @@ public class SemuxApiMock {
         if (isRunning.compareAndSet(false, true)) {
             Config config = kernel.getConfig();
 
-            dbFactory = new LevelDbFactory(config.dataDir());
+            dbFactory = new LevelDbFactory(config.databaseDir());
             client = new PeerClient(config.p2pListenIp(), config.p2pListenPort(), kernel.getCoinbase());
 
             kernel.setBlockchain(new BlockchainImpl(config, dbFactory));

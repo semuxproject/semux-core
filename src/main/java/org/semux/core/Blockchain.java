@@ -7,6 +7,7 @@
 package org.semux.core;
 
 import java.util.List;
+import java.util.Map;
 
 import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.BlockchainImpl.ValidatorStats;
@@ -180,6 +181,13 @@ public interface Blockchain {
      * @return
      */
     ValidatorStats getValidatorStats(byte[] address);
+
+    /**
+     * Get currently activated forks.
+     *
+     * @return
+     */
+    Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> getActivatedForks();
 
     /**
      * Register a blockchain listener.

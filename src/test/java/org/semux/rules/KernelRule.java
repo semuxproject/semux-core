@@ -132,7 +132,7 @@ public class KernelRule extends TemporaryFolder {
      * Opens the database.
      */
     public void openBlockchain() {
-        dbFactory = new LevelDbFactory(kernel.getConfig().dataDir());
+        dbFactory = new LevelDbFactory(kernel.getConfig().databaseDir());
         BlockchainImpl chain = new BlockchainImpl(kernel.getConfig(), dbFactory);
         kernel.setBlockchain(chain);
     }

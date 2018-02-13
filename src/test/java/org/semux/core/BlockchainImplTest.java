@@ -285,7 +285,7 @@ public class BlockchainImplTest {
     public void testForkActivated() {
         ValidatorActivatedFork fork = ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
         for (int i = 1; i <= fork.activationBlocksLookup; i++) {
-            chain.addBlock(createBlock(i, coinbase, new BlockHeaderData(fork.number).toBytes(),
+            chain.addBlock(createBlock(i, coinbase, new BlockHeaderData(new BlockHeaderData.ForkSignal(fork)).toBytes(),
                     Collections.singletonList(tx), Collections.singletonList(res)));
         }
 
@@ -301,7 +301,7 @@ public class BlockchainImplTest {
     @Test
     public void testForkCompatibility() {
         ValidatorActivatedFork fork = ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
-        Block block = createBlock(1, coinbase, new BlockHeaderData(fork.number).toBytes(),
+        Block block = createBlock(1, coinbase, new BlockHeaderData(new BlockHeaderData.ForkSignal(fork)).toBytes(),
                 Collections.singletonList(tx), Collections.singletonList(res));
         Whitebox.setInternalState(config, "forkUniformDistributionEnabled", false);
         chain = new BlockchainImpl(config, temporaryDBFactory);

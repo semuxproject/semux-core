@@ -6,11 +6,13 @@
  */
 package org.semux.consensus;
 
+import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sum;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
@@ -126,13 +128,14 @@ public class SemuxBft implements Consensus {
     protected VoteSet precommitVotes;
     protected VoteSet commitVotes;
 
-    protected boolean uniformDistributionActivated = false;
+    protected Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks;
 
     public SemuxBft(Kernel kernel) {
         this.kernel = kernel;
         this.config = kernel.getConfig();
 
         this.chain = kernel.getBlockchain();
+        this.activatedForks = this.chain.getActivatedForks();
         this.channelMgr = kernel.getChannelManager();
         this.pendingMgr = kernel.getPendingManager();
         this.sync = kernel.getSyncManager();
@@ -663,12 +666,17 @@ public class SemuxBft implements Consensus {
         }
     }
 
-    protected void activateForks() {
-        if (config.forkUniformDistributionEnabled() && !uniformDistributionActivated) {
-            uniformDistributionActivated = chain.forkActivated(height, ValidatorActivatedFork.UNIFORM_DISTRIBUTION);
-            if (uniformDistributionActivated) {
-                logger.info("Fork UNIFORM_DISTRIBUTION activated at height {}", height);
-            }
+    /**
+     * Attempt to activate pending forks at current height.
+     */
+    private void activateForks() {
+        if (config.forkUniformDistributionEnabled()
+                && !activatedForks.containsKey(UNIFORM_DISTRIBUTION)
+                && height <= UNIFORM_DISTRIBUTION.activationDeadline
+                && chain.forkActivated(height, UNIFORM_DISTRIBUTION)) {
+            activatedForks.put(UNIFORM_DISTRIBUTION,
+                    new ValidatorActivatedFork.Activation(UNIFORM_DISTRIBUTION, height));
+            logger.info("Fork UNIFORM_DISTRIBUTION activated at height {}", height);
         }
     }
 
@@ -712,7 +720,9 @@ public class SemuxBft implements Consensus {
      * @return
      */
     protected boolean isPrimary(long height, int view, String peerId) {
-        return config.getPrimaryValidator(validators, height, view, uniformDistributionActivated).equals(peerId);
+        return config
+                .getPrimaryValidator(validators, height, view, chain.forkActivated(height, UNIFORM_DISTRIBUTION))
+                .equals(peerId);
     }
 
     /**
@@ -769,8 +779,10 @@ public class SemuxBft implements Consensus {
         long number = height;
         byte[] prevHash = chain.getBlockHeader(height - 1).getHash();
         long timestamp = System.currentTimeMillis();
-        byte[] data = config.forkUniformDistributionEnabled()
-                ? new BlockHeaderData(ValidatorActivatedFork.UNIFORM_DISTRIBUTION.number).toBytes()
+
+        // signal UNIFORM_DISTRIBUTION fork
+        byte[] data = signalingUniformDistribution()
+                ? new BlockHeaderData(new BlockHeaderData.ForkSignal(UNIFORM_DISTRIBUTION)).toBytes()
                 : new byte[0];
 
         BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,
@@ -781,6 +793,27 @@ public class SemuxBft implements Consensus {
         logger.debug("Block creation: # txs = {}, time = {} ms", pendingTxs.size(), t2 - t1);
 
         return block;
+    }
+
+    /**
+     * Check whether SemuxBFT should be signaling
+     * ${@link ValidatorActivatedFork#UNIFORM_DISTRIBUTION} at current height.
+     *
+     * @return
+     */
+    private boolean signalingUniformDistribution() {
+        // do not signal the fork if this user decides not to participate in the fork
+        if (!config.forkUniformDistributionEnabled()) {
+            return false;
+        }
+
+        // continue signaling after fork activation
+        if (activatedForks.containsKey(UNIFORM_DISTRIBUTION)) {
+            return true;
+        }
+
+        // signal the fork before its activation deadline
+        return height <= UNIFORM_DISTRIBUTION.activationDeadline;
     }
 
     /**
