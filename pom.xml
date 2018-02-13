@@ -902,12 +902,6 @@
             <version>3.5.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.knowm.xchart</groupId>
-            <artifactId>xchart-parent</artifactId>
-            <version>3.5.0</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <profiles>
