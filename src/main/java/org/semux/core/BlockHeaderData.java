@@ -11,8 +11,12 @@ import java.util.BitSet;
 import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BlockHeaderData {
+
+    private static Logger logger = LoggerFactory.getLogger(BlockHeaderData.class);
 
     public static final BlockHeaderData VERSION_0_HEADER_DATA = new BlockHeaderData();
 
@@ -93,7 +97,7 @@ public class BlockHeaderData {
     }
 
     public static BlockHeaderData fromBytes(byte[] bytes) {
-        // consider 0-length header data as version 0
+        // consider 0-length header data as encoding version 0
         if (bytes == null || bytes.length == 0) {
             return VERSION_0_HEADER_DATA;
         }
@@ -109,7 +113,8 @@ public class BlockHeaderData {
                 byte[] reservedDecoded = simpleDecoder.readBytes();
                 return new BlockHeaderData(versionDecoded, reservedDecoded);
             }
-        } catch (IndexOutOfBoundsException ex) {
+        } catch (Exception ex) {
+            logger.debug("Failed to decode BlockHeaderData, falling back to an empty header data.", ex);
             return VERSION_0_HEADER_DATA;
         }
     }
@@ -133,10 +138,6 @@ public class BlockHeaderData {
 
         boolean signalingFork(ValidatorActivatedFork fork) {
             return bitSet.get(fork.number);
-        }
-
-        void addFork(ValidatorActivatedFork fork) {
-            bitSet.set(fork.number);
         }
 
         byte[] toBytes() {

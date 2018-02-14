@@ -53,6 +53,9 @@ import org.slf4j.LoggerFactory;
  * [3, block_hash] => [block_number]
  * [4, transaction_hash] => [block_number, from, to] | [coinbase_transaction]
  * [5, address, n] => [transaction_hash]
+ * [7] => [activated forks]
+ *
+ * [0xff] => [database version]
  * </pre>
  *
  * <pre>
@@ -178,7 +181,10 @@ public class BlockchainImpl implements Blockchain {
      * @param dbFactory
      */
     private void upgradeDb0(DbFactory dbFactory) {
+        // run the migration
         new MigrationBlockDbVersion001().migrate(config, dbFactory);
+
+        // reload this blockchain database
         openDb(dbFactory);
     }
 
@@ -750,7 +756,10 @@ public class BlockchainImpl implements Blockchain {
     }
 
     /**
-     * A temporary blockchain for database migration.
+     * A temporary blockchain for database migration. This class implements a
+     * lightweight version of
+     * ${@link org.semux.consensus.SemuxBft#applyBlock(Block)} to migrate blocks
+     * from an existing database to the latest schema.
      */
     private class MigrationBlockchain extends BlockchainImpl {
 
@@ -782,7 +791,11 @@ public class BlockchainImpl implements Blockchain {
     }
 
     /**
-     * Database migration from version 0 to version 1.
+     * Database migration from version 0 to version 1. The migration process creates
+     * a temporary ${@link MigrationBlockchain} then migrates all blocks from an
+     * existing blockchain database to the created temporary blockchain database.
+     * Once all blocks have been successfully migrated, the existing blockchain
+     * database is replaced by the migrated temporary blockchain database.
      */
     private class MigrationBlockDbVersion001 implements Migration {
 
