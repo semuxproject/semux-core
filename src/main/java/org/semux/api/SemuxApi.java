@@ -80,7 +80,7 @@ public interface SemuxApi {
 
     @GET
     @Path("add_to_whitelist")
-    @ApiOperation(value = "Add to Whitelist", notes = "Adds an IP address to whitelist.", response = ApiHandlerResponse.class)
+    @ApiOperation(value = "Add to whitelist", notes = "Adds an IP address to whitelist.", response = ApiHandlerResponse.class)
     @Produces(JSON_MIME)
     ApiHandlerResponse addToWhitelist(
             @ApiParam(value = "IP address", required = true) @QueryParam("ip") String ipAddress);
@@ -160,7 +160,7 @@ public interface SemuxApi {
 
     @GET
     @Path("get_validators")
-    @ApiOperation(value = "Get valididators", notes = "Returns a list of validators.", response = GetValidatorsResponse.class)
+    @ApiOperation(value = "Get validators", notes = "Returns a list of validators.", response = GetValidatorsResponse.class)
     @Produces(JSON_MIME)
     ApiHandlerResponse getValidators();
 
