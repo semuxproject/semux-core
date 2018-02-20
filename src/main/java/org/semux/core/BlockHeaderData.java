@@ -114,7 +114,7 @@ public class BlockHeaderData {
                 return new BlockHeaderData(versionDecoded, reservedDecoded);
             }
         } catch (Exception ex) {
-            logger.debug("Failed to decode BlockHeaderData, falling back to an empty header data.", ex);
+            logger.trace("Failed to decode BlockHeaderData, falling back to an empty header data.", ex);
             return VERSION_0_HEADER_DATA;
         }
     }

@@ -170,13 +170,21 @@ public abstract class AbstractConfig implements Config {
     public String getPrimaryValidator(List<String> validators, long height, int view, boolean uniformDist) {
         // TODO: add a checkpoint once UNIFORM_DISTRIBUTION is fully activated
         if (uniformDist) {
-            BigInteger seed = BigInteger.valueOf(height).add(BigIntegerUtil.random(BigInteger.valueOf(view)));
-            BigInteger size = BigInteger.valueOf(validators.size());
-            return validators.get(BigIntegerUtil.random(seed).mod(size).intValue());
+            return validators.get(getUniformDistPrimaryValidatorNumber(validators.size(), height, view));
         } else {
             byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
             return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
         }
+    }
+
+    public int getUniformDistPrimaryValidatorNumber(int size, long height, long view) {
+        BigInteger seed = BigIntegerUtil
+                .random(BigInteger.valueOf(height))
+                .xor(BigIntegerUtil.random(BigInteger.valueOf(view)));
+        return BigIntegerUtil
+                .random(seed)
+                .mod(BigInteger.valueOf(size))
+                .intValue();
     }
 
     @Override

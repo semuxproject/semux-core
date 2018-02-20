@@ -16,7 +16,11 @@ import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.style.Styler;
+import org.semux.config.Constants;
+import org.semux.config.MainnetConfig;
+import org.semux.crypto.Hash;
 import org.semux.util.BigIntegerUtil;
+import org.semux.util.Bytes;
 
 /**
  * This program generates a chart that shows the distribution of selected
@@ -28,6 +32,7 @@ public class ValidatorDistributionChart {
     public static void main(String[] args) {
         Random random = new Random();
 
+        MainnetConfig mainnetConfig = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
         HashMap<Integer, AtomicInteger> mapPRNG = new HashMap<>();
         HashMap<Integer, AtomicInteger> mapPRNG_fast = new HashMap<>();
 
@@ -40,9 +45,11 @@ public class ValidatorDistributionChart {
         BigInteger seed;
         for (long height = 0; height < 1_000_000; height++) {
             view = random.nextDouble() < 0.05 ? 1 : 0; // about 5%
-            seed = BigInteger.valueOf(height).add(BigIntegerUtil.random(BigInteger.valueOf(view)));
+            seed = BigIntegerUtil
+                    .random(BigInteger.valueOf(height))
+                    .xor(BigIntegerUtil.random(BigInteger.valueOf(view)));
             vPRNG = new Random(seed.longValue()).nextInt(100);
-            vPRNG_fast = BigIntegerUtil.random(seed).mod(BigInteger.valueOf(100)).intValue();
+            vPRNG_fast = mainnetConfig.getUniformDistPrimaryValidatorNumber(100, height, view);
 
             mapPRNG.get(vPRNG).incrementAndGet();
             mapPRNG_fast.get(vPRNG_fast).incrementAndGet();
