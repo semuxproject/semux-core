@@ -125,6 +125,10 @@ public class BigIntegerUtil {
      * @return
      */
     public static BigInteger random(BigInteger seed) {
+        // scramble the seed, credits to:
+        // http://hg.openjdk.java.net/jdk8/jdk8/jdk/file/tip/src/share/classes/java/util/Random.java#l145
+        seed = seed.xor(BigInteger.valueOf(0x5DEECE66DL)).and(BigInteger.valueOf((1L << 48) - 1));
+
         final BigInteger a = BigInteger.valueOf(214013L);
         final BigInteger c = BigInteger.valueOf(2531011L);
         final BigInteger m = BigInteger.valueOf(0x7FFFL);
