@@ -455,6 +455,7 @@
                     <reuseForks>false</reuseForks>
                     <!-- allow flaky tests -->
                     <rerunFailingTestsCount>2</rerunFailingTestsCount>
+                    <argLine>-Xmx1024m</argLine>
                 </configuration>
             </plugin>
 
