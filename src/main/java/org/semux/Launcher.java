@@ -226,7 +226,8 @@ public abstract class Launcher {
         switch (SystemUtil.getOsName()) {
         case WINDOWS:
             if (!SystemUtil.isWindowsVCRedist2010Installed()) {
-                throw new LauncherException("Microsoft Visual C++ 2010 Redistributable Package is not installed.");
+                throw new LauncherException(
+                        "Microsoft Visual C++ 2012 Redistributable Package is not installed. Please visit: https://www.microsoft.com/en-us/download/details.aspx?id=30679");
             }
             break;
         default:
