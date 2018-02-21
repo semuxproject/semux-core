@@ -34,6 +34,28 @@
         <url>https://github.com/semuxproject/semux/issues</url>
     </issueManagement>
 
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>central</id>
+            <name>bintray</name>
+            <url>https://jcenter.bintray.com</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>central</id>
+            <name>bintray-plugins</name>
+            <url>https://jcenter.bintray.com</url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <build>
         <plugins>
             <!-- compile -->
@@ -566,9 +588,9 @@
 
         <!-- LevelDB -->
         <dependency>
-            <groupId>org.fusesource.leveldbjni</groupId>
+            <groupId>org.ethereum</groupId>
             <artifactId>leveldbjni-all</artifactId>
-            <version>1.8</version>
+            <version>1.18.3</version>
         </dependency>
 
         <!-- Netty network framework -->
