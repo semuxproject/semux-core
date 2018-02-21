@@ -93,7 +93,7 @@ public class SemuxBftTest {
 
         Random r = new Random(System.nanoTime());
         for (int i = 0; i < blocks; i++) {
-            int view = r.nextInt(2);
+            int view = r.nextDouble() < 0.05 ? 1 : 0;
             for (int j = 0; j < bft.validators.size(); j++) {
                 if (bft.isPrimary(i, view, bft.validators.get(j))) {
                     if (j == last) {

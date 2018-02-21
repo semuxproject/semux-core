@@ -170,10 +170,7 @@ public abstract class AbstractConfig implements Config {
     public String getPrimaryValidator(List<String> validators, long height, int view, boolean uniformDist) {
         // TODO: add a checkpoint once UNIFORM_DISTRIBUTION is fully activated
         if (uniformDist) {
-            return validators.get(
-                    view == 0
-                            ? (int) (height % (long) validators.size())
-                            : getUniformDistPrimaryValidatorNumber(validators.size(), height, view));
+            return validators.get(getUniformDistPrimaryValidatorNumber(validators.size(), height, view));
         } else {
             byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
             return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
@@ -181,13 +178,30 @@ public abstract class AbstractConfig implements Config {
     }
 
     public int getUniformDistPrimaryValidatorNumber(int size, long height, long view) {
-        BigInteger seed = BigIntegerUtil
-                .random(BigInteger.valueOf(height))
-                .xor(BigIntegerUtil.random(BigInteger.valueOf(view)));
-        return BigIntegerUtil
-                .random(seed)
-                .mod(BigInteger.valueOf(size))
-                .intValue();
+        // use round-robin for view 0
+        int rr = (int) (height % (long) size);
+        if (view == 0) {
+            return rr;
+        }
+
+        // here we ensure there will never be consecutive block forgers after view
+        // change
+        int deterministicRand;
+        final int prevDeterministicRand = getUniformDistPrimaryValidatorNumber(size, height, view - 1);
+        BigInteger subView = BigInteger.ZERO;
+        do {
+            BigInteger seed = BigIntegerUtil
+                    .random(BigInteger.valueOf(height))
+                    .xor(BigIntegerUtil.random(BigInteger.valueOf(view)))
+                    .add(subView);
+            deterministicRand = BigIntegerUtil
+                    .random(seed)
+                    .mod(BigInteger.valueOf(size))
+                    .intValue();
+            subView = subView.add(BigInteger.ONE);
+        } while (deterministicRand == prevDeterministicRand);
+
+        return deterministicRand;
     }
 
     @Override

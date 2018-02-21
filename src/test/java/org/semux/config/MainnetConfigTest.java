@@ -72,6 +72,7 @@ public class MainnetConfigTest {
                 .collect(Collectors.toList());
         final int blocks = 1000;
         final int views = 10;
+        int repeats = 0;
 
         String[][] primaryValidators = new String[blocks][views];
 
@@ -81,10 +82,18 @@ public class MainnetConfigTest {
             for (int view = 0; view < views; view++) {
                 String primary = config.getPrimaryValidator(validators, i, view, true);
                 primaryValidators[(int) i][view] = primary;
+
+                if (view > 0 && primaryValidators[(int) i][view].equals(primaryValidators[(int) i][view - 1])) {
+                    repeats++;
+                }
             }
+
             validatorsCSV.append(StringUtils.join(primaryValidators[(int) i], ",")).append("\n");
         }
 
+        logger.info("Repeats {} / {} = {}%", repeats, blocks, (double) repeats / (double) blocks * 100.0);
+
+        assertEquals(0, repeats);
         assertEquals(
                 FileUtils.readFileToString(
                         new File(MainnetConfigTest.class.getResource("/config/validators1000.csv").getFile()),
