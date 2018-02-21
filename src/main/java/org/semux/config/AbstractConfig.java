@@ -179,9 +179,8 @@ public abstract class AbstractConfig implements Config {
 
     public int getUniformDistPrimaryValidatorNumber(int size, long height, long view) {
         // use round-robin for view 0
-        int rr = (int) (height % (long) size);
         if (view == 0) {
-            return rr;
+            return (int) (height % (long) size);
         }
 
         // here we ensure there will never be consecutive block forgers after view
