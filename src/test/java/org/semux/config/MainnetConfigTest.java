@@ -68,7 +68,7 @@ public class MainnetConfigTest {
 
     @Test
     public void testPrimaryUniformDistDeterminism() throws IOException {
-        List<String> validators = IntStream.range(1, 100).boxed().map(i -> String.format("v%d", i))
+        List<String> validators = IntStream.range(0, 100).boxed().map(i -> String.format("v%d", i))
                 .collect(Collectors.toList());
         final int blocks = 1000;
         final int views = 10;

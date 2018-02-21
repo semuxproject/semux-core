@@ -18,9 +18,7 @@ import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.style.Styler;
 import org.semux.config.Constants;
 import org.semux.config.MainnetConfig;
-import org.semux.crypto.Hash;
 import org.semux.util.BigIntegerUtil;
-import org.semux.util.Bytes;
 
 /**
  * This program generates a chart that shows the distribution of selected
