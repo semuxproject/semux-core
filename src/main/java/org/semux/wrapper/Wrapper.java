@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -74,7 +75,7 @@ public class Wrapper {
     }
 
     private static List<ImmutablePair<Pattern, Supplier<String>>> getDefaultJvmOptionSuppliers() {
-        return Arrays.asList(
+        List<ImmutablePair<Pattern, Supplier<String>>> defaults = new ArrayList<>(Arrays.asList(
                 // dynamically specify maximum heap size according to available physical memory
                 // if Xmx is not specified in jvmoptions
                 ImmutablePair.of(
@@ -92,7 +93,26 @@ public class Wrapper {
                         () -> "-Dlog4j2.shutdownHookEnabled=false"),
                 ImmutablePair.of(
                         Pattern.compile("^-Dlog4j2\\.disableJmx"),
-                        () -> "-Dlog4j2.disableJmx=true"));
+                        () -> "-Dlog4j2.disableJmx=true"),
+                ImmutablePair.of(
+                        Pattern.compile("^--add-opens=java\\.base/sun\\.net\\.dns="),
+                        () -> "--add-opens=java.base/sun.net.dns=ALL-UNNAMED")));
+
+        // see: https://github.com/netty/netty/issues/6347
+        if (SystemUtil.isJavaPlatformModuleSystemAvailable()) {
+            Collections.addAll(defaults,
+                    ImmutablePair.of(
+                            Pattern.compile("^--add-opens=java\\.base/java\\.lang\\.reflect="),
+                            () -> "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED"),
+                    ImmutablePair.of(
+                            Pattern.compile("^--add-opens=java\\.base/java\\.nio="),
+                            () -> "--add-opens=java.base/java.nio=ALL-UNNAMED"),
+                    ImmutablePair.of(
+                            Pattern.compile("^--add-opens=java\\.base/sun\\.nio\\.ch="),
+                            () -> "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"));
+        }
+
+        return defaults;
     }
 
     protected int exec(Mode mode, String[] jvmOptions, String[] args) throws IOException, InterruptedException {

@@ -11,10 +11,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
+import java.lang.management.ManagementFactory;
 import java.time.Duration;
 import java.time.Instant;
 
 import org.junit.Test;
+import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,5 +69,19 @@ public class SystemUtilTest {
     public void testIsWindowsVCRedist2010Installed() {
         assumeTrue(SystemUtil.getOsName() == SystemUtil.OsName.WINDOWS);
         assertTrue(SystemUtil.isWindowsVCRedist2010Installed());
+    }
+
+    @Test
+    public void testIsJavaPlatformModuleSystemAvailable() {
+        switch (ManagementFactory.getRuntimeMXBean().getSpecVersion()) {
+        case "1.8":
+            assertFalse(SystemUtil.isJavaPlatformModuleSystemAvailable());
+            break;
+        case "9":
+            assertTrue(SystemUtil.isJavaPlatformModuleSystemAvailable());
+            break;
+        default:
+            throw new UnreachableException();
+        }
     }
 }
