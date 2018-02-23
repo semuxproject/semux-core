@@ -52,7 +52,8 @@ public class WrapperTest {
                                         "-Dlog4j2.shutdownHookEnabled=false",
                                         "-Dlog4j2.disableJmx=true",
                                         SemuxGui.class.getCanonicalName() },
-                                null },
+                                null,
+                                false },
 
                         { new String[] { "--gui" },
                                 new String[] {
@@ -63,7 +64,8 @@ public class WrapperTest {
                                         "-Dlog4j2.shutdownHookEnabled=false",
                                         "-Dlog4j2.disableJmx=true",
                                         SemuxGui.class.getCanonicalName() },
-                                2000L * 1024 * 1024 },
+                                2000L * 1024 * 1024,
+                                false },
 
                         { new String[] { "--cli" }, new String[] {
                                 getJavaBinPath(),
@@ -73,7 +75,8 @@ public class WrapperTest {
                                 "-Dlog4j2.shutdownHookEnabled=false",
                                 "-Dlog4j2.disableJmx=true",
                                 SemuxCli.class.getCanonicalName() },
-                                2000L * 1024 * 1024 },
+                                2000L * 1024 * 1024,
+                                false },
 
                         { new String[] { "--gui" },
                                 new String[] {
@@ -84,7 +87,8 @@ public class WrapperTest {
                                         "-Dlog4j2.shutdownHookEnabled=false",
                                         "-Dlog4j2.disableJmx=true",
                                         SemuxGui.class.getCanonicalName() },
-                                MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 },
+                                MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1,
+                                false },
 
                         { new String[] { "--cli" },
                                 new String[] {
@@ -95,16 +99,37 @@ public class WrapperTest {
                                         "-Dlog4j2.shutdownHookEnabled=false",
                                         "-Dlog4j2.disableJmx=true",
                                         SemuxCli.class.getCanonicalName() },
-                                MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1 } });
+                                MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1,
+                                false },
+
+                        // when module system is available
+                        { new String[] { "--gui" },
+                                new String[] {
+                                        getJavaBinPath(),
+                                        "-cp", null,
+                                        "-Xmx1600M",
+                                        "-Dlog4j2.garbagefreeThreadContextMap=true",
+                                        "-Dlog4j2.shutdownHookEnabled=false",
+                                        "-Dlog4j2.disableJmx=true",
+                                        "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
+                                        "--add-opens=java.base/java.nio=ALL-UNNAMED",
+                                        "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
+                                        SemuxGui.class.getCanonicalName() },
+                                2000L * 1024 * 1024,
+                                true },
+                });
     }
 
     String[] inputArgs, javaArgs;
     Long mockAvailableMB;
+    Boolean isModuleSystemAvailable;
 
-    public WrapperTest(String[] inputArgs, String[] javaArgs, Long mockAvailableBytes) {
+    public WrapperTest(String[] inputArgs, String[] javaArgs, Long mockAvailableBytes,
+            Boolean isModuleSystemAvailable) {
         this.inputArgs = inputArgs;
         this.javaArgs = javaArgs;
         this.mockAvailableMB = mockAvailableBytes;
+        this.isModuleSystemAvailable = isModuleSystemAvailable;
     }
 
     @Test
@@ -122,6 +147,10 @@ public class WrapperTest {
         mockStatic(SystemUtil.class);
         if (mockAvailableMB != null) {
             when(SystemUtil.getAvailableMemorySize()).thenReturn(mockAvailableMB);
+        }
+
+        if (isModuleSystemAvailable) {
+            when(SystemUtil.isJavaPlatformModuleSystemAvailable()).thenReturn(true);
         }
 
         // execution

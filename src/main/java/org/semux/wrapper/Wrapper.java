@@ -93,10 +93,7 @@ public class Wrapper {
                         () -> "-Dlog4j2.shutdownHookEnabled=false"),
                 ImmutablePair.of(
                         Pattern.compile("^-Dlog4j2\\.disableJmx"),
-                        () -> "-Dlog4j2.disableJmx=true"),
-                ImmutablePair.of(
-                        Pattern.compile("^--add-opens=java\\.base/sun\\.net\\.dns="),
-                        () -> "--add-opens=java.base/sun.net.dns=ALL-UNNAMED")));
+                        () -> "-Dlog4j2.disableJmx=true")));
 
         // see: https://github.com/netty/netty/issues/6347
         if (SystemUtil.isJavaPlatformModuleSystemAvailable()) {
