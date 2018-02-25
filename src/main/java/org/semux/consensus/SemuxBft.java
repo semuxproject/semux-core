@@ -7,9 +7,13 @@
 package org.semux.consensus;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -783,11 +787,28 @@ public class SemuxBft implements Consensus {
         }
 
         // [2] check transactions and results (skipped)
-        if (!Block.validateTransactions(header, transactions, config.network())
+
+        // remove any that are pending transactions we know about and have already
+        // validated
+        Set<Transaction> unvalidatedTransactions = new HashSet<>(transactions);
+
+        int previouslyValidatedCount = 0;
+        List<PendingManager.PendingTransaction> pending = pendingMgr.getPendingTransactions(-1);
+        for (PendingManager.PendingTransaction t : pending) {
+            if (t.transactionResult.isSuccess()) {
+                boolean found = unvalidatedTransactions.remove(t.transaction);
+                if (found) {
+                    previouslyValidatedCount++;
+                }
+            }
+        }
+
+        if (!Block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())
                 || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
             logger.debug("Invalid block transactions");
             return false;
         }
+
         if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
             logger.warn("Duplicated transaction hash is not allowed");
             return false;
@@ -805,7 +826,8 @@ public class SemuxBft implements Consensus {
         }
 
         long t2 = System.currentTimeMillis();
-        logger.debug("Block validation: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
+        logger.debug("Block validation: # txs = {}, time = {} ms, previously validated {}", transactions.size(),
+                t2 - t1, previouslyValidatedCount);
 
         Block block = new Block(header, transactions, results);
         validBlocks.put(ByteArray.of(block.getHash()), block);

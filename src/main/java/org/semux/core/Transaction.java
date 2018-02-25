@@ -8,6 +8,8 @@ package org.semux.core;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.semux.Network;
 import org.semux.config.Constants;
 import org.semux.crypto.Hash;
@@ -288,5 +290,31 @@ public class Transaction {
         return "Transaction [type=" + type + ", from=" + Hex.encode(getFrom()) + ", to=" + Hex.encode(to) + ", value="
                 + value + ", fee=" + fee + ", nonce=" + nonce + ", timestamp=" + timestamp + ", data="
                 + Hex.encode(data) + ", hash=" + Hex.encode(hash) + "]";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        Transaction that = (Transaction) o;
+
+        return new EqualsBuilder()
+                .append(encoded, that.encoded)
+                .append(hash, that.hash)
+                .append(signature, that.signature)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(encoded)
+                .append(hash)
+                .append(signature)
+                .toHashCode();
     }
 }
