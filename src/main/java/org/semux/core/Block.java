@@ -145,13 +145,17 @@ public class Block {
      * been calculated.
      *
      * @param header
+     *            block header
      * @param unvalidatedTransactions
-     * @param transactions
+     *            transactions needing validating
+     * @param allTransactions
+     *            all transactions within the block
      * @param network
+     *            network
      * @return
      */
     public static boolean validateTransactions(BlockHeader header, Collection<Transaction> unvalidatedTransactions,
-            List<Transaction> transactions, Network network) {
+            List<Transaction> allTransactions, Network network) {
         // validate transactions
         boolean valid = unvalidatedTransactions.parallelStream().allMatch((tx) -> tx.validate(network));
         if (!valid) {
@@ -159,7 +163,7 @@ public class Block {
         }
 
         // validate transactions root
-        byte[] root = MerkleUtil.computeTransactionsRoot(transactions);
+        byte[] root = MerkleUtil.computeTransactionsRoot(allTransactions);
         return Arrays.equals(root, header.getTransactionsRoot());
     }
 
