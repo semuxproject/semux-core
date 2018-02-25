@@ -827,18 +827,14 @@ public class SemuxBft implements Consensus {
     private Set<Transaction> getUnvalidatedTransactions(List<Transaction> transactions) {
         Set<Transaction> unvalidatedTransactions = new HashSet<>(transactions);
 
-        int previouslyValidatedCount = 0;
-        List<PendingManager.PendingTransaction> pending = pendingMgr.getPendingTransactions(-1);
-        for (PendingManager.PendingTransaction t : pending) {
-            if (t.transactionResult.isSuccess()) {
-                boolean found = unvalidatedTransactions.remove(t.transaction);
-                if (found) {
-                    previouslyValidatedCount++;
-                }
+        List<PendingManager.PendingTransaction> pendingTransactions = pendingMgr.getPendingTransactions(-1);
+        for (PendingManager.PendingTransaction pendingTransaction : pendingTransactions) {
+            if (pendingTransaction.transactionResult.isSuccess()) {
+                unvalidatedTransactions.remove(pendingTransaction.transaction);
             }
         }
-        logger.debug("Block validation: # txs = {}, previously validated = {} ms", transactions.size(),
-                previouslyValidatedCount);
+        logger.debug("Block validation: # txs = {}, # txs unvalidated = {} ms", transactions.size(),
+                unvalidatedTransactions.size());
 
         return unvalidatedTransactions;
     }
