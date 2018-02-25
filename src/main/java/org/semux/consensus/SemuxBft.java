@@ -785,21 +785,7 @@ public class SemuxBft implements Consensus {
         }
 
         // [2] check transactions and results (skipped)
-
-        // remove any that are pending transactions we know about and have already
-        // validated
-        Set<Transaction> unvalidatedTransactions = new HashSet<>(transactions);
-
-        int previouslyValidatedCount = 0;
-        List<PendingManager.PendingTransaction> pending = pendingMgr.getPendingTransactions(-1);
-        for (PendingManager.PendingTransaction t : pending) {
-            if (t.transactionResult.isSuccess()) {
-                boolean found = unvalidatedTransactions.remove(t.transaction);
-                if (found) {
-                    previouslyValidatedCount++;
-                }
-            }
-        }
+        Set<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
 
         if (!Block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())
                 || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
@@ -824,12 +810,37 @@ public class SemuxBft implements Consensus {
         }
 
         long t2 = System.currentTimeMillis();
-        logger.debug("Block validation: # txs = {}, time = {} ms, previously validated {}", transactions.size(),
-                t2 - t1, previouslyValidatedCount);
+        logger.debug("Block validation: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
 
         Block block = new Block(header, transactions, results);
         validBlocks.put(ByteArray.of(block.getHash()), block);
         return true;
+    }
+
+    /**
+     * Filter transactions to find ones that have not already been validated via the
+     * pending manager.
+     *
+     * @param transactions
+     * @return
+     */
+    private Set<Transaction> getUnvalidatedTransactions(List<Transaction> transactions) {
+        Set<Transaction> unvalidatedTransactions = new HashSet<>(transactions);
+
+        int previouslyValidatedCount = 0;
+        List<PendingManager.PendingTransaction> pending = pendingMgr.getPendingTransactions(-1);
+        for (PendingManager.PendingTransaction t : pending) {
+            if (t.transactionResult.isSuccess()) {
+                boolean found = unvalidatedTransactions.remove(t.transaction);
+                if (found) {
+                    previouslyValidatedCount++;
+                }
+            }
+        }
+        logger.debug("Block validation: # txs = {}, previously validated = {} ms", transactions.size(),
+                previouslyValidatedCount);
+
+        return unvalidatedTransactions;
     }
 
     /**
