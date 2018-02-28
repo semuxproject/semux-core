@@ -233,7 +233,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         }
         case GET_NODES: {
             List<InetSocketAddress> activeAddresses = new ArrayList<>(channelMgr.getActiveAddresses());
-            Collections.shuffle(activeAddresses); // shuffle the list to balance the load of nodes
+            Collections.shuffle(activeAddresses); // shuffle the list to balance the load on nodes
             NodesMessage nodesMsg = new NodesMessage(activeAddresses.stream()
                     .limit(MAX_NODES).map(Node::new).collect(Collectors.toList()));
             msgQueue.sendMessage(nodesMsg);
