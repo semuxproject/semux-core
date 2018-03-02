@@ -12,7 +12,6 @@ import java.text.ParseException;
 import java.util.Locale;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
