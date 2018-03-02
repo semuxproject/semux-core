@@ -25,11 +25,16 @@ public class SwingUtilTest {
 
     @Before
     public void setUp() {
-        Locale.setDefault(new Locale("us", "US"));
+        reset();
     }
 
     @After
     public void tearDown() {
+        reset();
+    }
+
+    private void reset() {
+        Locale.setDefault(new Locale("en", "US"));
         SwingUtil.setDefaultUnit("SEM");
         SwingUtil.setDefaultFractionDigits(3);
     }
@@ -84,6 +89,13 @@ public class SwingUtilTest {
         SwingUtil.setDefaultUnit("SEM");
         SwingUtil.setDefaultFractionDigits(9);
         assertEquals("1,234.456789123 SEM", SwingUtil.formatValue(x));
+    }
+
+    @Test
+    public void testFormatValueFull() {
+        long x = 1_234_456_789_123L;
+        SwingUtil.setDefaultFractionDigits(0);
+        assertEquals("1,234.456789123 SEM", SwingUtil.formatValueFull(x));
     }
 
     @Test

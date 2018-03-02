@@ -362,6 +362,16 @@ public class SwingUtil {
     }
 
     /**
+     * Formats a Semux value without truncation.
+     *
+     * @param nano
+     * @return
+     */
+    public static String formatValueFull(long nano) {
+        return formatValue(nano, unit, 9, true);
+    }
+
+    /**
      * Set the default unit for {@link SwingUtil#formatValue(long)}
      *
      * @param unit
