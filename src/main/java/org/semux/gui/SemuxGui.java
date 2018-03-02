@@ -105,6 +105,8 @@ public class SemuxGui extends Launcher {
      */
     public SemuxGui() {
         SystemUtil.setLocale(getConfig().locale());
+        SwingUtil.setDefaultFractionDigits(getConfig().uiFractionDigits());
+        SwingUtil.setDefaultUnit(getConfig().uiUnit());
     }
 
     /**

@@ -11,6 +11,8 @@ import static org.junit.Assert.assertEquals;
 import java.text.ParseException;
 import java.util.Locale;
 
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,6 +26,12 @@ public class SwingUtilTest {
     @Before
     public void setUp() {
         Locale.setDefault(new Locale("us", "US"));
+    }
+
+    @After
+    public void tearDown() {
+        SwingUtil.setDefaultUnit("SEM");
+        SwingUtil.setDefaultFractionDigits(3);
     }
 
     @Test
@@ -52,9 +60,30 @@ public class SwingUtilTest {
 
     @Test
     public void testFormatAndEncodeValue() throws ParseException {
-        long x = 1_234_123_000_000L;
-        assertEquals("1,234.123 SEM", SwingUtil.formatValue(x));
-        assertEquals(x, SwingUtil.parseValue("1,234.123 SEM"));
+        long x = 1_234_456_789_000L;
+        assertEquals("1,234.456 SEM", SwingUtil.formatValue(x));
+        assertEquals(x, SwingUtil.parseValue("1,234.456789"));
+        assertEquals(x, SwingUtil.parseValue("1,234.456789 SEM"));
+        assertEquals(x, SwingUtil.parseValue("1,234,456.789 mSEM"));
+        assertEquals(x, SwingUtil.parseValue("1,234,456,789 μSEM"));
+    }
+
+    @Test
+    public void testFormatValueWithCustomUnit() {
+        long x = 1_234_456_789_123L;
+        assertEquals("1,234.456 SEM", SwingUtil.formatValue(x));
+        SwingUtil.setDefaultUnit("mSEM");
+        assertEquals("1,234,456.789 mSEM", SwingUtil.formatValue(x));
+        SwingUtil.setDefaultUnit("μSEM");
+        assertEquals("1,234,456,789.123 μSEM", SwingUtil.formatValue(x));
+    }
+
+    @Test
+    public void testFormatValueWithCustomFractionDigits() {
+        long x = 1_234_456_789_123L;
+        SwingUtil.setDefaultUnit("SEM");
+        SwingUtil.setDefaultFractionDigits(9);
+        assertEquals("1,234.456789123 SEM", SwingUtil.formatValue(x));
     }
 
     @Test

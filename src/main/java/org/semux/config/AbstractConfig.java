@@ -111,6 +111,8 @@ public abstract class AbstractConfig implements Config {
     // UI
     // =========================
     protected Locale locale = Locale.getDefault();
+    protected String uiUnit = "SEM";
+    protected int uiFractionDigits = 3;
 
     /**
      * Create an {@link AbstractConfig} instance.
@@ -399,6 +401,16 @@ public abstract class AbstractConfig implements Config {
         return locale;
     }
 
+    @Override
+    public String uiUnit() {
+        return uiUnit;
+    }
+
+    @Override
+    public int uiFractionDigits() {
+        return uiFractionDigits;
+    }
+
     protected void init() {
         File f = new File(configDir(), CONFIG_FILE);
         if (!f.exists()) {
@@ -484,6 +496,14 @@ public abstract class AbstractConfig implements Config {
                     if (localeComponents.length == 2) {
                         locale = new Locale(localeComponents[0], localeComponents[1]);
                     }
+                    break;
+                }
+                case "ui.unit": {
+                    uiUnit = props.getProperty(name).trim();
+                    break;
+                }
+                case "ui.fractionDigits": {
+                    uiFractionDigits = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 }
                 default:
