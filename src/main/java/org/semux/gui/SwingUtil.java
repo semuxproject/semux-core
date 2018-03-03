@@ -48,6 +48,7 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.semux.core.Transaction;
 import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
@@ -404,19 +405,14 @@ public class SwingUtil {
      * @throws ParseException
      */
     public static long parseValue(String str) throws ParseException {
-        // check if there is a specific unit in the value string
-        for (Map.Entry<String, Long> unitMapping : Unit.SUPPORTED.entrySet()) {
-            if (str.endsWith(" " + unitMapping.getKey())) {
-                str = str.replace(" " + unitMapping.getKey(), "");
-                return BigDecimal.valueOf(parseNumber(str).doubleValue())
-                        .multiply(BigDecimal.valueOf(unitMapping.getValue()))
-                        .longValue();
-            }
-        }
+        Pair<String, Long> numberUnit = Unit.SUPPORTED.entrySet().stream()
+                .filter(e -> str.endsWith(" " + e.getKey()))
+                .map(e -> Pair.of(str.replace(" " + e.getKey(), ""), e.getValue()))
+                .findAny()
+                .orElse(Pair.of(str, Unit.valueOf(unit)));
 
-        // if not, use the default unit
-        return BigDecimal.valueOf(parseNumber(str).doubleValue())
-                .multiply(BigDecimal.valueOf(Unit.valueOf(unit)))
+        return BigDecimal.valueOf(parseNumber(numberUnit.getKey()).doubleValue())
+                .multiply(BigDecimal.valueOf(numberUnit.getValue()))
                 .longValue();
     }
 
