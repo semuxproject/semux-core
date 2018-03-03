@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.semux.Kernel;
