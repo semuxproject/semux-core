@@ -7,7 +7,6 @@
 package org.semux.consensus;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -825,14 +824,20 @@ public class SemuxBft implements Consensus {
      * @return
      */
     private Set<Transaction> getUnvalidatedTransactions(List<Transaction> transactions) {
-        Set<Transaction> unvalidatedTransactions = new HashSet<>(transactions);
 
-        List<PendingManager.PendingTransaction> pendingTransactions = pendingMgr.getPendingTransactions(-1);
-        for (PendingManager.PendingTransaction pendingTransaction : pendingTransactions) {
-            if (pendingTransaction.transactionResult.isSuccess()) {
-                unvalidatedTransactions.remove(pendingTransaction.transaction);
-            }
-        }
+        // get all of the validated pending transactions
+        Set<Transaction> pendingUnvalidated = pendingMgr.getPendingTransactions(-1)
+                .stream()
+                .filter(pendingTx -> pendingTx.transactionResult.isSuccess())
+                .map(pendingTx -> pendingTx.transaction)
+                .collect(Collectors.toSet());
+
+        // filter out transactions we've already validated
+        Set<Transaction> unvalidatedTransactions = transactions
+                .stream()
+                .filter(pendingUnvalidated::contains)
+                .collect(Collectors.toSet());
+
         logger.debug("Block validation: # txs = {}, # txs unvalidated = {} ms", transactions.size(),
                 unvalidatedTransactions.size());
 
