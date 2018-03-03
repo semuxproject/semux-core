@@ -359,11 +359,13 @@ public class SwingUtil {
      * @return
      */
     public static String formatValue(long nano, String unit, int fractionDigits, boolean withUnit) {
-        return formatNumber(
-                BigDecimal.valueOf(nano).setScale(Unit.SCALE.get(unit), RoundingMode.FLOOR)
-                        .divide(BigDecimal.valueOf(Unit.valueOf(unit)), RoundingMode.FLOOR),
-                fractionDigits)
-                + (withUnit ? " " + unit : "");
+        return String.format(
+                "%s%s",
+                formatNumber(
+                        BigDecimal.valueOf(nano).setScale(Unit.SCALE.get(unit), RoundingMode.FLOOR)
+                                .divide(BigDecimal.valueOf(Unit.valueOf(unit)), RoundingMode.FLOOR),
+                        fractionDigits),
+                withUnit ? " " + unit : "");
     }
 
     /**
