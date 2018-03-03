@@ -832,10 +832,9 @@ public class SemuxBft implements Consensus {
                 .map(pendingTx -> pendingTx.transaction)
                 .collect(Collectors.toSet());
 
-        Predicate<Transaction> containsPredicate = pendingValidatedTransactions::contains;
         List<Transaction> unvalidatedTransactions = transactions
                 .stream()
-                .filter(containsPredicate.negate())
+                .filter(it -> !pendingValidatedTransactions.contains(it))
                 .collect(Collectors.toList());
 
         logger.debug("Block validation: # txs = {}, # txs unvalidated = {} ms", transactions.size(),
