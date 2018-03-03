@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.semux.Network;
+import org.semux.config.exception.ConfigException;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Hash;
@@ -124,6 +125,7 @@ public abstract class AbstractConfig implements Config {
         this.networkVersion = networkVersion;
 
         init();
+        validate();
     }
 
     @Override
@@ -491,6 +493,13 @@ public abstract class AbstractConfig implements Config {
             }
         } catch (Exception e) {
             logger.error("Failed to load config file: {}", f, e);
+        }
+    }
+
+    protected void validate() {
+        if (apiEnabled &&
+                (apiUsername.equals("YOUR_API_USERNAME") || apiPassword.equals("YOUR_API_PASSWORD"))) {
+            throw new ConfigException("Please change your API username/password from the default values.");
         }
     }
 }

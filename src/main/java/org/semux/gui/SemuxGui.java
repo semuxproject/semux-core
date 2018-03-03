@@ -26,6 +26,7 @@ import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
 import org.semux.Launcher;
 import org.semux.config.Constants;
+import org.semux.config.exception.ConfigException;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.Transaction;
@@ -84,7 +85,7 @@ public class SemuxGui extends Launcher {
             // start
             gui.start(args);
 
-        } catch (LauncherException e) {
+        } catch (LauncherException | ConfigException e) {
             JOptionPane.showMessageDialog(
                     null,
                     e.getMessage(),
