@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.semux.Kernel;
@@ -784,7 +785,7 @@ public class SemuxBft implements Consensus {
         }
 
         // [2] check transactions and results (skipped)
-        Set<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
+        List<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
 
         if (!Block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())
                 || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
@@ -823,20 +824,19 @@ public class SemuxBft implements Consensus {
      * @param transactions
      * @return
      */
-    private Set<Transaction> getUnvalidatedTransactions(List<Transaction> transactions) {
+    private List<Transaction> getUnvalidatedTransactions(List<Transaction> transactions) {
 
-        // get all of the validated pending transactions
-        Set<Transaction> pendingUnvalidated = pendingMgr.getPendingTransactions(-1)
+        Set<Transaction> pendingValidatedTransactions = pendingMgr.getPendingTransactions(-1)
                 .stream()
                 .filter(pendingTx -> pendingTx.transactionResult.isSuccess())
                 .map(pendingTx -> pendingTx.transaction)
                 .collect(Collectors.toSet());
 
-        // filter out transactions we've already validated
-        Set<Transaction> unvalidatedTransactions = transactions
+        Predicate<Transaction> containsPredicate = pendingValidatedTransactions::contains;
+        List<Transaction> unvalidatedTransactions = transactions
                 .stream()
-                .filter(pendingUnvalidated::contains)
-                .collect(Collectors.toSet());
+                .filter(containsPredicate.negate())
+                .collect(Collectors.toList());
 
         logger.debug("Block validation: # txs = {}, # txs unvalidated = {} ms", transactions.size(),
                 unvalidatedTransactions.size());
