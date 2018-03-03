@@ -496,9 +496,9 @@ public abstract class AbstractConfig implements Config {
         }
     }
 
-    protected void validate() {
+    private void validate() {
         if (apiEnabled &&
-                (apiUsername.equals("YOUR_API_USERNAME") || apiPassword.equals("YOUR_API_PASSWORD"))) {
+                ("YOUR_API_USERNAME".equals(apiUsername) || "YOUR_API_PASSWORD".equals(apiPassword))) {
             throw new ConfigException("Please change your API username/password from the default values.");
         }
     }
