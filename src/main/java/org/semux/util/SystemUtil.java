@@ -344,6 +344,22 @@ public class SystemUtil {
         }
     }
 
+    /**
+     * Determine if the current Java runtime supports the Java Platform Module
+     * System. Credits to: https://github.com/junit-team/
+     *
+     * @return {@code true} if the Java Platform Module System is available,
+     *         otherwise {@code false}
+     */
+    public static boolean isJavaPlatformModuleSystemAvailable() {
+        try {
+            Class.forName("java.lang.Module");
+            return true;
+        } catch (ClassNotFoundException expected) {
+            return false;
+        }
+    }
+
     private SystemUtil() {
     }
 }
