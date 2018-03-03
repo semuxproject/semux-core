@@ -329,13 +329,13 @@ public class SystemUtil {
                 return Advapi32Util.registryGetIntValue(
                         Advapi32Util.registryGetKey(
                                 WinReg.HKEY_LOCAL_MACHINE,
-                                "SOFTWARE\\Microsoft\\VisualStudio\\10.0\\VC\\VCRedist\\x64",
+                                "SOFTWARE\\Microsoft\\VisualStudio\\11.0\\VC\\Runtimes\\x64",
                                 WinNT.KEY_READ | WinNT.KEY_WOW64_32KEY).getValue(),
                         "Installed") == 1;
             } else {
                 return Advapi32Util.registryGetIntValue(
                         WinReg.HKEY_LOCAL_MACHINE,
-                        "SOFTWARE\\Microsoft\\VisualStudio\\10.0\\VC\\VCRedist\\x86",
+                        "SOFTWARE\\Microsoft\\VisualStudio\\11.0\\VC\\Runtimes\\x86",
                         "Installed") == 1;
             }
         } catch (Win32Exception e) {

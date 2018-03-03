@@ -49,5 +49,6 @@ cache:
     - $HOME/.m2
     - $HOME/Library/Caches/Homebrew
 before_install:
+  - rm ~/.m2/settings.xml # remove the default settings.xml in order to use custom repos
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then source .travis/linux_start_xvfb.sh; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then .travis/macos_install_jdk8.sh; fi
