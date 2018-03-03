@@ -30,6 +30,7 @@ import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.gui.dialog.ChangePasswordDialog;
+import org.semux.gui.dialog.ConsoleDialog;
 import org.semux.gui.dialog.ExportPrivateKeyDialog;
 import org.semux.gui.dialog.InputDialog;
 import org.semux.message.GuiMessages;
@@ -106,6 +107,12 @@ public class MenuBar extends JMenuBar implements ActionListener {
         itemAbout.addActionListener(this);
         menuHelp.add(itemAbout);
 
+        JMenuItem itemConsole = new JMenuItem(GuiMessages.get("Console"));
+        itemConsole.setName("itemConsole");
+        itemConsole.setActionCommand(Action.CONSOLE.name());
+        itemConsole.addActionListener(this);
+        menuHelp.add(itemConsole);
+
         JMenuItem itemHelp = new JMenuItem(GuiMessages.get("Help"));
         itemHelp.setName("itemHelp");
         itemHelp.setActionCommand(Action.HELP.name());
@@ -138,6 +145,9 @@ public class MenuBar extends JMenuBar implements ActionListener {
             break;
         case ABOUT:
             about();
+            break;
+        case CONSOLE:
+            console();
             break;
         case HELP:
             help();
@@ -287,6 +297,17 @@ public class MenuBar extends JMenuBar implements ActionListener {
                 logger.error("Unable to parse help url " + HELP_URL);
             }
         }
+    }
+
+    /**
+     * Shows the console
+     */
+    private void console() {
+        if (showErrorIfLocked()) {
+            return;
+        }
+        ConsoleDialog d = new ConsoleDialog(gui, frame);
+        d.setVisible(true);
     }
 
     /**
