@@ -10,7 +10,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -34,7 +33,6 @@ import org.semux.IntegrationTest;
 import org.semux.Kernel;
 import org.semux.Kernel.State;
 import org.semux.KernelMock;
-import org.semux.Network;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
 import org.semux.core.Unit;

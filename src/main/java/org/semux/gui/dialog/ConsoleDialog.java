@@ -8,6 +8,7 @@ package org.semux.gui.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Dialog;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -25,19 +26,21 @@ import javax.swing.JTextField;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import io.swagger.annotations.ApiOperation;
 import org.semux.api.ApiHandlerResponse;
 import org.semux.api.SemuxApi;
 import org.semux.api.SemuxApiImpl;
 import org.semux.gui.SemuxGui;
 import org.semux.message.GuiMessages;
 
-/**
- */
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import io.swagger.annotations.ApiOperation;
+
 public class ConsoleDialog extends JDialog implements ActionListener {
+
+    private static final long serialVersionUID = 1L;
 
     public static final String HELP = "help";
     private transient SemuxApi api;
@@ -54,6 +57,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         console = new JTextArea();
         console.setEditable(false);
         console.setName("txtConsole");
+        console.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
         JScrollPane scroll = new JScrollPane(console);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -110,15 +114,15 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         // api only takes string parameters;
 
         int numParams = commandParams.length - 1;
-        Class[] classes = new Class[numParams];
+        Class<?>[] classes = new Class[numParams];
         for (int i = 0; i < numParams; i++) {
             classes[i] = String.class;
         }
 
         try {
             Method method = api.getClass().getMethod(command, classes);
-            ApiHandlerResponse response = (ApiHandlerResponse) method.invoke(api,
-                    Arrays.copyOfRange(commandParams, 1, commandParams.length));
+            Object[] params = Arrays.copyOfRange(commandParams, 1, commandParams.length);
+            ApiHandlerResponse response = (ApiHandlerResponse) method.invoke(api, params);
 
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             console.append("\n");
