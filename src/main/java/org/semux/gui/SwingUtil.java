@@ -19,6 +19,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.text.DateFormat;
@@ -358,7 +359,11 @@ public class SwingUtil {
      * @return
      */
     public static String formatValue(long nano, String unit, int fractionDigits, boolean withUnit) {
-        return formatNumber(nano / (double) Unit.valueOf(unit), fractionDigits) + (withUnit ? " " + unit : "");
+        return formatNumber(
+                BigDecimal.valueOf(nano).setScale(Unit.SCALE.get(unit), RoundingMode.FLOOR)
+                        .divide(BigDecimal.valueOf(Unit.valueOf(unit)), RoundingMode.FLOOR),
+                fractionDigits)
+                + (withUnit ? " " + unit : "");
     }
 
     /**
@@ -401,12 +406,16 @@ public class SwingUtil {
         for (Map.Entry<String, Long> unitMapping : Unit.SUPPORTED.entrySet()) {
             if (str.endsWith(" " + unitMapping.getKey())) {
                 str = str.replace(" " + unitMapping.getKey(), "");
-                return (long) (parseNumber(str).doubleValue() * unitMapping.getValue());
+                return BigDecimal.valueOf(parseNumber(str).doubleValue())
+                        .multiply(BigDecimal.valueOf(unitMapping.getValue()))
+                        .longValue();
             }
         }
 
         // if not, use the default unit
-        return (long) (parseNumber(str).doubleValue() * Unit.valueOf(unit));
+        return BigDecimal.valueOf(parseNumber(str).doubleValue())
+                .multiply(BigDecimal.valueOf(Unit.valueOf(unit)))
+                .longValue();
     }
 
     /**
