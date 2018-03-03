@@ -295,6 +295,19 @@
                 <version>1.8</version>
                 <executions>
                     <execution>
+                        <id>package</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <echo file="${project.build.outputDirectory}/VERSION">${git.commit.id.abbrev}</echo>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>dist</id>
                         <phase>${dist.phase}</phase>
                         <configuration>
                             <target>
