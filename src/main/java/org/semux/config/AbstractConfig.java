@@ -112,7 +112,7 @@ public abstract class AbstractConfig implements Config {
     // =========================
     protected Locale locale = Locale.getDefault();
     protected String uiUnit = "SEM";
-    protected int uiFractionDigits = 9;
+    protected int uiFractionDigits = Unit.SCALE.get(uiUnit);
 
     /**
      * Create an {@link AbstractConfig} instance.
