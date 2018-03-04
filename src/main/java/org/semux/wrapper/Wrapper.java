@@ -99,6 +99,9 @@ public class Wrapper {
         if (SystemUtil.isJavaPlatformModuleSystemAvailable()) {
             Collections.addAll(defaults,
                     ImmutablePair.of(
+                            Pattern.compile("^--add-opens=java\\.base/sun\\.net\\.dns="),
+                            () -> "--add-opens=java.base/sun.net.dns=ALL-UNNAMED"),
+                    ImmutablePair.of(
                             Pattern.compile("^--add-opens=java\\.base/java\\.lang\\.reflect="),
                             () -> "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED"),
                     ImmutablePair.of(
