@@ -111,6 +111,7 @@ public class WrapperTest {
                                         "-Dlog4j2.garbagefreeThreadContextMap=true",
                                         "-Dlog4j2.shutdownHookEnabled=false",
                                         "-Dlog4j2.disableJmx=true",
+                                        "--add-opens=java.base/sun.net.dns=ALL-UNNAMED",
                                         "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
                                         "--add-opens=java.base/java.nio=ALL-UNNAMED",
                                         "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
