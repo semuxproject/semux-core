@@ -307,8 +307,12 @@ public class SystemUtil {
      * @return
      */
     public static Object getImplementationVersion() {
-        // this doesn't work with Java 9 and above
-        String version = SemuxGui.class.getPackage().getImplementationVersion();
+        String version = null;
+        try {
+            version = IOUtil.readStreamAsString(SemuxGui.class.getClassLoader().getResourceAsStream("VERSION")).trim();
+        } catch (IOException ex) {
+            logger.warn("Failed to read version.", ex);
+        }
 
         return version == null ? "unknown" : version;
     }

@@ -43,6 +43,9 @@ public class ConsoleDialogTest extends AssertJSwingJUnitTestCase {
         DialogFixture console = window.dialog("Console").requireVisible();
         JTextComponentFixture consoleText = console.textBox("txtConsole");
 
+        // check txtInput
+        console.textBox("txtInput").click().requireFocused().requireEditable().requireVisible();
+
         // help
         console.textBox("txtInput").enterText("help\n");
         await().until(() -> consoleText.text().contains("transfer"));
