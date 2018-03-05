@@ -311,7 +311,7 @@ public class SystemUtil {
         try {
             version = IOUtil.readStreamAsString(SemuxGui.class.getClassLoader().getResourceAsStream("VERSION")).trim();
         } catch (IOException ex) {
-            logger.warn("Failed to read version.", ex);
+            logger.warn("Failed to read version.");
         }
 
         return version == null ? "unknown" : version;
