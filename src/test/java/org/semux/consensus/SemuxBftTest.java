@@ -127,7 +127,6 @@ public class SemuxBftTest {
 
     @Test
     public void testFilterPendingTransactions() {
-        // mock blockchain with a single transaction
         Key to = new Key();
         Key from1 = new Key();
         long time = System.currentTimeMillis();
