@@ -823,7 +823,7 @@ public class SemuxBft implements Consensus {
      * @param transactions
      * @return
      */
-    private List<Transaction> getUnvalidatedTransactions(List<Transaction> transactions) {
+    protected List<Transaction> getUnvalidatedTransactions(List<Transaction> transactions) {
 
         Set<Transaction> pendingValidatedTransactions = pendingMgr.getPendingTransactions(-1)
                 .stream()
@@ -836,7 +836,7 @@ public class SemuxBft implements Consensus {
                 .filter(it -> !pendingValidatedTransactions.contains(it))
                 .collect(Collectors.toList());
 
-        logger.debug("Block validation: # txs = {}, # txs unvalidated = {} ms", transactions.size(),
+        logger.debug("Block validation: # txs = {}, # txs unvalidated = {}", transactions.size(),
                 unvalidatedTransactions.size());
 
         return unvalidatedTransactions;
