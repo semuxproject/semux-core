@@ -141,7 +141,7 @@ public class SemuxBftTest {
         assertFalse(semuxBFT.getUnvalidatedTransactions(Collections.singletonList(tx2)).isEmpty());
     }
 
-    private Transaction createTransaction(Key to, Key from1, long time, long nonce) {
+    private Transaction createTransaction(Key to, Key from, long time, long nonce) {
         return new Transaction(
                 kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
@@ -150,6 +150,6 @@ public class SemuxBftTest {
                 kernelRule.getKernel().getConfig().minTransactionFee(),
                 nonce,
                 time,
-                Bytes.EMPTY_BYTES).sign(from1);
+                Bytes.EMPTY_BYTES).sign(from);
     }
 }
