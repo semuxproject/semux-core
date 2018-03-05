@@ -8,6 +8,7 @@ package org.semux.consensus;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -27,7 +28,9 @@ import org.semux.config.Constants;
 import org.semux.config.MainnetConfig;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
+import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.crypto.Key;
@@ -121,4 +124,50 @@ public class SemuxBftTest {
         // the block should be rejected because of the duplicated tx
         assertFalse(semuxBFT.validateBlock(block2.getHeader(), block2.getTransactions()));
     }
+
+    @Test
+    public void testFilterPendingTransactions() {
+        // mock blockchain with a single transaction
+        Key to = new Key();
+        Key from1 = new Key();
+        long time = System.currentTimeMillis();
+        Transaction tx1 = new Transaction(
+                kernelRule.getKernel().getConfig().network(),
+                TransactionType.TRANSFER,
+                to.toAddress(),
+                10 * Unit.SEM,
+                kernelRule.getKernel().getConfig().minTransactionFee(),
+                0,
+                time,
+                Bytes.EMPTY_BYTES).sign(from1);
+
+        Transaction tx2 = new Transaction(
+                kernelRule.getKernel().getConfig().network(),
+                TransactionType.TRANSFER,
+                to.toAddress(),
+                10 * Unit.SEM,
+                kernelRule.getKernel().getConfig().minTransactionFee(),
+                1,
+                time,
+                Bytes.EMPTY_BYTES).sign(from1);
+
+        kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), 1000 * Unit.SEM);
+
+        PendingManager.PendingTransaction pending = new PendingManager.PendingTransaction(tx1,
+                new TransactionResult(true));
+        when(kernelRule.getKernel().getPendingManager().getPendingTransactions(anyInt()))
+                .thenReturn(Collections.singletonList(pending));
+        SemuxBft semuxBFT = new SemuxBft(kernelRule.getKernel());
+
+        assertTrue(semuxBFT.getUnvalidatedTransactions(Collections.singletonList(tx1)).isEmpty());
+        assertFalse(semuxBFT.getUnvalidatedTransactions(Collections.singletonList(tx2)).isEmpty());
+
+        when(kernelRule.getKernel().getPendingManager().getPendingTransactions(anyInt()))
+                .thenReturn(Collections.singletonList(new PendingManager.PendingTransaction(tx2,
+                        new TransactionResult(false))));
+
+        assertFalse(semuxBFT.getUnvalidatedTransactions(Collections.singletonList(tx2)).isEmpty());
+    }
+
 }
