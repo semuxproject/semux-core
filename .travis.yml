@@ -4,7 +4,7 @@ matrix:
     # Linux license, format, and coverage check
     - os: linux
       sudo: false
-      jdk: openjdk8
+      jdk: oraclejdk8
       script:
         - mvn license:check
         - mvn formatter:validate
