@@ -76,4 +76,15 @@ public class TransactionTest {
         assertEquals(timestamp, tx.getTimestamp());
         assertArrayEquals(data, tx.getData());
     }
+
+    @Test
+    public void testEquality() {
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, Bytes.random(128))
+                .sign(key);
+        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce, timestamp, tx.getData())
+                .sign(key);
+
+        assertEquals(tx, tx2);
+        assertEquals(tx.hashCode(), tx2.hashCode());
+    }
 }

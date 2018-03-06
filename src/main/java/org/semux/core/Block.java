@@ -8,6 +8,7 @@ package org.semux.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -136,14 +137,33 @@ public class Block {
      * @return
      */
     public static boolean validateTransactions(BlockHeader header, List<Transaction> transactions, Network network) {
+        return validateTransactions(header, transactions, transactions, network);
+    }
+
+    /**
+     * Validates transactions in parallel, only doing those that have not already
+     * been calculated.
+     *
+     * @param header
+     *            block header
+     * @param unvalidatedTransactions
+     *            transactions needing validating
+     * @param allTransactions
+     *            all transactions within the block
+     * @param network
+     *            network
+     * @return
+     */
+    public static boolean validateTransactions(BlockHeader header, Collection<Transaction> unvalidatedTransactions,
+            List<Transaction> allTransactions, Network network) {
         // validate transactions
-        boolean valid = transactions.parallelStream().allMatch((tx) -> tx.validate(network));
+        boolean valid = unvalidatedTransactions.parallelStream().allMatch((tx) -> tx.validate(network));
         if (!valid) {
             return false;
         }
 
         // validate transactions root
-        byte[] root = MerkleUtil.computeTransactionsRoot(transactions);
+        byte[] root = MerkleUtil.computeTransactionsRoot(allTransactions);
         return Arrays.equals(root, header.getTransactionsRoot());
     }
 
@@ -427,4 +447,5 @@ public class Block {
         return "Block [number = " + getNumber() + ", view = " + getView() + ", hash = " + Hex.encode(getHash())
                 + ", # txs = " + transactions.size() + ", # votes = " + votes.size() + "]";
     }
+
 }

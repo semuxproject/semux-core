@@ -118,4 +118,17 @@ public class BlockTest {
         assertTrue(Block.validateTransactions(previousHeader, transactions, Network.DEVNET));
         assertTrue(Block.validateResults(previousHeader, results));
     }
+
+    @Test
+    public void testValidateTransactionsSparse() {
+        BlockHeader previousHeader = new BlockHeader(number - 1, coinbase, prevHash, timestamp - 1, transactionsRoot,
+                resultsRoot, stateRoot, data);
+        BlockHeader header = new BlockHeader(number, coinbase, previousHeader.getHash(), timestamp, transactionsRoot,
+                resultsRoot, stateRoot, data);
+
+        assertTrue(Block.validateHeader(previousHeader, header));
+        assertTrue(Block.validateTransactions(previousHeader, Collections.singleton(transactions.get(0)), transactions,
+                Network.DEVNET));
+        assertTrue(Block.validateResults(previousHeader, results));
+    }
 }

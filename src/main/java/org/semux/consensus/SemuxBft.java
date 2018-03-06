@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -783,11 +784,14 @@ public class SemuxBft implements Consensus {
         }
 
         // [2] check transactions and results (skipped)
-        if (!Block.validateTransactions(header, transactions, config.network())
+        List<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
+
+        if (!Block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())
                 || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
             logger.debug("Invalid block transactions");
             return false;
         }
+
         if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
             logger.warn("Duplicated transaction hash is not allowed");
             return false;
@@ -810,6 +814,32 @@ public class SemuxBft implements Consensus {
         Block block = new Block(header, transactions, results);
         validBlocks.put(ByteArray.of(block.getHash()), block);
         return true;
+    }
+
+    /**
+     * Filter transactions to find ones that have not already been validated via the
+     * pending manager.
+     *
+     * @param transactions
+     * @return
+     */
+    protected List<Transaction> getUnvalidatedTransactions(List<Transaction> transactions) {
+
+        Set<Transaction> pendingValidatedTransactions = pendingMgr.getPendingTransactions(-1)
+                .stream()
+                .filter(pendingTx -> pendingTx.transactionResult.isSuccess())
+                .map(pendingTx -> pendingTx.transaction)
+                .collect(Collectors.toSet());
+
+        List<Transaction> unvalidatedTransactions = transactions
+                .stream()
+                .filter(it -> !pendingValidatedTransactions.contains(it))
+                .collect(Collectors.toList());
+
+        logger.debug("Block validation: # txs = {}, # txs unvalidated = {}", transactions.size(),
+                unvalidatedTransactions.size());
+
+        return unvalidatedTransactions;
     }
 
     /**

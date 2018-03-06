@@ -15,6 +15,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.semux.crypto.cache.PublicKeyCache;
 import org.semux.util.Bytes;
 import org.semux.util.SystemUtil;
@@ -294,6 +296,30 @@ public class Key {
             byte[] a = Arrays.copyOfRange(bytes, LENGTH - A_LEN, LENGTH);
 
             return new Signature(s, a);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+
+            if (o == null || getClass() != o.getClass())
+                return false;
+
+            Signature signature = (Signature) o;
+
+            return new EqualsBuilder()
+                    .append(s, signature.s)
+                    .append(a, signature.a)
+                    .isEquals();
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder(17, 37)
+                    .append(s)
+                    .append(a)
+                    .toHashCode();
         }
     }
 
