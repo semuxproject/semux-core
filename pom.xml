@@ -111,11 +111,11 @@
                     </apiSources>
                 </configuration>
                 <dependencies>
-                  <dependency>
-                      <groupId>javax.xml.bind</groupId>
-                      <artifactId>jaxb-api</artifactId>
-                      <version>2.3.0</version>
-                  </dependency>
+                    <dependency>
+                        <groupId>javax.xml.bind</groupId>
+                        <artifactId>jaxb-api</artifactId>
+                        <version>2.3.0</version>
+                    </dependency>
                 </dependencies>
             </plugin>
 
@@ -477,7 +477,7 @@
                                         <urn>commons-io:commons-io:2.6:jar:null:test:815893df5f31da2ece4040fe0a12fd44b577afaf</urn>
                                         <urn>commons-logging:commons-logging:1.2:jar:null:compile:4bfc12adfe4842bf07b657f0369c4cb522955686</urn>
                                         <urn>commons-validator:commons-validator:1.6:jar:null:compile:e989d1e87cdd60575df0765ed5bac65c905d7908</urn>
-                                        <urn>io.netty:netty-all:4.1.21.Final:jar:null:compile:d702a5858843dd83725ffcdfd6ed213ae22a8906</urn>
+                                        <urn>io.netty:netty-all:4.1.22.Final:jar:null:compile:c1cea5d30025e4d584d2b287d177c31aea4ae629</urn>
                                         <urn>io.swagger:swagger-annotations:1.5.18:jar:null:compile:f386aa7dc018534e6e05c40fff292e6cd9b9d8f8</urn>
                                         <urn>javax.ws.rs:javax.ws.rs-api:2.1:jar:null:compile:426a0862406536e690c7caa8bb6ed32191986fac</urn>
                                         <urn>junit:junit:4.12:jar:null:test:2973d150c0dc1fefe998f834810d68f278ea58ec</urn>
@@ -497,7 +497,7 @@
                                         <urn>org.apache.maven.plugins:maven-compiler-plugin:3.7.0:maven-plugin:null:runtime:a3229c9aae47047e3a177ecfd4afa10fb5512d4e</urn>
                                         <urn>org.apache.maven.plugins:maven-deploy-plugin:2.7:maven-plugin:null:runtime:6dadfb75679ca010b41286794f737088ebfe12fd</urn>
                                         <urn>org.apache.maven.plugins:maven-enforcer-plugin:3.0.0-M1:maven-plugin:null:runtime:02b46cf923a7f5c75ffae61cedff103e0def3560</urn>
-                                        <urn>org.apache.maven.plugins:maven-install-plugin:2.4:maven-plugin:null:runtime:9d1316166fe4c313f56276935e08df11f45267c2</urn>
+                                        <urn>org.apache.maven.plugins:maven-install-plugin:2.5.2:maven-plugin:null:runtime:8a67631619fc3c1d1f036e59362ddce71e1e496f</urn>
                                         <urn>org.apache.maven.plugins:maven-jar-plugin:3.0.2:maven-plugin:null:runtime:5518cc6a2ed1b1ec52419fa0e18f7e42b6279cb9</urn>
                                         <urn>org.apache.maven.plugins:maven-resources-plugin:2.6:maven-plugin:null:runtime:dd093ff6a4b680eae7ae83b5ab04310249fc6590</urn>
                                         <urn>org.apache.maven.plugins:maven-shade-plugin:3.1.0:maven-plugin:null:runtime:c08cd5163a49e31f6e28d6f8bb153013a2a2de79</urn>
@@ -546,6 +546,43 @@
                 </dependencies>
             </plugin>
         </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven 
+                    build itself. -->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.apache.maven.plugins
+                                        </groupId>
+                                        <artifactId>
+                                            maven-antrun-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [1.8,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>run</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
     <dependencies>
