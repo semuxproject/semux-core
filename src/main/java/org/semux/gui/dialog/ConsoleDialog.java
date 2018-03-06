@@ -100,6 +100,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
         }
         input.setText("");
+        console.setCaretPosition(console.getDocument().getLength());
     }
 
     /**
