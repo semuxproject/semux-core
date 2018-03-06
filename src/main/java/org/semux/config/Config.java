@@ -391,4 +391,18 @@ public interface Config {
      * @return
      */
     Locale locale();
+
+    /**
+     * Returns the unit of displayed values.
+     *
+     * @return
+     */
+    String uiUnit();
+
+    /**
+     * Returns the fraction digits of displayed values.
+     *
+     * @return
+     */
+    int uiFractionDigits();
 }

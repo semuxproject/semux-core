@@ -339,7 +339,7 @@ public class SendPanel extends JPanel implements ActionListener {
                         GuiMessages.get("InvalidData", config.maxTransactionDataSize(TransactionType.TRANSFER)));
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
-                        GuiMessages.get("TransferInfo", SwingUtil.formatValue(value), Hex.encode0x(to)),
+                        GuiMessages.get("TransferInfo", SwingUtil.formatValueFull(value), Hex.encode0x(to)),
                         GuiMessages.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
                 if (ret == JOptionPane.YES_OPTION) {
                     PendingManager pendingMgr = kernel.getPendingManager();

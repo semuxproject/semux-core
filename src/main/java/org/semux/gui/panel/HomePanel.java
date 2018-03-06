@@ -32,6 +32,7 @@ import org.semux.core.Block;
 import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
+import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
@@ -149,9 +150,9 @@ public class HomePanel extends JPanel implements ActionListener {
                             .addComponent(syncProgressLabel)
                             .addPreferredGap(ComponentPlacement.RELATED)
                             .addComponent(syncProgress))
-                        .addComponent(overview, GroupLayout.PREFERRED_SIZE, 324, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(overview, GroupLayout.PREFERRED_SIZE, 350, GroupLayout.PREFERRED_SIZE))
                     .addGap(18)
-                    .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE))
+                    .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.TRAILING)
@@ -190,6 +191,7 @@ public class HomePanel extends JPanel implements ActionListener {
             String mathSign = inBound ? "+" : "-";
             String prefix = (inBound && outBound) ? "" : (mathSign);
             JLabel lblAmount = new JLabel(prefix + SwingUtil.formatValue(tx.getValue()));
+            lblAmount.setToolTipText(SwingUtil.formatValue(tx.getValue()));
             lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
             JLabel lblTime = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
@@ -211,7 +213,7 @@ public class HomePanel extends JPanel implements ActionListener {
                                 .addPreferredGap(ComponentPlacement.RELATED, 87, Short.MAX_VALUE)
                                 .addComponent(lblAmount, GroupLayout.PREFERRED_SIZE, 128, GroupLayout.PREFERRED_SIZE))
                             .addGroup(groupLayout.createSequentialGroup()
-                                .addComponent(labelAddress, GroupLayout.DEFAULT_SIZE, 384, Short.MAX_VALUE)
+                                .addComponent(labelAddress, GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
                                 .addContainerGap())))
             );
             groupLayout.setVerticalGroup(
@@ -254,12 +256,16 @@ public class HomePanel extends JPanel implements ActionListener {
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
         this.coinbase.setText(SwingUtil.getAddressAbbr(model.getCoinbase().toAddress()));
+        this.coinbase.setToolTipText(Hex.PREF + model.getCoinbase().toAddressString());
         this.status.setText(model.getStatus() == Status.VALIDATOR ? GuiMessages.get("Validator")
                 : (model.getStatus() == Status.DELEGATE ? GuiMessages.get("Delegate") : GuiMessages.get("Normal")));
         this.available.setText(SwingUtil.formatValue(model.getTotalAvailable()));
+        this.available.setToolTipText(SwingUtil.formatValue(model.getTotalAvailable()));
         this.locked.setText(SwingUtil.formatValue(model.getTotalLocked()));
+        this.locked.setToolTipText(SwingUtil.formatValue(model.getTotalLocked()));
         this.peers.setText(SwingUtil.formatNumber(model.getActivePeers().size()));
         this.total.setText(SwingUtil.formatValue(model.getTotalAvailable() + model.getTotalLocked()));
+        this.total.setToolTipText(SwingUtil.formatValue(model.getTotalAvailable() + model.getTotalLocked()));
 
         // federate all transactions
         Set<ByteArray> hashes = new HashSet<>();

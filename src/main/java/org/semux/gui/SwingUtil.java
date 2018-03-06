@@ -19,6 +19,8 @@ import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -46,6 +48,7 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.semux.core.Transaction;
 import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
@@ -69,7 +72,9 @@ public class SwingUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SwingUtil.class);
 
-    private static final int DECIMALS = 3;
+    private static int fractionDigits = 3;
+
+    private static String unit = "SEM";
 
     private SwingUtil() {
     }
@@ -311,6 +316,7 @@ public class SwingUtil {
         NumberFormat format = NumberFormat.getInstance();
         format.setMinimumFractionDigits(0);
         format.setMaximumFractionDigits(decimals);
+        format.setRoundingMode(RoundingMode.FLOOR);
 
         return format.format(number);
     }
@@ -327,23 +333,68 @@ public class SwingUtil {
 
     /**
      * Formats a Semux value.
-     * 
+     *
      * @param nano
-     * @param withUnit
+     * @return
+     */
+    public static String formatValue(long nano) {
+        return formatValue(nano, unit, fractionDigits, true);
+    }
+
+    /**
+     * Formats a Semux value.
+     *
+     * @param nano
      * @return
      */
     public static String formatValue(long nano, boolean withUnit) {
-        return formatNumber(nano / (double) Unit.SEM, DECIMALS) + (withUnit ? " SEM" : "");
+        return formatValue(nano, unit, fractionDigits, withUnit);
     }
 
     /**
      * Formats a Semux value.
      * 
      * @param nano
+     * @param unit
+     * @param fractionDigits
      * @return
      */
-    public static String formatValue(long nano) {
-        return formatValue(nano, true);
+    public static String formatValue(long nano, String unit, int fractionDigits, boolean withUnit) {
+        return String.format(
+                "%s%s",
+                formatNumber(
+                        BigDecimal.valueOf(nano).setScale(Unit.SCALE.get(unit), RoundingMode.FLOOR)
+                                .divide(BigDecimal.valueOf(Unit.valueOf(unit)), RoundingMode.FLOOR),
+                        fractionDigits),
+                withUnit ? " " + unit : "");
+    }
+
+    /**
+     * Formats a Semux value without truncation.
+     *
+     * @param nano
+     * @return
+     */
+    public static String formatValueFull(long nano) {
+        return formatValue(nano, unit, 9, true);
+    }
+
+    /**
+     * Set the default unit for {@link SwingUtil#formatValue(long)}
+     *
+     * @param unit
+     */
+    public static void setDefaultUnit(String unit) {
+        SwingUtil.unit = unit;
+    }
+
+    /**
+     * Set the default fraction digits for {@link SwingUtil#formatValue(long)}
+     *
+     * @param fractionDigits
+     */
+    public static void setDefaultFractionDigits(int fractionDigits) {
+        SwingUtil.fractionDigits = fractionDigits;
     }
 
     /**
@@ -354,10 +405,15 @@ public class SwingUtil {
      * @throws ParseException
      */
     public static long parseValue(String str) throws ParseException {
-        if (str.endsWith(" SEM")) {
-            str = str.substring(0, str.length() - 4);
-        }
-        return (long) (parseNumber(str).doubleValue() * Unit.SEM);
+        Pair<String, Long> numberUnit = Unit.SUPPORTED.entrySet().stream()
+                .filter(e -> str.endsWith(" " + e.getKey()))
+                .map(e -> Pair.of(str.replace(" " + e.getKey(), ""), e.getValue()))
+                .findAny()
+                .orElse(Pair.of(str, Unit.valueOf(unit)));
+
+        return BigDecimal.valueOf(parseNumber(numberUnit.getKey()).doubleValue())
+                .multiply(BigDecimal.valueOf(numberUnit.getValue()))
+                .longValue();
     }
 
     /**
