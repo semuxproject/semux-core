@@ -22,7 +22,7 @@ public final class ValidatorActivatedFork implements Comparable<ValidatorActivat
      * primary validator. See: https://github.com/semuxproject/semux/issues/620
      */
     public static final ValidatorActivatedFork UNIFORM_DISTRIBUTION = new ValidatorActivatedFork((short) 1,
-            "UNIFORM_DISTRIBUTION", 1500, 2000, 200000);
+            "UNIFORM_DISTRIBUTION", 1500, 2000, 1000000);
 
     /**
      * An unique number of this fork.
