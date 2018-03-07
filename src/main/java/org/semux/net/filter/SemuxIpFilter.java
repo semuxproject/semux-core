@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.semux.net.filter.exception.ParseException;
+import org.semux.net.filter.exception.IpFilterJsonParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -245,7 +245,7 @@ public class SemuxIpFilter {
                     return new SemuxIpFilter();
                 }
             } catch (IOException e) {
-                throw new ParseException(String.format(
+                throw new IpFilterJsonParseException(String.format(
                         "Failed to parse %s. The file may be corrupted. Please either remove it or create a valid JSON file.",
                         path.toAbsolutePath().toString()), e);
             }

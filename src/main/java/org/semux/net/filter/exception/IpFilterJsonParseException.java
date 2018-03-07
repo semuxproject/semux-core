@@ -6,22 +6,22 @@
  */
 package org.semux.net.filter.exception;
 
-public class ParseException extends IllegalArgumentException {
+public class IpFilterJsonParseException extends IllegalArgumentException {
 
     private static final long serialVersionUID = 1L;
 
-    public ParseException() {
+    public IpFilterJsonParseException() {
     }
 
-    public ParseException(String s) {
+    public IpFilterJsonParseException(String s) {
         super(s);
     }
 
-    public ParseException(String message, Throwable cause) {
+    public IpFilterJsonParseException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public ParseException(Throwable cause) {
+    public IpFilterJsonParseException(Throwable cause) {
         super(cause);
     }
 }
