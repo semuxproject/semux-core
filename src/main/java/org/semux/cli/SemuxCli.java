@@ -25,6 +25,7 @@ import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.exception.LauncherException;
 import org.semux.message.CliMessages;
+import org.semux.net.filter.exception.IpFilterJsonParseException;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class SemuxCli extends Launcher {
             cli.setupLogger(args);
             // start
             cli.start(args);
-        } catch (LauncherException | ConfigException exception) {
+        } catch (LauncherException | ConfigException | IpFilterJsonParseException exception) {
             logger.error(exception.getMessage());
         } catch (ParseException exception) {
             logger.error(CliMessages.get("ParsingFailed", exception.getMessage()));

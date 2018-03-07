@@ -47,6 +47,7 @@ import org.semux.gui.model.WalletModel;
 import org.semux.gui.model.WalletModel.Status;
 import org.semux.message.GuiMessages;
 import org.semux.net.Peer;
+import org.semux.net.filter.exception.IpFilterJsonParseException;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +86,7 @@ public class SemuxGui extends Launcher {
             // start
             gui.start(args);
 
-        } catch (LauncherException | ConfigException e) {
+        } catch (LauncherException | ConfigException | IpFilterJsonParseException e) {
             JOptionPane.showMessageDialog(
                     null,
                     e.getMessage(),

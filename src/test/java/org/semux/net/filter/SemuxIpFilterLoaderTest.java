@@ -22,7 +22,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.semux.net.filter.exception.ParseException;
+import org.semux.net.filter.exception.IpFilterJsonParseException;
 
 import io.netty.handler.ipfilter.IpFilterRule;
 import io.netty.handler.ipfilter.IpFilterRuleType;
@@ -48,14 +48,14 @@ public class SemuxIpFilterLoaderTest extends SemuxIpFilterTestBase {
                                 new FilterRule("192.168.0.0/16", IpFilterRuleType.ACCEPT),
                                 new FilterRule("0.0.0.0/0", IpFilterRuleType.REJECT)),
                         null },
-                { getFile("exception_empty_object.json"), null, ParseException.class },
-                { getFile("exception_typo_in_rules1.json"), null, ParseException.class },
-                { getFile("exception_typo_in_rules2.json"), null, ParseException.class },
-                { getFile("exception_typo_in_rules3.json"), null, ParseException.class },
-                { getFile("exception_typo_in_rules4.json"), null, ParseException.class },
-                { getFile("exception_type_cast1.json"), null, ParseException.class },
-                { getFile("exception_type_cast2.json"), null, ParseException.class },
-                { getFile("exception_type_cast3.json"), null, ParseException.class }, });
+                { getFile("exception_empty_object.json"), null, IpFilterJsonParseException.class },
+                { getFile("exception_typo_in_rules1.json"), null, IpFilterJsonParseException.class },
+                { getFile("exception_typo_in_rules2.json"), null, IpFilterJsonParseException.class },
+                { getFile("exception_typo_in_rules3.json"), null, IpFilterJsonParseException.class },
+                { getFile("exception_typo_in_rules4.json"), null, IpFilterJsonParseException.class },
+                { getFile("exception_type_cast1.json"), null, IpFilterJsonParseException.class },
+                { getFile("exception_type_cast2.json"), null, IpFilterJsonParseException.class },
+                { getFile("exception_type_cast3.json"), null, IpFilterJsonParseException.class }, });
     }
 
     File jsonFile;

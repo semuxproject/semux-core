@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.validator.routines.InetAddressValidator;
-import org.semux.net.filter.exception.ParseException;
+import org.semux.net.filter.exception.IpFilterJsonParseException;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -115,9 +115,9 @@ public class FilterRule implements IpFilterRule {
         try {
             return new FilterRule(address, IpFilterRuleType.valueOf(type));
         } catch (IllegalArgumentException | NullPointerException ex) {
-            throw new ParseException("Rule type of ip filter must be either ACCEPT or REJECT");
+            throw new IpFilterJsonParseException("Rule type of ip filter must be either ACCEPT or REJECT");
         } catch (UnknownHostException ex) {
-            throw new ParseException(String.format("Invalid address %s", address), ex);
+            throw new IpFilterJsonParseException(String.format("Invalid address %s", address), ex);
         }
     }
 }
