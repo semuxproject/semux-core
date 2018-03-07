@@ -245,7 +245,9 @@ public class SemuxIpFilter {
                     return new SemuxIpFilter();
                 }
             } catch (IOException e) {
-                throw new ParseException(e);
+                throw new ParseException(String.format(
+                        "Failed to parse %s. The file may be corrupted. Please either remove it or create a valid JSON file.",
+                        path.toAbsolutePath().toString()), e);
             }
         }
     }

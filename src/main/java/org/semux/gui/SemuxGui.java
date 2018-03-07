@@ -85,7 +85,7 @@ public class SemuxGui extends Launcher {
             // start
             gui.start(args);
 
-        } catch (LauncherException | ConfigException e) {
+        } catch (LauncherException | ConfigException | org.semux.net.filter.exception.ParseException e) {
             JOptionPane.showMessageDialog(
                     null,
                     e.getMessage(),

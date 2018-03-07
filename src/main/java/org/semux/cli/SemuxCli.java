@@ -45,7 +45,7 @@ public class SemuxCli extends Launcher {
             cli.setupLogger(args);
             // start
             cli.start(args);
-        } catch (LauncherException | ConfigException exception) {
+        } catch (LauncherException | ConfigException | org.semux.net.filter.exception.ParseException exception) {
             logger.error(exception.getMessage());
         } catch (ParseException exception) {
             logger.error(CliMessages.get("ParsingFailed", exception.getMessage()));
