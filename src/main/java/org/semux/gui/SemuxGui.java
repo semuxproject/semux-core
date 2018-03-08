@@ -274,9 +274,7 @@ public class SemuxGui extends Launcher {
             main.setVisible(true);
 
             addressBookDialog = new AddressBookDialog(main, model, kernel.getWallet());
-            model.addListener((ev) -> {
-                addressBookDialog.refresh();
-            });
+            model.addListener((ev) -> addressBookDialog.refresh());
         });
 
         // start data refresh
