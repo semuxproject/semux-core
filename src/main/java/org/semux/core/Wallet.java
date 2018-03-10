@@ -441,7 +441,7 @@ public class Wallet {
                 logger.error("Failed to create the directory for wallet");
                 return false;
             }
-            
+
             IOUtil.writeToFile(enc.toBytes(), file);
             return true;
         } catch (CryptoException e) {
