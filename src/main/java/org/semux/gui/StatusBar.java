@@ -30,30 +30,34 @@ public class StatusBar extends JPanel {
 
     private static final long serialVersionUID = 2676757102891632156L;
 
-    private final JLabel peers;
+    private final JLabel peers = new JLabel();
 
-    private final JProgressBar syncProgressBar;
+    private final JProgressBar syncProgressBar = new JProgressBar();
 
     public StatusBar(Frame parent) {
         super();
+        init(parent);
+    }
+
+    private void init(Frame parent) {
         setBorder(new BevelBorder(BevelBorder.LOWERED));
         setPreferredSize(new Dimension(parent.getWidth(), getFontMetrics(getFont()).getHeight() + 10));
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-
         addGap(10);
 
+        // add number of peers
         JLabel peersLabel = new JLabel(GuiMessages.get("Peers") + ":");
         peersLabel.setHorizontalAlignment(SwingConstants.LEFT);
         add(peersLabel);
         addGap(5);
 
-        peers = new JLabel("");
         peers.setName("peers");
         peers.setHorizontalAlignment(SwingConstants.LEFT);
         add(peers);
 
         addSeparator();
 
+        // add progress bar
         JLabel syncProgressLabel = new JLabel(GuiMessages.get("SyncProgress") + ":");
         syncProgressLabel.setHorizontalAlignment(SwingConstants.LEFT);
         add(syncProgressLabel);
@@ -62,7 +66,6 @@ public class StatusBar extends JPanel {
         JPanel progressBarPanel = new JPanel();
         progressBarPanel.setLayout(new BoxLayout(progressBarPanel, BoxLayout.X_AXIS));
         progressBarPanel.setMaximumSize(new Dimension(200, getFontMetrics(getFont()).getHeight()));
-        syncProgressBar = new JProgressBar();
         syncProgressBar.setMaximum(10000);
         syncProgressBar.setAlignmentY(CENTER_ALIGNMENT);
         syncProgressBar.setStringPainted(true);
@@ -116,7 +119,7 @@ public class StatusBar extends JPanel {
         }
     }
 
-    private class SeparatorPanel extends JPanel {
+    private static final class SeparatorPanel extends JPanel {
 
         private static final long serialVersionUID = -5802537037684892071L;
 
