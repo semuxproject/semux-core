@@ -437,7 +437,11 @@ public class Wallet {
             writeAccounts(key, enc);
             writeAddressAliases(key, enc);
 
-            file.getParentFile().mkdirs();
+            if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
+                logger.error("Failed to create the directory for wallet");
+                return false;
+            }
+            
             IOUtil.writeToFile(enc.toBytes(), file);
             return true;
         } catch (CryptoException e) {
