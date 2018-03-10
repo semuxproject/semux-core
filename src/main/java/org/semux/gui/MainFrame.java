@@ -233,7 +233,11 @@ public class MainFrame extends JFrame implements ActionListener {
         return false;
     }
 
+    /**
+     * Event listener of ${@link Action#REFRESH}.
+     */
     protected void refresh() {
+        // update status bar
         statusBar.setPeersNumber(model.getActivePeers().size());
         statusBar.setProgress(model.getSyncProgress());
     }

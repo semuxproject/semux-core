@@ -8,6 +8,8 @@ package org.semux.gui;
 
 import static org.junit.Assert.assertEquals;
 
+import java.time.Duration;
+
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
@@ -20,7 +22,7 @@ public class StatusBarTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testSyncProgress100() {
         // mock progress
-        SemuxSync.SemuxSyncProgress progress = new SemuxSync.SemuxSyncProgress(1234L, 10000L);
+        SemuxSync.SemuxSyncProgress progress = new SemuxSync.SemuxSyncProgress(0, 1234L, 10000L, Duration.ZERO);
 
         StatusBarTestApplication application = GuiActionRunner
                 .execute(() -> new StatusBarTestApplication());
@@ -40,13 +42,14 @@ public class StatusBarTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testProgressFormatter() {
         assertEquals(GuiMessages.get("SyncFinished"),
-                StatusBar.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(100L, 100L)));
+                StatusBar.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(0, 100L, 100L, Duration.ZERO)));
         assertEquals(SwingUtil.formatPercentage(12.34, 2),
-                StatusBar.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(1234L, 10000L)));
+                StatusBar.SyncProgressFormatter
+                        .format(new SemuxSync.SemuxSyncProgress(0, 1234L, 10000L, Duration.ZERO)));
         assertEquals(SwingUtil.formatPercentage(0),
-                StatusBar.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(0L, 10000L)));
+                StatusBar.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(0, 0L, 10000L, Duration.ZERO)));
         assertEquals(GuiMessages.get("SyncStopped"),
-                StatusBar.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(100L, 0L)));
+                StatusBar.SyncProgressFormatter.format(new SemuxSync.SemuxSyncProgress(0, 100L, 0L, Duration.ZERO)));
         assertEquals(GuiMessages.get("SyncStopped"), StatusBar.SyncProgressFormatter.format(null));
     }
 

@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.time.Duration;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -19,6 +20,7 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.semux.core.SyncManager;
 import org.semux.message.GuiMessages;
 
@@ -33,6 +35,8 @@ public class StatusBar extends JPanel {
     private final JLabel peers = new JLabel();
 
     private final JProgressBar syncProgressBar = new JProgressBar();
+
+    private final JLabel syncEstimation = new JLabel();
 
     public StatusBar(Frame parent) {
         super();
@@ -71,6 +75,13 @@ public class StatusBar extends JPanel {
         syncProgressBar.setStringPainted(true);
         progressBarPanel.add(syncProgressBar);
         add(progressBarPanel);
+        addGap(10);
+
+        JLabel syncEstimationLabel = new JLabel(GuiMessages.get("SyncEstimation") + ":");
+        syncEstimationLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        add(syncEstimationLabel);
+        addGap(5);
+        add(syncEstimation);
 
         addSeparator();
     }
@@ -79,6 +90,11 @@ public class StatusBar extends JPanel {
         syncProgressBar.setString(SyncProgressFormatter.format(progress));
         syncProgressBar.setValue(
                 (int) Math.round((double) progress.getCurrentHeight() / (double) progress.getTargetHeight() * 10000d));
+
+        Duration estimation = progress.getSyncEstimation();
+        if (estimation != null) {
+            syncEstimation.setText(DurationFormatUtils.formatDurationHMS(progress.getSyncEstimation().toMillis()));
+        }
     }
 
     public void setPeersNumber(int peersNumber) {

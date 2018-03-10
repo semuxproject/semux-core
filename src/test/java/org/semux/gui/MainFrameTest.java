@@ -6,6 +6,8 @@
  */
 package org.semux.gui;
 
+import java.time.Duration;
+
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
@@ -38,7 +40,7 @@ public class MainFrameTest extends AssertJSwingJUnitTestCase {
         gui = new SemuxGui(model, kernel);
         model.setLatestBlock(kernel.getBlockchain().getLatestBlock());
         model.setCoinbase(coinbase);
-        model.setSyncProgress(new SemuxSync.SemuxSyncProgress(1, 1));
+        model.setSyncProgress(new SemuxSync.SemuxSyncProgress(0, 1, 1, Duration.ZERO));
 
         frame = GuiActionRunner.execute(() -> new MainFrame(gui));
 
