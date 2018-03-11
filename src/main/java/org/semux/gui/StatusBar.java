@@ -36,13 +36,17 @@ public class StatusBar extends JPanel {
 
     private final JProgressBar syncProgressBar = new JProgressBar();
 
-    private final JLabel syncEstimation = new JLabel();
-
     public StatusBar(Frame parent) {
         super();
         init(parent);
     }
 
+    /**
+     * Initialize UI components.
+     *
+     * @param parent
+     *            parent frame.
+     */
     private void init(Frame parent) {
         setBorder(new BevelBorder(BevelBorder.LOWERED));
         setPreferredSize(new Dimension(parent.getWidth(), getFontMetrics(getFont()).getHeight() + 10));
@@ -69,34 +73,45 @@ public class StatusBar extends JPanel {
 
         JPanel progressBarPanel = new JPanel();
         progressBarPanel.setLayout(new BoxLayout(progressBarPanel, BoxLayout.X_AXIS));
-        progressBarPanel.setMaximumSize(new Dimension(200, getFontMetrics(getFont()).getHeight()));
+        progressBarPanel.setMaximumSize(new Dimension(500, getFontMetrics(getFont()).getHeight()));
         syncProgressBar.setMaximum(10000);
         syncProgressBar.setAlignmentY(CENTER_ALIGNMENT);
         syncProgressBar.setStringPainted(true);
         progressBarPanel.add(syncProgressBar);
         add(progressBarPanel);
-        addGap(10);
-
-        JLabel syncEstimationLabel = new JLabel(GuiMessages.get("SyncEstimation") + ":");
-        syncEstimationLabel.setHorizontalAlignment(SwingConstants.LEFT);
-        add(syncEstimationLabel);
-        addGap(5);
-        add(syncEstimation);
 
         addSeparator();
     }
 
+    /**
+     * Update progress bar and estimated time.
+     *
+     * @param progress
+     *            current progress.
+     */
     public void setProgress(SyncManager.Progress progress) {
-        syncProgressBar.setString(SyncProgressFormatter.format(progress));
         syncProgressBar.setValue(
                 (int) Math.round((double) progress.getCurrentHeight() / (double) progress.getTargetHeight() * 10000d));
 
         Duration estimation = progress.getSyncEstimation();
-        if (estimation != null) {
-            syncEstimation.setText(DurationFormatUtils.formatDurationHMS(progress.getSyncEstimation().toMillis()));
+        if (estimation != null && estimation.getSeconds() > 0L) {
+            syncProgressBar.setString(String.format(
+                    "%s (%s)",
+                    SyncProgressFormatter.format(progress),
+                    // TODO: localize estimation
+                    DurationFormatUtils.formatDurationWords(
+                            estimation.toMillis(), true, true)));
+        } else {
+            syncProgressBar.setString(SyncProgressFormatter.format(progress));
         }
     }
 
+    /**
+     * Update the number of peers.
+     *
+     * @param peersNumber
+     *            current number of peers.
+     */
     public void setPeersNumber(int peersNumber) {
         peers.setText(SwingUtil.formatNumber(peersNumber));
     }
