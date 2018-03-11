@@ -71,7 +71,7 @@ public interface SyncManager {
         long getTargetHeight();
 
         /**
-         * @return the estimated time to complete this sync process.
+         * @return the estimated time to complete this sync process. 30 days at maximum.
          */
         Duration getSyncEstimation();
     }

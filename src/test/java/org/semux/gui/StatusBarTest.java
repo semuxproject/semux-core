@@ -20,9 +20,15 @@ import org.semux.message.GuiMessages;
 public class StatusBarTest extends AssertJSwingJUnitTestCase {
 
     @Test
-    public void testSyncProgress12_34() {
-        testStatusBar(1234L, 10000L, Duration.ofSeconds(123456), 1234,
-                "12.34 % (10 days 3 hours 36 minutes 34 seconds)");
+    public void testSyncProgress1() {
+        testStatusBar(1234L, 10000L, Duration.ofSeconds(370200), 1234,
+                "12.34 % (>= 1 month)");
+    }
+
+    @Test
+    public void testSyncProgress2() {
+        testStatusBar(1234L, 10000L, Duration.ofSeconds(300000), 1234,
+                "12.34 % (24 days 15 hours 58 minutes 31 seconds)");
     }
 
     @Test
@@ -36,8 +42,7 @@ public class StatusBarTest extends AssertJSwingJUnitTestCase {
         SemuxSync.SemuxSyncProgress progress = new SemuxSync.SemuxSyncProgress(0, currentHeight, targetHeight,
                 estimation);
 
-        StatusBarTestApplication application = GuiActionRunner
-                .execute(() -> new StatusBarTestApplication());
+        StatusBarTestApplication application = GuiActionRunner.execute(StatusBarTestApplication::new);
 
         GuiActionRunner.execute(() -> application.statusBar.setProgress(progress));
 

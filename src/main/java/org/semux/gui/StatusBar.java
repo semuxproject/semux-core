@@ -99,8 +99,9 @@ public class StatusBar extends JPanel {
                     "%s (%s)",
                     SyncProgressFormatter.format(progress),
                     // TODO: localize estimation
-                    DurationFormatUtils.formatDurationWords(
-                            estimation.toMillis(), true, true)));
+                    estimation.toDays() >= 30 ? ">= 1 month"
+                            : DurationFormatUtils.formatDurationWords(
+                                    estimation.toMillis(), true, true)));
         } else {
             syncProgressBar.setString(SyncProgressFormatter.format(progress));
         }
