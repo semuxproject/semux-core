@@ -15,6 +15,8 @@ public class TestnetConfig extends AbstractConfig {
 
     public TestnetConfig(String dataDir) {
         super(dataDir, Network.TESTNET, Constants.TESTNET_VERSION);
+        // testnet allows a much larger block size for performance tuning (100MB)
+        maxBlockTransactionsSize = 100 * 1024 * 1024;
     }
 
     @Override
