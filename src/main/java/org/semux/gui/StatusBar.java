@@ -12,6 +12,7 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.time.Duration;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -48,7 +49,7 @@ public class StatusBar extends JPanel {
      *            parent frame.
      */
     private void init(Frame parent) {
-        setBorder(new BevelBorder(BevelBorder.LOWERED));
+        setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.LIGHT_GRAY));
         setPreferredSize(new Dimension(parent.getWidth(), getFontMetrics(getFont()).getHeight() + 10));
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         addGap(10);

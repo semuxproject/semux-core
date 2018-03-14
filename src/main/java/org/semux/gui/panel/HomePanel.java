@@ -46,7 +46,7 @@ public class HomePanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static final int NUMBER_OF_TRANSACTIONS = 6;
+    private static final int NUMBER_OF_TRANSACTIONS = 5;
 
     private static final EnumSet<TransactionType> FEDERATED_TRANSACTION_TYPES = EnumSet.of(TransactionType.COINBASE,
             TransactionType.TRANSFER);

@@ -126,7 +126,6 @@ public class SemuxSync implements SyncManager {
     public void start(long targetHeight) {
         if (isRunning.compareAndSet(false, true)) {
             beginningInstant = Instant.now();
-            begin.set(chain.getLatestBlockNumber());
 
             logger.info("Syncing started, best known block = {}", targetHeight - 1);
 
@@ -136,6 +135,7 @@ public class SemuxSync implements SyncManager {
                 toComplete.clear();
                 toProcess.clear();
 
+                begin.set(chain.getLatestBlockNumber() + 1);
                 current.set(chain.getLatestBlockNumber() + 1);
                 target.set(targetHeight);
                 latestQueuedTask.set(chain.getLatestBlockNumber());
