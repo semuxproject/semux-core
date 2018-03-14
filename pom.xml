@@ -500,6 +500,7 @@
                                         <urn>commons-io:commons-io:2.6:jar:null:test:815893df5f31da2ece4040fe0a12fd44b577afaf</urn>
                                         <urn>commons-logging:commons-logging:1.2:jar:null:compile:4bfc12adfe4842bf07b657f0369c4cb522955686</urn>
                                         <urn>commons-validator:commons-validator:1.6:jar:null:compile:e989d1e87cdd60575df0765ed5bac65c905d7908</urn>
+                                        <urn>de.erichseifert.vectorgraphics2d:VectorGraphics2D:0.11:jar:null:test:f3bf8fe05b7997e03941bf77428598137500c300</urn>
                                         <urn>io.netty:netty-all:4.1.22.Final:jar:null:compile:c1cea5d30025e4d584d2b287d177c31aea4ae629</urn>
                                         <urn>io.swagger:swagger-annotations:1.5.18:jar:null:compile:f386aa7dc018534e6e05c40fff292e6cd9b9d8f8</urn>
                                         <urn>javax.ws.rs:javax.ws.rs-api:2.1:jar:null:compile:426a0862406536e690c7caa8bb6ed32191986fac</urn>
@@ -511,6 +512,7 @@
                                         <urn>net.java.dev.jna:jna:4.5.0:jar:null:compile:55b548d3195efc5280bf1c3f17b49659c54dee40</urn>
                                         <urn>net.revelc.code.formatter:formatter-maven-plugin:2.7.0:maven-plugin:null:runtime:001126378253588ea5a042d41714432033ca17a3</urn>
                                         <urn>org.apache.commons:commons-collections4:4.1:jar:null:compile:a4cf4688fe1c7e3a63aa636cc96d013af537768e</urn>
+                                        <urn>org.apache.commons:commons-compress:1.9:jar:null:test:cc18955ff1e36d5abd39a14bfe82b19154330a34</urn>
                                         <urn>org.apache.commons:commons-lang3:3.7:jar:null:compile:557edd918fd41f9260963583ebf5a61a43a6b423</urn>
                                         <urn>org.apache.logging.log4j:log4j-api:2.10.0:jar:null:compile:fec5797a55b786184a537abd39c3fa1449d752d6</urn>
                                         <urn>org.apache.logging.log4j:log4j-core:2.10.0:jar:null:compile:c90b597163cd28ab6d9687edd53db601b6ea75a1</urn>
@@ -541,6 +543,7 @@
                                         <urn>org.hamcrest:hamcrest-core:1.3:jar:null:test:42a25dc3219429f0e5d060061f71acb49bf010a0</urn>
                                         <urn>org.hamcrest:hamcrest-library:1.3:jar:null:test:4785a3c21320980282f9f33d0d1264a69040538f</urn>
                                         <urn>org.javassist:javassist:3.21.0-GA:jar:null:test:598244f595db5c5fb713731eddbb1c91a58d959b</urn>
+                                        <urn>org.knowm.xchart:xchart:3.5.0:jar:null:test:d0ec5cff2450cf013c4289d5c7c730c245a701ba</urn>
                                         <urn>org.mockito:mockito-core:2.8.9:jar:null:test:1afb35b2d77d40567756c379e54c18da3574a96e</urn>
                                         <urn>org.objenesis:objenesis:2.6:jar:null:test:639033469776fd37c08358c6b92a4761feb2af4b</urn>
                                         <urn>org.powermock:powermock-api-mockito-common:1.7.3:jar:null:test:54c112a921efad764eef571a1cf5b465d110c7df</urn>
@@ -550,6 +553,7 @@
                                         <urn>org.powermock:powermock-module-junit4-common:1.7.3:jar:null:test:7287dd56b2b907a15aa2b6a0f1ddb2dd52cf388f</urn>
                                         <urn>org.powermock:powermock-module-junit4:1.7.3:jar:null:test:f25cd17a4d7acba1a591beaecd99fad844875cc6</urn>
                                         <urn>org.powermock:powermock-reflect:1.7.3:jar:null:test:f3d3c696a9977094c796dc8ffd174f828f3410e8</urn>
+                                        <urn>org.rauschig:jarchivelib:0.7.1:jar:null:test:47a77274cc38cfe6c04bc2afa3ece808742dc42b</urn>
                                         <urn>org.slf4j:slf4j-api:1.7.25:jar:null:compile:da76ca59f6a57ee3102f8f9bd9cee742973efa8a</urn>
                                         <urn>org.threeten:threetenbp:1.3.6:jar:null:compile:89dcc04a7e028c3c963413a71f950703cf51f057</urn>
                                         <urn>org.xerial.snappy:snappy-java:1.1.7.1:jar:null:compile:d5190b41f3de61e3b83d692322d58630252bc8c3</urn>
