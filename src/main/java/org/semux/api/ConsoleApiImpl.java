@@ -34,7 +34,7 @@ public class ConsoleApiImpl implements ConsoleApi {
         Long number;
         try {
             number = Long.parseLong(blockNum);
-        } catch (CryptoException ex) {
+        } catch (NumberFormatException ex) {
             return failure("Parameter `number` is not a valid number");
         }
 
