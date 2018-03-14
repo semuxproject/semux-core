@@ -7,6 +7,13 @@
 package org.semux.gui.dialog;
 
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.DialogFixture;
@@ -18,8 +25,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.semux.core.Block;
+import org.semux.core.BlockHeader;
+import org.semux.core.Blockchain;
+import org.semux.core.Transaction;
+import org.semux.core.TransactionResult;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
+import org.semux.util.Bytes;
 
 /**
  */
@@ -51,7 +64,33 @@ public class ConsoleDialogTest extends AssertJSwingJUnitTestCase {
         console.textBox("txtInput").enterText("listAccounts\n");
         String walletAddress = kernelRule1.getKernel().getWallet().getAccount(0).toAddressString();
 
-        await().until(() -> consoleText.text().contains(walletAddress));
+        // getBlockByNumber
+        Blockchain blockChain = mock(Blockchain.class);
+        Block block = getBlock();
+        when(blockChain.getBlock(anyLong())).thenReturn(block);
+        kernelRule1.getKernel().setBlockchain(blockChain);
+
+        console.textBox("txtInput").enterText("getBlockByNumber 1\n");
+
+        await().until(() -> consoleText.text().contains("transactionsRoot"));
+    }
+
+    private Block getBlock() {
+
+        long number = 1;
+        byte[] coinbase = Bytes.random(20);
+        byte[] prevHash = Bytes.random(20);
+        long timestamp = System.currentTimeMillis();
+        byte[] transactionsRoot = Bytes.random(32);
+        byte[] resultsRoot = Bytes.random(32);
+        byte[] stateRoot = Bytes.random(32);
+        byte[] data = {};
+        List<Transaction> transactions = Collections.emptyList();
+        List<TransactionResult> results = Arrays.asList(new TransactionResult(true), new TransactionResult(true));
+        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
+                stateRoot, data);
+        Block block = new Block(header, transactions, results);
+        return block;
     }
 
     @Override

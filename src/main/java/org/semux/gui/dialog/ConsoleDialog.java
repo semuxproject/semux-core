@@ -27,6 +27,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
 import org.semux.api.ApiHandlerResponse;
+import org.semux.api.ConsoleApi;
+import org.semux.api.ConsoleApiImpl;
 import org.semux.api.SemuxApi;
 import org.semux.api.SemuxApiImpl;
 import org.semux.gui.SemuxGui;
@@ -43,7 +45,10 @@ public class ConsoleDialog extends JDialog implements ActionListener {
     private static final long serialVersionUID = 1L;
 
     public static final String HELP = "help";
+
     private transient SemuxApi api;
+    private transient ConsoleApi consoleApi;
+
     private JTextArea console;
     private JTextField input;
     private ObjectMapper mapper = new ObjectMapper();
@@ -73,6 +78,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         this.setSize(800, 600);
         this.setLocationRelativeTo(parent);
         api = new SemuxApiImpl(gui.getKernel());
+        consoleApi = new ConsoleApiImpl(gui.getKernel());
 
         console.append(GuiMessages.get("ConsoleHelp", HELP));
         addWindowListener(new WindowAdapter() {
@@ -111,8 +117,8 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         String[] commandParams = commandString.split(" ");
 
         String command = commandParams[0];
-        // api only takes string parameters;
 
+        // console only supports string parameters;
         int numParams = commandParams.length - 1;
         Class<?>[] classes = new Class[numParams];
         for (int i = 0; i < numParams; i++) {
@@ -120,9 +126,18 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         }
 
         try {
-            Method method = api.getClass().getMethod(command, classes);
-            Object[] params = Arrays.copyOfRange(commandParams, 1, commandParams.length);
-            ApiHandlerResponse response = (ApiHandlerResponse) method.invoke(api, params);
+
+            ApiHandlerResponse response;
+            try {
+                Method method = api.getClass().getMethod(command, classes);
+                Object[] params = Arrays.copyOfRange(commandParams, 1, commandParams.length);
+                response = (ApiHandlerResponse) method.invoke(api, params);
+            } catch (NoSuchMethodException e) {
+                // fall back to additional console commands
+                Method method = consoleApi.getClass().getMethod(command, classes);
+                Object[] params = Arrays.copyOfRange(commandParams, 1, commandParams.length);
+                response = (ApiHandlerResponse) method.invoke(consoleApi, params);
+            }
 
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             console.append("\n");
@@ -136,8 +151,17 @@ public class ConsoleDialog extends JDialog implements ActionListener {
     }
 
     private void printHelp() {
-        Method[] allMethods = SemuxApi.class.getMethods();
-        for (Method method : allMethods) {
+        Method[] apiMethods = SemuxApi.class.getMethods();
+        for (Method method : apiMethods) {
+            String methodString = getMethodString(method);
+
+            if (methodString != null) {
+                console.append(methodString);
+            }
+        }
+
+        Method[] additionalMethods = ConsoleApi.class.getMethods();
+        for (Method method : additionalMethods) {
             String methodString = getMethodString(method);
 
             if (methodString != null) {
