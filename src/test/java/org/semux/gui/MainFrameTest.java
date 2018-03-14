@@ -6,12 +6,15 @@
  */
 package org.semux.gui;
 
+import java.time.Duration;
+
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
+import org.semux.consensus.SemuxSync;
 import org.semux.crypto.Key;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
@@ -33,9 +36,11 @@ public class MainFrameTest extends AssertJSwingJUnitTestCase {
         Key coinbase = new Key();
         WalletModel model = new WalletModel();
         KernelMock kernel = kernelRule.getKernel();
+
         gui = new SemuxGui(model, kernel);
         model.setLatestBlock(kernel.getBlockchain().getLatestBlock());
         model.setCoinbase(coinbase);
+        model.setSyncProgress(new SemuxSync.SemuxSyncProgress(0, 1, 1, Duration.ZERO));
 
         frame = GuiActionRunner.execute(() -> new MainFrame(gui));
 

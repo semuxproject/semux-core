@@ -423,7 +423,17 @@ public class SwingUtil {
      * @return
      */
     public static String formatPercentage(double percentage) {
-        return formatNumber(percentage, 1) + " %";
+        return formatPercentage(percentage, 1);
+    }
+
+    /**
+     * Formats a percentage
+     *
+     * @param percentage
+     * @return
+     */
+    public static String formatPercentage(double percentage, int decimals) {
+        return formatNumber(percentage, decimals) + " %";
     }
 
     /**

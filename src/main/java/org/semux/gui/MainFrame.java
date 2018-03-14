@@ -58,6 +58,7 @@ public class MainFrame extends JFrame implements ActionListener {
     private ReceivePanel panelReceive;
     private TransactionsPanel panelTransactions;
     private DelegatesPanel panelDelegates;
+    private StatusBar statusBar;
 
     private JButton btnHome;
     private JButton btnSend;
@@ -91,6 +92,7 @@ public class MainFrame extends JFrame implements ActionListener {
             }
         });
         this.model = gui.getModel();
+        this.model.addListener(this);
 
         this.kernel = gui.getKernel();
 
@@ -165,6 +167,12 @@ public class MainFrame extends JFrame implements ActionListener {
         // show the first tab
         activePanel.add(panelHome);
         select(panelHome, btnHome);
+
+        // add status bar
+        statusBar = new StatusBar(this);
+        statusBar.setPeersNumber(model.getActivePeers().size());
+        statusBar.setProgress(model.getSyncProgress());
+        this.add(statusBar, BorderLayout.SOUTH);
     }
 
     @Override
@@ -189,6 +197,9 @@ public class MainFrame extends JFrame implements ActionListener {
             break;
         case LOCK:
             lock();
+            break;
+        case REFRESH:
+            refresh();
             break;
         default:
             throw new UnreachableException();
@@ -220,6 +231,15 @@ public class MainFrame extends JFrame implements ActionListener {
         }
 
         return false;
+    }
+
+    /**
+     * Event listener of ${@link Action#REFRESH}.
+     */
+    protected void refresh() {
+        // update status bar
+        statusBar.setPeersNumber(model.getActivePeers().size());
+        statusBar.setProgress(model.getSyncProgress());
     }
 
     private static final Border BORDER_NORMAL = new CompoundBorder(new LineBorder(new Color(180, 180, 180)),

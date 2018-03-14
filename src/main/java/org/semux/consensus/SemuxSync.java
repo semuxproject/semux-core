@@ -6,6 +6,9 @@
  */
 package org.semux.consensus;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.time.Instant;
@@ -104,9 +107,11 @@ public class SemuxSync implements SyncManager {
     private final Object lock = new Object();
 
     // current and target heights
+    private AtomicLong begin = new AtomicLong();
     private AtomicLong current = new AtomicLong();
     private AtomicLong target = new AtomicLong();
 
+    private Instant beginningInstant;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public SemuxSync(Kernel kernel) {
@@ -120,7 +125,8 @@ public class SemuxSync implements SyncManager {
     @Override
     public void start(long targetHeight) {
         if (isRunning.compareAndSet(false, true)) {
-            Instant begin = Instant.now();
+            beginningInstant = Instant.now();
+            begin.set(chain.getLatestBlockNumber());
 
             logger.info("Syncing started, best known block = {}", targetHeight - 1);
 
@@ -158,7 +164,7 @@ public class SemuxSync implements SyncManager {
             process.cancel(false);
 
             Instant end = Instant.now();
-            logger.info("Syncing finished, took {}", TimeUtil.formatDuration(Duration.between(begin, end)));
+            logger.info("Syncing finished, took {}", TimeUtil.formatDuration(Duration.between(beginningInstant, end)));
         }
     }
 
@@ -458,18 +464,33 @@ public class SemuxSync implements SyncManager {
 
     @Override
     public SemuxSyncProgress getProgress() {
-        return new SemuxSyncProgress(current.get(), target.get());
+        return new SemuxSyncProgress(
+                begin.get(),
+                current.get(),
+                target.get(),
+                Duration.between(beginningInstant != null ? beginningInstant : Instant.now(), Instant.now()));
     }
 
     public static class SemuxSyncProgress implements SyncManager.Progress {
+
+        final long beginHeight;
 
         final long currentHeight;
 
         final long targetHeight;
 
-        public SemuxSyncProgress(long currentHeight, long targetHeight) {
+        final Duration duration;
+
+        public SemuxSyncProgress(long beginHeight, long currentHeight, long targetHeight, Duration duration) {
+            this.beginHeight = beginHeight;
             this.currentHeight = currentHeight;
             this.targetHeight = targetHeight;
+            this.duration = duration;
+        }
+
+        @Override
+        public long getBeginHeight() {
+            return beginHeight;
         }
 
         @Override
@@ -480,6 +501,31 @@ public class SemuxSync implements SyncManager {
         @Override
         public long getTargetHeight() {
             return targetHeight;
+        }
+
+        @Override
+        public Duration getSyncEstimation() {
+            Long speed = getSpeed();
+            if (speed == null || speed == 0) {
+                return null;
+            }
+
+            return Duration.ofMillis(BigInteger.valueOf(getTargetHeight())
+                    .subtract(BigInteger.valueOf(getCurrentHeight()))
+                    .multiply(BigInteger.valueOf(speed))
+                    .longValue());
+        }
+
+        private Long getSpeed() {
+            Long downloadedBlocks = currentHeight - beginHeight;
+            if (downloadedBlocks <= 0 || duration.toMillis() == 0) {
+                return null;
+            }
+
+            return BigDecimal.valueOf(duration.toMillis())
+                    .divide(BigDecimal.valueOf(downloadedBlocks), MathContext.DECIMAL64)
+                    .round(MathContext.DECIMAL64)
+                    .longValue();
         }
     }
 }

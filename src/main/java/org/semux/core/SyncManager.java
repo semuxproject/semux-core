@@ -6,6 +6,8 @@
  */
 package org.semux.core;
 
+import java.time.Duration;
+
 import org.semux.net.Channel;
 import org.semux.net.msg.Message;
 
@@ -54,6 +56,11 @@ public interface SyncManager {
     interface Progress {
 
         /**
+         * @return the beginning height of this sync process.
+         */
+        long getBeginHeight();
+
+        /**
          * @return the current height of sync process.
          */
         long getCurrentHeight();
@@ -62,5 +69,10 @@ public interface SyncManager {
          * @return the target height of sync process.
          */
         long getTargetHeight();
+
+        /**
+         * @return the estimated time to complete this sync process. 30 days at maximum.
+         */
+        Duration getSyncEstimation();
     }
 }
