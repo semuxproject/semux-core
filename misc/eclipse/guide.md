@@ -5,7 +5,7 @@ This guide helps you set up Eclipse environment.
 ### Import the project
 
 1. Clone the semux project via `git clone https://github.com/semuxproject/semux`;
-2. Open IntelliJ IDEA and import it as `Existing Maven Project`.
+2. Open Eclipse and import it as `Existing Maven Project`.
 
 ### Set up code stye
 
