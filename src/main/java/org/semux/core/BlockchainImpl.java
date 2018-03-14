@@ -109,7 +109,7 @@ public class BlockchainImpl implements Blockchain {
         if (number == null) {
             // pre-allocation
             for (Premine p : genesis.getPremines().values()) {
-                accountState.adjustAvailable(p.getAddress(), p.getAmount() * Unit.SEM);
+                accountState.adjustAvailable(p.getAddress(), p.getAmount());
             }
             accountState.commit();
 
