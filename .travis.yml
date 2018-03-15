@@ -1,26 +1,37 @@
 language: java
 matrix:
   include:
-    # Linux license, format, and coverage check
-    - os: linux
+    # License, formatter, and FindBugs check
+    - env: NAME="License, formatter, and FindBugs check"
+      os: linux
       sudo: false
       jdk: oraclejdk8
       script:
         - mvn license:check
         - mvn formatter:validate
+        - mvn findbugs:check
+
+    # Coverage report
+    - env: NAME="Coverage report"
+      os: linux
+      sudo: false
+      jdk: oraclejdk8
+      script:
         - mvn cobertura:cobertura
       after_success:
         - mvn coveralls:report
 
     # Linux tests (java 8)
-    - os: linux
+    - env: NAME="Linux tests (java 8)"
+      os: linux
       sudo: false
       jdk: oraclejdk8
       script:
         - mvn test
 
     # Linux tests (java 9)
-    - os: linux
+    - env: NAME="Linux tests (java 9)"
+      os: linux
       sudo: false
       jdk: oraclejdk9
       script:
@@ -33,7 +44,8 @@ matrix:
     #     - mvn test
 
     # Docker tests
-    - language: none
+    - env: NAME="Docker tests"
+      language: none
       os: linux
       sudo: required
       services:
