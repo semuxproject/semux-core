@@ -67,6 +67,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import io.netty.util.internal.StringUtil;
+import java.text.DecimalFormat;
 
 public class SwingUtil {
 
@@ -295,10 +296,11 @@ public class SwingUtil {
      * @return
      * @throws ParseException
      */
-    public static Number parseNumber(String str) throws ParseException {
-        NumberFormat format = NumberFormat.getInstance();
+    public static BigDecimal parseNumber(String str) throws ParseException {
+        DecimalFormat format = (DecimalFormat) DecimalFormat.getInstance();
+        format.setParseBigDecimal(true);
         ParsePosition position = new ParsePosition(0);
-        Number number = format.parse(str, position);
+        BigDecimal number = (BigDecimal) format.parse(str, position);
         if (position.getIndex() != str.length() || number == null) {
             throw new ParseException("Failed to parse number: " + str, position.getIndex());
         }
@@ -411,7 +413,7 @@ public class SwingUtil {
                 .findAny()
                 .orElse(Pair.of(str, Unit.valueOf(unit)));
 
-        return BigDecimal.valueOf(parseNumber(numberUnit.getKey()).doubleValue())
+        return parseNumber(numberUnit.getKey())
                 .multiply(BigDecimal.valueOf(numberUnit.getValue()))
                 .longValue();
     }
@@ -489,7 +491,7 @@ public class SwingUtil {
      */
     public static final Comparator<String> NUMBER_COMPARATOR = (o1, o2) -> {
         try {
-            return Double.compare(parseNumber(o1).doubleValue(), parseNumber(o2).doubleValue());
+            return parseNumber(o1).compareTo(parseNumber(o2));
         } catch (ParseException e) {
             throw new NumberFormatException("Invalid number strings: " + o1 + ", " + o2);
         }
@@ -502,7 +504,7 @@ public class SwingUtil {
      */
     public static final Comparator<String> VALUE_COMPARATOR = (o1, o2) -> {
         try {
-            return Double.compare(parseValue(o1), parseValue(o2));
+            return Long.compare(parseValue(o1), parseValue(o2));
         } catch (ParseException e) {
             throw new NumberFormatException("Invalid number strings: " + o1 + ", " + o2);
         }

@@ -6,6 +6,7 @@
  */
 package org.semux.gui;
 
+import java.math.BigDecimal;
 import static org.junit.Assert.assertEquals;
 
 import java.text.ParseException;
@@ -40,14 +41,14 @@ public class SwingUtilTest {
 
     @Test
     public void testFormatNumber() {
-        double x = 12345678.1234;
+        BigDecimal x = new BigDecimal("12345678.1234");
         assertEquals("12,345,678", SwingUtil.formatNumber(x, 0));
         assertEquals("12,345,678.12", SwingUtil.formatNumber(x, 2));
     }
 
     @Test
     public void testParseNumber() throws ParseException {
-        assertEquals(12345678.12, SwingUtil.parseNumber("12,345,678.12").doubleValue(), 10e-9);
+        assertEquals(new BigDecimal("12345678.12"), SwingUtil.parseNumber("12,345,678.12"));
     }
 
     @Test
