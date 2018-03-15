@@ -155,7 +155,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         refresh();
     }
 
-    class ReceiveTableModel extends AbstractTableModel {
+    private static class ReceiveTableModel extends AbstractTableModel {
 
         private static final long serialVersionUID = 1L;
 

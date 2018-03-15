@@ -277,10 +277,13 @@ public class Kernel {
         // make sure no thread is reading/writing the state
         ReentrantReadWriteLock.WriteLock lock = stateLock.writeLock();
         lock.lock();
-        for (DbName name : DbName.values()) {
-            dbFactory.getDB(name).close();
+        try {
+            for (DbName name : DbName.values()) {
+                dbFactory.getDB(name).close();
+            }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
 
         state = State.STOPPED;
     }

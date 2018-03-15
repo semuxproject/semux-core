@@ -8,6 +8,7 @@ package org.semux.api;
 
 import java.io.File;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -58,6 +59,8 @@ import org.semux.net.filter.SemuxIpFilter;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public class SemuxApiImpl implements SemuxApi {
+    private static final Charset CHARSET = Charset.forName("UTF-8");
+
     private Kernel kernel;
 
     public SemuxApiImpl(Kernel kernel) {
@@ -458,7 +461,7 @@ public class SemuxApiImpl implements SemuxApi {
                 return failure(String.format("The provided address %s doesn't belong to the wallet", address));
             }
 
-            Key.Signature signedMessage = account.sign(message.getBytes());
+            Key.Signature signedMessage = account.sign(message.getBytes(CHARSET));
             return new SignMessageResponse(true, Hex.encode0x(signedMessage.toBytes()));
         } catch (NullPointerException | IllegalArgumentException e) {
             return failure("Invalid message");
@@ -488,7 +491,7 @@ public class SemuxApiImpl implements SemuxApi {
             if (!Arrays.equals(signatureAddress, addressBytes)) {
                 isValidSignature = false;
             }
-            if (!Key.verify(message.getBytes(), sig)) {
+            if (!Key.verify(message.getBytes(CHARSET), sig)) {
                 isValidSignature = false;
             }
 

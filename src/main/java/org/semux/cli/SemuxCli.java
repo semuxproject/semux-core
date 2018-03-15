@@ -323,7 +323,7 @@ public class SemuxCli extends Launcher {
     /**
      * Create a new wallet with a new password from input and save the wallet file
      * to disk
-     * 
+     *
      * @return created new wallet, or null if it failed to create the wallet
      */
     protected Wallet createNewWallet() {

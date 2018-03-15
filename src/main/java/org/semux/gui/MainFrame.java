@@ -70,7 +70,7 @@ public class MainFrame extends JFrame implements ActionListener {
     private JPanel activePanel;
     private JButton activeButton;
 
-    private WalletModel model;
+    private transient WalletModel model;
 
     public MainFrame(SemuxGui gui) {
         // ensure that all windows are released before it starts closing the Kernel

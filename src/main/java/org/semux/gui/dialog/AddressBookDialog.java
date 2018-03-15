@@ -103,7 +103,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
         return wallet;
     }
 
-    class AddressTableModel extends AbstractTableModel {
+    private static class AddressTableModel extends AbstractTableModel {
         private static final long serialVersionUID = 1L;
 
         private transient List<AddressBookEntry> addresses;

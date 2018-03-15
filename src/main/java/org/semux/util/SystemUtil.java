@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
@@ -47,7 +48,7 @@ public class SystemUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemUtil.class);
 
-    public static final Scanner scanner = new Scanner(System.in);
+    private static final Scanner scanner = new Scanner(new InputStreamReader(System.in, Charset.forName("UTF-8")));
 
     public enum OsName {
         WINDOWS("Windows"),
@@ -134,7 +135,8 @@ public class SystemUtil {
             con.setConnectTimeout(Constants.DEFAULT_CONNECT_TIMEOUT);
             con.setReadTimeout(Constants.DEFAULT_READ_TIMEOUT);
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), Charset.forName("UTF-8")));
             String ip = reader.readLine().trim();
             reader.close();
 

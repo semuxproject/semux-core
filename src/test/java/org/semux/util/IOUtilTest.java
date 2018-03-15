@@ -15,11 +15,14 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.junit.After;
 import org.junit.Test;
 
 public class IOUtilTest {
+
+    private static final Charset CHARSET = Charset.forName("UTF-8");
 
     private File f1 = new File("test1");
     private File f2 = new File("test2");
@@ -47,13 +50,13 @@ public class IOUtilTest {
 
     @Test
     public void testReadFileAsLines() throws IOException {
-        assertTrue(IOUtil.readFileAsLines(f1).isEmpty());
+        assertTrue(IOUtil.readFileAsLines(f1, CHARSET).isEmpty());
 
         IOUtil.writeToFile(Bytes.of("123\n456\n"), f1);
-        assertThat(IOUtil.readFileAsLines(f1), contains("123", "456"));
+        assertThat(IOUtil.readFileAsLines(f1, CHARSET), contains("123", "456"));
 
         IOUtil.writeToFile(Bytes.of("123\n456\n\n"), f1);
-        assertThat(IOUtil.readFileAsLines(f1), contains("123", "456", ""));
+        assertThat(IOUtil.readFileAsLines(f1, CHARSET), contains("123", "456", ""));
     }
 
     @Test
