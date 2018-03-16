@@ -16,6 +16,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -124,11 +126,11 @@ public class IOUtil {
      * @return A list of lines in the file, or empty if the file doesn't exist
      * @throws IOException
      */
-    public static List<String> readFileAsLines(File file) throws IOException {
+    public static List<String> readFileAsLines(File file, Charset charset) throws IOException {
         List<String> lines = new ArrayList<>();
 
         if (file.isFile()) {
-            try (BufferedReader in = new BufferedReader(new FileReader(file))) {
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset))) {
                 for (String line; (line = in.readLine()) != null;) {
                     lines.add(line);
                 }

@@ -422,6 +422,19 @@
                 </configuration>
             </plugin>
 
+            <!-- FindBugs -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>3.0.5</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <!-- FIXME: lower the FindBugs threshold to Medium -->
+                    <threshold>High</threshold>
+                    <xmlOutput>true</xmlOutput>
+                </configuration>
+            </plugin>
+
             <!-- testing -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -510,6 +523,7 @@
                                         <urn>org.bitlet:weupnp:0.1.4:jar:null:compile:b99cd791ede89b7c17426e6c51a0f171dc925def</urn>
                                         <urn>org.bouncycastle:bcprov-jdk15on:1.59:jar:null:compile:2507204241ab450456bdb8e8c0a8f986e418bd99</urn>
                                         <urn>org.codehaus.mojo:cobertura-maven-plugin:2.7:maven-plugin:null:runtime:0d49d827220fc4282babb85fb3b9970ffdb99aff</urn>
+                                        <urn>org.codehaus.mojo:findbugs-maven-plugin:3.0.5:maven-plugin:null:runtime:b3c2f7fcf51637697fe7da4d38ad795e54682355</urn>
                                         <urn>org.easytesting:fest-reflect:1.4.1:jar:null:test:2b92d5275e92a49e16c7ce6bd7e46b9080db0530</urn>
                                         <urn>org.easytesting:fest-util:1.2.5:jar:null:test:c4a8d7305b23b8d043be12c979813b096df11f44</urn>
                                         <urn>org.eluder.coveralls:coveralls-maven-plugin:4.3.0:maven-plugin:null:runtime:2f9f6bdef5dd1d863730a134a8f1280337440c46</urn>
