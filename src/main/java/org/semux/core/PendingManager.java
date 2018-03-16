@@ -185,13 +185,13 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Returns pending transactions and corresponding results.
      *
-     * @param limit
+     * @param byteLimit
      * @return
      */
-    public synchronized List<PendingTransaction> getPendingTransactions(int limit) {
+    public synchronized List<PendingTransaction> getPendingTransactions(int byteLimit) {
         List<PendingTransaction> txs = new ArrayList<>();
 
-        if (limit == -1) {
+        if (byteLimit == -1) {
             // returns all transactions if there is no limit
             txs.addAll(transactions);
         } else {
@@ -201,11 +201,11 @@ public class PendingManager implements Runnable, BlockchainListener {
             while (it.hasNext()) {
                 PendingTransaction tx = it.next();
 
-                if (size + tx.transaction.size() > limit) {
+                size += tx.transaction.size();
+                if (size > byteLimit) {
                     break;
                 } else {
                     txs.add(tx);
-                    size += tx.transaction.size();
                 }
             }
         }
