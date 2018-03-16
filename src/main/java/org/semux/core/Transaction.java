@@ -27,9 +27,9 @@ public class Transaction {
 
     private final byte[] to;
 
-    private final long value;
+    private final Amount value;
 
-    private final long fee;
+    private final Amount fee;
 
     private final long nonce;
 
@@ -54,7 +54,7 @@ public class Transaction {
      * @param timestamp
      * @param data
      */
-    public Transaction(Network network, TransactionType type, byte[] to, long value, long fee, long nonce,
+    public Transaction(Network network, TransactionType type, byte[] to, Amount value, Amount fee, long nonce,
             long timestamp, byte[] data) {
         this.networkId = network.id();
         this.type = type;
@@ -69,8 +69,8 @@ public class Transaction {
         enc.writeByte(networkId);
         enc.writeByte(type.toByte());
         enc.writeBytes(to);
-        enc.writeLong(value);
-        enc.writeLong(fee);
+        enc.writeAmount(value);
+        enc.writeAmount(fee);
         enc.writeLong(nonce);
         enc.writeLong(timestamp);
         enc.writeBytes(data);
@@ -92,8 +92,8 @@ public class Transaction {
         this.networkId = dec.readByte();
         this.type = TransactionType.of(dec.readByte());
         this.to = dec.readBytes();
-        this.value = dec.readLong();
-        this.fee = dec.readLong();
+        this.value = dec.readAmount();
+        this.fee = dec.readAmount();
         this.nonce = dec.readLong();
         this.timestamp = dec.readLong();
         this.data = dec.readBytes();
@@ -130,8 +130,8 @@ public class Transaction {
                 && networkId == network.id()
                 && type != null
                 && to != null && to.length == Key.ADDRESS_LEN
-                && value >= 0
-                && fee >= 0
+                && value.gte0()
+                && fee.gte0()
                 && nonce >= 0
                 && timestamp > 0
                 && data != null
@@ -198,7 +198,7 @@ public class Transaction {
      *
      * @return
      */
-    public long getValue() {
+    public Amount getValue() {
         return value;
     }
 
@@ -207,7 +207,7 @@ public class Transaction {
      *
      * @return
      */
-    public long getFee() {
+    public Amount getFee() {
         return fee;
     }
 

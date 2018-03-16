@@ -11,6 +11,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Amount.ZERO;
 
 import java.util.List;
 import java.util.Map;
@@ -21,9 +24,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
+import org.semux.core.Amount;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
-import org.semux.core.Unit;
 import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDbRule;
 import org.semux.util.ByteArray;
@@ -52,7 +55,7 @@ public class DelegateStateTest {
             assertNotNull(d);
             assertArrayEquals(delegates.get(k), d.getAddress());
             assertArrayEquals(Bytes.of(k), d.getName());
-            assertEquals(0, d.getVotes());
+            assertEquals(ZERO, d.getVotes());
         }
 
         assertEquals(delegates.size(), ds.getDelegates().size());
@@ -64,7 +67,7 @@ public class DelegateStateTest {
         Key delegate = new Key();
         Key voter = new Key();
 
-        assertFalse(ds.vote(voter.toAddress(), delegate.toAddress(), 1));
+        assertFalse(ds.vote(voter.toAddress(), delegate.toAddress(), NANO_SEM.of(1)));
     }
 
     @Test
@@ -76,7 +79,7 @@ public class DelegateStateTest {
 
         assertTrue(ds.register(delegate, delegateName));
         for (int i = 0; i < 1000; i++) {
-            assertTrue(ds.vote(voter, delegate, 1000));
+            assertTrue(ds.vote(voter, delegate, NANO_SEM.of(1000)));
         }
 
         List<Delegate> list = ds.getDelegates();
@@ -84,7 +87,7 @@ public class DelegateStateTest {
 
         assertArrayEquals(delegate, list.get(0).getAddress());
         assertArrayEquals(delegateName, list.get(0).getName());
-        assertEquals(1000 * 1000, list.get(0).getVotes());
+        assertEquals(NANO_SEM.of(1000 * 1000), list.get(0).getVotes());
     }
 
     @Test
@@ -98,7 +101,7 @@ public class DelegateStateTest {
             delegate = new Key().toAddress();
             delegateName = Bytes.of("delegate" + i);
             assertTrue(ds.register(delegate, delegateName));
-            assertTrue(ds.vote(voter, delegate, i));
+            assertTrue(ds.vote(voter, delegate, NANO_SEM.of(i)));
         }
 
         List<Delegate> list = ds.getDelegates();
@@ -106,14 +109,14 @@ public class DelegateStateTest {
 
         assertArrayEquals(delegate, list.get(0).getAddress());
         assertArrayEquals(delegateName, list.get(0).getName());
-        assertEquals(200 - 1, list.get(0).getVotes());
+        assertEquals(NANO_SEM.of(200 - 1), list.get(0).getVotes());
     }
 
     @Test
     public void testUnvote() {
         byte[] voter = new Key().toAddress();
         byte[] delegate = new Key().toAddress();
-        long value = 2 * Unit.SEM;
+        Amount value = SEM.of(2);
 
         ds.register(delegate, Bytes.of("test"));
         assertFalse(ds.unvote(voter, delegate, value));
@@ -125,33 +128,33 @@ public class DelegateStateTest {
     public void testGetVote() {
         byte[] voter = new Key().toAddress();
         byte[] delegate = new Key().toAddress();
-        long value = 2 * Unit.SEM;
+        Amount value = SEM.of(2);
 
         ds.register(delegate, Bytes.of("test"));
         assertTrue(ds.vote(voter, delegate, value));
         assertEquals(value, ds.getVote(voter, delegate));
         assertTrue(ds.vote(voter, delegate, value));
-        assertEquals(value * 2, ds.getVote(voter, delegate));
+        assertEquals(SEM.of(4), ds.getVote(voter, delegate));
         ds.commit();
-        assertEquals(value * 2, ds.getVote(voter, delegate));
+        assertEquals(SEM.of(4), ds.getVote(voter, delegate));
     }
 
     @Test
     public void testGetVotes() {
         Key delegateKey = new Key();
         Key voterKey1 = new Key();
-        long value1 = 1 * Unit.SEM;
+        Amount value1 = SEM.of(1);
         Key voterKey2 = new Key();
-        long value2 = 2 * Unit.SEM;
+        Amount value2 = SEM.of(2);
 
         ds.register(delegateKey.toAddress(), Bytes.of("test"));
         assertTrue(ds.vote(voterKey1.toAddress(), delegateKey.toAddress(), value1));
         assertTrue(ds.vote(voterKey2.toAddress(), delegateKey.toAddress(), value2));
         ds.commit();
 
-        Map<ByteArray, Long> votes = ds.getVotes(delegateKey.toAddress());
-        assertEquals(value1, (long) votes.get(new ByteArray(voterKey1.toAddress())));
-        assertEquals(value2, (long) votes.get(new ByteArray(voterKey2.toAddress())));
+        Map<ByteArray, Amount> votes = ds.getVotes(delegateKey.toAddress());
+        assertEquals(value1, votes.get(new ByteArray(voterKey1.toAddress())));
+        assertEquals(value2, votes.get(new ByteArray(voterKey2.toAddress())));
     }
 
     @After

@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.semux.core.Amount.Unit.NANO_SEM;
 
 import java.util.Collections;
 
@@ -23,12 +24,12 @@ public class WalletAccountTest {
     @Test
     public void testKey() {
         Key key = new Key();
-        Account acc = new Account(key.toAddress(), 1, 2, 3);
+        Account acc = new Account(key.toAddress(), NANO_SEM.of(1), NANO_SEM.of(2), 3);
         WalletAccount wa = new WalletAccount(key, acc, "test account");
 
         assertThat(wa.getAddress(), equalTo(key.toAddress()));
-        assertThat(wa.getAvailable(), equalTo(1L));
-        assertThat(wa.getLocked(), equalTo(2L));
+        assertThat(wa.getAvailable(), equalTo(NANO_SEM.of(1)));
+        assertThat(wa.getLocked(), equalTo(NANO_SEM.of(2)));
         assertThat(wa.getNonce(), equalTo(3L));
 
         assertTrue(wa.getTransactions().isEmpty());
@@ -46,7 +47,7 @@ public class WalletAccountTest {
     @Test(expected = IllegalArgumentException.class)
     public void testMismatch() {
         Key key = new Key();
-        Account acc = new Account(new Key().toAddress(), 1, 2, 3);
+        Account acc = new Account(new Key().toAddress(), NANO_SEM.of(1), NANO_SEM.of(2), 3);
         new WalletAccount(key, acc, "test account");
     }
 

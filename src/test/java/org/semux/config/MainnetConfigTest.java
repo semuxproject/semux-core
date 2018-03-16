@@ -8,11 +8,15 @@ package org.semux.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Amount.ZERO;
+
+import java.util.stream.LongStream;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.semux.Network;
-import org.semux.core.Unit;
+import org.semux.core.Amount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,11 +34,12 @@ public class MainnetConfigTest {
 
     @Test
     public void testBlockReward() {
-        long total = 0;
-        for (int i = 1; i <= 100_000_000; i++) {
-            total += config.getBlockReward(i);
-        }
-        assertEquals(75_000_000 * Unit.SEM, total);
+        Amount total = LongStream
+                .rangeClosed(1, 100_000_000)
+                .mapToObj(config::getBlockReward)
+                .reduce(ZERO, Amount::sum);
+
+        assertEquals(SEM.of(75_000_000), total);
     }
 
     @Test

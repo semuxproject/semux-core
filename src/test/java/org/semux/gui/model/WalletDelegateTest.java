@@ -12,21 +12,24 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Amount.ZERO;
 
 import java.util.Arrays;
 
 import org.junit.Test;
 import org.semux.Kernel;
+import org.semux.core.Amount;
 import org.semux.core.Blockchain;
 import org.semux.core.state.Delegate;
 import org.semux.util.Bytes;
 
 public class WalletDelegateTest {
 
-    private byte[] address = Bytes.random(20);
-    private byte[] name = Bytes.of("test");
-    private long registeredAt = 2;
-    private long votes = 3;
+    private final byte[] address = Bytes.random(20);
+    private final byte[] name = Bytes.of("test");
+    private final long registeredAt = 2;
+    private final Amount votes = NANO_SEM.of(3);
 
     @Test
     public void testBasic() {
@@ -39,17 +42,17 @@ public class WalletDelegateTest {
         assertThat(wd.getRegisteredAt(), equalTo(registeredAt));
         assertThat(wd.getVotes(), equalTo(votes));
 
-        assertEquals(0, wd.getVotesFromMe());
+        assertEquals(ZERO, wd.getVotesFromMe());
         assertEquals(0, wd.getNumberOfBlocksForged());
         assertEquals(0, wd.getNumberOfTurnsHit());
         assertEquals(0, wd.getNumberOfTurnsMissed());
 
-        wd.setVotesFromMe(1);
+        wd.setVotesFromMe(NANO_SEM.of(1));
         wd.setNumberOfBlocksForged(2);
         wd.setNumberOfTurnsHit(3);
         wd.setNumberOfTurnsMissed(4);
 
-        assertEquals(1L, wd.getVotesFromMe());
+        assertEquals(NANO_SEM.of(1), wd.getVotesFromMe());
         assertEquals(2L, wd.getNumberOfBlocksForged());
         assertEquals(3L, wd.getNumberOfTurnsHit());
         assertEquals(4L, wd.getNumberOfTurnsMissed());

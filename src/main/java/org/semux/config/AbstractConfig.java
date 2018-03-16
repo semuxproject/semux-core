@@ -6,6 +6,10 @@
  */
 package org.semux.config;
 
+import static org.semux.core.Amount.Unit.MILLI_SEM;
+import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Amount.ZERO;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Arrays;
@@ -20,8 +24,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.semux.Network;
 import org.semux.config.exception.ConfigException;
+import org.semux.core.Amount;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.crypto.Hash;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
@@ -46,9 +50,9 @@ public abstract class AbstractConfig implements Config {
     protected short networkVersion;
 
     protected int maxBlockTransactionsSize = 1024 * 1024;
-    protected long minTransactionFee = 5L * Unit.MILLI_SEM;
+    protected Amount minTransactionFee = MILLI_SEM.of(5);
     protected long maxTransactionTimeDrift = TimeUnit.HOURS.toMillis(2);
-    protected long minDelegateBurnAmount = 1000L * Unit.SEM;
+    protected Amount minDelegateBurnAmount = SEM.of(1000);
     protected long mandatoryUpgrade = Constants.BLOCKS_PER_DAY * 180L;
 
     // =========================
@@ -112,7 +116,7 @@ public abstract class AbstractConfig implements Config {
     // =========================
     protected Locale locale = Locale.getDefault();
     protected String uiUnit = "SEM";
-    protected int uiFractionDigits = Unit.SCALE.get(uiUnit);
+    protected int uiFractionDigits = 9;
 
     /**
      * Create an {@link AbstractConfig} instance.
@@ -131,11 +135,11 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public long getBlockReward(long number) {
+    public Amount getBlockReward(long number) {
         if (number <= 25_000_000L) {
-            return 3L * Unit.SEM;
+            return SEM.of(3);
         } else {
-            return 0;
+            return ZERO;
         }
     }
 
@@ -222,7 +226,7 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public long minTransactionFee() {
+    public Amount minTransactionFee() {
         return minTransactionFee;
     }
 
@@ -232,7 +236,7 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public long minDelegateBurnAmount() {
+    public Amount minDelegateBurnAmount() {
         return minDelegateBurnAmount;
     }
 

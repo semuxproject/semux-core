@@ -7,6 +7,7 @@
 package org.semux.gui.dialog;
 
 import static org.mockito.Mockito.when;
+import static org.semux.core.Amount.Unit.SEM;
 
 import java.util.Collections;
 
@@ -18,7 +19,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Key;
 import org.semux.gui.model.WalletDelegate;
@@ -38,7 +38,7 @@ public class DelegateDialogTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testDisplayVotes() {
         Delegate delegate = new Delegate(new Key().toAddress(), Bytes.of("delegate1"), 0L,
-                123L * Unit.SEM);
+                SEM.of(123));
         WalletDelegate walletDelegate = new WalletDelegate(delegate);
         when(walletModel.getDelegates()).thenReturn(Collections.singletonList(walletDelegate));
 

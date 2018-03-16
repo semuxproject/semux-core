@@ -9,6 +9,7 @@ package org.semux.gui.panel;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.semux.core.Amount.Unit.NANO_SEM;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
@@ -25,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.KernelMock;
+import org.semux.core.Amount;
 import org.semux.core.state.Account;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
@@ -55,8 +57,10 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
     public void testCopyAddress() {
         Key key1 = new Key();
         Key key2 = new Key();
-        WalletAccount acc1 = new WalletAccount(key1, new Account(key1.toAddress(), 1, 1, 1), null);
-        WalletAccount acc2 = new WalletAccount(key2, new Account(key2.toAddress(), 2, 2, 2), null);
+        Amount $1 = NANO_SEM.of(1);
+        Amount $2 = NANO_SEM.of(2);
+        WalletAccount acc1 = new WalletAccount(key1, new Account(key1.toAddress(), $1, $1, 1), null);
+        WalletAccount acc2 = new WalletAccount(key2, new Account(key2.toAddress(), $2, $2, 2), null);
 
         // mock walletModel
         when(walletModel.getAccounts()).thenReturn(Arrays.asList(acc1, acc2));

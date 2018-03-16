@@ -10,6 +10,7 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.semux.core.Amount.Unit.SEM;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +23,6 @@ import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Key;
@@ -49,13 +49,13 @@ public class SemuxSyncTest {
                 kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
                 to.toAddress(),
-                10 * Unit.SEM,
+                SEM.of(10),
                 kernelRule.getKernel().getConfig().minTransactionFee(),
                 0,
                 time,
                 Bytes.EMPTY_BYTES).sign(from1);
         kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
-        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), 1000 * Unit.SEM);
+        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), SEM.of(1000));
         Block block1 = kernelRule.createBlock(Collections.singletonList(tx1));
         kernelRule.getKernel().getBlockchain().addBlock(block1);
         SemuxSync semuxSync = spy(new SemuxSync(kernelRule.getKernel()));
@@ -64,12 +64,12 @@ public class SemuxSyncTest {
         // create a tx with the same hash with tx1 from a different signer in the second
         // block
         Key from2 = new Key();
-        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from2.toAddress(), 1000 * Unit.SEM);
+        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from2.toAddress(), SEM.of(1000));
         Transaction tx2 = new Transaction(
                 kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
                 to.toAddress(),
-                10 * Unit.SEM,
+                SEM.of(10),
                 kernelRule.getKernel().getConfig().minTransactionFee(),
                 0,
                 time,

@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.semux.Network;
+import org.semux.core.Amount;
 import org.semux.core.TransactionType;
 import org.semux.net.CapabilitySet;
 import org.semux.net.NodeManager.Node;
@@ -74,7 +75,7 @@ public interface Config {
      *
      * @return
      */
-    long minTransactionFee();
+    Amount minTransactionFee();
 
     /**
      * Returns the maximum allowed time drift between transaction timestamp and
@@ -89,7 +90,7 @@ public interface Config {
      *
      * @return
      */
-    long minDelegateBurnAmount();
+    Amount minDelegateBurnAmount();
 
     /**
      * Returns the block number before which this client needs to be upgraded.
@@ -105,7 +106,7 @@ public interface Config {
      *            block number
      * @return the block reward
      */
-    long getBlockReward(long number);
+    Amount getBlockReward(long number);
 
     /**
      * Returns the validator update rate.

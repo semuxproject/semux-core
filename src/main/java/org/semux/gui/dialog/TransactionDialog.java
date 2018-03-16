@@ -50,9 +50,9 @@ public class TransactionDialog extends JDialog {
         from.setName("fromText");
         JTextArea to = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getTo()));
         to.setName("toText");
-        JLabel value = new JLabel(SwingUtil.formatValue((tx.getValue())));
+        JLabel value = new JLabel(SwingUtil.formatAmount((tx.getValue())));
         value.setName("valueText");
-        JLabel fee = new JLabel(SwingUtil.formatValue((tx.getFee())));
+        JLabel fee = new JLabel(SwingUtil.formatAmount((tx.getFee())));
         fee.setName("feeText");
         JLabel nonce = new JLabel(SwingUtil.formatNumber(tx.getNonce()));
         nonce.setName("nonceText");

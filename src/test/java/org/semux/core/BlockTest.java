@@ -9,6 +9,7 @@ package org.semux.core;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.semux.core.Amount.ZERO;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +37,7 @@ public class BlockTest {
     private long timestamp = System.currentTimeMillis();
     private byte[] data = Bytes.of("data");
 
-    private Transaction tx = new Transaction(Network.DEVNET, TransactionType.TRANSFER, Bytes.random(20), 0,
+    private Transaction tx = new Transaction(Network.DEVNET, TransactionType.TRANSFER, Bytes.random(20), ZERO,
             config.minTransactionFee(),
             1, System.currentTimeMillis(), Bytes.EMPTY_BYTES).sign(new Key());
     private TransactionResult res = new TransactionResult(true);

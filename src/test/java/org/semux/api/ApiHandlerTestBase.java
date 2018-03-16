@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.semux.Network;
 import org.semux.config.Config;
+import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -96,13 +97,13 @@ public abstract class ApiHandlerTestBase {
     }
 
     protected Transaction createTransaction() {
-        return createTransaction(new Key(), new Key(), 0);
+        return createTransaction(new Key(), new Key(), Amount.ZERO);
     }
 
-    protected Transaction createTransaction(Key from, Key to, long value) {
+    protected Transaction createTransaction(Key from, Key to, Amount value) {
         Network network = config.network();
         TransactionType type = TransactionType.TRANSFER;
-        long fee = 0;
+        Amount fee = Amount.ZERO;
         long nonce = 1;
         long timestamp = System.currentTimeMillis();
         byte[] data = {};

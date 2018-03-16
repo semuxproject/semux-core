@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.semux.core.Amount.Unit.NANO_SEM;
 
 import org.junit.Test;
 import org.semux.Network;
@@ -32,8 +33,8 @@ public class TransactionTest {
     private Network network = Network.DEVNET;
     private TransactionType type = TransactionType.TRANSFER;
     private byte[] to = Bytes.random(20);
-    private long value = 2;
-    private long fee = config.minTransactionFee();
+    private Amount value = NANO_SEM.of(2);
+    private Amount fee = config.minTransactionFee();
     private long nonce = 1;
     private long timestamp = System.currentTimeMillis();
     private byte[] data = Bytes.of("data");

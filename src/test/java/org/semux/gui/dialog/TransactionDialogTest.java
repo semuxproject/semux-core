@@ -6,8 +6,10 @@
  */
 package org.semux.gui.dialog;
 
+import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.TransactionType.TRANSFER;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 import org.assertj.swing.edt.GuiActionRunner;
@@ -19,8 +21,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.semux.core.Amount;
 import org.semux.core.Transaction;
-import org.semux.core.Unit;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.gui.SwingUtil;
@@ -43,8 +45,8 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
 
         Key from = new Key();
         Key to = new Key();
-        long value = 1000 * Unit.SEM;
-        long fee = (long) (0.05 * Unit.SEM);
+        Amount value = SEM.of(1000);
+        Amount fee = SEM.fromDecimal(new BigDecimal("0.05"));
         long nonce = 0L;
         long now = Instant.now().toEpochMilli();
         byte[] data = "some data".getBytes();
@@ -61,8 +63,8 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
         dialog.textBox("hashText").requireVisible().requireText(Hex.encode0x(tx.getHash()));
         dialog.textBox("fromText").requireVisible().requireText(Hex.encode0x(from.toAddress()));
         dialog.textBox("toText").requireVisible().requireText(Hex.encode0x(to.toAddress()));
-        dialog.label("valueText").requireVisible().requireText(SwingUtil.formatValue(value));
-        dialog.label("feeText").requireVisible().requireText(SwingUtil.formatValue(fee));
+        dialog.label("valueText").requireVisible().requireText(SwingUtil.formatAmount(value));
+        dialog.label("feeText").requireVisible().requireText(SwingUtil.formatAmount(fee));
         dialog.label("nonceText").requireVisible().requireText("0");
         dialog.label("timestampText").requireVisible().requireText(SwingUtil.formatTimestamp(now));
         dialog.textBox("dataText").requireVisible().requireText(Hex.encode0x(data));

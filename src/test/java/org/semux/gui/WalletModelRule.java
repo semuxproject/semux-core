@@ -15,7 +15,7 @@ import java.util.List;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.rules.ExternalResource;
 import org.mockito.Mockito;
-import org.semux.core.Unit;
+import org.semux.core.Amount;
 import org.semux.core.state.Account;
 import org.semux.crypto.Key;
 import org.semux.gui.model.WalletAccount;
@@ -31,11 +31,11 @@ public class WalletModelRule extends ExternalResource {
 
     public WalletModel walletModel;
 
-    final int availableSEM;
+    final Amount availableSEM;
 
-    final int lockedSEM;
+    final Amount lockedSEM;
 
-    public WalletModelRule(int availableSEM, int lockedSEM) {
+    public WalletModelRule(Amount availableSEM, Amount lockedSEM) {
         this.key = new Key();
         this.availableSEM = availableSEM;
         this.lockedSEM = lockedSEM;
@@ -46,8 +46,8 @@ public class WalletModelRule extends ExternalResource {
         super.before();
         account = new Account(
                 key.toAddress(),
-                availableSEM * Unit.SEM,
-                lockedSEM * Unit.SEM,
+                availableSEM,
+                lockedSEM,
                 RandomUtils.nextInt(1, 100));
 
         walletAccount = new WalletAccount(key, account, "test account");

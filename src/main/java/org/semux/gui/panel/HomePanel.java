@@ -6,6 +6,8 @@
  */
 package org.semux.gui.panel;
 
+import static org.semux.core.Amount.sum;
+
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -164,8 +166,8 @@ public class HomePanel extends JPanel implements ActionListener {
             lblType.setIcon(SwingUtil.loadImage(name, 42, 42));
             String mathSign = inBound ? "+" : "-";
             String prefix = (inBound && outBound) ? "" : (mathSign);
-            JLabel lblAmount = new JLabel(prefix + SwingUtil.formatValue(tx.getValue()));
-            lblAmount.setToolTipText(SwingUtil.formatValue(tx.getValue()));
+            JLabel lblAmount = new JLabel(prefix + SwingUtil.formatAmount(tx.getValue()));
+            lblAmount.setToolTipText(SwingUtil.formatAmount(tx.getValue()));
             lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
             JLabel lblTime = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
@@ -232,12 +234,12 @@ public class HomePanel extends JPanel implements ActionListener {
         this.coinbase.setToolTipText(Hex.PREF + model.getCoinbase().toAddressString());
         this.status.setText(model.getStatus() == Status.VALIDATOR ? GuiMessages.get("Validator")
                 : (model.getStatus() == Status.DELEGATE ? GuiMessages.get("Delegate") : GuiMessages.get("Normal")));
-        this.available.setText(SwingUtil.formatValue(model.getTotalAvailable()));
-        this.available.setToolTipText(SwingUtil.formatValue(model.getTotalAvailable()));
-        this.locked.setText(SwingUtil.formatValue(model.getTotalLocked()));
-        this.locked.setToolTipText(SwingUtil.formatValue(model.getTotalLocked()));
-        this.total.setText(SwingUtil.formatValue(model.getTotalAvailable() + model.getTotalLocked()));
-        this.total.setToolTipText(SwingUtil.formatValue(model.getTotalAvailable() + model.getTotalLocked()));
+        this.available.setText(SwingUtil.formatAmount(model.getTotalAvailable()));
+        this.available.setToolTipText(SwingUtil.formatAmount(model.getTotalAvailable()));
+        this.locked.setText(SwingUtil.formatAmount(model.getTotalLocked()));
+        this.locked.setToolTipText(SwingUtil.formatAmount(model.getTotalLocked()));
+        this.total.setText(SwingUtil.formatAmount(sum(model.getTotalAvailable(), model.getTotalLocked())));
+        this.total.setToolTipText(SwingUtil.formatAmount(sum(model.getTotalAvailable(), model.getTotalLocked())));
 
         // federate all transactions
         Set<ByteArray> hashes = new HashSet<>();

@@ -10,6 +10,11 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Amount.sub;
+import static org.semux.core.Amount.sum;
 import static org.semux.core.TransactionResult.Error.INSUFFICIENT_AVAILABLE;
 import static org.semux.core.TransactionResult.Error.INSUFFICIENT_LOCKED;
 
@@ -64,8 +69,8 @@ public class TransactionExecutorTest {
         TransactionType type = TransactionType.TRANSFER;
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
-        long value = 5;
-        long fee = config.minTransactionFee();
+        Amount value = NANO_SEM.of(5);
+        Amount fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
@@ -78,19 +83,19 @@ public class TransactionExecutorTest {
         TransactionResult result = exec.execute(tx, as.track(), ds.track());
         assertFalse(result.isSuccess());
 
-        long available = 1000 * Unit.SEM;
+        Amount available = SEM.of(1000);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
         result = exec.execute(tx, as.track(), ds.track());
         assertTrue(result.isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
-        assertEquals(0, as.getAccount(to).getAvailable());
+        assertEquals(ZERO, as.getAccount(to).getAvailable());
 
         // execute and commit
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isSuccess());
-        assertEquals(available - value - fee, as.getAccount(key.toAddress()).getAvailable());
+        assertEquals(sub(available, sum(value, fee)), as.getAccount(key.toAddress()).getAvailable());
         assertEquals(value, as.getAccount(to).getAvailable());
     }
 
@@ -98,14 +103,14 @@ public class TransactionExecutorTest {
     public void testDelegate() {
         Key delegate = new Key();
 
-        long available = 2000 * Unit.SEM;
+        Amount available = SEM.of(2000);
         as.adjustAvailable(delegate.toAddress(), available);
 
         TransactionType type = TransactionType.DELEGATE;
         byte[] from = delegate.toAddress();
         byte[] to = Bytes.random(20);
-        long value = config.minDelegateBurnAmount();
-        long fee = config.minTransactionFee();
+        Amount value = config.minDelegateBurnAmount();
+        Amount fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = Bytes.random(16);
@@ -125,7 +130,7 @@ public class TransactionExecutorTest {
         tx = new Transaction(network, type, Bytes.EMPTY_ADDRESS, value, fee, nonce, timestamp, data).sign(delegate);
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isSuccess());
-        assertEquals(available - config.minDelegateBurnAmount() - fee,
+        assertEquals(sub(available, sum(config.minDelegateBurnAmount(), fee)),
                 as.getAccount(delegate.toAddress()).getAvailable());
         assertArrayEquals(delegate.toAddress(), ds.getDelegateByName(data).getAddress());
         assertArrayEquals(data, ds.getDelegateByAddress(delegate.toAddress()).getName());
@@ -136,14 +141,14 @@ public class TransactionExecutorTest {
         Key voter = new Key();
         Key delegate = new Key();
 
-        long available = 100 * Unit.SEM;
+        Amount available = SEM.of(100);
         as.adjustAvailable(voter.toAddress(), available);
 
         TransactionType type = TransactionType.VOTE;
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
-        long value = available / 3;
-        long fee = config.minTransactionFee();
+        Amount value = SEM.of(33);
+        Amount fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
@@ -158,7 +163,7 @@ public class TransactionExecutorTest {
         // vote for delegate
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isSuccess());
-        assertEquals(available - value - fee, as.getAccount(voter.toAddress()).getAvailable());
+        assertEquals(sub(available, sum(value, fee)), as.getAccount(voter.toAddress()).getAvailable());
         assertEquals(value, as.getAccount(voter.toAddress()).getLocked());
         assertEquals(value, ds.getDelegateByAddress(delegate.toAddress()).getVotes());
     }
@@ -168,7 +173,7 @@ public class TransactionExecutorTest {
         Key voter = new Key();
         Key delegate = new Key();
 
-        long available = 100 * Unit.SEM;
+        Amount available = SEM.of(100);
         as.adjustAvailable(voter.toAddress(), available);
 
         ds.register(delegate.toAddress(), Bytes.of("delegate"));
@@ -176,8 +181,8 @@ public class TransactionExecutorTest {
         TransactionType type = TransactionType.UNVOTE;
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
-        long value = available / 3;
-        long fee = config.minTransactionFee();
+        Amount value = SEM.of(33);
+        Amount fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
@@ -199,9 +204,9 @@ public class TransactionExecutorTest {
         // normal unvote
         result = executeAndCommit(exec, tx, as.track(), ds.track());
         assertTrue(result.isSuccess());
-        assertEquals(available + value - fee, as.getAccount(voter.toAddress()).getAvailable());
-        assertEquals(0, as.getAccount(voter.toAddress()).getLocked());
-        assertEquals(0, ds.getDelegateByAddress(delegate.toAddress()).getVotes());
+        assertEquals(sum(available, sub(value, fee)), as.getAccount(voter.toAddress()).getAvailable());
+        assertEquals(ZERO, as.getAccount(voter.toAddress()).getLocked());
+        assertEquals(ZERO, ds.getDelegateByAddress(delegate.toAddress()).getVotes());
     }
 
     @Test
@@ -209,14 +214,14 @@ public class TransactionExecutorTest {
         Key voter = new Key();
         Key delegate = new Key();
 
-        as.adjustAvailable(voter.toAddress(), config.minTransactionFee() - 1);
+        as.adjustAvailable(voter.toAddress(), sub(config.minTransactionFee(), NANO_SEM.of(1)));
         ds.register(delegate.toAddress(), Bytes.of("delegate"));
 
         TransactionType type = TransactionType.UNVOTE;
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
-        long value = 100 * Unit.SEM;
-        long fee = config.minTransactionFee();
+        Amount value = SEM.of(100);
+        Amount fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = System.currentTimeMillis();
         byte[] data = {};

@@ -76,18 +76,18 @@ public class BlockchainImpl implements Blockchain {
         FORGED, HIT, MISSED
     }
 
-    private Config config;
+    private final Config config;
 
-    private Db indexDB;
-    private Db blockDB;
+    private final Db indexDB;
+    private final Db blockDB;
 
-    private AccountState accountState;
-    private DelegateState delegateState;
+    private final AccountState accountState;
+    private final DelegateState delegateState;
 
-    private Genesis genesis;
+    private final Genesis genesis;
     private Block latestBlock;
 
-    private List<BlockchainListener> listeners = new ArrayList<>();
+    private final List<BlockchainListener> listeners = new ArrayList<>();
 
     /**
      * Create a blockchain instance.
@@ -276,11 +276,11 @@ public class BlockchainImpl implements Blockchain {
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
         List<Pair<Integer, Integer>> txIndices = block.getTransactionIndices();
-        long reward = config.getBlockReward(number);
+        Amount reward = config.getBlockReward(number);
 
         for (int i = 0; i < txs.size(); i++) {
             Transaction tx = txs.get(i);
-            reward += tx.getFee();
+            reward = Amount.sum(reward, tx.getFee());
 
             SimpleEncoder enc = new SimpleEncoder();
             enc.writeLong(number);
@@ -302,7 +302,7 @@ public class BlockchainImpl implements Blockchain {
                     TransactionType.COINBASE,
                     block.getCoinbase(),
                     reward,
-                    0,
+                    Amount.ZERO,
                     block.getNumber(),
                     block.getTimestamp(),
                     Bytes.EMPTY_BYTES);

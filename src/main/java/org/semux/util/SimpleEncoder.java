@@ -9,6 +9,7 @@ package org.semux.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.semux.core.Amount;
 import org.semux.util.exception.SimpleCodecException;
 
 public class SimpleEncoder {
@@ -53,6 +54,10 @@ public class SimpleEncoder {
 
         writeInt(i1);
         writeInt(i2);
+    }
+
+    public void writeAmount(Amount a) {
+        writeLong(a.getNano());
     }
 
     public void writeBytes(byte[] bytes, boolean vlq) {

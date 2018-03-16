@@ -6,6 +6,9 @@
  */
 package org.semux.consensus;
 
+import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Amount.sum;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -36,6 +39,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.config.Config;
+import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -433,11 +437,10 @@ public class SemuxSync implements SyncManager {
 
     protected boolean applyBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot) {
         // [5] apply block reward and tx fees
-        long reward = config.getBlockReward(block.getNumber());
-        for (Transaction tx : block.getTransactions()) {
-            reward += tx.getFee();
-        }
-        if (reward > 0) {
+        Amount txsReward = block.getTransactions().stream().map(Transaction::getFee).reduce(ZERO, Amount::sum);
+        Amount reward = sum(config.getBlockReward(block.getNumber()), txsReward);
+
+        if (reward.gt0()) {
             asSnapshot.adjustAvailable(block.getCoinbase(), reward);
         }
 

@@ -6,6 +6,8 @@
  */
 package org.semux.bench;
 
+import static org.semux.core.Amount.Unit.MILLI_SEM;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.text.SimpleDateFormat;
@@ -15,7 +17,6 @@ import java.util.Map;
 
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
-import org.semux.core.Unit;
 import org.semux.util.ApiClient;
 import org.semux.util.Bytes;
 import org.semux.util.ConsoleUtil;
@@ -36,7 +37,7 @@ public class SemuxPerformance {
             Map<String, Object> params = new HashMap<>();
             params.put("from", address);
             params.put("to", address);
-            params.put("value", 1 * Unit.MILLI_SEM);
+            params.put("value", MILLI_SEM.of(1));
             params.put("fee", config.minTransactionFee());
             params.put("data", Bytes.EMPTY_BYTES);
             params.put("password", password);

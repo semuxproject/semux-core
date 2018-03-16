@@ -13,6 +13,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Amount.ZERO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +39,6 @@ import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Key;
@@ -55,7 +56,7 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
     public KernelRule kernelRule1 = new KernelRule(51610, 51710);
 
     @Rule
-    public WalletModelRule walletRule = new WalletModelRule(10000, 1);
+    public WalletModelRule walletRule = new WalletModelRule(SEM.of(10000), SEM.of(1));
 
     @Captor
     ArgumentCaptor<Transaction> transactionArgumentCaptor = ArgumentCaptor.forClass(Transaction.class);
@@ -104,19 +105,23 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
         when(delegate1.getNameString()).thenReturn("delegate 1");
         when(delegate1.getAddressString()).thenReturn(delegateAccount1.toAddressString());
         when(delegate1.getAddress()).thenReturn(delegateAccount1.toAddress());
+        when(delegate1.getVotes()).thenReturn(ZERO);
+        when(delegate1.getVotesFromMe()).thenReturn(ZERO);
         walletDelegates.add(delegate1);
 
         delegateAccount2 = new Key();
         when(delegate2.getNameString()).thenReturn("delegate 2");
         when(delegate2.getAddressString()).thenReturn(delegateAccount2.toAddressString());
         when(delegate2.getAddress()).thenReturn(delegateAccount2.toAddress());
+        when(delegate2.getVotes()).thenReturn(ZERO);
+        when(delegate2.getVotesFromMe()).thenReturn(ZERO);
         walletDelegates.add(delegate2);
 
         when(walletRule.walletModel.getDelegates()).thenReturn(walletDelegates);
 
         // mock kernel
         kernelMock = spy(kernelRule1.getKernel());
-        when(delegateState.getVote(any(), any())).thenReturn(0L);
+        when(delegateState.getVote(any(), any())).thenReturn(ZERO);
         when(delegateState.getDelegateByAddress(DELEGATE_KEY.toAddress())).thenReturn(mock(Delegate.class));
         when(delegateState.getDelegateByName(Bytes.of("semux"))).thenReturn(mock(Delegate.class));
         when(blockchain.getDelegateState()).thenReturn(delegateState);
@@ -170,7 +175,7 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
     public void testInsufficientLocked() {
         testUnvote("10");
         window.optionPane(Timeout.timeout(1000))
-                .requireMessage(GuiMessages.get("InsufficientLockedFunds", SwingUtil.formatValue(10 * Unit.SEM)))
+                .requireMessage(GuiMessages.get("InsufficientLockedFunds", SwingUtil.formatAmount(SEM.of(10))))
                 .requireVisible();
     }
 

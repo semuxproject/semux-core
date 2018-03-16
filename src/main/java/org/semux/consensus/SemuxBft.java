@@ -6,6 +6,9 @@
  */
 package org.semux.consensus;
 
+import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Amount.sum;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +24,7 @@ import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.consensus.SemuxBft.Event.Type;
 import org.semux.consensus.exception.SemuxBftException;
+import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -876,11 +880,10 @@ public class SemuxBft implements Consensus {
         // [4] evaluate votes, skipped
 
         // [5] apply block reward and tx fees
-        long reward = config.getBlockReward(number);
-        for (Transaction tx : block.getTransactions()) {
-            reward += tx.getFee();
-        }
-        if (reward > 0) {
+        Amount txsReward = block.getTransactions().stream().map(Transaction::getFee).reduce(ZERO, Amount::sum);
+        Amount reward = sum(config.getBlockReward(number), txsReward);
+
+        if (reward.gt0()) {
             as.adjustAvailable(block.getCoinbase(), reward);
         }
 
