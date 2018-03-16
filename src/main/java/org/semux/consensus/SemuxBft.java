@@ -825,7 +825,7 @@ public class SemuxBft implements Consensus {
      */
     protected List<Transaction> getUnvalidatedTransactions(List<Transaction> transactions) {
 
-        Set<Transaction> pendingValidatedTransactions = pendingMgr.getPendingTransactions(-1)
+        Set<Transaction> pendingValidatedTransactions = pendingMgr.getPendingTransactions()
                 .stream()
                 .filter(pendingTx -> pendingTx.transactionResult.isSuccess())
                 .map(pendingTx -> pendingTx.transaction)

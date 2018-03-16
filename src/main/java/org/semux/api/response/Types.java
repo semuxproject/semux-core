@@ -230,7 +230,7 @@ public class Types {
                     kernel.getBlockchain().getLatestBlockNumber(),
                     Hex.encode0x(kernel.getBlockchain().getLatestBlockHash()),
                     kernel.getChannelManager().getActivePeers().size(),
-                    kernel.getPendingManager().getTransactions().size());
+                    kernel.getPendingManager().getPendingTransactions().size());
         }
     }
 

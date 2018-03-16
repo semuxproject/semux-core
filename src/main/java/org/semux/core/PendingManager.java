@@ -183,30 +183,28 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Returns pending transactions and corresponding results.
+     * Returns pending transactions, limited by the given total size in bytes.
      *
      * @param byteLimit
      * @return
      */
     public synchronized List<PendingTransaction> getPendingTransactions(int byteLimit) {
+        if (byteLimit < 0) {
+            throw new IllegalArgumentException("Limit can't be negative");
+        }
+
         List<PendingTransaction> txs = new ArrayList<>();
+        Iterator<PendingTransaction> it = transactions.iterator();
 
-        if (byteLimit == -1) {
-            // returns all transactions if there is no limit
-            txs.addAll(transactions);
-        } else {
-            Iterator<PendingTransaction> it = transactions.iterator();
+        int size = 0;
+        while (it.hasNext()) {
+            PendingTransaction tx = it.next();
 
-            int size = 0;
-            while (it.hasNext()) {
-                PendingTransaction tx = it.next();
-
-                size += tx.transaction.size();
-                if (size > byteLimit) {
-                    break;
-                } else {
-                    txs.add(tx);
-                }
+            size += tx.transaction.size();
+            if (size > byteLimit) {
+                break;
+            } else {
+                txs.add(tx);
             }
         }
 
@@ -214,22 +212,12 @@ public class PendingManager implements Runnable, BlockchainListener {
     }
 
     /**
-     * Returns transactions in the pool, with the given total size limit.
-     *
-     * @param limit
-     * @return
-     */
-    public synchronized List<PendingTransaction> getTransactions(int limit) {
-        return getPendingTransactions(limit);
-    }
-
-    /**
-     * Returns all transactions in the pool.
+     * Returns all pending transactions.
      *
      * @return
      */
-    public synchronized List<PendingTransaction> getTransactions() {
-        return getPendingTransactions(-1);
+    public synchronized List<PendingTransaction> getPendingTransactions() {
+        return getPendingTransactions(Integer.MAX_VALUE);
     }
 
     /**
