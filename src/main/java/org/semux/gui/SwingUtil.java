@@ -330,7 +330,6 @@ public class SwingUtil {
      * @param number
      * @return
      */
-    // TODO: rename formatInteger(long i)?
     public static String formatNumber(Number number) {
         return formatNumber(number, 0);
     }
@@ -348,7 +347,7 @@ public class SwingUtil {
     /**
      * Formats a Semux value.
      *
-     * @param nano
+     * @param a
      * @return
      */
     public static String formatAmountNoUnit(Amount a) {
@@ -358,7 +357,7 @@ public class SwingUtil {
     /**
      * Formats a Semux value without truncation.
      *
-     * @param nano
+     * @param a
      * @return
      */
     public static String formatAmountFull(Amount a) {
@@ -368,8 +367,10 @@ public class SwingUtil {
     /**
      * Formats a Semux value.
      *
-     * @param nano
+     * @param a
      * @param unit
+     * @param fractionDigits
+     * @param withUnit
      * @return
      */
     private static String formatAmount(Amount a, Unit unit, int fractionDigits, boolean withUnit) {

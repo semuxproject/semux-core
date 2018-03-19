@@ -118,7 +118,7 @@ public final class Amount {
     }
 
     public static Amount neg(Amount a) {
-        return new Amount(a.nano * -1);
+        return new Amount(Math.negateExact(a.nano));
     }
 
     public static Amount sum(Amount a1, Amount a2) {
@@ -126,7 +126,7 @@ public final class Amount {
     }
 
     public static Amount sub(Amount a1, Amount a2) {
-        return sum(a1, neg(a2));
+        return new Amount(Math.subtractExact(a1.nano, a2.nano));
     }
 
 }
