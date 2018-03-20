@@ -7,11 +7,13 @@
 package org.semux.util;
 
 import java.io.Console;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Scanner;
 
 public class ConsoleUtil {
 
-    private static final Scanner scanner = new Scanner(System.in);
+    private static final Scanner scanner = new Scanner(new InputStreamReader(System.in, Charset.defaultCharset()));
 
     private ConsoleUtil() {
     }

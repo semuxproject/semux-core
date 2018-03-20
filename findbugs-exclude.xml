@@ -1,8 +1,2 @@
 <FindBugsFilter>
-    <!-- It's fine for console reads to rely on default encoding -->
-    <Match>
-        <Class name="org.semux.util.ConsoleUtil"/>
-        <Bug pattern="DM_DEFAULT_ENCODING"/>
-    </Match>
 </FindBugsFilter>
-
