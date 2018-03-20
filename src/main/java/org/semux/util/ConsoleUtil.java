@@ -9,9 +9,6 @@ package org.semux.util;
 import java.io.Console;
 import java.util.Scanner;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-@SuppressFBWarnings(value = "DM_DEFAULT_ENCODING", justification = "It's fine for console reads to rely on default encoding")
 public class ConsoleUtil {
 
     private static final Scanner scanner = new Scanner(System.in);
