@@ -65,7 +65,7 @@ public class ConsoleDialogTest extends AssertJSwingJUnitTestCase {
 
         // listAccounts
         console.textBox("txtInput").enterText("listAccounts\n");
-        String walletAddress = kernelRule1.getKernel().getWallet().getAccount(0).toAddressString();
+        kernelRule1.getKernel().getWallet().getAccount(0).toAddressString();
 
         // getBlockByNumber
         Blockchain blockChain = mock(Blockchain.class);
