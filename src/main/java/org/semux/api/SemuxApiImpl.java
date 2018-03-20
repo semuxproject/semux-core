@@ -191,7 +191,7 @@ public class SemuxApiImpl implements SemuxApi {
     @Override
     public ApiHandlerResponse getPendingTransactions() {
         return new GetPendingTransactionsResponse(true,
-                kernel.getPendingManager().getTransactions().parallelStream()
+                kernel.getPendingManager().getPendingTransactions().parallelStream()
                         .map(pendingTransaction -> pendingTransaction.transaction)
                         .map(tx -> new Types.TransactionType(null, tx))
                         .collect(Collectors.toList()));

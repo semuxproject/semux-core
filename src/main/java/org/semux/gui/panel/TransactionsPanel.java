@@ -185,7 +185,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         List<StatusTransaction> transactions = new ArrayList<>();
 
         // add pending transactions
-        transactions.addAll(gui.getKernel().getPendingManager().getTransactions()
+        transactions.addAll(gui.getKernel().getPendingManager().getPendingTransactions()
                 .parallelStream()
                 .filter(pendingTx -> {
                     for (WalletAccount acc : model.getAccounts()) {

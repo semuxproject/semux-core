@@ -298,7 +298,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         Transaction tx = createTransaction();
         TransactionResult result = new TransactionResult(true);
         PendingManager pendingManager = spy(kernelRule.getKernel().getPendingManager());
-        when(pendingManager.getTransactions()).thenReturn(
+        when(pendingManager.getPendingTransactions()).thenReturn(
                 Collections.singletonList(new PendingManager.PendingTransaction(tx, result)));
         kernelRule.getKernel().setPendingManager(pendingManager);
 
@@ -490,7 +490,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         Thread.sleep(200);
 
-        List<PendingManager.PendingTransaction> list = pendingMgr.getTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), Hex.decode0x(response.txHash));
         assertEquals(list.get(list.size() - 1).transaction.getType(), TransactionType.TRANSFER);
@@ -506,7 +506,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         Thread.sleep(200);
 
-        List<PendingManager.PendingTransaction> list = pendingMgr.getTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), Hex.decode0x(response.txHash));
         assertEquals(list.get(list.size() - 1).transaction.getType(), TransactionType.DELEGATE);
@@ -525,7 +525,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         Thread.sleep(200);
 
-        List<PendingManager.PendingTransaction> list = pendingMgr.getTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(0).transaction.getHash(), Hex.decode0x(response.txHash));
         assertEquals(TransactionType.VOTE, list.get(0).transaction.getType());
@@ -549,7 +549,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         Thread.sleep(200);
 
-        List<PendingManager.PendingTransaction> list = pendingMgr.getTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), Hex.decode0x(response.txHash));
         assertEquals(TransactionType.UNVOTE, list.get(list.size() - 1).transaction.getType());

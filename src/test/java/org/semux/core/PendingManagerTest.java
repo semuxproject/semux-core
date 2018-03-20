@@ -81,7 +81,7 @@ public class PendingManagerTest {
         pendingMgr.addTransaction(tx);
 
         Thread.sleep(100);
-        assertEquals(1, pendingMgr.getTransactions().size());
+        assertEquals(1, pendingMgr.getPendingTransactions().size());
     }
 
     @Test
@@ -96,14 +96,14 @@ public class PendingManagerTest {
         pendingMgr.addTransaction(tx2);
 
         Thread.sleep(100);
-        assertEquals(1, pendingMgr.getTransactions().size());
+        assertEquals(1, pendingMgr.getPendingTransactions().size());
     }
 
     @Test
     public void testAddTransactionSyncErrorInvalidFormat() {
         Transaction tx = new Transaction(network, type, to, value, fee, 0, 0, Bytes.EMPTY_BYTES).sign(key);
         PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
-        assertEquals(0, pendingMgr.getTransactions().size());
+        assertEquals(0, pendingMgr.getPendingTransactions().size());
         assertNotNull(result.error);
         assertEquals(TransactionResult.Error.INVALID_FORMAT, result.error);
     }
@@ -118,7 +118,7 @@ public class PendingManagerTest {
         doReturn(true).when(kernel.getBlockchain()).hasTransaction(tx.getHash());
 
         PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
-        assertEquals(0, pendingMgr.getTransactions().size());
+        assertEquals(0, pendingMgr.getPendingTransactions().size());
         assertNotNull(result.error);
         assertEquals(TransactionResult.Error.DUPLICATED_HASH, result.error);
 
@@ -136,13 +136,13 @@ public class PendingManagerTest {
         pendingMgr.addTransaction(tx2);
 
         Thread.sleep(100);
-        assertEquals(0, pendingMgr.getTransactions().size());
+        assertEquals(0, pendingMgr.getPendingTransactions().size());
 
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
         pendingMgr.addTransaction(tx);
 
         Thread.sleep(100);
-        assertEquals(3, pendingMgr.getTransactions().size());
+        assertEquals(3, pendingMgr.getPendingTransactions().size());
     }
 
     @Test
@@ -158,13 +158,13 @@ public class PendingManagerTest {
         pendingMgr.addTransaction(tx2);
 
         TimeUnit.SECONDS.sleep(1);
-        assertEquals(0, pendingMgr.getTransactions().size());
+        assertEquals(0, pendingMgr.getPendingTransactions().size());
 
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
         pendingMgr.addTransaction(tx);
 
         TimeUnit.SECONDS.sleep(1);
-        List<PendingManager.PendingTransaction> txs = pendingMgr.getTransactions();
+        List<PendingManager.PendingTransaction> txs = pendingMgr.getPendingTransactions();
         assertEquals(3, txs.size());
     }
 
@@ -192,7 +192,7 @@ public class PendingManagerTest {
         }
 
         Thread.sleep(8000);
-        assertEquals(perm.length, pendingMgr.getTransactions().size());
+        assertEquals(perm.length, pendingMgr.getPendingTransactions().size());
     }
 
     @Test
@@ -206,7 +206,7 @@ public class PendingManagerTest {
         // pendingMgr.addTransaction(tx3);
 
         Thread.sleep(100);
-        assertEquals(1, pendingMgr.getTransactions().size());
+        assertEquals(1, pendingMgr.getPendingTransactions().size());
 
         long number = 1;
         byte[] coinbase = Bytes.random(20);
@@ -229,7 +229,7 @@ public class PendingManagerTest {
         pendingMgr.addTransaction(tx3);
 
         Thread.sleep(100);
-        assertArrayEquals(tx3.getHash(), pendingMgr.getTransactions().get(0).transaction.getHash());
+        assertArrayEquals(tx3.getHash(), pendingMgr.getPendingTransactions().get(0).transaction.getHash());
     }
 
     @After

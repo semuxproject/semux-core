@@ -122,7 +122,7 @@ public class SemuxBftTest {
         // pending manager has only tx1 (validated)
         PendingManager.PendingTransaction pending = new PendingManager.PendingTransaction(tx1,
                 new TransactionResult(true));
-        when(kernelRule.getKernel().getPendingManager().getPendingTransactions(anyInt()))
+        when(kernelRule.getKernel().getPendingManager().getPendingTransactions())
                 .thenReturn(Collections.singletonList(pending));
 
         SemuxBft semuxBFT = new SemuxBft(kernelRule.getKernel());
