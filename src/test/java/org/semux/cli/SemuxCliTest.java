@@ -57,6 +57,7 @@ import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.message.CliMessages;
+import org.semux.util.ConsoleUtil;
 import org.semux.util.SystemUtil;
 import org.semux.util.SystemUtil.OsName;
 
@@ -152,7 +153,7 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword(any())).thenReturn("password");
+        when(ConsoleUtil.readPassword(any())).thenReturn("password");
         when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
         when(SystemUtil.getOsArch()).thenReturn("amd64");
         doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
@@ -180,10 +181,10 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
         when(SystemUtil.getOsArch()).thenReturn("amd64");
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
         semuxCLI.start();
 
@@ -210,10 +211,10 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
         when(SystemUtil.getOsArch()).thenReturn("amd64");
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
         semuxCLI.start(new String[] { "--network", "testnet" });
 
@@ -240,10 +241,10 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
         when(SystemUtil.getOsArch()).thenReturn("amd64");
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
         semuxCLI.start(new String[] { "--network", "devnet" });
 
@@ -275,7 +276,7 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword(any())).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword(any())).thenReturn("oldpassword");
         when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
         when(SystemUtil.getOsArch()).thenReturn("amd64");
 
@@ -310,7 +311,7 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword(any())).thenReturn("a password").thenReturn("b password");
+        when(ConsoleUtil.readPassword(any())).thenReturn("a password").thenReturn("b password");
 
         // execution
         semuxCLI.start();
@@ -355,7 +356,7 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
 
         // execution
         semuxCLI.createAccount();
@@ -388,7 +389,7 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
 
         // execution
         semuxCLI.listAccounts();
@@ -413,8 +414,8 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
-        Mockito.when(SystemUtil.readPassword(anyString())).thenReturn("newpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
+        Mockito.when(ConsoleUtil.readPassword(anyString())).thenReturn("newpassword");
 
         // execution
         semuxCLI.changePassword();
@@ -436,8 +437,8 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
-        Mockito.when(SystemUtil.readPassword(anyString())).thenReturn("newpassword").thenReturn("newpasswordconfirm");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
+        Mockito.when(ConsoleUtil.readPassword(anyString())).thenReturn("newpassword").thenReturn("newpasswordconfirm");
 
         // execution
         semuxCLI.changePassword();
@@ -464,7 +465,7 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
 
         // execution
         semuxCLI.dumpPrivateKey(address);
@@ -492,7 +493,7 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         doCallRealMethod().when(SystemUtil.class, "exit", any(Integer.class));
 
         // expect System.exit(1)
@@ -519,7 +520,7 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         doCallRealMethod().when(SystemUtil.class, "exit", any(Integer.class));
 
         // expectation
@@ -547,7 +548,7 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         doCallRealMethod().when(SystemUtil.class, "exit", any(Integer.class));
 
         // expectation
@@ -573,7 +574,7 @@ public class SemuxCliTest {
 
         // mock SystemUtil
         mockStatic(SystemUtil.class);
-        when(SystemUtil.readPassword()).thenReturn("oldpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
 
         // execution
         semuxCLI.importPrivateKey(key);

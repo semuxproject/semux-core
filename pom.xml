@@ -482,6 +482,8 @@
                                         <urn>com.github.oshi:oshi-core:3.4.4:jar:null:compile:f1aa8e053d26f49b909a845745018c57fe9d7a74</urn>
                                         <urn>com.github.stefanbirkner:system-rules:1.17.1:jar:null:test:3642fe208063ad538ec6a2fca141d13e15f2b1f2</urn>
                                         <urn>com.github.zafarkhaja:java-semver:0.9.0:jar:null:compile:59a83ca73c72a5e25b3f0b1bb305230a11000329</urn>
+                                        <urn>com.google.code.findbugs:annotations:3.0.1:jar:null:compile:fc019a2216218990d64dfe756e7aa20f0069dea2</urn>
+                                        <urn>com.google.code.findbugs:jsr305:3.0.1:jar:null:compile:f7be08ec23c21485b9b5a1cf1654c2ec8c58168d</urn>
                                         <urn>com.google.zxing:core:3.3.2:jar:null:compile:f47e3fc99fb2755b8a354d60efa021a0b88f4180</urn>
                                         <urn>com.mycila:license-maven-plugin:3.0:maven-plugin:null:runtime:6e6175f847574fd15c644a69b540e279ea5d173f</urn>
                                         <urn>commons-beanutils:commons-beanutils:1.9.2:jar:null:compile:7a87d845ad3a155297e8f67d9008f4c1e5656b71</urn>
@@ -766,6 +768,13 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>2.6.1</version>
+        </dependency>
+
+        <!-- FindBugs annotations -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>annotations</artifactId>
+            <version>3.0.1</version>
         </dependency>
 
         <!-- Testing Libraries -->

@@ -10,7 +10,6 @@ import org.semux.Kernel;
 import org.semux.api.response.GetBlockResponse;
 import org.semux.api.response.Types;
 import org.semux.core.Block;
-import org.semux.crypto.CryptoException;
 
 /**
  */
