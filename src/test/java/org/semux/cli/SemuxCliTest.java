@@ -64,7 +64,7 @@ import org.semux.util.SystemUtil.OsName;
 import net.i2p.crypto.eddsa.KeyPairGenerator;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ SystemUtil.class, Kernel.class, SemuxCli.class })
+@PrepareForTest({ SystemUtil.class, ConsoleUtil.class, Kernel.class, SemuxCli.class })
 @PowerMockIgnore({ "jdk.internal.*", "javax.management.*" })
 public class SemuxCliTest {
 
@@ -152,7 +152,7 @@ public class SemuxCliTest {
         when(semuxCLI.loadWallet()).thenReturn(wallet);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword(any())).thenReturn("password");
         when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
         when(SystemUtil.getOsArch()).thenReturn("amd64");
@@ -180,7 +180,7 @@ public class SemuxCliTest {
         when(semuxCLI.loadWallet()).thenReturn(wallet);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
         when(SystemUtil.getOsArch()).thenReturn("amd64");
@@ -210,7 +210,7 @@ public class SemuxCliTest {
         when(semuxCLI.loadWallet()).thenReturn(wallet);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
         when(SystemUtil.getOsArch()).thenReturn("amd64");
@@ -240,7 +240,7 @@ public class SemuxCliTest {
         when(semuxCLI.loadWallet()).thenReturn(wallet);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
         when(SystemUtil.getOsArch()).thenReturn("amd64");
@@ -275,7 +275,7 @@ public class SemuxCliTest {
         whenNew(Key.class).withAnyArguments().thenReturn(newAccount);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword(any())).thenReturn("oldpassword");
         when(SystemUtil.getOsName()).thenReturn(OsName.LINUX);
         when(SystemUtil.getOsArch()).thenReturn("amd64");
@@ -310,7 +310,7 @@ public class SemuxCliTest {
         doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword(any())).thenReturn("a password").thenReturn("b password");
 
         // execution
@@ -355,7 +355,7 @@ public class SemuxCliTest {
         whenNew(Key.class).withAnyArguments().thenReturn(newAccount);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
 
         // execution
@@ -388,7 +388,7 @@ public class SemuxCliTest {
         when(semuxCLI.loadWallet()).thenReturn(wallet);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
 
         // execution
@@ -413,7 +413,7 @@ public class SemuxCliTest {
         when(semuxCLI.loadWallet()).thenReturn(wallet);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         Mockito.when(ConsoleUtil.readPassword(anyString())).thenReturn("newpassword");
 
@@ -436,7 +436,7 @@ public class SemuxCliTest {
         when(semuxCLI.loadWallet()).thenReturn(wallet);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         Mockito.when(ConsoleUtil.readPassword(anyString())).thenReturn("newpassword").thenReturn("newpasswordconfirm");
 
@@ -464,7 +464,7 @@ public class SemuxCliTest {
         when(wallet.getAccount(addressBytes)).thenReturn(account);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
 
         // execution
@@ -492,7 +492,7 @@ public class SemuxCliTest {
         when(wallet.getAccount(addressBytes)).thenReturn(null);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         doCallRealMethod().when(SystemUtil.class, "exit", any(Integer.class));
 
@@ -519,7 +519,7 @@ public class SemuxCliTest {
         when(wallet.addAccount(any(Key.class))).thenReturn(false);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         doCallRealMethod().when(SystemUtil.class, "exit", any(Integer.class));
 
@@ -547,7 +547,7 @@ public class SemuxCliTest {
         when(wallet.flush()).thenReturn(false);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         doCallRealMethod().when(SystemUtil.class, "exit", any(Integer.class));
 
@@ -573,7 +573,7 @@ public class SemuxCliTest {
         when(wallet.flush()).thenReturn(true);
 
         // mock SystemUtil
-        mockStatic(SystemUtil.class);
+        mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
 
         // execution
