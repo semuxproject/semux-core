@@ -25,6 +25,7 @@ public class Vote {
 
     private byte[] encoded;
     private Signature signature;
+    private Boolean validated;
 
     public Vote(VoteType type, boolean value, long height, int view, byte[] blockHash) {
         this.type = type;
@@ -79,13 +80,26 @@ public class Vote {
      * 
      * @return
      */
+    public boolean validate(boolean revalidate) {
+        if (revalidate) {
+            return (validated = type != null
+                    && height > 0
+                    && view >= 0
+                    && blockHash != null && blockHash.length == 32
+                    && encoded != null
+                    && signature != null && Key.verify(encoded, signature));
+        }
+        return validated != null ? validated
+                : (validated = type != null
+                        && height > 0
+                        && view >= 0
+                        && blockHash != null && blockHash.length == 32
+                        && encoded != null
+                        && signature != null && Key.verify(encoded, signature));
+    }
+
     public boolean validate() {
-        return type != null
-                && height > 0
-                && view >= 0
-                && blockHash != null && blockHash.length == 32
-                && encoded != null
-                && signature != null && Key.verify(encoded, signature);
+        return validate(false);
     }
 
     public VoteType getType() {
