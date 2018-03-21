@@ -6,6 +6,8 @@
  */
 package org.semux.api;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.File;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
@@ -59,7 +61,7 @@ import org.semux.net.filter.SemuxIpFilter;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public class SemuxApiImpl implements SemuxApi {
-    private static final Charset CHARSET = Charset.forName("UTF-8");
+    private static final Charset CHARSET = UTF_8;
 
     private Kernel kernel;
 

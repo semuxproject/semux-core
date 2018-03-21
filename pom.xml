@@ -432,6 +432,7 @@
                     <!-- FIXME: lower the FindBugs threshold to Medium -->
                     <threshold>High</threshold>
                     <xmlOutput>true</xmlOutput>
+                    <excludeFilterFile>${project.basedir}/findbugs-exclude.xml</excludeFilterFile>
                 </configuration>
             </plugin>
 

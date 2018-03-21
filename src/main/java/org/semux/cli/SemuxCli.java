@@ -26,6 +26,7 @@ import org.semux.crypto.Key;
 import org.semux.exception.LauncherException;
 import org.semux.message.CliMessages;
 import org.semux.net.filter.exception.IpFilterJsonParseException;
+import org.semux.util.ConsoleUtil;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -249,8 +250,8 @@ public class SemuxCli extends Launcher {
      * @return new password, or null if the confirmation failed
      */
     private String readNewPassword() {
-        String newPassword = SystemUtil.readPassword(CliMessages.get("EnterNewPassword"));
-        String newPasswordRe = SystemUtil.readPassword(CliMessages.get("ReEnterNewPassword"));
+        String newPassword = ConsoleUtil.readPassword(CliMessages.get("EnterNewPassword"));
+        String newPasswordRe = ConsoleUtil.readPassword(CliMessages.get("ReEnterNewPassword"));
 
         if (!newPassword.equals(newPasswordRe)) {
             logger.error(CliMessages.get("ReEnterNewPasswordIncorrect"));
@@ -309,7 +310,7 @@ public class SemuxCli extends Launcher {
 
     protected Wallet loadAndUnlockWallet() {
         if (getPassword() == null) {
-            setPassword(SystemUtil.readPassword());
+            setPassword(ConsoleUtil.readPassword());
         }
 
         Wallet wallet = loadWallet();

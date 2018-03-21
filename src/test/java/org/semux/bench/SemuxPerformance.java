@@ -18,7 +18,7 @@ import org.semux.config.DevnetConfig;
 import org.semux.core.Unit;
 import org.semux.util.ApiClient;
 import org.semux.util.Bytes;
-import org.semux.util.SystemUtil;
+import org.semux.util.ConsoleUtil;
 
 public class SemuxPerformance {
     private static InetSocketAddress server = new InetSocketAddress("127.0.0.1", 5171);
@@ -58,12 +58,12 @@ public class SemuxPerformance {
     }
 
     public static void main(String[] args) throws Exception {
-        address = SystemUtil.readPassword("Please enter your wallet address: ");
-        username = SystemUtil.readPassword("Please enter your API username: ");
-        password = SystemUtil.readPassword("Please enter your API password: ");
+        address = ConsoleUtil.readPassword("Please enter your wallet address: ");
+        username = ConsoleUtil.readPassword("Please enter your API username: ");
+        password = ConsoleUtil.readPassword("Please enter your API password: ");
 
         while (true) {
-            int n = Integer.parseInt(SystemUtil.readLine("# transactions to send: ").replaceAll("[^\\d]", ""));
+            int n = Integer.parseInt(ConsoleUtil.readLine("# transactions to send: ").replaceAll("[^\\d]", ""));
             if (n > 0) {
                 testTransfer(n);
             } else {

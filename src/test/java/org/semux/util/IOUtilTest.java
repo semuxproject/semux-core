@@ -6,6 +6,7 @@
  */
 package org.semux.util;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
@@ -22,7 +23,7 @@ import org.junit.Test;
 
 public class IOUtilTest {
 
-    private static final Charset CHARSET = Charset.forName("UTF-8");
+    private static final Charset CHARSET = UTF_8;
 
     private File f1 = new File("test1");
     private File f2 = new File("test2");
