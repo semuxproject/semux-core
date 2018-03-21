@@ -8,8 +8,10 @@ package org.semux.bench;
 
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.knowm.xchart.SwingWrapper;
@@ -41,13 +43,15 @@ public class ValidatorDistributionChart {
 
         int view, vPRNG, vPRNG_fast;
         BigInteger seed;
+        final List<String> validators = IntStream.range(0, 100).boxed().map(i -> Integer.toString(i))
+                .collect(Collectors.toList());
         for (long height = 0; height < 1_000_000; height++) {
             view = random.nextDouble() < 0.05 ? 1 : 0; // about 5%
             seed = BigIntegerUtil
                     .random(BigInteger.valueOf(height))
                     .xor(BigIntegerUtil.random(BigInteger.valueOf(view)));
             vPRNG = new Random(seed.longValue()).nextInt(100);
-            vPRNG_fast = mainnetConfig.getUniformDistPrimaryValidatorNumber(100, height, view);
+            vPRNG_fast = Integer.valueOf(mainnetConfig.getPrimaryValidator(validators, height, view, true));
 
             mapPRNG.get(vPRNG).incrementAndGet();
             mapPRNG_fast.get(vPRNG_fast).incrementAndGet();

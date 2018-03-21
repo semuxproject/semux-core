@@ -177,7 +177,7 @@ public abstract class AbstractConfig implements Config {
         }
     }
 
-    public int getUniformDistPrimaryValidatorNumber(int size, long height, long view) {
+    private int getUniformDistPrimaryValidatorNumber(int size, long height, long view) {
         // use round-robin for view 0
         if (view == 0) {
             return (int) (height % (long) size);
