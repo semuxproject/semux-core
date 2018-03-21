@@ -35,6 +35,7 @@ public class Vote {
         this.height = height;
         this.view = view;
         this.blockHash = blockHash;
+        this.validated = Optional.empty();
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeByte(type.toByte());
@@ -54,6 +55,7 @@ public class Vote {
         this.height = dec.readLong();
         this.view = dec.readInt();
         this.blockHash = dec.readBytes();
+        this.validated = Optional.empty();
 
         this.signature = Signature.fromBytes(signature);
     }
