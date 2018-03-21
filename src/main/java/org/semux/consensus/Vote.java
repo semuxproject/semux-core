@@ -6,6 +6,8 @@
  */
 package org.semux.consensus;
 
+import java.util.Optional;
+
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
 import org.semux.util.Bytes;
@@ -25,7 +27,7 @@ public class Vote {
 
     private byte[] encoded;
     private Signature signature;
-    private Boolean validated;
+    private Optional<Boolean> validated;
 
     public Vote(VoteType type, boolean value, long height, int view, byte[] blockHash) {
         this.type = type;
@@ -72,34 +74,33 @@ public class Vote {
      */
     public Vote sign(Key key) {
         this.signature = key.sign(encoded);
+        this.validated = Optional.empty();
         return this;
     }
 
     /**
-     * validate the vote format and signature.
+     * validate the vote format and signature while ignoring any cached validation
+     * value.
      * 
      * @return
      */
-    public boolean validate(boolean revalidate) {
-        if (revalidate) {
-            return (validated = type != null
-                    && height > 0
-                    && view >= 0
-                    && blockHash != null && blockHash.length == 32
-                    && encoded != null
-                    && signature != null && Key.verify(encoded, signature));
-        }
-        return validated != null ? validated
-                : (validated = type != null
-                        && height > 0
-                        && view >= 0
-                        && blockHash != null && blockHash.length == 32
-                        && encoded != null
-                        && signature != null && Key.verify(encoded, signature));
+    public boolean revalidate() {
+        return (validated = Optional.of(type != null
+                && height > 0
+                && view >= 0
+                && blockHash != null && blockHash.length == 32
+                && encoded != null
+                && signature != null && Key.verify(encoded, signature))).get();
     }
 
+    /**
+     * validate the vote format and signature. if exists, a memoized validation
+     * value is returned. NOTE: to force revalidation use {@link Vote#revalidate()}.
+     * 
+     * @return
+     */
     public boolean validate() {
-        return validate(false);
+        return validated.orElse(revalidate());
     }
 
     public VoteType getType() {
