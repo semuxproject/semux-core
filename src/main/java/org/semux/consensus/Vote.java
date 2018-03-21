@@ -102,7 +102,7 @@ public class Vote {
      * @return
      */
     public boolean validate() {
-        return validated.orElse(revalidate());
+        return validated.orElseGet(this::revalidate);
     }
 
     public VoteType getType() {
