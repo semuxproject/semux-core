@@ -76,6 +76,11 @@ public class Wrapper {
 
     private static List<ImmutablePair<Pattern, Supplier<String>>> getDefaultJvmOptionSuppliers() {
         List<ImmutablePair<Pattern, Supplier<String>>> defaults = new ArrayList<>(Arrays.asList(
+                // splash screen
+                ImmutablePair.of(
+                        Pattern.compile("^-splash"),
+                        () -> String.format("-splash:%s", Paths.get("resources", "splash.png").toAbsolutePath())),
+
                 // dynamically specify maximum heap size according to available physical memory
                 // if Xmx is not specified in jvmoptions
                 ImmutablePair.of(
