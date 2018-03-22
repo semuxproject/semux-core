@@ -25,7 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This splash screen fills the empty between startup dialog and {@link MainFrame}.
+ * This splash screen fills the empty between startup dialog and
+ * {@link MainFrame}.
  */
 public class SplashScreen extends JFrame implements SemuxEventListener {
 
