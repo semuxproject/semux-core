@@ -19,6 +19,8 @@ import org.semux.core.Block;
 import org.semux.core.SyncManager;
 import org.semux.crypto.Key;
 import org.semux.gui.Action;
+import org.semux.gui.SemuxEvent;
+import org.semux.gui.SemuxEventListener;
 import org.semux.net.Peer;
 import org.semux.util.ByteArray;
 
@@ -30,6 +32,7 @@ public class WalletModel {
 
     private List<ActionListener> listeners = new CopyOnWriteArrayList<>();
     private List<ActionListener> lockableComponents = new CopyOnWriteArrayList<>();
+    private List<SemuxEventListener> semuxEventListeners = new CopyOnWriteArrayList<>();
 
     private SyncManager.Progress syncProgress;
 
@@ -59,12 +62,39 @@ public class WalletModel {
     }
 
     /**
+     * Fires a Semux event.
+     *
+     * @param event
+     */
+    public void fireSemuxEvent(SemuxEvent event) {
+        semuxEventListeners.forEach(listener -> EventQueue.invokeLater(() -> listener.onSemuxEvent(event)));
+    }
+
+    /**
      * Add a listener.
      * 
      * @param listener
      */
     public void addListener(ActionListener listener) {
         listeners.add(listener);
+    }
+
+    /**
+     * Add a Semux event listener.
+     *
+     * @param listener
+     */
+    public void addSemuxEventListener(SemuxEventListener listener) {
+        semuxEventListeners.add(listener);
+    }
+
+    /**
+     * Remove a Semux event listener.
+     *
+     * @param listener
+     */
+    public void removeSemuxEventListener(SemuxEventListener listener) {
+        semuxEventListeners.remove(listener);
     }
 
     /**
