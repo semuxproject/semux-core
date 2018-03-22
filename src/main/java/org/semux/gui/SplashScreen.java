@@ -51,7 +51,7 @@ public class SplashScreen extends JFrame implements SemuxEventListener {
         progressBar = new JProgressBar();
         progressBar.setBorderPainted(false);
         progressBar.setStringPainted(true);
-        progressBar.setMaximum(100);
+        progressBar.setIndeterminate(true);
         progressBar.setString(GuiMessages.get("SplashLoading"));
         getContentPane().add(progressBar, BorderLayout.SOUTH);
 
@@ -64,17 +64,14 @@ public class SplashScreen extends JFrame implements SemuxEventListener {
     public synchronized void onSemuxEvent(SemuxEvent event) {
         switch (event) {
         case WALLET_LOADING:
-            progressBar.setValue(33);
             progressBar.setString(GuiMessages.get("SplashLoadingWallet"));
             break;
 
         case KERNEL_STARTING:
-            progressBar.setValue(66);
             progressBar.setString(GuiMessages.get("SplashStartingKernel"));
             break;
 
         case GUI_MAINFRAME_STARTED:
-            progressBar.setValue(100);
             walletModel.removeSemuxEventListener(this);
             setVisible(false);
             dispose();

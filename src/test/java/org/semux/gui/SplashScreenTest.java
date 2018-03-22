@@ -22,13 +22,13 @@ public class SplashScreenTest extends AssertJSwingJUnitTestCase {
         SplashScreenTestApplication application = GuiActionRunner.execute(SplashScreenTestApplication::new);
 
         FrameFixture window = new FrameFixture(robot(), application.splashScreen);
-        window.progressBar().requireVisible().requireValue(0).requireText(GuiMessages.get("SplashLoading"));
+        window.progressBar().requireVisible().requireText(GuiMessages.get("SplashLoading"));
 
         application.walletModel.fireSemuxEvent(SemuxEvent.WALLET_LOADING);
-        window.progressBar().requireVisible().requireValue(33).requireText(GuiMessages.get("SplashLoadingWallet"));
+        window.progressBar().requireVisible().requireText(GuiMessages.get("SplashLoadingWallet"));
 
         application.walletModel.fireSemuxEvent(SemuxEvent.KERNEL_STARTING);
-        window.progressBar().requireVisible().requireValue(66).requireText(GuiMessages.get("SplashStartingKernel"));
+        window.progressBar().requireVisible().requireText(GuiMessages.get("SplashStartingKernel"));
 
         // the splash screen should be disposed as soon as the mainframe starts
         application.walletModel.fireSemuxEvent(SemuxEvent.GUI_MAINFRAME_STARTED);
