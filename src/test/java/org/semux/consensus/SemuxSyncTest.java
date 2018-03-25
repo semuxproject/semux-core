@@ -7,12 +7,15 @@
 package org.semux.consensus;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,6 +28,7 @@ import org.semux.core.TransactionType;
 import org.semux.core.Unit;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
+import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.rules.KernelRule;
 import org.semux.rules.TemporaryDbRule;
@@ -85,4 +89,47 @@ public class SemuxSyncTest {
         assertFalse(semuxSync.validateBlock(block2, as, ds));
     }
 
+    @Test
+    public void testValidateBlockVotes() {
+        Key key1 = new Key();
+        Key key2 = new Key();
+        Key key3 = new Key();
+        List<String> validators = Arrays.asList(Hex.encode(key1.toAddress()),
+                Hex.encode(key2.toAddress()),
+                Hex.encode(key3.toAddress()));
+
+        // mock the chain
+        BlockchainImpl chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        doReturn(validators).when(chain).getValidators();
+        kernelRule.getKernel().setBlockchain(chain);
+
+        // mock sync manager
+        SemuxSync sync = spy(new SemuxSync(kernelRule.getKernel()));
+
+        // prepare block
+        Block block = kernelRule.createBlock(Collections.emptyList());
+        Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
+                block.getHash());
+        byte[] encoded = vote.getEncoded();
+        List<Key.Signature> votes = new ArrayList<>();
+        block.setVotes(votes);
+
+        // tests
+        assertFalse(sync.validateBlockVotes(block));
+
+        votes.add(key1.sign(encoded));
+        votes.add(key1.sign(encoded));
+        assertFalse(sync.validateBlockVotes(block));
+
+        votes.add(key2.sign(encoded));
+        assertTrue(sync.validateBlockVotes(block));
+
+        votes.add(key3.sign(encoded));
+        assertTrue(sync.validateBlockVotes(block));
+
+        votes.clear();
+        votes.add(new Key().sign(encoded));
+        votes.add(new Key().sign(encoded));
+        assertFalse(sync.validateBlockVotes(block));
+    }
 }

@@ -54,6 +54,7 @@ import org.semux.net.msg.Message;
 import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
+import org.semux.util.ByteArray;
 import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -406,26 +407,26 @@ public class SemuxSync implements SyncManager {
     }
 
     protected boolean validateBlockVotes(Block block) {
-        // check 2/3 rule of pBFT
-        List<String> validators = chain.getValidators();
+        Set<String> validators = new HashSet<>(chain.getValidators());
         int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
-        if (block.getVotes().size() < twoThirds) {
-            logger.debug("Invalid BFT votes: {} < {}", block.getVotes().size(), twoThirds);
-            return false;
-        }
 
-        // check vote signatures
-        Set<String> set = new HashSet<>(validators);
         Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
                 block.getHash());
         byte[] encoded = vote.getEncoded();
-        for (Signature sig : block.getVotes()) {
-            String a = Hex.encode(sig.getAddress());
 
-            if (!set.contains(a) || !Key.verify(encoded, sig)) {
-                logger.debug("Invalid BFT vote: signer = {}", a);
-                return false;
-            }
+        // check validity of votes
+        if (!block.getVotes().stream()
+                .allMatch(sig -> Key.verify(encoded, sig) && validators.contains(Hex.encode(sig.getAddress())))) {
+            logger.debug("Block votes are invalid");
+            return false;
+        }
+
+        // at least two thirds voters
+        if (block.getVotes().stream()
+                .map(sig -> new ByteArray(sig.getA()))
+                .collect(Collectors.toSet()).size() < twoThirds) {
+            logger.debug("Not enough votes, needs 2/3+");
+            return false;
         }
 
         return true;
