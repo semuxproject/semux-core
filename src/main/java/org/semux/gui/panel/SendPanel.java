@@ -404,7 +404,6 @@ public class SendPanel extends JPanel implements ActionListener {
                     GuiMessages.get("SuccessDialogTitle"),
                     JOptionPane.INFORMATION_MESSAGE);
             clear();
-            model.fireUpdateEvent();
         } else {
             showErrorDialog(GuiMessages.get("TransactionFailed", result.error.toString()));
         }

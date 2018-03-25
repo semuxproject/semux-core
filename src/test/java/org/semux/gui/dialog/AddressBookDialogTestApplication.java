@@ -26,7 +26,7 @@ public class AddressBookDialogTestApplication extends BaseTestApplication {
         super();
         gui = new SemuxGui(walletModel, kernelMock);
 
-        addressBookDialog = new AddressBookDialog(this, walletModel, gui.getKernel().getWallet()) {
+        addressBookDialog = new AddressBookDialog(this, gui.getKernel().getWallet(), gui) {
             private static final long serialVersionUID = 1L;
 
             @Override

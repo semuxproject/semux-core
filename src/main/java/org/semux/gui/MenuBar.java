@@ -202,7 +202,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
                     JOptionPane.showMessageDialog(frame, GuiMessages.get("ImportSuccess", n));
                 }
 
-                gui.getModel().fireUpdateEvent();
+                gui.updateModel();
             }
         }
     }
@@ -258,7 +258,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
                 if (wallet.addAccount(account)) {
                     wallet.flush();
                     JOptionPane.showMessageDialog(frame, GuiMessages.get("PrivateKeyImportSuccess"));
-                    gui.getModel().fireUpdateEvent();
+                    gui.updateModel();
                 } else {
                     JOptionPane.showMessageDialog(frame, GuiMessages.get("PrivateKeyAlreadyExists"));
                 }

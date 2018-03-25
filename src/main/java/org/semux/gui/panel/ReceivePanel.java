@@ -322,8 +322,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         boolean added = wallet.flush();
 
         if (added) {
-            // fire update event
-            model.fireUpdateEvent();
+            gui.updateModel();
 
             JOptionPane.showMessageDialog(this, GuiMessages.get("NewAccountCreated"));
         } else {
@@ -349,8 +348,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
                 wallet.removeAccount(acc.getKey());
                 wallet.flush();
 
-                // fire update event
-                model.fireUpdateEvent();
+                gui.updateModel();
 
                 JOptionPane.showMessageDialog(this, GuiMessages.get("AccountDeleted"));
             }
