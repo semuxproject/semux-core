@@ -64,16 +64,16 @@ public class SemuxGui extends Launcher {
 
     private static final int TRANSACTION_LIMIT = 1024; // per account
 
-    protected WalletModel model;
-    protected Kernel kernel;
+    private WalletModel model;
+    private Kernel kernel;
 
-    protected AddressBookDialog addressBookDialog;
+    private AddressBookDialog addressBookDialog;
 
-    protected boolean isRunning;
+    private boolean isRunning;
     private SplashScreen splashScreen;
-    protected JFrame main;
-    protected Thread dataThread;
-    protected Thread versionThread;
+    private JFrame main;
+    private Thread dataThread;
+    private Thread versionThread;
 
     public static void main(String[] args) {
         try {
