@@ -38,7 +38,6 @@ import org.semux.util.SystemUtil;
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({ "jdk.internal.*", "javax.management.*", "com.sun.*", "javax.xml.*", "org.xml.sax.*",
         "org.w3c.dom.*" })
-@PrepareForTest({ LoggerConfigurator.class, SystemUtil.class })
 public class LoggerConfiguratorTest {
 
     @Rule
@@ -56,6 +55,7 @@ public class LoggerConfiguratorTest {
     }
 
     @Test
+    @PrepareForTest({ LoggerConfigurator.class, SystemUtil.class })
     public void testConfigureFactoryDefault() {
         mockStatic(SystemUtil.class);
 
@@ -74,6 +74,7 @@ public class LoggerConfiguratorTest {
     }
 
     @Test
+    @PrepareForTest({ LoggerConfigurator.class, SystemUtil.class })
     public void testConfigureUserDefined() throws IOException {
         mockStatic(SystemUtil.class);
 
@@ -91,6 +92,7 @@ public class LoggerConfiguratorTest {
     }
 
     @Test
+    @PrepareForTest({ LoggerConfigurator.class, SystemUtil.class })
     public void testConfigureUserDefinedError() throws IOException {
         mockStatic(SystemUtil.class);
 

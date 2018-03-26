@@ -7,6 +7,7 @@
 package org.semux.rules;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.EnumMap;
 
 import org.junit.rules.TemporaryFolder;
@@ -23,10 +24,7 @@ public class TemporaryDbRule extends TemporaryFolder implements DbFactory {
     @Override
     public void before() throws Throwable {
         create();
-        for (DbName name : DbName.values()) {
-            File file = new File(getRoot(), Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
-            databases.put(name, new LevelDb(file));
-        }
+        open();
     }
 
     @Override
@@ -36,10 +34,23 @@ public class TemporaryDbRule extends TemporaryFolder implements DbFactory {
     }
 
     @Override
+    public void open() {
+        for (DbName name : DbName.values()) {
+            File file = new File(getRoot(), Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
+            databases.put(name, new LevelDb(file));
+        }
+    }
+
+    @Override
     public void close() {
         for (Db db : databases.values()) {
             db.close();
         }
+    }
+
+    @Override
+    public Path getDataDir() {
+        return super.getRoot().toPath();
     }
 
     @Override

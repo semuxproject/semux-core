@@ -12,14 +12,18 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Amount.Unit.SEM;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,6 +32,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.config.Constants;
 import org.semux.config.MainnetConfig;
 import org.semux.core.Block;
+import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
@@ -52,22 +57,45 @@ public class SemuxBftTest {
     public TemporaryDbRule temporaryDBRule = new TemporaryDbRule();
 
     @Test
-    public void testIsPrimary() {
-        List<String> validators = Arrays.asList("a", "b", "c", "d");
-        int blocks = 1000;
-        int repeat = 0;
-        int last = -1;
+    public void testIsPrimaryH256() {
+        List<String> validators = IntStream.range(1, 100).boxed().map(i -> String.format("v%d", i))
+                .collect(Collectors.toList());
 
         SemuxBft bft = mock(SemuxBft.class);
         bft.config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
         bft.validators = validators;
+        bft.chain = mock(Blockchain.class);
+        when(bft.chain.forkActivated(anyLong(), eq(UNIFORM_DISTRIBUTION))).thenReturn(false);
         when(bft.isPrimary(anyLong(), anyInt(), anyString())).thenCallRealMethod();
+
+        testIsPrimaryConsecutiveValidatorProbability(bft);
+    }
+
+    @Test
+    public void testIsPrimaryUniformDist() {
+        List<String> validators = IntStream.range(1, 100).boxed().map(i -> String.format("v%d", i))
+                .collect(Collectors.toList());
+
+        SemuxBft bft = mock(SemuxBft.class);
+        bft.config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
+        bft.validators = validators;
+        bft.chain = mock(Blockchain.class);
+        when(bft.chain.forkActivated(anyLong(), eq(UNIFORM_DISTRIBUTION))).thenReturn(true);
+        when(bft.isPrimary(anyLong(), anyInt(), anyString())).thenCallRealMethod();
+
+        testIsPrimaryConsecutiveValidatorProbability(bft);
+    }
+
+    private void testIsPrimaryConsecutiveValidatorProbability(SemuxBft bft) {
+        int blocks = 1000;
+        int repeat = 0;
+        int last = -1;
 
         Random r = new Random(System.nanoTime());
         for (int i = 0; i < blocks; i++) {
-            int view = r.nextInt(2);
-            for (int j = 0; j < validators.size(); j++) {
-                if (bft.isPrimary(i, view, validators.get(j))) {
+            int view = r.nextDouble() < 0.05 ? 1 : 0;
+            for (int j = 0; j < bft.validators.size(); j++) {
+                if (bft.isPrimary(i, view, bft.validators.get(j))) {
                     if (j == last) {
                         repeat++;
                     }
@@ -75,8 +103,9 @@ public class SemuxBftTest {
                 }
             }
         }
+
         logger.info("Consecutive validator probability: {}/{}", repeat, blocks);
-        assertEquals(1.0 / validators.size(), (double) repeat / blocks, 0.05);
+        assertEquals(1.0 / bft.validators.size(), (double) repeat / blocks, 0.05);
     }
 
     /**

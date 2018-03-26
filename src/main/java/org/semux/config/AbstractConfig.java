@@ -6,12 +6,13 @@
  */
 package org.semux.config;
 
-import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.Unit.MILLI_SEM;
 import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Amount.ZERO;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import org.semux.core.TransactionType;
 import org.semux.crypto.Hash;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
+import org.semux.util.BigIntegerUtil;
 import org.semux.util.Bytes;
 import org.semux.util.StringUtil;
 import org.semux.util.SystemUtil;
@@ -118,6 +120,11 @@ public abstract class AbstractConfig implements Config {
     protected String uiUnit = "SEM";
     protected int uiFractionDigits = 9;
 
+    // =========================
+    // Forks
+    // =========================
+    protected boolean forkUniformDistributionEnabled = true;
+
     /**
      * Create an {@link AbstractConfig} instance.
      *
@@ -160,9 +167,40 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public String getPrimaryValidator(List<String> validators, long height, int view) {
-        byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
-        return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
+    public String getPrimaryValidator(List<String> validators, long height, int view, boolean uniformDist) {
+        // TODO: add a checkpoint once UNIFORM_DISTRIBUTION is fully activated
+        if (uniformDist) {
+            return validators.get(getUniformDistPrimaryValidatorNumber(validators.size(), height, view));
+        } else {
+            byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
+            return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
+        }
+    }
+
+    private int getUniformDistPrimaryValidatorNumber(int size, long height, long view) {
+        // use round-robin for view 0
+        if (view == 0) {
+            return (int) (height % (long) size);
+        }
+
+        // here we ensure there will never be consecutive block forgers after view
+        // change
+        int deterministicRand;
+        final int prevDeterministicRand = getUniformDistPrimaryValidatorNumber(size, height, view - 1);
+        BigInteger subView = BigInteger.ZERO;
+        do {
+            BigInteger seed = BigIntegerUtil
+                    .random(BigInteger.valueOf(height))
+                    .xor(BigIntegerUtil.random(BigInteger.valueOf(view)))
+                    .add(subView);
+            deterministicRand = BigIntegerUtil
+                    .random(seed)
+                    .mod(BigInteger.valueOf(size))
+                    .intValue();
+            subView = subView.add(BigInteger.ONE);
+        } while (deterministicRand == prevDeterministicRand);
+
+        return deterministicRand;
     }
 
     @Override
@@ -178,6 +216,11 @@ public abstract class AbstractConfig implements Config {
     @Override
     public File dataDir() {
         return dataDir;
+    }
+
+    @Override
+    public File databaseDir() {
+        return new File(dataDir, Constants.DATABASE_DIR);
     }
 
     @Override
@@ -413,6 +456,11 @@ public abstract class AbstractConfig implements Config {
     @Override
     public int uiFractionDigits() {
         return uiFractionDigits;
+    }
+
+    @Override
+    public boolean forkUniformDistributionEnabled() {
+        return forkUniformDistributionEnabled;
     }
 
     protected void init() {

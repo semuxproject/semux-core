@@ -27,7 +27,7 @@ public class CompressPerformance {
     public static void main(String[] args) throws IOException {
         Config config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
 
-        LevelDbFactory dbFactory = new LevelDbFactory(config.dataDir());
+        LevelDbFactory dbFactory = new LevelDbFactory(config.databaseDir());
         Blockchain chain = new BlockchainImpl(config, dbFactory);
 
         for (Mode mode : Mode.values()) {

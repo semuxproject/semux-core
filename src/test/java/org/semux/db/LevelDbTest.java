@@ -96,7 +96,7 @@ public class LevelDbTest {
 
     @Test
     public void testLevelDBFactory() {
-        LevelDbFactory factory = new LevelDbFactory(new File(Constants.DEFAULT_DATA_DIR));
+        LevelDbFactory factory = new LevelDbFactory(new File(Constants.DEFAULT_DATA_DIR, Constants.DATABASE_DIR));
         for (DbName name : DbName.values()) {
             assertNotNull(factory.getDB(name));
         }

@@ -99,7 +99,7 @@ public class SemuxGuiTest {
 
         // prepare kernel
         Config config = kernel.getConfig();
-        Blockchain chain = new BlockchainImpl(config, new LevelDb.LevelDbFactory(kernel.getConfig().dataDir()));
+        Blockchain chain = new BlockchainImpl(config, new LevelDb.LevelDbFactory(kernel.getConfig().databaseDir()));
         kernel.setBlockchain(chain);
         ChannelManager channelMgr = new ChannelManager(kernel);
         kernel.setChannelManager(channelMgr);

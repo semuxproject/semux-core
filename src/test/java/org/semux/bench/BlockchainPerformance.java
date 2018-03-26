@@ -12,18 +12,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.semux.Network;
+import org.semux.TestUtils;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
+import org.semux.core.Blockchain;
+import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
+import org.semux.rules.TemporaryDbRule;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.slf4j.Logger;
@@ -130,10 +134,30 @@ public class BlockchainPerformance {
         logger.info("Perf_transaction_validation: {} μs/time", (t2 - t1) / repeat / 1_000);
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void testAddBlock() throws Throwable {
+        final int repeat = 10000;
+        Block[] blocks = new Block[repeat];
+        for (int i = 0; i < repeat; i++) {
+            blocks[i] = TestUtils.createEmptyBlock(i);
+        }
+
+        TemporaryDbRule temporaryDbRule = new TemporaryDbRule();
+        temporaryDbRule.before();
+        Blockchain blockchain = new BlockchainImpl(config, temporaryDbRule);
+        long t1 = System.currentTimeMillis();
+        for (int i = 0; i < repeat; i++) {
+            blockchain.addBlock(blocks[i]);
+        }
+        long t2 = System.currentTimeMillis();
+        temporaryDbRule.after();
+        logger.info("Perf_addBlock: {} ms / {} blocks", t2 - t1, repeat);
+    }
+
+    public static void main(String[] args) throws Throwable {
         Block block = testBlockCreation();
         testBlockValidation(block);
         testTransactionValidation();
+        testAddBlock();
 
         System.exit(0);
     }

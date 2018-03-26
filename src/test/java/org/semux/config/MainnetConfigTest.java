@@ -8,11 +8,19 @@ package org.semux.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Amount.ZERO;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.semux.Network;
@@ -55,5 +63,40 @@ public class MainnetConfigTest {
         }
 
         assertEquals(100, last);
+    }
+
+    @Test
+    public void testPrimaryUniformDistDeterminism() throws IOException {
+        List<String> validators = IntStream.range(0, 100).boxed().map(i -> String.format("v%d", i))
+                .collect(Collectors.toList());
+        final int blocks = 1000;
+        final int views = 10;
+        int repeats = 0;
+
+        String[][] primaryValidators = new String[blocks][views];
+
+        MainnetConfig config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
+        StringBuilder validatorsCSV = new StringBuilder();
+        for (long i = 0; i < blocks; i++) {
+            for (int view = 0; view < views; view++) {
+                String primary = config.getPrimaryValidator(validators, i, view, true);
+                primaryValidators[(int) i][view] = primary;
+
+                if (view > 0 && primaryValidators[(int) i][view].equals(primaryValidators[(int) i][view - 1])) {
+                    repeats++;
+                }
+            }
+
+            validatorsCSV.append(StringUtils.join(primaryValidators[(int) i], ",")).append("\n");
+        }
+
+        logger.info("Repeats {} / {} = {}%", repeats, blocks, (double) repeats / (double) blocks * 100.0);
+
+        assertEquals(0, repeats);
+        assertEquals(
+                FileUtils.readFileToString(
+                        new File(MainnetConfigTest.class.getResource("/config/validators1000.csv").getFile()),
+                        Charset.forName("UTF-8")).trim(),
+                validatorsCSV.toString().trim());
     }
 }

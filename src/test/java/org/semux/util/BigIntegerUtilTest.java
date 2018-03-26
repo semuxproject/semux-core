@@ -6,15 +6,23 @@
  */
 package org.semux.util;
 
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BigIntegerUtilTest {
+
+    private static Logger logger = LoggerFactory.getLogger(BigIntegerUtil.class);
 
     private BigInteger one = BigInteger.valueOf(1);
     private BigInteger two = BigInteger.valueOf(2);
@@ -89,5 +97,40 @@ public class BigIntegerUtilTest {
     @Test
     public void testSum() {
         assertEquals(three, BigIntegerUtil.sum(one, two));
+    }
+
+    /**
+     * Test if the random function is uniformly distributed. Credits to:
+     * https://github.com/dwdyer/uncommons-maths/blob/462c043ffbc8df4bd45c490e447ea1ba636b1f15/core/src/java/test/org/uncommons/maths/random/DiscreteUniformGeneratorTest.java
+     */
+    @Test
+    public void testRandomUniformlyDistributed() {
+        final int N = 10000, MAX = 100;
+        BigInteger[] data = new BigInteger[N];
+        BigInteger sum = BigInteger.ZERO;
+        for (int i = 0; i < N; i++) {
+            data[i] = BigIntegerUtil.random(BigInteger.valueOf(i)).mod(BigInteger.valueOf(MAX));
+            sum = sum.add(data[i]);
+        }
+
+        BigDecimal mean = new BigDecimal(sum).divide(BigDecimal.valueOf(N), MathContext.DECIMAL128);
+        BigDecimal squaredDiffs = BigDecimal.ZERO;
+        for (int i = 0; i < N; i++) {
+            BigDecimal diff = mean.subtract(new BigDecimal(data[i]));
+            squaredDiffs = squaredDiffs.add(diff.pow(2));
+        }
+        BigDecimal variance = squaredDiffs.divide(BigDecimal.valueOf(N), MathContext.DECIMAL128);
+        BigDecimal deviation = BigDecimal.valueOf(Math.sqrt(variance.doubleValue()));
+        BigDecimal expectedDeviation = BigDecimal.valueOf(MAX / Math.sqrt(12));
+        BigDecimal expectedMean = BigDecimal.valueOf(MAX).divide(BigDecimal.valueOf(2), MathContext.DECIMAL128);
+        logger.info("Mean = {}, Expected Mean = {}", mean, expectedMean);
+        logger.info("Deviation = {}, Expected Deviation = {}", deviation, expectedDeviation);
+
+        assertThat("deviation",
+                deviation.subtract(expectedDeviation).abs(),
+                lessThanOrEqualTo(BigDecimal.valueOf(0.02)));
+        assertThat("mean",
+                mean.subtract(expectedMean).abs(),
+                lessThanOrEqualTo(BigDecimal.valueOf(1)));
     }
 }

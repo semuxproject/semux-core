@@ -120,7 +120,7 @@ public class Kernel {
                 coinbase);
         printSystemInfo();
 
-        dbFactory = new LevelDbFactory(config.dataDir());
+        dbFactory = new LevelDbFactory(config.databaseDir());
         chain = new BlockchainImpl(config, dbFactory);
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
@@ -412,5 +412,9 @@ public class Kernel {
      */
     public PeerServer getP2p() {
         return p2p;
+    }
+
+    public DbFactory getDbFactory() {
+        return dbFactory;
     }
 }

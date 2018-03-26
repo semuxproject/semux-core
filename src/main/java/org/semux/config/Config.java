@@ -35,6 +35,13 @@ public interface Config {
     File dataDir();
 
     /**
+     * Returns the database directory.
+     *
+     * @return
+     */
+    File databaseDir();
+
+    /**
      * Returns the config directory.
      *
      * @return
@@ -129,9 +136,10 @@ public interface Config {
      * @param validators
      * @param height
      * @param view
+     * @param uniformDist
      * @return
      */
-    String getPrimaryValidator(List<String> validators, long height, int view);
+    String getPrimaryValidator(List<String> validators, long height, int view, boolean uniformDist);
 
     /**
      * Returns the client id.
@@ -406,4 +414,15 @@ public interface Config {
      * @return
      */
     int uiFractionDigits();
+
+    // =========================
+    // Forks
+    // =========================
+
+    /**
+     * Returns whether UNIFORM_DISTRIBUTION fork is enabled.
+     *
+     * @return
+     */
+    boolean forkUniformDistributionEnabled();
 }
