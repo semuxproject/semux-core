@@ -54,10 +54,6 @@ public final class ValidatorActivatedFork implements Comparable<ValidatorActivat
 
     private ValidatorActivatedFork(short number, String name, long activationBlocks, long activationBlocksLookup,
             long activationDeadline) {
-        if (number > BlockHeaderData.ForkSignalSet.MAX_PENDING_FORKS) {
-            throw new UnreachableException("There should never be more than 8 pending forks.");
-        }
-
         this.number = number;
         this.name = name;
         this.activationBlocks = activationBlocks;
