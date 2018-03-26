@@ -6,7 +6,7 @@
  */
 package org.semux.db;
 
-public enum DbName {
+public enum DatabaseName {
 
     /**
      * Block and transaction index.

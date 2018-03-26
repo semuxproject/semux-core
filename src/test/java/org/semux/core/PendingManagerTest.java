@@ -30,7 +30,7 @@ import org.semux.KernelMock;
 import org.semux.Network;
 import org.semux.core.state.AccountState;
 import org.semux.crypto.Key;
-import org.semux.db.LevelDb.LevelDbFactory;
+import org.semux.db.LeveldbDatabase.LevelDbFactory;
 import org.semux.net.ChannelManager;
 import org.semux.rules.KernelRule;
 import org.semux.util.ArrayUtil;

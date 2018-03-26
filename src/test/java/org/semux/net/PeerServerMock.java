@@ -15,17 +15,17 @@ import org.semux.consensus.SemuxBft;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
-import org.semux.db.Db;
-import org.semux.db.DbFactory;
-import org.semux.db.DbName;
-import org.semux.db.LevelDb.LevelDbFactory;
+import org.semux.db.Database;
+import org.semux.db.DatabaseFactory;
+import org.semux.db.DatabaseName;
+import org.semux.db.LeveldbDatabase.LevelDbFactory;
 
 public class PeerServerMock {
 
     private KernelMock kernel;
     private PeerServer server;
 
-    private DbFactory dbFactory;
+    private DatabaseFactory dbFactory;
     private PeerClient client;
 
     private AtomicBoolean isRunning = new AtomicBoolean(false);
@@ -62,8 +62,8 @@ public class PeerServerMock {
 
             client.close();
 
-            for (DbName name : DbName.values()) {
-                Db db = dbFactory.getDB(name);
+            for (DatabaseName name : DatabaseName.values()) {
+                Database db = dbFactory.getDB(name);
                 db.close();
             }
         }

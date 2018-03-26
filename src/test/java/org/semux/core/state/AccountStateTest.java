@@ -8,8 +8,8 @@ package org.semux.core.state;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Amount.Unit.NANO_SEM;
 
 import java.util.Map;
 
@@ -21,7 +21,7 @@ import org.semux.config.DevnetConfig;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis.Premine;
-import org.semux.rules.TemporaryDbRule;
+import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
@@ -31,7 +31,7 @@ public class AccountStateTest {
     private AccountState state;
 
     @Rule
-    public TemporaryDbRule temporaryDBFactory = new TemporaryDbRule();
+    public TemporaryDatabaseRule temporaryDBFactory = new TemporaryDatabaseRule();
 
     @Before
     public void setUp() {

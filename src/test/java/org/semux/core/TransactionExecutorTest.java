@@ -10,11 +10,11 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.semux.core.Amount.Unit.NANO_SEM;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sub;
 import static org.semux.core.Amount.sum;
+import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.TransactionResult.Error.INSUFFICIENT_AVAILABLE;
 import static org.semux.core.TransactionResult.Error.INSUFFICIENT_LOCKED;
 
@@ -28,13 +28,13 @@ import org.semux.config.DevnetConfig;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Key;
-import org.semux.rules.TemporaryDbRule;
+import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 
 public class TransactionExecutorTest {
 
     @Rule
-    public TemporaryDbRule temporaryDBFactory = new TemporaryDbRule();
+    public TemporaryDatabaseRule temporaryDBFactory = new TemporaryDatabaseRule();
 
     private Config config;
     private Blockchain chain;

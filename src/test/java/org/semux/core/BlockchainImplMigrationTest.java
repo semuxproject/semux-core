@@ -22,8 +22,8 @@ import org.rauschig.jarchivelib.ArchiverFactory;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.TestnetConfig;
-import org.semux.db.DbFactory;
-import org.semux.db.LevelDb;
+import org.semux.db.DatabaseFactory;
+import org.semux.db.LeveldbDatabase;
 import org.semux.net.filter.SemuxIpFilterLoaderTest;
 
 public class BlockchainImplMigrationTest {
@@ -40,7 +40,7 @@ public class BlockchainImplMigrationTest {
         archiver.extract(dbVersion0Tarball, temporaryFolder.getRoot());
 
         // load the database
-        DbFactory dbFactory = new LevelDb.LevelDbFactory(new File(temporaryFolder.getRoot(), "database"));
+        DatabaseFactory dbFactory = new LeveldbDatabase.LevelDbFactory(new File(temporaryFolder.getRoot(), "database"));
         Config config = new TestnetConfig(Constants.DEFAULT_DATA_DIR);
         BlockchainImpl blockchain = new BlockchainImpl(config, dbFactory);
 

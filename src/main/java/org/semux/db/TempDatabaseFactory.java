@@ -17,35 +17,35 @@ import java.util.EnumMap;
 /**
  * A temporary database.
  */
-public class TempDbFactory implements DbFactory {
+public class TempDatabaseFactory implements DatabaseFactory {
 
     static final String DIR_PREFIX = "semux-temp-db-";
 
-    private EnumMap<DbName, Db> databases = new EnumMap<>(DbName.class);
+    private EnumMap<DatabaseName, Database> databases = new EnumMap<>(DatabaseName.class);
 
     private Path tempDir;
 
-    public TempDbFactory() throws IOException {
+    public TempDatabaseFactory() throws IOException {
         open();
     }
 
     @Override
-    public Db getDB(DbName name) {
+    public Database getDB(DatabaseName name) {
         return databases.get(name);
     }
 
     @Override
     public void open() throws IOException {
         tempDir = Files.createTempDirectory(DIR_PREFIX);
-        for (DbName name : DbName.values()) {
+        for (DatabaseName name : DatabaseName.values()) {
             File dbDir = new File(tempDir.toFile(), name.toString().toLowerCase());
-            databases.put(name, new LevelDb(dbDir));
+            databases.put(name, new LeveldbDatabase(dbDir));
         }
     }
 
     @Override
     public void close() {
-        for (Db db : databases.values()) {
+        for (Database db : databases.values()) {
             db.close();
         }
     }

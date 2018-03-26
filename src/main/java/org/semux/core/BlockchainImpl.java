@@ -28,11 +28,11 @@ import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.core.state.DelegateStateImpl;
 import org.semux.crypto.Hex;
-import org.semux.db.Db;
-import org.semux.db.DbFactory;
-import org.semux.db.DbName;
+import org.semux.db.Database;
+import org.semux.db.DatabaseFactory;
+import org.semux.db.DatabaseName;
 import org.semux.db.Migration;
-import org.semux.db.TempDbFactory;
+import org.semux.db.TempDatabaseFactory;
 import org.semux.util.Bytes;
 import org.semux.util.FileUtil;
 import org.semux.util.SimpleDecoder;
@@ -94,8 +94,8 @@ public class BlockchainImpl implements Blockchain {
 
     private final Config config;
 
-    private Db indexDB;
-    private Db blockDB;
+    private Database indexDB;
+    private Database blockDB;
 
     private AccountState accountState;
     private DelegateState delegateState;
@@ -117,17 +117,18 @@ public class BlockchainImpl implements Blockchain {
      * @param config
      * @param dbFactory
      */
-    public BlockchainImpl(Config config, DbFactory dbFactory) {
+    public BlockchainImpl(Config config, DatabaseFactory dbFactory) {
         this.config = config;
         openDb(dbFactory);
     }
 
-    private void openDb(DbFactory factory) {
-        this.indexDB = factory.getDB(DbName.INDEX);
-        this.blockDB = factory.getDB(DbName.BLOCK);
+    private void openDb(DatabaseFactory factory) {
+        this.indexDB = factory.getDB(DatabaseName.INDEX);
+        this.blockDB = factory.getDB(DatabaseName.BLOCK);
 
-        this.accountState = new AccountStateImpl(factory.getDB(DbName.ACCOUNT));
-        this.delegateState = new DelegateStateImpl(this, factory.getDB(DbName.DELEGATE), factory.getDB(DbName.VOTE));
+        this.accountState = new AccountStateImpl(factory.getDB(DatabaseName.ACCOUNT));
+        this.delegateState = new DelegateStateImpl(this, factory.getDB(DatabaseName.DELEGATE),
+                factory.getDB(DatabaseName.VOTE));
 
         this.genesis = Genesis.load(config.network());
 
@@ -180,7 +181,7 @@ public class BlockchainImpl implements Blockchain {
      *
      * @param dbFactory
      */
-    private void upgradeDb0(DbFactory dbFactory) {
+    private void upgradeDb0(DatabaseFactory dbFactory) {
         // run the migration
         new MigrationBlockDbVersion001().migrate(config, dbFactory);
 
@@ -764,7 +765,7 @@ public class BlockchainImpl implements Blockchain {
      */
     private class MigrationBlockchain extends BlockchainImpl {
 
-        private MigrationBlockchain(Config config, DbFactory dbFactory) {
+        private MigrationBlockchain(Config config, DatabaseFactory dbFactory) {
             super(config, dbFactory);
         }
 
@@ -801,12 +802,12 @@ public class BlockchainImpl implements Blockchain {
     private class MigrationBlockDbVersion001 implements Migration {
 
         @Override
-        public void migrate(Config config, DbFactory dbFactory) {
+        public void migrate(Config config, DatabaseFactory dbFactory) {
             try {
                 logger.info("Upgrading the database... DO NOT CLOSE THE WALLET!");
 
                 // recreate block db in a temporary folder
-                TempDbFactory tempDb = new TempDbFactory();
+                TempDatabaseFactory tempDb = new TempDatabaseFactory();
                 MigrationBlockchain migrationBlockchain = new MigrationBlockchain(config, tempDb);
                 final long latestBlockNumber = getLatestBlockNumber();
                 for (long i = 1; i <= latestBlockNumber; i++) {

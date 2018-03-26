@@ -31,7 +31,7 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.rules.KernelRule;
-import org.semux.rules.TemporaryDbRule;
+import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -41,7 +41,7 @@ public class SemuxSyncTest {
     public KernelRule kernelRule = new KernelRule(51610, 51710);
 
     @Rule
-    public TemporaryDbRule temporaryDBRule = new TemporaryDbRule();
+    public TemporaryDatabaseRule temporaryDBRule = new TemporaryDatabaseRule();
 
     @Test
     public void testDuplicatedTransaction() {

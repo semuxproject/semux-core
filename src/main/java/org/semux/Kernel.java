@@ -26,9 +26,9 @@ import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Wallet;
 import org.semux.crypto.Key;
-import org.semux.db.DbFactory;
-import org.semux.db.DbName;
-import org.semux.db.LevelDb.LevelDbFactory;
+import org.semux.db.DatabaseFactory;
+import org.semux.db.DatabaseName;
+import org.semux.db.LeveldbDatabase.LevelDbFactory;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
@@ -70,7 +70,7 @@ public class Kernel {
     protected Wallet wallet;
     protected Key coinbase;
 
-    protected DbFactory dbFactory;
+    protected DatabaseFactory dbFactory;
     protected Blockchain chain;
     protected PeerClient client;
 
@@ -278,7 +278,7 @@ public class Kernel {
         ReentrantReadWriteLock.WriteLock lock = stateLock.writeLock();
         lock.lock();
         try {
-            for (DbName name : DbName.values()) {
+            for (DatabaseName name : DatabaseName.values()) {
                 dbFactory.getDB(name).close();
             }
         } finally {
@@ -414,7 +414,7 @@ public class Kernel {
         return p2p;
     }
 
-    public DbFactory getDbFactory() {
+    public DatabaseFactory getDbFactory() {
         return dbFactory;
     }
 }

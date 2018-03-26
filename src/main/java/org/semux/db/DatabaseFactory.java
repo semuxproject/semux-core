@@ -9,14 +9,14 @@ package org.semux.db;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public interface DbFactory {
+public interface DatabaseFactory {
     /**
      * Returns a KVDB instance for the specified database.
      * 
      * @param name
      * @return
      */
-    Db getDB(DbName name);
+    Database getDB(DatabaseName name);
 
     /**
      * Open resources.

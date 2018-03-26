@@ -25,20 +25,21 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semux.config.Constants;
-import org.semux.db.LevelDb.LevelDbFactory;
+import org.semux.db.LeveldbDatabase.LevelDbFactory;
 import org.semux.util.Bytes;
 import org.semux.util.ClosableIterator;
 
-public class LevelDbTest {
+public class LeveldbDatabseTest {
 
     private byte[] key = Bytes.of("key");
     private byte[] value = Bytes.of("value");
 
-    private LevelDb db;
+    private LeveldbDatabase db;
 
     @Before
     public void setUp() {
-        db = new LevelDb(new File(Constants.DEFAULT_DATA_DIR, Constants.DATABASE_DIR + File.separator + "test"));
+        db = new LeveldbDatabase(
+                new File(Constants.DEFAULT_DATA_DIR, Constants.DATABASE_DIR + File.separator + "test"));
     }
 
     @After
@@ -97,7 +98,7 @@ public class LevelDbTest {
     @Test
     public void testLevelDBFactory() {
         LevelDbFactory factory = new LevelDbFactory(new File(Constants.DEFAULT_DATA_DIR, Constants.DATABASE_DIR));
-        for (DbName name : DbName.values()) {
+        for (DatabaseName name : DatabaseName.values()) {
             assertNotNull(factory.getDB(name));
         }
         factory.close();

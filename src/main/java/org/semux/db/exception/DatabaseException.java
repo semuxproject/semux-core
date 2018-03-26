@@ -6,25 +6,25 @@
  */
 package org.semux.db.exception;
 
-public class LevelDbException extends RuntimeException {
+public class DatabaseException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    public LevelDbException() {
+    public DatabaseException() {
     }
 
-    public LevelDbException(String s) {
+    public DatabaseException(String s) {
         super(s);
     }
 
-    public LevelDbException(String s, Throwable throwable) {
+    public DatabaseException(String s, Throwable throwable) {
         super(s, throwable);
     }
 
-    public LevelDbException(Throwable throwable) {
+    public DatabaseException(Throwable throwable) {
         super(throwable);
     }
 
-    public LevelDbException(String s, Throwable throwable, boolean b, boolean b1) {
+    public DatabaseException(String s, Throwable throwable, boolean b, boolean b1) {
         super(s, throwable, b, b1);
     }
 }

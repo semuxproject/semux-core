@@ -17,7 +17,7 @@ import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.semux.crypto.Hex;
 
-public class DbScanner {
+public class DatabaseScanner {
     public static void main(String[] args) throws IOException {
         Options options = new Options();
         options.createIfMissing(false);

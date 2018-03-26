@@ -6,10 +6,10 @@
  */
 package org.semux.core.state;
 
-import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sub;
 import static org.semux.core.Amount.sum;
+import static org.semux.core.Amount.Unit.NANO_SEM;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.semux.core.Amount;
 import org.semux.core.Blockchain;
-import org.semux.db.Db;
+import org.semux.db.Database;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.ClosableIterator;
@@ -52,8 +52,8 @@ public class DelegateStateImpl implements DelegateState {
     private static final int ADDRESS_LEN = 20;
 
     protected Blockchain chain;
-    protected Db delegateDB;
-    protected Db voteDB;
+    protected Database delegateDB;
+    protected Database voteDB;
     protected DelegateStateImpl prev;
 
     /**
@@ -72,7 +72,7 @@ public class DelegateStateImpl implements DelegateState {
      * @param delegateDB
      * @param voteDB
      */
-    public DelegateStateImpl(Blockchain chain, Db delegateDB, Db voteDB) {
+    public DelegateStateImpl(Blockchain chain, Database delegateDB, Database voteDB) {
         this.chain = chain;
         this.delegateDB = delegateDB;
         this.voteDB = voteDB;

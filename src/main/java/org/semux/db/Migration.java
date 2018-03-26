@@ -10,5 +10,5 @@ import org.semux.config.Config;
 
 public interface Migration {
 
-    void migrate(Config config, DbFactory dbFactory);
+    void migrate(Config config, DatabaseFactory dbFactory);
 }

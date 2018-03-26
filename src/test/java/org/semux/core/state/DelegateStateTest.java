@@ -11,9 +11,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.Unit.SEM;
-import static org.semux.core.Amount.ZERO;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,7 @@ import org.semux.core.Amount;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.crypto.Key;
-import org.semux.rules.TemporaryDbRule;
+import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
@@ -39,7 +39,7 @@ public class DelegateStateTest {
     Map<String, byte[]> delegates;
 
     @Rule
-    public TemporaryDbRule temporaryDBFactory = new TemporaryDbRule();
+    public TemporaryDatabaseRule temporaryDBFactory = new TemporaryDatabaseRule();
 
     @Before
     public void init() {

@@ -21,7 +21,7 @@ import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Key;
-import org.semux.rules.TemporaryDbRule;
+import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 public class CorePerformanceTest {
 
     @Rule
-    public TemporaryDbRule temporaryDBFactory = new TemporaryDbRule();
+    public TemporaryDatabaseRule temporaryDBFactory = new TemporaryDatabaseRule();
 
     private static final Logger logger = LoggerFactory.getLogger(CorePerformanceTest.class);
 

@@ -30,14 +30,14 @@ import org.semux.config.DevnetConfig;
 import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.BlockchainImpl.StatsType;
 import org.semux.crypto.Key;
-import org.semux.rules.TemporaryDbRule;
+import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
 public class BlockchainImplTest {
 
     @Rule
-    public TemporaryDbRule temporaryDBFactory = new TemporaryDbRule();
+    public TemporaryDatabaseRule temporaryDBFactory = new TemporaryDatabaseRule();
 
     private Config config;
     private BlockchainImpl chain;

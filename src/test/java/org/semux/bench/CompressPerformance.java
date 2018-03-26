@@ -14,7 +14,7 @@ import org.semux.config.MainnetConfig;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
-import org.semux.db.LevelDb.LevelDbFactory;
+import org.semux.db.LeveldbDatabase.LevelDbFactory;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.xerial.snappy.Snappy;
 

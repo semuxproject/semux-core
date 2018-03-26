@@ -9,7 +9,7 @@ package org.semux.bench;
 import java.io.File;
 
 import org.semux.config.Constants;
-import org.semux.db.LevelDb;
+import org.semux.db.LeveldbDatabase;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,12 +19,12 @@ public class DBPerformance {
 
     private static final int REPEAT = 100_000;
 
-    private static LevelDb getTestDB() {
-        return new LevelDb(new File(Constants.DEFAULT_DATA_DIR, "test"));
+    private static LeveldbDatabase getTestDB() {
+        return new LeveldbDatabase(new File(Constants.DEFAULT_DATA_DIR, "test"));
     }
 
     public static void testWrite() {
-        LevelDb db = getTestDB();
+        LeveldbDatabase db = getTestDB();
         try {
             long t1 = System.nanoTime();
             for (int i = 0; i < REPEAT; i++) {
@@ -40,7 +40,7 @@ public class DBPerformance {
     }
 
     public static void testRead() {
-        LevelDb db = getTestDB();
+        LeveldbDatabase db = getTestDB();
         try {
             long t1 = System.nanoTime();
             for (int i = 0; i < REPEAT; i++) {
@@ -58,7 +58,7 @@ public class DBPerformance {
         testWrite();
         testRead();
 
-        LevelDb db = getTestDB();
+        LeveldbDatabase db = getTestDB();
         db.destroy();
     }
 }

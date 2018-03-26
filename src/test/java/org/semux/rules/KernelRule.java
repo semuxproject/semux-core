@@ -29,7 +29,7 @@ import org.semux.core.TransactionResult;
 import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
-import org.semux.db.LevelDb.LevelDbFactory;
+import org.semux.db.LeveldbDatabase.LevelDbFactory;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 

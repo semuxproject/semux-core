@@ -24,22 +24,22 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
-import org.semux.db.exception.LevelDbException;
+import org.semux.db.exception.DatabaseException;
 import org.semux.util.ClosableIterator;
 import org.semux.util.FileUtil;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LevelDb implements Db {
+public class LeveldbDatabase implements Database {
 
-    private static final Logger logger = LoggerFactory.getLogger(LevelDb.class);
+    private static final Logger logger = LoggerFactory.getLogger(LeveldbDatabase.class);
 
     private File file;
     private DB db;
     private boolean isOpened;
 
-    public LevelDb(File file) {
+    public LeveldbDatabase(File file) {
         this.file = file;
 
         File dir = file.getParentFile();
@@ -204,15 +204,15 @@ public class LevelDb implements Db {
                 try {
                     itr.close();
                 } catch (IOException e) {
-                    throw new LevelDbException(e);
+                    throw new DatabaseException(e);
                 }
             }
         }.initialize();
     }
 
-    public static class LevelDbFactory implements DbFactory {
+    public static class LevelDbFactory implements DatabaseFactory {
 
-        private EnumMap<DbName, Db> databases = new EnumMap<>(DbName.class);
+        private EnumMap<DatabaseName, Database> databases = new EnumMap<>(DatabaseName.class);
 
         private File dataDir;
         private AtomicBoolean open;
@@ -227,15 +227,15 @@ public class LevelDb implements Db {
         @Override
         public void open() {
             if (open.compareAndSet(false, true)) {
-                for (DbName name : DbName.values()) {
+                for (DatabaseName name : DatabaseName.values()) {
                     File file = Paths.get(dataDir.getAbsolutePath(), name.toString().toLowerCase()).toFile();
-                    databases.put(name, new LevelDb(file));
+                    databases.put(name, new LeveldbDatabase(file));
                 }
             }
         }
 
         @Override
-        public Db getDB(DbName name) {
+        public Database getDB(DatabaseName name) {
             open();
             return databases.get(name);
         }
@@ -243,7 +243,7 @@ public class LevelDb implements Db {
         @Override
         public void close() {
             if (open.compareAndSet(true, false)) {
-                for (Db db : databases.values()) {
+                for (Database db : databases.values()) {
                     db.close();
                 }
             }

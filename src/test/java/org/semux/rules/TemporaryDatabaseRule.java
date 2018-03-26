@@ -12,14 +12,14 @@ import java.util.EnumMap;
 
 import org.junit.rules.TemporaryFolder;
 import org.semux.config.Constants;
-import org.semux.db.Db;
-import org.semux.db.DbFactory;
-import org.semux.db.DbName;
-import org.semux.db.LevelDb;
+import org.semux.db.Database;
+import org.semux.db.DatabaseFactory;
+import org.semux.db.DatabaseName;
+import org.semux.db.LeveldbDatabase;
 
-public class TemporaryDbRule extends TemporaryFolder implements DbFactory {
+public class TemporaryDatabaseRule extends TemporaryFolder implements DatabaseFactory {
 
-    private EnumMap<DbName, Db> databases = new EnumMap<>(DbName.class);
+    private EnumMap<DatabaseName, Database> databases = new EnumMap<>(DatabaseName.class);
 
     @Override
     public void before() throws Throwable {
@@ -35,15 +35,15 @@ public class TemporaryDbRule extends TemporaryFolder implements DbFactory {
 
     @Override
     public void open() {
-        for (DbName name : DbName.values()) {
+        for (DatabaseName name : DatabaseName.values()) {
             File file = new File(getRoot(), Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
-            databases.put(name, new LevelDb(file));
+            databases.put(name, new LeveldbDatabase(file));
         }
     }
 
     @Override
     public void close() {
-        for (Db db : databases.values()) {
+        for (Database db : databases.values()) {
             db.close();
         }
     }
@@ -54,7 +54,7 @@ public class TemporaryDbRule extends TemporaryFolder implements DbFactory {
     }
 
     @Override
-    public Db getDB(DbName name) {
+    public Database getDB(DatabaseName name) {
         return databases.get(name);
     }
 }

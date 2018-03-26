@@ -27,7 +27,7 @@ import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
-import org.semux.rules.TemporaryDbRule;
+import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.slf4j.Logger;
@@ -141,7 +141,7 @@ public class BlockchainPerformance {
             blocks[i] = TestUtils.createEmptyBlock(i);
         }
 
-        TemporaryDbRule temporaryDbRule = new TemporaryDbRule();
+        TemporaryDatabaseRule temporaryDbRule = new TemporaryDatabaseRule();
         temporaryDbRule.before();
         Blockchain blockchain = new BlockchainImpl(config, temporaryDbRule);
         long t1 = System.currentTimeMillis();

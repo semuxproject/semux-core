@@ -17,7 +17,7 @@ import org.semux.util.ClosableIterator;
  * Key-value database.
  *
  */
-public interface Db {
+public interface Database {
 
     /**
      * Returns the value that is mapped to the specified key.
