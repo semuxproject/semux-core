@@ -782,7 +782,7 @@ public class SemuxBft implements Consensus {
 
         // signal UNIFORM_DISTRIBUTION fork
         byte[] data = signalingUniformDistribution()
-                ? new BlockHeaderData(new BlockHeaderData.ForkSignal(UNIFORM_DISTRIBUTION)).toBytes()
+                ? BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(UNIFORM_DISTRIBUTION)).toBytes()
                 : new byte[0];
 
         BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,
@@ -807,9 +807,9 @@ public class SemuxBft implements Consensus {
             return false;
         }
 
-        // continue signaling after fork activation
+        // do not continue signaling after fork activation to save space
         if (activatedForks.containsKey(UNIFORM_DISTRIBUTION)) {
-            return true;
+            return false;
         }
 
         // signal the fork before its activation deadline

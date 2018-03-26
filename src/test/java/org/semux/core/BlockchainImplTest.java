@@ -283,10 +283,11 @@ public class BlockchainImplTest {
 
     @Test
     public void testForkActivated() {
-        ValidatorActivatedFork fork = ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
+        final ValidatorActivatedFork fork = ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
         for (int i = 1; i <= fork.activationBlocksLookup; i++) {
-            chain.addBlock(createBlock(i, coinbase, new BlockHeaderData(new BlockHeaderData.ForkSignal(fork)).toBytes(),
-                    Collections.singletonList(tx), Collections.singletonList(res)));
+            chain.addBlock(
+                    createBlock(i, coinbase, BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(fork)).toBytes(),
+                            Collections.singletonList(tx), Collections.singletonList(res)));
         }
 
         for (long i = 0; i <= fork.activationBlocks; i++) {
@@ -301,7 +302,7 @@ public class BlockchainImplTest {
     @Test
     public void testForkCompatibility() {
         ValidatorActivatedFork fork = ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
-        Block block = createBlock(1, coinbase, new BlockHeaderData(new BlockHeaderData.ForkSignal(fork)).toBytes(),
+        Block block = createBlock(1, coinbase, BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(fork)).toBytes(),
                 Collections.singletonList(tx), Collections.singletonList(res));
         Whitebox.setInternalState(config, "forkUniformDistributionEnabled", false);
         chain = new BlockchainImpl(config, temporaryDBFactory);
@@ -313,7 +314,7 @@ public class BlockchainImplTest {
     }
 
     private Block createBlock(long number, List<Transaction> transactions, List<TransactionResult> results) {
-        return createBlock(number, coinbase, Bytes.of("test"), transactions, results);
+        return createBlock(number, coinbase, Bytes.EMPTY_BYTES, transactions, results);
     }
 
     private Block createBlock(long number, byte[] coinbase, byte[] data, List<Transaction> transactions,

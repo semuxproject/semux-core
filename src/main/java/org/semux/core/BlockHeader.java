@@ -19,8 +19,6 @@ import org.semux.util.SimpleEncoder;
 
 public class BlockHeader {
 
-    public static final int MAX_DATA_SIZE = 32;
-
     private byte[] hash;
 
     private long number;
@@ -112,7 +110,7 @@ public class BlockHeader {
                 && transactionsRoot != null && transactionsRoot.length == HASH_LEN
                 && resultsRoot != null && resultsRoot.length == HASH_LEN
                 && stateRoot != null && Arrays.equals(Bytes.EMPTY_HASH, stateRoot) // RESERVED FOR VM
-                && data != null && data.length <= MAX_DATA_SIZE
+                && data != null && data.length <= BlockHeaderData.MAX_SIZE
                 && encoded != null
                 && Arrays.equals(Hash.h256(encoded), hash);
     }

@@ -674,7 +674,8 @@ public class BlockchainImpl implements Blockchain {
      */
     @Override
     public synchronized boolean forkActivated(long height, ValidatorActivatedFork fork) {
-        if (height <= 0) {
+        // skips genesis block
+        if (height <= 1) {
             return false;
         }
 
@@ -686,14 +687,14 @@ public class BlockchainImpl implements Blockchain {
         // lookup from (height - 1)
         // to (height - fork.activationBlocksLookup)
         final long higherBound = height - 1;
-        final long lowerBound = Math.min(Math.max(height - fork.activationBlocksLookup, 0), higherBound);
+        final long lowerBound = Math.min(Math.max(height - fork.activationBlocksLookup, 1), higherBound);
         long activatedBlocks = 0;
 
         // O(1) dynamic-programming lookup, see the definition of ForkActivationMemory
         ForkActivationMemory forkActivationMemory = forkActivationMemoryMap.get(fork);
         if (forkActivationMemory != null && forkActivationMemory.height == height - 1) {
             activatedBlocks = forkActivationMemory.activatedBlocks -
-                    (forkActivationMemory.lowerBoundActivated && lowerBound > 0 ? 1 : 0) +
+                    (forkActivationMemory.lowerBoundActivated && lowerBound > 1 ? 1 : 0) +
                     (getBlockHeader(higherBound).getDecodedData().signalingFork(fork) ? 1 : 0);
         } else {
             // O(m) traversal lookup
