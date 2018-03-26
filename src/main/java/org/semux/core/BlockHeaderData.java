@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Decoded {@link Block#getData()}.
+ * Decoded {@link BlockHeader#getData()}.
  *
  * This class follows factory method pattern. Instances of this class should
  * only be initiated by one of the following methods:

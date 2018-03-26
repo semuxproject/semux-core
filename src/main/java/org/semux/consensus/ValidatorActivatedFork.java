@@ -7,10 +7,8 @@
 package org.semux.consensus;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.semux.core.BlockHeaderData;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
-import org.semux.util.exception.UnreachableException;
 
 /**
  * This class represents a Validator Activated Soft Fork inspired by Miner

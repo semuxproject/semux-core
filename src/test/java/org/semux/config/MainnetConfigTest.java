@@ -8,10 +8,8 @@ package org.semux.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.Unit.SEM;
-
-import java.util.stream.LongStream;
+import static org.semux.core.Amount.ZERO;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +17,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
