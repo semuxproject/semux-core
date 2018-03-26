@@ -6,10 +6,7 @@
  */
 package org.semux.gui;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-
 import org.assertj.swing.edt.GuiActionRunner;
-import org.assertj.swing.exception.ComponentLookupException;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Test;
@@ -22,17 +19,20 @@ public class SplashScreenTest extends AssertJSwingJUnitTestCase {
         SplashScreenTestApplication application = GuiActionRunner.execute(SplashScreenTestApplication::new);
 
         FrameFixture window = new FrameFixture(robot(), application.splashScreen);
-        window.progressBar().requireVisible().requireText(GuiMessages.get("SplashLoading"));
+        window.requireVisible().progressBar().requireVisible().requireText(GuiMessages.get("SplashLoading"));
 
         application.walletModel.fireSemuxEvent(SemuxEvent.WALLET_LOADING);
-        window.progressBar().requireVisible().requireText(GuiMessages.get("SplashLoadingWallet"));
+        window.requireVisible().progressBar().requireVisible().requireText(GuiMessages.get("SplashLoadingWallet"));
+
+        application.walletModel.fireSemuxEvent(SemuxEvent.GUI_WALLET_SELECTION_DIALOG_SHOWN);
+        window.requireNotVisible();
 
         application.walletModel.fireSemuxEvent(SemuxEvent.KERNEL_STARTING);
-        window.progressBar().requireVisible().requireText(GuiMessages.get("SplashStartingKernel"));
+        window.requireVisible().progressBar().requireVisible().requireText(GuiMessages.get("SplashStartingKernel"));
 
         // the splash screen should be disposed as soon as the mainframe starts
         application.walletModel.fireSemuxEvent(SemuxEvent.GUI_MAINFRAME_STARTED);
-        assertThatExceptionOfType(ComponentLookupException.class).isThrownBy(window::progressBar);
+        window.requireNotVisible();
     }
 
     @Override

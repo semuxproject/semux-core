@@ -227,6 +227,7 @@ public class SemuxGui extends Launcher {
             }
 
             // show select dialog
+            model.fireSemuxEvent(SemuxEvent.GUI_WALLET_SELECTION_DIALOG_SHOWN);
             int index = showSelectDialog(null, message, options);
 
             if (index == -1) {

@@ -11,5 +11,7 @@ public enum SemuxEvent {
 
     KERNEL_STARTING,
 
+    GUI_WALLET_SELECTION_DIALOG_SHOWN,
+
     GUI_MAINFRAME_STARTED,
 }

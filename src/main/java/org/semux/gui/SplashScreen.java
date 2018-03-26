@@ -58,7 +58,7 @@ public class SplashScreen extends JFrame implements SemuxEventListener {
 
         pack();
         setLocationRelativeTo(null);
-        setVisible(true);
+        showSplash();
     }
 
     @Override
@@ -68,16 +68,37 @@ public class SplashScreen extends JFrame implements SemuxEventListener {
             progressBar.setString(GuiMessages.get("SplashLoadingWallet"));
             break;
 
+        case GUI_WALLET_SELECTION_DIALOG_SHOWN:
+            hideSplash();
+            break;
+
         case KERNEL_STARTING:
+            showSplash();
             progressBar.setString(GuiMessages.get("SplashStartingKernel"));
             break;
 
         case GUI_MAINFRAME_STARTED:
             walletModel.removeSemuxEventListener(this);
-            setVisible(false);
-            dispose();
+            destroySplash();
             break;
         }
+    }
+
+    private void hideSplash() {
+        setVisible(false);
+        revalidate();
+        repaint();
+    }
+
+    private void showSplash() {
+        setVisible(true);
+        revalidate();
+        repaint();
+    }
+
+    private void destroySplash() {
+        setVisible(false);
+        dispose();
     }
 
     private class ContentPane extends JPanel {
