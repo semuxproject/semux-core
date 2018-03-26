@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SplashScreen extends JFrame implements SemuxEventListener {
 
-    private static final long serialVersionUID = 5729665012428583185L;
+    private static final long serialVersionUID = 1;
 
     private static final Logger logger = LoggerFactory.getLogger(SplashScreen.class);
 
@@ -103,7 +103,7 @@ public class SplashScreen extends JFrame implements SemuxEventListener {
 
     private class ContentPane extends JPanel {
 
-        private static final long serialVersionUID = -5929022627261315407L;
+        private static final long serialVersionUID = 1;
 
         private ContentPane() {
             setOpaque(false);
@@ -119,7 +119,7 @@ public class SplashScreen extends JFrame implements SemuxEventListener {
 
     private class ImagePane extends JPanel {
 
-        private static final long serialVersionUID = -2425357267526029507L;
+        private static final long serialVersionUID = 1;
 
         private transient BufferedImage backgroundImage;
 
