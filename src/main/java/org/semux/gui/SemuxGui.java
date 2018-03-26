@@ -64,15 +64,16 @@ public class SemuxGui extends Launcher {
 
     private static final int TRANSACTION_LIMIT = 1024; // per account
 
-    protected WalletModel model;
-    protected Kernel kernel;
+    private WalletModel model;
+    private Kernel kernel;
 
-    protected AddressBookDialog addressBookDialog;
+    private AddressBookDialog addressBookDialog;
 
-    protected boolean isRunning;
-    protected JFrame main;
-    protected Thread dataThread;
-    protected Thread versionThread;
+    private boolean isRunning;
+    private SplashScreen splashScreen;
+    private JFrame main;
+    private Thread dataThread;
+    private Thread versionThread;
 
     public static void main(String[] args) {
         try {
@@ -108,6 +109,8 @@ public class SemuxGui extends Launcher {
         SystemUtil.setLocale(getConfig().locale());
         SwingUtil.setDefaultFractionDigits(getConfig().uiFractionDigits());
         SwingUtil.setDefaultUnit(getConfig().uiUnit());
+
+        this.model = new WalletModel();
     }
 
     /**
@@ -183,6 +186,7 @@ public class SemuxGui extends Launcher {
         frame.join();
         frame.dispose();
 
+        showSplashScreen();
         setupCoinbase(wallet);
     }
 
@@ -203,6 +207,7 @@ public class SemuxGui extends Launcher {
             }
         }
 
+        showSplashScreen();
         setupCoinbase(wallet);
     }
 
@@ -211,6 +216,7 @@ public class SemuxGui extends Launcher {
      * account and use it as coinbase.
      */
     public void setupCoinbase(Wallet wallet) {
+        model.fireSemuxEvent(SemuxEvent.WALLET_LOADING);
         if (wallet.size() > 1) {
             String message = GuiMessages.get("AccountSelection");
             List<Object> options = new ArrayList<>();
@@ -221,6 +227,7 @@ public class SemuxGui extends Launcher {
             }
 
             // show select dialog
+            model.fireSemuxEvent(SemuxEvent.GUI_WALLET_SELECTION_DIALOG_SHOWN);
             int index = showSelectDialog(null, message, options);
 
             if (index == -1) {
@@ -250,6 +257,10 @@ public class SemuxGui extends Launcher {
         }
     }
 
+    private synchronized void showSplashScreen() {
+        splashScreen = new SplashScreen(model);
+    }
+
     /**
      * Starts the kernel and shows main frame.
      */
@@ -259,10 +270,10 @@ public class SemuxGui extends Launcher {
         }
 
         // set up model
-        model = new WalletModel();
         model.setCoinbase(wallet.getAccount(getCoinbase()));
 
         // set up kernel
+        model.fireSemuxEvent(SemuxEvent.KERNEL_STARTING);
         kernel = new Kernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
         kernel.start();
 
@@ -273,6 +284,7 @@ public class SemuxGui extends Launcher {
         EventQueue.invokeLater(() -> {
             main = new MainFrame(this);
             main.setVisible(true);
+            model.fireSemuxEvent(SemuxEvent.GUI_MAINFRAME_STARTED);
 
             addressBookDialog = new AddressBookDialog(main, model, kernel.getWallet());
             model.addListener(ev -> addressBookDialog.refresh());

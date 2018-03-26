@@ -232,6 +232,13 @@
                                 <preCp>anything</preCp>
                             </classPath>
                             <icon>src/main/resources/org/semux/gui/logo.ico</icon>
+                            <splash>
+                                <!-- this file must be a 24-bit BMP -->
+                                <file>misc/design/splash.bmp</file>
+                                <waitForWindow>true</waitForWindow>
+                                <timeout>600</timeout>
+                                <timeoutErr>true</timeoutErr>
+                            </splash>
                             <jre>
                                 <minVersion>1.8.0</minVersion>
                                 <jdkPreference>preferJre</jdkPreference>
@@ -333,6 +340,7 @@
                                         <include name="LICENSE*" />
                                     </fileset>
                                 </copy>
+                                <copy file="${project.basedir}/src/main/resources/org/semux/gui/splash.png" todir="${dist.base}/linux/resources" />
                                 <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar" tofile="${dist.base}/linux/semux.jar" />
                                 <copy file="${project.basedir}/scripts/semux-cli.sh" tofile="${dist.base}/linux/semux-cli.sh" />
                                 <copy file="${project.basedir}/scripts/semux-gui.sh" tofile="${dist.base}/linux/semux-gui.sh" />

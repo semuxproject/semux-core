@@ -53,19 +53,18 @@ public class Wrapper {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException, ParseException {
-
         WrapperCLIParser wrapperCLIParser = new WrapperCLIParser(args);
         Wrapper wrapper = new Wrapper();
-        String[] jvmOptions = wrapper.addDefaultJvmOptions(wrapperCLIParser.jvmOptions);
+        String[] jvmOptions = wrapper.addDefaultJvmOptions(wrapperCLIParser.mode, wrapperCLIParser.jvmOptions);
         int exitValue = wrapper.exec(wrapperCLIParser.mode, jvmOptions, wrapperCLIParser.remainingArgs);
         SystemUtil.exit(exitValue);
     }
 
-    protected String[] addDefaultJvmOptions(final String[] jvmOptions) {
+    protected String[] addDefaultJvmOptions(Mode mode, final String[] jvmOptions) {
         ArrayList<String> allocatedJvmOptions = new ArrayList<>(asList(jvmOptions));
 
         // add non-existing options
-        getDefaultJvmOptionSuppliers()
+        getDefaultJvmOptionSuppliers(mode)
                 .stream()
                 .sequential()
                 .filter(e -> Stream.of(jvmOptions).noneMatch(s -> e.getKey().matcher(s).find()))
@@ -74,7 +73,7 @@ public class Wrapper {
         return allocatedJvmOptions.toArray(new String[allocatedJvmOptions.size()]);
     }
 
-    private static List<ImmutablePair<Pattern, Supplier<String>>> getDefaultJvmOptionSuppliers() {
+    private static List<ImmutablePair<Pattern, Supplier<String>>> getDefaultJvmOptionSuppliers(Mode mode) {
         List<ImmutablePair<Pattern, Supplier<String>>> defaults = new ArrayList<>(Arrays.asList(
                 // dynamically specify maximum heap size according to available physical memory
                 // if Xmx is not specified in jvmoptions
@@ -110,6 +109,14 @@ public class Wrapper {
                     ImmutablePair.of(
                             Pattern.compile("^--add-opens=java\\.base/sun\\.nio\\.ch="),
                             () -> "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"));
+        }
+
+        if (mode.equals(Mode.GUI)) {
+            // splash screen
+            Collections.addAll(defaults,
+                    ImmutablePair.of(
+                            Pattern.compile("^-splash"),
+                            () -> String.format("-splash:%s", Paths.get("resources", "splash.png").toAbsolutePath())));
         }
 
         return defaults;

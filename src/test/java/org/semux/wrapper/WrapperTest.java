@@ -41,6 +41,7 @@ public class WrapperTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
+        String splash = String.format("-splash:%s", Paths.get("resources", "splash.png").toAbsolutePath());
         return Arrays
                 .asList(new Object[][] {
                         { new String[] { "--gui", "--jvmoptions", "-Xmx1G -Xms1G" },
@@ -51,6 +52,7 @@ public class WrapperTest {
                                         "-Dlog4j2.garbagefreeThreadContextMap=true",
                                         "-Dlog4j2.shutdownHookEnabled=false",
                                         "-Dlog4j2.disableJmx=true",
+                                        splash,
                                         SemuxGui.class.getCanonicalName() },
                                 null,
                                 false },
@@ -63,6 +65,7 @@ public class WrapperTest {
                                         "-Dlog4j2.garbagefreeThreadContextMap=true",
                                         "-Dlog4j2.shutdownHookEnabled=false",
                                         "-Dlog4j2.disableJmx=true",
+                                        splash,
                                         SemuxGui.class.getCanonicalName() },
                                 2000L * 1024 * 1024,
                                 false },
@@ -86,6 +89,7 @@ public class WrapperTest {
                                         "-Dlog4j2.garbagefreeThreadContextMap=true",
                                         "-Dlog4j2.shutdownHookEnabled=false",
                                         "-Dlog4j2.disableJmx=true",
+                                        splash,
                                         SemuxGui.class.getCanonicalName() },
                                 MINIMUM_HEAP_SIZE_MB * 1024 * 1024 - 1,
                                 false },
@@ -115,6 +119,7 @@ public class WrapperTest {
                                         "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
                                         "--add-opens=java.base/java.nio=ALL-UNNAMED",
                                         "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
+                                        splash,
                                         SemuxGui.class.getCanonicalName() },
                                 2000L * 1024 * 1024,
                                 true },
