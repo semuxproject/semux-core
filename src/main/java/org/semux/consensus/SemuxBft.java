@@ -642,7 +642,7 @@ public class SemuxBft implements Consensus {
             Vote vote = m.getVote();
 
             if (vote.getHeight() == height) {
-                if (vote.validate()) {
+                if (vote.revalidate()) {
                     events.add(new Event(Event.Type.VOTE, vote));
                 } else {
                     logger.debug("Invalid vote from {}", channel.getRemotePeer().getPeerId());
