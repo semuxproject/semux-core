@@ -107,7 +107,7 @@ public class SemuxGuiTest {
         kernel.setSyncManager(syncMgr);
 
         // process block
-        gui.processBlock(kernel.getBlockchain().getGenesis());
+        gui.updateModel();
 
         // assertions
         assertThat(model.getLatestBlock().getNumber()).isEqualTo(0L);

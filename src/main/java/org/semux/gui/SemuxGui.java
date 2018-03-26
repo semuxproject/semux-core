@@ -278,7 +278,7 @@ public class SemuxGui extends Launcher {
         kernel.start();
 
         // initialize the model with latest block
-        processBlock(kernel.getBlockchain().getLatestBlock());
+        updateModel();
 
         // start main frame
         EventQueue.invokeLater(() -> {
@@ -286,16 +286,16 @@ public class SemuxGui extends Launcher {
             main.setVisible(true);
             model.fireSemuxEvent(SemuxEvent.GUI_MAINFRAME_STARTED);
 
-            addressBookDialog = new AddressBookDialog(main, model, kernel.getWallet());
+            addressBookDialog = new AddressBookDialog(main, kernel.getWallet(), this);
             model.addListener(ev -> addressBookDialog.refresh());
         });
 
         // start data refresh
-        dataThread = new Thread(this::updateModel, "gui-data");
+        dataThread = new Thread(this::updateModelLoop, "gui-data");
         dataThread.start();
 
         // start version check
-        versionThread = new Thread(this::checkVersion, "gui-version");
+        versionThread = new Thread(this::checkVersionLoop, "gui-version");
         versionThread.start();
 
         isRunning = true;
@@ -331,7 +331,7 @@ public class SemuxGui extends Launcher {
     /**
      * Starts the version check loop.
      */
-    protected void checkVersion() {
+    protected void checkVersionLoop() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 Thread.sleep(5L * 60L * 1000L);
@@ -352,13 +352,13 @@ public class SemuxGui extends Launcher {
     /**
      * Starts the model update loop.
      */
-    protected void updateModel() {
+    protected void updateModelLoop() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Thread.sleep(10L * 1000L);
+                Thread.sleep(5L * 1000L);
 
                 // process latest block
-                processBlock(kernel.getBlockchain().getLatestBlock());
+                updateModel();
             } catch (InterruptedException e) {
                 logger.info("Data refresh interrupted, exiting");
                 Thread.currentThread().interrupt();
@@ -368,14 +368,13 @@ public class SemuxGui extends Launcher {
     }
 
     /**
-     * Handles a new block.
-     *
-     * @param block
+     * Update the model.
      */
-    protected void processBlock(Block block) {
+    public void updateModel() {
         Blockchain chain = kernel.getBlockchain();
         AccountState as = chain.getAccountState();
         DelegateState ds = chain.getDelegateState();
+        Block block = kernel.getBlockchain().getLatestBlock();
 
         // update latest block and coinbase delegate status
         model.setSyncProgress(kernel.getSyncManager().getProgress());

@@ -33,8 +33,8 @@ import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.AddressBookEntry;
+import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
-import org.semux.gui.model.WalletModel;
 import org.semux.message.GuiMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.exception.UnreachableException;
@@ -45,19 +45,19 @@ public class AddressBookDialog extends JDialog implements ActionListener {
 
     private static final String[] columnNames = { GuiMessages.get("Name"), GuiMessages.get("Address") };
 
-    private final transient WalletModel model;
     private final transient Wallet wallet;
+    private final transient SemuxGui gui;
 
     private final JTable table;
     private final AddressTableModel tableModel;
 
-    public AddressBookDialog(JFrame parent, WalletModel model, Wallet wallet) {
+    public AddressBookDialog(JFrame parent, Wallet wallet, SemuxGui gui) {
         super(null, GuiMessages.get("AddressBook"), Dialog.ModalityType.MODELESS);
         this.setName("AddressBookDialog");
 
-        this.model = model;
         this.wallet = wallet;
-        this.model.addLockable(this);
+        this.gui = gui;
+        this.gui.getModel().addLockable(this);
 
         tableModel = new AddressTableModel();
         table = new JTable(tableModel);
@@ -169,7 +169,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
             refresh();
             break;
         case ADD_ADDRESS: {
-            AddressBookUpdateDialog dialog = new AddressBookUpdateDialog(this, null, wallet, model);
+            AddressBookUpdateDialog dialog = new AddressBookUpdateDialog(this, null, wallet, gui);
             dialog.setVisible(true);
             break;
         }
@@ -179,7 +179,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("SelectAddress"));
                 break;
             }
-            AddressBookUpdateDialog dialog = new AddressBookUpdateDialog(this, entry, wallet, model);
+            AddressBookUpdateDialog dialog = new AddressBookUpdateDialog(this, entry, wallet, gui);
             dialog.setVisible(true);
             break;
         }
@@ -195,7 +195,8 @@ public class AddressBookDialog extends JDialog implements ActionListener {
                 } else {
                     wallet.removeAddressAlias(Hex.decode0x(entry.getAddress()));
                     wallet.flush();
-                    model.fireUpdateEvent();
+
+                    gui.updateModel();
                 }
             } else {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("SelectAddress"));

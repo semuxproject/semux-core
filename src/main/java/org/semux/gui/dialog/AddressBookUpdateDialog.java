@@ -25,8 +25,8 @@ import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.gui.Action;
 import org.semux.gui.AddressBookEntry;
+import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
-import org.semux.gui.model.WalletModel;
 import org.semux.message.GuiMessages;
 import org.semux.util.exception.UnreachableException;
 
@@ -36,17 +36,17 @@ public class AddressBookUpdateDialog extends JDialog implements ActionListener {
     private static final int MAX_ADDRESS_NAME_LENGTH = 256;
 
     private transient Wallet wallet;
-    private transient WalletModel model;
+    private transient SemuxGui gui;
 
     private JTextField nameText;
     private JTextField addressText;
 
-    public AddressBookUpdateDialog(Window parent, AddressBookEntry entry, Wallet wallet, WalletModel model) {
+    public AddressBookUpdateDialog(Window parent, AddressBookEntry entry, Wallet wallet, SemuxGui gui) {
         super(parent,
                 entry != null ? GuiMessages.get("EditAddressBookEntry") : GuiMessages.get("AddAddressBookEntry"));
 
         this.wallet = wallet;
-        this.model = model;
+        this.gui = gui;
 
         JLabel lblName = new JLabel("Name");
         JLabel lblAddress = new JLabel("Address");
@@ -125,7 +125,7 @@ public class AddressBookUpdateDialog extends JDialog implements ActionListener {
             wallet.setAddressAlias(Hex.decode0x(address), name);
             wallet.flush();
 
-            model.fireUpdateEvent();
+            gui.updateModel();
 
             this.dispose();
             break;
