@@ -9,6 +9,6 @@ This guide helps you set up Eclipse environment.
 
 ### Set up code stye
 
-1. Download the [Eclipse formatter XML](https://raw.githubusercontent.com/semuxproject/semux/master/misc/eclipse/formatter.xml);
+1. Download the [Eclipse formatter XML](https://raw.githubusercontent.com/semuxproject/semux/master/misc/formatter_eclipse.xml);
 2. Go to `Preferences` > `Java` > `Code Style` > `Formatter`, and import the downloaded schema;
 3. Now you're workspace is ready!

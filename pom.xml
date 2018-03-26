@@ -422,7 +422,7 @@
                 <configuration>
                     <encoding>UTF-8</encoding>
                     <lineEnding>LF</lineEnding>
-                    <configFile>${project.basedir}/misc/eclipse/formatter.xml</configFile>
+                    <configFile>${project.basedir}/misc/formatter_eclipse.xml</configFile>
                     <directories>
                         <directory>${project.build.sourceDirectory}</directory>
                         <directory>${project.build.testSourceDirectory}</directory>
