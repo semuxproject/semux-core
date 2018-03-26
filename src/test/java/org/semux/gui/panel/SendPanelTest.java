@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.semux.core.Amount.Unit.SEM;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.assertj.swing.edt.GuiActionRunner;
@@ -31,7 +32,6 @@ import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.gui.WalletModelRule;
@@ -45,7 +45,7 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
     public KernelRule kernelRule1 = new KernelRule(51610, 51710);
 
     @Rule
-    public WalletModelRule walletRule = new WalletModelRule(1000, 1000);
+    public WalletModelRule walletRule = new WalletModelRule(SEM.of(1000), SEM.of(1000));
 
     @Mock
     PendingManager pendingManager;
@@ -89,7 +89,7 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
         Transaction tx = transactionArgumentCaptor.getValue();
         assertEquals(TransactionType.TRANSFER, tx.getType());
         assertArrayEquals(recipient.toAddress(), tx.getTo());
-        assertEquals(100 * Unit.SEM, tx.getValue());
+        assertEquals(SEM.of(100), tx.getValue());
         assertEquals(kernelMock.getConfig().minTransactionFee(), tx.getFee());
     }
 

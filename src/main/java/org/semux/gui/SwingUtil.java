@@ -6,6 +6,8 @@
  */
 package org.semux.gui;
 
+import static java.util.Arrays.stream;
+import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.gui.TextContextMenuItem.COPY;
 import static org.semux.gui.TextContextMenuItem.CUT;
 import static org.semux.gui.TextContextMenuItem.PASTE;
@@ -24,7 +26,6 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.Arrays;
@@ -49,9 +50,9 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.semux.core.Amount;
+import org.semux.core.Amount.Unit;
 import org.semux.core.Transaction;
-import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
@@ -75,14 +76,14 @@ public class SwingUtil {
 
     private static int fractionDigits = 3;
 
-    private static String unit = "SEM";
+    private static Unit unit = SEM;
 
     private SwingUtil() {
     }
 
     /**
      * Put a JFrame in the center of screen.
-     * 
+     *
      * @param frame
      * @param width
      * @param height
@@ -97,7 +98,7 @@ public class SwingUtil {
 
     /**
      * Load an ImageIcon from resource, and rescale it.
-     * 
+     *
      * @param imageName
      *            image name
      * @return an image icon if exists, otherwise null
@@ -120,7 +121,7 @@ public class SwingUtil {
 
     /**
      * Generate an empty image icon.
-     * 
+     *
      * @param width
      * @param height
      * @return
@@ -137,7 +138,7 @@ public class SwingUtil {
 
     /**
      * Set the preferred width of table columns.
-     * 
+     *
      * @param table
      * @param total
      * @param widths
@@ -151,7 +152,7 @@ public class SwingUtil {
 
     /**
      * Set the alignments of table columns.
-     * 
+     *
      * @param table
      * @param right
      */
@@ -169,7 +170,7 @@ public class SwingUtil {
 
     /**
      * Generate an QR image for the given text.
-     * 
+     *
      * @param text
      * @param width
      * @param height
@@ -205,17 +206,17 @@ public class SwingUtil {
 
     /**
      * Adds a copy-paste-cut popup to the given component.
-     * 
+     *
      * @param comp
      */
     private static void addTextContextMenu(JComponent comp, List<TextContextMenuItem> textContextMenuItems) {
         JPopupMenu popup = new JPopupMenu();
 
-        for (TextContextMenuItem textContextMenuItem : textContextMenuItems) {
-            JMenuItem menuItem = new JMenuItem(textContextMenuItem.toAction());
-            menuItem.setText(textContextMenuItem.toString());
+        textContextMenuItems.forEach(i -> {
+            JMenuItem menuItem = new JMenuItem(i.toAction());
+            menuItem.setText(i.toString());
             popup.add(menuItem);
-        }
+        });
 
         comp.setComponentPopupMenu(popup);
     }
@@ -247,7 +248,7 @@ public class SwingUtil {
 
     /**
      * Generates a text field with copy-paste-cut popup menu.
-     * 
+     *
      * @return
      */
     public static JTextField textFieldWithCopyPastePopup() {
@@ -260,7 +261,7 @@ public class SwingUtil {
 
     /**
      * Generates a readonly selectable text area.
-     * 
+     *
      * @param txt
      * @return
      */
@@ -276,7 +277,7 @@ public class SwingUtil {
 
     /**
      * Convenience factory method for creating buttons
-     * 
+     *
      * @param text
      * @param listener
      * @param action
@@ -291,13 +292,13 @@ public class SwingUtil {
 
     /**
      * Parses a number from a localized string.
-     * 
+     *
      * @param str
      * @return
      * @throws ParseException
      */
     public static BigDecimal parseNumber(String str) throws ParseException {
-        DecimalFormat format = (DecimalFormat) DecimalFormat.getInstance();
+        DecimalFormat format = new DecimalFormat();
         format.setParseBigDecimal(true);
         ParsePosition position = new ParsePosition(0);
         BigDecimal number = (BigDecimal) format.parse(str, position);
@@ -309,13 +310,13 @@ public class SwingUtil {
 
     /**
      * Formats a number as a localized string.
-     * 
+     *
      * @param number
      * @param decimals
      * @return
      */
     public static String formatNumber(Number number, int decimals) {
-        NumberFormat format = NumberFormat.getInstance();
+        DecimalFormat format = new DecimalFormat();
         format.setMinimumFractionDigits(0);
         format.setMaximumFractionDigits(decimals);
         format.setRoundingMode(RoundingMode.FLOOR);
@@ -325,7 +326,7 @@ public class SwingUtil {
 
     /**
      * Format a number with zero decimals.
-     * 
+     *
      * @param number
      * @return
      */
@@ -336,62 +337,58 @@ public class SwingUtil {
     /**
      * Formats a Semux value.
      *
-     * @param nano
+     * @param a
      * @return
      */
-    public static String formatValue(long nano) {
-        return formatValue(nano, unit, fractionDigits, true);
+    public static String formatAmount(Amount a) {
+        return formatAmount(a, unit, fractionDigits, true);
     }
 
     /**
      * Formats a Semux value.
      *
-     * @param nano
+     * @param a
      * @return
      */
-    public static String formatValue(long nano, boolean withUnit) {
-        return formatValue(nano, unit, fractionDigits, withUnit);
-    }
-
-    /**
-     * Formats a Semux value.
-     * 
-     * @param nano
-     * @param unit
-     * @param fractionDigits
-     * @return
-     */
-    public static String formatValue(long nano, String unit, int fractionDigits, boolean withUnit) {
-        return String.format(
-                "%s%s",
-                formatNumber(
-                        BigDecimal.valueOf(nano).setScale(Unit.SCALE.get(unit), RoundingMode.FLOOR)
-                                .divide(BigDecimal.valueOf(Unit.valueOf(unit)), RoundingMode.FLOOR),
-                        fractionDigits),
-                withUnit ? " " + unit : "");
+    public static String formatAmountNoUnit(Amount a) {
+        return formatAmount(a, unit, fractionDigits, false);
     }
 
     /**
      * Formats a Semux value without truncation.
      *
-     * @param nano
+     * @param a
      * @return
      */
-    public static String formatValueFull(long nano) {
-        return formatValue(nano, unit, 9, true);
+    public static String formatAmountFull(Amount a) {
+        return formatAmount(a, unit, 9, true);
     }
 
     /**
-     * Set the default unit for {@link SwingUtil#formatValue(long)}
+     * Formats a Semux value.
+     *
+     * @param a
+     * @param unit
+     * @param fractionDigits
+     * @param withUnit
+     * @return
+     */
+    private static String formatAmount(Amount a, Unit unit, int fractionDigits, boolean withUnit) {
+        return formatNumber(unit.toDecimal(a, fractionDigits), fractionDigits)
+                + (withUnit ? (" " + unit.symbol) : "");
+    }
+
+    /**
+     * Set the default unit for {@link SwingUtil#formatAmount(Amount)}
      *
      * @param unit
      */
     public static void setDefaultUnit(String unit) {
-        SwingUtil.unit = unit;
+        SwingUtil.unit = Unit.ofSymbol(unit);
     }
 
     /**
-     * Set the default fraction digits for {@link SwingUtil#formatValue(long)}
+     * Set the default fraction digits for {@link SwingUtil#formatAmount(Amount)}
      *
      * @param fractionDigits
      */
@@ -401,26 +398,24 @@ public class SwingUtil {
 
     /**
      * Parses a Semux value.
-     * 
+     *
      * @param str
      * @return
      * @throws ParseException
      */
-    public static long parseValue(String str) throws ParseException {
-        Pair<String, Long> numberUnit = Unit.SUPPORTED.entrySet().stream()
-                .filter(e -> str.endsWith(" " + e.getKey()))
-                .map(e -> Pair.of(str.replace(" " + e.getKey(), ""), e.getValue()))
+    public static Amount parseAmount(String str) throws ParseException {
+        Unit theUnit = stream(Unit.values())
+                .filter(u -> str.endsWith(" " + u.symbol))
                 .findAny()
-                .orElse(Pair.of(str, Unit.valueOf(unit)));
+                .orElse(unit);
+        String strNoUnit = str.replace(" " + theUnit.symbol, "");
 
-        return parseNumber(numberUnit.getKey())
-                .multiply(BigDecimal.valueOf(numberUnit.getValue()))
-                .longValue();
+        return theUnit.fromDecimal(parseNumber(strNoUnit));
     }
 
     /**
      * Formats a percentage
-     * 
+     *
      * @param percentage
      * @return
      */
@@ -440,7 +435,7 @@ public class SwingUtil {
 
     /**
      * Format a timestamp into date string.
-     * 
+     *
      * @param timestamp
      * @return
      */
@@ -452,7 +447,7 @@ public class SwingUtil {
 
     /**
      * Parse timestamp from its string representation.
-     * 
+     *
      * @param timestamp
      * @return
      * @throws ParseException
@@ -465,17 +460,17 @@ public class SwingUtil {
 
     /**
      * Formats a vote
-     * 
+     *
      * @param vote
      * @return
      */
-    public static String formatVote(long vote) {
-        return formatValue(vote, false);
+    public static String formatVote(Amount vote) {
+        return formatAmountNoUnit(vote);
     }
 
     /**
      * Parses a percentage.
-     * 
+     *
      * @param str
      * @return
      * @throws ParseException
@@ -486,7 +481,7 @@ public class SwingUtil {
 
     /**
      * Number string comparator based on its value.
-     * 
+     *
      * @exception
      */
     public static final Comparator<String> NUMBER_COMPARATOR = (o1, o2) -> {
@@ -499,12 +494,12 @@ public class SwingUtil {
 
     /**
      * Value string comparator based on its value.
-     * 
+     *
      * @exception
      */
     public static final Comparator<String> VALUE_COMPARATOR = (o1, o2) -> {
         try {
-            return Long.compare(parseValue(o1), parseValue(o2));
+            return parseAmount(o1).compareTo(parseAmount(o2));
         } catch (ParseException e) {
             throw new NumberFormatException("Invalid number strings: " + o1 + ", " + o2);
         }
@@ -512,7 +507,7 @@ public class SwingUtil {
 
     /**
      * Percentage string comparator based on its value.
-     * 
+     *
      * @exception
      */
     public static final Comparator<String> PERCENTAGE_COMPARATOR = (o1, o2) -> {
@@ -525,7 +520,7 @@ public class SwingUtil {
 
     /**
      * Timestamp/date string comparator based on its value.
-     * 
+     *
      * @exception
      */
     public static final Comparator<String> TIMESTAMP_COMPARATOR = (o1, o2) -> {
@@ -538,7 +533,7 @@ public class SwingUtil {
 
     /**
      * Returns an description of an account.
-     * 
+     *
      * @param tx
      * @return
      */
@@ -559,7 +554,7 @@ public class SwingUtil {
 
     /**
      * Returns the alias, or delegate name, or abbreviation of an address.
-     * 
+     *
      * @param gui
      * @param address
      * @return
@@ -571,7 +566,7 @@ public class SwingUtil {
 
     /**
      * Returns the alias of an address.
-     * 
+     *
      * @param gui
      * @param address
      * @return
@@ -587,7 +582,7 @@ public class SwingUtil {
 
     /**
      * Returns the name of the delegate that corresponds to the given address.
-     * 
+     *
      * @param address
      * @return
      */
@@ -600,7 +595,7 @@ public class SwingUtil {
 
     /**
      * Returns the abbreviation of the given address.
-     * 
+     *
      * @param address
      * @return
      */

@@ -11,6 +11,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.semux.core.Amount.Unit.MILLI_SEM;
+import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Amount.Unit.SEM;
 
 import java.util.Collections;
 
@@ -23,11 +26,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.KernelMock;
+import org.semux.core.Amount;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.core.state.Account;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Key;
@@ -58,13 +61,14 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testTransactions() {
         Key key = new Key();
-        WalletAccount acc = spy(new WalletAccount(key, new Account(key.toAddress(), 1, 1, 1), null));
+        Amount $1 = NANO_SEM.of(1);
+        WalletAccount acc = spy(new WalletAccount(key, new Account(key.toAddress(), $1, $1, 1), null));
 
         Transaction tx = new Transaction(kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
                 Bytes.random(Key.ADDRESS_LEN),
-                1 * Unit.SEM,
-                10 * Unit.MILLI_SEM,
+                SEM.of(1),
+                MILLI_SEM.of(10),
                 0,
                 System.currentTimeMillis(),
                 Bytes.EMPTY_BYTES);

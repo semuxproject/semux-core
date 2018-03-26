@@ -6,6 +6,8 @@
  */
 package org.semux.gui.model;
 
+import static org.semux.core.Amount.ZERO;
+
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.SyncManager;
 import org.semux.crypto.Key;
@@ -155,12 +158,8 @@ public class WalletModel {
      * 
      * @return
      */
-    public long getTotalAvailable() {
-        long sum = 0;
-        for (WalletAccount acc : accounts) {
-            sum += acc.getAvailable();
-        }
-        return sum;
+    public Amount getTotalAvailable() {
+        return accounts.stream().map(it -> it.getAvailable()).reduce(ZERO, Amount::sum);
     }
 
     /**
@@ -168,12 +167,8 @@ public class WalletModel {
      * 
      * @return
      */
-    public long getTotalLocked() {
-        long sum = 0;
-        for (WalletAccount acc : accounts) {
-            sum += acc.getLocked();
-        }
-        return sum;
+    public Amount getTotalLocked() {
+        return accounts.stream().map(it -> it.getLocked()).reduce(ZERO, Amount::sum);
     }
 
     public List<WalletAccount> getAccounts() {

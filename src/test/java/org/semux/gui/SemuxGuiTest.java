@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.semux.core.Amount.ZERO;
 
 import java.util.Collections;
 
@@ -112,8 +113,8 @@ public class SemuxGuiTest {
         assertThat(model.getLatestBlock().getNumber()).isEqualTo(0L);
         assertThat(model.getAccounts().size()).isEqualTo(kernel.getWallet().size());
         assertThat(model.getDelegates().size()).isEqualTo(chain.getDelegateState().getDelegates().size());
-        assertThat(model.getTotalAvailable()).isEqualTo(0);
-        assertThat(model.getTotalLocked()).isEqualTo(0);
+        assertThat(model.getTotalAvailable()).isEqualTo(ZERO);
+        assertThat(model.getTotalLocked()).isEqualTo(ZERO);
         assertThat(model.getActivePeers().size()).isEqualTo(channelMgr.getActivePeers().size());
         assertThat(model.getSyncProgress()).isEqualToComparingOnlyGivenFields(syncMgr.getProgress(), "beginHeight",
                 "currentHeight", "targetHeight");

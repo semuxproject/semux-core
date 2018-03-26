@@ -7,6 +7,7 @@
 package org.semux.core;
 
 import static org.junit.Assert.assertTrue;
+import static org.semux.core.Amount.Unit.NANO_SEM;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,12 +42,12 @@ public class CorePerformanceTest {
 
         Random r = new Random();
         for (int i = 0; i < nDelegates; i++) {
-            Delegate d = new Delegate(Bytes.random(20), Bytes.random(16), r.nextLong(), r.nextLong());
+            Delegate d = new Delegate(Bytes.random(20), Bytes.random(16), r.nextLong(), NANO_SEM.of(r.nextLong()));
             list.add(d);
         }
 
         long t1 = System.nanoTime();
-        list.sort((d1, d2) -> Long.compare(d2.getVotes(), d1.getVotes()));
+        list.sort((d1, d2) -> d2.getVotes().compareTo(d1.getVotes()));
         long t2 = System.nanoTime();
         logger.info("Perf_delegate_sort: {} μs", (t2 - t1) / 1_000);
     }
@@ -61,8 +62,8 @@ public class CorePerformanceTest {
 
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
-            long value = 5;
-            long fee = config.minTransactionFee();
+            Amount value = NANO_SEM.of(5);
+            Amount fee = config.minTransactionFee();
             long nonce = 1;
             long timestamp = System.currentTimeMillis();
             byte[] data = Bytes.random(16);

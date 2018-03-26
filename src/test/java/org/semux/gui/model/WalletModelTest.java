@@ -16,6 +16,8 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Amount.ZERO;
 
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -114,13 +116,13 @@ public class WalletModelTest {
         WalletAccount wa1 = mock(WalletAccount.class);
         WalletAccount wa2 = mock(WalletAccount.class);
         when(wa1.getKey()).thenReturn(new Key());
-        when(wa1.getAvailable()).thenReturn(1L);
+        when(wa1.getAvailable()).thenReturn(NANO_SEM.of(1));
         when(wa2.getKey()).thenReturn(new Key());
-        when(wa2.getAvailable()).thenReturn(2L);
+        when(wa2.getAvailable()).thenReturn(NANO_SEM.of(2));
 
-        assertEquals(0, model.getTotalAvailable());
+        assertEquals(ZERO, model.getTotalAvailable());
         model.setAccounts(Arrays.asList(wa1, wa2));
-        assertEquals(3, model.getTotalAvailable());
+        assertEquals(NANO_SEM.of(3), model.getTotalAvailable());
 
         assertThat(model.getAccounts(), equalTo(Arrays.asList(wa1, wa2)));
     }
@@ -130,12 +132,12 @@ public class WalletModelTest {
         WalletAccount wa1 = mock(WalletAccount.class);
         WalletAccount wa2 = mock(WalletAccount.class);
         when(wa1.getKey()).thenReturn(new Key());
-        when(wa1.getLocked()).thenReturn(1L);
+        when(wa1.getLocked()).thenReturn(NANO_SEM.of(1));
         when(wa2.getKey()).thenReturn(new Key());
-        when(wa2.getLocked()).thenReturn(2L);
+        when(wa2.getLocked()).thenReturn(NANO_SEM.of(2));
 
-        assertEquals(0, model.getTotalLocked());
+        assertEquals(ZERO, model.getTotalLocked());
         model.setAccounts(Arrays.asList(wa1, wa2));
-        assertEquals(3, model.getTotalLocked());
+        assertEquals(NANO_SEM.of(3), model.getTotalLocked());
     }
 }

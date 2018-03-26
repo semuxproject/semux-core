@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.semux.core.Amount.Unit.SEM;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,9 +34,9 @@ import org.semux.IntegrationTest;
 import org.semux.Kernel;
 import org.semux.Kernel.State;
 import org.semux.KernelMock;
+import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
-import org.semux.core.Unit;
 import org.semux.net.NodeManager;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.SemuxChannelInitializer;
@@ -47,7 +48,7 @@ import org.semux.rules.KernelRule;
 @PowerMockIgnore({ "jdk.internal.*", "javax.management.*" })
 public class SyncingTest {
 
-    private static final long PREMINE = 5000L * Unit.SEM;
+    private static final Amount PREMINE = SEM.of(5000);
 
     @Rule
     KernelRule kernelRule1 = new KernelRule(51610, 51710);

@@ -18,6 +18,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Amount.Unit.SEM;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,13 +59,13 @@ import org.semux.api.response.SendTransactionResponse;
 import org.semux.api.response.SignMessageResponse;
 import org.semux.api.response.Types;
 import org.semux.api.response.VerifyMessageResponse;
+import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
@@ -92,7 +94,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
         chain = api.getKernel().getBlockchain();
         accountState = api.getKernel().getBlockchain().getAccountState();
-        accountState.adjustAvailable(wallet.getAccount(0).toAddress(), 5000 * Unit.SEM);
+        accountState.adjustAvailable(wallet.getAccount(0).toAddress(), SEM.of(5000));
         delegateState = api.getKernel().getBlockchain().getDelegateState();
         pendingMgr = api.getKernel().getPendingManager();
         nodeMgr = api.getKernel().getNodeManager();
@@ -358,17 +360,17 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
     public void testGetAccount() throws IOException {
         // create an account
         Key key = new Key();
-        accountState.adjustAvailable(key.toAddress(), 1000 * Unit.SEM);
+        accountState.adjustAvailable(key.toAddress(), SEM.of(1000));
         chain.addBlock(createBlock(
                 chain,
-                Collections.singletonList(createTransaction(key, key, 0)),
+                Collections.singletonList(createTransaction(key, key, Amount.ZERO)),
                 Collections.singletonList(new TransactionResult(true))));
 
         // request api endpoint
         String uri = "/get_account?address=" + key.toAddressString();
         GetAccountResponse response = request(uri, GetAccountResponse.class);
         assertTrue(response.success);
-        assertEquals(1000 * Unit.SEM, response.account.available);
+        assertEquals(SEM.of(1000).getNano(), response.account.available);
         assertEquals(1, response.account.transactionCount);
     }
 
@@ -405,7 +407,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         Key key2 = new Key();
         DelegateState ds = chain.getDelegateState();
         ds.register(key2.toAddress(), Bytes.of("test"));
-        ds.vote(key.toAddress(), key2.toAddress(), 200L);
+        ds.vote(key.toAddress(), key2.toAddress(), NANO_SEM.of(200));
 
         String uri = "/get_vote?voter=" + key.toAddressString() + "&delegate=" + key2.toAddressString();
         GetVoteResponse response = request(uri, GetVoteResponse.class);
@@ -419,7 +421,7 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         Key delegateKey = new Key();
         DelegateState ds = chain.getDelegateState();
         assertTrue(ds.register(delegateKey.toAddress(), Bytes.of("test")));
-        assertTrue(ds.vote(voterKey.toAddress(), delegateKey.toAddress(), 200L));
+        assertTrue(ds.vote(voterKey.toAddress(), delegateKey.toAddress(), NANO_SEM.of(200)));
         ds.commit();
 
         GetVotesResponse response = request("/get_votes?delegate=" + delegateKey.toAddressString(),
@@ -467,10 +469,11 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
             assertTrue(response.success);
             assertEquals(config.maxTransactionDataSize(type),
                     response.transactionLimits.maxTransactionDataSize.intValue());
-            assertEquals(config.minTransactionFee(), response.transactionLimits.minTransactionFee.longValue());
+            assertEquals(config.minTransactionFee().getNano(),
+                    response.transactionLimits.minTransactionFee.longValue());
 
             if (type.equals(TransactionType.DELEGATE)) {
-                assertEquals(config.minDelegateBurnAmount(),
+                assertEquals(config.minDelegateBurnAmount().getNano(),
                         response.transactionLimits.minDelegateBurnAmount.longValue());
             } else {
                 assertNull(response.transactionLimits.minDelegateBurnAmount);
@@ -481,9 +484,11 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
     @Test
     public void testTransfer() throws IOException, InterruptedException {
         Key key = new Key();
-        String uri = "/transfer?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + key.toAddressString()
-                + "&value=1000000000&fee=" + config.minTransactionFee() + "&data="
-                + Hex.encode(Bytes.of("test_transfer"));
+        String uri = "/transfer?"
+                + "&from=" + wallet.getAccount(0).toAddressString()
+                + "&to=" + key.toAddressString()
+                + "&value=1000000000&fee=" + config.minTransactionFee().getNano()
+                + "&data=" + Hex.encode(Bytes.of("test_transfer"));
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
         assertNotNull(response.txHash);
@@ -498,7 +503,9 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Test
     public void testDelegate() throws IOException, InterruptedException {
-        String uri = "/delegate?&from=" + wallet.getAccount(0).toAddressString() + "&fee=" + config.minTransactionFee()
+        String uri = "/delegate?"
+                + "&from=" + wallet.getAccount(0).toAddressString()
+                + "&fee=" + config.minTransactionFee().getNano()
                 + "&data=" + Hex.encode(Bytes.of("test_delegate"));
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
@@ -536,13 +543,16 @@ public class ApiHandlerTest extends ApiHandlerTestBase {
         Key delegate = new Key();
         delegateState.register(delegate.toAddress(), Bytes.of("test_unvote"));
 
-        long amount = 1000000000;
+        Amount amount = NANO_SEM.of(1000000000);
         byte[] voter = wallet.getAccounts().get(0).toAddress();
         accountState.adjustLocked(voter, amount);
         delegateState.vote(voter, delegate.toAddress(), amount);
 
-        String uri = "/unvote?&from=" + wallet.getAccount(0).toAddressString() + "&to=" + delegate.toAddressString()
-                + "&value=" + amount + "&fee=50000000";
+        String uri = "/unvote?"
+                + "&from=" + wallet.getAccount(0).toAddressString()
+                + "&to=" + delegate.toAddressString()
+                + "&value=" + amount.getNano()
+                + "&fee=50000000";
         DoTransactionResponse response = request(uri, DoTransactionResponse.class);
         assertTrue(response.success);
         assertNotNull(response.txHash);

@@ -9,6 +9,7 @@ package org.semux.core.state;
 import java.util.List;
 import java.util.Map;
 
+import org.semux.core.Amount;
 import org.semux.util.ByteArray;
 
 public interface DelegateState {
@@ -40,7 +41,7 @@ public interface DelegateState {
      * 
      * @return
      */
-    boolean vote(byte[] voter, byte[] delegate, long value);
+    boolean vote(byte[] voter, byte[] delegate, Amount value);
 
     /**
      * Removes vote of a delegate.
@@ -51,7 +52,7 @@ public interface DelegateState {
      * 
      * @return
      */
-    boolean unvote(byte[] voter, byte[] delegate, long value);
+    boolean unvote(byte[] voter, byte[] delegate, Amount value);
 
     /**
      * Returns vote that one voter has given to the specified delegate.
@@ -60,7 +61,7 @@ public interface DelegateState {
      * @param delegate
      * @return
      */
-    long getVote(byte[] voter, byte[] delegate);
+    Amount getVote(byte[] voter, byte[] delegate);
 
     /**
      * Returns all the votes for one delegate.
@@ -68,7 +69,7 @@ public interface DelegateState {
      * @param delegate
      * @return
      */
-    Map<ByteArray, Long> getVotes(byte[] delegate);
+    Map<ByteArray, Amount> getVotes(byte[] delegate);
 
     /**
      * Retrieves delegate by its name.

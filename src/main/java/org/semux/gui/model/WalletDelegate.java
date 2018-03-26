@@ -6,15 +6,18 @@
  */
 package org.semux.gui.model;
 
+import static org.semux.core.Amount.ZERO;
+
 import java.util.List;
 
 import org.semux.Kernel;
+import org.semux.core.Amount;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
 
 public class WalletDelegate extends Delegate {
 
-    protected long votesFromMe;
+    protected Amount votesFromMe = ZERO;
 
     protected long numberOfBlocksForged;
     protected long numberOfTurnsHit;
@@ -24,11 +27,11 @@ public class WalletDelegate extends Delegate {
         super(d.getAddress(), d.getName(), d.getRegisteredAt(), d.getVotes());
     }
 
-    public long getVotesFromMe() {
+    public Amount getVotesFromMe() {
         return votesFromMe;
     }
 
-    public void setVotesFromMe(long votesFromMe) {
+    public void setVotesFromMe(Amount votesFromMe) {
         this.votesFromMe = votesFromMe;
     }
 

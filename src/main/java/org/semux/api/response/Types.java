@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.semux.Kernel;
+import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
@@ -49,8 +50,8 @@ public class Types {
 
         public AccountType(Account account, int transactionCount) {
             this(Hex.encode0x(account.getAddress()),
-                    account.getAvailable(),
-                    account.getLocked(),
+                    encodeAmount(account.getAvailable()),
+                    encodeAmount(account.getLocked()),
                     account.getNonce(),
                     transactionCount);
         }
@@ -166,7 +167,7 @@ public class Types {
             this(Hex.PREF + delegate.getAddressString(),
                     delegate.getNameString(),
                     delegate.getRegisteredAt(),
-                    delegate.getVotes(),
+                    encodeAmount(delegate.getVotes()),
                     validatorStats.getBlocksForged(),
                     validatorStats.getTurnsHit(),
                     validatorStats.getTurnsMissed());
@@ -312,6 +313,17 @@ public class Types {
             this.minTransactionFee = minTransactionFee;
             this.minDelegateBurnAmount = minDelegateBurnAmount;
         }
+
+        public TransactionLimitsType(
+                Integer maxTransactionDataSize,
+                Amount minTransactionFee,
+                Amount minDelegateBurnAmount) {
+
+            this(maxTransactionDataSize,
+                    encodeAmount(minTransactionFee),
+                    encodeAmount(minDelegateBurnAmount));
+        }
+
     }
 
     public static class TransactionType {
@@ -375,12 +387,15 @@ public class Types {
                     tx.getType().toString(),
                     Hex.encode0x(tx.getFrom()),
                     Hex.encode0x(tx.getTo()),
-                    tx.getValue(),
-                    tx.getFee(),
+                    encodeAmount(tx.getValue()),
+                    encodeAmount(tx.getFee()),
                     tx.getNonce(),
                     tx.getTimestamp(),
                     Hex.encode0x(tx.getData()));
         }
     }
 
+    private static Long encodeAmount(Amount a) {
+        return a == null ? null : a.getNano();
+    }
 }

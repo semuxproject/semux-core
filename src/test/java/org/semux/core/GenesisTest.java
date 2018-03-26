@@ -23,8 +23,8 @@ import org.semux.util.Bytes;
 
 public class GenesisTest {
 
-    private static byte[] ZERO_ADDRESS = Hex.decode0x("0000000000000000000000000000000000000000");
-    private static byte[] ZERO_HASH = Bytes.EMPTY_HASH;
+    private static final byte[] ZERO_ADDRESS = Hex.decode0x("0000000000000000000000000000000000000000");
+    private static final byte[] ZERO_HASH = Bytes.EMPTY_HASH;
 
     Genesis genesis;
 
@@ -53,7 +53,7 @@ public class GenesisTest {
 
         assertFalse(premine.isEmpty());
         for (Premine p : premine.values()) {
-            assertTrue(p.getAmount() > 0);
+            assertTrue(p.getAmount().gt0());
         }
     }
 

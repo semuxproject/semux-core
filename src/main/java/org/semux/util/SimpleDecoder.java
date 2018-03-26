@@ -6,8 +6,11 @@
  */
 package org.semux.util;
 
+import static org.semux.core.Amount.Unit.NANO_SEM;
+
 import java.io.UnsupportedEncodingException;
 
+import org.semux.core.Amount;
 import org.semux.util.exception.SimpleCodecException;
 
 public class SimpleDecoder {
@@ -58,6 +61,10 @@ public class SimpleDecoder {
         int i2 = readInt();
 
         return (unsignedInt(i1) << 32) | unsignedInt(i2);
+    }
+
+    public Amount readAmount() {
+        return NANO_SEM.of(readLong());
     }
 
     public byte[] readBytes(boolean vlq) {

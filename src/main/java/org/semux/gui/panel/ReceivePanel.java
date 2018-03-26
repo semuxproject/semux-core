@@ -55,18 +55,18 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ReceivePanel.class);
 
-    private static String[] columnNames = { GuiMessages.get("Num"), GuiMessages.get("Name"), GuiMessages.get("Address"),
-            GuiMessages.get("Available"), GuiMessages.get("Locked") };
+    private static final String[] columnNames = { GuiMessages.get("Num"), GuiMessages.get("Name"),
+            GuiMessages.get("Address"), GuiMessages.get("Available"), GuiMessages.get("Locked") };
 
     private static final int QR_SIZE = 200;
 
-    private transient SemuxGui gui;
-    private transient WalletModel model;
-    private transient Kernel kernel;
+    private transient final SemuxGui gui;
+    private transient final WalletModel model;
+    private transient final Kernel kernel;
 
-    private JTable table;
-    private ReceiveTableModel tableModel;
-    private JLabel qr;
+    private final JTable table;
+    private final ReceiveTableModel tableModel;
+    private final JLabel qr;
 
     public ReceivePanel(SemuxGui gui) {
         this.gui = gui;
@@ -205,9 +205,9 @@ public class ReceivePanel extends JPanel implements ActionListener {
             case 2:
                 return Hex.PREF + acc.getKey().toAddressString();
             case 3:
-                return SwingUtil.formatValue(acc.getAvailable());
+                return SwingUtil.formatAmount(acc.getAvailable());
             case 4:
-                return SwingUtil.formatValue(acc.getLocked());
+                return SwingUtil.formatAmount(acc.getLocked());
             default:
                 return null;
             }

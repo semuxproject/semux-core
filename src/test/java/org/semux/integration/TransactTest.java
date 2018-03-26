@@ -15,6 +15,11 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Amount.sub;
+import static org.semux.core.Amount.sum;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,9 +48,9 @@ import org.semux.api.response.GetAccountResponse;
 import org.semux.api.response.GetAccountTransactionsResponse;
 import org.semux.api.response.GetDelegateResponse;
 import org.semux.api.response.Types;
+import org.semux.core.Amount;
 import org.semux.core.Genesis;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
 import org.semux.net.NodeManager;
@@ -67,7 +72,7 @@ public class TransactTest {
 
     private static Logger logger = LoggerFactory.getLogger(TransactTest.class);
 
-    private static final long PREMINE = 5000L * Unit.SEM;
+    private static final Amount PREMINE = SEM.of(5000);
 
     @Rule
     KernelRule kernelRuleValidator1 = new KernelRule(51610, 51710);
@@ -147,15 +152,15 @@ public class TransactTest {
 
     @Test
     public void testTransfer() throws IOException {
-        final long value = 1000 * Unit.SEM;
-        final long fee = kernelPremine.getConfig().minTransactionFee();
+        final Amount value = SEM.of(1000);
+        final Amount fee = kernelPremine.getConfig().minTransactionFee();
 
         // prepare transaction
         HashMap<String, Object> params = new HashMap<>();
         params.put("from", coinbaseOf(kernelPremine));
         params.put("to", coinbaseOf(kernelReceiver));
-        params.put("value", String.valueOf(value));
-        params.put("fee", String.valueOf(fee));
+        params.put("value", String.valueOf(value.getNano()));
+        params.put("fee", String.valueOf(fee.getNano()));
 
         // send transaction
         logger.info("Making transfer request", params);
@@ -167,7 +172,7 @@ public class TransactTest {
         // wait for transaction to be processed
         logger.info("Waiting for the transaction to be processed...");
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
-                equalTo(PREMINE - value - fee));
+                equalTo(sub(PREMINE, sum(value, fee))));
         await().atMost(20, SECONDS).until(availableOf(kernelReceiver, coinbaseOf(kernelReceiver)),
                 equalTo(value));
 
@@ -186,12 +191,12 @@ public class TransactTest {
 
     @Test
     public void testDelegate() throws IOException {
-        final long fee = kernelPremine.getConfig().minTransactionFee();
+        final Amount fee = kernelPremine.getConfig().minTransactionFee();
 
         // prepare transaction
         HashMap<String, Object> params = new HashMap<>();
         params.put("from", coinbaseOf(kernelPremine));
-        params.put("fee", fee);
+        params.put("fee", fee.getNano());
         params.put("data", Bytes.of("test"));
 
         // send transaction
@@ -204,7 +209,7 @@ public class TransactTest {
         // wait for transaction processing
         logger.info("Waiting for the transaction to be processed...");
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
-                equalTo(PREMINE - kernelPremine.getConfig().minDelegateBurnAmount() - fee));
+                equalTo(sub(PREMINE, sum(kernelPremine.getConfig().minDelegateBurnAmount(), fee))));
 
         // assert that the transaction has been recorded across nodes
         assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
@@ -212,20 +217,21 @@ public class TransactTest {
                 kernelPremine.getConfig().minDelegateBurnAmount(), fee, Bytes.of("test"));
 
         // assert that the number of votes has been recorded into delegate state
-        assertDelegate(kernelPremine, kernelPremine.getCoinbase().toAddress(), 0L);
+        assertDelegate(kernelPremine, kernelPremine.getCoinbase().toAddress(), ZERO);
     }
 
     @Test
     public void testVote() throws IOException {
-        final long fee = kernelPremine.getConfig().minTransactionFee();
+        final Amount fee = kernelPremine.getConfig().minTransactionFee();
+        final Amount votes = SEM.of(100);
+        final Amount votesWithFee = sum(votes, fee);
 
         // prepare transaction
-        final Long votes = 100 * Unit.SEM;
         HashMap<String, Object> params = new HashMap<>();
         params.put("from", coinbaseOf(kernelPremine));
         params.put("to", coinbaseOf(kernelValidator1));
-        params.put("value", votes);
-        params.put("fee", fee);
+        params.put("value", votes.getNano());
+        params.put("fee", fee.getNano());
 
         // send vote transaction
         logger.info("Making vote request", params);
@@ -237,7 +243,7 @@ public class TransactTest {
         // wait for the vote transaction to be processed
         logger.info("Waiting for the vote transaction to be processed...");
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
-                equalTo(PREMINE - votes - fee));
+                equalTo(sub(PREMINE, votesWithFee)));
 
         // assert that the vote transaction has been recorded across nodes
         assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
@@ -248,12 +254,12 @@ public class TransactTest {
         assertDelegate(kernelValidator1, kernelValidator1.getCoinbase().toAddress(), votes);
 
         // send unvote transaction
-        final Long unvotes = 50 * Unit.SEM;
+        final Amount unvotes = SEM.of(50);
         logger.info("Making unvote request", params);
         params.put("from", coinbaseOf(kernelPremine));
         params.put("to", coinbaseOf(kernelValidator1));
-        params.put("value", unvotes);
-        params.put("fee", fee);
+        params.put("value", unvotes.getNano());
+        params.put("fee", fee.getNano());
         DoTransactionResponse unvoteResponse = new ObjectMapper().readValue(
                 kernelPremine.getApiClient().request("unvote", params),
                 DoTransactionResponse.class);
@@ -262,7 +268,7 @@ public class TransactTest {
         // wait for the vote transaction to be processed
         logger.info("Waiting for the unvote transaction to be processed...");
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
-                equalTo(PREMINE - votes - fee + unvotes - fee));
+                equalTo(sum(sub(PREMINE, votesWithFee), sub(unvotes, fee))));
 
         // assert that the vote transaction has been recorded across nodes
         assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
@@ -270,13 +276,13 @@ public class TransactTest {
                 unvotes, fee, Bytes.EMPTY_BYTES);
 
         // assert that the number of votes has been recorded into the delegate state
-        assertDelegate(kernelValidator1, kernelValidator1.getCoinbase().toAddress(), votes - unvotes);
+        assertDelegate(kernelValidator1, kernelValidator1.getCoinbase().toAddress(), sub(votes, unvotes));
     }
 
     /**
      * Assert the latest transaction of the given address, by querying the specified
      * kernel.
-     * 
+     *
      * @param kernel
      * @param address
      * @param type
@@ -288,14 +294,14 @@ public class TransactTest {
      * @throws IOException
      */
     private void assertLatestTransaction(KernelMock kernel, byte[] address,
-            TransactionType type, byte[] from, byte[] to, long value, long fee, byte[] data)
+            TransactionType type, byte[] from, byte[] to, Amount value, Amount fee, byte[] data)
             throws IOException {
         Types.TransactionType result = latestTransactionOf(kernel, address);
         assertEquals(type.name(), result.type);
         assertEquals(Hex.encode0x(from), result.from);
         assertEquals(Hex.encode0x(to), result.to);
-        assertEquals((Long) value, result.value);
-        assertEquals((Long) fee, result.fee);
+        assertEquals(value, NANO_SEM.of(result.value));
+        assertEquals(fee, NANO_SEM.of(result.fee));
         assertEquals(Hex.encode0x(data), result.data);
     }
 
@@ -307,24 +313,24 @@ public class TransactTest {
      * @param votes
      * @throws IOException
      */
-    private void assertDelegate(KernelMock kernelMock, byte[] address, Long votes) throws IOException {
+    private void assertDelegate(KernelMock kernelMock, byte[] address, Amount votes) throws IOException {
         GetDelegateResponse getDelegateResponse = new ObjectMapper().readValue(
                 kernelMock
                         .getApiClient()
                         .request("get_delegate", "address", Hex.encode0x(address)),
                 GetDelegateResponse.class);
         assertTrue(getDelegateResponse.success);
-        assertEquals(votes, getDelegateResponse.delegate.votes);
+        assertEquals(votes, NANO_SEM.of(getDelegateResponse.delegate.votes));
     }
 
     /**
      * Returns the callable which can be used to get the balance of given address.
-     * 
+     *
      * @param kernelMock
      * @param address
      * @return
      */
-    private Callable<Long> availableOf(KernelMock kernelMock, byte[] address) {
+    private Callable<Amount> availableOf(KernelMock kernelMock, byte[] address) {
         return () -> {
             ApiClient apiClient = kernelMock.getApiClient();
 
@@ -333,14 +339,14 @@ public class TransactTest {
                             "address", address),
                     GetAccountResponse.class);
 
-            return response.account.available;
+            return NANO_SEM.of(response.account.available);
         };
     }
 
     /**
      * Returns the nth transaction of the given address, by querify the specified
      * kernel.
-     * 
+     *
      * @param kernel
      * @param address
      * @return
@@ -362,7 +368,7 @@ public class TransactTest {
 
     /**
      * Returns the coinbase address of the given kernel.
-     * 
+     *
      * @param kernelMock
      * @return
      */
@@ -373,7 +379,7 @@ public class TransactTest {
     /**
      * Mocks a genesis instance where kernelValidator1 and kernelValidator2 are
      * validators and kernelPremine has some premined balance.
-     * 
+     *
      * @return
      */
     private Genesis mockGenesis() {

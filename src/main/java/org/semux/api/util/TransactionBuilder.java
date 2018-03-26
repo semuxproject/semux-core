@@ -6,7 +6,10 @@
  */
 package org.semux.api.util;
 
+import static org.semux.core.Amount.Unit.NANO_SEM;
+
 import org.semux.Kernel;
+import org.semux.core.Amount;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.CryptoException;
@@ -40,12 +43,12 @@ public class TransactionBuilder {
     /**
      * Transaction value
      */
-    private long value;
+    private Amount value;
 
     /**
      * Transaction fee
      */
-    private long fee;
+    private Amount fee;
 
     /**
      * Transaction data
@@ -110,7 +113,7 @@ public class TransactionBuilder {
         }
 
         try {
-            this.value = Long.parseLong(value);
+            this.value = NANO_SEM.of(Long.parseLong(value));
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Parameter `value` is not a valid number");
         }
@@ -124,7 +127,7 @@ public class TransactionBuilder {
         }
 
         try {
-            this.fee = Long.parseLong(fee);
+            this.fee = NANO_SEM.of(Long.parseLong(fee));
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Parameter `fee` is not a valid number");
         }

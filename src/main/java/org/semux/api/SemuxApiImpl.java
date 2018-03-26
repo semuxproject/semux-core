@@ -12,7 +12,6 @@ import java.io.File;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -357,7 +356,8 @@ public class SemuxApiImpl implements SemuxApi {
             return failure("Parameter `delegate` is not a valid hexadecimal string");
         }
 
-        return new GetVoteResponse(true, kernel.getBlockchain().getDelegateState().getVote(voterBytes, delegateBytes));
+        return new GetVoteResponse(true,
+                kernel.getBlockchain().getDelegateState().getVote(voterBytes, delegateBytes).getNano());
     }
 
     @Override
@@ -375,7 +375,9 @@ public class SemuxApiImpl implements SemuxApi {
 
         return new GetVotesResponse(true,
                 kernel.getBlockchain().getDelegateState().getVotes(delegateBytes).entrySet().parallelStream()
-                        .collect(Collectors.toMap(entry -> Hex.PREF + entry.getKey().toString(), Map.Entry::getValue)));
+                        .collect(Collectors.toMap(
+                                entry -> Hex.PREF + entry.getKey().toString(),
+                                entry -> entry.getValue().getNano())));
     }
 
     @Override

@@ -6,6 +6,7 @@
  */
 package org.semux.core.state;
 
+import org.semux.core.Amount;
 import org.semux.crypto.Hex;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
@@ -13,8 +14,8 @@ import org.semux.util.SimpleEncoder;
 public class Account {
 
     private byte[] address;
-    private long available;
-    private long locked;
+    private Amount available;
+    private Amount locked;
     private long nonce;
 
     /**
@@ -25,7 +26,7 @@ public class Account {
      * @param locked
      * @param nonce
      */
-    public Account(byte[] address, long available, long locked, long nonce) {
+    public Account(byte[] address, Amount available, Amount locked, long nonce) {
         this.address = address;
         this.available = available;
         this.locked = locked;
@@ -39,8 +40,8 @@ public class Account {
      */
     public byte[] toBytes() {
         SimpleEncoder enc = new SimpleEncoder();
-        enc.writeLong(available);
-        enc.writeLong(locked);
+        enc.writeAmount(available);
+        enc.writeAmount(locked);
         enc.writeLong(nonce);
 
         return enc.toBytes();
@@ -55,8 +56,8 @@ public class Account {
      */
     public static Account fromBytes(byte[] address, byte[] bytes) {
         SimpleDecoder dec = new SimpleDecoder(bytes);
-        long available = dec.readLong();
-        long locked = dec.readLong();
+        Amount available = dec.readAmount();
+        Amount locked = dec.readAmount();
         long nonce = dec.readLong();
 
         return new Account(address, available, locked, nonce);
@@ -76,7 +77,7 @@ public class Account {
      * 
      * @return
      */
-    public long getAvailable() {
+    public Amount getAvailable() {
         return available;
     }
 
@@ -85,7 +86,7 @@ public class Account {
      * 
      * @param available
      */
-    void setAvailable(long available) {
+    void setAvailable(Amount available) {
         this.available = available;
     }
 
@@ -94,7 +95,7 @@ public class Account {
      * 
      * @return
      */
-    public long getLocked() {
+    public Amount getLocked() {
         return locked;
     }
 
@@ -103,7 +104,7 @@ public class Account {
      * 
      * @param locked
      */
-    void setLocked(long locked) {
+    void setLocked(Amount locked) {
         this.locked = locked;
     }
 

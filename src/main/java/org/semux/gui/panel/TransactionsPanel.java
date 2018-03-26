@@ -52,8 +52,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     private static final String[] columnNames = { GuiMessages.get("Type"), GuiMessages.get("FromTo"),
             GuiMessages.get("Value"), GuiMessages.get("Time"), GuiMessages.get("Status") };
 
-    private transient SemuxGui gui;
-    private transient WalletModel model;
+    private transient final SemuxGui gui;
+    private transient final WalletModel model;
 
     private JTable table;
     private TransactionsTableModel tableModel;
@@ -154,7 +154,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             case 1:
                 return SwingUtil.getTransactionDescription(gui, tx.getTransaction());
             case 2:
-                return SwingUtil.formatValue(tx.getTransaction().getValue());
+                return SwingUtil.formatAmount(tx.getTransaction().getValue());
             case 3:
                 return SwingUtil.formatTimestamp(tx.getTransaction().getTimestamp());
             case 4:

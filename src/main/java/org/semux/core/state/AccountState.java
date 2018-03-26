@@ -6,6 +6,8 @@
  */
 package org.semux.core.state;
 
+import org.semux.core.Amount;
+
 public interface AccountState {
 
     /**
@@ -29,7 +31,7 @@ public interface AccountState {
      * @param address
      * @param delta
      */
-    void adjustAvailable(byte[] address, long delta);
+    void adjustAvailable(byte[] address, Amount delta);
 
     /**
      * Adjusts the locked balance of an account.
@@ -37,7 +39,7 @@ public interface AccountState {
      * @param address
      * @param delta
      */
-    void adjustLocked(byte[] address, long delta);
+    void adjustLocked(byte[] address, Amount delta);
 
     /**
      * Returns the code of an account.
