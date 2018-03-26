@@ -8,8 +8,8 @@ package org.semux.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Amount.Unit.SEM;
 
 import java.util.stream.LongStream;
 
