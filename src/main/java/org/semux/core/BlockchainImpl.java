@@ -94,13 +94,13 @@ public class BlockchainImpl implements Blockchain {
 
     private final Config config;
 
-    private final Db indexDB;
-    private final Db blockDB;
+    private Db indexDB;
+    private Db blockDB;
 
-    private final AccountState accountState;
-    private final DelegateState delegateState;
+    private AccountState accountState;
+    private DelegateState delegateState;
 
-    private final Genesis genesis;
+    private Genesis genesis;
     private Block latestBlock;
 
     private final List<BlockchainListener> listeners = new ArrayList<>();
@@ -774,11 +774,11 @@ public class BlockchainImpl implements Blockchain {
             transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState());
 
             // [1] apply block reward and tx fees
-            long reward = config.getBlockReward(block.getNumber());
+            Amount reward = config.getBlockReward(block.getNumber());
             for (Transaction tx : block.getTransactions()) {
-                reward += tx.getFee();
+                reward = Amount.sum(reward, tx.getFee());
             }
-            if (reward > 0) {
+            if (reward.gt0()) {
                 getAccountState().adjustAvailable(block.getCoinbase(), reward);
             }
 

@@ -70,7 +70,7 @@ public class SemuxGui extends Launcher {
     private AddressBookDialog addressBookDialog;
 
     private boolean isRunning;
-    
+
     @SuppressWarnings("unused")
     private SplashScreen splashScreen;
     private JFrame main;

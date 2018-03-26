@@ -24,11 +24,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Decoded {@link Block#getData()}.
  *
- * This class follows factory method pattern. Instances of this class should only be initiated by one of the following methods:
+ * This class follows factory method pattern. Instances of this class should
+ * only be initiated by one of the following methods:
  * <ul>
- *     <li>{@link BlockHeaderData#v0()}</li>
- *     <li>{@link BlockHeaderData#v1(ForkSignalSet)}</li>
- *     <li>{@link BlockHeaderData#unrecognized(byte, byte[])}}</li>
+ * <li>{@link BlockHeaderData#v0()}</li>
+ * <li>{@link BlockHeaderData#v1(ForkSignalSet)}</li>
+ * <li>{@link BlockHeaderData#unrecognized(byte, byte[])}}</li>
  * </ul>
  */
 public class BlockHeaderData {
