@@ -15,7 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
 import org.semux.config.Constants;
@@ -39,6 +41,9 @@ import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * Blockchain implementation.
@@ -108,8 +113,17 @@ public class BlockchainImpl implements Blockchain {
     /**
      * Activated forks at current height.
      */
-    private Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks = new HashMap<>();
-    private Map<ValidatorActivatedFork, ForkActivationMemory> forkActivationMemoryMap = new HashMap<>();
+    private Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks = new ConcurrentHashMap<>();
+
+    /**
+     * Cache of <code>(fork, height) -> activated blocks</code>. As there's only one
+     * fork in this version, 2 slots are reserved for current height and current
+     * height - 1.
+     */
+    private Cache<ImmutablePair<ValidatorActivatedFork, Long>, ForkActivationMemory> forkActivationMemoryCache = Caffeine
+            .newBuilder()
+            .maximumSize(2)
+            .build();
 
     /**
      * Create a blockchain instance.
@@ -122,7 +136,7 @@ public class BlockchainImpl implements Blockchain {
         openDb(dbFactory);
     }
 
-    private void openDb(DatabaseFactory factory) {
+    private synchronized void openDb(DatabaseFactory factory) {
         this.indexDB = factory.getDB(DatabaseName.INDEX);
         this.blockDB = factory.getDB(DatabaseName.BLOCK);
 
@@ -572,7 +586,7 @@ public class BlockchainImpl implements Blockchain {
         return activations;
     }
 
-    protected void setActivatedForks(Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks) {
+    private void setActivatedForks(Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks) {
         SimpleEncoder simpleEncoder = new SimpleEncoder();
         simpleEncoder.writeInt(activatedForks.size());
         for (Map.Entry<ValidatorActivatedFork, ValidatorActivatedFork.Activation> entry : activatedForks.entrySet()) {
@@ -674,14 +688,22 @@ public class BlockchainImpl implements Blockchain {
      * @return
      */
     @Override
-    public synchronized boolean forkActivated(long height, ValidatorActivatedFork fork) {
+    public synchronized boolean forkActivated(final long height, ValidatorActivatedFork fork) {
         // skips genesis block
         if (height <= 1) {
             return false;
         }
 
+        // checks whether the fork has been activated and recorded in database
         if (activatedForks.containsKey(fork)) {
             return height >= activatedForks.get(fork).activatedAt;
+        }
+
+        // returns memoized result of fork activation lookup at current height
+        ForkActivationMemory currentHeightActivationMemory = forkActivationMemoryCache
+                .getIfPresent(ImmutablePair.of(fork, height));
+        if (currentHeightActivationMemory != null) {
+            return currentHeightActivationMemory.activatedBlocks >= fork.activationBlocks;
         }
 
         // sets boundaries:
@@ -692,23 +714,24 @@ public class BlockchainImpl implements Blockchain {
         long activatedBlocks = 0;
 
         // O(1) dynamic-programming lookup, see the definition of ForkActivationMemory
-        ForkActivationMemory forkActivationMemory = forkActivationMemoryMap.get(fork);
-        if (forkActivationMemory != null && forkActivationMemory.height == height - 1) {
+        ForkActivationMemory forkActivationMemory = forkActivationMemoryCache
+                .getIfPresent(ImmutablePair.of(fork, height - 1));
+        if (forkActivationMemory != null) {
             activatedBlocks = forkActivationMemory.activatedBlocks -
                     (forkActivationMemory.lowerBoundActivated && lowerBound > 1 ? 1 : 0) +
                     (getBlockHeader(higherBound).getDecodedData().signalingFork(fork) ? 1 : 0);
-        } else {
-            // O(m) traversal lookup
+        } else { // O(m) traversal lookup
             for (long i = higherBound; i >= lowerBound; i--) {
                 activatedBlocks += getBlockHeader(i).getDecodedData().signalingFork(fork) ? 1 : 0;
             }
         }
 
         // memorizes
-        forkActivationMemoryMap.put(fork, new ForkActivationMemory(
-                height,
-                getBlockHeader(lowerBound).getDecodedData().signalingFork(fork),
-                activatedBlocks));
+        forkActivationMemoryCache.put(
+                ImmutablePair.of(fork, height),
+                new ForkActivationMemory(
+                        getBlockHeader(lowerBound).getDecodedData().signalingFork(fork),
+                        activatedBlocks));
 
         // returns
         boolean activated = activatedBlocks >= fork.activationBlocks;
@@ -732,16 +755,11 @@ public class BlockchainImpl implements Blockchain {
      *      forkActivated(height - 1) ? 1 : 0
      * </code>
      */
-    private class ForkActivationMemory {
-
-        /**
-         * Memorized height.
-         */
-        public final long height;
+    private static class ForkActivationMemory {
 
         /**
          * Whether the fork is activated at height
-         * <code>({@link this#height} -{@link ValidatorActivatedFork#activationBlocksLookup})</code>.
+         * <code>(current height -{@link ValidatorActivatedFork#activationBlocksLookup})</code>.
          */
         public final boolean lowerBoundActivated;
 
@@ -750,8 +768,7 @@ public class BlockchainImpl implements Blockchain {
          */
         public final long activatedBlocks;
 
-        public ForkActivationMemory(long height, boolean lowerBoundActivated, long activatedBlocks) {
-            this.height = height;
+        public ForkActivationMemory(boolean lowerBoundActivated, long activatedBlocks) {
             this.lowerBoundActivated = lowerBoundActivated;
             this.activatedBlocks = activatedBlocks;
         }

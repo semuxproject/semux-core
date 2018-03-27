@@ -284,18 +284,32 @@ public class BlockchainImplTest {
     @Test
     public void testForkActivated() {
         final ValidatorActivatedFork fork = ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
-        for (int i = 1; i <= fork.activationBlocksLookup; i++) {
+        for (long i = 1; i <= fork.activationBlocksLookup; i++) {
             chain.addBlock(
                     createBlock(i, coinbase, BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(fork)).toBytes(),
                             Collections.singletonList(tx), Collections.singletonList(res)));
+
+            if (i <= fork.activationBlocks) {
+                for (long j = 0; j <= i; j++) {
+                    assertFalse(chain.forkActivated(i, fork));
+                }
+            } else {
+                for (long j = i; j > fork.activationBlocks; j--) {
+                    assertTrue(chain.forkActivated(j, fork));
+                }
+
+                for (long j = fork.activationBlocks; j >= 0; j--) {
+                    assertFalse(chain.forkActivated(j, fork));
+                }
+            }
         }
 
         for (long i = 0; i <= fork.activationBlocks; i++) {
-            assertFalse(chain.forkActivated(i, ValidatorActivatedFork.UNIFORM_DISTRIBUTION));
+            assertFalse(chain.forkActivated(i, fork));
         }
 
         for (long i = fork.activationBlocks + 1; i <= fork.activationBlocksLookup; i++) {
-            assertTrue(chain.forkActivated(i, ValidatorActivatedFork.UNIFORM_DISTRIBUTION));
+            assertTrue(chain.forkActivated(i, fork));
         }
     }
 
