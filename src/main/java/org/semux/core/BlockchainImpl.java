@@ -736,7 +736,9 @@ public class BlockchainImpl implements Blockchain {
         // returns
         boolean activated = activatedBlocks >= fork.activationBlocks;
         if (activatedBlocks > 0) {
-            logger.debug("Fork activation of {}: {} / {} (activated = {}) in the past {} blocks", fork.name,
+            logger.debug("Fork activation of {} at height {}: {} / {} (activated = {}) in the past {} blocks",
+                    fork.name,
+                    height,
                     activatedBlocks,
                     fork.activationBlocks, activated, fork.activationBlocksLookup);
         }
