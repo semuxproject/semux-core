@@ -271,12 +271,12 @@ public class SystemUtil {
     }
 
     /**
-     * Returns whether Microsoft Visual C++ 2010 Redistributable Package is
+     * Returns whether Microsoft Visual C++ 2012 Redistributable Package is
      * installed.
      *
      * @return
      */
-    public static boolean isWindowsVCRedist2010Installed() {
+    public static boolean isWindowsVCRedist2012Installed() {
         if (SystemUtil.getOsName() != OsName.WINDOWS) {
             throw new UnreachableException();
         }

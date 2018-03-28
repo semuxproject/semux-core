@@ -66,9 +66,9 @@ public class SystemUtilTest {
     }
 
     @Test
-    public void testIsWindowsVCRedist2010Installed() {
+    public void testIsWindowsVCRedist2012Installed() {
         assumeTrue(SystemUtil.getOsName() == SystemUtil.OsName.WINDOWS);
-        assertTrue(SystemUtil.isWindowsVCRedist2010Installed());
+        assertTrue(SystemUtil.isWindowsVCRedist2012Installed());
     }
 
     @Test
