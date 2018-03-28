@@ -1,0 +1,1 @@
+Semux API reference is now hosted at https://www.semux.org/assets/semux/api/v1.0.1/
