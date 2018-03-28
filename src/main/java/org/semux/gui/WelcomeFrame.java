@@ -190,7 +190,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             ok();
             break;
         case CANCEL:
-            SystemUtil.exitAsync(0);
+            SystemUtil.exitAsync(SystemUtil.Code.OK);
             break;
         default:
             throw new UnreachableException();
@@ -207,7 +207,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                     wait();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    SystemUtil.exitAsync(0);
+                    SystemUtil.exitAsync(SystemUtil.Code.OK);
                 }
             }
         }
@@ -259,10 +259,10 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         // paranoid check
         if (wallet.exists()) {
             logger.error("Wallet already exists!");
-            SystemUtil.exitAsync(1);
+            SystemUtil.exitAsync(SystemUtil.Code.WALLET_ALREADY_EXISTS);
         } else if (wallet.isUnlocked()) {
             logger.error("Wallet already unlocked!");
-            SystemUtil.exitAsync(1);
+            SystemUtil.exitAsync(SystemUtil.Code.WALLET_ALREADY_UNLOCKED);
         }
 
         if (isCreate()) {
@@ -272,7 +272,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                 done();
             } else {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("WalletSaveFailed"));
-                SystemUtil.exitAsync(-1);
+                SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_WRITE_WALLET_FILE);
             }
         } else {
             Wallet w = new Wallet(backupFile);
@@ -288,7 +288,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                     done();
                 } else {
                     JOptionPane.showMessageDialog(this, GuiMessages.get("WalletSaveFailed"));
-                    SystemUtil.exitAsync(-1);
+                    SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_WRITE_WALLET_FILE);
                 }
             }
         }

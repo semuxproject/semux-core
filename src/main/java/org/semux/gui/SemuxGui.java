@@ -203,7 +203,7 @@ public class SemuxGui extends Launcher {
             String pwd = dialog.showAndGet();
 
             if (pwd == null) {
-                SystemUtil.exitAsync(-1);
+                SystemUtil.exitAsync(SystemUtil.Code.OK);
             } else if (wallet.unlock(pwd)) {
                 break;
             }
@@ -233,7 +233,7 @@ public class SemuxGui extends Launcher {
             int index = showSelectDialog(null, message, options);
 
             if (index == -1) {
-                SystemUtil.exitAsync(0);
+                SystemUtil.exitAsync(SystemUtil.Code.OK);
             } else {
                 // use the selected account as coinbase.
                 setCoinbase(index);
@@ -255,7 +255,7 @@ public class SemuxGui extends Launcher {
                     GuiMessages.get("ErrorDialogTitle"),
                     JOptionPane.ERROR_MESSAGE);
             logger.error("Uncaught exception during kernel startup.", e);
-            SystemUtil.exitAsync(-1);
+            SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_LAUNCH_KERNEL);
         }
     }
 
@@ -342,7 +342,7 @@ public class SemuxGui extends Launcher {
                 String v = getMinVersion();
                 if (v != null && SystemUtil.compareVersion(Constants.CLIENT_VERSION, v) < 0) {
                     JOptionPane.showMessageDialog(null, GuiMessages.get("WalletNeedToBeUpgraded"));
-                    SystemUtil.exitAsync(-1);
+                    SystemUtil.exitAsync(SystemUtil.Code.CLIENT_UPGRADE_NEEDED);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

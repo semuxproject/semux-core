@@ -292,7 +292,7 @@ public class SemuxBft implements Consensus {
         if (isValidator()) {
             if (this.config.network() == Network.MAINNET && !SystemUtil.bench()) {
                 logger.error("You need to upgrade your computer to join the BFT consensus!");
-                SystemUtil.exitAsync(-1);
+                SystemUtil.exitAsync(SystemUtil.Code.HARDWARE_UPGRADE_NEEDED);
             }
             resetTimeout(config.bftNewHeightTimeout());
         }

@@ -47,6 +47,37 @@ public class SystemUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemUtil.class);
 
+    public static class Code {
+        // success
+        public static final int OK = 0;
+
+        // wallet
+        public static final int FAILED_TO_WRITE_WALLET_FILE = 101;
+        public static final int FAILED_TO_UNLOCK_WALLET = 102;
+        public static final int ACCOUNT_NOT_EXIST = 103;
+        public static final int ACCOUNT_ALREADY_EXISTS = 104;
+        public static final int INVALID_PRIVATE_KEY = 105;
+        public static final int WALLET_LOCKED = 106;
+        public static final int PASSWORD_REPEAT_NOT_MATCH = 107;
+        public static final int WALLET_ALREADY_EXISTS = 108;
+        public static final int WALLET_ALREADY_UNLOCKED = 109;
+
+        // kernel
+        public static final int FAILED_TO_INIT_ED25519 = 201;
+        public static final int FAILED_TO_LOAD_CONFIG = 202;
+        public static final int FAILED_TO_LOAD_GENESIS = 203;
+        public static final int FAILED_TO_LAUNCH_KERNEL = 204;
+
+        // database
+        public static final int FAILED_TO_OPEN_DB = 301;
+        public static final int FAILED_TO_REPAIR_DB = 302;
+        public static final int FAILED_TO_WRITE_BATCH_TO_DB = 303;
+
+        // upgrade
+        public static final int HARDWARE_UPGRADE_NEEDED = 401;
+        public static final int CLIENT_UPGRADE_NEEDED = 402;
+    }
+
     public enum OsName {
         WINDOWS("Windows"),
 
@@ -70,7 +101,7 @@ public class SystemUtil {
 
     /**
      * Returns the operating system name.
-     * 
+     *
      * @return
      */
     public static OsName getOsName() {
@@ -89,7 +120,7 @@ public class SystemUtil {
 
     /**
      * Returns the operating system architecture
-     * 
+     *
      * @return
      */
     public static String getOsArch() {
@@ -98,7 +129,7 @@ public class SystemUtil {
 
     /**
      * Returns the public IP address of this peer.
-     * 
+     *
      * @return an IP address if available, otherwise local address
      */
     public static String getIp() {
@@ -156,7 +187,7 @@ public class SystemUtil {
 
     /**
      * Compares two version strings.
-     * 
+     *
      * @param v1
      * @param v2
      * @return
@@ -167,7 +198,7 @@ public class SystemUtil {
 
     /**
      * Benchmarks the host system.
-     * 
+     *
      * @return
      */
     public static boolean bench() {
@@ -211,7 +242,7 @@ public class SystemUtil {
 
     /**
      * Returns the number of processors.
-     * 
+     *
      * @return
      */
     public static int getNumberOfProcessors() {
@@ -220,7 +251,7 @@ public class SystemUtil {
 
     /**
      * Returns the available physical memory size in bytes
-     * 
+     *
      * @return
      */
     public static long getAvailableMemorySize() {
@@ -230,7 +261,7 @@ public class SystemUtil {
 
     /**
      * Returns the size of heap in use.
-     * 
+     *
      * @return
      */
     public static long getUsedHeapSize() {
@@ -256,7 +287,7 @@ public class SystemUtil {
 
     /**
      * Returns the implementation version.
-     * 
+     *
      * @return
      */
     public static Object getImplementationVersion() {
