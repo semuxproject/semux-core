@@ -4,21 +4,23 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.response;
+package org.semux.api.v1_0_1.response;
 
-import org.semux.api.ApiHandlerResponse;
+import java.util.List;
+
+import org.semux.api.v1_0_1.ApiHandlerResponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class GetVoteResponse extends ApiHandlerResponse {
+public class GetValidatorsResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final Long vote;
+    public final List<String> validators;
 
-    public GetVoteResponse(
+    public GetValidatorsResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Long vote) {
+            @JsonProperty("result") List<String> validators) {
         super(success, null);
-        this.vote = vote;
+        this.validators = validators;
     }
 }

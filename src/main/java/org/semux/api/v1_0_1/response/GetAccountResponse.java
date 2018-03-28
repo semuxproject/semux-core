@@ -4,23 +4,21 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.response;
+package org.semux.api.v1_0_1.response;
 
-import java.util.List;
-
-import org.semux.api.ApiHandlerResponse;
+import org.semux.api.v1_0_1.ApiHandlerResponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class GetPeersResponse extends ApiHandlerResponse {
+public class GetAccountResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final List<Types.PeerType> peers;
+    public final Types.AccountType account;
 
-    public GetPeersResponse(
+    public GetAccountResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") List<Types.PeerType> peers) {
+            @JsonProperty("result") Types.AccountType account) {
         super(success, null);
-        this.peers = peers;
+        this.account = account;
     }
 }

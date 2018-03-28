@@ -4,21 +4,21 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.response;
+package org.semux.api.v1_0_1.response;
 
-import org.semux.api.ApiHandlerResponse;
+import org.semux.api.v1_0_1.ApiHandlerResponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class GetBlockResponse extends ApiHandlerResponse {
+public class GetRootResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final Types.BlockType block;
+    public final String result;
 
-    public GetBlockResponse(
+    public GetRootResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Types.BlockType block) {
+            @JsonProperty("result") String result) {
         super(success, null);
-        this.block = block;
+        this.result = result;
     }
 }

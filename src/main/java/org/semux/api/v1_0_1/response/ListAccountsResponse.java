@@ -4,23 +4,23 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.response;
+package org.semux.api.v1_0_1.response;
 
-import org.semux.api.ApiHandlerResponse;
+import java.util.List;
+
+import org.semux.api.v1_0_1.ApiHandlerResponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- */
-public class SignMessageResponse extends ApiHandlerResponse {
+public class ListAccountsResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final String signature;
+    public final List<String> accounts;
 
-    public SignMessageResponse(
+    public ListAccountsResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") String signature) {
+            @JsonProperty("result") List<String> accounts) {
         super(success, null);
-        this.signature = signature;
+        this.accounts = accounts;
     }
 }

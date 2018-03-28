@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api;
+package org.semux.api.v1_0_1;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 

@@ -4,12 +4,14 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api;
+package org.semux.api.v1_0_1;
 
 import java.util.Map;
 
 import org.semux.Kernel;
-import org.semux.api.response.GetRootResponse;
+import org.semux.api.ApiHandler;
+import org.semux.api.Command;
+import org.semux.api.v1_0_1.response.GetRootResponse;
 import org.semux.util.exception.UnreachableException;
 
 import io.netty.handler.codec.http.HttpHeaders;

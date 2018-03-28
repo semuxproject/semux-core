@@ -4,23 +4,21 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.response;
+package org.semux.api.v1_0_1.response;
 
-import java.util.Map;
-
-import org.semux.api.ApiHandlerResponse;
+import org.semux.api.v1_0_1.ApiHandlerResponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class GetVotesResponse extends ApiHandlerResponse {
+public class GetInfoResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
-    public final Map<String, Long> votes;
+    public final Types.InfoType info;
 
-    public GetVotesResponse(
+    public GetInfoResponse(
             @JsonProperty("success") Boolean success,
-            @JsonProperty("result") Map<String, Long> votes) {
+            @JsonProperty("result") Types.InfoType info) {
         super(success, null);
-        this.votes = votes;
+        this.info = info;
     }
 }

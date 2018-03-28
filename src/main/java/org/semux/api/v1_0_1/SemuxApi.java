@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api;
+package org.semux.api.v1_0_1;
 
 import static org.semux.config.Constants.JSON_MIME;
 
@@ -13,28 +13,28 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
-import org.semux.api.response.AddNodeResponse;
-import org.semux.api.response.CreateAccountResponse;
-import org.semux.api.response.DoTransactionResponse;
-import org.semux.api.response.GetAccountResponse;
-import org.semux.api.response.GetAccountTransactionsResponse;
-import org.semux.api.response.GetBlockResponse;
-import org.semux.api.response.GetDelegateResponse;
-import org.semux.api.response.GetDelegatesResponse;
-import org.semux.api.response.GetInfoResponse;
-import org.semux.api.response.GetLatestBlockNumberResponse;
-import org.semux.api.response.GetLatestBlockResponse;
-import org.semux.api.response.GetPeersResponse;
-import org.semux.api.response.GetPendingTransactionsResponse;
-import org.semux.api.response.GetTransactionLimitsResponse;
-import org.semux.api.response.GetTransactionResponse;
-import org.semux.api.response.GetValidatorsResponse;
-import org.semux.api.response.GetVoteResponse;
-import org.semux.api.response.GetVotesResponse;
-import org.semux.api.response.ListAccountsResponse;
-import org.semux.api.response.SendTransactionResponse;
-import org.semux.api.response.SignMessageResponse;
-import org.semux.api.response.VerifyMessageResponse;
+import org.semux.api.v1_0_1.response.AddNodeResponse;
+import org.semux.api.v1_0_1.response.CreateAccountResponse;
+import org.semux.api.v1_0_1.response.DoTransactionResponse;
+import org.semux.api.v1_0_1.response.GetAccountResponse;
+import org.semux.api.v1_0_1.response.GetAccountTransactionsResponse;
+import org.semux.api.v1_0_1.response.GetBlockResponse;
+import org.semux.api.v1_0_1.response.GetDelegateResponse;
+import org.semux.api.v1_0_1.response.GetDelegatesResponse;
+import org.semux.api.v1_0_1.response.GetInfoResponse;
+import org.semux.api.v1_0_1.response.GetLatestBlockNumberResponse;
+import org.semux.api.v1_0_1.response.GetLatestBlockResponse;
+import org.semux.api.v1_0_1.response.GetPeersResponse;
+import org.semux.api.v1_0_1.response.GetPendingTransactionsResponse;
+import org.semux.api.v1_0_1.response.GetTransactionLimitsResponse;
+import org.semux.api.v1_0_1.response.GetTransactionResponse;
+import org.semux.api.v1_0_1.response.GetValidatorsResponse;
+import org.semux.api.v1_0_1.response.GetVoteResponse;
+import org.semux.api.v1_0_1.response.GetVotesResponse;
+import org.semux.api.v1_0_1.response.ListAccountsResponse;
+import org.semux.api.v1_0_1.response.SendTransactionResponse;
+import org.semux.api.v1_0_1.response.SignMessageResponse;
+import org.semux.api.v1_0_1.response.VerifyMessageResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
