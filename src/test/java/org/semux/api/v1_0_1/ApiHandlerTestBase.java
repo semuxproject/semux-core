@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api;
+package org.semux.api.v1_0_1;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -15,6 +15,8 @@ import java.net.URL;
 import java.util.List;
 
 import org.semux.Network;
+import org.semux.api.SemuxApiMock;
+import org.semux.api.v1_0_1.ApiHandlerResponse;
 import org.semux.config.Config;
 import org.semux.core.Amount;
 import org.semux.core.Block;
