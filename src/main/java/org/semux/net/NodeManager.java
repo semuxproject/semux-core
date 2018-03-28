@@ -91,7 +91,7 @@ public class NodeManager {
 
             // every 0.5 seconds
             connectFuture = exec.scheduleAtFixedRate(this::doConnect, 100, 500, TimeUnit.MILLISECONDS);
-            // every 120 seconds, delayed by 10 seconds (public IP lookup)
+            // every 100 seconds, delayed by 5 seconds (public IP lookup)
             fetchFuture = exec.scheduleAtFixedRate(this::doFetch, 5, 100, TimeUnit.SECONDS);
 
             isRunning = true;

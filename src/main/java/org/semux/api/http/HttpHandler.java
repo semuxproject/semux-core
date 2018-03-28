@@ -93,12 +93,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
             keepAlive = HttpUtil.isKeepAlive(request);
             uri = request.uri();
-            params = new QueryStringDecoder(request.uri(), CHARSET).parameters();
-            if (params.isEmpty()) {
-                // empty params has to be reinitialized as a instance of HashMap to avoid
-                // UnsupportedOperationException
-                params = new HashMap<>();
-            }
+            // copy collection to ensure it is writable
+            params = new HashMap<>(new QueryStringDecoder(request.uri(), CHARSET).parameters());
             headers = request.headers();
             body = Unpooled.buffer(MAX_BODY_SIZE);
 
