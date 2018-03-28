@@ -59,6 +59,9 @@ import org.semux.net.filter.SemuxIpFilter;
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
+/**
+ * @deprecated
+ */
 public class SemuxApiImpl implements SemuxApi {
     private static final Charset CHARSET = UTF_8;
 

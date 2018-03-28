@@ -15,6 +15,9 @@ import org.semux.core.TransactionType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * @deprecated
+ */
 public class GetTransactionLimitsResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")

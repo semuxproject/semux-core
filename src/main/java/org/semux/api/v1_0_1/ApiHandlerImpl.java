@@ -18,7 +18,7 @@ import io.netty.handler.codec.http.HttpHeaders;
 
 /**
  * Semux RESTful API handler implementation.
- *
+ * @deprecated
  */
 public class ApiHandlerImpl implements ApiHandler {
 

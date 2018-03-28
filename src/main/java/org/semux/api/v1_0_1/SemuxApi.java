@@ -43,6 +43,7 @@ import io.swagger.annotations.Authorization;
 
 /**
  * Interface defining Semux API
+ * @deprecated
  */
 @Path("/")
 @Api(value = "/", authorizations = {

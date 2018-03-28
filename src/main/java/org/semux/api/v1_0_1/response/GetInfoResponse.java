@@ -10,6 +10,9 @@ import org.semux.api.v1_0_1.ApiHandlerResponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * @deprecated
+ */
 public class GetInfoResponse extends ApiHandlerResponse {
 
     @JsonProperty("result")
