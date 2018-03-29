@@ -52,30 +52,30 @@ public class SystemUtil {
         public static final int OK = 0;
 
         // wallet
-        public static final int FAILED_TO_WRITE_WALLET_FILE = 101;
-        public static final int FAILED_TO_UNLOCK_WALLET = 102;
-        public static final int ACCOUNT_NOT_EXIST = 103;
-        public static final int ACCOUNT_ALREADY_EXISTS = 104;
-        public static final int INVALID_PRIVATE_KEY = 105;
-        public static final int WALLET_LOCKED = 106;
-        public static final int PASSWORD_REPEAT_NOT_MATCH = 107;
-        public static final int WALLET_ALREADY_EXISTS = 108;
-        public static final int WALLET_ALREADY_UNLOCKED = 109;
+        public static final int FAILED_TO_WRITE_WALLET_FILE = 11;
+        public static final int FAILED_TO_UNLOCK_WALLET = 12;
+        public static final int ACCOUNT_NOT_EXIST = 13;
+        public static final int ACCOUNT_ALREADY_EXISTS = 14;
+        public static final int INVALID_PRIVATE_KEY = 15;
+        public static final int WALLET_LOCKED = 16;
+        public static final int PASSWORD_REPEAT_NOT_MATCH = 17;
+        public static final int WALLET_ALREADY_EXISTS = 18;
+        public static final int WALLET_ALREADY_UNLOCKED = 19;
 
         // kernel
-        public static final int FAILED_TO_INIT_ED25519 = 201;
-        public static final int FAILED_TO_LOAD_CONFIG = 202;
-        public static final int FAILED_TO_LOAD_GENESIS = 203;
-        public static final int FAILED_TO_LAUNCH_KERNEL = 204;
+        public static final int FAILED_TO_INIT_ED25519 = 31;
+        public static final int FAILED_TO_LOAD_CONFIG = 32;
+        public static final int FAILED_TO_LOAD_GENESIS = 33;
+        public static final int FAILED_TO_LAUNCH_KERNEL = 34;
 
         // database
-        public static final int FAILED_TO_OPEN_DB = 301;
-        public static final int FAILED_TO_REPAIR_DB = 302;
-        public static final int FAILED_TO_WRITE_BATCH_TO_DB = 303;
+        public static final int FAILED_TO_OPEN_DB = 51;
+        public static final int FAILED_TO_REPAIR_DB = 52;
+        public static final int FAILED_TO_WRITE_BATCH_TO_DB = 53;
 
         // upgrade
-        public static final int HARDWARE_UPGRADE_NEEDED = 401;
-        public static final int CLIENT_UPGRADE_NEEDED = 402;
+        public static final int HARDWARE_UPGRADE_NEEDED = 71;
+        public static final int CLIENT_UPGRADE_NEEDED = 72;
     }
 
     public enum OsName {
