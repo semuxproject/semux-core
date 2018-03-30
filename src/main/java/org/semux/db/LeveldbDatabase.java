@@ -89,11 +89,11 @@ public class LeveldbDatabase implements Database {
                     isOpened = true;
                 } catch (IOException ex) {
                     logger.error("Failed to open database", e);
-                    SystemUtil.exitAsync(-1);
+                    SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_OPEN_DB);
                 }
             } else {
                 logger.error("Failed to open database", e);
-                SystemUtil.exitAsync(-1);
+                SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_OPEN_DB);
             }
         }
     }
@@ -110,7 +110,7 @@ public class LeveldbDatabase implements Database {
             logger.info("Repair done!");
         } catch (IOException ex) {
             logger.error("Failed to repair the database", ex);
-            SystemUtil.exitAsync(-1);
+            SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_REPAIR_DB);
         }
     }
 
@@ -142,7 +142,7 @@ public class LeveldbDatabase implements Database {
             db.write(batch);
         } catch (IOException e) {
             logger.error("Failed to update batch", e);
-            SystemUtil.exitAsync(-1);
+            SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_WRITE_BATCH_TO_DB);
         }
     }
 

@@ -114,7 +114,7 @@ public class SemuxCliTest {
         when(semuxCLI.getPassword()).thenReturn("password");
 
         // execution
-        exit.expectSystemExitWithStatus(-1);
+        exit.expectSystemExitWithStatus(SystemUtil.Code.FAILED_TO_UNLOCK_WALLET);
         semuxCLI.loadAndUnlockWallet();
 
         // assertion
@@ -497,7 +497,7 @@ public class SemuxCliTest {
         doCallRealMethod().when(SystemUtil.class, "exit", any(Integer.class));
 
         // expect System.exit(1)
-        exit.expectSystemExitWithStatus(1);
+        exit.expectSystemExitWithStatus(SystemUtil.Code.ACCOUNT_NOT_EXIST);
 
         // execution
         semuxCLI.dumpPrivateKey(address);
@@ -524,7 +524,7 @@ public class SemuxCliTest {
         doCallRealMethod().when(SystemUtil.class, "exit", any(Integer.class));
 
         // expectation
-        exit.expectSystemExitWithStatus(1);
+        exit.expectSystemExitWithStatus(SystemUtil.Code.ACCOUNT_ALREADY_EXISTS);
 
         // execution
         semuxCLI.importPrivateKey(key);
@@ -552,7 +552,7 @@ public class SemuxCliTest {
         doCallRealMethod().when(SystemUtil.class, "exit", any(Integer.class));
 
         // expectation
-        exit.expectSystemExitWithStatus(2);
+        exit.expectSystemExitWithStatus(SystemUtil.Code.FAILED_TO_WRITE_WALLET_FILE);
 
         // execution
         semuxCLI.importPrivateKey(key);

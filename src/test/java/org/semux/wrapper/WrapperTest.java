@@ -166,7 +166,7 @@ public class WrapperTest {
         javaArgs[2] = System.getProperty("java.class.path"); // Read classpath from the JVM fork (test)
         verify(processBuilderMock).command(javaArgs);
         verifyStatic(SystemUtil.class);
-        SystemUtil.exit(0);
+        SystemUtil.exit(SystemUtil.Code.OK);
     }
 
     protected static String getJavaBinPath() {

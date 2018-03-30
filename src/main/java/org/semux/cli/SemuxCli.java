@@ -174,7 +174,7 @@ public class SemuxCli extends Launcher {
 
         if (getCoinbase() < 0 || getCoinbase() >= accounts.size()) {
             logger.error(CliMessages.get("CoinbaseDoesNotExist"));
-            SystemUtil.exit(-1);
+            SystemUtil.exit(SystemUtil.Code.ACCOUNT_NOT_EXIST);
             return;
         }
 
@@ -183,7 +183,7 @@ public class SemuxCli extends Launcher {
             startKernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
         } catch (Exception e) {
             logger.error("Uncaught exception during kernel startup.", e);
-            SystemUtil.exitAsync(-1);
+            SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_LAUNCH_KERNEL);
         }
     }
 
@@ -234,7 +234,7 @@ public class SemuxCli extends Launcher {
             Boolean isFlushed = wallet.flush();
             if (!isFlushed) {
                 logger.error(CliMessages.get("WalletFileCannotBeUpdated"));
-                SystemUtil.exit(1);
+                SystemUtil.exit(SystemUtil.Code.FAILED_TO_WRITE_WALLET_FILE);
                 return;
             }
 
@@ -255,7 +255,7 @@ public class SemuxCli extends Launcher {
 
         if (!newPassword.equals(newPasswordRe)) {
             logger.error(CliMessages.get("ReEnterNewPasswordIncorrect"));
-            SystemUtil.exit(1);
+            SystemUtil.exit(SystemUtil.Code.PASSWORD_REPEAT_NOT_MATCH);
             return null;
         }
 
@@ -269,7 +269,7 @@ public class SemuxCli extends Launcher {
         Key account = wallet.getAccount(addressBytes);
         if (account == null) {
             logger.error(CliMessages.get("AddressNotInWallet"));
-            SystemUtil.exit(1);
+            SystemUtil.exit(SystemUtil.Code.ACCOUNT_NOT_EXIST);
         } else {
             System.out.println(CliMessages.get("PrivateKeyIs", Hex.encode(account.getPrivateKey())));
         }
@@ -284,14 +284,14 @@ public class SemuxCli extends Launcher {
             boolean accountAdded = wallet.addAccount(account);
             if (!accountAdded) {
                 logger.error(CliMessages.get("PrivateKeyAlreadyInWallet"));
-                SystemUtil.exit(1);
+                SystemUtil.exit(SystemUtil.Code.ACCOUNT_ALREADY_EXISTS);
                 return;
             }
 
             boolean walletFlushed = wallet.flush();
             if (!walletFlushed) {
                 logger.error(CliMessages.get("WalletFileCannotBeUpdated"));
-                SystemUtil.exit(2);
+                SystemUtil.exit(SystemUtil.Code.FAILED_TO_WRITE_WALLET_FILE);
                 return;
             }
 
@@ -301,10 +301,10 @@ public class SemuxCli extends Launcher {
             logger.info(CliMessages.get("PrivateKey", Hex.encode(account.getPrivateKey())));
         } catch (InvalidKeySpecException exception) {
             logger.error(CliMessages.get("PrivateKeyCannotBeDecoded", exception.getMessage()));
-            SystemUtil.exit(3);
+            SystemUtil.exit(SystemUtil.Code.INVALID_PRIVATE_KEY);
         } catch (WalletLockedException exception) {
             logger.error(exception.getMessage());
-            SystemUtil.exit(-1);
+            SystemUtil.exit(SystemUtil.Code.WALLET_LOCKED);
         }
     }
 
@@ -315,7 +315,7 @@ public class SemuxCli extends Launcher {
 
         Wallet wallet = loadWallet();
         if (!wallet.unlock(getPassword())) {
-            SystemUtil.exit(-1);
+            SystemUtil.exit(SystemUtil.Code.FAILED_TO_UNLOCK_WALLET);
         }
 
         return wallet;
@@ -336,7 +336,7 @@ public class SemuxCli extends Launcher {
         Wallet wallet = loadWallet();
         if (!wallet.unlock(newPassword) || !wallet.flush()) {
             logger.error("CreateNewWalletError");
-            SystemUtil.exit(-1);
+            SystemUtil.exit(SystemUtil.Code.FAILED_TO_WRITE_WALLET_FILE);
             return null;
         }
 

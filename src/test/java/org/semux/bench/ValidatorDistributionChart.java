@@ -86,6 +86,6 @@ public class ValidatorDistributionChart {
                 percentagePRNG_fast);
 
         // Display
-        new SwingWrapper(chart).displayChart();
+        new SwingWrapper<>(chart).displayChart();
     }
 }

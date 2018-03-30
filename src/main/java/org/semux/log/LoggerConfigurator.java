@@ -74,7 +74,7 @@ public class LoggerConfigurator {
             if (throwable instanceof SAXException
                     || throwable instanceof IOException
                     || throwable instanceof ParserConfigurationException) {
-                SystemUtil.exit(1);
+                SystemUtil.exit(SystemUtil.Code.FAILED_TO_LOAD_CONFIG);
             }
         }
 

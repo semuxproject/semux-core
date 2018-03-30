@@ -103,7 +103,7 @@ public class Genesis extends Block {
             logger.error("Failed to load genesis file", e);
         }
 
-        SystemUtil.exitAsync(-1);
+        SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_LOAD_GENESIS);
         return null;
     }
 

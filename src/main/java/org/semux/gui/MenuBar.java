@@ -126,7 +126,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
 
         switch (action) {
         case EXIT:
-            SystemUtil.exitAsync(0);
+            SystemUtil.exitAsync(SystemUtil.Code.OK);
             break;
         case RECOVER_ACCOUNTS:
             recoverAccounts();

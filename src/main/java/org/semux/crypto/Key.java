@@ -63,8 +63,8 @@ public class Key {
             EdDSANamedCurveSpec params = EdDSANamedCurveTable.getByName("Ed25519");
             gen.initialize(params, new SecureRandom());
         } catch (InvalidAlgorithmParameterException e) {
-            logger.error("Failed to initialize keygen", e);
-            SystemUtil.exit(-1);
+            logger.error("Failed to initialize Ed25519 engine", e);
+            SystemUtil.exit(SystemUtil.Code.FAILED_TO_INIT_ED25519);
         }
     }
 
