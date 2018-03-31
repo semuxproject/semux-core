@@ -27,6 +27,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
 import org.semux.api.v1_0_2.ApiHandlerResponse;
+import org.semux.api.v1_0_2.SemuxApi;
 import org.semux.api.v1_0_2.SemuxApiImpl;
 import org.semux.gui.SemuxGui;
 import org.semux.message.GuiMessages;
@@ -139,7 +140,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
     }
 
     private void printHelp() {
-        Method[] apiMethods = SemuxApiImpl.class.getMethods();
+        Method[] apiMethods = SemuxApi.class.getMethods();
         for (Method method : apiMethods) {
             String methodString = getMethodString(method);
 
