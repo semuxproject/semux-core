@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * ApiHandlerResponse is the base class of Semux API responses
+ * 
  * @deprecated
  */
 public class ApiHandlerResponse {

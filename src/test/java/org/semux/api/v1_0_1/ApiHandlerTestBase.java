@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.List;
 
 import org.semux.Network;
+import org.semux.TestUtils;
 import org.semux.api.SemuxApiMock;
 import org.semux.api.v1_0_1.ApiHandlerResponse;
 import org.semux.config.Config;
@@ -38,6 +39,9 @@ import org.semux.util.MerkleUtil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * @deprecated
+ */
 public abstract class ApiHandlerTestBase {
 
     protected SemuxApiMock api;
@@ -82,34 +86,17 @@ public abstract class ApiHandlerTestBase {
     }
 
     protected Block createBlock(Blockchain chain, List<Transaction> transactions, List<TransactionResult> results) {
-        Key key = new Key();
-
-        long number = chain.getLatestBlockNumber() + 1;
-        byte[] coinbase = key.toAddress();
-        byte[] prevHash = chain.getLatestBlockHash();
-        long timestamp = System.currentTimeMillis();
-        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
-        byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
-        byte[] stateRoot = Bytes.EMPTY_HASH;
-        byte[] data = {};
-
-        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
-                stateRoot, data);
-        return new Block(header, transactions, results);
+        return TestUtils.createBlock(
+                chain.getLatestBlockNumber() + 1,
+                transactions,
+                results);
     }
 
     protected Transaction createTransaction() {
-        return createTransaction(new Key(), new Key(), Amount.ZERO);
+        return TestUtils.createTransaction(config);
     }
 
     protected Transaction createTransaction(Key from, Key to, Amount value) {
-        Network network = config.network();
-        TransactionType type = TransactionType.TRANSFER;
-        Amount fee = Amount.ZERO;
-        long nonce = 1;
-        long timestamp = System.currentTimeMillis();
-        byte[] data = {};
-
-        return new Transaction(network, type, to.toAddress(), value, fee, nonce, timestamp, data).sign(from);
+        return TestUtils.createTransaction(config, from, to, value);
     }
 }

@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.semux.Kernel;
+import org.semux.api.util.TransactionBuilder;
 import org.semux.api.v1_0_1.response.AddNodeResponse;
 import org.semux.api.v1_0_1.response.CreateAccountResponse;
 import org.semux.api.v1_0_1.response.DoTransactionResponse;
@@ -40,7 +41,6 @@ import org.semux.api.v1_0_1.response.SendTransactionResponse;
 import org.semux.api.v1_0_1.response.SignMessageResponse;
 import org.semux.api.v1_0_1.response.Types;
 import org.semux.api.v1_0_1.response.VerifyMessageResponse;
-import org.semux.api.util.TransactionBuilder;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;

@@ -80,6 +80,9 @@ import org.semux.util.Bytes;
 import io.netty.handler.ipfilter.IpFilterRuleType;
 import net.bytebuddy.utility.RandomString;
 
+/**
+ * @deprecated
+ */
 public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Rule

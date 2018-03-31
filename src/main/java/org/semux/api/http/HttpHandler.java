@@ -10,15 +10,20 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.semux.Kernel;
 import org.semux.api.ApiHandler;
-import org.semux.api.ApiHandlerResponse;
+import org.semux.api.Version;
 import org.semux.config.Config;
 import org.semux.util.BasicAuth;
 import org.semux.util.Bytes;
@@ -61,20 +66,26 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     private Config config;
-    private ApiHandler apiHandler;
+    private Map<Version, ApiHandler> apiHandlers = new ConcurrentHashMap<>();
 
     private boolean keepAlive;
-    private String uri;
+    private URI uri;
     private Map<String, List<String>> params;
     private HttpHeaders headers;
     private ByteBuf body;
 
-    private ApiHandlerResponse response = null;
+    private Object response = null;
     private HttpResponseStatus status;
+
+    public HttpHandler(Kernel kernel) {
+        this.config = kernel.getConfig();
+        this.apiHandlers.put(Version.v1_0_1, new org.semux.api.v1_0_1.ApiHandlerImpl(kernel));
+        this.apiHandlers.put(Version.v1_0_2, new org.semux.api.v1_0_2.ApiHandlerImpl(kernel));
+    }
 
     public HttpHandler(Config config, ApiHandler apiHandler) {
         this.config = config;
-        this.apiHandler = apiHandler;
+        this.apiHandlers.put(Version.v1_0_1, apiHandler);
     }
 
     @Override
@@ -92,7 +103,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
             }
 
             keepAlive = HttpUtil.isKeepAlive(request);
-            uri = request.uri();
+            uri = URI.create(request.uri());
+
             // copy collection to ensure it is writable
             params = new HashMap<>(new QueryStringDecoder(request.uri(), CHARSET).parameters());
             headers = request.headers();
@@ -130,11 +142,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                     return;
                 }
 
-                // process uri
-                if (uri.contains("?")) {
-                    uri = uri.substring(0, uri.indexOf('?'));
-                }
-
                 // parse parameter from body
                 if ("application/x-www-form-urlencoded".equals(headers.get("Content-type"))
                         && body.readableBytes() > 0) {
@@ -161,10 +168,13 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
                 // delegate the request to api handler if a response has not been generated
                 if (response == null) {
-                    response = apiHandler.service(uri, map, headers);
+                    Version version = checkVersion(uri.toString());
+                    response = apiHandlers
+                            .get(version)
+                            .service(uri.getPath().replaceAll("^/" + Version.prefixOf(version), ""), map, headers);
                     status = HttpResponseStatus.OK;
                 }
-                boolean prettyPrint = Boolean.valueOf(map.get("pretty"));
+                boolean prettyPrint = Boolean.parseBoolean(map.get("pretty"));
 
                 // write response
                 String responseString;
@@ -186,13 +196,22 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
         }
     }
 
+    private Version checkVersion(String uri) {
+        Path path = Paths.get(uri);
+        if (path.getNameCount() >= 2) {
+            return Version.fromPrefix(path.getName(0).toString());
+        } else {
+            return Version.v1_0_1;
+        }
+    }
+
     private void checkDecoderResult(HttpObject o) {
         DecoderResult result = o.decoderResult();
         if (result.isSuccess()) {
             return;
         }
 
-        response = new ApiHandlerResponse(false, BAD_REQUEST.toString());
+        response = new org.semux.api.v1_0_2.ApiHandlerResponse().success(false).message(BAD_REQUEST.toString());
         status = BAD_REQUEST;
     }
 

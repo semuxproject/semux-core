@@ -4,26 +4,25 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.v1_0_1;
+
+package org.semux.api.v1_0_2;
 
 import java.util.Map;
 
 import org.semux.Kernel;
 import org.semux.api.ApiHandler;
-import org.semux.api.v1_0_1.response.GetRootResponse;
 import org.semux.util.exception.UnreachableException;
 
 import io.netty.handler.codec.http.HttpHeaders;
 
 /**
  * Semux RESTful API handler implementation.
- * 
- * @deprecated
+ *
  */
 public class ApiHandlerImpl implements ApiHandler {
 
     private final Kernel kernel;
-    private final SemuxApi semuxApi;
+    private final SemuxApiImpl semuxApi;
 
     /**
      * Creates an API handler.
@@ -38,7 +37,7 @@ public class ApiHandlerImpl implements ApiHandler {
     @Override
     public ApiHandlerResponse service(String uri, Map<String, String> params, HttpHeaders headers) {
         if ("/".equals(uri)) {
-            return new GetRootResponse(true, "Semux API works");
+            return new GetRootResponse().success(true).message("Semux API works");
         }
 
         Command cmd = Command.of(uri.substring(1));
@@ -69,8 +68,11 @@ public class ApiHandlerImpl implements ApiHandler {
             case GET_LATEST_BLOCK:
                 return getLatestBlock();
 
-            case GET_BLOCK:
-                return getBlock(params);
+            case GET_BLOCK_BY_NUMBER:
+                return getBlockByNumber(params);
+
+            case GET_BLOCK_BY_HASH:
+                return getBlockByHash(params);
 
             case GET_PENDING_TRANSACTIONS:
                 return getPendingTransactions();
@@ -133,7 +135,7 @@ public class ApiHandlerImpl implements ApiHandler {
 
     /**
      * GET /verify_message?address&message&signature
-     * 
+     *
      * @param params
      * @return
      */
@@ -180,22 +182,23 @@ public class ApiHandlerImpl implements ApiHandler {
     }
 
     /**
-     * GET /get_block?number|hash
+     * GET /get_block_by_number?number
      *
      * @param params
      * @return
      */
-    private ApiHandlerResponse getBlock(Map<String, String> params) {
-        String number = params.get("number");
-        String hash = params.get("hash");
+    private ApiHandlerResponse getBlockByNumber(Map<String, String> params) {
+        return semuxApi.getBlockByNumber(params.get("number"));
+    }
 
-        if (number != null) {
-            return semuxApi.getBlock(Long.parseLong(number));
-        } else if (hash != null) {
-            return semuxApi.getBlock(hash);
-        } else {
-            return semuxApi.failure("Either parameter `number` or `hash` has to be provided");
-        }
+    /**
+     * GET /get_block_by_hash?hash
+     *
+     * @param params
+     * @return
+     */
+    private ApiHandlerResponse getBlockByHash(Map<String, String> params) {
+        return semuxApi.getBlockByHash(params.get("hash"));
     }
 
     /**

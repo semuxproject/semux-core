@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api;
+package org.semux.api.v1_0_1;
 
 import static java.lang.String.format;
 import static org.junit.Assert.assertFalse;
@@ -22,12 +22,15 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.semux.api.SemuxApiMock;
 import org.semux.crypto.Hex;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
 
 /**
  * The test case covers validation rules of ApiHandlerImpl
+ * 
+ * @deprecated
  */
 @RunWith(Parameterized.class)
 public class ApiHandlerErrorTest extends ApiHandlerTestBase {

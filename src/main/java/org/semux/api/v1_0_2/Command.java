@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api;
+package org.semux.api.v1_0_2;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,9 +61,14 @@ public enum Command {
     GET_LATEST_BLOCK,
 
     /**
-     * Get block by its number or hash.
+     * Get block by its number.
      */
-    GET_BLOCK,
+    GET_BLOCK_BY_NUMBER,
+
+    /**
+     * Get block by its hash.
+     */
+    GET_BLOCK_BY_HASH,
 
     // =======================
     // transaction

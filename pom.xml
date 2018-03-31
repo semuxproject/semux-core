@@ -63,6 +63,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
+                <configuration>
+                    <includes>
+                        <include>${project.basedir}/src/main/**/*.java</include>
+                        <include>${project.basedir}/src/gen/**/*.java</include>
+                    </includes>
+                </configuration>
             </plugin>
 
             <!-- build swagger document -->
@@ -104,7 +110,7 @@
                                 <scheme>http</scheme>
                             </schemes>
                             <locations>
-                                <location>org.semux.api.SemuxApi</location>
+                                <location>org.semux.api.v1_0_1.SemuxApi</location>
                             </locations>
                             <swaggerDirectory>target/swagger-ui</swaggerDirectory>
                         </apiSource>
@@ -117,6 +123,39 @@
                         <version>2.3.0</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+
+            <!-- TODO: generate swagger ui -->
+            <plugin>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-codegen-maven-plugin</artifactId>
+                <version>2.3.1</version>
+                <executions>
+                    <!-- v1.0.2 -->
+                    <execution>
+                        <id>swagger-codegen-1_0_2</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/v1_0_2/swagger.json</inputSpec>
+                            <language>jaxrs-cxf-client</language>
+                            <generateModels>true</generateModels>
+                            <generateModelTests>false</generateModelTests>
+                            <generateModelDocumentation>true</generateModelDocumentation>
+                            <generateApis>true</generateApis>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApiDocumentation>true</generateApiDocumentation>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+
+                            <addCompileSourceRoot>true</addCompileSourceRoot>
+                            <output>${project.basedir}</output>
+                            <modelPackage>org.semux.api.v1_0_2</modelPackage>
+                            <apiPackage>org.semux.api.v1_0_2</apiPackage>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- build fat jar -->
@@ -408,8 +447,8 @@
                     <header>misc/license_header.txt</header>
                     <encoding>UTF-8</encoding>
                     <includes>
-                        <include>src/**/*.java</include>
-                        <include>test/**/*.java</include>
+                        <include>src/main/**/*.java</include>
+                        <include>src/test/**/*.java</include>
                     </includes>
                 </configuration>
             </plugin>
@@ -424,8 +463,8 @@
                     <lineEnding>LF</lineEnding>
                     <configFile>${project.basedir}/misc/formatter_eclipse.xml</configFile>
                     <directories>
-                        <directory>${project.build.sourceDirectory}</directory>
-                        <directory>${project.build.testSourceDirectory}</directory>
+                        <directory>${project.basedir}/src/main/java</directory>
+                        <directory>${project.basedir}/src/test/java</directory>
                     </directories>
                 </configuration>
             </plugin>
@@ -627,6 +666,69 @@
             <version>1.5.18</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-jaxrs</artifactId>
+            <version>1.5.18</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-lang3</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- JAX-RS API Client -->
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-rs-client</artifactId>
+            <version>3.2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>1.1.0.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.2.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.2.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.2.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Logging framework -->
         <dependency>
@@ -677,6 +779,7 @@
             <artifactId>netty-all</artifactId>
             <version>4.1.22.Final</version>
         </dependency>
+
 
         <!-- Snappy Java -->
         <dependency>
@@ -745,6 +848,12 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.9.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+            <version>2.9.4</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- ED25519 -->
