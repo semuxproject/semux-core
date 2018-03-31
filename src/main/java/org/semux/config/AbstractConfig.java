@@ -220,7 +220,12 @@ public abstract class AbstractConfig implements Config {
 
     @Override
     public File databaseDir() {
-        return new File(dataDir, Constants.DATABASE_DIR);
+        return databaseDir(network);
+    }
+
+    @Override
+    public File databaseDir(Network network) {
+        return new File(dataDir, Constants.DATABASE_DIR + File.separator + network.name().toLowerCase());
     }
 
     @Override
