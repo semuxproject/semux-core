@@ -42,6 +42,13 @@ public interface Config {
     File databaseDir();
 
     /**
+     * Returns the database directory.
+     *
+     * @return
+     */
+    File databaseDir(Network network);
+
+    /**
      * Returns the config directory.
      *
      * @return
