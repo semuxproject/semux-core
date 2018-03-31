@@ -208,6 +208,7 @@ public class Kernel {
         if (blocksDir.exists()) {
             LeveldbDatabase db = new LeveldbDatabase(blocksDir);
             byte[] header = db.get(Bytes.merge((byte) 0x00, Bytes.of(0L)));
+            db.close();
 
             if (header == null || header.length < 33) {
                 logger.info("Unable to decode genesis header. Quit relocating");
