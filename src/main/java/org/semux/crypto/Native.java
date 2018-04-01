@@ -48,9 +48,9 @@ public class Native {
             break;
         case WINDOWS:
             if (SystemUtil.is32bitJvm()) {
-                initialized = loadLibrary("/native/win32/libsodium.dll") && loadLibrary("/native/win32/libcrypto.dll");
+                initialized = loadLibrary("/native/win32/libsodium.dll") && loadLibrary("/native/win32/crypto.dll");
             } else {
-                initialized = loadLibrary("/native/win64/libsodium.dll") && loadLibrary("/native/win64/libcrypto.dll");
+                initialized = loadLibrary("/native/win64/libsodium.dll") && loadLibrary("/native/win64/crypto.dll");
             }
             break;
         }
