@@ -67,7 +67,7 @@ public class NativeTest {
     @Test
     public void testBenchmarkBlake2b() {
         byte[] data = Bytes.random(512);
-        int repeat = 100_000;
+        int repeat = 50_000;
 
         // warm up
         for (int i = 0; i < repeat / 10; i++) {
@@ -97,7 +97,7 @@ public class NativeTest {
     @Test
     public void testBenchmarkEd25519Sign() {
         byte[] data = Bytes.random(512);
-        int repeat = 100_000;
+        int repeat = 50_000;
 
         Key key = new Key();
 
@@ -127,7 +127,7 @@ public class NativeTest {
     @Test
     public void testBenchmarkEd25519Verify() {
         byte[] data = Bytes.random(512);
-        int repeat = 100_000;
+        int repeat = 50_000;
 
         Key key = new Key();
         Key.Signature sig = key.sign(data);

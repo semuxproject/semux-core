@@ -36,15 +36,15 @@ public class Native {
         case LINUX:
             // TODO: add 32-bit linux build
             if (SystemUtil.is32bitJvm()) {
-                initialized = loadLibrary("/native/linux32/libsodium.so")
+                initialized = loadLibrary("/native/linux32/libsodium.so.23")
                         && loadLibrary("/native/linux32/libcrypto.so");
             } else {
-                initialized = loadLibrary("/native/linux64/libsodium.so")
+                initialized = loadLibrary("/native/linux64/libsodium.so.23")
                         && loadLibrary("/native/linux64/libcrypto.so");
             }
             break;
         case MACOS:
-            initialized = loadLibrary("/native/macos/libsodium.dylib") && loadLibrary("/native/macos/libcrypto.dylib");
+            initialized = loadLibrary("/native/macos/libsodium.23.dylib") && loadLibrary("/native/macos/libcrypto.dylib");
             break;
         case WINDOWS:
             if (SystemUtil.is32bitJvm()) {
