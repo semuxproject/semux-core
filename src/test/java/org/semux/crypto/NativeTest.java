@@ -16,13 +16,20 @@ import org.semux.util.Bytes;
 
 public class NativeTest {
 
-    private byte[] MESSAGE = Bytes.of("test");
-    private byte[] BLAKE2B_HASH = Hex.decode("928b20366943e2afd11ebc0eae2e53a93bf177a4fcf35bcc64d503704e65e202");
-    private byte[] PUBLIC_KEY = Hex.decode("04dca6ea3de4a96e952ea4ce178ba5330e7d1a25507c9195455a50aeb93220bf");
-    private byte[] PRIVATE_KEY = Hex
+    private static final byte[] MESSAGE = Bytes.of("test");
+    private static final byte[] BLAKE2B_HASH = Hex
+            .decode("928b20366943e2afd11ebc0eae2e53a93bf177a4fcf35bcc64d503704e65e202");
+    private static final byte[] PUBLIC_KEY = Hex
+            .decode("04dca6ea3de4a96e952ea4ce178ba5330e7d1a25507c9195455a50aeb93220bf");
+    private static final byte[] PRIVATE_KEY = Hex
             .decode("a73994d748b936ce63ae254508d909381fdbec3bbc11f4401630414f21fecb1704dca6ea3de4a96e952ea4ce178ba5330e7d1a25507c9195455a50aeb93220bf");
-    private byte[] ED25519_SIGNATURE = Hex
+    private static final byte[] ED25519_SIGNATURE = Hex
             .decode("cc52ae5b72af210073756f801cf8ffa36cefe96c5010b2cf25d04dfc5b0495e4ee3e14774c4607a4475f2b449a3181c9bd2c6aed46ed283debfebe19589f550e");
+
+    @Test
+    public void testInitialized() {
+        assertTrue(Native.isInitialized());
+    }
 
     @Test
     public void testBlake2bNull() {
