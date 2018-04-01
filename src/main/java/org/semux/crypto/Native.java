@@ -6,10 +6,31 @@
  */
 package org.semux.crypto;
 
+import org.semux.util.SystemUtil;
+
 /**
  * Semux crypto native implementation
  */
 public class Native {
+
+    /**
+     * Initialize the native libraries
+     */
+    private static void init() {
+        SystemUtil.OsName os = SystemUtil.getOsName();
+        switch (os) {
+        case LINUX:
+            break;
+        case WINDOWS:
+            break;
+        case MACOS:
+            break;
+        }
+    }
+
+    static {
+        init();
+    }
 
     /**
      * Computes the blake2b hash.
