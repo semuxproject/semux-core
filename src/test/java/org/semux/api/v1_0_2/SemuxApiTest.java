@@ -92,13 +92,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
 /**
- * Semux
- *
- * <p>
- * Semux is an experimental high-performance blockchain platform that powers
- * decentralized application.
- *
- * API tests for DefaultApi
+ * API tests for {@link SemuxApiImpl}
  */
 public class SemuxApiTest {
 
