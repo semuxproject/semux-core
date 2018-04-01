@@ -44,7 +44,8 @@ public class Native {
             }
             break;
         case MACOS:
-            initialized = loadLibrary("/native/macos/libsodium.23.dylib") && loadLibrary("/native/macos/libcrypto.dylib");
+            initialized = loadLibrary("/native/macos/libsodium.23.dylib")
+                    && loadLibrary("/native/macos/libcrypto.dylib");
             break;
         case WINDOWS:
             if (SystemUtil.is32bitJvm()) {
