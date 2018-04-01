@@ -22,18 +22,19 @@ public class Native {
     /**
      * Creates an Ed25519 message signature with the given private key.
      *
-     * @param msg
+     * @param message
      * @param privateKey
      * @return
      */
-    public static native byte[] ed25519_sign(byte[] msg, byte[] privateKey);
+    public static native byte[] ed25519_sign(byte[] message, byte[] privateKey);
 
     /**
      * Verifies an Ed25519 signature.
      *
+     * @param message
      * @param signature
      * @param publicKey
      * @return
      */
-    public static native boolean ed25519_verify(byte[] signature, byte[] publicKey);
+    public static native boolean ed25519_verify(byte[] message, byte[] signature, byte[] publicKey);
 }

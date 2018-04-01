@@ -26,10 +26,10 @@ JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_ed25519_1sign
 /*
  * Class:     org_semux_crypto_Native
  * Method:    ed25519_verify
- * Signature: ([B[B)Z
+ * Signature: ([B[B[B)Z
  */
 JNIEXPORT jboolean JNICALL Java_org_semux_crypto_Native_ed25519_1verify
-  (JNIEnv *, jclass, jbyteArray, jbyteArray);
+  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray);
 
 #ifdef __cplusplus
 }

@@ -18,4 +18,4 @@ set(SOURCE_FILES org_semux_crypto_Native.cpp)
 
 # build
 add_library(crypto SHARED ${SOURCE_FILES})
-target_link_libraries(crypto -lsodium)
+target_link_libraries(crypto sodium)
