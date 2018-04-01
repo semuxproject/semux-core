@@ -11,6 +11,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.time.Duration;
+import java.time.Instant;
+
 import org.junit.Test;
 import org.semux.util.Bytes;
 
@@ -59,5 +62,98 @@ public class NativeTest {
     @Test
     public void testEd25519Verify() {
         assertTrue(Native.ed25519_verify(MESSAGE, ED25519_SIGNATURE, PUBLIC_KEY));
+    }
+
+    @Test
+    public void testBenchmarkBlake2b() {
+        byte[] data = Bytes.random(512);
+        int repeat = 100_000;
+
+        // warm up
+        for (int i = 0; i < repeat / 10; i++) {
+            Native.blake2b(data);
+            Hash.h256(data);
+        }
+
+        // native
+        Instant start = Instant.now();
+        for (int i = 0; i < repeat; i++) {
+            Native.blake2b(data);
+        }
+        Instant end = Instant.now();
+        System.out.println("Blake2b native: " + Duration.between(start, end).toMillis() + "ms");
+
+        // java (JIT)
+        start = Instant.now();
+        for (int i = 0; i < repeat; i++) {
+            Hash.h256(data);
+        }
+        end = Instant.now();
+        System.out.println("Blake2b java: " + Duration.between(start, end).toMillis() + "ms");
+
+        assertArrayEquals(Hash.h256(data), Native.blake2b(data));
+    }
+
+    @Test
+    public void testBenchmarkEd25519Sign() {
+        byte[] data = Bytes.random(512);
+        int repeat = 100_000;
+
+        Key key = new Key();
+
+        // warm up
+        for (int i = 0; i < repeat / 10; i++) {
+            Native.ed25519_sign(data, PRIVATE_KEY);
+            key.sign(data);
+        }
+
+        // native
+        Instant start = Instant.now();
+        for (int i = 0; i < repeat; i++) {
+            Native.ed25519_sign(data, PRIVATE_KEY);
+        }
+        Instant end = Instant.now();
+        System.out.println("Ed25519 sign native: " + Duration.between(start, end).toMillis() + "ms");
+
+        // java (JIT)
+        start = Instant.now();
+        for (int i = 0; i < repeat; i++) {
+            key.sign(data);
+        }
+        end = Instant.now();
+        System.out.println("Ed25519 sign java: " + Duration.between(start, end).toMillis() + "ms");
+    }
+
+    @Test
+    public void testBenchmarkEd25519Verify() {
+        byte[] data = Bytes.random(512);
+        int repeat = 100_000;
+
+        Key key = new Key();
+        Key.Signature sig = key.sign(data);
+
+        byte[] sigNative = Native.ed25519_sign(data, PRIVATE_KEY);
+
+        // warm up
+        for (int i = 0; i < repeat / 10; i++) {
+            Native.ed25519_verify(data, sigNative, PUBLIC_KEY);
+            key.verify(data, sig);
+        }
+
+        // native
+        Instant start = Instant.now();
+        for (int i = 0; i < repeat; i++) {
+            Native.ed25519_verify(data, sigNative, PUBLIC_KEY);
+        }
+        Instant end = Instant.now();
+        System.out.println("Ed25519 verify native: " + Duration.between(start, end).toMillis() + "ms");
+
+        // java (JIT)
+        start = Instant.now();
+        for (int i = 0; i < repeat; i++) {
+            key.verify(data, sig);
+        }
+        end = Instant.now();
+        System.out.println("Ed25519 verify java: " + Duration.between(start, end).toMillis() + "ms");
     }
 }
