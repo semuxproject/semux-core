@@ -37,11 +37,12 @@ matrix:
       script:
         - mvn test
 
-    # macOS tests are disabled due to instability of travis-ci
-    # - os: osx
-    #   osx_image: xcode9.2
-    #   script:
-    #     - mvn test
+    # macOS tests
+    - env: NAME="macOS tests"
+    - os: osx
+      osx_image: xcode9.2
+      script:
+        - mvn test
 
     # Docker tests
     - env: NAME="Docker tests"
