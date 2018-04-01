@@ -17,7 +17,7 @@ public class Native {
      * @param data
      * @return
      */
-    public native byte[] blake2b(byte[] data);
+    public static native byte[] blake2b(byte[] data);
 
     /**
      * Creates an Ed25519 message signature with the given private key.
@@ -26,7 +26,7 @@ public class Native {
      * @param privateKey
      * @return
      */
-    public native byte[] ed25519_sign(byte[] msg, byte[] privateKey);
+    public static native byte[] ed25519_sign(byte[] msg, byte[] privateKey);
 
     /**
      * Verifies an Ed25519 signature.
@@ -35,5 +35,5 @@ public class Native {
      * @param publicKey
      * @return
      */
-    public native boolean ed25519_verify(byte[] signature, byte[] publicKey);
+    public static native boolean ed25519_verify(byte[] signature, byte[] publicKey);
 }
