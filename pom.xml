@@ -549,12 +549,12 @@
                                     <urns>
                                         <urn>com.akathist.maven.plugins.launch4j:launch4j-maven-plugin:1.7.21:maven-plugin:null:runtime:58402e775916bc8824e257c8d87ad6c8064663a5</urn>
                                         <urn>com.fasterxml.jackson.core:jackson-annotations:2.9.0:jar:null:compile:07c10d545325e3a6e72e06381afe469fd40eb701</urn>
-                                        <urn>com.fasterxml.jackson.core:jackson-core:2.9.4:jar:null:compile:a9a71ec1aa37da47db168fede9a4a5fb5e374320</urn>
-                                        <urn>com.fasterxml.jackson.core:jackson-databind:2.9.4:jar:null:compile:498bbc3b94f566982c7f7c6d4d303fce365529be</urn>
+                                        <urn>com.fasterxml.jackson.core:jackson-core:2.9.5:jar:null:compile:a22ac51016944b06fd9ffbc9541c6e7ce5eea117</urn>
+                                        <urn>com.fasterxml.jackson.core:jackson-databind:2.9.5:jar:null:compile:3490508379d065fe3fcb80042b62f630f7588606</urn>
                                         <urn>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.3:jar:null:compile:71232816d5ed7815af378f7f467c1c5995aef09e</urn>
-                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.4:jar:null:test:54e1460e8f77af67dd4e685cd6af7b7e008514da</urn>
-                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.4:jar:null:test:d7563656034ff7b0442578ad58b10507358b2b57</urn>
-                                        <urn>com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.4:jar:null:test:c2c8d1fba9a00a1805dc98992822ed01543b111b</urn>
+                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.5:jar:null:compile:38269f2904f15eaf08efacdb2a0b7d987fb24ee4</urn>
+                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.5:jar:null:compile:c80c1d72c0823a31ffb1bde032ef276f3dc19aef</urn>
+                                        <urn>com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.5:jar:null:compile:187555dec071c79f1cf797cb0862c06bd02fafd6</urn>
                                         <urn>com.fasterxml.woodstox:woodstox-core:5.0.3:jar:null:compile:10aa199207fda142eff01cd61c69244877d71770</urn>
                                         <urn>com.github.ben-manes.caffeine:caffeine:2.6.2:jar:null:compile:c8fd8817f9d2b2ced82f8968e0dd943aab557de0</urn>
                                         <urn>com.github.kongchen:swagger-maven-plugin:3.1.6:maven-plugin:null:runtime:4c733e81674312c7794a4180095c9053baf900d5</urn>
@@ -887,18 +887,17 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.9.4</version>
+            <version>2.9.5</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.4</version>
+            <version>2.9.5</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-json-provider</artifactId>
-            <version>2.9.4</version>
-            <scope>test</scope>
+            <version>2.9.5</version>
         </dependency>
 
         <!-- ED25519 -->
