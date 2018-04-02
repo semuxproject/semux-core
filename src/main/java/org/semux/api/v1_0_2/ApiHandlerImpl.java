@@ -36,7 +36,7 @@ public class ApiHandlerImpl implements ApiHandler {
 
     @Override
     public ApiHandlerResponse service(String uri, Map<String, String> params, HttpHeaders headers) {
-        if ("/".equals(uri)) {
+        if (uri.matches("^/?$")) {
             return new GetRootResponse().success(true).message("Semux API works");
         }
 

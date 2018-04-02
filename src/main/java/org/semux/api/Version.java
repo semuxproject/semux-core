@@ -32,7 +32,7 @@ public enum Version {
         case "v1.0.2":
             return v1_0_2;
         default:
-            throw new UnreachableException();
+            return null;
         }
     }
 

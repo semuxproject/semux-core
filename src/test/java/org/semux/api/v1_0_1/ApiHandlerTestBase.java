@@ -14,19 +14,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
-import org.semux.Network;
 import org.semux.TestUtils;
 import org.semux.api.SemuxApiMock;
-import org.semux.api.v1_0_1.ApiHandlerResponse;
 import org.semux.config.Config;
 import org.semux.core.Amount;
 import org.semux.core.Block;
-import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
-import org.semux.core.TransactionType;
 import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -34,8 +30,6 @@ import org.semux.crypto.Key;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.util.BasicAuth;
-import org.semux.util.Bytes;
-import org.semux.util.MerkleUtil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

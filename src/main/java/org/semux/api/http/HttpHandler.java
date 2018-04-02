@@ -12,12 +12,12 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -197,12 +197,11 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     private Version checkVersion(String uri) {
-        Path path = Paths.get(uri);
-        if (path.getNameCount() >= 2) {
-            return Version.fromPrefix(path.getName(0).toString());
-        } else {
-            return Version.v1_0_1;
-        }
+        Optional<Version> versionOptional = Arrays.stream(uri.split("/"))
+                .filter(s -> s.startsWith("v"))
+                .findFirst()
+                .map(Version::fromPrefix);
+        return versionOptional.orElse(Version.v1_0_1);
     }
 
     private void checkDecoderResult(HttpObject o) {
