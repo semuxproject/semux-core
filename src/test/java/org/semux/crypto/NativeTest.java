@@ -156,4 +156,23 @@ public class NativeTest {
         end = Instant.now();
         System.out.println("Ed25519 verify java: " + Duration.between(start, end).toMillis() + "ms");
     }
+
+    @Test
+    public void testCompatibility() {
+        Key key = new Key();
+        Key.Signature sig = key.sign(MESSAGE);
+
+        System.out.println("seed  : " + Hex.encode(key.sk.getSeed()));
+        System.out.println("sk    : " + Hex.encode(key.sk.geta()));
+        System.out.println("pk    : " + Hex.encode(key.pk.getAbyte()));
+        System.out.println("sig   : " + Hex.encode(sig.getS()));
+        System.out.println("--------------------");
+
+        byte[] pk2 = Bytes.merge(key.sk.getSeed(), key.sk.getAbyte());
+        byte[] sig2 = Native.ed25519_sign(MESSAGE, pk2);
+        System.out.println("sk 2  : " + Hex.encode(pk2));
+        System.out.println("sig 2 : " + Hex.encode(sig2));
+
+        assertArrayEquals(sig.getS(), sig2);
+    }
 }

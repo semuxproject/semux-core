@@ -94,12 +94,12 @@ public class Key {
 
     /**
      * Creates an ED25519 key pair with the specified public and private keys.
-     * 
+     *
      * @param privateKey
      *            the private key in "PKCS#8" format
      * @param publicKey
      *            the public key in "X.509" format, for verification purpose only
-     * 
+     *
      * @throws InvalidKeySpecException
      */
     public Key(byte[] privateKey, byte[] publicKey) throws InvalidKeySpecException {
