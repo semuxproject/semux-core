@@ -1,10 +1,45 @@
 # Semux Native Library
 
-## Build
+## Build on Linux
 
+
+Prerequisites:
+1. Build and install libsodium
+
+Build:
 ```
-mkdir build
-cd build
+mkdir build && cd build
 cmake ..
 make
 ```
+
+## Build on macOS
+
+Prerequisites:
+1. Build and install libsodium
+
+Build:
+```
+mkdir build && cd build
+cmake ..
+make
+install_name_tool -change "/usr/local/lib/libsodium.23.dylib" "@loader_path/libsodium.23.dylib" crypto/libcrypto.dylib
+```
+
+## Build on Windows
+
+Prerequisites:
+1. Visual Studio 2012 build tools
+2. CMake 3.8+
+3. Download and unpack libsodium pre-built binaries
+
+Build:
+```
+mkdir build && cd build
+cmake -G "Visual Studio 11 2012 x64" ..
+# build the solution with Visual Studio
+```
+
+
+
+

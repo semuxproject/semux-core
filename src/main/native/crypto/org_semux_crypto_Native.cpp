@@ -12,7 +12,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_blake2b
     jbyte *msg_ptr = env->GetByteArrayElements(msg, NULL);
     unsigned char hash[crypto_generichash_blake2b_BYTES];
     crypto_generichash_blake2b(hash, sizeof(hash), (const unsigned char *)msg_ptr, msg_size, NULL, 0);
-    env->ReleaseByteArrayElements(msg, msg_ptr, 0);
+    env->ReleaseByteArrayElements(msg, msg_ptr, JNI_ABORT);
 
     jbyteArray result = env->NewByteArray(sizeof(hash));
     env->SetByteArrayRegion(result, 0, sizeof(hash), (const jbyte*)hash);
@@ -34,8 +34,8 @@ JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_ed25519_1sign
     unsigned char sig[crypto_sign_ed25519_BYTES];
     crypto_sign_ed25519_detached(sig, NULL, (const unsigned char *)msg_ptr, msg_size,
         (const unsigned char *)sk_ptr);
-    env->ReleaseByteArrayElements(sk, sk_ptr, 0);
-    env->ReleaseByteArrayElements(msg, msg_ptr, 0);
+    env->ReleaseByteArrayElements(sk, sk_ptr, JNI_ABORT);
+    env->ReleaseByteArrayElements(msg, msg_ptr, JNI_ABORT);
 
     jbyteArray result = env->NewByteArray(sizeof(sig));
     env->SetByteArrayRegion(result, 0, sizeof(sig), (const jbyte*)sig);
@@ -58,9 +58,9 @@ JNIEXPORT jboolean JNICALL Java_org_semux_crypto_Native_ed25519_1verify
     jbyte *pk_ptr = env->GetByteArrayElements(pk, NULL);
     jboolean result = crypto_sign_ed25519_verify_detached((const unsigned char *)sig_ptr,
         (const unsigned char *)msg_ptr, msg_size, (const unsigned char *)pk_ptr) == 0;
-    env->ReleaseByteArrayElements(pk, pk_ptr, 0);
-    env->ReleaseByteArrayElements(sig, sig_ptr, 0);
-    env->ReleaseByteArrayElements(msg, msg_ptr, 0);
+    env->ReleaseByteArrayElements(pk, pk_ptr, JNI_ABORT);
+    env->ReleaseByteArrayElements(sig, sig_ptr, JNI_ABORT);
+    env->ReleaseByteArrayElements(msg, msg_ptr, JNI_ABORT);
 
     return result;
 }
