@@ -149,9 +149,14 @@ public class Key {
      */
     public Signature sign(byte[] message) {
         try {
-            EdDSAEngine engine = new EdDSAEngine();
-            engine.initSign(sk);
-            byte[] sig = engine.signOneShot(message);
+            byte[] sig;
+            if (Native.isEnabled()) {
+                sig = Native.ed25519_sign(message, Bytes.merge(sk.getSeed(), sk.getAbyte()));
+            } else {
+                EdDSAEngine engine = new EdDSAEngine();
+                engine.initSign(sk);
+                sig = engine.signOneShot(message);
+            }
 
             return new Signature(sig, pk.getAbyte());
         } catch (InvalidKeyException | SignatureException e) {
@@ -171,10 +176,14 @@ public class Key {
     public static boolean verify(byte[] message, Signature signature) {
         if (message != null && signature != null) { // avoid null pointer exception
             try {
-                EdDSAEngine engine = new EdDSAEngine();
-                engine.initVerify(PublicKeyCache.computeIfAbsent(signature.getPublicKey()));
+                if (Native.isEnabled()) {
+                    return Native.ed25519_verify(message, signature.getS(), signature.getA());
+                } else {
+                    EdDSAEngine engine = new EdDSAEngine();
+                    engine.initVerify(PublicKeyCache.computeIfAbsent(signature.getPublicKey()));
 
-                return engine.verifyOneShot(message, signature.getS());
+                    return engine.verifyOneShot(message, signature.getS());
+                }
             } catch (Exception e) {
                 // do nothing
             }

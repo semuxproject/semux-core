@@ -24,34 +24,31 @@ public class Native {
 
     private static final Logger logger = LoggerFactory.getLogger(Native.class);
 
-    private static File nativeDir;
-    private static boolean initialized = false;
+    protected static File nativeDir;
+    protected static boolean enabled = false;
 
     /**
      * Initializes the native libraries
      */
-    private static void init() {
+    protected static void init() {
         SystemUtil.OsName os = SystemUtil.getOsName();
         switch (os) {
         case LINUX:
             // TODO: add 32-bit linux build
             if (SystemUtil.is32bitJvm()) {
-                initialized = loadLibrary("/native/linux32/libsodium.so.23")
-                        && loadLibrary("/native/linux32/libcrypto.so");
+                enabled = loadLibrary("/native/linux32/libsodium.so.23") && loadLibrary("/native/linux32/libcrypto.so");
             } else {
-                initialized = loadLibrary("/native/linux64/libsodium.so.23")
-                        && loadLibrary("/native/linux64/libcrypto.so");
+                enabled = loadLibrary("/native/linux64/libsodium.so.23") && loadLibrary("/native/linux64/libcrypto.so");
             }
             break;
         case MACOS:
-            initialized = loadLibrary("/native/macos/libsodium.23.dylib")
-                    && loadLibrary("/native/macos/libcrypto.dylib");
+            enabled = loadLibrary("/native/macos/libsodium.23.dylib") && loadLibrary("/native/macos/libcrypto.dylib");
             break;
         case WINDOWS:
             if (SystemUtil.is32bitJvm()) {
-                initialized = loadLibrary("/native/win32/libsodium.dll") && loadLibrary("/native/win32/crypto.dll");
+                enabled = loadLibrary("/native/win32/libsodium.dll") && loadLibrary("/native/win32/crypto.dll");
             } else {
-                initialized = loadLibrary("/native/win64/libsodium.dll") && loadLibrary("/native/win64/crypto.dll");
+                enabled = loadLibrary("/native/win64/libsodium.dll") && loadLibrary("/native/win64/crypto.dll");
             }
             break;
         }
@@ -63,7 +60,7 @@ public class Native {
      * @param resource
      * @return
      */
-    public static boolean loadLibrary(String resource) {
+    protected static boolean loadLibrary(String resource) {
         try {
             if (nativeDir == null) {
                 nativeDir = Files.createTempDirectory("native").toFile();
@@ -74,13 +71,15 @@ public class Native {
                     : resource;
             File file = new File(nativeDir, name);
 
-            InputStream in = Native.class.getResourceAsStream(resource);
-            OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
-            for (int c; (c = in.read()) != -1;) {
-                out.write(c);
+            if (!file.exists()) {
+                InputStream in = Native.class.getResourceAsStream(resource);
+                OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+                for (int c; (c = in.read()) != -1;) {
+                    out.write(c);
+                }
+                out.close();
+                in.close();
             }
-            out.close();
-            in.close();
 
             System.load(file.getAbsolutePath());
             return true;
@@ -96,12 +95,26 @@ public class Native {
     }
 
     /**
-     * Returns whether the native library is properly initialized.
+     * Returns whether the native library is enabled.
      *
      * @return
      */
-    public static boolean isInitialized() {
-        return initialized;
+    public static boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Disables native implementation.
+     */
+    public static void disable() {
+        enabled = false;
+    }
+
+    /**
+     * Enables native implementation.
+     */
+    public static void enable() {
+        init();
     }
 
     /**

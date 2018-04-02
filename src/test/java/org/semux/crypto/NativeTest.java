@@ -14,6 +14,10 @@ import static org.junit.Assert.assertTrue;
 import java.time.Duration;
 import java.time.Instant;
 
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semux.util.Bytes;
 
@@ -29,9 +33,14 @@ public class NativeTest {
     private static final byte[] ED25519_SIGNATURE = Hex
             .decode("cc52ae5b72af210073756f801cf8ffa36cefe96c5010b2cf25d04dfc5b0495e4ee3e14774c4607a4475f2b449a3181c9bd2c6aed46ed283debfebe19589f550e");
 
-    @Test
-    public void testInitialized() {
-        assertTrue(Native.isInitialized());
+    @BeforeClass
+    public static void setup() {
+        Native.disable();
+    }
+
+    @AfterClass
+    public static void teardown() {
+        Native.enable();
     }
 
     @Test
@@ -65,13 +74,32 @@ public class NativeTest {
     }
 
     @Test
-    public void testBenchmarkBlake2b() {
+    public void testCompatibility() {
+        Key key = new Key();
+        Key.Signature sig = key.sign(MESSAGE);
+
+        System.out.println("seed  : " + Hex.encode(key.sk.getSeed()));
+        System.out.println("sk    : " + Hex.encode(key.sk.geta()));
+        System.out.println("pk    : " + Hex.encode(key.pk.getAbyte()));
+        System.out.println("sig   : " + Hex.encode(sig.getS()));
+        System.out.println("--------------------");
+
+        byte[] pk2 = Bytes.merge(key.sk.getSeed(), key.sk.getAbyte());
+        byte[] sig2 = Native.ed25519_sign(MESSAGE, pk2);
+        System.out.println("sk 2  : " + Hex.encode(pk2));
+        System.out.println("sig 2 : " + Hex.encode(sig2));
+
+        assertArrayEquals(sig.getS(), sig2);
+    }
+
+    @Ignore
+    @Test
+    public void benchmarkBlake2b() {
         byte[] data = Bytes.random(512);
         int repeat = 50_000;
 
         // warm up
         for (int i = 0; i < repeat / 10; i++) {
-            Native.blake2b(data);
             Hash.h256(data);
         }
 
@@ -94,8 +122,9 @@ public class NativeTest {
         assertArrayEquals(Hash.h256(data), Native.blake2b(data));
     }
 
+    @Ignore
     @Test
-    public void testBenchmarkEd25519Sign() {
+    public void benchmarkEd25519Sign() {
         byte[] data = Bytes.random(512);
         int repeat = 50_000;
 
@@ -124,8 +153,9 @@ public class NativeTest {
         System.out.println("Ed25519 sign java: " + Duration.between(start, end).toMillis() + "ms");
     }
 
+    @Ignore
     @Test
-    public void testBenchmarkEd25519Verify() {
+    public void benchmarkEd25519Verify() {
         byte[] data = Bytes.random(512);
         int repeat = 50_000;
 
@@ -155,24 +185,5 @@ public class NativeTest {
         }
         end = Instant.now();
         System.out.println("Ed25519 verify java: " + Duration.between(start, end).toMillis() + "ms");
-    }
-
-    @Test
-    public void testCompatibility() {
-        Key key = new Key();
-        Key.Signature sig = key.sign(MESSAGE);
-
-        System.out.println("seed  : " + Hex.encode(key.sk.getSeed()));
-        System.out.println("sk    : " + Hex.encode(key.sk.geta()));
-        System.out.println("pk    : " + Hex.encode(key.pk.getAbyte()));
-        System.out.println("sig   : " + Hex.encode(sig.getS()));
-        System.out.println("--------------------");
-
-        byte[] pk2 = Bytes.merge(key.sk.getSeed(), key.sk.getAbyte());
-        byte[] sig2 = Native.ed25519_sign(MESSAGE, pk2);
-        System.out.println("sk 2  : " + Hex.encode(pk2));
-        System.out.println("sig 2 : " + Hex.encode(sig2));
-
-        assertArrayEquals(sig.getS(), sig2);
     }
 }
