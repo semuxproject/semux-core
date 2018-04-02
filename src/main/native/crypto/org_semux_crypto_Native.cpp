@@ -34,7 +34,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_ed25519_1sign
     unsigned char sig[crypto_sign_ed25519_BYTES];
     crypto_sign_ed25519_detached(sig, NULL, (const unsigned char *)msg_ptr, msg_size,
         (const unsigned char *)sk_ptr);
-    env->ReleaseByteArrayElements(msg, sk_ptr, 0);
+    env->ReleaseByteArrayElements(sk, sk_ptr, 0);
     env->ReleaseByteArrayElements(msg, msg_ptr, 0);
 
     jbyteArray result = env->NewByteArray(sizeof(sig));
@@ -58,8 +58,8 @@ JNIEXPORT jboolean JNICALL Java_org_semux_crypto_Native_ed25519_1verify
     jbyte *pk_ptr = env->GetByteArrayElements(pk, NULL);
     jboolean result = crypto_sign_ed25519_verify_detached((const unsigned char *)sig_ptr,
         (const unsigned char *)msg_ptr, msg_size, (const unsigned char *)pk_ptr) == 0;
-    env->ReleaseByteArrayElements(msg, pk_ptr, 0);
-    env->ReleaseByteArrayElements(msg, sig_ptr, 0);
+    env->ReleaseByteArrayElements(pk, pk_ptr, 0);
+    env->ReleaseByteArrayElements(sig, sig_ptr, 0);
     env->ReleaseByteArrayElements(msg, msg_ptr, 0);
 
     return result;

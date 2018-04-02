@@ -72,7 +72,7 @@ public class Native {
             File file = new File(nativeDir, name);
 
             if (!file.exists()) {
-                InputStream in = Native.class.getResourceAsStream(resource);
+                InputStream in = Native.class.getResourceAsStream(resource); // null pointer exception
                 OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
                 for (int c; (c = in.read()) != -1;) {
                     out.write(c);
@@ -83,8 +83,8 @@ public class Native {
 
             System.load(file.getAbsolutePath());
             return true;
-        } catch (Exception e) {
-            logger.warn("Failed to load native library: {}", resource);
+        } catch (Exception | UnsatisfiedLinkError e) {
+            logger.warn("Failed to load native library: {}", resource, e);
             return false;
         }
     }

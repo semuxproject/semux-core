@@ -15,13 +15,16 @@ import java.time.Duration;
 import java.time.Instant;
 
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semux.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NativeTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(NativeTest.class);
 
     private static final byte[] MESSAGE = Bytes.of("test");
     private static final byte[] BLAKE2B_HASH = Hex
@@ -78,16 +81,16 @@ public class NativeTest {
         Key key = new Key();
         Key.Signature sig = key.sign(MESSAGE);
 
-        System.out.println("seed  : " + Hex.encode(key.sk.getSeed()));
-        System.out.println("sk    : " + Hex.encode(key.sk.geta()));
-        System.out.println("pk    : " + Hex.encode(key.pk.getAbyte()));
-        System.out.println("sig   : " + Hex.encode(sig.getS()));
-        System.out.println("--------------------");
+        logger.debug("seed  : " + Hex.encode(key.sk.getSeed()));
+        logger.debug("sk    : " + Hex.encode(key.sk.geta()));
+        logger.debug("pk    : " + Hex.encode(key.pk.getAbyte()));
+        logger.debug("sig   : " + Hex.encode(sig.getS()));
+        logger.debug("--------------------");
 
         byte[] pk2 = Bytes.merge(key.sk.getSeed(), key.sk.getAbyte());
         byte[] sig2 = Native.ed25519_sign(MESSAGE, pk2);
-        System.out.println("sk 2  : " + Hex.encode(pk2));
-        System.out.println("sig 2 : " + Hex.encode(sig2));
+        logger.debug("sk 2  : " + Hex.encode(pk2));
+        logger.debug("sig 2 : " + Hex.encode(sig2));
 
         assertArrayEquals(sig.getS(), sig2);
     }
@@ -109,7 +112,7 @@ public class NativeTest {
             Native.blake2b(data);
         }
         Instant end = Instant.now();
-        System.out.println("Blake2b native: " + Duration.between(start, end).toMillis() + "ms");
+        logger.debug("Blake2b native: " + Duration.between(start, end).toMillis() + "ms");
 
         // java (JIT)
         start = Instant.now();
@@ -117,7 +120,7 @@ public class NativeTest {
             Hash.h256(data);
         }
         end = Instant.now();
-        System.out.println("Blake2b java: " + Duration.between(start, end).toMillis() + "ms");
+        logger.debug("Blake2b java: " + Duration.between(start, end).toMillis() + "ms");
 
         assertArrayEquals(Hash.h256(data), Native.blake2b(data));
     }
@@ -142,7 +145,7 @@ public class NativeTest {
             Native.ed25519_sign(data, PRIVATE_KEY);
         }
         Instant end = Instant.now();
-        System.out.println("Ed25519 sign native: " + Duration.between(start, end).toMillis() + "ms");
+        logger.debug("Ed25519 sign native: " + Duration.between(start, end).toMillis() + "ms");
 
         // java (JIT)
         start = Instant.now();
@@ -150,7 +153,7 @@ public class NativeTest {
             key.sign(data);
         }
         end = Instant.now();
-        System.out.println("Ed25519 sign java: " + Duration.between(start, end).toMillis() + "ms");
+        logger.debug("Ed25519 sign java: " + Duration.between(start, end).toMillis() + "ms");
     }
 
     @Ignore
@@ -176,7 +179,7 @@ public class NativeTest {
             Native.ed25519_verify(data, sigNative, PUBLIC_KEY);
         }
         Instant end = Instant.now();
-        System.out.println("Ed25519 verify native: " + Duration.between(start, end).toMillis() + "ms");
+        logger.debug("Ed25519 verify native: " + Duration.between(start, end).toMillis() + "ms");
 
         // java (JIT)
         start = Instant.now();
@@ -184,6 +187,6 @@ public class NativeTest {
             key.verify(data, sig);
         }
         end = Instant.now();
-        System.out.println("Ed25519 verify java: " + Duration.between(start, end).toMillis() + "ms");
+        logger.debug("Ed25519 verify java: " + Duration.between(start, end).toMillis() + "ms");
     }
 }
