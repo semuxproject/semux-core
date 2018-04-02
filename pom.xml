@@ -151,7 +151,6 @@
                 </dependencies>
             </plugin>
 
-            <!-- TODO: generate swagger ui -->
             <plugin>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-codegen-maven-plugin</artifactId>
@@ -169,10 +168,10 @@
                             <language>jaxrs-cxf-client</language>
                             <generateModels>true</generateModels>
                             <generateModelTests>false</generateModelTests>
-                            <generateModelDocumentation>true</generateModelDocumentation>
+                            <generateModelDocumentation>false</generateModelDocumentation>
                             <generateApis>true</generateApis>
                             <generateApiTests>false</generateApiTests>
-                            <generateApiDocumentation>true</generateApiDocumentation>
+                            <generateApiDocumentation>false</generateApiDocumentation>
                             <generateSupportingFiles>false</generateSupportingFiles>
 
                             <addCompileSourceRoot>true</addCompileSourceRoot>
