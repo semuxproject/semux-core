@@ -17,7 +17,7 @@ import org.junit.Test;
 public class CommandTest {
 
     @Test
-    public void testParseCommand101() {
+    public void testParseCommand() {
         assertNull(Command.of("not_exists"));
         assertEquals(Command.ADD_NODE, Command.of("add_node"));
     }

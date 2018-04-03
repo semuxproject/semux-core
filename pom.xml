@@ -151,12 +151,13 @@
                 </dependencies>
             </plugin>
 
+            <!-- swagger codegen -->
             <plugin>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-codegen-maven-plugin</artifactId>
                 <version>2.3.1</version>
                 <executions>
-                    <!-- v1.1.0 api server stubs -->
+                    <!-- v1.1.0 api interfaces `src/gen/java/org/semux/api/v1_1_0/api` & `src/gen/java/org/semux/api/v1_1_0/model` -->
                     <execution>
                         <id>swagger-codegen-1_1_0</id>
                         <phase>generate-sources</phase>
@@ -590,8 +591,6 @@
                                         <urn>com.github.oshi:oshi-core:3.4.4:jar:null:compile:f1aa8e053d26f49b909a845745018c57fe9d7a74</urn>
                                         <urn>com.github.stefanbirkner:system-rules:1.17.1:jar:null:test:3642fe208063ad538ec6a2fca141d13e15f2b1f2</urn>
                                         <urn>com.github.zafarkhaja:java-semver:0.9.0:jar:null:compile:59a83ca73c72a5e25b3f0b1bb305230a11000329</urn>
-                                        <urn>com.github.stefanbirkner:system-rules:1.17.1:jar:null:test:3642fe208063ad538ec6a2fca141d13e15f2b1f2</urn>                                                                                  [245/9839]
-                                        <urn>com.github.zafarkhaja:java-semver:0.9.0:jar:null:compile:59a83ca73c72a5e25b3f0b1bb305230a11000329</urn>
                                         <urn>com.google.guava:guava:20.0:jar:null:compile:89507701249388e1ed5ddcf8c41f4ce1be7831ef</urn>
                                         <urn>com.google.zxing:core:3.3.2:jar:null:compile:f47e3fc99fb2755b8a354d60efa021a0b88f4180</urn>
                                         <urn>com.mycila:license-maven-plugin:3.0:maven-plugin:null:runtime:6e6175f847574fd15c644a69b540e279ea5d173f</urn>
@@ -639,7 +638,7 @@
                                         <urn>org.apache.maven.plugins:maven-install-plugin:2.4:maven-plugin:null:runtime:9d1316166fe4c313f56276935e08df11f45267c2</urn>
                                         <urn>org.apache.maven.plugins:maven-jar-plugin:3.0.2:maven-plugin:null:runtime:5518cc6a2ed1b1ec52419fa0e18f7e42b6279cb9</urn>
                                         <urn>org.apache.maven.plugins:maven-shade-plugin:3.1.0:maven-plugin:null:runtime:c08cd5163a49e31f6e28d6f8bb153013a2a2de79</urn>
-                                        <urn>org.apache.maven.plugins:maven-site-plugin:3.3:maven-plugin:null:runtime:77ba1752b1ac4c4339d6f11554800960a56a4ae1</urn>                                                                    [196/9839]
+                                        <urn>org.apache.maven.plugins:maven-site-plugin:3.3:maven-plugin:null:runtime:77ba1752b1ac4c4339d6f11554800960a56a4ae1</urn>
                                         <urn>org.apache.maven.plugins:maven-surefire-plugin:2.21.0:maven-plugin:null:runtime:71738b047986cfd76aa58228b504770903395070</urn>
                                         <urn>org.apache.ws.xmlschema:xmlschema-core:2.2.3:jar:null:compile:920a9a3132f925554ae8432d9473c8806734a8ec</urn>
                                         <urn>org.assertj:assertj-swing-junit:3.8.0:jar:null:test:51a93135b0edac8f92cd67bceea6efa2e2dfa870</urn>
@@ -730,7 +729,7 @@
     </build>
 
     <dependencies>
-        <!-- swagger API -->
+        <!-- Swagger & JAX-RS API -->
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
@@ -768,8 +767,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-        <!-- JAX-RS API -->
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-rs-client</artifactId>
@@ -782,7 +779,7 @@
             </exclusions>
         </dependency>
 
-        <!-- Java 9 Deprecated Packages -->
+        <!-- Java 9 Deprecated Packages Required by JAX-RS -->
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
@@ -853,7 +850,6 @@
             <artifactId>netty-all</artifactId>
             <version>4.1.22.Final</version>
         </dependency>
-
 
         <!-- Snappy Java -->
         <dependency>
