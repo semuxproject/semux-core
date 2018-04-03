@@ -27,8 +27,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import org.semux.api.v1_0_2.client.SemuxApi;
-import org.semux.api.v1_0_2.impl.SemuxApiServiceImpl;
+import org.semux.api.v1_1_0.client.SemuxApi;
+import org.semux.api.v1_1_0.impl.SemuxApiServiceImpl;
 import org.semux.gui.SemuxGui;
 import org.semux.message.GuiMessages;
 

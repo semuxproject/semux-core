@@ -27,6 +27,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.api.ApiHandler;
 import org.semux.api.Version;
+import org.semux.api.v1_1_0.impl.ApiHandlerImpl;
 import org.semux.config.Config;
 import org.semux.util.BasicAuth;
 import org.semux.util.Bytes;
@@ -83,7 +84,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
     public HttpHandler(Kernel kernel) {
         this.config = kernel.getConfig();
         this.apiHandlers.put(Version.v1_0_1, new org.semux.api.v1_0_1.ApiHandlerImpl(kernel));
-        this.apiHandlers.put(Version.v1_0_2, new org.semux.api.v1_0_2.ApiHandlerImpl(kernel));
+        this.apiHandlers.put(Version.v1_1_0, new ApiHandlerImpl(kernel));
     }
 
     public HttpHandler(Config config, ApiHandler apiHandler) {
@@ -219,7 +220,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
             return;
         }
 
-        response = new org.semux.api.v1_0_2.ApiHandlerResponse().success(false).message(BAD_REQUEST.toString());
+        response = new org.semux.api.v1_1_0.model.ApiHandlerResponse().success(false).message(BAD_REQUEST.toString());
         status = BAD_REQUEST;
     }
 
