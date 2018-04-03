@@ -3,6 +3,7 @@ package org.semux.api.v1_0_2;
 import java.util.ArrayList;
 import java.util.List;
 import org.semux.api.v1_0_2.TransactionType;
+import javax.validation.constraints.*;
 
 import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
@@ -74,7 +75,7 @@ public class BlockType  {
    * @return number
   **/
   @JsonProperty("number")
-  public String getNumber() {
+ @Pattern(regexp="^\\d+$")  public String getNumber() {
     return number;
   }
 
@@ -146,7 +147,7 @@ public class BlockType  {
    * @return timestamp
   **/
   @JsonProperty("timestamp")
-  public String getTimestamp() {
+ @Pattern(regexp="^\\d+$")  public String getTimestamp() {
     return timestamp;
   }
 

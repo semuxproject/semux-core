@@ -8,6 +8,7 @@ package org.semux.api.http;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
+import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.net.URI;
@@ -19,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
@@ -172,7 +175,13 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                     response = apiHandlers
                             .get(version)
                             .service(uri.getPath().replaceAll("^/" + Version.prefixOf(version), ""), map, headers);
-                    status = HttpResponseStatus.OK;
+
+                    if (response instanceof javax.ws.rs.core.Response) {
+                        status = HttpResponseStatus.valueOf(((Response) response).getStatus());
+                        response = ((Response) response).getEntity();
+                    } else {
+                        status = OK;
+                    }
                 }
                 boolean prettyPrint = Boolean.parseBoolean(map.get("pretty"));
 

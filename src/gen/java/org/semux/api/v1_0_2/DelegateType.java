@@ -1,5 +1,6 @@
 package org.semux.api.v1_0_2;
 
+import javax.validation.constraints.*;
 
 import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
@@ -74,7 +75,7 @@ public class DelegateType  {
    * @return registeredAt
   **/
   @JsonProperty("registeredAt")
-  public String getRegisteredAt() {
+ @Pattern(regexp="^\\d+$")  public String getRegisteredAt() {
     return registeredAt;
   }
 
@@ -92,7 +93,7 @@ public class DelegateType  {
    * @return votes
   **/
   @JsonProperty("votes")
-  public String getVotes() {
+ @Pattern(regexp="^\\d+$")  public String getVotes() {
     return votes;
   }
 
@@ -110,7 +111,7 @@ public class DelegateType  {
    * @return blocksForged
   **/
   @JsonProperty("blocksForged")
-  public String getBlocksForged() {
+ @Pattern(regexp="^\\d+$")  public String getBlocksForged() {
     return blocksForged;
   }
 
@@ -128,7 +129,7 @@ public class DelegateType  {
    * @return turnsHit
   **/
   @JsonProperty("turnsHit")
-  public String getTurnsHit() {
+ @Pattern(regexp="^\\d+$")  public String getTurnsHit() {
     return turnsHit;
   }
 
@@ -146,7 +147,7 @@ public class DelegateType  {
    * @return turnsMissed
   **/
   @JsonProperty("turnsMissed")
-  public String getTurnsMissed() {
+ @Pattern(regexp="^\\d+$")  public String getTurnsMissed() {
     return turnsMissed;
   }
 

@@ -25,10 +25,10 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
-import org.semux.api.v1_0_2.ApiHandlerResponse;
-import org.semux.api.v1_0_2.SemuxApi;
-import org.semux.api.v1_0_2.SemuxApiImpl;
+import org.semux.api.v1_0_2.client.SemuxApi;
+import org.semux.api.v1_0_2.impl.SemuxApiServiceImpl;
 import org.semux.gui.SemuxGui;
 import org.semux.message.GuiMessages;
 
@@ -44,7 +44,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
     public static final String HELP = "help";
 
-    private transient SemuxApiImpl api;
+    private transient SemuxApiServiceImpl api;
 
     private JTextArea console;
     private JTextField input;
@@ -74,7 +74,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
         this.setSize(800, 600);
         this.setLocationRelativeTo(parent);
-        api = new SemuxApiImpl(gui.getKernel());
+        api = new SemuxApiServiceImpl(gui.getKernel());
 
         console.append(GuiMessages.get("ConsoleHelp", HELP));
         addWindowListener(new WindowAdapter() {
@@ -123,14 +123,13 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         }
 
         try {
-            ApiHandlerResponse response;
             Method method = api.getClass().getMethod(command, classes);
             Object[] params = Arrays.copyOfRange(commandParams, 1, commandParams.length);
-            response = (ApiHandlerResponse) method.invoke(api, params);
+            Response response = (Response) method.invoke(api, params);
 
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             console.append("\n");
-            console.append(mapper.writeValueAsString(response));
+            console.append(mapper.writeValueAsString(response.getEntity()));
             console.append("\n");
         } catch (NoSuchMethodException e) {
             console.append(GuiMessages.get("UnknownMethod", command));

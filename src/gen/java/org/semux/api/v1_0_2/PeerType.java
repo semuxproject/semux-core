@@ -2,6 +2,7 @@ package org.semux.api.v1_0_2;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.constraints.*;
 
 import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
@@ -133,7 +134,7 @@ public class PeerType  {
    * @return latestBlockNumber
   **/
   @JsonProperty("latestBlockNumber")
-  public String getLatestBlockNumber() {
+ @Pattern(regexp="^\\d+$")  public String getLatestBlockNumber() {
     return latestBlockNumber;
   }
 
@@ -151,7 +152,7 @@ public class PeerType  {
    * @return latency
   **/
   @JsonProperty("latency")
-  public String getLatency() {
+ @Pattern(regexp="^\\d+$")  public String getLatency() {
     return latency;
   }
 

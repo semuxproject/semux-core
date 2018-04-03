@@ -1,5 +1,6 @@
 package org.semux.api.v1_0_2;
 
+import javax.validation.constraints.*;
 
 import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
@@ -44,7 +45,7 @@ public class TransactionLimitsType  {
    * @return minTransactionFee
   **/
   @JsonProperty("minTransactionFee")
-  public String getMinTransactionFee() {
+ @Pattern(regexp="^\\d+$")  public String getMinTransactionFee() {
     return minTransactionFee;
   }
 
@@ -62,7 +63,7 @@ public class TransactionLimitsType  {
    * @return minDelegateBurnAmount
   **/
   @JsonProperty("minDelegateBurnAmount")
-  public String getMinDelegateBurnAmount() {
+ @Pattern(regexp="^\\d+$")  public String getMinDelegateBurnAmount() {
     return minDelegateBurnAmount;
   }
 

@@ -1,4 +1,4 @@
-package org.semux.api.v1_0_2;
+package org.semux.api.v1_0_2.client;
 
 import org.semux.api.v1_0_2.AddNodeResponse;
 import org.semux.api.v1_0_2.ApiHandlerResponse;
@@ -39,8 +39,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.jaxrs.PATCH;
-import javax.validation.constraints.*;
-import javax.validation.Valid;
 
 /**
  * Semux
@@ -48,7 +46,7 @@ import javax.validation.Valid;
  * <p>Semux is an experimental high-performance blockchain platform that powers decentralized application.
  *
  */
-@Path("/v1.0.2")
+@Path("/")
 @Api(value = "/", description = "")
 public interface SemuxApi  {
 
@@ -62,10 +60,10 @@ public interface SemuxApi  {
     @Path("/add_node")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add node", tags={ "semux",  })
+    @ApiOperation(value = "Add node", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = AddNodeResponse.class) })
-    public Response addNode(@QueryParam("node") @NotNull String node);
+    public AddNodeResponse addNode(@QueryParam("node")String node);
 
     /**
      * Add to blacklist
@@ -77,10 +75,10 @@ public interface SemuxApi  {
     @Path("/add_to_blacklist")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add to blacklist", tags={ "semux",  })
+    @ApiOperation(value = "Add to blacklist", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = ApiHandlerResponse.class) })
-    public Response addToBlacklist(@QueryParam("ip") @NotNull String ip);
+    public ApiHandlerResponse addToBlacklist(@QueryParam("ip")String ip);
 
     /**
      * Add to whitelist
@@ -92,10 +90,10 @@ public interface SemuxApi  {
     @Path("/add_to_whitelist")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add to whitelist", tags={ "semux",  })
+    @ApiOperation(value = "Add to whitelist", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = ApiHandlerResponse.class) })
-    public Response addToWhitelist(@QueryParam("ip") @NotNull String ip);
+    public ApiHandlerResponse addToWhitelist(@QueryParam("ip")String ip);
 
     /**
      * Create account
@@ -107,10 +105,10 @@ public interface SemuxApi  {
     @Path("/create_account")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Create account", tags={ "semux",  })
+    @ApiOperation(value = "Create account", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = CreateAccountResponse.class) })
-    public Response createAccount(@QueryParam("name") String name);
+    public CreateAccountResponse createAccount(@QueryParam("name")String name);
 
     /**
      * Get account
@@ -122,10 +120,10 @@ public interface SemuxApi  {
     @Path("/get_account")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get account", tags={ "semux",  })
+    @ApiOperation(value = "Get account", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetAccountResponse.class) })
-    public Response getAccount(@QueryParam("address") @NotNull String address);
+    public GetAccountResponse getAccount(@QueryParam("address")String address);
 
     /**
      * Get account transactions
@@ -137,10 +135,10 @@ public interface SemuxApi  {
     @Path("/get_account_transactions")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get account transactions", tags={ "semux",  })
+    @ApiOperation(value = "Get account transactions", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetAccountTransactionsResponse.class) })
-    public Response getAccountTransactions(@QueryParam("address") @NotNull String address, @QueryParam("from") @NotNull String from, @QueryParam("to") @NotNull String to);
+    public GetAccountTransactionsResponse getAccountTransactions(@QueryParam("address")String address, @QueryParam("from")String from, @QueryParam("to")String to);
 
     /**
      * Get block by hash
@@ -152,10 +150,10 @@ public interface SemuxApi  {
     @Path("/get_block_by_hash")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get block by hash", tags={ "semux",  })
+    @ApiOperation(value = "Get block by hash", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetBlockResponse.class) })
-    public Response getBlockByHash(@QueryParam("hash") @NotNull @Pattern(regexp="^(0x)?[0-9a-fA-F]+$") String hash);
+    public GetBlockResponse getBlockByHash(@QueryParam("hash")String hash);
 
     /**
      * Get block by number
@@ -167,10 +165,10 @@ public interface SemuxApi  {
     @Path("/get_block_by_number")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get block by number", tags={ "semux",  })
+    @ApiOperation(value = "Get block by number", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetBlockResponse.class) })
-    public Response getBlockByNumber(@QueryParam("number") @NotNull @Pattern(regexp="^\\d+$") String number);
+    public GetBlockResponse getBlockByNumber(@QueryParam("number")String number);
 
     /**
      * Get a delegate
@@ -182,10 +180,10 @@ public interface SemuxApi  {
     @Path("/get_delegate")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get a delegate", tags={ "semux",  })
+    @ApiOperation(value = "Get a delegate", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetDelegateResponse.class) })
-    public Response getDelegate(@QueryParam("address") @NotNull String address);
+    public GetDelegateResponse getDelegate(@QueryParam("address")String address);
 
     /**
      * Get all delegates
@@ -197,10 +195,10 @@ public interface SemuxApi  {
     @Path("/get_delegates")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all delegates", tags={ "semux",  })
+    @ApiOperation(value = "Get all delegates", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetDelegatesResponse.class) })
-    public Response getDelegates();
+    public GetDelegatesResponse getDelegates();
 
     /**
      * Get info
@@ -212,10 +210,10 @@ public interface SemuxApi  {
     @Path("/get_info")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get info", tags={ "semux",  })
+    @ApiOperation(value = "Get info", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetInfoResponse.class) })
-    public Response getInfo();
+    public GetInfoResponse getInfo();
 
     /**
      * Get latest block
@@ -227,10 +225,10 @@ public interface SemuxApi  {
     @Path("/get_latest_block")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get latest block", tags={ "semux",  })
+    @ApiOperation(value = "Get latest block", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetLatestBlockResponse.class) })
-    public Response getLatestBlock();
+    public GetLatestBlockResponse getLatestBlock();
 
     /**
      * Get latest block number
@@ -242,10 +240,10 @@ public interface SemuxApi  {
     @Path("/get_latest_block_number")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get latest block number", tags={ "semux",  })
+    @ApiOperation(value = "Get latest block number", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetLatestBlockNumberResponse.class) })
-    public Response getLatestBlockNumber();
+    public GetLatestBlockNumberResponse getLatestBlockNumber();
 
     /**
      * Get peers
@@ -257,10 +255,10 @@ public interface SemuxApi  {
     @Path("/get_peers")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get peers", tags={ "semux",  })
+    @ApiOperation(value = "Get peers", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetPeersResponse.class) })
-    public Response getPeers();
+    public GetPeersResponse getPeers();
 
     /**
      * Get pending transactions
@@ -272,10 +270,10 @@ public interface SemuxApi  {
     @Path("/get_pending_transactions")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get pending transactions", tags={ "semux",  })
+    @ApiOperation(value = "Get pending transactions", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetPendingTransactionsResponse.class) })
-    public Response getPendingTransactions();
+    public GetPendingTransactionsResponse getPendingTransactions();
 
     /**
      * Get root
@@ -285,10 +283,10 @@ public interface SemuxApi  {
     @Path("/")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get root", tags={ "semux",  })
+    @ApiOperation(value = "Get root", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetRootResponse.class) })
-    public Response getRoot();
+    public GetRootResponse getRoot();
 
     /**
      * Get transaction
@@ -300,10 +298,10 @@ public interface SemuxApi  {
     @Path("/get_transaction")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get transaction", tags={ "semux",  })
+    @ApiOperation(value = "Get transaction", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetTransactionResponse.class) })
-    public Response getTransaction(@QueryParam("hash") @NotNull String hash);
+    public GetTransactionResponse getTransaction(@QueryParam("hash")String hash);
 
     /**
      * Get transaction limits
@@ -315,10 +313,10 @@ public interface SemuxApi  {
     @Path("/get_transaction_limits")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get transaction limits", tags={ "semux",  })
+    @ApiOperation(value = "Get transaction limits", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetTransactionLimitsResponse.class) })
-    public Response getTransactionLimits(@QueryParam("type") @NotNull String type);
+    public GetTransactionLimitsResponse getTransactionLimits(@QueryParam("type")String type);
 
     /**
      * Get validators
@@ -330,10 +328,10 @@ public interface SemuxApi  {
     @Path("/get_validators")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get validators", tags={ "semux",  })
+    @ApiOperation(value = "Get validators", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetValidatorsResponse.class) })
-    public Response getValidators();
+    public GetValidatorsResponse getValidators();
 
     /**
      * Get vote
@@ -345,10 +343,10 @@ public interface SemuxApi  {
     @Path("/get_vote")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get vote", tags={ "semux",  })
+    @ApiOperation(value = "Get vote", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetVoteResponse.class) })
-    public Response getVote(@QueryParam("delegate") @NotNull String delegate, @QueryParam("voter") @NotNull String voter);
+    public GetVoteResponse getVote(@QueryParam("delegate")String delegate, @QueryParam("voter")String voter);
 
     /**
      * Get votes
@@ -360,10 +358,10 @@ public interface SemuxApi  {
     @Path("/get_votes")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get votes", tags={ "semux",  })
+    @ApiOperation(value = "Get votes", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = GetVotesResponse.class) })
-    public Response getVotes(@QueryParam("delegate") @NotNull String delegate);
+    public GetVotesResponse getVotes(@QueryParam("delegate")String delegate);
 
     /**
      * List accounts
@@ -375,10 +373,10 @@ public interface SemuxApi  {
     @Path("/list_accounts")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "List accounts", tags={ "semux",  })
+    @ApiOperation(value = "List accounts", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = ListAccountsResponse.class) })
-    public Response listAccounts();
+    public ListAccountsResponse listAccounts();
 
     /**
      * Register delegate
@@ -390,10 +388,10 @@ public interface SemuxApi  {
     @Path("/delegate")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Register delegate", tags={ "semux",  })
+    @ApiOperation(value = "Register delegate", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = DoTransactionResponse.class) })
-    public Response registerDelegate(@QueryParam("from") @NotNull String from, @QueryParam("fee") @NotNull @Pattern(regexp="^\\d+$") String fee, @QueryParam("data") @NotNull @Pattern(regexp="^(0x)?[0-9a-fA-F]+$") String data);
+    public DoTransactionResponse registerDelegate(@QueryParam("from")String from, @QueryParam("fee")String fee, @QueryParam("data")String data);
 
     /**
      * Send a raw transaction
@@ -405,10 +403,10 @@ public interface SemuxApi  {
     @Path("/send_transaction")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Send a raw transaction", tags={ "semux",  })
+    @ApiOperation(value = "Send a raw transaction", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = SendTransactionResponse.class) })
-    public Response sendTransaction(@QueryParam("raw") @NotNull @Pattern(regexp="^(0x)?[0-9a-fA-F]+$") String raw);
+    public SendTransactionResponse sendTransaction(@QueryParam("raw")String raw);
 
     /**
      * Sign a message
@@ -420,10 +418,10 @@ public interface SemuxApi  {
     @Path("/sign_message")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Sign a message", tags={ "semux",  })
+    @ApiOperation(value = "Sign a message", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = SignMessageResponse.class) })
-    public Response signMessage(@QueryParam("address") @NotNull String address, @QueryParam("message") @NotNull String message);
+    public SignMessageResponse signMessage(@QueryParam("address")String address, @QueryParam("message")String message);
 
     /**
      * Transfer coins
@@ -435,10 +433,10 @@ public interface SemuxApi  {
     @Path("/transfer")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Transfer coins", tags={ "semux",  })
+    @ApiOperation(value = "Transfer coins", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = DoTransactionResponse.class) })
-    public Response transfer(@QueryParam("value") @NotNull @Pattern(regexp="^\\d+$") String value, @QueryParam("from") @NotNull String from, @QueryParam("to") @NotNull String to, @QueryParam("fee") @NotNull @Pattern(regexp="^\\d+$") String fee, @QueryParam("data") @NotNull @Pattern(regexp="^(0x)?[0-9a-fA-F]+$") String data);
+    public DoTransactionResponse transfer(@QueryParam("value")String value, @QueryParam("from")String from, @QueryParam("to")String to, @QueryParam("fee")String fee, @QueryParam("data")String data);
 
     /**
      * Unvote
@@ -450,10 +448,10 @@ public interface SemuxApi  {
     @Path("/unvote")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Unvote", tags={ "semux",  })
+    @ApiOperation(value = "Unvote", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = DoTransactionResponse.class) })
-    public Response unvote(@QueryParam("from") @NotNull String from, @QueryParam("to") @NotNull String to, @QueryParam("value") @NotNull @Pattern(regexp="^\\d+$") String value, @QueryParam("fee") @NotNull @Pattern(regexp="^\\d+$") String fee);
+    public DoTransactionResponse unvote(@QueryParam("from")String from, @QueryParam("to")String to, @QueryParam("value")String value, @QueryParam("fee")String fee);
 
     /**
      * Verify a message
@@ -465,10 +463,10 @@ public interface SemuxApi  {
     @Path("/verify_message")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Verify a message", tags={ "semux",  })
+    @ApiOperation(value = "Verify a message", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = VerifyMessageResponse.class) })
-    public Response verifyMessage(@QueryParam("address") @NotNull String address, @QueryParam("message") @NotNull String message, @QueryParam("signature") @NotNull String signature);
+    public VerifyMessageResponse verifyMessage(@QueryParam("address")String address, @QueryParam("message")String message, @QueryParam("signature")String signature);
 
     /**
      * Vote
@@ -480,9 +478,9 @@ public interface SemuxApi  {
     @Path("/vote")
     @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Vote", tags={ "semux" })
+    @ApiOperation(value = "Vote", tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "successful operation", response = DoTransactionResponse.class) })
-    public Response vote(@QueryParam("from") @NotNull String from, @QueryParam("to") @NotNull String to, @QueryParam("value") @NotNull @Pattern(regexp="^\\d+$") String value, @QueryParam("fee") @NotNull @Pattern(regexp="^\\d+$") String fee);
+    public DoTransactionResponse vote(@QueryParam("from")String from, @QueryParam("to")String to, @QueryParam("value")String value, @QueryParam("fee")String fee);
 }
 

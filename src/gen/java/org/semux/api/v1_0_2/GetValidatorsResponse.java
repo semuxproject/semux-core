@@ -3,6 +3,7 @@ package org.semux.api.v1_0_2;
 import java.util.ArrayList;
 import java.util.List;
 import org.semux.api.v1_0_2.ApiHandlerResponse;
+import javax.validation.constraints.*;
 
 import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;

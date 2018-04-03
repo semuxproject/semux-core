@@ -1,5 +1,6 @@
 package org.semux.api.v1_0_2;
 
+import javax.validation.constraints.*;
 
 import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
@@ -47,7 +48,7 @@ public class TransactionType  {
    * @return blockNumber
   **/
   @JsonProperty("blockNumber")
-  public String getBlockNumber() {
+ @Pattern(regexp="^\\d+$")  public String getBlockNumber() {
     return blockNumber;
   }
 
@@ -137,7 +138,7 @@ public class TransactionType  {
    * @return value
   **/
   @JsonProperty("value")
-  public String getValue() {
+ @Pattern(regexp="^\\d+$")  public String getValue() {
     return value;
   }
 
@@ -155,7 +156,7 @@ public class TransactionType  {
    * @return fee
   **/
   @JsonProperty("fee")
-  public String getFee() {
+ @Pattern(regexp="^\\d+$")  public String getFee() {
     return fee;
   }
 
@@ -173,7 +174,7 @@ public class TransactionType  {
    * @return nonce
   **/
   @JsonProperty("nonce")
-  public String getNonce() {
+ @Pattern(regexp="^\\d+$")  public String getNonce() {
     return nonce;
   }
 
@@ -191,7 +192,7 @@ public class TransactionType  {
    * @return timestamp
   **/
   @JsonProperty("timestamp")
-  public String getTimestamp() {
+ @Pattern(regexp="^\\d+$")  public String getTimestamp() {
     return timestamp;
   }
 

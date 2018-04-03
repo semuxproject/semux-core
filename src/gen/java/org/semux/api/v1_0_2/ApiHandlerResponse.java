@@ -1,5 +1,8 @@
 package org.semux.api.v1_0_2;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import javax.validation.constraints.*;
 
 import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
@@ -23,6 +26,7 @@ public class ApiHandlerResponse  {
    * @return success
   **/
   @JsonProperty("success")
+  @NotNull
   public Boolean isSuccess() {
     return success;
   }

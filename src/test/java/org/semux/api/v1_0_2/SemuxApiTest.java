@@ -31,7 +31,6 @@
 package org.semux.api.v1_0_2;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -99,7 +98,7 @@ public class SemuxApiTest {
     @Rule
     public KernelRule kernelRule = new KernelRule(51610, 51710);
 
-    private SemuxApi api;
+    private org.semux.api.v1_0_2.client.SemuxApi api;
 
     private SemuxApiMock apiMock;
 
@@ -131,7 +130,7 @@ public class SemuxApiTest {
 
         api = JAXRSClientFactory.create(
                 "http://localhost:51710/v1.0.2",
-                SemuxApi.class,
+                org.semux.api.v1_0_2.client.SemuxApi.class,
                 Collections.singletonList(new JacksonJsonProvider()),
                 config.apiUsername(),
                 config.apiPassword(),

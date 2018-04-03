@@ -1,6 +1,7 @@
 package org.semux.api.v1_0_2;
 
 import org.semux.api.v1_0_2.ApiHandlerResponse;
+import javax.validation.constraints.*;
 
 import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
@@ -21,7 +22,7 @@ public class GetVoteResponse extends ApiHandlerResponse {
    * @return result
   **/
   @JsonProperty("result")
-  public String getResult() {
+ @Pattern(regexp="^\\d+$")  public String getResult() {
     return result;
   }
 

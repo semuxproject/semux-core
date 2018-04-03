@@ -7,10 +7,15 @@
 
 package org.semux.api.v1_0_2;
 
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+
 import java.util.Map;
+
+import javax.ws.rs.core.Response;
 
 import org.semux.Kernel;
 import org.semux.api.ApiHandler;
+import org.semux.api.v1_0_2.impl.SemuxApiServiceImpl;
 import org.semux.util.exception.UnreachableException;
 
 import io.netty.handler.codec.http.HttpHeaders;
@@ -22,7 +27,7 @@ import io.netty.handler.codec.http.HttpHeaders;
 public class ApiHandlerImpl implements ApiHandler {
 
     private final Kernel kernel;
-    private final SemuxApiImpl semuxApi;
+    private final SemuxApiServiceImpl semuxApi;
 
     /**
      * Creates an API handler.
@@ -31,18 +36,20 @@ public class ApiHandlerImpl implements ApiHandler {
      */
     public ApiHandlerImpl(Kernel kernel) {
         this.kernel = kernel;
-        this.semuxApi = new SemuxApiImpl(kernel);
+        this.semuxApi = new SemuxApiServiceImpl(kernel);
     }
 
     @Override
-    public ApiHandlerResponse service(String uri, Map<String, String> params, HttpHeaders headers) {
+    public Response service(String uri, Map<String, String> params, HttpHeaders headers) {
         if (uri.matches("^/?$")) {
-            return new GetRootResponse().success(true).message("Semux API works");
+            return semuxApi.getRoot();
         }
 
         Command cmd = Command.of(uri.substring(1));
         if (cmd == null) {
-            return semuxApi.failure("Invalid request: uri = " + uri);
+            return Response.status(NOT_FOUND)
+                    .entity(new ApiHandlerResponse().success(false).message("Invalid request: uri = " + uri))
+                    .build();
         }
 
         try {
@@ -129,7 +136,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 throw new UnreachableException();
             }
         } catch (Exception e) {
-            return semuxApi.failure("Failed to process your request: " + e.getMessage());
+            return semuxApi.failure(new ApiHandlerResponse(), "Failed to process your request: " + e.getMessage());
         }
     }
 
@@ -139,7 +146,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse verifyMessage(Map<String, String> params) {
+    private Response verifyMessage(Map<String, String> params) {
         return semuxApi.verifyMessage(params.get("address"), params.get("message"), params.get("signature"));
     }
 
@@ -149,7 +156,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse signMessage(Map<String, String> params) {
+    private Response signMessage(Map<String, String> params) {
         return semuxApi.signMessage(params.get("address"), params.get("message"));
     }
 
@@ -158,7 +165,7 @@ public class ApiHandlerImpl implements ApiHandler {
      *
      * @return
      */
-    private ApiHandlerResponse getInfo() {
+    private Response getInfo() {
         return semuxApi.getInfo();
     }
 
@@ -167,7 +174,7 @@ public class ApiHandlerImpl implements ApiHandler {
      *
      * @return
      */
-    private ApiHandlerResponse getPeers() {
+    private Response getPeers() {
         return semuxApi.getPeers();
     }
 
@@ -177,7 +184,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return result
      */
-    private ApiHandlerResponse addNode(Map<String, String> params) {
+    private Response addNode(Map<String, String> params) {
         return semuxApi.addNode(params.get("node"));
     }
 
@@ -187,7 +194,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getBlockByNumber(Map<String, String> params) {
+    private Response getBlockByNumber(Map<String, String> params) {
         return semuxApi.getBlockByNumber(params.get("number"));
     }
 
@@ -197,7 +204,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getBlockByHash(Map<String, String> params) {
+    private Response getBlockByHash(Map<String, String> params) {
         return semuxApi.getBlockByHash(params.get("hash"));
     }
 
@@ -206,7 +213,7 @@ public class ApiHandlerImpl implements ApiHandler {
      *
      * @return
      */
-    private ApiHandlerResponse getPendingTransactions() {
+    private Response getPendingTransactions() {
         return semuxApi.getPendingTransactions();
     }
 
@@ -216,7 +223,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getAccountTransactions(Map<String, String> params) {
+    private Response getAccountTransactions(Map<String, String> params) {
         String address = params.get("address");
         String from = params.get("from");
         String to = params.get("to");
@@ -230,7 +237,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getTransaction(Map<String, String> params) {
+    private Response getTransaction(Map<String, String> params) {
         String hash = params.get("hash");
         return semuxApi.getTransaction(hash);
     }
@@ -241,7 +248,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse sendTransaction(Map<String, String> params) {
+    private Response sendTransaction(Map<String, String> params) {
         String raw = params.get("raw");
         return semuxApi.sendTransaction(raw);
     }
@@ -252,7 +259,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getAccount(Map<String, String> params) {
+    private Response getAccount(Map<String, String> params) {
         String address = params.get("address");
         return semuxApi.getAccount(address);
     }
@@ -263,7 +270,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse addToBlackList(Map<String, String> params) {
+    private Response addToBlackList(Map<String, String> params) {
         String ip = params.get("ip");
         return semuxApi.addToBlacklist(ip);
     }
@@ -274,7 +281,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse addToWhiteList(Map<String, String> params) {
+    private Response addToWhiteList(Map<String, String> params) {
         String ip = params.get("ip");
         return semuxApi.addToWhitelist(ip);
     }
@@ -284,7 +291,7 @@ public class ApiHandlerImpl implements ApiHandler {
      *
      * @return
      */
-    private ApiHandlerResponse getLatestBlockNumber() {
+    private Response getLatestBlockNumber() {
         return semuxApi.getLatestBlockNumber();
     }
 
@@ -293,7 +300,7 @@ public class ApiHandlerImpl implements ApiHandler {
      *
      * @return
      */
-    private ApiHandlerResponse getLatestBlock() {
+    private Response getLatestBlock() {
         return semuxApi.getLatestBlock();
     }
 
@@ -303,7 +310,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getDelegate(Map<String, String> params) {
+    private Response getDelegate(Map<String, String> params) {
         String address = params.get("address");
         return semuxApi.getDelegate(address);
     }
@@ -313,7 +320,7 @@ public class ApiHandlerImpl implements ApiHandler {
      *
      * @return
      */
-    private ApiHandlerResponse getValidators() {
+    private Response getValidators() {
         return semuxApi.getValidators();
     }
 
@@ -322,7 +329,7 @@ public class ApiHandlerImpl implements ApiHandler {
      *
      * @return
      */
-    private ApiHandlerResponse getDelegates() {
+    private Response getDelegates() {
         return semuxApi.getDelegates();
     }
 
@@ -332,7 +339,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getVote(Map<String, String> params) {
+    private Response getVote(Map<String, String> params) {
         String voter = params.get("voter");
         String delegate = params.get("delegate");
         return semuxApi.getVote(delegate, voter);
@@ -344,7 +351,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getVotes(Map<String, String> params) {
+    private Response getVotes(Map<String, String> params) {
         String delegate = params.get("delegate");
         return semuxApi.getVotes(delegate);
     }
@@ -354,7 +361,7 @@ public class ApiHandlerImpl implements ApiHandler {
      *
      * @return
      */
-    private ApiHandlerResponse listAccounts() {
+    private Response listAccounts() {
         return semuxApi.listAccounts();
     }
 
@@ -363,7 +370,7 @@ public class ApiHandlerImpl implements ApiHandler {
      *
      * @return
      */
-    private ApiHandlerResponse createAccount(Map<String, String> params) {
+    private Response createAccount(Map<String, String> params) {
         return semuxApi.createAccount(params.getOrDefault("name", null));
     }
 
@@ -373,7 +380,7 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse getTransactionLimits(Map<String, String> params) {
+    private Response getTransactionLimits(Map<String, String> params) {
         return semuxApi.getTransactionLimits(params.get("type"));
     }
 
@@ -392,10 +399,10 @@ public class ApiHandlerImpl implements ApiHandler {
      * @param params
      * @return
      */
-    private ApiHandlerResponse doTransaction(Command cmd, Map<String, String> params) {
+    private Response doTransaction(Command cmd, Map<String, String> params) {
         // [1] check if kernel.getWallet().is unlocked
         if (!kernel.getWallet().isUnlocked()) {
-            return semuxApi.failure("Wallet is locked");
+            return semuxApi.failure(new ApiHandlerResponse(), "Wallet is locked");
         }
 
         String from = params.get("from");
@@ -415,7 +422,7 @@ public class ApiHandlerImpl implements ApiHandler {
         case UNVOTE:
             return semuxApi.unvote(from, to, value, fee);
         default:
-            return semuxApi.failure("Unsupported transaction type: " + cmd.toString());
+            return semuxApi.failure(new ApiHandlerResponse(), "Unsupported transaction type: " + cmd.toString());
         }
     }
 }

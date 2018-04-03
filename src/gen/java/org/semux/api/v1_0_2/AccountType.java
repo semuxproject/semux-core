@@ -1,5 +1,6 @@
 package org.semux.api.v1_0_2;
 
+import javax.validation.constraints.*;
 
 import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlElement;
@@ -50,7 +51,7 @@ public class AccountType  {
    * @return available
   **/
   @JsonProperty("available")
-  public String getAvailable() {
+ @Pattern(regexp="^\\d+$")  public String getAvailable() {
     return available;
   }
 
@@ -68,7 +69,7 @@ public class AccountType  {
    * @return locked
   **/
   @JsonProperty("locked")
-  public String getLocked() {
+ @Pattern(regexp="^\\d+$")  public String getLocked() {
     return locked;
   }
 
@@ -86,7 +87,7 @@ public class AccountType  {
    * @return nonce
   **/
   @JsonProperty("nonce")
-  public String getNonce() {
+ @Pattern(regexp="^\\d+$")  public String getNonce() {
     return nonce;
   }
 
