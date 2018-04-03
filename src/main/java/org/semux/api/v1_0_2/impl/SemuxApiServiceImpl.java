@@ -101,8 +101,8 @@ public final class SemuxApiServiceImpl implements SemuxApi {
     public Response getPeers() {
         GetPeersResponse resp = new GetPeersResponse();
         resp.setResult(kernel.getChannelManager().getActivePeers().parallelStream()
-                        .map(TypeFactory::peerType)
-                        .collect(Collectors.toList()));
+                .map(TypeFactory::peerType)
+                .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -225,9 +225,9 @@ public final class SemuxApiServiceImpl implements SemuxApi {
     public Response getPendingTransactions() {
         GetPendingTransactionsResponse resp = new GetPendingTransactionsResponse();
         resp.result(kernel.getPendingManager().getPendingTransactions().parallelStream()
-                        .map(pendingTransaction -> pendingTransaction.transaction)
-                        .map(tx -> TypeFactory.transactionType(null, tx))
-                        .collect(Collectors.toList()));
+                .map(pendingTransaction -> pendingTransaction.transaction)
+                .map(tx -> TypeFactory.transactionType(null, tx))
+                .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -268,9 +268,9 @@ public final class SemuxApiServiceImpl implements SemuxApi {
         }
 
         resp.setResult(kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream()
-                        .map(tx -> TypeFactory.transactionType(
-                                kernel.getBlockchain().getTransactionBlockNumber(tx.getHash()), tx))
-                        .collect(Collectors.toList()));
+                .map(tx -> TypeFactory.transactionType(
+                        kernel.getBlockchain().getTransactionBlockNumber(tx.getHash()), tx))
+                .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -296,8 +296,8 @@ public final class SemuxApiServiceImpl implements SemuxApi {
         }
 
         resp.setResult(TypeFactory.transactionType(
-                        kernel.getBlockchain().getTransactionBlockNumber(transaction.getHash()),
-                        transaction));
+                kernel.getBlockchain().getTransactionBlockNumber(transaction.getHash()),
+                transaction));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -371,9 +371,9 @@ public final class SemuxApiServiceImpl implements SemuxApi {
     public Response getDelegates() {
         GetDelegatesResponse resp = new GetDelegatesResponse();
         resp.setResult(kernel.getBlockchain().getDelegateState().getDelegates().parallelStream()
-                        .map(delegate -> TypeFactory.delegateType(
-                                kernel.getBlockchain().getValidatorStats(delegate.getAddress()), delegate))
-                        .collect(Collectors.toList()));
+                .map(delegate -> TypeFactory.delegateType(
+                        kernel.getBlockchain().getValidatorStats(delegate.getAddress()), delegate))
+                .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -382,7 +382,7 @@ public final class SemuxApiServiceImpl implements SemuxApi {
     public Response getValidators() {
         GetValidatorsResponse resp = new GetValidatorsResponse();
         resp.setResult(kernel.getBlockchain().getValidators().parallelStream()
-                        .map(v -> Hex.PREF + v).collect(Collectors.toList()));
+                .map(v -> Hex.PREF + v).collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -413,7 +413,8 @@ public final class SemuxApiServiceImpl implements SemuxApi {
             return failure(resp, "Parameter `delegate` is not a valid hexadecimal string");
         }
 
-        resp.setResult(TypeFactory.encodeAmount(kernel.getBlockchain().getDelegateState().getVote(voterBytes, delegateBytes)));
+        resp.setResult(
+                TypeFactory.encodeAmount(kernel.getBlockchain().getDelegateState().getVote(voterBytes, delegateBytes)));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -433,9 +434,9 @@ public final class SemuxApiServiceImpl implements SemuxApi {
         }
 
         resp.setResult(kernel.getBlockchain().getDelegateState().getVotes(delegateBytes).entrySet().parallelStream()
-                                .collect(Collectors.toMap(
-                                        entry -> Hex.PREF + entry.getKey().toString(),
-                                        entry -> TypeFactory.encodeAmount(entry.getValue()))));
+                .collect(Collectors.toMap(
+                        entry -> Hex.PREF + entry.getKey().toString(),
+                        entry -> TypeFactory.encodeAmount(entry.getValue()))));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
