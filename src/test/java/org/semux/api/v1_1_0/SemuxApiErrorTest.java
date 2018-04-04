@@ -4,16 +4,22 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.v1_0_1;
+package org.semux.api.v1_1_0;
 
 import static java.lang.String.format;
+import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
+import javax.ws.rs.core.Response;
+
+import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -22,23 +28,24 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import org.semux.api.SemuxApiMock;
+import org.semux.api.ApiHandler;
+import org.semux.api.v1_1_0.impl.ApiHandlerImpl;
+import org.semux.api.v1_1_0.model.ApiHandlerResponse;
 import org.semux.crypto.Hex;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+
 /**
- * The test case covers validation rules of {@link ApiHandlerImpl}
- * 
- * @deprecated
+ * The test case covers validation rules of
+ * {@link org.semux.api.v1_1_0.impl.ApiHandlerImpl}
  */
 @RunWith(Parameterized.class)
-public class ApiHandlerErrorTest extends ApiHandlerTestBase {
+public class SemuxApiErrorTest extends SemuxApiTestBase {
 
     private static final String ADDRESS_PLACEHOLDER = "[wallet]";
-
-    @Rule
-    public KernelRule kernelRule = new KernelRule(51610, 51710);
 
     @Parameters(name = "request(\"{0}\")")
     public static Collection<Object[]> data() {
@@ -46,13 +53,13 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
                 { "/add_node" },
                 { "/add_node?node=I_am_not_a_node" },
                 { "/add_node?node=127.0.0.1:65536" },
-                // { "/add_node?node=.com:5161" },
+                { "/add_node?node=.com:5161" },
                 { "/add_to_blacklist" },
                 { "/add_to_blacklist?ip=I_am_not_an_IP" },
                 { "/add_to_whitelist" },
                 { "/add_to_whitelist?ip=I_am_not_an_IP" },
-                { "/get_block" },
-                { "/get_block?number=9999999999999999" },
+                { "/get_block_by_number" },
+                { "/get_block_by_number?number=9999999999999999" },
                 { "/get_account" },
                 { "/get_account?address=0xabc" },
                 { "/get_account?address=I_am_not_an_address" },
@@ -99,27 +106,33 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
 
     @Before
     public void setUp() {
-        api = new SemuxApiMock(kernelRule.getKernel());
-        api.start();
-
-        wallet = api.getKernel().getWallet();
-        config = api.getKernel().getConfig();
+        super.setUp();
     }
 
     @After
     public void tearDown() {
-        api.stop();
+        super.tearDown();
     }
 
     @Test
     public void testError() throws IOException {
         uri = uri.replace(ADDRESS_PLACEHOLDER, wallet.getAccount(0).toAddressString());
 
-        ApiHandlerResponse response = request(uri, ApiHandlerResponse.class);
-        assertFalse(response.success);
-        assertNotNull(response.message);
-
-        System.out.println(response.message);
+        WebClient webClient = WebClient.create(
+                String.format("http://%s:%d/v1.1%s", config.apiListenIp(), config.apiListenPort(), uri),
+                Collections.singletonList(new JacksonJsonProvider()),
+                config.apiUsername(),
+                config.apiPassword(),
+                null);
+        Response response = webClient.get();
+        assertNotNull(response);
+        ;
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        ApiHandlerResponse apiHandlerResponse = response.readEntity(ApiHandlerResponse.class);
+        assertNotNull(apiHandlerResponse);
+        assertNotNull(apiHandlerResponse.getMessage());
+        assertFalse(apiHandlerResponse.isSuccess());
+        System.out.println(apiHandlerResponse.getMessage());
     }
 
     private static String randomHex() {

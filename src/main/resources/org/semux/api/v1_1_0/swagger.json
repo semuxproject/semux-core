@@ -1118,6 +1118,9 @@
                 },
                 "message" : {
                     "type" : "string"
+                },
+                "result" : {
+                    "type" : "object"
                 }
             }
         },

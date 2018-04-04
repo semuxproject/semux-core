@@ -21,6 +21,9 @@ public class ApiHandlerResponse  {
 
   @ApiModelProperty(value = "")
   private String message = null;
+
+  @ApiModelProperty(value = "")
+  private Object result = null;
  /**
    * Get success
    * @return success
@@ -58,6 +61,24 @@ public class ApiHandlerResponse  {
     return this;
   }
 
+ /**
+   * Get result
+   * @return result
+  **/
+  @JsonProperty("result")
+  public Object getResult() {
+    return result;
+  }
+
+  public void setResult(Object result) {
+    this.result = result;
+  }
+
+  public ApiHandlerResponse result(Object result) {
+    this.result = result;
+    return this;
+  }
+
 
   @Override
   public String toString() {
@@ -66,6 +87,7 @@ public class ApiHandlerResponse  {
     
     sb.append("    success: ").append(toIndentedString(success)).append("\n");
     sb.append("    message: ").append(toIndentedString(message)).append("\n");
+    sb.append("    result: ").append(toIndentedString(result)).append("\n");
     sb.append("}");
     return sb.toString();
   }

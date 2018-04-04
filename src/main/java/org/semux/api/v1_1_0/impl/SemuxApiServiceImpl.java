@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.validator.routines.DomainValidator;
+import org.apache.commons.validator.routines.InetAddressValidator;
 import org.semux.Kernel;
 import org.semux.api.util.TransactionBuilder;
 import org.semux.api.v1_1_0.TypeFactory;
@@ -602,7 +604,17 @@ public final class SemuxApiServiceImpl implements SemuxApi {
             throw new IllegalArgumentException("Parameter `node` must in format of `host:port`");
         }
 
-        return new NodeManager.Node(matcher.group("host"), Integer.parseInt(matcher.group("port")));
+        String host = matcher.group("host");
+        if (!DomainValidator.getInstance().isValid(host) && !InetAddressValidator.getInstance().isValid(host)) {
+            throw new IllegalArgumentException("Parameter `host` must be a hostname or ip address`");
+        }
+
+        Integer port = Integer.parseInt(matcher.group("port"));
+        if (port < 0 || port > 65535) {
+            throw new IllegalArgumentException("Parameter `node` is invalid`");
+        }
+
+        return new NodeManager.Node(host, port);
     }
 
     private Response doTransaction(TransactionType type, String from, String to, String value, String fee,

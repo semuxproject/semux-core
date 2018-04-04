@@ -59,12 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.semux.api.SemuxApiMock;
 import org.semux.api.v1_1_0.model.AddNodeResponse;
 import org.semux.api.v1_1_0.model.BlockType;
 import org.semux.api.v1_1_0.model.CreateAccountResponse;
@@ -92,82 +87,27 @@ import org.semux.api.v1_1_0.model.SendTransactionResponse;
 import org.semux.api.v1_1_0.model.SignMessageResponse;
 import org.semux.api.v1_1_0.model.TransactionType;
 import org.semux.api.v1_1_0.model.VerifyMessageResponse;
-import org.semux.config.Config;
 import org.semux.core.Amount;
 import org.semux.core.Block;
-import org.semux.core.Blockchain;
 import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
-import org.semux.core.Wallet;
-import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.net.ChannelManager;
-import org.semux.net.NodeManager;
 import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
 import org.semux.net.filter.SemuxIpFilter;
-import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
-
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
 /**
  * API tests for {@link org.semux.api.v1_1_0.impl.SemuxApiServiceImpl}
  */
-public class SemuxApiTest {
-
-    @Rule
-    public KernelRule kernelRule = new KernelRule(51610, 51710);
-
-    private org.semux.api.v1_1_0.client.SemuxApi api;
-
-    private SemuxApiMock apiMock;
-
-    protected Config config;
-    protected Wallet wallet;
-
-    protected Blockchain chain;
-    protected AccountState accountState;
-    protected DelegateState delegateState;
-    protected PendingManager pendingMgr;
-    protected NodeManager nodeMgr;
-    protected ChannelManager channelMgr;
-
-    @Before
-    public void setUp() {
-        apiMock = new SemuxApiMock(kernelRule.getKernel());
-        apiMock.start();
-
-        config = apiMock.getKernel().getConfig();
-        wallet = apiMock.getKernel().getWallet();
-
-        chain = apiMock.getKernel().getBlockchain();
-        accountState = apiMock.getKernel().getBlockchain().getAccountState();
-        accountState.adjustAvailable(wallet.getAccount(0).toAddress(), SEM.of(5000));
-        delegateState = apiMock.getKernel().getBlockchain().getDelegateState();
-        pendingMgr = apiMock.getKernel().getPendingManager();
-        nodeMgr = apiMock.getKernel().getNodeManager();
-        channelMgr = apiMock.getKernel().getChannelManager();
-
-        api = JAXRSClientFactory.create(
-                "http://localhost:51710/v1.1",
-                org.semux.api.v1_1_0.client.SemuxApi.class,
-                Collections.singletonList(new JacksonJsonProvider()),
-                config.apiUsername(),
-                config.apiPassword(),
-                null);
-    }
-
-    @After
-    public void tearDown() {
-        apiMock.stop();
-    }
+public class SemuxApiTest extends SemuxApiTestBase {
 
     @Test
     public void addNodeTest() {
