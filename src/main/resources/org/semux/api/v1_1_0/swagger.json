@@ -22,13 +22,15 @@
     "produces" : [
         "application/json"
     ],
-    "host" : "localhost:5171",
-    "basePath" : "/v1.1.0",
+    "basePath" : "/v1.1",
     "securityDefinitions" : {
         "basicAuth" : {
             "type" : "basic"
         }
     },
+    "security" : [
+        {"basicAuth": []}
+    ],
     "paths" : {
         "/" : {
             "get" : {

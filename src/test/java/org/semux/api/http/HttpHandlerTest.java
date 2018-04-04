@@ -6,6 +6,8 @@
  */
 package org.semux.api.http;
 
+import static java.net.HttpURLConnection.HTTP_OK;
+import static junit.framework.TestCase.assertTrue;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 
@@ -132,6 +134,46 @@ public class HttpHandlerTest {
     }
 
     @Test
+    public void testGetStaticFiles() throws IOException {
+        startServer(null);
+
+        URL url = new URL("http://" + ip + ":" + port + "/v1.1/index.html");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestProperty("Authorization", auth);
+
+        StringBuilder lines = new StringBuilder();
+        Scanner s = new Scanner(con.getInputStream());
+        while (s.hasNextLine()) {
+            lines.append(s.nextLine());
+        }
+        s.close();
+
+        assertEquals(HTTP_OK, con.getResponseCode());
+        assertEquals("text/html", con.getHeaderField("content-type"));
+        assertTrue(lines.toString().length() > 1);
+    }
+
+    @Test
+    public void testGetStaticFiles404() throws IOException {
+        startServer(null);
+
+        URL url = new URL("http://" + ip + ":" + port + "/v1.1/xx.html");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestProperty("Authorization", auth);
+
+        StringBuilder lines = new StringBuilder();
+        Scanner s = new Scanner(con.getInputStream());
+        while (s.hasNextLine()) {
+            lines.append(s.nextLine());
+        }
+        s.close();
+
+        assertEquals(HTTP_OK, con.getResponseCode());
+        assertEquals("text/html", con.getHeaderField("content-type"));
+        assertTrue(lines.toString().length() > 1);
+    }
+
+    @Test
     public void testKeepAlive() throws IOException {
         startServer(null);
 
@@ -147,7 +189,7 @@ public class HttpHandlerTest {
             s.nextLine();
             s.close();
 
-            assertEquals(HttpURLConnection.HTTP_OK, con.getResponseCode());
+            assertEquals(HTTP_OK, con.getResponseCode());
             assertEquals("keep-alive", con.getHeaderField("connection"));
         }
     }

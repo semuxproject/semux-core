@@ -6,10 +6,17 @@
  */
 package org.semux.api.http;
 
+import static io.netty.handler.codec.http.HttpHeaderNames.CONNECTION;
+import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
+import static io.netty.handler.codec.http.HttpHeaderValues.CLOSE;
+import static io.netty.handler.codec.http.HttpHeaderValues.KEEP_ALIVE;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
+import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -20,13 +27,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.api.ApiHandler;
 import org.semux.api.Version;
-import org.semux.api.v1_1_0.impl.ApiHandlerImpl;
 import org.semux.config.Config;
 import org.semux.util.BasicAuth;
 import org.semux.util.Bytes;
@@ -38,18 +45,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.stream.ChunkedStream;
 import io.netty.util.CharsetUtil;
 
 /**
@@ -63,22 +74,38 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     protected static final int MAX_BODY_SIZE = 512 * 1024; // 512KB
     private static final Charset CHARSET = CharsetUtil.UTF_8;
     private static ObjectMapper objectMapper = new ObjectMapper();
+    private static MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap(
+            HttpHandler.class.getResourceAsStream("/org/semux/api/mime.types"));
+
+    private static final String CONTENT_TYPE_JSON = "application/json; charset=UTF-8";
+    private static final String RESPONSE_INTERNAL_SERVER_ERROR = "{\"success\":false,\"message\":\"500 Internal Server Error\"}";
+    private static final String RESPONSE_NOT_FOUND = "{\"success\":false,\"message\":\"404 Not Found\"}";
+    private static final String RESPONSE_BAD_REQUEST = "{\"success\":false,\"message\":\"400 Bad Request\"}";
 
     private Config config;
     private Map<Version, ApiHandler> apiHandlers = new ConcurrentHashMap<>();
 
-    private Object response = null;
-    private HttpResponseStatus status;
+    private Boolean isKeepAlive = false;
 
     public HttpHandler(Kernel kernel) {
         this.config = kernel.getConfig();
         this.apiHandlers.put(Version.v1_0_1, new org.semux.api.v1_0_1.ApiHandlerImpl(kernel));
-        this.apiHandlers.put(Version.v1_1_0, new ApiHandlerImpl(kernel));
+        this.apiHandlers.put(Version.v1_1_0, new org.semux.api.v1_1_0.impl.ApiHandlerImpl(kernel));
     }
 
-    public HttpHandler(Config config, ApiHandler apiHandler) {
+    /**
+     * For testing only.
+     *
+     * @param config
+     *            semux config instance.
+     * @param apiHandler
+     *            a customized ApiHandler for testing purpose.
+     */
+    protected HttpHandler(Config config, ApiHandler apiHandler) {
         this.config = config;
-        this.apiHandlers.put(Version.v1_0_1, apiHandler);
+        for (Version version : Version.values()) {
+            this.apiHandlers.put(version, apiHandler);
+        }
     }
 
     @Override
@@ -101,15 +128,18 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             resp.headers().set(HttpHeaderNames.WWW_AUTHENTICATE, "Basic realm=\"Semux RESTful API\"");
             resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
 
-            ctx.write(resp);
+            ctx.writeAndFlush(resp);
             return;
         }
 
         // check decoding result
-        if (!checkDecoderResult(msg)) {
-            writeResponse(ctx, false);
+        if (!msg.decoderResult().isSuccess()) {
+            writeJsonResponse(ctx, BAD_REQUEST, RESPONSE_BAD_REQUEST);
             return;
         }
+
+        // check if keep-alive is supported
+        isKeepAlive = HttpUtil.isKeepAlive(msg);
 
         // read request body
         ByteBuf content = msg.content();
@@ -142,35 +172,21 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             }
         }
 
-        // delegate the request to api handler if a response has not been generated
-        if (response == null) {
-            Version version = checkVersion(uri.toString());
-            response = apiHandlers
-                    .get(version)
-                    .service(uri.getPath().replaceAll("^/" + Version.prefixOf(version), ""), map, headers);
-
-            if (response instanceof javax.ws.rs.core.Response) {
-                status = HttpResponseStatus.valueOf(((Response) response).getStatus());
-                response = ((Response) response).getEntity();
-            } else {
-                status = OK;
-            }
+        // delegate the request
+        ChannelFuture lastContentFuture;
+        Version version = checkVersion(uri.toString());
+        String strippedUri = uri.getPath().replaceAll("^/" + Version.prefixOf(version), "");
+        if (version == Version.v1_1_0 && strippedUri.matches("^.+\\.(html|json|js|css|png)$")) { // static files
+            lastContentFuture = writeStaticFile(ctx, "/org/semux/api/v1_1_0", strippedUri);
+        } else { // api
+            boolean prettyPrint = Boolean.parseBoolean(map.get("pretty"));
+            Object response = apiHandlers.get(version).service(strippedUri, map, headers);
+            lastContentFuture = writeApiResponse(ctx, prettyPrint, response);
         }
 
-        // write response
-        boolean prettyPrint = Boolean.parseBoolean(map.get("pretty"));
-        writeResponse(ctx, prettyPrint);
-    }
-
-    private boolean checkDecoderResult(HttpObject o) {
-        DecoderResult result = o.decoderResult();
-        if (result.isSuccess()) {
-            return true;
+        if (!isKeepAlive) {
+            lastContentFuture.addListener(ChannelFutureListener.CLOSE);
         }
-
-        response = new org.semux.api.v1_1_0.model.ApiHandlerResponse().success(false).message(BAD_REQUEST.toString());
-        status = BAD_REQUEST;
-        return false;
     }
 
     private boolean checkBasicAuth(HttpHeaders headers) {
@@ -189,8 +205,31 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         return versionOptional.orElse(Version.v1_0_1);
     }
 
-    private void writeResponse(ChannelHandlerContext ctx, Boolean prettyPrint) {
-        // write response
+    private ChannelFuture writeStaticFile(ChannelHandlerContext ctx, String prefix, String filePath) {
+        InputStream inputStream = getClass().getResourceAsStream(prefix + filePath);
+        if (inputStream == null) {
+            return writeJsonResponse(ctx, NOT_FOUND, RESPONSE_NOT_FOUND);
+        }
+
+        DefaultHttpResponse resp = new DefaultHttpResponse(HTTP_1_1, OK);
+        resp.headers().set(CONNECTION, isKeepAlive ? KEEP_ALIVE : CLOSE);
+        resp.headers().set(CONTENT_TYPE, mimeTypesMap.getContentType(filePath));
+        HttpUtil.setTransferEncodingChunked(resp, true);
+        ctx.write(resp);
+
+        return ctx.writeAndFlush(new HttpChunkedInput(new ChunkedStream(inputStream)));
+    }
+
+    private ChannelFuture writeApiResponse(ChannelHandlerContext ctx, Boolean prettyPrint, Object response) {
+        HttpResponseStatus status;
+        if (response instanceof javax.ws.rs.core.Response) { // since v1.1, a standard JAX-RS response is provided
+            status = HttpResponseStatus.valueOf(((Response) response).getStatus());
+            response = ((Response) response).getEntity();
+        } else { // prior to v1.1, status is always OK
+            status = OK;
+        }
+
+        // encode response object
         String responseBody;
         try {
             if (prettyPrint) {
@@ -199,34 +238,37 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 responseBody = objectMapper.writeValueAsString(response);
             }
         } catch (JsonProcessingException e) {
-            responseBody = "{\"success\":false,\"message\":\"Internal server error\"}";
+            status = INTERNAL_SERVER_ERROR;
+            responseBody = RESPONSE_INTERNAL_SERVER_ERROR;
         }
 
+        return writeJsonResponse(ctx, status, responseBody);
+    }
+
+    private ChannelFuture writeJsonResponse(ChannelHandlerContext ctx, HttpResponseStatus status, String responseBody) {
+        return writeStringResponse(ctx, CONTENT_TYPE_JSON, status, responseBody);
+    }
+
+    private ChannelFuture writeStringResponse(ChannelHandlerContext ctx, String contentType, HttpResponseStatus status,
+            String responseBody) {
         // construct a HTTP response
-        FullHttpResponse resp = new DefaultFullHttpResponse(HTTP_1_1, status,
+        FullHttpResponse resp = new DefaultFullHttpResponse(
+                HTTP_1_1,
+                status,
                 Unpooled.copiedBuffer(responseBody == null ? "" : responseBody, CHARSET));
 
         // set response headers
-        if (resp.protocolVersion().isKeepAliveDefault()) {
-            resp.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-        }
-        resp.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=UTF-8");
-        resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
+        resp.headers().set(CONNECTION, isKeepAlive ? KEEP_ALIVE : CLOSE);
+        resp.headers().set(CONTENT_TYPE, contentType);
+        HttpUtil.setTransferEncodingChunked(resp, true);
 
         // write response
-        ctx.write(resp);
-
-        reset();
-    }
-
-    private void reset() {
-        response = null;
-        status = null;
+        return ctx.writeAndFlush(resp);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        logger.debug("Exception in API http handler", cause);
-        ctx.close();
+        logger.error("Exception in API http handler", cause);
+        writeJsonResponse(ctx, INTERNAL_SERVER_ERROR, RESPONSE_INTERNAL_SERVER_ERROR);
     }
 }
