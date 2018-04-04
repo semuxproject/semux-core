@@ -32,14 +32,11 @@ Prerequisites:
 1. Visual Studio 2012 build tools
 2. CMake 3.8+
 3. Download and unpack libsodium 1.0.16 pre-built binaries
+4. Set `sodiumDIR` environment variable
 
 Build:
 ```
 mkdir build && cd build
 cmake -G "Visual Studio 11 2012 x64" ..
-# build the solution with Visual Studio
+# Build the solution with Visual Studio
 ```
-
-
-
-
