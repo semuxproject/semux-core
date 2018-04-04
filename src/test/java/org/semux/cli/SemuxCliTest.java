@@ -59,7 +59,6 @@ import org.semux.crypto.Key;
 import org.semux.message.CliMessages;
 import org.semux.util.ConsoleUtil;
 import org.semux.util.SystemUtil;
-import org.semux.util.SystemUtil.OsName;
 
 import net.i2p.crypto.eddsa.KeyPairGenerator;
 

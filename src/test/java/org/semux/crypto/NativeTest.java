@@ -8,7 +8,6 @@ package org.semux.crypto;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.time.Duration;
@@ -46,9 +45,9 @@ public class NativeTest {
         Native.enable();
     }
 
-    @Test
+    @Test(expected = CryptoException.class)
     public void testBlake2bNull() {
-        assertNull(Native.blake2b(null));
+        Native.blake2b(null);
     }
 
     @Test
@@ -56,9 +55,9 @@ public class NativeTest {
         assertArrayEquals(BLAKE2B_HASH, Native.blake2b(MESSAGE));
     }
 
-    @Test
+    @Test(expected = CryptoException.class)
     public void testEd25519SignNull() {
-        assertNull(Native.ed25519_sign(null, null));
+        Native.ed25519_sign(null, null);
     }
 
     @Test
@@ -76,6 +75,7 @@ public class NativeTest {
         assertTrue(Native.ed25519_verify(MESSAGE, ED25519_SIGNATURE, PUBLIC_KEY));
     }
 
+    @Ignore
     @Test
     public void testCompatibility() {
         Key key = new Key();
@@ -95,7 +95,6 @@ public class NativeTest {
         assertArrayEquals(sig.getS(), sig2);
     }
 
-    @Ignore
     @Test
     public void benchmarkBlake2b() {
         byte[] data = Bytes.random(512);
@@ -170,7 +169,7 @@ public class NativeTest {
         // warm up
         for (int i = 0; i < repeat / 10; i++) {
             Native.ed25519_verify(data, sigNative, PUBLIC_KEY);
-            key.verify(data, sig);
+            Key.verify(data, sig);
         }
 
         // native
@@ -184,7 +183,7 @@ public class NativeTest {
         // java (JIT)
         start = Instant.now();
         for (int i = 0; i < repeat; i++) {
-            key.verify(data, sig);
+            Key.verify(data, sig);
         }
         end = Instant.now();
         logger.debug("Ed25519 verify java: " + Duration.between(start, end).toMillis() + "ms");

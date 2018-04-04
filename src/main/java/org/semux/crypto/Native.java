@@ -51,6 +51,8 @@ public class Native {
                 enabled = loadLibrary("/native/win64/libsodium.dll") && loadLibrary("/native/win64/crypto.dll");
             }
             break;
+        default:
+            break;
         }
     }
 
