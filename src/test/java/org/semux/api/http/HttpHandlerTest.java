@@ -6,6 +6,7 @@
  */
 package org.semux.api.http;
 
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static junit.framework.TestCase.assertTrue;
 import static org.awaitility.Awaitility.await;
@@ -161,16 +162,7 @@ public class HttpHandlerTest {
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("Authorization", auth);
 
-        StringBuilder lines = new StringBuilder();
-        Scanner s = new Scanner(con.getInputStream());
-        while (s.hasNextLine()) {
-            lines.append(s.nextLine());
-        }
-        s.close();
-
-        assertEquals(HTTP_OK, con.getResponseCode());
-        assertEquals("text/html", con.getHeaderField("content-type"));
-        assertTrue(lines.toString().length() > 1);
+        assertEquals(HTTP_NOT_FOUND, con.getResponseCode());
     }
 
     @Test
