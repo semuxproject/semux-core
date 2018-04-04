@@ -15,7 +15,6 @@ import java.time.Instant;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
@@ -37,6 +36,8 @@ public class NativeTest {
 
     @BeforeClass
     public static void setup() {
+        assertTrue(Native.isEnabled());
+
         Native.disable();
     }
 
@@ -75,22 +76,13 @@ public class NativeTest {
         assertTrue(Native.ed25519_verify(MESSAGE, ED25519_SIGNATURE, PUBLIC_KEY));
     }
 
-    @Ignore
     @Test
     public void testCompatibility() {
         Key key = new Key();
         Key.Signature sig = key.sign(MESSAGE);
 
-        logger.debug("seed  : " + Hex.encode(key.sk.getSeed()));
-        logger.debug("sk    : " + Hex.encode(key.sk.geta()));
-        logger.debug("pk    : " + Hex.encode(key.pk.getAbyte()));
-        logger.debug("sig   : " + Hex.encode(sig.getS()));
-        logger.debug("--------------------");
-
         byte[] pk2 = Bytes.merge(key.sk.getSeed(), key.sk.getAbyte());
         byte[] sig2 = Native.ed25519_sign(MESSAGE, pk2);
-        logger.debug("sk 2  : " + Hex.encode(pk2));
-        logger.debug("sig 2 : " + Hex.encode(sig2));
 
         assertArrayEquals(sig.getS(), sig2);
     }
@@ -98,7 +90,7 @@ public class NativeTest {
     @Test
     public void benchmarkBlake2b() {
         byte[] data = Bytes.random(512);
-        int repeat = 50_000;
+        int repeat = 20_000;
 
         // warm up
         for (int i = 0; i < repeat / 10; i++) {
@@ -124,11 +116,10 @@ public class NativeTest {
         assertArrayEquals(Hash.h256(data), Native.blake2b(data));
     }
 
-    @Ignore
     @Test
     public void benchmarkEd25519Sign() {
         byte[] data = Bytes.random(512);
-        int repeat = 50_000;
+        int repeat = 20_000;
 
         Key key = new Key();
 
@@ -155,11 +146,10 @@ public class NativeTest {
         logger.debug("Ed25519 sign java: " + Duration.between(start, end).toMillis() + "ms");
     }
 
-    @Ignore
     @Test
     public void benchmarkEd25519Verify() {
         byte[] data = Bytes.random(512);
-        int repeat = 50_000;
+        int repeat = 20_000;
 
         Key key = new Key();
         Key.Signature sig = key.sign(data);
