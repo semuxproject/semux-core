@@ -34,7 +34,6 @@ public class Native {
         SystemUtil.OsName os = SystemUtil.getOsName();
         switch (os) {
         case LINUX:
-            // TODO: add 32-bit linux build
             if (SystemUtil.is32bitJvm()) {
                 enabled = loadLibrary("/native/linux32/libsodium.so.23") && loadLibrary("/native/linux32/libcrypto.so");
             } else {
