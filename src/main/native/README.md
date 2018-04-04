@@ -4,7 +4,7 @@
 
 
 Prerequisites:
-1. Build and install libsodium
+1. Build and install libsodium 1.0.16
 
 Build:
 ```
@@ -16,7 +16,7 @@ make
 ## Build on macOS
 
 Prerequisites:
-1. Build and install libsodium
+1. Build and install libsodium 1.0.16
 
 Build:
 ```
@@ -31,7 +31,7 @@ install_name_tool -change "/usr/local/lib/libsodium.23.dylib" "@loader_path/libs
 Prerequisites:
 1. Visual Studio 2012 build tools
 2. CMake 3.8+
-3. Download and unpack libsodium pre-built binaries
+3. Download and unpack libsodium 1.0.16 pre-built binaries
 
 Build:
 ```
