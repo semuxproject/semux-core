@@ -48,7 +48,7 @@ import javax.validation.Valid;
  * <p>Semux is an experimental high-performance blockchain platform that powers decentralized application.
  *
  */
-@Path("/v1.0.2")
+@Path("/v1.1.0")
 @Api(value = "/", description = "")
 public interface SemuxApi  {
 

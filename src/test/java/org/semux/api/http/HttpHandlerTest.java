@@ -130,4 +130,25 @@ public class HttpHandlerTest {
         assertEquals("f", params.get("e"));
         assertEquals("d", headers.get("c"));
     }
+
+    @Test
+    public void testKeepAlive() throws IOException {
+        startServer(null);
+
+        for (int i = 0; i < 2; i++) {
+            URL url = new URL("http://" + ip + ":" + port + "/");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setUseCaches(false);
+            con.setRequestMethod("GET");
+            con.setRequestProperty("Connection", "keep-alive");
+            con.setRequestProperty("Authorization", auth);
+
+            Scanner s = new Scanner(con.getInputStream());
+            s.nextLine();
+            s.close();
+
+            assertEquals(HttpURLConnection.HTTP_OK, con.getResponseCode());
+            assertEquals("keep-alive", con.getHeaderField("connection"));
+        }
+    }
 }

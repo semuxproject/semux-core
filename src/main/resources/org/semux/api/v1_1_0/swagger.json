@@ -23,7 +23,7 @@
         "application/json"
     ],
     "host" : "localhost:5171",
-    "basePath" : "/v1.0.2",
+    "basePath" : "/v1.1.0",
     "securityDefinitions" : {
         "basicAuth" : {
             "type" : "basic"

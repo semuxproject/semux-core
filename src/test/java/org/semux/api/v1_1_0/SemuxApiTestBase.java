@@ -11,7 +11,6 @@ import static org.semux.core.Amount.Unit.SEM;
 import java.util.Collections;
 
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
-import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
