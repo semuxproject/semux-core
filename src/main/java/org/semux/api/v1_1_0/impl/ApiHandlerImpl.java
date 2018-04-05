@@ -41,7 +41,7 @@ import io.swagger.models.Swagger;
  */
 public class ApiHandlerImpl implements ApiHandler {
 
-    protected static Logger logger = LoggerFactory.getLogger(ApiHandlerImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ApiHandlerImpl.class);
 
     private final SemuxApiServiceImpl semuxApi;
 
