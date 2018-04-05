@@ -35,3 +35,6 @@ dist/
 
 # JVM crash dumps
 hs_err_pid*
+
+# ignore generated files
+src/gen
