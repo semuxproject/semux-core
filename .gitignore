@@ -14,6 +14,9 @@
 /node*
 /addressbook.json
 
+# cmake build dir
+build/
+
 # maven generated files
 target/
 dist/

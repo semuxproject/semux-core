@@ -94,12 +94,12 @@ public class Key {
 
     /**
      * Creates an ED25519 key pair with the specified public and private keys.
-     * 
+     *
      * @param privateKey
      *            the private key in "PKCS#8" format
      * @param publicKey
      *            the public key in "X.509" format, for verification purpose only
-     * 
+     *
      * @throws InvalidKeySpecException
      */
     public Key(byte[] privateKey, byte[] publicKey) throws InvalidKeySpecException {
@@ -141,17 +141,22 @@ public class Key {
     }
 
     /**
-     * Signs a message hash.
+     * Signs a message.
      * 
-     * @param msgHash
-     *            message hash
+     * @param message
+     *            message
      * @return
      */
-    public Signature sign(byte[] msgHash) {
+    public Signature sign(byte[] message) {
         try {
-            EdDSAEngine engine = new EdDSAEngine();
-            engine.initSign(sk);
-            byte[] sig = engine.signOneShot(msgHash);
+            byte[] sig;
+            if (Native.isEnabled()) {
+                sig = Native.ed25519_sign(message, Bytes.merge(sk.getSeed(), sk.getAbyte()));
+            } else {
+                EdDSAEngine engine = new EdDSAEngine();
+                engine.initSign(sk);
+                sig = engine.signOneShot(message);
+            }
 
             return new Signature(sig, pk.getAbyte());
         } catch (InvalidKeyException | SignatureException e) {
@@ -162,19 +167,23 @@ public class Key {
     /**
      * Verifies a signature.
      * 
-     * @param msgHash
-     *            message hash
+     * @param message
+     *            message
      * @param signature
      *            signature
      * @return True if the signature is valid, otherwise false
      */
-    public static boolean verify(byte[] msgHash, Signature signature) {
-        if (msgHash != null && signature != null) { // avoid null pointer exception
+    public static boolean verify(byte[] message, Signature signature) {
+        if (message != null && signature != null) { // avoid null pointer exception
             try {
-                EdDSAEngine engine = new EdDSAEngine();
-                engine.initVerify(PublicKeyCache.computeIfAbsent(signature.getPublicKey()));
+                if (Native.isEnabled()) {
+                    return Native.ed25519_verify(message, signature.getS(), signature.getA());
+                } else {
+                    EdDSAEngine engine = new EdDSAEngine();
+                    engine.initVerify(PublicKeyCache.computeIfAbsent(signature.getPublicKey()));
 
-                return engine.verifyOneShot(msgHash, signature.getS());
+                    return engine.verifyOneShot(message, signature.getS());
+                }
             } catch (Exception e) {
                 // do nothing
             }
@@ -186,16 +195,16 @@ public class Key {
     /**
      * Verifies a signature.
      * 
-     * @param msgHash
+     * @param message
      *            message hash
      * @param signature
      *            signature
      * @return True if the signature is valid, otherwise false
      */
-    public static boolean verify(byte[] msgHash, byte[] signature) {
+    public static boolean verify(byte[] message, byte[] signature) {
         Signature sig = Signature.fromBytes(signature);
 
-        return verify(msgHash, sig);
+        return verify(message, sig);
     }
 
     /**

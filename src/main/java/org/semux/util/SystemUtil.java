@@ -128,6 +128,26 @@ public class SystemUtil {
     }
 
     /**
+     * Returns whether the JVM is in 32-bit data model
+     *
+     * @return
+     */
+    public static boolean is32bitJvm() {
+        String model = System.getProperty("sun.arch.data.model");
+        return model != null && model.contains("32");
+    }
+
+    /**
+     * Returns whether the JVM is in 64-bit data model
+     *
+     * @return
+     */
+    public static boolean is64bitJvm() {
+        String model = System.getProperty("sun.arch.data.model");
+        return model != null && model.contains("64");
+    }
+
+    /**
      * Returns the public IP address of this peer.
      *
      * @return an IP address if available, otherwise local address
@@ -204,9 +224,8 @@ public class SystemUtil {
     public static boolean bench() {
         Runtime rt = Runtime.getRuntime();
 
-        // check JVM with best effort
-        String model = System.getProperty("sun.arch.data.model");
-        if (model != null && model.contains("32")) {
+        // check JVM data model
+        if (is32bitJvm()) {
             logger.info("You're running 32-bit JVM. Please consider upgrading to 64-bit JVM");
             return false;
         }
