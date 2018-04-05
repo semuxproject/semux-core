@@ -15,6 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.semux.api.SemuxApiMock;
+import org.semux.api.Version;
 import org.semux.config.Config;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
@@ -61,7 +62,7 @@ public abstract class SemuxApiTestBase {
         channelMgr = apiMock.getKernel().getChannelManager();
 
         api = JAXRSClientFactory.create(
-                "http://localhost:51710/v1.1",
+                "http://localhost:51710/" + Version.prefixOf(Version.v1_1_0),
                 org.semux.api.v1_1_0.client.SemuxApi.class,
                 Collections.singletonList(new JacksonJsonProvider()),
                 config.apiUsername(),

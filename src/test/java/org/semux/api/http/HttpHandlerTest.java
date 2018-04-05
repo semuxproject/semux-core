@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
+import org.semux.api.Version;
 import org.semux.api.v1_0_1.ApiHandlerResponse;
 import org.semux.rules.KernelRule;
 import org.semux.util.BasicAuth;
@@ -138,7 +139,7 @@ public class HttpHandlerTest {
     public void testGetStaticFiles() throws IOException {
         startServer(null);
 
-        URL url = new URL("http://" + ip + ":" + port + "/v1.1/index.html");
+        URL url = new URL("http://" + ip + ":" + port + "/" + Version.prefixOf(Version.v1_1_0) + "/index.html");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("Authorization", auth);
 
@@ -158,7 +159,7 @@ public class HttpHandlerTest {
     public void testGetStaticFiles404() throws IOException {
         startServer(null);
 
-        URL url = new URL("http://" + ip + ":" + port + "/v1.1/xx.html");
+        URL url = new URL("http://" + ip + ":" + port + "/" + Version.prefixOf(Version.v1_1_0) + "/xx.html");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("Authorization", auth);
 

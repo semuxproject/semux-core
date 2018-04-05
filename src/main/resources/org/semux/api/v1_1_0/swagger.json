@@ -22,7 +22,7 @@
     "produces" : [
         "application/json"
     ],
-    "basePath" : "/v1.1",
+    "basePath" : "/v1.1.0",
     "securityDefinitions" : {
         "basicAuth" : {
             "type" : "basic"

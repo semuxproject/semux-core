@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.semux.api.Version;
 import org.semux.api.v1_1_0.model.ApiHandlerResponse;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
@@ -130,7 +131,7 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
         uri = uri.replace(ADDRESS_PLACEHOLDER, wallet.getAccount(0).toAddressString());
 
         WebClient webClient = WebClient.create(
-                String.format("http://%s:%d/v1.1%s", config.apiListenIp(), config.apiListenPort(), uri),
+                String.format("http://%s:%d/%s%s", config.apiListenIp(), config.apiListenPort(), Version.prefixOf(Version.v1_1_0), uri),
                 Collections.singletonList(new JacksonJsonProvider()),
                 config.apiUsername(),
                 config.apiPassword(),

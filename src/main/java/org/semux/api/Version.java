@@ -19,7 +19,7 @@ public enum Version {
         case v1_0_1:
             return "v1.0.1";
         case v1_1_0:
-            return "v1.1";
+            return "v1.1.0";
         default:
             throw new UnreachableException();
         }
@@ -29,7 +29,7 @@ public enum Version {
         switch (prefix) {
         case "v1.0.1":
             return v1_0_1;
-        case "v1.1":
+        case "v1.1.0":
             return v1_1_0;
         default:
             return null;

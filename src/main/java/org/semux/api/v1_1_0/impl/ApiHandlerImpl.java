@@ -10,7 +10,6 @@ package org.semux.api.v1_1_0.impl;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
