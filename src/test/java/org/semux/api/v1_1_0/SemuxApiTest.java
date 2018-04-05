@@ -480,7 +480,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String fee = String.valueOf(config.minTransactionFee().getNano());
         String data = Hex.encode(Bytes.of("test_transfer"));
 
-        DoTransactionResponse response = api.transfer(value, from, to, fee, data);
+        DoTransactionResponse response = api.transfer(from, to, value, fee, data);
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());

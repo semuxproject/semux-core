@@ -65,7 +65,7 @@ public class HttpHandlerTest {
         new Thread(() -> server.start(ip, port, httpChannelInitializer == null ? new HttpChannelInitializer() {
             @Override
             HttpHandler initHandler() {
-                return new HttpHandler(kernel.getConfig(), (u, p, h) -> {
+                return new HttpHandler(kernel.getConfig(), (m, u, p, h) -> {
                     uri = u;
                     params = p;
                     headers = h;

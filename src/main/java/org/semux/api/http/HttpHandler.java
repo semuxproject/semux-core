@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.ws.rs.core.Response;
@@ -55,7 +56,6 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
@@ -77,10 +77,12 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap(
             HttpHandler.class.getResourceAsStream("/org/semux/api/mime.types"));
 
-    private static final String CONTENT_TYPE_JSON = "application/json; charset=UTF-8";
-    private static final String RESPONSE_INTERNAL_SERVER_ERROR = "{\"success\":false,\"message\":\"500 Internal Server Error\"}";
-    private static final String RESPONSE_NOT_FOUND = "{\"success\":false,\"message\":\"404 Not Found\"}";
-    private static final String RESPONSE_BAD_REQUEST = "{\"success\":false,\"message\":\"400 Bad Request\"}";
+    private static final String JSON_CONTENT_TYPE = "application/json; charset=UTF-8";
+    private static final String INTERNAL_SERVER_ERROR_RESPONSE = "{\"success\":false,\"message\":\"500 Internal Server Error\"}";
+    private static final String NOT_FOUND_RESPONSE = "{\"success\":false,\"message\":\"404 Not Found\"}";
+    private static final String BAD_REQUEST_RESPONSE = "{\"success\":false,\"message\":\"400 Bad Request\"}";
+
+    private static final Pattern STATIC_FILE_PATTERN = Pattern.compile("^.+\\.(html|json|js|css|png)$");
 
     private Config config;
     private Map<Version, ApiHandler> apiHandlers = new ConcurrentHashMap<>();
@@ -134,7 +136,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
         // check decoding result
         if (!msg.decoderResult().isSuccess()) {
-            writeJsonResponse(ctx, BAD_REQUEST, RESPONSE_BAD_REQUEST);
+            writeJsonResponse(ctx, BAD_REQUEST, BAD_REQUEST_RESPONSE);
             return;
         }
 
@@ -174,13 +176,13 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
         // delegate the request
         ChannelFuture lastContentFuture;
-        Version version = checkVersion(uri.toString());
-        String strippedUri = uri.getPath().replaceAll("^/" + Version.prefixOf(version), "");
-        if (version == Version.v1_1_0 && strippedUri.matches("^.+\\.(html|json|js|css|png)$")) { // static files
-            lastContentFuture = writeStaticFile(ctx, "/org/semux/api/v1_1_0", strippedUri);
+        Version version = checkVersionPrefix(uri.toString());
+        final String path = uri.getPath();
+        if (STATIC_FILE_PATTERN.matcher(path).matches()) { // static files
+            lastContentFuture = writeStaticFile(ctx, "/org/semux/api", uriToResourcePath(path));
         } else { // api
             boolean prettyPrint = Boolean.parseBoolean(map.get("pretty"));
-            Object response = apiHandlers.get(version).service(strippedUri, map, headers);
+            Object response = apiHandlers.get(version).service(msg.method(), path, map, headers);
             lastContentFuture = writeApiResponse(ctx, prettyPrint, response);
         }
 
@@ -197,7 +199,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 && MessageDigest.isEqual(Bytes.of(auth.getRight()), Bytes.of(config.apiPassword()));
     }
 
-    private Version checkVersion(String uri) {
+    private Version checkVersionPrefix(String uri) {
         Optional<Version> versionOptional = Arrays.stream(uri.split("/"))
                 .filter(s -> s.startsWith("v"))
                 .findFirst()
@@ -205,10 +207,20 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         return versionOptional.orElse(Version.v1_0_1);
     }
 
+    private String uriToResourcePath(String uri) {
+        for (Version version : Version.values()) {
+            String versionRegex = Version.prefixOf(version).replace(".", "\\.");
+            if (uri.matches("^/" + versionRegex + ".*$")) {
+                return uri.replaceFirst(versionRegex, version.toString().replace(".", "_"));
+            }
+        }
+        return uri;
+    }
+
     private ChannelFuture writeStaticFile(ChannelHandlerContext ctx, String prefix, String filePath) {
         InputStream inputStream = getClass().getResourceAsStream(prefix + filePath);
         if (inputStream == null) {
-            return writeJsonResponse(ctx, NOT_FOUND, RESPONSE_NOT_FOUND);
+            return writeJsonResponse(ctx, NOT_FOUND, NOT_FOUND_RESPONSE);
         }
 
         DefaultHttpResponse resp = new DefaultHttpResponse(HTTP_1_1, OK);
@@ -239,14 +251,14 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             }
         } catch (JsonProcessingException e) {
             status = INTERNAL_SERVER_ERROR;
-            responseBody = RESPONSE_INTERNAL_SERVER_ERROR;
+            responseBody = INTERNAL_SERVER_ERROR_RESPONSE;
         }
 
         return writeJsonResponse(ctx, status, responseBody);
     }
 
     private ChannelFuture writeJsonResponse(ChannelHandlerContext ctx, HttpResponseStatus status, String responseBody) {
-        return writeStringResponse(ctx, CONTENT_TYPE_JSON, status, responseBody);
+        return writeStringResponse(ctx, JSON_CONTENT_TYPE, status, responseBody);
     }
 
     private ChannelFuture writeStringResponse(ChannelHandlerContext ctx, String contentType, HttpResponseStatus status,
@@ -269,6 +281,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         logger.error("Exception in API http handler", cause);
-        writeJsonResponse(ctx, INTERNAL_SERVER_ERROR, RESPONSE_INTERNAL_SERVER_ERROR);
+        writeJsonResponse(ctx, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_RESPONSE);
     }
 }

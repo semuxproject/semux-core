@@ -9,20 +9,25 @@ package org.semux.api;
 import java.util.Map;
 
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
 
 /**
  * Semux RESTful API handler.
- *
  */
 public interface ApiHandler {
 
     /**
-     * Processes API request.
-     * 
+     * Service object.
+     *
+     * @param method
+     *            the method
      * @param uri
+     *            the uri
      * @param params
+     *            the params
      * @param headers
-     * @return
+     *            the headers
+     * @return the response object
      */
-    Object service(String uri, Map<String, String> params, HttpHeaders headers);
+    Object service(HttpMethod method, String uri, Map<String, String> params, HttpHeaders headers);
 }

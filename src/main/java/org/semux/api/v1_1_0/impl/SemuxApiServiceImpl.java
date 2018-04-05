@@ -77,38 +77,6 @@ public final class SemuxApiServiceImpl implements SemuxApi {
         this.kernel = kernel;
     }
 
-    public Response failure(ApiHandlerResponse resp, String message) {
-        resp.setSuccess(false);
-        resp.setMessage(message);
-        return Response.status(BAD_REQUEST).entity(resp).build();
-    }
-
-    @Override
-    public Response getRoot() {
-        GetRootResponse resp = new GetRootResponse();
-        resp.setMessage("Semux API Works!");
-        resp.setSuccess(true);
-        return Response.ok().entity(resp).build();
-    }
-
-    @Override
-    public Response getInfo() {
-        GetInfoResponse resp = new GetInfoResponse();
-        resp.setResult(TypeFactory.infoType(kernel));
-        resp.setSuccess(true);
-        return Response.ok().entity(resp).build();
-    }
-
-    @Override
-    public Response getPeers() {
-        GetPeersResponse resp = new GetPeersResponse();
-        resp.setResult(kernel.getChannelManager().getActivePeers().parallelStream()
-                .map(TypeFactory::peerType)
-                .collect(Collectors.toList()));
-        resp.setSuccess(true);
-        return Response.ok().entity(resp).build();
-    }
-
     @Override
     public Response addNode(String node) {
         AddNodeResponse resp = new AddNodeResponse();
@@ -159,77 +127,46 @@ public final class SemuxApiServiceImpl implements SemuxApi {
     }
 
     @Override
-    public Response getLatestBlockNumber() {
-        GetLatestBlockNumberResponse resp = new GetLatestBlockNumberResponse();
-        resp.result(String.valueOf(kernel.getBlockchain().getLatestBlockNumber()));
-        resp.success(true);
-        return Response.ok().entity(resp).build();
-    }
-
-    @Override
-    public Response getLatestBlock() {
-        GetLatestBlockResponse resp = new GetLatestBlockResponse();
-        resp.setResult(TypeFactory.blockType(kernel.getBlockchain().getLatestBlock()));
-        resp.setSuccess(true);
-        return Response.ok().entity(resp).build();
-    }
-
-    @Override
-    public Response getBlockByNumber(String blockNum) {
-        GetBlockResponse resp = new GetBlockResponse();
-
-        if (blockNum == null) {
-            return failure(resp, "Parameter `number` is required");
-        }
-
-        Long blockNumLong;
+    public Response createAccount(String name) {
+        CreateAccountResponse resp = new CreateAccountResponse();
         try {
-            blockNumLong = Long.parseLong(blockNum);
-        } catch (NumberFormatException e) {
-            return failure(resp, "Parameter `number` is not a valid number");
-        }
+            // create an account
+            Key key = new Key();
+            kernel.getWallet().addAccount(key);
 
-        Block block = kernel.getBlockchain().getBlock(blockNumLong);
-        if (block == null) {
-            return failure(resp, "The requested block was not found");
-        }
+            // set alias of the address
+            if (isSet(name)) {
+                kernel.getWallet().setAddressAlias(key.toAddress(), name);
+            }
 
-        resp.setResult(TypeFactory.blockType(block));
-        resp.setSuccess(true);
-        return Response.ok().entity(resp).build();
+            // save the account
+            kernel.getWallet().flush();
+            resp.setResult(Hex.PREF + key.toAddressString());
+            resp.setSuccess(true);
+            return Response.ok().entity(resp).build();
+        } catch (WalletLockedException e) {
+            return failure(resp, e.getMessage());
+        }
     }
 
     @Override
-    public Response getBlockByHash(String hashString) {
-        GetBlockResponse resp = new GetBlockResponse();
-        if (!isSet(hashString)) {
-            return failure(resp, "Parameter `hash` is required");
+    public Response getAccount(String address) {
+        GetAccountResponse resp = new GetAccountResponse();
+
+        if (!isSet(address)) {
+            return failure(resp, "Parameter `address` is required");
         }
 
-        byte[] hash;
+        byte[] addressBytes;
         try {
-            hash = Hex.decode0x(hashString);
+            addressBytes = Hex.decode0x(address);
         } catch (CryptoException ex) {
-            return failure(resp, "Parameter `hash` is not a valid hexadecimal string");
+            return failure(resp, "Parameter `address` is not a valid hexadecimal string");
         }
 
-        Block block = kernel.getBlockchain().getBlock(hash);
-        if (block == null) {
-            return failure(resp, "The requested block was not found");
-        }
-
-        resp.setResult(TypeFactory.blockType(block));
-        resp.setSuccess(true);
-        return Response.ok().entity(resp).build();
-    }
-
-    @Override
-    public Response getPendingTransactions() {
-        GetPendingTransactionsResponse resp = new GetPendingTransactionsResponse();
-        resp.result(kernel.getPendingManager().getPendingTransactions().parallelStream()
-                .map(pendingTransaction -> pendingTransaction.transaction)
-                .map(tx -> TypeFactory.transactionType(null, tx))
-                .collect(Collectors.toList()));
+        Account account = kernel.getBlockchain().getAccountState().getAccount(addressBytes);
+        int transactionCount = kernel.getBlockchain().getTransactionCount(account.getAddress());
+        resp.setResult(TypeFactory.accountType(account, transactionCount));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -278,67 +215,50 @@ public final class SemuxApiServiceImpl implements SemuxApi {
     }
 
     @Override
-    public Response getTransaction(String hash) {
-        GetTransactionResponse resp = new GetTransactionResponse();
-
-        if (!isSet(hash)) {
+    public Response getBlockByHash(String hashString) {
+        GetBlockResponse resp = new GetBlockResponse();
+        if (!isSet(hashString)) {
             return failure(resp, "Parameter `hash` is required");
         }
 
-        byte[] hashBytes;
+        byte[] hash;
         try {
-            hashBytes = Hex.decode0x(hash);
+            hash = Hex.decode0x(hashString);
         } catch (CryptoException ex) {
             return failure(resp, "Parameter `hash` is not a valid hexadecimal string");
         }
 
-        Transaction transaction = kernel.getBlockchain().getTransaction(hashBytes);
-        if (transaction == null) {
-            return failure(resp, "The request transaction was not found");
+        Block block = kernel.getBlockchain().getBlock(hash);
+        if (block == null) {
+            return failure(resp, "The requested block was not found");
         }
 
-        resp.setResult(TypeFactory.transactionType(
-                kernel.getBlockchain().getTransactionBlockNumber(transaction.getHash()),
-                transaction));
+        resp.setResult(TypeFactory.blockType(block));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
 
     @Override
-    public Response sendTransaction(String raw) {
-        SendTransactionResponse resp = new SendTransactionResponse();
+    public Response getBlockByNumber(String blockNum) {
+        GetBlockResponse resp = new GetBlockResponse();
 
-        if (!isSet(raw)) {
-            return failure(resp, "Parameter `raw` is required");
+        if (blockNum == null) {
+            return failure(resp, "Parameter `number` is required");
         }
 
+        Long blockNumLong;
         try {
-            kernel.getPendingManager().addTransaction(Transaction.fromBytes(Hex.decode0x(raw)));
-            resp.setSuccess(true);
-            return Response.ok().entity(resp).build();
-        } catch (CryptoException e) {
-            return failure(resp, "Parameter `raw` is not a valid hexadecimal string");
-        }
-    }
-
-    @Override
-    public Response getAccount(String address) {
-        GetAccountResponse resp = new GetAccountResponse();
-
-        if (!isSet(address)) {
-            return failure(resp, "Parameter `address` is required");
+            blockNumLong = Long.parseLong(blockNum);
+        } catch (NumberFormatException e) {
+            return failure(resp, "Parameter `number` is not a valid number");
         }
 
-        byte[] addressBytes;
-        try {
-            addressBytes = Hex.decode0x(address);
-        } catch (CryptoException ex) {
-            return failure(resp, "Parameter `address` is not a valid hexadecimal string");
+        Block block = kernel.getBlockchain().getBlock(blockNumLong);
+        if (block == null) {
+            return failure(resp, "The requested block was not found");
         }
 
-        Account account = kernel.getBlockchain().getAccountState().getAccount(addressBytes);
-        int transactionCount = kernel.getBlockchain().getTransactionCount(account.getAddress());
-        resp.setResult(TypeFactory.accountType(account, transactionCount));
+        resp.setResult(TypeFactory.blockType(block));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -378,6 +298,101 @@ public final class SemuxApiServiceImpl implements SemuxApi {
                 .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
+    }
+
+    @Override
+    public Response getInfo() {
+        GetInfoResponse resp = new GetInfoResponse();
+        resp.setResult(TypeFactory.infoType(kernel));
+        resp.setSuccess(true);
+        return Response.ok().entity(resp).build();
+    }
+
+    @Override
+    public Response getLatestBlock() {
+        GetLatestBlockResponse resp = new GetLatestBlockResponse();
+        resp.setResult(TypeFactory.blockType(kernel.getBlockchain().getLatestBlock()));
+        resp.setSuccess(true);
+        return Response.ok().entity(resp).build();
+    }
+
+    @Override
+    public Response getLatestBlockNumber() {
+        GetLatestBlockNumberResponse resp = new GetLatestBlockNumberResponse();
+        resp.result(String.valueOf(kernel.getBlockchain().getLatestBlockNumber()));
+        resp.success(true);
+        return Response.ok().entity(resp).build();
+    }
+
+    @Override
+    public Response getPeers() {
+        GetPeersResponse resp = new GetPeersResponse();
+        resp.setResult(kernel.getChannelManager().getActivePeers().parallelStream()
+                .map(TypeFactory::peerType)
+                .collect(Collectors.toList()));
+        resp.setSuccess(true);
+        return Response.ok().entity(resp).build();
+    }
+
+    @Override
+    public Response getPendingTransactions() {
+        GetPendingTransactionsResponse resp = new GetPendingTransactionsResponse();
+        resp.result(kernel.getPendingManager().getPendingTransactions().parallelStream()
+                .map(pendingTransaction -> pendingTransaction.transaction)
+                .map(tx -> TypeFactory.transactionType(null, tx))
+                .collect(Collectors.toList()));
+        resp.setSuccess(true);
+        return Response.ok().entity(resp).build();
+    }
+
+    @Override
+    public Response getRoot() {
+        GetRootResponse resp = new GetRootResponse();
+        resp.setMessage("Semux API Works!");
+        resp.setSuccess(true);
+        return Response.ok().entity(resp).build();
+    }
+
+    @Override
+    public Response getTransaction(String hash) {
+        GetTransactionResponse resp = new GetTransactionResponse();
+
+        if (!isSet(hash)) {
+            return failure(resp, "Parameter `hash` is required");
+        }
+
+        byte[] hashBytes;
+        try {
+            hashBytes = Hex.decode0x(hash);
+        } catch (CryptoException ex) {
+            return failure(resp, "Parameter `hash` is not a valid hexadecimal string");
+        }
+
+        Transaction transaction = kernel.getBlockchain().getTransaction(hashBytes);
+        if (transaction == null) {
+            return failure(resp, "The request transaction was not found");
+        }
+
+        resp.setResult(TypeFactory.transactionType(
+                kernel.getBlockchain().getTransactionBlockNumber(transaction.getHash()),
+                transaction));
+        resp.setSuccess(true);
+        return Response.ok().entity(resp).build();
+    }
+
+    @Override
+    public Response getTransactionLimits(String type) {
+        GetTransactionLimitsResponse resp = new GetTransactionLimitsResponse();
+        try {
+            resp.setResult(TypeFactory.transactionLimitsType(kernel, TransactionType.valueOf(type)));
+            resp.setSuccess(true);
+            return Response.ok().entity(resp).build();
+        } catch (NullPointerException | IllegalArgumentException e) {
+            return failure(resp, String.format("Invalid transaction type. (must be one of %s)",
+                    Arrays.stream(TransactionType.values())
+                            .map(TransactionType::toString)
+                            .collect(Collectors.joining(","))));
+        }
     }
 
     @Override
@@ -454,60 +469,24 @@ public final class SemuxApiServiceImpl implements SemuxApi {
     }
 
     @Override
-    public Response createAccount(String name) {
-        CreateAccountResponse resp = new CreateAccountResponse();
-        try {
-            // create an account
-            Key key = new Key();
-            kernel.getWallet().addAccount(key);
-
-            // set alias of the address
-            if (isSet(name)) {
-                kernel.getWallet().setAddressAlias(key.toAddress(), name);
-            }
-
-            // save the account
-            kernel.getWallet().flush();
-            resp.setResult(Hex.PREF + key.toAddressString());
-            resp.setSuccess(true);
-            return Response.ok().entity(resp).build();
-        } catch (WalletLockedException e) {
-            return failure(resp, e.getMessage());
-        }
-    }
-
-    @Override
-    public Response transfer(String from, String to, String value, String fee, String data) {
-        return doTransaction(TransactionType.TRANSFER, from, to, value, fee, data);
-    }
-
-    @Override
     public Response registerDelegate(String from, String fee, String delegateName) {
         return doTransaction(TransactionType.DELEGATE, from, null, null, fee, delegateName);
     }
 
     @Override
-    public Response vote(String from, String to, String value, String fee) {
-        return doTransaction(TransactionType.VOTE, from, to, value, fee, null);
-    }
+    public Response sendTransaction(String raw) {
+        SendTransactionResponse resp = new SendTransactionResponse();
 
-    @Override
-    public Response unvote(String from, String to, String value, String fee) {
-        return doTransaction(TransactionType.UNVOTE, from, to, value, fee, null);
-    }
+        if (!isSet(raw)) {
+            return failure(resp, "Parameter `raw` is required");
+        }
 
-    @Override
-    public Response getTransactionLimits(String type) {
-        GetTransactionLimitsResponse resp = new GetTransactionLimitsResponse();
         try {
-            resp.setResult(TypeFactory.transactionLimitsType(kernel, TransactionType.valueOf(type)));
+            kernel.getPendingManager().addTransaction(Transaction.fromBytes(Hex.decode0x(raw)));
             resp.setSuccess(true);
             return Response.ok().entity(resp).build();
-        } catch (NullPointerException | IllegalArgumentException e) {
-            return failure(resp, String.format("Invalid transaction type. (must be one of %s)",
-                    Arrays.stream(TransactionType.values())
-                            .map(TransactionType::toString)
-                            .collect(Collectors.joining(","))));
+        } catch (CryptoException e) {
+            return failure(resp, "Parameter `raw` is not a valid hexadecimal string");
         }
     }
 
@@ -545,6 +524,16 @@ public final class SemuxApiServiceImpl implements SemuxApi {
         } catch (NullPointerException | IllegalArgumentException e) {
             return failure(resp, "Invalid message");
         }
+    }
+
+    @Override
+    public Response transfer(String from, String to, String value, String fee, String data) {
+        return doTransaction(TransactionType.TRANSFER, from, to, value, fee, data);
+    }
+
+    @Override
+    public Response unvote(String from, String to, String value, String fee) {
+        return doTransaction(TransactionType.UNVOTE, from, to, value, fee, null);
     }
 
     @Override
@@ -587,11 +576,22 @@ public final class SemuxApiServiceImpl implements SemuxApi {
         return Response.ok().entity(resp).build();
     }
 
+    @Override
+    public Response vote(String from, String to, String value, String fee) {
+        return doTransaction(TransactionType.VOTE, from, to, value, fee, null);
+    }
+
+    public Response failure(ApiHandlerResponse resp, String message) {
+        resp.setSuccess(false);
+        resp.setMessage(message);
+        return Response.status(BAD_REQUEST).entity(resp).build();
+    }
+
     /**
      * Validates node parameter of /add_node API
      *
      * @param node
-     *            node parameter of /add_node API
+     *         node parameter of /add_node API
      * @return validated hostname and port number
      */
     private NodeManager.Node validateAddNodeParameter(String node) {

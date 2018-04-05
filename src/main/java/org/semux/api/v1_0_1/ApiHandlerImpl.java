@@ -10,10 +10,12 @@ import java.util.Map;
 
 import org.semux.Kernel;
 import org.semux.api.ApiHandler;
+import org.semux.api.Version;
 import org.semux.api.v1_0_1.response.GetRootResponse;
 import org.semux.util.exception.UnreachableException;
 
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
 
 /**
  * Semux RESTful API handler implementation.
@@ -36,7 +38,10 @@ public class ApiHandlerImpl implements ApiHandler {
     }
 
     @Override
-    public ApiHandlerResponse service(String uri, Map<String, String> params, HttpHeaders headers) {
+    public ApiHandlerResponse service(HttpMethod method, String uri, Map<String, String> params, HttpHeaders headers) {
+        // strip version prefix
+        uri = uri.replaceAll("^/" + Version.prefixOf(Version.v1_0_1), "");
+
         if ("/".equals(uri)) {
             return new GetRootResponse(true, "Semux API works");
         }
