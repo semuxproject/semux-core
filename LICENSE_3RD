@@ -6,10 +6,23 @@ Apache Commons:
     https://commons.apache.org/
     Apache License, Version 2.0
 
+Apache CXF:
+    https://cxf.apache.org/
+    Apache License, Version 2.0
+
+Apache XmlSchema Core:
+    http://ws.apache.org/xmlschema/xmlschema-core/
+    Apache License, Version 2.0
+
 Bouncy Castle:
     https://www.bouncycastle.org/
     Copyright (c) 2000 - 2017 The Legion of the Bouncy Castle Inc.
     Bouncy Castle License
+
+Bean Validation API:
+    http://beanvalidation.org/
+    Copyright (c) Red Hat, Inc.
+    Apache License, Version 2.0
 
 Caffeine:
     https://github.com/ben-manes/caffeine
@@ -19,8 +32,16 @@ EdDSA-Java:
     https://github.com/str4d/ed25519-java
     CC0 1.0 Universal
 
-Jackson:
+FasterXML Jackson:
     https://github.com/FasterXML/jackson
+    Apache License, Version 2.0
+
+FasterXML Stax2 API:
+    https://github.com/FasterXML/stax2-api
+    BSD License
+
+Google Guava:
+    https://github.com/google/guava
     Apache License, Version 2.0
 
 Java SemVer:
@@ -28,9 +49,14 @@ Java SemVer:
     Copyright 2012-2014 Zafar Khaja <zafarkhaja@gmail.com>.
     MIT License
 
-JAX-RS API
+JAX-RS API:
     Copyright (c) 2011-2012 Oracle
     http://jax-rs-spec.java.net
+    CDDL License Version 1.1
+
+JAXB API:
+    https://javaee.github.io/jaxb-v2/
+    Copyright (c) Oracle
     CDDL License Version 1.1
 
 JNA:
@@ -58,6 +84,10 @@ Oshi:
     https://github.com/oshi/oshi
     Eclipse Public License - v1.0
 
+Reflections:
+    https://github.com/ronmamo/reflections
+    BSD License
+
 SLF4J:
     Copyright (c) 2004-2017 QOS.ch
     https://www.slf4j.org/
@@ -67,7 +97,11 @@ Snappy Java:
     https://github.com/xerial/snappy-java
     Apache License, Version 2.0
 
-Swagger Annotations
+SnakeYAML:
+    http://www.snakeyaml.org
+    Apache License, Version 2.0
+
+Swagger API:
     Copyright 2016 SmartBear Software
     https://swagger.io/
     Apache License, Version 2.0
