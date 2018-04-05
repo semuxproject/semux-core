@@ -58,9 +58,8 @@ public class ApiHandlerImpl implements ApiHandler {
 
     @Override
     public Object service(HttpMethod method, String uri, Map<String, String> params, HttpHeaders headers) {
-        if (uri.matches("^/?$")) {
-            return semuxApi.getRoot();
-        }
+        // strip trailing slash
+        uri = uri.replaceAll("/$", "");
 
         Route route = routes.get(ImmutablePair.of(method, uri));
         if (route == null) {
