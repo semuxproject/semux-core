@@ -170,6 +170,7 @@
                             <configOptions>
                                 <useGenericResponse>true</useGenericResponse>
                                 <useAnnotatedBasePath>true</useAnnotatedBasePath>
+                                <useBeanValidationFeature>false</useBeanValidationFeature>
                             </configOptions>
 
                             <generateModels>true</generateModels>
@@ -196,6 +197,9 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/org/semux/api/v1_1_0/swagger.json</inputSpec>
                             <language>jaxrs-cxf-client</language>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                             <generateModels>false</generateModels>
                             <generateModelTests>false</generateModelTests>
                             <generateModelDocumentation>false</generateModelDocumentation>
@@ -780,11 +784,6 @@
         </dependency>
 
         <!-- Java 9 Deprecated Packages Required by JAX-RS -->
-        <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-            <version>1.1.0.Final</version>
-        </dependency>
         <dependency>
             <groupId>javax.activation</groupId>
             <artifactId>activation</artifactId>
