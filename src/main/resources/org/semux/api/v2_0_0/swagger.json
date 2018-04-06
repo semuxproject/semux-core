@@ -52,7 +52,7 @@
                 }
             }
         },
-        "/add_node" : {
+        "/node" : {
             "post" : {
                 "tags": [
                     "semux"
@@ -87,8 +87,8 @@
                 ]
             }
         },
-        "/add_to_blacklist" : {
-            "post" : {
+        "/blacklist" : {
+            "put" : {
                 "tags": [
                     "semux"
                 ],
@@ -122,8 +122,8 @@
                 ]
             }
         },
-        "/add_to_whitelist" : {
-            "post" : {
+        "/whitelist" : {
+            "put" : {
                 "tags": [
                     "semux"
                 ],
@@ -157,7 +157,40 @@
                 ]
             }
         },
-        "/create_account" : {
+        "/account" : {
+            "get" : {
+                "tags": [
+                    "semux"
+                ],
+                "summary" : "Get account",
+                "description" : "Returns an account.",
+                "operationId" : "getAccount",
+                "produces" : [
+                    "application/json"
+                ],
+                "parameters" : [
+                    {
+                        "name" : "address",
+                        "in" : "query",
+                        "description" : "Address of account",
+                        "required" : true,
+                        "type" : "string"
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "successful operation",
+                        "schema" : {
+                            "$ref" : "#/definitions/GetAccountResponse"
+                        }
+                    }
+                },
+                "security" : [
+                    {
+                        "basicAuth" : [ ]
+                    }
+                ]
+            },
             "post" : {
                 "tags": [
                     "semux"
@@ -193,65 +226,13 @@
             }
         },
         "/delegate" : {
-            "post" : {
-                "tags": [
-                    "semux"
-                ],
-                "summary" : "Register delegate",
-                "description" : "Registers as a delegate",
-                "operationId" : "registerDelegate",
-                "produces" : [
-                    "application/json"
-                ],
-                "parameters" : [
-                    {
-                        "name" : "from",
-                        "in" : "query",
-                        "description" : "Registering address",
-                        "required" : true,
-                        "type" : "string"
-                    },
-                    {
-                        "name" : "fee",
-                        "in" : "query",
-                        "description" : "Transaction fee",
-                        "required" : true,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^\\d+$"
-                    },
-                    {
-                        "name" : "data",
-                        "in" : "query",
-                        "description" : "Delegate name",
-                        "required" : true,
-                        "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
-                    }
-                ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/DoTransactionResponse"
-                        }
-                    }
-                },
-                "security" : [
-                    {
-                        "basicAuth" : [ ]
-                    }
-                ]
-            }
-        },
-        "/get_account" : {
             "get" : {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get account",
-                "description" : "Returns an account.",
-                "operationId" : "getAccount",
+                "summary" : "Get a delegate",
+                "description" : "Returns a delegate.",
+                "operationId" : "getDelegate",
                 "produces" : [
                     "application/json"
                 ],
@@ -259,7 +240,7 @@
                     {
                         "name" : "address",
                         "in" : "query",
-                        "description" : "Address of account",
+                        "description" : "Delegate address",
                         "required" : true,
                         "type" : "string"
                     }
@@ -268,7 +249,7 @@
                     "200" : {
                         "description" : "successful operation",
                         "schema" : {
-                            "$ref" : "#/definitions/GetAccountResponse"
+                            "$ref" : "#/definitions/GetDelegateResponse"
                         }
                     }
                 },
@@ -279,7 +260,7 @@
                 ]
             }
         },
-        "/get_account_transactions" : {
+        "/account/transactions" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -328,7 +309,7 @@
                 ]
             }
         },
-        "/get_block_by_hash" : {
+        "/block-by-hash" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -364,7 +345,7 @@
                 ]
             }
         },
-        "/get_block_by_number" : {
+        "/block-by-number" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -401,42 +382,7 @@
                 ]
             }
         },
-        "/get_delegate" : {
-            "get" : {
-                "tags": [
-                    "semux"
-                ],
-                "summary" : "Get a delegate",
-                "description" : "Returns a delegate.",
-                "operationId" : "getDelegate",
-                "produces" : [
-                    "application/json"
-                ],
-                "parameters" : [
-                    {
-                        "name" : "address",
-                        "in" : "query",
-                        "description" : "Delegate address",
-                        "required" : true,
-                        "type" : "string"
-                    }
-                ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetDelegateResponse"
-                        }
-                    }
-                },
-                "security" : [
-                    {
-                        "basicAuth" : [ ]
-                    }
-                ]
-            }
-        },
-        "/get_delegates" : {
+        "/delegates" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -462,7 +408,7 @@
                 ]
             }
         },
-        "/get_info" : {
+        "/info" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -488,7 +434,7 @@
                 ]
             }
         },
-        "/get_latest_block" : {
+        "/latest-block" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -514,7 +460,7 @@
                 ]
             }
         },
-        "/get_latest_block_number" : {
+        "/latest-block-number" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -540,7 +486,7 @@
                 ]
             }
         },
-        "/get_peers" : {
+        "/peers" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -566,7 +512,7 @@
                 ]
             }
         },
-        "/get_pending_transactions" : {
+        "/pending-transactions" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -592,7 +538,7 @@
                 ]
             }
         },
-        "/get_transaction" : {
+        "/transaction" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -627,7 +573,7 @@
                 ]
             }
         },
-        "/get_transaction_limits" : {
+        "/transaction-limits" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -662,7 +608,7 @@
                 ]
             }
         },
-        "/get_validators" : {
+        "/validators" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -688,7 +634,7 @@
                 ]
             }
         },
-        "/get_vote" : {
+        "/vote" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -730,7 +676,7 @@
                 ]
             }
         },
-        "/get_votes" : {
+        "/votes" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -765,7 +711,7 @@
                 ]
             }
         },
-        "/list_accounts" : {
+        "/accounts" : {
             "get" : {
                 "tags": [
                     "semux"
@@ -791,43 +737,7 @@
                 ]
             }
         },
-        "/send_transaction" : {
-            "post" : {
-                "tags": [
-                    "semux"
-                ],
-                "summary" : "Send a raw transaction",
-                "description" : "Broadcasts a raw transaction to the network.",
-                "operationId" : "sendTransaction",
-                "produces" : [
-                    "application/json"
-                ],
-                "parameters" : [
-                    {
-                        "name" : "raw",
-                        "in" : "query",
-                        "description" : "Raw transaction",
-                        "required" : true,
-                        "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
-                    }
-                ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/SendTransactionResponse"
-                        }
-                    }
-                },
-                "security" : [
-                    {
-                        "basicAuth" : [ ]
-                    }
-                ]
-            }
-        },
-        "/sign_message" : {
+        "/sign-message" : {
             "post" : {
                 "tags": [
                     "semux"
@@ -869,7 +779,56 @@
                 ]
             }
         },
-        "/transfer" : {
+        "/verify-message" : {
+            "get" : {
+                "tags": [
+                    "semux"
+                ],
+                "summary" : "Verify a message",
+                "description" : "Verify a signed message.",
+                "operationId" : "verifyMessage",
+                "produces" : [
+                    "application/json"
+                ],
+                "parameters" : [
+                    {
+                        "name" : "address",
+                        "in" : "query",
+                        "description" : "Address",
+                        "required" : true,
+                        "type" : "string"
+                    },
+                    {
+                        "name" : "message",
+                        "in" : "query",
+                        "description" : "Message",
+                        "required" : true,
+                        "type" : "string"
+                    },
+                    {
+                        "name" : "signature",
+                        "in" : "query",
+                        "description" : "Signature to verify",
+                        "required" : true,
+                        "type" : "string"
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "successful operation",
+                        "schema" : {
+                            "$ref" : "#/definitions/VerifyMessageResponse"
+                        }
+                    }
+                },
+                "security" : [
+                    {
+                        "basicAuth" : [ ]
+                    }
+                ]
+            }
+        },
+        "/transaction/transfer" : {
             "post" : {
                 "tags": [
                     "semux"
@@ -937,7 +896,7 @@
                 ]
             }
         },
-        "/unvote" : {
+        "/transaction/unvote" : {
             "post" : {
                 "tags": [
                     "semux"
@@ -997,56 +956,7 @@
                 ]
             }
         },
-        "/verify_message" : {
-            "get" : {
-                "tags": [
-                    "semux"
-                ],
-                "summary" : "Verify a message",
-                "description" : "Verify a signed message.",
-                "operationId" : "verifyMessage",
-                "produces" : [
-                    "application/json"
-                ],
-                "parameters" : [
-                    {
-                        "name" : "address",
-                        "in" : "query",
-                        "description" : "Address",
-                        "required" : true,
-                        "type" : "string"
-                    },
-                    {
-                        "name" : "message",
-                        "in" : "query",
-                        "description" : "Message",
-                        "required" : true,
-                        "type" : "string"
-                    },
-                    {
-                        "name" : "signature",
-                        "in" : "query",
-                        "description" : "Signature to verify",
-                        "required" : true,
-                        "type" : "string"
-                    }
-                ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/VerifyMessageResponse"
-                        }
-                    }
-                },
-                "security" : [
-                    {
-                        "basicAuth" : [ ]
-                    }
-                ]
-            }
-        },
-        "/vote" : {
+        "/transaction/vote" : {
             "post" : {
                 "tags": [
                     "semux"
@@ -1096,6 +1006,94 @@
                         "description" : "successful operation",
                         "schema" : {
                             "$ref" : "#/definitions/DoTransactionResponse"
+                        }
+                    }
+                },
+                "security" : [
+                    {
+                        "basicAuth" : [ ]
+                    }
+                ]
+            }
+        },
+        "/transaction/delegate": {
+            "post" : {
+                "tags": [
+                    "semux"
+                ],
+                "summary" : "Register delegate",
+                "description" : "Registers as a delegate",
+                "operationId" : "registerDelegate",
+                "produces" : [
+                    "application/json"
+                ],
+                "parameters" : [
+                    {
+                        "name" : "from",
+                        "in" : "query",
+                        "description" : "Registering address",
+                        "required" : true,
+                        "type" : "string"
+                    },
+                    {
+                        "name" : "fee",
+                        "in" : "query",
+                        "description" : "Transaction fee",
+                        "required" : true,
+                        "type" : "string",
+                        "format" : "int64",
+                        "pattern" : "^\\d+$"
+                    },
+                    {
+                        "name" : "data",
+                        "in" : "query",
+                        "description" : "Delegate name",
+                        "required" : true,
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "successful operation",
+                        "schema" : {
+                            "$ref" : "#/definitions/DoTransactionResponse"
+                        }
+                    }
+                },
+                "security" : [
+                    {
+                        "basicAuth" : [ ]
+                    }
+                ]
+            }
+        },
+        "/transaction/raw" : {
+            "post" : {
+                "tags": [
+                    "semux"
+                ],
+                "summary" : "Broadcast a raw transaction",
+                "description" : "Broadcasts a raw transaction to the network.",
+                "operationId" : "broadcastRawTransaction",
+                "produces" : [
+                    "application/json"
+                ],
+                "parameters" : [
+                    {
+                        "name" : "raw",
+                        "in" : "query",
+                        "description" : "Raw transaction",
+                        "required" : true,
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "successful operation",
+                        "schema" : {
+                            "$ref" : "#/definitions/SendTransactionResponse"
                         }
                     }
                 },

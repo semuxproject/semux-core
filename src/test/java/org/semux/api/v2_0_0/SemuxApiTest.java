@@ -438,7 +438,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     public void sendTransactionTest() throws InterruptedException {
         Transaction tx = createTransaction(config);
 
-        SendTransactionResponse response = api.sendTransaction(Hex.encode(tx.toBytes()));
+        SendTransactionResponse response = api.broadcastRawTransaction(Hex.encode(tx.toBytes()));
         assertTrue(response.isSuccess());
 
         Thread.sleep(200);

@@ -474,7 +474,7 @@ public final class SemuxApiServiceImpl implements SemuxApi {
     }
 
     @Override
-    public Response sendTransaction(String raw) {
+    public Response broadcastRawTransaction(String raw) {
         SendTransactionResponse resp = new SendTransactionResponse();
 
         if (!isSet(raw)) {
