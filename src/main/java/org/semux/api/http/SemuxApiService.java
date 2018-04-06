@@ -10,7 +10,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.Kernel;
-import org.semux.api.ApiHandlerImpl;
+import org.semux.api.v1_0_1.ApiHandlerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,7 +128,7 @@ public class SemuxApiService {
 
         @Override
         public HttpHandler initHandler() {
-            return new HttpHandler(kernel.getConfig(), new ApiHandlerImpl(kernel));
+            return new HttpHandler(kernel);
         }
     }
 }

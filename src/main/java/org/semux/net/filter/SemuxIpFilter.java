@@ -31,7 +31,6 @@ import io.netty.handler.ipfilter.IpFilterRuleType;
  * SemuxIpFilter is responsible for matching IP address of incoming connection
  * against defined rules in ipconfig.json
  *
- * <p>
  * Example Definition of Blacklisting IP Addresses:
  * <p>
  * <blockquote>

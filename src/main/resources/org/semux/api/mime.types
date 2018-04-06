@@ -1,0 +1,4 @@
+type=text/javascript    exts=js
+type=text/css   exts=css
+type=text/html  exts=html,htm
+type=application/json  exts=json,map

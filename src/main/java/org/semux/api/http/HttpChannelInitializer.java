@@ -9,16 +9,20 @@ package org.semux.api.http;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.HttpServerKeepAliveHandler;
+import io.netty.handler.stream.ChunkedWriteHandler;
 
 public abstract class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
     public void initChannel(SocketChannel ch) {
         ChannelPipeline p = ch.pipeline();
-        p.addLast(new HttpRequestDecoder());
-        p.addLast(new HttpResponseEncoder());
+        p.addLast(new HttpServerCodec());
+        p.addLast(new HttpServerKeepAliveHandler());
+        p.addLast(new HttpObjectAggregator(HttpHandler.MAX_BODY_SIZE));
+        p.addLast(new ChunkedWriteHandler());
         p.addLast(initHandler());
     }
 

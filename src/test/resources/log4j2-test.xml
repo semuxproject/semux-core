@@ -17,7 +17,8 @@
 
         <Logger name="io.netty" level="ERROR" />
         <Logger name="oshi" level="DEBUG" />
-        
+        <Logger name="io.swagger" level="ERROR" />
+
         <Root level="DEBUG">
             <AppenderRef ref="Console"/>
         </Root>
