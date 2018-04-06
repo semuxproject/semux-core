@@ -28,7 +28,7 @@
  * limitations under the License.
  */
 
-package org.semux.api.v1_1_0;
+package org.semux.api.v2_0_0;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertArrayEquals;
@@ -60,33 +60,33 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
-import org.semux.api.v1_1_0.model.AddNodeResponse;
-import org.semux.api.v1_1_0.model.BlockType;
-import org.semux.api.v1_1_0.model.CreateAccountResponse;
-import org.semux.api.v1_1_0.model.DelegateType;
-import org.semux.api.v1_1_0.model.DoTransactionResponse;
-import org.semux.api.v1_1_0.model.GetAccountResponse;
-import org.semux.api.v1_1_0.model.GetAccountTransactionsResponse;
-import org.semux.api.v1_1_0.model.GetBlockResponse;
-import org.semux.api.v1_1_0.model.GetDelegateResponse;
-import org.semux.api.v1_1_0.model.GetDelegatesResponse;
-import org.semux.api.v1_1_0.model.GetInfoResponse;
-import org.semux.api.v1_1_0.model.GetLatestBlockNumberResponse;
-import org.semux.api.v1_1_0.model.GetLatestBlockResponse;
-import org.semux.api.v1_1_0.model.GetPeersResponse;
-import org.semux.api.v1_1_0.model.GetPendingTransactionsResponse;
-import org.semux.api.v1_1_0.model.GetRootResponse;
-import org.semux.api.v1_1_0.model.GetTransactionLimitsResponse;
-import org.semux.api.v1_1_0.model.GetTransactionResponse;
-import org.semux.api.v1_1_0.model.GetValidatorsResponse;
-import org.semux.api.v1_1_0.model.GetVoteResponse;
-import org.semux.api.v1_1_0.model.GetVotesResponse;
-import org.semux.api.v1_1_0.model.ListAccountsResponse;
-import org.semux.api.v1_1_0.model.PeerType;
-import org.semux.api.v1_1_0.model.SendTransactionResponse;
-import org.semux.api.v1_1_0.model.SignMessageResponse;
-import org.semux.api.v1_1_0.model.TransactionType;
-import org.semux.api.v1_1_0.model.VerifyMessageResponse;
+import org.semux.api.v2_0_0.model.AddNodeResponse;
+import org.semux.api.v2_0_0.model.BlockType;
+import org.semux.api.v2_0_0.model.CreateAccountResponse;
+import org.semux.api.v2_0_0.model.DelegateType;
+import org.semux.api.v2_0_0.model.DoTransactionResponse;
+import org.semux.api.v2_0_0.model.GetAccountResponse;
+import org.semux.api.v2_0_0.model.GetAccountTransactionsResponse;
+import org.semux.api.v2_0_0.model.GetBlockResponse;
+import org.semux.api.v2_0_0.model.GetDelegateResponse;
+import org.semux.api.v2_0_0.model.GetDelegatesResponse;
+import org.semux.api.v2_0_0.model.GetInfoResponse;
+import org.semux.api.v2_0_0.model.GetLatestBlockNumberResponse;
+import org.semux.api.v2_0_0.model.GetLatestBlockResponse;
+import org.semux.api.v2_0_0.model.GetPeersResponse;
+import org.semux.api.v2_0_0.model.GetPendingTransactionsResponse;
+import org.semux.api.v2_0_0.model.GetRootResponse;
+import org.semux.api.v2_0_0.model.GetTransactionLimitsResponse;
+import org.semux.api.v2_0_0.model.GetTransactionResponse;
+import org.semux.api.v2_0_0.model.GetValidatorsResponse;
+import org.semux.api.v2_0_0.model.GetVoteResponse;
+import org.semux.api.v2_0_0.model.GetVotesResponse;
+import org.semux.api.v2_0_0.model.ListAccountsResponse;
+import org.semux.api.v2_0_0.model.PeerType;
+import org.semux.api.v2_0_0.model.SendTransactionResponse;
+import org.semux.api.v2_0_0.model.SignMessageResponse;
+import org.semux.api.v2_0_0.model.TransactionType;
+import org.semux.api.v2_0_0.model.VerifyMessageResponse;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
@@ -105,7 +105,7 @@ import org.semux.util.Bytes;
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
 /**
- * API tests for {@link org.semux.api.v1_1_0.impl.SemuxApiServiceImpl}
+ * API tests for {@link org.semux.api.v2_0_0.impl.SemuxApiServiceImpl}
  */
 public class SemuxApiTest extends SemuxApiTestBase {
 

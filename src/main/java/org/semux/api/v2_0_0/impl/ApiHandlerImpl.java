@@ -5,7 +5,7 @@
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 
-package org.semux.api.v1_1_0.impl;
+package org.semux.api.v2_0_0.impl;
 
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
@@ -23,8 +23,8 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.semux.Kernel;
 import org.semux.api.ApiHandler;
-import org.semux.api.v1_1_0.api.SemuxApi;
-import org.semux.api.v1_1_0.model.ApiHandlerResponse;
+import org.semux.api.v2_0_0.api.SemuxApi;
+import org.semux.api.v2_0_0.model.ApiHandlerResponse;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

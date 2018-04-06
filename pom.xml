@@ -157,7 +157,7 @@
                 <artifactId>swagger-codegen-maven-plugin</artifactId>
                 <version>2.3.1</version>
                 <executions>
-                    <!-- v1.1.0 api interfaces `src/gen/java/org/semux/api/v1_1_0/api` & `src/gen/java/org/semux/api/v1_1_0/model` -->
+                    <!-- v2.0.0 api interfaces `src/gen/java/org/semux/api/v2_0_0/api` & `src/gen/java/org/semux/api/v2_0_0/model` -->
                     <execution>
                         <id>swagger-codegen-1_1_0</id>
                         <phase>generate-sources</phase>
@@ -165,7 +165,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/v1_1_0/swagger.json</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/v2_0_0/swagger.json</inputSpec>
                             <language>jaxrs-cxf</language>
                             <configOptions>
                                 <useGenericResponse>true</useGenericResponse>
@@ -183,11 +183,11 @@
 
                             <addCompileSourceRoot>true</addCompileSourceRoot>
                             <output>${project.basedir}</output>
-                            <modelPackage>org.semux.api.v1_1_0.model</modelPackage>
-                            <apiPackage>org.semux.api.v1_1_0.api</apiPackage>
+                            <modelPackage>org.semux.api.v2_0_0.model</modelPackage>
+                            <apiPackage>org.semux.api.v2_0_0.api</apiPackage>
                         </configuration>
                     </execution>
-                    <!-- v1.1.0 api client interface `src/gen/java/org/semux/api/v1_1_0/client/SemuxApi.java` -->
+                    <!-- v2.0.0 api client interface `src/gen/java/org/semux/api/v2_0_0/client/SemuxApi.java` -->
                     <execution>
                         <id>swagger-codegen-1_1_0-client</id>
                         <phase>generate-sources</phase>
@@ -195,7 +195,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/v1_1_0/swagger.json</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/v2_0_0/swagger.json</inputSpec>
                             <language>jaxrs-cxf-client</language>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
@@ -210,8 +210,8 @@
 
                             <addCompileSourceRoot>true</addCompileSourceRoot>
                             <output>${project.basedir}</output>
-                            <modelPackage>org.semux.api.v1_1_0.model</modelPackage>
-                            <apiPackage>org.semux.api.v1_1_0.client</apiPackage>
+                            <modelPackage>org.semux.api.v2_0_0.model</modelPackage>
+                            <apiPackage>org.semux.api.v2_0_0.client</apiPackage>
                         </configuration>
                     </execution>
                 </executions>
