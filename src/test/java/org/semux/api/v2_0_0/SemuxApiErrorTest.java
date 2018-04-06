@@ -6,19 +6,21 @@
  */
 package org.semux.api.v2_0_0;
 
-import static java.lang.String.format;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.After;
@@ -29,6 +31,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.semux.api.Version;
+import org.semux.api.v2_0_0.api.SemuxApi;
 import org.semux.api.v2_0_0.model.ApiHandlerResponse;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
@@ -47,74 +50,144 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
     @Parameters(name = "request(\"{1}\")")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                { POST.class, "/add_node" },
-                { POST.class, "/add_node?node=I_am_not_a_node" },
-                { POST.class, "/add_node?node=127.0.0.1:65536" },
-                { POST.class, "/add_node?node=.com:5161" },
-                { POST.class, "/add_to_blacklist" },
-                { POST.class, "/add_to_blacklist?ip=I_am_not_an_IP" },
-                { POST.class, "/add_to_whitelist" },
-                { POST.class, "/add_to_whitelist?ip=I_am_not_an_IP" },
-                { GET.class, "/get_block_by_number" },
-                { GET.class, "/get_block_by_number?number=9999999999999999" },
-                { GET.class, "/get_block_by_hash" },
-                { GET.class, "/get_block_by_hash?hash=xxx" },
-                { GET.class, "/get_account" },
-                { GET.class, "/get_account?address=0xabc" },
-                { GET.class, "/get_account?address=I_am_not_an_address" },
-                { GET.class, "/get_delegate" },
-                { GET.class, "/get_delegate?address=" + Hex.encode(Bytes.random(20)) },
-                { GET.class, "/get_delegate?address=I_am_not_an_address" },
-                { GET.class, "/get_account_transactions" },
-                { GET.class, "/get_account_transactions?address=I_am_not_an_address" },
-                { GET.class, format("/get_account_transactions?address=%s", randomHex()) },
-                { GET.class, format("/get_account_transactions?address=%s&from=%s", randomHex(), "I_am_not_a_number") },
+                { POST.class, uriBuilder("addNode").build() },
+
+                { POST.class, uriBuilder("addNode").queryParam("node", "I_am_not_a_node").build() },
+
+                { POST.class, uriBuilder("addNode").queryParam("node", "127.0.0.1:65536").build() },
+
+                { POST.class, uriBuilder("addNode").queryParam("node", ".com:65536").build() },
+
+                { PUT.class, uriBuilder("addToBlacklist").build() },
+
+                { PUT.class, uriBuilder("addToBlacklist").queryParam("ip", "I_am_not_an_ip").build() },
+
+                { PUT.class, uriBuilder("addToWhitelist").build() },
+
+                { PUT.class, uriBuilder("addToWhitelist").queryParam("ip", "I_am_not_an_ip").build() },
+
+                { GET.class, uriBuilder("getBlockByNumber").build() },
+
+                { GET.class, uriBuilder("getBlockByNumber").queryParam("number", "9999999999999999").build() },
+
+                { GET.class, uriBuilder("getBlockByHash").build() },
+
+                { GET.class, uriBuilder("getBlockByHash").queryParam("hash", "xxx").build() },
+
+                { GET.class, uriBuilder("getAccount").build() },
+
+                { GET.class, uriBuilder("getAccount").queryParam("address", "0xabc").build() },
+
+                { GET.class, uriBuilder("getAccount").queryParam("address", "I_am_not_an_address").build() },
+
+                { GET.class, uriBuilder("getDelegate").build() },
+
+                { GET.class, uriBuilder("getDelegate").queryParam("address", Hex.encode(Bytes.random(20))).build() },
+
+                { GET.class, uriBuilder("getDelegate").queryParam("address", "I_am_not_an_address").build() },
+
+                { GET.class, uriBuilder("getAccountTransactions").build() },
+
                 { GET.class,
-                        format("/get_account_transactions?address=%s&from=%s&to=%s", randomHex(), "0",
-                                "I_am_not_a_number") },
-                { GET.class, "/get_transaction" },
-                { GET.class, format("/get_transaction?hash=%s", "I_am_not_a_hexadecimal_string") },
-                { GET.class, format("/get_transaction?hash=%s", randomHex()) },
-                { POST.class, "/send_transaction" },
-                { POST.class, "/send_transaction?raw=I_am_not_a_hexadecimal_string" },
-                { GET.class, "/get_vote" },
-                { GET.class, format("/get_vote?voter=%s", "I_am_not_a_valid_address") },
-                { GET.class, format("/get_vote?voter=%s", randomHex()) },
-                { GET.class, format("/get_vote?voter=%s&delegate=%s", randomHex(), "I_am_not_a_valid_address") },
-                { GET.class, "/get_votes" },
-                { GET.class, "/get_votes?delegate=I_am_not_hexadecimal_string" },
-                { POST.class, "/transfer" },
-                { POST.class, format("/transfer?from=%s", "_") }, // non-hexadecimal address
-                { POST.class, format("/transfer?from=%s", randomHex()) }, // non wallet address
-                { POST.class, format("/transfer?from=%s", ADDRESS_PLACEHOLDER) },
-                { POST.class, format("/transfer?from=%s&to=%s", ADDRESS_PLACEHOLDER, "_") }, // non-hexadecimal to
-                { POST.class, format("/transfer?from=%s&to=%s", ADDRESS_PLACEHOLDER, randomHex()) },
-                { POST.class, format("/transfer?from=%s&to=%s&value=%s", ADDRESS_PLACEHOLDER, randomHex(), "_") }, // non-number
-                { POST.class, format("/transfer?from=%s&to=%s&value=%s", ADDRESS_PLACEHOLDER, randomHex(), "10") },
+                        uriBuilder("getAccountTransactions").queryParam("address", "I_am_not_an_address").build() },
+
+                { GET.class, uriBuilder("getAccountTransactions").queryParam("address", randomHex()).build() },
+
+                { GET.class,
+                        uriBuilder("getAccountTransactions").queryParam("address", randomHex())
+                                .queryParam("from", "I_am_not_a_number").build() },
+
+                { GET.class,
+                        uriBuilder("getAccountTransactions").queryParam("address", randomHex()).queryParam("from", "0")
+                                .queryParam("to", "I_am_not_a_number").build() },
+
+                { GET.class, uriBuilder("getTransaction").build() },
+
+                { GET.class, uriBuilder("getTransaction").queryParam("hash", "I_am_not_a_hexadecimal_string").build() },
+
+                { GET.class, uriBuilder("getTransaction").queryParam("hash", randomHex()).build() },
+
+                { POST.class, uriBuilder("broadcastRawTransaction").build() },
+
                 { POST.class,
-                        format("/transfer?from=%s&to=%s&value=%s&fee=%s", ADDRESS_PLACEHOLDER, randomHex(), "10",
-                                "_") }, // non-number
+                        uriBuilder("broadcastRawTransaction").queryParam("raw", "I_am_not_a_hexadecimal_string")
+                                .build() },
+
+                { GET.class, uriBuilder("getVote").build() },
+
+                { GET.class, uriBuilder("getVote").queryParam("voter", "I_am_not_a_valid_address").build() },
+
+                { GET.class, uriBuilder("getVote").queryParam("voter", randomHex()).build() },
+
+                { GET.class,
+                        uriBuilder("getVote").queryParam("voter", randomHex())
+                                .queryParam("delegate", "I_am_not_a_valid_address").build() },
+
+                { GET.class, uriBuilder("getVotes").build() },
+
+                { GET.class, uriBuilder("getVotes").queryParam("delegate", "I_am_not_hexadecimal_string").build() },
+
+                { POST.class, uriBuilder("transfer").build() },
+
+                // non-hexadecimal address
+                { POST.class, uriBuilder("transfer").queryParam("from", "_").build() },
+
+                // non-wallet address
+                { POST.class, uriBuilder("transfer").queryParam("from", randomHex()).build() },
+
+                { POST.class, uriBuilder("transfer").queryParam("from", ADDRESS_PLACEHOLDER).build() },
+
+                // non-hexadecimal to
                 { POST.class,
-                        format("/transfer?from=%s&to=%s&value=%s&fee=%s", ADDRESS_PLACEHOLDER, randomHex(), "10",
-                                "10") },
+                        uriBuilder("transfer").queryParam("from", ADDRESS_PLACEHOLDER).queryParam("to", "_").build() },
+
                 { POST.class,
-                        format("/transfer?from=%s&to=%s&value=%s&fee=%s&data=%s", ADDRESS_PLACEHOLDER, randomHex(),
-                                "10",
-                                "10", "_") }, // non-hexadecimal data
+                        uriBuilder("transfer").queryParam("from", ADDRESS_PLACEHOLDER).queryParam("to", randomHex())
+                                .build() },
+
+                // non-number
                 { POST.class,
-                        format("/transfer?from=%s&to=%s&value=%s&fee=%s&data=%s", ADDRESS_PLACEHOLDER, randomHex(),
-                                "10",
-                                "10", randomHex()) }, // hexadecimal data
-                { GET.class, "/get_transaction_limits" },
-                { GET.class, "/get_transaction_limits?type=XXX" },
+                        uriBuilder("transfer").queryParam("from", ADDRESS_PLACEHOLDER).queryParam("to", randomHex())
+                                .queryParam("value", "_").build() },
+
+                { POST.class,
+                        uriBuilder("transfer").queryParam("from", ADDRESS_PLACEHOLDER).queryParam("to", randomHex())
+                                .queryParam("value", "10").build() },
+
+                // non-number
+                { POST.class,
+                        uriBuilder("transfer").queryParam("from", ADDRESS_PLACEHOLDER).queryParam("to", randomHex())
+                                .queryParam("value", "10").queryParam("fee", "_").build() },
+
+                { POST.class,
+                        uriBuilder("transfer").queryParam("from", ADDRESS_PLACEHOLDER).queryParam("to", randomHex())
+                                .queryParam("value", "10").queryParam("fee", "10").build() },
+
+                // non-hexadecimal data
+                { POST.class,
+                        uriBuilder("transfer").queryParam("from", ADDRESS_PLACEHOLDER).queryParam("to", randomHex())
+                                .queryParam("value", "10").queryParam("fee", "10").queryParam("data", "_").build() },
+
+                { POST.class,
+                        uriBuilder("transfer").queryParam("from", ADDRESS_PLACEHOLDER).queryParam("to", randomHex())
+                                .queryParam("value", "10").queryParam("fee", "10").queryParam("data", randomHex())
+                                .build() },
+
+                { GET.class, uriBuilder("getTransactionLimits").build() },
+
+                { GET.class, uriBuilder("getTransactionLimits").queryParam("type", "_").build() },
         });
+    }
+
+    private static UriBuilder uriBuilder(String methodName) {
+        return UriBuilder.fromMethod(SemuxApi.class, methodName);
     }
 
     @Parameter(0)
     public Class httpMethod;
 
     @Parameter(1)
-    public String uri;
+    public URI uri;
 
     @Before
     public void setUp() {
@@ -128,11 +201,13 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
 
     @Test
     public void testError() throws IOException {
-        uri = uri.replace(ADDRESS_PLACEHOLDER, wallet.getAccount(0).toAddressString());
+        String uriString = uri.getPath() + (uri.getQuery() != null
+                ? "?" + uri.getQuery().replace(ADDRESS_PLACEHOLDER, wallet.getAccount(0).toAddressString())
+                : "");
 
         WebClient webClient = WebClient.create(
                 String.format("http://%s:%d/%s%s", config.apiListenIp(), config.apiListenPort(),
-                        Version.prefixOf(Version.v2_0_0), uri),
+                        Version.prefixOf(Version.v2_0_0), uriString),
                 Collections.singletonList(new JacksonJsonProvider()),
                 config.apiUsername(),
                 config.apiPassword(),
