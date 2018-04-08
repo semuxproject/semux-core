@@ -29,6 +29,7 @@ import org.semux.api.v2_0_0.api.SemuxApi;
 import org.semux.api.v2_0_0.model.AddNodeResponse;
 import org.semux.api.v2_0_0.model.ApiHandlerResponse;
 import org.semux.api.v2_0_0.model.CreateAccountResponse;
+import org.semux.api.v2_0_0.model.CreateRawTransactionResponse;
 import org.semux.api.v2_0_0.model.DoTransactionResponse;
 import org.semux.api.v2_0_0.model.GetAccountResponse;
 import org.semux.api.v2_0_0.model.GetAccountTransactionsResponse;
@@ -123,6 +124,31 @@ public final class SemuxApiServiceImpl implements SemuxApi {
             return Response.ok().entity(resp.success(true)).build();
         } catch (UnknownHostException | IllegalArgumentException ex) {
             return failure(resp, ex.getMessage());
+        }
+    }
+
+    @Override
+    public Response createRawTransaction(String network, String type, String fee, String nonce, String to, String value,
+            String timestamp, String data) {
+        CreateRawTransactionResponse resp = new CreateRawTransactionResponse();
+
+        try {
+            TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
+                    .withNetwork(network)
+                    .withType(type)
+                    .withTo(to)
+                    .withValue(value)
+                    .withFee(fee)
+                    .withNonce(nonce)
+                    .withTimestamp(timestamp)
+                    .withData(data);
+
+            Transaction transaction = transactionBuilder.buildUnsigned();
+            resp.setResult(Hex.encode0x(transaction.getEncoded()));
+            resp.setSuccess(true);
+            return Response.ok().entity(resp).build();
+        } catch (IllegalArgumentException e) {
+            return failure(resp, e.getMessage());
         }
     }
 
@@ -621,14 +647,13 @@ public final class SemuxApiServiceImpl implements SemuxApi {
             String data) {
         DoTransactionResponse resp = new DoTransactionResponse();
         try {
-            TransactionBuilder transactionBuilder = new TransactionBuilder(kernel, type)
+            Transaction tx = new TransactionBuilder(kernel, type)
                     .withFrom(from)
                     .withTo(to)
                     .withValue(value)
                     .withFee(fee)
-                    .withData(data);
-
-            Transaction tx = transactionBuilder.build();
+                    .withData(data)
+                    .buildSigned();
 
             PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {

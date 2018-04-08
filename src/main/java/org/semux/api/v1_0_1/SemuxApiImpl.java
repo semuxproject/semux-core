@@ -542,14 +542,13 @@ public class SemuxApiImpl implements SemuxApi {
     protected ApiHandlerResponse doTransaction(TransactionType type, String from, String to, String value, String fee,
             String data) {
         try {
-            TransactionBuilder transactionBuilder = new TransactionBuilder(kernel, type)
+            Transaction tx = new TransactionBuilder(kernel, type)
                     .withFrom(from)
                     .withTo(to)
                     .withValue(value)
                     .withFee(fee)
-                    .withData(data);
-
-            Transaction tx = transactionBuilder.build();
+                    .withData(data)
+                    .buildSigned();
 
             PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {

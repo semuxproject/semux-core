@@ -63,6 +63,7 @@ import org.junit.Test;
 import org.semux.api.v2_0_0.model.AddNodeResponse;
 import org.semux.api.v2_0_0.model.BlockType;
 import org.semux.api.v2_0_0.model.CreateAccountResponse;
+import org.semux.api.v2_0_0.model.CreateRawTransactionResponse;
 import org.semux.api.v2_0_0.model.DelegateType;
 import org.semux.api.v2_0_0.model.DoTransactionResponse;
 import org.semux.api.v2_0_0.model.GetAccountResponse;
@@ -549,4 +550,84 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertEquals(VOTE, list.get(list.size() - 1).transaction.getType());
     }
 
+    @Test
+    public void createRawTransactionTransferTest() {
+        String network = "TESTNET";
+        String type = "TRANSFER";
+        String to = "0xdb7cadb25fdcdd546fb0268524107582c3f8999c";
+        String value = "123456789";
+        String fee = String.valueOf(config.minTransactionFee().getNano());
+        String nonce = "123";
+        String timestamp = "1523028482000";
+        String data = Hex.encode0x("test data".getBytes());
+
+        CreateRawTransactionResponse resp = api.createRawTransaction(
+                network,
+                type,
+                fee,
+                nonce,
+                to,
+                value,
+                timestamp,
+                data);
+
+        assertTrue(resp.isSuccess());
+        assertEquals(
+                "0x010114db7cadb25fdcdd546fb0268524107582c3f8999c00000000075bcd1500000000004c4b40000000000000007b000001629b9257d009746573742064617461",
+                resp.getResult());
+    }
+
+    @Test
+    public void createRawTransactionDelegateTest() {
+        String network = "TESTNET";
+        String type = "DELEGATE";
+        String to = "";
+        String value = "";
+        String fee = String.valueOf(config.minTransactionFee().getNano());
+        String nonce = "123";
+        String timestamp = "1523028482000";
+        String data = Hex.encode0x("semux1".getBytes());
+
+        CreateRawTransactionResponse resp = api.createRawTransaction(
+                network,
+                type,
+                fee,
+                nonce,
+                to,
+                value,
+                timestamp,
+                data);
+
+        assertTrue(resp.isSuccess());
+        assertEquals(
+                "0x0102140000000000000000000000000000000000000000000000e8d4a5100000000000004c4b40000000000000007b000001629b9257d00673656d757831",
+                resp.getResult());
+    }
+
+    @Test
+    public void createRawTransactionVoteTest() {
+        String network = "TESTNET";
+        String type = "VOTE";
+        String to = "0xdb7cadb25fdcdd546fb0268524107582c3f8999c";
+        String value = "123";
+        String fee = String.valueOf(config.minTransactionFee().getNano());
+        String nonce = "123";
+        String timestamp = "1523028482000";
+        String data = Hex.encode0x("semux1".getBytes());
+
+        CreateRawTransactionResponse resp = api.createRawTransaction(
+                network,
+                type,
+                fee,
+                nonce,
+                to,
+                value,
+                timestamp,
+                data);
+
+        assertTrue(resp.isSuccess());
+        assertEquals(
+                "0x010314db7cadb25fdcdd546fb0268524107582c3f8999c000000000000007b00000000004c4b40000000000000007b000001629b9257d00673656d757831",
+                resp.getResult());
+    }
 }

@@ -238,6 +238,38 @@ public class Transaction {
         return data;
     }
 
+    public byte[] getEncoded() {
+        return encoded;
+    }
+
+    /**
+     * Decodes an byte-encoded transaction that is not yet signed by a private key.
+     *
+     * @param encoded
+     *            the bytes of encoded transaction
+     * @return the decoded transaction
+     */
+    public static Transaction fromEncoded(byte[] encoded) {
+        SimpleDecoder decoder = new SimpleDecoder(encoded);
+        byte networkId = decoder.readByte();
+        byte type = decoder.readByte();
+        byte[] to = decoder.readBytes();
+        Amount value = decoder.readAmount();
+        Amount fee = decoder.readAmount();
+        Long nonce = decoder.readLong();
+        Long timestamp = decoder.readLong();
+        byte[] data = decoder.readBytes();
+        return new Transaction(
+                Network.of(networkId),
+                TransactionType.of(type),
+                to,
+                value,
+                fee,
+                nonce,
+                timestamp,
+                data);
+    }
+
     /**
      * Returns the signature.
      *

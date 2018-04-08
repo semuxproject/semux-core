@@ -1103,6 +1103,111 @@
                     }
                 ]
             }
+        },
+        "/create-raw-transaction" : {
+            "post" : {
+                "tags": [
+                    "semux"
+                ],
+                "summary" : "Create an unsigned raw transaction",
+                "description" : "Create an unsigned raw transaction then return its hexadecimal encoded string.",
+                "operationId" : "createRawTransaction",
+                "produces" : [
+                    "application/json"
+                ],
+                "parameters" : [
+                    {
+                        "name" : "network",
+                        "in" : "query",
+                        "description" : "Network name",
+                        "required" : true,
+                        "type" : "string",
+                        "enum" : [
+                            "MAINNET",
+                            "TESTNET",
+                            "DEVNET"
+                        ]
+                    },
+                    {
+                        "name" : "type",
+                        "in" : "query",
+                        "description" : "Transaction type",
+                        "required" : true,
+                        "type" : "string",
+                        "enum" : [
+                            "TRANSFER",
+                            "DELEGATE",
+                            "VOTE",
+                            "UNVOTE"
+                        ]
+                    },
+                    {
+                        "name" : "fee",
+                        "in" : "query",
+                        "description" : "Transaction fee in nano",
+                        "required" : true,
+                        "type" : "string",
+                        "format" : "int64",
+                        "pattern" : "^\\d+$"
+                    },
+                    {
+                        "name" : "nonce",
+                        "in" : "query",
+                        "description" : "Transaction nonce",
+                        "required" : true,
+                        "type" : "string",
+                        "format" : "int64",
+                        "pattern" : "^\\d+$"
+                    },
+                    {
+                        "name" : "to",
+                        "in" : "query",
+                        "description" : "Recipient's address",
+                        "required" : false,
+                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                    },
+                    {
+                        "name" : "value",
+                        "in" : "query",
+                        "description" : "Transaction value in nano",
+                        "required" : false,
+                        "type" : "string",
+                        "format" : "int64",
+                        "pattern" : "^\\d+$"
+                    },
+                    {
+                        "name" : "timestamp",
+                        "in" : "query",
+                        "description" : "Transaction timestamp in milliseconds. Default to current time.",
+                        "required" : false,
+                        "type" : "string",
+                        "format" : "int64",
+                        "pattern" : "^\\d+$"
+                    },
+                    {
+                        "name" : "data",
+                        "in" : "query",
+                        "description" : "Hexadecimal encoded transaction data.",
+                        "required" : false,
+                        "type" : "string",
+                        "format" : "int64",
+                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "successful operation",
+                        "schema" : {
+                            "$ref" : "#/definitions/CreateRawTransactionResponse"
+                        }
+                    }
+                },
+                "security" : [
+                    {
+                        "basicAuth" : [ ]
+                    }
+                ]
+            }
         }
     },
     "definitions" : {
@@ -1762,6 +1867,21 @@
                     "properties" : {
                         "validSignature" : {
                             "type" : "boolean"
+                        }
+                    }
+                }
+            ]
+        },
+        "CreateRawTransactionResponse" : {
+            "type" : "object",
+            "allOf" : [
+                {
+                    "$ref" : "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties" : {
+                        "result" : {
+                            "type" : "string"
                         }
                     }
                 }

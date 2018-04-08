@@ -18,6 +18,7 @@ import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
+import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
@@ -32,12 +33,15 @@ public class TransactionTest {
 
     private Network network = Network.DEVNET;
     private TransactionType type = TransactionType.TRANSFER;
-    private byte[] to = Bytes.random(20);
+    private byte[] to = Hex.decode0x("0xdb7cadb25fdcdd546fb0268524107582c3f8999c");
     private Amount value = NANO_SEM.of(2);
     private Amount fee = config.minTransactionFee();
     private long nonce = 1;
-    private long timestamp = System.currentTimeMillis();
+    private long timestamp = 1523028482000L;
     private byte[] data = Bytes.of("data");
+
+    private final byte[] encodedBytes = Hex.decode0x(
+            "0x020114db7cadb25fdcdd546fb0268524107582c3f8999c000000000000000200000000004c4b400000000000000001000001629b9257d00464617461");
 
     @Test
     public void testNew() {
@@ -50,6 +54,9 @@ public class TransactionTest {
         testFields(tx);
     }
 
+    /**
+     * Test serialization of a signed tx.
+     */
     @Test
     public void testSerialization() {
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
@@ -87,5 +94,40 @@ public class TransactionTest {
 
         assertEquals(tx, tx2);
         assertEquals(tx.hashCode(), tx2.hashCode());
+    }
+
+    /**
+     * Test encoding of an unsigned tx.
+     */
+    @Test
+    public void testEncoding() {
+        Transaction tx = new Transaction(
+                network,
+                type,
+                to,
+                value,
+                fee,
+                nonce,
+                timestamp,
+                data);
+
+        assertArrayEquals(encodedBytes, tx.getEncoded());
+    }
+
+    /**
+     * Test decoding of an unsigned tx.
+     */
+    @Test
+    public void testDecoding() {
+        Transaction tx = Transaction.fromEncoded(encodedBytes);
+
+        assertEquals(network.id(), tx.getNetworkId());
+        assertEquals(type, tx.getType());
+        assertArrayEquals(to, tx.getTo());
+        assertEquals(value, tx.getValue());
+        assertEquals(fee, tx.getFee());
+        assertEquals(nonce, tx.getNonce());
+        assertEquals(timestamp, tx.getTimestamp());
+        assertArrayEquals(data, tx.getData());
     }
 }
