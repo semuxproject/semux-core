@@ -63,8 +63,8 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 import org.semux.api.v2_0_0.model.AddNodeResponse;
 import org.semux.api.v2_0_0.model.BlockType;
+import org.semux.api.v2_0_0.model.ComposeRawTransactionResponse;
 import org.semux.api.v2_0_0.model.CreateAccountResponse;
-import org.semux.api.v2_0_0.model.CreateRawTransactionResponse;
 import org.semux.api.v2_0_0.model.DelegateType;
 import org.semux.api.v2_0_0.model.DoTransactionResponse;
 import org.semux.api.v2_0_0.model.GetAccountResponse;
@@ -553,7 +553,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     }
 
     @Test
-    public void createRawTransactionTransferTest() {
+    public void composeRawTransactionTransferTest() {
         String network = "TESTNET";
         String type = "TRANSFER";
         String to = "0xdb7cadb25fdcdd546fb0268524107582c3f8999c";
@@ -563,7 +563,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String timestamp = "1523028482000";
         String data = Hex.encode0x("test data".getBytes());
 
-        CreateRawTransactionResponse resp = api.createRawTransaction(
+        ComposeRawTransactionResponse resp = api.composeRawTransaction(
                 network,
                 type,
                 fee,
@@ -580,7 +580,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     }
 
     @Test
-    public void createRawTransactionDelegateTest() {
+    public void composeRawTransactionDelegateTest() {
         String network = "TESTNET";
         String type = "DELEGATE";
         String to = "";
@@ -590,7 +590,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String timestamp = "1523028482000";
         String data = Hex.encode0x("semux1".getBytes());
 
-        CreateRawTransactionResponse resp = api.createRawTransaction(
+        ComposeRawTransactionResponse resp = api.composeRawTransaction(
                 network,
                 type,
                 fee,
@@ -607,7 +607,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     }
 
     @Test
-    public void createRawTransactionVoteTest() {
+    public void composeRawTransactionVoteTest() {
         String network = "TESTNET";
         String type = "VOTE";
         String to = "0xdb7cadb25fdcdd546fb0268524107582c3f8999c";
@@ -617,7 +617,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String timestamp = "1523028482000";
         String data = Hex.encode0x("semux1".getBytes());
 
-        CreateRawTransactionResponse resp = api.createRawTransaction(
+        ComposeRawTransactionResponse resp = api.composeRawTransaction(
                 network,
                 type,
                 fee,

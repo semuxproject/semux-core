@@ -28,8 +28,8 @@ import org.semux.api.v2_0_0.TypeFactory;
 import org.semux.api.v2_0_0.api.SemuxApi;
 import org.semux.api.v2_0_0.model.AddNodeResponse;
 import org.semux.api.v2_0_0.model.ApiHandlerResponse;
+import org.semux.api.v2_0_0.model.ComposeRawTransactionResponse;
 import org.semux.api.v2_0_0.model.CreateAccountResponse;
-import org.semux.api.v2_0_0.model.CreateRawTransactionResponse;
 import org.semux.api.v2_0_0.model.DoTransactionResponse;
 import org.semux.api.v2_0_0.model.GetAccountResponse;
 import org.semux.api.v2_0_0.model.GetAccountTransactionsResponse;
@@ -129,9 +129,10 @@ public final class SemuxApiServiceImpl implements SemuxApi {
     }
 
     @Override
-    public Response createRawTransaction(String network, String type, String fee, String nonce, String to, String value,
+    public Response composeRawTransaction(String network, String type, String fee, String nonce, String to,
+            String value,
             String timestamp, String data) {
-        CreateRawTransactionResponse resp = new CreateRawTransactionResponse();
+        ComposeRawTransactionResponse resp = new ComposeRawTransactionResponse();
 
         try {
             TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
