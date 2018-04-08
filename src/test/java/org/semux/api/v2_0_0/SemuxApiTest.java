@@ -53,6 +53,7 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -86,6 +87,7 @@ import org.semux.api.v2_0_0.model.ListAccountsResponse;
 import org.semux.api.v2_0_0.model.PeerType;
 import org.semux.api.v2_0_0.model.SendTransactionResponse;
 import org.semux.api.v2_0_0.model.SignMessageResponse;
+import org.semux.api.v2_0_0.model.SignRawTransactionResponse;
 import org.semux.api.v2_0_0.model.TransactionType;
 import org.semux.api.v2_0_0.model.VerifyMessageResponse;
 import org.semux.core.Amount;
@@ -628,6 +630,21 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertTrue(resp.isSuccess());
         assertEquals(
                 "0x010314db7cadb25fdcdd546fb0268524107582c3f8999c000000000000007b00000000004c4b40000000000000007b000001629b9257d00673656d757831",
+                resp.getResult());
+    }
+
+    @Test
+    public void signRawTransactionTest() throws InvalidKeySpecException {
+        Key key = new Key(Hex.decode0x(
+                "0x302e020100300506032b6570042204207ea3e3e2ce1e2c4e7696f09a252a1b9d58948bc942c0b42092080a896c43649f"));
+        kernelRule.getKernel().getWallet().addAccount(key);
+
+        String rawTx = "0x010114db7cadb25fdcdd546fb0268524107582c3f8999c00000000075bcd1500000000004c4b40000000000000007b000001629b9257d009746573742064617461";
+        SignRawTransactionResponse resp = api.signRawTransaction(rawTx, key.toAddressString());
+
+        assertTrue(resp.isSuccess());
+        assertEquals(
+                "0x208ee0cd0b520f9685b2c2219984d31a229419a2c485729faa609291827888601741010114db7cadb25fdcdd546fb0268524107582c3f8999c00000000075bcd1500000000004c4b40000000000000007b000001629b9257d00974657374206461746160a6f2d0fb1a1573e556004420f5281978b7006444a67829c25d00905bafdfb23e941052fbe7112aae9d5b4a790165261f4da347c90e74fd84c316bb38a391d304057f987e38f88037e8019cbb774dda106fc051fc4a6320a00294fe1866d08442",
                 resp.getResult());
     }
 }

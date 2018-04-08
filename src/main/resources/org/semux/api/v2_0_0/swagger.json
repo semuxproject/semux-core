@@ -1110,7 +1110,7 @@
                     "semux"
                 ],
                 "summary" : "Create an unsigned raw transaction",
-                "description" : "Create an unsigned raw transaction then return its hexadecimal encoded string.",
+                "description" : "Create an unsigned raw transaction then return its hexadecimal encoded string. An unsigned raw transaction can be signed using /sign-raw-transaction API.",
                 "operationId" : "createRawTransaction",
                 "produces" : [
                     "application/json"
@@ -1199,6 +1199,50 @@
                         "description" : "successful operation",
                         "schema" : {
                             "$ref" : "#/definitions/CreateRawTransactionResponse"
+                        }
+                    }
+                },
+                "security" : [
+                    {
+                        "basicAuth" : [ ]
+                    }
+                ]
+            }
+        },
+        "/sign-raw-transaction" : {
+            "post" : {
+                "tags": [
+                    "semux"
+                ],
+                "summary": "Sign an unsigned raw transaction",
+                "description": "Sign an unsigned raw transaction then return its hexadecimal encoded string. An unsigned raw transaction can be created using /create-raw-transaction API.",
+                "operationId": "signRawTransaction",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name" : "raw",
+                        "in" : "query",
+                        "description" : "Unsigned raw transaction encoded in hexadecimal string.",
+                        "required" : true,
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                    },
+                    {
+                        "name" : "address",
+                        "in" : "query",
+                        "description" : "Signer's address. This address must exist in the wallet.",
+                        "required" : true,
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "successful operation",
+                        "schema" : {
+                            "$ref" : "#/definitions/SignRawTransactionResponse"
                         }
                     }
                 },
@@ -1873,6 +1917,21 @@
             ]
         },
         "CreateRawTransactionResponse" : {
+            "type" : "object",
+            "allOf" : [
+                {
+                    "$ref" : "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties" : {
+                        "result" : {
+                            "type" : "string"
+                        }
+                    }
+                }
+            ]
+        },
+        "SignRawTransactionResponse" : {
             "type" : "object",
             "allOf" : [
                 {

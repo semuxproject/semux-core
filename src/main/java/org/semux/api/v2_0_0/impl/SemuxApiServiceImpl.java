@@ -50,6 +50,7 @@ import org.semux.api.v2_0_0.model.GetVotesResponse;
 import org.semux.api.v2_0_0.model.ListAccountsResponse;
 import org.semux.api.v2_0_0.model.SendTransactionResponse;
 import org.semux.api.v2_0_0.model.SignMessageResponse;
+import org.semux.api.v2_0_0.model.SignRawTransactionResponse;
 import org.semux.api.v2_0_0.model.VerifyMessageResponse;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
@@ -549,6 +550,39 @@ public final class SemuxApiServiceImpl implements SemuxApi {
             return Response.ok().entity(resp).build();
         } catch (NullPointerException | IllegalArgumentException e) {
             return failure(resp, "Invalid message");
+        }
+    }
+
+    @Override
+    public Response signRawTransaction(String raw, String address) {
+        SignRawTransactionResponse resp = new SignRawTransactionResponse();
+
+        byte[] txBytes;
+        try {
+            txBytes = Hex.decode0x(raw);
+        } catch (CryptoException ex) {
+            return failure(resp, "Parameter `raw` is not a hexadecimal string.");
+        }
+
+        byte[] addressBytes;
+        try {
+            addressBytes = Hex.decode0x(address);
+        } catch (CryptoException ex) {
+            return failure(resp, "Parameter `address` is not a hexadecimal string.");
+        }
+
+        Key signerKey = kernel.getWallet().getAccount(addressBytes);
+        if (signerKey == null) {
+            return failure(resp, "Parameter `address` doesn't exist in the wallet.");
+        }
+
+        try {
+            Transaction tx = Transaction.fromEncoded(txBytes).sign(signerKey);
+            resp.setResult(Hex.encode0x(tx.toBytes()));
+            resp.setSuccess(true);
+            return Response.ok().entity(resp).build();
+        } catch (IndexOutOfBoundsException ex) {
+            return failure(resp, "Parameter `raw` is not a valid raw transaction.");
         }
     }
 
