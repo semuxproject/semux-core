@@ -71,13 +71,17 @@ public class TransactionBuilder {
      */
     private byte[] data;
 
-    public TransactionBuilder(Kernel kernel, TransactionType type) {
-        this.kernel = kernel;
-        this.type = type;
-    }
-
     public TransactionBuilder(Kernel kernel) {
         this.kernel = kernel;
+    }
+
+    public TransactionBuilder withType(TransactionType type) {
+        if (type == null) {
+            throw new IllegalArgumentException("Parameter `type` is required");
+        }
+
+        this.type = type;
+        return this;
     }
 
     public TransactionBuilder withType(String type) {

@@ -542,7 +542,8 @@ public class SemuxApiImpl implements SemuxApi {
     protected ApiHandlerResponse doTransaction(TransactionType type, String from, String to, String value, String fee,
             String data) {
         try {
-            Transaction tx = new TransactionBuilder(kernel, type)
+            Transaction tx = new TransactionBuilder(kernel)
+                    .withType(type)
                     .withFrom(from)
                     .withTo(to)
                     .withValue(value)

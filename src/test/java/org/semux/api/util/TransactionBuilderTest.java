@@ -22,12 +22,12 @@ public class TransactionBuilderTest {
     @Test
     public void testDelegateWithTo() {
         expectedException.expect(IllegalArgumentException.class);
-        new TransactionBuilder(mock(Kernel.class), TransactionType.DELEGATE).withTo("0xabc");
+        new TransactionBuilder(mock(Kernel.class)).withType(TransactionType.DELEGATE).withTo("0xabc");
     }
 
     @Test
     public void testDelegateWithValue() {
         expectedException.expect(IllegalArgumentException.class);
-        new TransactionBuilder(mock(Kernel.class), TransactionType.DELEGATE).withValue("10");
+        new TransactionBuilder(mock(Kernel.class)).withType(TransactionType.DELEGATE).withValue("10");
     }
 }
