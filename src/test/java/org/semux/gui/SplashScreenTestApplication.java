@@ -8,19 +8,15 @@ package org.semux.gui;
 
 import java.awt.Dimension;
 
-import org.semux.gui.model.WalletModel;
-
 public class SplashScreenTestApplication extends BaseTestApplication {
 
     private static final long serialVersionUID = 7961392121592436000L;
 
     protected SplashScreen splashScreen;
 
-    protected WalletModel walletModel;
-
     SplashScreenTestApplication() {
         super();
         this.setMinimumSize(new Dimension(960, 600));
-        splashScreen = new SplashScreen(walletModel = new WalletModel());
+        splashScreen = new SplashScreen();
     }
 }

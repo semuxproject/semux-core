@@ -4,14 +4,9 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.gui;
+package org.semux.gui.event;
 
-public enum SemuxEvent {
-    WALLET_LOADING,
+import org.semux.event.PubSubEvent;
 
-    KERNEL_STARTING,
-
-    GUI_WALLET_SELECTION_DIALOG_SHOWN,
-
-    GUI_MAINFRAME_STARTED,
+public class WalletSelectionDialogShownEvent implements PubSubEvent {
 }
