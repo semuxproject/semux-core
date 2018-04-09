@@ -12,6 +12,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
 import org.semux.Launcher;
+import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,20 +52,6 @@ public class PubSub {
         return instance;
     }
 
-    public synchronized void start() {
-        eventProcessingThread.start();
-        logger.info("PubSub service started");
-    }
-
-    public synchronized void stop() {
-        eventProcessingThread.interrupt();
-        logger.info("PubSub service stopped");
-    }
-
-    public boolean isRunning() {
-        return !isRunningSemaphore.tryAcquire();
-    }
-
     public boolean publish(PubSubEvent event) {
         return queue
                 .add(event);
@@ -89,17 +76,25 @@ public class PubSub {
         subscribers.values().forEach(q -> q.remove(subscriber));
     }
 
+    private synchronized void start() {
+        if (!isRunningSemaphore.tryAcquire()) {
+            throw new UnreachableException("PubSub service can be started for only once");
+        }
+
+        eventProcessingThread.start();
+        logger.info("PubSub service started");
+    }
+
+    private synchronized void stop() {
+        eventProcessingThread.interrupt();
+        logger.info("PubSub service stopped");
+    }
+
     private class EventProcessingThread extends Thread {
 
         @Override
         public void run() {
-            try {
-                isRunningSemaphore.acquire();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-
-            while (isRunning()) {
+            while (!isInterrupted()) {
                 final PubSubEvent event;
                 try {
                     event = queue.take();
