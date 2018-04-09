@@ -23,6 +23,7 @@ import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.Genesis.Premine;
+import org.semux.core.event.BlockchainDatabaseUpgradingEvent;
 import org.semux.core.exception.BlockchainException;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.AccountStateImpl;
@@ -35,6 +36,7 @@ import org.semux.db.DatabaseFactory;
 import org.semux.db.DatabaseName;
 import org.semux.db.Migration;
 import org.semux.db.TempDatabaseFactory;
+import org.semux.event.PubSub;
 import org.semux.util.Bytes;
 import org.semux.util.FileUtil;
 import org.semux.util.SimpleDecoder;
@@ -841,6 +843,7 @@ public class BlockchainImpl implements Blockchain {
                 for (long i = 1; i <= latestBlockNumber; i++) {
                     migrationBlockchain.applyBlock(getBlock(i));
                     if (i % 1000 == 0) {
+                        PubSub.getInstance().publish(new BlockchainDatabaseUpgradingEvent(i, latestBlockNumber));
                         logger.info("Loaded {} / {} blocks", i, latestBlockNumber);
                     }
                 }

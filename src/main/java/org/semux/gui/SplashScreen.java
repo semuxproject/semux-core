@@ -20,6 +20,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
+import org.semux.core.event.BlockchainDatabaseUpgradingEvent;
 import org.semux.core.event.WalletLoadingEvent;
 import org.semux.event.KernelBootingEvent;
 import org.semux.event.PubSub;
@@ -48,6 +49,7 @@ public class SplashScreen extends JFrame implements PubSubSubscriber {
         PubSub.getInstance().subscribe(WalletSelectionDialogShownEvent.class, this);
         PubSub.getInstance().subscribe(KernelBootingEvent.class, this);
         PubSub.getInstance().subscribe(MainFrameStartedEvent.class, this);
+        PubSub.getInstance().subscribe(BlockchainDatabaseUpgradingEvent.class, this);
 
         setUndecorated(true);
         setContentPane(new ContentPane());
@@ -80,6 +82,12 @@ public class SplashScreen extends JFrame implements PubSubSubscriber {
                 progressBar.setString(GuiMessages.get("SplashStartingKernel"));
             } else if (event instanceof MainFrameStartedEvent) {
                 destroySplash();
+            } else if (event instanceof BlockchainDatabaseUpgradingEvent) {
+                BlockchainDatabaseUpgradingEvent e = (BlockchainDatabaseUpgradingEvent) event;
+                progressBar.setString(GuiMessages.get("SplashUpgradingDatabase", e.loaded, e.total));
+                progressBar.setIndeterminate(false);
+                progressBar.setMaximum(10000);
+                progressBar.setValue((int) ((double) e.loaded / (double) e.total * 10000));
             }
         });
     }
