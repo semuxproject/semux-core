@@ -139,7 +139,7 @@ public class HttpHandlerTest {
     public void testGetStaticFiles() throws IOException {
         startServer(null);
 
-        URL url = new URL("http://" + ip + ":" + port + "/" + Version.prefixOf(Version.v2_0_0) + "/index.html");
+        URL url = new URL(server.getSwaggerUrl());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("Authorization", auth);
 
