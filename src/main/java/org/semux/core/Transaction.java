@@ -39,7 +39,8 @@ public class Transaction {
 
     private final byte[] encoded;
 
-    private final byte[] hash; // not serialized
+    private final byte[] hash;
+
     private Signature signature;
 
     /**
@@ -79,24 +80,24 @@ public class Transaction {
     }
 
     /**
-     * Create a transaction from raw bytes
+     * Create a signed transaction from raw bytes
      *
      * @param hash
      * @param encoded
      * @param signature
      */
-    public Transaction(byte[] hash, byte[] encoded, byte[] signature) {
+    private Transaction(byte[] hash, byte[] encoded, byte[] signature) {
         this.hash = hash;
 
-        SimpleDecoder dec = new SimpleDecoder(encoded);
-        this.networkId = dec.readByte();
-        this.type = TransactionType.of(dec.readByte());
-        this.to = dec.readBytes();
-        this.value = dec.readAmount();
-        this.fee = dec.readAmount();
-        this.nonce = dec.readLong();
-        this.timestamp = dec.readLong();
-        this.data = dec.readBytes();
+        Transaction decodedTx = fromEncoded(encoded);
+        this.networkId = decodedTx.networkId;
+        this.type = decodedTx.type;
+        this.to = decodedTx.to;
+        this.value = decodedTx.value;
+        this.fee = decodedTx.fee;
+        this.nonce = decodedTx.nonce;
+        this.timestamp = decodedTx.timestamp;
+        this.data = decodedTx.data;
 
         this.encoded = encoded;
         this.signature = Signature.fromBytes(signature);

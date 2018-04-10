@@ -46,7 +46,7 @@ public class ApiHandlerImpl implements ApiHandler {
     private final SemuxApiServiceImpl semuxApi;
 
     /**
-     * [http method, uri] => [method interface, method implementation]
+     * [http method, uri] => {@link Route}
      */
     private final Map<ImmutablePair<HttpMethod, String>, Route> routes;
 
