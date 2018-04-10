@@ -1,5 +1,48 @@
 # Change Log
 
+## [v1.1.0](https://github.com/semuxproject/semux/tree/v1.1.0) (2018-04-15)
+[Full Changelog](https://github.com/semuxproject/semux/compare/v1.0.1...v1.1.0)
+
+**UNIFORM_DISTRIBUTION Fork**
+
+`UNIFORM_DISTRIBUTION` fork is introduced in v1.1.0 to address issue [\#620](https://github.com/semuxproject/semux/issues/620)
+
+Validators are strongly suggested to upgrade to v1.1.0 ASAP in order to participate in the activation of `UNIFORM_DISTRIBUTION` fork which will be activated as soon as there are 1500 out of past 2000 blocks signaling the fork.
+
+Please note your validator node will stop forging blocks if you are unable to install v1.1.0 in advance of fork activation.
+
+**Database Upgrade**
+
+v1.1.0 will automatically apply a local database upgrade which takes about 1 ~ 5 minutes during wallet startup. Please ensure that you have at least 3 GB of space left on your disk.
+
+**Fixed bugs:**
+
+- GUI: Fix model refresh delay [\#746](https://github.com/semuxproject/semux/pull/746) ([semuxdev](https://github.com/semuxdev))
+- Consensus: Fix sync votes validation issue [\#742](https://github.com/semuxproject/semux/pull/742) ([semuxdev](https://github.com/semuxdev))
+
+**Implemented enhancements:**
+
+- Core: Store recent validator stats [\#767](https://github.com/semuxproject/semux/pull/767) ([semuxdev](https://github.com/semuxdev),[orogvany](https://github.com/orogvany))
+- API: Add API v2.0.0 and Swagger UI [\#771](https://github.com/semuxproject/semux/pull/771),[\#764](https://github.com/semuxproject/semux/pull/764) ([cryptokat](https://github.com/cryptokat))
+- Crypto: Crypto function speed is improved ~70% by introducing libsodium native implementation [\#760](https://github.com/semuxproject/semux/pull/760) ([semuxdev](https://github.com/semuxdev))
+- DB: Separate database from different network [\#759](https://github.com/semuxproject/semux/pull/759) ([semuxdev](https://github.com/semuxdev))
+- Util: Standardize system exit code [\#755](https://github.com/semuxproject/semux/pull/755) ([semuxdev](https://github.com/semuxdev))
+- Docs: Move wiki into the main repo to accept PRs on docs [\#749](https://github.com/semuxproject/semux/pull/749) ([cryptokat](https://github.com/cryptokat))
+- GUI: Add splash screen [\#744](https://github.com/semuxproject/semux/pull/744) ([cryptokat](https://github.com/cryptokat))
+- Consensus: Add memoization to Vote\#validate to avoid repeated validations [\#741](https://github.com/semuxproject/semux/pull/741) ([kaar2](https://github.com/kaar2))
+- GUI: Add getBlockByNumber to console [\#726](https://github.com/semuxproject/semux/pull/726) ([orogvany](https://github.com/orogvany))
+- Core: Introduce `Amount` class to normalize units in source code [\#724](https://github.com/semuxproject/semux/pull/724) ([witoldsz](https://github.com/witoldsz))
+- GUI: Use BigDecimal instead of double for correctness [\#718](https://github.com/semuxproject/semux/pull/718) ([witoldsz](https://github.com/witoldsz))
+- GUI: Refactor status bar [\#717](https://github.com/semuxproject/semux/pull/717) ([cryptokat](https://github.com/cryptokat))
+
+**Testnet changes:**
+
+- Increase block size limit to 10 MB [\#725](https://github.com/semuxproject/semux/pull/725) ([orogvany](https://github.com/orogvany))
+
+**Deprecations:**
+
+- API v1.0.1 is deprecated and planned to be removed in a future release
+
 ## [v1.0.1](https://github.com/semuxproject/semux/tree/v1.0.1) (2018-03-06)
 [Full Changelog](https://github.com/semuxproject/semux/compare/v1.0.0...v1.0.1)
 
