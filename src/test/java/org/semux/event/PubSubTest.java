@@ -11,19 +11,28 @@ import static org.awaitility.Awaitility.await;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.Test;
 
 public class PubSubTest {
 
     @Test
     public void testPubSub() {
-        final int repeats = 10;
-        AtomicInteger dispatched = new AtomicInteger(0);
-        PubSub.getInstance().subscribe(TestEvent1.class, event -> dispatched.incrementAndGet());
-        for (int i = 0; i < repeats; i++) {
+        final int fuzz1 = RandomUtils.nextInt(0, 10);
+        final int fuzz2 = RandomUtils.nextInt(0, 10);
+        AtomicInteger dispatched1 = new AtomicInteger(0);
+        AtomicInteger dispatched2 = new AtomicInteger(0);
+
+        PubSub.getInstance().subscribe(TestEvent1.class, event -> dispatched1.incrementAndGet());
+        PubSub.getInstance().subscribe(TestEvent2.class, event -> dispatched2.incrementAndGet());
+        for (int i = 0; i < fuzz1; i++) {
             new Thread(() -> PubSub.getInstance().publish(new TestEvent1())).run();
         }
-        await().until(() -> dispatched.get() == repeats);
+        for (int i = 0; i < fuzz2; i++) {
+            new Thread(() -> PubSub.getInstance().publish(new TestEvent2())).run();
+        }
+        await().until(() -> dispatched1.get() == fuzz1);
+        await().until(() -> dispatched2.get() == fuzz2);
     }
 
     @Test
