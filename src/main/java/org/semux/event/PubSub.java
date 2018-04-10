@@ -35,34 +35,62 @@ public class PubSub {
 
     private LinkedBlockingQueue<PubSubEvent> queue;
 
+    /**
+     * [event] => [list of subscribers]
+     */
     private ConcurrentHashMap<Class<? extends PubSubEvent>, ConcurrentLinkedQueue<PubSubSubscriber>> subscribers;
 
     private Thread eventProcessingThread;
 
-    private Semaphore isRunningSemaphore;
+    private Semaphore semaphore;
 
     private PubSub() {
         queue = new LinkedBlockingQueue<>();
         subscribers = new ConcurrentHashMap<>();
         eventProcessingThread = new EventProcessingThread();
-        isRunningSemaphore = new Semaphore(1);
+        semaphore = new Semaphore(1);
     }
 
     public static PubSub getInstance() {
         return instance;
     }
 
+    /**
+     * Add an event to {@link this#queue}.
+     *
+     * @param event
+     *            the event to be subscribed.
+     * @return whether the event is successfully added.
+     */
     public boolean publish(PubSubEvent event) {
         return queue
                 .add(event);
     }
 
+    /**
+     * Subscribe to an event.
+     *
+     * @param event
+     *            the event.
+     * @param subscriber
+     *            the subscriber.
+     * @return whether the event is successfully subscribed.
+     */
     public boolean subscribe(Class<? extends PubSubEvent> event, PubSubSubscriber subscriber) {
         return subscribers
                 .computeIfAbsent(event, k -> new ConcurrentLinkedQueue<>())
                 .add(subscriber);
     }
 
+    /**
+     * Unsubscribe an event.
+     *
+     * @param event
+     *            the event to be unsubscribed.
+     * @param subscriber
+     *            the subscriber.
+     * @return whether the event is successfully unsubscribed.
+     */
     public boolean unsubscribe(Class<? extends PubSubEvent> event, PubSubSubscriber subscriber) {
         ConcurrentLinkedQueue q = subscribers.get(event);
         if (q != null) {
@@ -72,12 +100,25 @@ public class PubSub {
         }
     }
 
+    /**
+     * Unsubscribe from all events.
+     *
+     * @param subscriber
+     *            the subscriber.
+     */
     public void unsubscribeAll(final PubSubSubscriber subscriber) {
         subscribers.values().forEach(q -> q.remove(subscriber));
     }
 
+    /**
+     * Start the {@link this#eventProcessingThread}.
+     *
+     * @throws UnreachableException
+     *             this method should only be called for once, otherwise an
+     *             exception will be thrown.
+     */
     private synchronized void start() {
-        if (!isRunningSemaphore.tryAcquire()) {
+        if (!semaphore.tryAcquire()) {
             throw new UnreachableException("PubSub service can be started for only once");
         }
 
@@ -85,11 +126,18 @@ public class PubSub {
         logger.info("PubSub service started");
     }
 
+    /**
+     * Stop the {@link this#eventProcessingThread}.
+     */
     private synchronized void stop() {
         eventProcessingThread.interrupt();
         logger.info("PubSub service stopped");
     }
 
+    /**
+     * This thread will be continuously polling for new events until PubSub is
+     * stopped.
+     */
     private class EventProcessingThread extends Thread {
 
         @Override
@@ -115,7 +163,7 @@ public class PubSub {
         @Override
         public void interrupt() {
             super.interrupt();
-            isRunningSemaphore.release();
+            semaphore.release();
         }
     }
 }
