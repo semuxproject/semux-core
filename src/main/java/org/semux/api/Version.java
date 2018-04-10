@@ -12,14 +12,14 @@ public enum Version {
 
     v1_0_1,
 
-    v1_1_0;
+    v2_0_0;
 
     public static String prefixOf(Version version) {
         switch (version) {
         case v1_0_1:
             return "v1.0.1";
-        case v1_1_0:
-            return "v1.1.0";
+        case v2_0_0:
+            return "v2.0.0";
         default:
             throw new UnreachableException();
         }
@@ -29,8 +29,8 @@ public enum Version {
         switch (prefix) {
         case "v1.0.1":
             return v1_0_1;
-        case "v1.1.0":
-            return v1_1_0;
+        case "v2.0.0":
+            return v2_0_0;
         default:
             return null;
         }

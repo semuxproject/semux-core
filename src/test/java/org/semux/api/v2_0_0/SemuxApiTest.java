@@ -28,7 +28,7 @@
  * limitations under the License.
  */
 
-package org.semux.api.v1_1_0;
+package org.semux.api.v2_0_0;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertArrayEquals;
@@ -53,6 +53,7 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -60,33 +61,35 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
-import org.semux.api.v1_1_0.model.AddNodeResponse;
-import org.semux.api.v1_1_0.model.BlockType;
-import org.semux.api.v1_1_0.model.CreateAccountResponse;
-import org.semux.api.v1_1_0.model.DelegateType;
-import org.semux.api.v1_1_0.model.DoTransactionResponse;
-import org.semux.api.v1_1_0.model.GetAccountResponse;
-import org.semux.api.v1_1_0.model.GetAccountTransactionsResponse;
-import org.semux.api.v1_1_0.model.GetBlockResponse;
-import org.semux.api.v1_1_0.model.GetDelegateResponse;
-import org.semux.api.v1_1_0.model.GetDelegatesResponse;
-import org.semux.api.v1_1_0.model.GetInfoResponse;
-import org.semux.api.v1_1_0.model.GetLatestBlockNumberResponse;
-import org.semux.api.v1_1_0.model.GetLatestBlockResponse;
-import org.semux.api.v1_1_0.model.GetPeersResponse;
-import org.semux.api.v1_1_0.model.GetPendingTransactionsResponse;
-import org.semux.api.v1_1_0.model.GetRootResponse;
-import org.semux.api.v1_1_0.model.GetTransactionLimitsResponse;
-import org.semux.api.v1_1_0.model.GetTransactionResponse;
-import org.semux.api.v1_1_0.model.GetValidatorsResponse;
-import org.semux.api.v1_1_0.model.GetVoteResponse;
-import org.semux.api.v1_1_0.model.GetVotesResponse;
-import org.semux.api.v1_1_0.model.ListAccountsResponse;
-import org.semux.api.v1_1_0.model.PeerType;
-import org.semux.api.v1_1_0.model.SendTransactionResponse;
-import org.semux.api.v1_1_0.model.SignMessageResponse;
-import org.semux.api.v1_1_0.model.TransactionType;
-import org.semux.api.v1_1_0.model.VerifyMessageResponse;
+import org.semux.api.v2_0_0.model.AddNodeResponse;
+import org.semux.api.v2_0_0.model.BlockType;
+import org.semux.api.v2_0_0.model.ComposeRawTransactionResponse;
+import org.semux.api.v2_0_0.model.CreateAccountResponse;
+import org.semux.api.v2_0_0.model.DelegateType;
+import org.semux.api.v2_0_0.model.DoTransactionResponse;
+import org.semux.api.v2_0_0.model.GetAccountResponse;
+import org.semux.api.v2_0_0.model.GetAccountTransactionsResponse;
+import org.semux.api.v2_0_0.model.GetBlockResponse;
+import org.semux.api.v2_0_0.model.GetDelegateResponse;
+import org.semux.api.v2_0_0.model.GetDelegatesResponse;
+import org.semux.api.v2_0_0.model.GetInfoResponse;
+import org.semux.api.v2_0_0.model.GetLatestBlockNumberResponse;
+import org.semux.api.v2_0_0.model.GetLatestBlockResponse;
+import org.semux.api.v2_0_0.model.GetPeersResponse;
+import org.semux.api.v2_0_0.model.GetPendingTransactionsResponse;
+import org.semux.api.v2_0_0.model.GetRootResponse;
+import org.semux.api.v2_0_0.model.GetTransactionLimitsResponse;
+import org.semux.api.v2_0_0.model.GetTransactionResponse;
+import org.semux.api.v2_0_0.model.GetValidatorsResponse;
+import org.semux.api.v2_0_0.model.GetVoteResponse;
+import org.semux.api.v2_0_0.model.GetVotesResponse;
+import org.semux.api.v2_0_0.model.ListAccountsResponse;
+import org.semux.api.v2_0_0.model.PeerType;
+import org.semux.api.v2_0_0.model.SendTransactionResponse;
+import org.semux.api.v2_0_0.model.SignMessageResponse;
+import org.semux.api.v2_0_0.model.SignRawTransactionResponse;
+import org.semux.api.v2_0_0.model.TransactionType;
+import org.semux.api.v2_0_0.model.VerifyMessageResponse;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
@@ -105,7 +108,7 @@ import org.semux.util.Bytes;
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
 /**
- * API tests for {@link org.semux.api.v1_1_0.impl.SemuxApiServiceImpl}
+ * API tests for {@link org.semux.api.v2_0_0.impl.SemuxApiServiceImpl}
  */
 public class SemuxApiTest extends SemuxApiTestBase {
 
@@ -438,7 +441,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     public void sendTransactionTest() throws InterruptedException {
         Transaction tx = createTransaction(config);
 
-        SendTransactionResponse response = api.sendTransaction(Hex.encode(tx.toBytes()));
+        SendTransactionResponse response = api.broadcastRawTransaction(Hex.encode(tx.toBytes()));
         assertTrue(response.isSuccess());
 
         Thread.sleep(200);
@@ -549,4 +552,99 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertEquals(VOTE, list.get(list.size() - 1).transaction.getType());
     }
 
+    @Test
+    public void composeRawTransactionTransferTest() {
+        String network = "TESTNET";
+        String type = "TRANSFER";
+        String to = "0xdb7cadb25fdcdd546fb0268524107582c3f8999c";
+        String value = "123456789";
+        String fee = String.valueOf(config.minTransactionFee().getNano());
+        String nonce = "123";
+        String timestamp = "1523028482000";
+        String data = Hex.encode0x("test data".getBytes());
+
+        ComposeRawTransactionResponse resp = api.composeRawTransaction(
+                network,
+                type,
+                fee,
+                nonce,
+                to,
+                value,
+                timestamp,
+                data);
+
+        assertTrue(resp.isSuccess());
+        assertEquals(
+                "0x010114db7cadb25fdcdd546fb0268524107582c3f8999c00000000075bcd1500000000004c4b40000000000000007b000001629b9257d009746573742064617461",
+                resp.getResult());
+    }
+
+    @Test
+    public void composeRawTransactionDelegateTest() {
+        String network = "TESTNET";
+        String type = "DELEGATE";
+        String to = "";
+        String value = "";
+        String fee = String.valueOf(config.minTransactionFee().getNano());
+        String nonce = "123";
+        String timestamp = "1523028482000";
+        String data = Hex.encode0x("semux1".getBytes());
+
+        ComposeRawTransactionResponse resp = api.composeRawTransaction(
+                network,
+                type,
+                fee,
+                nonce,
+                to,
+                value,
+                timestamp,
+                data);
+
+        assertTrue(resp.isSuccess());
+        assertEquals(
+                "0x0102140000000000000000000000000000000000000000000000e8d4a5100000000000004c4b40000000000000007b000001629b9257d00673656d757831",
+                resp.getResult());
+    }
+
+    @Test
+    public void composeRawTransactionVoteTest() {
+        String network = "TESTNET";
+        String type = "VOTE";
+        String to = "0xdb7cadb25fdcdd546fb0268524107582c3f8999c";
+        String value = "123";
+        String fee = String.valueOf(config.minTransactionFee().getNano());
+        String nonce = "123";
+        String timestamp = "1523028482000";
+        String data = Hex.encode0x("semux1".getBytes());
+
+        ComposeRawTransactionResponse resp = api.composeRawTransaction(
+                network,
+                type,
+                fee,
+                nonce,
+                to,
+                value,
+                timestamp,
+                data);
+
+        assertTrue(resp.isSuccess());
+        assertEquals(
+                "0x010314db7cadb25fdcdd546fb0268524107582c3f8999c000000000000007b00000000004c4b40000000000000007b000001629b9257d00673656d757831",
+                resp.getResult());
+    }
+
+    @Test
+    public void signRawTransactionTest() throws InvalidKeySpecException {
+        Key key = new Key(Hex.decode0x(
+                "0x302e020100300506032b6570042204207ea3e3e2ce1e2c4e7696f09a252a1b9d58948bc942c0b42092080a896c43649f"));
+        kernelRule.getKernel().getWallet().addAccount(key);
+
+        String rawTx = "0x010114db7cadb25fdcdd546fb0268524107582c3f8999c00000000075bcd1500000000004c4b40000000000000007b000001629b9257d009746573742064617461";
+        SignRawTransactionResponse resp = api.signRawTransaction(rawTx, key.toAddressString());
+
+        assertTrue(resp.isSuccess());
+        assertEquals(
+                "0x208ee0cd0b520f9685b2c2219984d31a229419a2c485729faa609291827888601741010114db7cadb25fdcdd546fb0268524107582c3f8999c00000000075bcd1500000000004c4b40000000000000007b000001629b9257d00974657374206461746160a6f2d0fb1a1573e556004420f5281978b7006444a67829c25d00905bafdfb23e941052fbe7112aae9d5b4a790165261f4da347c90e74fd84c316bb38a391d304057f987e38f88037e8019cbb774dda106fc051fc4a6320a00294fe1866d08442",
+                resp.getResult());
+    }
 }

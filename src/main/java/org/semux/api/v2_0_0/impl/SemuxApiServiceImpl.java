@@ -5,7 +5,7 @@
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 
-package org.semux.api.v1_1_0.impl;
+package org.semux.api.v2_0_0.impl;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
@@ -24,32 +24,34 @@ import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.semux.Kernel;
 import org.semux.api.util.TransactionBuilder;
-import org.semux.api.v1_1_0.TypeFactory;
-import org.semux.api.v1_1_0.api.SemuxApi;
-import org.semux.api.v1_1_0.model.AddNodeResponse;
-import org.semux.api.v1_1_0.model.ApiHandlerResponse;
-import org.semux.api.v1_1_0.model.CreateAccountResponse;
-import org.semux.api.v1_1_0.model.DoTransactionResponse;
-import org.semux.api.v1_1_0.model.GetAccountResponse;
-import org.semux.api.v1_1_0.model.GetAccountTransactionsResponse;
-import org.semux.api.v1_1_0.model.GetBlockResponse;
-import org.semux.api.v1_1_0.model.GetDelegateResponse;
-import org.semux.api.v1_1_0.model.GetDelegatesResponse;
-import org.semux.api.v1_1_0.model.GetInfoResponse;
-import org.semux.api.v1_1_0.model.GetLatestBlockNumberResponse;
-import org.semux.api.v1_1_0.model.GetLatestBlockResponse;
-import org.semux.api.v1_1_0.model.GetPeersResponse;
-import org.semux.api.v1_1_0.model.GetPendingTransactionsResponse;
-import org.semux.api.v1_1_0.model.GetRootResponse;
-import org.semux.api.v1_1_0.model.GetTransactionLimitsResponse;
-import org.semux.api.v1_1_0.model.GetTransactionResponse;
-import org.semux.api.v1_1_0.model.GetValidatorsResponse;
-import org.semux.api.v1_1_0.model.GetVoteResponse;
-import org.semux.api.v1_1_0.model.GetVotesResponse;
-import org.semux.api.v1_1_0.model.ListAccountsResponse;
-import org.semux.api.v1_1_0.model.SendTransactionResponse;
-import org.semux.api.v1_1_0.model.SignMessageResponse;
-import org.semux.api.v1_1_0.model.VerifyMessageResponse;
+import org.semux.api.v2_0_0.TypeFactory;
+import org.semux.api.v2_0_0.api.SemuxApi;
+import org.semux.api.v2_0_0.model.AddNodeResponse;
+import org.semux.api.v2_0_0.model.ApiHandlerResponse;
+import org.semux.api.v2_0_0.model.ComposeRawTransactionResponse;
+import org.semux.api.v2_0_0.model.CreateAccountResponse;
+import org.semux.api.v2_0_0.model.DoTransactionResponse;
+import org.semux.api.v2_0_0.model.GetAccountResponse;
+import org.semux.api.v2_0_0.model.GetAccountTransactionsResponse;
+import org.semux.api.v2_0_0.model.GetBlockResponse;
+import org.semux.api.v2_0_0.model.GetDelegateResponse;
+import org.semux.api.v2_0_0.model.GetDelegatesResponse;
+import org.semux.api.v2_0_0.model.GetInfoResponse;
+import org.semux.api.v2_0_0.model.GetLatestBlockNumberResponse;
+import org.semux.api.v2_0_0.model.GetLatestBlockResponse;
+import org.semux.api.v2_0_0.model.GetPeersResponse;
+import org.semux.api.v2_0_0.model.GetPendingTransactionsResponse;
+import org.semux.api.v2_0_0.model.GetRootResponse;
+import org.semux.api.v2_0_0.model.GetTransactionLimitsResponse;
+import org.semux.api.v2_0_0.model.GetTransactionResponse;
+import org.semux.api.v2_0_0.model.GetValidatorsResponse;
+import org.semux.api.v2_0_0.model.GetVoteResponse;
+import org.semux.api.v2_0_0.model.GetVotesResponse;
+import org.semux.api.v2_0_0.model.ListAccountsResponse;
+import org.semux.api.v2_0_0.model.SendTransactionResponse;
+import org.semux.api.v2_0_0.model.SignMessageResponse;
+import org.semux.api.v2_0_0.model.SignRawTransactionResponse;
+import org.semux.api.v2_0_0.model.VerifyMessageResponse;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
@@ -123,6 +125,32 @@ public final class SemuxApiServiceImpl implements SemuxApi {
             return Response.ok().entity(resp.success(true)).build();
         } catch (UnknownHostException | IllegalArgumentException ex) {
             return failure(resp, ex.getMessage());
+        }
+    }
+
+    @Override
+    public Response composeRawTransaction(String network, String type, String fee, String nonce, String to,
+            String value,
+            String timestamp, String data) {
+        ComposeRawTransactionResponse resp = new ComposeRawTransactionResponse();
+
+        try {
+            TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
+                    .withNetwork(network)
+                    .withType(type)
+                    .withTo(to)
+                    .withValue(value)
+                    .withFee(fee)
+                    .withNonce(nonce)
+                    .withTimestamp(timestamp)
+                    .withData(data);
+
+            Transaction transaction = transactionBuilder.buildUnsigned();
+            resp.setResult(Hex.encode0x(transaction.getEncoded()));
+            resp.setSuccess(true);
+            return Response.ok().entity(resp).build();
+        } catch (IllegalArgumentException e) {
+            return failure(resp, e.getMessage());
         }
     }
 
@@ -474,7 +502,7 @@ public final class SemuxApiServiceImpl implements SemuxApi {
     }
 
     @Override
-    public Response sendTransaction(String raw) {
+    public Response broadcastRawTransaction(String raw) {
         SendTransactionResponse resp = new SendTransactionResponse();
 
         if (!isSet(raw)) {
@@ -523,6 +551,39 @@ public final class SemuxApiServiceImpl implements SemuxApi {
             return Response.ok().entity(resp).build();
         } catch (NullPointerException | IllegalArgumentException e) {
             return failure(resp, "Invalid message");
+        }
+    }
+
+    @Override
+    public Response signRawTransaction(String raw, String address) {
+        SignRawTransactionResponse resp = new SignRawTransactionResponse();
+
+        byte[] txBytes;
+        try {
+            txBytes = Hex.decode0x(raw);
+        } catch (CryptoException ex) {
+            return failure(resp, "Parameter `raw` is not a hexadecimal string.");
+        }
+
+        byte[] addressBytes;
+        try {
+            addressBytes = Hex.decode0x(address);
+        } catch (CryptoException ex) {
+            return failure(resp, "Parameter `address` is not a hexadecimal string.");
+        }
+
+        Key signerKey = kernel.getWallet().getAccount(addressBytes);
+        if (signerKey == null) {
+            return failure(resp, "Parameter `address` doesn't exist in the wallet.");
+        }
+
+        try {
+            Transaction tx = Transaction.fromEncoded(txBytes).sign(signerKey);
+            resp.setResult(Hex.encode0x(tx.toBytes()));
+            resp.setSuccess(true);
+            return Response.ok().entity(resp).build();
+        } catch (IndexOutOfBoundsException ex) {
+            return failure(resp, "Parameter `raw` is not a valid raw transaction.");
         }
     }
 
@@ -621,14 +682,14 @@ public final class SemuxApiServiceImpl implements SemuxApi {
             String data) {
         DoTransactionResponse resp = new DoTransactionResponse();
         try {
-            TransactionBuilder transactionBuilder = new TransactionBuilder(kernel, type)
+            Transaction tx = new TransactionBuilder(kernel)
+                    .withType(type)
                     .withFrom(from)
                     .withTo(to)
                     .withValue(value)
                     .withFee(fee)
-                    .withData(data);
-
-            Transaction tx = transactionBuilder.build();
+                    .withData(data)
+                    .buildSigned();
 
             PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {

@@ -139,7 +139,7 @@ public class HttpHandlerTest {
     public void testGetStaticFiles() throws IOException {
         startServer(null);
 
-        URL url = new URL("http://" + ip + ":" + port + "/" + Version.prefixOf(Version.v1_1_0) + "/index.html");
+        URL url = new URL("http://" + ip + ":" + port + "/" + Version.prefixOf(Version.v2_0_0) + "/index.html");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("Authorization", auth);
 
@@ -159,7 +159,7 @@ public class HttpHandlerTest {
     public void testGetStaticFiles404() throws IOException {
         startServer(null);
 
-        URL url = new URL("http://" + ip + ":" + port + "/" + Version.prefixOf(Version.v1_1_0) + "/xx.html");
+        URL url = new URL("http://" + ip + ":" + port + "/" + Version.prefixOf(Version.v2_0_0) + "/xx.html");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("Authorization", auth);
 

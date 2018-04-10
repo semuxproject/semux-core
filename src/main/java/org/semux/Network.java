@@ -34,4 +34,17 @@ public enum Network {
     public String toString() {
         return label;
     }
+
+    public static Network of(byte networkId) {
+        switch (networkId) {
+        case (byte) 0:
+            return MAINNET;
+        case (byte) 1:
+            return TESTNET;
+        case (byte) 2:
+            return DEVNET;
+        default:
+            throw new IllegalArgumentException("Unsupported network id.");
+        }
+    }
 }

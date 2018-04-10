@@ -92,7 +92,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     public HttpHandler(Kernel kernel) {
         this.config = kernel.getConfig();
         this.apiHandlers.put(Version.v1_0_1, new org.semux.api.v1_0_1.ApiHandlerImpl(kernel));
-        this.apiHandlers.put(Version.v1_1_0, new org.semux.api.v1_1_0.impl.ApiHandlerImpl(kernel));
+        this.apiHandlers.put(Version.v2_0_0, new org.semux.api.v2_0_0.impl.ApiHandlerImpl(kernel));
     }
 
     /**
@@ -234,10 +234,10 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private ChannelFuture writeApiResponse(ChannelHandlerContext ctx, Boolean prettyPrint, Object response) {
         HttpResponseStatus status;
-        if (response instanceof javax.ws.rs.core.Response) { // since v1.1, a standard JAX-RS response is provided
+        if (response instanceof javax.ws.rs.core.Response) { // since v2.0.0, a standard JAX-RS response is provided
             status = HttpResponseStatus.valueOf(((Response) response).getStatus());
             response = ((Response) response).getEntity();
-        } else { // prior to v1.1, status is always OK
+        } else { // prior to v2.0.0, status is always OK
             status = OK;
         }
 
