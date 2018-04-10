@@ -113,6 +113,14 @@ public class MenuBar extends JMenuBar implements ActionListener {
         itemConsole.addActionListener(this);
         menuHelp.add(itemConsole);
 
+        if (gui.getKernel().getConfig().apiEnabled()) {
+            JMenuItem itemApiExplorer = new JMenuItem(GuiMessages.get("ApiExplorer"));
+            itemApiExplorer.setName("itemApiExplorer");
+            itemApiExplorer.setActionCommand(Action.API_EXPLORER.name());
+            itemApiExplorer.addActionListener(this);
+            menuHelp.add(itemApiExplorer);
+        }
+
         JMenuItem itemHelp = new JMenuItem(GuiMessages.get("Help"));
         itemHelp.setName("itemHelp");
         itemHelp.setActionCommand(Action.HELP.name());
@@ -148,6 +156,9 @@ public class MenuBar extends JMenuBar implements ActionListener {
             break;
         case CONSOLE:
             console();
+            break;
+        case API_EXPLORER:
+            apiExplorer();
             break;
         case HELP:
             help();
@@ -308,6 +319,21 @@ public class MenuBar extends JMenuBar implements ActionListener {
         }
         ConsoleDialog d = new ConsoleDialog(gui, frame);
         d.setVisible(true);
+    }
+
+    /**
+     * Shows the Swagger UI.
+     */
+    private void apiExplorer() {
+        if (Desktop.isDesktopSupported()) {
+            final String swaggerUrl = gui.getKernel().getApi().getSwaggerUrl();
+            try {
+                logger.info(swaggerUrl);
+                Desktop.getDesktop().browse(new URI(swaggerUrl));
+            } catch (IOException | URISyntaxException e) {
+                logger.error("Unable to parse swagger url " + swaggerUrl);
+            }
+        }
     }
 
     /**

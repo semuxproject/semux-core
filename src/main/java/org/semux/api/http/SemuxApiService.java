@@ -10,6 +10,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.Kernel;
+import org.semux.api.Version;
 import org.semux.api.v1_0_1.ApiHandlerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,8 @@ import io.netty.handler.logging.LoggingHandler;
  */
 public class SemuxApiService {
 
+    public static final Version DEFAULT_VERSION = Version.v2_0_0;
+
     private static final Logger logger = LoggerFactory.getLogger(SemuxApiService.class);
 
     private static final ThreadFactory factory = new ThreadFactory() {
@@ -44,6 +47,9 @@ public class SemuxApiService {
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
+
+    String ip;
+    int port;
 
     public SemuxApiService(Kernel kernel) {
         this.kernel = kernel;
@@ -76,6 +82,8 @@ public class SemuxApiService {
      */
     public void start(String ip, int port, HttpChannelInitializer httpChannelInitializer) {
         try {
+            this.ip = ip;
+            this.port = port;
             bossGroup = new NioEventLoopGroup(1, factory);
             workerGroup = new NioEventLoopGroup(0, factory);
 
@@ -85,6 +93,10 @@ public class SemuxApiService {
 
             logger.info("Starting API server: address = {}:{}", ip, port);
             channel = b.bind(ip, port).sync().channel();
+            logger.info(
+                    "API server started. API: {}, Swagger UI: {}",
+                    getAPIUrl(),
+                    getSwaggerUrl());
         } catch (Exception e) {
             logger.error("Failed to start API server", e);
         }
@@ -119,6 +131,14 @@ public class SemuxApiService {
      */
     public boolean isRunning() {
         return channel != null;
+    }
+
+    public String getAPIUrl() {
+        return String.format("http://%s:%d/%s/", ip, port, Version.prefixOf(DEFAULT_VERSION));
+    }
+
+    public String getSwaggerUrl() {
+        return String.format("http://%s:%d/%s/swagger.html", ip, port, Version.prefixOf(DEFAULT_VERSION));
     }
 
     /**

@@ -59,6 +59,8 @@ public enum Action {
 
     CONSOLE,
 
+    API_EXPLORER,
+
     HELP,
 
     SHOW_ADDRESS_BOOK,
