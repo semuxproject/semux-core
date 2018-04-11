@@ -6,6 +6,9 @@
  */
 package org.semux.core;
 
+import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,8 +32,11 @@ import org.semux.util.Bytes;
 import org.semux.util.IOUtil;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
 
 public class Wallet {
 
@@ -440,6 +446,12 @@ public class Wallet {
             if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
                 logger.error("Failed to create the directory for wallet");
                 return false;
+            }
+
+            // set posix permissions
+            if (SystemUtil.isPosix() && !file.exists()) {
+                Files.createFile(file.toPath());
+                Files.setPosixFilePermissions(file.toPath(), Sets.newHashSet(OWNER_READ, OWNER_WRITE));
             }
 
             IOUtil.writeToFile(enc.toBytes(), file);

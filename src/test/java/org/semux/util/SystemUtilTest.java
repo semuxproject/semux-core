@@ -10,6 +10,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
+import static org.semux.util.SystemUtil.OsName.LINUX;
+import static org.semux.util.SystemUtil.OsName.MACOS;
+import static org.semux.util.SystemUtil.OsName.WINDOWS;
 
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
@@ -67,7 +70,7 @@ public class SystemUtilTest {
 
     @Test
     public void testIsWindowsVCRedist2012Installed() {
-        assumeTrue(SystemUtil.getOsName() == SystemUtil.OsName.WINDOWS);
+        assumeTrue(SystemUtil.getOsName() == WINDOWS);
         assertTrue(SystemUtil.isWindowsVCRedist2012Installed());
     }
 
@@ -83,5 +86,19 @@ public class SystemUtilTest {
         default:
             throw new UnreachableException();
         }
+    }
+
+    @Test
+    public void testIsPosixTrue() {
+        SystemUtil.OsName os = SystemUtil.getOsName();
+        assumeTrue(os.equals(LINUX) || os.equals(MACOS));
+        assertTrue(SystemUtil.isPosix());
+    }
+
+    @Test
+    public void testIsPosixFalse() {
+        SystemUtil.OsName os = SystemUtil.getOsName();
+        assumeTrue(os.equals(WINDOWS));
+        assertFalse(SystemUtil.isPosix());
     }
 }

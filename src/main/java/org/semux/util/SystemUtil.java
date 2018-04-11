@@ -15,6 +15,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.FileSystems;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
@@ -365,6 +366,15 @@ public class SystemUtil {
         } catch (ClassNotFoundException expected) {
             return false;
         }
+    }
+
+    /**
+     * Check if current OS is POSIX compliant.
+     *
+     * @return whether current OS is POSIX compliant
+     */
+    public static boolean isPosix() {
+        return FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
     }
 
     private SystemUtil() {
