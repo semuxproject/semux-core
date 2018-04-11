@@ -124,8 +124,9 @@ public class SemuxGuiTest {
     @Test
     public void testGetMinVersion() {
         SemuxGui gui = spy(new SemuxGui());
-        String v = gui.getMinVersion();
-        logger.info("Min version: {}", v);
+        SemuxGui.Version v = gui.getCurrentVersions();
+        logger.info("Min version: {}", v.minVersion);
+        logger.info("Latest version: {}", v.latestVersion);
 
         assertThat(v).isNotNull();
     }

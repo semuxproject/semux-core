@@ -76,6 +76,7 @@ public class SemuxGui extends Launcher {
     private JFrame main;
     private Thread dataThread;
     private Thread versionThread;
+    private String lastVersionNotified;
 
     public static void main(String[] args) {
         try {
@@ -336,14 +337,19 @@ public class SemuxGui extends Launcher {
     protected void checkVersionLoop() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Thread.sleep(5L * 60L * 1000L);
-
-                // compare version
-                String v = getMinVersion();
-                if (v != null && SystemUtil.compareVersion(Constants.CLIENT_VERSION, v) < 0) {
+                Version v = getCurrentVersions();
+                if (v != null && SystemUtil.compareVersion(Constants.CLIENT_VERSION, v.minVersion) < 0) {
                     JOptionPane.showMessageDialog(null, GuiMessages.get("WalletNeedToBeUpgraded"));
-                    SystemUtil.exitAsync(SystemUtil.Code.CLIENT_UPGRADE_NEEDED);
+                    SystemUtil.exitAsync(-1);
                 }
+                // notify user if a new version has been posted (once)
+                if (v != null && SystemUtil.compareVersion(Constants.CLIENT_VERSION, v.latestVersion) < 0
+                        && !v.latestVersion.equals(lastVersionNotified)) {
+                    JOptionPane.showMessageDialog(null, GuiMessages.get("WalletCanBeUpgraded"));
+                    lastVersionNotified = v.latestVersion;
+                }
+
+                Thread.sleep(8L * 60L * 60L * 1000L); // 8 hours
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
@@ -442,7 +448,7 @@ public class SemuxGui extends Launcher {
      *
      * @return the min version, or null if failed to retrieve
      */
-    protected String getMinVersion() {
+    protected Version getCurrentVersions() {
         try {
             URL url = new URL("http://api.semux.org/version");
             URLConnection con = url.openConnection();
@@ -452,7 +458,9 @@ public class SemuxGui extends Launcher {
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(con.getInputStream());
-            return node.get("minVersion").asText();
+            String minVersion = node.get("minVersion").asText();
+            String latestVersion = node.get("latestVersion").asText();
+            return new Version(minVersion, latestVersion);
         } catch (IOException e) {
             logger.info("Failed to fetch version info");
         }
@@ -461,5 +469,15 @@ public class SemuxGui extends Launcher {
 
     protected int showSelectDialog(JFrame parent, String message, List<Object> options) {
         return new SelectDialog(parent, message, options).showAndGet();
+    }
+
+    protected static class Version {
+        public String minVersion;
+        public String latestVersion;
+
+        public Version(String minVersion, String latestVersion) {
+            this.minVersion = minVersion;
+            this.latestVersion = latestVersion;
+        }
     }
 }
