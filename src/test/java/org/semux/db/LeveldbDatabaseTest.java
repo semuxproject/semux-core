@@ -29,7 +29,7 @@ import org.semux.db.LeveldbDatabase.LevelDbFactory;
 import org.semux.util.Bytes;
 import org.semux.util.ClosableIterator;
 
-public class LeveldbDatabseTest {
+public class LeveldbDatabaseTest {
 
     private byte[] key = Bytes.of("key");
     private byte[] value = Bytes.of("value");
