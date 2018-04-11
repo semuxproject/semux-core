@@ -444,6 +444,8 @@
                                 <copy file="${project.basedir}/scripts/semux-gui.sh" tofile="${dist.base}/linux/semux-gui.sh" />
                                 <chmod file="${dist.base}/linux/semux.jar" perm="755" />
                                 <chmod file="${dist.base}/linux/semux*.sh" perm="755" />
+                                <chmod dir="${dist.base}/linux/config" perm="700" />
+                                <chmod file="${dist.base}/linux/config/*" perm="600" />
 
                                 <!-- macos build -->
                                 <!-- use fat jar because .app bundle is not production ready -->
@@ -452,6 +454,8 @@
                                 </copy>
                                 <chmod file="${dist.base}/macos/semux.jar" perm="755" />
                                 <chmod file="${dist.base}/macos/semux*.sh" perm="755" />
+                                <chmod dir="${dist.base}/macos/config" perm="700" />
+                                <chmod file="${dist.base}/macos/config/*" perm="600" />
                             </target>
                         </configuration>
                         <goals>
