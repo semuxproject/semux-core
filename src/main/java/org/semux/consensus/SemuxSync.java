@@ -6,6 +6,7 @@
  */
 package org.semux.consensus;
 
+import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sum;
 
@@ -15,6 +16,7 @@ import java.math.MathContext;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.config.Config;
+import org.semux.config.Constants;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
@@ -377,6 +380,15 @@ public class SemuxSync implements SyncManager {
         Block latest = chain.getLatestBlock();
         if (!Block.validateHeader(latest.getHeader(), header)) {
             logger.debug("Invalid block header");
+            return false;
+        }
+
+        // set UNIFORM_DISTRIBUTION fork as the prerequisite of disallowing coinbase
+        // magic account from forging blocks to avoid potential network freeze caused by
+        // malicious users.
+        if (chain.forkActivated(block.getNumber(), UNIFORM_DISTRIBUTION)
+                && Arrays.equals(block.getCoinbase(), Constants.COINBASE_KEY.toAddress())) {
+            logger.warn("Adding a block forged by coinbase magic account");
             return false;
         }
 

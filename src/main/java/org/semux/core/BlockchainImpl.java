@@ -343,15 +343,6 @@ public class BlockchainImpl implements Blockchain {
             throw new BlockchainException("Blocks can only be added sequentially");
         }
 
-        // set UNIFORM_DISTRIBUTION fork as the prerequisite of disallowing coinbase
-        // magic account from forging blocks to avoid potential network freeze caused by
-        // malicious users.
-        if (activatedForks.containsKey(UNIFORM_DISTRIBUTION)
-                && Arrays.equals(block.getCoinbase(), Constants.COINBASE_KEY.toAddress())) {
-            logger.error("Adding a block forged by coinbase magic account");
-            throw new BlockchainException("Coinbase magic account should never be used to forge blocks");
-        }
-
         // [1] update block
         blockDB.put(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)), block.toBytesHeader());
         blockDB.put(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)), block.toBytesTransactions());
