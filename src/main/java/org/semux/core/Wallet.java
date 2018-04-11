@@ -105,10 +105,10 @@ public class Wallet {
                 Map<ByteArray, String> newAliases = new HashMap<>();
                 switch (version) {
                 case 1:
-                    newAccounts = readAccounts(key, dec, false);
+                    newAccounts = readAccounts(key, dec, false, version);
                     break;
                 case 2:
-                    newAccounts = readAccounts(key, dec, true);
+                    newAccounts = readAccounts(key, dec, true, version);
                     newAliases = readAddressAliases(key, dec);
                     break;
                 case 3:
@@ -116,7 +116,7 @@ public class Wallet {
                     for (int i = 0; i < HASH_ROUNDS; i++) {
                         key = Hash.h256(key);
                     }
-                    newAccounts = readAccounts(key, dec, true);
+                    newAccounts = readAccounts(key, dec, true, version);
                     newAliases = readAddressAliases(key, dec);
                     break;
                 default:
@@ -153,16 +153,20 @@ public class Wallet {
      * @return
      * @throws InvalidKeySpecException
      */
-    protected List<Key> readAccounts(byte[] key, SimpleDecoder dec, boolean vlq) throws InvalidKeySpecException {
+    protected List<Key> readAccounts(byte[] key, SimpleDecoder dec, boolean vlq, int version)
+            throws InvalidKeySpecException {
         List<Key> list = new ArrayList<>();
         int total = dec.readInt(); // size
 
         for (int i = 0; i < total; i++) {
             byte[] iv = dec.readBytes(vlq);
-            byte[] publicKey = dec.readBytes(vlq);
+            if (version < 3) {
+                byte[] publicKey = dec.readBytes(vlq);
+            }
             byte[] privateKey = Aes.decrypt(dec.readBytes(vlq), key, iv);
+            Key addressKey = new Key(privateKey);
+            list.add(new Key(privateKey, addressKey.getPublicKey()));
 
-            list.add(new Key(privateKey, publicKey));
         }
         return list;
     }
@@ -180,7 +184,6 @@ public class Wallet {
                 byte[] iv = Bytes.random(16);
 
                 enc.writeBytes(iv);
-                enc.writeBytes(a.getPublicKey());
                 enc.writeBytes(Aes.encrypt(a.getPrivateKey(), key, iv));
             }
         }
@@ -443,7 +446,8 @@ public class Wallet {
             SimpleEncoder enc = new SimpleEncoder();
             enc.writeInt(VERSION);
 
-            // to discourage brute forcing, use many rounds of hashing.  We could memoize this.
+            // to discourage brute forcing, use many rounds of hashing. We could memoize
+            // this.
             for (int i = 0; i < HASH_ROUNDS; i++) {
                 key = Hash.h256(key);
             }
