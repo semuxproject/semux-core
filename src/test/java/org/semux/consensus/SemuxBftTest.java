@@ -29,6 +29,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.semux.TestUtils;
 import org.semux.config.Constants;
 import org.semux.config.MainnetConfig;
 import org.semux.core.Block;
@@ -168,6 +169,21 @@ public class SemuxBftTest {
                         new TransactionResult(false))));
 
         assertFalse(semuxBFT.getUnvalidatedTransactions(Collections.singletonList(tx2)).isEmpty());
+    }
+
+    @Test
+    public void testValidateBlockCoinbase() {
+        kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+
+        Block block = TestUtils.createBlock(
+                kernelRule.getKernel().getBlockchain().getLatestBlock().getHash(),
+                Constants.COINBASE_KEY,
+                1,
+                Collections.emptyList(),
+                Collections.emptyList());
+
+        SemuxBft semuxBFT = new SemuxBft(kernelRule.getKernel());
+        assertFalse(semuxBFT.validateBlock(block.getHeader(), Collections.emptyList()));
     }
 
     private Transaction createTransaction(Key to, Key from, long time, long nonce) {

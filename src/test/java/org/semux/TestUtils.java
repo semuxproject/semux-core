@@ -23,16 +23,19 @@ import org.semux.util.MerkleUtil;
 public class TestUtils {
 
     public static Block createBlock(long number, List<Transaction> txs, List<TransactionResult> res) {
-        Key key = new Key();
-        byte[] coinbase = key.toAddress();
-        byte[] prevHash = Bytes.EMPTY_HASH;
+        return createBlock(Bytes.EMPTY_HASH, new Key(), number, txs, res);
+    }
+
+    public static Block createBlock(byte[] prevHash, Key coinbase, long number, List<Transaction> txs,
+            List<TransactionResult> res) {
         long timestamp = System.currentTimeMillis();
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(txs);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(res);
         byte[] stateRoot = Bytes.EMPTY_HASH;
         byte[] data = {};
 
-        BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
+        BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,
+                resultsRoot,
                 stateRoot, data);
         return new Block(header, txs, res);
     }
