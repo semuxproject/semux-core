@@ -8,6 +8,7 @@ package org.semux.api.v2_0_0;
 
 import static org.semux.core.TransactionType.DELEGATE;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.semux.Kernel;
@@ -39,7 +40,11 @@ public class TypeFactory {
                 .transactionCount(transactionCount);
     }
 
-    public static BlockType blockType(Block block) {
+    public static BlockType blockType(Block block, Transaction coinbaseTransaction) {
+        List<Transaction> txs = block.getTransactions();
+        if (coinbaseTransaction != null) {
+            txs.add(0, coinbaseTransaction);
+        }
         return new BlockType()
                 .hash(Hex.encode0x(block.getHash()))
                 .number(String.valueOf(block.getNumber()))
@@ -52,7 +57,7 @@ public class TypeFactory {
                 .resultsRoot(Hex.encode0x(block.getResultsRoot()))
                 .stateRoot(Hex.encode0x(block.getStateRoot()))
                 .data(Hex.encode0x(block.getData()))
-                .transactions(block.getTransactions().stream()
+                .transactions(txs.stream()
                         .map(tx -> transactionType(block.getNumber(), tx))
                         .collect(Collectors.toList()));
     }

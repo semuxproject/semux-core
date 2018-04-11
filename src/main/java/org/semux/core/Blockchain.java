@@ -101,6 +101,16 @@ public interface Blockchain {
     Transaction getTransaction(byte[] hash);
 
     /**
+     * Returns coinbase transaction of the block number. This method is required as
+     * Semux doesn't store coinbase transaction in blocks.
+     *
+     * @param blockNumber
+     *            the block number
+     * @return the coinbase transaction
+     */
+    Transaction getCoinbaseTransaction(long blockNumber);
+
+    /**
      * Returns whether the transaction is in the blockchain.
      *
      * @param hash
