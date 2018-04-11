@@ -845,6 +845,11 @@ public class SemuxBft implements Consensus {
             return false;
         }
 
+        if (!Arrays.equals(header.getCoinbase(), proposal.getSignature().getAddress())) {
+            logger.warn("The coinbase should always equal to the proposer's address");
+            return false;
+        }
+
         // [2] check transactions and results (skipped)
         List<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
 
