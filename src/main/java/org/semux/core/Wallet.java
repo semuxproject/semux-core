@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.bouncycastle.crypto.generators.BCrypt;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
@@ -37,7 +38,8 @@ public class Wallet {
     private static final Logger logger = LoggerFactory.getLogger(Wallet.class);
 
     private static final int VERSION = 3;
-    private static final int HASH_ROUNDS = 100_000;
+    private static final int SALT_LENGTH = 16;
+    private static final int BCRYPT_COST = 12;
 
     private File file;
     private String password;
@@ -112,10 +114,8 @@ public class Wallet {
                     newAliases = readAddressAliases(key, dec);
                     break;
                 case 3:
-                    // to discourage brute forcing, use many rounds of hashing
-                    for (int i = 0; i < HASH_ROUNDS; i++) {
-                        key = Hash.h256(key);
-                    }
+                    byte[] salt = dec.readBytes();
+                    key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
                     newAccounts = readAccounts(key, dec, true, version);
                     newAliases = readAddressAliases(key, dec);
                     break;
@@ -446,11 +446,10 @@ public class Wallet {
             SimpleEncoder enc = new SimpleEncoder();
             enc.writeInt(VERSION);
 
-            // to discourage brute forcing, use many rounds of hashing. We could memoize
-            // this.
-            for (int i = 0; i < HASH_ROUNDS; i++) {
-                key = Hash.h256(key);
-            }
+            byte[] salt = Bytes.random(SALT_LENGTH);
+            enc.writeBytes(salt);
+
+            key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
 
             writeAccounts(key, enc);
             writeAddressAliases(key, enc);
