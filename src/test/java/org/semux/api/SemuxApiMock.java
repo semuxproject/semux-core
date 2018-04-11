@@ -69,4 +69,8 @@ public class SemuxApiMock {
     public KernelMock getKernel() {
         return kernel;
     }
+
+    public SemuxApiService getApi() {
+        return server;
+    }
 }

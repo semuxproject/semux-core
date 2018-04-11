@@ -3,7 +3,7 @@
     "info" : {
         "description" : "Semux is an experimental high-performance blockchain platform that powers decentralized application.",
         "version" : "2.0.0",
-        "title" : "Semux",
+        "title" : "Semux API",
         "contact" : {
             "name" : "Semux Foundation",
             "url" : "https://www.semux.org"
@@ -738,7 +738,7 @@
             }
         },
         "/sign-message" : {
-            "post" : {
+            "get" : {
                 "tags": [
                     "semux"
                 ],
@@ -1105,7 +1105,7 @@
             }
         },
         "/compose-raw-transaction" : {
-            "post" : {
+            "get" : {
                 "tags": [
                     "semux"
                 ],
@@ -1164,6 +1164,7 @@
                         "in" : "query",
                         "description" : "Recipient's address",
                         "required" : false,
+                        "type" : "string",
                         "pattern" : "^(0x)?[0-9a-fA-F]+$"
                     },
                     {
@@ -1210,7 +1211,7 @@
             }
         },
         "/sign-raw-transaction" : {
-            "post" : {
+            "get" : {
                 "tags": [
                     "semux"
                 ],
@@ -1267,9 +1268,6 @@
                 },
                 "message" : {
                     "type" : "string"
-                },
-                "result" : {
-                    "type" : "object"
                 }
             }
         },

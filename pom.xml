@@ -97,7 +97,7 @@
                 </executions>
             </plugin>
 
-            <!-- build swagger document -->
+            <!-- build v1.0.1 swagger document -->
             <plugin>
                 <groupId>com.github.kongchen</groupId>
                 <artifactId>swagger-maven-plugin</artifactId>
@@ -114,9 +114,9 @@
                     <apiSources>
                         <apiSource>
                             <info>
-                                <title>Semux</title>
+                                <title>Semux API</title>
                                 <description>${project.description}</description>
-                                <version>${project.version}</version>
+                                <version>1.0.1</version>
                                 <contact>
                                     <name>${project.organization.name}</name>
                                     <url>${project.organization.url}</url>
