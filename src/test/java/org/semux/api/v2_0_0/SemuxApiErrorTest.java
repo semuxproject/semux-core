@@ -36,6 +36,8 @@ import org.semux.api.v2_0_0.model.ApiHandlerResponse;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 /**
@@ -208,7 +210,8 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
         WebClient webClient = WebClient.create(
                 String.format("http://%s:%d/%s%s", config.apiListenIp(), config.apiListenPort(),
                         Version.prefixOf(Version.v2_0_0), uriString),
-                Collections.singletonList(new JacksonJsonProvider()),
+                Collections.singletonList(new JacksonJsonProvider(
+                        new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false))),
                 config.apiUsername(),
                 config.apiPassword(),
                 null);
