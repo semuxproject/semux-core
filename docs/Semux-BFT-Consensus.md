@@ -13,7 +13,7 @@ There are six phases to semux BFT Consensus.  On each block, the validators will
 
 
 #### New Height
-#####Time: 3 seconds (firm)
+##### Time: 3 seconds (firm)
 Set height to lastHeight + 1
 
 Send new height message to all peers
