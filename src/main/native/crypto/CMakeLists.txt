@@ -14,7 +14,7 @@ find_package(sodium REQUIRED)
 include_directories(${sodium_INCLUDE_DIR})
 
 # source files
-set(SOURCE_FILES org_semux_crypto_Native.cpp)
+set(SOURCE_FILES org_semux_crypto_Native.cpp ripemd160.c)
 
 # build
 add_library(crypto SHARED ${SOURCE_FILES})

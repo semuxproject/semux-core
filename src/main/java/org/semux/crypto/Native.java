@@ -119,21 +119,29 @@ public class Native {
     }
 
     /**
-     * Computes the blake2b hash.
+     * Computes the 256-bit hash. See {@link Hash#h256(byte[])}
      *
      * @param data
      * @return
      */
-    public static native byte[] blake2b(byte[] data);
+    public static native byte[] h256(byte[] data);
 
     /**
-     * Creates an Ed25519 message signature with the given private key.
+     * Computes the 160-bit hash. See {@link Hash#h160(byte[])}
+     *
+     * @param data
+     * @return
+     */
+    public static native byte[] h160(byte[] data);
+
+    /**
+     * Signs an message using the given key.
      *
      * @param message
      * @param privateKey
      * @return
      */
-    public static native byte[] ed25519_sign(byte[] message, byte[] privateKey);
+    public static native byte[] sign(byte[] message, byte[] privateKey);
 
     /**
      * Verifies an Ed25519 signature.
@@ -143,5 +151,5 @@ public class Native {
      * @param publicKey
      * @return
      */
-    public static native boolean ed25519_verify(byte[] message, byte[] signature, byte[] publicKey);
+    public static native boolean verify(byte[] message, byte[] signature, byte[] publicKey);
 }

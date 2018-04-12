@@ -1,7 +1,8 @@
 #include "org_semux_crypto_Native.h"
+#include "ripemd160.h"
 #include <sodium.h>
 
-JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_blake2b
+JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_h256
 (JNIEnv *env, jclass cls, jbyteArray msg)
 {
     // check inputs
@@ -27,7 +28,37 @@ JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_blake2b
     return result;
 }
 
-JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_ed25519_1sign
+JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_h160
+(JNIEnv *env, jclass cls, jbyteArray msg)
+{
+    // check inputs
+    if (msg == NULL) {
+        env->ThrowNew(env->FindClass("org/semux/crypto/CryptoException"), "Input can't be null");
+        return NULL;
+    }
+
+    // read byte arrays
+    jsize msg_size = env->GetArrayLength(msg);
+    jbyte *msg_buf = (jbyte *)malloc(msg_size);
+    env->GetByteArrayRegion(msg, 0, msg_size, msg_buf);
+
+    // compute blake2b hash
+    unsigned char hash[crypto_generichash_blake2b_BYTES];
+    crypto_generichash_blake2b(hash, sizeof(hash), (const unsigned char *)msg_buf, msg_size, NULL, 0);
+
+    // compute ripemd160 digest
+    unsigned char digest[20];
+    ripemd160(hash, sizeof(hash), digest);
+
+    // release buffer
+    free(msg_buf);
+
+    jbyteArray result = env->NewByteArray(sizeof(digest));
+    env->SetByteArrayRegion(result, 0, sizeof(digest), (const jbyte*)digest);
+    return result;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_sign
 (JNIEnv *env, jclass cls, jbyteArray msg, jbyteArray sk)
 {
     // check inputs
@@ -57,7 +88,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_ed25519_1sign
     return result;
 }
 
-JNIEXPORT jboolean JNICALL Java_org_semux_crypto_Native_ed25519_1verify
+JNIEXPORT jboolean JNICALL Java_org_semux_crypto_Native_verify
 (JNIEnv *env, jclass cls, jbyteArray msg, jbyteArray sig, jbyteArray pk)
 {
     // check inputs
