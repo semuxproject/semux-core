@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.bouncycastle.crypto.generators.BCrypt;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
@@ -36,7 +37,9 @@ public class Wallet {
 
     private static final Logger logger = LoggerFactory.getLogger(Wallet.class);
 
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
+    private static final int SALT_LENGTH = 16;
+    private static final int BCRYPT_COST = 12;
 
     private File file;
     private String password;
@@ -94,7 +97,7 @@ public class Wallet {
         }
 
         try {
-            byte[] key = Hash.h256(Bytes.of(password));
+            byte[] key;
 
             if (exists()) {
                 SimpleDecoder dec = new SimpleDecoder(IOUtil.readFile(file));
@@ -104,10 +107,18 @@ public class Wallet {
                 Map<ByteArray, String> newAliases = new HashMap<>();
                 switch (version) {
                 case 1:
-                    newAccounts = readAccounts(key, dec, false);
+                    key = Hash.h256(Bytes.of(password));
+                    newAccounts = readAccounts(key, dec, false, version);
                     break;
                 case 2:
-                    newAccounts = readAccounts(key, dec, true);
+                    key = Hash.h256(Bytes.of(password));
+                    newAccounts = readAccounts(key, dec, true, version);
+                    newAliases = readAddressAliases(key, dec);
+                    break;
+                case 3:
+                    byte[] salt = dec.readBytes();
+                    key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
+                    newAccounts = readAccounts(key, dec, true, version);
                     newAliases = readAddressAliases(key, dec);
                     break;
                 default:
@@ -144,16 +155,20 @@ public class Wallet {
      * @return
      * @throws InvalidKeySpecException
      */
-    protected List<Key> readAccounts(byte[] key, SimpleDecoder dec, boolean vlq) throws InvalidKeySpecException {
+    protected List<Key> readAccounts(byte[] key, SimpleDecoder dec, boolean vlq, int version)
+            throws InvalidKeySpecException {
         List<Key> list = new ArrayList<>();
         int total = dec.readInt(); // size
 
         for (int i = 0; i < total; i++) {
             byte[] iv = dec.readBytes(vlq);
-            byte[] publicKey = dec.readBytes(vlq);
+            if (version < 3) {
+                byte[] publicKey = dec.readBytes(vlq);
+            }
             byte[] privateKey = Aes.decrypt(dec.readBytes(vlq), key, iv);
+            Key addressKey = new Key(privateKey);
+            list.add(new Key(privateKey, addressKey.getPublicKey()));
 
-            list.add(new Key(privateKey, publicKey));
         }
         return list;
     }
@@ -171,7 +186,6 @@ public class Wallet {
                 byte[] iv = Bytes.random(16);
 
                 enc.writeBytes(iv);
-                enc.writeBytes(a.getPublicKey());
                 enc.writeBytes(Aes.encrypt(a.getPrivateKey(), key, iv));
             }
         }
@@ -433,6 +447,11 @@ public class Wallet {
 
             SimpleEncoder enc = new SimpleEncoder();
             enc.writeInt(VERSION);
+
+            byte[] salt = Bytes.random(SALT_LENGTH);
+            enc.writeBytes(salt);
+
+            key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
 
             writeAccounts(key, enc);
             writeAddressAliases(key, enc);
