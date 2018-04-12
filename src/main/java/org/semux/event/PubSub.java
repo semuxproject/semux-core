@@ -11,27 +11,18 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.semux.Launcher;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * PubSub is a global service that provides a communication channel between
- * different components of Semux wallet. This service holds a singleton
- * {@link PubSub#instance} which automatically starts at process startup and
- * stops at process shutdown.
+ * PubSub is a a communication channel between different components of Semux
+ * wallet. Instances of PubSub should only be created using
+ * {@link PubSubFactory}.
  */
 public class PubSub {
 
     private static Logger logger = LoggerFactory.getLogger(PubSub.class);
-
-    private static PubSub instance = new PubSub();
-
-    static {
-        instance.start();
-        Launcher.registerShutdownHook("pubsub", () -> instance.stop());
-    }
 
     private LinkedBlockingQueue<PubSubEvent> queue;
 
@@ -44,15 +35,10 @@ public class PubSub {
 
     private AtomicBoolean isRunning;
 
-    private PubSub() {
+    protected PubSub() {
         queue = new LinkedBlockingQueue<>();
         subscribers = new ConcurrentHashMap<>();
-        eventProcessingThread = new EventProcessingThread();
         isRunning = new AtomicBoolean(false);
-    }
-
-    public static PubSub getInstance() {
-        return instance;
     }
 
     /**
@@ -63,6 +49,12 @@ public class PubSub {
      * @return whether the event is successfully added.
      */
     public boolean publish(PubSubEvent event) {
+        // Do not accept any event if this pubsub instance hasn't been started in order
+        // to avoid memory garbage.
+        if (!isRunning.get()) {
+            return false;
+        }
+
         return queue
                 .add(event);
     }
@@ -70,28 +62,30 @@ public class PubSub {
     /**
      * Subscribe to an event.
      *
-     * @param event
-     *            the event.
      * @param subscriber
      *            the subscriber.
-     * @return whether the event is successfully subscribed.
+     * @param eventClss
+     *            the event classes to be subscribed.
      */
-    public boolean subscribe(Class<? extends PubSubEvent> event, PubSubSubscriber subscriber) {
-        return subscribers
-                .computeIfAbsent(event, k -> new ConcurrentLinkedQueue<>())
-                .add(subscriber);
+    @SafeVarargs
+    public final void subscribe(PubSubSubscriber subscriber, Class<? extends PubSubEvent>... eventClss) {
+        for (Class<? extends PubSubEvent> eventCls : eventClss) {
+            subscribers
+                    .computeIfAbsent(eventCls, k -> new ConcurrentLinkedQueue<>())
+                    .add(subscriber);
+        }
     }
 
     /**
      * Unsubscribe an event.
      *
-     * @param event
-     *            the event to be unsubscribed.
      * @param subscriber
      *            the subscriber.
+     * @param event
+     *            the event to be unsubscribed.
      * @return whether the event is successfully unsubscribed.
      */
-    public boolean unsubscribe(Class<? extends PubSubEvent> event, PubSubSubscriber subscriber) {
+    public boolean unsubscribe(PubSubSubscriber subscriber, Class<? extends PubSubEvent> event) {
         ConcurrentLinkedQueue q = subscribers.get(event);
         if (q != null) {
             return q.remove(subscriber);
@@ -117,11 +111,12 @@ public class PubSub {
      *             this method should only be called for once, otherwise an
      *             exception will be thrown.
      */
-    private synchronized void start() {
+    public synchronized void start() {
         if (!isRunning.compareAndSet(false, true)) {
             throw new UnreachableException("PubSub service can be started for only once");
         }
 
+        eventProcessingThread = new EventProcessingThread();
         eventProcessingThread.start();
         logger.info("PubSub service started");
     }
@@ -129,7 +124,7 @@ public class PubSub {
     /**
      * Stop the {@link this#eventProcessingThread}.
      */
-    private synchronized void stop() {
+    public synchronized void stop() {
         eventProcessingThread.interrupt();
         logger.info("PubSub service stopped");
     }
@@ -158,7 +153,11 @@ public class PubSub {
                 ConcurrentLinkedQueue<PubSubSubscriber> q = subscribers.get(event.getClass());
                 if (q != null) {
                     for (PubSubSubscriber subscriber : q) {
-                        subscriber.onPubSubEvent(event);
+                        try {
+                            subscriber.onPubSubEvent(event);
+                        } catch (Exception e) {
+                            logger.error("Event processing error", e);
+                        }
                     }
                 }
             }

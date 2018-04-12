@@ -25,6 +25,7 @@ import org.semux.core.event.WalletLoadingEvent;
 import org.semux.event.KernelBootingEvent;
 import org.semux.event.PubSub;
 import org.semux.event.PubSubEvent;
+import org.semux.event.PubSubFactory;
 import org.semux.event.PubSubSubscriber;
 import org.semux.gui.event.MainFrameStartedEvent;
 import org.semux.gui.event.WalletSelectionDialogShownEvent;
@@ -42,14 +43,12 @@ public class SplashScreen extends JFrame implements PubSubSubscriber {
 
     private static final Logger logger = LoggerFactory.getLogger(SplashScreen.class);
 
+    private static final PubSub pubSub = PubSubFactory.getDefault();
+
     private JProgressBar progressBar;
 
     public SplashScreen() {
-        PubSub.getInstance().subscribe(WalletLoadingEvent.class, this);
-        PubSub.getInstance().subscribe(WalletSelectionDialogShownEvent.class, this);
-        PubSub.getInstance().subscribe(KernelBootingEvent.class, this);
-        PubSub.getInstance().subscribe(MainFrameStartedEvent.class, this);
-        PubSub.getInstance().subscribe(BlockchainDatabaseUpgradingEvent.class, this);
+        subscribeEvents();
 
         setUndecorated(true);
         setContentPane(new ContentPane());
@@ -68,6 +67,17 @@ public class SplashScreen extends JFrame implements PubSubSubscriber {
         pack();
         setLocationRelativeTo(null);
         showSplash();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void subscribeEvents() {
+        pubSub.subscribe(
+                this,
+                WalletLoadingEvent.class,
+                WalletSelectionDialogShownEvent.class,
+                KernelBootingEvent.class,
+                MainFrameStartedEvent.class,
+                BlockchainDatabaseUpgradingEvent.class);
     }
 
     @Override
@@ -105,7 +115,7 @@ public class SplashScreen extends JFrame implements PubSubSubscriber {
     }
 
     private void destroySplash() {
-        PubSub.getInstance().unsubscribeAll(this);
+        pubSub.unsubscribeAll(this);
         setVisible(false);
         dispose();
     }

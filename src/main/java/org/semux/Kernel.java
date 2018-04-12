@@ -36,6 +36,7 @@ import org.semux.db.LeveldbDatabase;
 import org.semux.db.LeveldbDatabase.LevelDbFactory;
 import org.semux.event.KernelBootingEvent;
 import org.semux.event.PubSub;
+import org.semux.event.PubSubFactory;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
@@ -64,7 +65,9 @@ public class Kernel {
         System.setProperty("jna.nosys", "true");
     }
 
-    protected static final Logger logger = LoggerFactory.getLogger(Kernel.class);
+    private static final Logger logger = LoggerFactory.getLogger(Kernel.class);
+
+    private static final PubSub pubSub = PubSubFactory.getDefault();
 
     public enum State {
         STOPPED, BOOTING, RUNNING, STOPPING
@@ -117,7 +120,7 @@ public class Kernel {
             return;
         } else {
             state = State.BOOTING;
-            PubSub.getInstance().publish(new KernelBootingEvent());
+            pubSub.publish(new KernelBootingEvent());
         }
 
         // ====================================

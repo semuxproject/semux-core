@@ -37,6 +37,7 @@ import org.semux.db.DatabaseName;
 import org.semux.db.Migration;
 import org.semux.db.TempDatabaseFactory;
 import org.semux.event.PubSub;
+import org.semux.event.PubSubFactory;
 import org.semux.util.Bytes;
 import org.semux.util.FileUtil;
 import org.semux.util.SimpleDecoder;
@@ -831,6 +832,8 @@ public class BlockchainImpl implements Blockchain {
      */
     private class MigrationBlockDbVersion001 implements Migration {
 
+        private final PubSub pubSub = PubSubFactory.getDefault();
+
         @Override
         public void migrate(Config config, DatabaseFactory dbFactory) {
             try {
@@ -843,7 +846,7 @@ public class BlockchainImpl implements Blockchain {
                 for (long i = 1; i <= latestBlockNumber; i++) {
                     migrationBlockchain.applyBlock(getBlock(i));
                     if (i % 1000 == 0) {
-                        PubSub.getInstance().publish(new BlockchainDatabaseUpgradingEvent(i, latestBlockNumber));
+                        pubSub.publish(new BlockchainDatabaseUpgradingEvent(i, latestBlockNumber));
                         logger.info("Loaded {} / {} blocks", i, latestBlockNumber);
                     }
                 }

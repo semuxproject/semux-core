@@ -12,9 +12,23 @@ import static org.awaitility.Awaitility.await;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 public class PubSubTest {
+
+    private static final PubSub pubSub = PubSubFactory.getDefault();
+
+    @Before
+    public void setUp() {
+        pubSub.start();
+    }
+
+    @After
+    public void tearDown() {
+        pubSub.stop();
+    }
 
     @Test
     public void testPubSub() {
@@ -23,13 +37,13 @@ public class PubSubTest {
         AtomicInteger dispatched1 = new AtomicInteger(0);
         AtomicInteger dispatched2 = new AtomicInteger(0);
 
-        PubSub.getInstance().subscribe(TestEvent1.class, event -> dispatched1.incrementAndGet());
-        PubSub.getInstance().subscribe(TestEvent2.class, event -> dispatched2.incrementAndGet());
+        pubSub.subscribe(event -> dispatched1.incrementAndGet(), TestEvent1.class);
+        pubSub.subscribe(event -> dispatched2.incrementAndGet(), TestEvent2.class);
         for (int i = 0; i < fuzz1; i++) {
-            new Thread(() -> PubSub.getInstance().publish(new TestEvent1())).run();
+            new Thread(() -> pubSub.publish(new TestEvent1())).run();
         }
         for (int i = 0; i < fuzz2; i++) {
-            new Thread(() -> PubSub.getInstance().publish(new TestEvent2())).run();
+            new Thread(() -> pubSub.publish(new TestEvent2())).run();
         }
         await().until(() -> dispatched1.get() == fuzz1);
         await().until(() -> dispatched2.get() == fuzz2);
@@ -38,19 +52,19 @@ public class PubSubTest {
     @Test
     public void testUnsubscribe() {
         PubSubSubscriber subscriber = event -> fail();
-        PubSub.getInstance().subscribe(TestEvent1.class, subscriber);
-        PubSub.getInstance().unsubscribe(TestEvent1.class, subscriber);
-        PubSub.getInstance().publish(new TestEvent1());
+        pubSub.subscribe(subscriber, TestEvent1.class);
+        pubSub.unsubscribe(subscriber, TestEvent1.class);
+        pubSub.publish(new TestEvent1());
     }
 
     @Test
     public void testUnsubscribeAll() {
         PubSubSubscriber subscriber = event -> fail();
-        PubSub.getInstance().subscribe(TestEvent1.class, subscriber);
-        PubSub.getInstance().subscribe(TestEvent2.class, subscriber);
-        PubSub.getInstance().unsubscribeAll(subscriber);
-        PubSub.getInstance().publish(new TestEvent1());
-        PubSub.getInstance().publish(new TestEvent1());
+        pubSub.subscribe(subscriber, TestEvent1.class);
+        pubSub.subscribe(subscriber, TestEvent2.class);
+        pubSub.unsubscribeAll(subscriber);
+        pubSub.publish(new TestEvent1());
+        pubSub.publish(new TestEvent1());
     }
 
     private static class TestEvent1 implements PubSubEvent {

@@ -17,15 +17,23 @@ import org.semux.core.event.BlockchainDatabaseUpgradingEvent;
 import org.semux.core.event.WalletLoadingEvent;
 import org.semux.event.KernelBootingEvent;
 import org.semux.event.PubSub;
+import org.semux.event.PubSubFactory;
 import org.semux.gui.event.MainFrameStartedEvent;
 import org.semux.gui.event.WalletSelectionDialogShownEvent;
 import org.semux.message.GuiMessages;
 
 public class SplashScreenTest extends AssertJSwingJUnitTestCase {
 
+    private static final PubSub pubSub = PubSubFactory.getDefault();
+
     @Override
     protected void onSetUp() {
+        pubSub.start();
+    }
 
+    @Override
+    protected void onTearDown() {
+        pubSub.stop();
     }
 
     @Test
@@ -37,27 +45,27 @@ public class SplashScreenTest extends AssertJSwingJUnitTestCase {
         window.requireVisible().progressBar().requireVisible().requireText(GuiMessages.get("SplashLoading"));
 
         // WalletLoadingEvent
-        PubSub.getInstance().publish(new WalletLoadingEvent());
+        pubSub.publish(new WalletLoadingEvent());
         await().until(
                 () -> window.requireVisible().progressBar().text().equals(GuiMessages.get("SplashLoadingWallet")));
 
         // WalletSelectionDialogShownEvent
-        PubSub.getInstance().publish(new WalletSelectionDialogShownEvent());
+        pubSub.publish(new WalletSelectionDialogShownEvent());
         await().until(() -> !window.target().isVisible());
 
         // KernelBootingEvent
-        PubSub.getInstance().publish(new KernelBootingEvent());
+        pubSub.publish(new KernelBootingEvent());
         await().until(
                 () -> window.progressBar().text().equals(GuiMessages.get("SplashStartingKernel")));
 
         // BlockchainDatabaseUpgradingEvent
-        PubSub.getInstance().publish(new BlockchainDatabaseUpgradingEvent(50L, 100L));
+        pubSub.publish(new BlockchainDatabaseUpgradingEvent(50L, 100L));
         window.progressBar().waitUntilIsDeterminate();
         window.requireVisible().progressBar().requireText(GuiMessages.get("SplashUpgradingDatabase", 50, 100));
         assertEquals(50 / 100, window.progressBar().target().getValue() / window.progressBar().target().getMaximum());
 
         // the splash screen should be disposed as soon as the mainframe starts
-        PubSub.getInstance().publish(new MainFrameStartedEvent());
+        pubSub.publish(new MainFrameStartedEvent());
         await().until(() -> !window.target().isVisible());
     }
 }

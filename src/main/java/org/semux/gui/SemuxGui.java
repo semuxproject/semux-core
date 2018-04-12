@@ -39,6 +39,7 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.event.PubSub;
+import org.semux.event.PubSubFactory;
 import org.semux.exception.LauncherException;
 import org.semux.gui.dialog.AddressBookDialog;
 import org.semux.gui.dialog.InputDialog;
@@ -66,6 +67,8 @@ public class SemuxGui extends Launcher {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxGui.class);
 
+    private static final PubSub pubSub = PubSubFactory.getDefault();
+
     private static final int TRANSACTION_LIMIT = 1024; // per account
 
     private WalletModel model;
@@ -91,6 +94,8 @@ public class SemuxGui extends Launcher {
             SemuxGui gui = new SemuxGui();
             // set up logger
             gui.setupLogger(args);
+            // set up pubsub
+            gui.setupPubSub();
             // start
             gui.start(args);
 
@@ -223,7 +228,7 @@ public class SemuxGui extends Launcher {
      * account and use it as coinbase.
      */
     public void setupCoinbase(Wallet wallet) {
-        PubSub.getInstance().publish(new WalletLoadingEvent());
+        pubSub.publish(new WalletLoadingEvent());
 
         if (wallet.size() > 1) {
             String message = GuiMessages.get("AccountSelection");
@@ -235,7 +240,7 @@ public class SemuxGui extends Launcher {
             }
 
             // show select dialog
-            PubSub.getInstance().publish(new WalletSelectionDialogShownEvent());
+            pubSub.publish(new WalletSelectionDialogShownEvent());
             int index = showSelectDialog(null, message, options);
 
             if (index == -1) {
@@ -291,7 +296,7 @@ public class SemuxGui extends Launcher {
         EventQueue.invokeLater(() -> {
             main = new MainFrame(this);
             main.setVisible(true);
-            PubSub.getInstance().publish(new MainFrameStartedEvent());
+            pubSub.publish(new MainFrameStartedEvent());
 
             addressBookDialog = new AddressBookDialog(main, kernel.getWallet(), this);
             model.addListener(ev -> addressBookDialog.refresh());

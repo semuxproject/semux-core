@@ -25,6 +25,7 @@ import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
 import org.semux.config.MainnetConfig;
 import org.semux.config.TestnetConfig;
+import org.semux.event.PubSubFactory;
 import org.semux.exception.LauncherException;
 import org.semux.log.LoggerConfigurator;
 import org.semux.message.CliMessages;
@@ -162,6 +163,14 @@ public abstract class Launcher {
         parseOptions(args);
 
         LoggerConfigurator.configure(new File(dataDir));
+    }
+
+    /**
+     * Set up pubsub service.
+     */
+    protected void setupPubSub() {
+        PubSubFactory.getDefault().start();
+        registerShutdownHook("pubsub-default", () -> PubSubFactory.getDefault().stop());
     }
 
     /**
