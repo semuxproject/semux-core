@@ -17,9 +17,9 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
@@ -31,8 +31,6 @@ import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.util.SystemUtil;
-
-import com.google.common.collect.Sets;
 
 public class WalletTest {
 
@@ -113,7 +111,7 @@ public class WalletTest {
 
     @Test
     public void testIsPosixPermissionSecured() throws IOException {
-        Files.setPosixFilePermissions(file.toPath(), Sets.newHashSet(OTHERS_READ));
+        Files.setPosixFilePermissions(file.toPath(), new HashSet<>(Collections.singletonList(OTHERS_READ)));
         assertFalse(wallet.isPosixPermissionSecured());
     }
 
