@@ -86,6 +86,7 @@ public class BlockchainImpl implements Blockchain {
     protected static final byte TYPE_TRANSACTION_HASH = 0x04;
     protected static final byte TYPE_ACCOUNT_TRANSACTION = 0x05;
     protected static final byte TYPE_ACTIVATED_FORKS = 0x06;
+    protected static final byte TYPE_COINBASE_TRANSACTION_HASH = 0x07;
     protected static final byte TYPE_DATABASE_VERSION = (byte) 0xff;
 
     protected static final byte TYPE_BLOCK_HEADER = 0x00;
@@ -290,6 +291,13 @@ public class BlockchainImpl implements Blockchain {
     }
 
     @Override
+    public Transaction getCoinbaseTransaction(long blockNumber) {
+        return blockNumber == 0
+                ? null
+                : getTransaction(indexDB.get(Bytes.merge(TYPE_COINBASE_TRANSACTION_HASH, Bytes.of(blockNumber))));
+    }
+
+    @Override
     public boolean hasTransaction(final byte[] hash) {
         return indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash)) != null;
     }
@@ -386,6 +394,7 @@ public class BlockchainImpl implements Blockchain {
                     Bytes.EMPTY_BYTES);
             tx.sign(Constants.COINBASE_KEY);
             indexDB.put(Bytes.merge(TYPE_TRANSACTION_HASH, tx.getHash()), tx.toBytes());
+            indexDB.put(Bytes.merge(TYPE_COINBASE_TRANSACTION_HASH, Bytes.of(block.getNumber())), tx.getHash());
             addTransactionToAccount(tx, block.getCoinbase());
 
             // [5] update validator statistics

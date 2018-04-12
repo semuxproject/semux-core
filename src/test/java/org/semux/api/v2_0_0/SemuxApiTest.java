@@ -45,6 +45,7 @@ import static org.semux.TestUtils.createBlock;
 import static org.semux.TestUtils.createTransaction;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.TransactionType.COINBASE;
 import static org.semux.core.TransactionType.TRANSFER;
 import static org.semux.core.TransactionType.UNVOTE;
 import static org.semux.core.TransactionType.VOTE;
@@ -61,6 +62,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
+import org.semux.TestUtils;
 import org.semux.api.v2_0_0.model.AddNodeResponse;
 import org.semux.api.v2_0_0.model.BlockType;
 import org.semux.api.v2_0_0.model.ComposeRawTransactionResponse;
@@ -254,6 +256,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
     @Test
     public void getLatestBlockTest() {
+        // test genesis block
         Genesis genesisBlock = chain.getGenesis();
         GetLatestBlockResponse response = api.getLatestBlock();
         assertNotNull(response);
@@ -267,6 +270,28 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertEquals(genesisBlock.getTimestamp(), Long.parseLong(blockJson.getTimestamp()));
         assertEquals(Hex.encode0x(genesisBlock.getTransactionsRoot()), blockJson.getTransactionsRoot());
         assertEquals(Hex.encode0x(genesisBlock.getData()), blockJson.getData());
+
+        // add 1 block
+        Block firstBlock = TestUtils.createBlock(
+                1,
+                Collections.emptyList(),
+                Collections.emptyList());
+        chain.addBlock(firstBlock);
+
+        response = api.getLatestBlock();
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+
+        blockJson = response.getResult();
+        assertEquals(Hex.encode0x(firstBlock.getHash()), blockJson.getHash());
+        assertEquals(firstBlock.getNumber(), Long.parseLong(blockJson.getNumber()));
+        assertEquals(Hex.encode0x(firstBlock.getCoinbase()), blockJson.getCoinbase());
+        assertEquals(Hex.encode0x(firstBlock.getParentHash()), blockJson.getParentHash());
+        assertEquals(firstBlock.getTimestamp(), Long.parseLong(blockJson.getTimestamp()));
+        assertEquals(Hex.encode0x(firstBlock.getTransactionsRoot()), blockJson.getTransactionsRoot());
+        assertEquals(1, blockJson.getTransactions().size()); // coinbase tx should be included
+        assertEquals(COINBASE.toString(), blockJson.getTransactions().get(0).getType());
+        assertEquals(Hex.encode0x(firstBlock.getData()), blockJson.getData());
     }
 
     @Test

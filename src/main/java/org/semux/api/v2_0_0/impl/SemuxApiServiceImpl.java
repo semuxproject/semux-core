@@ -261,7 +261,7 @@ public final class SemuxApiServiceImpl implements SemuxApi {
             return failure(resp, "The requested block was not found");
         }
 
-        resp.setResult(TypeFactory.blockType(block));
+        resp.setResult(TypeFactory.blockType(block, kernel.getBlockchain().getCoinbaseTransaction(block.getNumber())));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -286,7 +286,7 @@ public final class SemuxApiServiceImpl implements SemuxApi {
             return failure(resp, "The requested block was not found");
         }
 
-        resp.setResult(TypeFactory.blockType(block));
+        resp.setResult(TypeFactory.blockType(block, kernel.getBlockchain().getCoinbaseTransaction(block.getNumber())));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -339,7 +339,8 @@ public final class SemuxApiServiceImpl implements SemuxApi {
     @Override
     public Response getLatestBlock() {
         GetLatestBlockResponse resp = new GetLatestBlockResponse();
-        resp.setResult(TypeFactory.blockType(kernel.getBlockchain().getLatestBlock()));
+        Block block = kernel.getBlockchain().getLatestBlock();
+        resp.setResult(TypeFactory.blockType(block, kernel.getBlockchain().getCoinbaseTransaction(block.getNumber())));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
