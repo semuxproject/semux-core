@@ -341,6 +341,7 @@ public class SemuxGui extends Launcher {
                 if (v != null && SystemUtil.compareVersion(Constants.CLIENT_VERSION, v.minVersion) < 0) {
                     JOptionPane.showMessageDialog(null, GuiMessages.get("WalletNeedToBeUpgraded"));
                     SystemUtil.exitAsync(SystemUtil.Code.CLIENT_UPGRADE_NEEDED);
+                    return;
                 }
                 // notify user if a new version has been posted (once)
                 if (v != null && SystemUtil.compareVersion(Constants.CLIENT_VERSION, v.latestVersion) < 0
