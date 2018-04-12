@@ -465,6 +465,10 @@ public class Wallet {
         return false;
     }
 
+    public boolean checkPosixPermission() throws IOException {
+        return Files.getPosixFilePermissions(getFile().toPath()).equals(Sets.newHashSet(OWNER_READ, OWNER_WRITE));
+    }
+
     /**
      * Returns the alias of the given address.
      * 
