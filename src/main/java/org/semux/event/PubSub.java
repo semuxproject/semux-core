@@ -9,7 +9,7 @@ package org.semux.event;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.semux.Launcher;
 import org.semux.util.exception.UnreachableException;
@@ -42,13 +42,13 @@ public class PubSub {
 
     private Thread eventProcessingThread;
 
-    private Semaphore semaphore;
+    private AtomicBoolean isRunning;
 
     private PubSub() {
         queue = new LinkedBlockingQueue<>();
         subscribers = new ConcurrentHashMap<>();
         eventProcessingThread = new EventProcessingThread();
-        semaphore = new Semaphore(1);
+        isRunning = new AtomicBoolean(false);
     }
 
     public static PubSub getInstance() {
@@ -118,7 +118,7 @@ public class PubSub {
      *             exception will be thrown.
      */
     private synchronized void start() {
-        if (!semaphore.tryAcquire()) {
+        if (!isRunning.compareAndSet(false, true)) {
             throw new UnreachableException("PubSub service can be started for only once");
         }
 
@@ -167,7 +167,7 @@ public class PubSub {
         @Override
         public void interrupt() {
             super.interrupt();
-            semaphore.release();
+            isRunning.set(false);
         }
     }
 }
