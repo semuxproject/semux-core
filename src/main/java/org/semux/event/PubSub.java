@@ -140,6 +140,10 @@ public class PubSub {
      */
     private class EventProcessingThread extends Thread {
 
+        private EventProcessingThread() {
+            super("pubsub-event-processing");
+        }
+
         @Override
         public void run() {
             while (!isInterrupted()) {
