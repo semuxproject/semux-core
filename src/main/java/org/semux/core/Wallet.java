@@ -97,7 +97,7 @@ public class Wallet {
         }
 
         try {
-            byte[] key = Hash.h256(Bytes.of(password));
+            byte[] key;
 
             if (exists()) {
                 SimpleDecoder dec = new SimpleDecoder(IOUtil.readFile(file));
@@ -107,9 +107,11 @@ public class Wallet {
                 Map<ByteArray, String> newAliases = new HashMap<>();
                 switch (version) {
                 case 1:
+                    key = Hash.h256(Bytes.of(password));
                     newAccounts = readAccounts(key, dec, false, version);
                     break;
                 case 2:
+                    key = Hash.h256(Bytes.of(password));
                     newAccounts = readAccounts(key, dec, true, version);
                     newAliases = readAddressAliases(key, dec);
                     break;
