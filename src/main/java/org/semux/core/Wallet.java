@@ -465,7 +465,7 @@ public class Wallet {
         return false;
     }
 
-    public boolean checkPosixPermission() throws IOException {
+    public boolean isPosixPermissionSecured() throws IOException {
         return Files.getPosixFilePermissions(getFile().toPath()).equals(Sets.newHashSet(OWNER_READ, OWNER_WRITE));
     }
 

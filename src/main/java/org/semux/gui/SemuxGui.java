@@ -6,22 +6,17 @@
  */
 package org.semux.gui;
 
-import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
-import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
-
 import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
@@ -59,7 +54,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Sets;
 
 /**
  * Graphic user interface.
@@ -200,7 +194,7 @@ public class SemuxGui extends Launcher {
     }
 
     public void checkWalletPermissions(Wallet wallet) throws IOException {
-        if (SystemUtil.isPosix() && !wallet.checkPosixPermission()) {
+        if (SystemUtil.isPosix() && !wallet.isPosixPermissionSecured()) {
             JOptionPane.showMessageDialog(
                     null,
                     GuiMessages.get("WarningWalletPosixPermission"),
