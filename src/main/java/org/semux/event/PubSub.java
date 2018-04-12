@@ -24,18 +24,21 @@ public class PubSub {
 
     private static Logger logger = LoggerFactory.getLogger(PubSub.class);
 
-    private LinkedBlockingQueue<PubSubEvent> queue;
+    private final String name;
+
+    private final LinkedBlockingQueue<PubSubEvent> queue;
 
     /**
      * [event] => [list of subscribers]
      */
-    private ConcurrentHashMap<Class<? extends PubSubEvent>, ConcurrentLinkedQueue<PubSubSubscriber>> subscribers;
+    private final ConcurrentHashMap<Class<? extends PubSubEvent>, ConcurrentLinkedQueue<PubSubSubscriber>> subscribers;
 
     private Thread eventProcessingThread;
 
     private AtomicBoolean isRunning;
 
-    protected PubSub() {
+    protected PubSub(String name) {
+        this.name = name;
         queue = new LinkedBlockingQueue<>();
         subscribers = new ConcurrentHashMap<>();
         isRunning = new AtomicBoolean(false);
@@ -136,7 +139,7 @@ public class PubSub {
     private class EventProcessingThread extends Thread {
 
         private EventProcessingThread() {
-            super("pubsub-event-processing");
+            super("pubsub-event-processing-" + name);
         }
 
         @Override
