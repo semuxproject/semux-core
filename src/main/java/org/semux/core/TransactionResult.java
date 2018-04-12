@@ -78,6 +78,11 @@ public class TransactionResult {
         INVALID_DELEGATE_BURN_AMOUNT,
 
         /**
+         * Invalid transaction recipient.
+         */
+        INVALID_RECIPIENT,
+
+        /**
          * Transaction failed.
          */
         FAILED

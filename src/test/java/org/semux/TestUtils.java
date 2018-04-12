@@ -52,7 +52,7 @@ public class TestUtils {
         Network network = config.network();
         TransactionType type = TransactionType.TRANSFER;
         Amount fee = Amount.ZERO;
-        long nonce = 1;
+        long nonce = 0;
         long timestamp = System.currentTimeMillis();
         byte[] data = {};
 

@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.semux.KernelMock;
 import org.semux.Network;
+import org.semux.config.Constants;
 import org.semux.core.state.AccountState;
 import org.semux.crypto.Key;
 import org.semux.db.LeveldbDatabase.LevelDbFactory;
@@ -126,6 +127,19 @@ public class PendingManagerTest {
         assertEquals(TransactionResult.Error.DUPLICATED_HASH, result.error);
 
         Mockito.reset(kernel.getBlockchain());
+    }
+
+    @Test
+    public void testAddTransactionSyncInvalidRecipient() {
+        Transaction tx = new Transaction(network, type, Constants.COINBASE_KEY.toAddress(), value, fee, 0,
+                System.currentTimeMillis(),
+                Bytes.EMPTY_BYTES)
+                        .sign(key);
+
+        PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
+        assertEquals(0, pendingMgr.getPendingTransactions().size());
+        assertNotNull(result.error);
+        assertEquals(TransactionResult.Error.INVALID_RECIPIENT, result.error);
     }
 
     @Test

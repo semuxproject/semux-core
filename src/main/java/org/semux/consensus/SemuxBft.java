@@ -864,6 +864,11 @@ public class SemuxBft implements Consensus {
             return false;
         }
 
+        if (transactions.stream().anyMatch(tx -> Arrays.equals(tx.getTo(), Constants.COINBASE_KEY.toAddress()))) {
+            logger.warn("Sending transactions to coinbase magic account is not allowed");
+            return false;
+        }
+
         AccountState as = accountState.track();
         DelegateState ds = delegateState.track();
         TransactionExecutor exec = new TransactionExecutor(config);

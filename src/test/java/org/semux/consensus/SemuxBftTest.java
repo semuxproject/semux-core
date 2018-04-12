@@ -32,8 +32,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.TestUtils;
 import org.semux.config.Constants;
 import org.semux.config.MainnetConfig;
+import org.semux.core.Amount;
 import org.semux.core.Block;
-import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
@@ -214,6 +214,27 @@ public class SemuxBftTest {
         semuxBFT.proposal = new Proposal(new Proof(block.getNumber(), 0), block.getHeader(), Collections.emptyList());
         semuxBFT.proposal.sign(new Key());
         assertFalse(semuxBFT.validateBlock(block.getHeader(), Collections.emptyList()));
+    }
+
+    @Test
+    public void testValidateTransactionRecipient() {
+        kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+
+        Key blockForger = new Key();
+        Transaction tx = TestUtils.createTransaction(kernelRule.getKernel().getConfig(), new Key(),
+                Constants.COINBASE_KEY, Amount.ZERO);
+        Block block = TestUtils.createBlock(
+                kernelRule.getKernel().getBlockchain().getLatestBlock().getHash(),
+                blockForger,
+                1,
+                Collections.singletonList(tx),
+                Collections.singletonList(new TransactionResult(true)));
+
+        SemuxBft semuxBFT = new SemuxBft(kernelRule.getKernel());
+        semuxBFT.proposal = new Proposal(new Proof(block.getNumber(), 0), block.getHeader(),
+                Collections.singletonList(tx));
+        semuxBFT.proposal.sign(blockForger);
+        assertFalse(semuxBFT.validateBlock(block.getHeader(), Collections.singletonList(tx)));
     }
 
     private Transaction createTransaction(Key to, Key from, long time, long nonce) {

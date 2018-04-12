@@ -9,8 +9,11 @@ package org.semux.consensus;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 import static org.semux.core.Amount.Unit.SEM;
 
 import java.util.ArrayList;
@@ -22,9 +25,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.semux.TestUtils;
+import org.semux.config.Constants;
+import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
+import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -86,6 +93,38 @@ public class SemuxSyncTest {
         // the block should be rejected because of the duplicated tx
         AccountState as = kernelRule.getKernel().getBlockchain().getAccountState().track();
         DelegateState ds = kernelRule.getKernel().getBlockchain().getDelegateState().track();
+        assertFalse(semuxSync.validateBlock(block2, as, ds));
+    }
+
+    @Test
+    public void testValidateCoinbaseMagic() {
+        BlockchainImpl blockchain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        when(blockchain.forkActivated(anyLong(), eq(ValidatorActivatedFork.UNIFORM_DISTRIBUTION))).thenReturn(true);
+        kernelRule.getKernel().setBlockchain(blockchain);
+
+        // block.coinbase = coinbase magic account
+        Block block = TestUtils.createBlock(
+                kernelRule.getKernel().getBlockchain().getLatestBlock().getHash(),
+                Constants.COINBASE_KEY,
+                kernelRule.getKernel().getBlockchain().getLatestBlockNumber() + 1,
+                Collections.emptyList(),
+                Collections.emptyList());
+
+        AccountState as = kernelRule.getKernel().getBlockchain().getAccountState().track();
+        DelegateState ds = kernelRule.getKernel().getBlockchain().getDelegateState().track();
+        SemuxSync semuxSync = new SemuxSync(kernelRule.getKernel());
+        assertFalse(semuxSync.validateBlock(block, as, ds));
+
+        // tx.to = coinbase magic account
+        Transaction tx = TestUtils.createTransaction(kernelRule.getKernel().getConfig(), new Key(),
+                Constants.COINBASE_KEY, Amount.ZERO);
+        Block block2 = TestUtils.createBlock(
+                kernelRule.getKernel().getBlockchain().getLatestBlock().getHash(),
+                new Key(),
+                kernelRule.getKernel().getBlockchain().getLatestBlockNumber() + 1,
+                Collections.singletonList(tx),
+                Collections.singletonList(new TransactionResult(true)));
+
         assertFalse(semuxSync.validateBlock(block2, as, ds));
     }
 
