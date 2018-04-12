@@ -48,8 +48,7 @@ public class Wallet {
 
     private static final Set<PosixFilePermission> DEFAULT_PERMISSIONS = new HashSet<>(Arrays.asList(
             OWNER_READ,
-            OWNER_WRITE
-    ));
+            OWNER_WRITE));
 
     private File file;
     private String password;
