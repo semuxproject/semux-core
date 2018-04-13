@@ -9,6 +9,7 @@ package org.semux.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -19,7 +20,15 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
-import org.semux.gui.model.WalletModel;
+import org.semux.core.event.BlockchainDatabaseUpgradingEvent;
+import org.semux.core.event.WalletLoadingEvent;
+import org.semux.event.KernelBootingEvent;
+import org.semux.event.PubSub;
+import org.semux.event.PubSubEvent;
+import org.semux.event.PubSubFactory;
+import org.semux.event.PubSubSubscriber;
+import org.semux.gui.event.MainFrameStartedEvent;
+import org.semux.gui.event.WalletSelectionDialogShownEvent;
 import org.semux.message.GuiMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,19 +37,18 @@ import org.slf4j.LoggerFactory;
  * This splash screen fills the empty between startup dialog and
  * {@link MainFrame}.
  */
-public class SplashScreen extends JFrame implements SemuxEventListener {
+public class SplashScreen extends JFrame implements PubSubSubscriber {
 
     private static final long serialVersionUID = 1;
 
     private static final Logger logger = LoggerFactory.getLogger(SplashScreen.class);
 
-    private transient WalletModel walletModel;
+    private static final PubSub pubSub = PubSubFactory.getDefault();
 
     private JProgressBar progressBar;
 
-    public SplashScreen(WalletModel walletModel) {
-        this.walletModel = walletModel;
-        walletModel.addSemuxEventListener(this);
+    public SplashScreen() {
+        subscribeEvents();
 
         setUndecorated(true);
         setContentPane(new ContentPane());
@@ -61,27 +69,37 @@ public class SplashScreen extends JFrame implements SemuxEventListener {
         showSplash();
     }
 
+    @SuppressWarnings("unchecked")
+    private void subscribeEvents() {
+        pubSub.subscribe(
+                this,
+                WalletLoadingEvent.class,
+                WalletSelectionDialogShownEvent.class,
+                KernelBootingEvent.class,
+                MainFrameStartedEvent.class,
+                BlockchainDatabaseUpgradingEvent.class);
+    }
+
     @Override
-    public synchronized void onSemuxEvent(SemuxEvent event) {
-        switch (event) {
-        case WALLET_LOADING:
-            progressBar.setString(GuiMessages.get("SplashLoadingWallet"));
-            break;
-
-        case GUI_WALLET_SELECTION_DIALOG_SHOWN:
-            hideSplash();
-            break;
-
-        case KERNEL_STARTING:
-            showSplash();
-            progressBar.setString(GuiMessages.get("SplashStartingKernel"));
-            break;
-
-        case GUI_MAINFRAME_STARTED:
-            walletModel.removeSemuxEventListener(this);
-            destroySplash();
-            break;
-        }
+    public void onPubSubEvent(final PubSubEvent event) {
+        EventQueue.invokeLater(() -> {
+            if (event instanceof WalletLoadingEvent) {
+                progressBar.setString(GuiMessages.get("SplashLoadingWallet"));
+            } else if (event instanceof WalletSelectionDialogShownEvent) {
+                hideSplash();
+            } else if (event instanceof KernelBootingEvent) {
+                showSplash();
+                progressBar.setString(GuiMessages.get("SplashStartingKernel"));
+            } else if (event instanceof MainFrameStartedEvent) {
+                destroySplash();
+            } else if (event instanceof BlockchainDatabaseUpgradingEvent) {
+                BlockchainDatabaseUpgradingEvent e = (BlockchainDatabaseUpgradingEvent) event;
+                progressBar.setString(GuiMessages.get("SplashUpgradingDatabase", e.loaded, e.total));
+                progressBar.setIndeterminate(false);
+                progressBar.setMaximum(10000);
+                progressBar.setValue((int) ((double) e.loaded / (double) e.total * 10000));
+            }
+        });
     }
 
     private void hideSplash() {
@@ -97,6 +115,7 @@ public class SplashScreen extends JFrame implements SemuxEventListener {
     }
 
     private void destroySplash() {
+        pubSub.unsubscribeAll(this);
         setVisible(false);
         dispose();
     }

@@ -31,16 +31,21 @@ import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.Transaction;
 import org.semux.core.Wallet;
+import org.semux.core.event.WalletLoadingEvent;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.event.PubSub;
+import org.semux.event.PubSubFactory;
 import org.semux.exception.LauncherException;
 import org.semux.gui.dialog.AddressBookDialog;
 import org.semux.gui.dialog.InputDialog;
 import org.semux.gui.dialog.SelectDialog;
+import org.semux.gui.event.MainFrameStartedEvent;
+import org.semux.gui.event.WalletSelectionDialogShownEvent;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
@@ -61,6 +66,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SemuxGui extends Launcher {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxGui.class);
+
+    private static final PubSub pubSub = PubSubFactory.getDefault();
 
     private static final int TRANSACTION_LIMIT = 1024; // per account
 
@@ -87,6 +94,8 @@ public class SemuxGui extends Launcher {
             SemuxGui gui = new SemuxGui();
             // set up logger
             gui.setupLogger(args);
+            // set up pubsub
+            gui.setupPubSub();
             // start
             gui.start(args);
 
@@ -230,7 +239,8 @@ public class SemuxGui extends Launcher {
      * account and use it as coinbase.
      */
     public void setupCoinbase(Wallet wallet) {
-        model.fireSemuxEvent(SemuxEvent.WALLET_LOADING);
+        pubSub.publish(new WalletLoadingEvent());
+
         if (wallet.size() > 1) {
             String message = GuiMessages.get("AccountSelection");
             List<Object> options = new ArrayList<>();
@@ -241,7 +251,7 @@ public class SemuxGui extends Launcher {
             }
 
             // show select dialog
-            model.fireSemuxEvent(SemuxEvent.GUI_WALLET_SELECTION_DIALOG_SHOWN);
+            pubSub.publish(new WalletSelectionDialogShownEvent());
             int index = showSelectDialog(null, message, options);
 
             if (index == -1) {
@@ -272,7 +282,7 @@ public class SemuxGui extends Launcher {
     }
 
     private synchronized void showSplashScreen() {
-        splashScreen = new SplashScreen(model);
+        splashScreen = new SplashScreen();
     }
 
     /**
@@ -287,7 +297,6 @@ public class SemuxGui extends Launcher {
         model.setCoinbase(wallet.getAccount(getCoinbase()));
 
         // set up kernel
-        model.fireSemuxEvent(SemuxEvent.KERNEL_STARTING);
         kernel = new Kernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
         kernel.start();
 
@@ -298,7 +307,7 @@ public class SemuxGui extends Launcher {
         EventQueue.invokeLater(() -> {
             main = new MainFrame(this);
             main.setVisible(true);
-            model.fireSemuxEvent(SemuxEvent.GUI_MAINFRAME_STARTED);
+            pubSub.publish(new MainFrameStartedEvent());
 
             addressBookDialog = new AddressBookDialog(main, kernel.getWallet(), this);
             model.addListener(ev -> addressBookDialog.refresh());

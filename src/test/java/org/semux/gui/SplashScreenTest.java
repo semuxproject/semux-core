@@ -6,37 +6,66 @@
  */
 package org.semux.gui;
 
+import static org.awaitility.Awaitility.await;
+import static org.junit.Assert.assertEquals;
+
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Test;
+import org.semux.core.event.BlockchainDatabaseUpgradingEvent;
+import org.semux.core.event.WalletLoadingEvent;
+import org.semux.event.KernelBootingEvent;
+import org.semux.event.PubSub;
+import org.semux.event.PubSubFactory;
+import org.semux.gui.event.MainFrameStartedEvent;
+import org.semux.gui.event.WalletSelectionDialogShownEvent;
 import org.semux.message.GuiMessages;
 
 public class SplashScreenTest extends AssertJSwingJUnitTestCase {
 
+    private static final PubSub pubSub = PubSubFactory.getDefault();
+
+    @Override
+    protected void onSetUp() {
+        pubSub.start();
+    }
+
+    @Override
+    protected void onTearDown() {
+        pubSub.stop();
+    }
+
     @Test
     public void testEvents() {
-        SplashScreenTestApplication application = GuiActionRunner.execute(SplashScreenTestApplication::new);
+        SplashScreenTestApplication application = GuiActionRunner
+                .execute(SplashScreenTestApplication::new);
 
         FrameFixture window = new FrameFixture(robot(), application.splashScreen);
         window.requireVisible().progressBar().requireVisible().requireText(GuiMessages.get("SplashLoading"));
 
-        application.walletModel.fireSemuxEvent(SemuxEvent.WALLET_LOADING);
-        window.requireVisible().progressBar().requireVisible().requireText(GuiMessages.get("SplashLoadingWallet"));
+        // WalletLoadingEvent
+        pubSub.publish(new WalletLoadingEvent());
+        await().until(
+                () -> window.requireVisible().progressBar().text().equals(GuiMessages.get("SplashLoadingWallet")));
 
-        application.walletModel.fireSemuxEvent(SemuxEvent.GUI_WALLET_SELECTION_DIALOG_SHOWN);
-        window.requireNotVisible();
+        // WalletSelectionDialogShownEvent
+        pubSub.publish(new WalletSelectionDialogShownEvent());
+        await().until(() -> !window.target().isVisible());
 
-        application.walletModel.fireSemuxEvent(SemuxEvent.KERNEL_STARTING);
-        window.requireVisible().progressBar().requireVisible().requireText(GuiMessages.get("SplashStartingKernel"));
+        // KernelBootingEvent
+        pubSub.publish(new KernelBootingEvent());
+        await().until(
+                () -> window.progressBar().text().equals(GuiMessages.get("SplashStartingKernel")));
+
+        // BlockchainDatabaseUpgradingEvent
+        pubSub.publish(new BlockchainDatabaseUpgradingEvent(50L, 100L));
+        window.progressBar().waitUntilIsDeterminate();
+        window.requireVisible().progressBar().requireText(GuiMessages.get("SplashUpgradingDatabase", 50, 100));
+        assertEquals(50 / 100, window.progressBar().target().getValue() / window.progressBar().target().getMaximum());
 
         // the splash screen should be disposed as soon as the mainframe starts
-        application.walletModel.fireSemuxEvent(SemuxEvent.GUI_MAINFRAME_STARTED);
-        window.requireNotVisible();
-    }
-
-    @Override
-    protected void onSetUp() {
-
+        pubSub.publish(new MainFrameStartedEvent());
+        await().until(() -> !window.target().isVisible());
     }
 }
