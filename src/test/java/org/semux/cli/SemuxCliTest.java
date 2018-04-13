@@ -26,6 +26,7 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
 import static org.semux.TestLoggingAppender.err;
 import static org.semux.TestLoggingAppender.info;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -121,21 +122,21 @@ public class SemuxCliTest {
     }
 
     @Test
-    public void testHelp() throws ParseException {
+    public void testHelp() throws ParseException, IOException {
         SemuxCli semuxCLI = spy(new SemuxCli());
         semuxCLI.start(new String[] { "--help" });
         verify(semuxCLI).printHelp();
     }
 
     @Test
-    public void testVersion() throws ParseException {
+    public void testVersion() throws ParseException, IOException {
         SemuxCli semuxCLI = spy(new SemuxCli());
         semuxCLI.start(new String[] { "--version" });
         verify(semuxCLI).printVersion();
     }
 
     @Test
-    public void testMainNetwork() throws ParseException {
+    public void testMainNetwork() throws ParseException, IOException {
         SemuxCli semuxCLI = spy(new SemuxCli());
 
         // mock accounts
@@ -162,7 +163,7 @@ public class SemuxCliTest {
     }
 
     @Test
-    public void testMainNetworkNotSpecified() throws ParseException {
+    public void testMainNetworkNotSpecified() throws ParseException, IOException {
 
         SemuxCli semuxCLI = spy(new SemuxCli());
 
@@ -192,7 +193,7 @@ public class SemuxCliTest {
     }
 
     @Test
-    public void testTestNetwork() throws ParseException {
+    public void testTestNetwork() throws ParseException, IOException {
 
         SemuxCli semuxCLI = spy(new SemuxCli());
 
@@ -222,7 +223,7 @@ public class SemuxCliTest {
     }
 
     @Test
-    public void testDevNetwork() throws ParseException {
+    public void testDevNetwork() throws ParseException, IOException {
 
         SemuxCli semuxCLI = spy(new SemuxCli());
 
@@ -297,7 +298,7 @@ public class SemuxCliTest {
     }
 
     @Test
-    public void testStartKernelWithEmptyWalletInvalidNewPassword() {
+    public void testStartKernelWithEmptyWalletInvalidNewPassword() throws IOException {
         SemuxCli semuxCLI = spy(new SemuxCli());
 
         // mock wallet
@@ -323,7 +324,7 @@ public class SemuxCliTest {
     }
 
     @Test
-    public void testAccountActionList() throws ParseException {
+    public void testAccountActionList() throws ParseException, IOException {
         SemuxCli semuxCLI = spy(new SemuxCli());
         Mockito.doNothing().when(semuxCLI).listAccounts();
         semuxCLI.start(new String[] { "--account", "list" });
@@ -331,7 +332,7 @@ public class SemuxCliTest {
     }
 
     @Test
-    public void testAccountActionCreate() throws ParseException {
+    public void testAccountActionCreate() throws ParseException, IOException {
         SemuxCli semuxCLI = spy(new SemuxCli());
         Mockito.doNothing().when(semuxCLI).createAccount();
         semuxCLI.start(new String[] { "--account", "create" });

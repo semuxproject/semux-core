@@ -6,6 +6,7 @@
  */
 package org.semux.core;
 
+import static java.nio.file.attribute.PosixFilePermission.OTHERS_READ;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -15,8 +16,10 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
@@ -27,6 +30,7 @@ import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.util.SystemUtil;
 
 public class WalletTest {
 
@@ -38,6 +42,7 @@ public class WalletTest {
     public void setUp() {
         try {
             file = File.createTempFile("wallet", ".data");
+            Files.deleteIfExists(file.toPath()); // Wallet only needs the file's path
             pwd = "password";
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -88,7 +93,7 @@ public class WalletTest {
     }
 
     @Test
-    public void testFlush() throws InterruptedException {
+    public void testFlush() throws InterruptedException, IOException {
         long sz = file.length();
         Thread.sleep(500);
 
@@ -98,6 +103,16 @@ public class WalletTest {
 
         wallet.flush();
         assertTrue(file.length() < sz);
+
+        if (SystemUtil.isPosix()) {
+            assertTrue(wallet.isPosixPermissionSecured());
+        }
+    }
+
+    @Test
+    public void testIsPosixPermissionSecured() throws IOException {
+        Files.setPosixFilePermissions(file.toPath(), new HashSet<>(Collections.singletonList(OTHERS_READ)));
+        assertFalse(wallet.isPosixPermissionSecured());
     }
 
     @Test

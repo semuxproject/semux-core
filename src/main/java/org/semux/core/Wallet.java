@@ -6,17 +6,24 @@
  */
 package org.semux.core;
 
+import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bouncycastle.crypto.generators.BCrypt;
@@ -30,6 +37,7 @@ import org.semux.util.Bytes;
 import org.semux.util.IOUtil;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +48,10 @@ public class Wallet {
     private static final int VERSION = 3;
     private static final int SALT_LENGTH = 16;
     private static final int BCRYPT_COST = 12;
+
+    private static final Set<PosixFilePermission> DEFAULT_PERMISSIONS = new HashSet<>(Arrays.asList(
+            OWNER_READ,
+            OWNER_WRITE));
 
     private File file;
     private String password;
@@ -461,6 +473,12 @@ public class Wallet {
                 return false;
             }
 
+            // set posix permissions
+            if (SystemUtil.isPosix() && !file.exists()) {
+                Files.createFile(file.toPath());
+                Files.setPosixFilePermissions(file.toPath(), DEFAULT_PERMISSIONS);
+            }
+
             IOUtil.writeToFile(enc.toBytes(), file);
             return true;
         } catch (CryptoException e) {
@@ -470,6 +488,10 @@ public class Wallet {
         }
 
         return false;
+    }
+
+    public boolean isPosixPermissionSecured() throws IOException {
+        return Files.getPosixFilePermissions(getFile().toPath()).equals(DEFAULT_PERMISSIONS);
     }
 
     /**

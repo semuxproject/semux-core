@@ -12,6 +12,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.semux.core.Amount.ZERO;
 
+import java.io.IOException;
 import java.util.Collections;
 
 import org.apache.commons.cli.ParseException;
@@ -39,7 +40,7 @@ public class SemuxGuiTest {
     public KernelRule kernelRule = new KernelRule(51610, 51710);
 
     @Test
-    public void testStart() throws ParseException {
+    public void testStart() throws ParseException, IOException {
         SemuxGui gui = spy(new SemuxGui());
 
         Mockito.doNothing().when(gui).showUnlock(any());

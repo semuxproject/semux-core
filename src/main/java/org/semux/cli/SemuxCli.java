@@ -7,6 +7,7 @@
 package org.semux.cli;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class SemuxCli extends Launcher {
             cli.setupLogger(args);
             // start
             cli.start(args);
-        } catch (LauncherException | ConfigException | IpFilterJsonParseException exception) {
+        } catch (LauncherException | ConfigException | IpFilterJsonParseException | IOException exception) {
             logger.error(exception.getMessage());
         } catch (ParseException exception) {
             logger.error(CliMessages.get("ParsingFailed", exception.getMessage()));
@@ -111,7 +112,7 @@ public class SemuxCli extends Launcher {
         addOption(importPrivateKeyOption);
     }
 
-    public void start(String[] args) throws ParseException {
+    public void start(String[] args) throws ParseException, IOException {
         // parse options
         CommandLine cmd = parseOptions(args);
 
@@ -155,11 +156,15 @@ public class SemuxCli extends Launcher {
         System.out.println(Constants.CLIENT_VERSION);
     }
 
-    protected void start() {
+    protected void start() throws IOException {
         // load wallet file
         Wallet wallet = loadWallet().exists() ? loadAndUnlockWallet() : createNewWallet();
         if (wallet == null) {
             return;
+        }
+
+        if (SystemUtil.isPosix() && !wallet.isPosixPermissionSecured()) {
+            logger.warn(CliMessages.get("WarningWalletPosixPermission"));
         }
 
         // create a new account if the wallet is empty

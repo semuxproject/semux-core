@@ -90,7 +90,7 @@ public class SemuxGui extends Launcher {
             // start
             gui.start(args);
 
-        } catch (LauncherException | ConfigException | IpFilterJsonParseException e) {
+        } catch (LauncherException | ConfigException | IpFilterJsonParseException | IOException e) {
             JOptionPane.showMessageDialog(
                     null,
                     e.getMessage(),
@@ -163,7 +163,7 @@ public class SemuxGui extends Launcher {
      * @param args
      * @throws ParseException
      */
-    public void start(String[] args) throws ParseException {
+    public void start(String[] args) throws ParseException, IOException {
         // parse options
         parseOptions(args);
 
@@ -173,6 +173,7 @@ public class SemuxGui extends Launcher {
         if (!wallet.exists()) {
             showWelcome(wallet);
         } else {
+            checkWalletPermissions(wallet);
             showUnlock(wallet);
         }
     }
@@ -191,6 +192,16 @@ public class SemuxGui extends Launcher {
 
         showSplashScreen();
         setupCoinbase(wallet);
+    }
+
+    public void checkWalletPermissions(Wallet wallet) throws IOException {
+        if (SystemUtil.isPosix() && !wallet.isPosixPermissionSecured()) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    GuiMessages.get("WarningWalletPosixPermission"),
+                    GuiMessages.get("WarningDialogTitle"),
+                    JOptionPane.WARNING_MESSAGE);
+        }
     }
 
     /**
