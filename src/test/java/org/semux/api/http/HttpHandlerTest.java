@@ -30,6 +30,7 @@ import org.semux.util.BasicAuth;
 
 import io.netty.handler.codec.http.HttpHeaders;
 
+@SuppressWarnings("deprecation")
 public class HttpHandlerTest {
 
     @Rule

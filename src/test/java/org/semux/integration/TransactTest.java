@@ -64,6 +64,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+// TODO: migrate to API v2
+@SuppressWarnings("deprecation")
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class })

@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.Kernel;
 import org.semux.api.Version;
-import org.semux.api.v1_0_1.ApiHandlerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +141,7 @@ public class SemuxApiService {
     }
 
     /**
-     * The default channel initializer using {@link ApiHandlerImpl}.
+     * The default channel initializer.
      */
     private class SemuxAPIHttpChannelInitializer extends HttpChannelInitializer {
 

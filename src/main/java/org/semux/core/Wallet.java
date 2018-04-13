@@ -163,7 +163,7 @@ public class Wallet {
         for (int i = 0; i < total; i++) {
             byte[] iv = dec.readBytes(vlq);
             if (version < 3) {
-                byte[] publicKey = dec.readBytes(vlq);
+                dec.readBytes(vlq); // public key
             }
             byte[] privateKey = Aes.decrypt(dec.readBytes(vlq), key, iv);
             Key addressKey = new Key(privateKey);
