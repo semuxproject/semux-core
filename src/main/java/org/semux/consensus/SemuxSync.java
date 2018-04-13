@@ -379,6 +379,7 @@ public class SemuxSync implements SyncManager {
         // Added checks to UNIFORM_DISTRIBUTION fork:
         // - blocks should never be forged by coinbase magic account
         // - transactions should never be sent to coinbase magic account
+        // TODO: move checks to Transaction#validate after fork activation
         if (chain.forkActivated(block.getNumber(), UNIFORM_DISTRIBUTION)) {
             if (Arrays.equals(block.getCoinbase(), Constants.COINBASE_KEY.toAddress())) {
                 logger.warn("A block forged by the coinbase magic account is not allowed");
