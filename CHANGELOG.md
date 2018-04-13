@@ -22,9 +22,12 @@ v1.1.0 will automatically apply a local database upgrade which takes about 1 ~ 5
 
 **Implemented enhancements:**
 
-- Core: Store recent validator stats [\#767](https://github.com/semuxproject/semux/pull/767) ([semuxdev](https://github.com/semuxdev),[orogvany](https://github.com/orogvany))
+- Core: Change default POSIX permissions of wallet.data and config files to 600 [\#789](https://github.com/semuxproject/semux/pull/789) ([cryptokat](https://github.com/cryptokat))
+- Docs: Basic introductions to Semux BFT consensus [\#785](https://github.com/semuxproject/semux/pull/785) ([orogvany](https://github.com/orogvany))
+- GUI: Inform user when a new version of Semux Wallet has been posted [\#783](https://github.com/semuxproject/semux/pull/783) ([orogvany](https://github.com/orogvany))
+- Docs: Move API documentation to https://semuxproject.github.io/semux-api-docs/ [\#779](https://github.com/semuxproject/semux/pull/779) ([cryptokat](https://github.com/cryptokat))
 - API: Add API v2.0.0 and Swagger UI [\#771](https://github.com/semuxproject/semux/pull/771),[\#764](https://github.com/semuxproject/semux/pull/764) ([cryptokat](https://github.com/cryptokat))
-- Crypto: Crypto function speed is improved ~70% by introducing libsodium native implementation [\#760](https://github.com/semuxproject/semux/pull/760) ([semuxdev](https://github.com/semuxdev))
+- Crypto: Crypto function speed is improved ~70% by introducing libsodium & ripemd160 native implementation [\#760](https://github.com/semuxproject/semux/pull/760),[\#791](https://github.com/semuxproject/semux/pull/791) ([semuxdev](https://github.com/semuxdev))
 - DB: Separate database from different network [\#759](https://github.com/semuxproject/semux/pull/759) ([semuxdev](https://github.com/semuxdev))
 - Util: Standardize system exit code [\#755](https://github.com/semuxproject/semux/pull/755) ([semuxdev](https://github.com/semuxdev))
 - Docs: Move wiki into the main repo to accept PRs on docs [\#749](https://github.com/semuxproject/semux/pull/749) ([cryptokat](https://github.com/cryptokat))
