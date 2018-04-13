@@ -151,7 +151,7 @@ public class Key {
         try {
             byte[] sig;
             if (Native.isEnabled()) {
-                sig = Native.ed25519_sign(message, Bytes.merge(sk.getSeed(), sk.getAbyte()));
+                sig = Native.sign(message, Bytes.merge(sk.getSeed(), sk.getAbyte()));
             } else {
                 EdDSAEngine engine = new EdDSAEngine();
                 engine.initSign(sk);
@@ -177,7 +177,7 @@ public class Key {
         if (message != null && signature != null) { // avoid null pointer exception
             try {
                 if (Native.isEnabled()) {
-                    return Native.ed25519_verify(message, signature.getS(), signature.getA());
+                    return Native.verify(message, signature.getS(), signature.getA());
                 } else {
                     EdDSAEngine engine = new EdDSAEngine();
                     engine.initVerify(PublicKeyCache.computeIfAbsent(signature.getPublicKey()));

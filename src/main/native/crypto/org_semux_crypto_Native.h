@@ -9,26 +9,34 @@ extern "C" {
 #endif
 /*
  * Class:     org_semux_crypto_Native
- * Method:    blake2b
+ * Method:    h256
  * Signature: ([B)[B
  */
-JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_blake2b
+JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_h256
   (JNIEnv *, jclass, jbyteArray);
 
 /*
  * Class:     org_semux_crypto_Native
- * Method:    ed25519_sign
+ * Method:    h160
+ * Signature: ([B)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_h160
+  (JNIEnv *, jclass, jbyteArray);
+
+/*
+ * Class:     org_semux_crypto_Native
+ * Method:    sign
  * Signature: ([B[B)[B
  */
-JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_ed25519_1sign
+JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_sign
   (JNIEnv *, jclass, jbyteArray, jbyteArray);
 
 /*
  * Class:     org_semux_crypto_Native
- * Method:    ed25519_verify
+ * Method:    verify
  * Signature: ([B[B[B)Z
  */
-JNIEXPORT jboolean JNICALL Java_org_semux_crypto_Native_ed25519_1verify
+JNIEXPORT jboolean JNICALL Java_org_semux_crypto_Native_verify
   (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray);
 
 #ifdef __cplusplus

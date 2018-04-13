@@ -26,26 +26,27 @@ public class Hash {
 
     /**
      * Generate the 256-bit hash.
-     * 
+     *
      * @param input
      * @return
      */
     public static byte[] h256(byte[] input) {
-        try {
-            if (Native.isEnabled()) {
-                return Native.blake2b(input);
-            } else {
+
+        if (Native.isEnabled()) {
+            return Native.h256(input);
+        } else {
+            try {
                 MessageDigest digest = MessageDigest.getInstance(Constants.HASH_ALGORITHM);
                 return digest.digest(input);
+            } catch (Exception e) {
+                throw new CryptoException(e);
             }
-        } catch (Exception e) {
-            throw new CryptoException(e);
         }
     }
 
     /**
      * Merge two byte arrays and compute the 256-bit hash.
-     * 
+     *
      * @param one
      * @param two
      * @return
@@ -60,18 +61,26 @@ public class Hash {
 
     /**
      * Generate the 160-bit hash, using h256 and RIPEMD.
-     * 
+     *
      * @param input
      * @return
      */
     public static byte[] h160(byte[] input) {
-        byte[] h256 = h256(input);
+        if (Native.isEnabled()) {
+            return Native.h160(input);
+        } else {
+            try {
+                byte[] h256 = h256(input);
 
-        RIPEMD160Digest digest = new RIPEMD160Digest();
-        digest.update(h256, 0, h256.length);
-        byte[] out = new byte[20];
-        digest.doFinal(out, 0);
-        return out;
+                RIPEMD160Digest digest = new RIPEMD160Digest();
+                digest.update(h256, 0, h256.length);
+                byte[] out = new byte[20];
+                digest.doFinal(out, 0);
+                return out;
+            } catch (Exception e) {
+                throw new CryptoException(e);
+            }
+        }
     }
 
     private Hash() {
