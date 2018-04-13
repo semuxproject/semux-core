@@ -265,7 +265,7 @@ public class SemuxIpFilter {
 
                 new ObjectMapper().writer(SerializationFeature.INDENT_OUTPUT).writeValue(path.toFile(), ipFilter);
             } catch (IOException e) {
-                logger.error("Failed to save ip filter", e);
+                logger.error("Failed to save ip filter: {}", e.getMessage());
             }
         }
 
