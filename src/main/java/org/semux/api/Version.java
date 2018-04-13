@@ -6,23 +6,16 @@
  */
 package org.semux.api;
 
-import org.semux.util.exception.UnreachableException;
-
 public enum Version {
 
-    v1_0_1,
+    v1_0_1("v1.0.1"),
 
-    v2_0_0;
+    v2_0_0("v2.0.0");
 
-    public static String prefixOf(Version version) {
-        switch (version) {
-        case v1_0_1:
-            return "v1.0.1";
-        case v2_0_0:
-            return "v2.0.0";
-        default:
-            throw new UnreachableException();
-        }
+    public final String prefix;
+
+    Version(String prefix) {
+        this.prefix = prefix;
     }
 
     public static Version fromPrefix(String prefix) {

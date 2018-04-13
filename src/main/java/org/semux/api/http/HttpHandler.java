@@ -21,12 +21,13 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.ws.rs.core.Response;
@@ -85,15 +86,13 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final Pattern STATIC_FILE_PATTERN = Pattern.compile("^.+\\.(html|json|js|css|png)$");
 
     private Config config;
-    private Map<Version, ApiHandler> apiHandlers = new ConcurrentHashMap<>();
+    private final Map<Version, ApiHandler> apiHandlers;
 
     private Boolean isKeepAlive = false;
 
-    @SuppressWarnings("deprecation")
-    public HttpHandler(Kernel kernel) {
+    public HttpHandler(Kernel kernel, final Map<Version, ApiHandler> apiHandlers) {
         this.config = kernel.getConfig();
-        this.apiHandlers.put(Version.v1_0_1, new org.semux.api.v1_0_1.ApiHandlerImpl(kernel));
-        this.apiHandlers.put(Version.v2_0_0, new org.semux.api.v2_0_0.impl.ApiHandlerImpl(kernel));
+        this.apiHandlers = apiHandlers;
     }
 
     /**
@@ -106,9 +105,11 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
      */
     protected HttpHandler(Config config, ApiHandler apiHandler) {
         this.config = config;
-        for (Version version : Version.values()) {
-            this.apiHandlers.put(version, apiHandler);
-        }
+        this.apiHandlers = Collections
+                .unmodifiableMap(Arrays.stream(Version.values())
+                        .collect(Collectors.toMap(
+                                v -> v,
+                                v -> apiHandler)));
     }
 
     @Override
@@ -210,7 +211,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private String uriToResourcePath(String uri) {
         for (Version version : Version.values()) {
-            String versionRegex = Version.prefixOf(version).replace(".", "\\.");
+            String versionRegex = version.prefix.replace(".", "\\.");
             if (uri.matches("^/" + versionRegex + ".*$")) {
                 return uri.replaceFirst(versionRegex, version.toString().replace(".", "_"));
             }

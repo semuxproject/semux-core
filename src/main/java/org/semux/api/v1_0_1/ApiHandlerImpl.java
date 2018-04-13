@@ -40,7 +40,7 @@ public class ApiHandlerImpl implements ApiHandler {
     @Override
     public ApiHandlerResponse service(HttpMethod method, String uri, Map<String, String> params, HttpHeaders headers) {
         // strip version prefix
-        uri = uri.replaceAll("^/" + Version.prefixOf(Version.v1_0_1), "");
+        uri = uri.replaceAll("^/" + Version.v1_0_1.prefix, "");
 
         if ("/".equals(uri)) {
             return new GetRootResponse(true, "Semux API works");

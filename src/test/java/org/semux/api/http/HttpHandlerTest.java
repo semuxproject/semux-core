@@ -160,7 +160,7 @@ public class HttpHandlerTest {
     public void testGetStaticFiles404() throws IOException {
         startServer(null);
 
-        URL url = new URL("http://" + ip + ":" + port + "/" + Version.prefixOf(Version.v2_0_0) + "/xx.html");
+        URL url = new URL("http://" + ip + ":" + port + "/" + Version.v2_0_0.prefix + "/xx.html");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("Authorization", auth);
 
