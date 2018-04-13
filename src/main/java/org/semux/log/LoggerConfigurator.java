@@ -44,12 +44,13 @@ public class LoggerConfigurator {
 
             // register configuration error listener
             StatusListener errorStatusListener = new ConfigurationErrorStatusListener();
+            StatusLogger.getLogger().setLevel(Level.OFF);
+            StatusLogger.getLogger().reset();
             StatusLogger.getLogger().registerListener(errorStatusListener);
 
             // load configuration
             final LoggerContext context = (LoggerContext) LogManager.getContext(false);
             context.setConfigLocation(file.toURI());
-            context.reconfigure();
             context.updateLoggers();
 
             // remove configuration error listener

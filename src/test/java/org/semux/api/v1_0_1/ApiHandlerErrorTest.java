@@ -26,6 +26,8 @@ import org.semux.api.SemuxApiMock;
 import org.semux.crypto.Hex;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The test case covers validation rules of {@link ApiHandlerImpl}
@@ -34,6 +36,8 @@ import org.semux.util.Bytes;
  */
 @RunWith(Parameterized.class)
 public class ApiHandlerErrorTest extends ApiHandlerTestBase {
+
+    private static final Logger logger = LoggerFactory.getLogger(ApiHandlerErrorTest.class);
 
     private static final String ADDRESS_PLACEHOLDER = "[wallet]";
 
@@ -119,7 +123,7 @@ public class ApiHandlerErrorTest extends ApiHandlerTestBase {
         assertFalse(response.success);
         assertNotNull(response.message);
 
-        System.out.println(response.message);
+        logger.info(response.message);
     }
 
     private static String randomHex() {

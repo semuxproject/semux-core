@@ -69,7 +69,6 @@ public class SplashScreen extends JFrame implements PubSubSubscriber {
         showSplash();
     }
 
-    @SuppressWarnings("unchecked")
     private void subscribeEvents() {
         pubSub.subscribe(
                 this,

@@ -89,7 +89,7 @@ public class PubSub {
      * @return whether the event is successfully unsubscribed.
      */
     public boolean unsubscribe(PubSubSubscriber subscriber, Class<? extends PubSubEvent> event) {
-        ConcurrentLinkedQueue q = subscribers.get(event);
+        ConcurrentLinkedQueue<?> q = subscribers.get(event);
         if (q != null) {
             return q.remove(subscriber);
         } else {

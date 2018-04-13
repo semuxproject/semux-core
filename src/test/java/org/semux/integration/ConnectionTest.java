@@ -89,7 +89,7 @@ public class ConnectionTest {
     }
 
     @After
-    public void tearDown() throws InterruptedException {
+    public void tearDown() {
         // close all connections
         sockets.parallelStream().filter(Objects::nonNull).forEach(socket -> {
             try {

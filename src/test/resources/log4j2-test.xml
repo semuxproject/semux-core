@@ -7,17 +7,17 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="org.semux.api" level="DEBUG" />
-        <Logger name="org.semux.core" level="DEBUG" />
-        <Logger name="org.semux.consensus" level="DEBUG" />
-        <Logger name="org.semux.db" level="DEBUG" />
-        <Logger name="org.semux.net" level="DEBUG" />
-        <Logger name="org.semux.vm" level="DEBUG" />
-        <Logger name="org.semux.wrapper" level="DEBUG" />
+        <Logger name="org.semux.api" level="INFO" />
+        <Logger name="org.semux.core" level="INFO" />
+        <Logger name="org.semux.consensus" level="INFO" />
+        <Logger name="org.semux.db" level="INFO" />
+        <Logger name="org.semux.net" level="INFO" />
+        <Logger name="org.semux.vm" level="INFO" />
+        <Logger name="org.semux.wrapper" level="INFO" />
 
         <Logger name="io.netty" level="ERROR" />
-        <Logger name="oshi" level="DEBUG" />
         <Logger name="io.swagger" level="ERROR" />
+        <Logger name="oshi" level="INFO" />
 
         <Root level="DEBUG">
             <AppenderRef ref="Console"/>
