@@ -6,6 +6,7 @@
  */
 package org.semux.consensus;
 
+import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sum;
 
@@ -15,6 +16,7 @@ import java.math.MathContext;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.config.Config;
+import org.semux.config.Constants;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
@@ -373,6 +376,23 @@ public class SemuxSync implements SyncManager {
         BlockHeader header = block.getHeader();
         List<Transaction> transactions = block.getTransactions();
 
+        // Added checks to UNIFORM_DISTRIBUTION fork:
+        // - blocks should never be forged by coinbase magic account
+        // - transactions should never be sent to coinbase magic account
+        // TODO: move checks to Transaction#validate after fork activation
+        if (chain.forkActivated(block.getNumber(), UNIFORM_DISTRIBUTION)) {
+            if (Arrays.equals(block.getCoinbase(), Constants.COINBASE_KEY.toAddress())) {
+                logger.warn("A block forged by the coinbase magic account is not allowed");
+                return false;
+            }
+
+            if (block.getTransactions().stream()
+                    .anyMatch(tx -> Arrays.equals(tx.getTo(), Constants.COINBASE_KEY.toAddress()))) {
+                logger.warn("Sending Transactions to coinbase magic account is not allowed");
+                return false;
+            }
+        }
+
         // [1] check block header
         Block latest = chain.getLatestBlock();
         if (!Block.validateHeader(latest.getHeader(), header)) {
@@ -396,9 +416,8 @@ public class SemuxSync implements SyncManager {
             return false;
         }
 
-        TransactionExecutor transactionExecutor = new TransactionExecutor(config);
-
         // [3] evaluate transactions
+        TransactionExecutor transactionExecutor = new TransactionExecutor(config);
         List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot);
         if (!Block.validateResults(header, results)) {
             logger.debug("Invalid transactions");

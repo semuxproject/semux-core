@@ -7,6 +7,7 @@
 package org.semux.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.Kernel;
+import org.semux.config.Constants;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.net.Channel;
@@ -304,6 +306,11 @@ public class PendingManager implements Runnable, BlockchainListener {
         if (tx.getTimestamp() < now - kernel.getConfig().maxTransactionTimeDrift()
                 || tx.getTimestamp() > now + kernel.getConfig().maxTransactionTimeDrift()) {
             return new ProcessTransactionResult(0, TransactionResult.Error.INVALID_TIMESTAMP);
+        }
+
+        // reject transactions sending to coinbase magic account
+        if (Arrays.equals(tx.getTo(), Constants.COINBASE_KEY.toAddress())) {
+            return new ProcessTransactionResult(0, TransactionResult.Error.INVALID_RECIPIENT);
         }
 
         // Check transaction nonce: pending transactions must be executed sequentially

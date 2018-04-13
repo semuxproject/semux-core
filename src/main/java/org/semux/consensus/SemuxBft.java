@@ -11,6 +11,7 @@ import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sum;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 import org.semux.Kernel;
 import org.semux.Network;
 import org.semux.config.Config;
+import org.semux.config.Constants;
 import org.semux.consensus.SemuxBft.Event.Type;
 import org.semux.consensus.exception.SemuxBftException;
 import org.semux.core.Amount;
@@ -838,6 +840,16 @@ public class SemuxBft implements Consensus {
             return false;
         }
 
+        if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_KEY.toAddress())) {
+            logger.warn("A block forged by the coinbase magic account is not allowed");
+            return false;
+        }
+
+        if (!Arrays.equals(header.getCoinbase(), proposal.getSignature().getAddress())) {
+            logger.warn("The coinbase should always equal to the proposer's address");
+            return false;
+        }
+
         // [2] check transactions and results (skipped)
         List<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
 
@@ -849,6 +861,11 @@ public class SemuxBft implements Consensus {
 
         if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
             logger.warn("Duplicated transaction hash is not allowed");
+            return false;
+        }
+
+        if (transactions.stream().anyMatch(tx -> Arrays.equals(tx.getTo(), Constants.COINBASE_KEY.toAddress()))) {
+            logger.warn("Sending transactions to coinbase magic account is not allowed");
             return false;
         }
 
