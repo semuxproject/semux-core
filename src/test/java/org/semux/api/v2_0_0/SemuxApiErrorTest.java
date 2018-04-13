@@ -209,7 +209,7 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
 
         WebClient webClient = WebClient.create(
                 String.format("http://%s:%d/%s%s", config.apiListenIp(), config.apiListenPort(),
-                        Version.prefixOf(Version.v2_0_0), uriString),
+                        Version.v2_0_0.prefix, uriString),
                 Collections.singletonList(new JacksonJsonProvider(
                         new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false))),
                 config.apiUsername(),

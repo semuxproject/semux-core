@@ -21,12 +21,13 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.ws.rs.core.Response;
@@ -104,10 +105,11 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
      */
     protected HttpHandler(Config config, ApiHandler apiHandler) {
         this.config = config;
-        this.apiHandlers = new ConcurrentHashMap<>();
-        for (Version version : Version.values()) {
-            this.apiHandlers.put(version, apiHandler);
-        }
+        this.apiHandlers = Collections
+                .unmodifiableMap(Arrays.stream(Version.values())
+                        .collect(Collectors.toMap(
+                                v -> v,
+                                v -> apiHandler)));
     }
 
     @Override
@@ -209,7 +211,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private String uriToResourcePath(String uri) {
         for (Version version : Version.values()) {
-            String versionRegex = Version.prefixOf(version).replace(".", "\\.");
+            String versionRegex = version.prefix.replace(".", "\\.");
             if (uri.matches("^/" + versionRegex + ".*$")) {
                 return uri.replaceFirst(versionRegex, version.toString().replace(".", "_"));
             }

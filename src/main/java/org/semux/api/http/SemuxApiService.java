@@ -6,10 +6,12 @@
  */
 package org.semux.api.http;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.semux.Kernel;
 import org.semux.api.ApiHandler;
@@ -57,10 +59,11 @@ public class SemuxApiService {
 
     public SemuxApiService(Kernel kernel) {
         this.kernel = kernel;
-
-        this.apiHandlers = new ConcurrentHashMap<>();
-        this.apiHandlers.put(Version.v1_0_1, new org.semux.api.v1_0_1.ApiHandlerImpl(kernel));
-        this.apiHandlers.put(Version.v2_0_0, new org.semux.api.v2_0_0.impl.ApiHandlerImpl(kernel));
+        this.apiHandlers = Collections
+                .unmodifiableMap(Arrays.stream(Version.values())
+                        .collect(Collectors.toMap(
+                                v -> v,
+                                v -> v.apiHandlerFactory.apply(kernel))));
     }
 
     /**
@@ -142,11 +145,11 @@ public class SemuxApiService {
     }
 
     public String getAPIUrl() {
-        return String.format("http://%s:%d/%s/", ip, port, Version.prefixOf(DEFAULT_VERSION));
+        return String.format("http://%s:%d/%s/", ip, port, DEFAULT_VERSION.prefix);
     }
 
     public String getSwaggerUrl() {
-        return String.format("http://%s:%d/%s/swagger.html", ip, port, Version.prefixOf(DEFAULT_VERSION));
+        return String.format("http://%s:%d/%s/swagger.html", ip, port, DEFAULT_VERSION.prefix);
     }
 
     /**
