@@ -85,15 +85,13 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final Pattern STATIC_FILE_PATTERN = Pattern.compile("^.+\\.(html|json|js|css|png)$");
 
     private Config config;
-    private Map<Version, ApiHandler> apiHandlers = new ConcurrentHashMap<>();
+    private final Map<Version, ApiHandler> apiHandlers;
 
     private Boolean isKeepAlive = false;
 
-    @SuppressWarnings("deprecation")
-    public HttpHandler(Kernel kernel) {
+    public HttpHandler(Kernel kernel, final Map<Version, ApiHandler> apiHandlers) {
         this.config = kernel.getConfig();
-        this.apiHandlers.put(Version.v1_0_1, new org.semux.api.v1_0_1.ApiHandlerImpl(kernel));
-        this.apiHandlers.put(Version.v2_0_0, new org.semux.api.v2_0_0.impl.ApiHandlerImpl(kernel));
+        this.apiHandlers = apiHandlers;
     }
 
     /**
@@ -106,6 +104,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
      */
     protected HttpHandler(Config config, ApiHandler apiHandler) {
         this.config = config;
+        this.apiHandlers = new ConcurrentHashMap<>();
         for (Version version : Version.values()) {
             this.apiHandlers.put(version, apiHandler);
         }

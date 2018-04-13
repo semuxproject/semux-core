@@ -6,10 +6,13 @@
  */
 package org.semux.api.http;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.Kernel;
+import org.semux.api.ApiHandler;
 import org.semux.api.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,11 +50,17 @@ public class SemuxApiService {
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
+    private final Map<Version, ApiHandler> apiHandlers;
+
     String ip;
     int port;
 
     public SemuxApiService(Kernel kernel) {
         this.kernel = kernel;
+
+        this.apiHandlers = new ConcurrentHashMap<>();
+        this.apiHandlers.put(Version.v1_0_1, new org.semux.api.v1_0_1.ApiHandlerImpl(kernel));
+        this.apiHandlers.put(Version.v2_0_0, new org.semux.api.v2_0_0.impl.ApiHandlerImpl(kernel));
     }
 
     /**
@@ -147,7 +156,7 @@ public class SemuxApiService {
 
         @Override
         public HttpHandler initHandler() {
-            return new HttpHandler(kernel);
+            return new HttpHandler(kernel, apiHandlers);
         }
     }
 }
