@@ -186,7 +186,7 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
     }
 
     @Parameter(0)
-    public Class httpMethod;
+    public Class<?> httpMethod;
 
     @Parameter(1)
     public URI uri;

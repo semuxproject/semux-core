@@ -107,10 +107,13 @@ public class ApiHandlerImpl implements ApiHandler {
 
     private class Route {
 
+        @SuppressWarnings("unused")
         final HttpMethod httpMethod;
 
+        @SuppressWarnings("unused")
         final String uri;
 
+        @SuppressWarnings("unused")
         final Method methodInterface;
 
         final Method methodImpl;

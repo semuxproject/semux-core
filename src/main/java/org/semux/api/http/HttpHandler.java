@@ -89,6 +89,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private Boolean isKeepAlive = false;
 
+    @SuppressWarnings("deprecation")
     public HttpHandler(Kernel kernel) {
         this.config = kernel.getConfig();
         this.apiHandlers.put(Version.v1_0_1, new org.semux.api.v1_0_1.ApiHandlerImpl(kernel));
