@@ -63,7 +63,15 @@ public class SemuxApiService {
                 .unmodifiableMap(Arrays.stream(Version.values())
                         .collect(Collectors.toMap(
                                 v -> v,
-                                v -> v.apiHandlerFactory.apply(kernel))));
+                                v -> {
+                                    if (v.equals(Version.v1_0_1)) {
+                                        return new org.semux.api.v1_0_1.ApiHandlerImpl(kernel);
+                                    } else if (v.equals(Version.v2_0_0)) {
+                                        return new org.semux.api.v2_0_0.impl.ApiHandlerImpl(kernel);
+                                    } else {
+                                        return null;
+                                    }
+                                })));
     }
 
     /**
