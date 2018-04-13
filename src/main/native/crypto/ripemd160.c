@@ -147,7 +147,7 @@ void ripemd160_init(ripemd160_state *self)
     self->bufpos = 0;
 }
 
-static inline void byteswap32(uint32_t *v)
+static __inline void byteswap32(uint32_t *v)
 {
     union { uint32_t w; uint8_t b[4]; } x, y;
 
@@ -162,7 +162,7 @@ static inline void byteswap32(uint32_t *v)
     x.w = y.w = 0;
 }
 
-static inline void byteswap_digest(uint32_t *p)
+static __inline void byteswap_digest(uint32_t *p)
 {
     unsigned int i;
 
