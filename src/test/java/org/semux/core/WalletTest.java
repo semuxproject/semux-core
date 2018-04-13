@@ -13,6 +13,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -111,6 +112,7 @@ public class WalletTest {
 
     @Test
     public void testIsPosixPermissionSecured() throws IOException {
+        assumeTrue(SystemUtil.isPosix());
         Files.setPosixFilePermissions(file.toPath(), new HashSet<>(Collections.singletonList(OTHERS_READ)));
         assertFalse(wallet.isPosixPermissionSecured());
     }
