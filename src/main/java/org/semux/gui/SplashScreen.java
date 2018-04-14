@@ -50,6 +50,8 @@ public class SplashScreen extends JFrame implements PubSubSubscriber {
     public SplashScreen() {
         subscribeEvents();
 
+        setTitle(GuiMessages.get("SemuxWallet"));
+        setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
         setUndecorated(true);
         setContentPane(new ContentPane());
         setBackground(new Color(0, 0, 0, 0));

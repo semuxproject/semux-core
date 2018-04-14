@@ -6,7 +6,11 @@
  */
 package org.semux.db;
 
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public interface DatabaseFactory {
@@ -34,4 +38,12 @@ public interface DatabaseFactory {
      * @return
      */
     Path getDataDir();
+
+    /**
+     * @param path
+     *            the destination path.
+     */
+    default void moveTo(Path path) throws IOException {
+        Files.move(getDataDir(), path, REPLACE_EXISTING, ATOMIC_MOVE);
+    }
 }
