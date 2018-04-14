@@ -6,9 +6,6 @@
  */
 package org.semux.db;
 
-import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,9 +51,5 @@ public class TempDatabaseFactory implements DatabaseFactory {
     @Override
     public Path getDataDir() {
         return tempDir;
-    }
-
-    public void move(Path path) throws IOException {
-        Files.move(tempDir, path, REPLACE_EXISTING, ATOMIC_MOVE);
     }
 }

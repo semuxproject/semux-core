@@ -6,12 +6,9 @@
  */
 package org.semux.core;
 
-import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -856,12 +853,9 @@ public class BlockchainImpl implements Blockchain {
                 tempDb.close();
 
                 // replace the database folder with the upgraded database
-                Files.move(
-                        dbFactory.getDataDir(),
-                        dbFactory.getDataDir().resolveSibling(
-                                dbFactory.getDataDir().getFileName().toString() + "_bak_" + System.currentTimeMillis()),
-                        REPLACE_EXISTING, ATOMIC_MOVE);
-                tempDb.move(dbFactory.getDataDir());
+                dbFactory.moveTo(dbFactory.getDataDir().resolveSibling(
+                        dbFactory.getDataDir().getFileName().toString() + "_bak_" + System.currentTimeMillis()));
+                tempDb.moveTo(dbFactory.getDataDir());
                 dbFactory.open();
 
                 logger.info("Database upgraded to version 1.");
