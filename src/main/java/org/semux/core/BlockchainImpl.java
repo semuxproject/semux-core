@@ -6,9 +6,12 @@
  */
 package org.semux.core;
 
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,7 +42,6 @@ import org.semux.db.TempDatabaseFactory;
 import org.semux.event.PubSub;
 import org.semux.event.PubSubFactory;
 import org.semux.util.Bytes;
-import org.semux.util.FileUtil;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 import org.slf4j.Logger;
@@ -853,8 +855,12 @@ public class BlockchainImpl implements Blockchain {
                 dbFactory.close();
                 tempDb.close();
 
-                // replace the database folder with the recreated database
-                FileUtil.recursiveDelete(dbFactory.getDataDir().toFile());
+                // replace the database folder with the upgraded database
+                Files.move(
+                        dbFactory.getDataDir(),
+                        dbFactory.getDataDir().resolveSibling(
+                                dbFactory.getDataDir().getFileName().toString() + "_bak_" + System.currentTimeMillis()),
+                        REPLACE_EXISTING, ATOMIC_MOVE);
                 tempDb.move(dbFactory.getDataDir());
                 dbFactory.open();
 
