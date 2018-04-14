@@ -44,6 +44,7 @@ matrix:
       script:
         - mvn test
 
+allow_failures:
     # Docker tests
     - env: NAME="Docker tests"
       language: none
