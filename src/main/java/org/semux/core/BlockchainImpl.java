@@ -9,6 +9,7 @@ package org.semux.core;
 import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,8 +35,8 @@ import org.semux.crypto.Hex;
 import org.semux.db.Database;
 import org.semux.db.DatabaseFactory;
 import org.semux.db.DatabaseName;
+import org.semux.db.LeveldbDatabase;
 import org.semux.db.Migration;
-import org.semux.db.TempDatabaseFactory;
 import org.semux.event.PubSub;
 import org.semux.event.PubSubFactory;
 import org.semux.util.Bytes;
@@ -839,7 +840,11 @@ public class BlockchainImpl implements Blockchain {
                 logger.info("Upgrading the database... DO NOT CLOSE THE WALLET!");
 
                 // recreate block db in a temporary folder
-                TempDatabaseFactory tempDb = new TempDatabaseFactory();
+                String dbName = dbFactory.getDataDir().getFileName().toString();
+                Path tempPath = dbFactory
+                        .getDataDir()
+                        .resolveSibling(dbName + "_tmp_" + System.currentTimeMillis());
+                LeveldbDatabase.LevelDbFactory tempDb = new LeveldbDatabase.LevelDbFactory(tempPath.toFile());
                 MigrationBlockchain migrationBlockchain = new MigrationBlockchain(config, tempDb);
                 final long latestBlockNumber = getLatestBlockNumber();
                 for (long i = 1; i <= latestBlockNumber; i++) {
@@ -852,9 +857,13 @@ public class BlockchainImpl implements Blockchain {
                 dbFactory.close();
                 tempDb.close();
 
-                // replace the database folder with the upgraded database
-                dbFactory.moveTo(dbFactory.getDataDir().resolveSibling(
-                        dbFactory.getDataDir().getFileName().toString() + "_bak_" + System.currentTimeMillis()));
+                // move the existing database to backup folder then replace the database folder
+                // with the upgraded database
+                Path backupPath = dbFactory
+                        .getDataDir()
+                        .resolveSibling(
+                                dbFactory.getDataDir().getFileName().toString() + "_bak_" + System.currentTimeMillis());
+                dbFactory.moveTo(backupPath);
                 tempDb.moveTo(dbFactory.getDataDir());
                 dbFactory.open();
 
