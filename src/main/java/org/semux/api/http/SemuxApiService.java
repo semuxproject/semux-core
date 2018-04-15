@@ -57,6 +57,7 @@ public class SemuxApiService {
     String ip;
     int port;
 
+    @SuppressWarnings("deprecation")
     public SemuxApiService(Kernel kernel) {
         this.kernel = kernel;
         this.apiHandlers = Collections
