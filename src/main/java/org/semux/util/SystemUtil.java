@@ -223,8 +223,6 @@ public class SystemUtil {
      * @return
      */
     public static boolean bench() {
-        Runtime rt = Runtime.getRuntime();
-
         // check JVM data model
         if (is32bitJvm()) {
             logger.info("You're running 32-bit JVM. Please consider upgrading to 64-bit JVM");
@@ -232,14 +230,14 @@ public class SystemUtil {
         }
 
         // check CPU
-        if (rt.availableProcessors() < 2) {
-            logger.info("# of CPU cores = {}", rt.availableProcessors());
+        if (getNumberOfProcessors() < 2) {
+            logger.info("# of CPU cores = {}", getNumberOfProcessors());
             return false;
         }
 
         // check memory
-        if (rt.maxMemory() < 2L * 1024L * 1024L * 1024L) {
-            logger.info("Max allowed JVM heap memory size = {} MB", rt.maxMemory() / 1024 / 1024);
+        if (Runtime.getRuntime().maxMemory() < 2L * 1024L * 1024L * 1024L) {
+            logger.info("Max allowed JVM heap memory size = {} MB", Runtime.getRuntime().maxMemory() / 1024 / 1024);
             return false;
         }
 
@@ -305,20 +303,25 @@ public class SystemUtil {
         }
     }
 
+    private static String version = null;
+
     /**
      * Returns the implementation version.
      *
      * @return
      */
     public static Object getImplementationVersion() {
-        String version = null;
-        try {
-            version = IOUtil.readStreamAsString(SemuxGui.class.getClassLoader().getResourceAsStream("VERSION")).trim();
-        } catch (IOException ex) {
-            logger.debug("Failed to read version.");
+        if (version == null) {
+            try {
+                version = IOUtil.readStreamAsString(SemuxGui.class.getClassLoader().getResourceAsStream("VERSION"))
+                        .trim();
+            } catch (IOException ex) {
+                logger.info("Failed to read version.");
+                version = "unknown";
+            }
         }
 
-        return version == null ? "unknown" : version;
+        return version;
     }
 
     /**
