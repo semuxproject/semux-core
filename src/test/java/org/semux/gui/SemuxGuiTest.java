@@ -20,6 +20,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.semux.KernelMock;
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
@@ -53,7 +54,7 @@ public class SemuxGuiTest {
         gui.start(args);
 
         assertThat(gui.getDataDir()).isEqualTo(args[1]);
-        assertThat(gui.getNetwork()).isEqualTo(args[3]);
+        assertThat(gui.getNetwork()).isEqualTo(Network.MAINNET);
         verify(gui).showUnlock(any());
 
         // start without wallet
