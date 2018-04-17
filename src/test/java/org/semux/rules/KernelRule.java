@@ -29,7 +29,7 @@ import org.semux.core.TransactionResult;
 import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
-import org.semux.db.LeveldbDatabase.LevelDbFactory;
+import org.semux.db.LeveldbDatabase.LeveldbFactory;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
@@ -45,7 +45,7 @@ public class KernelRule extends TemporaryFolder {
     private String password;
     private KernelMock kernel;
 
-    private LevelDbFactory dbFactory;
+    private LeveldbFactory dbFactory;
 
     public KernelRule(int p2pPort, int apiPort) {
         super();
@@ -132,7 +132,7 @@ public class KernelRule extends TemporaryFolder {
      * Opens the database.
      */
     public void openBlockchain() {
-        dbFactory = new LevelDbFactory(kernel.getConfig().databaseDir());
+        dbFactory = new LeveldbFactory(kernel.getConfig().databaseDir());
         BlockchainImpl chain = new BlockchainImpl(kernel.getConfig(), dbFactory);
         kernel.setBlockchain(chain);
     }

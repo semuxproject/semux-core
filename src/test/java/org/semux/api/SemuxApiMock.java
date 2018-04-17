@@ -16,7 +16,7 @@ import org.semux.core.PendingManager;
 import org.semux.db.Database;
 import org.semux.db.DatabaseFactory;
 import org.semux.db.DatabaseName;
-import org.semux.db.LeveldbDatabase.LevelDbFactory;
+import org.semux.db.LeveldbDatabase.LeveldbFactory;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
@@ -39,7 +39,7 @@ public class SemuxApiMock {
         if (isRunning.compareAndSet(false, true)) {
             Config config = kernel.getConfig();
 
-            dbFactory = new LevelDbFactory(config.databaseDir());
+            dbFactory = new LeveldbFactory(config.databaseDir());
             client = new PeerClient(config.p2pListenIp(), config.p2pListenPort(), kernel.getCoinbase());
 
             kernel.setBlockchain(new BlockchainImpl(config, dbFactory));

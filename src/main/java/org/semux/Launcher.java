@@ -7,7 +7,6 @@
 package org.semux;
 
 import static org.semux.Network.MAINNET;
-import static org.semux.Network.TESTNET;
 
 import java.io.File;
 import java.util.ArrayList;

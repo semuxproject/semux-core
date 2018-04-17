@@ -14,7 +14,7 @@ import org.semux.config.MainnetConfig;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
-import org.semux.db.LeveldbDatabase.LevelDbFactory;
+import org.semux.db.LeveldbDatabase.LeveldbFactory;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.xerial.snappy.Snappy;
 
@@ -27,7 +27,7 @@ public class CompressPerformance {
     public static void main(String[] args) throws IOException {
         Config config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
 
-        LevelDbFactory dbFactory = new LevelDbFactory(config.databaseDir());
+        LeveldbFactory dbFactory = new LeveldbFactory(config.databaseDir());
         Blockchain chain = new BlockchainImpl(config, dbFactory);
 
         for (Mode mode : Mode.values()) {

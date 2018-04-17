@@ -40,7 +40,7 @@ public class BlockchainImplMigrationTest {
         archiver.extract(dbVersion0Tarball, temporaryFolder.getRoot());
 
         // load the database
-        DatabaseFactory dbFactory = new LeveldbDatabase.LevelDbFactory(new File(temporaryFolder.getRoot(), "database"));
+        DatabaseFactory dbFactory = new LeveldbDatabase.LeveldbFactory(new File(temporaryFolder.getRoot(), "database"));
         Config config = new TestnetConfig(Constants.DEFAULT_DATA_DIR);
         BlockchainImpl blockchain = new BlockchainImpl(config, dbFactory);
 

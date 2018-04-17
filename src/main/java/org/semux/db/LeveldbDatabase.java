@@ -11,7 +11,6 @@ import static org.fusesource.leveldbjni.JniDBFactory.factory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
@@ -211,14 +210,14 @@ public class LeveldbDatabase implements Database {
         }.initialize();
     }
 
-    public static class LevelDbFactory implements DatabaseFactory {
+    public static class LeveldbFactory implements DatabaseFactory {
 
         private EnumMap<DatabaseName, Database> databases = new EnumMap<>(DatabaseName.class);
 
         private File dataDir;
         private AtomicBoolean open;
 
-        public LevelDbFactory(File dataDir) {
+        public LeveldbFactory(File dataDir) {
             this.dataDir = dataDir;
             this.open = new AtomicBoolean(false);
 

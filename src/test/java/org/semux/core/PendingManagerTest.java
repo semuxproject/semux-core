@@ -31,7 +31,7 @@ import org.semux.Network;
 import org.semux.config.Constants;
 import org.semux.core.state.AccountState;
 import org.semux.crypto.Key;
-import org.semux.db.LeveldbDatabase.LevelDbFactory;
+import org.semux.db.LeveldbDatabase.LeveldbFactory;
 import org.semux.net.ChannelManager;
 import org.semux.rules.KernelRule;
 import org.semux.util.ArrayUtil;
@@ -60,7 +60,7 @@ public class PendingManagerTest {
         kernel = kernelRule.getKernel();
 
         kernel.setBlockchain(
-                new BlockchainImpl(kernel.getConfig(), new LevelDbFactory(kernel.getConfig().databaseDir())));
+                new BlockchainImpl(kernel.getConfig(), new LeveldbFactory(kernel.getConfig().databaseDir())));
         kernel.setChannelManager(new ChannelManager(kernel));
 
         accountState = kernel.getBlockchain().getAccountState();

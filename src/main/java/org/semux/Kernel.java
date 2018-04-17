@@ -33,7 +33,7 @@ import org.semux.crypto.Key;
 import org.semux.db.DatabaseFactory;
 import org.semux.db.DatabaseName;
 import org.semux.db.LeveldbDatabase;
-import org.semux.db.LeveldbDatabase.LevelDbFactory;
+import org.semux.db.LeveldbDatabase.LeveldbFactory;
 import org.semux.event.KernelBootingEvent;
 import org.semux.event.PubSub;
 import org.semux.event.PubSubFactory;
@@ -136,7 +136,7 @@ public class Kernel {
         // initialize blockchain database
         // ====================================
         relocateDatabaseIfNeeded();
-        dbFactory = new LevelDbFactory(config.databaseDir());
+        dbFactory = new LeveldbFactory(config.databaseDir());
         chain = new BlockchainImpl(config, dbFactory);
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);

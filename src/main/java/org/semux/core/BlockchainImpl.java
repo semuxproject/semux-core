@@ -844,7 +844,7 @@ public class BlockchainImpl implements Blockchain {
                 Path tempPath = dbFactory
                         .getDataDir()
                         .resolveSibling(dbName + "_tmp_" + System.currentTimeMillis());
-                LeveldbDatabase.LevelDbFactory tempDb = new LeveldbDatabase.LevelDbFactory(tempPath.toFile());
+                LeveldbDatabase.LeveldbFactory tempDb = new LeveldbDatabase.LeveldbFactory(tempPath.toFile());
                 MigrationBlockchain migrationBlockchain = new MigrationBlockchain(config, tempDb);
                 final long latestBlockNumber = getLatestBlockNumber();
                 for (long i = 1; i <= latestBlockNumber; i++) {
