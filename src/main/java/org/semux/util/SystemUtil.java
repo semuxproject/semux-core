@@ -68,6 +68,7 @@ public class SystemUtil {
         public static final int FAILED_TO_LOAD_CONFIG = 32;
         public static final int FAILED_TO_LOAD_GENESIS = 33;
         public static final int FAILED_TO_LAUNCH_KERNEL = 34;
+        public static final int INVALID_NETWORK_LABEL = 35;
 
         // database
         public static final int FAILED_TO_OPEN_DB = 51;

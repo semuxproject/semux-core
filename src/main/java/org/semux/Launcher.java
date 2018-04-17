@@ -6,6 +6,9 @@
  */
 package org.semux;
 
+import static org.semux.Network.MAINNET;
+import static org.semux.Network.TESTNET;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,16 +33,13 @@ import org.semux.exception.LauncherException;
 import org.semux.log.LoggerConfigurator;
 import org.semux.message.CliMessages;
 import org.semux.util.SystemUtil;
+import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class Launcher {
 
     private static final Logger logger = LoggerFactory.getLogger(Launcher.class);
-
-    protected static final String DEVNET = "devnet";
-    protected static final String TESTNET = "testnet";
-    protected static final String MAINNET = "mainnet";
 
     /**
      * Here we make sure that all shutdown hooks will be executed in the order of
@@ -56,7 +56,7 @@ public abstract class Launcher {
     private Options options = new Options();
 
     private String dataDir = Constants.DEFAULT_DATA_DIR;
-    private String network = MAINNET;
+    private Network network = MAINNET;
 
     private int coinbase = 0;
     private String password = null;
@@ -85,12 +85,14 @@ public abstract class Launcher {
      */
     public Config getConfig() {
         switch (getNetwork()) {
+        case MAINNET:
+            return new MainnetConfig(getDataDir());
         case TESTNET:
             return new TestnetConfig(getDataDir());
         case DEVNET:
             return new DevnetConfig(getDataDir());
         default:
-            return new MainnetConfig(getDataDir());
+            throw new UnreachableException();
         }
     }
 
@@ -99,7 +101,7 @@ public abstract class Launcher {
      *
      * @return
      */
-    public String getNetwork() {
+    public Network getNetwork() {
         return network;
     }
 
@@ -146,7 +148,14 @@ public abstract class Launcher {
         }
 
         if (cmd.hasOption(SemuxOption.NETWORK.toString())) {
-            setNetwork(cmd.getOptionValue(SemuxOption.NETWORK.toString()));
+            String option = cmd.getOptionValue(SemuxOption.NETWORK.toString());
+            Network net = Network.of(option);
+            if (net == null) {
+                logger.error("Invalid network label: {}", option);
+                SystemUtil.exit(SystemUtil.Code.INVALID_NETWORK_LABEL);
+            } else {
+                setNetwork(net);
+            }
         }
 
         return cmd;
@@ -196,7 +205,7 @@ public abstract class Launcher {
      *
      * @param network
      */
-    protected void setNetwork(String network) {
+    protected void setNetwork(Network network) {
         this.network = network;
     }
 

@@ -6,6 +6,9 @@
  */
 package org.semux;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum Network {
 
     MAINNET((byte) 0, "mainnet"),
@@ -19,8 +22,18 @@ public enum Network {
         this.label = label;
     }
 
-    byte id;
-    String label;
+    private byte id;
+    private String label;
+
+    private static Map<String, Network> labels = new HashMap<>();
+    private static Map<Byte, Network> ids = new HashMap<>();
+
+    static {
+        for (Network net : Network.values()) {
+            labels.put(net.label, net);
+            ids.put(net.id, net);
+        }
+    }
 
     public byte id() {
         return id;
@@ -36,15 +49,10 @@ public enum Network {
     }
 
     public static Network of(byte networkId) {
-        switch (networkId) {
-        case (byte) 0:
-            return MAINNET;
-        case (byte) 1:
-            return TESTNET;
-        case (byte) 2:
-            return DEVNET;
-        default:
-            throw new IllegalArgumentException("Unsupported network id.");
-        }
+        return ids.get(networkId);
+    }
+
+    public static Network of(String label) {
+        return labels.get(label);
     }
 }
