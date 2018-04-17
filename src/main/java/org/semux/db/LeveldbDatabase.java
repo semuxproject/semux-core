@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -228,7 +229,7 @@ public class LeveldbDatabase implements Database {
         public void open() {
             if (open.compareAndSet(false, true)) {
                 for (DatabaseName name : DatabaseName.values()) {
-                    File file = Paths.get(dataDir.getAbsolutePath(), name.toString().toLowerCase()).toFile();
+                    File file = new File(dataDir.getAbsolutePath(), name.toString().toLowerCase(Locale.ROOT));
                     databases.put(name, new LeveldbDatabase(file));
                 }
             }

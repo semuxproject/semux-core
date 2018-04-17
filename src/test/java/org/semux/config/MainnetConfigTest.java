@@ -6,8 +6,11 @@
  */
 package org.semux.config;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Amount.ZERO;
 
@@ -15,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -25,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semux.Network;
 import org.semux.core.Amount;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,5 +103,15 @@ public class MainnetConfigTest {
                         new File(MainnetConfigTest.class.getResource("/config/validators1000.csv").getFile()),
                         Charset.forName("UTF-8")).trim(),
                 validatorsCSV.toString().trim());
+    }
+
+    /**
+     * See: https://github.com/semuxproject/semux/issues/811
+     */
+    @Test
+    public void testWindowsLocalizedDatabaseDir() throws IOException {
+        assumeTrue(SystemUtil.getOsName().equals(SystemUtil.OsName.WINDOWS));
+        Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+        assertThat(config.databaseDir().getCanonicalPath(), containsString("database\\mainnet"));
     }
 }
