@@ -34,7 +34,7 @@ public class StatusBar extends JPanel {
 
     private final JLabel peers = new JLabel();
 
-    private final JProgressBar syncProgressBar = new JProgressBar();
+    private final JProgressBar syncProgressBar = SwingUtil.createMetalProgressBar();
 
     public StatusBar(Frame parent) {
         super();
