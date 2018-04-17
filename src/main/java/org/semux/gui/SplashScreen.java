@@ -59,7 +59,7 @@ public class SplashScreen extends JFrame implements PubSubSubscriber {
         setLayout(new BorderLayout());
         add(new ImagePane());
 
-        progressBar = new JProgressBar();
+        progressBar = SwingUtil.createMetalProgressBar();
         progressBar.setBorderPainted(false);
         progressBar.setStringPainted(true);
         progressBar.setIndeterminate(true);
@@ -68,7 +68,6 @@ public class SplashScreen extends JFrame implements PubSubSubscriber {
 
         pack();
         setLocationRelativeTo(null);
-        showSplash();
     }
 
     private void subscribeEvents() {
@@ -83,24 +82,29 @@ public class SplashScreen extends JFrame implements PubSubSubscriber {
 
     @Override
     public void onPubSubEvent(final PubSubEvent event) {
-        EventQueue.invokeLater(() -> {
-            if (event instanceof WalletLoadingEvent) {
+        if (event instanceof WalletLoadingEvent) {
+            EventQueue.invokeLater(() -> {
+                showSplash();
                 progressBar.setString(GuiMessages.get("SplashLoadingWallet"));
-            } else if (event instanceof WalletSelectionDialogShownEvent) {
-                hideSplash();
-            } else if (event instanceof KernelBootingEvent) {
+            });
+        } else if (event instanceof WalletSelectionDialogShownEvent) {
+            EventQueue.invokeLater(this::hideSplash);
+        } else if (event instanceof KernelBootingEvent) {
+            EventQueue.invokeLater(() -> {
                 showSplash();
                 progressBar.setString(GuiMessages.get("SplashStartingKernel"));
-            } else if (event instanceof MainFrameStartedEvent) {
-                destroySplash();
-            } else if (event instanceof BlockchainDatabaseUpgradingEvent) {
+            });
+        } else if (event instanceof MainFrameStartedEvent) {
+            EventQueue.invokeLater(this::destroySplash);
+        } else if (event instanceof BlockchainDatabaseUpgradingEvent) {
+            EventQueue.invokeLater(() -> {
                 BlockchainDatabaseUpgradingEvent e = (BlockchainDatabaseUpgradingEvent) event;
                 progressBar.setString(GuiMessages.get("SplashUpgradingDatabase", e.loaded, e.total));
                 progressBar.setIndeterminate(false);
                 progressBar.setMaximum(10000);
                 progressBar.setValue((int) ((double) e.loaded / (double) e.total * 10000));
-            }
-        });
+            });
+        }
     }
 
     private void hideSplash() {

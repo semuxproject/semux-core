@@ -44,9 +44,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.LookAndFeel;
+import javax.swing.UIManager;
+import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
@@ -602,5 +606,20 @@ public class SwingUtil {
     public static String getAddressAbbr(byte[] address) {
         return Hex.PREF + Hex.encode(Arrays.copyOfRange(address, 0, 2)) + "..."
                 + Hex.encode(Arrays.copyOfRange(address, address.length - 2, address.length));
+    }
+
+    public static JProgressBar createMetalProgressBar() {
+        JProgressBar progressBar;
+
+        try {
+            LookAndFeel defaultLookAndFeel = UIManager.getLookAndFeel();
+            UIManager.setLookAndFeel(MetalLookAndFeel.class.getCanonicalName());
+            progressBar = new JProgressBar();
+            UIManager.setLookAndFeel(defaultLookAndFeel);
+        } catch (Exception e) {
+            progressBar = new JProgressBar();
+        }
+
+        return progressBar;
     }
 }

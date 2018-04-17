@@ -42,7 +42,6 @@ public class SplashScreenTest extends AssertJSwingJUnitTestCase {
                 .execute(SplashScreenTestApplication::new);
 
         FrameFixture window = new FrameFixture(robot(), application.splashScreen);
-        window.requireVisible().progressBar().requireVisible().requireText(GuiMessages.get("SplashLoading"));
 
         // WalletLoadingEvent
         pubSub.publish(new WalletLoadingEvent());
