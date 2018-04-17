@@ -107,7 +107,7 @@ public class SystemUtil {
      * @return
      */
     public static OsName getOsName() {
-        String os = System.getProperty("os.name").toLowerCase();
+        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
 
         if (os.contains("win")) {
             return OsName.WINDOWS;
