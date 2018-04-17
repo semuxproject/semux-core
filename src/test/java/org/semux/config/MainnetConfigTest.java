@@ -111,7 +111,9 @@ public class MainnetConfigTest {
     @Test
     public void testWindowsLocalizedDatabaseDir() throws IOException {
         assumeTrue(SystemUtil.getOsName().equals(SystemUtil.OsName.WINDOWS));
+        Locale defaultLocale = Locale.getDefault();
         Locale.setDefault(Locale.forLanguageTag("tr-TR"));
         assertThat(config.databaseDir().getCanonicalPath(), containsString("database\\mainnet"));
+        Locale.setDefault(defaultLocale); // reset
     }
 }
