@@ -1,8 +1,8 @@
-FROM openjdk:8-jre-alpine
+FROM openjdk:8-jre
 
 WORKDIR /
 
-RUN apk --no-cache add curl jq
+RUN apt-get update && apt-get install --yes curl jq
 
 RUN LATEST=`curl -s https://api.github.com/repos/semuxproject/semux/releases/latest | jq '.assets[]  | select(.name | contains("linux"))'` && \
     LINK=`echo ${LATEST} | jq -r '.browser_download_url'` && \
@@ -12,7 +12,7 @@ RUN LATEST=`curl -s https://api.github.com/repos/semuxproject/semux/releases/lat
     tar -xzf ${TARBALL} -C /semux --strip-components=1 && \
     rm ${TARBALL}
 
-RUN apk del curl jq
+RUN apt-get remove --yes curl jq
 
 EXPOSE 5161
 
