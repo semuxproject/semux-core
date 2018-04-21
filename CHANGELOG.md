@@ -1,5 +1,19 @@
 # Change Log
 
+## [v1.1.1](https://github.com/semuxproject/semux/tree/v1.1.1) (2018-04-22)
+[Full Changelog](https://github.com/semuxproject/semux/compare/v1.1.0...v1.1.1)
+
+**Fixed bugs:**
+
+- Fix a bug that database folders are wrongly named under Turkish Windows [\#812](https://github.com/semuxproject/semux/pull/812) ([cryptokat](https://github.com/cryptokat)) 
+
+**Implemented enhancements:**
+
+- Provide a consistent progressbar on OSX with Windows and Linux [\#813](https://github.com/semuxproject/semux/pull/813) ([cryptokat](https://github.com/cryptokat))
+- Validate network name before startup [\#810](https://github.com/semuxproject/semux/pull/810) ([semuxdev](https://github.com/semuxdev))
+- Optimize client version lookup [\#809](https://github.com/semuxproject/semux/pull/809) ([semuxdev](https://github.com/semuxdev))
+- Change Windows Java download URL from java.com to oracle.com [\#808](https://github.com/semuxproject/semux/pull/808) ([cryptokat](https://github.com/cryptokat))
+
 ## [v1.1.0](https://github.com/semuxproject/semux/tree/v1.1.0) (2018-04-15)
 [Full Changelog](https://github.com/semuxproject/semux/compare/v1.0.1...v1.1.0)
 
