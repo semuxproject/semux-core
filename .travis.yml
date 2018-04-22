@@ -1,8 +1,5 @@
 language: java
 
-before_install:
-  - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-
 matrix:
   include:
     # License, formatter, and FindBugs check
@@ -45,16 +42,9 @@ matrix:
     - env: NAME="Linux tests (Java 10)"
       os: linux
       sudo: false
-      install: . ./install-jdk.sh -F 10 -L BCL
       script:
-        - mvn test
-
-    # Linux tests (Java 11 LTS)
-    - env: NAME="Linux tests (Java 11)"
-      os: linux
-      sudo: false
-      install: . ./install-jdk.sh -F 11 -L BCL
-      script:
+        - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+        - source ./install-jdk.sh -F 10 -L BCL
         - mvn test
 
     # macOS tests
