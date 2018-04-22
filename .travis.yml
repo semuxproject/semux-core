@@ -67,10 +67,6 @@ matrix:
         - timeout 10 .travis/docker_test_build.sh
         - docker kill $(docker ps -q)
 
-  # The following environments are known to fail
-  allow_failures:
-      - env: Name='Oracle JDK 11'
-
 cache:
   directories:
     - .autoconf
