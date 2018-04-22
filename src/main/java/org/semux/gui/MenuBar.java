@@ -26,6 +26,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.semux.config.Constants;
 import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
@@ -42,7 +43,8 @@ public class MenuBar extends JMenuBar implements ActionListener {
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(MenuBar.class);
-    public static final String HELP_URL = "https://github.com/semuxproject/semux/tree/v1.1.0/docs";
+    public static final String HELP_URL = "https://github.com/semuxproject/semux/tree/v" + Constants.CLIENT_VERSION
+            + "/docs";
 
     private transient SemuxGui gui;
     private JFrame frame;
