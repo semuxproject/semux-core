@@ -81,6 +81,8 @@ public class SystemUtilTest {
             assertFalse(SystemUtil.isJavaPlatformModuleSystemAvailable());
             break;
         case "9":
+        case "10":
+        case "11":
             assertTrue(SystemUtil.isJavaPlatformModuleSystemAvailable());
             break;
         default:
