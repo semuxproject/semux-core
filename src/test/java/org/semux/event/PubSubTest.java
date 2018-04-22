@@ -9,6 +9,7 @@ package org.semux.event;
 import static junit.framework.TestCase.fail;
 import static org.awaitility.Awaitility.await;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.RandomUtils;
@@ -45,8 +46,8 @@ public class PubSubTest {
         for (int i = 0; i < fuzz2; i++) {
             new Thread(() -> pubSub.publish(new TestEvent2())).run();
         }
-        await().until(() -> dispatched1.get() == fuzz1);
-        await().until(() -> dispatched2.get() == fuzz2);
+        await().atMost(30, TimeUnit.SECONDS).until(() -> dispatched1.get() == fuzz1);
+        await().atMost(30, TimeUnit.SECONDS).until(() -> dispatched2.get() == fuzz2);
     }
 
     @Test
