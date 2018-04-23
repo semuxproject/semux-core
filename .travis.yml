@@ -1,4 +1,5 @@
 language: java
+
 matrix:
   include:
     # License, formatter, and FindBugs check
@@ -21,20 +22,29 @@ matrix:
       after_success:
         - mvn coveralls:report
 
-    # Linux tests (java 8)
-    - env: NAME="Linux tests (java 8)"
+    # Linux tests (Java 8 LTS)
+    - env: NAME="Linux tests (Java 8)"
       os: linux
       sudo: false
       jdk: oraclejdk8
       script:
         - mvn test
 
-    # Linux tests (java 9)
-    - env: NAME="Linux tests (java 9)"
+    # Linux tests (Java 9)
+    - env: NAME="Linux tests (Java 9)"
       os: linux
       sudo: false
       jdk: oraclejdk9
       script:
+        - mvn test
+
+    # Linux tests (Java 10)
+    - env: NAME="Linux tests (Java 10)"
+      os: linux
+      sudo: false
+      script:
+        - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+        - source ./install-jdk.sh -F 10 -L BCL
         - mvn test
 
     # macOS tests
@@ -44,7 +54,6 @@ matrix:
       script:
         - mvn test
 
-allow_failures:
     # Docker tests
     - env: NAME="Docker tests"
       language: none
@@ -57,11 +66,13 @@ allow_failures:
         - docker run -d -p 5161:5161 semux:latest --password=""
         - timeout 10 .travis/docker_test_build.sh
         - docker kill $(docker ps -q)
+
 cache:
   directories:
     - .autoconf
     - $HOME/.m2
     - $HOME/Library/Caches/Homebrew
+
 before_install:
   - rm ~/.m2/settings.xml || true # remove the default settings.xml in order to use custom repos
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then source .travis/linux_start_xvfb.sh; fi
