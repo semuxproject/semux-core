@@ -53,12 +53,12 @@ public class Wallet {
             OWNER_READ,
             OWNER_WRITE));
 
-    private File file;
-    private String password;
+    private final File file;
 
     private final Map<ByteArray, Key> accounts = Collections.synchronizedMap(new LinkedHashMap<>());
-
     private final Map<ByteArray, String> aliases = new ConcurrentHashMap<>();
+
+    private String password;
 
     /**
      * Creates a new wallet instance.
@@ -455,15 +455,13 @@ public class Wallet {
         requireUnlocked();
 
         try {
-            byte[] key = Hash.h256(Bytes.of(password));
-
             SimpleEncoder enc = new SimpleEncoder();
             enc.writeInt(VERSION);
 
             byte[] salt = Bytes.random(SALT_LENGTH);
             enc.writeBytes(salt);
 
-            key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
+            byte[] key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
 
             writeAccounts(key, enc);
             writeAddressAliases(key, enc);
