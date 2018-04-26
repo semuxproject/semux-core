@@ -19,12 +19,13 @@ public class Peer {
      * Below are the listening IP address and port number, not necessarily the real
      * address that we're connecting to.
      */
-    private String ip;
-    private int port;
+    private final String ip;
+    private final int port;
 
-    private short networkVersion;
-    private String clientId;
-    private String peerId;
+    private final short networkVersion;
+    private final String clientId;
+    private final String peerId;
+
     private long latestBlockNumber;
 
     /*
@@ -35,7 +36,7 @@ public class Peer {
     /**
      * Set of capabilities the peer supports
      */
-    private CapabilitySet capabilities;
+    private final CapabilitySet capabilities;
 
     /**
      * Create a new Peer instance.

@@ -15,7 +15,7 @@ import org.semux.util.exception.BytesException;
 
 public class Bytes {
 
-    private static SecureRandom secureRandom = new SecureRandom();
+    private static final SecureRandom secureRandom = new SecureRandom();
 
     /**
      * Default charset.

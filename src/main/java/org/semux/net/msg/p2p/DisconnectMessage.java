@@ -13,7 +13,7 @@ import org.semux.util.Bytes;
 
 public class DisconnectMessage extends Message {
 
-    private ReasonCode reason;
+    private final ReasonCode reason;
 
     /**
      * Create a DISCONNECT message.

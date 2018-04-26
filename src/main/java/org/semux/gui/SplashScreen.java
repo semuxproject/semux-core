@@ -16,9 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
+import javax.swing.*;
 
 import org.semux.core.event.BlockchainDatabaseUpgradingEvent;
 import org.semux.core.event.WalletLoadingEvent;
@@ -45,7 +43,7 @@ public class SplashScreen extends JFrame implements PubSubSubscriber {
 
     private static final PubSub pubSub = PubSubFactory.getDefault();
 
-    private JProgressBar progressBar;
+    private final JProgressBar progressBar;
 
     public SplashScreen() {
         subscribeEvents();
@@ -55,7 +53,7 @@ public class SplashScreen extends JFrame implements PubSubSubscriber {
         setUndecorated(true);
         setContentPane(new ContentPane());
         setBackground(new Color(0, 0, 0, 0));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         add(new ImagePane());
 

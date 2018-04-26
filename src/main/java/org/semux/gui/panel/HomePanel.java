@@ -53,18 +53,18 @@ public class HomePanel extends JPanel implements ActionListener {
     private static final EnumSet<TransactionType> FEDERATED_TRANSACTION_TYPES = EnumSet.of(TransactionType.COINBASE,
             TransactionType.TRANSFER);
 
-    private transient SemuxGui gui;
-    private transient WalletModel model;
+    private final transient SemuxGui gui;
+    private final transient WalletModel model;
 
-    private JLabel blockNum;
-    private JLabel blockTime;
-    private JLabel coinbase;
-    private JLabel status;
-    private JLabel available;
-    private JLabel locked;
-    private JLabel total;
+    private final JLabel blockNum;
+    private final JLabel blockTime;
+    private final JLabel coinbase;
+    private final JLabel status;
+    private final JLabel available;
+    private final JLabel locked;
+    private final JLabel total;
 
-    private JPanel transactions;
+    private final JPanel transactions;
 
     public HomePanel(SemuxGui gui) {
         this.gui = gui;

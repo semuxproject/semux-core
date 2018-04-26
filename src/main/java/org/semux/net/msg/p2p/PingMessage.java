@@ -13,7 +13,7 @@ import org.semux.util.SimpleEncoder;
 
 public class PingMessage extends Message {
 
-    private long timestamp;
+    private final long timestamp;
 
     /**
      * Create a PING message.

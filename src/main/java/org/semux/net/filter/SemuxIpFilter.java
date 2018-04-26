@@ -76,7 +76,7 @@ public class SemuxIpFilter {
      * CopyOnWriteArrayList allows APIs to update rules atomically without affecting
      * the performance of read-only iteration
      */
-    private CopyOnWriteArrayList<FilterRule> rules;
+    private final CopyOnWriteArrayList<FilterRule> rules;
 
     public SemuxIpFilter(List<FilterRule> rules) {
         this.rules = new CopyOnWriteArrayList<>(rules);
@@ -203,7 +203,7 @@ public class SemuxIpFilter {
      */
     public static final class Builder {
 
-        private ArrayList<FilterRule> rules = new ArrayList<>();
+        private final ArrayList<FilterRule> rules = new ArrayList<>();
 
         private void addRule(String cidrNotation, IpFilterRuleType type) throws UnknownHostException {
             FilterRule ipSubnetFilterRule = new FilterRule(cidrNotation, type);

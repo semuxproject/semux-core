@@ -13,7 +13,7 @@ import org.semux.util.SimpleEncoder;
 
 public class Account {
 
-    private byte[] address;
+    private final byte[] address;
     private Amount available;
     private Amount locked;
     private long nonce;

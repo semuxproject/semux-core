@@ -13,7 +13,7 @@ import org.semux.core.Amount;
 import org.semux.util.exception.SimpleCodecException;
 
 public class SimpleEncoder {
-    private ByteArrayOutputStream out;
+    private final ByteArrayOutputStream out;
 
     public SimpleEncoder(byte[] toAppend) {
         this.out = new ByteArrayOutputStream();

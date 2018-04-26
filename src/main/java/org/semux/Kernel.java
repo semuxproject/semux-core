@@ -75,7 +75,7 @@ public class Kernel {
 
     protected State state = State.STOPPED;
 
-    protected ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
+    protected final ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
     protected Config config = null;
 
     protected Wallet wallet;

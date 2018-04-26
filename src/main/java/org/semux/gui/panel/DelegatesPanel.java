@@ -67,20 +67,20 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private transient WalletModel model;
+    private final transient WalletModel model;
 
-    private transient Kernel kernel;
-    private transient Config config;
+    private final transient Kernel kernel;
+    private final transient Config config;
 
-    private JTable table;
-    private DelegatesTableModel tableModel;
+    private final JTable table;
+    private final DelegatesTableModel tableModel;
 
-    JComboBox<AccountItem> selectFrom;
+    private final JTextField textVote;
+    private final JTextField textUnvote;
+    private final JTextField textName;
+    private final JLabel labelSelectedDelegate;
 
-    private JTextField textVote;
-    private JTextField textUnvote;
-    private JTextField textName;
-    private JLabel labelSelectedDelegate;
+    final JComboBox<AccountItem> selectFrom;
 
     public DelegatesPanel(SemuxGui gui, JFrame frame) {
         this.model = gui.getModel();
@@ -648,8 +648,8 @@ public class DelegatesPanel extends JPanel implements ActionListener {
      * Represents an item in the account drop list.
      */
     protected static class AccountItem {
-        WalletAccount account;
-        String name;
+        final WalletAccount account;
+        final String name;
 
         public AccountItem(WalletAccount a) {
             this.account = a;

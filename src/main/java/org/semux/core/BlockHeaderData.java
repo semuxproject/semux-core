@@ -36,7 +36,7 @@ public class BlockHeaderData {
 
     public static final int MAX_SIZE = 32;
 
-    private static Logger logger = LoggerFactory.getLogger(BlockHeaderData.class);
+    private static final Logger logger = LoggerFactory.getLogger(BlockHeaderData.class);
 
     private static final BlockHeaderData VERSION_0_HEADER_DATA = BlockHeaderData.v0();
 

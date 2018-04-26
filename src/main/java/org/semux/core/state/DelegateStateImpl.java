@@ -51,7 +51,8 @@ public class DelegateStateImpl implements DelegateState {
 
     private static final int ADDRESS_LEN = 20;
 
-    protected Blockchain chain;
+    protected final Blockchain chain;
+
     protected Database delegateDB;
     protected Database voteDB;
     protected DelegateStateImpl prev;

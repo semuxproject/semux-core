@@ -27,7 +27,13 @@ import org.semux.message.GuiMessages;
 
 public class ChangePasswordDialog extends JDialog implements ActionListener {
 
-    private transient SemuxGui gui;
+    private static final long serialVersionUID = 1L;
+
+    private final transient SemuxGui gui;
+
+    private final JPasswordField oldPasswordField;
+    private final JPasswordField passwordField;
+    private final JPasswordField repeatField;
 
     public ChangePasswordDialog(SemuxGui gui, JFrame parent) {
         super(parent, GuiMessages.get("ChangePassword"));
@@ -97,11 +103,6 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
         this.setMinimumSize(new Dimension(400, 240));
         this.setLocationRelativeTo(parent);
     }
-
-    private static final long serialVersionUID = 1L;
-    private JPasswordField oldPasswordField;
-    private JPasswordField passwordField;
-    private JPasswordField repeatField;
 
     @Override
     public void actionPerformed(ActionEvent e) {

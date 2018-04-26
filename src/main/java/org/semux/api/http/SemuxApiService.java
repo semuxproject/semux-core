@@ -38,7 +38,7 @@ public class SemuxApiService {
     private static final Logger logger = LoggerFactory.getLogger(SemuxApiService.class);
 
     private static final ThreadFactory factory = new ThreadFactory() {
-        AtomicInteger cnt = new AtomicInteger(0);
+        final AtomicInteger cnt = new AtomicInteger(0);
 
         @Override
         public Thread newThread(Runnable r) {
@@ -46,7 +46,7 @@ public class SemuxApiService {
         }
     };
 
-    private Kernel kernel;
+    private final Kernel kernel;
     private Channel channel;
 
     private EventLoopGroup bossGroup;

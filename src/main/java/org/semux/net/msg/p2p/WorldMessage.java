@@ -18,9 +18,9 @@ import org.semux.util.SimpleEncoder;
 
 public class WorldMessage extends Message {
 
-    private Peer peer;
-    private long timestamp;
-    private Signature signature;
+    private final Peer peer;
+    private final long timestamp;
+    private final Signature signature;
 
     /**
      * Create a WORLD message.

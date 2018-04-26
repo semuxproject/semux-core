@@ -21,7 +21,7 @@ public class SemuxFrameHandler extends ByteToMessageCodec<Frame> {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxFrameHandler.class);
 
-    private Config config;
+    private final Config config;
 
     public SemuxFrameHandler(Config config) {
         this.config = config;

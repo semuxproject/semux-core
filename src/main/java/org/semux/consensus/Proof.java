@@ -14,9 +14,9 @@ import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
 public class Proof {
-    private long height;
-    private int view;
-    private List<Vote> votes;
+    private final long height;
+    private final int view;
+    private final List<Vote> votes;
 
     public Proof(long height, int view, List<Vote> votes) {
         this.height = height;

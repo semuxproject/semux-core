@@ -19,7 +19,7 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 public class Channel {
     private static final AtomicLong cnt = new AtomicLong(0);
 
-    private long id;
+    private final long id;
 
     private boolean isInbound;
     private InetSocketAddress remoteAddress;

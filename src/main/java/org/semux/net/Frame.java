@@ -26,12 +26,12 @@ public class Frame {
     public static final byte COMPRESS_NONE = 0;
     public static final byte COMPRESS_SNAPPY = 1;
 
-    protected short version; /* version, 2 bytes */
-    protected byte compressType; /* compress type, 1 byte */
-    protected byte packetType; /* packet type, 1 byte */
-    protected int packetId; /* packet id, 4 bytes */
-    protected int packetSize; /* packet size, 4 bytes */
-    protected int bodySize; /* body size, 4 bytes */
+    protected final short version; /* version, 2 bytes */
+    protected final byte compressType; /* compress type, 1 byte */
+    protected final byte packetType; /* packet type, 1 byte */
+    protected final int packetId; /* packet id, 4 bytes */
+    protected final int packetSize; /* packet size, 4 bytes */
+    protected final int bodySize; /* body size, 4 bytes */
 
     protected byte[] body;
 

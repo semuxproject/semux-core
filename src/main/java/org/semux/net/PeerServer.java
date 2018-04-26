@@ -30,7 +30,7 @@ public class PeerServer {
     private static final Logger logger = LoggerFactory.getLogger(PeerServer.class);
 
     private static final ThreadFactory factory = new ThreadFactory() {
-        AtomicInteger cnt = new AtomicInteger(0);
+        final AtomicInteger cnt = new AtomicInteger(0);
 
         @Override
         public Thread newThread(Runnable r) {
@@ -38,7 +38,8 @@ public class PeerServer {
         }
     };
 
-    protected Kernel kernel;
+    protected final Kernel kernel;
+
     protected Channel channel;
 
     private NioEventLoopGroup bossGroup;

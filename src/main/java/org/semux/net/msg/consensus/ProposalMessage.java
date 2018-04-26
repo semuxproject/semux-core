@@ -12,7 +12,7 @@ import org.semux.net.msg.MessageCode;
 
 public class ProposalMessage extends Message {
 
-    private Proposal proposal;
+    private final Proposal proposal;
 
     public ProposalMessage(Proposal proposal) {
         super(MessageCode.BFT_PROPOSAL, null);

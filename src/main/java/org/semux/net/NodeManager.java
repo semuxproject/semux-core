@@ -39,7 +39,7 @@ public class NodeManager {
     private static final Logger logger = LoggerFactory.getLogger(NodeManager.class);
 
     private static final ThreadFactory factory = new ThreadFactory() {
-        private AtomicInteger cnt = new AtomicInteger(0);
+        private final AtomicInteger cnt = new AtomicInteger(0);
 
         @Override
         public Thread newThread(Runnable r) {
@@ -51,17 +51,17 @@ public class NodeManager {
     private static final int LRU_CACHE_SIZE = 1024;
     private static final long RECONNECT_WAIT = 2L * 60L * 1000L;
 
-    private Kernel kernel;
-    private Config config;
+    private final Kernel kernel;
+    private final Config config;
 
-    private ChannelManager channelMgr;
-    private PeerClient client;
+    private final ChannelManager channelMgr;
+    private final PeerClient client;
 
-    private Deque<Node> deque = new ConcurrentLinkedDeque<>();
+    private final Deque<Node> deque = new ConcurrentLinkedDeque<>();
 
-    private Cache<Node, Long> lastConnect = Caffeine.newBuilder().maximumSize(LRU_CACHE_SIZE).build();
+    private final Cache<Node, Long> lastConnect = Caffeine.newBuilder().maximumSize(LRU_CACHE_SIZE).build();
 
-    private ScheduledExecutorService exec;
+    private final ScheduledExecutorService exec;
     private ScheduledFuture<?> connectFuture;
     private ScheduledFuture<?> fetchFuture;
 
@@ -226,7 +226,7 @@ public class NodeManager {
      */
     public static class Node {
 
-        private InetSocketAddress address;
+        private final InetSocketAddress address;
 
         /**
          * Construct a node with the given socket address.

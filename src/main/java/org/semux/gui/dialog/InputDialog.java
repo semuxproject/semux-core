@@ -28,7 +28,7 @@ public class InputDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private JTextField textField;
+    private final JTextField textField;
     private String text;
 
     public InputDialog(JFrame parent, String message, boolean isPassword) {

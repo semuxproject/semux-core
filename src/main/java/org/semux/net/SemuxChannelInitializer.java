@@ -22,11 +22,11 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxChannelInitializer.class);
 
-    private Kernel kernel;
-    private ChannelManager channelMgr;
+    private final Kernel kernel;
+    private final ChannelManager channelMgr;
 
-    private Node remoteNode;
-    private boolean discoveryMode;
+    private final Node remoteNode;
+    private final boolean discoveryMode;
 
     /**
      * Create an instance of SemuxChannelInitializer.

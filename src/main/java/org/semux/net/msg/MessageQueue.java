@@ -31,18 +31,18 @@ public class MessageQueue {
     private static final Logger logger = LoggerFactory.getLogger(MessageQueue.class);
 
     private static final ScheduledExecutorService timer = Executors.newScheduledThreadPool(2, new ThreadFactory() {
-        private AtomicInteger cnt = new AtomicInteger(0);
+        private final AtomicInteger cnt = new AtomicInteger(0);
 
         public Thread newThread(Runnable r) {
             return new Thread(r, "msg-" + cnt.getAndIncrement());
         }
     });
 
-    private Config config;
+    private final Config config;
 
-    private Queue<MessageWrapper> requests = new ConcurrentLinkedQueue<>();
-    private Queue<MessageWrapper> responses = new ConcurrentLinkedQueue<>();
-    private Queue<MessageWrapper> prioritizedResponses = new ConcurrentLinkedQueue<>();
+    private final Queue<MessageWrapper> requests = new ConcurrentLinkedQueue<>();
+    private final Queue<MessageWrapper> responses = new ConcurrentLinkedQueue<>();
+    private final Queue<MessageWrapper> prioritizedResponses = new ConcurrentLinkedQueue<>();
 
     private ChannelHandlerContext ctx;
     private ScheduledFuture<?> timerTask;

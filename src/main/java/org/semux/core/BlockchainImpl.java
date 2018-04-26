@@ -124,7 +124,7 @@ public class BlockchainImpl implements Blockchain {
      * fork in this version, 2 slots are reserved for current height and current
      * height - 1.
      */
-    private Cache<ImmutablePair<ValidatorActivatedFork, Long>, ForkActivationMemory> forkActivationMemoryCache = Caffeine
+    private final Cache<ImmutablePair<ValidatorActivatedFork, Long>, ForkActivationMemory> forkActivationMemoryCache = Caffeine
             .newBuilder()
             .maximumSize(2)
             .build();

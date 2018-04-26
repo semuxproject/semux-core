@@ -24,7 +24,7 @@ public class ApiHandlerResponse {
 
     @JsonProperty("message")
     @JsonInclude(NON_NULL)
-    public String message;
+    public final String message;
 
     @JsonCreator
     public ApiHandlerResponse(

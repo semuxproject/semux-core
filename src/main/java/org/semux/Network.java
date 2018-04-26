@@ -22,11 +22,11 @@ public enum Network {
         this.label = label;
     }
 
-    private byte id;
-    private String label;
+    private final byte id;
+    private final String label;
 
-    private static Map<String, Network> labels = new HashMap<>();
-    private static Map<Byte, Network> ids = new HashMap<>();
+    private static final Map<String, Network> labels = new HashMap<>();
+    private static final Map<Byte, Network> ids = new HashMap<>();
 
     static {
         for (Network net : Network.values()) {

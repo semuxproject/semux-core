@@ -46,8 +46,8 @@ public class MenuBar extends JMenuBar implements ActionListener {
     public static final String HELP_URL = "https://github.com/semuxproject/semux/tree/v" + Constants.CLIENT_VERSION
             + "/docs";
 
-    private transient SemuxGui gui;
-    private JFrame frame;
+    private final transient SemuxGui gui;
+    private final JFrame frame;
 
     public MenuBar(SemuxGui gui, JFrame frame) {
         this.gui = gui;

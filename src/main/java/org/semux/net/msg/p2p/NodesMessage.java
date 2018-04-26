@@ -19,7 +19,7 @@ public class NodesMessage extends Message {
 
     public static final int MAX_NODES = 256;
 
-    private List<Node> nodes;
+    private final List<Node> nodes;
 
     /**
      * Create a NODES message.

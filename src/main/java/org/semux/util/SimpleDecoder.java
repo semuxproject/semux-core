@@ -16,9 +16,10 @@ import org.semux.util.exception.SimpleCodecException;
 public class SimpleDecoder {
     private static final String ENCODING = "UTF-8";
 
-    private byte[] in;
-    private int from;
-    private int to;
+    private final byte[] in;
+    private final int from;
+    private final int to;
+
     private int index;
 
     public SimpleDecoder(byte[] in) {

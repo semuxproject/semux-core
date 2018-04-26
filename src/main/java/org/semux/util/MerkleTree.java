@@ -16,8 +16,8 @@ import org.semux.crypto.Hash;
  */
 public class MerkleTree {
 
-    private Node root;
-    private int size;
+    private final Node root;
+    private final int size;
     private int levels = 0;
 
     /**
@@ -108,7 +108,7 @@ public class MerkleTree {
     }
 
     private static class Node {
-        byte[] value;
+        final byte[] value;
         Node left;
         Node right;
 

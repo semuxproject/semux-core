@@ -71,7 +71,7 @@ public class SemuxGui extends Launcher {
 
     private static final int TRANSACTION_LIMIT = 1024; // per account
 
-    private WalletModel model;
+    private final WalletModel model;
     private Kernel kernel;
 
     private AddressBookDialog addressBookDialog;
@@ -493,8 +493,8 @@ public class SemuxGui extends Launcher {
     }
 
     protected static class Version {
-        public String minVersion;
-        public String latestVersion;
+        public final String minVersion;
+        public final String latestVersion;
 
         public Version(String minVersion, String latestVersion) {
             this.minVersion = minVersion;

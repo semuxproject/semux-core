@@ -39,7 +39,7 @@ public class PeerClient {
     private static final Logger logger = LoggerFactory.getLogger(PeerClient.class);
 
     private static final ThreadFactory factory = new ThreadFactory() {
-        AtomicInteger cnt = new AtomicInteger(0);
+        final AtomicInteger cnt = new AtomicInteger(0);
 
         @Override
         public Thread newThread(Runnable r) {
@@ -49,13 +49,12 @@ public class PeerClient {
 
     private static final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor(factory);
 
+    private final int port;
+    private final Key coinbase;
+    private final EventLoopGroup workerGroup;
+
     private ScheduledFuture<?> ipRefreshFuture = null;
-
     private String ip;
-    private int port;
-    private Key coinbase;
-
-    private EventLoopGroup workerGroup;
 
     /**
      * Create a new PeerClient instance.

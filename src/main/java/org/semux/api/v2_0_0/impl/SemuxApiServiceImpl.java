@@ -73,7 +73,7 @@ import net.i2p.crypto.eddsa.EdDSAPublicKey;
 public final class SemuxApiServiceImpl implements SemuxApi {
     private static final Charset CHARSET = UTF_8;
 
-    private Kernel kernel;
+    private final Kernel kernel;
 
     public SemuxApiServiceImpl(Kernel kernel) {
         this.kernel = kernel;

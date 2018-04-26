@@ -43,13 +43,13 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(WelcomeFrame.class);
 
-    private JPasswordField txtPassword;
-    private JPasswordField txtPasswordRepeat;
-    private JLabel lblPasswordRepeat;
-    private JRadioButton btnCreate;
-    private JRadioButton btnRecover;
+    private final JPasswordField txtPassword;
+    private final JPasswordField txtPasswordRepeat;
+    private final JLabel lblPasswordRepeat;
+    private final JRadioButton btnCreate;
+    private final JRadioButton btnRecover;
 
-    private transient Wallet wallet;
+    private final transient Wallet wallet;
 
     private transient File backupFile = null;
 

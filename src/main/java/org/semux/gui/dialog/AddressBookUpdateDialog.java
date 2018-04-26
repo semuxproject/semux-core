@@ -35,11 +35,11 @@ public class AddressBookUpdateDialog extends JDialog implements ActionListener {
     private static final long serialVersionUID = 1L;
     private static final int MAX_ADDRESS_NAME_LENGTH = 256;
 
-    private transient Wallet wallet;
-    private transient SemuxGui gui;
+    private final transient Wallet wallet;
+    private final transient SemuxGui gui;
 
-    private JTextField nameText;
-    private JTextField addressText;
+    private final JTextField nameText;
+    private final JTextField addressText;
 
     public AddressBookUpdateDialog(Window parent, AddressBookEntry entry, Wallet wallet, SemuxGui gui) {
         super(parent,

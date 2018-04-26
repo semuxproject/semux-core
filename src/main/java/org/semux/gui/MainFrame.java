@@ -49,28 +49,28 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private transient Kernel kernel;
+    private final transient Kernel kernel;
+    private final transient WalletModel model;
 
-    private LockGlassPane lockGlassPane;
+    private final LockGlassPane lockGlassPane;
 
-    private HomePanel panelHome;
-    private SendPanel panelSend;
-    private ReceivePanel panelReceive;
-    private TransactionsPanel panelTransactions;
-    private DelegatesPanel panelDelegates;
-    private StatusBar statusBar;
+    private final HomePanel panelHome;
+    private final SendPanel panelSend;
+    private final ReceivePanel panelReceive;
+    private final TransactionsPanel panelTransactions;
+    private final DelegatesPanel panelDelegates;
+    private final StatusBar statusBar;
 
-    private JButton btnHome;
-    private JButton btnSend;
-    private JButton btnReceive;
-    private JButton btnTransactions;
-    private JButton btnDelegates;
-    private JButton btnLock;
+    private final JButton btnHome;
+    private final JButton btnSend;
+    private final JButton btnReceive;
+    private final JButton btnTransactions;
+    private final JButton btnDelegates;
+    private final JButton btnLock;
 
-    private JPanel activePanel;
+    private final JPanel activePanel;
+
     private JButton activeButton;
-
-    private transient WalletModel model;
 
     public MainFrame(SemuxGui gui) {
         // ensure that all windows are released before it starts closing the Kernel

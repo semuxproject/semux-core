@@ -14,7 +14,7 @@ import java.math.BigInteger;
 
 public final class Amount {
 
-    public static enum Unit {
+    public enum Unit {
         NANO_SEM(0, "nSEM"),
 
         MICRO_SEM(3, "μSEM"),
@@ -31,7 +31,7 @@ public final class Amount {
         private final long factor;
         public final String symbol;
 
-        private Unit(int exp, String symbol) {
+        Unit(int exp, String symbol) {
             this.exp = exp;
             this.factor = BigInteger.TEN.pow(exp).longValueExact();
             this.symbol = symbol;
