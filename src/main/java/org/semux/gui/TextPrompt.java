@@ -119,8 +119,8 @@ public class TextPrompt extends JLabel
     }
 
     /**
-     * Set the prompt Show property to control when the prompt is shown. Valid values
-     * are:
+     * Set the prompt Show property to control when the prompt is shown. Valid
+     * values are:
      *
      * Show.ALWAYS (default) - always show the prompt Show.Focus_GAINED - show the
      * prompt when the component gains focus (and hide the prompt when focus is
