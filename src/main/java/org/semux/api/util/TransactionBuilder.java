@@ -24,7 +24,7 @@ import org.semux.util.Bytes;
  */
 public class TransactionBuilder {
 
-    private Kernel kernel;
+    private final Kernel kernel;
 
     /**
      * Network id

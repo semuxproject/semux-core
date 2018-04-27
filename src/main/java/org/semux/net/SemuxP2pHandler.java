@@ -60,29 +60,27 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
     private final static Logger logger = LoggerFactory.getLogger(SemuxP2pHandler.class);
 
-    private static ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
-        private AtomicInteger cnt = new AtomicInteger(0);
+    private static final ScheduledExecutorService exec = Executors
+            .newSingleThreadScheduledExecutor(new ThreadFactory() {
+                private final AtomicInteger cnt = new AtomicInteger(0);
 
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(r, "p2p-" + cnt.getAndIncrement());
-        }
-    });
+                @Override
+                public Thread newThread(Runnable r) {
+                    return new Thread(r, "p2p-" + cnt.getAndIncrement());
+                }
+            });
 
-    private Channel channel;
+    private final Channel channel;
+    private final Config config;
+    private final Blockchain chain;
+    private final PendingManager pendingMgr;
+    private final ChannelManager channelMgr;
+    private final NodeManager nodeMgr;
+    private final PeerClient client;
+    private final SyncManager sync;
+    private final Consensus consensus;
+    private final MessageQueue msgQueue;
 
-    private Config config;
-
-    private Blockchain chain;
-    private PendingManager pendingMgr;
-    private ChannelManager channelMgr;
-    private NodeManager nodeMgr;
-    private PeerClient client;
-
-    private SyncManager sync;
-    private Consensus consensus;
-
-    private MessageQueue msgQueue;
     private boolean isHandshakeDone;
 
     private ScheduledFuture<?> getNodes = null;

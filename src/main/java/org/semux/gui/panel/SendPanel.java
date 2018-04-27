@@ -55,19 +55,18 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private transient SemuxGui gui;
-    private transient WalletModel model;
-    private transient Kernel kernel;
+    private final transient SemuxGui gui;
+    private final transient WalletModel model;
+    private final transient Kernel kernel;
+    private final transient Config config;
 
-    private transient Config config;
-
-    private JComboBox<AccountItem> selectFrom;
-    private JTextField txtTo;
-    private JTextField txtAmount;
-    private JTextField txtFee;
-    private JTextField txtData;
-    private JRadioButton rdbtnText;
-    private JRadioButton rdbtnHex;
+    private final JComboBox<AccountItem> selectFrom;
+    private final JTextField txtTo;
+    private final JTextField txtAmount;
+    private final JTextField txtFee;
+    private final JTextField txtData;
+    private final JRadioButton rdbtnText;
+    private final JRadioButton rdbtnHex;
 
     public SendPanel(SemuxGui gui, JFrame frame) {
         this.gui = gui;
@@ -429,8 +428,8 @@ public class SendPanel extends JPanel implements ActionListener {
      * Represents an item in the account drop list.
      */
     protected static class AccountItem {
-        WalletAccount account;
-        String name;
+        final WalletAccount account;
+        final String name;
 
         public AccountItem(WalletAccount a) {
             Optional<String> alias = a.getName();

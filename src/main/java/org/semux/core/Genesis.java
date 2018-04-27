@@ -34,11 +34,11 @@ public class Genesis extends Block {
     private static final Logger logger = LoggerFactory.getLogger(Genesis.class);
 
     @JsonDeserialize(keyUsing = ByteArrayKeyDeserializer.class)
-    private Map<ByteArray, Premine> premines;
+    private final Map<ByteArray, Premine> premines;
 
-    private Map<String, byte[]> delegates;
+    private final Map<String, byte[]> delegates;
 
-    private Map<String, Object> config;
+    private final Map<String, Object> config;
 
     /**
      * Creates a {@link Genesis} block instance.
@@ -135,9 +135,9 @@ public class Genesis extends Block {
     }
 
     public static class Premine {
-        private byte[] address;
-        private Amount amount;
-        private String note;
+        private final byte[] address;
+        private final Amount amount;
+        private final String note;
 
         public Premine(byte[] address, Amount amount, String note) {
             this.address = address;

@@ -12,7 +12,7 @@ import org.semux.util.Bytes;
 
 public class NewHeightMessage extends Message {
 
-    private long height;
+    private final long height;
 
     public NewHeightMessage(long height) {
         super(MessageCode.BFT_NEW_HEIGHT, null);

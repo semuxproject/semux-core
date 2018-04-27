@@ -31,7 +31,7 @@ public class SelectDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private JComboBox<Object> comboBox;
+    private final JComboBox<Object> comboBox;
     private int selected = -1;
 
     public SelectDialog(JFrame parent, String message, List<?> options) {

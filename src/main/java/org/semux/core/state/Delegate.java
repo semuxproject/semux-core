@@ -17,9 +17,10 @@ import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
 public class Delegate {
-    protected byte[] address;
-    protected byte[] name;
-    protected long registeredAt;
+    protected final byte[] address;
+    protected final byte[] name;
+    protected final long registeredAt;
+
     protected Amount votes = ZERO;
 
     /**

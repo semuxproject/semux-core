@@ -35,7 +35,7 @@ public class LeveldbDatabase implements Database {
 
     private static final Logger logger = LoggerFactory.getLogger(LeveldbDatabase.class);
 
-    private File file;
+    private final File file;
     private DB db;
     private boolean isOpened;
 
@@ -178,7 +178,7 @@ public class LeveldbDatabase implements Database {
     public ClosableIterator<Entry<byte[], byte[]>> iterator(byte[] prefix) {
 
         return new ClosableIterator<Entry<byte[], byte[]>>() {
-            DBIterator itr = db.iterator();
+            final DBIterator itr = db.iterator();
 
             private ClosableIterator<Entry<byte[], byte[]>> initialize() {
                 if (prefix != null) {
@@ -212,10 +212,10 @@ public class LeveldbDatabase implements Database {
 
     public static class LeveldbFactory implements DatabaseFactory {
 
-        private EnumMap<DatabaseName, Database> databases = new EnumMap<>(DatabaseName.class);
+        private final EnumMap<DatabaseName, Database> databases = new EnumMap<>(DatabaseName.class);
 
-        private File dataDir;
-        private AtomicBoolean open;
+        private final File dataDir;
+        private final AtomicBoolean open;
 
         public LeveldbFactory(File dataDir) {
             this.dataDir = dataDir;

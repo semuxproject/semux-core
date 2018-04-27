@@ -12,7 +12,7 @@ import org.semux.net.msg.MessageCode;
 
 public class TransactionMessage extends Message {
 
-    private Transaction transaction;
+    private final Transaction transaction;
 
     /**
      * Create a TRANSACTION message.

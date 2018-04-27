@@ -11,7 +11,7 @@ import org.semux.net.msg.MessageCode;
 import org.semux.util.Bytes;
 
 public class GetBlockMessage extends Message {
-    private long number;
+    private final long number;
 
     public GetBlockMessage(long number) {
         super(MessageCode.GET_BLOCK, BlockMessage.class);

@@ -36,8 +36,9 @@ public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] columnNames = { "#", GuiMessages.get("Address"), GuiMessages.get("PrivateKey") };
-    private JTable table;
+    private static final String[] columnNames = { "#", GuiMessages.get("Address"), GuiMessages.get("PrivateKey") };
+
+    private final JTable table;
 
     public ExportPrivateKeyDialog(SemuxGui gui, JFrame parent) {
         super(null, GuiMessages.get("ExportPrivateKey"), Dialog.ModalityType.MODELESS);

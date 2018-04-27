@@ -13,7 +13,7 @@ import org.semux.util.SimpleEncoder;
 
 public class PongMessage extends Message {
 
-    private long timestamp;
+    private final long timestamp;
 
     /**
      * Create a PONG message.

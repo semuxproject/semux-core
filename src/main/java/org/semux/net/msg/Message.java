@@ -16,12 +16,12 @@ public abstract class Message {
     /**
      * message code.
      */
-    protected MessageCode code;
+    protected final MessageCode code;
 
     /**
      * Response message class.
      */
-    protected Class<?> responseMessageClass;
+    protected final Class<?> responseMessageClass;
 
     /**
      * encoded data.

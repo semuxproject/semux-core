@@ -19,25 +19,25 @@ import org.semux.util.SimpleEncoder;
 
 public class BlockHeader {
 
-    private byte[] hash;
+    private final byte[] hash;
 
-    private long number;
+    private final long number;
 
-    private byte[] coinbase;
+    private final byte[] coinbase;
 
-    private byte[] parentHash;
+    private final byte[] parentHash;
 
-    private long timestamp;
+    private final long timestamp;
 
-    private byte[] transactionsRoot;
+    private final byte[] transactionsRoot;
 
-    private byte[] resultsRoot;
+    private final byte[] resultsRoot;
 
-    private byte[] stateRoot;
+    private final byte[] stateRoot;
 
-    private byte[] data;
+    private final byte[] data;
 
-    private byte[] encoded;
+    private final byte[] encoded;
 
     /**
      * Creates an instance of block header.

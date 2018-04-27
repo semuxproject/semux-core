@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PubSub {
 
-    private static Logger logger = LoggerFactory.getLogger(PubSub.class);
+    private static final Logger logger = LoggerFactory.getLogger(PubSub.class);
 
     private final String name;
 
@@ -35,7 +35,7 @@ public class PubSub {
 
     private Thread eventProcessingThread;
 
-    private AtomicBoolean isRunning;
+    private final AtomicBoolean isRunning;
 
     protected PubSub(String name) {
         this.name = name;

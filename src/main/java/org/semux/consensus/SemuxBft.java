@@ -95,22 +95,22 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 public class SemuxBft implements Consensus {
     static final Logger logger = LoggerFactory.getLogger(SemuxBft.class);
 
-    protected Kernel kernel;
+    protected final Kernel kernel;
+
+    protected final PendingManager pendingMgr;
+    protected final SyncManager sync;
+    protected final Key coinbase;
+    protected final AccountState accountState;
+    protected final DelegateState delegateState;
+    protected final Timer timer;
+    protected final Broadcaster broadcaster;
+    protected final BlockingQueue<Event> events = new LinkedBlockingQueue<>();
+    protected final Cache<ByteArray, Block> validBlocks = Caffeine.newBuilder().maximumSize(8).build();
+
     protected Config config;
 
     protected Blockchain chain;
     protected ChannelManager channelMgr;
-    protected PendingManager pendingMgr;
-    protected SyncManager sync;
-
-    protected Key coinbase;
-
-    protected AccountState accountState;
-    protected DelegateState delegateState;
-
-    protected Timer timer;
-    protected Broadcaster broadcaster;
-    protected BlockingQueue<Event> events = new LinkedBlockingQueue<>();
 
     protected Status status;
     protected State state;
@@ -120,8 +120,6 @@ public class SemuxBft implements Consensus {
     protected Proof proof;
     protected Proposal proposal;
 
-    protected Cache<ByteArray, Block> validBlocks = Caffeine.newBuilder().maximumSize(8).build();
-
     protected List<String> validators;
     protected List<Channel> activeValidators;
     protected long lastUpdate;
@@ -130,7 +128,7 @@ public class SemuxBft implements Consensus {
     protected VoteSet precommitVotes;
     protected VoteSet commitVotes;
 
-    protected Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks;
+    protected final Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks;
 
     public SemuxBft(Kernel kernel) {
         this.kernel = kernel;
@@ -1042,7 +1040,7 @@ public class SemuxBft implements Consensus {
     }
 
     public class Broadcaster implements Runnable {
-        private BlockingQueue<Message> queue = new LinkedBlockingQueue<>();
+        private final BlockingQueue<Message> queue = new LinkedBlockingQueue<>();
 
         private Thread t;
 
@@ -1130,8 +1128,8 @@ public class SemuxBft implements Consensus {
             VOTE
         }
 
-        private Type type;
-        private Object data;
+        private final Type type;
+        private final Object data;
 
         public Event(Type type) {
             this(type, null);

@@ -44,11 +44,11 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
     public static final String HELP = "help";
 
-    private transient SemuxApiServiceImpl api;
+    private final transient SemuxApiServiceImpl api;
 
-    private JTextArea console;
-    private JTextField input;
-    private ObjectMapper mapper = new ObjectMapper();
+    private final JTextArea console;
+    private final JTextField input;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public ConsoleDialog(SemuxGui gui, JFrame parent) {
 

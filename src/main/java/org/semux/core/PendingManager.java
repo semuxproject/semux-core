@@ -46,7 +46,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     private static final ThreadFactory factory = new ThreadFactory() {
 
-        private AtomicInteger cnt = new AtomicInteger(0);
+        private final AtomicInteger cnt = new AtomicInteger(0);
 
         @Override
         public Thread newThread(Runnable r) {
@@ -61,27 +61,29 @@ public class PendingManager implements Runnable, BlockchainListener {
     private static final int DELAYED_MAX_SIZE = 32 * 1024;
     private static final int PROCESSED_MAX_SIZE = 32 * 1024;
 
-    private Kernel kernel;
+    private final Kernel kernel;
     private AccountState pendingAS;
     private DelegateState pendingDS;
 
     /**
      * Transaction queue.
      */
-    private LinkedList<Transaction> queue = new LinkedList<>();
+    private final LinkedList<Transaction> queue = new LinkedList<>();
 
     /**
      * Transaction pool.
      */
-    private List<PendingTransaction> transactions = new ArrayList<>();
+    private final List<PendingTransaction> transactions = new ArrayList<>();
 
     /**
      * Transaction cache.
      */
-    private Cache<ByteArray, Transaction> delayed = Caffeine.newBuilder().maximumSize(DELAYED_MAX_SIZE).build();
-    private Cache<ByteArray, Transaction> processed = Caffeine.newBuilder().maximumSize(PROCESSED_MAX_SIZE).build();
+    private final Cache<ByteArray, Transaction> delayed = Caffeine.newBuilder().maximumSize(DELAYED_MAX_SIZE).build();
+    private final Cache<ByteArray, Transaction> processed = Caffeine.newBuilder().maximumSize(PROCESSED_MAX_SIZE)
+            .build();
 
-    private ScheduledExecutorService exec;
+    private final ScheduledExecutorService exec;
+
     private ScheduledFuture<?> validateFuture;
 
     private volatile boolean isRunning;

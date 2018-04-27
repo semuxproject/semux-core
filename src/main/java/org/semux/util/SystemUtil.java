@@ -89,7 +89,7 @@ public class SystemUtil {
 
         UNKNOWN("Unknown");
 
-        private String name;
+        private final String name;
 
         OsName(String name) {
             this.name = name;

@@ -22,7 +22,7 @@ public enum ResourceBundles {
 
     GUI_MESSAGES("org/semux/gui/messages"), CLI_MESSAGES("org/semux/cli/messages");
 
-    private String bundleName;
+    private final String bundleName;
 
     ResourceBundles(String bundleName) {
         this.bundleName = bundleName;

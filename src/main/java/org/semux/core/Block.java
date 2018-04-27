@@ -27,17 +27,17 @@ public class Block {
     /**
      * The block header.
      */
-    private BlockHeader header;
+    private final BlockHeader header;
 
     /**
      * The transactions.
      */
-    private List<Transaction> transactions;
+    private final List<Transaction> transactions;
 
     /**
      * The transaction results.
      */
-    private List<TransactionResult> results;
+    private final List<TransactionResult> results;
 
     /**
      * The BFT view and votes.
@@ -48,17 +48,18 @@ public class Block {
     // =========================
     // Auxiliary data
     // =========================
+
     /**
      * Encoding of transactions.
      */
-    protected byte[] encodedHeader;
-    protected byte[] encodedTransactions;
-    protected byte[] encodedResults;
+    protected final byte[] encodedHeader;
+    protected final byte[] encodedTransactions;
+    protected final byte[] encodedResults;
 
     /**
      * Transaction indexes
      */
-    protected List<Pair<Integer, Integer>> indexes = new ArrayList<>();
+    protected final List<Pair<Integer, Integer>> indexes = new ArrayList<>();
 
     /**
      * Create a new block, with no BFT information.

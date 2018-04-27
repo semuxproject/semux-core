@@ -20,6 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.SyncManager;
+import org.semux.core.state.Account;
 import org.semux.crypto.Key;
 import org.semux.gui.Action;
 import org.semux.net.Peer;
@@ -31,8 +32,8 @@ import org.semux.util.ByteArray;
  */
 public class WalletModel {
 
-    private List<ActionListener> listeners = new CopyOnWriteArrayList<>();
-    private List<ActionListener> lockableComponents = new CopyOnWriteArrayList<>();
+    private final List<ActionListener> listeners = new CopyOnWriteArrayList<>();
+    private final List<ActionListener> lockableComponents = new CopyOnWriteArrayList<>();
 
     private SyncManager.Progress syncProgress;
 
@@ -159,7 +160,7 @@ public class WalletModel {
      * @return
      */
     public Amount getTotalAvailable() {
-        return accounts.stream().map(it -> it.getAvailable()).reduce(ZERO, Amount::sum);
+        return accounts.stream().map(Account::getAvailable).reduce(ZERO, Amount::sum);
     }
 
     /**
@@ -168,7 +169,7 @@ public class WalletModel {
      * @return
      */
     public Amount getTotalLocked() {
-        return accounts.stream().map(it -> it.getLocked()).reduce(ZERO, Amount::sum);
+        return accounts.stream().map(Account::getLocked).reduce(ZERO, Amount::sum);
     }
 
     public List<WalletAccount> getAccounts() {

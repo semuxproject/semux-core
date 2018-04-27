@@ -18,14 +18,15 @@ public class Vote {
     public static final boolean VALUE_APPROVE = true;
     public static final boolean VALUE_REJECT = false;
 
-    private VoteType type;
-    private boolean value;
+    private final VoteType type;
+    private final boolean value;
 
-    private long height;
-    private int view;
-    private byte[] blockHash;
+    private final long height;
+    private final int view;
+    private final byte[] blockHash;
 
-    private byte[] encoded;
+    private final byte[] encoded;
+
     private Signature signature;
     private Optional<Boolean> validated;
 

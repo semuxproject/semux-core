@@ -20,11 +20,11 @@ import org.semux.util.SimpleEncoder;
 
 public class Proposal {
 
-    private Proof proof;
-    private BlockHeader blockHeader;
-    private List<Transaction> transactions;
+    private final Proof proof;
+    private final BlockHeader blockHeader;
+    private final List<Transaction> transactions;
 
-    private byte[] encoded;
+    private final byte[] encoded;
     private Signature signature;
 
     public Proposal(Proof proof, BlockHeader blockHeader, List<Transaction> transactions) {

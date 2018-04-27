@@ -21,9 +21,9 @@ import org.semux.crypto.Hex;
  */
 public class ApiClient {
 
-    private InetSocketAddress server;
-    private String username;
-    private String password;
+    private final InetSocketAddress server;
+    private final String username;
+    private final String password;
 
     /**
      * Crate an API client instance.

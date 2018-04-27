@@ -46,13 +46,13 @@ public abstract class Launcher {
      * ${@link Runtime#addShutdownHook(Thread)} starts shutdown hooks concurrently
      * in unspecified order.
      */
-    private static List<Pair<String, Runnable>> shutdownHooks = Collections.synchronizedList(new ArrayList<>());
+    private static final List<Pair<String, Runnable>> shutdownHooks = Collections.synchronizedList(new ArrayList<>());
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(Launcher::shutdownHook, "shutdown-hook"));
     }
 
-    private Options options = new Options();
+    private final Options options = new Options();
 
     private String dataDir = Constants.DEFAULT_DATA_DIR;
     private Network network = MAINNET;

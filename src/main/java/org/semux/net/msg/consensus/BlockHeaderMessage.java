@@ -14,7 +14,7 @@ import org.semux.util.SimpleEncoder;
 
 public class BlockHeaderMessage extends Message {
 
-    private BlockHeader header;
+    private final BlockHeader header;
 
     public BlockHeaderMessage(BlockHeader header) {
         super(MessageCode.GET_BLOCK_HEADER, null);

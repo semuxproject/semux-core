@@ -12,7 +12,7 @@ import org.semux.net.msg.MessageCode;
 
 public class VoteMessage extends Message {
 
-    private Vote vote;
+    private final Vote vote;
 
     public VoteMessage(Vote vote) {
         super(MessageCode.BFT_VOTE, null);

@@ -12,7 +12,7 @@ import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
 public class GetBlockHeaderMessage extends Message {
-    private long number;
+    private final long number;
 
     public GetBlockHeaderMessage(long number) {
         super(MessageCode.GET_BLOCK_HEADER, BlockMessage.class);

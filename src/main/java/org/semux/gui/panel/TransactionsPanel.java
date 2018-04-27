@@ -55,8 +55,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     private transient final SemuxGui gui;
     private transient final WalletModel model;
 
-    private JTable table;
-    private TransactionsTableModel tableModel;
+    private final JTable table;
+    private final TransactionsTableModel tableModel;
 
     public TransactionsPanel(SemuxGui gui, JFrame frame) {
         this.gui = gui;
@@ -240,8 +240,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     }
 
     private static class StatusTransaction {
-        private String status;
-        private Transaction transaction;
+        private final String status;
+        private final Transaction transaction;
 
         public StatusTransaction(Transaction transaction, String status) {
 

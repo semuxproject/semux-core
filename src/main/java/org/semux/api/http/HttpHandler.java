@@ -74,8 +74,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     protected static final int MAX_BODY_SIZE = 512 * 1024; // 512KB
     private static final Charset CHARSET = CharsetUtil.UTF_8;
-    private static ObjectMapper objectMapper = new ObjectMapper();
-    private static MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap(
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap(
             HttpHandler.class.getResourceAsStream("/org/semux/api/mime.types"));
 
     private static final String JSON_CONTENT_TYPE = "application/json; charset=UTF-8";
@@ -85,7 +85,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private static final Pattern STATIC_FILE_PATTERN = Pattern.compile("^.+\\.(html|json|js|css|png)$");
 
-    private Config config;
+    private final Config config;
     private final Map<Version, ApiHandler> apiHandlers;
 
     private Boolean isKeepAlive = false;

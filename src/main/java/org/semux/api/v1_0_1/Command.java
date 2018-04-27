@@ -167,7 +167,8 @@ public enum Command {
      */
     UNVOTE;
 
-    private static Map<String, Command> map = new HashMap<>();
+    private static final Map<String, Command> map = new HashMap<>();
+
     static {
         for (Command cmd : Command.values()) {
             map.put(cmd.name().toLowerCase(), cmd);

@@ -14,7 +14,7 @@ import org.semux.util.SimpleEncoder;
 
 public class BlockMessage extends Message {
 
-    private Block block;
+    private final Block block;
 
     public BlockMessage(Block block) {
         super(MessageCode.BLOCK, null);

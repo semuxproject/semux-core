@@ -29,14 +29,14 @@ import org.semux.util.ByteArray;
  */
 public class VoteSet {
 
-    private Map<ByteArray, Map<String, Vote>> approvals;
-    private Map<String, Vote> rejections;
-    private VoteType type;
-    private long height;
-    private int view;
+    private final Map<ByteArray, Map<String, Vote>> approvals;
+    private final Map<String, Vote> rejections;
+    private final VoteType type;
+    private final long height;
+    private final int view;
 
-    private Set<String> validators;
-    private int twoThirds;
+    private final Set<String> validators;
+    private final int twoThirds;
 
     /**
      * Create a vote set.
