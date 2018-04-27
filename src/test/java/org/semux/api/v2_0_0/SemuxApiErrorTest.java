@@ -152,10 +152,6 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
                         uriBuilder("transfer").queryParam("from", ADDRESS_PLACEHOLDER).queryParam("to", randomHex())
                                 .queryParam("value", "_").build() },
 
-                { POST.class,
-                        uriBuilder("transfer").queryParam("from", ADDRESS_PLACEHOLDER).queryParam("to", randomHex())
-                                .queryParam("value", "10").build() },
-
                 // non-number
                 { POST.class,
                         uriBuilder("transfer").queryParam("from", ADDRESS_PLACEHOLDER).queryParam("to", randomHex())

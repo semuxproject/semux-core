@@ -449,7 +449,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String from = wallet.getAccount(0).toAddressString();
         String fee = String.valueOf(config.minTransactionFee().getNano());
         String data = Hex.encode(Bytes.of("test_delegate"));
-        DoTransactionResponse response = api.registerDelegate(from, fee, data);
+        DoTransactionResponse response = api.registerDelegate(from, data, fee);
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
@@ -505,7 +505,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String value = "1000000000";
         String from = wallet.getAccount(0).toAddressString();
         String to = key.toAddressString();
-        String fee = String.valueOf(config.minTransactionFee().getNano());
+        String fee = "5432100";
         String data = Hex.encode(Bytes.of("test_transfer"));
 
         DoTransactionResponse response = api.transfer(from, to, value, fee, data);
@@ -517,8 +517,34 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
         List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), Hex.decode0x(response.getResult()));
-        assertEquals(TRANSFER, list.get(list.size() - 1).transaction.getType());
+        Transaction tx = list.get(list.size() - 1).transaction;
+        assertArrayEquals(tx.getHash(), Hex.decode0x(response.getResult()));
+        assertEquals(TRANSFER, tx.getType());
+        assertEquals(Amount.Unit.NANO_SEM.of(Long.parseLong(fee)), tx.getFee());
+        assertEquals(data, Hex.encode(tx.getData()));
+    }
+
+    @Test
+    public void transferDefaultFeeTest() throws InterruptedException {
+        Key key = new Key();
+        String value = "1000000000";
+        String from = wallet.getAccount(0).toAddressString();
+        String to = key.toAddressString();
+        String data = Hex.encode(Bytes.of("test_transfer"));
+
+        DoTransactionResponse response = api.transfer(from, to, value, null, null);
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+        assertNotNull(response.getResult());
+
+        Thread.sleep(200);
+
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
+        assertFalse(list.isEmpty());
+        Transaction tx = list.get(list.size() - 1).transaction;
+        assertArrayEquals(tx.getHash(), Hex.decode0x(response.getResult()));
+        assertEquals(TRANSFER, tx.getType());
+        assertEquals(config.minTransactionFee(), tx.getFee());
     }
 
     @Test

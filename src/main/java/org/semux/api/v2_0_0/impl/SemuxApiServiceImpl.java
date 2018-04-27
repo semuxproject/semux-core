@@ -498,7 +498,7 @@ public final class SemuxApiServiceImpl implements SemuxApi {
     }
 
     @Override
-    public Response registerDelegate(String from, String fee, String delegateName) {
+    public Response registerDelegate(String from, String delegateName, String fee) {
         return doTransaction(TransactionType.DELEGATE, from, null, null, fee, delegateName);
     }
 
