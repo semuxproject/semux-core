@@ -867,7 +867,7 @@
                         "name" : "fee",
                         "in" : "query",
                         "description" : "Transaction fee",
-                        "required" : true,
+                        "required" : false,
                         "type" : "string",
                         "format" : "int64",
                         "pattern" : "^\\d+$"
@@ -876,7 +876,7 @@
                         "name" : "data",
                         "in" : "query",
                         "description" : "Transaction data",
-                        "required" : true,
+                        "required" : false,
                         "type" : "string",
                         "pattern" : "^(0x)?[0-9a-fA-F]+$"
                     }
@@ -935,7 +935,7 @@
                         "name" : "fee",
                         "in" : "query",
                         "description" : "Transaction fee",
-                        "required" : true,
+                        "required" : false,
                         "type" : "string",
                         "format" : "int64",
                         "pattern" : "^\\d+$"
@@ -995,7 +995,7 @@
                         "name" : "fee",
                         "in" : "query",
                         "description" : "Transaction fee",
-                        "required" : true,
+                        "required" : false,
                         "type" : "string",
                         "format" : "int64",
                         "pattern" : "^\\d+$"
@@ -1039,7 +1039,7 @@
                         "name" : "fee",
                         "in" : "query",
                         "description" : "Transaction fee",
-                        "required" : true,
+                        "required" : false,
                         "type" : "string",
                         "format" : "int64",
                         "pattern" : "^\\d+$"

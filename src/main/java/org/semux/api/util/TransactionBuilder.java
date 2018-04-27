@@ -168,8 +168,9 @@ public class TransactionBuilder {
     }
 
     public TransactionBuilder withFee(String fee) {
-        if (fee == null) {
-            throw new IllegalArgumentException("Parameter `fee` is required");
+        if (fee == null || fee.isEmpty()) {
+            this.fee = kernel.getConfig().minTransactionFee();
+            return this;
         }
 
         try {
