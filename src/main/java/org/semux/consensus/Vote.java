@@ -27,7 +27,7 @@ public class Vote {
 
     private byte[] encoded;
     private Signature signature;
-    private Optional<Boolean> validated;
+    private Boolean validated;
 
     public Vote(VoteType type, boolean value, long height, int view, byte[] blockHash) {
         this.type = type;
@@ -35,7 +35,7 @@ public class Vote {
         this.height = height;
         this.view = view;
         this.blockHash = blockHash;
-        this.validated = Optional.empty();
+        this.validated = null;
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeByte(type.toByte());
@@ -55,7 +55,7 @@ public class Vote {
         this.height = dec.readLong();
         this.view = dec.readInt();
         this.blockHash = dec.readBytes();
-        this.validated = Optional.empty();
+        this.validated = null;
 
         this.signature = Signature.fromBytes(signature);
     }
@@ -76,7 +76,7 @@ public class Vote {
      */
     public Vote sign(Key key) {
         this.signature = key.sign(encoded);
-        this.validated = Optional.empty();
+        this.validated = null;
         return this;
     }
 
@@ -87,12 +87,12 @@ public class Vote {
      * @return
      */
     public boolean revalidate() {
-        return (validated = Optional.of(type != null
+        return (validated = (type != null
                 && height > 0
                 && view >= 0
                 && blockHash != null && blockHash.length == 32
                 && encoded != null
-                && signature != null && Key.verify(encoded, signature))).get();
+                && signature != null && Key.verify(encoded, signature)));
     }
 
     /**
@@ -102,7 +102,7 @@ public class Vote {
      * @return
      */
     public boolean validate() {
-        return validated.orElseGet(this::revalidate);
+        return validated == null ? revalidate() : validated;
     }
 
     public VoteType getType() {
