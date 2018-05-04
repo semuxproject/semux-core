@@ -1093,7 +1093,7 @@
                     "200" : {
                         "description" : "successful operation",
                         "schema" : {
-                            "$ref" : "#/definitions/SendTransactionResponse"
+                            "$ref" : "#/definitions/DoTransactionResponse"
                         }
                     }
                 },
@@ -1802,17 +1802,6 @@
                     }
                 }
             }
-        },
-        "SendTransactionResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                }
-            ]
         },
         "SignMessageResponse" : {
             "type" : "object",

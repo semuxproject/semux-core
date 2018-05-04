@@ -87,7 +87,6 @@ import org.semux.api.v2_0_0.model.GetVoteResponse;
 import org.semux.api.v2_0_0.model.GetVotesResponse;
 import org.semux.api.v2_0_0.model.ListAccountsResponse;
 import org.semux.api.v2_0_0.model.PeerType;
-import org.semux.api.v2_0_0.model.SendTransactionResponse;
 import org.semux.api.v2_0_0.model.SignMessageResponse;
 import org.semux.api.v2_0_0.model.SignRawTransactionResponse;
 import org.semux.api.v2_0_0.model.TransactionType;
@@ -463,16 +462,21 @@ public class SemuxApiTest extends SemuxApiTestBase {
     }
 
     @Test
-    public void sendTransactionTest() throws InterruptedException {
-        Transaction tx = createTransaction(config);
+    public void broadcastRawTransactionTest() throws InterruptedException {
+        Key from = new Key();
+        Key to = new Key();
+        Amount value = Amount.ZERO;
+        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from.toAddress(),
+                config.minTransactionFee());
+        Transaction tx = createTransaction(config, from, to, value);
 
-        SendTransactionResponse response = api.broadcastRawTransaction(Hex.encode(tx.toBytes()));
+        DoTransactionResponse response = api.broadcastRawTransaction(Hex.encode(tx.toBytes()));
         assertTrue(response.isSuccess());
 
         Thread.sleep(200);
-        List<Transaction> list = pendingMgr.getQueue();
-        assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), tx.getHash());
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
+        assertThat(list).hasSize(1);
+        assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), tx.getHash());
     }
 
     @Test
