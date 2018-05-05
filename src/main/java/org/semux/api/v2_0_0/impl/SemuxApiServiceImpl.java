@@ -511,6 +511,13 @@ public final class SemuxApiServiceImpl implements SemuxApi {
 
         try {
             Transaction tx = Transaction.fromBytes(Hex.decode0x(raw));
+
+            // tx nonce is validated in advance to avoid silently pushing the tx into
+            // delayed queue of pending manager
+            if (tx.getNonce() != kernel.getPendingManager().getNonce(tx.getFrom())) {
+                return failure(resp, "Invalid transaction nonce.");
+            }
+
             PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {
                 return failure(resp, "Transaction rejected by pending manager: " + result.error.toString());
@@ -520,6 +527,8 @@ public final class SemuxApiServiceImpl implements SemuxApi {
             return Response.ok().entity(resp).build();
         } catch (CryptoException e) {
             return failure(resp, "Parameter `raw` is not a valid hexadecimal string");
+        } catch (IndexOutOfBoundsException e) {
+            return failure(resp, "Parameter `raw` is not a valid hexadecimal raw transaction");
         }
     }
 

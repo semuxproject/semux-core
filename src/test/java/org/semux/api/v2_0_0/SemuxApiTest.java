@@ -61,6 +61,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.BadRequestException;
+
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.Test;
 import org.semux.TestUtils;
 import org.semux.api.v2_0_0.model.AddNodeResponse;
@@ -477,6 +480,23 @@ public class SemuxApiTest extends SemuxApiTestBase {
         List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
         assertThat(list).hasSize(1);
         assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), tx.getHash());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void broadcastRawTransactionInvalidNonceTest() {
+        Key from = new Key();
+        Key to = new Key();
+        Amount value = Amount.ZERO;
+
+        // mock state
+        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from.toAddress(),
+                config.minTransactionFee());
+        PendingManager pendingManager = spy(pendingMgr);
+        when(pendingManager.getNonce(from.toAddress())).thenReturn(100L);
+        kernelRule.getKernel().setPendingManager(pendingManager);
+
+        Transaction tx = createTransaction(config, from, to, value);
+        api.broadcastRawTransaction(Hex.encode(tx.toBytes()));
     }
 
     @Test
