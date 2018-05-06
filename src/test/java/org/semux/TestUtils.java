@@ -51,7 +51,7 @@ public class TestUtils {
     public static Transaction createTransaction(Config config, Key from, Key to, Amount value) {
         Network network = config.network();
         TransactionType type = TransactionType.TRANSFER;
-        Amount fee = Amount.ZERO;
+        Amount fee = config.minTransactionFee();
         long nonce = 0;
         long timestamp = System.currentTimeMillis();
         byte[] data = {};

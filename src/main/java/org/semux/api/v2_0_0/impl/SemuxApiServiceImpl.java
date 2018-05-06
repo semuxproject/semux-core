@@ -31,6 +31,7 @@ import org.semux.api.v2_0_0.model.ApiHandlerResponse;
 import org.semux.api.v2_0_0.model.ComposeRawTransactionResponse;
 import org.semux.api.v2_0_0.model.CreateAccountResponse;
 import org.semux.api.v2_0_0.model.DoTransactionResponse;
+import org.semux.api.v2_0_0.model.GetAccountPendingTransactionsResponse;
 import org.semux.api.v2_0_0.model.GetAccountResponse;
 import org.semux.api.v2_0_0.model.GetAccountTransactionsResponse;
 import org.semux.api.v2_0_0.model.GetBlockResponse;
@@ -194,7 +195,12 @@ public final class SemuxApiServiceImpl implements SemuxApi {
 
         Account account = kernel.getBlockchain().getAccountState().getAccount(addressBytes);
         int transactionCount = kernel.getBlockchain().getTransactionCount(account.getAddress());
-        resp.setResult(TypeFactory.accountType(account, transactionCount));
+        int pendingTransactionCount = (int) kernel.getPendingManager()
+                .getPendingTransactions().stream()
+                .filter(pendingTransaction -> Arrays.equals(pendingTransaction.transaction.getFrom(), addressBytes) ||
+                        Arrays.equals(pendingTransaction.transaction.getTo(), addressBytes))
+                .count();
+        resp.setResult(TypeFactory.accountType(account, transactionCount, pendingTransactionCount));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -240,6 +246,58 @@ public final class SemuxApiServiceImpl implements SemuxApi {
                 .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
+    }
+
+    @Override
+    public Response getAccountPendingTransactions(String address, String from, String to) {
+        GetAccountPendingTransactionsResponse resp = new GetAccountPendingTransactionsResponse();
+        byte[] addressBytes;
+        int fromInt;
+        int toInt;
+
+        if (!isSet(address)) {
+            return failure(resp, "Parameter `address` is required");
+        }
+        if (!isSet(from)) {
+            return failure(resp, "Parameter `from` is required");
+        }
+        if (!isSet(to)) {
+            return failure(resp, "Parameter `to` is required");
+        }
+
+        try {
+            addressBytes = Hex.decode0x(address);
+        } catch (CryptoException ex) {
+            return failure(resp, "Parameter `address` is not a valid hexadecimal string");
+        }
+
+        try {
+            fromInt = Integer.parseInt(from);
+        } catch (NumberFormatException ex) {
+            return failure(resp, "Parameter `from` is not a valid integer");
+        }
+
+        try {
+            toInt = Integer.parseInt(to);
+        } catch (NumberFormatException ex) {
+            return failure(resp, "Parameter `to` is not a valid integer");
+        }
+
+        if (toInt <= fromInt) {
+            return failure(resp, "Parameter `to` must be greater than `from`");
+        }
+
+        resp.setResult(kernel.getPendingManager()
+                .getPendingTransactions()
+                .parallelStream()
+                .filter(pendingTransaction -> Arrays.equals(pendingTransaction.transaction.getFrom(), addressBytes) ||
+                        Arrays.equals(pendingTransaction.transaction.getTo(), addressBytes))
+                .skip(fromInt)
+                .limit(toInt - fromInt)
+                .map(pendingTransaction -> TypeFactory.pendingTransactionType(pendingTransaction.transaction))
+                .collect(Collectors.toList()));
+        resp.setSuccess(true);
+        return Response.ok(resp).build();
     }
 
     @Override
