@@ -196,9 +196,9 @@ public final class SemuxApiServiceImpl implements SemuxApi {
         Account account = kernel.getBlockchain().getAccountState().getAccount(addressBytes);
         int transactionCount = kernel.getBlockchain().getTransactionCount(account.getAddress());
         int pendingTransactionCount = (int) kernel.getPendingManager()
-                .getPendingTransactions().stream()
-                .filter(pendingTransaction -> Arrays.equals(pendingTransaction.transaction.getFrom(), addressBytes) ||
-                        Arrays.equals(pendingTransaction.transaction.getTo(), addressBytes))
+                .getPendingTransactions().parallelStream()
+                .map(pendingTransaction -> pendingTransaction.transaction)
+                .filter(tx -> Arrays.equals(tx.getFrom(), addressBytes) || Arrays.equals(tx.getTo(), addressBytes))
                 .count();
         resp.setResult(TypeFactory.accountType(account, transactionCount, pendingTransactionCount));
         resp.setSuccess(true);
@@ -288,13 +288,12 @@ public final class SemuxApiServiceImpl implements SemuxApi {
         }
 
         resp.setResult(kernel.getPendingManager()
-                .getPendingTransactions()
-                .parallelStream()
-                .filter(pendingTransaction -> Arrays.equals(pendingTransaction.transaction.getFrom(), addressBytes) ||
-                        Arrays.equals(pendingTransaction.transaction.getTo(), addressBytes))
+                .getPendingTransactions().parallelStream()
+                .map(pendingTransaction -> pendingTransaction.transaction)
+                .filter(tx -> Arrays.equals(tx.getFrom(), addressBytes) || Arrays.equals(tx.getTo(), addressBytes))
                 .skip(fromInt)
                 .limit(toInt - fromInt)
-                .map(pendingTransaction -> TypeFactory.transactionType(null, pendingTransaction.transaction))
+                .map(tx -> TypeFactory.transactionType(null, tx))
                 .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok(resp).build();
