@@ -1536,7 +1536,7 @@
                         "result" : {
                             "type" : "array",
                             "items" : {
-                                "$ref" : "#/definitions/PendingTransactionType"
+                                "$ref" : "#/definitions/TransactionType"
                             }
                         }
                     }
@@ -1940,51 +1940,6 @@
                     "format" : "int64",
                     "pattern" : "^\\d+$"
                 },
-                "hash" : {
-                    "type" : "string",
-                    "pattern" : "^0x[0-9a-fA-F]{64}$"
-                },
-                "type" : {
-                    "type" : "string",
-                    "enum" : ["COINBASE", "TRANSFER", "DELEGATE", "VOTE", "UNVOTE", "CREATE", "CALL"]
-                },
-                "from" : {
-                    "type" : "string",
-                    "pattern" : "^0x[0-9a-fA-F]{40}$"
-                },
-                "to" : {
-                    "type" : "string",
-                    "pattern" : "^0x[0-9a-fA-F]{40}$"
-                },
-                "value" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "fee" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "nonce" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "timestamp" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "data" : {
-                    "type" : "string",
-                    "pattern" : "^0x[0-9a-fA-F]+$"
-                }
-            }
-        },
-        "PendingTransactionType" : {
-            "type" : "object",
-            "properties" : {
                 "hash" : {
                     "type" : "string",
                     "pattern" : "^0x[0-9a-fA-F]{64}$"

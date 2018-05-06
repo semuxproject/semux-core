@@ -294,7 +294,7 @@ public final class SemuxApiServiceImpl implements SemuxApi {
                         Arrays.equals(pendingTransaction.transaction.getTo(), addressBytes))
                 .skip(fromInt)
                 .limit(toInt - fromInt)
-                .map(pendingTransaction -> TypeFactory.pendingTransactionType(pendingTransaction.transaction))
+                .map(pendingTransaction -> TypeFactory.transactionType(null, pendingTransaction.transaction))
                 .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok(resp).build();
