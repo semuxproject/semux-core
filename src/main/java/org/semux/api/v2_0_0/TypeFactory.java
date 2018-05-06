@@ -75,6 +75,8 @@ public class TypeFactory {
 
     public static InfoType infoType(Kernel kernel) {
         return new InfoType()
+                .network(InfoType.NetworkEnum.fromValue(kernel.getConfig().network().name()))
+                .capabilities(kernel.getConfig().capabilitySet().toList())
                 .clientId(kernel.getConfig().getClientId())
                 .coinbase(Hex.encode0x(kernel.getCoinbase().toAddress()))
                 .latestBlockNumber(String.valueOf(kernel.getBlockchain().getLatestBlockNumber()))
