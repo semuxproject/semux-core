@@ -368,8 +368,8 @@
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get account transactions",
-                "description" : "Returns transactions from/to an account.",
+                "summary" : "Get account votes",
+                "description" : "Returns votes from the account.",
                 "operationId" : "getAccountVotes",
                 "produces" : [
                     "application/json"
@@ -1476,32 +1476,39 @@
             "type" : "object",
             "properties" : {
                 "address" : {
+                    "description": "Delegate SEM address",
                     "type" : "string"
                 },
                 "name" : {
+                    "description": "Delegate name",
                     "type" : "string"
                 },
                 "registeredAt" : {
+                    "description": "Delegate registration block number",
                     "type" : "string",
                     "format" : "int64",
                     "pattern" : "^\\d+$"
                 },
                 "votes" : {
+                    "description": "Total votes of the delegate",
                     "type" : "string",
                     "format" : "int64",
                     "pattern" : "^\\d+$"
                 },
                 "blocksForged" : {
+                    "description": "Total forged blocks including primary rounds & backup rounds",
                     "type" : "string",
                     "format" : "int64",
                     "pattern" : "^\\d+$"
                 },
                 "turnsHit" : {
+                    "description": "Forged blocks when the delegate is a primary validator",
                     "type" : "string",
                     "format" : "int64",
                     "pattern" : "^\\d+$"
                 },
                 "turnsMissed" : {
+                    "description": "Missed blocks when the delegate is a primary validator",
                     "type" : "string",
                     "format" : "int64",
                     "pattern" : "^\\d+$"
@@ -1603,6 +1610,7 @@
                     "$ref" : "#/definitions/DelegateType"
                 },
                 "votes" : {
+                    "description": "Votes from the account",
                     "type" : "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
