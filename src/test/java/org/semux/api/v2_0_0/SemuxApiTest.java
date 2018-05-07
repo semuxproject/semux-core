@@ -246,7 +246,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         DelegateState delegateState = chain.getDelegateState();
         List<Delegate> delegates = delegateState.getDelegates();
         Key voter = new Key();
-        for (int i = 0;i < delegates.size();i++) {
+        for (int i = 0; i < delegates.size(); i++) {
             delegateState.vote(voter.toAddress(), delegates.get(i).getAddress(), Amount.Unit.NANO_SEM.of(i + 1));
         }
 

@@ -29,7 +29,6 @@ import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
-import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.net.Peer;
 import org.semux.util.TimeUtil;
@@ -82,16 +81,22 @@ public class TypeFactory {
     }
 
     public static List<AccountVoteType> accountVotes(Blockchain blockchain, byte[] address) {
-        DelegateState delegateState = blockchain.getDelegateState();
         Set<String> validators = new HashSet<>(blockchain.getValidators());
-        return delegateState
+        return blockchain.getDelegateState()
                 .getDelegates()
                 .parallelStream()
-                .map(delegate -> new AccountVoteType()
-                        .delegate(TypeFactory.delegateType(blockchain.getValidatorStats(delegate.getAddress()), delegate, validators.contains(delegate.getAddressString())))
-                        .votes(String.valueOf(delegateState.getVote(address, delegate.getAddress()).getNano())))
+                .map(delegate -> accountVoteType(blockchain, address, delegate, validators.contains(delegate.getAddressString())))
                 .filter(accountVote -> !accountVote.getVotes().equals("0"))
                 .collect(Collectors.toList());
+    }
+
+    public static AccountVoteType accountVoteType(Blockchain blockchain, byte[] address, Delegate delegate, Boolean isValidator) {
+        return new AccountVoteType()
+                .delegate(
+                        TypeFactory.delegateType(blockchain.getValidatorStats(delegate.getAddress()), delegate, isValidator))
+                .votes(
+                        String.valueOf(
+                                blockchain.getDelegateState().getVote(address, delegate.getAddress()).getNano()));
     }
 
     public static InfoType infoType(Kernel kernel) {
