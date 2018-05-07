@@ -90,6 +90,7 @@ public class TypeFactory {
                 .map(delegate -> new AccountVoteType()
                         .delegate(TypeFactory.delegateType(blockchain.getValidatorStats(delegate.getAddress()), delegate, validators.contains(delegate.getAddressString())))
                         .votes(String.valueOf(delegateState.getVote(address, delegate.getAddress()).getNano())))
+                .filter(accountVote -> !accountVote.getVotes().equals("0"))
                 .collect(Collectors.toList());
     }
 
