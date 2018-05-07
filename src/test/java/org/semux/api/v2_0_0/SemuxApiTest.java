@@ -76,6 +76,7 @@ import org.semux.api.v2_0_0.model.DoTransactionResponse;
 import org.semux.api.v2_0_0.model.GetAccountPendingTransactionsResponse;
 import org.semux.api.v2_0_0.model.GetAccountResponse;
 import org.semux.api.v2_0_0.model.GetAccountTransactionsResponse;
+import org.semux.api.v2_0_0.model.GetAccountVotesResponse;
 import org.semux.api.v2_0_0.model.GetBlockResponse;
 import org.semux.api.v2_0_0.model.GetDelegateResponse;
 import org.semux.api.v2_0_0.model.GetDelegatesResponse;
@@ -103,6 +104,7 @@ import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
+import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
@@ -237,6 +239,23 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
         response = api.getAccountPendingTransactions(Hex.encode0x(from.toAddress()), "2", "3");
         assertThat(response.getResult()).hasSize(0);
+    }
+
+    @Test
+    public void getAccountVotesTest() {
+        DelegateState delegateState = chain.getDelegateState();
+        List<Delegate> delegates = delegateState.getDelegates();
+        Key voter = new Key();
+        for (int i = 0;i < delegates.size();i++) {
+            delegateState.vote(voter.toAddress(), delegates.get(i).getAddress(), Amount.Unit.NANO_SEM.of(i + 1));
+        }
+
+        GetAccountVotesResponse resp = api.getAccountVotes(Hex.encode0x(voter.toAddress()));
+        assertTrue(resp.isSuccess());
+        assertThat(resp.getResult()).hasSize(delegates.size());
+        assertThat(resp.getResult().get(0))
+                .hasFieldOrPropertyWithValue("votes", "1")
+                .hasFieldOrPropertyWithValue("delegate.address", Hex.encode0x(delegates.get(0).getAddress()));
     }
 
     @Test

@@ -8,11 +8,14 @@ package org.semux.api.v2_0_0;
 
 import static org.semux.core.TransactionType.DELEGATE;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.semux.Kernel;
 import org.semux.api.v2_0_0.model.AccountType;
+import org.semux.api.v2_0_0.model.AccountVoteType;
 import org.semux.api.v2_0_0.model.BlockType;
 import org.semux.api.v2_0_0.model.DelegateType;
 import org.semux.api.v2_0_0.model.InfoType;
@@ -21,10 +24,12 @@ import org.semux.api.v2_0_0.model.TransactionLimitsType;
 import org.semux.api.v2_0_0.model.TransactionType;
 import org.semux.core.Amount;
 import org.semux.core.Block;
+import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
+import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.net.Peer;
 import org.semux.util.TimeUtil;
@@ -74,6 +79,18 @@ public class TypeFactory {
                 .turnsHit(String.valueOf(validatorStats.getTurnsHit()))
                 .turnsMissed(String.valueOf(validatorStats.getTurnsMissed()))
                 .validator(isValidator);
+    }
+
+    public static List<AccountVoteType> accountVotes(Blockchain blockchain, byte[] address) {
+        DelegateState delegateState = blockchain.getDelegateState();
+        Set<String> validators = new HashSet<>(blockchain.getValidators());
+        return delegateState
+                .getDelegates()
+                .parallelStream()
+                .map(delegate -> new AccountVoteType()
+                        .delegate(TypeFactory.delegateType(blockchain.getValidatorStats(delegate.getAddress()), delegate, validators.contains(delegate.getAddressString())))
+                        .votes(String.valueOf(delegateState.getVote(address, delegate.getAddress()).getNano())))
+                .collect(Collectors.toList());
     }
 
     public static InfoType infoType(Kernel kernel) {
