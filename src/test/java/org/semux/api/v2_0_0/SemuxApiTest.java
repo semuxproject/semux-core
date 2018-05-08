@@ -88,6 +88,7 @@ import org.semux.api.v2_0_0.model.GetTransactionResponse;
 import org.semux.api.v2_0_0.model.GetValidatorsResponse;
 import org.semux.api.v2_0_0.model.GetVoteResponse;
 import org.semux.api.v2_0_0.model.GetVotesResponse;
+import org.semux.api.v2_0_0.model.InfoType;
 import org.semux.api.v2_0_0.model.ListAccountsResponse;
 import org.semux.api.v2_0_0.model.PeerType;
 import org.semux.api.v2_0_0.model.SignMessageResponse;
@@ -248,6 +249,8 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
+        assertEquals(InfoType.NetworkEnum.DEVNET.name(), response.getResult().getNetwork());
+        assertEquals(config.capabilitySet().toList(), response.getResult().getCapabilities());
         assertEquals("0", response.getResult().getLatestBlockNumber());
         assertEquals(Hex.encode0x(chain.getLatestBlock().getHash()), response.getResult().getLatestBlockHash());
         assertEquals(Integer.valueOf(0), response.getResult().getActivePeers());

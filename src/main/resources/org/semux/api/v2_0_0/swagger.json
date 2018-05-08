@@ -1720,6 +1720,16 @@
         "InfoType" : {
             "type" : "object",
             "properties" : {
+                "network" : {
+                    "type" : "string",
+                    "enum" : ["MAINNET", "TESTNET", "DEVNET"]
+                },
+                "capabilities" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string"
+                    }
+                },
                 "clientId" : {
                     "type" : "string"
                 },
