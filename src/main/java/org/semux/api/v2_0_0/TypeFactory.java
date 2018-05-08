@@ -85,15 +85,18 @@ public class TypeFactory {
         return blockchain.getDelegateState()
                 .getDelegates()
                 .parallelStream()
-                .map(delegate -> accountVoteType(blockchain, address, delegate, validators.contains(delegate.getAddressString())))
+                .map(delegate -> accountVoteType(blockchain, address, delegate,
+                        validators.contains(delegate.getAddressString())))
                 .filter(accountVote -> !accountVote.getVotes().equals("0"))
                 .collect(Collectors.toList());
     }
 
-    public static AccountVoteType accountVoteType(Blockchain blockchain, byte[] address, Delegate delegate, Boolean isValidator) {
+    public static AccountVoteType accountVoteType(Blockchain blockchain, byte[] address, Delegate delegate,
+            Boolean isValidator) {
         return new AccountVoteType()
                 .delegate(
-                        TypeFactory.delegateType(blockchain.getValidatorStats(delegate.getAddress()), delegate, isValidator))
+                        TypeFactory.delegateType(blockchain.getValidatorStats(delegate.getAddress()), delegate,
+                                isValidator))
                 .votes(
                         String.valueOf(
                                 blockchain.getDelegateState().getVote(address, delegate.getAddress()).getNano()));
