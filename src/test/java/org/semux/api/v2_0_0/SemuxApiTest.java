@@ -72,6 +72,7 @@ import org.semux.api.v2_0_0.model.ComposeRawTransactionResponse;
 import org.semux.api.v2_0_0.model.CreateAccountResponse;
 import org.semux.api.v2_0_0.model.DelegateType;
 import org.semux.api.v2_0_0.model.DoTransactionResponse;
+import org.semux.api.v2_0_0.model.GetAccountPendingTransactionsResponse;
 import org.semux.api.v2_0_0.model.GetAccountResponse;
 import org.semux.api.v2_0_0.model.GetAccountTransactionsResponse;
 import org.semux.api.v2_0_0.model.GetBlockResponse;
@@ -202,6 +203,39 @@ public class SemuxApiTest extends SemuxApiTestBase {
         for (TransactionType txType : response.getResult()) {
             assertEquals(block.getNumber(), Long.parseLong(txType.getBlockNumber()));
         }
+    }
+
+    @Test
+    public void getAccountPendingTransactionsTest() {
+        Key from = new Key();
+        Key to = new Key();
+        Transaction tx0 = createTransaction(config);
+        Transaction tx1 = createTransaction(config, from, to, Amount.ZERO);
+        Transaction tx2 = createTransaction(config, to, from, Amount.ZERO);
+        chain.getAccountState().adjustAvailable(tx0.getFrom(), config.minTransactionFee());
+        chain.getAccountState().adjustAvailable(from.toAddress(), config.minTransactionFee());
+        chain.getAccountState().adjustAvailable(to.toAddress(), config.minTransactionFee());
+        assert (pendingMgr.addTransactionSync(tx0).accepted == 1);
+        assert (pendingMgr.addTransactionSync(tx1).accepted == 1);
+        assert (pendingMgr.addTransactionSync(tx2).accepted == 1);
+
+        GetAccountPendingTransactionsResponse response;
+
+        response = api.getAccountPendingTransactions(Hex.encode0x(from.toAddress()), "0", "1");
+        assertThat(response.getResult()).hasSize(1);
+        assertThat(response.getResult().get(0).getHash()).isEqualTo(Hex.encode0x(tx1.getHash()));
+
+        response = api.getAccountPendingTransactions(Hex.encode0x(from.toAddress()), "0", "2");
+        assertThat(response.getResult()).hasSize(2);
+        assertThat(response.getResult().get(0).getHash()).isEqualTo(Hex.encode0x(tx1.getHash()));
+        assertThat(response.getResult().get(1).getHash()).isEqualTo(Hex.encode0x(tx2.getHash()));
+
+        response = api.getAccountPendingTransactions(Hex.encode0x(from.toAddress()), "1", "2");
+        assertThat(response.getResult()).hasSize(1);
+        assertThat(response.getResult().get(0).getHash()).isEqualTo(Hex.encode0x(tx2.getHash()));
+
+        response = api.getAccountPendingTransactions(Hex.encode0x(from.toAddress()), "2", "3");
+        assertThat(response.getResult()).hasSize(0);
     }
 
     @Test

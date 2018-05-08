@@ -31,13 +31,14 @@ import org.semux.util.TimeUtil;
 
 public class TypeFactory {
 
-    public static AccountType accountType(Account account, int transactionCount) {
+    public static AccountType accountType(Account account, int transactionCount, int pendingTransactionCount) {
         return new AccountType()
                 .address(Hex.encode0x(account.getAddress()))
                 .available(encodeAmount(account.getAvailable()))
                 .locked(encodeAmount(account.getLocked()))
                 .nonce(String.valueOf(account.getNonce()))
-                .transactionCount(transactionCount);
+                .transactionCount(transactionCount)
+                .pendingTransactionCount(pendingTransactionCount);
     }
 
     public static BlockType blockType(Block block, Transaction coinbaseTransaction) {
@@ -108,9 +109,9 @@ public class TypeFactory {
 
     public static TransactionType transactionType(Long blockNumber, Transaction tx) {
         return new TransactionType()
-                .blockNumber(String.valueOf(blockNumber))
+                .blockNumber(blockNumber == null ? null : String.valueOf(blockNumber))
                 .hash(Hex.encode0x(tx.getHash()))
-                .type(tx.getType().toString())
+                .type(TransactionType.TypeEnum.fromValue(tx.getType().name()))
                 .from(Hex.encode0x(tx.getFrom()))
                 .to(Hex.encode0x(tx.getTo()))
                 .value(encodeAmount(tx.getValue()))
