@@ -56,6 +56,7 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -263,6 +264,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
             GetDelegateResponse response = api.getDelegate(Hex.encode0x(entry.getValue()));
             assertTrue(response.isSuccess());
             assertEquals(entry.getKey(), response.getResult().getName());
+            assertTrue("is validator", response.getResult().isValidator());
         }
     }
 
@@ -270,11 +272,16 @@ public class SemuxApiTest extends SemuxApiTestBase {
     public void getDelegatesTest() {
         Genesis gen = chain.getGenesis();
         GetDelegatesResponse response = api.getDelegates();
-        assertEquals(gen.getDelegates().size(), response.getResult().size());
-        assertThat(gen.getDelegates().entrySet().stream().map(e -> Hex.encode0x(e.getValue())).sorted()
-                .collect(Collectors.toList()))
-                        .isEqualTo(response.getResult().stream().map(DelegateType::getAddress).sorted()
-                                .collect(Collectors.toList()));
+
+        Collection<byte[]> delegates = gen.getDelegates().values();
+        List<DelegateType> result = response.getResult();
+
+        assertEquals(delegates.size(), result.size());
+        assertEquals(
+                delegates.stream().map(Hex::encode0x).sorted().collect(Collectors.toList()),
+                result.stream().map(DelegateType::getAddress).sorted().collect(Collectors.toList()));
+
+        assertTrue("is validator", result.get(0).isValidator());
     }
 
     @Test
