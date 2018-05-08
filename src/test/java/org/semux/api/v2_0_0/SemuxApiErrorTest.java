@@ -22,6 +22,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.After;
 import org.junit.Before;
@@ -113,6 +114,10 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
 
                 { POST.class,
                         uriBuilder("broadcastRawTransaction").queryParam("raw", "I_am_not_a_hexadecimal_string")
+                                .build() },
+
+                { POST.class,
+                        uriBuilder("broadcastRawTransaction").queryParam("raw", Hex.encode0x(RandomUtils.nextBytes(10)))
                                 .build() },
 
                 { GET.class, uriBuilder("getVote").build() },

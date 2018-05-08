@@ -48,7 +48,6 @@ import org.semux.api.v2_0_0.model.GetValidatorsResponse;
 import org.semux.api.v2_0_0.model.GetVoteResponse;
 import org.semux.api.v2_0_0.model.GetVotesResponse;
 import org.semux.api.v2_0_0.model.ListAccountsResponse;
-import org.semux.api.v2_0_0.model.SendTransactionResponse;
 import org.semux.api.v2_0_0.model.SignMessageResponse;
 import org.semux.api.v2_0_0.model.SignRawTransactionResponse;
 import org.semux.api.v2_0_0.model.VerifyMessageResponse;
@@ -504,18 +503,32 @@ public final class SemuxApiServiceImpl implements SemuxApi {
 
     @Override
     public Response broadcastRawTransaction(String raw) {
-        SendTransactionResponse resp = new SendTransactionResponse();
+        DoTransactionResponse resp = new DoTransactionResponse();
 
         if (!isSet(raw)) {
             return failure(resp, "Parameter `raw` is required");
         }
 
         try {
-            kernel.getPendingManager().addTransaction(Transaction.fromBytes(Hex.decode0x(raw)));
+            Transaction tx = Transaction.fromBytes(Hex.decode0x(raw));
+
+            // tx nonce is validated in advance to avoid silently pushing the tx into
+            // delayed queue of pending manager
+            if (tx.getNonce() != kernel.getPendingManager().getNonce(tx.getFrom())) {
+                return failure(resp, "Invalid transaction nonce.");
+            }
+
+            PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
+            if (result.error != null) {
+                return failure(resp, "Transaction rejected by pending manager: " + result.error.toString());
+            }
+            resp.setResult(Hex.encode0x(tx.getHash()));
             resp.setSuccess(true);
             return Response.ok().entity(resp).build();
         } catch (CryptoException e) {
             return failure(resp, "Parameter `raw` is not a valid hexadecimal string");
+        } catch (IndexOutOfBoundsException e) {
+            return failure(resp, "Parameter `raw` is not a valid hexadecimal raw transaction");
         }
     }
 

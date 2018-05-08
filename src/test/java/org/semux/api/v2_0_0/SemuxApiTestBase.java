@@ -26,6 +26,8 @@ import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.rules.KernelRule;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 public abstract class SemuxApiTestBase {
@@ -62,9 +64,11 @@ public abstract class SemuxApiTestBase {
         channelMgr = apiMock.getKernel().getChannelManager();
 
         api = JAXRSClientFactory.create(
-                "http://localhost:51710/" + Version.v2_0_0.prefix,
+                String.format("http://%s:%d/%s", config.apiListenIp(), config.apiListenPort(),
+                        Version.v2_0_0.prefix),
                 org.semux.api.v2_0_0.client.SemuxApi.class,
-                Collections.singletonList(new JacksonJsonProvider()),
+                Collections.singletonList(new JacksonJsonProvider(
+                        new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false))),
                 config.apiUsername(),
                 config.apiPassword(),
                 null);
