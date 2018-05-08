@@ -1,5 +1,9 @@
 # Full Node Setup
 
+## Ports
+
+Port 5161 is required to be open for running a full Semux node.
+
 ## Debian/Ubuntu Linux
 
 ### Using pre-compiled binaries
