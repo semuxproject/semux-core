@@ -1411,6 +1411,9 @@
                     "type" : "string",
                     "format" : "int64",
                     "pattern" : "^\\d+$"
+                },
+                "validator" : {
+                    "type" : "boolean"
                 }
             }
         },

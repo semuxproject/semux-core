@@ -14,6 +14,8 @@ import java.io.File;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -53,6 +55,7 @@ import org.semux.api.v2_0_0.model.SignMessageResponse;
 import org.semux.api.v2_0_0.model.SignRawTransactionResponse;
 import org.semux.api.v2_0_0.model.VerifyMessageResponse;
 import org.semux.core.Block;
+import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
@@ -304,15 +307,17 @@ public final class SemuxApiServiceImpl implements SemuxApi {
         } catch (CryptoException e) {
             return failure(resp, e.getMessage());
         }
+        Blockchain chain = kernel.getBlockchain();
 
-        Delegate delegate = kernel.getBlockchain().getDelegateState().getDelegateByAddress(addressBytes);
+        Delegate delegate = chain.getDelegateState().getDelegateByAddress(addressBytes);
         if (delegate == null) {
             return failure(resp, "The provided address is not a delegate");
         }
 
-        BlockchainImpl.ValidatorStats validatorStats = kernel.getBlockchain().getValidatorStats(addressBytes);
+        BlockchainImpl.ValidatorStats validatorStats = chain.getValidatorStats(addressBytes);
+        boolean isValidator = chain.getValidators().contains(address.replace("0x", ""));
 
-        resp.setResult(TypeFactory.delegateType(validatorStats, delegate));
+        resp.setResult(TypeFactory.delegateType(validatorStats, delegate, isValidator));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -320,9 +325,14 @@ public final class SemuxApiServiceImpl implements SemuxApi {
     @Override
     public Response getDelegates() {
         GetDelegatesResponse resp = new GetDelegatesResponse();
-        resp.setResult(kernel.getBlockchain().getDelegateState().getDelegates().parallelStream()
+        Blockchain chain = kernel.getBlockchain();
+        Set<String> validators = new HashSet<>(chain.getValidators());
+
+        resp.setResult(chain.getDelegateState().getDelegates().parallelStream()
                 .map(delegate -> TypeFactory.delegateType(
-                        kernel.getBlockchain().getValidatorStats(delegate.getAddress()), delegate))
+                        chain.getValidatorStats(delegate.getAddress()),
+                        delegate,
+                        validators.contains(delegate.getAddressString())))
                 .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();

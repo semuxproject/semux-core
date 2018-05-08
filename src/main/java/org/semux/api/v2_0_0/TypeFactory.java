@@ -62,7 +62,8 @@ public class TypeFactory {
                         .collect(Collectors.toList()));
     }
 
-    public static DelegateType delegateType(BlockchainImpl.ValidatorStats validatorStats, Delegate delegate) {
+    public static DelegateType delegateType(BlockchainImpl.ValidatorStats validatorStats, Delegate delegate,
+            boolean isValidator) {
         return new DelegateType()
                 .address(Hex.encode0x(delegate.getAddress()))
                 .name(delegate.getNameString())
@@ -70,7 +71,8 @@ public class TypeFactory {
                 .votes(encodeAmount(delegate.getVotes()))
                 .blocksForged(String.valueOf(validatorStats.getBlocksForged()))
                 .turnsHit(String.valueOf(validatorStats.getTurnsHit()))
-                .turnsMissed(String.valueOf(validatorStats.getTurnsMissed()));
+                .turnsMissed(String.valueOf(validatorStats.getTurnsMissed()))
+                .validator(isValidator);
     }
 
     public static InfoType infoType(Kernel kernel) {
