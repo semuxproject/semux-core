@@ -1,0 +1,13 @@
+[Unit]
+Description=Semux
+After=network.target
+
+[Service]
+User=username
+Group=groupname
+Type=simple
+ExecStart=/home/username/semux/semux-cli.sh --password "YOUR_WALLET_PASSWORD"
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
