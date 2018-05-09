@@ -36,6 +36,7 @@ import org.semux.api.v2_0_0.model.DoTransactionResponse;
 import org.semux.api.v2_0_0.model.GetAccountPendingTransactionsResponse;
 import org.semux.api.v2_0_0.model.GetAccountResponse;
 import org.semux.api.v2_0_0.model.GetAccountTransactionsResponse;
+import org.semux.api.v2_0_0.model.GetAccountVotesResponse;
 import org.semux.api.v2_0_0.model.GetBlockResponse;
 import org.semux.api.v2_0_0.model.GetDelegateResponse;
 import org.semux.api.v2_0_0.model.GetDelegatesResponse;
@@ -297,6 +298,26 @@ public final class SemuxApiServiceImpl implements SemuxApi {
                 .limit(toInt - fromInt)
                 .map(tx -> TypeFactory.transactionType(null, tx))
                 .collect(Collectors.toList()));
+        resp.setSuccess(true);
+        return Response.ok(resp).build();
+    }
+
+    @Override
+    public Response getAccountVotes(String address) {
+        GetAccountVotesResponse resp = new GetAccountVotesResponse();
+        byte[] addressBytes;
+
+        if (!isSet(address)) {
+            return failure(resp, "Parameter `address` is required");
+        }
+
+        try {
+            addressBytes = Hex.decode0x(address);
+        } catch (CryptoException ex) {
+            return failure(resp, "Parameter `address` is not a valid hexadecimal string");
+        }
+
+        resp.setResult(TypeFactory.accountVotes(kernel.getBlockchain(), addressBytes));
         resp.setSuccess(true);
         return Response.ok(resp).build();
     }

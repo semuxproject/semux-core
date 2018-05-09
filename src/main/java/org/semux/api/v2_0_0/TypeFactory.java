@@ -8,11 +8,14 @@ package org.semux.api.v2_0_0;
 
 import static org.semux.core.TransactionType.DELEGATE;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.semux.Kernel;
 import org.semux.api.v2_0_0.model.AccountType;
+import org.semux.api.v2_0_0.model.AccountVoteType;
 import org.semux.api.v2_0_0.model.BlockType;
 import org.semux.api.v2_0_0.model.DelegateType;
 import org.semux.api.v2_0_0.model.InfoType;
@@ -21,6 +24,7 @@ import org.semux.api.v2_0_0.model.TransactionLimitsType;
 import org.semux.api.v2_0_0.model.TransactionType;
 import org.semux.core.Amount;
 import org.semux.core.Block;
+import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.state.Account;
@@ -74,6 +78,28 @@ public class TypeFactory {
                 .turnsHit(String.valueOf(validatorStats.getTurnsHit()))
                 .turnsMissed(String.valueOf(validatorStats.getTurnsMissed()))
                 .validator(isValidator);
+    }
+
+    public static List<AccountVoteType> accountVotes(Blockchain blockchain, byte[] address) {
+        Set<String> validators = new HashSet<>(blockchain.getValidators());
+        return blockchain.getDelegateState()
+                .getDelegates()
+                .parallelStream()
+                .map(delegate -> accountVoteType(blockchain, address, delegate,
+                        validators.contains(delegate.getAddressString())))
+                .filter(accountVote -> !accountVote.getVotes().equals("0"))
+                .collect(Collectors.toList());
+    }
+
+    public static AccountVoteType accountVoteType(Blockchain blockchain, byte[] address, Delegate delegate,
+            Boolean isValidator) {
+        return new AccountVoteType()
+                .delegate(
+                        TypeFactory.delegateType(blockchain.getValidatorStats(delegate.getAddress()), delegate,
+                                isValidator))
+                .votes(
+                        String.valueOf(
+                                blockchain.getDelegateState().getVote(address, delegate.getAddress()).getNano()));
     }
 
     public static InfoType infoType(Kernel kernel) {
