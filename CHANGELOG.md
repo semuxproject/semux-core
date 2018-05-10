@@ -1,5 +1,15 @@
 # Change Log
 
+## [v1.2.0](https://github.com/semuxproject/semux/tree/v1.2.0) (2018-05-25)
+
+**Fixed bugs:**
+
+- TODO
+
+**Implemented enhancements:**
+
+- TODO 
+
 ## [v1.1.1](https://github.com/semuxproject/semux/tree/v1.1.1) (2018-04-22)
 [Full Changelog](https://github.com/semuxproject/semux/compare/v1.1.0...v1.1.1)
 
