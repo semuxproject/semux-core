@@ -1015,7 +1015,7 @@
                     {
                         "name" : "from",
                         "in" : "query",
-                        "description" : "Voting address. The address must exist in the wallet.data of this Semux node.",
+                        "description" : "Voter's address. The address must exist in the wallet.data of this Semux node.",
                         "required" : true,
                         "type" : "string",
                         "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
@@ -1031,7 +1031,7 @@
                     {
                         "name" : "value",
                         "in" : "query",
-                        "description" : "Vote amount in nano SEM",
+                        "description" : "Number of votes in nano SEM",
                         "required" : true,
                         "type" : "string",
                         "format" : "int64",
@@ -1077,7 +1077,7 @@
                     {
                         "name" : "from",
                         "in" : "query",
-                        "description" : "Voting address. The address must exist in the wallet.data of this Semux node.",
+                        "description" : "Voter's address. The address must exist in the wallet.data of this Semux node.",
                         "required" : true,
                         "type" : "string",
                         "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
@@ -1093,7 +1093,7 @@
                     {
                         "name" : "value",
                         "in" : "query",
-                        "description" : "Vote amount in nano SEM",
+                        "description" : "Number of votes in nano SEM",
                         "required" : true,
                         "type" : "string",
                         "format" : "int64",
