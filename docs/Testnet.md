@@ -1,3 +1,5 @@
+## Testnet
+
 ### How to connect Semux Testnet
 
 You can connect to the testnet via the following command
@@ -9,3 +11,7 @@ You can connect to the testnet via the following command
 
 * Testnet faucet: https://www.semux.org/testnetfaucet
 * Testnet explorer: https://testnet.semux.info/
+
+### Devnet
+
+If you prefer using a local testing blockchain, see [Devnet](./Devnet.md).
