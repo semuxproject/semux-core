@@ -2,13 +2,29 @@
 
 ## [v1.2.0](https://github.com/semuxproject/semux/tree/v1.2.0) (2018-05-25)
 
+This release introduces Java 10 support plus a few API & documentation improvements for third-party service integration & light wallet implementation.
+
 **Fixed bugs:**
 
-- TODO
+- Fixed a memory leak caused by connection limiter [\#826](https://github.com/semuxproject/semux/issues/826) ([semuxdev](https://github.com/semuxdev))
+- API 
+  - Fixed a bug that `data` parameter was required for making transactions in API v2  [\#825](https://github.com/semuxproject/semux/pull/825) ([cryptokat](https://github.com/cryptokat))
 
 **Implemented enhancements:**
 
-- TODO 
+- Add Java 10 Support [\#820](https://github.com/semuxproject/semux/pull/820) ([semuxdev](https://github.com/semuxdev))
+- Docs
+  - Add devnet doc and API base unit doc [\#847](https://github.com/semuxproject/semux/pull/847) ([cryptokat](https://github.com/cryptokat))
+  - Add links to API clients [\#845](https://github.com/semuxproject/semux/pull/845) ([cryptokat](https://github.com/cryptokat))
+  - Add links to delegate pools and block explorers [\#839](https://github.com/semuxproject/semux/pull/839) ([cryptokat](https://github.com/cryptokat))
+  - Improve API descriptions and validation patterns in swagger definition [\#848](https://github.com/semuxproject/semux/pull/848) ([cryptokat](https://github.com/cryptokat))
+- API
+  - Add `GET /account/votes?address` API [\#838](https://github.com/semuxproject/semux/pull/838) ([cryptokat](https://github.com/cryptokat))
+  - Add `GET /account/pending-transactions?address&from&to` API [\#837](https://github.com/semuxproject/semux/pull/837) ([cryptokat](https://github.com/cryptokat))
+  - Add `validator` flag to `DelegateType` [\#841](https://github.com/semuxproject/semux/pull/841) ([witoldsz](https://github.com/witoldsz))
+  - Add `network` and `capabilities` into the response of `GET /info` API [\#835](https://github.com/semuxproject/semux/pull/835) ([cryptokat](https://github.com/cryptokat))
+  - Validate raw transaction passing in `POST /transaction/raw` [\#831](https://github.com/semuxproject/semux/pull/831) ([cryptokat](https://github.com/cryptokat))
+  - Change `fee` parameter from required to optional, default to minimum fee if omitted [\#825](https://github.com/semuxproject/semux/pull/825) ([cryptokat](https://github.com/cryptokat))
 
 ## [v1.1.1](https://github.com/semuxproject/semux/tree/v1.1.1) (2018-04-22)
 [Full Changelog](https://github.com/semuxproject/semux/compare/v1.1.0...v1.1.1)
