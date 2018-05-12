@@ -16,6 +16,10 @@ api.username = YOUR_API_USERNAME
 api.password = YOUR_API_PASSWORD
 ```
 
+## Base Unit
+
+The base unit of Semux API is Nano SEM (10<sup>-9</sup> SEM)
+
 ## Documentation
 
 Semux API documentation can be found at: https://semuxproject.github.io/semux-api-docs/
