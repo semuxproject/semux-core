@@ -67,7 +67,7 @@
                     {
                         "name" : "node",
                         "in" : "query",
-                        "description" : "Name of the node in host:port format",
+                        "description" : "Address of the node in host:port format",
                         "required" : true,
                         "type" : "string"
                     }
@@ -104,7 +104,8 @@
                         "in" : "query",
                         "description" : "IP address",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern": "^(\\d{1,3}\\.){3}\\d{1,3}$"
                     }
                 ],
                 "responses" : {
@@ -139,7 +140,8 @@
                         "in" : "query",
                         "description" : "IP address",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern": "^(\\d{1,3}\\.){3}\\d{1,3}$"
                     }
                 ],
                 "responses" : {
@@ -174,7 +176,8 @@
                         "in" : "query",
                         "description" : "Address of account",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     }
                 ],
                 "responses" : {
@@ -242,7 +245,8 @@
                         "in" : "query",
                         "description" : "Delegate address",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     }
                 ],
                 "responses" : {
@@ -278,7 +282,7 @@
                         "description" : "Address of account",
                         "required" : true,
                         "type" : "string",
-                        "pattern" : "^0x[0-9a-fA-F]{40}$"
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
                         "name" : "from",
@@ -332,7 +336,7 @@
                         "description" : "Address of account",
                         "required" : true,
                         "type" : "string",
-                        "pattern" : "^0x[0-9a-fA-F]{40}$"
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
                         "name": "from",
@@ -381,7 +385,7 @@
                         "description" : "Address of account",
                         "required" : true,
                         "type" : "string",
-                        "pattern" : "^0x[0-9a-fA-F]{40}$"
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     }
                 ],
                 "responses" : {
@@ -417,7 +421,7 @@
                         "description" : "Hash of block",
                         "required" : true,
                         "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                        "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
                     }
                 ],
                 "responses" : {
@@ -645,7 +649,8 @@
                         "in" : "query",
                         "description" : "Transaction hash",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
                     }
                 ],
                 "responses" : {
@@ -669,7 +674,7 @@
                     "semux"
                 ],
                 "summary" : "Get transaction limits",
-                "description" : "Get minimum fee and maximum size.",
+                "description" : "Returns transaction limitations including minimum transaction fee and maximum transaction size.",
                 "operationId" : "getTransactionLimits",
                 "produces" : [
                     "application/json"
@@ -680,7 +685,8 @@
                         "in" : "query",
                         "description" : "Type of transaction",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "enum" : ["COINBASE", "TRANSFER", "DELEGATE", "VOTE", "UNVOTE", "CREATE", "CALL"]
                     }
                 ],
                 "responses" : {
@@ -704,7 +710,7 @@
                     "semux"
                 ],
                 "summary" : "Get validators",
-                "description" : "Returns a list of validators.",
+                "description" : "Returns a list of validators in Semux addresses.",
                 "operationId" : "getValidators",
                 "produces" : [
                     "application/json"
@@ -741,14 +747,16 @@
                         "in" : "query",
                         "description" : "Delegate address",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
                         "name" : "voter",
                         "in" : "query",
                         "description" : "Voter address",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     }
                 ],
                 "responses" : {
@@ -771,8 +779,8 @@
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get votes",
-                "description" : "Returns all the votes to a delegate",
+                "summary" : "Get a delegate's votes",
+                "description" : "Returns all the votes to a delegate as a map of [voter address] => [votes]",
                 "operationId" : "getVotes",
                 "produces" : [
                     "application/json"
@@ -783,7 +791,8 @@
                         "in" : "query",
                         "description" : "Delegate address",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     }
                 ],
                 "responses" : {
@@ -842,14 +851,15 @@
                     {
                         "name" : "address",
                         "in" : "query",
-                        "description" : "Signing address",
+                        "description" : "Signing address. The address must exist in the wallet.data of this Semux node.",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
                         "name" : "message",
                         "in" : "query",
-                        "description" : "Message to sign",
+                        "description" : "Message to sign in UTF-8 string",
                         "required" : true,
                         "type" : "string"
                     }
@@ -884,14 +894,15 @@
                     {
                         "name" : "address",
                         "in" : "query",
-                        "description" : "Address",
+                        "description" : "Address of the message signer",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
                         "name" : "message",
                         "in" : "query",
-                        "description" : "Message",
+                        "description" : "Message in UTF-8 string",
                         "required" : true,
                         "type" : "string"
                     },
@@ -900,7 +911,8 @@
                         "in" : "query",
                         "description" : "Signature to verify",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{192}$"
                     }
                 ],
                 "responses" : {
@@ -933,21 +945,23 @@
                     {
                         "name" : "from",
                         "in" : "query",
-                        "description" : "Sending address",
+                        "description" : "Sender's address. The address must exist in the wallet.data of this Semux node.",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
                         "name" : "to",
                         "in" : "query",
-                        "description" : "Receiving address",
+                        "description" : "Recipient's address",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
                         "name" : "value",
                         "in" : "query",
-                        "description" : "Amount of SEM to transfer",
+                        "description" : "Amount of SEM to transfer in nano SEM",
                         "required" : true,
                         "type" : "string",
                         "format" : "int64",
@@ -956,7 +970,7 @@
                     {
                         "name" : "fee",
                         "in" : "query",
-                        "description" : "Transaction fee",
+                        "description" : "Transaction fee in nano SEM, default to minimum fee if omitted",
                         "required" : false,
                         "type" : "string",
                         "format" : "int64",
@@ -965,7 +979,7 @@
                     {
                         "name" : "data",
                         "in" : "query",
-                        "description" : "Transaction data",
+                        "description" : "Transaction data encoded in hexadecimal string",
                         "required" : false,
                         "type" : "string",
                         "pattern" : "^(0x)?[0-9a-fA-F]+$"
@@ -1001,21 +1015,23 @@
                     {
                         "name" : "from",
                         "in" : "query",
-                        "description" : "Voting address",
+                        "description" : "Voter's address. The address must exist in the wallet.data of this Semux node.",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
                         "name" : "to",
                         "in" : "query",
                         "description" : "Delegate address",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
                         "name" : "value",
                         "in" : "query",
-                        "description" : "Vote amount",
+                        "description" : "Number of votes in nano SEM",
                         "required" : true,
                         "type" : "string",
                         "format" : "int64",
@@ -1024,7 +1040,7 @@
                     {
                         "name" : "fee",
                         "in" : "query",
-                        "description" : "Transaction fee",
+                        "description" : "Transaction fee in nano SEM, default to minimum fee if omitted",
                         "required" : false,
                         "type" : "string",
                         "format" : "int64",
@@ -1061,21 +1077,23 @@
                     {
                         "name" : "from",
                         "in" : "query",
-                        "description" : "Voting address",
+                        "description" : "Voter's address. The address must exist in the wallet.data of this Semux node.",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
                         "name" : "to",
                         "in" : "query",
                         "description" : "Delegate address",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
                         "name" : "value",
                         "in" : "query",
-                        "description" : "Vote amount",
+                        "description" : "Number of votes in nano SEM",
                         "required" : true,
                         "type" : "string",
                         "format" : "int64",
@@ -1084,7 +1102,7 @@
                     {
                         "name" : "fee",
                         "in" : "query",
-                        "description" : "Transaction fee",
+                        "description" : "Transaction fee in nano SEM, default to minimum fee if omitted",
                         "required" : false,
                         "type" : "string",
                         "format" : "int64",
@@ -1123,12 +1141,13 @@
                         "in" : "query",
                         "description" : "Registering address",
                         "required" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
                         "name" : "fee",
                         "in" : "query",
-                        "description" : "Transaction fee",
+                        "description" : "Transaction fee in nano SEM, default to minimum fee if omitted",
                         "required" : false,
                         "type" : "string",
                         "format" : "int64",
@@ -1137,7 +1156,7 @@
                     {
                         "name" : "data",
                         "in" : "query",
-                        "description" : "Delegate name",
+                        "description" : "Delegate name in hexadecimal encoded UTF-8 string, 16 bytes of data at maximum",
                         "required" : true,
                         "type" : "string",
                         "pattern" : "^(0x)?[0-9a-fA-F]+$"
@@ -1255,12 +1274,12 @@
                         "description" : "Recipient's address",
                         "required" : false,
                         "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
                         "name" : "value",
                         "in" : "query",
-                        "description" : "Transaction value in nano",
+                        "description" : "Transaction value in nano SEM",
                         "required" : false,
                         "type" : "string",
                         "format" : "int64",
@@ -1326,7 +1345,7 @@
                         "description" : "Signer's address. This address must exist in the wallet.",
                         "required" : true,
                         "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                        "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     }
                 ],
                 "responses" : {
@@ -1373,7 +1392,8 @@
             "type" : "object",
             "properties" : {
                 "address" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                 },
                 "available" : {
                     "type" : "string",
@@ -1412,7 +1432,8 @@
             "type" : "object",
             "properties" : {
                 "hash" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "number" : {
                     "type" : "string",
@@ -1424,30 +1445,38 @@
                     "format" : "int32"
                 },
                 "coinbase" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                 },
                 "parentHash" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "timestamp" : {
+                    "description": "Block timestamp in milliseconds specified by the block forger. There can be a time drift up to 30 seconds.",
                     "type" : "string",
                     "format" : "int64",
                     "pattern" : "^\\d+$"
                 },
                 "date" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}-\\d{2}-\\d{2}$"
                 },
                 "transactionsRoot" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "resultsRoot" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "stateRoot" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "data" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]*$"
                 },
                 "transactions" : {
                     "type" : "array",
@@ -1466,7 +1495,8 @@
                 {
                     "properties" : {
                         "result" : {
-                            "type" : "string"
+                            "type" : "string",
+                            "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                         }
                     }
                 }
@@ -1477,7 +1507,8 @@
             "properties" : {
                 "address" : {
                     "description": "Delegate SEM address",
-                    "type" : "string"
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                 },
                 "name" : {
                     "description": "Delegate name",
@@ -1514,6 +1545,7 @@
                     "pattern" : "^\\d+$"
                 },
                 "validator" : {
+                    "description" : "Whether the delegate is currently a validator",
                     "type" : "boolean"
                 }
             }
@@ -1527,7 +1559,8 @@
                 {
                     "properties" : {
                         "result" : {
-                            "type" : "string"
+                            "type" : "string",
+                            "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
                         }
                     }
                 }
@@ -1577,7 +1610,7 @@
                         "result": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/TransactionType"
+                                "$ref": "#/definitions/PendingTransactionType"
                             }
                         }
                     }
@@ -1765,7 +1798,7 @@
                         "result" : {
                             "type" : "array",
                             "items" : {
-                                "$ref" : "#/definitions/TransactionType"
+                                "$ref" : "#/definitions/PendingTransactionType"
                             }
                         }
                     }
@@ -1820,9 +1853,12 @@
                 {
                     "properties" : {
                         "result" : {
+                            "description" : "A list of validator addresses",
                             "type" : "array",
                             "items" : {
-                                "type" : "string"
+                                "description" : "Validator address",
+                                "type" : "string",
+                                "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                             }
                         }
                     }
@@ -1861,6 +1897,7 @@
                 {
                     "properties" : {
                         "result" : {
+                            "description" : "A map of [voter address] => [votes]",
                             "type" : "object",
                             "additionalProperties" : {
                                 "type" : "string",
@@ -1889,7 +1926,8 @@
                     "type" : "string"
                 },
                 "coinbase" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                 },
                 "latestBlockNumber" : {
                     "type" : "string",
@@ -1897,7 +1935,8 @@
                     "pattern" : "^\\d+$"
                 },
                 "latestBlockHash" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "activePeers" : {
                     "type" : "integer",
@@ -1922,8 +1961,11 @@
                     "properties" : {
                         "result" : {
                             "type" : "array",
+                            "description" : "A list of account addresses",
                             "items" : {
-                                "type" : "string"
+                                "description" : "Account address",
+                                "type" : "string",
+                                "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                             }
                         }
                     }
@@ -1934,7 +1976,8 @@
             "type" : "object",
             "properties" : {
                 "ip" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "pattern": "^(\\d{1,3}\\.){3}\\d{1,3}$"
                 },
                 "port" : {
                     "type" : "integer",
@@ -1980,7 +2023,9 @@
                 {
                     "properties" : {
                         "result" : {
-                            "type" : "string"
+                            "description" : "The message signature encoded in hexadecimal string",
+                            "type" : "string",
+                            "pattern" : "^(0x)?[0-9a-fA-F]{192}$"
                         }
                     }
                 }
@@ -1990,15 +2035,18 @@
             "type" : "object",
             "properties" : {
                 "maxTransactionDataSize" : {
+                    "description" : "The maximum transaction size in bytes",
                     "type" : "integer",
                     "format" : "int32"
                 },
                 "minTransactionFee" : {
+                    "description" : "The minimum transaction fee in nano SEM",
                     "type" : "string",
                     "format" : "int64",
                     "pattern" : "^\\d+$"
                 },
                 "minDelegateBurnAmount" : {
+                    "description" : "The amount of nano SEM required to burn for delegate registration",
                     "type" : "string",
                     "format" : "int64",
                     "pattern" : "^\\d+$"
@@ -2015,26 +2063,30 @@
                 },
                 "hash" : {
                     "type" : "string",
-                    "pattern" : "^0x[0-9a-fA-F]{64}$"
+                    "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "type" : {
                     "type" : "string",
                     "enum" : ["COINBASE", "TRANSFER", "DELEGATE", "VOTE", "UNVOTE", "CREATE", "CALL"]
                 },
                 "from" : {
+                    "description" : "Sender's address",
                     "type" : "string",
-                    "pattern" : "^0x[0-9a-fA-F]{40}$"
+                    "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                 },
                 "to" : {
+                    "description" : "Recipient's address",
                     "type" : "string",
-                    "pattern" : "^0x[0-9a-fA-F]{40}$"
+                    "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                 },
                 "value" : {
+                    "description" : "Transaction value in nano SEM",
                     "type" : "string",
                     "format" : "int64",
                     "pattern" : "^\\d+$"
                 },
                 "fee" : {
+                    "description" : "Transaction fee in nano SEM",
                     "type" : "string",
                     "format" : "int64",
                     "pattern" : "^\\d+$"
@@ -2045,13 +2097,66 @@
                     "pattern" : "^\\d+$"
                 },
                 "timestamp" : {
+                    "description": "Transaction timestamp in milliseconds specified by the transaction creator. There can be a time drift up to 2 hours.",
                     "type" : "string",
                     "format" : "int64",
                     "pattern" : "^\\d+$"
                 },
                 "data" : {
+                    "description" : "Transaction data encoded in hexadecimal string",
                     "type" : "string",
-                    "pattern" : "^0x[0-9a-fA-F]+$"
+                    "pattern" : "^(0x)?[0-9a-fA-F]*$"
+                }
+            }
+        },
+        "PendingTransactionType" : {
+            "type" : "object",
+            "properties" : {
+                "hash" : {
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
+                },
+                "type" : {
+                    "type" : "string",
+                    "enum" : ["COINBASE", "TRANSFER", "DELEGATE", "VOTE", "UNVOTE", "CREATE", "CALL"]
+                },
+                "from" : {
+                    "description" : "Sender's address",
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
+                },
+                "to" : {
+                    "description" : "Recipient's address",
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
+                },
+                "value" : {
+                    "description" : "Transaction value in nano SEM",
+                    "type" : "string",
+                    "format" : "int64",
+                    "pattern" : "^\\d+$"
+                },
+                "fee" : {
+                    "description" : "Transaction fee in nano SEM",
+                    "type" : "string",
+                    "format" : "int64",
+                    "pattern" : "^\\d+$"
+                },
+                "nonce" : {
+                    "type" : "string",
+                    "format" : "int64",
+                    "pattern" : "^\\d+$"
+                },
+                "timestamp" : {
+                    "description" : "Transaction timestamp in milliseconds specified by the transaction creator. There can be a time drift up to 2 hours.",
+                    "type" : "string",
+                    "format" : "int64",
+                    "pattern" : "^\\d+$"
+                },
+                "data" : {
+                    "description" : "Transaction data encoded in hexadecimal string",
+                    "type" : "string",
+                    "pattern" : "^(0x)?[0-9a-fA-F]*$"
                 }
             }
         },
@@ -2067,6 +2172,7 @@
                 {
                     "properties" : {
                         "validSignature" : {
+                            "description" : "Whether the signature is valid",
                             "type" : "boolean"
                         }
                     }
@@ -2082,6 +2188,7 @@
                 {
                     "properties" : {
                         "result" : {
+                            "description" : "The composed raw transaction encoded in hexadecimal string",
                             "type" : "string"
                         }
                     }
@@ -2097,6 +2204,7 @@
                 {
                     "properties" : {
                         "result" : {
+                            "description" : "The signed raw transaction encoded in hexadecimal string",
                             "type" : "string"
                         }
                     }

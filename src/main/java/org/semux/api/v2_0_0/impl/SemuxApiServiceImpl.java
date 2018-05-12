@@ -296,7 +296,7 @@ public final class SemuxApiServiceImpl implements SemuxApi {
                 .filter(tx -> Arrays.equals(tx.getFrom(), addressBytes) || Arrays.equals(tx.getTo(), addressBytes))
                 .skip(fromInt)
                 .limit(toInt - fromInt)
-                .map(tx -> TypeFactory.transactionType(null, tx))
+                .map(TypeFactory::pendingTransactionType)
                 .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok(resp).build();
@@ -455,7 +455,7 @@ public final class SemuxApiServiceImpl implements SemuxApi {
         GetPendingTransactionsResponse resp = new GetPendingTransactionsResponse();
         resp.result(kernel.getPendingManager().getPendingTransactions().parallelStream()
                 .map(pendingTransaction -> pendingTransaction.transaction)
-                .map(tx -> TypeFactory.transactionType(null, tx))
+                .map(TypeFactory::pendingTransactionType)
                 .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();

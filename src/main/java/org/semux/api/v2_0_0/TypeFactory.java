@@ -20,6 +20,7 @@ import org.semux.api.v2_0_0.model.BlockType;
 import org.semux.api.v2_0_0.model.DelegateType;
 import org.semux.api.v2_0_0.model.InfoType;
 import org.semux.api.v2_0_0.model.PeerType;
+import org.semux.api.v2_0_0.model.PendingTransactionType;
 import org.semux.api.v2_0_0.model.TransactionLimitsType;
 import org.semux.api.v2_0_0.model.TransactionType;
 import org.semux.core.Amount;
@@ -137,9 +138,22 @@ public class TypeFactory {
 
     public static TransactionType transactionType(Long blockNumber, Transaction tx) {
         return new TransactionType()
-                .blockNumber(blockNumber == null ? null : String.valueOf(blockNumber))
+                .blockNumber(String.valueOf(blockNumber))
                 .hash(Hex.encode0x(tx.getHash()))
                 .type(TransactionType.TypeEnum.fromValue(tx.getType().name()))
+                .from(Hex.encode0x(tx.getFrom()))
+                .to(Hex.encode0x(tx.getTo()))
+                .value(encodeAmount(tx.getValue()))
+                .fee(encodeAmount(tx.getFee()))
+                .nonce(String.valueOf(tx.getNonce()))
+                .timestamp(String.valueOf(tx.getTimestamp()))
+                .data(Hex.encode0x(tx.getData()));
+    }
+
+    public static PendingTransactionType pendingTransactionType(Transaction tx) {
+        return new PendingTransactionType()
+                .hash(Hex.encode0x(tx.getHash()))
+                .type(PendingTransactionType.TypeEnum.fromValue(tx.getType().name()))
                 .from(Hex.encode0x(tx.getFrom()))
                 .to(Hex.encode0x(tx.getTo()))
                 .value(encodeAmount(tx.getValue()))
