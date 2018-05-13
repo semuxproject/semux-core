@@ -59,7 +59,8 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
 
             if (!channelMgr.isAcceptable(address)) {
                 if (logger.isDebugEnabled())
-                    logger.debug("Not allowed connection from/to: {}", address.toString());
+                    logger.debug("Disallowed {} connection: {}", isServerMode() ? "inbound" : "outbound",
+                            address.toString());
                 ch.disconnect();
                 return;
             }
