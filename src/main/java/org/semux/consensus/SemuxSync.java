@@ -6,7 +6,6 @@
  */
 package org.semux.consensus;
 
-import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sum;
 
@@ -376,21 +375,10 @@ public class SemuxSync implements SyncManager {
         BlockHeader header = block.getHeader();
         List<Transaction> transactions = block.getTransactions();
 
-        // Added checks to UNIFORM_DISTRIBUTION fork:
-        // - blocks should never be forged by coinbase magic account
-        // - transactions should never be sent to coinbase magic account
-        // TODO: move checks to Transaction#validate after fork activation
-        if (chain.forkActivated(block.getNumber(), UNIFORM_DISTRIBUTION)) {
-            if (Arrays.equals(block.getCoinbase(), Constants.COINBASE_KEY.toAddress())) {
-                logger.warn("A block forged by the coinbase magic account is not allowed");
-                return false;
-            }
-
-            if (block.getTransactions().stream()
-                    .anyMatch(tx -> Arrays.equals(tx.getTo(), Constants.COINBASE_KEY.toAddress()))) {
-                logger.warn("Sending Transactions to coinbase magic account is not allowed");
-                return false;
-            }
+        // blocks should never be forged by coinbase magic account
+        if (Arrays.equals(block.getCoinbase(), Constants.COINBASE_ADDRESS)) {
+            logger.warn("A block forged by the coinbase magic account is not allowed");
+            return false;
         }
 
         // [1] check block header

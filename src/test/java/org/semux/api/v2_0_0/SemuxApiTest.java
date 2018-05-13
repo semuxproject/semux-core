@@ -64,7 +64,6 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.junit.Test;
 import org.semux.TestUtils;
 import org.semux.api.v2_0_0.model.AddNodeResponse;
