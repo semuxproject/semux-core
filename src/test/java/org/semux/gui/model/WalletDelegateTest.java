@@ -72,10 +72,10 @@ public class WalletDelegateTest {
 
         Delegate d = new Delegate(address, name, registeredAt, votes);
         WalletDelegate wd = new WalletDelegate(d);
-        assertFalse(wd.isValidator(kernel));
+        assertFalse(wd.isValidator());
 
         d = new Delegate(address, Bytes.of(v1), registeredAt, votes);
         wd = new WalletDelegate(d);
-        assertFalse(wd.isValidator(kernel));
+        assertFalse(wd.isValidator());
     }
 }

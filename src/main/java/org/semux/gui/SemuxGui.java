@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -439,9 +441,16 @@ public class SemuxGui extends Launcher {
 
         // update delegates
         List<WalletDelegate> wds = new ArrayList<>();
+        List<String> validators = chain.getValidators();
+        Map<String, Integer> validatorPositionMap = IntStream
+                .range(0, validators.size())
+                .boxed()
+                .collect(Collectors.toMap(validators::get, i -> i));
         for (Delegate d : ds.getDelegates()) {
-            WalletDelegate wd = new WalletDelegate(d);
-            wds.add(wd);
+            wds.add(validatorPositionMap.containsKey(d.getAddressString())
+                    ? new WalletDelegate(d, validatorPositionMap.containsKey(d.getAddressString()),
+                            validatorPositionMap.get(d.getAddressString()))
+                    : new WalletDelegate(d));
         }
         model.setDelegates(wds);
 
