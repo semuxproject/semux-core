@@ -8,6 +8,9 @@ package org.semux.config;
 
 import static org.semux.net.Capability.SEM_TESTNET;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.semux.Network;
 import org.semux.net.CapabilitySet;
 
@@ -21,5 +24,10 @@ public class DevnetConfig extends AbstractConfig {
     @Override
     public CapabilitySet capabilitySet() {
         return CapabilitySet.of(SEM_TESTNET);
+    }
+
+    @Override
+    public Map<Long, Byte[]> checkpoints() {
+        return Collections.emptyMap();
     }
 }

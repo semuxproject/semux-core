@@ -9,6 +9,7 @@ package org.semux.config;
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -425,4 +426,15 @@ public interface Config {
      * @return
      */
     boolean forkUniformDistributionEnabled();
+
+    // =========================
+    // Checkpoints
+    // =========================
+
+    /**
+     * Get checkpoints.
+     *
+     * @return a map of blockchain checkpoints [block height] => [block hash]
+     */
+    Map<Long, Byte[]> checkpoints();
 }
