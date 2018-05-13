@@ -107,13 +107,6 @@ public interface Config {
     Amount minDelegateBurnAmount();
 
     /**
-     * Returns the block number before which this client needs to be upgraded.
-     *
-     * @return
-     */
-    long mandatoryUpgrade();
-
-    /**
      * Returns the block reward for a specific block.
      *
      * @param number

@@ -55,7 +55,6 @@ public abstract class AbstractConfig implements Config {
     protected Amount minTransactionFee = MILLI_SEM.of(5);
     protected long maxTransactionTimeDrift = TimeUnit.HOURS.toMillis(2);
     protected Amount minDelegateBurnAmount = SEM.of(1000);
-    protected long mandatoryUpgrade = Constants.BLOCKS_PER_DAY * 180L;
 
     // =========================
     // P2P
@@ -286,11 +285,6 @@ public abstract class AbstractConfig implements Config {
     @Override
     public Amount minDelegateBurnAmount() {
         return minDelegateBurnAmount;
-    }
-
-    @Override
-    public long mandatoryUpgrade() {
-        return mandatoryUpgrade;
     }
 
     @Override

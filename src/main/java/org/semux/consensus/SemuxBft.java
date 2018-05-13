@@ -918,9 +918,7 @@ public class SemuxBft implements Consensus {
         List<Transaction> transactions = block.getTransactions();
         long number = header.getNumber();
 
-        if (header.getNumber() > config.mandatoryUpgrade()) {
-            throw new SemuxBftException("This client needs to be upgraded");
-        } else if (header.getNumber() != chain.getLatestBlockNumber() + 1) {
+        if (header.getNumber() != chain.getLatestBlockNumber() + 1) {
             throw new SemuxBftException("Applying wrong block: number = " + header.getNumber());
         }
 
