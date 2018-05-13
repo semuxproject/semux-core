@@ -97,16 +97,21 @@ public class Constants {
     public static final Key COINBASE_KEY;
 
     /**
+     * Address bytes of {@link this#COINBASE_KEY}. This is stored as a cache to
+     * avoid redundant h160 calls.
+     */
+    public static final byte[] COINBASE_ADDRESS;
+
+    /**
      * The public-private key pair of the genesis validator.
      */
     public static final Key DEVNET_KEY;
 
     static {
         try {
-            COINBASE_KEY = new Key(Hex.decode0x(
-                    "0x302e020100300506032b657004220420acdd12174cbc3fa6e4076cb1e270989cf4d47b0de8942c8542fe6a3bed34d7bf"));
-            DEVNET_KEY = new Key(Hex.decode0x(
-                    "0x302e020100300506032b657004220420acbd5f2cb2b6053f704376d12df99f2aa163d267a755c7f1d9fe55d2a2dc5405"));
+            COINBASE_KEY = new Key(Hex.decode0x("0x302e020100300506032b657004220420acdd12174cbc3fa6e4076cb1e270989cf4d47b0de8942c8542fe6a3bed34d7bf"));
+            COINBASE_ADDRESS = COINBASE_KEY.toAddress();
+            DEVNET_KEY = new Key(Hex.decode0x("0x302e020100300506032b657004220420acbd5f2cb2b6053f704376d12df99f2aa163d267a755c7f1d9fe55d2a2dc5405"));
         } catch (InvalidKeySpecException e) {
             throw new CryptoException(e);
         }

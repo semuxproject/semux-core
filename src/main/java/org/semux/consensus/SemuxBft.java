@@ -128,7 +128,7 @@ public class SemuxBft implements Consensus {
     protected VoteSet precommitVotes;
     protected VoteSet commitVotes;
 
-    protected final Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks;
+    protected Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks;
 
     public SemuxBft(Kernel kernel) {
         this.kernel = kernel;
@@ -279,6 +279,7 @@ public class SemuxBft implements Consensus {
         proposal = null;
 
         // activate forks
+        activatedForks = chain.getActivatedForks();
         activateForks();
 
         // update validators
@@ -838,7 +839,7 @@ public class SemuxBft implements Consensus {
             return false;
         }
 
-        if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_KEY.toAddress())) {
+        if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
             logger.warn("A block forged by the coinbase magic account is not allowed");
             return false;
         }
