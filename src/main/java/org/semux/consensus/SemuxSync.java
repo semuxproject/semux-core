@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.config.Config;
@@ -385,9 +384,9 @@ public class SemuxSync implements SyncManager {
 
         // validate checkpoint
         if (config.checkpoints().containsKey(header.getNumber()) &&
-                !Arrays.equals(ArrayUtils.toObject(header.getHash()), config.checkpoints().get(header.getNumber()))) {
+                !Arrays.equals(header.getHash(), config.checkpoints().get(header.getNumber()))) {
             logger.error("Checkpoint validation failed, checkpoint is {} => {}, getting {}", header.getNumber(),
-                    Hex.encode0x(ArrayUtils.toPrimitive(config.checkpoints().get(header.getNumber()))),
+                    Hex.encode0x(config.checkpoints().get(header.getNumber())),
                     Hex.encode0x(header.getHash()));
             return false;
         }

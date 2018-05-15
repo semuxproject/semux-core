@@ -12,24 +12,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.semux.Network;
 import org.semux.crypto.Hex;
 import org.semux.net.CapabilitySet;
 
 public class MainnetConfig extends AbstractConfig {
 
-    private static final Map<Long, Byte[]> checkpoints;
+    private static final Map<Long, byte[]> checkpoints;
     static {
-        HashMap<Long, Byte[]> initCheckpoints = new HashMap<>();
+        HashMap<Long, byte[]> initCheckpoints = new HashMap<>();
 
         // the first day of semux mainnet
-        initCheckpoints.put(2880L, ArrayUtils
-                .toObject(Hex.decode0x("0xc494425a534d035d9ceb1c05d84ff23b39e9940c5cbd1cbab35fafaffa711e3c")));
+        initCheckpoints.put(2880L, Hex.decode0x("0xc494425a534d035d9ceb1c05d84ff23b39e9940c5cbd1cbab35fafaffa711e3c"));
 
         // one checkpoint for every 60 days
-        initCheckpoints.put(172800L, ArrayUtils
-                .toObject(Hex.decode0x("0xe0f8694ab43cddc1cf99fdee887297522111df0b82a07816350e0ffb801d0253")));
+        initCheckpoints.put(172800L,
+                Hex.decode0x("0xe0f8694ab43cddc1cf99fdee887297522111df0b82a07816350e0ffb801d0253"));
 
         checkpoints = MapUtils.unmodifiableMap(initCheckpoints);
     }
@@ -44,7 +42,7 @@ public class MainnetConfig extends AbstractConfig {
     }
 
     @Override
-    public Map<Long, Byte[]> checkpoints() {
+    public Map<Long, byte[]> checkpoints() {
         return checkpoints;
     }
 }

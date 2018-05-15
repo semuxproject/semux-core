@@ -436,5 +436,5 @@ public interface Config {
      *
      * @return a map of blockchain checkpoints [block height] => [block hash]
      */
-    Map<Long, Byte[]> checkpoints();
+    Map<Long, byte[]> checkpoints();
 }

@@ -27,7 +27,7 @@ public class DevnetConfig extends AbstractConfig {
     }
 
     @Override
-    public Map<Long, Byte[]> checkpoints() {
+    public Map<Long, byte[]> checkpoints() {
         return Collections.emptyMap();
     }
 }
