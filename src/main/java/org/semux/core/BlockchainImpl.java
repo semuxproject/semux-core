@@ -711,6 +711,12 @@ public class BlockchainImpl implements Blockchain {
             return height >= activatedForks.get(fork).activatedAt;
         }
 
+        // checks whether the local blockchain has reached the fork activation
+        // checkpoint
+        if (config.forkActivationCheckpoints().containsKey(fork)) {
+            return config.forkActivationCheckpoints().get(fork) <= height;
+        }
+
         // returns memoized result of fork activation lookup at current height
         ForkActivationMemory currentHeightActivationMemory = forkActivationMemoryCache
                 .getIfPresent(ImmutablePair.of(fork, height));

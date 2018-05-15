@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.semux.Network;
+import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.net.CapabilitySet;
 
 public class TestnetConfig extends AbstractConfig {
@@ -31,6 +32,11 @@ public class TestnetConfig extends AbstractConfig {
     public Map<Long, byte[]> checkpoints() {
         // we don't set checkpoints for the public testnet as the testnet can be reset
         // at anytime
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<ValidatorActivatedFork, Long> forkActivationCheckpoints() {
         return Collections.emptyMap();
     }
 }

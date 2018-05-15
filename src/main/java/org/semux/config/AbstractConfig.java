@@ -167,7 +167,6 @@ public abstract class AbstractConfig implements Config {
 
     @Override
     public String getPrimaryValidator(List<String> validators, long height, int view, boolean uniformDist) {
-        // TODO: add a checkpoint once UNIFORM_DISTRIBUTION is fully activated
         if (uniformDist) {
             return validators.get(getUniformDistPrimaryValidatorNumber(validators.size(), height, view));
         } else {
