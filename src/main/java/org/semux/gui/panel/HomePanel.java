@@ -56,6 +56,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private final transient SemuxGui gui;
     private final transient WalletModel model;
 
+    private final JLabel bestBlockNum;
     private final JLabel blockNum;
     private final JLabel blockTime;
     private final JLabel coinbase;
@@ -76,7 +77,13 @@ public class HomePanel extends JPanel implements ActionListener {
         overview.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
                 GuiMessages.get("Overview"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        overview.setLayout(new GridLayout(7, 2, 0, 0));
+        overview.setLayout(new GridLayout(8, 2, 0, 0));
+
+        JLabel labelBestBlockNum = new JLabel(GuiMessages.get("BestBlockNum") + ":");
+        overview.add(labelBestBlockNum);
+
+        bestBlockNum = new JLabel("");
+        overview.add(bestBlockNum);
 
         JLabel labelBlockNum = new JLabel(GuiMessages.get("BlockNum") + ":");
         overview.add(labelBlockNum);
@@ -228,6 +235,7 @@ public class HomePanel extends JPanel implements ActionListener {
      */
     protected void refresh() {
         Block block = model.getLatestBlock();
+        this.bestBlockNum.setText(SwingUtil.formatNumber(model.getSyncProgress().getTargetHeight()));
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
         this.coinbase.setText(SwingUtil.getAddressAbbr(model.getCoinbase().toAddress()));
