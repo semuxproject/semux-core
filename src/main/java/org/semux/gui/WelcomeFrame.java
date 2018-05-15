@@ -48,6 +48,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
     private final JLabel lblPasswordRepeat;
     private final JRadioButton btnCreate;
     private final JRadioButton btnRecover;
+    private final JButton btnNext;
 
     private final transient Wallet wallet;
 
@@ -101,9 +102,10 @@ public class WelcomeFrame extends JFrame implements ActionListener {
         JButton btnCancel = SwingUtil.createDefaultButton(GuiMessages.get("Cancel"), this, Action.CANCEL);
         btnCancel.setName("btnCancel");
 
-        JButton btnNext = SwingUtil.createDefaultButton(GuiMessages.get("Next"), this, Action.OK);
+        btnNext = SwingUtil.createDefaultButton(GuiMessages.get("Next"), this, Action.OK);
         btnNext.setName("btnNext");
         btnNext.setSelected(true);
+        btnNext.setMultiClickThreshhold(1000);
 
         JLabel lblPassword = new JLabel(GuiMessages.get("Password") + ":");
         txtPassword = new JPasswordField();
@@ -187,6 +189,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
             recoverAccounts();
             break;
         case OK:
+            btnNext.setEnabled(false);
             ok();
             break;
         case CANCEL:
