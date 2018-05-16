@@ -343,7 +343,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             case 4:
                 return SwingUtil.formatVote(d.getVotesFromMe());
             case 5:
-                return d.isValidator(kernel) ? GuiMessages.get("Validator") : GuiMessages.get("Delegate");
+                return d.isValidator() ? GuiMessages.get("Validator") : GuiMessages.get("Delegate");
             case 6:
                 return SwingUtil.formatPercentage(d.getRate());
             default:
@@ -408,8 +408,27 @@ public class DelegatesPanel extends JPanel implements ActionListener {
     protected void refreshDelegates() {
         List<WalletDelegate> delegates = model.getDelegates();
         delegates.sort((d1, d2) -> {
-            int c = d2.getVotes().compareTo(d1.getVotes());
-            return c != 0 ? c : d1.getNameString().compareTo(d2.getNameString());
+            if (d1.isValidator() && !d2.isValidator()) {
+                return -1;
+            }
+
+            if (!d1.isValidator() && d2.isValidator()) {
+                return 1;
+            }
+
+            if (d1.isValidator() && d2.isValidator()) {
+                return Integer.compare(d1.getValidatorPosition(), d2.getValidatorPosition());
+            }
+
+            if (d1.getVotes() != d2.getVotes()) {
+                return d2.getVotes().compareTo(d1.getVotes());
+            }
+
+            if (d1.getRegisteredAt() != d2.getRegisteredAt()) {
+                return Long.compare(d1.getRegisteredAt(), d2.getRegisteredAt());
+            }
+
+            return d1.getNameString().compareTo(d2.getNameString());
         });
 
         WalletAccount acc = getSelectedAccount();
