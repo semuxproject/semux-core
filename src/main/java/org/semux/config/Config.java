@@ -9,10 +9,12 @@ package org.semux.config;
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import org.semux.Network;
+import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.Amount;
 import org.semux.core.TransactionType;
 import org.semux.net.CapabilitySet;
@@ -105,13 +107,6 @@ public interface Config {
      * @return
      */
     Amount minDelegateBurnAmount();
-
-    /**
-     * Returns the block number before which this client needs to be upgraded.
-     *
-     * @return
-     */
-    long mandatoryUpgrade();
 
     /**
      * Returns the block reward for a specific block.
@@ -432,4 +427,23 @@ public interface Config {
      * @return
      */
     boolean forkUniformDistributionEnabled();
+
+    // =========================
+    // Checkpoints
+    // =========================
+
+    /**
+     * Get checkpoints.
+     *
+     * @return a map of blockchain checkpoints [block height] => [block hash]
+     */
+    Map<Long, byte[]> checkpoints();
+
+    /**
+     * Get fork activation checkpoints.
+     *
+     * @return a map of Validator-Activated fork activation checkpoints [fork] =>
+     *         [block height]
+     */
+    Map<ValidatorActivatedFork, Long> forkActivationCheckpoints();
 }

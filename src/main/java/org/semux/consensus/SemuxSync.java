@@ -6,7 +6,6 @@
  */
 package org.semux.consensus;
 
-import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sum;
 
@@ -376,43 +375,41 @@ public class SemuxSync implements SyncManager {
         BlockHeader header = block.getHeader();
         List<Transaction> transactions = block.getTransactions();
 
-        // Added checks to UNIFORM_DISTRIBUTION fork:
-        // - blocks should never be forged by coinbase magic account
-        // - transactions should never be sent to coinbase magic account
-        // TODO: move checks to Transaction#validate after fork activation
-        if (chain.forkActivated(block.getNumber(), UNIFORM_DISTRIBUTION)) {
-            if (Arrays.equals(block.getCoinbase(), Constants.COINBASE_KEY.toAddress())) {
-                logger.warn("A block forged by the coinbase magic account is not allowed");
-                return false;
-            }
-
-            if (block.getTransactions().stream()
-                    .anyMatch(tx -> Arrays.equals(tx.getTo(), Constants.COINBASE_KEY.toAddress()))) {
-                logger.warn("Sending Transactions to coinbase magic account is not allowed");
-                return false;
-            }
-        }
-
         // [1] check block header
         Block latest = chain.getLatestBlock();
         if (!Block.validateHeader(latest.getHeader(), header)) {
-            logger.debug("Invalid block header");
+            logger.error("Invalid block header");
+            return false;
+        }
+
+        // validate checkpoint
+        if (config.checkpoints().containsKey(header.getNumber()) &&
+                !Arrays.equals(header.getHash(), config.checkpoints().get(header.getNumber()))) {
+            logger.error("Checkpoint validation failed, checkpoint is {} => {}, getting {}", header.getNumber(),
+                    Hex.encode0x(config.checkpoints().get(header.getNumber())),
+                    Hex.encode0x(header.getHash()));
+            return false;
+        }
+
+        // blocks should never be forged by coinbase magic account
+        if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
+            logger.error("A block forged by the coinbase magic account is not allowed");
             return false;
         }
 
         // [2] check transactions and results
         if (!Block.validateTransactions(header, transactions, config.network())
                 || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
-            logger.debug("Invalid block transactions");
+            logger.error("Invalid block transactions");
             return false;
         }
         if (!Block.validateResults(header, block.getResults())) {
-            logger.debug("Invalid results");
+            logger.error("Invalid results");
             return false;
         }
 
         if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
-            logger.warn("Duplicated transaction hash is not allowed");
+            logger.error("Duplicated transaction hash is not allowed");
             return false;
         }
 
@@ -420,7 +417,7 @@ public class SemuxSync implements SyncManager {
         TransactionExecutor transactionExecutor = new TransactionExecutor(config);
         List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot);
         if (!Block.validateResults(header, results)) {
-            logger.debug("Invalid transactions");
+            logger.error("Invalid transactions");
             return false;
         }
 

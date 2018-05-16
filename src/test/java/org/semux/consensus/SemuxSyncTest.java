@@ -19,13 +19,18 @@ import static org.semux.core.Amount.Unit.SEM;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.powermock.reflect.Whitebox;
 import org.semux.TestUtils;
+import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.core.Amount;
 import org.semux.core.Block;
@@ -170,5 +175,35 @@ public class SemuxSyncTest {
         votes.add(new Key().sign(encoded));
         votes.add(new Key().sign(encoded));
         assertFalse(sync.validateBlockVotes(block));
+    }
+
+    @Test
+    public void testCheckpoints() {
+        Key key1 = new Key();
+        List<String> validators = Arrays.asList(Hex.encode(key1.toAddress()));
+
+        // mock the chain
+        BlockchainImpl chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        doReturn(validators).when(chain).getValidators();
+        kernelRule.getKernel().setBlockchain(chain);
+
+        // mock sync manager
+        SemuxSync sync = spy(new SemuxSync(kernelRule.getKernel()));
+
+        // prepare block
+        Block block = kernelRule.createBlock(Collections.emptyList());
+        Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
+                block.getHash());
+        block.setVotes(Arrays.asList(vote.sign(key1).getSignature()));
+
+        // mock checkpoints
+        Map<Long, byte[]> checkpoints = new HashMap<>();
+        checkpoints.put(block.getNumber(), RandomUtils.nextBytes(32));
+        Config config = spy(kernelRule.getKernel().getConfig());
+        when(config.checkpoints()).thenReturn(checkpoints);
+        Whitebox.setInternalState(sync, "config", config);
+
+        // tests
+        assertFalse(sync.validateBlock(block, chain.getAccountState(), chain.getDelegateState()));
     }
 }

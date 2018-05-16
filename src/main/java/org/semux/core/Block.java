@@ -158,7 +158,7 @@ public class Block {
     public static boolean validateTransactions(BlockHeader header, Collection<Transaction> unvalidatedTransactions,
             List<Transaction> allTransactions, Network network) {
         // validate transactions
-        boolean valid = unvalidatedTransactions.parallelStream().allMatch((tx) -> tx.validate(network));
+        boolean valid = unvalidatedTransactions.parallelStream().allMatch(tx -> tx.validate(network));
         if (!valid) {
             return false;
         }

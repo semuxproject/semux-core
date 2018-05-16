@@ -8,7 +8,11 @@ package org.semux.config;
 
 import static org.semux.net.Capability.SEM_TESTNET;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.semux.Network;
+import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.net.CapabilitySet;
 
 public class DevnetConfig extends AbstractConfig {
@@ -21,5 +25,15 @@ public class DevnetConfig extends AbstractConfig {
     @Override
     public CapabilitySet capabilitySet() {
         return CapabilitySet.of(SEM_TESTNET);
+    }
+
+    @Override
+    public Map<Long, byte[]> checkpoints() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<ValidatorActivatedFork, Long> forkActivationCheckpoints() {
+        return Collections.emptyMap();
     }
 }

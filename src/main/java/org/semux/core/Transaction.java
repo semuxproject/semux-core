@@ -146,7 +146,8 @@ public class Transaction {
                 // It won't introduce any fundamental loss to the system but could potentially
                 // cause confusion for block explorer, and thus are prohibited.
                 && (type == TransactionType.COINBASE
-                        || !Arrays.equals(signature.getAddress(), Constants.COINBASE_KEY.toAddress()));
+                        || (!Arrays.equals(signature.getAddress(), Constants.COINBASE_ADDRESS) &&
+                                !Arrays.equals(to, Constants.COINBASE_ADDRESS)));
     }
 
     /**

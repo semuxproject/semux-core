@@ -128,7 +128,7 @@ public class SemuxBft implements Consensus {
     protected VoteSet precommitVotes;
     protected VoteSet commitVotes;
 
-    protected final Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks;
+    protected Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks;
 
     public SemuxBft(Kernel kernel) {
         this.kernel = kernel;
@@ -279,6 +279,7 @@ public class SemuxBft implements Consensus {
         proposal = null;
 
         // activate forks
+        activatedForks = chain.getActivatedForks();
         activateForks();
 
         // update validators
@@ -829,7 +830,7 @@ public class SemuxBft implements Consensus {
         // [1] check block header
         Block latest = chain.getLatestBlock();
         if (!Block.validateHeader(latest.getHeader(), header)) {
-            logger.debug("Invalid block header");
+            logger.warn("Invalid block header");
             return false;
         }
 
@@ -838,7 +839,7 @@ public class SemuxBft implements Consensus {
             return false;
         }
 
-        if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_KEY.toAddress())) {
+        if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
             logger.warn("A block forged by the coinbase magic account is not allowed");
             return false;
         }
@@ -853,17 +854,12 @@ public class SemuxBft implements Consensus {
 
         if (!Block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())
                 || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
-            logger.debug("Invalid block transactions");
+            logger.warn("Invalid block transactions");
             return false;
         }
 
         if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
             logger.warn("Duplicated transaction hash is not allowed");
-            return false;
-        }
-
-        if (transactions.stream().anyMatch(tx -> Arrays.equals(tx.getTo(), Constants.COINBASE_KEY.toAddress()))) {
-            logger.warn("Sending transactions to coinbase magic account is not allowed");
             return false;
         }
 
@@ -874,7 +870,7 @@ public class SemuxBft implements Consensus {
         // [3] evaluate transactions
         List<TransactionResult> results = exec.execute(transactions, as, ds);
         if (!Block.validateResults(header, results)) {
-            logger.debug("Invalid transactions");
+            logger.warn("Invalid transactions");
             return false;
         }
 
@@ -922,9 +918,7 @@ public class SemuxBft implements Consensus {
         List<Transaction> transactions = block.getTransactions();
         long number = header.getNumber();
 
-        if (header.getNumber() > config.mandatoryUpgrade()) {
-            throw new SemuxBftException("This client needs to be upgraded");
-        } else if (header.getNumber() != chain.getLatestBlockNumber() + 1) {
+        if (header.getNumber() != chain.getLatestBlockNumber() + 1) {
             throw new SemuxBftException("Applying wrong block: number = " + header.getNumber());
         }
 

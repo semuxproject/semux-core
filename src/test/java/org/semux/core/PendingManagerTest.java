@@ -139,7 +139,7 @@ public class PendingManagerTest {
         PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
         assertEquals(0, pendingMgr.getPendingTransactions().size());
         assertNotNull(result.error);
-        assertEquals(TransactionResult.Error.INVALID_RECIPIENT, result.error);
+        assertEquals(TransactionResult.Error.INVALID_FORMAT, result.error);
     }
 
     @Test
