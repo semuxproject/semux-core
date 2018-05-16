@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.semux.core.Amount;
@@ -220,8 +221,8 @@ public class WalletModel {
      *
      * @return Value for property 'primaryValidator'.
      */
-    public WalletDelegate getPrimaryValidator() {
-        return primaryValidator;
+    public Optional<WalletDelegate> getPrimaryValidator() {
+        return Optional.ofNullable(primaryValidator);
     }
 
     /**
@@ -239,8 +240,8 @@ public class WalletModel {
      *
      * @return Value for property 'nextPrimaryValidator'.
      */
-    public WalletDelegate getNextPrimaryValidator() {
-        return nextPrimaryValidator;
+    public Optional<WalletDelegate> getNextPrimaryValidator() {
+        return Optional.ofNullable(nextPrimaryValidator);
     }
 
     /**
@@ -258,8 +259,8 @@ public class WalletModel {
      *
      * @return Value for property 'nextValidatorSetUpdate'.
      */
-    public Long getNextValidatorSetUpdate() {
-        return nextValidatorSetUpdate;
+    public Optional<Long> getNextValidatorSetUpdate() {
+        return Optional.ofNullable(nextValidatorSetUpdate);
     }
 
     /**

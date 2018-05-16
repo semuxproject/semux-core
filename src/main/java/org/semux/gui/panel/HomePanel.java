@@ -18,7 +18,6 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -41,6 +40,7 @@ import javax.swing.border.TitledBorder;
 import org.semux.core.Block;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
+import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.HorizontalSeparator;
@@ -375,17 +375,12 @@ public class HomePanel extends JPanel implements ActionListener {
         this.total.setText(SwingUtil.formatAmount(sum(model.getTotalAvailable(), model.getTotalLocked())));
         this.total.setToolTipText(SwingUtil.formatAmount(sum(model.getTotalAvailable(), model.getTotalLocked())));
 
-        this.primaryValidator.setText(model.getPrimaryValidator() != null
-                ? model.getPrimaryValidator().getNameString()
-                : "-");
-        this.nextPrimaryValidator.setText(model.getNextPrimaryValidator() != null
-                ? model.getNextPrimaryValidator().getNameString()
-                : "-");
-        this.nextValidatorSetUpdate.setText(model.getNextValidatorSetUpdate() != null
-                ? GuiMessages.get("NextValidatorSetUpdateTime", model.getNextValidatorSetUpdate(),
-                        TimeUtil.formatTimestamp(block.getTimestamp()
-                                + (model.getNextValidatorSetUpdate() - block.getNumber()) * 30 * 1000))
-                : "-");
+        this.primaryValidator.setText(model.getPrimaryValidator().map(Delegate::getNameString).orElse("-"));
+        this.nextPrimaryValidator.setText(model.getNextPrimaryValidator().map(Delegate::getNameString).orElse("-"));
+        this.nextValidatorSetUpdate.setText(model.getNextValidatorSetUpdate()
+                .map(n -> GuiMessages.get("NextValidatorSetUpdateTime", n,
+                        TimeUtil.formatTimestamp(block.getTimestamp() + (n - block.getNumber()) * 30 * 1000)))
+                .orElse("-"));
 
         // federate all transactions
         Set<ByteArray> hashes = new HashSet<>();
