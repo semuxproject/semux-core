@@ -54,11 +54,10 @@ public class ConnectionLimitHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-
-        AtomicInteger cnt = connectionCount
-                .getIfPresent(((InetSocketAddress) ctx.channel().remoteAddress()).getAddress());
-        if (cnt != null) {
-            cnt.decrementAndGet();
+        InetAddress address = ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress();
+        AtomicInteger cnt = connectionCount.get(address, k -> new AtomicInteger(0));
+        if (cnt.decrementAndGet() < 0) {
+            connectionCount.invalidate(address);
         }
     }
 
