@@ -32,7 +32,6 @@ import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
 import org.semux.net.Peer;
-import org.semux.util.TimeUtil;
 
 public class TypeFactory {
 
@@ -58,7 +57,6 @@ public class TypeFactory {
                 .coinbase(Hex.encode0x(block.getCoinbase()))
                 .parentHash(Hex.encode0x(block.getParentHash()))
                 .timestamp(String.valueOf(block.getTimestamp()))
-                .date(TimeUtil.formatTimestamp(block.getTimestamp()))
                 .transactionsRoot(Hex.encode0x(block.getTransactionsRoot()))
                 .resultsRoot(Hex.encode0x(block.getResultsRoot()))
                 .stateRoot(Hex.encode0x(block.getStateRoot()))
