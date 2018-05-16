@@ -46,6 +46,10 @@ public class WalletModel {
     private volatile List<WalletAccount> accounts = new ArrayList<>();
     private volatile List<WalletDelegate> delegates = new ArrayList<>();
 
+    private volatile WalletDelegate primaryValidator;
+    private volatile WalletDelegate nextPrimaryValidator;
+    private volatile Long nextValidatorSetUpdate;
+
     private Map<String, Peer> activePeers = new HashMap<>();
 
     /**
@@ -209,6 +213,63 @@ public class WalletModel {
 
     public void setActivePeers(Map<String, Peer> activePeers) {
         this.activePeers = activePeers;
+    }
+
+    /**
+     * Getter for property 'primaryValidator'.
+     *
+     * @return Value for property 'primaryValidator'.
+     */
+    public WalletDelegate getPrimaryValidator() {
+        return primaryValidator;
+    }
+
+    /**
+     * Setter for property 'primaryValidator'.
+     *
+     * @param primaryValidator
+     *            Value to set for property 'primaryValidator'.
+     */
+    public void setPrimaryValidator(WalletDelegate primaryValidator) {
+        this.primaryValidator = primaryValidator;
+    }
+
+    /**
+     * Getter for property 'nextPrimaryValidator'.
+     *
+     * @return Value for property 'nextPrimaryValidator'.
+     */
+    public WalletDelegate getNextPrimaryValidator() {
+        return nextPrimaryValidator;
+    }
+
+    /**
+     * Setter for property 'nextPrimaryValidator'.
+     *
+     * @param nextPrimaryValidator
+     *            Value to set for property 'nextPrimaryValidator'.
+     */
+    public void setNextPrimaryValidator(WalletDelegate nextPrimaryValidator) {
+        this.nextPrimaryValidator = nextPrimaryValidator;
+    }
+
+    /**
+     * Getter for property 'nextValidatorSetUpdate'.
+     *
+     * @return Value for property 'nextValidatorSetUpdate'.
+     */
+    public Long getNextValidatorSetUpdate() {
+        return nextValidatorSetUpdate;
+    }
+
+    /**
+     * Setter for property 'nextValidatorSetUpdate'.
+     *
+     * @param nextValidatorSetUpdate
+     *            Value to set for property 'nextValidatorSetUpdate'.
+     */
+    public void setNextValidatorSetUpdate(Long nextValidatorSetUpdate) {
+        this.nextValidatorSetUpdate = nextValidatorSetUpdate;
     }
 
     /**
