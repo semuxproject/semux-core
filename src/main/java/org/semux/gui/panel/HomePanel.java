@@ -189,6 +189,7 @@ public class HomePanel extends JPanel implements ActionListener {
         consensus.add(labelPrimaryValidator, c);
 
         primaryValidator = new JLabel("");
+        primaryValidator.setName("primaryValidator");
         primaryValidator.setFont(plainFont);
         primaryValidator.setHorizontalAlignment(SwingConstants.LEFT);
         c.gridx = 0;
@@ -212,6 +213,7 @@ public class HomePanel extends JPanel implements ActionListener {
         consensus.add(labelNextPrimaryValidator, c);
 
         nextPrimaryValidator = new JLabel("");
+        nextPrimaryValidator.setName("nextPrimaryValidator");
         nextPrimaryValidator.setFont(plainFont);
         nextPrimaryValidator.setHorizontalAlignment(SwingConstants.LEFT);
         c.gridx = 0;
@@ -235,6 +237,7 @@ public class HomePanel extends JPanel implements ActionListener {
         consensus.add(labelNextValidatorSetUpdate, c);
 
         nextValidatorSetUpdate = new JLabel("");
+        nextValidatorSetUpdate.setName("nextValidatorSetUpdate");
         nextValidatorSetUpdate.setFont(plainFont);
         nextValidatorSetUpdate.setHorizontalAlignment(SwingConstants.LEFT);
         c.gridx = 0;
@@ -359,9 +362,9 @@ public class HomePanel extends JPanel implements ActionListener {
      */
     protected void refresh() {
         Block block = model.getLatestBlock();
-        this.bestBlockNum.setText(model.getSyncProgress().getTargetHeight() > 0
-                ? SwingUtil.formatNumber(model.getSyncProgress().getTargetHeight() - 1)
-                : "-");
+        this.bestBlockNum.setText(model.getSyncProgress()
+                .map(s -> s.getTargetHeight() > 0 ? SwingUtil.formatNumber(s.getTargetHeight() - 1) : "-")
+                .orElse("-"));
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
         this.coinbase.setText(SwingUtil.getAddressAbbr(model.getCoinbase().toAddress()));
@@ -379,7 +382,7 @@ public class HomePanel extends JPanel implements ActionListener {
         this.nextPrimaryValidator.setText(model.getNextPrimaryValidator().map(Delegate::getNameString).orElse("-"));
         this.nextValidatorSetUpdate.setText(model.getNextValidatorSetUpdate()
                 .map(n -> GuiMessages.get("NextValidatorSetUpdateTime", n,
-                        TimeUtil.formatTimestamp(block.getTimestamp() + (n - block.getNumber()) * 30 * 1000)))
+                        TimeUtil.formatTimestamp(block.getTimestamp() + (n - block.getNumber() - 1) * 30 * 1000)))
                 .orElse("-"));
 
         // federate all transactions

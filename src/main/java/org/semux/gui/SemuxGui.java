@@ -20,7 +20,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -457,18 +456,23 @@ public class SemuxGui extends Launcher {
         model.setDelegates(wds);
 
         // update validators
-        String primaryValidator = getConfig().getPrimaryValidator(validators, block.getNumber() + 1, 0,
+        String primaryValidator = getConfig().getPrimaryValidator(validators,
+                block.getNumber() + 1,
+                0,
                 chain.forkActivated(block.getNumber() + 1, ValidatorActivatedFork.UNIFORM_DISTRIBUTION));
-        model.setPrimaryValidator(
-                wds.stream().filter(wd -> wd.getAddressString().equals(primaryValidator)).findFirst().orElse(null));
-        model.setNextPrimaryValidator((block.getNumber() + 2) % getConfig().getValidatorUpdateInterval() == 0 ? null
+        model.setPrimaryValidator(wds.stream()
+                .filter(wd -> wd.getAddressString().equals(primaryValidator))
+                .findFirst()
+                .orElse(null));
+        model.setNextPrimaryValidator((block.getNumber() + 2) % getConfig().getValidatorUpdateInterval() == 0
+                ? null
                 : wds.stream()
                         .filter(wd -> wd.getAddressString()
                                 .equals(validators.get((int) ((block.getNumber() + 2) % validators.size()))))
-                        .findFirst().orElse(null));
-        model.setNextValidatorSetUpdate(LongStream
-                .range(block.getNumber() + 2, block.getNumber() + 2 + getConfig().getValidatorUpdateInterval()).boxed()
-                .filter(n -> n % getConfig().getValidatorUpdateInterval() == 0).findFirst().orElse(null));
+                        .findFirst()
+                        .orElse(null));
+        model.setNextValidatorSetUpdate(((block.getNumber() + 1) / getConfig().getValidatorUpdateInterval() + 1)
+                * getConfig().getValidatorUpdateInterval());
 
         // update active peers
         Map<String, Peer> activePeers = new HashMap<>();

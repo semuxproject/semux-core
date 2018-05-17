@@ -91,8 +91,8 @@ public class WalletModel {
      *
      * @return Value to set for property ${@link #syncProgress}.
      */
-    public SyncManager.Progress getSyncProgress() {
-        return syncProgress;
+    public Optional<SyncManager.Progress> getSyncProgress() {
+        return Optional.ofNullable(syncProgress);
     }
 
     /**
