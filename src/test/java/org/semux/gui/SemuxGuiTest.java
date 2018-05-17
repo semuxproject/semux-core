@@ -68,7 +68,7 @@ public class SemuxGuiTest {
         Wallet wallet = kernelRule.getKernel().getWallet();
 
         // setup coinbase
-        SemuxGui gui = spy(new SemuxGui(new WalletModel(), kernelRule.getKernel()));
+        SemuxGui gui = spy(new SemuxGui(new WalletModel(kernelRule.getKernel().getConfig()), kernelRule.getKernel()));
         Mockito.doNothing().when(gui).startKernelAndMain(any());
         Mockito.doReturn(3).when(gui).showSelectDialog(any(), any(), any());
         gui.setupCoinbase(wallet);
@@ -83,7 +83,7 @@ public class SemuxGuiTest {
         wallet.setAccounts(Collections.emptyList());
 
         // setup coinbase
-        SemuxGui gui = spy(new SemuxGui(new WalletModel(), kernelRule.getKernel()));
+        SemuxGui gui = spy(new SemuxGui(new WalletModel(kernelRule.getKernel().getConfig()), kernelRule.getKernel()));
         Mockito.doNothing().when(gui).startKernelAndMain(any());
         gui.setupCoinbase(wallet);
 
@@ -95,7 +95,7 @@ public class SemuxGuiTest {
     public void testProcessBlock() {
         KernelMock kernel = kernelRule.getKernel();
 
-        WalletModel model = new WalletModel();
+        WalletModel model = new WalletModel(kernel.getConfig());
 
         SemuxGui gui = new SemuxGui(model, kernel);
 

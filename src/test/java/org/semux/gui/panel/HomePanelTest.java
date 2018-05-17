@@ -67,10 +67,10 @@ public class HomePanelTest extends AssertJSwingJUnitTestCase {
         // mock wallet model
         WalletDelegate primaryValidator = new WalletDelegate(
                 new Delegate(new Key().toAddress(), "primary".getBytes(), 0, Amount.ZERO));
-        when(walletModel.getPrimaryValidator()).thenReturn(Optional.of(primaryValidator));
+        when(walletModel.getPrimaryValidatorDelegate()).thenReturn(Optional.of(primaryValidator));
         WalletDelegate nextPrimaryValidator = new WalletDelegate(
                 new Delegate(new Key().toAddress(), "next".getBytes(), 0, Amount.ZERO));
-        when(walletModel.getNextPrimaryValidator()).thenReturn(Optional.of(nextPrimaryValidator));
+        when(walletModel.getNextPrimaryValidatorDelegate()).thenReturn(Optional.of(nextPrimaryValidator));
         when(walletModel.getNextValidatorSetUpdate()).thenReturn(Optional.of(200L));
 
         // mock kernel

@@ -34,10 +34,11 @@ public class MainFrameTest extends AssertJSwingJUnitTestCase {
         kernelRule.openBlockchain();
 
         Key coinbase = new Key();
-        WalletModel model = new WalletModel();
+        WalletModel model = new WalletModel(kernelRule.getKernel().getConfig());
         KernelMock kernel = kernelRule.getKernel();
 
         gui = new SemuxGui(model, kernel);
+        model.setValidators(kernelRule.getKernel().getBlockchain().getValidators());
         model.setLatestBlock(kernel.getBlockchain().getLatestBlock());
         model.setCoinbase(coinbase);
         model.setSyncProgress(new SemuxSync.SemuxSyncProgress(0, 1, 1, Duration.ZERO));

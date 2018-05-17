@@ -378,8 +378,9 @@ public class HomePanel extends JPanel implements ActionListener {
         this.total.setText(SwingUtil.formatAmount(sum(model.getTotalAvailable(), model.getTotalLocked())));
         this.total.setToolTipText(SwingUtil.formatAmount(sum(model.getTotalAvailable(), model.getTotalLocked())));
 
-        this.primaryValidator.setText(model.getPrimaryValidator().map(Delegate::getNameString).orElse("-"));
-        this.nextPrimaryValidator.setText(model.getNextPrimaryValidator().map(Delegate::getNameString).orElse("-"));
+        this.primaryValidator.setText(model.getPrimaryValidatorDelegate().map(Delegate::getNameString).orElse("-"));
+        this.nextPrimaryValidator
+                .setText(model.getNextPrimaryValidatorDelegate().map(Delegate::getNameString).orElse("-"));
         this.nextValidatorSetUpdate.setText(model.getNextValidatorSetUpdate()
                 .map(n -> GuiMessages.get("NextValidatorSetUpdateTime", n,
                         TimeUtil.formatTimestamp(block.getTimestamp() + (n - block.getNumber() - 1) * 30 * 1000)))

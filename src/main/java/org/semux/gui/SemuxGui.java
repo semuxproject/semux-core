@@ -29,7 +29,6 @@ import org.semux.Kernel;
 import org.semux.Launcher;
 import org.semux.config.Constants;
 import org.semux.config.exception.ConfigException;
-import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.Transaction;
@@ -125,7 +124,7 @@ public class SemuxGui extends Launcher {
         SwingUtil.setDefaultFractionDigits(getConfig().uiFractionDigits());
         SwingUtil.setDefaultUnit(getConfig().uiUnit());
 
-        this.model = new WalletModel();
+        this.model = new WalletModel(getConfig());
     }
 
     /**
@@ -456,23 +455,8 @@ public class SemuxGui extends Launcher {
         model.setDelegates(wds);
 
         // update validators
-        String primaryValidator = getConfig().getPrimaryValidator(validators,
-                block.getNumber() + 1,
-                0,
-                chain.forkActivated(block.getNumber() + 1, ValidatorActivatedFork.UNIFORM_DISTRIBUTION));
-        model.setPrimaryValidator(wds.stream()
-                .filter(wd -> wd.getAddressString().equals(primaryValidator))
-                .findFirst()
-                .orElse(null));
-        model.setNextPrimaryValidator((block.getNumber() + 2) % getConfig().getValidatorUpdateInterval() == 0
-                ? null
-                : wds.stream()
-                        .filter(wd -> wd.getAddressString()
-                                .equals(validators.get((int) ((block.getNumber() + 2) % validators.size()))))
-                        .findFirst()
-                        .orElse(null));
-        model.setNextValidatorSetUpdate(((block.getNumber() + 1) / getConfig().getValidatorUpdateInterval() + 1)
-                * getConfig().getValidatorUpdateInterval());
+        model.setValidators(validators);
+        model.setActivatedForks(chain.getActivatedForks());
 
         // update active peers
         Map<String, Peer> activePeers = new HashMap<>();
