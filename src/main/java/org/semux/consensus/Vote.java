@@ -6,8 +6,6 @@
  */
 package org.semux.consensus;
 
-import java.util.Optional;
-
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
 import org.semux.util.Bytes;

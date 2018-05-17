@@ -56,7 +56,7 @@ public class ConnectionLimitHandlerTest {
         assertEquals(0, ConnectionLimitHandler.getConnectionsCount(InetAddress.getByName("127.0.0.1")));
 
         // ensure that the address has been removed from the hash map
-        // assertFalse(ConnectionLimitHandler.containsAddress(InetAddress.getByName("127.0.0.1")));
+        assertFalse(ConnectionLimitHandler.containsAddress(InetAddress.getByName("127.0.0.1")));
     }
 
     @Test

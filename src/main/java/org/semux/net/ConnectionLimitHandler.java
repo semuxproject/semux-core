@@ -56,7 +56,7 @@ public class ConnectionLimitHandler extends ChannelInboundHandlerAdapter {
         super.channelInactive(ctx);
         InetAddress address = ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress();
         AtomicInteger cnt = connectionCount.get(address, k -> new AtomicInteger(0));
-        if (cnt.decrementAndGet() < 0) {
+        if (cnt.decrementAndGet() <= 0) {
             connectionCount.invalidate(address);
         }
     }
@@ -69,7 +69,8 @@ public class ConnectionLimitHandler extends ChannelInboundHandlerAdapter {
      * @return current connection count
      */
     public static int getConnectionsCount(InetAddress address) {
-        return connectionCount.get(address, k -> new AtomicInteger(0)).intValue();
+        AtomicInteger cnt = connectionCount.getIfPresent(address);
+        return cnt == null ? 0 : cnt.get();
     }
 
     /**
