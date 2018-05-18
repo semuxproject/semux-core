@@ -136,10 +136,15 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 groupLayout.createParallelGroup(GroupLayout.Alignment.TRAILING).addGroup(
                         groupLayout.createSequentialGroup()
                                 .addComponent(type)
+                                .addGap(10)
                                 .addComponent(selectType)
+                                .addGap(10)
                                 .addComponent(from)
+                                .addGap(10)
                                 .addComponent(selectFrom)
+                                .addGap(10)
                                 .addComponent(to)
+                                .addGap(10)
                                 .addComponent(selectTo))
                         .addComponent(scrollPane));
         groupLayout.setVerticalGroup(
@@ -152,6 +157,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                                         .addComponent(selectFrom)
                                         .addComponent(to)
                                         .addComponent(selectTo)))
+                        .addGap(18)
                         .addComponent(scrollPane));
         setLayout(groupLayout);
 
