@@ -371,7 +371,6 @@ public class SemuxCliTest {
         List<LogEvent> logs = TestLoggingAppender.events();
         assertThat(logs, hasItem(info(CliMessages.get("NewAccountCreatedForAddress", newAccount.toAddressString()))));
         assertThat(logs, hasItem(info(CliMessages.get("PublicKey", Hex.encode(newAccount.getPublicKey())))));
-        assertThat(logs, hasItem(info(CliMessages.get("PrivateKey", Hex.encode(newAccount.getPrivateKey())))));
     }
 
     @Test
