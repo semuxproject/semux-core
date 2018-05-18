@@ -76,7 +76,7 @@ public class SelectDialog extends JDialog implements ActionListener {
                             .addComponent(btnCancel, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(ComponentPlacement.UNRELATED)
                             .addComponent(btnOk, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE))
-                        .addComponent(comboBox, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(comboBox, GroupLayout.PREFERRED_SIZE, 512, Short.MAX_VALUE))
                     .addGap(17))
         );
         groupLayout.setVerticalGroup(
@@ -90,7 +90,7 @@ public class SelectDialog extends JDialog implements ActionListener {
                             .addGap(21)
                             .addComponent(lblMessage)
                             .addGap(18)
-                            .addComponent(comboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                            .addComponent(comboBox, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
                             .addGap(16)
                             .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                                 .addComponent(btnOk)
