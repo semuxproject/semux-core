@@ -247,14 +247,14 @@ public class WalletModel {
      *
      * @return The address of the current primary validator.
      */
-    public Optional<String> getPrimaryValidator() {
+    public Optional<String> getValidator(int view) {
         if (validators == null || latestBlock == null || activatedForks == null) {
             return Optional.empty();
         }
 
         return Optional.ofNullable(config.getPrimaryValidator(validators,
                 latestBlock.getNumber() + 1,
-                0,
+                view,
                 activatedForks.containsKey(ValidatorActivatedFork.UNIFORM_DISTRIBUTION)));
     }
 
@@ -264,13 +264,13 @@ public class WalletModel {
      *
      * @return The {@link WalletDelegate} of the current primary validator.
      */
-    public Optional<WalletDelegate> getPrimaryValidatorDelegate() {
-        if (delegates == null || !getPrimaryValidator().isPresent()) {
+    public Optional<WalletDelegate> getValidatorDelegate(int view) {
+        if (delegates == null || !getValidator(view).isPresent()) {
             return Optional.empty();
         }
 
         return delegates.stream()
-                .filter(wd -> wd.getAddressString().equals(getPrimaryValidator().get()))
+                .filter(wd -> wd.getAddressString().equals(getValidator(view).get()))
                 .findFirst();
     }
 

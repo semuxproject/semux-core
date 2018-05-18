@@ -6,6 +6,7 @@
  */
 package org.semux.gui.panel;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -26,11 +27,11 @@ import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Key;
+import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GuiMessages;
 import org.semux.rules.KernelRule;
-import org.semux.util.TimeUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HomePanelTest extends AssertJSwingJUnitTestCase {
@@ -65,11 +66,17 @@ public class HomePanelTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testConsensusTable() {
         // mock wallet model
-        WalletDelegate primaryValidator = new WalletDelegate(
-                new Delegate(new Key().toAddress(), "primary".getBytes(), 0, Amount.ZERO));
-        when(walletModel.getPrimaryValidatorDelegate()).thenReturn(Optional.of(primaryValidator));
+        final String primaryValidatorName = "abcdefghijklmnop";
+        final String backupValidator = "bcdefghijklmnopq";
+        final String nextValidator = "cdefghijklmnopqr";
+        WalletDelegate primaryValidatorDelegate = new WalletDelegate(
+                new Delegate(new Key().toAddress(), primaryValidatorName.getBytes(), 0, Amount.ZERO));
+        WalletDelegate backupValidatorDelegate = new WalletDelegate(
+                new Delegate(new Key().toAddress(), backupValidator.getBytes(), 0, Amount.ZERO));
+        when(walletModel.getValidatorDelegate(eq(0))).thenReturn(Optional.of(primaryValidatorDelegate));
+        when(walletModel.getValidatorDelegate(eq(1))).thenReturn(Optional.of(backupValidatorDelegate));
         WalletDelegate nextPrimaryValidator = new WalletDelegate(
-                new Delegate(new Key().toAddress(), "next".getBytes(), 0, Amount.ZERO));
+                new Delegate(new Key().toAddress(), nextValidator.getBytes(), 0, Amount.ZERO));
         when(walletModel.getNextPrimaryValidatorDelegate()).thenReturn(Optional.of(nextPrimaryValidator));
         when(walletModel.getNextValidatorSetUpdate()).thenReturn(Optional.of(200L));
 
@@ -79,11 +86,11 @@ public class HomePanelTest extends AssertJSwingJUnitTestCase {
 
         window = new FrameFixture(robot(), application);
         window.show().requireVisible().moveToFront();
-        window.label("primaryValidator").requireVisible().requireText("primary");
-        window.label("nextPrimaryValidator").requireVisible().requireText("next");
-        window.label("nextValidatorSetUpdate").requireVisible().requireText(GuiMessages.get(
-                "NextValidatorSetUpdateTime",
-                200,
-                TimeUtil.formatTimestamp(1527206400000L + 30L * 1000L)));
+        window.label("primaryValidator").requireVisible().requireText(primaryValidatorName);
+        window.label("backupValidator").requireVisible().requireText(backupValidator);
+        window.label("nextValidator").requireVisible().requireText(nextValidator);
+        window.label("roundEndBlock").requireVisible().requireText(String.valueOf(200));
+        window.label("roundEndTime").requireVisible()
+                .requireText(SwingUtil.formatTimestamp(1527206400000L + 30L * 1000L));
     }
 }

@@ -174,7 +174,7 @@ public class WalletModelTest {
             Block block = mock(Block.class);
             when(block.getNumber()).thenReturn((long) i);
             model.setLatestBlock(block);
-            assertEquals(delegates.get((i + 1) % delegates.size()), model.getPrimaryValidatorDelegate().get());
+            assertEquals(delegates.get((i + 1) % delegates.size()), model.getValidatorDelegate(0).get());
         }
     }
 

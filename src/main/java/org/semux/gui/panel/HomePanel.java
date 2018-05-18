@@ -43,7 +43,6 @@ import org.semux.core.TransactionType;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
-import org.semux.gui.HorizontalSeparator;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletAccount;
@@ -51,7 +50,6 @@ import org.semux.gui.model.WalletModel;
 import org.semux.gui.model.WalletModel.Status;
 import org.semux.message.GuiMessages;
 import org.semux.util.ByteArray;
-import org.semux.util.TimeUtil;
 import org.semux.util.exception.UnreachableException;
 
 public class HomePanel extends JPanel implements ActionListener {
@@ -78,8 +76,10 @@ public class HomePanel extends JPanel implements ActionListener {
 
     // Consensus Table
     private final JLabel primaryValidator;
-    private final JLabel nextPrimaryValidator;
-    private final JLabel nextValidatorSetUpdate;
+    private final JLabel backupValidator;
+    private final JLabel nextValidator;
+    private final JLabel roundEndBlock;
+    private final JLabel roundEndTime;
 
     // Transactions Table
     private final JPanel transactions;
@@ -175,13 +175,13 @@ public class HomePanel extends JPanel implements ActionListener {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.insets = new Insets(0, 0, 0, 0);
         c.fill = GridBagConstraints.BOTH;
-        c.gridwidth = 1;
         c.gridheight = 1;
         c.weightx = 1;
         c.weighty = 1;
 
         JLabel labelPrimaryValidator = new JLabel(GuiMessages.get("PrimaryValidator") + ":");
         labelPrimaryValidator.setFont(boldFont);
+        c.gridwidth = 1;
         c.gridx = 0;
         c.gridy = 0;
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -192,61 +192,103 @@ public class HomePanel extends JPanel implements ActionListener {
         primaryValidator.setName("primaryValidator");
         primaryValidator.setFont(plainFont);
         primaryValidator.setHorizontalAlignment(SwingConstants.LEFT);
-        c.gridx = 0;
-        c.gridy = 1;
+        c.gridwidth = 2;
+        c.gridx = 1;
+        c.gridy = 0;
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         consensus.add(primaryValidator, c);
 
+        JLabel labelBackupValidator = new JLabel(GuiMessages.get("BackupValidator") + ":");
+        labelBackupValidator.setFont(boldFont);
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 1;
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        consensus.add(labelBackupValidator, c);
+
+        backupValidator = new JLabel("");
+        backupValidator.setName("backupValidator");
+        backupValidator.setFont(plainFont);
+        backupValidator.setHorizontalAlignment(SwingConstants.LEFT);
+        c.gridwidth = 2;
+        c.gridx = 1;
+        c.gridy = 1;
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        consensus.add(backupValidator, c);
+
+        JLabel labelNextValidator = new JLabel(GuiMessages.get("NextValidator") + ":");
+        labelNextValidator.setFont(boldFont);
+        c.gridwidth = 1;
         c.gridx = 0;
         c.gridy = 2;
-        c.anchor = GridBagConstraints.CENTER;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        consensus.add(new HorizontalSeparator(), c);
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        consensus.add(labelNextValidator, c);
 
-        JLabel labelNextPrimaryValidator = new JLabel(GuiMessages.get("NextPrimaryValidator") + ":");
-        labelNextPrimaryValidator.setFont(boldFont);
+        nextValidator = new JLabel("");
+        nextValidator.setName("nextValidator");
+        nextValidator.setFont(plainFont);
+        nextValidator.setHorizontalAlignment(SwingConstants.LEFT);
+        c.gridwidth = 2;
+        c.gridx = 1;
+        c.gridy = 2;
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        consensus.add(nextValidator, c);
+
+        JLabel labelRoundEndBlock = new JLabel(GuiMessages.get("RoundEndBlock") + ":");
+        labelRoundEndBlock.setFont(boldFont);
+        c.gridwidth = 1;
         c.gridx = 0;
         c.gridy = 3;
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
-        consensus.add(labelNextPrimaryValidator, c);
+        consensus.add(labelRoundEndBlock, c);
 
-        nextPrimaryValidator = new JLabel("");
-        nextPrimaryValidator.setName("nextPrimaryValidator");
-        nextPrimaryValidator.setFont(plainFont);
-        nextPrimaryValidator.setHorizontalAlignment(SwingConstants.LEFT);
+        roundEndBlock = new JLabel("");
+        roundEndBlock.setName("roundEndBlock");
+        roundEndBlock.setFont(plainFont);
+        roundEndBlock.setHorizontalAlignment(SwingConstants.LEFT);
+        c.gridwidth = 2;
+        c.gridx = 1;
+        c.gridy = 3;
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        consensus.add(roundEndBlock, c);
+
+        JLabel labelRoundEndTime = new JLabel(GuiMessages.get("RoundEndTime") + ":");
+        labelRoundEndTime.setFont(boldFont);
+        c.gridwidth = 1;
         c.gridx = 0;
         c.gridy = 4;
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
-        consensus.add(nextPrimaryValidator, c);
+        consensus.add(labelRoundEndTime, c);
 
-        c.gridx = 0;
-        c.gridy = 5;
-        c.anchor = GridBagConstraints.CENTER;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        consensus.add(new HorizontalSeparator(), c);
-
-        JLabel labelNextValidatorSetUpdate = new JLabel(GuiMessages.get("NextValidatorSetUpdate") + ":");
-        labelNextValidatorSetUpdate.setFont(boldFont);
-        c.gridx = 0;
-        c.gridy = 6;
+        roundEndTime = new JLabel("");
+        roundEndTime.setName("roundEndTime");
+        roundEndTime.setFont(plainFont);
+        roundEndTime.setHorizontalAlignment(SwingConstants.LEFT);
+        c.gridwidth = 2;
+        c.gridx = 1;
+        c.gridy = 4;
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
-        consensus.add(labelNextValidatorSetUpdate, c);
-
-        nextValidatorSetUpdate = new JLabel("");
-        nextValidatorSetUpdate.setName("nextValidatorSetUpdate");
-        nextValidatorSetUpdate.setFont(plainFont);
-        nextValidatorSetUpdate.setHorizontalAlignment(SwingConstants.LEFT);
-        c.gridx = 0;
-        c.gridy = 7;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        consensus.add(nextValidatorSetUpdate, c);
+        consensus.add(roundEndTime, c);
 
         // empty rows
+        c.gridx = 0;
+        c.gridy = 5;
+        consensus.add(Box.createRigidArea(new Dimension(0, 0)), c);
+        c.gridx = 0;
+        c.gridy = 6;
+        consensus.add(Box.createRigidArea(new Dimension(0, 0)), c);
+        c.gridx = 0;
+        c.gridy = 7;
+        consensus.add(Box.createRigidArea(new Dimension(0, 0)), c);
         c.gridx = 0;
         c.gridy = 8;
         consensus.add(Box.createRigidArea(new Dimension(0, 0)), c);
@@ -362,6 +404,8 @@ public class HomePanel extends JPanel implements ActionListener {
      */
     protected void refresh() {
         Block block = model.getLatestBlock();
+
+        // overview table
         this.bestBlockNum.setText(model.getSyncProgress()
                 .map(s -> s.getTargetHeight() > 0 ? SwingUtil.formatNumber(s.getTargetHeight() - 1) : "-")
                 .orElse("-"));
@@ -378,15 +422,24 @@ public class HomePanel extends JPanel implements ActionListener {
         this.total.setText(SwingUtil.formatAmount(sum(model.getTotalAvailable(), model.getTotalLocked())));
         this.total.setToolTipText(SwingUtil.formatAmount(sum(model.getTotalAvailable(), model.getTotalLocked())));
 
-        this.primaryValidator.setText(model.getPrimaryValidatorDelegate().map(Delegate::getNameString).orElse("-"));
-        this.nextPrimaryValidator
+        // consensus info table
+        this.primaryValidator
+                .setText(model.getValidatorDelegate(0).map(Delegate::getNameString).orElse("-"));
+        this.backupValidator
+                .setText(model.getValidatorDelegate(1).map(Delegate::getNameString).orElse("-"));
+        this.nextValidator
                 .setText(model.getNextPrimaryValidatorDelegate().map(Delegate::getNameString).orElse("-"));
-        this.nextValidatorSetUpdate.setText(model.getNextValidatorSetUpdate()
-                .map(n -> GuiMessages.get("NextValidatorSetUpdateTime", n,
-                        TimeUtil.formatTimestamp(block.getTimestamp() + (n - block.getNumber() - 1) * 30 * 1000)))
-                .orElse("-"));
+        this.roundEndBlock
+                .setText(model.getNextValidatorSetUpdate()
+                        .map(String::valueOf)
+                        .orElse("-"));
+        this.roundEndTime
+                .setText(model.getNextValidatorSetUpdate()
+                        .map(n -> SwingUtil
+                                .formatTimestamp(block.getTimestamp() + (n - block.getNumber() - 1) * 30 * 1000))
+                        .orElse("-"));
 
-        // federate all transactions
+        // transaction table: federate all transactions
         Set<ByteArray> hashes = new HashSet<>();
         List<Transaction> list = new ArrayList<>();
         for (WalletAccount acc : model.getAccounts()) {
