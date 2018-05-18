@@ -10,12 +10,8 @@ import static org.semux.core.Amount.sum;
 
 import java.awt.Color;
 import java.awt.ComponentOrientation;
-import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -24,7 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -168,130 +163,58 @@ public class HomePanel extends JPanel implements ActionListener {
         consensus.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 0, 10)),
                 GuiMessages.get("Consensus"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        consensus.setLayout(new GridBagLayout());
+        consensus.setLayout(new GridLayout(8, 2));
         consensus.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.insets = new Insets(0, 0, 0, 0);
-        c.fill = GridBagConstraints.BOTH;
-        c.gridheight = 1;
-        c.weightx = 1;
-        c.weighty = 1;
 
         JLabel labelPrimaryValidator = new JLabel(GuiMessages.get("PrimaryValidator") + ":");
         labelPrimaryValidator.setFont(boldFont);
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy = 0;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        consensus.add(labelPrimaryValidator, c);
+        consensus.add(labelPrimaryValidator);
 
         primaryValidator = new JLabel("");
         primaryValidator.setName("primaryValidator");
         primaryValidator.setFont(plainFont);
         primaryValidator.setHorizontalAlignment(SwingConstants.LEFT);
-        c.gridwidth = 2;
-        c.gridx = 1;
-        c.gridy = 0;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        consensus.add(primaryValidator, c);
+        consensus.add(primaryValidator);
 
         JLabel labelBackupValidator = new JLabel(GuiMessages.get("BackupValidator") + ":");
         labelBackupValidator.setFont(boldFont);
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy = 1;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        consensus.add(labelBackupValidator, c);
+        consensus.add(labelBackupValidator);
 
         backupValidator = new JLabel("");
         backupValidator.setName("backupValidator");
         backupValidator.setFont(plainFont);
         backupValidator.setHorizontalAlignment(SwingConstants.LEFT);
-        c.gridwidth = 2;
-        c.gridx = 1;
-        c.gridy = 1;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        consensus.add(backupValidator, c);
+        consensus.add(backupValidator);
 
         JLabel labelNextValidator = new JLabel(GuiMessages.get("NextValidator") + ":");
         labelNextValidator.setFont(boldFont);
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy = 2;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        consensus.add(labelNextValidator, c);
+        consensus.add(labelNextValidator);
 
         nextValidator = new JLabel("");
         nextValidator.setName("nextValidator");
         nextValidator.setFont(plainFont);
         nextValidator.setHorizontalAlignment(SwingConstants.LEFT);
-        c.gridwidth = 2;
-        c.gridx = 1;
-        c.gridy = 2;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        consensus.add(nextValidator, c);
+        consensus.add(nextValidator);
 
         JLabel labelRoundEndBlock = new JLabel(GuiMessages.get("RoundEndBlock") + ":");
         labelRoundEndBlock.setFont(boldFont);
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy = 3;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        consensus.add(labelRoundEndBlock, c);
+        consensus.add(labelRoundEndBlock);
 
         roundEndBlock = new JLabel("");
         roundEndBlock.setName("roundEndBlock");
         roundEndBlock.setFont(plainFont);
         roundEndBlock.setHorizontalAlignment(SwingConstants.LEFT);
-        c.gridwidth = 2;
-        c.gridx = 1;
-        c.gridy = 3;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        consensus.add(roundEndBlock, c);
+        consensus.add(roundEndBlock);
 
         JLabel labelRoundEndTime = new JLabel(GuiMessages.get("RoundEndTime") + ":");
         labelRoundEndTime.setFont(boldFont);
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy = 4;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        consensus.add(labelRoundEndTime, c);
+        consensus.add(labelRoundEndTime);
 
         roundEndTime = new JLabel("");
         roundEndTime.setName("roundEndTime");
         roundEndTime.setFont(plainFont);
         roundEndTime.setHorizontalAlignment(SwingConstants.LEFT);
-        c.gridwidth = 2;
-        c.gridx = 1;
-        c.gridy = 4;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        consensus.add(roundEndTime, c);
-
-        // empty rows
-        c.gridx = 0;
-        c.gridy = 5;
-        consensus.add(Box.createRigidArea(new Dimension(0, 0)), c);
-        c.gridx = 0;
-        c.gridy = 6;
-        consensus.add(Box.createRigidArea(new Dimension(0, 0)), c);
-        c.gridx = 0;
-        c.gridy = 7;
-        consensus.add(Box.createRigidArea(new Dimension(0, 0)), c);
-        c.gridx = 0;
-        c.gridy = 8;
-        consensus.add(Box.createRigidArea(new Dimension(0, 0)), c);
+        consensus.add(roundEndTime);
 
         // setup transactions panel
         transactions = new JPanel();
