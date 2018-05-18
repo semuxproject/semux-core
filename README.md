@@ -5,6 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/semuxproject/semux/badge.svg?branch=develop)](https://coveralls.io/github/semuxproject/semux)
 [![Crowdin](https://d322cqt584bo4o.cloudfront.net/semux/localized.svg)](https://crowdin.com/project/semux)
 
+[![Throughput Graph](https://graphs.waffle.io/semuxproject/semux/throughput.svg)](https://waffle.io/semuxproject/semux/metrics/throughput)
 
 ## What is Semux
 
