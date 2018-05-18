@@ -15,7 +15,10 @@ import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
@@ -48,6 +51,7 @@ import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GuiMessages;
+import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.exception.UnreachableException;
 
@@ -61,7 +65,7 @@ public class SendPanel extends JPanel implements ActionListener {
     private final transient Config config;
 
     private final JComboBox<AccountItem> selectFrom;
-    private final JTextField txtTo;
+    private final JComboBox<AccountItem> selectTo;
     private final JTextField txtAmount;
     private final JTextField txtFee;
     private final JTextField txtData;
@@ -87,11 +91,9 @@ public class SendPanel extends JPanel implements ActionListener {
         JLabel lblTo = new JLabel(GuiMessages.get("To") + ":");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        txtTo = SwingUtil.textFieldWithCopyPastePopup();
-        txtTo.setName("txtTo");
-        txtTo.setColumns(24);
-        txtTo.setActionCommand(Action.SEND.name());
-        txtTo.addActionListener(this);
+        selectTo = SwingUtil.comboBoxWithCopyPastePopup();
+        selectTo.setName("selectTo");
+        selectTo.setEditable(true);
 
         JLabel lblAmount = new JLabel(GuiMessages.get("Amount") + ":");
         lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -187,7 +189,7 @@ public class SendPanel extends JPanel implements ActionListener {
                                             .addPreferredGap(ComponentPlacement.RELATED)
                                             .addComponent(rdbtnHex))))
                                 .addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
-                                    .addComponent(txtTo, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                                    .addComponent(selectTo, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
                                     .addGap(18)
                                     .addComponent(btnAddressBook)))
                             .addGap(59))))
@@ -202,7 +204,7 @@ public class SendPanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblTo)
-                        .addComponent(txtTo, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(selectTo, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnAddressBook))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
@@ -234,11 +236,24 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     public String getToText() {
-        return txtTo.getText().trim();
+
+        Object selected = selectTo.getSelectedItem();
+        String ret = "";
+
+        if (selected instanceof AccountItem) {
+            // selected item
+            AccountItem accountItem = (AccountItem) selected;
+            ret = Hex.encode0x(accountItem.address);
+        } else if (selected != null) {
+            // manually entered
+            return selected.toString().trim();
+        }
+
+        return ret;
     }
 
     public void setToText(byte[] address) {
-        txtTo.setText(Hex.encode(address));
+        selectTo.setSelectedItem(Hex.encode(address));
     }
 
     public Amount getAmountText() throws ParseException {
@@ -295,17 +310,38 @@ public class SendPanel extends JPanel implements ActionListener {
 
         // record selected account
         AccountItem selected = (AccountItem) selectFrom.getSelectedItem();
+        Object toSelected = selectTo.getSelectedItem();
 
+        Set<AccountItem> accountItems = new TreeSet<>();
         // update account list
         selectFrom.removeAllItems();
         for (WalletAccount aList : list) {
-            selectFrom.addItem(new AccountItem(aList));
+            AccountItem accountItem = new AccountItem(aList);
+
+            selectFrom.addItem(accountItem);
+            accountItems.add(accountItem);
         }
+
+        // add aliases
+        for (Map.Entry<ByteArray, String> address : kernel.getWallet().getAddressAliases().entrySet()) {
+            // only add aliases not in wallet
+            if (kernel.getWallet().getAccount(address.getKey().getData()) == null) {
+                accountItems.add(new AccountItem(address.getValue(), address.getKey().getData()));
+            }
+        }
+
+        // to contains all current accounts and address book
+        selectTo.removeAllItems();
+        for (AccountItem accountItem : accountItems) {
+            selectTo.addItem(accountItem);
+        }
+
+        selectTo.setSelectedItem(toSelected);
 
         // recover selected account
         if (selected != null) {
             for (int i = 0; i < list.size(); i++) {
-                if (Arrays.equals(list.get(i).getAddress(), selected.account.getAddress())) {
+                if (Arrays.equals(list.get(i).getAddress(), selected.address)) {
                     selectFrom.setSelectedIndex(i);
                     break;
                 }
@@ -427,22 +463,32 @@ public class SendPanel extends JPanel implements ActionListener {
     /**
      * Represents an item in the account drop list.
      */
-    protected static class AccountItem {
-        final WalletAccount account;
+    protected static class AccountItem implements Comparable<AccountItem> {
+        final byte[] address;
         final String name;
 
-        public AccountItem(WalletAccount a) {
+        AccountItem(WalletAccount a) {
             Optional<String> alias = a.getName();
 
-            this.account = a;
-            this.name = Hex.PREF + account.getKey().toAddressString() + ", " // address
+            this.address = a.getKey().toAddress();
+            this.name = Hex.PREF + a.getKey().toAddressString() + ", " // address
                     + (alias.map(s -> s + ", ").orElse("")) // alias
-                    + SwingUtil.formatAmount(account.getAvailable()); // available
+                    + SwingUtil.formatAmount(a.getAvailable()); // available
+        }
+
+        AccountItem(String alias, byte[] address) {
+            this.name = Hex.encode0x(address) + ", " + alias;
+            this.address = address;
         }
 
         @Override
         public String toString() {
             return this.name;
+        }
+
+        @Override
+        public int compareTo(AccountItem o) {
+            return name.compareTo(o.name);
         }
     }
 }
