@@ -208,7 +208,6 @@ public class SemuxCli extends Launcher {
         if (wallet.flush()) {
             logger.info(CliMessages.get("NewAccountCreatedForAddress", key.toAddressString()));
             logger.info(CliMessages.get("PublicKey", Hex.encode(key.getPublicKey())));
-            logger.info(CliMessages.get("PrivateKey", Hex.encode(key.getPrivateKey())));
         }
     }
 
