@@ -66,11 +66,11 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     private final TransactionsTableModel tableModel;
 
     private final JComboBox<ComboBoxItem<TransactionType>> selectType;
-    private final JComboBox<ComboBoxItem<ByteArray>> selectFrom;
-    private final JComboBox<ComboBoxItem<ByteArray>> selectTo;
+    private final JComboBox<ComboBoxItem<byte[]>> selectFrom;
+    private final JComboBox<ComboBoxItem<byte[]>> selectTo;
 
-    private final TransactionsComboBoxModel<ByteArray> fromModel;
-    private final TransactionsComboBoxModel<ByteArray> toModel;
+    private final TransactionsComboBoxModel<byte[]> fromModel;
+    private final TransactionsComboBoxModel<byte[]> toModel;
     private final TransactionsComboBoxModel<TransactionType> typeModel;
 
     public TransactionsPanel(SemuxGui gui, JFrame frame) {
@@ -276,8 +276,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
      */
     protected void refresh() {
         transactions.clear();
-        Set<ByteArray> to = new HashSet<>();
-        Set<ByteArray> from = new HashSet<>();
+        Set<byte[]> to = new HashSet<>();
+        Set<byte[]> from = new HashSet<>();
 
         // add pending transactions
         transactions.addAll(gui.getKernel().getPendingManager().getPendingTransactions()
@@ -316,8 +316,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         // track all used addresses
         for (StatusTransaction statusTransaction : transactions) {
             Transaction transaction = statusTransaction.getTransaction();
-            to.add(new ByteArray(transaction.getFrom()));
-            from.add(new ByteArray(transaction.getFrom()));
+            to.add(transaction.getFrom());
+            from.add(transaction.getFrom());
         }
 
         // filter transactions
@@ -326,11 +326,11 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         tableModel.setData(filteredTransactions);
 
         fromModel.setData(from.stream()
-                .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it.getData()), it))
+                .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it), it))
                 .collect(Collectors.toCollection(TreeSet::new)));
 
         toModel.setData(to.stream()
-                .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it.getData()), it))
+                .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it), it))
                 .collect(Collectors.toCollection(TreeSet::new)));
 
         if (tx != null) {
@@ -353,8 +353,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     private List<StatusTransaction> filterTransactions(List<StatusTransaction> transactions) {
         List<StatusTransaction> filtered = new ArrayList<>();
         TransactionType type = typeModel.getSelectedValue();
-        ByteArray to = toModel.getSelectedValue();
-        ByteArray from = fromModel.getSelectedValue();
+        byte[] to = toModel.getSelectedValue();
+        byte[] from = fromModel.getSelectedValue();
 
         // add if not filtered out
         for (StatusTransaction transaction : transactions) {
@@ -362,16 +362,17 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 continue;
             }
 
-            if (to != null && !Arrays.equals(to.getData(), transaction.getTransaction().getTo())) {
+            if (to != null && !Arrays.equals(to, transaction.getTransaction().getTo())) {
                 continue;
             }
 
-            if (from != null && !Arrays.equals(from.getData(), transaction.getTransaction().getFrom())) {
+            if (from != null && !Arrays.equals(from, transaction.getTransaction().getFrom())) {
                 continue;
             }
 
             filtered.add(transaction);
         }
+
         return filtered;
     }
 
