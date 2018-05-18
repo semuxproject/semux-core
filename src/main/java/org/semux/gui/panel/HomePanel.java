@@ -161,7 +161,7 @@ public class HomePanel extends JPanel implements ActionListener {
         // setup consensus panel
         JPanel consensus = new JPanel();
         consensus.setBorder(new TitledBorder(
-                new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 0, 10)),
+                new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
                 GuiMessages.get("Consensus"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
         consensus.setLayout(new GridLayout(8, 2));
         consensus.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
