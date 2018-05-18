@@ -8,11 +8,13 @@ package org.semux.net;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -23,7 +25,8 @@ public class ConnectionLimitHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectionLimitHandler.class);
 
-    private static final ConcurrentHashMap<InetAddress, AtomicInteger> connectionCount = new ConcurrentHashMap<>();
+    private static final Cache<InetAddress, AtomicInteger> connectionCount = Caffeine.newBuilder()
+            .maximumSize(16 * 1024).build();
 
     private final int maxInboundConnectionsPerIp;
 
@@ -41,7 +44,7 @@ public class ConnectionLimitHandler extends ChannelInboundHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         InetAddress address = ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress();
-        if (connectionCount.computeIfAbsent(address, k -> new AtomicInteger(0))
+        if (connectionCount.get(address, k -> new AtomicInteger(0))
                 .incrementAndGet() > maxInboundConnectionsPerIp) {
             logger.warn("Too many connections from {}", address.getHostAddress());
             ctx.close();
@@ -51,9 +54,11 @@ public class ConnectionLimitHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        connectionCount.computeIfPresent(
-                ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress(),
-                (inetAddress, atomicInteger) -> atomicInteger.decrementAndGet() == 0 ? null : atomicInteger);
+        InetAddress address = ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress();
+        AtomicInteger cnt = connectionCount.get(address, k -> new AtomicInteger(0));
+        if (cnt.decrementAndGet() <= 0) {
+            connectionCount.invalidate(address);
+        }
     }
 
     /**
@@ -64,7 +69,8 @@ public class ConnectionLimitHandler extends ChannelInboundHandlerAdapter {
      * @return current connection count
      */
     public static int getConnectionsCount(InetAddress address) {
-        return connectionCount.getOrDefault(address, new AtomicInteger(0)).intValue();
+        AtomicInteger cnt = connectionCount.getIfPresent(address);
+        return cnt == null ? 0 : cnt.get();
     }
 
     /**
@@ -75,13 +81,13 @@ public class ConnectionLimitHandler extends ChannelInboundHandlerAdapter {
      * @return whether there is a counter of the address.
      */
     public static boolean containsAddress(InetAddress address) {
-        return connectionCount.containsKey(address);
+        return connectionCount.getIfPresent(address) != null;
     }
 
     /**
      * Reset connection count
      */
     public static void reset() {
-        connectionCount.clear();
+        connectionCount.invalidateAll();
     }
 }
