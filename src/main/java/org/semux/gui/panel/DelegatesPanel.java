@@ -159,7 +159,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
                         .addComponent(votePanel, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
-                        .addComponent(selectFrom, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                        .addComponent(selectFrom, GroupLayout.PREFERRED_SIZE, 210, Short.MAX_VALUE)
                         .addComponent(label, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
                         .addComponent(delegateRegistrationPanel, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)))
         );
