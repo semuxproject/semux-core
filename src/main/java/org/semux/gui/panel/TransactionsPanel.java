@@ -323,7 +323,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         for (StatusTransaction statusTransaction : transactions) {
             Transaction transaction = statusTransaction.getTransaction();
             to.add(transaction.getFrom());
-            from.add(transaction.getFrom());
+            from.add(transaction.getTo());
         }
 
         // filter transactions
