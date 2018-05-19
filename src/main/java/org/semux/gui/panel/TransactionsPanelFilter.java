@@ -97,13 +97,11 @@ public class TransactionsPanelFilter {
                 continue;
             }
 
-            if(min != null && transaction.getTransaction().getValue().lt(min))
-            {
+            if (min != null && transaction.getTransaction().getValue().lt(min)) {
                 continue;
             }
 
-            if(max != null && transaction.getTransaction().getValue().gt(max))
-            {
+            if (max != null && transaction.getTransaction().getValue().gt(max)) {
                 continue;
             }
 
@@ -143,7 +141,7 @@ public class TransactionsPanelFilter {
         try {
             return SwingUtil.parseAmount(txtField.getText());
         } catch (ParseException e) {
-            logger.debug("Unable to parse amount for {}", txtField.getText() );
+            logger.debug("Unable to parse amount for {}", txtField.getText());
         }
 
         return null;

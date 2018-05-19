@@ -152,8 +152,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                                         .addComponent(amount)
                                         .addComponent(panelFilter.getTxtMin())
                                         .addComponent(separator)
-                                        .addComponent(panelFilter.getTxtMax())
-                                        ))
+                                        .addComponent(panelFilter.getTxtMax())))
                         .addGap(18)
                         .addComponent(scrollPane));
         setLayout(groupLayout);
