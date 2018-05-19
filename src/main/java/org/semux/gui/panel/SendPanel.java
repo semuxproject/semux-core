@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,6 +64,7 @@ public class SendPanel extends JPanel implements ActionListener {
     private final transient WalletModel model;
     private final transient Kernel kernel;
     private final transient Config config;
+    private transient Set<AccountItem> existingAccountItems = Collections.emptySet();
 
     private final JComboBox<AccountItem> selectFrom;
     private final JComboBox<AccountItem> selectTo;
@@ -310,7 +312,6 @@ public class SendPanel extends JPanel implements ActionListener {
 
         // record selected account
         AccountItem selected = (AccountItem) selectFrom.getSelectedItem();
-        Object toSelected = selectTo.getSelectedItem();
 
         Set<AccountItem> accountItems = new TreeSet<>();
         // update account list
@@ -330,13 +331,17 @@ public class SendPanel extends JPanel implements ActionListener {
             }
         }
 
-        // to contains all current accounts and address book
-        selectTo.removeAllItems();
-        for (AccountItem accountItem : accountItems) {
-            selectTo.addItem(accountItem);
-        }
+        // 'to' contains all current accounts and address book, updates only if changed
+        if (!existingAccountItems.containsAll(accountItems) || !accountItems.containsAll(existingAccountItems)) {
+            Object toSelected = selectTo.getSelectedItem();
 
-        selectTo.setSelectedItem(toSelected);
+            selectTo.removeAllItems();
+            for (AccountItem accountItem : accountItems) {
+                selectTo.addItem(accountItem);
+            }
+            existingAccountItems = accountItems;
+            selectTo.setSelectedItem(toSelected);
+        }
 
         // recover selected account
         if (selected != null) {
