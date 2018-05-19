@@ -16,7 +16,7 @@ More info can be found at our [Wiki page](https://github.com/semuxproject/semux/
 
 ## Get started
 
-1. Download and install [Java SE Runtime Environment 8](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html) or above
+1. Download and install [Java SE Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 2. *(Windows user) Download and install [Microsoft Visual C++ Redistributable for Visual Studio 2012 Update 4](https://www.microsoft.com/en-us/download/details.aspx?id=30679)*
 3. Download the [Latest Wallet Release](https://github.com/semuxproject/semux/releases) and unpack it to a desired directory.
 4. Run ``semux.exe`` if you're on Windows; run ``./semux-gui.sh`` or ``./semux-cli.sh`` if you're on Linux or macOS.
