@@ -107,6 +107,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         JLabel to = new JLabel(GuiMessages.get("To"));
         JLabel from = new JLabel(GuiMessages.get("From"));
         JLabel type = new JLabel(GuiMessages.get("Type"));
+        JLabel amount = new JLabel(GuiMessages.get("Amount"));
+        JLabel separator = new JLabel("-");
 
         // create filter
         panelFilter = new TransactionsPanelFilter(gui, tableModel);
@@ -127,6 +129,14 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                                 .addComponent(to)
                                 .addGap(10)
                                 .addComponent(panelFilter.getSelectTo(), GroupLayout.PREFERRED_SIZE, 210,
+                                        Short.MAX_VALUE)
+                                .addGap(10)
+                                .addComponent(amount)
+                                .addGap(10)
+                                .addComponent(panelFilter.getTxtMin(), GroupLayout.PREFERRED_SIZE, 60,
+                                        Short.MAX_VALUE)
+                                .addComponent(separator)
+                                .addComponent(panelFilter.getTxtMax(), GroupLayout.PREFERRED_SIZE, 60,
                                         Short.MAX_VALUE))
                         .addComponent(scrollPane));
         groupLayout.setVerticalGroup(
@@ -138,7 +148,12 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                                         .addComponent(from)
                                         .addComponent(panelFilter.getSelectFrom())
                                         .addComponent(to)
-                                        .addComponent(panelFilter.getSelectTo())))
+                                        .addComponent(panelFilter.getSelectTo())
+                                        .addComponent(amount)
+                                        .addComponent(panelFilter.getTxtMin())
+                                        .addComponent(separator)
+                                        .addComponent(panelFilter.getTxtMax())
+                                        ))
                         .addGap(18)
                         .addComponent(scrollPane));
         setLayout(groupLayout);

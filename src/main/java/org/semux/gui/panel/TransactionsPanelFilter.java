@@ -6,14 +6,19 @@
  */
 package org.semux.gui.panel;
 
+import org.semux.core.Amount;
 import org.semux.core.TransactionType;
 import org.semux.gui.ComboBoxItem;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
 import org.semux.util.ByteArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JTextField;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -24,11 +29,15 @@ import java.util.stream.Collectors;
 
 public class TransactionsPanelFilter {
 
+    private static final Logger logger = LoggerFactory.getLogger(TransactionsPanelFilter.class);
+
     private transient final SemuxGui gui;
 
     private final JComboBox<ComboBoxItem<TransactionType>> selectType;
     private final JComboBox<ComboBoxItem<byte[]>> selectFrom;
     private final JComboBox<ComboBoxItem<byte[]>> selectTo;
+    private final JTextField txtMin;
+    private final JTextField txtMax;
 
     private final TransactionsComboBoxModel<byte[]> fromModel;
     private final TransactionsComboBoxModel<byte[]> toModel;
@@ -41,6 +50,9 @@ public class TransactionsPanelFilter {
     public TransactionsPanelFilter(SemuxGui gui, TransactionsPanel.TransactionsTableModel tableModel) {
         this.gui = gui;
         this.tableModel = tableModel;
+
+        txtMin = new JTextField();
+        txtMax = new JTextField();
 
         toModel = new TransactionsComboBoxModel<>();
         fromModel = new TransactionsComboBoxModel<>();
@@ -64,6 +76,8 @@ public class TransactionsPanelFilter {
         byte[] to = toModel.getSelectedValue();
         byte[] from = fromModel.getSelectedValue();
         TransactionType transactionType = typeModel.getSelectedValue();
+        Amount min = getAmount(txtMin);
+        Amount max = getAmount(txtMax);
 
         Set<ByteArray> allTo = new HashSet<>();
         Set<ByteArray> allFrom = new HashSet<>();
@@ -80,6 +94,16 @@ public class TransactionsPanelFilter {
             }
 
             if (from != null && !Arrays.equals(from, transaction.getTransaction().getFrom())) {
+                continue;
+            }
+
+            if(min != null && transaction.getTransaction().getValue().lt(min))
+            {
+                continue;
+            }
+
+            if(max != null && transaction.getTransaction().getValue().gt(max))
+            {
                 continue;
             }
 
@@ -112,6 +136,19 @@ public class TransactionsPanelFilter {
         return filtered;
     }
 
+    /**
+     * Parse an amount from freeform text field.
+     */
+    private Amount getAmount(JTextField txtField) {
+        try {
+            return SwingUtil.parseAmount(txtField.getText());
+        } catch (ParseException e) {
+            logger.debug("Unable to parse amount for {}", txtField.getText() );
+        }
+
+        return null;
+    }
+
     public JComboBox<ComboBoxItem<TransactionType>> getSelectType() {
         return selectType;
     }
@@ -126,6 +163,14 @@ public class TransactionsPanelFilter {
 
     public void setTransactions(List<TransactionsPanel.StatusTransaction> transactions) {
         this.transactions = transactions;
+    }
+
+    public JTextField getTxtMin() {
+        return txtMin;
+    }
+
+    public JTextField getTxtMax() {
+        return txtMax;
     }
 
     class TransactionsComboBoxModel<T> extends DefaultComboBoxModel<ComboBoxItem<T>> {
