@@ -547,7 +547,7 @@ public class SemuxApiImpl implements SemuxApi {
                     .withFrom(from)
                     .withTo(to)
                     .withValue(value)
-                    .withFee(fee)
+                    .withFee(fee, false)
                     .withData(data)
                     .buildSigned();
 

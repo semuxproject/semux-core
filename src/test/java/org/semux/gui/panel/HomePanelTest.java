@@ -30,7 +30,6 @@ import org.semux.crypto.Key;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
-import org.semux.message.GuiMessages;
 import org.semux.rules.KernelRule;
 
 @RunWith(MockitoJUnitRunner.class)
