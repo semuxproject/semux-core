@@ -492,7 +492,7 @@ public class SemuxSync implements SyncManager {
 
     public static class SemuxSyncProgress implements SyncManager.Progress {
 
-        final long beginHeight;
+        final long startingHeight;
 
         final long currentHeight;
 
@@ -500,16 +500,16 @@ public class SemuxSync implements SyncManager {
 
         final Duration duration;
 
-        public SemuxSyncProgress(long beginHeight, long currentHeight, long targetHeight, Duration duration) {
-            this.beginHeight = beginHeight;
+        public SemuxSyncProgress(long startingHeight, long currentHeight, long targetHeight, Duration duration) {
+            this.startingHeight = startingHeight;
             this.currentHeight = currentHeight;
             this.targetHeight = targetHeight;
             this.duration = duration;
         }
 
         @Override
-        public long getBeginHeight() {
-            return beginHeight;
+        public long getStartingHeight() {
+            return startingHeight;
         }
 
         @Override
@@ -536,7 +536,7 @@ public class SemuxSync implements SyncManager {
         }
 
         private Long getSpeed() {
-            Long downloadedBlocks = currentHeight - beginHeight;
+            Long downloadedBlocks = currentHeight - startingHeight;
             if (downloadedBlocks <= 0 || duration.toMillis() == 0) {
                 return null;
             }

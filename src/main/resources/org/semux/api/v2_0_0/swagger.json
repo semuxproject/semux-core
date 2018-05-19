@@ -1362,6 +1362,33 @@
                     }
                 ]
             }
+        },
+        "/syncing" : {
+            "get" : {
+                "tags" : [
+                    "semux"
+                ],
+                "summary" : "Get syncing progress",
+                "description" : "Returns an object with data about the sync status",
+                "operationId" : "getSyncingProgress",
+                "produces" : [
+                    "application/json"
+                ],
+                "parameters" : [],
+                "responses" : {
+                    "200" : {
+                        "description" : "An object about the current sync status",
+                        "schema" : {
+                            "$ref" : "#/definitions/GetSyncingProgressResponse"
+                        }
+                    }
+                },
+                "security" : [
+                    {
+                        "basicAuth" : [ ]
+                    }
+                ]
+            }
         }
     },
     "definitions" : {
@@ -2206,6 +2233,55 @@
                     }
                 }
             ]
+        },
+        "GetSyncingProgressResponse" : {
+            "type" : "object",
+            "allOf": [
+                {
+                    "$ref" : "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "required" : [
+                        "result"
+                    ],
+                    "properties" : {
+                        "result" : {
+                            "type" : "object",
+                            "$ref" : "#/definitions/SyncingProgressType"
+                        }
+                    }
+                }
+            ]
+        },
+        "SyncingProgressType" : {
+            "type" : "object",
+            "required": [
+                "syncing"
+            ],
+            "properties" : {
+                "syncing" : {
+                    "description": "Whether the node is syncing",
+                    "type": "boolean"
+                },
+                "startingHeight" : {
+                    "description": "The block height at which the sync started",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "currentHeight" : {
+                    "description": "The current block height",
+                    "type" : "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "targetHeight" : {
+                    "description": "The target block height",
+                    "type": "string",
+                    "format" : "int64",
+                    "pattern": "^\\d+$"
+                }
+            }
         }
     }
 }
