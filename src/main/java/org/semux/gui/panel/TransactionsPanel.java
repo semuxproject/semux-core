@@ -368,8 +368,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         byte[] to = toModel.getSelectedValue();
         byte[] from = fromModel.getSelectedValue();
 
-        Set<byte[]> allTo = new HashSet<>();
-        Set<byte[]> allFrom = new HashSet<>();
+        Set<ByteArray> allTo = new HashSet<>();
+        Set<ByteArray> allFrom = new HashSet<>();
 
         // add if not filtered out
         for (StatusTransaction transaction : transactions) {
@@ -386,8 +386,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             }
 
             filtered.add(transaction);
-            allTo.add(transaction.getTransaction().getTo());
-            allFrom.add(transaction.getTransaction().getFrom());
+            allTo.add(new ByteArray(transaction.getTransaction().getTo()));
+            allFrom.add(new ByteArray(transaction.getTransaction().getFrom()));
         }
 
         // update filters that are not set for reduced filter set if filter not already
@@ -395,13 +395,13 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         // further filtering
         if (to == null) {
             toModel.setData(allTo.stream()
-                    .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it), it))
+                    .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it.getData()), it.getData()))
                     .collect(Collectors.toCollection(TreeSet::new)));
         }
 
         if (from == null) {
             fromModel.setData(allFrom.stream()
-                    .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it), it))
+                    .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it.getData()), it.getData()))
                     .collect(Collectors.toCollection(TreeSet::new)));
         }
 
