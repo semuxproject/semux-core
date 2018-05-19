@@ -391,8 +391,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         }
 
         // update filters that are not set for reduced filter set if filter not already
-        // set on them for
-        // further filtering
+        // set on them for further filtering
         if (to == null) {
             toModel.setData(allTo.stream()
                     .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it.getData()), it.getData()))
