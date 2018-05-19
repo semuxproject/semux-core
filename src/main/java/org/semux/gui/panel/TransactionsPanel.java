@@ -20,12 +20,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,7 +34,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.semux.core.Transaction;
-import org.semux.core.TransactionType;
 import org.semux.gui.Action;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
@@ -60,18 +56,10 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
     private transient final SemuxGui gui;
     private transient final WalletModel model;
-    private transient final List<StatusTransaction> transactions = new ArrayList<>();
 
     private final JTable table;
     private final TransactionsTableModel tableModel;
-
-    private final JComboBox<ComboBoxItem<TransactionType>> selectType;
-    private final JComboBox<ComboBoxItem<byte[]>> selectFrom;
-    private final JComboBox<ComboBoxItem<byte[]>> selectTo;
-
-    private final TransactionsComboBoxModel<byte[]> fromModel;
-    private final TransactionsComboBoxModel<byte[]> toModel;
-    private final TransactionsComboBoxModel<TransactionType> typeModel;
+    private final TransactionsPanelFilter panelFilter;
 
     public TransactionsPanel(SemuxGui gui, JFrame frame) {
         this.gui = gui;
@@ -116,20 +104,12 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        // add filters
-        toModel = new TransactionsComboBoxModel<>();
-        fromModel = new TransactionsComboBoxModel<>();
-        typeModel = new TransactionsComboBoxModel<>();
-        typeModel.setData(Arrays.stream(TransactionType.values()).map(it -> new ComboBoxItem<>(it.toString(), it))
-                .collect(Collectors.toSet()));
-
-        selectType = new JComboBox<>(typeModel);
-        selectFrom = new JComboBox<>(fromModel);
-        selectTo = new JComboBox<>(toModel);
-
         JLabel to = new JLabel(GuiMessages.get("To"));
         JLabel from = new JLabel(GuiMessages.get("From"));
         JLabel type = new JLabel(GuiMessages.get("Type"));
+
+        // create filter
+        panelFilter = new TransactionsPanelFilter(gui, tableModel);
 
         GroupLayout groupLayout = new GroupLayout(this);
         groupLayout.setHorizontalGroup(
@@ -137,78 +117,33 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                         groupLayout.createSequentialGroup()
                                 .addComponent(type)
                                 .addGap(10)
-                                .addComponent(selectType)
+                                .addComponent(panelFilter.getSelectType())
                                 .addGap(10)
                                 .addComponent(from)
                                 .addGap(10)
-                                .addComponent(selectFrom, GroupLayout.PREFERRED_SIZE, 210, Short.MAX_VALUE)
+                                .addComponent(panelFilter.getSelectFrom(), GroupLayout.PREFERRED_SIZE, 210,
+                                        Short.MAX_VALUE)
                                 .addGap(10)
                                 .addComponent(to)
                                 .addGap(10)
-                                .addComponent(selectTo, GroupLayout.PREFERRED_SIZE, 210, Short.MAX_VALUE))
+                                .addComponent(panelFilter.getSelectTo(), GroupLayout.PREFERRED_SIZE, 210,
+                                        Short.MAX_VALUE))
                         .addComponent(scrollPane));
         groupLayout.setVerticalGroup(
                 groupLayout.createSequentialGroup()
                         .addGroup(groupLayout.createSequentialGroup()
                                 .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                                         .addComponent(type)
-                                        .addComponent(selectType)
+                                        .addComponent(panelFilter.getSelectType())
                                         .addComponent(from)
-                                        .addComponent(selectFrom)
+                                        .addComponent(panelFilter.getSelectFrom())
                                         .addComponent(to)
-                                        .addComponent(selectTo)))
+                                        .addComponent(panelFilter.getSelectTo())))
                         .addGap(18)
                         .addComponent(scrollPane));
         setLayout(groupLayout);
 
         refresh();
-    }
-
-    class TransactionsComboBoxModel<T> extends DefaultComboBoxModel<ComboBoxItem<T>> {
-
-        private final ComboBoxItem<T> defaultItem;
-        private final Set<ComboBoxItem<T>> currentValues = new TreeSet<>();
-
-        public TransactionsComboBoxModel() {
-            this.defaultItem = new ComboBoxItem<>("", null);
-        }
-
-        public synchronized void setData(Set<ComboBoxItem<T>> values) {
-
-            // don't re-render the list if there are no changes
-            // avoids undesirable refreshing of a list user might be interacting with
-            if (currentValues.containsAll(values) && values.containsAll(currentValues)) {
-                return;
-            }
-
-            currentValues.clear();
-            currentValues.addAll(values);
-
-            Object selected = getSelectedItem();
-            removeAllElements();
-            addElement(defaultItem);
-            for (ComboBoxItem<T> value : currentValues) {
-                addElement(value);
-            }
-            setSelectedItem(selected);
-        }
-
-        public void setSelectedItem(Object anObject) {
-            // only refresh if new object selected
-            T existing = getSelectedValue();
-            T newValue = (T) (anObject instanceof ComboBoxItem ? ((ComboBoxItem) anObject).value : anObject);
-            if (existing != newValue || existing == null || !existing.equals(newValue)) {
-                super.setSelectedItem(anObject);
-                List<StatusTransaction> filteredTransactions = filterTransactions(transactions);
-                tableModel.setData(filteredTransactions);
-            }
-
-        }
-
-        T getSelectedValue() {
-            ComboBoxItem<T> selected = (ComboBoxItem<T>) getSelectedItem();
-            return selected != null ? selected.getValue() : null;
-        }
     }
 
     class TransactionsTableModel extends AbstractTableModel {
@@ -287,9 +222,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
      * Refreshes this panel.
      */
     protected void refresh() {
-        transactions.clear();
-        Set<ByteArray> to = new HashSet<>();
-        Set<ByteArray> from = new HashSet<>();
+        List<StatusTransaction> transactions = new ArrayList<>();
 
         // add pending transactions
         transactions.addAll(gui.getKernel().getPendingManager().getPendingTransactions()
@@ -325,25 +258,10 @@ public class TransactionsPanel extends JPanel implements ActionListener {
          */
         Transaction tx = getSelectedTransaction();
 
-        // track all used addresses
-        for (StatusTransaction statusTransaction : transactions) {
-            Transaction transaction = statusTransaction.getTransaction();
-            to.add(new ByteArray(transaction.getFrom()));
-            from.add(new ByteArray(transaction.getTo()));
-        }
-
         // filter transactions
-        List<StatusTransaction> filteredTransactions = filterTransactions(transactions);
-
+        panelFilter.setTransactions(transactions);
+        List<StatusTransaction> filteredTransactions = panelFilter.getFilteredTransactions();
         tableModel.setData(filteredTransactions);
-
-        fromModel.setData(from.stream()
-                .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it.getData()), it.getData()))
-                .collect(Collectors.toCollection(TreeSet::new)));
-
-        toModel.setData(to.stream()
-                .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it.getData()), it.getData()))
-                .collect(Collectors.toCollection(TreeSet::new)));
 
         if (tx != null) {
             for (int i = 0; i < transactions.size(); i++) {
@@ -356,58 +274,6 @@ public class TransactionsPanel extends JPanel implements ActionListener {
     }
 
     /**
-     * Filter transactions if filters are selected
-     *
-     * @param transactions
-     *            transactions
-     * @return filtered transactions
-     */
-    private List<StatusTransaction> filterTransactions(List<StatusTransaction> transactions) {
-        List<StatusTransaction> filtered = new ArrayList<>();
-        TransactionType type = typeModel.getSelectedValue();
-        byte[] to = toModel.getSelectedValue();
-        byte[] from = fromModel.getSelectedValue();
-
-        Set<ByteArray> allTo = new HashSet<>();
-        Set<ByteArray> allFrom = new HashSet<>();
-
-        // add if not filtered out
-        for (StatusTransaction transaction : transactions) {
-            if (type != null && !transaction.getTransaction().getType().equals(type)) {
-                continue;
-            }
-
-            if (to != null && !Arrays.equals(to, transaction.getTransaction().getTo())) {
-                continue;
-            }
-
-            if (from != null && !Arrays.equals(from, transaction.getTransaction().getFrom())) {
-                continue;
-            }
-
-            filtered.add(transaction);
-            allTo.add(new ByteArray(transaction.getTransaction().getTo()));
-            allFrom.add(new ByteArray(transaction.getTransaction().getFrom()));
-        }
-
-        // update filters that are not set for reduced filter set if filter not already
-        // set on them for further filtering
-        if (to == null) {
-            toModel.setData(allTo.stream()
-                    .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it.getData()), it.getData()))
-                    .collect(Collectors.toCollection(TreeSet::new)));
-        }
-
-        if (from == null) {
-            fromModel.setData(allFrom.stream()
-                    .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it.getData()), it.getData()))
-                    .collect(Collectors.toCollection(TreeSet::new)));
-        }
-
-        return filtered;
-    }
-
-    /**
      * Returns the selected transaction.
      *
      * @return
@@ -417,7 +283,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
     }
 
-    private static class StatusTransaction {
+    static class StatusTransaction {
         private final String status;
         private final Transaction transaction;
 
@@ -433,51 +299,6 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         public Transaction getTransaction() {
             return transaction;
-        }
-    }
-
-    private static class ComboBoxItem<T> implements Comparable<ComboBoxItem<T>> {
-        private final String displayName;
-        private final T value;
-
-        public ComboBoxItem(String displayName, T value) {
-            this.displayName = displayName;
-            this.value = value;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        public T getValue() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return displayName;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o)
-                return true;
-            if (o == null || getClass() != o.getClass())
-                return false;
-
-            ComboBoxItem<?> that = (ComboBoxItem<?>) o;
-
-            return displayName != null ? displayName.equals(that.displayName) : that.displayName == null;
-        }
-
-        @Override
-        public int hashCode() {
-            return displayName != null ? displayName.hashCode() : 0;
-        }
-
-        @Override
-        public int compareTo(ComboBoxItem<T> o) {
-            return displayName.compareTo(o.displayName);
         }
     }
 }
