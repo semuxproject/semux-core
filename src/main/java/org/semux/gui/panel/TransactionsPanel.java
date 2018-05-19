@@ -288,8 +288,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
      */
     protected void refresh() {
         transactions.clear();
-        Set<byte[]> to = new HashSet<>();
-        Set<byte[]> from = new HashSet<>();
+        Set<ByteArray> to = new HashSet<>();
+        Set<ByteArray> from = new HashSet<>();
 
         // add pending transactions
         transactions.addAll(gui.getKernel().getPendingManager().getPendingTransactions()
@@ -328,8 +328,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         // track all used addresses
         for (StatusTransaction statusTransaction : transactions) {
             Transaction transaction = statusTransaction.getTransaction();
-            to.add(transaction.getFrom());
-            from.add(transaction.getTo());
+            to.add(new ByteArray(transaction.getFrom()));
+            from.add(new ByteArray(transaction.getTo()));
         }
 
         // filter transactions
@@ -338,11 +338,11 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         tableModel.setData(filteredTransactions);
 
         fromModel.setData(from.stream()
-                .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it), it))
+                .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it.getData()), it.getData()))
                 .collect(Collectors.toCollection(TreeSet::new)));
 
         toModel.setData(to.stream()
-                .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it), it))
+                .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it.getData()), it.getData()))
                 .collect(Collectors.toCollection(TreeSet::new)));
 
         if (tx != null) {
