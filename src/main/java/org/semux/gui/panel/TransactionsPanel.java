@@ -141,11 +141,11 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                                 .addGap(10)
                                 .addComponent(from)
                                 .addGap(10)
-                                .addComponent(selectFrom)
+                                .addComponent(selectFrom, GroupLayout.PREFERRED_SIZE, 210, Short.MAX_VALUE)
                                 .addGap(10)
                                 .addComponent(to)
                                 .addGap(10)
-                                .addComponent(selectTo))
+                                .addComponent(selectTo, GroupLayout.PREFERRED_SIZE, 210, Short.MAX_VALUE))
                         .addComponent(scrollPane));
         groupLayout.setVerticalGroup(
                 groupLayout.createSequentialGroup()
@@ -173,7 +173,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             this.defaultItem = new ComboBoxItem<>("", null);
         }
 
-        public void setData(Set<ComboBoxItem<T>> values) {
+        public synchronized void setData(Set<ComboBoxItem<T>> values) {
 
             // don't re-render the list if there are no changes
             // avoids undesirable refreshing of a list user might be interacting with
@@ -194,9 +194,15 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         }
 
         public void setSelectedItem(Object anObject) {
-            super.setSelectedItem(anObject);
-            List<StatusTransaction> filteredTransactions = filterTransactions(transactions);
-            tableModel.setData(filteredTransactions);
+            // only refresh if new object selected
+            T existing = getSelectedValue();
+            T newValue = (T) (anObject instanceof ComboBoxItem ? ((ComboBoxItem) anObject).value : anObject);
+            if (existing != newValue || existing == null || !existing.equals(newValue)) {
+                super.setSelectedItem(anObject);
+                List<StatusTransaction> filteredTransactions = filterTransactions(transactions);
+                tableModel.setData(filteredTransactions);
+            }
+
         }
 
         T getSelectedValue() {
@@ -362,6 +368,9 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         byte[] to = toModel.getSelectedValue();
         byte[] from = fromModel.getSelectedValue();
 
+        Set<byte[]> allTo = new HashSet<>();
+        Set<byte[]> allFrom = new HashSet<>();
+
         // add if not filtered out
         for (StatusTransaction transaction : transactions) {
             if (type != null && !transaction.getTransaction().getType().equals(type)) {
@@ -377,6 +386,23 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             }
 
             filtered.add(transaction);
+            allTo.add(transaction.getTransaction().getTo());
+            allFrom.add(transaction.getTransaction().getFrom());
+        }
+
+        // update filters that are not set for reduced filter set if filter not already
+        // set on them for
+        // further filtering
+        if (to == null) {
+            toModel.setData(allTo.stream()
+                    .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it), it))
+                    .collect(Collectors.toCollection(TreeSet::new)));
+        }
+
+        if (from == null) {
+            fromModel.setData(allFrom.stream()
+                    .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it), it))
+                    .collect(Collectors.toCollection(TreeSet::new)));
         }
 
         return filtered;
