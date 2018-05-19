@@ -9,13 +9,18 @@ package org.semux.gui.model;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.ZERO;
 
@@ -24,29 +29,39 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.semux.config.MainnetConfig;
+import org.semux.consensus.ValidatorActivatedFork;
+import org.semux.core.Amount;
 import org.semux.core.Block;
+import org.semux.core.state.Delegate;
 import org.semux.crypto.Key;
 import org.semux.net.Peer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WalletModelTest {
 
+    @Mock
+    private MainnetConfig config;
+
     private WalletModel model;
 
     @Before
     public void setUp() throws IOException {
-        model = spy(new WalletModel());
+        model = spy(new WalletModel(config));
     }
 
     @After
@@ -139,5 +154,86 @@ public class WalletModelTest {
         assertEquals(ZERO, model.getTotalLocked());
         model.setAccounts(Arrays.asList(wa1, wa2));
         assertEquals(NANO_SEM.of(3), model.getTotalLocked());
+    }
+
+    @Test
+    public void testGetPrimaryValidatorDelegate() {
+        when(config.getPrimaryValidator(any(), anyLong(), anyInt(), anyBoolean())).thenCallRealMethod();
+        model = new WalletModel(config);
+        List<WalletDelegate> delegates = Arrays.asList(
+                new WalletDelegate(new Delegate(new Key().toAddress(), "delegate1".getBytes(), 0, Amount.ZERO)),
+                new WalletDelegate(new Delegate(new Key().toAddress(), "delegate2".getBytes(), 0, Amount.ZERO)));
+        model.setDelegates(delegates);
+        model.setValidators(delegates.stream().map(Delegate::getAddressString).collect(Collectors.toList()));
+
+        Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks = new HashMap<>();
+        activatedForks.put(UNIFORM_DISTRIBUTION, new ValidatorActivatedFork.Activation(UNIFORM_DISTRIBUTION, 0));
+        model.setActivatedForks(activatedForks);
+
+        for (int i = 0; i < 10; i++) {
+            Block block = mock(Block.class);
+            when(block.getNumber()).thenReturn((long) i);
+            model.setLatestBlock(block);
+            assertEquals(delegates.get((i + 1) % delegates.size()), model.getValidatorDelegate(0).get());
+        }
+    }
+
+    @Test
+    public void testGetNextPrimaryValidatorDelegate() {
+        when(config.getValidatorUpdateInterval()).thenCallRealMethod();
+        model = new WalletModel(config);
+        List<WalletDelegate> delegates = Arrays.asList(
+                new WalletDelegate(new Delegate(new Key().toAddress(), "delegate1".getBytes(), 0, Amount.ZERO)),
+                new WalletDelegate(new Delegate(new Key().toAddress(), "delegate2".getBytes(), 0, Amount.ZERO)));
+        model.setDelegates(delegates);
+        model.setValidators(delegates.stream().map(Delegate::getAddressString).collect(Collectors.toList()));
+
+        Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks = new HashMap<>();
+        activatedForks.put(UNIFORM_DISTRIBUTION, new ValidatorActivatedFork.Activation(UNIFORM_DISTRIBUTION, 0));
+        model.setActivatedForks(activatedForks);
+
+        Map<Long, WalletDelegate> testCases = new HashMap<>();
+
+        for (int i = 0; i < 10; i++) {
+            testCases.put((long) i, delegates.get((i + 2) % delegates.size()));
+        }
+
+        testCases.put(198L, null);
+
+        testCases.forEach((key, value) -> {
+            Block block = mock(Block.class);
+            when(block.getNumber()).thenReturn(key);
+            model.setLatestBlock(block);
+
+            if (value == null) {
+                assertFalse(model.getNextPrimaryValidatorDelegate().isPresent());
+            } else {
+                assertEquals(value, model.getNextPrimaryValidatorDelegate().get());
+            }
+        });
+    }
+
+    @Test
+    public void testGetNextValidatorSetUpdate() {
+        when(config.getValidatorUpdateInterval()).thenCallRealMethod();
+        model = new WalletModel(config);
+
+        Map<Long, Long> testCases = new HashMap<>();
+
+        for (long i = 0; i <= 198; i++) {
+            testCases.put(i, 200L);
+        }
+        for (long i = 199; i <= 398; i++) {
+            testCases.put(i, 400L);
+        }
+        testCases.put(399L, 600L);
+
+        testCases.forEach((key, value) -> {
+            Block block = mock(Block.class);
+            when(block.getNumber()).thenReturn(key);
+            model.setLatestBlock(block);
+            assertEquals(value, model.getNextValidatorSetUpdate().get());
+        });
+
     }
 }

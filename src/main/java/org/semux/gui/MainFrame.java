@@ -171,7 +171,7 @@ public class MainFrame extends JFrame implements ActionListener {
         // add status bar
         statusBar = new StatusBar(this);
         statusBar.setPeersNumber(model.getActivePeers().size());
-        statusBar.setProgress(model.getSyncProgress());
+        model.getSyncProgress().ifPresent(statusBar::setProgress);
         this.add(statusBar, BorderLayout.SOUTH);
     }
 
@@ -239,7 +239,7 @@ public class MainFrame extends JFrame implements ActionListener {
     protected void refresh() {
         // update status bar
         statusBar.setPeersNumber(model.getActivePeers().size());
-        statusBar.setProgress(model.getSyncProgress());
+        model.getSyncProgress().ifPresent(statusBar::setProgress);
     }
 
     private static final Border BORDER_NORMAL = new CompoundBorder(new LineBorder(new Color(180, 180, 180)),

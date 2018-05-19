@@ -124,7 +124,7 @@ public class SemuxGui extends Launcher {
         SwingUtil.setDefaultFractionDigits(getConfig().uiFractionDigits());
         SwingUtil.setDefaultUnit(getConfig().uiUnit());
 
-        this.model = new WalletModel();
+        this.model = new WalletModel(getConfig());
     }
 
     /**
@@ -453,6 +453,10 @@ public class SemuxGui extends Launcher {
                     : new WalletDelegate(d));
         }
         model.setDelegates(wds);
+
+        // update validators
+        model.setValidators(validators);
+        model.setActivatedForks(chain.getActivatedForks());
 
         // update active peers
         Map<String, Peer> activePeers = new HashMap<>();
