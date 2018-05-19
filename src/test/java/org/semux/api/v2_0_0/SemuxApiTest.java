@@ -55,6 +55,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.spec.InvalidKeySpecException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -85,6 +86,7 @@ import org.semux.api.v2_0_0.model.GetLatestBlockResponse;
 import org.semux.api.v2_0_0.model.GetPeersResponse;
 import org.semux.api.v2_0_0.model.GetPendingTransactionsResponse;
 import org.semux.api.v2_0_0.model.GetRootResponse;
+import org.semux.api.v2_0_0.model.GetSyncingProgressResponse;
 import org.semux.api.v2_0_0.model.GetTransactionLimitsResponse;
 import org.semux.api.v2_0_0.model.GetTransactionResponse;
 import org.semux.api.v2_0_0.model.GetValidatorsResponse;
@@ -95,12 +97,15 @@ import org.semux.api.v2_0_0.model.ListAccountsResponse;
 import org.semux.api.v2_0_0.model.PeerType;
 import org.semux.api.v2_0_0.model.SignMessageResponse;
 import org.semux.api.v2_0_0.model.SignRawTransactionResponse;
+import org.semux.api.v2_0_0.model.SyncingProgressType;
 import org.semux.api.v2_0_0.model.TransactionType;
 import org.semux.api.v2_0_0.model.VerifyMessageResponse;
+import org.semux.consensus.SemuxSync;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
+import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.state.Delegate;
@@ -783,5 +788,40 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertEquals(
                 "0x208ee0cd0b520f9685b2c2219984d31a229419a2c485729faa609291827888601741010114db7cadb25fdcdd546fb0268524107582c3f8999c00000000075bcd1500000000004c4b40000000000000007b000001629b9257d00974657374206461746160a6f2d0fb1a1573e556004420f5281978b7006444a67829c25d00905bafdfb23e941052fbe7112aae9d5b4a790165261f4da347c90e74fd84c316bb38a391d304057f987e38f88037e8019cbb774dda106fc051fc4a6320a00294fe1866d08442",
                 resp.getResult());
+    }
+
+    @Test
+    public void getSyncingProgressStoppedTest() {
+        SemuxSync semuxSync = mock(SemuxSync.class);
+        when(semuxSync.isRunning()).thenReturn(false);
+        kernelRule.getKernel().setSyncManager(semuxSync);
+
+        GetSyncingProgressResponse resp = api.getSyncingProgress();
+        SyncingProgressType result = resp.getResult();
+        assertTrue(resp.isSuccess());
+        assertFalse(result.isSyncing());
+        assertNull(result.getStartingHeight());
+        assertNull(result.getCurrentHeight());
+        assertNull(result.getTargetHeight());
+    }
+
+    @Test
+    public void getSyncingProgressStartedTest() {
+        SemuxSync semuxSync = mock(SemuxSync.class);
+        when(semuxSync.isRunning()).thenReturn(true);
+        when(semuxSync.getProgress()).thenReturn(new SemuxSync.SemuxSyncProgress(
+                1,
+                10,
+                100,
+                Duration.ofSeconds(1000)));
+        kernelRule.getKernel().setSyncManager(semuxSync);
+
+        GetSyncingProgressResponse resp = api.getSyncingProgress();
+        SyncingProgressType result = resp.getResult();
+        assertTrue(resp.isSuccess());
+        assertTrue(result.isSyncing());
+        assertEquals("1", result.getStartingHeight());
+        assertEquals("10", result.getCurrentHeight());
+        assertEquals("100", result.getTargetHeight());
     }
 }

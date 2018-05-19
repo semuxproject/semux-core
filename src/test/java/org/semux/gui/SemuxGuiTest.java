@@ -120,7 +120,7 @@ public class SemuxGuiTest {
         assertThat(model.getTotalLocked()).isEqualTo(ZERO);
         assertThat(model.getActivePeers().size()).isEqualTo(channelMgr.getActivePeers().size());
         assertThat(model.getSyncProgress().get()).isEqualToComparingOnlyGivenFields(syncMgr.getProgress(),
-                "beginHeight",
+                "startingHeight",
                 "currentHeight", "targetHeight");
     }
 
