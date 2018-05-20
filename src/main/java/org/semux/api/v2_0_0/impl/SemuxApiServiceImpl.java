@@ -71,7 +71,6 @@ import org.semux.net.filter.SemuxIpFilter;
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
-@SuppressWarnings("Duplicates")
 public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
     private static final Charset CHARSET = UTF_8;
 

@@ -118,7 +118,6 @@ import io.netty.handler.ipfilter.IpFilterRuleType;
 /**
  * API tests for {@link org.semux.api.v2_1_0.impl.SemuxApiServiceImpl}
  */
-@SuppressWarnings("Duplicates")
 public class SemuxApiTest extends SemuxApiTestBase {
 
     @Test
@@ -617,7 +616,6 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String value = "1000000000";
         String from = wallet.getAccount(0).toAddressString();
         String to = key.toAddressString();
-        String data = Hex.encode(Bytes.of("test_transfer"));
 
         DoTransactionResponse response = api.transfer(from, to, value, null, null);
         assertNotNull(response);

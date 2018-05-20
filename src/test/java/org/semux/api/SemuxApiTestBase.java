@@ -8,14 +8,10 @@ package org.semux.api;
 
 import static org.semux.core.Amount.Unit.SEM;
 
-import java.util.Collections;
-
-import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.semux.api.SemuxApiMock;
-import org.semux.api.Version;
 import org.semux.config.Config;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
@@ -25,8 +21,6 @@ import org.semux.core.state.DelegateState;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.rules.KernelRule;
-
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 public abstract class SemuxApiTestBase {
 
