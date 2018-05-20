@@ -11,7 +11,7 @@
 
 Semux is an experimental high-performance blockchain platform that powers decentralized application. It's written purely in Java and powered by Semux BFT consensus algorithm.
 
-More info can be found at our [Wiki page](https://github.com/semuxproject/semux/wiki).
+More info can be found at our [Documentation page](./docs/README.md).
 
 
 ## Get started
@@ -46,7 +46,7 @@ Run:
 
 Anyone is welcome to contribute to this open source project in the form of peer review, testing and patches. Please see the [contributing](./.github/contributing.md) guide for more details.
 
-If you found a bug, please submit it to [issues](https://github.com/semuxproject/semux/issues).
+If you find a bug, please submit it to [issues](https://github.com/semuxproject/semux/issues).
 
 
 ## Wallet Localization
