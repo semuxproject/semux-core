@@ -329,7 +329,8 @@ public class SendPanel extends JPanel implements ActionListener {
             }
         }
 
-        // 'to' contains all current accounts and address book, only update if user isn't interacting with it
+        // 'to' contains all current accounts and address book, only update if user
+        // isn't interacting with it
         if (!selectTo.isPopupVisible()) {
             Object toSelected = selectTo.getSelectedItem();
 
