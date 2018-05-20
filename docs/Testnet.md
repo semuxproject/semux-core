@@ -1,5 +1,9 @@
 ## Testnet
 
+Testnet is, as the name implies, for testing features of the blockchain without spending 'real' semux.
+
+It allows developers of tools and wallets to integrate and test features without risk.
+
 ### How to connect Semux Testnet
 
 You can connect to the testnet via the following command
