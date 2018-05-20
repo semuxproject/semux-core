@@ -1,4 +1,4 @@
-Welcome to the semux wiki!
+Welcome to the semux documentation!
 
 ### How it Works
 * [Semux BFT Consensus](./Semux-BFT-Consensus.md)
