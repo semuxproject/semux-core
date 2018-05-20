@@ -15,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -140,20 +141,30 @@ public class HttpHandlerTest {
     public void testGetStaticFiles() throws IOException {
         startServer(null);
 
-        URL url = new URL(server.getSwaggerUrl());
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestProperty("Authorization", auth);
+        Map<String, String> testCases = new HashMap<>();
+        testCases.put(server.getSwaggerUrl(), "text/html");
+        testCases.put(String.format("http://%s:%d/swagger-ui/swagger-ui.css", server.ip, server.port), "text/css");
+        testCases.put(String.format("http://%s:%d/swagger-ui/swagger-ui-bundle.js", server.ip, server.port),
+                "text/javascript");
+        testCases.put(String.format("http://%s:%d/swagger-ui/swagger-ui-standalone-preset.js", server.ip, server.port),
+                "text/javascript");
 
-        StringBuilder lines = new StringBuilder();
-        Scanner s = new Scanner(con.getInputStream());
-        while (s.hasNextLine()) {
-            lines.append(s.nextLine());
+        for (Map.Entry<String, String> e : testCases.entrySet()) {
+            URL url = new URL(e.getKey());
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestProperty("Authorization", auth);
+
+            StringBuilder lines = new StringBuilder();
+            Scanner s = new Scanner(con.getInputStream());
+            while (s.hasNextLine()) {
+                lines.append(s.nextLine());
+            }
+            s.close();
+
+            assertEquals(HTTP_OK, con.getResponseCode());
+            assertEquals(e.getValue(), con.getHeaderField("content-type"));
+            assertTrue(lines.toString().length() > 1);
         }
-        s.close();
-
-        assertEquals(HTTP_OK, con.getResponseCode());
-        assertEquals("text/html", con.getHeaderField("content-type"));
-        assertTrue(lines.toString().length() > 1);
     }
 
     @Test

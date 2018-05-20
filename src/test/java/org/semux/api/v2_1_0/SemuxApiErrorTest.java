@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.v2_0_0;
+package org.semux.api.v2_1_0;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -22,6 +22,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.After;
 import org.junit.Before;
@@ -31,8 +32,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.semux.api.Version;
-import org.semux.api.v2_0_0.api.SemuxApi;
-import org.semux.api.v2_0_0.model.ApiHandlerResponse;
+import org.semux.api.v2_1_0.api.SemuxApi;
+import org.semux.api.v2_1_0.model.ApiHandlerResponse;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
 
@@ -42,7 +43,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 /**
  * The test case covers validation rules of
- * {@link org.semux.api.v2_0_0.impl.SemuxApiServiceImpl}
+ * {@link org.semux.api.v2_1_0.impl.SemuxApiServiceImpl}
  */
 @RunWith(Parameterized.class)
 public class SemuxApiErrorTest extends SemuxApiTestBase {
@@ -113,6 +114,10 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
 
                 { POST.class,
                         uriBuilder("broadcastRawTransaction").queryParam("raw", "I_am_not_a_hexadecimal_string")
+                                .build() },
+
+                { POST.class,
+                        uriBuilder("broadcastRawTransaction").queryParam("raw", Hex.encode0x(RandomUtils.nextBytes(10)))
                                 .build() },
 
                 { GET.class, uriBuilder("getVote").build() },
@@ -205,7 +210,7 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
 
         WebClient webClient = WebClient.create(
                 String.format("http://%s:%d/%s%s", config.apiListenIp(), config.apiListenPort(),
-                        Version.v2_0_0.prefix, uriString),
+                        Version.v2_1_0.prefix, uriString),
                 Collections.singletonList(new JacksonJsonProvider(
                         new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false))),
                 config.apiUsername(),

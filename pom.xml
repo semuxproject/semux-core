@@ -159,7 +159,7 @@
                 <executions>
                     <!-- v2.0.0 api interfaces `src/gen/java/org/semux/api/v2_0_0/api` & `src/gen/java/org/semux/api/v2_0_0/model` -->
                     <execution>
-                        <id>swagger-codegen-1_1_0</id>
+                        <id>swagger-codegen-2_0_0</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
@@ -189,7 +189,7 @@
                     </execution>
                     <!-- v2.0.0 api client interface `src/gen/java/org/semux/api/v2_0_0/client/SemuxApi.java` -->
                     <execution>
-                        <id>swagger-codegen-1_1_0-client</id>
+                        <id>swagger-codegen-2_0_0-client</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
@@ -212,6 +212,64 @@
                             <output>${project.basedir}</output>
                             <modelPackage>org.semux.api.v2_0_0.model</modelPackage>
                             <apiPackage>org.semux.api.v2_0_0.client</apiPackage>
+                        </configuration>
+                    </execution>
+
+                    <!-- v2.1.0 api interfaces `src/gen/java/org/semux/api/v2_1_0/api` & `src/gen/java/org/semux/api/v2_1_0/model` -->
+                    <execution>
+                        <id>swagger-codegen-2_1_0</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/v2_1_0/swagger.json</inputSpec>
+                            <language>jaxrs-cxf</language>
+                            <configOptions>
+                                <useGenericResponse>true</useGenericResponse>
+                                <useAnnotatedBasePath>true</useAnnotatedBasePath>
+                                <useBeanValidationFeature>false</useBeanValidationFeature>
+                            </configOptions>
+
+                            <generateModels>true</generateModels>
+                            <generateModelTests>false</generateModelTests>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateApis>true</generateApis>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+
+                            <addCompileSourceRoot>true</addCompileSourceRoot>
+                            <output>${project.basedir}</output>
+                            <modelPackage>org.semux.api.v2_1_0.model</modelPackage>
+                            <apiPackage>org.semux.api.v2_1_0.api</apiPackage>
+                        </configuration>
+                    </execution>
+                    <!-- v2.1.0 api client interface `src/gen/java/org/semux/api/v2_1_0/client/SemuxApi.java` -->
+                    <execution>
+                        <id>swagger-codegen-2_1_0-client</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/v2_1_0/swagger.json</inputSpec>
+                            <language>jaxrs-cxf-client</language>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                            <generateModels>false</generateModels>
+                            <generateModelTests>false</generateModelTests>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateApis>true</generateApis>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+
+                            <addCompileSourceRoot>true</addCompileSourceRoot>
+                            <output>${project.basedir}</output>
+                            <modelPackage>org.semux.api.v2_1_0.model</modelPackage>
+                            <apiPackage>org.semux.api.v2_1_0.client</apiPackage>
                         </configuration>
                     </execution>
                 </executions>
@@ -646,6 +704,7 @@
                                         <urn>org.reflections:reflections:0.9.11:jar:null:compile:23bba0ff497ec61fbca967d9b641c7681a71edb3</urn>
                                         <urn>org.slf4j:slf4j-api:1.7.25:jar:null:compile:da76ca59f6a57ee3102f8f9bd9cee742973efa8a</urn>
                                         <urn>org.threeten:threetenbp:1.3.6:jar:null:compile:89dcc04a7e028c3c963413a71f950703cf51f057</urn>
+                                        <urn>org.webjars:swagger-ui:3.14.2:jar:null:compile:05f83eebdceedad1e26ddde584e4c08c20811921</urn>
                                         <urn>org.xerial.snappy:snappy-java:1.1.7.1:jar:null:compile:d5190b41f3de61e3b83d692322d58630252bc8c3</urn>
                                         <urn>org.yaml:snakeyaml:1.18:jar:null:compile:e4a441249ade301985cb8d009d4e4a72b85bf68e</urn>
                                         <urn>pl.project13.maven:git-commit-id-plugin:2.2.4:maven-plugin:null:runtime:43a0dc1d02821c51847d587ecc4a6943086b884c</urn>
@@ -750,6 +809,11 @@
                     <artifactId>jackson-annotations</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>swagger-ui</artifactId>
+            <version>3.14.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>

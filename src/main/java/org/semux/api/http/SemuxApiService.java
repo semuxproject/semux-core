@@ -33,7 +33,7 @@ import io.netty.handler.logging.LoggingHandler;
  */
 public class SemuxApiService {
 
-    public static final Version DEFAULT_VERSION = Version.v2_0_0;
+    public static final Version DEFAULT_VERSION = Version.v2_1_0;
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxApiService.class);
 
@@ -65,11 +65,18 @@ public class SemuxApiService {
                         .collect(Collectors.toMap(
                                 v -> v,
                                 v -> {
-                                    if (v.equals(Version.v1_0_1)) {
+                                    switch (v) {
+                                    case v1_0_1:
                                         return new org.semux.api.v1_0_1.ApiHandlerImpl(kernel);
-                                    } else if (v.equals(Version.v2_0_0)) {
-                                        return new org.semux.api.v2_0_0.impl.ApiHandlerImpl(kernel);
-                                    } else {
+                                    case v2_0_0:
+                                        return new org.semux.api.ApiHandlerImpl(
+                                                new org.semux.api.v2_0_0.impl.SemuxApiServiceImpl(kernel),
+                                                org.semux.api.v2_0_0.api.SemuxApi.class);
+                                    case v2_1_0:
+                                        return new org.semux.api.ApiHandlerImpl(
+                                                new org.semux.api.v2_1_0.impl.SemuxApiServiceImpl(kernel),
+                                                org.semux.api.v2_1_0.api.SemuxApi.class);
+                                    default:
                                         return null;
                                     }
                                 })));

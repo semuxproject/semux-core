@@ -10,7 +10,9 @@ public enum Version {
 
     v1_0_1("v1.0.1"),
 
-    v2_0_0("v2.0.0");
+    v2_0_0("v2.0.0"),
+
+    v2_1_0("v2.1.0");
 
     public final String prefix;
 
@@ -24,6 +26,8 @@ public enum Version {
             return v1_0_1;
         case "v2.0.0":
             return v2_0_0;
+        case "v2.1.0":
+            return v2_1_0;
         default:
             return null;
         }

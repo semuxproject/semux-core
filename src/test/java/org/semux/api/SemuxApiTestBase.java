@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.v2_0_0;
+package org.semux.api;
 
 import static org.semux.core.Amount.Unit.SEM;
 
@@ -33,8 +33,6 @@ public abstract class SemuxApiTestBase {
     @Rule
     public KernelRule kernelRule = new KernelRule(51610, 51710);
 
-    protected org.semux.api.v2_0_0.client.SemuxApi api;
-
     protected SemuxApiMock apiMock;
     protected Config config;
     protected Wallet wallet;
@@ -60,14 +58,6 @@ public abstract class SemuxApiTestBase {
         pendingMgr = apiMock.getKernel().getPendingManager();
         nodeMgr = apiMock.getKernel().getNodeManager();
         channelMgr = apiMock.getKernel().getChannelManager();
-
-        api = JAXRSClientFactory.create(
-                "http://localhost:51710/" + Version.v2_0_0.prefix,
-                org.semux.api.v2_0_0.client.SemuxApi.class,
-                Collections.singletonList(new JacksonJsonProvider()),
-                config.apiUsername(),
-                config.apiPassword(),
-                null);
     }
 
     @After

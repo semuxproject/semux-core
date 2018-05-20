@@ -5,7 +5,7 @@
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 
-package org.semux.api.v2_0_0.impl;
+package org.semux.api.v2_1_0.impl;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
@@ -14,6 +14,8 @@ import java.io.File;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -25,35 +27,37 @@ import org.apache.commons.validator.routines.InetAddressValidator;
 import org.semux.Kernel;
 import org.semux.api.FailableApiService;
 import org.semux.api.util.TransactionBuilder;
-import org.semux.api.v2_0_0.TypeFactory;
-import org.semux.api.v2_0_0.api.SemuxApi;
-import org.semux.api.v2_0_0.model.AddNodeResponse;
-import org.semux.api.v2_0_0.model.ApiHandlerResponse;
-import org.semux.api.v2_0_0.model.ComposeRawTransactionResponse;
-import org.semux.api.v2_0_0.model.CreateAccountResponse;
-import org.semux.api.v2_0_0.model.DoTransactionResponse;
-import org.semux.api.v2_0_0.model.GetAccountResponse;
-import org.semux.api.v2_0_0.model.GetAccountTransactionsResponse;
-import org.semux.api.v2_0_0.model.GetBlockResponse;
-import org.semux.api.v2_0_0.model.GetDelegateResponse;
-import org.semux.api.v2_0_0.model.GetDelegatesResponse;
-import org.semux.api.v2_0_0.model.GetInfoResponse;
-import org.semux.api.v2_0_0.model.GetLatestBlockNumberResponse;
-import org.semux.api.v2_0_0.model.GetLatestBlockResponse;
-import org.semux.api.v2_0_0.model.GetPeersResponse;
-import org.semux.api.v2_0_0.model.GetPendingTransactionsResponse;
-import org.semux.api.v2_0_0.model.GetRootResponse;
-import org.semux.api.v2_0_0.model.GetTransactionLimitsResponse;
-import org.semux.api.v2_0_0.model.GetTransactionResponse;
-import org.semux.api.v2_0_0.model.GetValidatorsResponse;
-import org.semux.api.v2_0_0.model.GetVoteResponse;
-import org.semux.api.v2_0_0.model.GetVotesResponse;
-import org.semux.api.v2_0_0.model.ListAccountsResponse;
-import org.semux.api.v2_0_0.model.SendTransactionResponse;
-import org.semux.api.v2_0_0.model.SignMessageResponse;
-import org.semux.api.v2_0_0.model.SignRawTransactionResponse;
-import org.semux.api.v2_0_0.model.VerifyMessageResponse;
+import org.semux.api.v2_1_0.TypeFactory;
+import org.semux.api.v2_1_0.api.SemuxApi;
+import org.semux.api.v2_1_0.model.AddNodeResponse;
+import org.semux.api.v2_1_0.model.ApiHandlerResponse;
+import org.semux.api.v2_1_0.model.ComposeRawTransactionResponse;
+import org.semux.api.v2_1_0.model.CreateAccountResponse;
+import org.semux.api.v2_1_0.model.DoTransactionResponse;
+import org.semux.api.v2_1_0.model.GetAccountPendingTransactionsResponse;
+import org.semux.api.v2_1_0.model.GetAccountResponse;
+import org.semux.api.v2_1_0.model.GetAccountTransactionsResponse;
+import org.semux.api.v2_1_0.model.GetAccountVotesResponse;
+import org.semux.api.v2_1_0.model.GetBlockResponse;
+import org.semux.api.v2_1_0.model.GetDelegateResponse;
+import org.semux.api.v2_1_0.model.GetDelegatesResponse;
+import org.semux.api.v2_1_0.model.GetInfoResponse;
+import org.semux.api.v2_1_0.model.GetLatestBlockNumberResponse;
+import org.semux.api.v2_1_0.model.GetLatestBlockResponse;
+import org.semux.api.v2_1_0.model.GetPeersResponse;
+import org.semux.api.v2_1_0.model.GetPendingTransactionsResponse;
+import org.semux.api.v2_1_0.model.GetRootResponse;
+import org.semux.api.v2_1_0.model.GetTransactionLimitsResponse;
+import org.semux.api.v2_1_0.model.GetTransactionResponse;
+import org.semux.api.v2_1_0.model.GetValidatorsResponse;
+import org.semux.api.v2_1_0.model.GetVoteResponse;
+import org.semux.api.v2_1_0.model.GetVotesResponse;
+import org.semux.api.v2_1_0.model.ListAccountsResponse;
+import org.semux.api.v2_1_0.model.SignMessageResponse;
+import org.semux.api.v2_1_0.model.SignRawTransactionResponse;
+import org.semux.api.v2_1_0.model.VerifyMessageResponse;
 import org.semux.core.Block;
+import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
@@ -73,9 +77,10 @@ import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 @SuppressWarnings("Duplicates")
 public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
+
     private static final Charset CHARSET = UTF_8;
 
-    private Kernel kernel;
+    private final Kernel kernel;
 
     public SemuxApiServiceImpl(Kernel kernel) {
         this.kernel = kernel;
@@ -196,7 +201,12 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
 
         Account account = kernel.getBlockchain().getAccountState().getAccount(addressBytes);
         int transactionCount = kernel.getBlockchain().getTransactionCount(account.getAddress());
-        resp.setResult(TypeFactory.accountType(account, transactionCount));
+        int pendingTransactionCount = (int) kernel.getPendingManager()
+                .getPendingTransactions().parallelStream()
+                .map(pendingTransaction -> pendingTransaction.transaction)
+                .filter(tx -> Arrays.equals(tx.getFrom(), addressBytes) || Arrays.equals(tx.getTo(), addressBytes))
+                .count();
+        resp.setResult(TypeFactory.accountType(account, transactionCount, pendingTransactionCount));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -242,6 +252,77 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
                 .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
+    }
+
+    @Override
+    public Response getAccountPendingTransactions(String address, String from, String to) {
+        GetAccountPendingTransactionsResponse resp = new GetAccountPendingTransactionsResponse();
+        byte[] addressBytes;
+        int fromInt;
+        int toInt;
+
+        if (!isSet(address)) {
+            return failure(resp, "Parameter `address` is required");
+        }
+        if (!isSet(from)) {
+            return failure(resp, "Parameter `from` is required");
+        }
+        if (!isSet(to)) {
+            return failure(resp, "Parameter `to` is required");
+        }
+
+        try {
+            addressBytes = Hex.decode0x(address);
+        } catch (CryptoException ex) {
+            return failure(resp, "Parameter `address` is not a valid hexadecimal string");
+        }
+
+        try {
+            fromInt = Integer.parseInt(from);
+        } catch (NumberFormatException ex) {
+            return failure(resp, "Parameter `from` is not a valid integer");
+        }
+
+        try {
+            toInt = Integer.parseInt(to);
+        } catch (NumberFormatException ex) {
+            return failure(resp, "Parameter `to` is not a valid integer");
+        }
+
+        if (toInt <= fromInt) {
+            return failure(resp, "Parameter `to` must be greater than `from`");
+        }
+
+        resp.setResult(kernel.getPendingManager()
+                .getPendingTransactions().parallelStream()
+                .map(pendingTransaction -> pendingTransaction.transaction)
+                .filter(tx -> Arrays.equals(tx.getFrom(), addressBytes) || Arrays.equals(tx.getTo(), addressBytes))
+                .skip(fromInt)
+                .limit(toInt - fromInt)
+                .map(TypeFactory::pendingTransactionType)
+                .collect(Collectors.toList()));
+        resp.setSuccess(true);
+        return Response.ok(resp).build();
+    }
+
+    @Override
+    public Response getAccountVotes(String address) {
+        GetAccountVotesResponse resp = new GetAccountVotesResponse();
+        byte[] addressBytes;
+
+        if (!isSet(address)) {
+            return failure(resp, "Parameter `address` is required");
+        }
+
+        try {
+            addressBytes = Hex.decode0x(address);
+        } catch (CryptoException ex) {
+            return failure(resp, "Parameter `address` is not a valid hexadecimal string");
+        }
+
+        resp.setResult(TypeFactory.accountVotes(kernel.getBlockchain(), addressBytes));
+        resp.setSuccess(true);
+        return Response.ok(resp).build();
     }
 
     @Override
@@ -306,15 +387,17 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         } catch (CryptoException e) {
             return failure(resp, e.getMessage());
         }
+        Blockchain chain = kernel.getBlockchain();
 
-        Delegate delegate = kernel.getBlockchain().getDelegateState().getDelegateByAddress(addressBytes);
+        Delegate delegate = chain.getDelegateState().getDelegateByAddress(addressBytes);
         if (delegate == null) {
             return failure(resp, "The provided address is not a delegate");
         }
 
-        BlockchainImpl.ValidatorStats validatorStats = kernel.getBlockchain().getValidatorStats(addressBytes);
+        BlockchainImpl.ValidatorStats validatorStats = chain.getValidatorStats(addressBytes);
+        boolean isValidator = chain.getValidators().contains(address.replace("0x", ""));
 
-        resp.setResult(TypeFactory.delegateType(validatorStats, delegate));
+        resp.setResult(TypeFactory.delegateType(validatorStats, delegate, isValidator));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }
@@ -322,9 +405,14 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
     @Override
     public Response getDelegates() {
         GetDelegatesResponse resp = new GetDelegatesResponse();
-        resp.setResult(kernel.getBlockchain().getDelegateState().getDelegates().parallelStream()
+        Blockchain chain = kernel.getBlockchain();
+        Set<String> validators = new HashSet<>(chain.getValidators());
+
+        resp.setResult(chain.getDelegateState().getDelegates().parallelStream()
                 .map(delegate -> TypeFactory.delegateType(
-                        kernel.getBlockchain().getValidatorStats(delegate.getAddress()), delegate))
+                        chain.getValidatorStats(delegate.getAddress()),
+                        delegate,
+                        validators.contains(delegate.getAddressString())))
                 .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
@@ -370,7 +458,7 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         GetPendingTransactionsResponse resp = new GetPendingTransactionsResponse();
         resp.result(kernel.getPendingManager().getPendingTransactions().parallelStream()
                 .map(pendingTransaction -> pendingTransaction.transaction)
-                .map(tx -> TypeFactory.transactionType(null, tx))
+                .map(TypeFactory::pendingTransactionType)
                 .collect(Collectors.toList()));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
@@ -500,24 +588,38 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
     }
 
     @Override
-    public Response registerDelegate(String from, String fee, String delegateName) {
+    public Response registerDelegate(String from, String delegateName, String fee) {
         return doTransaction(TransactionType.DELEGATE, from, null, null, fee, delegateName);
     }
 
     @Override
     public Response broadcastRawTransaction(String raw) {
-        SendTransactionResponse resp = new SendTransactionResponse();
+        DoTransactionResponse resp = new DoTransactionResponse();
 
         if (!isSet(raw)) {
             return failure(resp, "Parameter `raw` is required");
         }
 
         try {
-            kernel.getPendingManager().addTransaction(Transaction.fromBytes(Hex.decode0x(raw)));
+            Transaction tx = Transaction.fromBytes(Hex.decode0x(raw));
+
+            // tx nonce is validated in advance to avoid silently pushing the tx into
+            // delayed queue of pending manager
+            if (tx.getNonce() != kernel.getPendingManager().getNonce(tx.getFrom())) {
+                return failure(resp, "Invalid transaction nonce.");
+            }
+
+            PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
+            if (result.error != null) {
+                return failure(resp, "Transaction rejected by pending manager: " + result.error.toString());
+            }
+            resp.setResult(Hex.encode0x(tx.getHash()));
             resp.setSuccess(true);
             return Response.ok().entity(resp).build();
         } catch (CryptoException e) {
             return failure(resp, "Parameter `raw` is not a valid hexadecimal string");
+        } catch (IndexOutOfBoundsException e) {
+            return failure(resp, "Parameter `raw` is not a valid hexadecimal raw transaction");
         }
     }
 

@@ -7,6 +7,7 @@
 package org.semux.api;
 
 import static org.junit.Assert.assertEquals;
+import static org.semux.api.http.SemuxApiService.DEFAULT_VERSION;
 
 import org.junit.After;
 import org.junit.Before;
@@ -34,12 +35,14 @@ public class SemuxApiServiceTest {
 
     @Test
     public void getAPIUrlTest() {
-        assertEquals("http://127.0.0.1:51710/v2.0.0/", apiMock.getApi().getAPIUrl());
+        assertEquals(String.format("http://127.0.0.1:51710/%s/", DEFAULT_VERSION.prefix),
+                apiMock.getApi().getAPIUrl());
     }
 
     @Test
     public void getSwaggerUrlTest() {
-        assertEquals("http://127.0.0.1:51710/v2.0.0/swagger.html", apiMock.getApi().getSwaggerUrl());
+        assertEquals(String.format("http://127.0.0.1:51710/%s/swagger.html", DEFAULT_VERSION.prefix),
+                apiMock.getApi().getSwaggerUrl());
     }
 
 }

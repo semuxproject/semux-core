@@ -28,7 +28,7 @@
  * limitations under the License.
  */
 
-package org.semux.api.v2_0_0;
+package org.semux.api.v2_1_0;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertArrayEquals;
@@ -56,48 +56,54 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.BadRequestException;
+
 import org.junit.Test;
 import org.semux.TestUtils;
-import org.semux.api.v2_0_0.model.AddNodeResponse;
-import org.semux.api.v2_0_0.model.BlockType;
-import org.semux.api.v2_0_0.model.ComposeRawTransactionResponse;
-import org.semux.api.v2_0_0.model.CreateAccountResponse;
-import org.semux.api.v2_0_0.model.DelegateType;
-import org.semux.api.v2_0_0.model.DoTransactionResponse;
-import org.semux.api.v2_0_0.model.GetAccountResponse;
-import org.semux.api.v2_0_0.model.GetAccountTransactionsResponse;
-import org.semux.api.v2_0_0.model.GetBlockResponse;
-import org.semux.api.v2_0_0.model.GetDelegateResponse;
-import org.semux.api.v2_0_0.model.GetDelegatesResponse;
-import org.semux.api.v2_0_0.model.GetInfoResponse;
-import org.semux.api.v2_0_0.model.GetLatestBlockNumberResponse;
-import org.semux.api.v2_0_0.model.GetLatestBlockResponse;
-import org.semux.api.v2_0_0.model.GetPeersResponse;
-import org.semux.api.v2_0_0.model.GetPendingTransactionsResponse;
-import org.semux.api.v2_0_0.model.GetRootResponse;
-import org.semux.api.v2_0_0.model.GetTransactionLimitsResponse;
-import org.semux.api.v2_0_0.model.GetTransactionResponse;
-import org.semux.api.v2_0_0.model.GetValidatorsResponse;
-import org.semux.api.v2_0_0.model.GetVoteResponse;
-import org.semux.api.v2_0_0.model.GetVotesResponse;
-import org.semux.api.v2_0_0.model.ListAccountsResponse;
-import org.semux.api.v2_0_0.model.PeerType;
-import org.semux.api.v2_0_0.model.SendTransactionResponse;
-import org.semux.api.v2_0_0.model.SignMessageResponse;
-import org.semux.api.v2_0_0.model.SignRawTransactionResponse;
-import org.semux.api.v2_0_0.model.TransactionType;
-import org.semux.api.v2_0_0.model.VerifyMessageResponse;
+import org.semux.api.v2_1_0.model.AddNodeResponse;
+import org.semux.api.v2_1_0.model.BlockType;
+import org.semux.api.v2_1_0.model.ComposeRawTransactionResponse;
+import org.semux.api.v2_1_0.model.CreateAccountResponse;
+import org.semux.api.v2_1_0.model.DelegateType;
+import org.semux.api.v2_1_0.model.DoTransactionResponse;
+import org.semux.api.v2_1_0.model.GetAccountPendingTransactionsResponse;
+import org.semux.api.v2_1_0.model.GetAccountResponse;
+import org.semux.api.v2_1_0.model.GetAccountTransactionsResponse;
+import org.semux.api.v2_1_0.model.GetAccountVotesResponse;
+import org.semux.api.v2_1_0.model.GetBlockResponse;
+import org.semux.api.v2_1_0.model.GetDelegateResponse;
+import org.semux.api.v2_1_0.model.GetDelegatesResponse;
+import org.semux.api.v2_1_0.model.GetInfoResponse;
+import org.semux.api.v2_1_0.model.GetLatestBlockNumberResponse;
+import org.semux.api.v2_1_0.model.GetLatestBlockResponse;
+import org.semux.api.v2_1_0.model.GetPeersResponse;
+import org.semux.api.v2_1_0.model.GetPendingTransactionsResponse;
+import org.semux.api.v2_1_0.model.GetRootResponse;
+import org.semux.api.v2_1_0.model.GetTransactionLimitsResponse;
+import org.semux.api.v2_1_0.model.GetTransactionResponse;
+import org.semux.api.v2_1_0.model.GetValidatorsResponse;
+import org.semux.api.v2_1_0.model.GetVoteResponse;
+import org.semux.api.v2_1_0.model.GetVotesResponse;
+import org.semux.api.v2_1_0.model.InfoType;
+import org.semux.api.v2_1_0.model.ListAccountsResponse;
+import org.semux.api.v2_1_0.model.PeerType;
+import org.semux.api.v2_1_0.model.SignMessageResponse;
+import org.semux.api.v2_1_0.model.SignRawTransactionResponse;
+import org.semux.api.v2_1_0.model.TransactionType;
+import org.semux.api.v2_1_0.model.VerifyMessageResponse;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
+import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
@@ -110,7 +116,7 @@ import org.semux.util.Bytes;
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
 /**
- * API tests for {@link org.semux.api.v2_0_0.impl.SemuxApiServiceImpl}
+ * API tests for {@link org.semux.api.v2_1_0.impl.SemuxApiServiceImpl}
  */
 @SuppressWarnings("Duplicates")
 public class SemuxApiTest extends SemuxApiTestBase {
@@ -203,6 +209,56 @@ public class SemuxApiTest extends SemuxApiTestBase {
     }
 
     @Test
+    public void getAccountPendingTransactionsTest() {
+        Key from = new Key();
+        Key to = new Key();
+        Transaction tx0 = createTransaction(config);
+        Transaction tx1 = createTransaction(config, from, to, Amount.ZERO);
+        Transaction tx2 = createTransaction(config, to, from, Amount.ZERO);
+        chain.getAccountState().adjustAvailable(tx0.getFrom(), config.minTransactionFee());
+        chain.getAccountState().adjustAvailable(from.toAddress(), config.minTransactionFee());
+        chain.getAccountState().adjustAvailable(to.toAddress(), config.minTransactionFee());
+        assert (pendingMgr.addTransactionSync(tx0).accepted == 1);
+        assert (pendingMgr.addTransactionSync(tx1).accepted == 1);
+        assert (pendingMgr.addTransactionSync(tx2).accepted == 1);
+
+        GetAccountPendingTransactionsResponse response;
+
+        response = api.getAccountPendingTransactions(Hex.encode0x(from.toAddress()), "0", "1");
+        assertThat(response.getResult()).hasSize(1);
+        assertThat(response.getResult().get(0).getHash()).isEqualTo(Hex.encode0x(tx1.getHash()));
+
+        response = api.getAccountPendingTransactions(Hex.encode0x(from.toAddress()), "0", "2");
+        assertThat(response.getResult()).hasSize(2);
+        assertThat(response.getResult().get(0).getHash()).isEqualTo(Hex.encode0x(tx1.getHash()));
+        assertThat(response.getResult().get(1).getHash()).isEqualTo(Hex.encode0x(tx2.getHash()));
+
+        response = api.getAccountPendingTransactions(Hex.encode0x(from.toAddress()), "1", "2");
+        assertThat(response.getResult()).hasSize(1);
+        assertThat(response.getResult().get(0).getHash()).isEqualTo(Hex.encode0x(tx2.getHash()));
+
+        response = api.getAccountPendingTransactions(Hex.encode0x(from.toAddress()), "2", "3");
+        assertThat(response.getResult()).hasSize(0);
+    }
+
+    @Test
+    public void getAccountVotesTest() {
+        DelegateState delegateState = chain.getDelegateState();
+        List<Delegate> delegates = delegateState.getDelegates();
+        Key voter = new Key();
+        for (int i = 0; i < delegates.size(); i++) {
+            delegateState.vote(voter.toAddress(), delegates.get(i).getAddress(), Amount.Unit.NANO_SEM.of(i + 1));
+        }
+
+        GetAccountVotesResponse resp = api.getAccountVotes(Hex.encode0x(voter.toAddress()));
+        assertTrue(resp.isSuccess());
+        assertThat(resp.getResult()).hasSize(delegates.size());
+        assertThat(resp.getResult().get(0))
+                .hasFieldOrPropertyWithValue("votes", "1")
+                .hasFieldOrPropertyWithValue("delegate.address", Hex.encode0x(delegates.get(0).getAddress()));
+    }
+
+    @Test
     public void getBlockByHashTest() {
         Genesis gen = chain.getGenesis();
         GetBlockResponse response = api.getBlockByHash(Hex.encode0x(gen.getHash()));
@@ -227,6 +283,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
             GetDelegateResponse response = api.getDelegate(Hex.encode0x(entry.getValue()));
             assertTrue(response.isSuccess());
             assertEquals(entry.getKey(), response.getResult().getName());
+            assertTrue("is validator", response.getResult().isValidator());
         }
     }
 
@@ -234,11 +291,16 @@ public class SemuxApiTest extends SemuxApiTestBase {
     public void getDelegatesTest() {
         Genesis gen = chain.getGenesis();
         GetDelegatesResponse response = api.getDelegates();
-        assertEquals(gen.getDelegates().size(), response.getResult().size());
-        assertThat(gen.getDelegates().entrySet().stream().map(e -> Hex.encode0x(e.getValue())).sorted()
-                .collect(Collectors.toList()))
-                        .isEqualTo(response.getResult().stream().map(DelegateType::getAddress).sorted()
-                                .collect(Collectors.toList()));
+
+        Collection<byte[]> delegates = gen.getDelegates().values();
+        List<DelegateType> result = response.getResult();
+
+        assertEquals(delegates.size(), result.size());
+        assertEquals(
+                delegates.stream().map(Hex::encode0x).sorted().collect(Collectors.toList()),
+                result.stream().map(DelegateType::getAddress).sorted().collect(Collectors.toList()));
+
+        assertTrue("is validator", result.get(0).isValidator());
     }
 
     @Test
@@ -247,6 +309,8 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
+        assertEquals(InfoType.NetworkEnum.DEVNET.name(), response.getResult().getNetwork());
+        assertEquals(config.capabilitySet().toList(), response.getResult().getCapabilities());
         assertEquals("0", response.getResult().getLatestBlockNumber());
         assertEquals(Hex.encode0x(chain.getLatestBlock().getHash()), response.getResult().getLatestBlockHash());
         assertEquals(Integer.valueOf(0), response.getResult().getActivePeers());
@@ -450,7 +514,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String from = wallet.getAccount(0).toAddressString();
         String fee = String.valueOf(config.minTransactionFee().getNano());
         String data = Hex.encode(Bytes.of("test_delegate"));
-        DoTransactionResponse response = api.registerDelegate(from, fee, data);
+        DoTransactionResponse response = api.registerDelegate(from, data, fee);
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
@@ -464,16 +528,38 @@ public class SemuxApiTest extends SemuxApiTestBase {
     }
 
     @Test
-    public void sendTransactionTest() throws InterruptedException {
-        Transaction tx = createTransaction(config);
+    public void broadcastRawTransactionTest() throws InterruptedException {
+        Key from = new Key();
+        Key to = new Key();
+        Amount value = Amount.ZERO;
+        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from.toAddress(),
+                config.minTransactionFee());
+        Transaction tx = createTransaction(config, from, to, value);
 
-        SendTransactionResponse response = api.broadcastRawTransaction(Hex.encode(tx.toBytes()));
+        DoTransactionResponse response = api.broadcastRawTransaction(Hex.encode(tx.toBytes()));
         assertTrue(response.isSuccess());
 
         Thread.sleep(200);
-        List<Transaction> list = pendingMgr.getQueue();
-        assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).getHash(), tx.getHash());
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
+        assertThat(list).hasSize(1);
+        assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), tx.getHash());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void broadcastRawTransactionInvalidNonceTest() {
+        Key from = new Key();
+        Key to = new Key();
+        Amount value = Amount.ZERO;
+
+        // mock state
+        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from.toAddress(),
+                config.minTransactionFee());
+        PendingManager pendingManager = spy(pendingMgr);
+        when(pendingManager.getNonce(from.toAddress())).thenReturn(100L);
+        kernelRule.getKernel().setPendingManager(pendingManager);
+
+        Transaction tx = createTransaction(config, from, to, value);
+        api.broadcastRawTransaction(Hex.encode(tx.toBytes()));
     }
 
     @Test
@@ -506,7 +592,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String value = "1000000000";
         String from = wallet.getAccount(0).toAddressString();
         String to = key.toAddressString();
-        String fee = String.valueOf(config.minTransactionFee().getNano());
+        String fee = "5432100";
         String data = Hex.encode(Bytes.of("test_transfer"));
 
         DoTransactionResponse response = api.transfer(from, to, value, fee, data);
@@ -518,8 +604,34 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
         List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
         assertFalse(list.isEmpty());
-        assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), Hex.decode0x(response.getResult()));
-        assertEquals(TRANSFER, list.get(list.size() - 1).transaction.getType());
+        Transaction tx = list.get(list.size() - 1).transaction;
+        assertArrayEquals(tx.getHash(), Hex.decode0x(response.getResult()));
+        assertEquals(TRANSFER, tx.getType());
+        assertEquals(Amount.Unit.NANO_SEM.of(Long.parseLong(fee)), tx.getFee());
+        assertEquals(data, Hex.encode(tx.getData()));
+    }
+
+    @Test
+    public void transferDefaultFeeTest() throws InterruptedException {
+        Key key = new Key();
+        String value = "1000000000";
+        String from = wallet.getAccount(0).toAddressString();
+        String to = key.toAddressString();
+        String data = Hex.encode(Bytes.of("test_transfer"));
+
+        DoTransactionResponse response = api.transfer(from, to, value, null, null);
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+        assertNotNull(response.getResult());
+
+        Thread.sleep(200);
+
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
+        assertFalse(list.isEmpty());
+        Transaction tx = list.get(list.size() - 1).transaction;
+        assertArrayEquals(tx.getHash(), Hex.decode0x(response.getResult()));
+        assertEquals(TRANSFER, tx.getType());
+        assertEquals(config.minTransactionFee(), tx.getFee());
     }
 
     @Test
