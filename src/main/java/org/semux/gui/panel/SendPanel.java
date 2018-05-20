@@ -14,7 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,7 +63,6 @@ public class SendPanel extends JPanel implements ActionListener {
     private final transient WalletModel model;
     private final transient Kernel kernel;
     private final transient Config config;
-    private transient Set<AccountItem> existingAccountItems = Collections.emptySet();
 
     private final JComboBox<AccountItem> selectFrom;
     private final JComboBox<AccountItem> selectTo;
@@ -331,15 +329,14 @@ public class SendPanel extends JPanel implements ActionListener {
             }
         }
 
-        // 'to' contains all current accounts and address book, updates only if changed
-        if (!existingAccountItems.containsAll(accountItems) || !accountItems.containsAll(existingAccountItems)) {
+        // 'to' contains all current accounts and address book, only update if user isn't interacting with it
+        if (!selectTo.isPopupVisible()) {
             Object toSelected = selectTo.getSelectedItem();
 
             selectTo.removeAllItems();
             for (AccountItem accountItem : accountItems) {
                 selectTo.addItem(accountItem);
             }
-            existingAccountItems = accountItems;
             selectTo.setSelectedItem(toSelected);
         }
 
