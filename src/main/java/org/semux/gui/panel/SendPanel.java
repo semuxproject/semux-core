@@ -296,18 +296,20 @@ public class SendPanel extends JPanel implements ActionListener {
         // record selected account
         AccountItem selected = (AccountItem) selectFrom.getSelectedItem();
 
-        // update account list
-        selectFrom.removeAllItems();
-        for (WalletAccount aList : list) {
-            selectFrom.addItem(new AccountItem(aList));
-        }
+        // update account list if user is not interacting with it
+        if (!selectFrom.isPopupVisible()) {
+            selectFrom.removeAllItems();
+            for (WalletAccount aList : list) {
+                selectFrom.addItem(new AccountItem(aList));
+            }
 
-        // recover selected account
-        if (selected != null) {
-            for (int i = 0; i < list.size(); i++) {
-                if (Arrays.equals(list.get(i).getAddress(), selected.account.getAddress())) {
-                    selectFrom.setSelectedIndex(i);
-                    break;
+            // recover selected account
+            if (selected != null) {
+                for (int i = 0; i < list.size(); i++) {
+                    if (Arrays.equals(list.get(i).getAddress(), selected.account.getAddress())) {
+                        selectFrom.setSelectedIndex(i);
+                        break;
+                    }
                 }
             }
         }
