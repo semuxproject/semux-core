@@ -29,6 +29,17 @@ public interface Config {
     // =========================
     // General
     // =========================
+
+    /**
+     * @return The config file itself.
+     */
+    File getFile();
+
+    /**
+     * @return The wallet password.
+     */
+    String walletPassword();
+
     /**
      * Returns the data directory.
      *

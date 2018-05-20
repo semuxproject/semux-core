@@ -28,6 +28,7 @@ import org.semux.exception.LauncherException;
 import org.semux.message.CliMessages;
 import org.semux.net.filter.exception.IpFilterJsonParseException;
 import org.semux.util.ConsoleUtil;
+import org.semux.util.FileUtil;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,8 @@ import org.slf4j.LoggerFactory;
 public class SemuxCli extends Launcher {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxCli.class);
+
+    private static final String ENV_SEMUX_WALLET_PASSWORD = "SEMUX_WALLET_PASSWORD";
 
     public static void main(String[] args) {
         try {
@@ -122,6 +125,10 @@ public class SemuxCli extends Launcher {
 
         if (cmd.hasOption(SemuxOption.PASSWORD.toString())) {
             setPassword(cmd.getOptionValue(SemuxOption.PASSWORD.toString()));
+        } else if (getConfig().walletPassword() != null) {
+            setPassword(getConfig().walletPassword());
+        } else if (System.getenv(ENV_SEMUX_WALLET_PASSWORD) != null) {
+            setPassword(System.getenv(ENV_SEMUX_WALLET_PASSWORD));
         }
 
         if (cmd.hasOption(SemuxOption.HELP.toString())) {
@@ -163,8 +170,14 @@ public class SemuxCli extends Launcher {
             return;
         }
 
-        if (SystemUtil.isPosix() && !wallet.isPosixPermissionSecured()) {
-            logger.warn(CliMessages.get("WarningWalletPosixPermission"));
+        if (SystemUtil.isPosix()) {
+            if (!wallet.isPosixPermissionSecured()) {
+                logger.warn(CliMessages.get("WarningWalletPosixPermission"));
+            }
+
+            if (!FileUtil.isPosixPermissionSecured(getConfig().getFile())) {
+                logger.warn(CliMessages.get("WarningConfigPosixPermission"));
+            }
         }
 
         // create a new account if the wallet is empty
