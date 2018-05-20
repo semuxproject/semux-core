@@ -57,8 +57,6 @@ public class TransactionsPanelFilter {
         toModel = new TransactionsComboBoxModel<>();
         fromModel = new TransactionsComboBoxModel<>();
         typeModel = new TransactionsComboBoxModel<>();
-        typeModel.setData(Arrays.stream(TransactionType.values()).map(it -> new ComboBoxItem<>(it.toString(), it))
-                .collect(Collectors.toSet()));
 
         selectType = new JComboBox<>(typeModel);
         selectFrom = new JComboBox<>(fromModel);
@@ -113,19 +111,19 @@ public class TransactionsPanelFilter {
 
         // update filters that are not set for reduced filter set if filter not already
         // set on them for further filtering
-        if (to == null) {
+        if (to == null && !selectTo.isPopupVisible()) {
             toModel.setData(allTo.stream()
                     .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it.getData()), it.getData()))
                     .collect(Collectors.toCollection(TreeSet::new)));
         }
 
-        if (from == null) {
+        if (from == null && !selectFrom.isPopupVisible()) {
             fromModel.setData(allFrom.stream()
                     .map(it -> new ComboBoxItem<>(SwingUtil.describeAddress(gui, it.getData()), it.getData()))
                     .collect(Collectors.toCollection(TreeSet::new)));
         }
 
-        if (transactionType == null) {
+        if (transactionType == null && !selectType.isPopupVisible()) {
             typeModel.setData(allTransactionType.stream()
                     .map(it -> new ComboBoxItem<>(it.toString(), it))
                     .collect(Collectors.toCollection(TreeSet::new)));
@@ -174,7 +172,6 @@ public class TransactionsPanelFilter {
     class TransactionsComboBoxModel<T> extends DefaultComboBoxModel<ComboBoxItem<T>> {
 
         private final ComboBoxItem<T> defaultItem;
-        private final Set<ComboBoxItem<T>> currentValues = new TreeSet<>();
 
         public TransactionsComboBoxModel() {
             this.defaultItem = new ComboBoxItem<>("", null);
@@ -182,19 +179,10 @@ public class TransactionsPanelFilter {
 
         public synchronized void setData(Set<ComboBoxItem<T>> values) {
 
-            // don't re-render the list if there are no changes
-            // avoids undesirable refreshing of a list user might be interacting with
-            if (currentValues.containsAll(values) && values.containsAll(currentValues)) {
-                return;
-            }
-
-            currentValues.clear();
-            currentValues.addAll(values);
-
             Object selected = getSelectedItem();
             removeAllElements();
             addElement(defaultItem);
-            for (ComboBoxItem<T> value : currentValues) {
+            for (ComboBoxItem<T> value : values) {
                 addElement(value);
             }
             setSelectedItem(selected);
@@ -205,12 +193,11 @@ public class TransactionsPanelFilter {
             // only refresh if new object selected
             T existing = getSelectedValue();
             T newValue = (T) (anObject instanceof ComboBoxItem ? ((ComboBoxItem) anObject).getValue() : anObject);
-            if (existing != newValue || existing == null || !existing.equals(newValue)) {
+            if (existing != newValue && (existing == null || !existing.equals(newValue))) {
                 super.setSelectedItem(anObject);
                 List<TransactionsPanel.StatusTransaction> filteredTransactions = getFilteredTransactions();
                 tableModel.setData(filteredTransactions);
             }
-
         }
 
         T getSelectedValue() {
