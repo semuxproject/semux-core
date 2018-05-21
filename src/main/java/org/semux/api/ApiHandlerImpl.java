@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.QueryParam;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,22 +116,40 @@ public class ApiHandlerImpl implements ApiHandler {
 
         final Method methodImpl;
 
-        final List<QueryParam> queryParams;
+        final List<Pair<QueryParam, Class<?>>> queryParams;
 
         Route(HttpMethod httpMethod, String uri, Method methodInterface, Method methodImpl) {
             this.httpMethod = httpMethod;
             this.uri = uri;
             this.methodInterface = methodInterface;
             this.methodImpl = methodImpl;
-            this.queryParams = Arrays.stream(methodInterface.getParameters())
-                    .map(p -> p.getAnnotation(QueryParam.class))
+            this.queryParams = Arrays
+                    .stream(methodInterface.getParameters())
+                    .map(p -> new ImmutablePair<QueryParam, Class<?>>(p.getAnnotation(QueryParam.class), p.getType()))
                     .collect(Collectors.toList());
         }
 
         Object invoke(Map<String, String> params) throws Exception {
             return this.methodImpl.invoke(
                     semuxApi,
-                    queryParams.stream().map(p -> params.getOrDefault(p.value(), null)).toArray());
+                    queryParams.stream().map(p -> {
+                        String param = params.getOrDefault(p.getLeft().value(), null);
+
+                        if (param == null) {
+                            return null;
+                        }
+
+                        // convert params
+                        if (p.getRight().equals(Boolean.class)) {
+                            return Boolean.parseBoolean(param);
+                        }
+
+                        if (p.getRight().equals(Integer.class)) {
+                            return Integer.parseInt(param);
+                        }
+
+                        return param;
+                    }).toArray());
         }
     }
 }
