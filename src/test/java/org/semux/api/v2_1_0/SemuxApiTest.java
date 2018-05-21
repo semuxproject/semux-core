@@ -122,6 +122,7 @@ import io.netty.handler.ipfilter.IpFilterRuleType;
 /**
  * API tests for {@link org.semux.api.v2_1_0.impl.SemuxApiServiceImpl}
  */
+@SuppressWarnings("Duplicates")
 public class SemuxApiTest extends SemuxApiTestBase {
 
     @Test
@@ -517,7 +518,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String from = wallet.getAccount(0).toAddressString();
         String fee = String.valueOf(config.minTransactionFee().getNano());
         String data = Hex.encode(Bytes.of("test_delegate"));
-        DoTransactionResponse response = api.registerDelegate(from, data, fee);
+        DoTransactionResponse response = api.registerDelegate(from, data, fee, null);
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
@@ -598,7 +599,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String fee = "5432100";
         String data = Hex.encode(Bytes.of("test_transfer"));
 
-        DoTransactionResponse response = api.transfer(from, to, value, fee, data);
+        DoTransactionResponse response = api.transfer(from, to, value, fee, data, null);
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
@@ -621,7 +622,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String from = wallet.getAccount(0).toAddressString();
         String to = key.toAddressString();
 
-        DoTransactionResponse response = api.transfer(from, to, value, null, null);
+        DoTransactionResponse response = api.transfer(from, to, value, null, null, null);
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
@@ -651,7 +652,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String value = String.valueOf(amount.getNano());
         String fee = "50000000";
 
-        DoTransactionResponse response = api.unvote(from, to, value, fee);
+        DoTransactionResponse response = api.unvote(from, to, value, fee, null);
         assertNotNull(response);
 
         assertTrue(response.isSuccess());
@@ -680,7 +681,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String value = String.valueOf(amount.getNano());
         String fee = String.valueOf(config.minTransactionFee().getNano());
 
-        DoTransactionResponse response = api.vote(from, to, value, fee);
+        DoTransactionResponse response = api.vote(from, to, value, fee, null);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
 

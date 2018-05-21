@@ -78,6 +78,7 @@ import org.semux.net.filter.SemuxIpFilter;
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
+@SuppressWarnings("Duplicates")
 public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
 
     private static final Charset CHARSET = UTF_8;
@@ -590,8 +591,8 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
     }
 
     @Override
-    public Response registerDelegate(String from, String delegateName, String fee) {
-        return doTransaction(TransactionType.DELEGATE, from, null, null, fee, delegateName);
+    public Response registerDelegate(String from, String delegateName, String fee, String nonce) {
+        return doTransaction(TransactionType.DELEGATE, from, null, null, fee, nonce, delegateName);
     }
 
     @Override
@@ -695,13 +696,13 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
     }
 
     @Override
-    public Response transfer(String from, String to, String value, String fee, String data) {
-        return doTransaction(TransactionType.TRANSFER, from, to, value, fee, data);
+    public Response transfer(String from, String to, String value, String fee, String nonce, String data) {
+        return doTransaction(TransactionType.TRANSFER, from, to, value, fee, nonce, data);
     }
 
     @Override
-    public Response unvote(String from, String to, String value, String fee) {
-        return doTransaction(TransactionType.UNVOTE, from, to, value, fee, null);
+    public Response unvote(String from, String to, String value, String fee, String nonce) {
+        return doTransaction(TransactionType.UNVOTE, from, to, value, fee, nonce, null);
     }
 
     @Override
@@ -745,8 +746,8 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
     }
 
     @Override
-    public Response vote(String from, String to, String value, String fee) {
-        return doTransaction(TransactionType.VOTE, from, to, value, fee, null);
+    public Response vote(String from, String to, String value, String fee, String nonce) {
+        return doTransaction(TransactionType.VOTE, from, to, value, fee, nonce, null);
     }
 
     @Override
@@ -814,19 +815,23 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return new NodeManager.Node(host, port);
     }
 
-    private Response doTransaction(TransactionType type, String from, String to, String value, String fee,
+    private Response doTransaction(TransactionType type, String from, String to, String value, String fee, String nonce,
             String data) {
         DoTransactionResponse resp = new DoTransactionResponse();
         try {
-            Transaction tx = new TransactionBuilder(kernel)
+            TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
                     .withType(type)
                     .withFrom(from)
                     .withTo(to)
                     .withValue(value)
                     .withFee(fee, true)
-                    .withData(data)
-                    .buildSigned();
+                    .withData(data);
 
+            if (nonce != null) {
+                transactionBuilder.withNonce(nonce);
+            }
+
+            Transaction tx = transactionBuilder.buildSigned();
             PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {
                 return failure(resp, "Transaction rejected by pending manager: " + result.error.toString());

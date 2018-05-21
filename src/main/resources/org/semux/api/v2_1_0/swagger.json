@@ -977,6 +977,15 @@
                         "pattern" : "^\\d+$"
                     },
                     {
+                        "name" : "nonce",
+                        "in" : "query",
+                        "description" : "Transaction nonce",
+                        "required" : false,
+                        "type" : "string",
+                        "format" : "int64",
+                        "pattern" : "^\\d+$"
+                    },
+                    {
                         "name" : "data",
                         "in" : "query",
                         "description" : "Transaction data encoded in hexadecimal string",
@@ -1045,6 +1054,15 @@
                         "type" : "string",
                         "format" : "int64",
                         "pattern" : "^\\d+$"
+                    },
+                    {
+                        "name" : "nonce",
+                        "in" : "query",
+                        "description" : "Transaction nonce",
+                        "required" : false,
+                        "type" : "string",
+                        "format" : "int64",
+                        "pattern" : "^\\d+$"
                     }
                 ],
                 "responses" : {
@@ -1107,6 +1125,15 @@
                         "type" : "string",
                         "format" : "int64",
                         "pattern" : "^\\d+$"
+                    },
+                    {
+                        "name" : "nonce",
+                        "in" : "query",
+                        "description" : "Transaction nonce",
+                        "required" : false,
+                        "type" : "string",
+                        "format" : "int64",
+                        "pattern" : "^\\d+$"
                     }
                 ],
                 "responses" : {
@@ -1145,6 +1172,14 @@
                         "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
+                        "name" : "data",
+                        "in" : "query",
+                        "description" : "Delegate name in hexadecimal encoded UTF-8 string, 16 bytes of data at maximum",
+                        "required" : true,
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                    },
+                    {
                         "name" : "fee",
                         "in" : "query",
                         "description" : "Transaction fee in nano SEM, default to minimum fee if omitted",
@@ -1154,12 +1189,13 @@
                         "pattern" : "^\\d+$"
                     },
                     {
-                        "name" : "data",
+                        "name" : "nonce",
                         "in" : "query",
-                        "description" : "Delegate name in hexadecimal encoded UTF-8 string, 16 bytes of data at maximum",
-                        "required" : true,
+                        "description" : "Transaction nonce",
+                        "required" : false,
                         "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                        "format" : "int64",
+                        "pattern" : "^\\d+$"
                     }
                 ],
                 "responses" : {
