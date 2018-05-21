@@ -418,10 +418,25 @@ public class Wallet {
      * 
      */
     public boolean removeAccount(Key key) throws WalletLockedException {
+        return removeAccount(key.toAddress());
+    }
+
+    /**
+     * Deletes an account in the wallet.
+     *
+     * NOTE: you need to call {@link #flush()} to update the wallet on disk.
+     *
+     * @param address
+     *            address bytes of the account to delete
+     * @return true if the account was successfully deleted, false otherwise
+     * @throws WalletLockedException
+     *
+     */
+    public boolean removeAccount(byte[] address) throws WalletLockedException {
         requireUnlocked();
 
         synchronized (accounts) {
-            return accounts.remove(ByteArray.of(key.toAddress())) != null;
+            return accounts.remove(ByteArray.of(address)) != null;
         }
     }
 

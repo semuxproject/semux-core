@@ -72,6 +72,7 @@ import org.semux.api.v2_1_0.model.BlockType;
 import org.semux.api.v2_1_0.model.ComposeRawTransactionResponse;
 import org.semux.api.v2_1_0.model.CreateAccountResponse;
 import org.semux.api.v2_1_0.model.DelegateType;
+import org.semux.api.v2_1_0.model.DeleteAccountResponse;
 import org.semux.api.v2_1_0.model.DoTransactionResponse;
 import org.semux.api.v2_1_0.model.GetAccountPendingTransactionsResponse;
 import org.semux.api.v2_1_0.model.GetAccountResponse;
@@ -193,6 +194,14 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertTrue(response.isSuccess());
         assertEquals(SEM.of(1000).getNano(), Long.parseLong(response.getResult().getAvailable()));
         assertEquals(Integer.valueOf(1), response.getResult().getTransactionCount());
+    }
+
+    @Test
+    public void deleteAccountTest() {
+        Key account = wallet.getAccounts().get(0);
+        DeleteAccountResponse resp = api.deleteAccount(account.toAddressString());
+        assertTrue(resp.isSuccess());
+        assertThat(wallet.getAccounts()).doesNotContain(account);
     }
 
     @Test
