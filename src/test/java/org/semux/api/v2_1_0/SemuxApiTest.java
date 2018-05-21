@@ -597,9 +597,10 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String from = wallet.getAccount(0).toAddressString();
         String to = key.toAddressString();
         String fee = "5432100";
+        String nonce = null;
         String data = Hex.encode(Bytes.of("test_transfer"));
 
-        DoTransactionResponse response = api.transfer(from, to, value, fee, data, null);
+        DoTransactionResponse response = api.transfer(from, to, value, fee, nonce, data);
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
