@@ -979,7 +979,7 @@
                     {
                         "name" : "nonce",
                         "in" : "query",
-                        "description" : "Transaction nonce",
+                        "description" : "Transaction nonce, default to sender's nonce if omitted",
                         "required" : false,
                         "type" : "string",
                         "format" : "int64",
@@ -1058,7 +1058,7 @@
                     {
                         "name" : "nonce",
                         "in" : "query",
-                        "description" : "Transaction nonce",
+                        "description" : "Transaction nonce, default to sender's nonce if omitted",
                         "required" : false,
                         "type" : "string",
                         "format" : "int64",
@@ -1129,7 +1129,7 @@
                     {
                         "name" : "nonce",
                         "in" : "query",
-                        "description" : "Transaction nonce",
+                        "description" : "Transaction nonce, default to sender's nonce if omitted",
                         "required" : false,
                         "type" : "string",
                         "format" : "int64",
@@ -1191,7 +1191,7 @@
                     {
                         "name" : "nonce",
                         "in" : "query",
-                        "description" : "Transaction nonce",
+                        "description" : "Transaction nonce, default to sender's nonce if omitted",
                         "required" : false,
                         "type" : "string",
                         "format" : "int64",
