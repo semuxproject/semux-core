@@ -616,6 +616,19 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertEquals(data, Hex.encode(tx.getData()));
     }
 
+    @Test(expected = BadRequestException.class)
+    public void transferWithInvalidNonceTest() {
+        Key key = new Key();
+        String value = "1000000000";
+        String from = wallet.getAccount(0).toAddressString();
+        String to = key.toAddressString();
+        String fee = "5432100";
+        String nonce = "999";
+        String data = null;
+
+        api.transfer(from, to, value, fee, nonce, data);
+    }
+
     @Test
     public void transferDefaultFeeTest() throws InterruptedException {
         Key key = new Key();
