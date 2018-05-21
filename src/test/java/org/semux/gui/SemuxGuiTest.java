@@ -44,8 +44,11 @@ public class SemuxGuiTest {
     public void testStart() throws ParseException, IOException {
         SemuxGui gui = spy(new SemuxGui());
 
-        Mockito.doNothing().when(gui).showUnlock(any());
         Mockito.doNothing().when(gui).showWelcome(any());
+        Mockito.doNothing().when(gui).checkFilePermissions(any());
+        Mockito.doNothing().when(gui).unlockWallet(any());
+        Mockito.doNothing().when(gui).showSplashScreen();
+        Mockito.doNothing().when(gui).setupCoinbase(any());
 
         String[] args = new String[] {
                 "--datadir", kernelRule.getKernel().getConfig().dataDir().getAbsolutePath(),
@@ -55,7 +58,10 @@ public class SemuxGuiTest {
 
         assertThat(gui.getDataDir()).isEqualTo(args[1]);
         assertThat(gui.getNetwork()).isEqualTo(Network.MAINNET);
-        verify(gui).showUnlock(any());
+        verify(gui).checkFilePermissions(any());
+        verify(gui).unlockWallet(any());
+        verify(gui).showSplashScreen();
+        verify(gui).setupCoinbase(any());
 
         // start without wallet
         kernelRule.getKernel().getWallet().getFile().delete();
