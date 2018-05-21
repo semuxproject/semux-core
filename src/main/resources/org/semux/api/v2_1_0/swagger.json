@@ -1228,7 +1228,7 @@
                     {
                         "name" : "raw",
                         "in" : "query",
-                        "description" : "Raw transaction",
+                        "description" : "Raw transaction encoded in hexadecimal string.",
                         "required" : true,
                         "type" : "string",
                         "pattern" : "^(0x)?[0-9a-fA-F]+$"
