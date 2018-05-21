@@ -53,7 +53,7 @@ Please re-enter the new password:
 
 ### Automatic wallet unlock
 
-The standard wallet.data file of Semux is always encrypted even if you entered an empty password during wallet creation. Therefore the wallet password is required to be provided for automatic unlock when you setup a full node.
+The standard wallet.data file of Semux is always encrypted even if you entered an empty password during wallet creation. Therefore a wallet password is required to be provided for automatic unlock when you setup a full node.
 
 The following ways are available for automatic wallet unlock which will be applied in sequence:
 
