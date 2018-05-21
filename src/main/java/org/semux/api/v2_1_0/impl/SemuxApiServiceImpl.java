@@ -47,6 +47,7 @@ import org.semux.api.v2_1_0.model.GetLatestBlockResponse;
 import org.semux.api.v2_1_0.model.GetPeersResponse;
 import org.semux.api.v2_1_0.model.GetPendingTransactionsResponse;
 import org.semux.api.v2_1_0.model.GetRootResponse;
+import org.semux.api.v2_1_0.model.GetSyncingProgressResponse;
 import org.semux.api.v2_1_0.model.GetTransactionLimitsResponse;
 import org.semux.api.v2_1_0.model.GetTransactionResponse;
 import org.semux.api.v2_1_0.model.GetValidatorsResponse;
@@ -55,11 +56,13 @@ import org.semux.api.v2_1_0.model.GetVotesResponse;
 import org.semux.api.v2_1_0.model.ListAccountsResponse;
 import org.semux.api.v2_1_0.model.SignMessageResponse;
 import org.semux.api.v2_1_0.model.SignRawTransactionResponse;
+import org.semux.api.v2_1_0.model.SyncingProgressType;
 import org.semux.api.v2_1_0.model.VerifyMessageResponse;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
+import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.exception.WalletLockedException;
@@ -744,6 +747,26 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
     @Override
     public Response vote(String from, String to, String value, String fee) {
         return doTransaction(TransactionType.VOTE, from, to, value, fee, null);
+    }
+
+    @Override
+    public Response getSyncingProgress() {
+        GetSyncingProgressResponse resp = new GetSyncingProgressResponse();
+        SyncingProgressType result = new SyncingProgressType();
+
+        if (kernel.getSyncManager().isRunning()) {
+            SyncManager.Progress progress = kernel.getSyncManager().getProgress();
+            result.setSyncing(true);
+            result.setStartingHeight(String.valueOf(progress.getStartingHeight()));
+            result.setCurrentHeight(String.valueOf(progress.getCurrentHeight()));
+            result.setTargetHeight(String.valueOf(progress.getTargetHeight()));
+        } else {
+            result.setSyncing(false);
+        }
+
+        resp.setSuccess(true);
+        resp.setResult(result);
+        return Response.ok(resp).build();
     }
 
     public Response failure(ApiHandlerResponse resp, Response.Status status, String message) {
