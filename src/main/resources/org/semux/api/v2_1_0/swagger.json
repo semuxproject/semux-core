@@ -198,8 +198,8 @@
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Create account",
-                "description" : "Creates a new account.",
+                "summary" : "Create or import an account",
+                "description" : "Creates a new account by generating a new private key or importing an existing private key when parameter 'privateKey' is provided.",
                 "operationId" : "createAccount",
                 "produces" : [
                     "application/json"
@@ -211,6 +211,14 @@
                         "description" : "Assigned alias to the created account.",
                         "required" : false,
                         "type" : "string"
+                    },
+                    {
+                        "name" : "privateKey",
+                        "in" : "query",
+                        "description" : "The private key to be imported, create a new key if omitted",
+                        "required" : false,
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]{96}$"
                     }
                 ],
                 "responses" : {
