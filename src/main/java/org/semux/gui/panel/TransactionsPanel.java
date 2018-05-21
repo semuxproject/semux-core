@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.GroupLayout;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -57,6 +59,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
     private final JTable table;
     private final TransactionsTableModel tableModel;
+    private final TransactionsPanelFilter panelFilter;
 
     public TransactionsPanel(SemuxGui gui, JFrame frame) {
         this.gui = gui;
@@ -101,7 +104,58 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY));
 
-        add(scrollPane);
+        JLabel to = new JLabel(GuiMessages.get("To"));
+        JLabel from = new JLabel(GuiMessages.get("From"));
+        JLabel type = new JLabel(GuiMessages.get("Type"));
+        JLabel amount = new JLabel(GuiMessages.get("Amount"));
+        JLabel separator = new JLabel("-");
+
+        // create filter
+        panelFilter = new TransactionsPanelFilter(gui, tableModel);
+
+        GroupLayout groupLayout = new GroupLayout(this);
+        groupLayout.setHorizontalGroup(
+                groupLayout.createParallelGroup(GroupLayout.Alignment.TRAILING).addGroup(
+                        groupLayout.createSequentialGroup()
+                                .addComponent(type)
+                                .addGap(10)
+                                .addComponent(panelFilter.getSelectType())
+                                .addGap(10)
+                                .addComponent(from)
+                                .addGap(10)
+                                .addComponent(panelFilter.getSelectFrom(), GroupLayout.PREFERRED_SIZE, 210,
+                                        Short.MAX_VALUE)
+                                .addGap(10)
+                                .addComponent(to)
+                                .addGap(10)
+                                .addComponent(panelFilter.getSelectTo(), GroupLayout.PREFERRED_SIZE, 210,
+                                        Short.MAX_VALUE)
+                                .addGap(10)
+                                .addComponent(amount)
+                                .addGap(10)
+                                .addComponent(panelFilter.getTxtMin(), GroupLayout.PREFERRED_SIZE, 60,
+                                        Short.MAX_VALUE)
+                                .addComponent(separator)
+                                .addComponent(panelFilter.getTxtMax(), GroupLayout.PREFERRED_SIZE, 60,
+                                        Short.MAX_VALUE))
+                        .addComponent(scrollPane));
+        groupLayout.setVerticalGroup(
+                groupLayout.createSequentialGroup()
+                        .addGroup(groupLayout.createSequentialGroup()
+                                .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                        .addComponent(type)
+                                        .addComponent(panelFilter.getSelectType())
+                                        .addComponent(from)
+                                        .addComponent(panelFilter.getSelectFrom())
+                                        .addComponent(to)
+                                        .addComponent(panelFilter.getSelectTo())
+                                        .addComponent(amount)
+                                        .addComponent(panelFilter.getTxtMin())
+                                        .addComponent(separator)
+                                        .addComponent(panelFilter.getTxtMax())))
+                        .addGap(18)
+                        .addComponent(scrollPane));
+        setLayout(groupLayout);
 
         refresh();
     }
@@ -112,7 +166,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
 
         private transient List<StatusTransaction> transactions;
 
-        public TransactionsTableModel() {
+        TransactionsTableModel() {
             this.transactions = Collections.emptyList();
         }
 
@@ -121,7 +175,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
             this.fireTableDataChanged();
         }
 
-        public Transaction getRow(int row) {
+        Transaction getRow(int row) {
             if (row >= 0 && row < transactions.size()) {
                 return transactions.get(row).getTransaction();
             }
@@ -214,10 +268,14 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 (tx1, tx2) -> Long.compare(tx2.getTransaction().getTimestamp(), tx1.getTransaction().getTimestamp()));
 
         /*
-         * update table model
+         * update model
          */
         Transaction tx = getSelectedTransaction();
-        tableModel.setData(transactions);
+
+        // filter transactions
+        panelFilter.setTransactions(transactions);
+        List<StatusTransaction> filteredTransactions = panelFilter.getFilteredTransactions();
+        tableModel.setData(filteredTransactions);
 
         if (tx != null) {
             for (int i = 0; i < transactions.size(); i++) {
@@ -239,7 +297,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         return (row != -1) ? tableModel.getRow(table.convertRowIndexToModel(row)) : null;
     }
 
-    private static class StatusTransaction {
+    static class StatusTransaction {
         private final String status;
         private final Transaction transaction;
 

@@ -563,7 +563,7 @@ public class SwingUtil {
      * @param address
      * @return
      */
-    private static String describeAddress(SemuxGui gui, byte[] address) {
+    public static String describeAddress(SemuxGui gui, byte[] address) {
         return getAddressAlias(gui, address)
                 .orElse(getAddressDelegateName(gui, address).orElse(getAddressAbbr(address)));
     }
