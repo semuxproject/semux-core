@@ -55,6 +55,7 @@ import org.semux.gui.model.WalletModel.Status;
 import org.semux.message.GuiMessages;
 import org.semux.net.Peer;
 import org.semux.net.filter.exception.IpFilterJsonParseException;
+import org.semux.util.FileUtil;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -184,15 +185,17 @@ public class SemuxGui extends Launcher {
         if (!wallet.exists()) {
             showWelcome(wallet);
         } else {
-            checkWalletPermissions(wallet);
-            showUnlock(wallet);
+            checkFilePermissions(wallet);
+            unlockWallet(wallet);
+            showSplashScreen();
+            setupCoinbase(wallet);
         }
     }
 
     /**
      * Shows the welcome frame.
      */
-    public void showWelcome(Wallet wallet) {
+    protected void showWelcome(Wallet wallet) {
         // start welcome frame
         WelcomeFrame frame = new WelcomeFrame(wallet);
         frame.setVisible(true);
@@ -205,13 +208,38 @@ public class SemuxGui extends Launcher {
         setupCoinbase(wallet);
     }
 
-    public void checkWalletPermissions(Wallet wallet) throws IOException {
-        if (SystemUtil.isPosix() && !wallet.isPosixPermissionSecured()) {
-            JOptionPane.showMessageDialog(
-                    null,
-                    GuiMessages.get("WarningWalletPosixPermission"),
-                    GuiMessages.get("WarningDialogTitle"),
-                    JOptionPane.WARNING_MESSAGE);
+    protected void checkFilePermissions(Wallet wallet) throws IOException {
+        if (SystemUtil.isPosix()) {
+            if (!wallet.isPosixPermissionSecured()) {
+                JOptionPane.showMessageDialog(
+                        null,
+                        GuiMessages.get("WarningWalletPosixPermission"),
+                        GuiMessages.get("WarningDialogTitle"),
+                        JOptionPane.WARNING_MESSAGE);
+            }
+
+            if (getConfig().getFile().exists() && !FileUtil.isPosixPermissionSecured(getConfig().getFile())) {
+                JOptionPane.showMessageDialog(
+                        null,
+                        GuiMessages.get("WarningConfigPosixPermission"),
+                        GuiMessages.get("WarningDialogTitle"),
+                        JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
+    protected void unlockWallet(Wallet wallet) {
+        if (getConfig().walletPassword() != null) {
+            if (!wallet.unlock(getConfig().walletPassword())) {
+                JOptionPane.showMessageDialog(
+                        null,
+                        GuiMessages.get("AutomaticUnlockFailed"),
+                        GuiMessages.get("ErrorDialogTitle"),
+                        JOptionPane.ERROR_MESSAGE);
+                SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_UNLOCK_WALLET);
+            }
+        } else {
+            showUnlockDialog(wallet);
         }
     }
 
@@ -219,7 +247,7 @@ public class SemuxGui extends Launcher {
      * Shows the unlock frame, which reads user-entered password and tries to unlock
      * the wallet.
      */
-    public void showUnlock(Wallet wallet) {
+    protected void showUnlockDialog(Wallet wallet) {
         for (int i = 0;; i++) {
             InputDialog dialog = new InputDialog(null, i == 0 ? GuiMessages.get("EnterPassword") + ":"
                     : GuiMessages.get("WrongPasswordPleaseTryAgain") + ":", true);
@@ -231,16 +259,13 @@ public class SemuxGui extends Launcher {
                 break;
             }
         }
-
-        showSplashScreen();
-        setupCoinbase(wallet);
     }
 
     /**
      * Select an account as coinbase if the wallet is not empty; or create a new
      * account and use it as coinbase.
      */
-    public void setupCoinbase(Wallet wallet) {
+    protected void setupCoinbase(Wallet wallet) {
         pubSub.publish(new WalletLoadingEvent());
 
         if (wallet.size() > 1) {
@@ -283,14 +308,14 @@ public class SemuxGui extends Launcher {
         }
     }
 
-    private synchronized void showSplashScreen() {
+    protected synchronized void showSplashScreen() {
         splashScreen = new SplashScreen();
     }
 
     /**
      * Starts the kernel and shows main frame.
      */
-    public synchronized void startKernelAndMain(Wallet wallet) {
+    protected synchronized void startKernelAndMain(Wallet wallet) {
         if (isRunning) {
             return;
         }
