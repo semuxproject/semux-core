@@ -17,7 +17,7 @@ public class BlockHeaderMessage extends Message {
     private final BlockHeader header;
 
     public BlockHeaderMessage(BlockHeader header) {
-        super(MessageCode.GET_BLOCK_HEADER, null);
+        super(MessageCode.BLOCK_HEADER, null);
 
         this.header = header;
 
@@ -27,13 +27,12 @@ public class BlockHeaderMessage extends Message {
     }
 
     public BlockHeaderMessage(byte[] encoded) {
-        super(MessageCode.GET_BLOCK, null);
+        super(MessageCode.BLOCK_HEADER, null);
 
         this.encoded = encoded;
 
         SimpleDecoder dec = new SimpleDecoder(encoded);
-        byte[] bytes = dec.readBytes();
-        this.header = BlockHeader.fromBytes(bytes);
+        this.header = BlockHeader.fromBytes(dec.readBytes());
     }
 
     public BlockHeader getHeader() {
