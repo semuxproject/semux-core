@@ -308,6 +308,12 @@ public class PendingManager implements Runnable, BlockchainListener {
             return new ProcessTransactionResult(0, TransactionResult.Error.INVALID_TIMESTAMP);
         }
 
+        // report INVALID_NONCE error to prevent the transaction from being silently
+        // ignored due to a low nonce
+        if (tx.getNonce() < getNonce(tx.getFrom())) {
+            return new ProcessTransactionResult(0, TransactionResult.Error.INVALID_NONCE);
+        }
+
         // Check transaction nonce: pending transactions must be executed sequentially
         // by nonce in ascending order. In case of a nonce jump, the transaction is
         // delayed for the next event loop of PendingManager.
