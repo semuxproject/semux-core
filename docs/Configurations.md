@@ -1,4 +1,6 @@
-### General configuration
+# Configurations
+
+### Kernel configuration
 
 ```
 ################################################################################
@@ -81,9 +83,9 @@ ui.fractionDigits = 9
 
 ### IP whitelist and blacklist
 
-Example:
+Example `ipfilter.json`:
 ```
-{ 
+{
     "rules": [
         {"type": "ACCEPT", "address": "127.0.0.1/8"},
         {"type": "ACCEPT", "address": "192.168.0.0/16"},

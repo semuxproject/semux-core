@@ -1,8 +1,8 @@
-# Semux API
+# RESTful API
 
 Semux provides a rich RESTful API for interacting with the blockchain programatically.
 
-## Configuration 
+## Configuration
 
 Semux API server can be enabled by changing following properties in your `config/semux.properties`:
 ```
