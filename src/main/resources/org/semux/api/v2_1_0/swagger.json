@@ -988,9 +988,9 @@
                     {
                         "name" : "validateNonce",
                         "in" : "query",
-                        "description" : "Whether validate tx nonce against the current account state, default to true if omitted",
+                        "description" : "Whether validate tx nonce against the current account state, default to false if omitted",
                         "required" : false,
-                        "default" : true,
+                        "default" : false,
                         "type" : "boolean"
                     },
                     {
@@ -1075,9 +1075,9 @@
                     {
                         "name" : "validateNonce",
                         "in" : "query",
-                        "description" : "Whether validate tx nonce against the current account state, default to true if omitted",
+                        "description" : "Whether validate tx nonce against the current account state, default to false if omitted",
                         "required" : false,
-                        "default" : true,
+                        "default" : false,
                         "type" : "boolean"
                     }
                 ],
@@ -1154,9 +1154,9 @@
                     {
                         "name" : "validateNonce",
                         "in" : "query",
-                        "description" : "Whether validate tx nonce against the current account state, default to true if omitted",
+                        "description" : "Whether validate tx nonce against the current account state, default to false if omitted",
                         "required" : false,
-                        "default" : true,
+                        "default" : false,
                         "type" : "boolean"
                     }
                 ],
@@ -1224,9 +1224,9 @@
                     {
                         "name" : "validateNonce",
                         "in" : "query",
-                        "description" : "Whether validate tx nonce against the current account state, default to true if omitted",
+                        "description" : "Whether validate tx nonce against the current account state, default to false if omitted",
                         "required" : false,
-                        "default" : true,
+                        "default" : false,
                         "type" : "boolean"
                     }
                 ],
@@ -1268,9 +1268,9 @@
                     {
                         "name" : "validateNonce",
                         "in" : "query",
-                        "description" : "Whether to validate tx nonce against the current account state, default to true if omitted",
+                        "description" : "Whether to validate tx nonce against the current account state, default to false if omitted",
                         "required" : false,
-                        "default" : true,
+                        "default" : false,
                         "type" : "boolean"
                     }
                 ],

@@ -550,7 +550,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     }
 
     @Test(expected = BadRequestException.class)
-    public void broadcastRawTransactionInvalidNonceTest() {
+    public void broadcastRawTransactionValidateNonceTest() {
         Key from = new Key();
         Key to = new Key();
         Amount value = Amount.ZERO;
@@ -562,12 +562,12 @@ public class SemuxApiTest extends SemuxApiTestBase {
         when(pendingManager.getNonce(from.toAddress())).thenReturn(100L);
         kernelRule.getKernel().setPendingManager(pendingManager);
 
-        Transaction tx = createTransaction(config, from, to, value);
-        api.broadcastRawTransaction(Hex.encode(tx.toBytes()), null);
+        Transaction tx = createTransaction(config, from, to, value, 101L);
+        api.broadcastRawTransaction(Hex.encode(tx.toBytes()), true);
     }
 
     @Test
-    public void broadcastRawTransactionInvalidNonceWithValidateNonceFalseTest() {
+    public void broadcastRawTransactionNoValidateNonceTest() {
         Key from = new Key();
         Key to = new Key();
         Amount value = Amount.ZERO;
@@ -579,7 +579,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         when(pendingManager.getNonce(from.toAddress())).thenReturn(100L);
         kernelRule.getKernel().setPendingManager(pendingManager);
 
-        Transaction tx = createTransaction(config, from, to, value);
+        Transaction tx = createTransaction(config, from, to, value, 101L);
         DoTransactionResponse resp = api.broadcastRawTransaction(Hex.encode(tx.toBytes()), false);
         assertTrue(resp.isSuccess());
     }
@@ -635,8 +635,8 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertEquals(data, Hex.encode(tx.getData()));
     }
 
-    @Test(expected = BadRequestException.class)
-    public void transferWithInvalidNonceTest() {
+    @Test
+    public void transferWithHighNonceTest() {
         Key key = new Key();
         String value = "1000000000";
         String from = wallet.getAccount(0).toAddressString();
@@ -644,6 +644,21 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String fee = "5432100";
         String nonce = "999";
         Boolean validateNonce = null;
+        String data = null;
+
+        DoTransactionResponse resp = api.transfer(from, to, value, fee, nonce, validateNonce, data);
+        assertTrue(resp.isSuccess());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void transferValidateNonceTest() {
+        Key key = new Key();
+        String value = "1000000000";
+        String from = wallet.getAccount(0).toAddressString();
+        String to = key.toAddressString();
+        String fee = "5432100";
+        String nonce = "999";
+        Boolean validateNonce = true;
         String data = null;
 
         api.transfer(from, to, value, fee, nonce, validateNonce, data);

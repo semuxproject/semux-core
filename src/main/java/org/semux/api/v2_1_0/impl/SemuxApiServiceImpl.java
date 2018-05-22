@@ -608,7 +608,7 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
 
             // tx nonce is validated in advance to avoid silently pushing the tx into
             // delayed queue of pending manager
-            if ((validateNonce == null || validateNonce)
+            if ((validateNonce != null && validateNonce)
                     && tx.getNonce() != kernel.getPendingManager().getNonce(tx.getFrom())) {
                 return failure(resp, "Invalid transaction nonce.");
             }
@@ -837,7 +837,7 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
 
             // tx nonce is validated in advance to avoid silently pushing the tx into
             // delayed queue of pending manager
-            if ((validateNonce == null || validateNonce)
+            if ((validateNonce != null && validateNonce)
                     && tx.getNonce() != kernel.getPendingManager().getNonce(tx.getFrom())) {
                 return failure(resp, "Invalid transaction nonce.");
             }
