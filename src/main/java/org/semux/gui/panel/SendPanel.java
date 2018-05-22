@@ -327,7 +327,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
             // recover selected account
             if (selected != null) {
-                for(AccountItem item : accountItems) {
+                for (AccountItem item : accountItems) {
                     if (Arrays.equals(item.address, selected.address)) {
                         selectFrom.setSelectedItem(item);
                         break;
