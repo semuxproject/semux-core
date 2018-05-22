@@ -308,20 +308,35 @@ public class SendPanel extends JPanel implements ActionListener {
     protected void refresh() {
         List<WalletAccount> list = model.getAccounts();
 
-        // record selected account
-        AccountItem selected = (AccountItem) selectFrom.getSelectedItem();
-
         Set<AccountItem> accountItems = new TreeSet<>();
-        // update account list
-        selectFrom.removeAllItems();
         for (WalletAccount aList : list) {
             AccountItem accountItem = new AccountItem(aList);
-
-            selectFrom.addItem(accountItem);
             accountItems.add(accountItem);
         }
 
-        // add aliases
+        // update account list if user is not interacting with it
+        if (!selectFrom.isPopupVisible()) {
+            // record selected account
+            AccountItem selected = (AccountItem) selectFrom.getSelectedItem();
+
+            selectFrom.removeAllItems();
+
+            for (AccountItem accountItem : accountItems) {
+                selectFrom.addItem(accountItem);
+            }
+
+            // recover selected account
+            if (selected != null) {
+                for(AccountItem item : accountItems) {
+                    if (Arrays.equals(item.address, selected.address)) {
+                        selectFrom.setSelectedItem(item);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // add aliases to list of accounts
         for (Map.Entry<ByteArray, String> address : kernel.getWallet().getAddressAliases().entrySet()) {
             // only add aliases not in wallet
             if (kernel.getWallet().getAccount(address.getKey().getData()) == null) {
@@ -339,16 +354,6 @@ public class SendPanel extends JPanel implements ActionListener {
                 selectTo.addItem(accountItem);
             }
             selectTo.setSelectedItem(toSelected);
-        }
-
-        // recover selected account
-        if (selected != null) {
-            for (int i = 0; i < list.size(); i++) {
-                if (Arrays.equals(list.get(i).getAddress(), selected.address)) {
-                    selectFrom.setSelectedIndex(i);
-                    break;
-                }
-            }
         }
     }
 
