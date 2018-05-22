@@ -831,6 +831,8 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
 
             if (nonce != null) {
                 transactionBuilder.withNonce(nonce);
+            } else {
+                // TODO: fix race condition of auto-assigned nonce
             }
 
             Transaction tx = transactionBuilder.buildSigned();
