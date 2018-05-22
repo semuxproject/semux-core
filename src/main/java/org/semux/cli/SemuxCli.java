@@ -315,7 +315,6 @@ public class SemuxCli extends Launcher {
             logger.info(CliMessages.get("PrivateKeyImportedSuccessfully"));
             logger.info(CliMessages.get("Address", account.toAddressString()));
             logger.info(CliMessages.get("PublicKey", Hex.encode(account.getPublicKey())));
-            logger.info(CliMessages.get("PrivateKey", Hex.encode(account.getPrivateKey())));
         } catch (InvalidKeySpecException exception) {
             logger.error(CliMessages.get("PrivateKeyCannotBeDecoded", exception.getMessage()));
             SystemUtil.exit(SystemUtil.Code.INVALID_PRIVATE_KEY);
