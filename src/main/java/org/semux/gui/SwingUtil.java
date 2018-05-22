@@ -39,6 +39,7 @@ import java.util.Optional;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -257,6 +258,19 @@ public class SwingUtil {
      */
     public static JTextField textFieldWithCopyPastePopup() {
         JTextField textField = new JTextField();
+        textField.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        addTextContextMenu(textField, Arrays.asList(COPY, PASTE, CUT));
+        addTextMouseClickFocusListener(textField);
+        return textField;
+    }
+
+    /**
+     * Generates a text field with copy-paste-cut popup menu.
+     *
+     * @return
+     */
+    public static <T> JComboBox<T> comboBoxWithCopyPastePopup() {
+        JComboBox<T> textField = new JComboBox<>();
         textField.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         addTextContextMenu(textField, Arrays.asList(COPY, PASTE, CUT));
         addTextMouseClickFocusListener(textField);
