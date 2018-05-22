@@ -6,25 +6,52 @@ This release introduces Java 10 support plus a few API & documentation improveme
 
 **Fixed bugs:**
 
-- Fixed a memory leak caused by connection limiter [\#826](https://github.com/semuxproject/semux/issues/826) ([semuxdev](https://github.com/semuxdev))
-- API 
-  - Fixed a bug that `data` parameter was required for making transactions in API v2  [\#825](https://github.com/semuxproject/semux/pull/825) ([cryptokat](https://github.com/cryptokat))
+- Net
+  - Fixed a memory leak caused by connection limiter [\#826](https://github.com/semuxproject/semux/issues/826) ([semuxdev](https://github.com/semuxdev))
+- API 2.0.0
+  - Fixed a bug that `data` parameter was marked as required for making transactions in API v2.0.0 Swagger definition [\#825](https://github.com/semuxproject/semux/pull/825) ([cryptokat](https://github.com/cryptokat))
+- Consensus
+  - Fixed an issue that SemuxBFT reports a wrong fork activation height for a freshly synced client [\#850](https://github.com/semuxproject/semux/pull/850) ([cryptokat](https://github.com/cryptokat))
+- GUI
+  - Fixed an issue that long aliases can break rendering [\#865](https://github.com/semuxproject/semux/pull/865) ([orogvany](https://github.com/orogvany))
+
+**New features:**
+
+- Add Java 10 Support [\#820](https://github.com/semuxproject/semux/pull/820) ([semuxdev](https://github.com/semuxdev))
+- Add API 2.1.0 based off API 2.0.0 [\#872](https://github.com/semuxproject/semux/pull/872) ([cryptokat](https://github.com/cryptokat))
+  - Add `DELETE /account?address` [\#884](https://github.com/semuxproject/semux/pull/884) ([cryptokat](https://github.com/cryptokat))
+  - Add `GET /account/votes?address` API [\#838](https://github.com/semuxproject/semux/pull/838) ([cryptokat](https://github.com/cryptokat))
+  - Add `GET /account/pending-transactions?address&from&to` API [\#837](https://github.com/semuxproject/semux/pull/837) ([cryptokat](https://github.com/cryptokat))
+  - Add `validator` flag to `DelegateType` [\#841](https://github.com/semuxproject/semux/pull/841) ([witoldsz](https://github.com/witoldsz))
+  - Add `network` and `capabilities` into the response of `GET /info` API [\#835](https://github.com/semuxproject/semux/pull/835) ([cryptokat](https://github.com/cryptokat))
+  - Add an optional parameter `privateKey` to `POST /account` that enables consumers to import private keys [\#884](https://github.com/semuxproject/semux/pull/884) ([cryptokat](https://github.com/cryptokat))
+  - Add optional parameters `nonce` and `validateNonce` to transaction ops that enables consumers to manage transaction nonces on client-side [\#883](https://github.com/semuxproject/semux/pull/883) ([cryptokat](https://github.com/cryptokat))
+  - Validate raw transaction passing in `POST /transaction/raw` [\#831](https://github.com/semuxproject/semux/pull/831) ([cryptokat](https://github.com/cryptokat))
+  - Change `fee` parameter from required to optional, default to minimum fee if omitted [\#825](https://github.com/semuxproject/semux/pull/825) ([cryptokat](https://github.com/cryptokat))
+- GUI
+  - Add a transaction filter on Transactions panel [\#860](https://github.com/semuxproject/semux/pull/860) ([orogvany](https://github.com/orogvany))
+  - Add dropdown for selecting recipient on Send panel [\#861](https://github.com/semuxproject/semux/pull/861) ([orogvany](https://github.com/orogvany))
+- Consensus
+  - Add blockchain checkpoints [\#850](https://github.com/semuxproject/semux/pull/850) ([cryptokat](https://github.com/cryptokat))
+- Security
+  - Provide safe ways for automatic wallet unlock to address [an issue](https://github.com/semuxproject/semux/issues/878) that `--password` CLI option exposes wallet password to process explorer [\#881](https://github.com/semuxproject/semux/pull/881) ([cryptokat](https://github.com/cryptokat))
+    - semux.properties: `wallet.password`
+    - environment variable: `SEMUX_WALLET_PASSWORD` 
 
 **Implemented enhancements:**
 
-- Add Java 10 Support [\#820](https://github.com/semuxproject/semux/pull/820) ([semuxdev](https://github.com/semuxdev))
+- GUI
+  - Rearrange sorting of delegate panel [\#851](https://github.com/semuxproject/semux/pull/851) ([cryptokat](https://github.com/cryptokat))
+    - Reflect internal validator positions within 200-block round
+    - Prioritize registration block over delegate name
+- Security
+  - Don't dump private key in log file on create [\#864](https://github.com/semuxproject/semux/pull/864) ([orogvany](https://github.com/orogvany))
 - Docs
   - Add devnet doc and API base unit doc [\#847](https://github.com/semuxproject/semux/pull/847) ([cryptokat](https://github.com/cryptokat))
   - Add links to API clients [\#845](https://github.com/semuxproject/semux/pull/845) ([cryptokat](https://github.com/cryptokat))
   - Add links to delegate pools and block explorers [\#839](https://github.com/semuxproject/semux/pull/839) ([cryptokat](https://github.com/cryptokat))
   - Improve API descriptions and validation patterns in swagger definition [\#848](https://github.com/semuxproject/semux/pull/848) ([cryptokat](https://github.com/cryptokat))
-- API
-  - Add `GET /account/votes?address` API [\#838](https://github.com/semuxproject/semux/pull/838) ([cryptokat](https://github.com/cryptokat))
-  - Add `GET /account/pending-transactions?address&from&to` API [\#837](https://github.com/semuxproject/semux/pull/837) ([cryptokat](https://github.com/cryptokat))
-  - Add `validator` flag to `DelegateType` [\#841](https://github.com/semuxproject/semux/pull/841) ([witoldsz](https://github.com/witoldsz))
-  - Add `network` and `capabilities` into the response of `GET /info` API [\#835](https://github.com/semuxproject/semux/pull/835) ([cryptokat](https://github.com/cryptokat))
-  - Validate raw transaction passing in `POST /transaction/raw` [\#831](https://github.com/semuxproject/semux/pull/831) ([cryptokat](https://github.com/cryptokat))
-  - Change `fee` parameter from required to optional, default to minimum fee if omitted [\#825](https://github.com/semuxproject/semux/pull/825) ([cryptokat](https://github.com/cryptokat))
+  - Re-organize documentation [\#873](https://github.com/semuxproject/semux/pull/873) ([orogvany](https://github.com/orogvany))
 
 ## [v1.1.1](https://github.com/semuxproject/semux/tree/v1.1.1) (2018-04-22)
 [Full Changelog](https://github.com/semuxproject/semux/compare/v1.1.0...v1.1.1)
