@@ -15,7 +15,7 @@ public class GetBlockHeaderMessage extends Message {
     private final long number;
 
     public GetBlockHeaderMessage(long number) {
-        super(MessageCode.GET_BLOCK_HEADER, BlockMessage.class);
+        super(MessageCode.GET_BLOCK_HEADER, BlockHeaderMessage.class);
 
         this.number = number;
 
@@ -25,7 +25,7 @@ public class GetBlockHeaderMessage extends Message {
     }
 
     public GetBlockHeaderMessage(byte[] encoded) {
-        super(MessageCode.GET_BLOCK_HEADER, BlockMessage.class);
+        super(MessageCode.GET_BLOCK_HEADER, BlockHeaderMessage.class);
 
         this.encoded = encoded;
 

@@ -13,6 +13,7 @@ import java.util.Collections;
 import org.junit.Test;
 import org.semux.core.BlockHeader;
 import org.semux.crypto.Key;
+import org.semux.net.msg.MessageCode;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 
@@ -33,8 +34,12 @@ public class BlockHeaderMessageTest {
                 stateRoot, data);
 
         BlockHeaderMessage m = new BlockHeaderMessage(header);
-        BlockHeaderMessage m2 = new BlockHeaderMessage(m.getEncoded());
+        assertThat(m.getCode()).isEqualTo(MessageCode.BLOCK_HEADER);
+        assertThat(m.getResponseMessageClass()).isNull();
 
+        BlockHeaderMessage m2 = new BlockHeaderMessage(m.getEncoded());
+        assertThat(m2.getCode()).isEqualTo(MessageCode.BLOCK_HEADER);
+        assertThat(m2.getResponseMessageClass()).isNull();
         assertThat(m2.getHeader()).isEqualToComparingFieldByField(header);
     }
 }
