@@ -144,10 +144,6 @@ public class ApiHandlerImpl implements ApiHandler {
                             return Boolean.parseBoolean(param);
                         }
 
-                        if (p.getRight().equals(Integer.class)) {
-                            return Integer.parseInt(param);
-                        }
-
                         return param;
                     }).toArray());
         }
