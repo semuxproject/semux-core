@@ -122,6 +122,7 @@ import io.netty.handler.ipfilter.IpFilterRuleType;
 /**
  * API tests for {@link org.semux.api.v2_1_0.impl.SemuxApiServiceImpl}
  */
+@SuppressWarnings("Duplicates")
 public class SemuxApiTest extends SemuxApiTestBase {
 
     @Test
@@ -517,7 +518,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String from = wallet.getAccount(0).toAddressString();
         String fee = String.valueOf(config.minTransactionFee().getNano());
         String data = Hex.encode(Bytes.of("test_delegate"));
-        DoTransactionResponse response = api.registerDelegate(from, data, fee);
+        DoTransactionResponse response = api.registerDelegate(from, data, fee, null, null);
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
@@ -539,7 +540,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
                 config.minTransactionFee());
         Transaction tx = createTransaction(config, from, to, value);
 
-        DoTransactionResponse response = api.broadcastRawTransaction(Hex.encode(tx.toBytes()));
+        DoTransactionResponse response = api.broadcastRawTransaction(Hex.encode(tx.toBytes()), null);
         assertTrue(response.isSuccess());
 
         Thread.sleep(200);
@@ -549,7 +550,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     }
 
     @Test(expected = BadRequestException.class)
-    public void broadcastRawTransactionInvalidNonceTest() {
+    public void broadcastRawTransactionValidateNonceTest() {
         Key from = new Key();
         Key to = new Key();
         Amount value = Amount.ZERO;
@@ -561,8 +562,26 @@ public class SemuxApiTest extends SemuxApiTestBase {
         when(pendingManager.getNonce(from.toAddress())).thenReturn(100L);
         kernelRule.getKernel().setPendingManager(pendingManager);
 
-        Transaction tx = createTransaction(config, from, to, value);
-        api.broadcastRawTransaction(Hex.encode(tx.toBytes()));
+        Transaction tx = createTransaction(config, from, to, value, 101L);
+        api.broadcastRawTransaction(Hex.encode(tx.toBytes()), true);
+    }
+
+    @Test
+    public void broadcastRawTransactionNoValidateNonceTest() {
+        Key from = new Key();
+        Key to = new Key();
+        Amount value = Amount.ZERO;
+
+        // mock state
+        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from.toAddress(),
+                config.minTransactionFee());
+        PendingManager pendingManager = spy(pendingMgr);
+        when(pendingManager.getNonce(from.toAddress())).thenReturn(100L);
+        kernelRule.getKernel().setPendingManager(pendingManager);
+
+        Transaction tx = createTransaction(config, from, to, value, 101L);
+        DoTransactionResponse resp = api.broadcastRawTransaction(Hex.encode(tx.toBytes()), false);
+        assertTrue(resp.isSuccess());
     }
 
     @Test
@@ -596,9 +615,11 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String from = wallet.getAccount(0).toAddressString();
         String to = key.toAddressString();
         String fee = "5432100";
+        String nonce = null;
+        Boolean validateNonce = null;
         String data = Hex.encode(Bytes.of("test_transfer"));
 
-        DoTransactionResponse response = api.transfer(from, to, value, fee, data);
+        DoTransactionResponse response = api.transfer(from, to, value, fee, nonce, validateNonce, data);
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
@@ -615,13 +636,42 @@ public class SemuxApiTest extends SemuxApiTestBase {
     }
 
     @Test
+    public void transferWithHighNonceTest() {
+        Key key = new Key();
+        String value = "1000000000";
+        String from = wallet.getAccount(0).toAddressString();
+        String to = key.toAddressString();
+        String fee = "5432100";
+        String nonce = "999";
+        Boolean validateNonce = null;
+        String data = null;
+
+        DoTransactionResponse resp = api.transfer(from, to, value, fee, nonce, validateNonce, data);
+        assertTrue(resp.isSuccess());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void transferValidateNonceTest() {
+        Key key = new Key();
+        String value = "1000000000";
+        String from = wallet.getAccount(0).toAddressString();
+        String to = key.toAddressString();
+        String fee = "5432100";
+        String nonce = "999";
+        Boolean validateNonce = true;
+        String data = null;
+
+        api.transfer(from, to, value, fee, nonce, validateNonce, data);
+    }
+
+    @Test
     public void transferDefaultFeeTest() throws InterruptedException {
         Key key = new Key();
         String value = "1000000000";
         String from = wallet.getAccount(0).toAddressString();
         String to = key.toAddressString();
 
-        DoTransactionResponse response = api.transfer(from, to, value, null, null);
+        DoTransactionResponse response = api.transfer(from, to, value, null, null, null, null);
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
@@ -651,7 +701,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String value = String.valueOf(amount.getNano());
         String fee = "50000000";
 
-        DoTransactionResponse response = api.unvote(from, to, value, fee);
+        DoTransactionResponse response = api.unvote(from, to, value, fee, null, null);
         assertNotNull(response);
 
         assertTrue(response.isSuccess());
@@ -680,7 +730,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String value = String.valueOf(amount.getNano());
         String fee = String.valueOf(config.minTransactionFee().getNano());
 
-        DoTransactionResponse response = api.vote(from, to, value, fee);
+        DoTransactionResponse response = api.vote(from, to, value, fee, null, null);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
 

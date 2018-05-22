@@ -977,6 +977,23 @@
                         "pattern" : "^\\d+$"
                     },
                     {
+                        "name" : "nonce",
+                        "in" : "query",
+                        "description" : "Transaction nonce, default to sender's nonce if omitted",
+                        "required" : false,
+                        "type" : "string",
+                        "format" : "int64",
+                        "pattern" : "^\\d+$"
+                    },
+                    {
+                        "name" : "validateNonce",
+                        "in" : "query",
+                        "description" : "Whether validate tx nonce against the current account state, default to false if omitted",
+                        "required" : false,
+                        "default" : false,
+                        "type" : "boolean"
+                    },
+                    {
                         "name" : "data",
                         "in" : "query",
                         "description" : "Transaction data encoded in hexadecimal string",
@@ -1045,6 +1062,23 @@
                         "type" : "string",
                         "format" : "int64",
                         "pattern" : "^\\d+$"
+                    },
+                    {
+                        "name" : "nonce",
+                        "in" : "query",
+                        "description" : "Transaction nonce, default to sender's nonce if omitted",
+                        "required" : false,
+                        "type" : "string",
+                        "format" : "int64",
+                        "pattern" : "^\\d+$"
+                    },
+                    {
+                        "name" : "validateNonce",
+                        "in" : "query",
+                        "description" : "Whether validate tx nonce against the current account state, default to false if omitted",
+                        "required" : false,
+                        "default" : false,
+                        "type" : "boolean"
                     }
                 ],
                 "responses" : {
@@ -1107,6 +1141,23 @@
                         "type" : "string",
                         "format" : "int64",
                         "pattern" : "^\\d+$"
+                    },
+                    {
+                        "name" : "nonce",
+                        "in" : "query",
+                        "description" : "Transaction nonce, default to sender's nonce if omitted",
+                        "required" : false,
+                        "type" : "string",
+                        "format" : "int64",
+                        "pattern" : "^\\d+$"
+                    },
+                    {
+                        "name" : "validateNonce",
+                        "in" : "query",
+                        "description" : "Whether validate tx nonce against the current account state, default to false if omitted",
+                        "required" : false,
+                        "default" : false,
+                        "type" : "boolean"
                     }
                 ],
                 "responses" : {
@@ -1145,6 +1196,14 @@
                         "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
+                        "name" : "data",
+                        "in" : "query",
+                        "description" : "Delegate name in hexadecimal encoded UTF-8 string, 16 bytes of data at maximum",
+                        "required" : true,
+                        "type" : "string",
+                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                    },
+                    {
                         "name" : "fee",
                         "in" : "query",
                         "description" : "Transaction fee in nano SEM, default to minimum fee if omitted",
@@ -1154,12 +1213,21 @@
                         "pattern" : "^\\d+$"
                     },
                     {
-                        "name" : "data",
+                        "name" : "nonce",
                         "in" : "query",
-                        "description" : "Delegate name in hexadecimal encoded UTF-8 string, 16 bytes of data at maximum",
-                        "required" : true,
+                        "description" : "Transaction nonce, default to sender's nonce if omitted",
+                        "required" : false,
                         "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                        "format" : "int64",
+                        "pattern" : "^\\d+$"
+                    },
+                    {
+                        "name" : "validateNonce",
+                        "in" : "query",
+                        "description" : "Whether validate tx nonce against the current account state, default to false if omitted",
+                        "required" : false,
+                        "default" : false,
+                        "type" : "boolean"
                     }
                 ],
                 "responses" : {
@@ -1192,10 +1260,18 @@
                     {
                         "name" : "raw",
                         "in" : "query",
-                        "description" : "Raw transaction",
+                        "description" : "Raw transaction encoded in hexadecimal string.",
                         "required" : true,
                         "type" : "string",
                         "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                    },
+                    {
+                        "name" : "validateNonce",
+                        "in" : "query",
+                        "description" : "Whether to validate tx nonce against the current account state, default to false if omitted",
+                        "required" : false,
+                        "default" : false,
+                        "type" : "boolean"
                     }
                 ],
                 "responses" : {

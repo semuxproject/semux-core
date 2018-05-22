@@ -78,6 +78,7 @@ import org.semux.net.filter.SemuxIpFilter;
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
+@SuppressWarnings("Duplicates")
 public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
 
     private static final Charset CHARSET = UTF_8;
@@ -590,12 +591,12 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
     }
 
     @Override
-    public Response registerDelegate(String from, String delegateName, String fee) {
-        return doTransaction(TransactionType.DELEGATE, from, null, null, fee, delegateName);
+    public Response registerDelegate(String from, String data, String fee, String nonce, Boolean validateNonce) {
+        return doTransaction(TransactionType.DELEGATE, from, null, null, fee, nonce, validateNonce, data);
     }
 
     @Override
-    public Response broadcastRawTransaction(String raw) {
+    public Response broadcastRawTransaction(String raw, Boolean validateNonce) {
         DoTransactionResponse resp = new DoTransactionResponse();
 
         if (!isSet(raw)) {
@@ -607,7 +608,8 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
 
             // tx nonce is validated in advance to avoid silently pushing the tx into
             // delayed queue of pending manager
-            if (tx.getNonce() != kernel.getPendingManager().getNonce(tx.getFrom())) {
+            if ((validateNonce != null && validateNonce)
+                    && tx.getNonce() != kernel.getPendingManager().getNonce(tx.getFrom())) {
                 return failure(resp, "Invalid transaction nonce.");
             }
 
@@ -695,13 +697,14 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
     }
 
     @Override
-    public Response transfer(String from, String to, String value, String fee, String data) {
-        return doTransaction(TransactionType.TRANSFER, from, to, value, fee, data);
+    public Response transfer(String from, String to, String value, String fee, String nonce, Boolean validateNonce,
+            String data) {
+        return doTransaction(TransactionType.TRANSFER, from, to, value, fee, nonce, validateNonce, data);
     }
 
     @Override
-    public Response unvote(String from, String to, String value, String fee) {
-        return doTransaction(TransactionType.UNVOTE, from, to, value, fee, null);
+    public Response unvote(String from, String to, String value, String fee, String nonce, Boolean validateNonce) {
+        return doTransaction(TransactionType.UNVOTE, from, to, value, fee, nonce, validateNonce, null);
     }
 
     @Override
@@ -745,8 +748,8 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
     }
 
     @Override
-    public Response vote(String from, String to, String value, String fee) {
-        return doTransaction(TransactionType.VOTE, from, to, value, fee, null);
+    public Response vote(String from, String to, String value, String fee, String nonce, Boolean validateNonce) {
+        return doTransaction(TransactionType.VOTE, from, to, value, fee, nonce, validateNonce, null);
     }
 
     @Override
@@ -814,18 +817,32 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return new NodeManager.Node(host, port);
     }
 
-    private Response doTransaction(TransactionType type, String from, String to, String value, String fee,
-            String data) {
+    private Response doTransaction(TransactionType type, String from, String to, String value, String fee, String nonce,
+            Boolean validateNonce, String data) {
         DoTransactionResponse resp = new DoTransactionResponse();
         try {
-            Transaction tx = new TransactionBuilder(kernel)
+            TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
                     .withType(type)
                     .withFrom(from)
                     .withTo(to)
                     .withValue(value)
                     .withFee(fee, true)
-                    .withData(data)
-                    .buildSigned();
+                    .withData(data);
+
+            if (nonce != null) {
+                transactionBuilder.withNonce(nonce);
+            } else {
+                // TODO: fix race condition of auto-assigned nonce
+            }
+
+            Transaction tx = transactionBuilder.buildSigned();
+
+            // tx nonce is validated in advance to avoid silently pushing the tx into
+            // delayed queue of pending manager
+            if ((validateNonce != null && validateNonce)
+                    && tx.getNonce() != kernel.getPendingManager().getNonce(tx.getFrom())) {
+                return failure(resp, "Invalid transaction nonce.");
+            }
 
             PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {

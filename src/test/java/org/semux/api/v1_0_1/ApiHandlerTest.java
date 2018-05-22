@@ -83,6 +83,7 @@ import net.bytebuddy.utility.RandomString;
 /**
  * @deprecated
  */
+@SuppressWarnings("Duplicates")
 public class ApiHandlerTest extends ApiHandlerTestBase {
 
     @Rule
