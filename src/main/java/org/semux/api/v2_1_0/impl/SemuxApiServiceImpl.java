@@ -13,6 +13,7 @@ import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import java.io.File;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,6 +34,7 @@ import org.semux.api.v2_1_0.model.AddNodeResponse;
 import org.semux.api.v2_1_0.model.ApiHandlerResponse;
 import org.semux.api.v2_1_0.model.ComposeRawTransactionResponse;
 import org.semux.api.v2_1_0.model.CreateAccountResponse;
+import org.semux.api.v2_1_0.model.DeleteAccountResponse;
 import org.semux.api.v2_1_0.model.DoTransactionResponse;
 import org.semux.api.v2_1_0.model.GetAccountPendingTransactionsResponse;
 import org.semux.api.v2_1_0.model.GetAccountResponse;
@@ -165,12 +167,20 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
     }
 
     @Override
-    public Response createAccount(String name) {
+    public Response createAccount(String name, String privateKey) {
         CreateAccountResponse resp = new CreateAccountResponse();
         try {
-            // create an account
-            Key key = new Key();
-            kernel.getWallet().addAccount(key);
+            Key key;
+            if (privateKey != null) { // import
+                byte[] privateKeyBytes = Hex.decode0x(privateKey);
+                key = new Key(privateKeyBytes);
+            } else { // generate
+                key = new Key();
+            }
+
+            if (!kernel.getWallet().addAccount(key)) {
+                return failure(resp, "The key already exists in this wallet.");
+            }
 
             // set alias of the address
             if (isSet(name)) {
@@ -182,6 +192,10 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
             resp.setResult(Hex.PREF + key.toAddressString());
             resp.setSuccess(true);
             return Response.ok().entity(resp).build();
+        } catch (CryptoException ex) {
+            return failure(resp, "Parameter `privateKey` is not a valid hexadecimal string");
+        } catch (InvalidKeySpecException e) {
+            return failure(resp, "Parameter `privateKey` is not a valid ED25519 private key encoded in PKCS#8 format");
         } catch (WalletLockedException e) {
             return failure(resp, e.getMessage());
         }
@@ -212,6 +226,34 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         resp.setResult(TypeFactory.accountType(account, transactionCount, pendingTransactionCount));
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
+    }
+
+    @Override
+    public Response deleteAccount(String address) {
+        DeleteAccountResponse resp = new DeleteAccountResponse();
+
+        if (!isSet(address)) {
+            return failure(resp, "Parameter `address` is required");
+        }
+
+        try {
+            byte[] addressBytes = Hex.decode0x(address);
+
+            if (!kernel.getWallet().removeAccount(addressBytes)) {
+                return failure(resp, "The provided address doesn't exist in this wallet.");
+            }
+
+            if (!kernel.getWallet().flush()) {
+                return failure(resp, "Failed to write the wallet.");
+            }
+
+            resp.setSuccess(true);
+            return Response.ok(resp).build();
+        } catch (CryptoException ex) {
+            return failure(resp, "Parameter `address` is not a valid hexadecimal string");
+        } catch (WalletLockedException e) {
+            return failure(resp, e.getMessage());
+        }
     }
 
     @Override

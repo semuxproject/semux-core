@@ -72,6 +72,7 @@ import org.semux.api.v2_1_0.model.BlockType;
 import org.semux.api.v2_1_0.model.ComposeRawTransactionResponse;
 import org.semux.api.v2_1_0.model.CreateAccountResponse;
 import org.semux.api.v2_1_0.model.DelegateType;
+import org.semux.api.v2_1_0.model.DeleteAccountResponse;
 import org.semux.api.v2_1_0.model.DoTransactionResponse;
 import org.semux.api.v2_1_0.model.GetAccountPendingTransactionsResponse;
 import org.semux.api.v2_1_0.model.GetAccountResponse;
@@ -174,9 +175,19 @@ public class SemuxApiTest extends SemuxApiTestBase {
     @Test
     public void createAccountTest() {
         int size = wallet.getAccounts().size();
-        CreateAccountResponse response = api.createAccount(null);
+        CreateAccountResponse response = api.createAccount(null, null);
         assertTrue(response.isSuccess());
         assertEquals(size + 1, wallet.getAccounts().size());
+    }
+
+    @Test
+    public void createAccountImportPrivateKeyTest() {
+        int size = wallet.getAccounts().size();
+        String privateKey = "302e020100300506032b657004220420acbd5f2cb2b6053f704376d12df99f2aa163d267a755c7f1d9fe55d2a2dc5405";
+        CreateAccountResponse response = api.createAccount(null, privateKey);
+        assertTrue(response.isSuccess());
+        assertEquals(size + 1, wallet.getAccounts().size());
+        assertEquals("23a6049381fd2cfb0661d9de206613b83d53d7df", wallet.getAccounts().get(size).toAddressString());
     }
 
     @Test
@@ -194,6 +205,14 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertTrue(response.isSuccess());
         assertEquals(SEM.of(1000).getNano(), Long.parseLong(response.getResult().getAvailable()));
         assertEquals(Integer.valueOf(1), response.getResult().getTransactionCount());
+    }
+
+    @Test
+    public void deleteAccountTest() {
+        Key account = wallet.getAccounts().get(0);
+        DeleteAccountResponse resp = api.deleteAccount(account.toAddressString());
+        assertTrue(resp.isSuccess());
+        assertThat(wallet.getAccounts()).doesNotContain(account);
     }
 
     @Test
