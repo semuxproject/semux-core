@@ -56,9 +56,9 @@ public interface SyncManager {
     interface Progress {
 
         /**
-         * @return the beginning height of this sync process.
+         * @return the starting height of this sync process.
          */
-        long getBeginHeight();
+        long getStartingHeight();
 
         /**
          * @return the current height of sync process.

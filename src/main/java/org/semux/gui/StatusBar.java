@@ -9,7 +9,6 @@ package org.semux.gui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Graphics;
 import java.time.Duration;
 
 import javax.swing.BorderFactory;
@@ -122,7 +121,7 @@ public class StatusBar extends JPanel {
     }
 
     private void addSeparator() {
-        SeparatorPanel separator = new SeparatorPanel();
+        VerticalSeparator separator = new VerticalSeparator();
         separator.setMaximumSize(new Dimension(1, getFontMetrics(getFont()).getHeight()));
         addGap(20);
         add(separator);
@@ -149,28 +148,5 @@ public class StatusBar extends JPanel {
                 return GuiMessages.get("SyncStopped");
             }
         }
-    }
-
-    private static final class SeparatorPanel extends JPanel {
-
-        private static final long serialVersionUID = -5802537037684892071L;
-
-        private final Color leftColor;
-        private final Color rightColor;
-
-        private SeparatorPanel() {
-            this.leftColor = Color.GRAY;
-            this.rightColor = Color.WHITE;
-            setOpaque(false);
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            g.setColor(leftColor);
-            g.drawLine(0, 0, 0, getHeight());
-            g.setColor(rightColor);
-            g.drawLine(1, 0, 1, getHeight());
-        }
-
     }
 }

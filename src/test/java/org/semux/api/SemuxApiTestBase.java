@@ -4,18 +4,14 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.v2_0_0;
+package org.semux.api;
 
 import static org.semux.core.Amount.Unit.SEM;
 
-import java.util.Collections;
-
-import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.semux.api.SemuxApiMock;
-import org.semux.api.Version;
 import org.semux.config.Config;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
@@ -26,14 +22,10 @@ import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.rules.KernelRule;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-
 public abstract class SemuxApiTestBase {
 
     @Rule
     public KernelRule kernelRule = new KernelRule(51610, 51710);
-
-    protected org.semux.api.v2_0_0.client.SemuxApi api;
 
     protected SemuxApiMock apiMock;
     protected Config config;
@@ -60,14 +52,6 @@ public abstract class SemuxApiTestBase {
         pendingMgr = apiMock.getKernel().getPendingManager();
         nodeMgr = apiMock.getKernel().getNodeManager();
         channelMgr = apiMock.getKernel().getChannelManager();
-
-        api = JAXRSClientFactory.create(
-                "http://localhost:51710/" + Version.v2_0_0.prefix,
-                org.semux.api.v2_0_0.client.SemuxApi.class,
-                Collections.singletonList(new JacksonJsonProvider()),
-                config.apiUsername(),
-                config.apiPassword(),
-                null);
     }
 
     @After

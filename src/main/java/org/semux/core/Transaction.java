@@ -6,6 +6,8 @@
  */
 package org.semux.core;
 
+import static org.semux.util.Bytes.EMPTY_ADDRESS;
+
 import java.util.Arrays;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -137,7 +139,7 @@ public class Transaction {
                 && timestamp > 0
                 && data != null
                 && encoded != null
-                && signature != null
+                && signature != null && !Arrays.equals(signature.getAddress(), EMPTY_ADDRESS)
 
                 && Arrays.equals(Hash.h256(encoded), hash)
                 && Key.verify(hash, signature)

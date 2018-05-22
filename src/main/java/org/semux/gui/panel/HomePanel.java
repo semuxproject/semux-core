@@ -9,6 +9,8 @@ package org.semux.gui.panel;
 import static org.semux.core.Amount.sum;
 
 import java.awt.Color;
+import java.awt.ComponentOrientation;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,6 +35,7 @@ import javax.swing.border.TitledBorder;
 import org.semux.core.Block;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
+import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.SemuxGui;
@@ -56,6 +59,8 @@ public class HomePanel extends JPanel implements ActionListener {
     private final transient SemuxGui gui;
     private final transient WalletModel model;
 
+    // Overview Table
+    private final JLabel bestBlockNum;
     private final JLabel blockNum;
     private final JLabel blockTime;
     private final JLabel coinbase;
@@ -64,6 +69,14 @@ public class HomePanel extends JPanel implements ActionListener {
     private final JLabel locked;
     private final JLabel total;
 
+    // Consensus Table
+    private final JLabel primaryValidator;
+    private final JLabel backupValidator;
+    private final JLabel nextValidator;
+    private final JLabel roundEndBlock;
+    private final JLabel roundEndTime;
+
+    // Transactions Table
     private final JPanel transactions;
 
     public HomePanel(SemuxGui gui) {
@@ -71,59 +84,142 @@ public class HomePanel extends JPanel implements ActionListener {
         this.model = gui.getModel();
         this.model.addListener(this);
 
+        Font plainFont = getFont().deriveFont(getFont().getStyle() | Font.PLAIN);
+        Font boldFont = getFont().deriveFont(getFont().getStyle() | Font.BOLD);
+
         // setup overview panel
         JPanel overview = new JPanel();
         overview.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
                 GuiMessages.get("Overview"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        overview.setLayout(new GridLayout(7, 2, 0, 0));
+        overview.setLayout(new GridLayout(8, 2, 0, 0));
+
+        JLabel labelBestBlockNum = new JLabel(GuiMessages.get("BestBlockNum") + ":");
+        labelBestBlockNum.setFont(boldFont);
+        overview.add(labelBestBlockNum);
+
+        bestBlockNum = new JLabel("");
+        bestBlockNum.setFont(plainFont);
+        overview.add(bestBlockNum);
 
         JLabel labelBlockNum = new JLabel(GuiMessages.get("BlockNum") + ":");
+        labelBlockNum.setFont(boldFont);
         overview.add(labelBlockNum);
 
         blockNum = new JLabel("");
+        blockNum.setFont(plainFont);
         overview.add(blockNum);
 
         JLabel lblBlockTime = new JLabel(GuiMessages.get("BlockTime") + ":");
+        lblBlockTime.setFont(boldFont);
         overview.add(lblBlockTime);
 
         blockTime = new JLabel("");
+        blockTime.setFont(plainFont);
         overview.add(blockTime);
 
         JLabel labelCoinbase = new JLabel(GuiMessages.get("Coinbase") + ":");
+        labelCoinbase.setFont(boldFont);
         overview.add(labelCoinbase);
 
         coinbase = new JLabel("");
+        coinbase.setFont(plainFont);
         overview.add(coinbase);
 
         JLabel labelStatus = new JLabel(GuiMessages.get("Status") + ":");
+        labelStatus.setFont(boldFont);
         overview.add(labelStatus);
 
         status = new JLabel("");
+        status.setFont(plainFont);
         overview.add(status);
 
         JLabel labelAvailable = new JLabel(GuiMessages.get("Available") + ":");
+        labelAvailable.setFont(boldFont);
         overview.add(labelAvailable);
 
         available = new JLabel("");
+        available.setFont(plainFont);
         overview.add(available);
 
         JLabel labelLocked = new JLabel(GuiMessages.get("Locked") + ":");
+        labelLocked.setFont(boldFont);
         overview.add(labelLocked);
 
         locked = new JLabel("");
+        locked.setFont(plainFont);
         overview.add(locked);
 
         JLabel labelTotal = new JLabel(GuiMessages.get("TotalBalance") + ":");
+        labelTotal.setFont(boldFont);
         overview.add(labelTotal);
 
         total = new JLabel("");
+        total.setFont(plainFont);
         overview.add(total);
+
+        // setup consensus panel
+        JPanel consensus = new JPanel();
+        consensus.setBorder(new TitledBorder(
+                new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
+                GuiMessages.get("Consensus"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+        consensus.setLayout(new GridLayout(8, 2));
+        consensus.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+
+        JLabel labelPrimaryValidator = new JLabel(GuiMessages.get("PrimaryValidator") + ":");
+        labelPrimaryValidator.setFont(boldFont);
+        consensus.add(labelPrimaryValidator);
+
+        primaryValidator = new JLabel("");
+        primaryValidator.setName("primaryValidator");
+        primaryValidator.setFont(plainFont);
+        primaryValidator.setHorizontalAlignment(SwingConstants.LEFT);
+        consensus.add(primaryValidator);
+
+        JLabel labelBackupValidator = new JLabel(GuiMessages.get("BackupValidator") + ":");
+        labelBackupValidator.setFont(boldFont);
+        consensus.add(labelBackupValidator);
+
+        backupValidator = new JLabel("");
+        backupValidator.setName("backupValidator");
+        backupValidator.setFont(plainFont);
+        backupValidator.setHorizontalAlignment(SwingConstants.LEFT);
+        consensus.add(backupValidator);
+
+        JLabel labelNextValidator = new JLabel(GuiMessages.get("NextValidator") + ":");
+        labelNextValidator.setFont(boldFont);
+        consensus.add(labelNextValidator);
+
+        nextValidator = new JLabel("");
+        nextValidator.setName("nextValidator");
+        nextValidator.setFont(plainFont);
+        nextValidator.setHorizontalAlignment(SwingConstants.LEFT);
+        consensus.add(nextValidator);
+
+        JLabel labelRoundEndBlock = new JLabel(GuiMessages.get("RoundEndBlock") + ":");
+        labelRoundEndBlock.setFont(boldFont);
+        consensus.add(labelRoundEndBlock);
+
+        roundEndBlock = new JLabel("");
+        roundEndBlock.setName("roundEndBlock");
+        roundEndBlock.setFont(plainFont);
+        roundEndBlock.setHorizontalAlignment(SwingConstants.LEFT);
+        consensus.add(roundEndBlock);
+
+        JLabel labelRoundEndTime = new JLabel(GuiMessages.get("RoundEndTime") + ":");
+        labelRoundEndTime.setFont(boldFont);
+        consensus.add(labelRoundEndTime);
+
+        roundEndTime = new JLabel("");
+        roundEndTime.setName("roundEndTime");
+        roundEndTime.setFont(plainFont);
+        roundEndTime.setHorizontalAlignment(SwingConstants.LEFT);
+        consensus.add(roundEndTime);
 
         // setup transactions panel
         transactions = new JPanel();
         transactions.setBorder(new TitledBorder(
-                new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
+                new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 0, 10, 10)),
                 GuiMessages.get("Transactions"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
 
         // @formatter:off
@@ -132,17 +228,20 @@ public class HomePanel extends JPanel implements ActionListener {
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                        .addComponent(overview, GroupLayout.PREFERRED_SIZE, 350, GroupLayout.PREFERRED_SIZE))
-                    .addGap(18)
+                        .addComponent(overview, GroupLayout.PREFERRED_SIZE, 350, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(consensus, GroupLayout.PREFERRED_SIZE, 350, GroupLayout.PREFERRED_SIZE))
+                    .addGap(10)
                     .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.TRAILING)
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 567, Short.MAX_VALUE)
+                        .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 570, Short.MAX_VALUE)
                         .addGroup(groupLayout.createSequentialGroup()
-                            .addComponent(overview, GroupLayout.PREFERRED_SIZE, 199, GroupLayout.PREFERRED_SIZE)
+                            .addComponent(overview, GroupLayout.PREFERRED_SIZE, 210, GroupLayout.PREFERRED_SIZE)
+                            .addGap(10)
+                            .addComponent(consensus, GroupLayout.PREFERRED_SIZE, 210, GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(ComponentPlacement.RELATED, 353, Short.MAX_VALUE)
                             .addPreferredGap(ComponentPlacement.RELATED)))
                     .addGap(0))
@@ -228,6 +327,11 @@ public class HomePanel extends JPanel implements ActionListener {
      */
     protected void refresh() {
         Block block = model.getLatestBlock();
+
+        // overview table
+        this.bestBlockNum.setText(model.getSyncProgress()
+                .map(s -> s.getTargetHeight() > 0 ? SwingUtil.formatNumber(s.getTargetHeight() - 1) : "-")
+                .orElse("-"));
         this.blockNum.setText(SwingUtil.formatNumber(block.getNumber()));
         this.blockTime.setText(SwingUtil.formatTimestamp(block.getTimestamp()));
         this.coinbase.setText(SwingUtil.getAddressAbbr(model.getCoinbase().toAddress()));
@@ -241,7 +345,24 @@ public class HomePanel extends JPanel implements ActionListener {
         this.total.setText(SwingUtil.formatAmount(sum(model.getTotalAvailable(), model.getTotalLocked())));
         this.total.setToolTipText(SwingUtil.formatAmount(sum(model.getTotalAvailable(), model.getTotalLocked())));
 
-        // federate all transactions
+        // consensus info table
+        this.primaryValidator
+                .setText(model.getValidatorDelegate(0).map(Delegate::getNameString).orElse("-"));
+        this.backupValidator
+                .setText(model.getValidatorDelegate(1).map(Delegate::getNameString).orElse("-"));
+        this.nextValidator
+                .setText(model.getNextPrimaryValidatorDelegate().map(Delegate::getNameString).orElse("-"));
+        this.roundEndBlock
+                .setText(model.getNextValidatorSetUpdate()
+                        .map(String::valueOf)
+                        .orElse("-"));
+        this.roundEndTime
+                .setText(model.getNextValidatorSetUpdate()
+                        .map(n -> SwingUtil
+                                .formatTimestamp(block.getTimestamp() + (n - block.getNumber() - 1) * 30 * 1000))
+                        .orElse("-"));
+
+        // transaction table: federate all transactions
         Set<ByteArray> hashes = new HashSet<>();
         List<Transaction> list = new ArrayList<>();
         for (WalletAccount acc : model.getAccounts()) {

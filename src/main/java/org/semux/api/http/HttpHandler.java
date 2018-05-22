@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -84,6 +85,12 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final String BAD_REQUEST_RESPONSE = "{\"success\":false,\"message\":\"400 Bad Request\"}";
 
     private static final Pattern STATIC_FILE_PATTERN = Pattern.compile("^.+\\.(html|json|js|css|png)$");
+    private static final Map<Pattern, String> staticFileRoutes;
+    static {
+        staticFileRoutes = new HashMap<>();
+        staticFileRoutes.put(Pattern.compile("^\\/swagger-ui(\\/.+)$"),
+                "/META-INF/resources/webjars/swagger-ui/3.14.2");
+    }
 
     private final Config config;
     private final Map<Version, ApiHandler> apiHandlers;
@@ -181,7 +188,20 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         Version version = checkVersionPrefix(uri.toString());
         final String path = uri.getPath();
         if (STATIC_FILE_PATTERN.matcher(path).matches()) { // static files
-            lastContentFuture = writeStaticFile(ctx, "/org/semux/api", uriToResourcePath(path));
+            lastContentFuture = staticFileRoutes
+                    .entrySet()
+                    .stream()
+                    .filter(e -> e.getKey().matcher(path).matches())
+                    .findFirst()
+                    .map(e -> {
+                        Matcher matcher = e.getKey().matcher(path);
+                        if (matcher.matches() && matcher.groupCount() == 1) {
+                            return writeStaticFile(ctx, e.getValue(), uriToResourcePath(matcher.group(1)));
+                        } else {
+                            return writeStaticFile(ctx, e.getValue(), uriToResourcePath(path));
+                        }
+                    })
+                    .orElseGet(() -> writeStaticFile(ctx, "/org/semux/api", uriToResourcePath(path)));
         } else { // api
             boolean prettyPrint = Boolean.parseBoolean(map.get("pretty"));
             Object response = apiHandlers.get(version).service(msg.method(), path, map, headers);

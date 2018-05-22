@@ -44,8 +44,11 @@ public class SemuxGuiTest {
     public void testStart() throws ParseException, IOException {
         SemuxGui gui = spy(new SemuxGui());
 
-        Mockito.doNothing().when(gui).showUnlock(any());
         Mockito.doNothing().when(gui).showWelcome(any());
+        Mockito.doNothing().when(gui).checkFilePermissions(any());
+        Mockito.doNothing().when(gui).unlockWallet(any());
+        Mockito.doNothing().when(gui).showSplashScreen();
+        Mockito.doNothing().when(gui).setupCoinbase(any());
 
         String[] args = new String[] {
                 "--datadir", kernelRule.getKernel().getConfig().dataDir().getAbsolutePath(),
@@ -55,7 +58,10 @@ public class SemuxGuiTest {
 
         assertThat(gui.getDataDir()).isEqualTo(args[1]);
         assertThat(gui.getNetwork()).isEqualTo(Network.MAINNET);
-        verify(gui).showUnlock(any());
+        verify(gui).checkFilePermissions(any());
+        verify(gui).unlockWallet(any());
+        verify(gui).showSplashScreen();
+        verify(gui).setupCoinbase(any());
 
         // start without wallet
         kernelRule.getKernel().getWallet().getFile().delete();
@@ -68,7 +74,7 @@ public class SemuxGuiTest {
         Wallet wallet = kernelRule.getKernel().getWallet();
 
         // setup coinbase
-        SemuxGui gui = spy(new SemuxGui(new WalletModel(), kernelRule.getKernel()));
+        SemuxGui gui = spy(new SemuxGui(new WalletModel(kernelRule.getKernel().getConfig()), kernelRule.getKernel()));
         Mockito.doNothing().when(gui).startKernelAndMain(any());
         Mockito.doReturn(3).when(gui).showSelectDialog(any(), any(), any());
         gui.setupCoinbase(wallet);
@@ -83,7 +89,7 @@ public class SemuxGuiTest {
         wallet.setAccounts(Collections.emptyList());
 
         // setup coinbase
-        SemuxGui gui = spy(new SemuxGui(new WalletModel(), kernelRule.getKernel()));
+        SemuxGui gui = spy(new SemuxGui(new WalletModel(kernelRule.getKernel().getConfig()), kernelRule.getKernel()));
         Mockito.doNothing().when(gui).startKernelAndMain(any());
         gui.setupCoinbase(wallet);
 
@@ -95,7 +101,7 @@ public class SemuxGuiTest {
     public void testProcessBlock() {
         KernelMock kernel = kernelRule.getKernel();
 
-        WalletModel model = new WalletModel();
+        WalletModel model = new WalletModel(kernel.getConfig());
 
         SemuxGui gui = new SemuxGui(model, kernel);
 
@@ -119,7 +125,8 @@ public class SemuxGuiTest {
         assertThat(model.getTotalAvailable()).isEqualTo(ZERO);
         assertThat(model.getTotalLocked()).isEqualTo(ZERO);
         assertThat(model.getActivePeers().size()).isEqualTo(channelMgr.getActivePeers().size());
-        assertThat(model.getSyncProgress()).isEqualToComparingOnlyGivenFields(syncMgr.getProgress(), "beginHeight",
+        assertThat(model.getSyncProgress().get()).isEqualToComparingOnlyGivenFields(syncMgr.getProgress(),
+                "startingHeight",
                 "currentHeight", "targetHeight");
     }
 

@@ -1,13 +1,4 @@
-### Total supply
-
-The max supply of semux is capped at 100,000,000 SEM.
-
-| Purpose       | Amount         | Note                                                       |
-|---------------|----------------|------------------------------------------------------------|
-| Block Rewards | 75,000,000 SEM | Distributed to Semux validators                            |
-| Foundation    | 10,000,000 SEM | Development, marketing, promotion and bounties             |
-| Community     | 10,000,000 SEM | Alpha/beta/rc test, bitcointalk airdrop, BTC giveway, etc. |
-| Founder       | 5,000,000 SEM  | Founder and core developers of Semux                       |
+# Block Rewards           
 
 ### Block reward
 
@@ -22,3 +13,14 @@ public static long getBlockReward(long number) {
     }
 }
 ```
+
+### Total supply
+
+The max supply of semux is capped at 100,000,000 SEM.
+
+| Purpose       | Amount         | Note                                                       |
+|---------------|----------------|------------------------------------------------------------|
+| Block Rewards | 75,000,000 SEM | Distributed to Semux validators                            |
+| Foundation    | 10,000,000 SEM | Development, marketing, promotion and bounties             |
+| Community     | 10,000,000 SEM | Alpha/beta/rc test, bitcointalk airdrop, BTC giveway, etc. |
+| Founder       | 5,000,000 SEM  | Founder and core developers of Semux                       |

@@ -6,8 +6,18 @@ After=network.target
 User=username
 Group=groupname
 Type=simple
-ExecStart=/home/username/semux/semux-cli.sh --password "YOUR_WALLET_PASSWORD"
 Restart=on-failure
+
+# For Mainnet node
+ExecStart=/home/username/semux/semux-cli.sh
+
+# For Testnet node
+# ExecStart=/home/username/semux/semux-cli.sh --network testnet
+
+# SEMUX_WALLET_PASSWORD environment variable is required to automatically unlock your wallet.data file.
+# Please ensure sure that the access permission of this service unit file is properly configured when you put your password here.
+# Alternatively wallet.password property in your semux.properties config file can be set for automatic unlock.
+Environment=SEMUX_WALLET_PASSWORD=YOUR_WALLET_PASSWORD
 
 [Install]
 WantedBy=multi-user.target

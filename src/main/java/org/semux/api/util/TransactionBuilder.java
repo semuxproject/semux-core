@@ -167,8 +167,8 @@ public class TransactionBuilder {
         return this;
     }
 
-    public TransactionBuilder withFee(String fee) {
-        if (fee == null || fee.isEmpty()) {
+    public TransactionBuilder withFee(String fee, boolean optional) {
+        if (optional && (fee == null || fee.isEmpty())) {
             this.fee = kernel.getConfig().minTransactionFee();
             return this;
         }

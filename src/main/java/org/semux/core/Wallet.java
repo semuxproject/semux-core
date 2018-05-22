@@ -6,24 +6,19 @@
  */
 package org.semux.core;
 
-import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
-import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
+import static org.semux.util.FileUtil.POSIX_SECURED_PERMISSIONS;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermission;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bouncycastle.crypto.generators.BCrypt;
@@ -34,6 +29,7 @@ import org.semux.crypto.Hash;
 import org.semux.crypto.Key;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
+import org.semux.util.FileUtil;
 import org.semux.util.IOUtil;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
@@ -48,10 +44,6 @@ public class Wallet {
     private static final int VERSION = 3;
     private static final int SALT_LENGTH = 16;
     private static final int BCRYPT_COST = 12;
-
-    private static final Set<PosixFilePermission> DEFAULT_PERMISSIONS = new HashSet<>(Arrays.asList(
-            OWNER_READ,
-            OWNER_WRITE));
 
     private final File file;
 
@@ -474,7 +466,7 @@ public class Wallet {
             // set posix permissions
             if (SystemUtil.isPosix() && !file.exists()) {
                 Files.createFile(file.toPath());
-                Files.setPosixFilePermissions(file.toPath(), DEFAULT_PERMISSIONS);
+                Files.setPosixFilePermissions(file.toPath(), POSIX_SECURED_PERMISSIONS);
             }
 
             IOUtil.writeToFile(enc.toBytes(), file);
@@ -489,7 +481,7 @@ public class Wallet {
     }
 
     public boolean isPosixPermissionSecured() throws IOException {
-        return Files.getPosixFilePermissions(getFile().toPath()).equals(DEFAULT_PERMISSIONS);
+        return FileUtil.isPosixPermissionSecured(getFile());
     }
 
     /**
