@@ -1,4 +1,4 @@
-## Testnet
+# Testnet
 
 Testnet is, as the name implies, for testing features of the blockchain without spending 'real' semux.
 

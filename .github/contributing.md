@@ -10,17 +10,17 @@ indent: no tab, 4 spaces instead
 line limit: 120 chars
 ```
 
-To format your code, please run the following command:
+To format your code, run:
 ```
 mvn formatter:format license:format
 ```
 
-To check potential code-style and security issues, run:
+To check code style and potential security bugs, run:
 ```
-mvn findbugs:check
+mvn formatter:validate findbugs:check
 ```
 
-For IDE users, [Eclipse Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/eclipse/guide.md) and [IntelliJ IDEA Setup Guide](https://github.com/semuxproject/semux/blob/master/misc/intellij/guide.md) are also provided.
+For IDE setup, visit [here](../docs/IDE-Setup.md).
 
 ## Contributor workflow
 

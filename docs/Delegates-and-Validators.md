@@ -1,3 +1,5 @@
+# Delegates and Validators
+
 ### What is a delegate
 
 **Delegates** are special accounts on the **Semux BFT** consensus. Delegates are accounts that are available for voting and could become a validator. To register as a delegate you need to have `1000 SEMs` + transaction fee.

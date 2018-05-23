@@ -1,4 +1,4 @@
-# Pools
+# Delegate Pools
 
 A pool is a validator that shares a portion of forged earnings with voters.
 
