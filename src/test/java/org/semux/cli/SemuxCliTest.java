@@ -590,6 +590,5 @@ public class SemuxCliTest {
         List<LogEvent> logs = TestLoggingAppender.events();
         assertThat(logs, hasItem(info(CliMessages.get("PrivateKeyImportedSuccessfully"))));
         assertThat(logs, hasItem(info(CliMessages.get("Address", "0680a919c78faa59b127014b6181979ae0a62dbd"))));
-        assertThat(logs, hasItem(info(CliMessages.get("PrivateKey", key))));
     }
 }
