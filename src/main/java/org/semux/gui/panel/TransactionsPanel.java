@@ -142,17 +142,22 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         groupLayout.setVerticalGroup(
                 groupLayout.createSequentialGroup()
                         .addGroup(groupLayout.createSequentialGroup()
-                                .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.CENTER, false)
                                         .addComponent(type)
-                                        .addComponent(panelFilter.getSelectType())
+                                        .addComponent(panelFilter.getSelectType(), GroupLayout.PREFERRED_SIZE, 25,
+                                                GroupLayout.PREFERRED_SIZE)
                                         .addComponent(from)
-                                        .addComponent(panelFilter.getSelectFrom())
+                                        .addComponent(panelFilter.getSelectFrom(), GroupLayout.PREFERRED_SIZE, 25,
+                                                GroupLayout.PREFERRED_SIZE)
                                         .addComponent(to)
-                                        .addComponent(panelFilter.getSelectTo())
+                                        .addComponent(panelFilter.getSelectTo(), GroupLayout.PREFERRED_SIZE, 25,
+                                                GroupLayout.PREFERRED_SIZE)
                                         .addComponent(amount)
-                                        .addComponent(panelFilter.getTxtMin())
+                                        .addComponent(panelFilter.getTxtMin(), GroupLayout.PREFERRED_SIZE, 25,
+                                                GroupLayout.PREFERRED_SIZE)
                                         .addComponent(separator)
-                                        .addComponent(panelFilter.getTxtMax())))
+                                        .addComponent(panelFilter.getTxtMax(), GroupLayout.PREFERRED_SIZE, 25,
+                                                GroupLayout.PREFERRED_SIZE)))
                         .addGap(18)
                         .addComponent(scrollPane));
         setLayout(groupLayout);
