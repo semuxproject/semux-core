@@ -171,6 +171,8 @@ public class TransactionsPanelFilter {
 
     class TransactionsComboBoxModel<T> extends DefaultComboBoxModel<ComboBoxItem<T>> {
 
+        private static final long serialVersionUID = 1L;
+        
         private final ComboBoxItem<T> defaultItem;
 
         public TransactionsComboBoxModel() {
@@ -192,7 +194,8 @@ public class TransactionsPanelFilter {
         public void setSelectedItem(Object anObject) {
             // only refresh if new object selected
             T existing = getSelectedValue();
-            T newValue = (T) (anObject instanceof ComboBoxItem ? ((ComboBoxItem) anObject).getValue() : anObject);
+            @SuppressWarnings("unchecked")
+            T newValue = (T) (anObject instanceof ComboBoxItem ? ((ComboBoxItem<T>) anObject).getValue() : anObject);
             if (existing != newValue && (existing == null || !existing.equals(newValue))) {
                 super.setSelectedItem(anObject);
                 List<TransactionsPanel.StatusTransaction> filteredTransactions = getFilteredTransactions();
@@ -201,6 +204,7 @@ public class TransactionsPanelFilter {
         }
 
         T getSelectedValue() {
+            @SuppressWarnings("unchecked")
             ComboBoxItem<T> selected = (ComboBoxItem<T>) getSelectedItem();
             return selected != null ? selected.getValue() : null;
         }
