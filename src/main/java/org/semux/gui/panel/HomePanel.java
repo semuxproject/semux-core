@@ -92,7 +92,7 @@ public class HomePanel extends JPanel implements ActionListener {
         overview.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
                 GuiMessages.get("Overview"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        overview.setLayout(new GridLayout(8, 2, 0, 0));
+        overview.setLayout(new GridLayout(8, 2, 0, 8));
 
         JLabel labelBestBlockNum = new JLabel(GuiMessages.get("BestBlockNum") + ":");
         labelBestBlockNum.setFont(boldFont);
@@ -163,7 +163,7 @@ public class HomePanel extends JPanel implements ActionListener {
         consensus.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
                 GuiMessages.get("Consensus"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        consensus.setLayout(new GridLayout(8, 2));
+        consensus.setLayout(new GridLayout(5, 2, 0, 8));
         consensus.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 
         JLabel labelPrimaryValidator = new JLabel(GuiMessages.get("PrimaryValidator") + ":");
@@ -237,12 +237,11 @@ public class HomePanel extends JPanel implements ActionListener {
             groupLayout.createParallelGroup(Alignment.TRAILING)
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 570, Short.MAX_VALUE)
+                        .addComponent(transactions, GroupLayout.DEFAULT_SIZE, 500, Short.MAX_VALUE)
                         .addGroup(groupLayout.createSequentialGroup()
-                            .addComponent(overview, GroupLayout.PREFERRED_SIZE, 210, GroupLayout.PREFERRED_SIZE)
+                            .addComponent(overview, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                             .addGap(10)
-                            .addComponent(consensus, GroupLayout.PREFERRED_SIZE, 210, GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(ComponentPlacement.RELATED, 353, Short.MAX_VALUE)
+                            .addComponent(consensus, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(ComponentPlacement.RELATED)))
                     .addGap(0))
         );
