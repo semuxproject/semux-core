@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -283,6 +284,7 @@ public class MainFrame extends JFrame implements ActionListener {
         btn.setFocusPainted(false);
         btn.setBorder(BORDER_NORMAL);
         btn.setContentAreaFilled(false);
+        btn.setFont(btn.getFont().deriveFont(btn.getFont().getStyle() | Font.BOLD));
 
         return btn;
     }
