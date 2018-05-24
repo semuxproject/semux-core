@@ -123,6 +123,7 @@ import io.netty.handler.ipfilter.IpFilterRuleType;
 /**
  * API tests for {@link org.semux.api.v2_1_0.impl.SemuxApiServiceImpl}
  */
+@SuppressWarnings("Duplicates")
 public class SemuxApiTest extends SemuxApiTestBase {
 
     @Test
