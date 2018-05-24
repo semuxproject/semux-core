@@ -172,7 +172,7 @@ public class TransactionsPanelFilter {
     class TransactionsComboBoxModel<T> extends DefaultComboBoxModel<ComboBoxItem<T>> {
 
         private static final long serialVersionUID = 1L;
-        
+
         private final ComboBoxItem<T> defaultItem;
 
         public TransactionsComboBoxModel() {
