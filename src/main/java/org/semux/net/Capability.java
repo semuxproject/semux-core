@@ -10,14 +10,14 @@ import org.semux.net.msg.ReasonCode;
 
 /**
  * This enum represents the available capabilities in current version of Semux
- * wallet.
+ * wallet. One peer should be disconnected by
+ * ${@link ReasonCode#INCOMPATIBLE_PROTOCOL} if the peer doesn't support the
+ * required set of capabilities.
  */
 public enum Capability {
 
     /**
-     * A mandatory capability of Semux mainnet. One peer should be disconnected by
-     * ${@link ReasonCode#INCOMPATIBLE_PROTOCOL} if the peer doesn't support this
-     * capability.
+     * A mandatory capability of Semux mainnet.
      */
     SEM,
 

@@ -17,6 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -81,7 +82,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private final Consensus consensus;
     private final MessageQueue msgQueue;
 
-    private boolean isHandshakeDone;
+    private AtomicBoolean isHandshakeDone = new AtomicBoolean(false);
 
     private ScheduledFuture<?> getNodes = null;
     private ScheduledFuture<?> pingPong = null;
@@ -105,7 +106,6 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         this.consensus = kernel.getConsensus();
 
         this.msgQueue = channel.getMessageQueue();
-        this.isHandshakeDone = false;
     }
 
     @Override
@@ -167,6 +167,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             ReasonCode error = null;
             if (!isSupported(peer)) {
                 error = ReasonCode.INCOMPATIBLE_PROTOCOL;
+
             } else if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isActivePeer(peer.getPeerId())) {
                 error = ReasonCode.DUPLICATED_PEER_ID;
 
@@ -253,7 +254,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
         /* sync */
         case GET_BLOCK: {
-            if (isHandshakeDone) {
+            if (isHandshakeDone.get()) {
                 GetBlockMessage m = (GetBlockMessage) msg;
                 Block block = chain.getBlock(m.getNumber());
                 channel.getMessageQueue().sendMessage(new BlockMessage(block));
@@ -261,13 +262,13 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             break;
         }
         case BLOCK: {
-            if (isHandshakeDone) {
+            if (isHandshakeDone.get()) {
                 sync.onMessage(channel, msg);
             }
             break;
         }
         case GET_BLOCK_HEADER: {
-            if (isHandshakeDone) {
+            if (isHandshakeDone.get()) {
                 GetBlockHeaderMessage m = (GetBlockHeaderMessage) msg;
                 BlockHeader header = chain.getBlockHeader(m.getNumber());
                 channel.getMessageQueue().sendMessage(new BlockHeaderMessage(header));
@@ -275,7 +276,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             break;
         }
         case BLOCK_HEADER: {
-            if (isHandshakeDone) {
+            if (isHandshakeDone.get()) {
                 sync.onMessage(channel, msg);
             }
             break;
@@ -286,7 +287,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         case BFT_NEW_VIEW:
         case BFT_PROPOSAL:
         case BFT_VOTE: {
-            if (isHandshakeDone) {
+            if (isHandshakeDone.get()) {
                 consensus.onMessage(channel, msg);
             }
             break;
@@ -310,7 +311,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     }
 
     /**
-     * Checks if a World message is success.
+     * Checks if a WORLD message is success.
      *
      * @return
      */
@@ -325,7 +326,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      * @param peer
      */
     private void onHandshakeDone(Peer peer) {
-        if (!isHandshakeDone) {
+        if (isHandshakeDone.compareAndSet(false, true)) {
             // notify consensus about peer height
             consensus.onMessage(channel, new NewHeightMessage(peer.getLatestBlockNumber() + 1));
 
@@ -336,9 +337,6 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             // start ping pong
             pingPong = exec.scheduleAtFixedRate(() -> msgQueue.sendMessage(new PingMessage()),
                     channel.isInbound() ? 1 : 0, 1, TimeUnit.MINUTES);
-
-            // set indicator
-            isHandshakeDone = true;
         } else {
             msgQueue.disconnect(ReasonCode.HANDSHAKE_EXISTS);
         }
