@@ -336,17 +336,18 @@ public class SendPanel extends JPanel implements ActionListener {
             }
         }
 
-        // add aliases to list of accounts
-        for (Map.Entry<ByteArray, String> address : kernel.getWallet().getAddressAliases().entrySet()) {
-            // only add aliases not in wallet
-            if (kernel.getWallet().getAccount(address.getKey().getData()) == null) {
-                accountItems.add(new AccountItem(address.getValue(), address.getKey().getData()));
-            }
-        }
-
         // 'to' contains all current accounts and address book, only update if user
-        // isn't interacting with it
-        if (!selectTo.isPopupVisible()) {
+        // isn't interacting with it, and wallet is unlocked
+        if (!selectTo.isPopupVisible() && kernel.getWallet().isUnlocked()) {
+
+            // add aliases to list of accounts
+            for (Map.Entry<ByteArray, String> address : kernel.getWallet().getAddressAliases().entrySet()) {
+                // only add aliases not in wallet
+                if (kernel.getWallet().getAccount(address.getKey().getData()) == null) {
+                    accountItems.add(new AccountItem(address.getValue(), address.getKey().getData()));
+                }
+            }
+
             Object toSelected = selectTo.getSelectedItem();
 
             selectTo.removeAllItems();
