@@ -431,8 +431,13 @@ public class SendPanel extends JPanel implements ActionListener {
      * @return
      */
     protected WalletAccount getSelectedAccount() {
-        int idx = selectFrom.getSelectedIndex();
-        return (idx == -1) ? null : model.getAccounts().get(idx);
+        AccountItem selected = (AccountItem) selectFrom.getSelectedItem();
+        return selected == null ? null
+                : model.getAccounts()
+                        .stream()
+                        .filter(walletAccount -> Arrays.equals(selected.address, walletAccount.getAddress()))
+                        .findFirst()
+                        .orElse(null);
     }
 
     /**
