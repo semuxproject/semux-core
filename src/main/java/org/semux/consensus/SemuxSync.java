@@ -377,16 +377,7 @@ public class SemuxSync implements SyncManager {
                                     iter.remove();
                                 }
                                 else{
-                                    InetSocketAddress a = p.getValue().getRemoteAddress();
-                                    logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
-                                    toDownload.add(p.getKey().getNumber());
-                                    toComplete.remove(p.getKey().getNumber());
-                                    toProcess.remove(p.getKey());
-                                    currentSet.remove(p);
-                                    toFinalize.remove(p.getKey().getNumber(), p);
-
-                                   // disconnect if the peer sends us invalid block
-                                   p.getValue().getMessageQueue().disconnect(ReasonCode.BAD_PEER);  
+                                    handleInvalidBlock(p.getKey(), p.getValue());
                                     break;
                                 }
                             }
@@ -397,16 +388,7 @@ public class SemuxSync implements SyncManager {
                                     toComplete.remove(p.getKey().getNumber());
                                 }
                                 else{
-                                    InetSocketAddress a = p.getValue().getRemoteAddress();
-                                    logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
-                                    toDownload.add(p.getKey().getNumber());
-                                    toComplete.remove(p.getKey().getNumber());
-                                    toProcess.remove(p.getKey());
-                                    currentSet.remove(p);
-                                    toFinalize.remove(p.getKey().getNumber(), p);
-
-                                   // disconnect if the peer sends us invalid block
-                                   p.getValue().getMessageQueue().disconnect(ReasonCode.BAD_PEER);  
+                                    handleInvalidBlock(p.getKey(), p.getValue());
                                     break;
                                 }                                 
                             }
@@ -469,45 +451,52 @@ public class SemuxSync implements SyncManager {
                         }
                     }
                     else{
-                        InetSocketAddress a = pair.getValue().getRemoteAddress();
-                        logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
-                        toDownload.add(pair.getKey().getNumber());
-                        toComplete.remove(pair.getKey().getNumber());
-                        toProcess.remove(pair.getKey());
-                        currentSet.remove(pair);
-                        toFinalize.remove(pair.getKey().getNumber(), pair);
-
-                       // disconnect if the peer sends us invalid block
-                       pair.getValue().getMessageQueue().disconnect(ReasonCode.BAD_PEER);  
+                        handleInvalidBlock(pair.getKey(), pair.getValue());
                     }
                 }
                 else{
                     if (validateApplyBlock(pair.getKey())) {
                         if (toDownload.remove(pair.getKey().getNumber())) {
                             growToDownloadQueue();
-                        toComplete.remove(pair.getKey().getNumber());
+                            toComplete.remove(pair.getKey().getNumber());
                         }
-                    } else {
-                        InetSocketAddress a = pair.getValue().getRemoteAddress();
-                        logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
-                        toDownload.add(pair.getKey().getNumber());
-                        toComplete.remove(pair.getKey().getNumber());
-                        toProcess.remove(pair.getKey());
-                        currentSet.remove(pair);
-                        toFinalize.remove(pair.getKey().getNumber(), pair);
-
-                       // disconnect if the peer sends us invalid block
-                       pair.getValue().getMessageQueue().disconnect(ReasonCode.BAD_PEER);   
+                    }
+                    else {
+                        handleInvalidBlock(pair.getKey(), pair.getValue());
                     }
                 }
             }
         }
     }
+    
+    /**
+     * Handle invalid block:
+     * Add block # to back to download queue.
+     * Remove block # from all other queues.
+     * Disconnect from the peer that sent the block.
+     * 
+     * @param block
+     * @param channel 
+     */
+    protected void handleInvalidBlock(Block block, Channel channel){
+        InetSocketAddress a = channel.getRemoteAddress();
+        logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
+        toDownload.add(block.getNumber());
+        toComplete.remove(block.getNumber());
+        currentSet.remove(Pair.of(block, channel));
+        toFinalize.remove(block.getNumber(), Pair.of(block, channel));
+        toProcess.remove(Pair.of(block, channel));
+
+       // disconnect if the peer sends us invalid block
+       channel.getMessageQueue().disconnect(ReasonCode.BAD_PEER);    
+    }
 
     /**
      * Check if a block is valid, and apply to the chain if yes.
+     * Votes are validated only if validateVotes is true.
      *
      * @param block
+     * @param validateVotes
      * @return
      */
     protected boolean validateApplyBlock(Block block, boolean validateVotes) {
@@ -522,6 +511,16 @@ public class SemuxSync implements SyncManager {
         return validateApplyBlock(block, true);
     }
 
+    /**
+     * Validate the block. 
+     * Votes are validated only if validateVotes is true.
+     * 
+     * @param block
+     * @param asSnapshot
+     * @param dsSnapshot
+     * @param validateVotes
+     * @return 
+     */
     protected boolean validateBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot, boolean validateVotes) {
         BlockHeader header = block.getHeader();
         List<Transaction> transactions = block.getTransactions();
