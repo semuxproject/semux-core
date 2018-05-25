@@ -258,7 +258,8 @@ public class SemuxSync implements SyncManager {
             Long task = toDownload.first();
 
             // quit if too many pending blocks
-            if (toProcess.size() > MAX_PENDING_BLOCKS && task > toProcess.first().getKey().getNumber()) {
+            int pendingBlocks = toProcess.size() + currentSet.size() + toFinalize.size();
+            if (pendingBlocks > MAX_PENDING_BLOCKS && task > toProcess.first().getKey().getNumber()) {
                 logger.trace("Pending block queue is full");
                 return;
             }
