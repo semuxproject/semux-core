@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -110,6 +111,12 @@ public class SemuxSync implements SyncManager {
     private Map<Long, Long> toComplete = new HashMap<>();
     private TreeSet<Pair<Block, Channel>> toProcess = new TreeSet<>(
             Comparator.comparingLong(o -> o.getKey().getNumber()));
+    private TreeSet<Pair<Block, Channel>> currentSet = new TreeSet<>(
+            Comparator.comparingLong(o -> o.getKey().getNumber()));
+    private TreeMap<Long, Pair<Block, Channel>> toFinalize = new TreeMap<>();
+    
+    private long lastBlockInSet;
+    private boolean fastsync;
     private final Object lock = new Object();
 
     // current and target heights
@@ -140,6 +147,8 @@ public class SemuxSync implements SyncManager {
                 toDownload.clear();
                 toComplete.clear();
                 toProcess.clear();
+                currentSet.clear();
+                toFinalize.clear();
 
                 begin.set(chain.getLatestBlockNumber() + 1);
                 current.set(chain.getLatestBlockNumber() + 1);
@@ -314,46 +323,183 @@ public class SemuxSync implements SyncManager {
             stop();
             return; // This is important because stop() only notify
         }
-
-        Pair<Block, Channel> pair = null;
+        
+        // Perform fast syncing only if all blocks in current validator sets have been forged.
         synchronized (lock) {
-            Iterator<Pair<Block, Channel>> iterator = toProcess.iterator();
-            while (iterator.hasNext()) {
-                Pair<Block, Channel> p = iterator.next();
-
-                if (p.getKey().getNumber() <= latest) {
-                    iterator.remove();
-                } else if (p.getKey().getNumber() == latest + 1) {
-                    iterator.remove();
-                    pair = p;
-                    break;
-                } else {
-                    break;
+            if (!fastsync){
+                if (latest % config.getValidatorUpdateInterval() == 0){
+                    if (target.get() >= latest + config.getValidatorUpdateInterval()){
+                        toFinalize.clear();
+                        currentSet.clear();
+                        lastBlockInSet = latest + config.getValidatorUpdateInterval();
+                        fastsync = true;
+                    }
                 }
             }
         }
 
-        if (pair != null) {
-            logger.info("{}", pair.getKey());
-
-            if (validateApplyBlock(pair.getKey())) {
-                synchronized (lock) {
-                    if (toDownload.remove(pair.getKey().getNumber())) {
-                        growToDownloadQueue();
+        Pair<Block, Channel> pair = null;
+        synchronized (lock) {
+            // Validate votes only for the last block in each validator set.
+            // For each block in the set, compare it's hash against it's child hash.
+            // Once all hashes are validated, validate (while skipping vote validation)
+            // and apply each block.
+            if(fastsync){
+                // If not all hashes in set were validated
+                if (toFinalize.size() < lastBlockInSet - latest){ 
+                    // Add missing blocks to currentSet
+                    Iterator<Pair<Block, Channel>> iter = toProcess.iterator();
+                    while (iter.hasNext()){ 
+                        Pair<Block, Channel> p = iter.next();
+                        if (p.getKey().getNumber() <= latest) {
+                            iter.remove();
+                        }
+                        else if (p.getKey().getNumber() <= lastBlockInSet){
+                            iter.remove();
+                            currentSet.add(p);
+                        }
+                        else{
+                            break;
+                        }
                     }
-                    toComplete.remove(pair.getKey().getNumber());
-                }
-            } else {
-                InetSocketAddress a = pair.getValue().getRemoteAddress();
-                logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
+                    // Validate remaining block hashes
+                    iter = currentSet.descendingIterator(); 
+                    while (iter.hasNext()){
+                        Pair<Block, Channel> p = iter.next();
+                        if (p.getKey().getNumber() <= latest) {
+                            iter.remove();
+                        }
+                        else if (!toFinalize.containsKey(p.getKey().getNumber())){
+                            Pair<Block, Channel> child = toFinalize.get(p.getKey().getNumber() + 1);
+                            if (child != null){
+                                if (Arrays.equals(child.getKey().getParentHash(), p.getKey().getHash())){
+                                    toFinalize.put(p.getKey().getNumber(), p);
+                                    iter.remove();
+                                }
+                                else{
+                                    InetSocketAddress a = p.getValue().getRemoteAddress();
+                                    logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
+                                    toDownload.add(p.getKey().getNumber());
+                                    toComplete.remove(p.getKey().getNumber());
+                                    toProcess.remove(p.getKey());
+                                    currentSet.remove(p);
+                                    toFinalize.remove(p.getKey().getNumber(), p);
 
-                synchronized (lock) {
-                    toDownload.add(pair.getKey().getNumber());
-                    toComplete.remove(pair.getKey().getNumber());
-                }
+                                   // disconnect if the peer sends us invalid block
+                                   p.getValue().getMessageQueue().disconnect(ReasonCode.BAD_PEER);  
+                                    break;
+                                }
+                            }
+                            else if (p.getKey().getNumber() == lastBlockInSet){ 
+                                iter.remove();
+                                if (validateBlockVotes(p.getKey())){ // Validate votes for last block
+                                    toFinalize.put(p.getKey().getNumber(), p);
+                                    toComplete.remove(p.getKey().getNumber());
+                                }
+                                else{
+                                    InetSocketAddress a = p.getValue().getRemoteAddress();
+                                    logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
+                                    toDownload.add(p.getKey().getNumber());
+                                    toComplete.remove(p.getKey().getNumber());
+                                    toProcess.remove(p.getKey());
+                                    currentSet.remove(p);
+                                    toFinalize.remove(p.getKey().getNumber(), p);
 
-                // disconnect if the peer sends us invalid block
-                pair.getValue().getMessageQueue().disconnect(ReasonCode.BAD_PEER);
+                                   // disconnect if the peer sends us invalid block
+                                   p.getValue().getMessageQueue().disconnect(ReasonCode.BAD_PEER);  
+                                    break;
+                                }                                 
+                            }
+                            else{
+                                break;
+                            }
+                        }
+                        else{
+                            iter.remove();
+                        }
+                    }
+                }
+                else{
+                    Iterator<Entry<Long, Pair<Block, Channel>>> iter = toFinalize.entrySet().iterator();
+                    while (iter.hasNext()) {
+                        Entry<Long, Pair<Block, Channel>> e = iter.next();
+                        if (e.getKey() <= latest) {
+                            iter.remove();
+                        }
+                        else if (e.getKey() == latest + 1){
+                            iter.remove();
+                            pair = e.getValue();
+                            break;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                }
+            }
+            // Normal sync
+            else{ 
+                Iterator<Pair<Block, Channel>> iter = toProcess.iterator();
+                while (iter.hasNext()) {
+                    Pair<Block, Channel> p = iter.next();
+                    if (p.getKey().getNumber() <= latest) {
+                        iter.remove();
+                    } else if (p.getKey().getNumber() == latest + 1) {
+                        iter.remove();
+                        pair = p;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        
+        synchronized (lock) {
+            if (pair != null) {
+                logger.info("{}", pair.getKey());
+                if (fastsync){
+                    if (validateApplyBlock(pair.getKey(), false)){ // Skip vote validation
+                        if (toDownload.remove(pair.getKey().getNumber())) {
+                            growToDownloadQueue();
+                        }
+                        toComplete.remove(pair.getKey().getNumber());
+                        if (pair.getKey().getNumber() == lastBlockInSet){
+                            fastsync = false;
+                        }
+                    }
+                    else{
+                        InetSocketAddress a = pair.getValue().getRemoteAddress();
+                        logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
+                        toDownload.add(pair.getKey().getNumber());
+                        toComplete.remove(pair.getKey().getNumber());
+                        toProcess.remove(pair.getKey());
+                        currentSet.remove(pair);
+                        toFinalize.remove(pair.getKey().getNumber(), pair);
+
+                       // disconnect if the peer sends us invalid block
+                       pair.getValue().getMessageQueue().disconnect(ReasonCode.BAD_PEER);  
+                    }
+                }
+                else{
+                    if (validateApplyBlock(pair.getKey())) {
+                        if (toDownload.remove(pair.getKey().getNumber())) {
+                            growToDownloadQueue();
+                        toComplete.remove(pair.getKey().getNumber());
+                        }
+                    } else {
+                        InetSocketAddress a = pair.getValue().getRemoteAddress();
+                        logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
+                        toDownload.add(pair.getKey().getNumber());
+                        toComplete.remove(pair.getKey().getNumber());
+                        toProcess.remove(pair.getKey());
+                        currentSet.remove(pair);
+                        toFinalize.remove(pair.getKey().getNumber(), pair);
+
+                       // disconnect if the peer sends us invalid block
+                       pair.getValue().getMessageQueue().disconnect(ReasonCode.BAD_PEER);   
+                    }
+                }
             }
         }
     }
@@ -364,14 +510,19 @@ public class SemuxSync implements SyncManager {
      * @param block
      * @return
      */
-    protected boolean validateApplyBlock(Block block) {
+    protected boolean validateApplyBlock(Block block, boolean validateVotes) {
         AccountState as = chain.getAccountState().track();
         DelegateState ds = chain.getDelegateState().track();
-
-        return validateBlock(block, as, ds) && applyBlock(block, as, ds);
+        boolean validated = validateVotes ? validateBlock(block, as, ds, true) : 
+                validateBlock(block, as, ds, false);
+        return validated && applyBlock(block, as, ds);
+    }
+    
+    protected boolean validateApplyBlock(Block block) {
+        return validateApplyBlock(block, true);
     }
 
-    protected boolean validateBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot) {
+    protected boolean validateBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot, boolean validateVotes) {
         BlockHeader header = block.getHeader();
         List<Transaction> transactions = block.getTransactions();
 
@@ -422,7 +573,14 @@ public class SemuxSync implements SyncManager {
         }
 
         // [4] evaluate votes
-        return validateBlockVotes(block);
+        if (validateVotes) {
+            return validateBlockVotes(block);
+        }
+        return true;
+    }
+    
+    protected boolean validateBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot) {
+        return validateBlock(block, asSnapshot, dsSnapshot, true);
     }
 
     protected boolean validateBlockVotes(Block block) {
