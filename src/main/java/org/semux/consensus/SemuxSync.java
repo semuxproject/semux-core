@@ -116,7 +116,7 @@ public class SemuxSync implements SyncManager {
     private TreeMap<Long, Pair<Block, Channel>> toFinalize = new TreeMap<>();
     
     private long lastBlockInSet;
-    private boolean fastsync;
+    private boolean fastSync;
     private final Object lock = new Object();
 
     // current and target heights
@@ -154,6 +154,7 @@ public class SemuxSync implements SyncManager {
                 current.set(chain.getLatestBlockNumber() + 1);
                 target.set(targetHeight);
                 latestQueuedTask.set(chain.getLatestBlockNumber());
+                fastSync = false;
                 growToDownloadQueue();
             }
 
@@ -327,13 +328,13 @@ public class SemuxSync implements SyncManager {
         
         // Perform fast syncing only if all blocks in current validator sets have been forged.
         synchronized (lock) {
-            if (!fastsync){
+            if (!fastSync){
                 if (latest % config.getValidatorUpdateInterval() == 0){
                     if (target.get() >= latest + config.getValidatorUpdateInterval()){
                         toFinalize.clear();
                         currentSet.clear();
                         lastBlockInSet = latest + config.getValidatorUpdateInterval();
-                        fastsync = true;
+                        fastSync = true;
                     }
                 }
             }
@@ -345,7 +346,7 @@ public class SemuxSync implements SyncManager {
             // For each block in the set, compare it's hash against it's child hash.
             // Once all hashes are validated, validate (while skipping vote validation)
             // and apply each block.
-            if(fastsync){
+            if(fastSync){
                 // If not all hashes in set were validated
                 if (toFinalize.size() < lastBlockInSet - latest){ 
                     // Add missing blocks to currentSet
@@ -441,14 +442,14 @@ public class SemuxSync implements SyncManager {
         synchronized (lock) {
             if (pair != null) {
                 logger.info("{}", pair.getKey());
-                if (fastsync){
+                if (fastSync){
                     if (validateApplyBlock(pair.getKey(), false)){ // Skip vote validation
                         if (toDownload.remove(pair.getKey().getNumber())) {
                             growToDownloadQueue();
                         }
                         toComplete.remove(pair.getKey().getNumber());
                         if (pair.getKey().getNumber() == lastBlockInSet){
-                            fastsync = false;
+                            fastSync = false;
                         }
                     }
                     else{
