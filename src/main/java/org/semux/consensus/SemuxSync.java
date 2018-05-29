@@ -341,64 +341,47 @@ public class SemuxSync implements SyncManager {
         }
 
         Pair<Block, Channel> pair = null;
+        Iterator<Pair<Block, Channel>> iter;
         synchronized (lock) {
-            // Validate votes only for the last block in each validator set.
-            // For each block in the set, compare it's hash against it's child hash.
-            // Once all hashes are validated, validate (while skipping vote validation)
-            // and apply each block.
-            if(fastSync){
-                // If not all hashes in set were validated
-                if (toFinalize.size() < lastBlockInSet - latest){ 
-                    // Add missing blocks to currentSet
-                    Iterator<Pair<Block, Channel>> iter = toProcess.iterator();
-                    while (iter.hasNext()){ 
-                        Pair<Block, Channel> p = iter.next();
-                        if (p.getKey().getNumber() <= latest) {
-                            iter.remove();
-                        }
-                        else if (p.getKey().getNumber() <= lastBlockInSet){
-                            iter.remove();
-                            currentSet.add(p);
-                        }
-                        else{
-                            break;
-                        }
-                    }
-                    // Validate remaining block hashes
-                    validateSetHashes();
-                }
-                else{
-                    Iterator<Entry<Long, Pair<Block, Channel>>> iter = toFinalize.entrySet().iterator();
-                    while (iter.hasNext()) {
-                        Entry<Long, Pair<Block, Channel>> e = iter.next();
-                        if (e.getKey() <= latest) {
-                            iter.remove();
-                        }
-                        else if (e.getKey() == latest + 1){
-                            iter.remove();
-                            pair = e.getValue();
-                            break;
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-            }
-            // Normal sync
-            else{ 
-                Iterator<Pair<Block, Channel>> iter = toProcess.iterator();
-                while (iter.hasNext()) {
+            // If not all hashes in current validator set were validated
+            if (fastSync && toFinalize.size() < lastBlockInSet - latest){ 
+                // Add missing blocks to currentSet
+                iter = toProcess.iterator();
+                while (iter.hasNext()){ 
                     Pair<Block, Channel> p = iter.next();
                     if (p.getKey().getNumber() <= latest) {
                         iter.remove();
-                    } else if (p.getKey().getNumber() == latest + 1) {
+                    }
+                    else if (p.getKey().getNumber() <= lastBlockInSet){
                         iter.remove();
-                        pair = p;
-                        break;
-                    } else {
+                        currentSet.add(p);
+                    }
+                    else{
                         break;
                     }
+                }
+                
+                // Validate remaining block hashes
+                validateSetHashes();
+                return;
+            }
+
+            if (fastSync){
+                iter = toFinalize.values().stream().sorted(Comparator.comparingLong(o -> o.getKey().getNumber())).iterator();
+            }
+            else{
+                iter = toProcess.iterator();
+            }
+            while (iter.hasNext()) {
+                Pair<Block, Channel> p = iter.next();
+                if (p.getKey().getNumber() <= latest) {
+                    iter.remove();
+                } else if (p.getKey().getNumber() == latest + 1) {
+                    iter.remove();
+                    pair = p;
+                    break;
+                } else {
+                    break;
                 }
             }
         }
@@ -406,41 +389,32 @@ public class SemuxSync implements SyncManager {
         synchronized (lock) {
             if (pair != null) {
                 logger.info("{}", pair.getKey());
-                if (fastSync){
-                    if (validateApplyBlock(pair.getKey(), false)){ // Skip vote validation
-                        if (toDownload.remove(pair.getKey().getNumber())) {
-                            growToDownloadQueue();
-                        }
-                        toComplete.remove(pair.getKey().getNumber());
-                        if (pair.getKey().getNumber() == lastBlockInSet){
-                            fastSync = false;
-                        }
+                if (validateApplyBlock(pair.getKey(), !fastSync)){
+                    if (toDownload.remove(pair.getKey().getNumber())) {
+                        growToDownloadQueue();
                     }
-                    else{
-                        handleInvalidBlock(pair.getKey(), pair.getValue());
+                    toComplete.remove(pair.getKey().getNumber());
+                    
+                    if (pair.getKey().getNumber() == lastBlockInSet){
+                        fastSync = false;
                     }
                 }
                 else{
-                    if (validateApplyBlock(pair.getKey())) {
-                        if (toDownload.remove(pair.getKey().getNumber())) {
-                            growToDownloadQueue();
-                            toComplete.remove(pair.getKey().getNumber());
-                        }
-                    }
-                    else {
-                        handleInvalidBlock(pair.getKey(), pair.getValue());
-                    }
+                    handleInvalidBlock(pair.getKey(), pair.getValue());
                 }
             }
         }
     }
     
-        protected void validateSetHashes(){
+    protected void validateSetHashes(){
         synchronized(lock){
             Iterator<Pair<Block, Channel>> iter = currentSet.descendingIterator(); 
             while (iter.hasNext()){
                 Pair<Block, Channel> p = iter.next();
-                if (!toFinalize.containsKey(p.getKey().getNumber())){
+                if (toFinalize.containsKey(p.getKey().getNumber())){
+                    iter.remove();
+                }
+                else{
                     Pair<Block, Channel> child = toFinalize.get(p.getKey().getNumber() + 1);
                     if (child != null){
                         // Validate block header and compare its hash against its child parent hash
@@ -451,7 +425,7 @@ public class SemuxSync implements SyncManager {
                         }
                         else{
                             handleInvalidBlock(p.getKey(), p.getValue());
-                            break;
+                            return;
                         }
                     }
                     else if (p.getKey().getNumber() == lastBlockInSet){ 
@@ -463,15 +437,12 @@ public class SemuxSync implements SyncManager {
                         }
                         else{
                             handleInvalidBlock(p.getKey(), p.getValue());
-                            break;
+                            return;
                         }                                 
                     }
                     else{
-                        break;
+                        return;
                     }
-                }
-                else{
-                    iter.remove();
                 }
             }            
         }
@@ -510,9 +481,7 @@ public class SemuxSync implements SyncManager {
     protected boolean validateApplyBlock(Block block, boolean validateVotes) {
         AccountState as = chain.getAccountState().track();
         DelegateState ds = chain.getDelegateState().track();
-        boolean validated = validateVotes ? validateBlock(block, as, ds, true) : 
-                validateBlock(block, as, ds, false);
-        return validated && applyBlock(block, as, ds);
+        return validateBlock(block, as, ds, validateVotes) && applyBlock(block, as, ds);    
     }
     
     protected boolean validateApplyBlock(Block block) {
