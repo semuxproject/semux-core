@@ -314,7 +314,14 @@ public class SemuxSync implements SyncManager {
             }
         }
     }
-
+    
+    /**
+     * Fast sync process:
+     * Validate votes only for the last block in each validator set.
+     * For each block in the set, compare its hash against its child parent hash.
+     * Once all hashes are validated, validate (while skipping vote validation)
+     * and apply each block to the chain.
+     */
     private void process() {
         if (!isRunning()) {
             return;
@@ -326,9 +333,10 @@ public class SemuxSync implements SyncManager {
             return; // This is important because stop() only notify
         }
         
-        // Perform fast syncing only if all blocks in current validator sets have been forged.
+        // Perform fast sync only if all blocks in current validator sets have been forged
         synchronized (lock) {
             if (!fastSync){
+                // fastSync value is updated at the beginning of each set
                 if (latest % config.getValidatorUpdateInterval() == 0){
                     if (target.get() >= latest + config.getValidatorUpdateInterval()){
                         toFinalize.clear();
@@ -339,7 +347,7 @@ public class SemuxSync implements SyncManager {
                 }
             }
         }
-
+        
         Pair<Block, Channel> pair = null;
         Iterator<Pair<Block, Channel>> iter;
         synchronized (lock) {
@@ -361,11 +369,12 @@ public class SemuxSync implements SyncManager {
                     }
                 }
                 
-                // Validate remaining block hashes
+                // Validate remaining block hashes in current set
                 validateSetHashes();
                 return;
             }
-
+            
+            // Check if next block is ready to be applied to the chain
             if (fastSync){
                 iter = toFinalize.values().stream().sorted(Comparator.comparingLong(o -> o.getKey().getNumber())).iterator();
             }
@@ -386,9 +395,11 @@ public class SemuxSync implements SyncManager {
             }
         }
         
+        // Validate and apply block to the chain
         synchronized (lock) {
             if (pair != null) {
                 logger.info("{}", pair.getKey());
+                // If fastSync is true - skip vote validation
                 if (validateApplyBlock(pair.getKey(), !fastSync)){
                     if (toDownload.remove(pair.getKey().getNumber())) {
                         growToDownloadQueue();
@@ -450,8 +461,8 @@ public class SemuxSync implements SyncManager {
     
     /**
      * Handle invalid block:
-     * Add block # to back to download queue.
-     * Remove block # from all other queues.
+     * Add block back to download queue.
+     * Remove block from all other queues.
      * Disconnect from the peer that sent the block.
      * 
      * @param block
