@@ -365,43 +365,7 @@ public class SemuxSync implements SyncManager {
                         }
                     }
                     // Validate remaining block hashes
-                    iter = currentSet.descendingIterator(); 
-                    while (iter.hasNext()){
-                        Pair<Block, Channel> p = iter.next();
-                        if (p.getKey().getNumber() <= latest) {
-                            iter.remove();
-                        }
-                        else if (!toFinalize.containsKey(p.getKey().getNumber())){
-                            Pair<Block, Channel> child = toFinalize.get(p.getKey().getNumber() + 1);
-                            if (child != null){
-                                if (Arrays.equals(child.getKey().getParentHash(), p.getKey().getHash())){
-                                    toFinalize.put(p.getKey().getNumber(), p);
-                                    iter.remove();
-                                }
-                                else{
-                                    handleInvalidBlock(p.getKey(), p.getValue());
-                                    break;
-                                }
-                            }
-                            else if (p.getKey().getNumber() == lastBlockInSet){ 
-                                iter.remove();
-                                if (validateBlockVotes(p.getKey())){ // Validate votes for last block
-                                    toFinalize.put(p.getKey().getNumber(), p);
-                                    toComplete.remove(p.getKey().getNumber());
-                                }
-                                else{
-                                    handleInvalidBlock(p.getKey(), p.getValue());
-                                    break;
-                                }                                 
-                            }
-                            else{
-                                break;
-                            }
-                        }
-                        else{
-                            iter.remove();
-                        }
-                    }
+                    validateSetHashes();
                 }
                 else{
                     Iterator<Entry<Long, Pair<Block, Channel>>> iter = toFinalize.entrySet().iterator();
@@ -468,6 +432,48 @@ public class SemuxSync implements SyncManager {
                     }
                 }
             }
+        }
+    }
+    
+        protected void validateSetHashes(){
+        synchronized(lock){
+            Iterator<Pair<Block, Channel>> iter = currentSet.descendingIterator(); 
+            while (iter.hasNext()){
+                Pair<Block, Channel> p = iter.next();
+                if (!toFinalize.containsKey(p.getKey().getNumber())){
+                    Pair<Block, Channel> child = toFinalize.get(p.getKey().getNumber() + 1);
+                    if (child != null){
+                        // Validate block header and compare its hash against its child parent hash
+                        if (Arrays.equals(child.getKey().getParentHash(), p.getKey().getHash()) &&
+                                p.getKey().getHeader().validate()){
+                            toFinalize.put(p.getKey().getNumber(), p);
+                            iter.remove();
+                        }
+                        else{
+                            handleInvalidBlock(p.getKey(), p.getValue());
+                            break;
+                        }
+                    }
+                    else if (p.getKey().getNumber() == lastBlockInSet){ 
+                        iter.remove();
+                        // Validate votes for last block in set
+                        if (validateBlockVotes(p.getKey()) && p.getKey().getHeader().validate()){
+                            toFinalize.put(p.getKey().getNumber(), p);
+                            toComplete.remove(p.getKey().getNumber());
+                        }
+                        else{
+                            handleInvalidBlock(p.getKey(), p.getValue());
+                            break;
+                        }                                 
+                    }
+                    else{
+                        break;
+                    }
+                }
+                else{
+                    iter.remove();
+                }
+            }            
         }
     }
     
