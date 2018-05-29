@@ -460,12 +460,13 @@ public class SemuxSync implements SyncManager {
     protected void handleInvalidBlock(Block block, Channel channel){
         InetSocketAddress a = channel.getRemoteAddress();
         logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
-        toDownload.add(block.getNumber());
-        toComplete.remove(block.getNumber());
-        currentSet.remove(Pair.of(block, channel));
-        toFinalize.remove(block.getNumber(), Pair.of(block, channel));
-        toProcess.remove(Pair.of(block, channel));
-
+        synchronized(lock) {
+            toDownload.add(block.getNumber());
+            toComplete.remove(block.getNumber());
+            currentSet.remove(Pair.of(block, channel));
+            toFinalize.remove(block.getNumber(), Pair.of(block, channel));
+            toProcess.remove(Pair.of(block, channel));
+        }
        // disconnect if the peer sends us invalid block
        channel.getMessageQueue().disconnect(ReasonCode.BAD_PEER);    
     }
