@@ -381,10 +381,13 @@ public class SemuxSync implements SyncManager {
             }
             while (iter.hasNext()) {
                 Pair<Block, Channel> p = iter.next();
+                // In case a normal sync is performed, toProcess might contain blocks which
+                // already have been applied to the chain
                 if (p.getKey().getNumber() <= latest) {
                     iter.remove();
                 } else if (p.getKey().getNumber() == latest + 1) {
-                    iter.remove();
+                    toFinalize.remove(p.getKey().getNumber());
+                    toProcess.remove(p);
                     pair = p;
                     break;
                 } else {
