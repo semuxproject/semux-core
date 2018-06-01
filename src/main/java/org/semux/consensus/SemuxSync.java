@@ -349,18 +349,17 @@ public class SemuxSync implements SyncManager {
         }
 
         Pair<Block, Channel> pair = null;
-        Iterator<Pair<Block, Channel>> iter;
         synchronized (lock) {
             // If not all hashes in current validator set were validated
             if (fastSync && toFinalize.size() < lastBlockInSet - latest) {
                 // Add missing blocks to currentSet
-                iter = toProcess.iterator();
-                while (iter.hasNext()) {
-                    Pair<Block, Channel> p = iter.next();
+                Iterator<Pair<Block, Channel>> blocksToProcessIterator = toProcess.iterator();
+                while (blocksToProcessIterator.hasNext()) {
+                    Pair<Block, Channel> p = blocksToProcessIterator.next();
                     if (p.getKey().getNumber() <= latest) {
-                        iter.remove();
+                        blocksToProcessIterator.remove();
                     } else if (p.getKey().getNumber() <= lastBlockInSet) {
-                        iter.remove();
+                        blocksToProcessIterator.remove();
                         currentSet.add(p);
                     } else {
                         break;
@@ -372,19 +371,19 @@ public class SemuxSync implements SyncManager {
                 return;
             }
 
+            Iterator<Pair<Block, Channel>> blocksToApplyIterator;
             // Check if next block is ready to be applied to the chain
             if (fastSync) {
-                iter = toFinalize.values().stream().sorted(Comparator.comparingLong(o -> o.getKey().getNumber()))
-                        .iterator();
+                blocksToApplyIterator = toFinalize.values().iterator();
             } else {
-                iter = toProcess.iterator();
+                blocksToApplyIterator = toProcess.iterator();
             }
-            while (iter.hasNext()) {
-                Pair<Block, Channel> p = iter.next();
+            while (blocksToApplyIterator.hasNext()) {
+                Pair<Block, Channel> p = blocksToApplyIterator.next();
                 // In case a normal sync is performed, toProcess might contain blocks which
                 // already have been applied to the chain
                 if (p.getKey().getNumber() <= latest) {
-                    iter.remove();
+                    blocksToApplyIterator.remove();
                 } else if (p.getKey().getNumber() == latest + 1) {
                     toFinalize.remove(p.getKey().getNumber());
                     toProcess.remove(p);
@@ -397,33 +396,32 @@ public class SemuxSync implements SyncManager {
         }
 
         // Validate and apply block to the chain
-        synchronized (lock) {
-            if (pair != null) {
-                logger.info("{}", pair.getKey());
-                // If fastSync is true - skip vote validation
-                if (validateApplyBlock(pair.getKey(), !fastSync)) {
+        if (pair != null) {
+            logger.info("{}", pair.getKey());
+            // If fastSync is true - skip vote validation
+            if (validateApplyBlock(pair.getKey(), !fastSync)) {
+                synchronized (lock) {
                     if (toDownload.remove(pair.getKey().getNumber())) {
                         growToDownloadQueue();
                     }
                     toComplete.remove(pair.getKey().getNumber());
-
                     if (pair.getKey().getNumber() == lastBlockInSet) {
                         fastSync = false;
                     }
-                } else {
-                    handleInvalidBlock(pair.getKey(), pair.getValue());
                 }
+            } else {
+                handleInvalidBlock(pair.getKey(), pair.getValue());
             }
         }
     }
 
     protected void validateSetHashes() {
         synchronized (lock) {
-            Iterator<Pair<Block, Channel>> iter = currentSet.descendingIterator();
-            while (iter.hasNext()) {
-                Pair<Block, Channel> p = iter.next();
+            Iterator<Pair<Block, Channel>> iterator = currentSet.descendingIterator();
+            while (iterator.hasNext()) {
+                Pair<Block, Channel> p = iterator.next();
                 if (toFinalize.containsKey(p.getKey().getNumber())) {
-                    iter.remove();
+                    iterator.remove();
                 } else {
                     Pair<Block, Channel> child = toFinalize.get(p.getKey().getNumber() + 1);
                     if (child != null) {
@@ -431,13 +429,13 @@ public class SemuxSync implements SyncManager {
                         if (Arrays.equals(child.getKey().getParentHash(), p.getKey().getHash()) &&
                                 p.getKey().getHeader().validate()) {
                             toFinalize.put(p.getKey().getNumber(), p);
-                            iter.remove();
+                            iterator.remove();
                         } else {
                             handleInvalidBlock(p.getKey(), p.getValue());
                             return;
                         }
                     } else if (p.getKey().getNumber() == lastBlockInSet) {
-                        iter.remove();
+                        iterator.remove();
                         // Validate votes for last block in set
                         if (validateBlockVotes(p.getKey()) && p.getKey().getHeader().validate()) {
                             toFinalize.put(p.getKey().getNumber(), p);
