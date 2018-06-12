@@ -34,6 +34,6 @@ Once you've successfully started Semux API server, a Swagger UI page is availabl
 
 Semux provides a [Swagger API Spec in JSON](../src/main/resources/org/semux/api/v2_1_0/swagger.json) since API version 2. You can either generate an API client by yourself using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) or use the following pre-generated clients:
 
-- Javascript: https://github.com/semuxproject/semux-js-sdk
-- PHP: https://github.com/semuxproject/semux-php-sdk
+- Javascript: https://github.com/semuxproject/semux-js
+- PHP: https://github.com/semuxproject/semux-php
 - Python: https://github.com/mdodong/semuxapi-py

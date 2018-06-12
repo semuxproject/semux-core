@@ -4,7 +4,7 @@ WORKDIR /
 
 RUN apt-get update && apt-get install --yes curl jq
 
-RUN LATEST=`curl -s https://api.github.com/repos/semuxproject/semux/releases/latest | jq '.assets[]  | select(.name | contains("linux"))'` && \
+RUN LATEST=`curl -s https://api.github.com/repos/semuxproject/semux-core/releases/latest | jq '.assets[]  | select(.name | contains("linux"))'` && \
     LINK=`echo ${LATEST} | jq -r '.browser_download_url'` && \
     TARBALL=`echo ${LATEST} | jq -r '.name'` && \
     curl -Lo ${TARBALL} ${LINK} && \

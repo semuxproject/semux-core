@@ -17,8 +17,8 @@ sudo apt-get install openjdk-8-jre
 **Download & extract Semux pre-compiled binaries of the latest release**
 
 ```bash
-wget https://github.com/semuxproject/semux/releases/download/v1.1.1/semux-linux-1.1.1-a089548.tar.gz
-tar -zxvf semux-linux-1.1.1-a089548.tar.gz 
+wget https://github.com/semuxproject/semux-core/releases/download/v1.2.0/semux-linux-1.2.0-73852f9.tar.gz
+tar -zxvf semux-linux-1.2.0-73852f9.tar.gz
 ```
 
 ### Compiling from source code
@@ -30,7 +30,7 @@ sudo apt-get install openjdk-8-jdk maven
 
 **Clone source code**
 ```bash
-git clone https://github.com/semuxproject/semux.git
+git clone https://github.com/semuxproject/semux-core.git
 ```
 
 **Compile**
