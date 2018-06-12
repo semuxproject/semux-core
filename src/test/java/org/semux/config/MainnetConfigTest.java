@@ -105,9 +105,6 @@ public class MainnetConfigTest {
                 validatorsCSV.toString().trim());
     }
 
-    /**
-     * See: https://github.com/semuxproject/semux/issues/811
-     */
     @Test
     public void testWindowsLocalizedDatabaseDir() throws IOException {
         assumeTrue(SystemUtil.getOsName().equals(SystemUtil.OsName.WINDOWS));
