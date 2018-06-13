@@ -90,9 +90,9 @@ public class SemuxSync implements SyncManager {
     private static final ScheduledExecutorService timer1 = Executors.newSingleThreadScheduledExecutor(factory);
     private static final ScheduledExecutorService timer2 = Executors.newSingleThreadScheduledExecutor(factory);
 
-    private static final long MAX_DOWNLOAD_TIME = 10L * 1000L; // 10 seconds
+    private static final long MAX_DOWNLOAD_TIME = 2L * 1000L; // 2 seconds
 
-    private static final int MAX_UNFINISHED_JOBS = 16;
+    private static final int MAX_UNFINISHED_JOBS = 256;
 
     private static final int MAX_QUEUED_BLOCKS = 8192;
     private static final int MAX_PENDING_BLOCKS = 512;
@@ -397,7 +397,6 @@ public class SemuxSync implements SyncManager {
 
         // Validate and apply block to the chain
         if (pair != null) {
-            logger.info("{}", pair.getKey());
             // If fastSync is true - skip vote validation
             if (validateApplyBlock(pair.getKey(), !fastSync)) {
                 synchronized (lock) {
@@ -406,6 +405,7 @@ public class SemuxSync implements SyncManager {
                     }
                     toComplete.remove(pair.getKey().getNumber());
                     if (pair.getKey().getNumber() == lastBlockInSet) {
+                        logger.info("{}", pair.getKey());
                         fastSync = false;
                     }
                 }
