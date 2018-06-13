@@ -777,9 +777,12 @@ public class SemuxBft implements Consensus {
         byte[] stateRoot = Bytes.EMPTY_HASH;
 
         // construct block
+        BlockHeader parent = chain.getBlockHeader(height - 1);
         long number = height;
-        byte[] prevHash = chain.getBlockHeader(height - 1).getHash();
-        long timestamp = System.currentTimeMillis();
+        byte[] prevHash = parent.getHash();
+        long timestamp = System.currentTimeMillis() > parent.getTimestamp()
+                ? System.currentTimeMillis()
+                : parent.getTimestamp() + 1;
 
         // signal UNIFORM_DISTRIBUTION fork
         byte[] data = signalingUniformDistribution()
