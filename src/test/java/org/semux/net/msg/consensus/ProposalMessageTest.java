@@ -17,6 +17,7 @@ import org.semux.core.BlockHeader;
 import org.semux.crypto.Key;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
+import org.semux.util.TimeUtil;
 
 public class ProposalMessageTest {
     @Test
@@ -28,7 +29,7 @@ public class ProposalMessageTest {
         long number = 1;
         byte[] coinbase = Bytes.random(Key.ADDRESS_LEN);
         byte[] prevHash = Bytes.random(32);
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(Collections.emptyList());
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(Collections.emptyList());
         byte[] stateRoot = Bytes.EMPTY_HASH;

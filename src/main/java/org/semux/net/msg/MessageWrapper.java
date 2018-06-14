@@ -6,6 +6,8 @@
  */
 package org.semux.net.msg;
 
+import org.semux.util.TimeUtil;
+
 /**
  * Utility that keeps track of the number of retries and lastTimestamp.
  *
@@ -29,7 +31,7 @@ public class MessageWrapper {
     }
 
     public void saveTime() {
-        lastTimestamp = System.currentTimeMillis();
+        lastTimestamp = TimeUtil.currentTimeMillis();
     }
 
     public void answer() {

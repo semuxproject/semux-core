@@ -28,7 +28,7 @@ public class TransactionDialog extends JDialog {
     private static final long serialVersionUID = 1L;
 
     public TransactionDialog(JFrame parent, Transaction tx) {
-        super(null, GuiMessages.get("Transaction"), Dialog.ModalityType.MODELESS);
+        super(null, GuiMessages.get("Transaction"), ModalityType.MODELESS);
         setName("TransactionDialog");
 
         JLabel lblHash = new JLabel(GuiMessages.get("Hash") + ":");

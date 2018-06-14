@@ -36,6 +36,7 @@ import org.semux.net.ChannelManager;
 import org.semux.rules.KernelRule;
 import org.semux.util.ArrayUtil;
 import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
 
 public class PendingManagerTest {
 
@@ -78,7 +79,7 @@ public class PendingManagerTest {
 
     @Test
     public void testGetTransaction() throws InterruptedException {
-        long now = System.currentTimeMillis();
+        long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
@@ -90,7 +91,7 @@ public class PendingManagerTest {
 
     @Test
     public void testAddTransaction() throws InterruptedException {
-        long now = System.currentTimeMillis();
+        long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
@@ -114,7 +115,7 @@ public class PendingManagerTest {
 
     @Test
     public void testAddTransactionSyncErrorDuplicatedHash() {
-        Transaction tx = new Transaction(network, type, to, value, fee, 0, System.currentTimeMillis(),
+        Transaction tx = new Transaction(network, type, to, value, fee, 0, TimeUtil.currentTimeMillis(),
                 Bytes.EMPTY_BYTES)
                         .sign(key);
 
@@ -132,7 +133,7 @@ public class PendingManagerTest {
     @Test
     public void testAddTransactionSyncInvalidRecipient() {
         Transaction tx = new Transaction(network, type, Constants.COINBASE_KEY.toAddress(), value, fee, 0,
-                System.currentTimeMillis(),
+                TimeUtil.currentTimeMillis(),
                 Bytes.EMPTY_BYTES)
                         .sign(key);
 
@@ -144,7 +145,7 @@ public class PendingManagerTest {
 
     @Test
     public void testNonceJump() throws InterruptedException {
-        long now = System.currentTimeMillis();
+        long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
         Transaction tx3 = new Transaction(network, type, to, value, fee, nonce + 2, now, Bytes.EMPTY_BYTES).sign(key);
@@ -164,7 +165,7 @@ public class PendingManagerTest {
 
     @Test
     public void testNonceJumpTimestampError() throws InterruptedException {
-        long now = System.currentTimeMillis();
+        long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
         Transaction tx3 = new Transaction(network, type, to, value, fee, nonce + 2,
@@ -187,7 +188,7 @@ public class PendingManagerTest {
 
     @Test
     public void testTimestampError() {
-        long now = System.currentTimeMillis();
+        long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
         Transaction tx3 = new Transaction(network, type, to, value, fee, nonce, now - ALLOWED_TIME_DRIFT - 1,
@@ -198,7 +199,7 @@ public class PendingManagerTest {
 
     @Test
     public void testHighVolumeTransaction() throws InterruptedException {
-        long now = System.currentTimeMillis();
+        long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
         int[] perm = ArrayUtil.permutation(5000);
@@ -214,7 +215,7 @@ public class PendingManagerTest {
 
     @Test
     public void testNewBlock() throws InterruptedException {
-        long now = System.currentTimeMillis();
+        long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
@@ -228,7 +229,7 @@ public class PendingManagerTest {
         long number = 1;
         byte[] coinbase = Bytes.random(20);
         byte[] prevHash = Bytes.random(20);
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] transactionsRoot = Bytes.random(32);
         byte[] resultsRoot = Bytes.random(32);
         byte[] stateRoot = Bytes.random(32);

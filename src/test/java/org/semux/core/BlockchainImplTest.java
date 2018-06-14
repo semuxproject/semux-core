@@ -33,6 +33,7 @@ import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
+import org.semux.util.TimeUtil;
 
 public class BlockchainImplTest {
 
@@ -53,7 +54,7 @@ public class BlockchainImplTest {
     private Amount fee = NANO_SEM.of(1);
     private long nonce = 12345;
     private byte[] data = Bytes.of("test");
-    private long timestamp = System.currentTimeMillis() - 60 * 1000;
+    private long timestamp = TimeUtil.currentTimeMillis() - 60 * 1000;
     private Transaction tx = new Transaction(network, TransactionType.TRANSFER, to, value, fee, nonce, timestamp,
             data)
                     .sign(key);
@@ -336,7 +337,7 @@ public class BlockchainImplTest {
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
         byte[] stateRoot = Bytes.EMPTY_HASH;
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
 
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
                 stateRoot, data);

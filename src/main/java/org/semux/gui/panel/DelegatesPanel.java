@@ -61,6 +61,7 @@ import org.semux.gui.model.WalletModel;
 import org.semux.message.GuiMessages;
 import org.semux.util.Bytes;
 import org.semux.util.SystemUtil;
+import org.semux.util.TimeUtil;
 import org.semux.util.exception.UnreachableException;
 
 public class DelegatesPanel extends JPanel implements ActionListener {
@@ -532,7 +533,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             byte[] fromAddress = a.getKey().toAddress();
             byte[] toAddress = d.getAddress();
             long nonce = pendingMgr.getNonce(fromAddress);
-            long timestamp = System.currentTimeMillis();
+            long timestamp = TimeUtil.currentTimeMillis();
             byte[] data = {};
             Transaction tx = new Transaction(network, type, toAddress, value, fee, nonce, timestamp, data);
             tx.sign(a.getKey());
@@ -600,7 +601,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             Amount value = config.minDelegateBurnAmount();
             Amount fee = config.minTransactionFee();
             long nonce = pendingMgr.getNonce(a.getAddress());
-            long timestamp = System.currentTimeMillis();
+            long timestamp = TimeUtil.currentTimeMillis();
             byte[] data = Bytes.of(name);
             Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(a.getKey());
 

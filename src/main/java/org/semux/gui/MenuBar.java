@@ -43,7 +43,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(MenuBar.class);
-    public static final String HELP_URL = "https://github.com/semuxproject/semux-core/tree/v" + Constants.CLIENT_VERSION
+    public static final String HELP_URL = "https://github.com/semuxproject/semux/tree/v" + Constants.CLIENT_VERSION
             + "/docs";
 
     private final transient SemuxGui gui;

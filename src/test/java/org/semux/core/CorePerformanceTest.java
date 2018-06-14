@@ -23,6 +23,7 @@ import org.semux.core.state.Delegate;
 import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +66,7 @@ public class CorePerformanceTest {
             Amount value = NANO_SEM.of(5);
             Amount fee = config.minTransactionFee();
             long nonce = 1;
-            long timestamp = System.currentTimeMillis();
+            long timestamp = TimeUtil.currentTimeMillis();
             byte[] data = Bytes.random(16);
 
             Transaction tx = new Transaction(Network.DEVNET, type, to, value, fee, nonce, timestamp, data);

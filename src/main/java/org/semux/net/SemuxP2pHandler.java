@@ -48,6 +48,7 @@ import org.semux.net.msg.p2p.PingMessage;
 import org.semux.net.msg.p2p.PongMessage;
 import org.semux.net.msg.p2p.TransactionMessage;
 import org.semux.net.msg.p2p.WorldMessage;
+import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -225,7 +226,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         }
         case PONG: {
             if (mr != null) {
-                long latency = System.currentTimeMillis() - mr.getLastTimestamp();
+                long latency = TimeUtil.currentTimeMillis() - mr.getLastTimestamp();
                 channel.getRemotePeer().setLatency(latency);
             }
             break;

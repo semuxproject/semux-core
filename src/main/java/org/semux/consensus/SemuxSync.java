@@ -224,7 +224,7 @@ public class SemuxSync implements SyncManager {
 
         synchronized (lock) {
             // filter all expired tasks
-            long now = System.currentTimeMillis();
+            long now = TimeUtil.currentTimeMillis();
             Iterator<Entry<Long, Long>> itr = toComplete.entrySet().iterator();
             while (itr.hasNext()) {
                 Entry<Long, Long> entry = itr.next();
@@ -276,7 +276,7 @@ public class SemuxSync implements SyncManager {
                 if (toDownload.remove(task)) {
                     growToDownloadQueue();
                 }
-                toComplete.put(task, System.currentTimeMillis());
+                toComplete.put(task, TimeUtil.currentTimeMillis());
             }
         }
     }
@@ -490,7 +490,7 @@ public class SemuxSync implements SyncManager {
                 Duration.between(beginningInstant != null ? beginningInstant : Instant.now(), Instant.now()));
     }
 
-    public static class SemuxSyncProgress implements SyncManager.Progress {
+    public static class SemuxSyncProgress implements Progress {
 
         final long startingHeight;
 

@@ -205,7 +205,7 @@ public class DelegateStateImpl implements DelegateState {
     public void commit() {
         synchronized (delegateUpdates) {
             if (prev == null) {
-                for (Map.Entry<ByteArray, byte[]> entry : delegateUpdates.entrySet()) {
+                for (Entry<ByteArray, byte[]> entry : delegateUpdates.entrySet()) {
                     if (entry.getValue() == null) {
                         delegateDB.delete(entry.getKey().getData());
                     } else {
@@ -223,7 +223,7 @@ public class DelegateStateImpl implements DelegateState {
 
         synchronized (voteUpdates) {
             if (prev == null) {
-                for (Map.Entry<ByteArray, byte[]> entry : voteUpdates.entrySet()) {
+                for (Entry<ByteArray, byte[]> entry : voteUpdates.entrySet()) {
                     if (entry.getValue() == null) {
                         voteDB.delete(entry.getKey().getData());
                     } else {
@@ -252,7 +252,7 @@ public class DelegateStateImpl implements DelegateState {
      * @param map
      */
     protected void getDelegates(Map<ByteArray, Delegate> map) {
-        for (Map.Entry<ByteArray, byte[]> entry : delegateUpdates.entrySet()) {
+        for (Entry<ByteArray, byte[]> entry : delegateUpdates.entrySet()) {
             /* filter address */
             if (entry.getKey().length() == ADDRESS_LEN && !map.containsKey(entry.getKey())) {
                 if (entry.getValue() == null) {
