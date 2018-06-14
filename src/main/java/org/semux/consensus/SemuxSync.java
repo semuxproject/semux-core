@@ -90,12 +90,11 @@ public class SemuxSync implements SyncManager {
     private static final ScheduledExecutorService timer1 = Executors.newSingleThreadScheduledExecutor(factory);
     private static final ScheduledExecutorService timer2 = Executors.newSingleThreadScheduledExecutor(factory);
 
-    private static final long MAX_DOWNLOAD_TIME = 2L * 1000L; // 2 seconds
+    private final long DOWNLOAD_TIMEOUT;
 
-    private static final int MAX_UNFINISHED_JOBS = 256;
-
-    private static final int MAX_QUEUED_BLOCKS = 8192;
-    private static final int MAX_PENDING_BLOCKS = 512;
+    private final int MAX_QUEUED_JOBS;
+    private final int MAX_PENDING_JOBS;
+    private final int MAX_PENDING_BLOCKS;
 
     private static final Random random = new Random();
 
@@ -133,6 +132,11 @@ public class SemuxSync implements SyncManager {
 
         this.chain = kernel.getBlockchain();
         this.channelMgr = kernel.getChannelManager();
+
+        this.DOWNLOAD_TIMEOUT = config.syncDownloadTimeout();
+        this.MAX_QUEUED_JOBS = config.syncMaxQueuedJobs();
+        this.MAX_PENDING_JOBS = config.syncMaxPendingJobs();
+        this.MAX_PENDING_BLOCKS = config.syncMaxPendingBlocks();
     }
 
     @Override
@@ -239,7 +243,7 @@ public class SemuxSync implements SyncManager {
             while (itr.hasNext()) {
                 Entry<Long, Long> entry = itr.next();
 
-                if (entry.getValue() + MAX_DOWNLOAD_TIME < now) {
+                if (entry.getValue() + DOWNLOAD_TIMEOUT < now) {
                     logger.debug("Downloading of block #{} has expired", entry.getKey());
                     toDownload.add(entry.getKey());
                     itr.remove();
@@ -247,8 +251,8 @@ public class SemuxSync implements SyncManager {
             }
 
             // quit if too many unfinished jobs
-            if (toComplete.size() > MAX_UNFINISHED_JOBS) {
-                logger.trace("Max unfinished jobs reached");
+            if (toComplete.size() > MAX_PENDING_JOBS) {
+                logger.trace("Max pending jobs reached");
                 return;
             }
 
@@ -261,7 +265,7 @@ public class SemuxSync implements SyncManager {
             // quit if too many pending blocks
             int pendingBlocks = toProcess.size() + currentSet.size() + toFinalize.size();
             if (pendingBlocks > MAX_PENDING_BLOCKS && task > toProcess.first().getKey().getNumber()) {
-                logger.trace("Pending block queue is full");
+                logger.trace("Max pending blocks reached");
                 return;
             }
 
@@ -301,12 +305,12 @@ public class SemuxSync implements SyncManager {
     private void growToDownloadQueue() {
         // To avoid overhead, this method doesn't add new tasks before the queue is less
         // than half-filled
-        if (toDownload.size() >= MAX_QUEUED_BLOCKS / 2) {
+        if (toDownload.size() >= MAX_QUEUED_JOBS / 2) {
             return;
         }
 
         for (long task = latestQueuedTask.get() + 1; //
-                task < target.get() && toDownload.size() < MAX_QUEUED_BLOCKS; //
+                task < target.get() && toDownload.size() < MAX_QUEUED_JOBS; //
                 task++) {
             latestQueuedTask.accumulateAndGet(task, (prev, next) -> next > prev ? next : prev);
             if (!chain.hasBlock(task)) {
@@ -407,8 +411,7 @@ public class SemuxSync implements SyncManager {
                     if (pair.getKey().getNumber() == lastBlockInSet) {
                         logger.info("{}", pair.getKey()); // Log last block in set
                         fastSync = false;
-                    }
-                    else if (!fastSync) {
+                    } else if (!fastSync) {
                         logger.info("{}", pair.getKey()); // Log all blocks
                     }
                 }

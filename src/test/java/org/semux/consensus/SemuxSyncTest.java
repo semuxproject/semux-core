@@ -65,7 +65,7 @@ public class SemuxSyncTest {
 
     @Rule
     public TemporaryDatabaseRule temporaryDBRule = new TemporaryDatabaseRule();
-    
+
     public long validatorInterval;
 
     @Test
@@ -235,7 +235,7 @@ public class SemuxSyncTest {
         doReturn(validators).when(chain).getValidators();
         PowerMockito.doNothing().when(chain, "updateValidators", anyLong());
         kernelRule.getKernel().setBlockchain(chain);
-        
+
         validatorInterval = kernelRule.getKernel().getConfig().getValidatorUpdateInterval();
 
         SemuxSync sync = spy(new SemuxSync(kernelRule.getKernel()));
@@ -311,7 +311,7 @@ public class SemuxSyncTest {
                 .spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
         doReturn(validators).when(chain).getValidators();
         kernelRule.getKernel().setBlockchain(chain);
-        
+
         validatorInterval = kernelRule.getKernel().getConfig().getValidatorUpdateInterval();
 
         SemuxSync sync = spy(new SemuxSync(kernelRule.getKernel()));
@@ -327,7 +327,8 @@ public class SemuxSyncTest {
         isRunning.set(true);
         Whitebox.setInternalState(sync, "toProcess", toProcess);
         AtomicLong target = Whitebox.getInternalState(sync, "target");
-        target.set(validatorInterval - 1); // when the remaining number of blocks to sync < validatorInterval fastSync is not activated
+        target.set(validatorInterval - 1); // when the remaining number of blocks to sync < validatorInterval fastSync
+                                           // is not activated
 
         Block block = kernelRule.createBlock(Collections.emptyList());
         Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_REJECT, block.getNumber(), block.getView(),
@@ -384,7 +385,7 @@ public class SemuxSyncTest {
         BlockchainImpl chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
         doReturn(validators).when(chain).getValidators();
         kernelRule.getKernel().setBlockchain(chain);
-        
+
         validatorInterval = kernelRule.getKernel().getConfig().getValidatorUpdateInterval();
 
         SemuxSync sync = spy(new SemuxSync(kernelRule.getKernel()));
@@ -422,19 +423,19 @@ public class SemuxSyncTest {
         Block validBlock = kernelRule.createBlock(Collections.emptyList(), currentSet.last().getKey().getHeader());
         currentSet.add(Pair.of(validBlock, channel));
 
-        for (int i = 0; i < (int)(Math.ceil(validatorInterval / 2)) - 2; i++) {
+        for (int i = 0; i < (int) (Math.ceil(validatorInterval / 2)) - 2; i++) {
             Block block = kernelRule.createBlock(Collections.emptyList(), currentSet.last().getKey().getHeader());
             currentSet.add(Pair.of(block, channel));
         }
 
         currentSet.remove(Pair.of(validBlock, channel));
         currentSet.add(Pair.of(invalidBlock, channel));
-        
+
         Block lastBlock = kernelRule.createBlock(Collections.emptyList(), currentSet.last().getKey().getHeader());
         currentSet.add(Pair.of(lastBlock, channel));
-        
+
         Whitebox.invokeMethod(sync, "validateSetHashes"); // last block votes are validated
-        
+
         assert (currentSet.size() == validatorInterval - 1);
         assert (toFinalize.isEmpty());
         assert (toDownload.contains(validatorInterval));

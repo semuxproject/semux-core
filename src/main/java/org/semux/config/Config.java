@@ -286,6 +286,38 @@ public interface Config {
     List<String> netDnsSeedsTestNet();
 
     // =========================
+    // Sync
+    // =========================
+
+    /**
+     * Returns the download timeout in milliseconds
+     *
+     * @return
+     */
+    long syncDownloadTimeout();
+
+    /**
+     * Returns the max number of queued jobs
+     *
+     * @return
+     */
+    int syncMaxQueuedJobs();
+
+    /**
+     * Returns the max number of pending jobs
+     *
+     * @return
+     */
+    int syncMaxPendingJobs();
+
+    /**
+     * Returns the max number of pending blocks
+     *
+     * @return
+     */
+    int syncMaxPendingBlocks();
+
+    // =========================
     // API
     // =========================
 
