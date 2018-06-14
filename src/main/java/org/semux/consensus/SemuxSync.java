@@ -405,8 +405,11 @@ public class SemuxSync implements SyncManager {
                     }
                     toComplete.remove(pair.getKey().getNumber());
                     if (pair.getKey().getNumber() == lastBlockInSet) {
-                        logger.info("{}", pair.getKey());
+                        logger.info("{}", pair.getKey()); // Log last block in set
                         fastSync = false;
+                    }
+                    else if (!fastSync) {
+                        logger.info("{}", pair.getKey()); // Log all blocks
                     }
                 }
             } else {
