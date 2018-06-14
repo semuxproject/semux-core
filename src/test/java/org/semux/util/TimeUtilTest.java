@@ -11,7 +11,6 @@ import static org.junit.Assert.assertTrue;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 
 import org.junit.Assert;
 import org.junit.Test;
