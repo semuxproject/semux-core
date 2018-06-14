@@ -19,7 +19,7 @@ public final class ValidatorActivatedFork implements Comparable<ValidatorActivat
 
     /**
      * This soft fork introduces an uniformly-distributed hash function for choosing
-     * primary validator. See: https://github.com/semuxproject/semux/issues/620
+     * primary validator.
      */
     public static final ValidatorActivatedFork UNIFORM_DISTRIBUTION = new ValidatorActivatedFork((short) 1,
             "UNIFORM_DISTRIBUTION", 1500, 2000, 1000000);
