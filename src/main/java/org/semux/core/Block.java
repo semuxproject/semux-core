@@ -130,6 +130,7 @@ public class Block {
             logger.warn("Header was null.");
             return false;
         }
+
         if (!header.validate()) {
             logger.warn("Header was invalid.");
             return false;
