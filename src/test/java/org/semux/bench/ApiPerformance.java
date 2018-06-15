@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.semux.api.SemuxApiMock;
 import org.semux.config.Config;
 import org.semux.rules.KernelRule;
-import org.semux.util.ApiClient;
+import org.semux.util.SimpleApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,13 +35,12 @@ public class ApiPerformance {
         try {
             int repeat = 1000;
 
-            Config config = api.getKernel().getConfig();
+            Config c = api.getKernel().getConfig();
             long t1 = System.nanoTime();
             for (int i = 0; i < repeat; i++) {
-                ApiClient a = new ApiClient(new InetSocketAddress(config.apiListenIp(), config.apiListenPort()),
-                        config.apiUsername(),
-                        config.apiPassword());
-                a.request("get_info");
+                SimpleApiClient a = new SimpleApiClient(c.apiListenIp(), c.apiListenPort(), c.apiUsername(),
+                        c.apiPassword());
+                a.get("/info");
             }
             long t2 = System.nanoTime();
             logger.info("Perf_api_basic: " + (t2 - t1) / 1_000 / repeat + " μs/time");

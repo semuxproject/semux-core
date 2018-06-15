@@ -160,8 +160,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         }
 
         // parse parameter from request body
-        if ("application/x-www-form-urlencoded".equals(headers.get("Content-type"))
-                && body.readableBytes() > 0) {
+        if (body.readableBytes() > 0) {
+            // FIXME: assuming "application/x-www-form-urlencoded"
             QueryStringDecoder decoder = new QueryStringDecoder("?" + body.toString(CHARSET));
             Map<String, List<String>> map = decoder.parameters();
             for (Map.Entry<String, List<String>> entry : map.entrySet()) {
@@ -226,7 +226,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 .filter(s -> s.startsWith("v"))
                 .findFirst()
                 .map(Version::fromPrefix);
-        return versionOptional.orElse(Version.v1_0_1);
+        return versionOptional.orElse(Version.v2_1_0);
     }
 
     private String uriToResourcePath(String uri) {

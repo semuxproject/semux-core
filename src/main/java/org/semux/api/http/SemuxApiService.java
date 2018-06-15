@@ -66,8 +66,6 @@ public class SemuxApiService {
                                 v -> v,
                                 v -> {
                                     switch (v) {
-                                    case v1_0_1:
-                                        return new org.semux.api.v1_0_1.ApiHandlerImpl(kernel);
                                     case v2_0_0:
                                         return new org.semux.api.ApiHandlerImpl(
                                                 new org.semux.api.v2_0_0.impl.SemuxApiServiceImpl(kernel),

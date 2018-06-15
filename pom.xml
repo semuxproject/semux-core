@@ -97,60 +97,6 @@
                 </executions>
             </plugin>
 
-            <!-- build v1.0.1 swagger document -->
-            <plugin>
-                <groupId>com.github.kongchen</groupId>
-                <artifactId>swagger-maven-plugin</artifactId>
-                <version>3.1.6</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <apiSources>
-                        <apiSource>
-                            <info>
-                                <title>Semux API</title>
-                                <description>${project.description}</description>
-                                <version>1.0.1</version>
-                                <contact>
-                                    <name>${project.organization.name}</name>
-                                    <url>${project.organization.url}</url>
-                                </contact>
-                                <license>
-                                    <name>MIT License</name>
-                                    <url>https://opensource.org/licenses/mit-license.php</url>
-                                </license>
-                            </info>
-                            <securityDefinitions>
-                                <securityDefinition>
-                                    <name>basicAuth</name>
-                                    <type>basic</type>
-                                </securityDefinition>
-                            </securityDefinitions>
-                            <schemes>
-                                <scheme>http</scheme>
-                            </schemes>
-                            <locations>
-                                <location>org.semux.api.v1_0_1.SemuxApi</location>
-                            </locations>
-                            <swaggerDirectory>target/swagger-ui</swaggerDirectory>
-                        </apiSource>
-                    </apiSources>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>javax.xml.bind</groupId>
-                        <artifactId>jaxb-api</artifactId>
-                        <version>2.3.0</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
             <!-- swagger codegen -->
             <plugin>
                 <groupId>io.swagger</groupId>

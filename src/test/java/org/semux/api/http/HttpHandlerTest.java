@@ -25,7 +25,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
 import org.semux.api.Version;
-import org.semux.api.v1_0_1.ApiHandlerResponse;
+import org.semux.api.v2_1_0.model.ApiHandlerResponse;
 import org.semux.rules.KernelRule;
 import org.semux.util.BasicAuth;
 
@@ -73,7 +73,10 @@ public class HttpHandlerTest {
                     params = p;
                     headers = h;
 
-                    return new ApiHandlerResponse(true, "test");
+                    ApiHandlerResponse r = new ApiHandlerResponse();
+                    r.setSuccess(true);
+                    r.setMessage("test");
+                    return r;
                 });
             }
         } : httpChannelInitializer)).start();
