@@ -32,7 +32,7 @@ public class MerkleUtilTest {
         Amount value = SEM.of(1);
         Amount fee = ZERO;
         long nonce = 1;
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = Bytes.random(128);
         Transaction tx1 = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(new Key());
         Transaction tx2 = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(new Key());

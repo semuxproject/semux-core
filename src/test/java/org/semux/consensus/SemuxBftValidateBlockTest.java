@@ -33,6 +33,7 @@ import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.Transaction;
+import org.semux.util.TimeUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Block.class, System.class })
@@ -63,7 +64,7 @@ public class SemuxBftValidateBlockTest {
                         (Supplier<BlockHeader>) () -> {
                             BlockHeader blockHeader = mock(BlockHeader.class);
                             when(blockHeader.getTimestamp())
-                                    .thenReturn(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
+                                    .thenReturn(TimeUtil.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
                             return blockHeader;
                         },
                         (Supplier<List<Transaction>>) ArrayList::new,

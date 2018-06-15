@@ -28,6 +28,7 @@ import org.semux.Kernel;
 import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
+import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -200,7 +201,7 @@ public class NodeManager {
 
         while ((node = deque.pollFirst()) != null && channelMgr.size() < config.netMaxOutboundConnections()) {
             Long lastTouch = lastConnect.getIfPresent(node);
-            long now = System.currentTimeMillis();
+            long now = TimeUtil.currentTimeMillis();
 
             if (!client.getNode().equals(node)
                     && !activeAddresses.contains(node.toAddress())

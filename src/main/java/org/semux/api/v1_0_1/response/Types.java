@@ -96,7 +96,7 @@ public class Types {
         public final String data;
 
         @JsonProperty("transactions")
-        public final List<Types.TransactionType> transactions;
+        public final List<TransactionType> transactions;
 
         public BlockType(
                 @JsonProperty("hash") String hash,
@@ -110,7 +110,7 @@ public class Types {
                 @JsonProperty("resultsRoot") String resultsRoot,
                 @JsonProperty("stateRoot") String stateRoot,
                 @JsonProperty("data") String data,
-                @JsonProperty("transactions") List<Types.TransactionType> transactions) {
+                @JsonProperty("transactions") List<TransactionType> transactions) {
             this.hash = hash;
             this.number = number;
             this.view = view;
@@ -138,7 +138,7 @@ public class Types {
                     Hex.encode0x(block.getStateRoot()),
                     Hex.encode0x(block.getData()),
                     block.getTransactions().stream()
-                            .map(tx -> new Types.TransactionType(block.getNumber(), tx))
+                            .map(tx -> new TransactionType(block.getNumber(), tx))
                             .collect(Collectors.toList()));
         }
     }

@@ -30,6 +30,7 @@ import org.semux.crypto.Key.Signature;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
+import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ public class BlockchainPerformance {
             Amount value = NANO_SEM.of(1);
             Amount fee = config.minTransactionFee();
             long nonce = 1 + i;
-            long timestamp = System.currentTimeMillis();
+            long timestamp = TimeUtil.currentTimeMillis();
             byte[] data = Bytes.EMPTY_BYTES;
             Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(key);
 
@@ -69,7 +70,7 @@ public class BlockchainPerformance {
         long number = 1;
         byte[] coinbase = key.toAddress();
         byte[] prevHash = Bytes.random(32);
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(txs);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(res);
         byte[] stateRoot = Bytes.EMPTY_HASH;
@@ -119,7 +120,7 @@ public class BlockchainPerformance {
         Amount value = NANO_SEM.of(1);
         Amount fee = config.minTransactionFee();
         long nonce = 1;
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = {};
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
         tx.sign(key);
@@ -144,11 +145,11 @@ public class BlockchainPerformance {
         TemporaryDatabaseRule temporaryDbRule = new TemporaryDatabaseRule();
         temporaryDbRule.before();
         Blockchain blockchain = new BlockchainImpl(config, temporaryDbRule);
-        long t1 = System.currentTimeMillis();
+        long t1 = TimeUtil.currentTimeMillis();
         for (int i = 0; i < repeat; i++) {
             blockchain.addBlock(blocks[i]);
         }
-        long t2 = System.currentTimeMillis();
+        long t2 = TimeUtil.currentTimeMillis();
         temporaryDbRule.after();
         logger.info("Perf_addBlock: {} ms / {} blocks", t2 - t1, repeat);
     }

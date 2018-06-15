@@ -45,6 +45,7 @@ import org.semux.crypto.Key;
 import org.semux.rules.KernelRule;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,7 +120,7 @@ public class SemuxBftTest {
         // mock blockchain with a single transaction
         Key to = new Key();
         Key from1 = new Key();
-        long time = System.currentTimeMillis();
+        long time = TimeUtil.currentTimeMillis();
         Transaction tx1 = createTransaction(to, from1, time, 0);
         kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
         kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), SEM.of(1000));
@@ -157,7 +158,7 @@ public class SemuxBftTest {
     public void testFilterPendingTransactions() {
         Key to = new Key();
         Key from = new Key();
-        long time = System.currentTimeMillis();
+        long time = TimeUtil.currentTimeMillis();
         Transaction tx1 = createTransaction(to, from, time, 0);
         Transaction tx2 = createTransaction(to, from, time, 1);
 
@@ -243,7 +244,7 @@ public class SemuxBftTest {
         Blockchain chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
         kernelRule.getKernel().setBlockchain(chain);
 
-        long timestamp = System.currentTimeMillis() + 10000;
+        long timestamp = TimeUtil.currentTimeMillis() + 10000;
         long number = chain.getLatestBlockNumber() + 1;
         Block previousBlock = TestUtils.createBlock(
                 timestamp,

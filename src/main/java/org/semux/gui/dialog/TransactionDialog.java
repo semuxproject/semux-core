@@ -6,8 +6,6 @@
  */
 package org.semux.gui.dialog;
 
-import java.awt.Dialog;
-
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JDialog;
@@ -28,7 +26,7 @@ public class TransactionDialog extends JDialog {
     private static final long serialVersionUID = 1L;
 
     public TransactionDialog(JFrame parent, Transaction tx) {
-        super(null, GuiMessages.get("Transaction"), Dialog.ModalityType.MODELESS);
+        super(null, GuiMessages.get("Transaction"), ModalityType.MODELESS);
         setName("TransactionDialog");
 
         JLabel lblHash = new JLabel(GuiMessages.get("Hash") + ":");

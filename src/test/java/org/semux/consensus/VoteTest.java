@@ -24,6 +24,7 @@ import org.semux.crypto.Key;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
+import org.semux.util.TimeUtil;
 
 public class VoteTest {
 
@@ -70,7 +71,7 @@ public class VoteTest {
         long number = 1;
         byte[] coinbase = key1.toAddress();
         byte[] prevHash = Bytes.EMPTY_HASH;
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(transactions);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(results);
         byte[] stateRoot = Bytes.EMPTY_HASH;

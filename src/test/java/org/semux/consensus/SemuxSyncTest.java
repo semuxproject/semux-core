@@ -45,6 +45,7 @@ import org.semux.crypto.Key;
 import org.semux.rules.KernelRule;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class SemuxSyncTest {
@@ -60,7 +61,7 @@ public class SemuxSyncTest {
         // mock blockchain with a single transaction
         Key to = new Key();
         Key from1 = new Key();
-        long time = System.currentTimeMillis();
+        long time = TimeUtil.currentTimeMillis();
         Transaction tx1 = new Transaction(
                 kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,

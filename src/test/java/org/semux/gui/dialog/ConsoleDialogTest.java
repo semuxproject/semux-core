@@ -33,6 +33,7 @@ import org.semux.core.TransactionResult;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
 
 /**
  */
@@ -83,7 +84,7 @@ public class ConsoleDialogTest extends AssertJSwingJUnitTestCase {
         long number = 1;
         byte[] coinbase = Bytes.random(20);
         byte[] prevHash = Bytes.random(20);
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] transactionsRoot = Bytes.random(32);
         byte[] resultsRoot = Bytes.random(32);
         byte[] stateRoot = Bytes.random(32);

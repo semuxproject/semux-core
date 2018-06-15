@@ -164,7 +164,7 @@ public class SemuxIpFilter {
      *            the path where rules will be persisted at.
      */
     public void persist(Path path) {
-        new SemuxIpFilter.Saver().save(path, this);
+        new Saver().save(path, this);
     }
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
@@ -230,8 +230,8 @@ public class SemuxIpFilter {
     }
 
     /**
-     * ${@link SemuxIpFilter.Loader} is responsible for loading ipfilter.json file
-     * into an instance of SemuxIpFilter.
+     * ${@link Loader} is responsible for loading ipfilter.json file into an
+     * instance of SemuxIpFilter.
      */
     public static final class Loader {
 
@@ -252,7 +252,7 @@ public class SemuxIpFilter {
     }
 
     /**
-     * ${@link SemuxIpFilter.Saver} is responsible for persisting the state of a
+     * ${@link Saver} is responsible for persisting the state of a
      * ${@link SemuxIpFilter} instance.
      */
     public static final class Saver {

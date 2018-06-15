@@ -25,6 +25,7 @@ import org.semux.net.msg.p2p.TransactionMessage;
 import org.semux.util.ArrayUtil;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,7 +243,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     @Override
     public synchronized void onBlockAdded(Block block) {
         if (isRunning) {
-            long t1 = System.currentTimeMillis();
+            long t1 = TimeUtil.currentTimeMillis();
 
             // clear transaction pool
             List<PendingTransaction> txs = reset();
@@ -253,7 +254,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                 accepted += processTransaction(tx.transaction, false).accepted;
             }
 
-            long t2 = System.currentTimeMillis();
+            long t2 = TimeUtil.currentTimeMillis();
             logger.debug("Pending tx evaluation: # txs = {} / {},  time = {} ms", accepted, txs.size(), t2 - t1);
         }
     }
@@ -294,7 +295,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     protected ProcessTransactionResult processTransaction(Transaction tx, boolean relay) {
 
         int cnt = 0;
-        long now = System.currentTimeMillis();
+        long now = TimeUtil.currentTimeMillis();
 
         // reject transactions with a duplicated tx hash
         if (kernel.getBlockchain().hasTransaction(tx.getHash())) {

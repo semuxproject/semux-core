@@ -7,7 +7,6 @@
 package org.semux.gui.dialog;
 
 import java.awt.BorderLayout;
-import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -52,7 +51,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
     public ConsoleDialog(SemuxGui gui, JFrame parent) {
 
-        super(null, GuiMessages.get("Console"), Dialog.ModalityType.MODELESS);
+        super(null, GuiMessages.get("Console"), ModalityType.MODELESS);
 
         setName("Console");
 

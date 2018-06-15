@@ -35,7 +35,7 @@ public class SelectDialog extends JDialog implements ActionListener {
     private int selected = -1;
 
     public SelectDialog(JFrame parent, String message, List<?> options) {
-        super(parent, GuiMessages.get("Select"), java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
+        super(parent, GuiMessages.get("Select"), ModalityType.TOOLKIT_MODAL);
 
         JLabel labelLogo = new JLabel("");
         labelLogo.setIcon(SwingUtil.loadImage("logo", 96, 96));

@@ -638,6 +638,7 @@
                                         <urn>commons-digester:commons-digester:1.8.1:jar:null:compile:3dec9b9c7ea9342d4dbe8c38560080d85b44a015</urn>
                                         <urn>commons-io:commons-io:2.6:jar:null:test:815893df5f31da2ece4040fe0a12fd44b577afaf</urn>
                                         <urn>commons-logging:commons-logging:1.2:jar:null:compile:4bfc12adfe4842bf07b657f0369c4cb522955686</urn>
+                                        <urn>commons-net:commons-net:3.3:jar:null:compile:cd0d5510908225f76c5fe5a3f1df4fa44866f81e</urn>
                                         <urn>commons-validator:commons-validator:1.6:jar:null:compile:e989d1e87cdd60575df0765ed5bac65c905d7908</urn>
                                         <urn>de.erichseifert.vectorgraphics2d:VectorGraphics2D:0.11:jar:null:test:f3bf8fe05b7997e03941bf77428598137500c300</urn>
                                         <urn>io.netty:netty-all:4.1.22.Final:jar:null:compile:c1cea5d30025e4d584d2b287d177c31aea4ae629</urn>
@@ -954,6 +955,11 @@
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.3</version>
         </dependency>
 
         <!-- JSON -->

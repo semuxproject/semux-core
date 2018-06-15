@@ -8,7 +8,6 @@ package org.semux.gui.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -41,7 +40,7 @@ public class ExportPrivateKeyDialog extends JDialog implements ActionListener {
     private final JTable table;
 
     public ExportPrivateKeyDialog(SemuxGui gui, JFrame parent) {
-        super(null, GuiMessages.get("ExportPrivateKey"), Dialog.ModalityType.MODELESS);
+        super(null, GuiMessages.get("ExportPrivateKey"), ModalityType.MODELESS);
         Wallet wallet = gui.getKernel().getWallet();
 
         Object[][] data = new Object[wallet.size()][];

@@ -19,6 +19,7 @@ import org.semux.core.TransactionType;
 import org.semux.crypto.Key;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
+import org.semux.util.TimeUtil;
 
 public class TestUtils {
 
@@ -41,7 +42,7 @@ public class TestUtils {
 
     public static Block createBlock(byte[] prevHash, Key coinbase, long number, List<Transaction> txs,
             List<TransactionResult> res) {
-        return createBlock(System.currentTimeMillis(), prevHash, coinbase, number, txs, res);
+        return createBlock(TimeUtil.currentTimeMillis(), prevHash, coinbase, number, txs, res);
     }
 
     public static Block createEmptyBlock(long number) {
@@ -60,7 +61,7 @@ public class TestUtils {
         Network network = config.network();
         TransactionType type = TransactionType.TRANSFER;
         Amount fee = config.minTransactionFee();
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = {};
 
         return new Transaction(network, type, to.toAddress(), value, fee, nonce, timestamp, data).sign(from);

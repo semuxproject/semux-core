@@ -10,6 +10,7 @@ import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+import org.semux.util.TimeUtil;
 
 public class PingMessage extends Message {
 
@@ -22,7 +23,7 @@ public class PingMessage extends Message {
     public PingMessage() {
         super(MessageCode.PING, PongMessage.class);
 
-        this.timestamp = System.currentTimeMillis();
+        this.timestamp = TimeUtil.currentTimeMillis();
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeLong(timestamp);

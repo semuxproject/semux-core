@@ -6,18 +6,6 @@
  */
 package org.semux.gui.panel;
 
-import org.semux.core.Amount;
-import org.semux.core.TransactionType;
-import org.semux.gui.ComboBoxItem;
-import org.semux.gui.SemuxGui;
-import org.semux.gui.SwingUtil;
-import org.semux.util.ByteArray;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JTextField;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +14,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
+
+import org.semux.core.Amount;
+import org.semux.core.TransactionType;
+import org.semux.gui.ComboBoxItem;
+import org.semux.gui.SemuxGui;
+import org.semux.gui.SwingUtil;
+import org.semux.util.ByteArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TransactionsPanelFilter {
 

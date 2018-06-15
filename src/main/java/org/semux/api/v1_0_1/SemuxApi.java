@@ -218,7 +218,8 @@ public interface SemuxApi {
     @Path("vote")
     @ApiOperation(value = "Vote", notes = "Votes for a delegate.", response = DoTransactionResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse vote(@ApiParam(value = "Voting address", required = true) @QueryParam("from") String from,
+    ApiHandlerResponse vote(
+            @ApiParam(value = "Voting address", required = true) @QueryParam("from") String from,
             @ApiParam(value = "Delegate address", required = true) @QueryParam("to") String to,
             @ApiParam(value = "Vote amount", required = true) @QueryParam("value") String value,
             @ApiParam(value = "Transaction fee", required = true) @QueryParam("fee") String fee);
@@ -227,7 +228,8 @@ public interface SemuxApi {
     @Path("unvote")
     @ApiOperation(value = "Unvote", notes = "Unvotes for a delegate.", response = DoTransactionResponse.class)
     @Produces(JSON_MIME)
-    ApiHandlerResponse unvote(@ApiParam(value = "Voting address", required = true) @QueryParam("from") String from,
+    ApiHandlerResponse unvote(
+            @ApiParam(value = "Voting address", required = true) @QueryParam("from") String from,
             @ApiParam(value = "Delegate address", required = true) @QueryParam("to") String to,
             @ApiParam(value = "Vote amount", required = true) @QueryParam("value") String value,
             @ApiParam(value = "Transaction fee", required = true) @QueryParam("fee") String fee);

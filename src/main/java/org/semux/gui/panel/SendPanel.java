@@ -53,6 +53,7 @@ import org.semux.gui.model.WalletModel;
 import org.semux.message.GuiMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
 import org.semux.util.exception.UnreachableException;
 
 public class SendPanel extends JPanel implements ActionListener {
@@ -397,7 +398,7 @@ public class SendPanel extends JPanel implements ActionListener {
                     TransactionType type = TransactionType.TRANSFER;
                     byte[] from = acc.getKey().toAddress();
                     long nonce = pendingMgr.getNonce(from);
-                    long timestamp = System.currentTimeMillis();
+                    long timestamp = TimeUtil.currentTimeMillis();
                     Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, rawData);
                     tx.sign(acc.getKey());
 

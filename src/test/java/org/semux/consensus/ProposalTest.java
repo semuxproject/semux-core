@@ -27,6 +27,7 @@ import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Key;
 import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
 
 public class ProposalTest {
 
@@ -38,7 +39,7 @@ public class ProposalTest {
         Amount value = NANO_SEM.of(2);
         Amount fee = NANO_SEM.of(50_000_000L);
         long nonce = 1;
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = Bytes.of("data");
 
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);

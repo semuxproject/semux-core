@@ -137,7 +137,7 @@ public class AccountStateImpl implements AccountState {
     public void commit() {
         synchronized (updates) {
             if (prev == null) {
-                for (Map.Entry<ByteArray, byte[]> entry : updates.entrySet()) {
+                for (Entry<ByteArray, byte[]> entry : updates.entrySet()) {
                     if (entry.getValue() == null) {
                         accountDB.delete(entry.getKey().getData());
                     } else {
