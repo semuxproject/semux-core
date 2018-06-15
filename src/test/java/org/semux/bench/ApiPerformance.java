@@ -7,7 +7,6 @@
 package org.semux.bench;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 
 import org.junit.Rule;
 import org.junit.Test;

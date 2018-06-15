@@ -57,7 +57,6 @@ public class SemuxApiService {
     String ip;
     int port;
 
-    @SuppressWarnings("deprecation")
     public SemuxApiService(Kernel kernel) {
         this.kernel = kernel;
         this.apiHandlers = Collections
@@ -68,8 +67,8 @@ public class SemuxApiService {
                                     switch (v) {
                                     case v2_0_0:
                                         return new org.semux.api.ApiHandlerImpl(
-                                                new org.semux.api.v2_0_0.impl.SemuxApiServiceImpl(kernel),
-                                                org.semux.api.v2_0_0.api.SemuxApi.class);
+                                                new org.semux.api.v2_1_0.impl.SemuxApiServiceImpl(kernel),
+                                                org.semux.api.v2_1_0.api.SemuxApi.class);
                                     case v2_1_0:
                                         return new org.semux.api.ApiHandlerImpl(
                                                 new org.semux.api.v2_1_0.impl.SemuxApiServiceImpl(kernel),
