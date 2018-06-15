@@ -30,7 +30,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.api.mockito.PowerMockito;
 import org.semux.TestUtils;
 import org.semux.config.Constants;
 import org.semux.config.MainnetConfig;
@@ -46,7 +45,6 @@ import org.semux.crypto.Key;
 import org.semux.rules.KernelRule;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
-import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

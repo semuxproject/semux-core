@@ -780,9 +780,14 @@ public class SemuxBft implements Consensus {
         BlockHeader parent = chain.getBlockHeader(height - 1);
         long number = height;
         byte[] prevHash = parent.getHash();
-        long timestamp = System.currentTimeMillis() > parent.getTimestamp()
-                ? System.currentTimeMillis()
-                : parent.getTimestamp() + 1;
+        long timestamp = System.currentTimeMillis();
+        /*
+         * in case the previous block timestamp is drifted too munch, adjust this block
+         * timestamp to avoid invalid blocks (triggered by timestamp rule).
+         *
+         * See https://github.com/semuxproject/semux-core/issues/1
+         */
+        timestamp = timestamp > parent.getTimestamp() ? timestamp : parent.getTimestamp() + 1;
 
         // signal UNIFORM_DISTRIBUTION fork
         byte[] data = signalingUniformDistribution()
