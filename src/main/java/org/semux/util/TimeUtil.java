@@ -6,11 +6,6 @@
  */
 package org.semux.util;
 
-import org.apache.commons.net.ntp.NTPUDPClient;
-import org.apache.commons.net.ntp.TimeInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
@@ -21,6 +16,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.net.ntp.NTPUDPClient;
+import org.apache.commons.net.ntp.TimeInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TimeUtil {
 

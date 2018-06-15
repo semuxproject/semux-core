@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Amount.Unit.SEM;
@@ -236,6 +237,28 @@ public class SemuxBftTest {
                 Collections.singletonList(tx));
         semuxBFT.proposal.sign(blockForger);
         assertFalse(semuxBFT.validateBlock(block.getHeader(), Collections.singletonList(tx)));
+    }
+
+    @Test
+    public void testProposeBlock() {
+        Blockchain chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        kernelRule.getKernel().setBlockchain(chain);
+
+        long timestamp = TimeUtil.currentTimeMillis() + 10000;
+        long number = chain.getLatestBlockNumber() + 1;
+        Block previousBlock = TestUtils.createBlock(
+                timestamp,
+                kernelRule.getKernel().getBlockchain().getLatestBlock().getHash(),
+                new Key(),
+                number,
+                Collections.emptyList(),
+                Collections.emptyList());
+        chain.addBlock(previousBlock);
+
+        SemuxBft bft = new SemuxBft(kernelRule.getKernel());
+        bft.height = number + 1;
+        Block block = bft.proposeBlock();
+        assertEquals(timestamp + 1, block.getTimestamp());
     }
 
     private Transaction createTransaction(Key to, Key from, long time, long nonce) {

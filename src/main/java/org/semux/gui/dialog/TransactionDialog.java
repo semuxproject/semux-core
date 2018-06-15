@@ -6,8 +6,6 @@
  */
 package org.semux.gui.dialog;
 
-import java.awt.Dialog;
-
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JDialog;

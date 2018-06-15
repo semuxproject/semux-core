@@ -27,9 +27,8 @@ public class TestUtils {
         return createBlock(Bytes.EMPTY_HASH, new Key(), number, txs, res);
     }
 
-    public static Block createBlock(byte[] prevHash, Key coinbase, long number, List<Transaction> txs,
+    public static Block createBlock(long timestamp, byte[] prevHash, Key coinbase, long number, List<Transaction> txs,
             List<TransactionResult> res) {
-        long timestamp = TimeUtil.currentTimeMillis();
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(txs);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(res);
         byte[] stateRoot = Bytes.EMPTY_HASH;
@@ -39,6 +38,11 @@ public class TestUtils {
                 resultsRoot,
                 stateRoot, data);
         return new Block(header, txs, res);
+    }
+
+    public static Block createBlock(byte[] prevHash, Key coinbase, long number, List<Transaction> txs,
+            List<TransactionResult> res) {
+        return createBlock(TimeUtil.currentTimeMillis(), prevHash, coinbase, number, txs, res);
     }
 
     public static Block createEmptyBlock(long number) {

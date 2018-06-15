@@ -11,7 +11,6 @@ import static org.semux.core.Amount.Unit.SEM;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
-import org.semux.api.SemuxApiMock;
 import org.semux.config.Config;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
