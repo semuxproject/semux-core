@@ -10,7 +10,7 @@ import java.util.Collections;
 
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.junit.Before;
-import org.semux.api.Version;
+import org.semux.api.ApiVersion;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
@@ -23,7 +23,7 @@ public abstract class SemuxApiTestBase extends org.semux.api.SemuxApiTestBase {
         super.setUp();
 
         api = JAXRSClientFactory.create(
-                "http://localhost:51710/" + Version.v2_1_0.prefix,
+                "http://localhost:51710/" + ApiVersion.v2_1_0.prefix,
                 org.semux.api.v2_1_0.client.SemuxApi.class,
                 Collections.singletonList(new JacksonJsonProvider()),
                 config.apiUsername(),

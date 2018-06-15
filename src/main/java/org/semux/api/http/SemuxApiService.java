@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import org.semux.Kernel;
 import org.semux.api.ApiHandler;
-import org.semux.api.Version;
+import org.semux.api.ApiVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ import io.netty.handler.logging.LoggingHandler;
  */
 public class SemuxApiService {
 
-    public static final Version DEFAULT_VERSION = Version.v2_1_0;
+    public static final ApiVersion DEFAULT_VERSION = ApiVersion.v2_1_0;
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxApiService.class);
 
@@ -52,7 +52,7 @@ public class SemuxApiService {
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
-    private final Map<Version, ApiHandler> apiHandlers;
+    private final Map<ApiVersion, ApiHandler> apiHandlers;
 
     String ip;
     int port;
@@ -60,7 +60,7 @@ public class SemuxApiService {
     public SemuxApiService(Kernel kernel) {
         this.kernel = kernel;
         this.apiHandlers = Collections
-                .unmodifiableMap(Arrays.stream(Version.values())
+                .unmodifiableMap(Arrays.stream(ApiVersion.values())
                         .collect(Collectors.toMap(
                                 v -> v,
                                 v -> {

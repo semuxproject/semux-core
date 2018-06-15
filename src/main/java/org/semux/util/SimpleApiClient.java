@@ -13,7 +13,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.semux.api.Version;
+import org.semux.api.ApiVersion;
 import org.semux.config.Constants;
 import org.semux.crypto.Hex;
 
@@ -25,7 +25,7 @@ public class SimpleApiClient {
 
     public static final String DEFAULT_HOST = "127.0.0.1";
     public static final int DEFAULT_PORT = Constants.DEFAULT_API_PORT;
-    public static final String DEFAULT_VERSION = Version.v2_1_0.prefix;
+    public static final String DEFAULT_VERSION = ApiVersion.v2_1_0.prefix;
 
     private final String root;
     private final String username;

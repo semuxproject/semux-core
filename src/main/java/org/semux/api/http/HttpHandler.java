@@ -36,7 +36,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.api.ApiHandler;
-import org.semux.api.Version;
+import org.semux.api.ApiVersion;
 import org.semux.config.Config;
 import org.semux.util.BasicAuth;
 import org.semux.util.Bytes;
@@ -93,11 +93,11 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     }
 
     private final Config config;
-    private final Map<Version, ApiHandler> apiHandlers;
+    private final Map<ApiVersion, ApiHandler> apiHandlers;
 
     private Boolean isKeepAlive = false;
 
-    public HttpHandler(Kernel kernel, final Map<Version, ApiHandler> apiHandlers) {
+    public HttpHandler(Kernel kernel, final Map<ApiVersion, ApiHandler> apiHandlers) {
         this.config = kernel.getConfig();
         this.apiHandlers = apiHandlers;
     }
@@ -113,7 +113,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     protected HttpHandler(Config config, ApiHandler apiHandler) {
         this.config = config;
         this.apiHandlers = Collections
-                .unmodifiableMap(Arrays.stream(Version.values())
+                .unmodifiableMap(Arrays.stream(ApiVersion.values())
                         .collect(Collectors.toMap(
                                 v -> v,
                                 v -> apiHandler)));
@@ -185,7 +185,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
         // delegate the request
         ChannelFuture lastContentFuture;
-        Version version = checkVersionPrefix(uri.toString());
+        ApiVersion version = checkVersionPrefix(uri.toString());
         final String path = uri.getPath();
         if (STATIC_FILE_PATTERN.matcher(path).matches()) { // static files
             lastContentFuture = staticFileRoutes
@@ -221,16 +221,16 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 && MessageDigest.isEqual(Bytes.of(auth.getRight()), Bytes.of(config.apiPassword()));
     }
 
-    private Version checkVersionPrefix(String uri) {
-        Optional<Version> versionOptional = Arrays.stream(uri.split("/"))
+    private ApiVersion checkVersionPrefix(String uri) {
+        Optional<ApiVersion> versionOptional = Arrays.stream(uri.split("/"))
                 .filter(s -> s.startsWith("v"))
                 .findFirst()
-                .map(Version::fromPrefix);
-        return versionOptional.orElse(Version.v2_1_0);
+                .map(ApiVersion::fromPrefix);
+        return versionOptional.orElse(ApiVersion.v2_1_0);
     }
 
     private String uriToResourcePath(String uri) {
-        for (Version version : Version.values()) {
+        for (ApiVersion version : ApiVersion.values()) {
             String versionRegex = version.prefix.replace(".", "\\.");
             if (uri.matches("^/" + versionRegex + ".*$")) {
                 return uri.replaceFirst(versionRegex, version.toString().replace(".", "_"));

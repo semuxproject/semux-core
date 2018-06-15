@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import org.semux.api.Version;
+import org.semux.api.ApiVersion;
 import org.semux.api.v2_1_0.api.SemuxApi;
 import org.semux.api.v2_1_0.model.ApiHandlerResponse;
 import org.semux.crypto.Hex;
@@ -210,7 +210,7 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
 
         WebClient webClient = WebClient.create(
                 String.format("http://%s:%d/%s%s", config.apiListenIp(), config.apiListenPort(),
-                        Version.v2_1_0.prefix, uriString),
+                        ApiVersion.v2_1_0.prefix, uriString),
                 Collections.singletonList(new JacksonJsonProvider(
                         new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false))),
                 config.apiUsername(),

@@ -6,7 +6,7 @@
  */
 package org.semux.api;
 
-public enum Version {
+public enum ApiVersion {
 
     v2_0_0("v2.0.0"),
 
@@ -14,11 +14,11 @@ public enum Version {
 
     public final String prefix;
 
-    Version(String prefix) {
+    ApiVersion(String prefix) {
         this.prefix = prefix;
     }
 
-    public static Version fromPrefix(String prefix) {
+    public static ApiVersion fromPrefix(String prefix) {
         switch (prefix) {
         case "v2.0.0":
             return v2_0_0;
