@@ -861,9 +861,13 @@ public class SemuxBft implements Consensus {
         // [2] check transactions and results (skipped)
         List<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
 
-        if (!Block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())
-                || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
+        if (!Block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())) {
             logger.warn("Invalid block transactions");
+            return false;
+        }
+
+        if (transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
+            logger.warn("Block transactions size exceeds maximum");
             return false;
         }
 

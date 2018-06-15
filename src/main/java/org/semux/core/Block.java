@@ -18,11 +18,14 @@ import org.semux.crypto.Key.Signature;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a block in the blockchain.
  */
 public class Block {
+    static final Logger logger = LoggerFactory.getLogger(Block.class);
 
     /**
      * The block header.
@@ -123,10 +126,32 @@ public class Block {
      * @return
      */
     public static boolean validateHeader(BlockHeader previous, BlockHeader header) {
-        return header != null && header.validate()
-                && header.getNumber() == previous.getNumber() + 1
-                && Arrays.equals(header.getParentHash(), previous.getHash())
-                && header.getTimestamp() > previous.getTimestamp();
+        if (header == null) {
+            logger.warn("Header was null.");
+            return false;
+        }
+
+        if (!header.validate()) {
+            logger.warn("Header was invalid.");
+            return false;
+        }
+
+        if (header.getNumber() != previous.getNumber() + 1) {
+            logger.warn("Header number was not one greater than previous block.");
+            return false;
+        }
+
+        if (!Arrays.equals(header.getParentHash(), previous.getHash())) {
+            logger.warn("Header parent hash was not equal to previous block hash.");
+            return false;
+        }
+
+        if (header.getTimestamp() <= previous.getTimestamp()) {
+            logger.warn("Header timestamp was before previous block.");
+            return false;
+        }
+
+        return true;
     }
 
     /**
