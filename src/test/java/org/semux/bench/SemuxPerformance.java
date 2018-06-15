@@ -20,6 +20,7 @@ import org.semux.config.DevnetConfig;
 import org.semux.util.ApiClient;
 import org.semux.util.Bytes;
 import org.semux.util.ConsoleUtil;
+import org.semux.util.TimeUtil;
 
 public class SemuxPerformance {
     private static InetSocketAddress server = new InetSocketAddress("127.0.0.1", 5171);
@@ -32,7 +33,7 @@ public class SemuxPerformance {
     public static void testTransfer(int n) throws IOException, InterruptedException {
         DevnetConfig config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
 
-        long t1 = System.currentTimeMillis();
+        long t1 = TimeUtil.currentTimeMillis();
         for (int i = 1; i <= n; i++) {
             Map<String, Object> params = new HashMap<>();
             params.put("from", address);
@@ -51,7 +52,7 @@ public class SemuxPerformance {
 
             if (i % tps == 0) {
                 System.out.println(new SimpleDateFormat("[HH:mm:ss]").format(new Date()) + " " + i);
-                long t2 = System.currentTimeMillis();
+                long t2 = TimeUtil.currentTimeMillis();
                 Thread.sleep(Math.max(0, 1000 - (t2 - t1)));
                 t1 = t2;
             }

@@ -30,6 +30,7 @@ import org.semux.net.filter.exception.IpFilterJsonParseException;
 import org.semux.util.ConsoleUtil;
 import org.semux.util.FileUtil;
 import org.semux.util.SystemUtil;
+import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -178,6 +179,11 @@ public class SemuxCli extends Launcher {
             if (!FileUtil.isPosixPermissionSecured(getConfig().getFile())) {
                 logger.warn(CliMessages.get("WarningConfigPosixPermission"));
             }
+        }
+
+        long timeDrift = TimeUtil.getTimeOffsetFromNtp();
+        if (Math.abs(timeDrift) > 20000L) {
+            logger.warn(CliMessages.get("SystemTimeDrift"));
         }
 
         // create a new account if the wallet is empty

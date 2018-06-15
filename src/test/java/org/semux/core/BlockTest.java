@@ -26,6 +26,7 @@ import org.semux.crypto.Key.Signature;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SimpleDecoder;
+import org.semux.util.TimeUtil;
 
 public class BlockTest {
 
@@ -34,12 +35,12 @@ public class BlockTest {
     private long number = 5;
     private byte[] coinbase = Bytes.random(20);
     private byte[] prevHash = Bytes.random(32);
-    private long timestamp = System.currentTimeMillis();
+    private long timestamp = TimeUtil.currentTimeMillis();
     private byte[] data = Bytes.of("data");
 
     private Transaction tx = new Transaction(Network.DEVNET, TransactionType.TRANSFER, Bytes.random(20), ZERO,
             config.minTransactionFee(),
-            1, System.currentTimeMillis(), Bytes.EMPTY_BYTES).sign(new Key());
+            1, TimeUtil.currentTimeMillis(), Bytes.EMPTY_BYTES).sign(new Key());
     private TransactionResult res = new TransactionResult(true);
     private List<Transaction> transactions = Collections.singletonList(tx);
     private List<TransactionResult> results = Collections.singletonList(res);

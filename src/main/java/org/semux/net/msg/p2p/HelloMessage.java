@@ -15,6 +15,7 @@ import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+import org.semux.util.TimeUtil;
 
 public class HelloMessage extends Message {
 
@@ -32,7 +33,7 @@ public class HelloMessage extends Message {
         super(MessageCode.HELLO, WorldMessage.class);
 
         this.peer = peer;
-        this.timestamp = System.currentTimeMillis();
+        this.timestamp = TimeUtil.currentTimeMillis();
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeBytes(peer.toBytes());
@@ -73,7 +74,7 @@ public class HelloMessage extends Message {
      */
     public boolean validate(Config config) {
         if (peer != null && peer.validate()
-                && Math.abs(System.currentTimeMillis() - timestamp) <= config.netHandshakeExpiry()
+                && Math.abs(TimeUtil.currentTimeMillis() - timestamp) <= config.netHandshakeExpiry()
                 && signature != null
                 && peer.getPeerId().equals(Hex.encode(signature.getAddress()))) {
 

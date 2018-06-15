@@ -8,7 +8,6 @@ package org.semux.gui.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -52,7 +51,7 @@ public class AddressBookDialog extends JDialog implements ActionListener {
     private final AddressTableModel tableModel;
 
     public AddressBookDialog(JFrame parent, Wallet wallet, SemuxGui gui) {
-        super(null, GuiMessages.get("AddressBook"), Dialog.ModalityType.MODELESS);
+        super(null, GuiMessages.get("AddressBook"), ModalityType.MODELESS);
         this.setName("AddressBookDialog");
 
         this.wallet = wallet;

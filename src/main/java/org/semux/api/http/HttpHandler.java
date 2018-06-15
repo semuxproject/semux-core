@@ -256,7 +256,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private ChannelFuture writeApiResponse(ChannelHandlerContext ctx, Boolean prettyPrint, Object response) {
         HttpResponseStatus status;
-        if (response instanceof javax.ws.rs.core.Response) { // since v2.0.0, a standard JAX-RS response is provided
+        if (response instanceof Response) { // since v2.0.0, a standard JAX-RS response is provided
             status = HttpResponseStatus.valueOf(((Response) response).getStatus());
             response = ((Response) response).getEntity();
         } else { // prior to v2.0.0, status is always OK

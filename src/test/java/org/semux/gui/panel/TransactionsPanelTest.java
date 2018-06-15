@@ -39,6 +39,7 @@ import org.semux.gui.model.WalletModel;
 import org.semux.message.GuiMessages;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
@@ -70,7 +71,7 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
                 SEM.of(1),
                 MILLI_SEM.of(10),
                 0,
-                System.currentTimeMillis(),
+                TimeUtil.currentTimeMillis(),
                 Bytes.EMPTY_BYTES);
         tx.sign(new Key());
         acc.setTransactions(Collections.singletonList(tx));

@@ -6,8 +6,6 @@
  */
 package org.semux.gui.dialog;
 
-import java.awt.Dialog;
-
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JDialog;
@@ -28,7 +26,7 @@ public class DelegateDialog extends JDialog {
     private static final long serialVersionUID = 1L;
 
     public DelegateDialog(SemuxGui gui, JFrame parent, WalletDelegate d) {
-        super(null, GuiMessages.get("Delegate"), Dialog.ModalityType.MODELESS);
+        super(null, GuiMessages.get("Delegate"), ModalityType.MODELESS);
         setName("DelegateDialog");
         Block block = gui.getKernel().getBlockchain().getBlock(d.getRegisteredAt());
 

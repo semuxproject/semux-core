@@ -22,7 +22,7 @@ import org.junit.experimental.categories.Category;
 import org.semux.util.SystemUtil;
 import org.semux.util.SystemUtil.OsName;
 
-@Category(org.semux.windows.WindowsIntegrationTest.class)
+@Category(WindowsIntegrationTest.class)
 public class Launch4jWrapperIT {
 
     private Process l4jWrapper;

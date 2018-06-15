@@ -32,6 +32,7 @@ import org.semux.crypto.Key;
 import org.semux.db.LeveldbDatabase.LeveldbFactory;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
+import org.semux.util.TimeUtil;
 
 /**
  * A kernel rule creates a temporary folder as the data directory. Ten accounts
@@ -158,7 +159,7 @@ public class KernelRule extends TemporaryFolder {
         Key key = new Key();
         byte[] coinbase = key.toAddress();
         byte[] prevHash = getKernel().getBlockchain().getLatestBlock().getHash();
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(txs);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(res);
         byte[] stateRoot = Bytes.EMPTY_HASH;

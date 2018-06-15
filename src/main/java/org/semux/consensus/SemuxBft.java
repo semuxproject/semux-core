@@ -59,6 +59,7 @@ import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SystemUtil;
+import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -189,7 +190,7 @@ public class SemuxBft implements Consensus {
                 }
 
                 // in case we get stuck at one height for too long
-                if (lastUpdate + 2 * 60 * 1000L < System.currentTimeMillis()) {
+                if (lastUpdate + 2 * 60 * 1000L < TimeUtil.currentTimeMillis()) {
                     updateValidators();
                 }
 
@@ -251,7 +252,7 @@ public class SemuxBft implements Consensus {
             broadcaster.stop();
 
             status = Status.STOPPED;
-            Event ev = new Event(Event.Type.STOP);
+            Event ev = new Event(Type.STOP);
             if (!events.offer(ev)) {
                 logger.error("Failed to add an event to message queue: ev = {}", ev);
             }
@@ -616,7 +617,7 @@ public class SemuxBft implements Consensus {
             channel.getRemotePeer().setLatestBlockNumber(m.getHeight() - 1);
 
             if (m.getHeight() > height) {
-                events.add(new Event(Event.Type.NEW_HEIGHT, m.getHeight()));
+                events.add(new Event(Type.NEW_HEIGHT, m.getHeight()));
             }
             break;
         }
@@ -627,9 +628,9 @@ public class SemuxBft implements Consensus {
             channel.getRemotePeer().setLatestBlockNumber(m.getHeight() - 1);
 
             if (m.getHeight() > height) {
-                events.add(new Event(Event.Type.NEW_HEIGHT, m.getHeight()));
+                events.add(new Event(Type.NEW_HEIGHT, m.getHeight()));
             } else if (m.getHeight() == height) {
-                events.add(new Event(Event.Type.NEW_VIEW, m.getProof()));
+                events.add(new Event(Type.NEW_VIEW, m.getProof()));
             }
             break;
         }
@@ -639,7 +640,7 @@ public class SemuxBft implements Consensus {
 
             if (p.getHeight() == height) {
                 if (p.validate()) {
-                    events.add(new Event(Event.Type.PROPOSAL, m.getProposal()));
+                    events.add(new Event(Type.PROPOSAL, m.getProposal()));
                 } else {
                     logger.debug("Invalid proposal from {}", channel.getRemotePeer().getPeerId());
                     channel.getMessageQueue().disconnect(ReasonCode.BAD_PEER);
@@ -653,7 +654,7 @@ public class SemuxBft implements Consensus {
 
             if (vote.getHeight() == height) {
                 if (vote.revalidate()) {
-                    events.add(new Event(Event.Type.VOTE, vote));
+                    events.add(new Event(Type.VOTE, vote));
                 } else {
                     logger.debug("Invalid vote from {}", channel.getRemotePeer().getPeerId());
                     channel.getMessageQueue().disconnect(ReasonCode.BAD_PEER);
@@ -687,7 +688,7 @@ public class SemuxBft implements Consensus {
     protected void updateValidators() {
         validators = chain.getValidators();
         activeValidators = channelMgr.getActiveChannels(validators);
-        lastUpdate = System.currentTimeMillis();
+        lastUpdate = TimeUtil.currentTimeMillis();
     }
 
     /**
@@ -759,7 +760,7 @@ public class SemuxBft implements Consensus {
      * @return the proposed block
      */
     protected Block proposeBlock() {
-        long t1 = System.currentTimeMillis();
+        long t1 = TimeUtil.currentTimeMillis();
 
         // fetch pending transactions
         final List<PendingManager.PendingTransaction> pending = pendingMgr
@@ -779,7 +780,7 @@ public class SemuxBft implements Consensus {
         // construct block
         long number = height;
         byte[] prevHash = chain.getBlockHeader(height - 1).getHash();
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
 
         // signal UNIFORM_DISTRIBUTION fork
         byte[] data = signalingUniformDistribution()
@@ -790,7 +791,7 @@ public class SemuxBft implements Consensus {
                 resultsRoot, stateRoot, data);
         Block block = new Block(header, pendingTxs, pendingResults);
 
-        long t2 = System.currentTimeMillis();
+        long t2 = TimeUtil.currentTimeMillis();
         logger.debug("Block creation: # txs = {}, time = {} ms", pendingTxs.size(), t2 - t1);
 
         return block;
@@ -825,7 +826,7 @@ public class SemuxBft implements Consensus {
      * @return
      */
     protected boolean validateBlock(BlockHeader header, List<Transaction> transactions) {
-        long t1 = System.currentTimeMillis();
+        long t1 = TimeUtil.currentTimeMillis();
 
         // [1] check block header
         Block latest = chain.getLatestBlock();
@@ -834,7 +835,7 @@ public class SemuxBft implements Consensus {
             return false;
         }
 
-        if (header.getTimestamp() - System.currentTimeMillis() > config.maxBlockTimeDrift()) {
+        if (header.getTimestamp() - TimeUtil.currentTimeMillis() > config.maxBlockTimeDrift()) {
             logger.warn("A block in the future is not allowed");
             return false;
         }
@@ -874,7 +875,7 @@ public class SemuxBft implements Consensus {
             return false;
         }
 
-        long t2 = System.currentTimeMillis();
+        long t2 = TimeUtil.currentTimeMillis();
         logger.debug("Block validation: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
 
         Block block = new Block(header, transactions, results);
@@ -985,7 +986,7 @@ public class SemuxBft implements Consensus {
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
                 synchronized (this) {
-                    if (timeout != -1 && timeout < System.currentTimeMillis()) {
+                    if (timeout != -1 && timeout < TimeUtil.currentTimeMillis()) {
                         events.add(new Event(Type.TIMEOUT));
                         timeout = -1;
                         continue;
@@ -1025,7 +1026,7 @@ public class SemuxBft implements Consensus {
             if (milliseconds < 0) {
                 throw new IllegalArgumentException("Timeout can not be negative");
             }
-            timeout = System.currentTimeMillis() + milliseconds;
+            timeout = TimeUtil.currentTimeMillis() + milliseconds;
         }
 
         public synchronized void clear() {

@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.semux.config.Constants;
 import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ public class BlockHeaderTest {
     private long number = 1;
     private byte[] coinbase = Bytes.random(20);
     private byte[] prevHash = Bytes.random(32);
-    private long timestamp = System.currentTimeMillis();
+    private long timestamp = TimeUtil.currentTimeMillis();
     private byte[] transactionsRoot = Bytes.random(32);
     private byte[] resultsRoot = Bytes.random(32);
     private byte[] stateRoot = Bytes.random(32);

@@ -30,6 +30,7 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
 
 public class TransactionExecutorTest {
 
@@ -72,7 +73,7 @@ public class TransactionExecutorTest {
         Amount value = NANO_SEM.of(5);
         Amount fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = Bytes.random(16);
 
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
@@ -112,7 +113,7 @@ public class TransactionExecutorTest {
         Amount value = config.minDelegateBurnAmount();
         Amount fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = Bytes.random(16);
 
         // register delegate (to != EMPTY_ADDRESS, random name)
@@ -150,7 +151,7 @@ public class TransactionExecutorTest {
         Amount value = SEM.of(33);
         Amount fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = {};
 
         // vote for non-existing delegate
@@ -184,7 +185,7 @@ public class TransactionExecutorTest {
         Amount value = SEM.of(33);
         Amount fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = {};
 
         // unvote (never voted before)
@@ -223,7 +224,7 @@ public class TransactionExecutorTest {
         Amount value = SEM.of(100);
         Amount fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
-        long timestamp = System.currentTimeMillis();
+        long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = {};
 
         // unvote (never voted before)
