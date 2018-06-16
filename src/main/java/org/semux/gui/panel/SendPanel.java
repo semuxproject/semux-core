@@ -13,12 +13,11 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
@@ -308,7 +307,7 @@ public class SendPanel extends JPanel implements ActionListener {
     protected void refresh() {
         List<WalletAccount> list = model.getAccounts();
 
-        Set<AccountItem> accountItems = new LinkedHashSet<>();
+        List<AccountItem> accountItems = new ArrayList<>();
         for (WalletAccount aList : list) {
             AccountItem accountItem = new AccountItem(aList);
             accountItems.add(accountItem);
