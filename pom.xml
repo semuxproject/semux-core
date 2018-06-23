@@ -103,15 +103,15 @@
                 <artifactId>swagger-codegen-maven-plugin</artifactId>
                 <version>2.3.1</version>
                 <executions>
-                    <!-- v2.0.0 api interfaces `src/gen/java/org/semux/api/v2_0_0/api` & `src/gen/java/org/semux/api/v2_0_0/model` -->
+                    <!-- API interfaces and models -->
                     <execution>
-                        <id>swagger-codegen-2_0_0</id>
+                        <id>swagger-codegen</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/v2_0_0/swagger.json</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/swagger/v2.1.0.json</inputSpec>
                             <language>jaxrs-cxf</language>
                             <configOptions>
                                 <useGenericResponse>true</useGenericResponse>
@@ -129,19 +129,19 @@
 
                             <addCompileSourceRoot>true</addCompileSourceRoot>
                             <output>${project.basedir}</output>
-                            <modelPackage>org.semux.api.v2_0_0.model</modelPackage>
-                            <apiPackage>org.semux.api.v2_0_0.api</apiPackage>
+                            <modelPackage>org.semux.api.v2.model</modelPackage>
+                            <apiPackage>org.semux.api.v2.api</apiPackage>
                         </configuration>
                     </execution>
-                    <!-- v2.0.0 api client interface `src/gen/java/org/semux/api/v2_0_0/client/SemuxApi.java` -->
+                    <!-- API client interface -->
                     <execution>
-                        <id>swagger-codegen-2_0_0-client</id>
+                        <id>swagger-codegen-client</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/v2_0_0/swagger.json</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/swagger/v2.1.0.json</inputSpec>
                             <language>jaxrs-cxf-client</language>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
@@ -156,66 +156,8 @@
 
                             <addCompileSourceRoot>true</addCompileSourceRoot>
                             <output>${project.basedir}</output>
-                            <modelPackage>org.semux.api.v2_0_0.model</modelPackage>
-                            <apiPackage>org.semux.api.v2_0_0.client</apiPackage>
-                        </configuration>
-                    </execution>
-
-                    <!-- v2.1.0 api interfaces `src/gen/java/org/semux/api/v2_1_0/api` & `src/gen/java/org/semux/api/v2_1_0/model` -->
-                    <execution>
-                        <id>swagger-codegen-2_1_0</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/v2_1_0/swagger.json</inputSpec>
-                            <language>jaxrs-cxf</language>
-                            <configOptions>
-                                <useGenericResponse>true</useGenericResponse>
-                                <useAnnotatedBasePath>true</useAnnotatedBasePath>
-                                <useBeanValidationFeature>false</useBeanValidationFeature>
-                            </configOptions>
-
-                            <generateModels>true</generateModels>
-                            <generateModelTests>false</generateModelTests>
-                            <generateModelDocumentation>false</generateModelDocumentation>
-                            <generateApis>true</generateApis>
-                            <generateApiTests>false</generateApiTests>
-                            <generateApiDocumentation>false</generateApiDocumentation>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-
-                            <addCompileSourceRoot>true</addCompileSourceRoot>
-                            <output>${project.basedir}</output>
-                            <modelPackage>org.semux.api.v2_1_0.model</modelPackage>
-                            <apiPackage>org.semux.api.v2_1_0.api</apiPackage>
-                        </configuration>
-                    </execution>
-                    <!-- v2.1.0 api client interface `src/gen/java/org/semux/api/v2_1_0/client/SemuxApi.java` -->
-                    <execution>
-                        <id>swagger-codegen-2_1_0-client</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/v2_1_0/swagger.json</inputSpec>
-                            <language>jaxrs-cxf-client</language>
-                            <configOptions>
-                                <useBeanValidation>false</useBeanValidation>
-                            </configOptions>
-                            <generateModels>false</generateModels>
-                            <generateModelTests>false</generateModelTests>
-                            <generateModelDocumentation>false</generateModelDocumentation>
-                            <generateApis>true</generateApis>
-                            <generateApiTests>false</generateApiTests>
-                            <generateApiDocumentation>false</generateApiDocumentation>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-
-                            <addCompileSourceRoot>true</addCompileSourceRoot>
-                            <output>${project.basedir}</output>
-                            <modelPackage>org.semux.api.v2_1_0.model</modelPackage>
-                            <apiPackage>org.semux.api.v2_1_0.client</apiPackage>
+                            <modelPackage>org.semux.api.v2.model</modelPackage>
+                            <apiPackage>org.semux.api.v2.client</apiPackage>
                         </configuration>
                     </execution>
                 </executions>

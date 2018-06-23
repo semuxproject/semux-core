@@ -19,9 +19,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.semux.Kernel;
+import org.semux.api.http.HttpChannelInitializer;
+import org.semux.api.v2.SemuxApiImpl;
+import org.semux.api.v2.api.SemuxApi;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,14 +38,14 @@ import io.swagger.models.Operation;
 import io.swagger.models.Swagger;
 
 /**
- * Semux RESTful API handler implementation.
- *
+ * The handler that processes all api requests. It delegates the request
+ * to Semux API implementations based on version.
  */
 public class ApiHandlerImpl implements ApiHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiHandlerImpl.class);
 
-    private final FailableApiService semuxApi;
+    private final SemuxApi semuxApi;
 
     private final Class<?> swaggerInterface;
 
@@ -49,27 +54,27 @@ public class ApiHandlerImpl implements ApiHandler {
      */
     private final Map<ImmutablePair<HttpMethod, String>, Route> routes;
 
-    public ApiHandlerImpl(FailableApiService semuxApi, Class<?> swaggerInterface) {
-        this.semuxApi = semuxApi;
-        this.swaggerInterface = swaggerInterface;
+    public ApiHandlerImpl(Kernel kernel) {
+        SemuxApi apiImplementationV2 = new SemuxApiImpl(kernel);
+        Class<?> apiInterfaceV2 = SemuxApi.class;
+
+        this.semuxApi = apiImplementationV2;
+        this.swaggerInterface = apiInterfaceV2;
         this.routes = new ConcurrentHashMap<>();
         loadRoutes();
     }
 
     @Override
-    public Object service(HttpMethod method, String uri, Map<String, String> params, HttpHeaders headers) {
-        // strip trailing slash
-        uri = uri.replaceAll("/$", "");
-
-        Route route = routes.get(ImmutablePair.of(method, uri));
+    public Response service(HttpMethod method, String path, Map<String, String> params, HttpHeaders headers) {
+        Route route = routes.get(ImmutablePair.of(method, path));
         if (route == null) {
-            return semuxApi.failure(NOT_FOUND, "Invalid request: uri = " + uri);
+            return Response.status(NOT_FOUND).entity("Invalid request: path = ").build();
         }
 
         try {
-            return route.invoke(params);
+            return (Response) route.invoke(params);
         } catch (Exception e) {
-            return semuxApi.failure(INTERNAL_SERVER_ERROR, "Failed to process your request: " + e.getMessage());
+            return Response.status(INTERNAL_SERVER_ERROR).entity("Failed to process your request: ").build();
         }
     }
 
@@ -83,7 +88,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 methodMap.put(methodInterface.getName(), ImmutablePair.of(methodInterface, methodImpl));
             }
         } catch (NoSuchMethodException ex) {
-            throw new UnreachableException(ex);
+            throw new UnreachableException(ex); 
         }
 
         // load swagger annotations as routes

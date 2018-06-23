@@ -5,7 +5,7 @@
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 
-package org.semux.api.v2_1_0.impl;
+package org.semux.api.v2;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
@@ -26,40 +26,38 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.semux.Kernel;
-import org.semux.api.FailableApiService;
 import org.semux.api.util.TransactionBuilder;
-import org.semux.api.v2_1_0.TypeFactory;
-import org.semux.api.v2_1_0.api.SemuxApi;
-import org.semux.api.v2_1_0.model.AddNodeResponse;
-import org.semux.api.v2_1_0.model.ApiHandlerResponse;
-import org.semux.api.v2_1_0.model.ComposeRawTransactionResponse;
-import org.semux.api.v2_1_0.model.CreateAccountResponse;
-import org.semux.api.v2_1_0.model.DeleteAccountResponse;
-import org.semux.api.v2_1_0.model.DoTransactionResponse;
-import org.semux.api.v2_1_0.model.GetAccountPendingTransactionsResponse;
-import org.semux.api.v2_1_0.model.GetAccountResponse;
-import org.semux.api.v2_1_0.model.GetAccountTransactionsResponse;
-import org.semux.api.v2_1_0.model.GetAccountVotesResponse;
-import org.semux.api.v2_1_0.model.GetBlockResponse;
-import org.semux.api.v2_1_0.model.GetDelegateResponse;
-import org.semux.api.v2_1_0.model.GetDelegatesResponse;
-import org.semux.api.v2_1_0.model.GetInfoResponse;
-import org.semux.api.v2_1_0.model.GetLatestBlockNumberResponse;
-import org.semux.api.v2_1_0.model.GetLatestBlockResponse;
-import org.semux.api.v2_1_0.model.GetPeersResponse;
-import org.semux.api.v2_1_0.model.GetPendingTransactionsResponse;
-import org.semux.api.v2_1_0.model.GetRootResponse;
-import org.semux.api.v2_1_0.model.GetSyncingProgressResponse;
-import org.semux.api.v2_1_0.model.GetTransactionLimitsResponse;
-import org.semux.api.v2_1_0.model.GetTransactionResponse;
-import org.semux.api.v2_1_0.model.GetValidatorsResponse;
-import org.semux.api.v2_1_0.model.GetVoteResponse;
-import org.semux.api.v2_1_0.model.GetVotesResponse;
-import org.semux.api.v2_1_0.model.ListAccountsResponse;
-import org.semux.api.v2_1_0.model.SignMessageResponse;
-import org.semux.api.v2_1_0.model.SignRawTransactionResponse;
-import org.semux.api.v2_1_0.model.SyncingProgressType;
-import org.semux.api.v2_1_0.model.VerifyMessageResponse;
+import org.semux.api.v2.api.SemuxApi;
+import org.semux.api.v2.model.AddNodeResponse;
+import org.semux.api.v2.model.ApiHandlerResponse;
+import org.semux.api.v2.model.ComposeRawTransactionResponse;
+import org.semux.api.v2.model.CreateAccountResponse;
+import org.semux.api.v2.model.DeleteAccountResponse;
+import org.semux.api.v2.model.DoTransactionResponse;
+import org.semux.api.v2.model.GetAccountPendingTransactionsResponse;
+import org.semux.api.v2.model.GetAccountResponse;
+import org.semux.api.v2.model.GetAccountTransactionsResponse;
+import org.semux.api.v2.model.GetAccountVotesResponse;
+import org.semux.api.v2.model.GetBlockResponse;
+import org.semux.api.v2.model.GetDelegateResponse;
+import org.semux.api.v2.model.GetDelegatesResponse;
+import org.semux.api.v2.model.GetInfoResponse;
+import org.semux.api.v2.model.GetLatestBlockNumberResponse;
+import org.semux.api.v2.model.GetLatestBlockResponse;
+import org.semux.api.v2.model.GetPeersResponse;
+import org.semux.api.v2.model.GetPendingTransactionsResponse;
+import org.semux.api.v2.model.GetRootResponse;
+import org.semux.api.v2.model.GetSyncingProgressResponse;
+import org.semux.api.v2.model.GetTransactionLimitsResponse;
+import org.semux.api.v2.model.GetTransactionResponse;
+import org.semux.api.v2.model.GetValidatorsResponse;
+import org.semux.api.v2.model.GetVoteResponse;
+import org.semux.api.v2.model.GetVotesResponse;
+import org.semux.api.v2.model.ListAccountsResponse;
+import org.semux.api.v2.model.SignMessageResponse;
+import org.semux.api.v2.model.SignRawTransactionResponse;
+import org.semux.api.v2.model.SyncingProgressType;
+import org.semux.api.v2.model.VerifyMessageResponse;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
@@ -80,19 +78,16 @@ import org.semux.net.filter.SemuxIpFilter;
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
-public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
+public final class SemuxApiImpl implements SemuxApi {
 
     private static final Charset CHARSET = UTF_8;
 
     private final Kernel kernel;
 
-    public SemuxApiServiceImpl(Kernel kernel) {
+    public SemuxApiImpl(Kernel kernel) {
         this.kernel = kernel;
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response addNode(String node) {
         AddNodeResponse resp = new AddNodeResponse();
@@ -105,9 +100,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         }
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response addToBlacklist(String ip) {
         ApiHandlerResponse resp = new ApiHandlerResponse();
@@ -127,9 +119,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         }
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response addToWhitelist(String ip) {
         ApiHandlerResponse resp = new ApiHandlerResponse();
@@ -148,9 +137,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         }
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response composeRawTransaction(String network, String type, String fee, String nonce, String to,
             String value,
@@ -177,9 +163,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         }
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response createAccount(String name, String privateKey) {
         CreateAccountResponse resp = new CreateAccountResponse();
@@ -215,9 +198,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         }
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getAccount(String address) {
         GetAccountResponse resp = new GetAccountResponse();
@@ -245,9 +225,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.1.0
-     */
     @Override
     public Response deleteAccount(String address) {
         DeleteAccountResponse resp = new DeleteAccountResponse();
@@ -276,9 +253,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         }
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getAccountTransactions(String address, String from, String to) {
         GetAccountTransactionsResponse resp = new GetAccountTransactionsResponse();
@@ -322,9 +296,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.1.0
-     */
     @Override
     public Response getAccountPendingTransactions(String address, String from, String to) {
         GetAccountPendingTransactionsResponse resp = new GetAccountPendingTransactionsResponse();
@@ -376,9 +347,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok(resp).build();
     }
 
-    /**
-     * @since 2.1.0
-     */
     @Override
     public Response getAccountVotes(String address) {
         GetAccountVotesResponse resp = new GetAccountVotesResponse();
@@ -399,9 +367,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getBlockByHash(String hashString) {
         GetBlockResponse resp = new GetBlockResponse();
@@ -426,9 +391,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getBlockByNumber(String blockNum) {
         GetBlockResponse resp = new GetBlockResponse();
@@ -454,9 +416,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getDelegate(String address) {
         GetDelegateResponse resp = new GetDelegateResponse();
@@ -485,9 +444,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getDelegates() {
         GetDelegatesResponse resp = new GetDelegatesResponse();
@@ -504,9 +460,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getInfo() {
         GetInfoResponse resp = new GetInfoResponse();
@@ -515,9 +468,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getLatestBlock() {
         GetLatestBlockResponse resp = new GetLatestBlockResponse();
@@ -527,9 +477,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getLatestBlockNumber() {
         GetLatestBlockNumberResponse resp = new GetLatestBlockNumberResponse();
@@ -538,9 +485,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getPeers() {
         GetPeersResponse resp = new GetPeersResponse();
@@ -551,9 +495,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getPendingTransactions() {
         GetPendingTransactionsResponse resp = new GetPendingTransactionsResponse();
@@ -565,9 +506,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getRoot() {
         GetRootResponse resp = new GetRootResponse();
@@ -576,9 +514,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getTransaction(String hash) {
         GetTransactionResponse resp = new GetTransactionResponse();
@@ -606,9 +541,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getTransactionLimits(String type) {
         GetTransactionLimitsResponse resp = new GetTransactionLimitsResponse();
@@ -624,9 +556,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         }
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getValidators() {
         GetValidatorsResponse resp = new GetValidatorsResponse();
@@ -636,9 +565,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getVote(String delegate, String voter) {
         GetVoteResponse resp = new GetVoteResponse();
@@ -671,9 +597,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response getVotes(String delegate) {
         GetVotesResponse resp = new GetVotesResponse();
@@ -696,9 +619,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response listAccounts() {
         ListAccountsResponse resp = new ListAccountsResponse();
@@ -709,17 +629,11 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response registerDelegate(String from, String data, String fee, String nonce, Boolean validateNonce) {
         return doTransaction(TransactionType.DELEGATE, from, null, null, fee, nonce, validateNonce, data);
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response broadcastRawTransaction(String raw, Boolean validateNonce) {
         DoTransactionResponse resp = new DoTransactionResponse();
@@ -752,9 +666,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         }
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response signMessage(String address, String message) {
         SignMessageResponse resp = new SignMessageResponse();
@@ -791,9 +702,6 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         }
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response signRawTransaction(String raw, String address) {
         SignRawTransactionResponse resp = new SignRawTransactionResponse();
@@ -827,26 +735,17 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         }
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response transfer(String from, String to, String value, String fee, String nonce, Boolean validateNonce,
             String data) {
         return doTransaction(TransactionType.TRANSFER, from, to, value, fee, nonce, validateNonce, data);
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response unvote(String from, String to, String value, String fee, String nonce, Boolean validateNonce) {
         return doTransaction(TransactionType.UNVOTE, from, to, value, fee, nonce, validateNonce, null);
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response verifyMessage(String address, String message, String signature) {
         VerifyMessageResponse resp = new VerifyMessageResponse();
@@ -887,17 +786,11 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok().entity(resp).build();
     }
 
-    /**
-     * @since 2.0.0
-     */
     @Override
     public Response vote(String from, String to, String value, String fee, String nonce, Boolean validateNonce) {
         return doTransaction(TransactionType.VOTE, from, to, value, fee, nonce, validateNonce, null);
     }
 
-    /**
-     * @since 2.1.0
-     */
     @Override
     public Response getSyncingProgress() {
         GetSyncingProgressResponse resp = new GetSyncingProgressResponse();
@@ -918,18 +811,18 @@ public final class SemuxApiServiceImpl implements SemuxApi, FailableApiService {
         return Response.ok(resp).build();
     }
 
-    @Override
-    public Response failure(Response.Status status, String message) {
+    // TODO: clean up methods below
+    private Response failure(Response.Status status, String message) {
         return failure(new ApiHandlerResponse(), status, message);
     }
 
-    protected Response failure(ApiHandlerResponse resp, Response.Status status, String message) {
+    private Response failure(ApiHandlerResponse resp, Response.Status status, String message) {
         resp.setSuccess(false);
         resp.setMessage(message);
         return Response.status(status).entity(resp).build();
     }
 
-    protected Response failure(ApiHandlerResponse resp, String message) {
+    private Response failure(ApiHandlerResponse resp, String message) {
         return failure(resp, BAD_REQUEST, message);
     }
 

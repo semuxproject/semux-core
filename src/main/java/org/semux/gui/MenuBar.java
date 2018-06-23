@@ -328,7 +328,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
      */
     private void apiExplorer() {
         if (Desktop.isDesktopSupported()) {
-            final String swaggerUrl = gui.getKernel().getApi().getSwaggerUrl();
+            final String swaggerUrl = gui.getKernel().getApi().getApiExplorerUrl();
             try {
                 Desktop.getDesktop().browse(new URI(swaggerUrl));
             } catch (IOException | URISyntaxException e) {

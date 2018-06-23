@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.v2_1_0;
+package org.semux.api.v2;
 
 import static org.semux.core.TransactionType.DELEGATE;
 
@@ -14,15 +14,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.semux.Kernel;
-import org.semux.api.v2_1_0.model.AccountType;
-import org.semux.api.v2_1_0.model.AccountVoteType;
-import org.semux.api.v2_1_0.model.BlockType;
-import org.semux.api.v2_1_0.model.DelegateType;
-import org.semux.api.v2_1_0.model.InfoType;
-import org.semux.api.v2_1_0.model.PeerType;
-import org.semux.api.v2_1_0.model.PendingTransactionType;
-import org.semux.api.v2_1_0.model.TransactionLimitsType;
-import org.semux.api.v2_1_0.model.TransactionType;
+import org.semux.api.v2.model.AccountType;
+import org.semux.api.v2.model.AccountVoteType;
+import org.semux.api.v2.model.BlockType;
+import org.semux.api.v2.model.DelegateType;
+import org.semux.api.v2.model.InfoType;
+import org.semux.api.v2.model.PeerType;
+import org.semux.api.v2.model.PendingTransactionType;
+import org.semux.api.v2.model.TransactionLimitsType;
+import org.semux.api.v2.model.TransactionType;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;

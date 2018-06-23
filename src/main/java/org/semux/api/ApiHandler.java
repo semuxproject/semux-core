@@ -8,6 +8,8 @@ package org.semux.api;
 
 import java.util.Map;
 
+import javax.ws.rs.core.Response;
+
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 
@@ -21,13 +23,13 @@ public interface ApiHandler {
      *
      * @param method
      *            the method
-     * @param uri
-     *            the uri
+     * @param path
+     *            the path
      * @param params
      *            the params
      * @param headers
      *            the headers
      * @return the response object
      */
-    Object service(HttpMethod method, String uri, Map<String, String> params, HttpHeaders headers);
+    Response service(HttpMethod method, String path, Map<String, String> params, HttpHeaders headers);
 }

@@ -26,8 +26,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import org.semux.api.v2_1_0.client.SemuxApi;
-import org.semux.api.v2_1_0.impl.SemuxApiServiceImpl;
+import org.semux.api.v2.client.SemuxApi;
+import org.semux.api.v2.SemuxApiImpl;
 import org.semux.gui.SemuxGui;
 import org.semux.message.GuiMessages;
 
@@ -43,7 +43,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
     public static final String HELP = "help";
 
-    private final transient SemuxApiServiceImpl api;
+    private final transient SemuxApiImpl api;
 
     private final JTextArea console;
     private final JTextField input;
@@ -73,7 +73,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
         this.setSize(800, 600);
         this.setLocationRelativeTo(parent);
-        api = new SemuxApiServiceImpl(gui.getKernel());
+        api = new SemuxApiImpl(gui.getKernel());
 
         console.append(GuiMessages.get("ConsoleHelp", HELP));
         addWindowListener(new WindowAdapter() {

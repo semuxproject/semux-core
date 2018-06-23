@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.v2_1_0;
+package org.semux.api.v2;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,8 +32,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.semux.api.ApiVersion;
-import org.semux.api.v2_1_0.api.SemuxApi;
-import org.semux.api.v2_1_0.model.ApiHandlerResponse;
+import org.semux.api.v2.api.SemuxApi;
+import org.semux.api.v2.model.ApiHandlerResponse;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
 
@@ -42,8 +42,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 /**
- * The test case covers validation rules of
- * {@link org.semux.api.v2_1_0.impl.SemuxApiServiceImpl}
+ * The test case covers validation rules of {@link SemuxApiImpl}
  */
 @RunWith(Parameterized.class)
 public class SemuxApiErrorTest extends SemuxApiTestBase {
@@ -210,7 +209,7 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
 
         WebClient webClient = WebClient.create(
                 String.format("http://%s:%d/%s%s", config.apiListenIp(), config.apiListenPort(),
-                        ApiVersion.v2_1_0.prefix, uriString),
+                        ApiVersion.DEFAULT.prefix, uriString),
                 Collections.singletonList(new JacksonJsonProvider(
                         new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false))),
                 config.apiUsername(),

@@ -4,18 +4,14 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.api.http;
+package org.semux.api;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.semux.Kernel;
-import org.semux.api.ApiHandler;
-import org.semux.api.ApiVersion;
+import org.semux.api.http.HttpChannelInitializer;
+import org.semux.api.http.HttpHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,11 +25,8 @@ import io.netty.handler.logging.LoggingHandler;
 
 /**
  * Semux API launcher
- *
  */
 public class SemuxApiService {
-
-    public static final ApiVersion DEFAULT_VERSION = ApiVersion.v2_1_0;
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxApiService.class);
 
@@ -46,37 +39,20 @@ public class SemuxApiService {
         }
     };
 
-    private final Kernel kernel;
+    private Kernel kernel;
     private Channel channel;
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
-    private final Map<ApiVersion, ApiHandler> apiHandlers;
+    private HttpHandler handler;
 
-    String ip;
-    int port;
+    private String ip;
+    private int port;
 
     public SemuxApiService(Kernel kernel) {
         this.kernel = kernel;
-        this.apiHandlers = Collections
-                .unmodifiableMap(Arrays.stream(ApiVersion.values())
-                        .collect(Collectors.toMap(
-                                v -> v,
-                                v -> {
-                                    switch (v) {
-                                    case v2_0_0:
-                                        return new org.semux.api.ApiHandlerImpl(
-                                                new org.semux.api.v2_1_0.impl.SemuxApiServiceImpl(kernel),
-                                                org.semux.api.v2_1_0.api.SemuxApi.class);
-                                    case v2_1_0:
-                                        return new org.semux.api.ApiHandlerImpl(
-                                                new org.semux.api.v2_1_0.impl.SemuxApiServiceImpl(kernel),
-                                                org.semux.api.v2_1_0.api.SemuxApi.class);
-                                    default:
-                                        return null;
-                                    }
-                                })));
+        this.handler = new HttpHandler(kernel, new ApiHandlerImpl(kernel));
     }
 
     /**
@@ -93,18 +69,18 @@ public class SemuxApiService {
      * @param port
      */
     public void start(String ip, int port) {
-        start(ip, port, new SemuxAPIHttpChannelInitializer());
+        start(ip, port, handler);
     }
 
     /**
      * Starts API server at the given binding IP and port, with the specified
      * channel initializer.
-     * 
+     *
      * @param ip
      * @param port
-     * @param httpChannelInitializer
+     * @param httpHandler
      */
-    public void start(String ip, int port, HttpChannelInitializer httpChannelInitializer) {
+    public void start(String ip, int port, HttpHandler httpHandler) {
         try {
             this.ip = ip;
             this.port = port;
@@ -113,14 +89,15 @@ public class SemuxApiService {
 
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                    .handler(new LoggingHandler(LogLevel.INFO)).childHandler(httpChannelInitializer);
+                    .handler(new LoggingHandler(LogLevel.INFO)).childHandler(new HttpChannelInitializer() {
+                public HttpHandler initHandler() {
+                    return httpHandler;
+                }
+            });
 
             logger.info("Starting API server: address = {}:{}", ip, port);
             channel = b.bind(ip, port).sync().channel();
-            logger.info(
-                    "API server started. API: {}, Swagger UI: {}",
-                    getAPIUrl(),
-                    getSwaggerUrl());
+            logger.info("API server started. Explorer: {}, Base URL: {}", getApiExplorerUrl(), getApiBaseUrl());
         } catch (Exception e) {
             logger.error("Failed to start API server", e);
         }
@@ -148,31 +125,38 @@ public class SemuxApiService {
         }
     }
 
+    public String getIp() {
+        return ip;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
     /**
      * Returns whether the API server is running or not.
-     * 
+     *
      * @return
      */
     public boolean isRunning() {
         return channel != null;
     }
 
-    public String getAPIUrl() {
-        return String.format("http://%s:%d/%s/", ip, port, DEFAULT_VERSION.prefix);
-    }
-
-    public String getSwaggerUrl() {
-        return String.format("http://%s:%d/%s/swagger.html", ip, port, DEFAULT_VERSION.prefix);
+    /**
+     * Returns the API base URL.
+     *
+     * @return
+     */
+    public String getApiBaseUrl() {
+        return String.format("http://%s:%d/%s/", ip, port, ApiVersion.DEFAULT.prefix);
     }
 
     /**
-     * The default channel initializer.
+     * Returns the API explorer URL.
+     *
+     * @return
      */
-    private class SemuxAPIHttpChannelInitializer extends HttpChannelInitializer {
-
-        @Override
-        public HttpHandler initHandler() {
-            return new HttpHandler(kernel, apiHandlers);
-        }
+    public String getApiExplorerUrl() {
+        return String.format("http://%s:%d/index.html", ip, port, ApiVersion.DEFAULT.prefix);
     }
 }

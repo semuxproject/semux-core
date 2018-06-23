@@ -28,7 +28,7 @@
  * limitations under the License.
  */
 
-package org.semux.api.v2_1_0;
+package org.semux.api.v2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertArrayEquals;
@@ -67,40 +67,40 @@ import javax.ws.rs.BadRequestException;
 
 import org.junit.Test;
 import org.semux.TestUtils;
-import org.semux.api.v2_1_0.model.AddNodeResponse;
-import org.semux.api.v2_1_0.model.BlockType;
-import org.semux.api.v2_1_0.model.ComposeRawTransactionResponse;
-import org.semux.api.v2_1_0.model.CreateAccountResponse;
-import org.semux.api.v2_1_0.model.DelegateType;
-import org.semux.api.v2_1_0.model.DeleteAccountResponse;
-import org.semux.api.v2_1_0.model.DoTransactionResponse;
-import org.semux.api.v2_1_0.model.GetAccountPendingTransactionsResponse;
-import org.semux.api.v2_1_0.model.GetAccountResponse;
-import org.semux.api.v2_1_0.model.GetAccountTransactionsResponse;
-import org.semux.api.v2_1_0.model.GetAccountVotesResponse;
-import org.semux.api.v2_1_0.model.GetBlockResponse;
-import org.semux.api.v2_1_0.model.GetDelegateResponse;
-import org.semux.api.v2_1_0.model.GetDelegatesResponse;
-import org.semux.api.v2_1_0.model.GetInfoResponse;
-import org.semux.api.v2_1_0.model.GetLatestBlockNumberResponse;
-import org.semux.api.v2_1_0.model.GetLatestBlockResponse;
-import org.semux.api.v2_1_0.model.GetPeersResponse;
-import org.semux.api.v2_1_0.model.GetPendingTransactionsResponse;
-import org.semux.api.v2_1_0.model.GetRootResponse;
-import org.semux.api.v2_1_0.model.GetSyncingProgressResponse;
-import org.semux.api.v2_1_0.model.GetTransactionLimitsResponse;
-import org.semux.api.v2_1_0.model.GetTransactionResponse;
-import org.semux.api.v2_1_0.model.GetValidatorsResponse;
-import org.semux.api.v2_1_0.model.GetVoteResponse;
-import org.semux.api.v2_1_0.model.GetVotesResponse;
-import org.semux.api.v2_1_0.model.InfoType;
-import org.semux.api.v2_1_0.model.ListAccountsResponse;
-import org.semux.api.v2_1_0.model.PeerType;
-import org.semux.api.v2_1_0.model.SignMessageResponse;
-import org.semux.api.v2_1_0.model.SignRawTransactionResponse;
-import org.semux.api.v2_1_0.model.SyncingProgressType;
-import org.semux.api.v2_1_0.model.TransactionType;
-import org.semux.api.v2_1_0.model.VerifyMessageResponse;
+import org.semux.api.v2.model.AddNodeResponse;
+import org.semux.api.v2.model.BlockType;
+import org.semux.api.v2.model.ComposeRawTransactionResponse;
+import org.semux.api.v2.model.CreateAccountResponse;
+import org.semux.api.v2.model.DelegateType;
+import org.semux.api.v2.model.DeleteAccountResponse;
+import org.semux.api.v2.model.DoTransactionResponse;
+import org.semux.api.v2.model.GetAccountPendingTransactionsResponse;
+import org.semux.api.v2.model.GetAccountResponse;
+import org.semux.api.v2.model.GetAccountTransactionsResponse;
+import org.semux.api.v2.model.GetAccountVotesResponse;
+import org.semux.api.v2.model.GetBlockResponse;
+import org.semux.api.v2.model.GetDelegateResponse;
+import org.semux.api.v2.model.GetDelegatesResponse;
+import org.semux.api.v2.model.GetInfoResponse;
+import org.semux.api.v2.model.GetLatestBlockNumberResponse;
+import org.semux.api.v2.model.GetLatestBlockResponse;
+import org.semux.api.v2.model.GetPeersResponse;
+import org.semux.api.v2.model.GetPendingTransactionsResponse;
+import org.semux.api.v2.model.GetRootResponse;
+import org.semux.api.v2.model.GetSyncingProgressResponse;
+import org.semux.api.v2.model.GetTransactionLimitsResponse;
+import org.semux.api.v2.model.GetTransactionResponse;
+import org.semux.api.v2.model.GetValidatorsResponse;
+import org.semux.api.v2.model.GetVoteResponse;
+import org.semux.api.v2.model.GetVotesResponse;
+import org.semux.api.v2.model.InfoType;
+import org.semux.api.v2.model.ListAccountsResponse;
+import org.semux.api.v2.model.PeerType;
+import org.semux.api.v2.model.SignMessageResponse;
+import org.semux.api.v2.model.SignRawTransactionResponse;
+import org.semux.api.v2.model.SyncingProgressType;
+import org.semux.api.v2.model.TransactionType;
+import org.semux.api.v2.model.VerifyMessageResponse;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Amount;
 import org.semux.core.Block;
@@ -121,7 +121,7 @@ import org.semux.util.Bytes;
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
 /**
- * API tests for {@link org.semux.api.v2_1_0.impl.SemuxApiServiceImpl}
+ * API tests for {@link SemuxApiImpl}
  */
 public class SemuxApiTest extends SemuxApiTestBase {
 
