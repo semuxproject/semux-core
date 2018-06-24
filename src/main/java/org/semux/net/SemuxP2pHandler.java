@@ -155,8 +155,15 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         switch (msg.getCode()) {
         /* p2p */
         case DISCONNECT: {
+            ReasonCode reason = ((DisconnectMessage) msg).getReason();
             logger.debug("Received DISCONNECT message: reason = {}, remoteIP = {}",
-                    ((DisconnectMessage) msg).getReason(), channel.getRemoteIp());
+                    reason, channel.getRemoteIp());
+
+            // Users often get confused with no logging why they are unable to sync
+            if (reason.equals(ReasonCode.INVALID_HANDSHAKE)) {
+                logger.warn("Disconnected from peer due to invalid handshake.  The most common cause of this is"
+                        + " using a proxy/VPN.  If this is the case, please set 'p2p.declaredIp' in configuration.");
+            }
             stopTimers();
             ctx.close();
             break;
