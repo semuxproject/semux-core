@@ -317,6 +317,22 @@ public interface Config {
      */
     int syncMaxPendingBlocks();
 
+    /**
+     * Returns whether fastSync is enabled.
+     *
+     * @return
+     */
+    boolean fastSyncEnabled();
+
+    /**
+     * Returns the number of blocks in the fastSync safe gap. fastSync will be
+     * disabled if the gap between the target block and the last synced block <=
+     * safe gap.
+     *
+     * @return
+     */
+    int fastSyncSafeGap();
+
     // =========================
     // API
     // =========================
