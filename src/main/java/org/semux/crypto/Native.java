@@ -31,24 +31,21 @@ public class Native {
      * Initializes the native libraries
      */
     protected static void init() {
+        if (SystemUtil.is32bitJvm()) {
+            // No more support for 32-bit systems
+            return;
+        }
+
         SystemUtil.OsName os = SystemUtil.getOsName();
         switch (os) {
         case LINUX:
-            if (SystemUtil.is32bitJvm()) {
-                enabled = loadLibrary("/native/linux32/libsodium.so.23") && loadLibrary("/native/linux32/libcrypto.so");
-            } else {
-                enabled = loadLibrary("/native/linux64/libsodium.so.23") && loadLibrary("/native/linux64/libcrypto.so");
-            }
+            enabled = loadLibrary("/native/linux64/libsodium.so.23") && loadLibrary("/native/linux64/libcrypto.so");
             break;
         case MACOS:
             enabled = loadLibrary("/native/macos/libsodium.23.dylib") && loadLibrary("/native/macos/libcrypto.dylib");
             break;
         case WINDOWS:
-            if (SystemUtil.is32bitJvm()) {
-                enabled = loadLibrary("/native/win32/libsodium.dll") && loadLibrary("/native/win32/crypto.dll");
-            } else {
-                enabled = loadLibrary("/native/win64/libsodium.dll") && loadLibrary("/native/win64/crypto.dll");
-            }
+            enabled = loadLibrary("/native/win64/libsodium.dll") && loadLibrary("/native/win64/crypto.dll");
             break;
         default:
             break;

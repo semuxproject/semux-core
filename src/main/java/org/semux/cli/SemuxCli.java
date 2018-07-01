@@ -45,6 +45,12 @@ public class SemuxCli extends Launcher {
 
     public static void main(String[] args) {
         try {
+            // check jvm version
+            if (SystemUtil.is32bitJvm()) {
+                logger.error(CliMessages.get("Jvm32NotSupported"));
+                SystemUtil.exit(SystemUtil.Code.JVM_32_NOT_SUPPORTED);
+            }
+
             checkPrerequisite();
 
             SemuxCli cli = new SemuxCli();

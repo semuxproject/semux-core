@@ -90,9 +90,15 @@ public class SemuxGui extends Launcher {
 
     public static void main(String[] args) {
         try {
-            setupLookAndFeel();
+            // check jvm version
+            if (SystemUtil.is32bitJvm()) {
+                JOptionPane.showMessageDialog(null, GuiMessages.get("Jvm32NotSupported"));
+                SystemUtil.exit(SystemUtil.Code.JVM_32_NOT_SUPPORTED);
+            }
 
             checkPrerequisite();
+
+            setupLookAndFeel();
 
             SemuxGui gui = new SemuxGui();
             // set up logger

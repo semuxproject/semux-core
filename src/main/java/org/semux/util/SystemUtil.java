@@ -78,6 +78,7 @@ public class SystemUtil {
         // upgrade
         public static final int HARDWARE_UPGRADE_NEEDED = 71;
         public static final int CLIENT_UPGRADE_NEEDED = 72;
+        public static final int JVM_32_NOT_SUPPORTED = 73;
     }
 
     public enum OsName {
