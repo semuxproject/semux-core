@@ -5,6 +5,9 @@ divided into general peer messages, and messages that Validators use to forge ne
 
 Messages are written using the Semux [Message Encoding](./Message-Encoding.md) format.
 
+Messages send the code byte first, then the parameters in order
+
+
 ## Standard Message Objects
 
 ### Peer
