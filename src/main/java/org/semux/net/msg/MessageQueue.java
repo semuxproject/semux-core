@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2017-2018 The Semux Developers
- *
+ * <p>
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.config.Config;
 import org.semux.net.msg.p2p.DisconnectMessage;
+import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -195,6 +196,8 @@ public class MessageQueue {
 
             logger.trace("Wiring message: {}", msg);
             ctx.writeAndFlush(msg).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+            logger.trace("Message {} to {} took {} ms", msg.code, ctx.channel().remoteAddress(),
+                    TimeUtil.currentTimeMillis() - mw.getLastTimestamp());
 
             if (msg.getResponseMessageClass() != null) {
                 mw.increaseRetries();
