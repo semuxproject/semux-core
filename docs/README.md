@@ -18,3 +18,4 @@ Welcome to the semux documentation!
 * [IDE Setup](./IDE-Setup.md)
 * [RESTful API](./RESTful-API.md)
 * [Testnet](./Testnet.md)
+* [Network Protocol](./Network-Protocol.md)

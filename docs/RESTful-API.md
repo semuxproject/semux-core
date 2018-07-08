@@ -37,3 +37,4 @@ Semux provides a [Swagger API Spec in JSON](../src/main/resources/org/semux/api/
 - Javascript: https://github.com/semuxproject/semux-js
 - PHP: https://github.com/semuxproject/semux-php
 - Python: https://github.com/mdodong/semuxapi-py
+- Java: https://github.com/orogvany/semux-java-client
