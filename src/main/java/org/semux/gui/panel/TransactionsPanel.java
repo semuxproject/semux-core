@@ -283,8 +283,8 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         tableModel.setData(filteredTransactions);
 
         if (tx != null) {
-            for (int i = 0; i < transactions.size(); i++) {
-                if (Arrays.equals(tx.getHash(), transactions.get(i).getTransaction().getHash())) {
+            for (int i = 0; i < filteredTransactions.size(); i++) {
+                if (Arrays.equals(tx.getHash(), filteredTransactions.get(i).getTransaction().getHash())) {
                     table.setRowSelectionInterval(table.convertRowIndexToView(i), table.convertRowIndexToView(i));
                     break;
                 }

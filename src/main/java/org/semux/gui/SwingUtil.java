@@ -595,7 +595,8 @@ public class SwingUtil {
             return account.getName();
         }
 
-        return Optional.empty();
+        // use address book for lookup
+        return gui.getKernel().getWallet().getAddressAlias(address);
     }
 
     /**
