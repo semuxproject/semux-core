@@ -2,7 +2,7 @@
 
 ## What is BFT
 
-In fault-tolerant computer systems, and in particular distributed computing systems, Byzantine fault tolerance (BFT) is the characteristic of a system that tolerates the class of failures known as the Byzantine Generals' Problem.
+In fault-tolerant computer systems, and in particular distributed computing systems, Byzantine fault tolerance (BFT) is the characteristic of a system that tolerates the class of failures known as the [Byzantine Generals' Problem](https://en.wikipedia.org/wiki/Byzantine_fault_tolerance).
 
 ## What is Semux BFT
 
@@ -16,13 +16,13 @@ dPOS is preferable for energy use and scalability.
 
 ## Semux BFT specifications
 
-There are six phases to semux BFT Consensus.  On each block, the validators will go through these phases to forge the next block.
+There are six phases to Semux BFT Consensus.  On each block, the validators will go through these phases to forge the next block.
 
 #### New Height
 ##### Time: 3 seconds (firm)
 Set height to lastHeight + 1
 
-Send new height message to all peers
+Send new height message to all peers.
 
 #### Propose
 ##### Time: 12 seconds (firm)
@@ -33,7 +33,6 @@ If you are the primary validator, propose a block, and broadcast it.
 
 Send new view message to all peers.
 
-
 #### Validate
 ##### Time: 6 seconds (firm)
 
@@ -42,7 +41,6 @@ If you have received a proposal, validate it, and vote on results.
 If you did not receive a proposal, vote no.
 
 Send validate vote to all peers.
-
 
 #### PreCommit
 ##### Time: 6 seconds (firm)

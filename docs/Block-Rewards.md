@@ -2,17 +2,11 @@
 
 ### Block reward
 
-Semux are created each time a validator forges a new block.
+Semux are created each time a validator forges a new block.  
 
-```java
-public static long getBlockReward(long number) {
-    if (number <= 25_000_000) {
-        return 3 * Unit.SEM;
-    } else {
-        return 0;
-    }
-}
-```
+Once maximum supply is reached, new Semux will no longer be created.
+
+Validators receive the block reward as well as all fees contained in the block.
 
 ### Total supply
 
