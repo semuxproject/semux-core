@@ -38,6 +38,7 @@ public class TimeUtil {
     public static final String DEFAULT_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String NTP_POOL = "pool.ntp.org";
     private static final ScheduledExecutorService ntpUpdateTimer = Executors.newSingleThreadScheduledExecutor(factory);
+    private static final int TIME_RETRIES = 5;
 
     private static long timeOffsetFromNtp = 0;
 
@@ -79,18 +80,22 @@ public class TimeUtil {
     private static void updateNetworkTimeOffset() {
         NTPUDPClient client = new NTPUDPClient();
         client.setDefaultTimeout(10000);
-        try {
-            client.open();
-            InetAddress hostAddr = InetAddress.getByName(NTP_POOL);
-            TimeInfo info = client.getTime(hostAddr);
-            info.computeDetails();
+        for (int i = 0; i < TIME_RETRIES; i++) {
+            try {
+                client.open();
+                InetAddress hostAddr = InetAddress.getByName(NTP_POOL);
+                TimeInfo info = client.getTime(hostAddr);
+                info.computeDetails();
 
-            // update our current internal state
-            timeOffsetFromNtp = info.getOffset();
-        } catch (IOException e) {
-            logger.warn("Unable to retrieve NTP time", e);
-        } finally {
-            client.close();
+                // update our current internal state
+                timeOffsetFromNtp = info.getOffset();
+                // break from retry loop
+                return;
+            } catch (IOException e) {
+                logger.warn("Unable to retrieve NTP time", e);
+            } finally {
+                client.close();
+            }
         }
     }
 
