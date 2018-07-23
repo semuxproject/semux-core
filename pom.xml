@@ -399,6 +399,9 @@
                                 <minVersion>1.8.0</minVersion>
                                 <jdkPreference>preferJre</jdkPreference>
                                 <maxHeapPercent>80</maxHeapPercent>
+                                <opts>
+                                    <opt>-Dfile.encoding=UTF-8</opt>
+                                </opts>
                             </jre>
                             <versionInfo>
                                 <fileVersion>${dist.windowsExecutableVersion}</fileVersion>
