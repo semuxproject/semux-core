@@ -98,7 +98,7 @@ public class KernelRule extends TemporaryFolder {
 
     /**
      * Returns the password.
-     * 
+     *
      * @return
      */
     public String getPassword() {
@@ -107,7 +107,7 @@ public class KernelRule extends TemporaryFolder {
 
     /**
      * Returns the kernel.
-     * 
+     *
      * @return
      */
     public KernelMock getKernel() {
@@ -150,15 +150,24 @@ public class KernelRule extends TemporaryFolder {
      *
      * @param txs
      *            list of transaction
+     * @param lastBlock
+     *            last block header
      * @return created block
      */
-    public Block createBlock(List<Transaction> txs) {
+    public Block createBlock(List<Transaction> txs, BlockHeader lastBlock) {
         List<TransactionResult> res = txs.stream().map(tx -> new TransactionResult(true)).collect(Collectors.toList());
 
-        long number = getKernel().getBlockchain().getLatestBlock().getNumber() + 1;
+        long number;
+        byte[] prevHash;
+        if (lastBlock == null) {
+            number = getKernel().getBlockchain().getLatestBlock().getNumber() + 1;
+            prevHash = getKernel().getBlockchain().getLatestBlock().getHash();
+        } else {
+            number = lastBlock.getNumber() + 1;
+            prevHash = lastBlock.getHash();
+        }
         Key key = new Key();
         byte[] coinbase = key.toAddress();
-        byte[] prevHash = getKernel().getBlockchain().getLatestBlock().getHash();
         long timestamp = TimeUtil.currentTimeMillis();
         byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(txs);
         byte[] resultsRoot = MerkleUtil.computeResultsRoot(res);
@@ -176,5 +185,9 @@ public class KernelRule extends TemporaryFolder {
                 data);
 
         return new Block(header, txs, res);
+    }
+
+    public Block createBlock(List<Transaction> txs) {
+        return createBlock(txs, null);
     }
 }

@@ -87,6 +87,14 @@ public abstract class AbstractConfig implements Config {
     protected List<String> netDnsSeedsTestNet = Collections.singletonList("testnet.semux.org");
 
     // =========================
+    // Sync
+    // =========================
+    protected long downloadTimeout = 2000L;
+    protected int maxQueuedJobs = 8192;
+    protected int maxPendingJobs = 256;
+    protected int maxPendingBlocks = 512;
+
+    // =========================
     // API
     // =========================
     protected boolean apiEnabled = false;
@@ -378,6 +386,26 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
+    public long syncDownloadTimeout() {
+        return downloadTimeout;
+    }
+
+    @Override
+    public int syncMaxQueuedJobs() {
+        return maxQueuedJobs;
+    }
+
+    @Override
+    public int syncMaxPendingJobs() {
+        return maxPendingJobs;
+    }
+
+    @Override
+    public int syncMaxPendingBlocks() {
+        return maxPendingBlocks;
+    }
+
+    @Override
     public boolean apiEnabled() {
         return apiEnabled;
     }
@@ -537,6 +565,19 @@ public abstract class AbstractConfig implements Config {
                     break;
                 case "net.dnsSeeds.testNet":
                     netDnsSeedsTestNet = Arrays.asList(props.getProperty(name).trim().split(","));
+                    break;
+
+                case "sync.downloadTimeout":
+                    downloadTimeout = Long.parseLong(props.getProperty(name).trim());
+                    break;
+                case "sync.maxQueuedJobs":
+                    maxQueuedJobs = Integer.parseInt(props.getProperty(name).trim());
+                    break;
+                case "sync.maxPendingJobs":
+                    maxPendingJobs = Integer.parseInt(props.getProperty(name).trim());
+                    break;
+                case "sync.maxPendingBlocks":
+                    maxPendingBlocks = Integer.parseInt(props.getProperty(name).trim());
                     break;
 
                 case "api.enabled":

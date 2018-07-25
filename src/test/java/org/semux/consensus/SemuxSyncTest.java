@@ -12,22 +12,30 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.semux.core.Amount.Unit.SEM;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.reflect.Whitebox;
 import org.semux.TestUtils;
 import org.semux.config.Config;
@@ -42,6 +50,9 @@ import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.crypto.Key.Signature;
+import org.semux.net.Channel;
+import org.semux.net.msg.MessageQueue;
 import org.semux.rules.KernelRule;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
@@ -55,6 +66,8 @@ public class SemuxSyncTest {
 
     @Rule
     public TemporaryDatabaseRule temporaryDBRule = new TemporaryDatabaseRule();
+
+    public long validatorInterval;
 
     @Test
     public void testDuplicatedTransaction() {
@@ -206,5 +219,256 @@ public class SemuxSyncTest {
 
         // tests
         assertFalse(sync.validateBlock(block, chain.getAccountState(), chain.getDelegateState()));
+    }
+
+    @Test
+    public void testFastSync() throws Exception {
+        List<Key> keys = new ArrayList<>();
+        List<String> validators = new ArrayList<>();
+
+        for (int i = 0; i < 4; i++) {
+            keys.add(new Key());
+            validators.add(Hex.encode(keys.get(i).toAddress()));
+        }
+
+        BlockchainImpl chain = PowerMockito
+                .spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        doReturn(validators).when(chain).getValidators();
+        PowerMockito.doNothing().when(chain, "updateValidators", anyLong());
+        kernelRule.getKernel().setBlockchain(chain);
+
+        validatorInterval = kernelRule.getKernel().getConfig().getValidatorUpdateInterval();
+
+        SemuxSync sync = spy(new SemuxSync(kernelRule.getKernel()));
+        MessageQueue msgQueue = mock(MessageQueue.class);
+        Channel channel = mock(Channel.class);
+        when(channel.getRemoteAddress()).thenReturn(new InetSocketAddress("0.0.0.0", 5161));
+        when(channel.getMessageQueue()).thenReturn(msgQueue);
+
+        TreeSet<Pair<Block, Channel>> toProcess = new TreeSet<>(
+                Comparator.comparingLong(o -> o.getKey().getNumber()));
+
+        for (int i = 0; i < validatorInterval; i++) {
+            Block block = null;
+            if (i == 0) {
+                block = kernelRule.createBlock(Collections.emptyList());
+            } else {
+                block = kernelRule.createBlock(Collections.emptyList(), toProcess.last().getKey().getHeader());
+            }
+
+            Vote vote = null;
+            if (i == validatorInterval - 1) { // votes are validated for the last block in the set
+                vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
+                        block.getHash());
+            } else { // vote validation is skipped for all other blocks in the set
+                vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_REJECT, block.getNumber(), block.getView(),
+                        block.getHash());
+            }
+            List<Signature> votes = new ArrayList<>();
+            for (Key key : keys) {
+                votes.add(vote.sign(key).getSignature());
+            }
+
+            block.setVotes(votes);
+            toProcess.add(Pair.of(block, channel));
+            Thread.sleep(2); // to avoid duplicate time stamp
+        }
+
+        AtomicBoolean isRunning = Whitebox.getInternalState(sync, "isRunning");
+        isRunning.set(true);
+        Whitebox.setInternalState(sync, "toProcess", toProcess);
+        AtomicLong target = Whitebox.getInternalState(sync, "target");
+        target.set(validatorInterval + 1);
+
+        Whitebox.invokeMethod(sync, "process");
+        TreeSet<Pair<Block, Channel>> currentSet = Whitebox.getInternalState(sync, "currentSet");
+        Map<Long, Pair<Block, Channel>> toFinalize = Whitebox.getInternalState(sync, "toFinalize");
+
+        assert (toProcess.isEmpty());
+        assert (currentSet.isEmpty());
+        assert (toFinalize.size() == validatorInterval);
+        assertTrue(Whitebox.getInternalState(sync, "fastSync"));
+
+        for (int i = 0; i < validatorInterval; i++) {
+            Whitebox.invokeMethod(sync, "process");
+        }
+
+        assert (toFinalize.isEmpty());
+        assert (chain.getLatestBlockNumber() == validatorInterval);
+        assertFalse(Whitebox.getInternalState(sync, "fastSync"));
+    }
+
+    @Test
+    public void testNormalSync() throws Exception {
+        List<Key> keys = new ArrayList<>();
+        List<String> validators = new ArrayList<>();
+
+        for (int i = 0; i < 4; i++) {
+            keys.add(new Key());
+            validators.add(Hex.encode(keys.get(i).toAddress()));
+        }
+
+        BlockchainImpl chain = PowerMockito
+                .spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        doReturn(validators).when(chain).getValidators();
+        kernelRule.getKernel().setBlockchain(chain);
+
+        validatorInterval = kernelRule.getKernel().getConfig().getValidatorUpdateInterval();
+
+        SemuxSync sync = spy(new SemuxSync(kernelRule.getKernel()));
+        MessageQueue msgQueue = mock(MessageQueue.class);
+        Channel channel = mock(Channel.class);
+        when(channel.getRemoteAddress()).thenReturn(new InetSocketAddress("0.0.0.0", 5161));
+        when(channel.getMessageQueue()).thenReturn(msgQueue);
+
+        TreeSet<Pair<Block, Channel>> toProcess = new TreeSet<>(
+                Comparator.comparingLong(o -> o.getKey().getNumber()));
+
+        AtomicBoolean isRunning = Whitebox.getInternalState(sync, "isRunning");
+        isRunning.set(true);
+        Whitebox.setInternalState(sync, "toProcess", toProcess);
+        AtomicLong target = Whitebox.getInternalState(sync, "target");
+        target.set(validatorInterval - 1); // when the remaining number of blocks to sync < validatorInterval fastSync
+                                           // is not activated
+
+        Block block = kernelRule.createBlock(Collections.emptyList());
+        Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_REJECT, block.getNumber(), block.getView(),
+                block.getHash());
+        for (int i = 0; i < 4; i++) {
+            List<Signature> votes = new ArrayList<>();
+            for (Key key : keys) {
+                votes.add(vote.sign(key).getSignature());
+            }
+            block.setVotes(votes);
+        }
+
+        toProcess.add(Pair.of(block, channel));
+        Whitebox.invokeMethod(sync, "process");
+
+        // when fastSync is not activated, votes are validated for each block
+        assert (toProcess.isEmpty());
+        assertFalse(Whitebox.getInternalState(sync, "fastSync"));
+        assert (chain.getLatestBlockNumber() == 0);
+
+        vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
+                block.getHash());
+        for (int i = 0; i < 4; i++) {
+            List<Signature> votes = new ArrayList<>();
+            for (Key key : keys) {
+                votes.add(vote.sign(key).getSignature());
+            }
+            block.setVotes(votes);
+        }
+
+        toProcess.add(Pair.of(block, channel));
+        Whitebox.invokeMethod(sync, "process");
+
+        assert (toProcess.isEmpty());
+        assertFalse(Whitebox.getInternalState(sync, "fastSync"));
+        assert (chain.getLatestBlockNumber() == 1);
+
+        target.set(10 * validatorInterval); // fastSync is activated only at the beginning of a validator set
+        Whitebox.invokeMethod(sync, "process");
+
+        assertFalse(Whitebox.getInternalState(sync, "fastSync"));
+    }
+
+    @Test
+    public void testValidateSetHashes() throws Exception {
+        List<Key> keys = new ArrayList<>();
+        List<String> validators = new ArrayList<>();
+
+        for (int i = 0; i < 4; i++) {
+            keys.add(new Key());
+            validators.add(Hex.encode(keys.get(i).toAddress()));
+        }
+
+        BlockchainImpl chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        doReturn(validators).when(chain).getValidators();
+        kernelRule.getKernel().setBlockchain(chain);
+
+        validatorInterval = kernelRule.getKernel().getConfig().getValidatorUpdateInterval();
+
+        SemuxSync sync = spy(new SemuxSync(kernelRule.getKernel()));
+        Whitebox.setInternalState(sync, "lastBlockInSet", validatorInterval);
+
+        MessageQueue msgQueue = mock(MessageQueue.class);
+        Channel channel = mock(Channel.class);
+        when(channel.getRemoteAddress()).thenReturn(new InetSocketAddress("0.0.0.0", 5161));
+        when(channel.getMessageQueue()).thenReturn(msgQueue);
+
+        TreeSet<Pair<Block, Channel>> currentSet = new TreeSet<>(
+                Comparator.comparingLong(o -> o.getKey().getNumber()));
+
+        for (int i = 0; i < validatorInterval / 2; i++) {
+            Block block = null;
+            ;
+            if (i == 0) {
+                block = kernelRule.createBlock(Collections.emptyList());
+            } else {
+                block = kernelRule.createBlock(Collections.emptyList(), currentSet.last().getKey().getHeader());
+            }
+            currentSet.add(Pair.of(block, channel));
+        }
+
+        Whitebox.setInternalState(sync, "currentSet", currentSet);
+        Map<Long, Pair<Block, Channel>> toFinalize = Whitebox.getInternalState(sync, "toFinalize");
+        TreeSet<Long> toDownload = Whitebox.getInternalState(sync, "toDownload");
+
+        Whitebox.invokeMethod(sync, "validateSetHashes");
+
+        assert (currentSet.size() == validatorInterval / 2);
+        assert (toFinalize.isEmpty());
+
+        Block invalidBlock = kernelRule.createBlock(Collections.emptyList(), currentSet.last().getKey().getHeader());
+        Block validBlock = kernelRule.createBlock(Collections.emptyList(), currentSet.last().getKey().getHeader());
+        currentSet.add(Pair.of(validBlock, channel));
+
+        for (int i = 0; i < (int) (Math.ceil(validatorInterval / 2)) - 2; i++) {
+            Block block = kernelRule.createBlock(Collections.emptyList(), currentSet.last().getKey().getHeader());
+            currentSet.add(Pair.of(block, channel));
+        }
+
+        currentSet.remove(Pair.of(validBlock, channel));
+        currentSet.add(Pair.of(invalidBlock, channel));
+
+        Block lastBlock = kernelRule.createBlock(Collections.emptyList(), currentSet.last().getKey().getHeader());
+        currentSet.add(Pair.of(lastBlock, channel));
+
+        Whitebox.invokeMethod(sync, "validateSetHashes"); // last block votes are validated
+
+        assert (currentSet.size() == validatorInterval - 1);
+        assert (toFinalize.isEmpty());
+        assert (toDownload.contains(validatorInterval));
+
+        Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, lastBlock.getNumber(), lastBlock.getView(),
+                lastBlock.getHash());
+        for (int i = 0; i < 4; i++) {
+            List<Signature> votes = new ArrayList<>();
+            for (Key key : keys) {
+                votes.add(vote.sign(key).getSignature());
+            }
+            lastBlock.setVotes(votes);
+        }
+
+        currentSet.add(Pair.of(lastBlock, channel));
+        Whitebox.invokeMethod(sync, "validateSetHashes"); // invalid block is added back to the download queue
+
+        assert (currentSet.size() == validatorInterval / 2);
+        assert (toFinalize.size() == validatorInterval - currentSet.size() - 1);
+        assert (toDownload.contains(validatorInterval - toFinalize.size()));
+
+        Channel channel2 = new Channel();
+        currentSet.add(Pair.of(lastBlock, channel2));
+        Whitebox.invokeMethod(sync, "validateSetHashes"); // only one block with the same height is added to toFinalize
+
+        assert (currentSet.size() == validatorInterval / 2);
+        assert (toFinalize.size() == validatorInterval - currentSet.size() - 1);
+
+        currentSet.add(Pair.of(validBlock, channel));
+        Whitebox.invokeMethod(sync, "validateSetHashes");
+
+        assert (currentSet.isEmpty());
+        assert (toFinalize.size() == validatorInterval);
     }
 }
