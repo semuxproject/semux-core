@@ -7,6 +7,7 @@
 package org.semux.core;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,6 +69,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * Transaction queue.
      */
     private final LinkedList<Transaction> queue = new LinkedList<>();
+    private final HashSet<Transaction> queueSet = new HashSet<>();
 
     /**
      * Transaction pool.
@@ -155,8 +157,12 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @param tx
      */
     public synchronized void addTransaction(Transaction tx) {
-        if (queue.size() < QUEUE_MAX_SIZE && tx.validate(kernel.getConfig().network())) {
+        if (queue.size() < QUEUE_MAX_SIZE
+                && tx.validate(kernel.getConfig().network())
+                && !queueSet.contains(tx)) {
+
             queue.add(tx);
+            queueSet.add(tx);
         }
     }
 
@@ -265,6 +271,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         while (transactions.size() < TRANSACTIONS_MAX_SIZE && (tx = queue.poll()) != null) {
 
+            queueSet.remove(tx);
             // reject already executed transactions
             ByteArray key = ByteArray.of(tx.getHash());
             if (processed.getIfPresent(key) != null) {
