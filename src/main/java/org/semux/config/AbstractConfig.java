@@ -93,6 +93,8 @@ public abstract class AbstractConfig implements Config {
     protected int maxQueuedJobs = 8192;
     protected int maxPendingJobs = 256;
     protected int maxPendingBlocks = 512;
+    protected boolean fastSyncEnabled = true;
+    protected int fastSyncSafeGap = 1024;
 
     // =========================
     // API
@@ -406,6 +408,16 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
+    public boolean fastSyncEnabled() {
+        return fastSyncEnabled;
+    }
+
+    @Override
+    public int fastSyncSafeGap() {
+        return fastSyncSafeGap;
+    }
+
+    @Override
     public boolean apiEnabled() {
         return apiEnabled;
     }
@@ -578,6 +590,9 @@ public abstract class AbstractConfig implements Config {
                     break;
                 case "sync.maxPendingBlocks":
                     maxPendingBlocks = Integer.parseInt(props.getProperty(name).trim());
+                    break;
+                case "sync.fastSyncEnabled":
+                    fastSyncEnabled = Boolean.parseBoolean(props.getProperty(name).trim());
                     break;
 
                 case "api.enabled":

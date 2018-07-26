@@ -278,7 +278,7 @@ public class SemuxSyncTest {
         isRunning.set(true);
         Whitebox.setInternalState(sync, "toProcess", toProcess);
         AtomicLong target = Whitebox.getInternalState(sync, "target");
-        target.set(validatorInterval + 1);
+        target.set(validatorInterval + kernelRule.getKernel().getConfig().fastSyncSafeGap() + 1);
 
         Whitebox.invokeMethod(sync, "process");
         TreeSet<Pair<Block, Channel>> currentSet = Whitebox.getInternalState(sync, "currentSet");
@@ -328,8 +328,12 @@ public class SemuxSyncTest {
         isRunning.set(true);
         Whitebox.setInternalState(sync, "toProcess", toProcess);
         AtomicLong target = Whitebox.getInternalState(sync, "target");
-        target.set(validatorInterval - 1); // when the remaining number of blocks to sync < validatorInterval fastSync
-                                           // is not activated
+        target.set(validatorInterval + kernelRule.getKernel().getConfig().fastSyncSafeGap() - 1); // when the remaining
+                                                                                                  // number of blocks to
+                                                                                                  // sync <
+                                                                                                  // validatorInterval +
+                                                                                                  // safe gap fastSync
+        // is not activated
 
         Block block = kernelRule.createBlock(Collections.emptyList());
         Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_REJECT, block.getNumber(), block.getView(),
@@ -367,7 +371,10 @@ public class SemuxSyncTest {
         assertFalse(Whitebox.getInternalState(sync, "fastSync"));
         assert (chain.getLatestBlockNumber() == 1);
 
-        target.set(10 * validatorInterval); // fastSync is activated only at the beginning of a validator set
+        target.set(10 * validatorInterval + kernelRule.getKernel().getConfig().fastSyncSafeGap()); // fastSync is
+                                                                                                   // activated only at
+                                                                                                   // the beginning of a
+                                                                                                   // validator set
         Whitebox.invokeMethod(sync, "process");
 
         assertFalse(Whitebox.getInternalState(sync, "fastSync"));

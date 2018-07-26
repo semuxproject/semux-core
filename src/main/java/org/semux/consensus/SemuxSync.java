@@ -336,13 +336,13 @@ public class SemuxSync implements SyncManager {
             return; // This is important because stop() only notify
         }
 
-        // Perform fast sync only if all blocks in current validator sets have been
-        // forged
+        // If fast sync in enabled, perform fast sync only if
+        // target - (latest + #blocks in validator set) > safe gap
         synchronized (lock) {
-            if (!fastSync) {
-                // fastSync value is updated at the beginning of each set
+            if (config.fastSyncEnabled() && !fastSync) {
+                // fastSync value is updated at the beginning of each validator set
                 if (latest % config.getValidatorUpdateInterval() == 0) {
-                    if (target.get() >= latest + config.getValidatorUpdateInterval()) {
+                    if (target.get() > latest + config.getValidatorUpdateInterval() + config.fastSyncSafeGap()) {
                         toFinalize.clear();
                         currentSet.clear();
                         lastBlockInSet = latest + config.getValidatorUpdateInterval();
