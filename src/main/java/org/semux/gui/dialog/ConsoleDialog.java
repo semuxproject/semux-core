@@ -77,7 +77,6 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         this.setSize(800, 600);
         this.setLocationRelativeTo(parent);
 
-
         this.api = new org.semux.api.v2.SemuxApiImpl(gui.getKernel());
         for (Method m : org.semux.api.v2.api.SemuxApi.class.getMethods()) {
             MethodDescriptor md = parseMethod(m);
@@ -193,7 +192,8 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
         builder.append("\n");
 
-        return new MethodDescriptor(name, argumentTypes.toArray(new Class<?>[argumentTypes.size()]), builder.toString());
+        return new MethodDescriptor(name, argumentTypes.toArray(new Class<?>[argumentTypes.size()]),
+                builder.toString());
     }
 
     private static class MethodDescriptor {

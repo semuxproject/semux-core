@@ -42,7 +42,8 @@ public class Native {
             enabled = loadLibrary("/native/linux64/libsodium.so.23") && loadLibrary("/native/linux64/libcrypto.so");
             break;
         case MACOS:
-            enabled = loadLibrary("/native/macos64/libsodium.23.dylib") && loadLibrary("/native/macos64/libcrypto.dylib");
+            enabled = loadLibrary("/native/macos64/libsodium.23.dylib")
+                    && loadLibrary("/native/macos64/libcrypto.dylib");
             break;
         case WINDOWS:
             enabled = loadLibrary("/native/win64/libsodium.dll") && loadLibrary("/native/win64/crypto.dll");
