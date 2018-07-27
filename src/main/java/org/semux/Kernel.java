@@ -17,7 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
-import org.semux.api.http.SemuxApiService;
+import org.semux.api.SemuxApiService;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.consensus.SemuxBft;

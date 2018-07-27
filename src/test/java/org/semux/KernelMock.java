@@ -6,8 +6,6 @@
  */
 package org.semux;
 
-import java.net.InetSocketAddress;
-
 import org.semux.config.Config;
 import org.semux.consensus.SemuxBft;
 import org.semux.consensus.SemuxSync;
@@ -18,7 +16,7 @@ import org.semux.crypto.Key;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
-import org.semux.util.ApiClient;
+import org.semux.util.SimpleApiClient;
 
 /**
  * This kernel mock extends the {@link Kernel} by adding a bunch of setters of
@@ -121,11 +119,10 @@ public class KernelMock extends Kernel {
     /**
      * Returns an API client instance which connects to the mock kernel.
      *
-     * @return an {@link ApiClient} instance
+     * @return an {@link SimpleApiClient} instance
      */
-    public ApiClient getApiClient() {
-        Config config = getConfig();
-        return new ApiClient(new InetSocketAddress(config.apiListenIp(), config.apiListenPort()),
-                config.apiUsername(), config.apiPassword());
+    public SimpleApiClient getApiClient() {
+        Config c = getConfig();
+        return new SimpleApiClient(c.apiListenIp(), c.apiListenPort(), c.apiUsername(), c.apiPassword());
     }
 }

@@ -19,19 +19,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import javax.ws.rs.core.Response;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
-import org.semux.api.Version;
-import org.semux.api.v1_0_1.ApiHandlerResponse;
+import org.semux.api.ApiHandler;
+import org.semux.api.ApiVersion;
+import org.semux.api.SemuxApiService;
 import org.semux.rules.KernelRule;
 import org.semux.util.BasicAuth;
 
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
 
-@SuppressWarnings("deprecation")
 public class HttpHandlerTest {
 
     @Rule
@@ -56,6 +59,21 @@ public class HttpHandlerTest {
         ip = kernel.getConfig().apiListenIp();
         port = kernel.getConfig().apiListenPort();
         auth = BasicAuth.generateAuth(kernel.getConfig().apiUsername(), kernel.getConfig().apiPassword());
+
+        new Thread(() -> server.start(ip, port, new ApiHandler() {
+
+            @Override
+            public Response service(HttpMethod m, String u, Map<String, String> p, HttpHeaders h) {
+                uri = u;
+                params = p;
+                headers = h;
+
+                return Response.ok().entity("OK").build();
+            }
+        })).start();
+
+        // wait for server to boot up
+        await().until(() -> server.isRunning());
     }
 
     @After
@@ -63,28 +81,8 @@ public class HttpHandlerTest {
         server.stop();
     }
 
-    private void startServer(HttpChannelInitializer httpChannelInitializer) {
-        // wait for server to boot up
-        new Thread(() -> server.start(ip, port, httpChannelInitializer == null ? new HttpChannelInitializer() {
-            @Override
-            HttpHandler initHandler() {
-                return new HttpHandler(kernel.getConfig(), (m, u, p, h) -> {
-                    uri = u;
-                    params = p;
-                    headers = h;
-
-                    return new ApiHandlerResponse(true, "test");
-                });
-            }
-        } : httpChannelInitializer)).start();
-
-        await().until(() -> server.isRunning());
-    }
-
     @Test(expected = IOException.class)
     public void testAuth() throws IOException {
-        startServer(null);
-
         URL url = new URL("http://" + ip + ":" + port + "/getinfo");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("c", "d");
@@ -99,8 +97,6 @@ public class HttpHandlerTest {
 
     @Test
     public void testPOST() throws IOException {
-        startServer(null);
-
         URL url = new URL("http://" + ip + ":" + port + "/test?a=b");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("c", "d");
@@ -121,8 +117,6 @@ public class HttpHandlerTest {
 
     @Test
     public void testGET() throws IOException {
-        startServer(null);
-
         URL url = new URL("http://" + ip + ":" + port + "/test?a=b&e=f");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("c", "d");
@@ -139,14 +133,14 @@ public class HttpHandlerTest {
 
     @Test
     public void testGetStaticFiles() throws IOException {
-        startServer(null);
-
         Map<String, String> testCases = new HashMap<>();
-        testCases.put(server.getSwaggerUrl(), "text/html");
-        testCases.put(String.format("http://%s:%d/swagger-ui/swagger-ui.css", server.ip, server.port), "text/css");
-        testCases.put(String.format("http://%s:%d/swagger-ui/swagger-ui-bundle.js", server.ip, server.port),
+        testCases.put(server.getApiExplorerUrl(), "text/html");
+        testCases.put(String.format("http://%s:%d/swagger-ui/swagger-ui.css", server.getIp(), server.getPort()),
+                "text/css");
+        testCases.put(String.format("http://%s:%d/swagger-ui/swagger-ui-bundle.js", server.getIp(), server.getPort()),
                 "text/javascript");
-        testCases.put(String.format("http://%s:%d/swagger-ui/swagger-ui-standalone-preset.js", server.ip, server.port),
+        testCases.put(String
+                .format("http://%s:%d/swagger-ui/swagger-ui-standalone-preset.js", server.getIp(), server.getPort()),
                 "text/javascript");
 
         for (Map.Entry<String, String> e : testCases.entrySet()) {
@@ -169,9 +163,7 @@ public class HttpHandlerTest {
 
     @Test
     public void testGetStaticFiles404() throws IOException {
-        startServer(null);
-
-        URL url = new URL("http://" + ip + ":" + port + "/" + Version.v2_0_0.prefix + "/xx.html");
+        URL url = new URL("http://" + ip + ":" + port + "/" + ApiVersion.DEFAULT.prefix + "/xx.html");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("Authorization", auth);
 
@@ -180,8 +172,6 @@ public class HttpHandlerTest {
 
     @Test
     public void testKeepAlive() throws IOException {
-        startServer(null);
-
         for (int i = 0; i < 2; i++) {
             URL url = new URL("http://" + ip + ":" + port + "/");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();

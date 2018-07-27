@@ -9,7 +9,6 @@ package org.semux.bench;
 import static org.semux.core.Amount.Unit.MILLI_SEM;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,13 +16,14 @@ import java.util.Map;
 
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
-import org.semux.util.ApiClient;
 import org.semux.util.Bytes;
 import org.semux.util.ConsoleUtil;
+import org.semux.util.SimpleApiClient;
 import org.semux.util.TimeUtil;
 
 public class SemuxPerformance {
-    private static InetSocketAddress server = new InetSocketAddress("127.0.0.1", 5171);
+    private static String host = "127.0.0.1";
+    private static int port = 5171;
     private static String username = "";
     private static String password = "";
 
@@ -43,8 +43,8 @@ public class SemuxPerformance {
             params.put("data", Bytes.EMPTY_BYTES);
             params.put("password", password);
 
-            ApiClient api = new ApiClient(server, username, password);
-            String response = api.request("transfer", params);
+            SimpleApiClient api = new SimpleApiClient(host, port, username, password);
+            String response = api.post("/transaction/transfer", params);
             if (!response.contains("\"success\":true")) {
                 System.out.println(response);
                 return;

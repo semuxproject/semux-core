@@ -26,5 +26,5 @@ public abstract class HttpChannelInitializer extends ChannelInitializer<SocketCh
         p.addLast(initHandler());
     }
 
-    abstract HttpHandler initHandler();
+    public abstract HttpHandler initHandler();
 }

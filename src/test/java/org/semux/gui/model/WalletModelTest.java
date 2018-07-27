@@ -21,8 +21,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
-import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Amount.Unit.NANO_SEM;
 
 import java.awt.event.ActionListener;
 import java.io.IOException;

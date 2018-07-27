@@ -15,11 +15,11 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
-import static org.semux.core.Amount.Unit.NANO_SEM;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sub;
 import static org.semux.core.Amount.sum;
+import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Amount.Unit.SEM;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,11 +43,10 @@ import org.semux.IntegrationTest;
 import org.semux.Kernel;
 import org.semux.Kernel.State;
 import org.semux.KernelMock;
-import org.semux.api.v1_0_1.response.DoTransactionResponse;
-import org.semux.api.v1_0_1.response.GetAccountResponse;
-import org.semux.api.v1_0_1.response.GetAccountTransactionsResponse;
-import org.semux.api.v1_0_1.response.GetDelegateResponse;
-import org.semux.api.v1_0_1.response.Types;
+import org.semux.api.v2.model.DoTransactionResponse;
+import org.semux.api.v2.model.GetAccountResponse;
+import org.semux.api.v2.model.GetAccountTransactionsResponse;
+import org.semux.api.v2.model.GetDelegateResponse;
 import org.semux.core.Amount;
 import org.semux.core.Genesis;
 import org.semux.core.TransactionType;
@@ -57,15 +56,13 @@ import org.semux.net.NodeManager;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.SemuxChannelInitializer;
 import org.semux.rules.KernelRule;
-import org.semux.util.ApiClient;
 import org.semux.util.Bytes;
+import org.semux.util.SimpleApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-// TODO: migrate to API v2
-@SuppressWarnings("deprecation")
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class })
@@ -167,9 +164,9 @@ public class TransactTest {
         // send transaction
         logger.info("Making transfer request", params);
         DoTransactionResponse response = new ObjectMapper().readValue(
-                kernelPremine.getApiClient().request("transfer", params),
+                kernelPremine.getApiClient().post("/transaction/transfer", params),
                 DoTransactionResponse.class);
-        assertTrue(response.success);
+        assertTrue(response.isSuccess());
 
         // wait for transaction to be processed
         logger.info("Waiting for the transaction to be processed...");
@@ -204,9 +201,9 @@ public class TransactTest {
         // send transaction
         logger.info("Making delegate request", params);
         DoTransactionResponse response = new ObjectMapper().readValue(
-                kernelPremine.getApiClient().request("delegate", params),
+                kernelPremine.getApiClient().post("/transaction/delegate", params),
                 DoTransactionResponse.class);
-        assertTrue(response.success);
+        assertTrue(response.isSuccess());
 
         // wait for transaction processing
         logger.info("Waiting for the transaction to be processed...");
@@ -238,9 +235,9 @@ public class TransactTest {
         // send vote transaction
         logger.info("Making vote request", params);
         DoTransactionResponse voteResponse = new ObjectMapper().readValue(
-                kernelPremine.getApiClient().request("vote", params),
+                kernelPremine.getApiClient().post("/transaction/vote", params),
                 DoTransactionResponse.class);
-        assertTrue(voteResponse.success);
+        assertTrue(voteResponse.isSuccess());
 
         // wait for the vote transaction to be processed
         logger.info("Waiting for the vote transaction to be processed...");
@@ -263,9 +260,9 @@ public class TransactTest {
         params.put("value", unvotes.getNano());
         params.put("fee", fee.getNano());
         DoTransactionResponse unvoteResponse = new ObjectMapper().readValue(
-                kernelPremine.getApiClient().request("unvote", params),
+                kernelPremine.getApiClient().post("/transaction/unvote", params),
                 DoTransactionResponse.class);
-        assertTrue(unvoteResponse.success);
+        assertTrue(unvoteResponse.isSuccess());
 
         // wait for the vote transaction to be processed
         logger.info("Waiting for the unvote transaction to be processed...");
@@ -298,13 +295,13 @@ public class TransactTest {
     private void assertLatestTransaction(KernelMock kernel, byte[] address,
             TransactionType type, byte[] from, byte[] to, Amount value, Amount fee, byte[] data)
             throws IOException {
-        Types.TransactionType result = latestTransactionOf(kernel, address);
-        assertEquals(type.name(), result.type);
-        assertEquals(Hex.encode0x(from), result.from);
-        assertEquals(Hex.encode0x(to), result.to);
-        assertEquals(value, NANO_SEM.of(result.value));
-        assertEquals(fee, NANO_SEM.of(result.fee));
-        assertEquals(Hex.encode0x(data), result.data);
+        org.semux.api.v2.model.TransactionType result = latestTransactionOf(kernel, address);
+        assertEquals(type.name(), result.getType());
+        assertEquals(Hex.encode0x(from), result.getFrom());
+        assertEquals(Hex.encode0x(to), result.getTo());
+        assertEquals(value, NANO_SEM.of(Long.parseLong(result.getValue())));
+        assertEquals(fee, NANO_SEM.of(Long.parseLong(result.getFee())));
+        assertEquals(Hex.encode0x(data), result.getData());
     }
 
     /**
@@ -319,10 +316,10 @@ public class TransactTest {
         GetDelegateResponse getDelegateResponse = new ObjectMapper().readValue(
                 kernelMock
                         .getApiClient()
-                        .request("get_delegate", "address", Hex.encode0x(address)),
+                        .get("/delegate", "address", Hex.encode0x(address)),
                 GetDelegateResponse.class);
-        assertTrue(getDelegateResponse.success);
-        assertEquals(votes, NANO_SEM.of(getDelegateResponse.delegate.votes));
+        assertTrue(getDelegateResponse.isSuccess());
+        assertEquals(votes, NANO_SEM.of(Long.parseLong(getDelegateResponse.getResult().getVotes())));
     }
 
     /**
@@ -334,14 +331,13 @@ public class TransactTest {
      */
     private Callable<Amount> availableOf(KernelMock kernelMock, byte[] address) {
         return () -> {
-            ApiClient apiClient = kernelMock.getApiClient();
+            SimpleApiClient apiClient = kernelMock.getApiClient();
 
             GetAccountResponse response = new ObjectMapper().readValue(
-                    apiClient.request("get_account",
-                            "address", address),
+                    apiClient.get("/account", "address", address),
                     GetAccountResponse.class);
 
-            return NANO_SEM.of(response.account.available);
+            return NANO_SEM.of(Long.parseLong(response.getResult().getAvailable()));
         };
     }
 
@@ -354,18 +350,18 @@ public class TransactTest {
      * @return
      * @throws IOException
      */
-    private Types.TransactionType latestTransactionOf(KernelMock kernel, byte[] address)
+    private org.semux.api.v2.model.TransactionType latestTransactionOf(KernelMock kernel, byte[] address)
             throws IOException {
-        ApiClient apiClient = kernel.getApiClient();
+        SimpleApiClient apiClient = kernel.getApiClient();
 
         GetAccountTransactionsResponse response = new ObjectMapper().readValue(
-                apiClient.request("get_account_transactions",
+                apiClient.get("/account/transactions",
                         "address", address,
                         "from", 0,
                         "to", 1000),
                 GetAccountTransactionsResponse.class);
 
-        return response.transactions.get(response.transactions.size() - 1);
+        return response.getResult().get(response.getResult().size() - 1);
     }
 
     /**
