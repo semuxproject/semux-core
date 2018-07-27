@@ -32,26 +32,6 @@
         {"basicAuth": []}
     ],
     "paths" : {
-        "/" : {
-            "get" : {
-                "tags": [
-                  "semux"
-                ],
-                "summary" : "Get root",
-                "operationId" : "getRoot",
-                "produces" : [
-                    "application/json"
-                ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetRootResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/node" : {
             "post" : {
                 "tags": [

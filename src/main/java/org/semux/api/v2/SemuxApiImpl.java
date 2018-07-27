@@ -46,7 +46,6 @@ import org.semux.api.v2.model.GetLatestBlockNumberResponse;
 import org.semux.api.v2.model.GetLatestBlockResponse;
 import org.semux.api.v2.model.GetPeersResponse;
 import org.semux.api.v2.model.GetPendingTransactionsResponse;
-import org.semux.api.v2.model.GetRootResponse;
 import org.semux.api.v2.model.GetSyncingProgressResponse;
 import org.semux.api.v2.model.GetTransactionLimitsResponse;
 import org.semux.api.v2.model.GetTransactionResponse;
@@ -502,14 +501,6 @@ public final class SemuxApiImpl implements SemuxApi {
                 .map(pendingTransaction -> pendingTransaction.transaction)
                 .map(TypeFactory::pendingTransactionType)
                 .collect(Collectors.toList()));
-        resp.setSuccess(true);
-        return Response.ok().entity(resp).build();
-    }
-
-    @Override
-    public Response getRoot() {
-        GetRootResponse resp = new GetRootResponse();
-        resp.setMessage("Semux API Works!");
         resp.setSuccess(true);
         return Response.ok().entity(resp).build();
     }

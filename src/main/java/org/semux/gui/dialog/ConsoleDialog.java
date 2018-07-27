@@ -114,7 +114,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
         String command = commandParams[0];
 
-        // console only supports string parameters;
+        // TODO: fix the boolean type support
         int numParams = commandParams.length - 1;
         Class<?>[] classes = new Class[numParams];
         for (int i = 0; i < numParams; i++) {
@@ -162,7 +162,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         builder.append(method.getName());
         for (Parameter parameter : method.getParameters()) {
 
-            if (!parameter.getType().equals(String.class)) {
+            if (!parameter.getType().equals(String.class) && !parameter.getType().equals(Boolean.class)) {
                 // we only currently support string types
                 return null;
             }

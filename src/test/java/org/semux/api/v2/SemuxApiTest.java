@@ -86,7 +86,6 @@ import org.semux.api.v2.model.GetLatestBlockNumberResponse;
 import org.semux.api.v2.model.GetLatestBlockResponse;
 import org.semux.api.v2.model.GetPeersResponse;
 import org.semux.api.v2.model.GetPendingTransactionsResponse;
-import org.semux.api.v2.model.GetRootResponse;
 import org.semux.api.v2.model.GetSyncingProgressResponse;
 import org.semux.api.v2.model.GetTransactionLimitsResponse;
 import org.semux.api.v2.model.GetTransactionResponse;
@@ -430,12 +429,6 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
         assertThat(response.getResult()).hasSize(1);
-    }
-
-    @Test
-    public void getRootTest() {
-        GetRootResponse response = api.getRoot();
-        assertNotNull(response);
     }
 
     @Test
