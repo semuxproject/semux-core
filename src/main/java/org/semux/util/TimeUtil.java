@@ -92,7 +92,7 @@ public class TimeUtil {
                 // break from retry loop
                 return;
             } catch (IOException e) {
-                logger.warn("Unable to retrieve NTP time", e);
+                logger.warn("Unable to retrieve NTP time");
             } finally {
                 client.close();
             }
