@@ -20,7 +20,9 @@ import java.util.Map;
  */
 public enum ApiVersion {
 
+    // no longer supported
     v1_0_0("v1.0.0"),
+    v1_0_1("v1.0.1"),
 
     v2_0_0("v2.0.0"),
     v2_1_0("v2.1.0");

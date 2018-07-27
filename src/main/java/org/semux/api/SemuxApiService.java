@@ -45,14 +45,14 @@ public class SemuxApiService {
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
-    private HttpHandler handler;
+    private ApiHandler apiHandler;
 
     private String ip;
     private int port;
 
     public SemuxApiService(Kernel kernel) {
         this.kernel = kernel;
-        this.handler = new HttpHandler(kernel, new ApiHandlerImpl(kernel));
+        this.apiHandler = new ApiHandlerImpl(kernel);
     }
 
     /**
@@ -69,7 +69,7 @@ public class SemuxApiService {
      * @param port
      */
     public void start(String ip, int port) {
-        start(ip, port, handler);
+        start(ip, port, apiHandler);
     }
 
     /**
@@ -78,9 +78,9 @@ public class SemuxApiService {
      *
      * @param ip
      * @param port
-     * @param httpHandler
+     * @param apiHandler
      */
-    public void start(String ip, int port, HttpHandler httpHandler) {
+    public void start(String ip, int port, ApiHandler apiHandler) {
         try {
             this.ip = ip;
             this.port = port;
@@ -91,13 +91,13 @@ public class SemuxApiService {
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO)).childHandler(new HttpChannelInitializer() {
                 public HttpHandler initHandler() {
-                    return httpHandler;
+                    return new HttpHandler(kernel, apiHandler);
                 }
             });
 
             logger.info("Starting API server: address = {}:{}", ip, port);
             channel = b.bind(ip, port).sync().channel();
-            logger.info("API server started. Explorer: {}, Base URL: {}", getApiExplorerUrl(), getApiBaseUrl());
+            logger.info("API server started. Base URL: {}, Explorer: {}", getApiBaseUrl(), getApiExplorerUrl());
         } catch (Exception e) {
             logger.error("Failed to start API server", e);
         }

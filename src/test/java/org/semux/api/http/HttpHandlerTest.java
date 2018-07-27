@@ -26,12 +26,14 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
+import org.semux.api.ApiHandler;
 import org.semux.api.ApiVersion;
 import org.semux.api.SemuxApiService;
 import org.semux.rules.KernelRule;
 import org.semux.util.BasicAuth;
 
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
 
 public class HttpHandlerTest {
 
@@ -58,13 +60,16 @@ public class HttpHandlerTest {
         port = kernel.getConfig().apiListenPort();
         auth = BasicAuth.generateAuth(kernel.getConfig().apiUsername(), kernel.getConfig().apiPassword());
 
-        new Thread(() -> server.start(ip, port, new HttpHandler(kernel.getConfig(), (m, u, p, h) -> {
-            uri = u;
-            params = p;
-            headers = h;
+        new Thread(() -> server.start(ip, port, new ApiHandler() {
 
-            return Response.ok().entity("OK").build();
-        }))).start();
+            @Override public Response service(HttpMethod m, String u, Map<String, String> p, HttpHeaders h) {
+                uri = u;
+                params = p;
+                headers = h;
+
+                return Response.ok().entity("OK").build();
+            }
+        })).start();
 
         // wait for server to boot up
         await().until(() -> server.isRunning());
