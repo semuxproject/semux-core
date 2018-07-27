@@ -66,16 +66,18 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpHandler.class);
 
-    protected static final int MAX_BODY_SIZE = 512 * 1024; // 512KB
+    public static final String INTERNAL_SERVER_ERROR_RESPONSE = "{\"success\":false,\"message\":\"500 Internal Server Error\"}";
+    public static final String NOT_FOUND_RESPONSE = "{\"success\":false,\"message\":\"404 Not Found\"}";
+    public static final String BAD_REQUEST_RESPONSE = "{\"success\":false,\"message\":\"400 Bad Request\"}";
+
+    public static final int MAX_BODY_SIZE = 512 * 1024; // 512KB
+
     private static final Charset CHARSET = CharsetUtil.UTF_8;
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap(
             HttpHandler.class.getResourceAsStream("/org/semux/api/mime.types"));
 
     private static final String JSON_CONTENT_TYPE = "application/json; charset=UTF-8";
-    private static final String INTERNAL_SERVER_ERROR_RESPONSE = "{\"success\":false,\"message\":\"500 Internal Server Error\"}";
-    private static final String NOT_FOUND_RESPONSE = "{\"success\":false,\"message\":\"404 Not Found\"}";
-    private static final String BAD_REQUEST_RESPONSE = "{\"success\":false,\"message\":\"400 Bad Request\"}";
 
     private static final Pattern STATIC_FILE_PATTERN = Pattern.compile("^.+\\.(html|json|js|css|png)$");
 
@@ -99,9 +101,9 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
      * For testing only.
      *
      * @param config
-     *         semux config instance.
+     *            semux config instance.
      * @param apiHandler
-     *         a customized ApiHandler for testing purpose.
+     *            a customized ApiHandler for testing purpose.
      */
     protected HttpHandler(Config config, ApiHandler apiHandler) {
         this.config = config;

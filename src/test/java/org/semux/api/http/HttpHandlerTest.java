@@ -62,7 +62,8 @@ public class HttpHandlerTest {
 
         new Thread(() -> server.start(ip, port, new ApiHandler() {
 
-            @Override public Response service(HttpMethod m, String u, Map<String, String> p, HttpHeaders h) {
+            @Override
+            public Response service(HttpMethod m, String u, Map<String, String> p, HttpHeaders h) {
                 uri = u;
                 params = p;
                 headers = h;
@@ -139,7 +140,7 @@ public class HttpHandlerTest {
         testCases.put(String.format("http://%s:%d/swagger-ui/swagger-ui-bundle.js", server.getIp(), server.getPort()),
                 "text/javascript");
         testCases.put(String
-                        .format("http://%s:%d/swagger-ui/swagger-ui-standalone-preset.js", server.getIp(), server.getPort()),
+                .format("http://%s:%d/swagger-ui/swagger-ui-standalone-preset.js", server.getIp(), server.getPort()),
                 "text/javascript");
 
         for (Map.Entry<String, String> e : testCases.entrySet()) {

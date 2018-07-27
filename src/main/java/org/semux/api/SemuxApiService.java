@@ -90,10 +90,10 @@ public class SemuxApiService {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO)).childHandler(new HttpChannelInitializer() {
-                public HttpHandler initHandler() {
-                    return new HttpHandler(kernel, apiHandler);
-                }
-            });
+                        public HttpHandler initHandler() {
+                            return new HttpHandler(kernel, apiHandler);
+                        }
+                    });
 
             logger.info("Starting API server: address = {}:{}", ip, port);
             channel = b.bind(ip, port).sync().channel();
