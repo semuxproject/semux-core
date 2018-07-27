@@ -22,17 +22,13 @@ api.password = YOUR_API_PASSWORD
 
 The base unit of Semux API is Nano SEM (10<sup>-9</sup> SEM)
 
-## Documentation
-
-Semux API documentation can be found at: https://semuxproject.github.io/semux-api-docs/
-
 ## API Explorer
 
-Once you've successfully started Semux API server, a Swagger UI page is available locally as an API explorer at: http://localhost:5171/v2.1.0/swagger.html
+Once you've successfully started Semux API server, a Swagger UI page is available locally as an API explorer at: http://localhost:5171/index.html
 
 ## API Clients
 
-Semux provides a [Swagger API Spec in JSON](../src/main/resources/org/semux/api/v2_1_0/swagger.json) since API version 2. You can either generate an API client by yourself using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) or use the following pre-generated clients:
+Semux provides a [Swagger API Spec in JSON](../src/main/resources/org/semux/api/swagger/v2.1.0.json) since API version 2. You can either generate an API client by yourself using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) or use the following pre-generated clients:
 
 - Javascript: https://github.com/semuxproject/semux-js
 - PHP: https://github.com/semuxproject/semux-php
