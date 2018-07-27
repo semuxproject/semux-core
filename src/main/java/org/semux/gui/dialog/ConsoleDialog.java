@@ -15,7 +15,10 @@ import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -26,7 +29,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import org.semux.api.v2.client.SemuxApi;
 import org.semux.api.v2.SemuxApiImpl;
 import org.semux.gui.SemuxGui;
 import org.semux.message.GuiMessages;
@@ -43,11 +45,12 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
     public static final String HELP = "help";
 
-    private final transient SemuxApiImpl api;
-
     private final JTextArea console;
     private final JTextField input;
-    private final ObjectMapper mapper = new ObjectMapper();
+
+    private final transient SemuxApiImpl api;
+    private final transient ObjectMapper mapper = new ObjectMapper();
+    private final transient Map<String, MethodDescriptor> methods = new TreeMap<>();
 
     public ConsoleDialog(SemuxGui gui, JFrame parent) {
 
@@ -73,7 +76,13 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
         this.setSize(800, 600);
         this.setLocationRelativeTo(parent);
-        api = new SemuxApiImpl(gui.getKernel());
+
+
+        this.api = new org.semux.api.v2.SemuxApiImpl(gui.getKernel());
+        for (Method m : org.semux.api.v2.api.SemuxApi.class.getMethods()) {
+            MethodDescriptor md = parseMethod(m);
+            this.methods.put(md.name, md);
+        }
 
         console.append(GuiMessages.get("ConsoleHelp", HELP));
         addWindowListener(new WindowAdapter() {
@@ -96,7 +105,9 @@ public class ConsoleDialog extends JDialog implements ActionListener {
             printHelp();
             break;
         default:
-            callApi(command);
+            console.append("\n");
+            console.append(callApi(command));
+            console.append("\n");
             break;
 
         }
@@ -107,50 +118,51 @@ public class ConsoleDialog extends JDialog implements ActionListener {
     /**
      * Use reflection to call methods
      *
-     * @param commandString
+     * @param input
      */
-    private void callApi(String commandString) {
-        String[] commandParams = commandString.split(" ");
+    protected String callApi(String input) {
+        String[] commandArguments = input.split(" ");
+        String command = commandArguments[0];
 
-        String command = commandParams[0];
-
-        // TODO: fix the boolean type support
-        int numParams = commandParams.length - 1;
-        Class<?>[] classes = new Class[numParams];
-        for (int i = 0; i < numParams; i++) {
-            classes[i] = String.class;
+        MethodDescriptor md = methods.get(command);
+        if (md == null) {
+            return GuiMessages.get("UnknownMethod", command);
         }
 
         try {
-            Method method = api.getClass().getMethod(command, classes);
-            Object[] params = Arrays.copyOfRange(commandParams, 1, commandParams.length);
-            Response response = (Response) method.invoke(api, params);
+            Method method = api.getClass().getMethod(command, md.argumentTypes);
+            Object[] arguments = new Object[commandArguments.length - 1];
+            for (int i = 0; i < arguments.length; i++) {
+                if (md.argumentTypes[i] == Boolean.class) {
+                    arguments[i] = Boolean.parseBoolean(commandArguments[i + 1]);
+                } else {
+                    arguments[i] = commandArguments[i + 1];
+                }
+            }
 
+            Response response = (Response) method.invoke(api, arguments);
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
-            console.append("\n");
-            console.append(mapper.writeValueAsString(response.getEntity()));
-            console.append("\n");
+
+            return mapper.writeValueAsString(response.getEntity());
         } catch (NoSuchMethodException e) {
-            console.append(GuiMessages.get("UnknownMethod", command));
+            return GuiMessages.get("UnknownMethod", command);
         } catch (InvocationTargetException | IllegalAccessException | JsonProcessingException e) {
-            console.append(GuiMessages.get("MethodError", command));
+            return GuiMessages.get("MethodError", command);
         }
     }
 
     private void printHelp() {
-        Method[] apiMethods = SemuxApi.class.getMethods();
-        for (Method method : apiMethods) {
-            String methodString = getMethodString(method);
-
-            if (methodString != null) {
-                console.append(methodString);
-            }
+        for (MethodDescriptor md : methods.values()) {
+            console.append(md.description);
         }
 
         console.append("\n");
     }
 
-    private String getMethodString(Method method) {
+    private MethodDescriptor parseMethod(Method method) {
+        String name = method.getName();
+        List<Class<?>> argumentTypes = new ArrayList<>();
+
         // get the annotation
         Path path = method.getAnnotation(Path.class);
         if (path == null) {
@@ -161,11 +173,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
         builder.append(method.getName());
         for (Parameter parameter : method.getParameters()) {
-
-            if (!parameter.getType().equals(String.class) && !parameter.getType().equals(Boolean.class)) {
-                // we only currently support string types
-                return null;
-            }
+            argumentTypes.add(parameter.getType());
 
             builder.append(" ");
             QueryParam param = parameter.getAnnotation(QueryParam.class);
@@ -184,6 +192,19 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         }
 
         builder.append("\n");
-        return builder.toString();
+
+        return new MethodDescriptor(name, argumentTypes.toArray(new Class<?>[argumentTypes.size()]), builder.toString());
+    }
+
+    private static class MethodDescriptor {
+        private String name;
+        private Class<?>[] argumentTypes;
+        private String description;
+
+        public MethodDescriptor(String name, Class<?>[] argumentTypes, String description) {
+            this.name = name;
+            this.argumentTypes = argumentTypes;
+            this.description = description;
+        }
     }
 }
