@@ -38,7 +38,6 @@ public class TransactionDialog extends JDialog {
         JLabel lblNonce = new JLabel(GuiMessages.get("Nonce") + ":");
         JLabel lblTimestamp = new JLabel(GuiMessages.get("Timestamp") + ":");
         JLabel lblData = new JLabel(GuiMessages.get("Data") + ":");
-        JLabel lblDataDecoded = new JLabel(GuiMessages.get("DataDecoded") + ":");
 
         JTextArea hash = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getHash()));
         hash.setName("hashText");
@@ -62,11 +61,6 @@ public class TransactionDialog extends JDialog {
         data.setLineWrap(true);
         JScrollPane dataScroll = new JScrollPane(data);
 
-        JTextArea dataDecoded = SwingUtil.textAreaWithCopyPopup(Bytes.toString(tx.getData()));
-        dataDecoded.setName("dataDecodedText");
-        dataDecoded.setLineWrap(true);
-        JScrollPane dataDecodedScroll = new JScrollPane(dataDecoded);
-
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());
         groupLayout.setHorizontalGroup(
@@ -74,7 +68,6 @@ public class TransactionDialog extends JDialog {
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGap(42)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                        .addComponent(lblDataDecoded)
                         .addComponent(lblData)
                         .addComponent(lblTimestamp)
                         .addComponent(lblNonce)
@@ -94,8 +87,7 @@ public class TransactionDialog extends JDialog {
                         .addComponent(fee)
                         .addComponent(nonce)
                         .addComponent(timestamp)
-                        .addComponent(dataScroll, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(dataDecodedScroll, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(dataScroll, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap(19, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
@@ -137,10 +129,6 @@ public class TransactionDialog extends JDialog {
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblData)
                         .addComponent(dataScroll, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(ComponentPlacement.UNRELATED)
-                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(lblDataDecoded)
-                        .addComponent(dataDecodedScroll, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap(20, Short.MAX_VALUE))
         );
         getContentPane().setLayout(groupLayout);

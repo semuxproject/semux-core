@@ -68,7 +68,6 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
         dialog.label("nonceText").requireVisible().requireText("0");
         dialog.label("timestampText").requireVisible().requireText(SwingUtil.formatTimestamp(now));
         dialog.textBox("dataText").requireVisible().requireText(Hex.encode0x(data));
-        dialog.textBox("dataDecodedText").requireVisible().requireText(Bytes.toString(data));
     }
 
     @Override
