@@ -4,6 +4,4 @@
 cd "$(dirname "$0")"
 
 # start kernel
-java -cp semux.jar org.semux.wrapper.Wrapper \
---jvmoptions "" \
---cli "$@"
+java -cp semux.jar org.semux.Main --cli "$@"
