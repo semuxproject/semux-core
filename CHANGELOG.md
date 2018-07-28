@@ -1,5 +1,28 @@
 # Change Log
 
+## [v1.3.0](https://github.com/semuxproject/semux-core/tree/v1.3.0) (2018-08-05)
+
+This release fix the validator timestamp issue and introduces fast syncing.
+
+**Bugfixes:**
+- GUI
+    - Fixed the sender address order issue
+- Tools
+    - Fixed windows unicode directories 
+
+**Features and enhancements:**
+- Consensus
+    - Changed the creation of block proposal timestamp
+    - Introduced fast syncing
+- Core
+    - Introduced NTP time adjustment
+    - Removed 32-bit system support
+- API
+    - Removed API v1
+- Net
+    - Added filter of duplicated transactions
+
+
 ## [v1.2.0](https://github.com/semuxproject/semux-core/tree/v1.2.0) (2018-05-25)
 
 This release introduces Java 10 support plus a few API & documentation improvements for third-party service integration & light wallet implementation.
