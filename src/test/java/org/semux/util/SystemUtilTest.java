@@ -55,6 +55,16 @@ public class SystemUtilTest {
     }
 
     @Test
+    public void testGetTotalMemorySize() {
+        long size = SystemUtil.getTotalMemorySize();
+        logger.info("Total memory size = {} MB", size / 1024L / 1024L);
+
+        assertTrue(size > 0);
+        assertTrue(size < 64L * 1024L * 1024L * 1024L);
+        assertTrue(size != 0xffffffffL);
+    }
+
+    @Test
     public void testGetUsedHeapSize() {
         long size = SystemUtil.getUsedHeapSize();
         logger.info("Used heap size = {} MB", size / 1024L / 1024L);

@@ -238,8 +238,8 @@ public class SystemUtil {
         }
 
         // check memory
-        if (Runtime.getRuntime().maxMemory() < 2L * 1024L * 1024L * 1024L) {
-            logger.info("Max allowed JVM heap memory size = {} MB", Runtime.getRuntime().maxMemory() / 1024 / 1024);
+        if (getTotalMemorySize() < 3L * 1024L * 1024L * 1024L) {
+            logger.info("Total physical memory size = {} MB", getTotalMemorySize() / 1024 / 1024);
             return false;
         }
 
@@ -277,6 +277,16 @@ public class SystemUtil {
     public static long getAvailableMemorySize() {
         SystemInfo systemInfo = new SystemInfo();
         return systemInfo.getHardware().getMemory().getAvailable();
+    }
+
+    /**
+     * Returns the total physical memory size in bytes
+     *
+     * @return
+     */
+    public static long getTotalMemorySize() {
+        SystemInfo systemInfo = new SystemInfo();
+        return systemInfo.getHardware().getMemory().getTotal();
     }
 
     /**
