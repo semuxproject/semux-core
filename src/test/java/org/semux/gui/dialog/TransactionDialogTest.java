@@ -28,7 +28,6 @@ import org.semux.crypto.Key;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
-import org.semux.util.Bytes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionDialogTest extends AssertJSwingJUnitTestCase {

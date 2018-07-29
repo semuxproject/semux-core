@@ -54,8 +54,16 @@ public class FileUtil {
         }
     }
 
+    /**
+     * Check if the file's permission is secure.
+     *
+     * @param file
+     * @return
+     * @throws IOException
+     */
     public static boolean isPosixPermissionSecured(File file) throws IOException {
-        return Files.getPosixFilePermissions(file.toPath()).equals(POSIX_SECURED_PERMISSIONS);
+        Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(file.toPath());
+        return permissions.containsAll(POSIX_SECURED_PERMISSIONS) && POSIX_SECURED_PERMISSIONS.containsAll(permissions);
     }
 
     private FileUtil() {

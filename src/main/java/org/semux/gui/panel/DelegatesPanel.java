@@ -169,9 +169,9 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 .addGroup(groupLayout.createSequentialGroup()
                     .addComponent(selectFrom, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
-                    .addComponent(votePanel, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(votePanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
-                    .addComponent(delegateRegistrationPanel, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(delegateRegistrationPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addGap(18)
                     .addComponent(label)
                     .addContainerGap(174, Short.MAX_VALUE))
@@ -228,17 +228,18 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         groupLayout2.setVerticalGroup(
             groupLayout2.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout2.createSequentialGroup()
-                    .addGap(16)
+                    .addGap(12)
                     .addGroup(groupLayout2.createParallelGroup(Alignment.BASELINE)
                         .addComponent(labelSelectedDelegate))
-                    .addGap(16)
+                    .addGap(12)
                     .addGroup(groupLayout2.createParallelGroup(Alignment.BASELINE)
                         .addComponent(btnVote)
                         .addComponent(textVote, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
-                    .addGap(16)
+                    .addGap(12)
                     .addGroup(groupLayout2.createParallelGroup(Alignment.BASELINE)
                         .addComponent(textUnvote, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnUnvote)))
+                        .addComponent(btnUnvote))
+                    .addGap(12))
         );
         votePanel.setLayout(groupLayout2);
         // @formatter:on
@@ -274,10 +275,11 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         groupLayout3.setVerticalGroup(
             groupLayout3.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout3.createSequentialGroup()
-                    .addGap(16)
+                    .addGap(12)
                     .addComponent(textName, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                    .addGap(16)
-                    .addComponent(btnDelegate))
+                    .addGap(12)
+                    .addComponent(btnDelegate)
+                    .addGap(12))
         );
         delegateRegistrationPanel.setLayout(groupLayout3);
         // @formatter:on
