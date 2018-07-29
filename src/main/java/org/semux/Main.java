@@ -30,9 +30,6 @@ public class Main {
             }
         }
 
-        System.setProperty("log4j2.garbagefreeThreadContextMap", "true");
-        System.setProperty("log4j2.shutdownHookEnabled", "false");
-        System.setProperty("log4j2.disableJmx", "true");
         if (startGui) {
             SemuxGui.main(startArgs.toArray(new String[0]));
         } else {
