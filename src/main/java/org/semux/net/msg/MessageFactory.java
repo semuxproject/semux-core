@@ -25,23 +25,30 @@ import org.semux.net.msg.p2p.TransactionMessage;
 import org.semux.net.msg.p2p.WorldMessage;
 import org.semux.util.Bytes;
 import org.semux.util.exception.UnreachableException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MessageFactory {
 
+    private static final Logger logger = LoggerFactory.getLogger(MessageFactory.class);
+
     /**
      * Decode a raw message.
-     * 
+     *
      * @param code
+     *            The message code
      * @param encoded
-     * @return
+     *            The message encoded
+     * @return The decoded message, or NULL if the message type is not unknown
      * @throws MessageException
-     *             if the message is undecodable
+     *             when the encoding is illegal
      */
     public Message create(byte code, byte[] encoded) throws MessageException {
 
         MessageCode c = MessageCode.of(code);
         if (c == null) {
-            throw new MessageException("Invalid message code: " + Hex.encode0x(Bytes.of(code)));
+            logger.debug("Invalid message code: {}", Hex.encode0x(Bytes.of(code)));
+            return null;
         }
 
         try {

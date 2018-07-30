@@ -87,6 +87,8 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, Frame frame, List<Object> out) throws Exception {
+        Message decodedMsg = null;
+
         if (frame.isChunked()) {
             synchronized (incompletePackets) {
                 int packetId = frame.getPacketId();
@@ -105,7 +107,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
                 pair.getLeft().add(frame);
                 int remaining = pair.getRight().addAndGet(-frame.getBodySize());
                 if (remaining == 0) {
-                    out.add(decodeMessage(pair.getLeft()));
+                    decodedMsg = decodeMessage(pair.getLeft());
 
                     // remove complete packets from cache
                     incompletePackets.invalidate(packetId);
@@ -114,7 +116,11 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
                 }
             }
         } else {
-            out.add(decodeMessage(Collections.singletonList(frame)));
+            decodedMsg = decodeMessage(Collections.singletonList(frame));
+        }
+
+        if (decodedMsg != null) {
+            out.add(decodedMsg);
         }
     }
 
@@ -122,7 +128,8 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
      * Decode message from the frames.
      * 
      * @param frames
-     * @return
+     *            The message frames
+     * @return The decoded message, or NULL if the message code is unknown
      * @throws MessageException
      */
     protected Message decodeMessage(List<Frame> frames) throws MessageException {
