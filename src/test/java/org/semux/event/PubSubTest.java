@@ -41,10 +41,10 @@ public class PubSubTest {
         pubSub.subscribe(event -> dispatched1.incrementAndGet(), TestEvent1.class);
         pubSub.subscribe(event -> dispatched2.incrementAndGet(), TestEvent2.class);
         for (int i = 0; i < fuzz1; i++) {
-            new Thread(() -> pubSub.publish(new TestEvent1())).start();
+            pubSub.publish(new TestEvent1());
         }
         for (int i = 0; i < fuzz2; i++) {
-            new Thread(() -> pubSub.publish(new TestEvent2())).start();
+            pubSub.publish(new TestEvent2());
         }
         await().atMost(30, TimeUnit.SECONDS).until(() -> dispatched1.get() == fuzz1);
         await().atMost(30, TimeUnit.SECONDS).until(() -> dispatched2.get() == fuzz2);
