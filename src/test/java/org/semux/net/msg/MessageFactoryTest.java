@@ -6,13 +6,21 @@
  */
 package org.semux.net.msg;
 
+import static org.junit.Assert.assertNull;
+
 import org.junit.Test;
 
 public class MessageFactoryTest {
 
-    @Test(expected = MessageException.class)
+    @Test
     public void testNonExist() throws MessageException {
         MessageFactory factory = new MessageFactory();
-        factory.create((byte) 0xff, new byte[1]);
+        assertNull(factory.create((byte) 0xff, new byte[1]));
+    }
+
+    @Test(expected = MessageException.class)
+    public void testWrongCodec() throws MessageException {
+        MessageFactory factory = new MessageFactory();
+        factory.create((byte) 0x01, new byte[1]);
     }
 }
