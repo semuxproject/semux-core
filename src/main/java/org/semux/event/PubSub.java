@@ -129,6 +129,11 @@ public class PubSub {
      */
     public synchronized void stop() {
         eventProcessingThread.interrupt();
+        try {
+            eventProcessingThread.join(10_000L);
+        } catch (InterruptedException e) {
+            logger.error("Failed to stop PubSub");
+        }
         logger.info("PubSub service stopped");
     }
 
