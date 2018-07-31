@@ -27,7 +27,6 @@ import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.semux.Kernel;
 import org.semux.api.util.TransactionBuilder;
-import org.semux.api.v2.api.SemuxApi;
 import org.semux.api.v2.model.AddNodeResponse;
 import org.semux.api.v2.model.ApiHandlerResponse;
 import org.semux.api.v2.model.ComposeRawTransactionResponse;

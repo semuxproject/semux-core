@@ -29,6 +29,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import org.semux.api.v2.SemuxApi;
 import org.semux.api.v2.SemuxApiImpl;
 import org.semux.gui.SemuxGui;
 import org.semux.message.GuiMessages;
@@ -78,7 +79,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         this.setLocationRelativeTo(parent);
 
         this.api = new org.semux.api.v2.SemuxApiImpl(gui.getKernel());
-        for (Method m : org.semux.api.v2.api.SemuxApi.class.getMethods()) {
+        for (Method m : SemuxApi.class.getMethods()) {
             MethodDescriptor md = parseMethod(m);
             this.methods.put(md.name, md);
         }

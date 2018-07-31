@@ -130,7 +130,7 @@
                             <addCompileSourceRoot>true</addCompileSourceRoot>
                             <output>${project.basedir}</output>
                             <modelPackage>org.semux.api.v2.model</modelPackage>
-                            <apiPackage>org.semux.api.v2.api</apiPackage>
+                            <apiPackage>org.semux.api.v2</apiPackage>
                         </configuration>
                     </execution>
                     <!-- API client interface -->

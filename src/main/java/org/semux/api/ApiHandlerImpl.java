@@ -26,7 +26,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.api.http.HttpHandler;
 import org.semux.api.v2.SemuxApiImpl;
-import org.semux.api.v2.api.SemuxApi;
+import org.semux.api.v2.SemuxApi;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
