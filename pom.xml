@@ -496,7 +496,6 @@
                             <goal>enforce</goal>
                         </goals>
                         <configuration>
-                            <skip>false</skip>
                             <rules>
                                 <DependencyConvergence />
                                 <digestRule implementation="uk.co.froot.maven.enforcer.DigestRule">

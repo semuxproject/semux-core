@@ -28,7 +28,7 @@ matrix:
       sudo: false
       jdk: oraclejdk8
       script:
-        - mvn test
+        - mvn test -Denforcer.skip=true
 
     # Linux tests (Java 9)
     - env: NAME="Linux tests (Java 9)"
@@ -36,7 +36,7 @@ matrix:
       sudo: false
       jdk: oraclejdk9
       script:
-        - mvn test
+        - mvn test -Denforcer.skip=true
 
     # Linux tests (Java 10)
     - env: NAME="Linux tests (Java 10)"
@@ -45,14 +45,14 @@ matrix:
       script:
         - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
         - source ./install-jdk.sh -F 10 -L BCL
-        - mvn test
+        - mvn test -Denforcer.skip=true
 
     # macOS tests
     - env: NAME="macOS tests"
       os: osx
       osx_image: xcode9.2
       script:
-        - mvn test
+        - mvn test -Denforcer.skip=true
 
     # Docker tests
     - env: NAME="Docker tests"

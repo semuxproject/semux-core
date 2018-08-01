@@ -28,10 +28,10 @@ build: off
 
 build_script:
   - cd C:\projects\semux
-  - mvn clean install -DskipTests
+  - mvn clean install -Denforcer.skip=true -DskipTests
 
 test_script:
-  - mvn verify
+  - mvn verify -Denforcer.skip=true
 
 cache:
   - C:\Users\appveyor\.m2\
