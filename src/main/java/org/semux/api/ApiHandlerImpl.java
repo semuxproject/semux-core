@@ -9,6 +9,7 @@ package org.semux.api;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,6 +19,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
@@ -25,17 +31,14 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.api.http.HttpHandler;
-import org.semux.api.v2.SemuxApiImpl;
 import org.semux.api.v2.SemuxApi;
+import org.semux.api.v2.SemuxApiImpl;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
-import io.swagger.jaxrs.Reader;
-import io.swagger.models.Operation;
-import io.swagger.models.Swagger;
 
 /**
  * The handler that processes all api requests. It delegates the request to
@@ -79,34 +82,46 @@ public class ApiHandlerImpl implements ApiHandler {
         }
     }
 
+    private HttpMethod readHttpMethod(Method method) {
+        for (Annotation anno : method.getAnnotations()) {
+            if (anno.getClass().equals(GET.class)) {
+                return HttpMethod.GET;
+            } else if (anno.getClass().equals(POST.class)) {
+                return HttpMethod.POST;
+            } else if (anno.getClass().equals(PUT.class)) {
+                return HttpMethod.PUT;
+            } else if (anno.getClass().equals(DELETE.class)) {
+                return HttpMethod.DELETE;
+            }
+        }
+
+        throw new UnreachableException("Unknonw method type is being used.");
+    }
+
+    private String readPath(Method method) {
+        Path path = method.getAnnotation(Path.class);
+        String value = path.value();
+
+        return value.substring(value.indexOf('/', 1));
+    }
+
     private Map<ImmutablePair<HttpMethod, String>, Route> loadRoutes(Object semuxApi, Class<?> swaggerInterface) {
         Map<ImmutablePair<HttpMethod, String>, Route> result = new HashMap<>();
 
-        // map of [operation id] => [methodInterface, methodImpl]
-        Map<String, ImmutablePair<Method, Method>> methodMap = new HashMap<>();
         try {
             for (Method methodInterface : swaggerInterface.getMethods()) {
                 Method methodImpl = semuxApi.getClass().getMethod(methodInterface.getName(),
                         methodInterface.getParameterTypes());
-                methodMap.put(methodInterface.getName(), ImmutablePair.of(methodInterface, methodImpl));
-            }
-        } catch (NoSuchMethodException ex) {
-            throw new UnreachableException(ex);
-        }
 
-        // load swagger annotations as routes
-        Swagger swagger = new Reader(new Swagger()).read(swaggerInterface);
-        for (Map.Entry<String, io.swagger.models.Path> entry : swagger.getPaths().entrySet()) {
-            for (Map.Entry<io.swagger.models.HttpMethod, Operation> operation : entry.getValue().getOperationMap()
-                    .entrySet()) {
-                HttpMethod method = HttpMethod.valueOf(operation.getKey().name());
-                String path = entry.getKey().substring(entry.getKey().indexOf('/', 1)); // stripped path
-                ImmutablePair<HttpMethod, String> key = ImmutablePair.of(method, path);
-                ImmutablePair<Method, Method> methodPair = methodMap.get(operation.getValue().getOperationId());
+                HttpMethod httpMethod = readHttpMethod(methodInterface);
+                String path = readPath(methodInterface);
 
-                result.put(key, new Route(semuxApi, key.left, key.right, methodPair.left, methodPair.right));
-                logger.debug("Loaded route: {} {}", key.getLeft(), key.getRight());
+                result.put(ImmutablePair.of(httpMethod, path),
+                        new Route(semuxApi, httpMethod, path, methodInterface, methodImpl));
+                logger.debug("Loaded route: {} {}", httpMethod, path);
             }
+        } catch (SecurityException | NoSuchMethodException e) {
+            throw new UnreachableException(e);
         }
 
         return result;
