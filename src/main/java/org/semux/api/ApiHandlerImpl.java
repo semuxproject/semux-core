@@ -84,25 +84,29 @@ public class ApiHandlerImpl implements ApiHandler {
 
     private HttpMethod readHttpMethod(Method method) {
         for (Annotation anno : method.getAnnotations()) {
-            if (anno.getClass().equals(GET.class)) {
+            if (anno.annotationType().equals(GET.class)) {
                 return HttpMethod.GET;
-            } else if (anno.getClass().equals(POST.class)) {
+            } else if (anno.annotationType().equals(POST.class)) {
                 return HttpMethod.POST;
-            } else if (anno.getClass().equals(PUT.class)) {
+            } else if (anno.annotationType().equals(PUT.class)) {
                 return HttpMethod.PUT;
-            } else if (anno.getClass().equals(DELETE.class)) {
+            } else if (anno.annotationType().equals(DELETE.class)) {
                 return HttpMethod.DELETE;
             }
         }
 
-        throw new UnreachableException("Unknonw method type is being used.");
+        logger.error("Failed to read HTTP method from {}", method);
+        return null;
     }
 
     private String readPath(Method method) {
-        Path path = method.getAnnotation(Path.class);
-        String value = path.value();
-
-        return value.substring(value.indexOf('/', 1));
+        try {
+            Path path = method.getAnnotation(Path.class);
+            return path.value();
+        } catch (NullPointerException e) {
+            logger.error("Failed to read HTTP path from {}", method, e);
+            return null;
+        }
     }
 
     private Map<ImmutablePair<HttpMethod, String>, Route> loadRoutes(Object semuxApi, Class<?> swaggerInterface) {
@@ -116,9 +120,11 @@ public class ApiHandlerImpl implements ApiHandler {
                 HttpMethod httpMethod = readHttpMethod(methodInterface);
                 String path = readPath(methodInterface);
 
-                result.put(ImmutablePair.of(httpMethod, path),
-                        new Route(semuxApi, httpMethod, path, methodInterface, methodImpl));
-                logger.debug("Loaded route: {} {}", httpMethod, path);
+                if (httpMethod != null && path != null) {
+                    result.put(ImmutablePair.of(httpMethod, path),
+                            new Route(semuxApi, httpMethod, path, methodInterface, methodImpl));
+                    logger.debug("Loaded route: {} {}", httpMethod, path);
+                }
             }
         } catch (SecurityException | NoSuchMethodException e) {
             throw new UnreachableException(e);
