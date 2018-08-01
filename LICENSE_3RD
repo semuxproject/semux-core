@@ -33,6 +33,10 @@ JAX-RS API:
     http://jax-rs-spec.java.net
     CDDL License Version 1.1
 
+Jersey Common:
+    https://jersey.github.io/
+    CDDL License Version 1.1
+
 JNA:
     https://github.com/java-native-access/jna
     Apache License, Version 2.0
