@@ -19,10 +19,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.iq80.leveldb.DBException;
-import org.iq80.leveldb.Options;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.semux.config.Constants;
 import org.semux.db.LeveldbDatabase.LeveldbFactory;
@@ -34,65 +30,70 @@ public class LeveldbDatabaseTest {
     private byte[] key = Bytes.of("key");
     private byte[] value = Bytes.of("value");
 
-    private LeveldbDatabase db;
-
-    @Before
-    public void setUp() {
-        db = new LeveldbDatabase(
+    public LeveldbDatabase openDatabase() {
+        return new LeveldbDatabase(
                 new File(Constants.DEFAULT_DATA_DIR, Constants.DATABASE_DIR + File.separator + "test"));
-    }
-
-    @After
-    public void tearDown() {
-        db.destroy();
     }
 
     @Test
     public void testRecover() {
-        db.close();
-        Options options = db.createOptions();
-        db.recover(options);
+        LeveldbDatabase db = openDatabase();
+        try {
+            db.recover(db.createOptions());
+        } finally {
+            db.destroy();
+        }
     }
 
     @Test
     public void testGetAndPut() {
+        LeveldbDatabase db = openDatabase();
         try {
             assertNull(db.get(key));
             db.put(key, value);
             assertTrue(Arrays.equals(value, db.get(key)));
-            db.delete(key);
         } finally {
-            db.close();
+            db.destroy();
         }
     }
 
     @Test
     public void testUpdateBatch() {
-        db.put(Bytes.of("a"), Bytes.of("1"));
+        LeveldbDatabase db = openDatabase();
+        try {
+            db.put(Bytes.of("a"), Bytes.of("1"));
 
-        List<Pair<byte[], byte[]>> update = new ArrayList<>();
-        update.add(Pair.of(Bytes.of("a"), null));
-        update.add(Pair.of(Bytes.of("b"), Bytes.of("2")));
-        update.add(Pair.of(Bytes.of("c"), Bytes.of("3")));
-        db.updateBatch(update);
+            List<Pair<byte[], byte[]>> update = new ArrayList<>();
+            update.add(Pair.of(Bytes.of("a"), null));
+            update.add(Pair.of(Bytes.of("b"), Bytes.of("2")));
+            update.add(Pair.of(Bytes.of("c"), Bytes.of("3")));
+            db.updateBatch(update);
 
-        assertNull(db.get(Bytes.of("a")));
-        assertArrayEquals(db.get(Bytes.of("b")), Bytes.of("2"));
-        assertArrayEquals(db.get(Bytes.of("c")), Bytes.of("3"));
+            assertNull(db.get(Bytes.of("a")));
+            assertArrayEquals(db.get(Bytes.of("b")), Bytes.of("2"));
+            assertArrayEquals(db.get(Bytes.of("c")), Bytes.of("3"));
+        } finally {
+            db.destroy();
+        }
     }
 
     @Test
     public void testIterator() {
-        db.put(Bytes.of("a"), Bytes.of("1"));
-        db.put(Bytes.of("b"), Bytes.of("2"));
-        db.put(Bytes.of("c"), Bytes.of("3"));
+        LeveldbDatabase db = openDatabase();
+        try {
+            db.put(Bytes.of("a"), Bytes.of("1"));
+            db.put(Bytes.of("b"), Bytes.of("2"));
+            db.put(Bytes.of("c"), Bytes.of("3"));
 
-        ClosableIterator<Entry<byte[], byte[]>> itr = db.iterator(Bytes.of("a1"));
-        assertTrue(itr.hasNext());
-        assertArrayEquals(Bytes.of("b"), itr.next().getKey());
-        assertTrue(itr.hasNext());
-        assertArrayEquals(Bytes.of("c"), itr.next().getKey());
-        itr.close();
+            ClosableIterator<Entry<byte[], byte[]>> itr = db.iterator(Bytes.of("a1"));
+            assertTrue(itr.hasNext());
+            assertArrayEquals(Bytes.of("b"), itr.next().getKey());
+            assertTrue(itr.hasNext());
+            assertArrayEquals(Bytes.of("c"), itr.next().getKey());
+            itr.close();
+        } finally {
+            db.destroy();
+        }
     }
 
     @Test
@@ -102,20 +103,25 @@ public class LeveldbDatabaseTest {
             assertNotNull(factory.getDB(name));
         }
         factory.close();
+
+        // NOTE: empty databases are created
     }
 
-    @Test(expected = DBException.class)
+    @Test
     public void testClose() {
-        db.close();
-
-        db.get(key);
+        LeveldbDatabase db = openDatabase();
+        try {
+            db.close();
+        } finally {
+            db.destroy();
+        }
     }
 
     @Test
     public void testDestroy() {
+        LeveldbDatabase db = openDatabase();
         db.destroy();
 
-        File f = new File(Constants.DEFAULT_DATA_DIR, Constants.DATABASE_DIR + File.separator + "test");
-        assertFalse(f.exists());
+        assertFalse(db.getDataDir().toFile().exists());
     }
 }

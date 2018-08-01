@@ -39,6 +39,11 @@ public class LeveldbDatabase implements Database {
     private DB db;
     private boolean isOpened;
 
+    /**
+     * Creates an LevelDB instance and opens it.
+     *
+     * @param file
+     */
     public LeveldbDatabase(File file) {
         this.file = file;
 
@@ -71,7 +76,7 @@ public class LeveldbDatabase implements Database {
 
     /**
      * Open the database.
-     * 
+     *
      * @param options
      */
     protected void open(Options options) {
@@ -105,7 +110,7 @@ public class LeveldbDatabase implements Database {
      */
     protected void recover(Options options) {
         try {
-            logger.info("Database is corrupted, trying to repair...");
+            logger.info("Trying to repair the database: {}", file);
             factory.repair(file, options);
             logger.info("Repair done!");
         } catch (IOException ex) {

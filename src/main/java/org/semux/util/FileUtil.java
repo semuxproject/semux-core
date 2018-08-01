@@ -12,9 +12,11 @@ import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,25 +32,15 @@ public class FileUtil {
 
     /**
      * Delete a file or directory recursively.
-     * 
+     *
      * @param file
      */
     public static void recursiveDelete(File file) {
-        if (!file.exists()) {
-            return;
-        }
-
-        if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            if (files != null) {
-                for (File f : files) {
-                    recursiveDelete(f);
-                }
-            }
-        }
-
         try {
-            Files.delete(file.toPath());
+            Files.walk(file.toPath())
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
         } catch (IOException e) {
             log.error("Failed to delete file: {}", file, e);
         }
