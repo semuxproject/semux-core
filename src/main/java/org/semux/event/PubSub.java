@@ -119,7 +119,7 @@ public class PubSub {
             throw new UnreachableException("PubSub service can be started for only once");
         }
 
-        eventProcessingThread = new Thread(new EventProcessor(), "pubsub-event-processor");
+        eventProcessingThread = new Thread(new EventProcessor(), "event-processor-" + name);
         eventProcessingThread.start();
         logger.info("PubSub service started");
     }
