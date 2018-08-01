@@ -522,51 +522,51 @@
                                     <urns>
                                         <urn>com.akathist.maven.plugins.launch4j:launch4j-maven-plugin:1.7.21:maven-plugin:null:runtime:58402e775916bc8824e257c8d87ad6c8064663a5</urn>
                                         <urn>com.fasterxml.jackson.core:jackson-annotations:2.9.0:jar:null:compile:07c10d545325e3a6e72e06381afe469fd40eb701</urn>
-                                        <urn>com.fasterxml.jackson.core:jackson-core:2.9.5:jar:null:compile:a22ac51016944b06fd9ffbc9541c6e7ce5eea117</urn>
-                                        <urn>com.fasterxml.jackson.core:jackson-databind:2.9.5:jar:null:compile:3490508379d065fe3fcb80042b62f630f7588606</urn>
-                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.5:jar:null:compile:38269f2904f15eaf08efacdb2a0b7d987fb24ee4</urn>
-                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.5:jar:null:compile:c80c1d72c0823a31ffb1bde032ef276f3dc19aef</urn>
-                                        <urn>com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.5:jar:null:compile:187555dec071c79f1cf797cb0862c06bd02fafd6</urn>
-                                        <urn>com.fasterxml.woodstox:woodstox-core:5.0.3:jar:null:compile:10aa199207fda142eff01cd61c69244877d71770</urn>
+                                        <urn>com.fasterxml.jackson.core:jackson-core:2.9.6:jar:null:compile:4e393793c37c77e042ccc7be5a914ae39251b365</urn>
+                                        <urn>com.fasterxml.jackson.core:jackson-databind:2.9.6:jar:null:compile:cfa4f316351a91bfd95cb0644c6a2c95f52db1fc</urn>
+                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.6:jar:null:test:30341c6f8a6f2d65acc37c31b570bf09403ea69e</urn>
+                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.6:jar:null:test:f7b8ccdd851c2ea43f04636a1396a242479571b3</urn>
+                                        <urn>com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.6:jar:null:test:9a4641aa784374e36b0436b707507e52997ef91c</urn>
+                                        <urn>com.fasterxml.woodstox:woodstox-core:5.0.3:jar:null:test:10aa199207fda142eff01cd61c69244877d71770</urn>
                                         <urn>com.github.ben-manes.caffeine:caffeine:2.6.2:jar:null:compile:c8fd8817f9d2b2ced82f8968e0dd943aab557de0</urn>
-                                        <urn>com.github.oshi:oshi-core:3.4.4:jar:null:compile:f1aa8e053d26f49b909a845745018c57fe9d7a74</urn>
-                                        <urn>com.github.stefanbirkner:system-rules:1.17.1:jar:null:test:3642fe208063ad538ec6a2fca141d13e15f2b1f2</urn>
+                                        <urn>com.github.oshi:oshi-core:3.7.1:jar:null:compile:a6f3c9c6bfe6110dc7100db480297cbd37afd631</urn>
+                                        <urn>com.github.stefanbirkner:system-rules:1.18.0:jar:null:test:04d95a6c83a298c60195c74b8cce3cc094e56dbb</urn>
                                         <urn>com.github.zafarkhaja:java-semver:0.9.0:jar:null:compile:59a83ca73c72a5e25b3f0b1bb305230a11000329</urn>
-                                        <urn>com.google.zxing:core:3.3.2:jar:null:compile:f47e3fc99fb2755b8a354d60efa021a0b88f4180</urn>
+                                        <urn>com.google.zxing:core:3.3.3:jar:null:compile:b640badcc97f18867c4dfd249ef8d20ec0204c07</urn>
                                         <urn>com.mycila:license-maven-plugin:3.0:maven-plugin:null:runtime:6e6175f847574fd15c644a69b540e279ea5d173f</urn>
                                         <urn>commons-beanutils:commons-beanutils:1.9.2:jar:null:compile:7a87d845ad3a155297e8f67d9008f4c1e5656b71</urn>
                                         <urn>commons-cli:commons-cli:1.4:jar:null:compile:c51c00206bb913cd8612b24abd9fa98ae89719b1</urn>
                                         <urn>commons-digester:commons-digester:1.8.1:jar:null:compile:3dec9b9c7ea9342d4dbe8c38560080d85b44a015</urn>
                                         <urn>commons-io:commons-io:2.6:jar:null:test:815893df5f31da2ece4040fe0a12fd44b577afaf</urn>
                                         <urn>commons-logging:commons-logging:1.2:jar:null:compile:4bfc12adfe4842bf07b657f0369c4cb522955686</urn>
-                                        <urn>commons-net:commons-net:3.3:jar:null:compile:cd0d5510908225f76c5fe5a3f1df4fa44866f81e</urn>
+                                        <urn>commons-net:commons-net:3.6:jar:null:compile:b71de00508dcb078d2b24b5fa7e538636de9b3da</urn>
                                         <urn>commons-validator:commons-validator:1.6:jar:null:compile:e989d1e87cdd60575df0765ed5bac65c905d7908</urn>
-                                        <urn>de.erichseifert.vectorgraphics2d:VectorGraphics2D:0.11:jar:null:test:f3bf8fe05b7997e03941bf77428598137500c300</urn>
-                                        <urn>io.netty:netty-all:4.1.22.Final:jar:null:compile:c1cea5d30025e4d584d2b287d177c31aea4ae629</urn>
-                                        <urn>io.swagger:swagger-annotations:1.5.18:jar:null:compile:f386aa7dc018534e6e05c40fff292e6cd9b9d8f8</urn>
+                                        <urn>de.erichseifert.vectorgraphics2d:VectorGraphics2D:0.13:jar:null:test:f1ad944da4c6b6a27d244d3a04ce1c67b8b026b6</urn>
+                                        <urn>io.netty:netty-all:4.1.28.Final:jar:null:compile:33ae3d109e16b8c591bdf343f6b52ccd0ef75905</urn>
+                                        <urn>io.swagger:swagger-annotations:1.5.20:jar:null:compile:16051f93ce11ca489a5313775d825f82fcc2cd6c</urn>
                                         <urn>io.swagger:swagger-codegen-maven-plugin:2.3.1:maven-plugin:null:runtime:6c78aed2d61154f139f0d735c695f79d08cb9094</urn>
                                         <urn>javax.activation:activation:1.1.1:jar:null:compile:485de3a253e23f645037828c07f1d7f1af40763a</urn>
-                                        <urn>javax.annotation:javax.annotation-api:1.3.1:jar:null:compile:20a2c0583598d68b0835474bbe07792d4f3b219f</urn>
+                                        <urn>javax.annotation:javax.annotation-api:1.3.2:jar:null:compile:934c04d3cfef185a8008e7bf34331b79730a9d43</urn>
                                         <urn>javax.validation:validation-api:2.0.1.Final:jar:null:compile:cb855558e6271b1b32e716d24cb85c7f583ce09e</urn>
                                         <urn>javax.ws.rs:javax.ws.rs-api:2.1:jar:null:compile:426a0862406536e690c7caa8bb6ed32191986fac</urn>
                                         <urn>javax.xml.bind:jaxb-api:2.3.0:jar:null:compile:99f802e0cb3e953ba3d6e698795c4aeb98d37c48</urn>
                                         <urn>junit:junit:4.12:jar:null:test:2973d150c0dc1fefe998f834810d68f278ea58ec</urn>
-                                        <urn>net.bytebuddy:byte-buddy-agent:1.8.7:jar:null:test:c6bf62b5eeac2f20a2996166a13f5e16ca33982e</urn>
-                                        <urn>net.bytebuddy:byte-buddy:1.8.7:jar:null:test:aae7620ad53e31d914667862fd6865afcfb00731</urn>
-                                        <urn>net.i2p.crypto:eddsa:0.2.0:jar:null:compile:0856a92559c4daf744cb27c93cd8b7eb1f8c4780</urn>
-                                        <urn>net.java.dev.jna:jna-platform:4.5.0:jar:null:compile:00ab163522ed76eb01c8c9a750dedacb134fc8c0</urn>
-                                        <urn>net.java.dev.jna:jna:4.5.0:jar:null:compile:55b548d3195efc5280bf1c3f17b49659c54dee40</urn>
+                                        <urn>net.bytebuddy:byte-buddy-agent:1.8.15:jar:null:test:a2dbe3457401f65ad4022617fbb3fc0e5f427c7d</urn>
+                                        <urn>net.bytebuddy:byte-buddy:1.8.15:jar:null:test:cb36fe3c70ead5fcd016856a7efff908402d86b8</urn>
+                                        <urn>net.i2p.crypto:eddsa:0.3.0:jar:null:compile:1901c8d4d8bffb7d79027686cfb91e704217c3e1</urn>
+                                        <urn>net.java.dev.jna:jna-platform:4.5.2:jar:null:compile:741853c07152f6c0fef5194efa6b2dabac22e9c0</urn>
+                                        <urn>net.java.dev.jna:jna:4.5.2:jar:null:compile:35d000afbaa4ed425d91873b40f4df9b8236875b</urn>
                                         <urn>net.revelc.code.formatter:formatter-maven-plugin:2.7.0:maven-plugin:null:runtime:001126378253588ea5a042d41714432033ca17a3</urn>
-                                        <urn>org.apache.commons:commons-collections4:4.1:jar:null:compile:a4cf4688fe1c7e3a63aa636cc96d013af537768e</urn>
+                                        <urn>org.apache.commons:commons-collections4:4.2:jar:null:compile:54ebea0a5b653d3c680131e73fe807bb8f78c4ed</urn>
                                         <urn>org.apache.commons:commons-compress:1.9:jar:null:test:cc18955ff1e36d5abd39a14bfe82b19154330a34</urn>
                                         <urn>org.apache.commons:commons-lang3:3.7:jar:null:compile:557edd918fd41f9260963583ebf5a61a43a6b423</urn>
-                                        <urn>org.apache.cxf:cxf-core:3.2.4:jar:null:compile:fa6977ede9232e599eab2aa72fea8309dced1492</urn>
-                                        <urn>org.apache.cxf:cxf-rt-frontend-jaxrs:3.2.4:jar:null:compile:735ec36e8fa3d04e4fb7db97ed4e81c2f064f8ab</urn>
-                                        <urn>org.apache.cxf:cxf-rt-rs-client:3.2.4:jar:null:compile:98987afffc70b95669a966e9ce4bce9f294c3b0f</urn>
-                                        <urn>org.apache.cxf:cxf-rt-transports-http:3.2.4:jar:null:compile:db5639e24c78dd860c13c0807acf3454c604e11c</urn>
-                                        <urn>org.apache.logging.log4j:log4j-api:2.10.0:jar:null:compile:fec5797a55b786184a537abd39c3fa1449d752d6</urn>
-                                        <urn>org.apache.logging.log4j:log4j-core:2.10.0:jar:null:compile:c90b597163cd28ab6d9687edd53db601b6ea75a1</urn>
-                                        <urn>org.apache.logging.log4j:log4j-slf4j-impl:2.10.0:jar:null:compile:8e4e0a30736175e31c7f714d95032c1734cfbdea</urn>
+                                        <urn>org.apache.cxf:cxf-core:3.2.5:jar:null:test:97ef733f24a22275974b78f557a70334508f9404</urn>
+                                        <urn>org.apache.cxf:cxf-rt-frontend-jaxrs:3.2.5:jar:null:test:018eaaa3c72afbea2854d5ef1b60dabd8f4c41e7</urn>
+                                        <urn>org.apache.cxf:cxf-rt-rs-client:3.2.5:jar:null:test:9a2fb46779c819fd8c1f0ecfeb0d76162da7a084</urn>
+                                        <urn>org.apache.cxf:cxf-rt-transports-http:3.2.5:jar:null:test:57d6a6c9f8c756c3346f65814137c3b79179dd94</urn>
+                                        <urn>org.apache.logging.log4j:log4j-api:2.11.1:jar:null:compile:268f0fe4df3eefe052b57c87ec48517d64fb2a10</urn>
+                                        <urn>org.apache.logging.log4j:log4j-core:2.11.1:jar:null:compile:592a48674c926b01a9a747c7831bcd82a9e6d6e4</urn>
+                                        <urn>org.apache.logging.log4j:log4j-slf4j-impl:2.11.1:jar:null:compile:4b41b53a3a2d299ce381a69d165381ca19f62912</urn>
                                         <urn>org.apache.maven.plugins:maven-antrun-plugin:1.8:maven-plugin:null:runtime:0d02c0af622aa6a0c86e81c519299e888e0a32a3</urn>
                                         <urn>org.apache.maven.plugins:maven-clean-plugin:3.0.0:maven-plugin:null:runtime:6653cb054e6b81705e383fbcced26c92802e40ae</urn>
                                         <urn>org.apache.maven.plugins:maven-compiler-plugin:3.7.0:maven-plugin:null:runtime:a3229c9aae47047e3a177ecfd4afa10fb5512d4e</urn>
@@ -578,17 +578,17 @@
                                         <urn>org.apache.maven.plugins:maven-shade-plugin:3.1.0:maven-plugin:null:runtime:c08cd5163a49e31f6e28d6f8bb153013a2a2de79</urn>
                                         <urn>org.apache.maven.plugins:maven-site-plugin:3.3:maven-plugin:null:runtime:77ba1752b1ac4c4339d6f11554800960a56a4ae1</urn>
                                         <urn>org.apache.maven.plugins:maven-surefire-plugin:2.22.0:maven-plugin:null:runtime:8adc7b2b94e83a8df238bad8011b9be046f7aad5</urn>
-                                        <urn>org.apache.ws.xmlschema:xmlschema-core:2.2.3:jar:null:compile:920a9a3132f925554ae8432d9473c8806734a8ec</urn>
+                                        <urn>org.apache.ws.xmlschema:xmlschema-core:2.2.3:jar:null:test:920a9a3132f925554ae8432d9473c8806734a8ec</urn>
                                         <urn>org.assertj:assertj-core:3.8.0:jar:null:test:b209d90ff2e279bee3e02547ee7b11349c52d0e3</urn>
                                         <urn>org.assertj:assertj-swing-junit:3.8.0:jar:null:test:51a93135b0edac8f92cd67bceea6efa2e2dfa870</urn>
                                         <urn>org.assertj:assertj-swing:3.8.0:jar:null:test:43e985f95237bf9c5fbfa21230f30cc5e859a4fb</urn>
-                                        <urn>org.awaitility:awaitility:3.0.0:jar:null:test:7e6b79f2b1e57eaa967b229791f31ca55aea668a</urn>
+                                        <urn>org.awaitility:awaitility:3.1.2:jar:null:test:087cb4229cd30fa2ef4cadb0a238935288cad3b8</urn>
                                         <urn>org.bitlet:weupnp:0.1.4:jar:null:compile:b99cd791ede89b7c17426e6c51a0f171dc925def</urn>
                                         <urn>org.bouncycastle:bcprov-jdk15on:1.59:jar:null:compile:2507204241ab450456bdb8e8c0a8f986e418bd99</urn>
                                         <urn>org.codehaus.mojo:build-helper-maven-plugin:3.0.0:maven-plugin:null:runtime:6cf0de27a842bb277106d4abc2483d839354b0b1</urn>
                                         <urn>org.codehaus.mojo:cobertura-maven-plugin:2.7:maven-plugin:null:runtime:0d49d827220fc4282babb85fb3b9970ffdb99aff</urn>
                                         <urn>org.codehaus.mojo:findbugs-maven-plugin:3.0.5:maven-plugin:null:runtime:b3c2f7fcf51637697fe7da4d38ad795e54682355</urn>
-                                        <urn>org.codehaus.woodstox:stax2-api:3.1.4:jar:null:compile:ac19014b1e6a7c08aad07fe114af792676b685b7</urn>
+                                        <urn>org.codehaus.woodstox:stax2-api:3.1.4:jar:null:test:ac19014b1e6a7c08aad07fe114af792676b685b7</urn>
                                         <urn>org.easytesting:fest-reflect:1.4.1:jar:null:test:2b92d5275e92a49e16c7ce6bd7e46b9080db0530</urn>
                                         <urn>org.easytesting:fest-util:1.2.5:jar:null:test:c4a8d7305b23b8d043be12c979813b096df11f44</urn>
                                         <urn>org.eluder.coveralls:coveralls-maven-plugin:4.3.0:maven-plugin:null:runtime:2f9f6bdef5dd1d863730a134a8f1280337440c46</urn>
@@ -596,21 +596,20 @@
                                         <urn>org.hamcrest:hamcrest-core:1.3:jar:null:test:42a25dc3219429f0e5d060061f71acb49bf010a0</urn>
                                         <urn>org.hamcrest:hamcrest-library:1.3:jar:null:test:4785a3c21320980282f9f33d0d1264a69040538f</urn>
                                         <urn>org.javassist:javassist:3.21.0-GA:jar:null:test:598244f595db5c5fb713731eddbb1c91a58d959b</urn>
-                                        <urn>org.knowm.xchart:xchart:3.5.0:jar:null:test:d0ec5cff2450cf013c4289d5c7c730c245a701ba</urn>
+                                        <urn>org.knowm.xchart:xchart:3.5.2:jar:null:test:86afe335a28a992aba42f80b6b46d88eaf30b504</urn>
                                         <urn>org.mockito:mockito-core:2.8.9:jar:null:test:1afb35b2d77d40567756c379e54c18da3574a96e</urn>
                                         <urn>org.objenesis:objenesis:2.6:jar:null:test:639033469776fd37c08358c6b92a4761feb2af4b</urn>
-                                        <urn>org.powermock:powermock-api-mockito-common:1.7.3:jar:null:test:54c112a921efad764eef571a1cf5b465d110c7df</urn>
-                                        <urn>org.powermock:powermock-api-mockito2:1.7.3:jar:null:test:0d505af2c1dcf0aa357bf66d5c206d7b6e512e42</urn>
-                                        <urn>org.powermock:powermock-api-support:1.7.3:jar:null:test:8f5b46fa56773007430bd0347af9fe72f8acb4c4</urn>
-                                        <urn>org.powermock:powermock-core:1.7.3:jar:null:test:73cd1fff8c9685be1ff2f369b561546e7549e003</urn>
-                                        <urn>org.powermock:powermock-module-junit4-common:1.7.3:jar:null:test:7287dd56b2b907a15aa2b6a0f1ddb2dd52cf388f</urn>
-                                        <urn>org.powermock:powermock-module-junit4:1.7.3:jar:null:test:f25cd17a4d7acba1a591beaecd99fad844875cc6</urn>
-                                        <urn>org.powermock:powermock-reflect:1.7.3:jar:null:test:f3d3c696a9977094c796dc8ffd174f828f3410e8</urn>
+                                        <urn>org.powermock:powermock-api-mockito-common:1.7.4:jar:null:test:7db8344c2c34baab81ac3f6e9ad1cf45e1d08d37</urn>
+                                        <urn>org.powermock:powermock-api-mockito2:1.7.4:jar:null:test:8ac438f60fceacba48113b13d1546eb9b8443be9</urn>
+                                        <urn>org.powermock:powermock-api-support:1.7.4:jar:null:test:688c8cb384a31060fc04130eec1c6e68546d0e3e</urn>
+                                        <urn>org.powermock:powermock-core:1.7.4:jar:null:test:2170b16d933fdd9815bc1f3871771ab30e9ad2fe</urn>
+                                        <urn>org.powermock:powermock-module-junit4-common:1.7.4:jar:null:test:53a078efeb50a0a8ab80c2eb3ecf83219d64008c</urn>
+                                        <urn>org.powermock:powermock-module-junit4:1.7.4:jar:null:test:18cc40fb5e3997ad766405986bcbb64d6a4551a4</urn>
+                                        <urn>org.powermock:powermock-reflect:1.7.4:jar:null:test:a484263077a371165c2fa96aa52935cd580a3e3c</urn>
                                         <urn>org.rauschig:jarchivelib:0.7.1:jar:null:test:47a77274cc38cfe6c04bc2afa3ece808742dc42b</urn>
                                         <urn>org.slf4j:slf4j-api:1.7.25:jar:null:compile:da76ca59f6a57ee3102f8f9bd9cee742973efa8a</urn>
-                                        <urn>org.threeten:threetenbp:1.3.6:jar:null:compile:89dcc04a7e028c3c963413a71f950703cf51f057</urn>
-                                        <urn>org.webjars:swagger-ui:3.14.2:jar:null:compile:05f83eebdceedad1e26ddde584e4c08c20811921</urn>
-                                        <urn>org.xerial.snappy:snappy-java:1.1.7.1:jar:null:compile:d5190b41f3de61e3b83d692322d58630252bc8c3</urn>
+                                        <urn>org.webjars:swagger-ui:3.17.6:jar:null:compile:aa6e8134f67aea65a701823fc2b3a5dfe88344c8</urn>
+                                        <urn>org.xerial.snappy:snappy-java:1.1.7.2:jar:null:compile:307b286efd119ad2c6d4291128bf110bddc68088</urn>
                                         <urn>pl.project13.maven:git-commit-id-plugin:2.2.4:maven-plugin:null:runtime:43a0dc1d02821c51847d587ecc4a6943086b884c</urn>
                                     </urns>
                                 </digestRule>
@@ -690,12 +689,12 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>1.5.18</version>
+            <version>1.5.20</version>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>swagger-ui</artifactId>
-            <version>3.14.2</version>
+            <version>3.17.6</version>
         </dependency>
 
         <!-- Java 9 Deprecated Packages Required by JAX-RS -->
@@ -712,7 +711,7 @@
         <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
-            <version>1.3.1</version>
+            <version>1.3.2</version>
         </dependency>
 
         <!-- Logging framework -->
@@ -724,17 +723,17 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.10.0</version>
+            <version>2.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.10.0</version>
+            <version>2.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.10.0</version>
+            <version>2.11.1</version>
             <exclusions>
                 <!-- NOTE: log4j requires a newer version of slfj which is still in beta -->
                 <exclusion>
@@ -762,21 +761,21 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.22.Final</version>
+            <version>4.1.28.Final</version>
         </dependency>
 
         <!-- Snappy Java -->
         <dependency>
             <groupId>org.xerial.snappy</groupId>
             <artifactId>snappy-java</artifactId>
-            <version>1.1.7.1</version>
+            <version>1.1.7.2</version>
         </dependency>
 
         <!-- Oshi Core -->
         <dependency>
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
-            <version>3.4.4</version>
+            <version>3.7.1</version>
         </dependency>
 
         <!-- Apache commons -->
@@ -788,7 +787,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.1</version>
+            <version>4.2</version>
         </dependency>
         <dependency>
             <groupId>commons-validator</groupId>
@@ -824,33 +823,33 @@
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
-            <version>3.3</version>
+            <version>3.6</version>
         </dependency>
 
         <!-- JSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.9.5</version>
+            <version>2.9.6</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.5</version>
+            <version>2.9.6</version>
         </dependency>
 
         <!-- ED25519 -->
         <dependency>
             <groupId>net.i2p.crypto</groupId>
             <artifactId>eddsa</artifactId>
-            <version>0.2.0</version>
+            <version>0.3.0</version>
         </dependency>
 
         <!-- zxing QR -->
         <dependency>
             <groupId>com.google.zxing</groupId>
             <artifactId>core</artifactId>
-            <version>3.3.2</version>
+            <version>3.3.3</version>
         </dependency>
 
         <!-- weupnp -->
@@ -914,7 +913,7 @@
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
-            <version>1.7.3</version>
+            <version>1.7.4</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -926,7 +925,7 @@
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito2</artifactId>
-            <version>1.7.3</version>
+            <version>1.7.4</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -946,7 +945,7 @@
         <dependency>
             <groupId>com.github.stefanbirkner</groupId>
             <artifactId>system-rules</artifactId>
-            <version>1.17.1</version>
+            <version>1.18.0</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -958,7 +957,7 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>3.0.0</version>
+            <version>3.1.2</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -970,13 +969,13 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.8.7</version>
+            <version>1.8.15</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy-agent</artifactId>
-            <version>1.8.7</version>
+            <version>1.8.15</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -994,13 +993,13 @@
         <dependency>
             <groupId>org.knowm.xchart</groupId>
             <artifactId>xchart</artifactId>
-            <version>3.5.0</version>
+            <version>3.5.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-rs-client</artifactId>
-            <version>3.2.4</version>
+            <version>3.2.5</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -1012,7 +1011,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-json-provider</artifactId>
-            <version>2.9.5</version>
+            <version>2.9.6</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
