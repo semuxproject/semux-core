@@ -7,12 +7,14 @@
 package org.semux;
 
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 import org.semux.util.SystemUtil;
 
 public class JvmOptions {
     public static void main(String[] args) {
         StringBuilder sb = new StringBuilder();
+
         sb.append(" -Xmx" + SystemUtil.getAvailableMemorySize() * 75 / 100 / 1024 / 1024 + "m");
         sb.append(" -Dlog4j2.garbagefreeThreadContextMap=true");
         sb.append(" -Dlog4j2.shutdownHookEnabled=false");
@@ -21,7 +23,9 @@ public class JvmOptions {
             sb.append(" --add-opens=java.base/sun.net.dns=ALL-UNNAMED");
             sb.append(" --add-opens=java.base/java.lang.reflect=ALL-UNNAMED");
         }
-        sb.append(" -splash:" + Paths.get("resources", "splash.png").toAbsolutePath());
+        if (Stream.of(args).anyMatch(k -> k.equals("--gui"))) {
+            sb.append(" -splash:" + Paths.get("resources", "splash.png").toAbsolutePath());
+        }
 
         System.out.println(sb);
     }
