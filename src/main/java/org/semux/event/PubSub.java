@@ -119,7 +119,7 @@ public class PubSub {
             throw new UnreachableException("PubSub service can be started for only once");
         }
 
-        eventProcessingThread = new EventProcessingThread();
+        eventProcessingThread = new Thread(new EventProcessor(), "pubsub-event-processor");
         eventProcessingThread.start();
         logger.info("PubSub service started");
     }
@@ -132,8 +132,10 @@ public class PubSub {
         try {
             eventProcessingThread.join(10_000L);
         } catch (InterruptedException e) {
-            logger.error("Failed to stop PubSub");
+            logger.error("Interrupted while joining the PubSub processing thread");
         }
+
+        isRunning.set(false);
         logger.info("PubSub service stopped");
     }
 
@@ -141,20 +143,14 @@ public class PubSub {
      * This thread will be continuously polling for new events until PubSub is
      * stopped.
      */
-    private class EventProcessingThread extends Thread {
-
-        private EventProcessingThread() {
-            super("pubsub-event-processing-" + name);
-        }
-
+    private class EventProcessor implements Runnable {
         @Override
         public void run() {
-            while (!isInterrupted()) {
-                final PubSubEvent event;
+            while (!Thread.currentThread().isInterrupted()) {
+                PubSubEvent event;
                 try {
                     event = queue.take();
                 } catch (InterruptedException e) {
-                    interrupt();
                     return;
                 }
 
@@ -169,12 +165,6 @@ public class PubSub {
                     }
                 }
             }
-        }
-
-        @Override
-        public void interrupt() {
-            super.interrupt();
-            isRunning.set(false);
         }
     }
 }
