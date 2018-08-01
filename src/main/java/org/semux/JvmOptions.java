@@ -17,8 +17,10 @@ public class JvmOptions {
         sb.append(" -Dlog4j2.garbagefreeThreadContextMap=true");
         sb.append(" -Dlog4j2.shutdownHookEnabled=false");
         sb.append(" -Dlog4j2.disableJmx=true");
-        sb.append(" --add-opens=java.base/sun.net.dns=ALL-UNNAMED");
-        sb.append(" --add-opens=java.base/java.lang.reflect=ALL-UNNAMED");
+        if (SystemUtil.isJavaPlatformModuleSystemAvailable()) {
+            sb.append(" --add-opens=java.base/sun.net.dns=ALL-UNNAMED");
+            sb.append(" --add-opens=java.base/java.lang.reflect=ALL-UNNAMED");
+        }
         sb.append(" -splash:" + Paths.get("resources", "splash.png").toAbsolutePath());
 
         System.out.println(sb);
