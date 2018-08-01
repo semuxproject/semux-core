@@ -608,7 +608,7 @@
                                         <urn>org.powermock:powermock-reflect:1.7.4:jar:null:test:a484263077a371165c2fa96aa52935cd580a3e3c</urn>
                                         <urn>org.rauschig:jarchivelib:0.7.1:jar:null:test:47a77274cc38cfe6c04bc2afa3ece808742dc42b</urn>
                                         <urn>org.slf4j:slf4j-api:1.7.25:jar:null:compile:da76ca59f6a57ee3102f8f9bd9cee742973efa8a</urn>
-                                        <urn>org.webjars:swagger-ui:3.17.6:jar:null:compile:aa6e8134f67aea65a701823fc2b3a5dfe88344c8</urn>
+                                        <urn>org.webjars:swagger-ui:3.14.2:jar:null:compile:05f83eebdceedad1e26ddde584e4c08c20811921</urn>
                                         <urn>org.xerial.snappy:snappy-java:1.1.7.2:jar:null:compile:307b286efd119ad2c6d4291128bf110bddc68088</urn>
                                         <urn>pl.project13.maven:git-commit-id-plugin:2.2.4:maven-plugin:null:runtime:43a0dc1d02821c51847d587ecc4a6943086b884c</urn>
                                     </urns>
@@ -694,7 +694,7 @@
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>swagger-ui</artifactId>
-            <version>3.17.6</version>
+            <version>3.14.2</version>
         </dependency>
 
         <!-- Java 9 Deprecated Packages Required by JAX-RS -->
