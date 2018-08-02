@@ -664,9 +664,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <execute>
-                                            <runOnIncremental>false</runOnIncremental>
-                                        </execute >
+                                        <ignore></ignore>
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
@@ -749,13 +747,6 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>2.11.1</version>
-            <exclusions>
-                <!-- NOTE: log4j requires a newer version of slfj which is still in beta -->
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- Bouncy Castle -->
@@ -805,6 +796,11 @@
             <version>4.2</version>
         </dependency>
         <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
             <version>1.6</version>
@@ -818,11 +814,6 @@
                     <artifactId>commons-logging</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>commons-cli</groupId>
@@ -974,12 +965,6 @@
             <artifactId>awaitility</artifactId>
             <version>3.1.2</version>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.objenesis</groupId>
-                    <artifactId>objenesis</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.bytebuddy</groupId>
