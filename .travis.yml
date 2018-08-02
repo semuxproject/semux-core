@@ -18,7 +18,7 @@ matrix:
       sudo: false
       jdk: oraclejdk8
       script:
-        - mvn cobertura:cobertura
+        - mvn cobertura:cobertura -Denforcer.skip=true
       after_success:
         - mvn coveralls:report
 
