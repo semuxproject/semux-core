@@ -20,14 +20,15 @@ import java.util.Map;
  */
 public enum ApiVersion {
 
-    // version 1, no longer supported
-    v1("v1"), v1_0_0("v1.0.0"), v1_0_1("v1.0.1"),
+    @Deprecated
+    v1_0_0("v1.0.0"),
 
-    // version 2
-    v2("v2"), v2_0_0("v2.0.0"), v2_1_0("v2.1.0"),
+    @Deprecated
+    v1_0_1("v1.0.1"),
 
-    // version 3
-    v3("v3");
+    v2_0_0("v2.0.0"),
+
+    v2_1_0("v2.1.0");
 
     public final static ApiVersion DEFAULT = v2_1_0;
 

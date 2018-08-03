@@ -57,7 +57,6 @@ public class ApiHandlerImpl implements ApiHandler {
         Class<?> apiInterfaceV2 = SemuxApi.class;
         Map<ImmutablePair<HttpMethod, String>, Route> routesV2 = loadRoutes(apiImplementationV2, apiInterfaceV2);
 
-        this.routes.put(ApiVersion.v2, routesV2);
         this.routes.put(ApiVersion.v2_0_0, routesV2);
         this.routes.put(ApiVersion.v2_1_0, routesV2);
     }
@@ -137,14 +136,11 @@ public class ApiHandlerImpl implements ApiHandler {
 
         final Object semuxApi;
 
-        @SuppressWarnings("unused")
-        final HttpMethod httpMethod;
+        @SuppressWarnings("unused") final HttpMethod httpMethod;
 
-        @SuppressWarnings("unused")
-        final String path;
+        @SuppressWarnings("unused") final String path;
 
-        @SuppressWarnings("unused")
-        final Method methodInterface;
+        @SuppressWarnings("unused") final Method methodInterface;
 
         final Method methodImpl;
 

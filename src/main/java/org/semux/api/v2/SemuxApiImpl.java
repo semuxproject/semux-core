@@ -808,7 +808,7 @@ public final class SemuxApiImpl implements SemuxApi {
      */
     private Response success(ApiHandlerResponse resp) {
         resp.setSuccess(true);
-        resp.setMessage("Request processed successfully");
+        resp.setMessage("successful operation");
 
         return Response.ok().entity(resp).build();
     }
@@ -831,7 +831,7 @@ public final class SemuxApiImpl implements SemuxApi {
      * Validates node parameter of /add_node API
      *
      * @param node
-     *            node parameter of /add_node API
+     *         node parameter of /add_node API
      * @return validated hostname and port number
      */
     private NodeManager.Node validateAddNodeParameter(String node) {
@@ -859,7 +859,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
     /**
      * Constructs a transaction and adds it to pending manager.
-     * 
+     *
      * @param type
      * @param from
      * @param to
