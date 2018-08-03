@@ -155,8 +155,12 @@ public abstract class AbstractConfig implements Config {
 
     @Override
     public Amount getBlockReward(long number) {
-        if (number <= 25_000_000L) {
+        if (number <= 10_000_000L) {
             return SEM.of(3);
+        } else if (number <= 25_000_000L) {
+            return SEM.of(2);
+        } else if (number <= 40_000_000L) {
+            return SEM.of(1);
         } else {
             return ZERO;
         }
