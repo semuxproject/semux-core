@@ -831,7 +831,7 @@ public final class SemuxApiImpl implements SemuxApi {
      * Validates node parameter of /add_node API
      *
      * @param node
-     *         node parameter of /add_node API
+     *            node parameter of /add_node API
      * @return validated hostname and port number
      */
     private NodeManager.Node validateAddNodeParameter(String node) {

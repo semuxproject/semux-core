@@ -136,11 +136,14 @@ public class ApiHandlerImpl implements ApiHandler {
 
         final Object semuxApi;
 
-        @SuppressWarnings("unused") final HttpMethod httpMethod;
+        @SuppressWarnings("unused")
+        final HttpMethod httpMethod;
 
-        @SuppressWarnings("unused") final String path;
+        @SuppressWarnings("unused")
+        final String path;
 
-        @SuppressWarnings("unused") final Method methodInterface;
+        @SuppressWarnings("unused")
+        final Method methodInterface;
 
         final Method methodImpl;
 
