@@ -46,27 +46,27 @@ public class SemuxGuiTest {
 
         Mockito.doNothing().when(gui).showWelcome(any());
         Mockito.doNothing().when(gui).checkFilePermissions(any());
-        Mockito.doNothing().when(gui).unlockWallet(any());
-        Mockito.doNothing().when(gui).showSplashScreen();
-        Mockito.doNothing().when(gui).setupCoinbase(any());
+        Mockito.doCallRealMethod().when(gui).unlockWallet(any());
+        Mockito.doNothing().when(gui).setupSplashScreen();
+        Mockito.doReturn(0).when(gui).setupCoinbase(any());
+        Mockito.doNothing().when(gui).startKernel(any(), any(), any());
 
         String[] args = new String[] {
                 "--datadir", kernelRule.getKernel().getConfig().dataDir().getAbsolutePath(),
-                "--network", "mainnet"
+                "--network", "mainnet",
+                "--coinbase", "0",
+                "--password", kernelRule.getPassword()
         };
         gui.start(args);
 
         assertThat(gui.getDataDir()).isEqualTo(args[1]);
         assertThat(gui.getNetwork()).isEqualTo(Network.MAINNET);
+        assertThat(gui.getCoinbase()).isEqualTo(0);
+        assertThat(gui.getPassword()).isEqualTo(kernelRule.getPassword());
         verify(gui).checkFilePermissions(any());
         verify(gui).unlockWallet(any());
-        verify(gui).showSplashScreen();
+        verify(gui).setupSplashScreen();
         verify(gui).setupCoinbase(any());
-
-        // start without wallet
-        kernelRule.getKernel().getWallet().getFile().delete();
-        gui.start(args);
-        verify(gui).showWelcome(any());
     }
 
     @Test
@@ -75,12 +75,11 @@ public class SemuxGuiTest {
 
         // setup coinbase
         SemuxGui gui = spy(new SemuxGui(new WalletModel(kernelRule.getKernel().getConfig()), kernelRule.getKernel()));
-        Mockito.doNothing().when(gui).startKernelAndMain(any());
+        Mockito.doNothing().when(gui).startKernel(any(), any(), any());
         Mockito.doReturn(3).when(gui).showSelectDialog(any(), any(), any());
-        gui.setupCoinbase(wallet);
 
         // verify
-        assertThat(gui.getCoinbase()).isEqualTo(3);
+        assertThat(gui.setupCoinbase(wallet)).isEqualTo(3);
     }
 
     @Test
@@ -90,7 +89,7 @@ public class SemuxGuiTest {
 
         // setup coinbase
         SemuxGui gui = spy(new SemuxGui(new WalletModel(kernelRule.getKernel().getConfig()), kernelRule.getKernel()));
-        Mockito.doNothing().when(gui).startKernelAndMain(any());
+        Mockito.doNothing().when(gui).startKernel(any(), any(), any());
         gui.setupCoinbase(wallet);
 
         // verify

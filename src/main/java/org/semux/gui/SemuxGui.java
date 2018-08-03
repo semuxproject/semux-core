@@ -27,6 +27,7 @@ import javax.swing.JOptionPane;
 import org.apache.commons.cli.ParseException;
 import org.semux.Kernel;
 import org.semux.Launcher;
+import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.exception.ConfigException;
 import org.semux.core.Block;
@@ -96,16 +97,16 @@ public class SemuxGui extends Launcher {
                 SystemUtil.exit(SystemUtil.Code.JVM_32_NOT_SUPPORTED);
             }
 
+            // check system prerequisite
             checkPrerequisite();
 
+            // setup default look and feel
             setupLookAndFeel();
 
+            // start GUI
             SemuxGui gui = new SemuxGui();
-            // set up logger
             gui.setupLogger(args);
-            // set up pubsub
             gui.setupPubSub();
-            // start
             gui.start(args);
 
         } catch (LauncherException | ConfigException | IpFilterJsonParseException | IOException e) {
@@ -168,7 +169,7 @@ public class SemuxGui extends Launcher {
 
     /**
      * Returns the address book dialog.
-     * 
+     *
      * @return
      */
     public AddressBookDialog getAddressBookDialog() {
@@ -185,16 +186,34 @@ public class SemuxGui extends Launcher {
         // parse options
         parseOptions(args);
 
-        // create a wallet instance.
+        // create/unlock wallet
         Wallet wallet = new Wallet(new File(getDataDir(), "wallet.data"));
-
         if (!wallet.exists()) {
             showWelcome(wallet);
         } else {
             checkFilePermissions(wallet);
             unlockWallet(wallet);
-            showSplashScreen();
-            setupCoinbase(wallet);
+        }
+
+        // setup splash screen
+        setupSplashScreen();
+
+        // setup coinbase & launch kernel
+        try {
+            int coinbase = setupCoinbase(wallet);
+            if (coinbase == -1) {
+                SystemUtil.exit(SystemUtil.Code.OK);
+            }
+
+            startKernel(getConfig(), wallet, wallet.getAccount(coinbase));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    e.getMessage(),
+                    GuiMessages.get("ErrorDialogTitle"),
+                    JOptionPane.ERROR_MESSAGE);
+            logger.error("Uncaught exception during kernel startup.", e);
+            SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_LAUNCH_KERNEL);
         }
     }
 
@@ -209,9 +228,6 @@ public class SemuxGui extends Launcher {
         // wait until done
         frame.join();
         frame.dispose();
-
-        showSplashScreen();
-        setupCoinbase(wallet);
     }
 
     protected void checkFilePermissions(Wallet wallet) throws IOException {
@@ -235,8 +251,8 @@ public class SemuxGui extends Launcher {
     }
 
     protected void unlockWallet(Wallet wallet) {
-        if (getConfig().walletPassword() != null) {
-            if (!wallet.unlock(getConfig().walletPassword())) {
+        if (getPassword() != null) {
+            if (!wallet.unlock(getPassword())) {
                 JOptionPane.showMessageDialog(
                         null,
                         GuiMessages.get("AutomaticUnlockFailed"),
@@ -271,66 +287,55 @@ public class SemuxGui extends Launcher {
      * Select an account as coinbase if the wallet is not empty; or create a new
      * account and use it as coinbase.
      */
-    protected void setupCoinbase(Wallet wallet) {
+    protected int setupCoinbase(Wallet wallet) {
         pubSub.publish(new WalletLoadingEvent());
 
-        if (wallet.size() > 1) {
-            String message = GuiMessages.get("AccountSelection");
-            List<Object> options = new ArrayList<>();
-            List<Key> list = wallet.getAccounts();
-            for (Key key : list) {
-                Optional<String> name = wallet.getAddressAlias(key.toAddress());
-                options.add(Hex.PREF + key.toAddressString() + (name.map(s -> ", " + s).orElse("")));
-            }
-
-            // show select dialog
-            pubSub.publish(new WalletSelectionDialogShownEvent());
-            int index = showSelectDialog(null, message, options);
-
-            if (index == -1) {
-                SystemUtil.exitAsync(SystemUtil.Code.OK);
-            } else {
-                // use the selected account as coinbase.
-                setCoinbase(index);
-            }
-        } else if (wallet.size() == 0) {
+        // create an account is empty
+        if (wallet.size() == 0) {
             wallet.addAccount(new Key());
             wallet.flush();
-
-            // use the first account as coinbase.
-            setCoinbase(0);
         }
 
-        try {
-            startKernelAndMain(wallet);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(
-                    null,
-                    e.getMessage(),
-                    GuiMessages.get("ErrorDialogTitle"),
-                    JOptionPane.ERROR_MESSAGE);
-            logger.error("Uncaught exception during kernel startup.", e);
-            SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_LAUNCH_KERNEL);
+        // use the coinbase specified in arguments
+        if (getCoinbase() != null && getCoinbase() >= 0 && getCoinbase() < wallet.size()) {
+            return getCoinbase();
         }
+
+        // use the first account
+        if (wallet.size() == 1) {
+            return 0;
+        }
+
+        String message = GuiMessages.get("AccountSelection");
+        List<Object> options = new ArrayList<>();
+        List<Key> list = wallet.getAccounts();
+        for (Key key : list) {
+            Optional<String> name = wallet.getAddressAlias(key.toAddress());
+            options.add(Hex.PREF + key.toAddressString() + (name.map(s -> ", " + s).orElse("")));
+        }
+
+        // show select dialog
+        pubSub.publish(new WalletSelectionDialogShownEvent());
+        return showSelectDialog(null, message, options);
     }
 
-    protected synchronized void showSplashScreen() {
+    protected synchronized void setupSplashScreen() {
         splashScreen = new SplashScreen();
     }
 
     /**
      * Starts the kernel and shows main frame.
      */
-    protected synchronized void startKernelAndMain(Wallet wallet) {
+    protected synchronized void startKernel(Config config, Wallet wallet, Key coinbase) {
         if (isRunning) {
             return;
         }
 
         // set up model
-        model.setCoinbase(wallet.getAccount(getCoinbase()));
+        model.setCoinbase(coinbase);
 
         // set up kernel
-        kernel = new Kernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
+        kernel = new Kernel(config, wallet, coinbase);
         kernel.start();
 
         // initialize the model with latest block

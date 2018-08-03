@@ -36,11 +36,6 @@ public interface Config {
     File getFile();
 
     /**
-     * @return The wallet password.
-     */
-    String walletPassword();
-
-    /**
      * Returns the data directory.
      *
      * @return

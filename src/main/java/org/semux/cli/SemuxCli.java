@@ -41,8 +41,6 @@ public class SemuxCli extends Launcher {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxCli.class);
 
-    private static final String ENV_SEMUX_WALLET_PASSWORD = "SEMUX_WALLET_PASSWORD";
-
     public static void main(String[] args) {
         try {
             // check jvm version
@@ -51,13 +49,14 @@ public class SemuxCli extends Launcher {
                 SystemUtil.exit(SystemUtil.Code.JVM_32_NOT_SUPPORTED);
             }
 
+            // system system prerequisites
             checkPrerequisite();
 
+            // start CLI
             SemuxCli cli = new SemuxCli();
-            // set up logger
             cli.setupLogger(args);
-            // start
             cli.start(args);
+
         } catch (LauncherException | ConfigException | IpFilterJsonParseException | IOException exception) {
             logger.error(exception.getMessage());
         } catch (ParseException exception) {
@@ -94,19 +93,6 @@ public class SemuxCli extends Launcher {
                 .longOpt(SemuxOption.CHANGE_PASSWORD.toString()).desc(CliMessages.get("ChangeWalletPassword")).build();
         addOption(changePasswordOption);
 
-        Option coinbaseOption = Option.builder()
-                .longOpt(SemuxOption.COINBASE.toString()).desc(CliMessages.get("SpecifyCoinbase"))
-                .hasArg(true).numberOfArgs(1).optionalArg(false).argName("index").type(Number.class)
-                .build();
-        addOption(coinbaseOption);
-
-        Option passwordOption = Option.builder()
-                .longOpt(SemuxOption.PASSWORD.toString()).desc(CliMessages.get("WalletPassword"))
-                .hasArg(true).numberOfArgs(1).optionalArg(false).argName(SemuxOption.PASSWORD.toString())
-                .type(String.class)
-                .build();
-        addOption(passwordOption);
-
         Option dumpPrivateKeyOption = Option.builder()
                 .longOpt(SemuxOption.DUMP_PRIVATE_KEY.toString())
                 .desc(CliMessages.get("PrintHexKey"))
@@ -123,38 +109,33 @@ public class SemuxCli extends Launcher {
     }
 
     public void start(String[] args) throws ParseException, IOException {
-        // parse options
+        // parse common options
         CommandLine cmd = parseOptions(args);
 
-        if (cmd.hasOption(SemuxOption.COINBASE.toString())) {
-            setCoinbase(((Number) cmd.getParsedOptionValue(SemuxOption.COINBASE.toString())).intValue());
-        }
-
-        if (cmd.hasOption(SemuxOption.PASSWORD.toString())) {
-            setPassword(cmd.getOptionValue(SemuxOption.PASSWORD.toString()));
-        } else if (getConfig().walletPassword() != null) {
-            setPassword(getConfig().walletPassword());
-        } else if (System.getenv(ENV_SEMUX_WALLET_PASSWORD) != null) {
-            setPassword(System.getenv(ENV_SEMUX_WALLET_PASSWORD));
-        }
-
+        // parse remaining options
         if (cmd.hasOption(SemuxOption.HELP.toString())) {
             printHelp();
+
         } else if (cmd.hasOption(SemuxOption.VERSION.toString())) {
             printVersion();
+
         } else if (cmd.hasOption(SemuxOption.ACCOUNT.toString())) {
-            String accountAction = cmd.getOptionValue(SemuxOption.ACCOUNT.toString()).trim();
-            if (accountAction.equals("create")) {
+            String action = cmd.getOptionValue(SemuxOption.ACCOUNT.toString()).trim();
+            if ("create".equals(action)) {
                 createAccount();
-            } else if (accountAction.equals("list")) {
+            } else if ("list".equals(action)) {
                 listAccounts();
             }
+
         } else if (cmd.hasOption(SemuxOption.CHANGE_PASSWORD.toString())) {
             changePassword();
+
         } else if (cmd.hasOption(SemuxOption.DUMP_PRIVATE_KEY.toString())) {
             dumpPrivateKey(cmd.getOptionValue(SemuxOption.DUMP_PRIVATE_KEY.toString()).trim());
+
         } else if (cmd.hasOption(SemuxOption.IMPORT_PRIVATE_KEY.toString())) {
             importPrivateKey(cmd.getOptionValue(SemuxOption.IMPORT_PRIVATE_KEY.toString()).trim());
+
         } else {
             start();
         }
@@ -177,6 +158,7 @@ public class SemuxCli extends Launcher {
             return;
         }
 
+        // check file permissions
         if (SystemUtil.isPosix()) {
             if (!wallet.isPosixPermissionSecured()) {
                 logger.warn(CliMessages.get("WarningWalletPosixPermission"));
@@ -187,6 +169,7 @@ public class SemuxCli extends Launcher {
             }
         }
 
+        // check time drift
         long timeDrift = TimeUtil.getTimeOffsetFromNtp();
         if (Math.abs(timeDrift) > 20000L) {
             logger.warn(CliMessages.get("SystemTimeDrift"));
@@ -202,7 +185,9 @@ public class SemuxCli extends Launcher {
             logger.info(CliMessages.get("NewAccountCreatedForAddress", key.toAddressString()));
         }
 
-        if (getCoinbase() < 0 || getCoinbase() >= accounts.size()) {
+        // check coinbase if the user specifies one
+        int coinbase = getCoinbase() == null ? 0 : getCoinbase();
+        if (coinbase < 0 || coinbase >= accounts.size()) {
             logger.error(CliMessages.get("CoinbaseDoesNotExist"));
             SystemUtil.exit(SystemUtil.Code.ACCOUNT_NOT_EXIST);
             return;
@@ -210,13 +195,16 @@ public class SemuxCli extends Launcher {
 
         // start kernel
         try {
-            startKernel(getConfig(), wallet, wallet.getAccount(getCoinbase()));
+            startKernel(getConfig(), wallet, wallet.getAccount(coinbase));
         } catch (Exception e) {
             logger.error("Uncaught exception during kernel startup.", e);
             SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_LAUNCH_KERNEL);
         }
     }
 
+    /**
+     * Starts the kernel.
+     */
     protected Kernel startKernel(Config config, Wallet wallet, Key coinbase) {
         Kernel kernel = new Kernel(config, wallet, coinbase);
         kernel.start();
@@ -275,7 +263,7 @@ public class SemuxCli extends Launcher {
 
     /**
      * Read a new password from input and require confirmation
-     * 
+     *
      * @return new password, or null if the confirmation failed
      */
     private String readNewPassword() {

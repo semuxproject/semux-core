@@ -47,7 +47,6 @@ public abstract class AbstractConfig implements Config {
     // =========================
     // General
     // =========================
-    protected String walletPassword;
     protected File dataDir;
     protected Network network;
     protected short networkVersion;
@@ -152,11 +151,6 @@ public abstract class AbstractConfig implements Config {
     @Override
     public File getFile() {
         return new File(configDir(), CONFIG_FILE);
-    }
-
-    @Override
-    public String walletPassword() {
-        return walletPassword;
     }
 
     @Override
@@ -516,9 +510,6 @@ public abstract class AbstractConfig implements Config {
                 String name = (String) k;
 
                 switch (name) {
-                case "wallet.password":
-                    walletPassword = props.getProperty(name).trim();
-                    break;
                 case "p2p.declaredIp":
                     p2pDeclaredIp = props.getProperty(name).trim();
                     break;

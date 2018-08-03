@@ -40,6 +40,8 @@ public abstract class Launcher {
 
     private static final Logger logger = LoggerFactory.getLogger(Launcher.class);
 
+    private static final String ENV_SEMUX_WALLET_PASSWORD = "SEMUX_WALLET_PASSWORD";
+
     /**
      * Here we make sure that all shutdown hooks will be executed in the order of
      * registration. This is necessary to be manually maintained because
@@ -57,7 +59,7 @@ public abstract class Launcher {
     private String dataDir = Constants.DEFAULT_DATA_DIR;
     private Network network = MAINNET;
 
-    private int coinbase = 0;
+    private Integer coinbase = null;
     private String password = null;
 
     public Launcher() {
@@ -73,6 +75,19 @@ public abstract class Launcher {
                 .hasArg(true).numberOfArgs(1).optionalArg(false).argName("name").type(String.class)
                 .build();
         addOption(networkOption);
+
+        Option coinbaseOption = Option.builder()
+                .longOpt(SemuxOption.COINBASE.toString()).desc(CliMessages.get("SpecifyCoinbase"))
+                .hasArg(true).numberOfArgs(1).optionalArg(false).argName("index").type(Number.class)
+                .build();
+        addOption(coinbaseOption);
+
+        Option passwordOption = Option.builder()
+                .longOpt(SemuxOption.PASSWORD.toString()).desc(CliMessages.get("WalletPassword"))
+                .hasArg(true).numberOfArgs(1).optionalArg(false).argName(SemuxOption.PASSWORD.toString())
+                .type(String.class)
+                .build();
+        addOption(passwordOption);
     }
 
     /**
@@ -116,16 +131,16 @@ public abstract class Launcher {
     /**
      * Returns the coinbase.
      *
-     * @return
+     * @return The specified coinbase, or NULL
      */
-    public int getCoinbase() {
+    public Integer getCoinbase() {
         return coinbase;
     }
 
     /**
      * Returns the provided password if any.
      *
-     * @return
+     * @return The specified password, or NULL
      */
     public String getPassword() {
         return password;
@@ -155,6 +170,17 @@ public abstract class Launcher {
             } else {
                 setNetwork(net);
             }
+        }
+
+        if (cmd.hasOption(SemuxOption.COINBASE.toString())) {
+            setCoinbase(((Number) cmd.getParsedOptionValue(SemuxOption.COINBASE.toString())).intValue());
+        }
+
+        // Priority: arguments => system property => console input
+        if (cmd.hasOption(SemuxOption.PASSWORD.toString())) {
+            setPassword(cmd.getOptionValue(SemuxOption.PASSWORD.toString()));
+        } else if (System.getenv(ENV_SEMUX_WALLET_PASSWORD) != null) {
+            setPassword(System.getenv(ENV_SEMUX_WALLET_PASSWORD));
         }
 
         return cmd;
@@ -237,7 +263,6 @@ public abstract class Launcher {
 
     /**
      * Check runtime prerequisite.
-     *
      */
     protected static void checkPrerequisite() {
         switch (SystemUtil.getOsName()) {
@@ -264,7 +289,6 @@ public abstract class Launcher {
 
     /**
      * Call registered shutdown hooks in the order of registration.
-     *
      */
     private static synchronized void shutdownHook() {
         // shutdown hooks
