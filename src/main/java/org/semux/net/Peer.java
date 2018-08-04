@@ -101,6 +101,15 @@ public class Peer {
     }
 
     /**
+     * Returns the network.
+     *
+     * @return
+     */
+    public Network getNetwork() {
+        return network;
+    }
+
+    /**
      * Returns the network version.
      *
      * @return

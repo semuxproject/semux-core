@@ -161,7 +161,7 @@ public interface Config {
      * 
      * @return
      */
-    CapabilitySet getCapabilities();
+    CapabilitySet getClientCapabilities();
 
     // =========================
     // P2P

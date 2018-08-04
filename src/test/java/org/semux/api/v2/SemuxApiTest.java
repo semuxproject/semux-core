@@ -332,7 +332,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
         assertEquals(InfoType.NetworkEnum.DEVNET.name(), response.getResult().getNetwork());
-        assertEquals(config.getCapabilities().toList(), response.getResult().getCapabilities());
+        assertEquals(config.getClientCapabilities().toList(), response.getResult().getCapabilities());
         assertEquals("0", response.getResult().getLatestBlockNumber());
         assertEquals(Hex.encode0x(chain.getLatestBlock().getHash()), response.getResult().getLatestBlockHash());
         assertEquals(Integer.valueOf(0), response.getResult().getActivePeers());
@@ -393,9 +393,9 @@ public class SemuxApiTest extends SemuxApiTestBase {
         channelMgr = spy(kernelRule.getKernel().getChannelManager());
         List<Peer> peers = Arrays.asList(
                 new Peer(Network.DEVNET, (short) 1, "peer1", "1.2.3.4", 5161, "client1",
-                        config.getCapabilities().toArray(), 1),
+                        config.getClientCapabilities().toArray(), 1),
                 new Peer(Network.DEVNET, (short) 2, "peer2", "2.3.4.5", 5171, "client2",
-                        config.getCapabilities().toArray(), 2));
+                        config.getClientCapabilities().toArray(), 2));
         when(channelMgr.getActivePeers()).thenReturn(peers);
         kernelRule.getKernel().setChannelManager(channelMgr);
 

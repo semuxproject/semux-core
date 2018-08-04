@@ -21,8 +21,6 @@ import org.semux.net.msg.p2p.NodesMessage;
 import org.semux.net.msg.p2p.PingMessage;
 import org.semux.net.msg.p2p.PongMessage;
 import org.semux.net.msg.p2p.TransactionMessage;
-import org.semux.net.msg.p2p.handshake.v1.HelloMessage;
-import org.semux.net.msg.p2p.handshake.v1.WorldMessage;
 import org.semux.util.Bytes;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
@@ -56,9 +54,13 @@ public class MessageFactory {
             case DISCONNECT:
                 return new DisconnectMessage(encoded);
             case HELLO:
-                return new HelloMessage(encoded);
+                return new org.semux.net.msg.p2p.handshake.v1.HelloMessage(encoded);
             case WORLD:
-                return new WorldMessage(encoded);
+                return new org.semux.net.msg.p2p.handshake.v1.WorldMessage(encoded);
+            case HELLO_V2:
+                return new org.semux.net.msg.p2p.handshake.v2.HelloMessage(encoded);
+            case WORLD_V2:
+                return new org.semux.net.msg.p2p.handshake.v2.WorldMessage(encoded);
             case PING:
                 return new PingMessage(encoded);
             case PONG:

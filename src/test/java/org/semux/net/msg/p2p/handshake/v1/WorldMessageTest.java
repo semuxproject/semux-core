@@ -18,7 +18,7 @@ import org.semux.crypto.Key;
 public class WorldMessageTest {
 
     @Test
-    public void TestIsValid() {
+    public void testCodec() {
         Config config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
 
         Key key = new Key();

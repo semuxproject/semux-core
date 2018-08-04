@@ -230,7 +230,7 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
-    public CapabilitySet getCapabilities() {
+    public CapabilitySet getClientCapabilities() {
         return Constants.CLIENT_CAPABILITIES;
     }
 
