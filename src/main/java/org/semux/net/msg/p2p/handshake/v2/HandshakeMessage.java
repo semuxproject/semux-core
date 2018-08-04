@@ -142,4 +142,13 @@ public abstract class HandshakeMessage extends Message {
         return new Peer(network, networkVersion, peerId, ip, port, clientId, capabilities.toArray(),
                 latestBlockNumber);
     }
+
+    /**
+     * Returns the secret.
+     *
+     * @return
+     */
+    public byte[] getSecret() {
+        return secret;
+    }
 }

@@ -362,6 +362,20 @@ public class SystemUtil {
         return FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
     }
 
+    /**
+     * Checks if it's running in JUnit test.
+     *
+     * @return
+     */
+    public static boolean isJUnitTest() {
+        try {
+            Class.forName("org.semux.TestUtils");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     private SystemUtil() {
     }
 }

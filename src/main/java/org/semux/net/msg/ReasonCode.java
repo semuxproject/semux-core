@@ -9,14 +9,14 @@ package org.semux.net.msg;
 public enum ReasonCode {
 
     /**
-     * [0x00] Reserved code.
+     * [0x00] Bad network.
      */
-    RESERVED(0x00),
+    BAD_NETWORK(0x00),
 
     /**
      * [0x01] Incompatible protocol.
      */
-    INCOMPATIBLE_PROTOCOL(0x01),
+    BAD_NETWORK_VERSION(0x01),
 
     /**
      * [0x02] Too many active peers.

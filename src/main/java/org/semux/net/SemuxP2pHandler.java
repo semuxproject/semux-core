@@ -10,6 +10,7 @@ import static org.semux.net.msg.p2p.NodesMessage.MAX_NODES;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -50,6 +51,8 @@ import org.semux.net.msg.p2p.TransactionMessage;
 import org.semux.net.msg.p2p.handshake.v2.HelloMessage;
 import org.semux.net.msg.p2p.handshake.v2.InitMessage;
 import org.semux.net.msg.p2p.handshake.v2.WorldMessage;
+import org.semux.util.Bytes;
+import org.semux.util.SystemUtil;
 import org.semux.util.TimeUtil;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
@@ -92,6 +95,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private ScheduledFuture<?> getNodes = null;
     private ScheduledFuture<?> pingPong = null;
 
+    private byte[] secret = Bytes.random(InitMessage.SECRET_LENGTH);
+    private long timestamp = TimeUtil.currentTimeMillis();
+
     /**
      * Creates a new P2P handler.
      *
@@ -113,6 +119,22 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         this.msgQueue = channel.getMessageQueue();
     }
 
+    /**
+     * Client prior to v1.3.0 does not accept unknown message type. To make sure
+     * they are able to connect to the network; we're partially applying the new
+     * handshake protocol.
+     *
+     * @return
+     */
+    protected boolean isNewHandShakeEnabled() {
+
+        if (SystemUtil.isJUnitTest()) {
+            return true;
+        }
+
+        return Math.random() < 0.5;
+    }
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         logger.debug("P2P handler active, cid = {}", channel.getId());
@@ -126,12 +148,20 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             return;
         }
 
-        // send a HELLO message to initiate handshake
-        if (!channel.isInbound()) {
-            msgQueue.sendMessage(new org.semux.net.msg.p2p.handshake.v1.HelloMessage(
-                    config.network(), config.networkVersion(), client.getPeerId(),
-                    client.getIp(), client.getPort(), config.getClientId(), chain.getLatestBlockNumber(),
-                    client.getCoinbase()));
+        if (isNewHandShakeEnabled()) {
+            if (channel.isInbound()) {
+                msgQueue.sendMessage(new InitMessage(secret, timestamp));
+            } else {
+                // in this case, the connection will never be established if the peer
+                // doesn't enable new handshake protocol.
+            }
+        } else {
+            if (channel.isOutbound()) {
+                msgQueue.sendMessage(new org.semux.net.msg.p2p.handshake.v1.HelloMessage(
+                        config.network(), config.networkVersion(), client.getPeerId(),
+                        client.getIp(), client.getPort(), config.getClientId(), chain.getLatestBlockNumber(),
+                        client.getCoinbase()));
+            }
         }
     }
 
@@ -228,24 +258,13 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     protected void onHello(org.semux.net.msg.p2p.handshake.v1.HelloMessage msg) {
         Peer peer = msg.getPeer();
 
-        if (!Stream.of(peer.getCapabilities())
-                .anyMatch(k -> (config.network() == Network.MAINNET ? "SEM" : "SEM_TESTNET").equals(k))) {
-            msgQueue.disconnect(ReasonCode.INCOMPATIBLE_PROTOCOL);
+        // check peer
+        if (checkPeer(peer, false) != null) {
+            msgQueue.disconnect(checkPeer(peer, false));
             return;
         }
 
-        if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isActivePeer(peer.getPeerId())) {
-            msgQueue.disconnect(ReasonCode.DUPLICATED_PEER_ID);
-            return;
-        }
-
-        if (chain.getValidators().contains(peer.getPeerId()) // is a validator
-                && channelMgr.isActiveIP(channel.getRemoteIp()) // already connected
-                && config.network() == Network.MAINNET) { // on main net
-            msgQueue.disconnect(ReasonCode.VALIDATOR_IP_LIMITED);
-            return;
-        }
-
+        // check message
         if (!msg.validate(config) || (config.network() == Network.MAINNET && !channel.getRemoteIp()
                 .equals(msg.getPeer().getIp()))) {
             msgQueue.disconnect(ReasonCode.INVALID_HANDSHAKE);
@@ -258,9 +277,6 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
                 client.getIp(), client.getPort(), config.getClientId(), chain.getLatestBlockNumber(),
                 client.getCoinbase()));
 
-        // notify channel manager
-        channelMgr.onChannelActive(channel, peer);
-
         // handshake done
         onHandshakeDone(peer);
     }
@@ -268,32 +284,18 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     protected void onWorld(org.semux.net.msg.p2p.handshake.v1.WorldMessage msg) {
         Peer peer = msg.getPeer();
 
-        if (!Stream.of(msg.getPeer().getCapabilities())
-                .anyMatch(k -> (config.network() == Network.MAINNET ? "SEM" : "SEM_TESTNET").equals(k))) {
-            msgQueue.disconnect(ReasonCode.INCOMPATIBLE_PROTOCOL);
+        // check peer
+        if (checkPeer(peer, false) != null) {
+            msgQueue.disconnect(checkPeer(peer, false));
             return;
         }
 
-        if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isActivePeer(peer.getPeerId())) {
-            msgQueue.disconnect(ReasonCode.DUPLICATED_PEER_ID);
-            return;
-        }
-
-        if (chain.getValidators().contains(peer.getPeerId()) // is a validator
-                && channelMgr.isActiveIP(channel.getRemoteIp()) // already connected
-                && config.network() == Network.MAINNET) { // on main net
-            msgQueue.disconnect(ReasonCode.VALIDATOR_IP_LIMITED);
-            return;
-        }
-
-        if (!msg.validate(config) || (config.network() == Network.MAINNET && !channel.getRemoteIp()
-                .equals(msg.getPeer().getIp()))) {
+        // check message
+        if ((config.network() == Network.MAINNET && !channel.getRemoteIp().equals(msg.getPeer().getIp()))
+                || !msg.validate(config)) {
             msgQueue.disconnect(ReasonCode.INVALID_HANDSHAKE);
             return;
         }
-
-        // register into channel manager
-        channelMgr.onChannelActive(channel, peer);
 
         // handshake done
         onHandshakeDone(peer);
@@ -330,15 +332,72 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     }
 
     protected void onHandshakeInit(InitMessage msg) {
+        // unexpected
+        if (channel.isInbound()) {
+            return;
+        }
 
+        // record the secret
+        this.secret = msg.getSecret();
+        this.timestamp = msg.getTimestamp();
+
+        // send the HELLO message
+        this.msgQueue.sendMessage(new HelloMessage(config.network(), config.networkVersion(), client.getPeerId(),
+                client.getPort(), config.getClientId(), config.getClientCapabilities(),
+                chain.getLatestBlockNumber(),
+                secret, client.getCoinbase()));
     }
 
     protected void onHandshakeHello(HelloMessage msg) {
+        // unexpected
+        if (channel.isOutbound()) {
+            return;
+        }
+        Peer peer = msg.getPeer(channel.getRemoteIp());
 
+        // check peer
+        if (checkPeer(peer, true) != null) {
+            msgQueue.disconnect(checkPeer(peer, false));
+            return;
+        }
+
+        // check message
+        if (!Arrays.equals(secret, msg.getSecret()) || !msg.validate(config)) {
+            msgQueue.disconnect(ReasonCode.INVALID_HANDSHAKE);
+            return;
+        }
+
+        // send the WORLD message
+        this.msgQueue.sendMessage(new WorldMessage(config.network(), config.networkVersion(), client.getPeerId(),
+                client.getPort(), config.getClientId(), config.getClientCapabilities(),
+                chain.getLatestBlockNumber(),
+                secret, client.getCoinbase()));
+
+        // handshake done
+        onHandshakeDone(peer);
     }
 
     protected void onHandshakeWorld(WorldMessage msg) {
+        // unexpected
+        if (channel.isInbound()) {
+            return;
+        }
+        Peer peer = msg.getPeer(channel.getRemoteIp());
 
+        // check peer
+        if (checkPeer(peer, true) != null) {
+            msgQueue.disconnect(checkPeer(peer, false));
+            return;
+        }
+
+        // check message
+        if (!Arrays.equals(secret, msg.getSecret()) || !msg.validate(config)) {
+            msgQueue.disconnect(ReasonCode.INVALID_HANDSHAKE);
+            return;
+        }
+
+        // handshake done
+        onHandshakeDone(peer);
     }
 
     protected void onSync(Message msg) {
@@ -380,11 +439,49 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         bft.onMessage(channel, msg);
     }
 
+    // =========================
+    // Helper methods below
+    // =========================
+
+    /**
+     * Check whether the peer is valid to connect.
+     */
+    private ReasonCode checkPeer(Peer peer, boolean newHandShake) {
+        // has to be same network
+        if (newHandShake && !config.network().equals(peer.getNetwork())
+                || !newHandShake && !Stream.of(peer.getCapabilities())
+                        .anyMatch(k -> (config.network() == Network.MAINNET ? "SEM" : "SEM_TESTNET").equals(k))) {
+            return ReasonCode.BAD_NETWORK;
+        }
+
+        // has to be compatible version
+        if (config.networkVersion() != peer.getNetworkVersion()) {
+            return ReasonCode.BAD_NETWORK_VERSION;
+        }
+
+        // not connected
+        if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isActivePeer(peer.getPeerId())) {
+            return ReasonCode.DUPLICATED_PEER_ID;
+        }
+
+        // validator can't share IP address
+        if (chain.getValidators().contains(peer.getPeerId()) // is a validator
+                && channelMgr.isActiveIP(channel.getRemoteIp()) // already connected
+                && config.network() == Network.MAINNET) { // on main net
+            return ReasonCode.VALIDATOR_IP_LIMITED;
+        }
+
+        return null;
+    }
+
     /**
      * When handshake is done.
      */
     private void onHandshakeDone(Peer peer) {
         if (isHandshakeDone.compareAndSet(false, true)) {
+            // register into channel manager
+            channelMgr.onChannelActive(channel, peer);
+
             // notify bft about peer height
             bft.onMessage(channel, new NewHeightMessage(peer.getLatestBlockNumber() + 1));
 
