@@ -5,6 +5,7 @@ Welcome to the semux documentation!
 * [Delegates and Validators](./Delegates-and-Validators.md)
 * [Semux BFT Consensus](./Semux-BFT-Consensus.md)
 * [Semux Virtual Machine](./Semux-Virtual-Machine.md)
+* [Signatures and Keys](./Signatures.md)
 
 ### Using Semux
 * [Configurations](./Configurations.md)
