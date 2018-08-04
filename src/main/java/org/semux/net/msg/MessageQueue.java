@@ -165,7 +165,7 @@ public class MessageQueue {
 
     /**
      * Returns the number of messages in queue.
-     * 
+     *
      * @return
      */
     public int size() {
@@ -176,8 +176,8 @@ public class MessageQueue {
         removeAnsweredMessage(requests.peek());
 
         // send responses
-        MessageWrapper msg = prioritizedResponses.poll();
-        sendToWire(msg == null ? responses.poll() : msg);
+        sendToWire(prioritizedResponses.poll());
+        sendToWire(responses.poll());
 
         // send requests
         sendToWire(requests.peek());

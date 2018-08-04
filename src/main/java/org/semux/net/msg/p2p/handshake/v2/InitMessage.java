@@ -22,6 +22,9 @@ public class InitMessage extends Message {
     public InitMessage(byte[] secret, long timestamp) {
         super(MessageCode.HANDSHAKE_INIT, null);
 
+        this.secret = secret;
+        this.timestamp = timestamp;
+
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeBytes(secret);
         enc.writeLong(timestamp);

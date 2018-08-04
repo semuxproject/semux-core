@@ -46,7 +46,7 @@ public class ConnectionLimitHandler extends ChannelInboundHandlerAdapter {
         InetAddress address = ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress();
         if (connectionCount.get(address, k -> new AtomicInteger(0))
                 .incrementAndGet() > maxInboundConnectionsPerIp) {
-            logger.warn("Too many connections from {}", address.getHostAddress());
+            logger.debug("Too many connections from {}", address.getHostAddress());
             ctx.close();
         }
     }

@@ -26,11 +26,11 @@ import org.semux.net.NodeManager;
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class, ValidatorActivatedFork.class })
-public class UniformDistributionForkSyncingCompatibilityTest extends SyncingTest {
+public class UniformDistForkSyncingTest extends SyncingTest {
 
     @Override
     protected int targetHeight() {
-        // it needs more blocks to cover the cases that validators disagree with each
+        // it needs more blocks to cover the case where validators disagree with each
         // other
         return 5;
     }

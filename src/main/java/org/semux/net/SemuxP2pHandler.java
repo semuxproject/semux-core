@@ -356,8 +356,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         Peer peer = msg.getPeer(channel.getRemoteIp());
 
         // check peer
-        if (checkPeer(peer, true) != null) {
-            msgQueue.disconnect(checkPeer(peer, false));
+        ReasonCode code = checkPeer(peer, true);
+        if (code != null) {
+            msgQueue.disconnect(code);
             return;
         }
 
@@ -385,8 +386,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         Peer peer = msg.getPeer(channel.getRemoteIp());
 
         // check peer
-        if (checkPeer(peer, true) != null) {
-            msgQueue.disconnect(checkPeer(peer, false));
+        ReasonCode code = checkPeer(peer, true);
+        if (code != null) {
+            msgQueue.disconnect(code);
             return;
         }
 
