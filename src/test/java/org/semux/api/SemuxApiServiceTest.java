@@ -40,7 +40,7 @@ public class SemuxApiServiceTest {
 
     @Test
     public void testGetApiExplorerUrl() {
-        assertEquals(String.format("http://127.0.0.1:51710/index.html"),
+        assertEquals("http://127.0.0.1:51710/index.html",
                 apiMock.getApi().getApiExplorerUrl());
     }
 

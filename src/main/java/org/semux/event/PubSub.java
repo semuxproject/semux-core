@@ -58,8 +58,7 @@ public class PubSub {
             return false;
         }
 
-        return queue
-                .add(event);
+        return queue.add(event);
     }
 
     /**

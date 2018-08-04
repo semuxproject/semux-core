@@ -260,8 +260,8 @@ public class Transaction {
         byte[] to = decoder.readBytes();
         Amount value = decoder.readAmount();
         Amount fee = decoder.readAmount();
-        Long nonce = decoder.readLong();
-        Long timestamp = decoder.readLong();
+        long nonce = decoder.readLong();
+        long timestamp = decoder.readLong();
         byte[] data = decoder.readBytes();
         return new Transaction(
                 Network.of(networkId),

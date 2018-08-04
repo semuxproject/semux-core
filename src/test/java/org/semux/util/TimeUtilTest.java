@@ -6,7 +6,7 @@
  */
 package org.semux.util;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -37,7 +37,7 @@ public class TimeUtilTest {
 
     @Test
     public void testFormatDuration() {
-        assertTrue(TimeUtil.formatDuration(duration).equals(formatted));
+        assertEquals(TimeUtil.formatDuration(duration), formatted);
     }
 
     @Test

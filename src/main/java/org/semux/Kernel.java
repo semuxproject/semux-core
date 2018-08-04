@@ -78,7 +78,7 @@ public class Kernel {
     protected State state = State.STOPPED;
 
     protected final ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
-    protected Config config = null;
+    protected Config config;
 
     protected Wallet wallet;
     protected Key coinbase;

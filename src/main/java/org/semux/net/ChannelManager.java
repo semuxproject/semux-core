@@ -193,9 +193,8 @@ public class ChannelManager {
      * @return
      */
     public List<Channel> getActiveChannels() {
-        List<Channel> list = new ArrayList<>();
 
-        list.addAll(activeChannels.values());
+        List<Channel> list = new ArrayList<>(activeChannels.values());
 
         return list;
     }

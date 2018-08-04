@@ -6,9 +6,9 @@
  */
 package org.semux.config;
 
+import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.Unit.MILLI_SEM;
 import static org.semux.core.Amount.Unit.SEM;
-import static org.semux.core.Amount.ZERO;
 
 import java.io.File;
 import java.io.FileInputStream;

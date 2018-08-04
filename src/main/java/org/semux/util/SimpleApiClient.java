@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,7 +90,7 @@ public class SimpleApiClient {
             if (entry.getValue() instanceof byte[]) {
                 v = Hex.encode((byte[]) entry.getValue());
             } else {
-                v = URLEncoder.encode(entry.getValue().toString(), "UTF-8");
+                v = URLEncoder.encode(entry.getValue().toString(), StandardCharsets.UTF_8.name());
             }
             sb.append("&").append(entry.getKey()).append("=").append(v);
         }

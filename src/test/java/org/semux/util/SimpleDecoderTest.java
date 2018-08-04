@@ -8,6 +8,8 @@ package org.semux.util;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.semux.crypto.Hex;
@@ -47,14 +49,14 @@ public class SimpleDecoderTest {
         byte[] encoded = enc.toBytes();
 
         SimpleDecoder dec = new SimpleDecoder(encoded);
-        assertEquals(true, dec.readBoolean());
+        assertTrue(dec.readBoolean());
         assertEquals(byte1, dec.readByte());
         assertEquals(short1, dec.readShort());
         assertEquals(int1, dec.readInt());
         assertEquals(long1, dec.readLong());
         assertArrayEquals(bytes1, dec.readBytes());
         assertEquals(string1, dec.readString());
-        assertEquals(false, dec.readBoolean());
+        assertFalse(dec.readBoolean());
         assertEquals(byte2, dec.readByte());
         assertEquals(short2, dec.readShort());
         assertEquals(int2, dec.readInt());

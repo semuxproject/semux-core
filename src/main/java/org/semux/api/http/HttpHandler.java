@@ -190,8 +190,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
         } else {
             boolean prettyPrint = Boolean.parseBoolean(map.get("pretty"));
-            Object response = apiHandler.service(msg.method(), path, map, headers);
-            lastContentFuture = writeApiResponse(ctx, prettyPrint, (Response) response);
+            Response response = apiHandler.service(msg.method(), path, map, headers);
+            lastContentFuture = writeApiResponse(ctx, prettyPrint, response);
         }
 
         if (!isKeepAlive) {

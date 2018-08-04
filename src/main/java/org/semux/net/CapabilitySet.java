@@ -86,7 +86,7 @@ public class CapabilitySet {
      * Converts the capability set to an array of String.
      */
     public String[] toArray() {
-        return capabilities.stream().map(Capability::name).toArray(size -> new String[size]);
+        return capabilities.stream().map(Capability::name).toArray(String[]::new);
     }
 
     @Override

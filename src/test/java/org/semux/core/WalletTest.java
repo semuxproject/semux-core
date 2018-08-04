@@ -10,6 +10,7 @@ import static java.nio.file.attribute.PosixFilePermission.OTHERS_READ;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -138,7 +139,7 @@ public class WalletTest {
         wallet.unlock(pwd);
         wallet.addWallet(wallet1);
 
-        assertTrue(wallet.getAccount(key.toAddress()) != null);
+        assertNotNull(wallet.getAccount(key.toAddress()));
         assertEquals("originalName", wallet.getAddressAlias(key.toAddress()).get());
 
         // change the name in wallet
@@ -150,7 +151,7 @@ public class WalletTest {
         // import again and make sure name did not change, but new key was added
         int added = wallet.addWallet(wallet1);
         assertEquals(1, added);
-        assertTrue(wallet.getAccount(key2.toAddress()) != null);
+        assertNotNull(wallet.getAccount(key2.toAddress()));
         assertEquals("newName", wallet.getAddressAlias(key.toAddress()).get());
     }
 

@@ -129,7 +129,7 @@ public class BlockHeaderData {
 
         try {
             SimpleDecoder simpleDecoder = new SimpleDecoder(bytes);
-            Byte versionDecoded = simpleDecoder.readByte();
+            byte versionDecoded = simpleDecoder.readByte();
             if (versionDecoded == 0x00) {
                 return VERSION_0_HEADER_DATA;
             } else if (versionDecoded == 0x01) {

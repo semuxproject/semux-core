@@ -7,6 +7,7 @@
 package org.semux.core;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -35,12 +36,12 @@ public class GenesisTest {
 
     @Test
     public void testIsGenesis() {
-        assertTrue(genesis.getNumber() == 0);
+        assertEquals(0, genesis.getNumber());
     }
 
     @Test
     public void testBlock() {
-        assertTrue(genesis.getNumber() == 0);
+        assertEquals(0, genesis.getNumber());
         assertArrayEquals(ZERO_ADDRESS, genesis.getCoinbase());
         assertArrayEquals(ZERO_HASH, genesis.getParentHash());
         assertTrue(genesis.getTimestamp() > 0);
@@ -63,7 +64,7 @@ public class GenesisTest {
 
         assertFalse(delegates.isEmpty());
         for (byte[] address : delegates.values()) {
-            assertTrue(address.length == 20);
+            assertEquals(20, address.length);
         }
     }
 

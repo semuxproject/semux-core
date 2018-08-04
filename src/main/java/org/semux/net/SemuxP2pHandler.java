@@ -124,6 +124,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      * they are able to connect to the network; we're partially applying the new
      * handshake protocol.
      *
+     * Especially, after receiving an inbound connection, do not send the INIT
+     * message immediately; otherwise the connection will be killed by the peer.
+     *
      * @return
      */
     protected boolean isNewHandShakeEnabled() {
@@ -259,8 +262,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         Peer peer = msg.getPeer();
 
         // check peer
-        if (checkPeer(peer, false) != null) {
-            msgQueue.disconnect(checkPeer(peer, false));
+        ReasonCode code = checkPeer(peer, false);
+        if (code != null) {
+            msgQueue.disconnect(code);
             return;
         }
 
@@ -285,8 +289,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         Peer peer = msg.getPeer();
 
         // check peer
-        if (checkPeer(peer, false) != null) {
-            msgQueue.disconnect(checkPeer(peer, false));
+        ReasonCode code = checkPeer(peer, false);
+        if (code != null) {
+            msgQueue.disconnect(code);
             return;
         }
 
@@ -451,8 +456,8 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private ReasonCode checkPeer(Peer peer, boolean newHandShake) {
         // has to be same network
         if (newHandShake && !config.network().equals(peer.getNetwork())
-                || !newHandShake && !Stream.of(peer.getCapabilities())
-                        .anyMatch(k -> (config.network() == Network.MAINNET ? "SEM" : "SEM_TESTNET").equals(k))) {
+                || !newHandShake && Stream.of(peer.getCapabilities())
+                        .noneMatch(k -> (config.network() == Network.MAINNET ? "SEM" : "SEM_TESTNET").equals(k))) {
             return ReasonCode.BAD_NETWORK;
         }
 

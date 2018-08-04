@@ -66,8 +66,7 @@ public class Native {
                 nativeDir.deleteOnExit();
             }
 
-            String name = resource.contains("/") ? resource.substring(resource.lastIndexOf('/') + 1, resource.length())
-                    : resource;
+            String name = resource.contains("/") ? resource.substring(resource.lastIndexOf('/') + 1) : resource;
             File file = new File(nativeDir, name);
 
             if (!file.exists()) {

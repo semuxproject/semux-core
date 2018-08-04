@@ -7,7 +7,7 @@
 package org.semux.util;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,22 +26,22 @@ public class MerkleTreeTest {
     @Test
     public void testEmpty() {
         MerkleTree tree = new MerkleTree(Collections.emptyList());
-        assertTrue(tree.size() == 0);
+        assertEquals(0, tree.size());
         assertArrayEquals(new byte[32], tree.getRootHash());
 
         List<byte[]> proof = tree.getProof(0);
-        assertTrue(proof.size() == 1);
+        assertEquals(1, proof.size());
         assertArrayEquals(new byte[32], proof.get(0));
     }
 
     @Test
     public void testOneElement() {
         MerkleTree tree = new MerkleTree(Collections.singletonList(hash1));
-        assertTrue(tree.size() == 1);
+        assertEquals(1, tree.size());
         assertArrayEquals(hash1, tree.getRootHash());
 
         List<byte[]> proof = tree.getProof(0);
-        assertTrue(proof.size() == 1);
+        assertEquals(1, proof.size());
         assertArrayEquals(hash1, proof.get(0));
     }
 
@@ -50,11 +50,11 @@ public class MerkleTreeTest {
         byte[] hash12 = Hash.h256(hash1, hash2);
 
         MerkleTree tree = new MerkleTree(Arrays.asList(hash1, hash2));
-        assertTrue(tree.size() == 2);
+        assertEquals(2, tree.size());
         assertArrayEquals(hash12, tree.getRootHash());
 
         List<byte[]> proof = tree.getProof(1);
-        assertTrue(proof.size() == 2);
+        assertEquals(2, proof.size());
         assertArrayEquals(hash12, proof.get(0));
         assertArrayEquals(hash2, proof.get(1));
     }
@@ -66,11 +66,11 @@ public class MerkleTreeTest {
         byte[] hash1233 = Hash.h256(hash12, hash33);
 
         MerkleTree tree = new MerkleTree(Arrays.asList(hash1, hash2, hash3));
-        assertTrue(tree.size() == 3);
+        assertEquals(3, tree.size());
         assertArrayEquals(hash1233, tree.getRootHash());
 
         List<byte[]> proof = tree.getProof(2);
-        assertTrue(proof.size() == 3);
+        assertEquals(3, proof.size());
         assertArrayEquals(hash1233, proof.get(0));
         assertArrayEquals(hash33, proof.get(1));
         assertArrayEquals(hash3, proof.get(2));

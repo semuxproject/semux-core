@@ -194,7 +194,7 @@ public class SemuxSyncTest {
     @Test
     public void testCheckpoints() {
         Key key1 = new Key();
-        List<String> validators = Arrays.asList(Hex.encode(key1.toAddress()));
+        List<String> validators = Collections.singletonList(Hex.encode(key1.toAddress()));
 
         // mock the chain
         BlockchainImpl chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
@@ -208,7 +208,7 @@ public class SemuxSyncTest {
         Block block = kernelRule.createBlock(Collections.emptyList());
         Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
                 block.getHash());
-        block.setVotes(Arrays.asList(vote.sign(key1).getSignature()));
+        block.setVotes(Collections.singletonList(vote.sign(key1).getSignature()));
 
         // mock checkpoints
         Map<Long, byte[]> checkpoints = new HashMap<>();
@@ -249,14 +249,14 @@ public class SemuxSyncTest {
                 Comparator.comparingLong(o -> o.getKey().getNumber()));
 
         for (int i = 0; i < validatorInterval; i++) {
-            Block block = null;
+            Block block;
             if (i == 0) {
                 block = kernelRule.createBlock(Collections.emptyList());
             } else {
                 block = kernelRule.createBlock(Collections.emptyList(), toProcess.last().getKey().getHeader());
             }
 
-            Vote vote = null;
+            Vote vote;
             if (i == validatorInterval - 1) { // votes are validated for the last block in the set
                 vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
                         block.getHash());
@@ -401,8 +401,7 @@ public class SemuxSyncTest {
                 Comparator.comparingLong(o -> o.getKey().getNumber()));
 
         for (int i = 0; i < validatorInterval / 2; i++) {
-            Block block = null;
-            ;
+            Block block;
             if (i == 0) {
                 block = kernelRule.createBlock(Collections.emptyList());
             } else {
