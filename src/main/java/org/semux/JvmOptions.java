@@ -20,7 +20,6 @@ public class JvmOptions {
         sb.append(" -Dlog4j2.shutdownHookEnabled=false");
         sb.append(" -Dlog4j2.disableJmx=true");
         if (SystemUtil.isJavaPlatformModuleSystemAvailable()) {
-            sb.append(" --add-opens=java.base/sun.net.dns=ALL-UNNAMED");
             sb.append(" --add-opens=java.base/java.lang.reflect=ALL-UNNAMED");
         }
         if (Stream.of(args).anyMatch(k -> k.equals("--gui"))) {

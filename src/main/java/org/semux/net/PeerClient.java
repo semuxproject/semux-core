@@ -6,13 +6,8 @@
  */
 package org.semux.net;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.config.Config;
@@ -47,8 +42,6 @@ public class PeerClient {
         }
     };
 
-    private static final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor(factory);
-
     private final int port;
     private final Key coinbase;
     private final EventLoopGroup workerGroup;
@@ -58,17 +51,12 @@ public class PeerClient {
 
     /**
      * Create a new PeerClient instance.
-     * 
+     *
      * @param config
      * @param coinbase
      */
     public PeerClient(Config config, Key coinbase) {
-        this(config.p2pDeclaredIp().orElse(InetAddress.getLoopbackAddress().getHostAddress()), config.p2pListenPort(),
-                coinbase);
-
-        if (!config.p2pDeclaredIp().isPresent()) {
-            startIpRefresh();
-        }
+        this(config.p2pDeclaredIp().orElse(SystemUtil.getIp()), config.p2pListenPort(), coinbase);
     }
 
     /**
@@ -79,7 +67,7 @@ public class PeerClient {
      * @param coinbase
      */
     public PeerClient(String ip, int port, Key coinbase) {
-        logger.info("Use IP address: {}", ip);
+        logger.info("Peer client info: peerId = {}, ip = {}, port = {}", coinbase.toAddressString(), ip, port);
 
         this.ip = ip;
         this.port = port;
@@ -89,28 +77,8 @@ public class PeerClient {
     }
 
     /**
-     * Keeps updating public IP address.
-     */
-    protected void startIpRefresh() {
-        logger.info("Starting IP refresh thread");
-
-        ipRefreshFuture = timer.scheduleAtFixedRate(() -> {
-            String newIp = SystemUtil.getIp();
-            try {
-                if (!ip.equals(newIp) && !InetAddress.getByName(newIp).isSiteLocalAddress()) {
-                    logger.info("New IP address detected: {} => {}", ip, newIp);
-                    ip = newIp;
-                }
-            } catch (UnknownHostException e) {
-                logger.error("The fetched IP address is invalid: {}", newIp);
-            }
-
-        }, 0, 30, TimeUnit.SECONDS);
-    }
-
-    /**
      * Returns this node.
-     * 
+     *
      * @return
      */
     public Node getNode() {
@@ -119,7 +87,7 @@ public class PeerClient {
 
     /**
      * Returns the listening IP address.
-     * 
+     *
      * @return
      */
     public String getIp() {
@@ -128,7 +96,7 @@ public class PeerClient {
 
     /**
      * Returns the listening IP port.
-     * 
+     *
      * @return
      */
     public int getPort() {
@@ -137,7 +105,7 @@ public class PeerClient {
 
     /**
      * Returns the peerId of this client.
-     * 
+     *
      * @return
      */
     public String getPeerId() {
@@ -146,7 +114,7 @@ public class PeerClient {
 
     /**
      * Returns the coinbase.
-     * 
+     *
      * @return
      */
     public Key getCoinbase() {
@@ -155,7 +123,7 @@ public class PeerClient {
 
     /**
      * Connects to a remote peer asynchronously.
-     * 
+     *
      * @param remoteNode
      * @return
      */
