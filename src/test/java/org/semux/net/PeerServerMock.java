@@ -47,7 +47,7 @@ public class PeerServerMock {
             kernel.setPendingManager(new PendingManager(kernel));
             kernel.setNodeManager(new NodeManager(kernel));
 
-            kernel.setConsensus(new SemuxBft(kernel));
+            kernel.setBftManager(new SemuxBft(kernel));
             kernel.setSyncManager(new SemuxSync(kernel));
 
             // start peer server
