@@ -66,6 +66,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 
 import org.junit.Test;
+import org.semux.Network;
 import org.semux.TestUtils;
 import org.semux.api.v2.model.AddNodeResponse;
 import org.semux.api.v2.model.BlockType;
@@ -331,7 +332,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
         assertEquals(InfoType.NetworkEnum.DEVNET.name(), response.getResult().getNetwork());
-        assertEquals(config.capabilitySet().toList(), response.getResult().getCapabilities());
+        assertEquals(config.getCapabilities().toList(), response.getResult().getCapabilities());
         assertEquals("0", response.getResult().getLatestBlockNumber());
         assertEquals(Hex.encode0x(chain.getLatestBlock().getHash()), response.getResult().getLatestBlockHash());
         assertEquals(Integer.valueOf(0), response.getResult().getActivePeers());
@@ -391,8 +392,10 @@ public class SemuxApiTest extends SemuxApiTestBase {
     public void getPeersTest() {
         channelMgr = spy(kernelRule.getKernel().getChannelManager());
         List<Peer> peers = Arrays.asList(
-                new Peer("1.2.3.4", 5161, (short) 1, "client1", "peer1", config.capabilitySet(), 1),
-                new Peer("2.3.4.5", 5171, (short) 2, "client2", "peer2", config.capabilitySet(), 2));
+                new Peer(Network.DEVNET, (short) 1, "peer1", "1.2.3.4", 5161, "client1",
+                        config.getCapabilities().toArray(), 1),
+                new Peer(Network.DEVNET, (short) 2, "peer2", "2.3.4.5", 5171, "client2",
+                        config.getCapabilities().toArray(), 2));
         when(channelMgr.getActivePeers()).thenReturn(peers);
         kernelRule.getKernel().setChannelManager(channelMgr);
 
@@ -412,7 +415,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
             assertEquals(Hex.PREF + peer.getPeerId(), peerJson.getPeerId());
             assertEquals(peer.getLatestBlockNumber(), Long.parseLong(peerJson.getLatestBlockNumber()));
             assertEquals(peer.getLatency(), Long.parseLong(peerJson.getLatency()));
-            assertEquals(peer.getCapabilities().toList(), peerJson.getCapabilities());
+            assertArrayEquals(peer.getCapabilities(), peerJson.getCapabilities().toArray());
         }
     }
 

@@ -11,6 +11,8 @@ import java.security.spec.InvalidKeySpecException;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.net.Capability;
+import org.semux.net.CapabilitySet;
 
 public class Constants {
 
@@ -40,6 +42,12 @@ public class Constants {
      * Version of this client.
      */
     public static final String CLIENT_VERSION = "1.4.0";
+
+    /**
+     * Capability of this client.
+     */
+    public static final CapabilitySet CLIENT_CAPABILITIES = CapabilitySet.of(Capability.SEMUX, Capability.CORE,
+            Capability.LIGHT);
 
     /**
      * Algorithm name for the 256-bit hash.

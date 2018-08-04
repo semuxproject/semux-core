@@ -6,15 +6,29 @@
  */
 package org.semux.net;
 
-import static org.semux.net.Capability.MAX_NUMBER_OF_CAPABILITIES;
-
-import org.semux.util.SimpleDecoder;
-import org.semux.util.SimpleEncoder;
+import org.semux.Network;
 
 /**
- * Represents a Peer in the semux network.
+ * Represents a Peer in the semux network, including both static and dynamic
+ * info.
  */
 public class Peer {
+
+    /**
+     * The network id;
+     */
+    private final Network network;
+
+    /**
+     * The network version.
+     */
+    private final short networkVersion;
+
+    /**
+     * The peer id.
+     */
+    private final String peerId;
+
     /**
      * The IP address.
      */
@@ -26,24 +40,16 @@ public class Peer {
     private final int port;
 
     /**
-     * The network version.
-     */
-    private final short networkVersion;
-
-    /**
      * The client software id.
      */
     private final String clientId;
 
     /**
-     * The peer id.
-     */
-    private final String peerId;
-
-    /**
      * The supported capabilities.
+     *
+     * TODO: use CapabilitySet once we fully remove handshake v1.
      */
-    private final CapabilitySet capabilities;
+    private final String[] capabilities;
 
     // ===============================
     // Variables below are volatile
@@ -55,16 +61,18 @@ public class Peer {
     /**
      * Create a new Peer instance.
      *
+     * @param network
+     * @param networkVersion
+     * @param peerId
      * @param ip
      * @param port
-     * @param networkVersion
      * @param clientId
-     * @param peerId
      * @param capabilities
      * @param latestBlockNumber
      */
-    public Peer(String ip, int port, short networkVersion, String clientId, String peerId, CapabilitySet capabilities,
-            long latestBlockNumber) {
+    public Peer(Network network, short networkVersion, String peerId, String ip, int port, String clientId,
+            String[] capabilities, long latestBlockNumber) {
+        this.network = network;
         this.ip = ip;
         this.port = port;
         this.peerId = peerId;
@@ -120,11 +128,9 @@ public class Peer {
     }
 
     /**
-     * Getter for property 'capabilities'.
-     *
-     * @return Value for property 'capabilities'.
+     * Returns the capabilities.
      */
-    public CapabilitySet getCapabilities() {
+    public String[] getCapabilities() {
         return capabilities;
     }
 
@@ -167,57 +173,5 @@ public class Peer {
     @Override
     public String toString() {
         return getPeerId() + "@" + ip + ":" + port;
-    }
-
-    /*
-     * The following methods should be removed once we decide to fully deprecate the
-     * old handshake.
-     */
-
-    public boolean validate() {
-        return ip != null && ip.length() <= 128
-                && port >= 0
-                && networkVersion >= 0
-                && clientId != null && clientId.length() < 128
-                && peerId != null && peerId.length() == 40
-                && latestBlockNumber >= 0
-                && capabilities != null && capabilities.size() <= MAX_NUMBER_OF_CAPABILITIES;
-    }
-
-    public byte[] toBytes() {
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeString(ip);
-        enc.writeInt(port);
-        enc.writeShort(networkVersion);
-        enc.writeString(clientId);
-        enc.writeString(peerId);
-        enc.writeLong(latestBlockNumber);
-
-        // encode capabilities
-        enc.writeInt(capabilities.size());
-        for (String capability : capabilities.toList()) {
-            enc.writeString(capability);
-        }
-
-        return enc.toBytes();
-    }
-
-    public static Peer fromBytes(byte[] bytes) {
-        SimpleDecoder dec = new SimpleDecoder(bytes);
-        String ip = dec.readString();
-        int port = dec.readInt();
-        short p2pVersion = dec.readShort();
-        String clientId = dec.readString();
-        String peerId = dec.readString();
-        long latestBlockNumber = dec.readLong();
-
-        // decode capabilities
-        final int numberOfCapabilities = Math.min(dec.readInt(), MAX_NUMBER_OF_CAPABILITIES);
-        String[] capabilityList = new String[numberOfCapabilities];
-        for (int i = 0; i < numberOfCapabilities; i++) {
-            capabilityList[i] = dec.readString();
-        }
-
-        return new Peer(ip, port, p2pVersion, clientId, peerId, CapabilitySet.of(capabilityList), latestBlockNumber);
     }
 }

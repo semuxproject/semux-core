@@ -6,8 +6,6 @@
  */
 package org.semux.config;
 
-import static org.semux.net.Capability.SEM;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +13,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.semux.Network;
 import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.crypto.Hex;
-import org.semux.net.CapabilitySet;
 
 public class MainnetConfig extends AbstractConfig {
 
@@ -49,11 +46,6 @@ public class MainnetConfig extends AbstractConfig {
 
     public MainnetConfig(String dataDir) {
         super(dataDir, Network.MAINNET, Constants.MAINNET_VERSION);
-    }
-
-    @Override
-    public CapabilitySet capabilitySet() {
-        return CapabilitySet.of(SEM);
     }
 
     @Override

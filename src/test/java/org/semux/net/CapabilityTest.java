@@ -6,6 +6,7 @@
  */
 package org.semux.net;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -15,9 +16,10 @@ public class CapabilityTest {
 
     @Test
     public void testIsSupported() {
-        assertFalse(CapabilitySet.emptySet().isSupported(Capability.SEM));
-        assertFalse(CapabilitySet.of("ETH").isSupported(Capability.SEM));
-        assertTrue(CapabilitySet.of("SEM").isSupported(Capability.SEM));
-        assertTrue(CapabilitySet.of(Capability.SEM).isSupported(Capability.SEM));
+        assertFalse(CapabilitySet.emptySet().isSupported(Capability.SEMUX));
+        assertFalse(CapabilitySet.of("SEMUX").isSupported(Capability.LIGHT));
+        assertTrue(CapabilitySet.of("SEMUX").isSupported(Capability.SEMUX));
+        assertTrue(CapabilitySet.of(Capability.SEMUX).isSupported(Capability.SEMUX));
+        assertEquals(CapabilitySet.of(Capability.SEMUX), CapabilitySet.of(Capability.SEMUX));
     }
 }

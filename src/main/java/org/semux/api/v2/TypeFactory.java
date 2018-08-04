@@ -8,6 +8,7 @@ package org.semux.api.v2;
 
 import static org.semux.core.TransactionType.DELEGATE;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -105,7 +106,7 @@ public class TypeFactory {
     public static InfoType infoType(Kernel kernel) {
         return new InfoType()
                 .network(InfoType.NetworkEnum.fromValue(kernel.getConfig().network().name()))
-                .capabilities(kernel.getConfig().capabilitySet().toList())
+                .capabilities(kernel.getConfig().getCapabilities().toList())
                 .clientId(kernel.getConfig().getClientId())
                 .coinbase(Hex.encode0x(kernel.getCoinbase().toAddress()))
                 .latestBlockNumber(String.valueOf(kernel.getBlockchain().getLatestBlockNumber()))
@@ -123,7 +124,7 @@ public class TypeFactory {
                 .peerId(Hex.PREF + peer.getPeerId())
                 .latestBlockNumber(String.valueOf(peer.getLatestBlockNumber()))
                 .latency(String.valueOf(peer.getLatency()))
-                .capabilities(peer.getCapabilities().toList());
+                .capabilities(Arrays.asList(peer.getCapabilities()));
     }
 
     public static TransactionLimitsType transactionLimitsType(Kernel kernel,

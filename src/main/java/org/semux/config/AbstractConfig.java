@@ -6,9 +6,9 @@
  */
 package org.semux.config;
 
-import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.Unit.MILLI_SEM;
 import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Amount.ZERO;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,6 +28,7 @@ import org.semux.config.exception.ConfigException;
 import org.semux.core.Amount;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Hash;
+import org.semux.net.CapabilitySet;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
 import org.semux.util.BigIntegerUtil;
@@ -226,6 +227,11 @@ public abstract class AbstractConfig implements Config {
                 SystemUtil.getImplementationVersion(),
                 SystemUtil.getOsName().toString(),
                 SystemUtil.getOsArch());
+    }
+
+    @Override
+    public CapabilitySet getCapabilities() {
+        return Constants.CLIENT_CAPABILITIES;
     }
 
     @Override

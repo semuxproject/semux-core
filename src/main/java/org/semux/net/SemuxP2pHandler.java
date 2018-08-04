@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.semux.Kernel;
 import org.semux.Network;
@@ -42,12 +43,12 @@ import org.semux.net.msg.consensus.GetBlockMessage;
 import org.semux.net.msg.consensus.NewHeightMessage;
 import org.semux.net.msg.p2p.DisconnectMessage;
 import org.semux.net.msg.p2p.GetNodesMessage;
-import org.semux.net.msg.p2p.HelloMessage;
 import org.semux.net.msg.p2p.NodesMessage;
 import org.semux.net.msg.p2p.PingMessage;
 import org.semux.net.msg.p2p.PongMessage;
 import org.semux.net.msg.p2p.TransactionMessage;
-import org.semux.net.msg.p2p.WorldMessage;
+import org.semux.net.msg.p2p.handshake.v1.HelloMessage;
+import org.semux.net.msg.p2p.handshake.v1.WorldMessage;
 import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,9 +125,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
         // send a HELLO message to initiate handshake
         if (!channel.isInbound()) {
-            Peer peer = new Peer(client.getIp(), client.getPort(), config.networkVersion(), config.getClientId(),
-                    client.getPeerId(), config.capabilitySet(), chain.getLatestBlockNumber());
-            HelloMessage msg = new HelloMessage(peer, client.getCoinbase());
+            HelloMessage msg = new HelloMessage(config.network(), config.networkVersion(), client.getPeerId(),
+                    client.getIp(), client.getPort(), config.getClientId(), chain.getLatestBlockNumber(),
+                    client.getCoinbase());
             msgQueue.sendMessage(msg);
         }
     }
@@ -193,9 +194,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
                 channelMgr.onChannelActive(channel, peer);
 
                 // reply with a WORLD message
-                peer = new Peer(client.getIp(), client.getPort(), config.networkVersion(), config.getClientId(),
-                        client.getPeerId(), config.capabilitySet(), chain.getLatestBlockNumber());
-                WorldMessage worldMsg = new WorldMessage(peer, client.getCoinbase());
+                WorldMessage worldMsg = new WorldMessage(config.network(), config.networkVersion(), client.getPeerId(),
+                        client.getIp(), client.getPort(), config.getClientId(), chain.getLatestBlockNumber(),
+                        client.getCoinbase());
                 msgQueue.sendMessage(worldMsg);
 
                 // handshake done
@@ -309,6 +310,24 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     }
 
     /**
+     * Returns whether the p2p version is supported.
+     *
+     * @param peer
+     * @return
+     */
+    private boolean isSupported(Peer peer) {
+        if (config.networkVersion() != peer.getNetworkVersion()) {
+            return false;
+        }
+
+        if (config.network() == Network.MAINNET) {
+            return Stream.of(peer.getCapabilities()).anyMatch(k -> "SEM".equals(k));
+        } else {
+            return Stream.of(peer.getCapabilities()).anyMatch(k -> "SEM_TESTNET".equals(k));
+        }
+    }
+
+    /**
      * Checks if a HELLO message is success.
      *
      * @return
@@ -347,24 +366,6 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
                     channel.isInbound() ? 1 : 0, 1, TimeUnit.MINUTES);
         } else {
             msgQueue.disconnect(ReasonCode.HANDSHAKE_EXISTS);
-        }
-    }
-
-    /**
-     * Returns whether the p2p version is supported.
-     *
-     * @param peer
-     * @return
-     */
-    private boolean isSupported(Peer peer) {
-        if (config.networkVersion() != peer.getNetworkVersion()) {
-            return false;
-        }
-
-        if (config.network() == Network.MAINNET) {
-            return peer.getCapabilities().isSupported(Capability.SEM);
-        } else {
-            return peer.getCapabilities().isSupported(Capability.SEM_TESTNET);
         }
     }
 

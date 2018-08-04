@@ -6,14 +6,11 @@
  */
 package org.semux.config;
 
-import static org.semux.net.Capability.SEM_TESTNET;
-
 import java.util.Collections;
 import java.util.Map;
 
 import org.semux.Network;
 import org.semux.consensus.ValidatorActivatedFork;
-import org.semux.net.CapabilitySet;
 
 public class TestnetConfig extends AbstractConfig {
 
@@ -21,11 +18,6 @@ public class TestnetConfig extends AbstractConfig {
         super(dataDir, Network.TESTNET, Constants.TESTNET_VERSION);
         // testnet allows a much larger block size for performance tuning (10MB)
         maxBlockTransactionsSize = 10 * 1024 * 1024;
-    }
-
-    @Override
-    public CapabilitySet capabilitySet() {
-        return CapabilitySet.of(SEM_TESTNET);
     }
 
     @Override
