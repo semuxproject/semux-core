@@ -22,8 +22,8 @@ public class PeerTest {
         String peerId = new Key().toAddressString();
         long latestBlockNumber = 1;
 
-        Peer peer = new Peer(ip, port, p2pVersion, clientId, peerId, latestBlockNumber,
-                CapabilitySet.of(Capability.SEM));
+        Peer peer = new Peer(ip, port, p2pVersion, clientId, peerId, CapabilitySet.of(Capability.SEM),
+                latestBlockNumber);
         peer = Peer.fromBytes(peer.toBytes());
 
         assertEquals(ip, peer.getIp());

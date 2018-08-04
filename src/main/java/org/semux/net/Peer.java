@@ -12,31 +12,45 @@ import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
 /**
- * Represents a Peer in the Semux network.
+ * Represents a Peer in the semux network.
  */
 public class Peer {
-    /*
-     * Below are the listening IP address and port number, not necessarily the real
-     * address that we're connecting to.
+    /**
+     * The IP address.
      */
     private final String ip;
-    private final int port;
-
-    private final short networkVersion;
-    private final String clientId;
-    private final String peerId;
-
-    private long latestBlockNumber;
-
-    /*
-     * Variables below are not persisted
-     */
-    private long latency;
 
     /**
-     * Set of capabilities the peer supports
+     * The listening port.
+     */
+    private final int port;
+
+    /**
+     * The network version.
+     */
+    private final short networkVersion;
+
+    /**
+     * The client software id.
+     */
+    private final String clientId;
+
+    /**
+     * The peer id.
+     */
+    private final String peerId;
+
+    /**
+     * The supported capabilities.
      */
     private final CapabilitySet capabilities;
+
+    // ===============================
+    // Variables below are volatile
+    // ===============================
+
+    private long latestBlockNumber;
+    private long latency;
 
     /**
      * Create a new Peer instance.
@@ -46,34 +60,23 @@ public class Peer {
      * @param networkVersion
      * @param clientId
      * @param peerId
-     * @param latestBlockNumber
      * @param capabilities
+     * @param latestBlockNumber
      */
-    public Peer(String ip, int port, short networkVersion, String clientId, String peerId, long latestBlockNumber,
-            CapabilitySet capabilities) {
-        super();
+    public Peer(String ip, int port, short networkVersion, String clientId, String peerId, CapabilitySet capabilities,
+            long latestBlockNumber) {
         this.ip = ip;
         this.port = port;
         this.peerId = peerId;
-        this.latestBlockNumber = latestBlockNumber;
         this.networkVersion = networkVersion;
         this.clientId = clientId;
         this.capabilities = capabilities;
-    }
-
-    public boolean validate() {
-        return ip != null && ip.length() <= 128
-                && port >= 0
-                && networkVersion >= 0
-                && clientId != null && clientId.length() < 128
-                && peerId != null && peerId.length() == 40
-                && latestBlockNumber >= 0
-                && capabilities != null && capabilities.size() <= MAX_NUMBER_OF_CAPABILITIES;
+        this.latestBlockNumber = latestBlockNumber;
     }
 
     /**
      * Returns the listening IP address.
-     * 
+     *
      * @return
      */
     public String getIp() {
@@ -82,7 +85,7 @@ public class Peer {
 
     /**
      * Returns the listening port number.
-     * 
+     *
      * @return
      */
     public int getPort() {
@@ -91,7 +94,7 @@ public class Peer {
 
     /**
      * Returns the network version.
-     * 
+     *
      * @return
      */
     public short getNetworkVersion() {
@@ -100,7 +103,7 @@ public class Peer {
 
     /**
      * Returns the client id.
-     * 
+     *
      * @return
      */
     public String getClientId() {
@@ -109,47 +112,11 @@ public class Peer {
 
     /**
      * Returns the peerId.
-     * 
+     *
      * @return
      */
     public String getPeerId() {
         return peerId;
-    }
-
-    /**
-     * Returns the latestBlockNumber.
-     * 
-     * @return
-     */
-    public long getLatestBlockNumber() {
-        return latestBlockNumber;
-    }
-
-    /**
-     * Sets the latestBlockNumber.
-     * 
-     * @param number
-     */
-    public void setLatestBlockNumber(long number) {
-        this.latestBlockNumber = number;
-    }
-
-    /**
-     * Returns peer latency.
-     * 
-     * @return
-     */
-    public long getLatency() {
-        return latency;
-    }
-
-    /**
-     * Sets peer latency.
-     * 
-     * @param latency
-     */
-    public void setLatency(long latency) {
-        this.latency = latency;
     }
 
     /**
@@ -162,10 +129,61 @@ public class Peer {
     }
 
     /**
-     * Converts into a byte array.
-     * 
+     * Returns the latest block number.
+     *
      * @return
      */
+    public long getLatestBlockNumber() {
+        return latestBlockNumber;
+    }
+
+    /**
+     * Sets the latest block number.
+     *
+     * @param number
+     */
+    public void setLatestBlockNumber(long number) {
+        this.latestBlockNumber = number;
+    }
+
+    /**
+     * Returns peer latency.
+     *
+     * @return
+     */
+    public long getLatency() {
+        return latency;
+    }
+
+    /**
+     * Sets peer latency.
+     *
+     * @param latency
+     */
+    public void setLatency(long latency) {
+        this.latency = latency;
+    }
+
+    @Override
+    public String toString() {
+        return getPeerId() + "@" + ip + ":" + port;
+    }
+
+    /*
+     * The following methods should be removed once we decide to fully deprecate the
+     * old handshake.
+     */
+
+    public boolean validate() {
+        return ip != null && ip.length() <= 128
+                && port >= 0
+                && networkVersion >= 0
+                && clientId != null && clientId.length() < 128
+                && peerId != null && peerId.length() == 40
+                && latestBlockNumber >= 0
+                && capabilities != null && capabilities.size() <= MAX_NUMBER_OF_CAPABILITIES;
+    }
+
     public byte[] toBytes() {
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeString(ip);
@@ -184,12 +202,6 @@ public class Peer {
         return enc.toBytes();
     }
 
-    /**
-     * Parses from a byte array.
-     * 
-     * @param bytes
-     * @return
-     */
     public static Peer fromBytes(byte[] bytes) {
         SimpleDecoder dec = new SimpleDecoder(bytes);
         String ip = dec.readString();
@@ -206,12 +218,6 @@ public class Peer {
             capabilityList[i] = dec.readString();
         }
 
-        return new Peer(ip, port, p2pVersion, clientId, peerId, latestBlockNumber, CapabilitySet.of(capabilityList));
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String toString() {
-        return getPeerId() + "@" + ip + ":" + port;
+        return new Peer(ip, port, p2pVersion, clientId, peerId, CapabilitySet.of(capabilityList), latestBlockNumber);
     }
 }

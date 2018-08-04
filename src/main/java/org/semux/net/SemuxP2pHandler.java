@@ -125,7 +125,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         // send a HELLO message to initiate handshake
         if (!channel.isInbound()) {
             Peer peer = new Peer(client.getIp(), client.getPort(), config.networkVersion(), config.getClientId(),
-                    client.getPeerId(), chain.getLatestBlockNumber(), config.capabilitySet());
+                    client.getPeerId(), config.capabilitySet(), chain.getLatestBlockNumber());
             HelloMessage msg = new HelloMessage(peer, client.getCoinbase());
             msgQueue.sendMessage(msg);
         }
@@ -194,7 +194,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
                 // reply with a WORLD message
                 peer = new Peer(client.getIp(), client.getPort(), config.networkVersion(), config.getClientId(),
-                        client.getPeerId(), chain.getLatestBlockNumber(), config.capabilitySet());
+                        client.getPeerId(), config.capabilitySet(), chain.getLatestBlockNumber());
                 WorldMessage worldMsg = new WorldMessage(peer, client.getCoinbase());
                 msgQueue.sendMessage(worldMsg);
 
