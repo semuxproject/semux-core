@@ -17,14 +17,11 @@ import org.semux.net.CapabilitySet;
 import org.semux.net.Peer;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
-import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 import org.semux.util.TimeUtil;
 
 public abstract class HandshakeMessage extends Message {
-
-    protected final byte prefix;
 
     protected final Network network;
     protected final short networkVersion;
@@ -36,16 +33,16 @@ public abstract class HandshakeMessage extends Message {
     protected final CapabilitySet capabilities;
 
     protected final long latestBlockNumber;
-    protected final long timestamp;
 
+    protected final byte[] secret;
+    protected final long timestamp;
     protected final Key.Signature signature;
 
-    public HandshakeMessage(byte prefix, MessageCode code, Class<?> responseMessageClass,
+    public HandshakeMessage(MessageCode code, Class<?> responseMessageClass,
             Network network, short networkVersion, String peerId, int port,
             String clientId, CapabilitySet capabilities, long latestBlockNumber,
-            Key coinbase) {
+            byte[] secret, Key coinbase) {
         super(code, responseMessageClass);
-        this.prefix = prefix;
 
         this.network = network;
         this.networkVersion = networkVersion;
@@ -54,19 +51,19 @@ public abstract class HandshakeMessage extends Message {
         this.clientId = clientId;
         this.capabilities = capabilities;
         this.latestBlockNumber = latestBlockNumber;
+        this.secret = secret;
         this.timestamp = TimeUtil.currentTimeMillis();
 
         SimpleEncoder enc = encodeBasicInfo();
-        this.signature = coinbase.sign(Bytes.merge(prefix, enc.toBytes()));
+        this.signature = coinbase.sign(enc.toBytes());
         enc.writeBytes(signature.toBytes());
 
         this.encoded = enc.toBytes();
     }
 
-    public HandshakeMessage(byte prefix, MessageCode code, Class<?> responseMessageClass,
+    public HandshakeMessage(MessageCode code, Class<?> responseMessageClass,
             byte[] encoded) {
         super(code, responseMessageClass);
-        this.prefix = prefix;
 
         SimpleDecoder dec = new SimpleDecoder(encoded);
         this.network = Network.of(dec.readByte());
@@ -80,6 +77,7 @@ public abstract class HandshakeMessage extends Message {
         }
         this.capabilities = CapabilitySet.of(capabilities.toArray(new String[0]));
         this.latestBlockNumber = dec.readLong();
+        this.secret = dec.readBytes();
         this.timestamp = dec.readLong();
         this.signature = Key.Signature.fromBytes(dec.readBytes());
 
@@ -99,6 +97,7 @@ public abstract class HandshakeMessage extends Message {
             enc.writeString(capability);
         }
         enc.writeLong(latestBlockNumber);
+        enc.writeBytes(secret);
         enc.writeLong(timestamp);
 
         return enc;
@@ -121,12 +120,13 @@ public abstract class HandshakeMessage extends Message {
                 && port > 0 && port <= 65535
                 && clientId != null && clientId.length() < 128
                 && latestBlockNumber >= 0
+                && secret != null && secret.length == InitMessage.SECRET_LENGTH
                 && Math.abs(TimeUtil.currentTimeMillis() - timestamp) <= config.netHandshakeExpiry()
                 && signature != null
                 && peerId.equals(Hex.encode(signature.getAddress()))) {
 
             SimpleEncoder enc = encodeBasicInfo();
-            return Key.verify(Bytes.merge(prefix, enc.toBytes()), signature);
+            return Key.verify(enc.toBytes(), signature);
         } else {
             return false;
         }

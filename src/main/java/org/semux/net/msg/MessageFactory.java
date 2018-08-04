@@ -57,10 +57,6 @@ public class MessageFactory {
                 return new org.semux.net.msg.p2p.handshake.v1.HelloMessage(encoded);
             case WORLD:
                 return new org.semux.net.msg.p2p.handshake.v1.WorldMessage(encoded);
-            case HELLO_V2:
-                return new org.semux.net.msg.p2p.handshake.v2.HelloMessage(encoded);
-            case WORLD_V2:
-                return new org.semux.net.msg.p2p.handshake.v2.WorldMessage(encoded);
             case PING:
                 return new PingMessage(encoded);
             case PONG:
@@ -71,6 +67,12 @@ public class MessageFactory {
                 return new NodesMessage(encoded);
             case TRANSACTION:
                 return new TransactionMessage(encoded);
+            case HANDSHAKE_INIT:
+                return new org.semux.net.msg.p2p.handshake.v2.InitMessage(encoded);
+            case HANDSHAKE_HELLO:
+                return new org.semux.net.msg.p2p.handshake.v2.HelloMessage(encoded);
+            case HANDSHAKE_WORLD:
+                return new org.semux.net.msg.p2p.handshake.v2.WorldMessage(encoded);
 
             case GET_BLOCK:
                 return new GetBlockMessage(encoded);

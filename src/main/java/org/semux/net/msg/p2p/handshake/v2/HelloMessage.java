@@ -13,17 +13,15 @@ import org.semux.net.msg.MessageCode;
 
 public class HelloMessage extends HandshakeMessage {
 
-    private static final byte PREFIX = 0x00;
-
     public HelloMessage(Network network, short networkVersion, String peerId, int port,
             String clientId, CapabilitySet capabilities, long latestBlockNumber,
-            Key coinbase) {
-        super(PREFIX, MessageCode.HELLO_V2, WorldMessage.class, network, networkVersion, peerId, port, clientId,
-                capabilities, latestBlockNumber, coinbase);
+            byte[] secret, Key coinbase) {
+        super(MessageCode.HANDSHAKE_HELLO, WorldMessage.class, network, networkVersion, peerId, port, clientId,
+                capabilities, latestBlockNumber, secret, coinbase);
     }
 
     public HelloMessage(byte[] encoded) {
-        super(PREFIX, MessageCode.HELLO_V2, WorldMessage.class, encoded);
+        super(MessageCode.HANDSHAKE_HELLO, WorldMessage.class, encoded);
     }
 
     @Override

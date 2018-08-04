@@ -17,13 +17,13 @@ public class WorldMessage extends HandshakeMessage {
 
     public WorldMessage(Network network, short networkVersion, String peerId, int port,
             String clientId, CapabilitySet capabilities, long latestBlockNumber,
-            Key coinbase) {
-        super(PREFIX, MessageCode.WORLD_V2, null, network, networkVersion, peerId, port, clientId,
-                capabilities, latestBlockNumber, coinbase);
+            byte[] secret, Key coinbase) {
+        super(MessageCode.HANDSHAKE_WORLD, null, network, networkVersion, peerId, port, clientId,
+                capabilities, latestBlockNumber, secret, coinbase);
     }
 
     public WorldMessage(byte[] encoded) {
-        super(PREFIX, MessageCode.WORLD_V2, null, encoded);
+        super(MessageCode.HANDSHAKE_WORLD, null, encoded);
     }
 
     @Override

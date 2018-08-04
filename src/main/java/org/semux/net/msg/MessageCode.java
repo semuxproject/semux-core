@@ -53,14 +53,19 @@ public enum MessageCode {
     TRANSACTION(0x07),
 
     /**
-     * [0x21] The new HELLO message
+     * [0x08] A message containing a random bytes
      */
-    HELLO_V2(0x21),
+    HANDSHAKE_INIT(0x08),
 
     /**
-     * [0x22] The new WORLD message.
+     * [0x09] The new HELLO message
      */
-    WORLD_V2(0x22),
+    HANDSHAKE_HELLO(0x09),
+
+    /**
+     * [0x10] The new WORLD message.
+     */
+    HANDSHAKE_WORLD(0x10),
 
     // =======================================
     // [0x30, 0x3f] Reserved for sync

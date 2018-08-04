@@ -16,6 +16,7 @@ import org.semux.config.DevnetConfig;
 import org.semux.crypto.Key;
 import org.semux.net.CapabilitySet;
 import org.semux.net.Peer;
+import org.semux.util.Bytes;
 
 public class WorldMessageTest {
 
@@ -26,7 +27,7 @@ public class WorldMessageTest {
         Key key = new Key();
         String peerId = key.toAddressString();
         WorldMessage msg = new WorldMessage(config.network(), config.networkVersion(), peerId, 5161,
-                config.getClientId(), config.getClientCapabilities(), 2, key);
+                config.getClientId(), config.getClientCapabilities(), 2, Bytes.random(InitMessage.SECRET_LENGTH), key);
         assertTrue(msg.validate(config));
 
         msg = new WorldMessage(msg.getEncoded());
