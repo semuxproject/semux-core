@@ -25,10 +25,10 @@ import java.util.stream.Stream;
 import org.semux.Kernel;
 import org.semux.Network;
 import org.semux.config.Config;
+import org.semux.core.BftManager;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
-import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.net.NodeManager.Node;
@@ -47,9 +47,11 @@ import org.semux.net.msg.p2p.NodesMessage;
 import org.semux.net.msg.p2p.PingMessage;
 import org.semux.net.msg.p2p.PongMessage;
 import org.semux.net.msg.p2p.TransactionMessage;
-import org.semux.net.msg.p2p.handshake.v1.HelloMessage;
-import org.semux.net.msg.p2p.handshake.v1.WorldMessage;
+import org.semux.net.msg.p2p.handshake.v2.HelloMessage;
+import org.semux.net.msg.p2p.handshake.v2.InitMessage;
+import org.semux.net.msg.p2p.handshake.v2.WorldMessage;
 import org.semux.util.TimeUtil;
+import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,10 +83,11 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private final NodeManager nodeMgr;
     private final PeerClient client;
     private final SyncManager sync;
-    private final Consensus consensus;
+    private final BftManager bft;
     private final MessageQueue msgQueue;
 
     private AtomicBoolean isHandshakeDone = new AtomicBoolean(false);
+    private AtomicBoolean isClosed = new AtomicBoolean(false);
 
     private ScheduledFuture<?> getNodes = null;
     private ScheduledFuture<?> pingPong = null;
@@ -105,7 +108,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         this.client = kernel.getClient();
 
         this.sync = kernel.getSyncManager();
-        this.consensus = kernel.getConsensus();
+        this.bft = kernel.getBftManager();
 
         this.msgQueue = channel.getMessageQueue();
     }
@@ -125,10 +128,10 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
         // send a HELLO message to initiate handshake
         if (!channel.isInbound()) {
-            HelloMessage msg = new HelloMessage(config.network(), config.networkVersion(), client.getPeerId(),
+            msgQueue.sendMessage(new org.semux.net.msg.p2p.handshake.v1.HelloMessage(
+                    config.network(), config.networkVersion(), client.getPeerId(),
                     client.getIp(), client.getPort(), config.getClientId(), chain.getLatestBlockNumber(),
-                    client.getCoinbase());
-            msgQueue.sendMessage(msg);
+                    client.getCoinbase()));
         }
     }
 
@@ -136,225 +139,254 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         logger.debug("P2P handler inactive, cid = {}", channel.getId());
 
-        stopTimers();
+        close(ctx);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.debug("Exception in P2P handler, cid = {}", channel.getId(), cause);
 
-        stopTimers();
-
-        ctx.close();
+        close(ctx);
     }
 
     @Override
     public void channelRead0(final ChannelHandlerContext ctx, Message msg) throws InterruptedException {
         logger.trace("Received message: {}", msg);
-        MessageWrapper mr = msgQueue.onMessageReceived(msg);
+        MessageWrapper request = msgQueue.onMessageReceived(msg);
 
         switch (msg.getCode()) {
         /* p2p */
-        case DISCONNECT: {
-            ReasonCode reason = ((DisconnectMessage) msg).getReason();
-            logger.debug("Received DISCONNECT message: reason = {}, remoteIP = {}",
-                    reason, channel.getRemoteIp());
-
-            // Users often get confused with no logging why they are unable to sync
-            if (reason.equals(ReasonCode.INVALID_HANDSHAKE)) {
-                logger.warn("Disconnected from peer due to invalid handshake.");
-            }
-            stopTimers();
-            ctx.close();
+        case DISCONNECT:
+            onDisconnect(ctx, (DisconnectMessage) msg);
             break;
-        }
-        case HELLO: {
-            HelloMessage helloMsg = (HelloMessage) msg;
-            Peer peer = helloMsg.getPeer();
-
-            ReasonCode error = null;
-            if (!isSupported(peer)) {
-                error = ReasonCode.INCOMPATIBLE_PROTOCOL;
-
-            } else if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isActivePeer(peer.getPeerId())) {
-                error = ReasonCode.DUPLICATED_PEER_ID;
-
-            } else if (chain.getValidators().contains(peer.getPeerId()) // validator
-                    && channelMgr.isActiveIP(channel.getRemoteIp()) // connected
-                    && config.network() == Network.MAINNET) { // main net
-                error = ReasonCode.VALIDATOR_IP_LIMITED;
-
-            } else if (!isValid(helloMsg)) {
-                error = ReasonCode.INVALID_HANDSHAKE;
-            }
-
-            if (error == null) {
-                // notify channel manager
-                channelMgr.onChannelActive(channel, peer);
-
-                // reply with a WORLD message
-                WorldMessage worldMsg = new WorldMessage(config.network(), config.networkVersion(), client.getPeerId(),
-                        client.getIp(), client.getPort(), config.getClientId(), chain.getLatestBlockNumber(),
-                        client.getCoinbase());
-                msgQueue.sendMessage(worldMsg);
-
-                // handshake done
-                onHandshakeDone(peer);
-            } else {
-                msgQueue.disconnect(error);
-            }
+        case HELLO:
+            onHello((org.semux.net.msg.p2p.handshake.v1.HelloMessage) msg);
             break;
-        }
-        case WORLD: {
-            // update peer state
-            WorldMessage worldMsg = (WorldMessage) msg;
-
-            if (!isValid(worldMsg)) {
-                msgQueue.disconnect(ReasonCode.INVALID_HANDSHAKE);
-                break;
-            }
-
-            if (!isSupported(worldMsg.getPeer())) {
-                msgQueue.disconnect(ReasonCode.INCOMPATIBLE_PROTOCOL);
-                break;
-            }
-
-            Peer peer = worldMsg.getPeer();
-            channelMgr.onChannelActive(channel, peer);
-
-            // handshake done
-            onHandshakeDone(peer);
+        case WORLD:
+            onWorld((org.semux.net.msg.p2p.handshake.v1.WorldMessage) msg);
             break;
-        }
-        case PING: {
-            PongMessage pong = new PongMessage();
-            msgQueue.sendMessage(pong);
+        case PING:
+            onPing();
             break;
-        }
-        case PONG: {
-            if (mr != null) {
-                long latency = TimeUtil.currentTimeMillis() - mr.getLastTimestamp();
-                channel.getRemotePeer().setLatency(latency);
-            }
+        case PONG:
+            onPong(request);
             break;
-        }
-        case GET_NODES: {
-            List<InetSocketAddress> activeAddresses = new ArrayList<>(channelMgr.getActiveAddresses());
-            Collections.shuffle(activeAddresses); // shuffle the list to balance the load on nodes
-            NodesMessage nodesMsg = new NodesMessage(activeAddresses.stream()
-                    .limit(MAX_NODES).map(Node::new).collect(Collectors.toList()));
-            msgQueue.sendMessage(nodesMsg);
+        case GET_NODES:
+            onGetNodes();
             break;
-        }
-        case NODES: {
-            // TODO: record how frequent this message is being used, ban if necessary
-            NodesMessage nodesMsg = (NodesMessage) msg;
-            if (nodesMsg.validate()) {
-                nodeMgr.addNodes(nodesMsg.getNodes());
-            }
+        case NODES:
+            onNodes((NodesMessage) msg);
             break;
-        }
-        case TRANSACTION: {
-            TransactionMessage transactionMsg = (TransactionMessage) msg;
-            pendingMgr.addTransaction(transactionMsg.getTransaction());
+        case TRANSACTION:
+            onTransaction((TransactionMessage) msg);
             break;
-        }
+        case HANDSHAKE_INIT:
+            onHandshakeInit((InitMessage) msg);
+            break;
+        case HANDSHAKE_HELLO:
+            onHandshakeHello((HelloMessage) msg);
+            break;
+        case HANDSHAKE_WORLD:
+            onHandshakeWorld((WorldMessage) msg);
+            break;
 
         /* sync */
-        case GET_BLOCK: {
-            if (isHandshakeDone.get()) {
-                GetBlockMessage m = (GetBlockMessage) msg;
-                Block block = chain.getBlock(m.getNumber());
-                channel.getMessageQueue().sendMessage(new BlockMessage(block));
-            }
+        case GET_BLOCK:
+        case BLOCK:
+        case GET_BLOCK_HEADER:
+        case BLOCK_HEADER:
+            onSync(msg);
             break;
-        }
-        case BLOCK: {
-            if (isHandshakeDone.get()) {
-                sync.onMessage(channel, msg);
-            }
-            break;
-        }
-        case GET_BLOCK_HEADER: {
-            if (isHandshakeDone.get()) {
-                GetBlockHeaderMessage m = (GetBlockHeaderMessage) msg;
-                BlockHeader header = chain.getBlockHeader(m.getNumber());
-                channel.getMessageQueue().sendMessage(new BlockHeaderMessage(header));
-            }
-            break;
-        }
-        case BLOCK_HEADER: {
-            if (isHandshakeDone.get()) {
-                sync.onMessage(channel, msg);
-            }
-            break;
-        }
 
-        /* consensus */
+        /* bft */
         case BFT_NEW_HEIGHT:
         case BFT_NEW_VIEW:
         case BFT_PROPOSAL:
-        case BFT_VOTE: {
-            if (isHandshakeDone.get()) {
-                consensus.onMessage(channel, msg);
-            }
+        case BFT_VOTE:
+            onBft(msg);
             break;
-        }
 
-        default: {
+        default:
             ctx.fireChannelRead(msg);
             break;
         }
+    }
+
+    protected void onDisconnect(ChannelHandlerContext ctx, DisconnectMessage msg) {
+        ReasonCode reason = msg.getReason();
+        logger.debug("Received DISCONNECT message: reason = {}, remoteIP = {}",
+                reason, channel.getRemoteIp());
+
+        // Users often get confused with no logging why they are unable to sync
+        if (reason.equals(ReasonCode.INVALID_HANDSHAKE)) {
+            logger.warn("Disconnected from peer due to invalid handshake.");
+        }
+
+        close(ctx);
+    }
+
+    protected void onHello(org.semux.net.msg.p2p.handshake.v1.HelloMessage msg) {
+        Peer peer = msg.getPeer();
+
+        if (!Stream.of(peer.getCapabilities())
+                .anyMatch(k -> (config.network() == Network.MAINNET ? "SEM" : "SEM_TESTNET").equals(k))) {
+            msgQueue.disconnect(ReasonCode.INCOMPATIBLE_PROTOCOL);
+            return;
+        }
+
+        if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isActivePeer(peer.getPeerId())) {
+            msgQueue.disconnect(ReasonCode.DUPLICATED_PEER_ID);
+            return;
+        }
+
+        if (chain.getValidators().contains(peer.getPeerId()) // is a validator
+                && channelMgr.isActiveIP(channel.getRemoteIp()) // already connected
+                && config.network() == Network.MAINNET) { // on main net
+            msgQueue.disconnect(ReasonCode.VALIDATOR_IP_LIMITED);
+            return;
+        }
+
+        if (!msg.validate(config) || (config.network() == Network.MAINNET && !channel.getRemoteIp()
+                .equals(msg.getPeer().getIp()))) {
+            msgQueue.disconnect(ReasonCode.INVALID_HANDSHAKE);
+            return;
+        }
+
+        // reply with a WORLD message
+        msgQueue.sendMessage(new org.semux.net.msg.p2p.handshake.v1.WorldMessage(
+                config.network(), config.networkVersion(), client.getPeerId(),
+                client.getIp(), client.getPort(), config.getClientId(), chain.getLatestBlockNumber(),
+                client.getCoinbase()));
+
+        // notify channel manager
+        channelMgr.onChannelActive(channel, peer);
+
+        // handshake done
+        onHandshakeDone(peer);
+    }
+
+    protected void onWorld(org.semux.net.msg.p2p.handshake.v1.WorldMessage msg) {
+        Peer peer = msg.getPeer();
+
+        if (!Stream.of(msg.getPeer().getCapabilities())
+                .anyMatch(k -> (config.network() == Network.MAINNET ? "SEM" : "SEM_TESTNET").equals(k))) {
+            msgQueue.disconnect(ReasonCode.INCOMPATIBLE_PROTOCOL);
+            return;
+        }
+
+        if (client.getPeerId().equals(peer.getPeerId()) || channelMgr.isActivePeer(peer.getPeerId())) {
+            msgQueue.disconnect(ReasonCode.DUPLICATED_PEER_ID);
+            return;
+        }
+
+        if (chain.getValidators().contains(peer.getPeerId()) // is a validator
+                && channelMgr.isActiveIP(channel.getRemoteIp()) // already connected
+                && config.network() == Network.MAINNET) { // on main net
+            msgQueue.disconnect(ReasonCode.VALIDATOR_IP_LIMITED);
+            return;
+        }
+
+        if (!msg.validate(config) || (config.network() == Network.MAINNET && !channel.getRemoteIp()
+                .equals(msg.getPeer().getIp()))) {
+            msgQueue.disconnect(ReasonCode.INVALID_HANDSHAKE);
+            return;
+        }
+
+        // register into channel manager
+        channelMgr.onChannelActive(channel, peer);
+
+        // handshake done
+        onHandshakeDone(peer);
+    }
+
+    protected void onPing() {
+        PongMessage pong = new PongMessage();
+        msgQueue.sendMessage(pong);
+    }
+
+    protected void onPong(MessageWrapper request) {
+        if (request != null) {
+            long latency = TimeUtil.currentTimeMillis() - request.getLastTimestamp();
+            channel.getRemotePeer().setLatency(latency);
         }
     }
 
-    /**
-     * Returns whether the p2p version is supported.
-     *
-     * @param peer
-     * @return
-     */
-    private boolean isSupported(Peer peer) {
-        if (config.networkVersion() != peer.getNetworkVersion()) {
-            return false;
-        }
+    protected void onGetNodes() {
+        List<InetSocketAddress> activeAddresses = new ArrayList<>(channelMgr.getActiveAddresses());
+        Collections.shuffle(activeAddresses); // shuffle the list to balance the load on nodes
+        NodesMessage nodesMsg = new NodesMessage(activeAddresses.stream()
+                .limit(MAX_NODES).map(Node::new).collect(Collectors.toList()));
+        msgQueue.sendMessage(nodesMsg);
+    }
 
-        if (config.network() == Network.MAINNET) {
-            return Stream.of(peer.getCapabilities()).anyMatch(k -> "SEM".equals(k));
-        } else {
-            return Stream.of(peer.getCapabilities()).anyMatch(k -> "SEM_TESTNET".equals(k));
+    protected void onNodes(NodesMessage msg) {
+        if (msg.validate()) {
+            nodeMgr.addNodes(msg.getNodes());
         }
     }
 
-    /**
-     * Checks if a HELLO message is success.
-     *
-     * @return
-     */
-    private boolean isValid(HelloMessage msg) {
-        return msg.validate(config)
-                && (config.network() == Network.DEVNET || channel.getRemoteIp().equals(msg.getPeer().getIp()));
+    protected void onTransaction(TransactionMessage msg) {
+        pendingMgr.addTransaction(msg.getTransaction());
     }
 
-    /**
-     * Checks if a WORLD message is success.
-     *
-     * @return
-     */
-    private boolean isValid(WorldMessage msg) {
-        return msg.validate(config)
-                && (config.network() == Network.DEVNET || channel.getRemoteIp().equals(msg.getPeer().getIp()));
+    protected void onHandshakeInit(InitMessage msg) {
+
+    }
+
+    protected void onHandshakeHello(HelloMessage msg) {
+
+    }
+
+    protected void onHandshakeWorld(WorldMessage msg) {
+
+    }
+
+    protected void onSync(Message msg) {
+        if (!isHandshakeDone.get()) {
+            return;
+        }
+
+        switch (msg.getCode()) {
+        case GET_BLOCK: {
+            GetBlockMessage m = (GetBlockMessage) msg;
+            Block block = chain.getBlock(m.getNumber());
+            channel.getMessageQueue().sendMessage(new BlockMessage(block));
+            break;
+        }
+        case BLOCK: {
+            sync.onMessage(channel, msg);
+            break;
+        }
+        case GET_BLOCK_HEADER: {
+            GetBlockHeaderMessage m = (GetBlockHeaderMessage) msg;
+            BlockHeader header = chain.getBlockHeader(m.getNumber());
+            channel.getMessageQueue().sendMessage(new BlockHeaderMessage(header));
+            break;
+        }
+        case BLOCK_HEADER: {
+            sync.onMessage(channel, msg);
+            break;
+        }
+        default:
+            throw new UnreachableException();
+        }
+    }
+
+    protected void onBft(Message msg) {
+        if (!isHandshakeDone.get()) {
+            return;
+        }
+
+        bft.onMessage(channel, msg);
     }
 
     /**
      * When handshake is done.
-     *
-     * @param peer
      */
     private void onHandshakeDone(Peer peer) {
         if (isHandshakeDone.compareAndSet(false, true)) {
-            // notify consensus about peer height
-            consensus.onMessage(channel, new NewHeightMessage(peer.getLatestBlockNumber() + 1));
+            // notify bft about peer height
+            bft.onMessage(channel, new NewHeightMessage(peer.getLatestBlockNumber() + 1));
 
             // start peers exchange
             getNodes = exec.scheduleAtFixedRate(() -> msgQueue.sendMessage(new GetNodesMessage()),
@@ -371,17 +403,21 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     /**
      * Stops all scheduled timers and the message queue.
      */
-    private void stopTimers() {
-        if (getNodes != null) {
-            getNodes.cancel(false);
-            getNodes = null;
-        }
+    private void close(ChannelHandlerContext ctx) {
+        if (isClosed.compareAndSet(false, true)) {
+            if (getNodes != null) {
+                getNodes.cancel(false);
+                getNodes = null;
+            }
 
-        if (pingPong != null) {
-            pingPong.cancel(false);
-            pingPong = null;
-        }
+            if (pingPong != null) {
+                pingPong.cancel(false);
+                pingPong = null;
+            }
 
-        msgQueue.deactivate();
+            msgQueue.deactivate();
+
+            ctx.close();
+        }
     }
 }

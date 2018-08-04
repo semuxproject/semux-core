@@ -28,7 +28,7 @@ public class KernelTest {
                 && kernel.getPendingManager().isRunning()
                 && kernel.getApi().isRunning()
                 && kernel.getP2p().isRunning()
-                && kernel.getConsensus().isRunning()
+                && kernel.getBftManager().isRunning()
                 && !kernel.getSyncManager().isRunning());
 
         // stop kernel
@@ -38,7 +38,7 @@ public class KernelTest {
                 && !kernel.getPendingManager().isRunning()
                 && !kernel.getApi().isRunning()
                 && !kernel.getP2p().isRunning()
-                && !kernel.getConsensus().isRunning()
+                && !kernel.getBftManager().isRunning()
                 && !kernel.getSyncManager().isRunning());
     }
 }

@@ -21,6 +21,9 @@ import org.semux.net.msg.p2p.NodesMessage;
 import org.semux.net.msg.p2p.PingMessage;
 import org.semux.net.msg.p2p.PongMessage;
 import org.semux.net.msg.p2p.TransactionMessage;
+import org.semux.net.msg.p2p.handshake.v2.HelloMessage;
+import org.semux.net.msg.p2p.handshake.v2.InitMessage;
+import org.semux.net.msg.p2p.handshake.v2.WorldMessage;
 import org.semux.util.Bytes;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
@@ -68,11 +71,11 @@ public class MessageFactory {
             case TRANSACTION:
                 return new TransactionMessage(encoded);
             case HANDSHAKE_INIT:
-                return new org.semux.net.msg.p2p.handshake.v2.InitMessage(encoded);
+                return new InitMessage(encoded);
             case HANDSHAKE_HELLO:
-                return new org.semux.net.msg.p2p.handshake.v2.HelloMessage(encoded);
+                return new HelloMessage(encoded);
             case HANDSHAKE_WORLD:
-                return new org.semux.net.msg.p2p.handshake.v2.WorldMessage(encoded);
+                return new WorldMessage(encoded);
 
             case GET_BLOCK:
                 return new GetBlockMessage(encoded);

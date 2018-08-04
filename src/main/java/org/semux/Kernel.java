@@ -22,9 +22,9 @@ import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.consensus.SemuxBft;
 import org.semux.consensus.SemuxSync;
+import org.semux.core.BftManager;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
-import org.semux.core.Consensus;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Wallet;
@@ -94,7 +94,7 @@ public class Kernel {
 
     protected Thread consThread;
     protected SemuxSync sync;
-    protected SemuxBft cons;
+    protected SemuxBft bft;
 
     /**
      * Creates a kernel instance and initializes it.
@@ -174,9 +174,9 @@ public class Kernel {
         // start sync/consensus
         // ====================================
         sync = new SemuxSync(this);
-        cons = new SemuxBft(this);
+        bft = new SemuxBft(this);
 
-        consThread = new Thread(cons::start, "cons");
+        consThread = new Thread(bft::start, "consensus");
         consThread.start();
 
         // ====================================
@@ -333,13 +333,13 @@ public class Kernel {
         // stop consensus
         try {
             sync.stop();
-            cons.stop();
+            bft.stop();
 
             // make sure consensus thread is fully stopped
             consThread.join();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            logger.error("Failed to stop sync/consensus properly");
+            logger.error("Failed to stop sync/bft manager properly");
         }
 
         // stop API and p2p
@@ -467,12 +467,12 @@ public class Kernel {
     }
 
     /**
-     * Returns the consensus.
+     * Returns the BFT manager.
      * 
      * @return
      */
-    public Consensus getConsensus() {
-        return cons;
+    public BftManager getBftManager() {
+        return bft;
     }
 
     /**

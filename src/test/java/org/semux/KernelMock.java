@@ -95,7 +95,7 @@ public class KernelMock extends Kernel {
      * @param cons
      */
     public void setConsensus(SemuxBft cons) {
-        this.cons = cons;
+        this.bft = cons;
     }
 
     /**

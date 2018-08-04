@@ -13,8 +13,6 @@ import org.semux.net.msg.MessageCode;
 
 public class WorldMessage extends HandshakeMessage {
 
-    private static final byte PREFIX = 0x01;
-
     public WorldMessage(Network network, short networkVersion, String peerId, int port,
             String clientId, CapabilitySet capabilities, long latestBlockNumber,
             byte[] secret, Key coinbase) {

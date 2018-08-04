@@ -33,7 +33,7 @@ import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.BlockHeaderData;
 import org.semux.core.Blockchain;
-import org.semux.core.Consensus;
+import org.semux.core.BftManager;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
@@ -93,7 +93,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  * <li><code>FINALIZE</code>: finalize a block</li>
  * </ul>
  */
-public class SemuxBft implements Consensus {
+public class SemuxBft implements BftManager {
     static final Logger logger = LoggerFactory.getLogger(SemuxBft.class);
 
     protected final Kernel kernel;
@@ -153,7 +153,7 @@ public class SemuxBft implements Consensus {
     }
 
     /**
-     * Pause the consensus, and do synchronization.
+     * Pause the bft manager, and do synchronization.
      * 
      */
     protected void sync(long target) {
@@ -216,7 +216,7 @@ public class SemuxBft implements Consensus {
                     break;
                 }
             } catch (InterruptedException e) {
-                logger.info("Consensus got interrupted");
+                logger.info("BftManager got interrupted");
                 Thread.currentThread().interrupt();
                 break;
             } catch (Exception e) {
@@ -231,12 +231,12 @@ public class SemuxBft implements Consensus {
             status = Status.RUNNING;
             timer.start();
             broadcaster.start();
-            logger.info("Consensus started");
+            logger.info("BftManager started");
 
             enterNewHeight();
             eventLoop();
 
-            logger.info("Consensus stopped");
+            logger.info("BftManager stopped");
         }
     }
 
@@ -1016,7 +1016,7 @@ public class SemuxBft implements Consensus {
 
         public synchronized void start() {
             if (t == null) {
-                t = new Thread(this, "cons-timer");
+                t = new Thread(this, "bft-timer");
                 t.start();
             }
         }
@@ -1077,7 +1077,7 @@ public class SemuxBft implements Consensus {
 
         public synchronized void start() {
             if (t == null) {
-                t = new Thread(this, "cons-relay");
+                t = new Thread(this, "bft-relay");
                 t.start();
             }
         }

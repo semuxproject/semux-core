@@ -9,20 +9,20 @@ package org.semux.core;
 import org.semux.net.Channel;
 import org.semux.net.msg.Message;
 
-public interface Consensus {
+public interface BftManager {
     /**
-     * Starts consensus.
+     * Starts bft manager.
      * 
      */
     void start();
 
     /**
-     * Stops consensus.
+     * Stops bft manager.
      */
     void stop();
 
     /**
-     * Returns if the consensus is running.
+     * Returns if the bft manager is running.
      * 
      * @return
      */
