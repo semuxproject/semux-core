@@ -11,29 +11,37 @@ import org.semux.net.msg.ReasonCode;
 /**
  * This enum represents the available capabilities in current version of Semux
  * wallet. One peer should be disconnected by
- * ${@link ReasonCode#INCOMPATIBLE_PROTOCOL} if the peer doesn't support the
+ * ${@link ReasonCode#BAD_NETWORK_VERSION} if the peer doesn't support the
  * required set of capabilities.
  */
 public enum Capability {
 
     /**
-     * A mandatory capability of Semux mainnet.
+     * A mandatory capability for all clients.
      */
-    SEM,
+    SEMUX,
 
     /**
-     * A mandatory capability of Semux testnet.
+     * This client supports the CORE protocol.
      */
-    SEM_TESTNET;
-
-    // TODO: BATCH_SYNC
-
-    // TODO: FAST_SYNC
-
-    // TODO: DAPP
+    CORE,
 
     /**
-     * The maximum number of capabilities that can be supported.
+     * This client supports the LIGHT protocol.
      */
-    public static final int MAX_NUMBER_OF_CAPABILITIES = 128;
+    LIGHT,
+
+    /**
+     * The client supports FAST_SYNC protocol.
+     */
+    FAST_SYNC;
+
+    public static Capability of(String name) {
+        try {
+            return valueOf(name);
+        } catch (IllegalArgumentException | NullPointerException ex) {
+            return null;
+        }
+    }
+
 }

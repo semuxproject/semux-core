@@ -76,7 +76,7 @@ public class BlockchainImplTest {
         chain.addBlock(newBlock);
 
         assertNotEquals(0, chain.getLatestBlockNumber());
-        assertTrue(chain.getLatestBlock().getNumber() == newBlock.getNumber());
+        assertEquals(newBlock.getNumber(), chain.getLatestBlock().getNumber());
     }
 
     @Test
@@ -97,8 +97,8 @@ public class BlockchainImplTest {
         Block newBlock = createBlock(number);
         chain.addBlock(newBlock);
 
-        assertTrue(chain.getBlock(number).getNumber() == number);
-        assertTrue(chain.getBlock(newBlock.getHash()).getNumber() == number);
+        assertEquals(number, chain.getBlock(number).getNumber());
+        assertEquals(number, chain.getBlock(newBlock.getHash()).getNumber());
     }
 
     @Test
@@ -147,8 +147,8 @@ public class BlockchainImplTest {
         assertTrue(Arrays.equals(to, t.getTo()));
         assertTrue(Arrays.equals(data, t.getData()));
         assertEquals(value, t.getValue());
-        assertTrue(t.getNonce() == nonce);
-        assertTrue(t.getTimestamp() == timestamp);
+        assertEquals(nonce, t.getNonce());
+        assertEquals(timestamp, t.getTimestamp());
     }
 
     @Test

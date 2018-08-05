@@ -12,12 +12,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.FileSystems;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 
 import org.semux.config.Constants;
 import org.semux.gui.SemuxGui;
@@ -32,11 +30,6 @@ import com.sun.jna.platform.win32.Win32Exception;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.platform.win32.WinReg;
 
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioDatagramChannel;
-import io.netty.resolver.dns.DnsNameResolver;
-import io.netty.resolver.dns.DnsNameResolverBuilder;
-import io.netty.resolver.dns.SequentialDnsServerAddressStreamProvider;
 import oshi.SystemInfo;
 
 public class SystemUtil {
@@ -151,34 +144,11 @@ public class SystemUtil {
     }
 
     /**
-     * Returns the public IP address of this peer.
+     * Returns my public IP address.
      *
      * @return an IP address if available, otherwise local address
      */
     public static String getIp() {
-        // [1] fetch IP address from OpenDNS. This works for socks5 proxy users.
-        NioEventLoopGroup ev = new NioEventLoopGroup(1);
-        try {
-            DnsNameResolver nameResolver = new DnsNameResolverBuilder(ev.next())
-                    .channelType(NioDatagramChannel.class)
-                    .queryTimeoutMillis(1000)
-                    .nameServerProvider(new SequentialDnsServerAddressStreamProvider(
-                            new InetSocketAddress("208.67.222.222", 53),
-                            new InetSocketAddress("208.67.220.220", 53),
-                            new InetSocketAddress("208.67.222.220", 53),
-                            new InetSocketAddress("208.67.220.222", 53)))
-                    .build();
-            return nameResolver.resolve("myip.opendns.com").await().get().getHostAddress();
-        } catch (ExecutionException e) {
-            // do nothing
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } finally {
-            ev.shutdownGracefully();
-        }
-        logger.error("Failed to retrieve your IP address from OpenDNS");
-
-        // [2] fetch IP address from Amazon AWS. This works for public Wi-Fi users.
         try {
             URL url = new URL("http://checkip.amazonaws.com/");
             URLConnection con = url.openConnection();
@@ -195,17 +165,17 @@ public class SystemUtil {
             if (ip.matches("(\\d{1,3}\\.){3}\\d{1,3}")) {
                 return ip;
             }
-        } catch (IOException e) {
-            // do nothing
-        }
-        logger.error("Failed to retrieve your IP address from Amazon AWS");
+        } catch (IOException e1) {
+            logger.warn("Failed to retrieve your public IP address");
 
-        // [3] Use local address as failover
-        try {
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (Exception e) {
-            return InetAddress.getLoopbackAddress().getHostAddress();
+            try {
+                return InetAddress.getLocalHost().getHostAddress();
+            } catch (Exception e2) {
+                logger.warn("Failed to retrieve your localhost IP address");
+            }
         }
+
+        return InetAddress.getLoopbackAddress().getHostAddress();
     }
 
     /**
@@ -390,6 +360,20 @@ public class SystemUtil {
      */
     public static boolean isPosix() {
         return FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
+    }
+
+    /**
+     * Checks if it's running in JUnit test.
+     *
+     * @return
+     */
+    public static boolean isJUnitTest() {
+        try {
+            Class.forName("org.semux.TestUtils");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     private SystemUtil() {

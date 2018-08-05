@@ -8,6 +8,7 @@ package org.semux.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.semux.util.SystemUtil.OsName.LINUX;
@@ -41,7 +42,7 @@ public class SystemUtilTest {
         String ip = SystemUtil.getIp();
         logger.info("IP address = {}, took {} ms", ip, Duration.between(begin, Instant.now()).toMillis());
 
-        assertFalse("127.0.0.1".equals(ip));
+        assertNotEquals("127.0.0.1", ip);
     }
 
     @Test

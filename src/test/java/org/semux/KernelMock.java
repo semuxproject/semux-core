@@ -90,12 +90,12 @@ public class KernelMock extends Kernel {
     }
 
     /**
-     * Sets the consensus instance.
+     * Sets the bft manager instance.
      * 
-     * @param cons
+     * @param bft
      */
-    public void setConsensus(SemuxBft cons) {
-        this.cons = cons;
+    public void setBftManager(SemuxBft bft) {
+        this.bft = bft;
     }
 
     /**

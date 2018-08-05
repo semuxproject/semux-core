@@ -396,7 +396,7 @@ public final class SemuxApiImpl implements SemuxApi {
             return badRequest(resp, "Parameter `number` is required");
         }
 
-        Long blockNumLong;
+        long blockNumLong;
         try {
             blockNumLong = Long.parseLong(blockNum);
         } catch (NumberFormatException e) {

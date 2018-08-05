@@ -6,7 +6,7 @@
  */
 package org.semux.net.filter;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
@@ -145,6 +145,6 @@ public class SemuxIpFilterSaverTest extends SemuxIpFilterTestBase {
         saver.save(dest, ipFilter);
 
         final ObjectMapper mapper = new ObjectMapper();
-        assertTrue(mapper.readTree(jsonFile).equals(mapper.readTree(dest.toFile())));
+        assertEquals(mapper.readTree(jsonFile), mapper.readTree(dest.toFile()));
     }
 }

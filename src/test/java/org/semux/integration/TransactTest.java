@@ -25,9 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.junit.After;
@@ -107,11 +105,6 @@ public class TransactTest {
         mockStatic(Genesis.class);
         when(Genesis.load(any())).thenReturn(genesis);
 
-        // mock seed nodes
-        Set<Node> nodes = new HashSet<>();
-        nodes.add(new Node(kernelValidator1.getConfig().p2pListenIp(), kernelValidator1.getConfig().p2pListenPort()));
-        nodes.add(new Node(kernelValidator2.getConfig().p2pListenIp(), kernelValidator2.getConfig().p2pListenPort()));
-
         // start kernels
         kernelValidator1.start();
         kernelValidator2.start();
@@ -124,11 +117,19 @@ public class TransactTest {
         kernels.add(kernelPremine);
         kernels.add(kernelReceiver);
 
-        // connect to each other
-        for (Kernel kernel : kernels) {
-            for (Node node : nodes) {
-                SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, node);
-                kernel.getClient().connect(node, ci);
+        List<Node> nodes = new ArrayList<>();
+        nodes.add(new Node(kernelValidator1.getConfig().p2pListenIp(), kernelValidator1.getConfig().p2pListenPort()));
+        nodes.add(new Node(kernelValidator2.getConfig().p2pListenIp(), kernelValidator2.getConfig().p2pListenPort()));
+        nodes.add(new Node(kernelPremine.getConfig().p2pListenIp(), kernelPremine.getConfig().p2pListenPort()));
+        nodes.add(new Node(kernelReceiver.getConfig().p2pListenIp(), kernelReceiver.getConfig().p2pListenPort()));
+
+        // Make the three kernels connect
+        for (int i = 0; i < kernels.size(); i++) {
+            for (int j = i + 1; j < nodes.size(); j++) {
+                // Note: with the new three-way handshake, two nodes can't connect to each other
+                // at the same time.
+                SemuxChannelInitializer ci = new SemuxChannelInitializer(kernels.get(i), nodes.get(j));
+                kernels.get(i).getClient().connect(nodes.get(j), ci);
             }
         }
 

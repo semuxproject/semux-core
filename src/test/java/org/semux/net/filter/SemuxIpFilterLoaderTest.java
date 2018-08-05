@@ -7,7 +7,7 @@
 package org.semux.net.filter;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.net.UnknownHostException;
@@ -79,7 +79,7 @@ public class SemuxIpFilterLoaderTest extends SemuxIpFilterTestBase {
         SemuxIpFilter.Loader loader = new SemuxIpFilter.Loader();
         SemuxIpFilter semuxIpFilter = loader.load(jsonFile.toPath());
         List<FilterRule> loadedRules = semuxIpFilter.getRules();
-        assertTrue(loadedRules.size() == rules.size());
+        assertEquals(loadedRules.size(), rules.size());
         for (int i = 0; i < loadedRules.size(); i++) {
             assertThat(loadedRules.get(i)).isEqualToComparingFieldByFieldRecursively(rules.get(i));
         }

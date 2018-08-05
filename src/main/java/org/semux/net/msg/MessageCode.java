@@ -52,6 +52,21 @@ public enum MessageCode {
      */
     TRANSACTION(0x07),
 
+    /**
+     * [0x08] A message containing a random bytes
+     */
+    HANDSHAKE_INIT(0x08),
+
+    /**
+     * [0x09] The new HELLO message
+     */
+    HANDSHAKE_HELLO(0x09),
+
+    /**
+     * [0x10] The new WORLD message.
+     */
+    HANDSHAKE_WORLD(0x10),
+
     // =======================================
     // [0x30, 0x3f] Reserved for sync
     // =======================================
@@ -101,6 +116,7 @@ public enum MessageCode {
     BFT_VOTE(0x43);
 
     private static final MessageCode[] map = new MessageCode[256];
+
     static {
         for (MessageCode mc : MessageCode.values()) {
             map[mc.code] = mc;

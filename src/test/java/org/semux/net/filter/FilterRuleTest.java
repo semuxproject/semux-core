@@ -6,7 +6,7 @@
  */
 package org.semux.net.filter;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -65,6 +65,6 @@ public class FilterRuleTest {
         InetAddress inetAddress = InetAddress.getByName(matchesIp);
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
         when(inetSocketAddress.getAddress()).thenReturn(inetAddress);
-        assertTrue(FilterRule.matches(inetSocketAddress) == matches);
+        assertEquals(matches, FilterRule.matches(inetSocketAddress));
     }
 }

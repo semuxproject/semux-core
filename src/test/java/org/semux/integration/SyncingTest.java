@@ -17,9 +17,7 @@ import static org.semux.core.Amount.Unit.SEM;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
@@ -67,8 +65,6 @@ public class SyncingTest {
     private KernelMock kernel3; // seed node
     private KernelMock kernel4; // normal node
 
-    Set<Node> nodes = new HashSet<>();
-
     protected int targetHeight() {
         return 2;
     }
@@ -97,15 +93,24 @@ public class SyncingTest {
         kernels.add(kernel1);
         kernels.add(kernel2);
         kernels.add(kernel3);
-        kernels.add(kernel4);
 
-        // connect to each other
-        for (Kernel kernel : kernels) {
-            for (Node node : nodes) {
-                SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, node);
-                kernel.getClient().connect(node, ci);
+        List<Node> nodes = new ArrayList<>();
+        nodes.add(new Node(kernel1.getConfig().p2pListenIp(), kernel1.getConfig().p2pListenPort()));
+        nodes.add(new Node(kernel2.getConfig().p2pListenIp(), kernel2.getConfig().p2pListenPort()));
+        nodes.add(new Node(kernel3.getConfig().p2pListenIp(), kernel3.getConfig().p2pListenPort()));
+
+        // Make the three kernels connect
+        for (int i = 0; i < kernels.size(); i++) {
+            for (int j = i + 1; j < nodes.size(); j++) {
+                // Note: with the new three-way handshake, two nodes can't connect to each other
+                // at the same time.
+                SemuxChannelInitializer ci = new SemuxChannelInitializer(kernels.get(i), nodes.get(j));
+                kernels.get(i).getClient().connect(nodes.get(j), ci);
             }
         }
+
+        // let the fourth kernel connects
+        kernel4.getNodeManager().addNodes(nodes);
 
         // wait for kernels
         await().atMost(20, SECONDS).until(() -> kernel1.state() == State.RUNNING
@@ -120,11 +125,6 @@ public class SyncingTest {
         Genesis genesis = mockGenesis();
         mockStatic(Genesis.class);
         when(Genesis.load(any())).thenReturn(genesis);
-
-        // mock seed nodes
-        nodes.add(new Node(kernel1.getConfig().p2pListenIp(), kernel1.getConfig().p2pListenPort()));
-        nodes.add(new Node(kernel2.getConfig().p2pListenIp(), kernel2.getConfig().p2pListenPort()));
-        nodes.add(new Node(kernel3.getConfig().p2pListenIp(), kernel3.getConfig().p2pListenPort()));
     }
 
     @After

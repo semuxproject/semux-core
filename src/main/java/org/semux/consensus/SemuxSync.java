@@ -300,7 +300,7 @@ public class SemuxSync implements SyncManager {
      * Queue new tasks sequentially starting from
      * ${@link SemuxSync#latestQueuedTask} until the size of
      * ${@link SemuxSync#toDownload} queue is greater than or equal to
-     * ${@value MAX_QUEUED_BLOCKS}
+     * MAX_QUEUED_JOBS
      */
     private void growToDownloadQueue() {
         // To avoid overhead, this method doesn't add new tasks before the queue is less
@@ -679,7 +679,7 @@ public class SemuxSync implements SyncManager {
         }
 
         private Long getSpeed() {
-            Long downloadedBlocks = currentHeight - startingHeight;
+            long downloadedBlocks = currentHeight - startingHeight;
             if (downloadedBlocks <= 0 || duration.toMillis() == 0) {
                 return null;
             }

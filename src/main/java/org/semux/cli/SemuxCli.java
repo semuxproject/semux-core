@@ -248,7 +248,7 @@ public class SemuxCli extends Launcher {
             }
 
             wallet.changePassword(newPassword);
-            Boolean isFlushed = wallet.flush();
+            boolean isFlushed = wallet.flush();
             if (!isFlushed) {
                 logger.error(CliMessages.get("WalletFileCannotBeUpdated"));
                 SystemUtil.exit(SystemUtil.Code.FAILED_TO_WRITE_WALLET_FILE);

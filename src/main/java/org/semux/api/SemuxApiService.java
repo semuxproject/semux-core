@@ -157,6 +157,6 @@ public class SemuxApiService {
      * @return
      */
     public String getApiExplorerUrl() {
-        return String.format("http://%s:%d/index.html", ip, port, ApiVersion.DEFAULT.prefix);
+        return String.format("http://%s:%d/index.html", ip, port);
     }
 }

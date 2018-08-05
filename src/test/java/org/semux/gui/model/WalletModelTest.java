@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,10 +61,6 @@ public class WalletModelTest {
     @Before
     public void setUp() throws IOException {
         model = spy(new WalletModel(config));
-    }
-
-    @After
-    public void tearDown() {
     }
 
     @Test
@@ -101,7 +96,7 @@ public class WalletModelTest {
         Block block = mock(Block.class);
         when(block.getNumber()).thenReturn(1L);
 
-        assertEquals(null, model.getLatestBlock());
+        assertNull(model.getLatestBlock());
         model.setLatestBlock(block);
         assertEquals(1, model.getLatestBlock().getNumber());
     }

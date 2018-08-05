@@ -7,94 +7,96 @@
 package org.semux.net;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * An immutable set of capabilities.
  */
 public class CapabilitySet {
 
-    private final Set<String> capabilities;
+    private final Set<Capability> capabilities;
 
-    private CapabilitySet(Set<String> capabilities) {
-        this.capabilities = capabilities;
+    private CapabilitySet(Collection<Capability> capabilities) {
+        /* Use TreeSet to maintain capability order, for deterministic hashcode */
+        this.capabilities = Collections.unmodifiableSet(new TreeSet<>(capabilities));
     }
 
     /**
-     * Creates an empty and immutable ${@link CapabilitySet}
-     *
-     * @return an empty and immutable ${@link CapabilitySet}
+     * Creates an empty set.
      */
     public static CapabilitySet emptySet() {
         return new CapabilitySet(Collections.emptySet());
     }
 
     /**
-     * Converts a list of ${@link Capability} into a ${@link CapabilitySet}.
+     * Converts an array of capability into capability set.
      *
-     * @param capabilityList
-     *            a list of ${@link Capability}
-     * @return a ${@link CapabilitySet} contains the provided list of
-     *         ${@link Capability}
+     * @param capabilities
+     *            the specified capabilities
      */
-    public static CapabilitySet of(Capability... capabilityList) {
-        return new CapabilitySet(Arrays.stream(capabilityList).map(Capability::toString)
-                .collect(Collectors.toSet()));
+    public static CapabilitySet of(Capability... capabilities) {
+        return new CapabilitySet(Stream.of(capabilities).filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
     /**
-     * Converts a list of String into a ${@link CapabilitySet}.
+     * Converts an array of capability into capability set.
      *
-     * @param capabilityList
-     *            a list of ${@link String}
-     * @return a ${@link CapabilitySet} contains the provided list of
-     *         ${@link String}.
+     * @param capabilities
+     *            the specified capabilities
+     * @ImplNode unknown capabilities are ignored
      */
-    public static CapabilitySet of(String... capabilityList) {
-        return new CapabilitySet(Arrays.stream(capabilityList).collect(Collectors.toSet()));
+    public static CapabilitySet of(String... capabilities) {
+        return new CapabilitySet(
+                Stream.of(capabilities).map(Capability::of).filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
     /**
      * Checks whether the capability is supported by the ${@link CapabilitySet}.
      *
      * @param capability
-     *            the ${@link Capability} to be checked.
+     *            the capability to be checked.
      * @return true if the capability is supported, false if not
      */
     public boolean isSupported(Capability capability) {
-        return capabilities.contains(capability.toString());
+        return capabilities.contains(capability);
     }
 
     /**
-     *
-     * @return the number of capabilities in the ${@link CapabilitySet}.
+     * Returns the size of the capability set.
      */
     public int size() {
         return capabilities.size();
     }
 
     /**
-     * Converts the ${@link CapabilitySet} to a list of String.
-     *
-     * @return a list of capabilities in ${@link String}
+     * Converts the capability set to an list of String.
      */
     public List<String> toList() {
-        return capabilities.stream().sorted().collect(Collectors.toList());
+        return capabilities.stream().map(Capability::name).collect(Collectors.toList());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Converts the capability set to an array of String.
+     */
+    public String[] toArray() {
+        return capabilities.stream().map(Capability::name).toArray(String[]::new);
+    }
+
     @Override
     public boolean equals(Object object) {
-        return object instanceof CapabilitySet && capabilities.equals(((CapabilitySet) object).capabilities);
+        return object instanceof CapabilitySet
+                && Arrays.equals(toArray(), ((CapabilitySet) object).toArray());
     }
 
-    /** {@inheritDoc} */
     @Override
     public int hashCode() {
-        return Objects.hash(capabilities);
+        return Arrays.hashCode(toArray());
     }
 }

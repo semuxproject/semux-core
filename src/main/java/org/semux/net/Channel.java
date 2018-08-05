@@ -92,6 +92,15 @@ public class Channel {
     }
 
     /**
+     * Returns whether this is an outbound channel.
+     *
+     * @return
+     */
+    public boolean isOutbound() {
+        return !isInbound();
+    }
+
+    /**
      * Returns the remote peer.
      * 
      * @return

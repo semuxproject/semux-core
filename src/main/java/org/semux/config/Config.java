@@ -157,11 +157,11 @@ public interface Config {
     String getClientId();
 
     /**
-     * Returns the set of capability.
-     *
+     * Returns the capabilities of the client.
+     * 
      * @return
      */
-    CapabilitySet capabilitySet();
+    CapabilitySet getClientCapabilities();
 
     // =========================
     // P2P

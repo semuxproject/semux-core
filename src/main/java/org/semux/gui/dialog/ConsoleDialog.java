@@ -193,7 +193,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
         builder.append("\n");
 
-        return new MethodDescriptor(name, argumentTypes.toArray(new Class<?>[argumentTypes.size()]),
+        return new MethodDescriptor(name, argumentTypes.toArray(new Class<?>[0]),
                 builder.toString());
     }
 

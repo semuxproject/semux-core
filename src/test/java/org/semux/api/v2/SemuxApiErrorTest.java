@@ -24,8 +24,6 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -189,16 +187,6 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
 
     @Parameter(1)
     public URI uri;
-
-    @Before
-    public void setUp() {
-        super.setUp();
-    }
-
-    @After
-    public void tearDown() {
-        super.tearDown();
-    }
 
     @Test
     public void testError() throws IOException {

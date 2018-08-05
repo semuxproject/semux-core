@@ -17,12 +17,13 @@ import org.semux.net.msg.consensus.ProposalMessage;
 import org.semux.net.msg.consensus.VoteMessage;
 import org.semux.net.msg.p2p.DisconnectMessage;
 import org.semux.net.msg.p2p.GetNodesMessage;
-import org.semux.net.msg.p2p.HelloMessage;
 import org.semux.net.msg.p2p.NodesMessage;
 import org.semux.net.msg.p2p.PingMessage;
 import org.semux.net.msg.p2p.PongMessage;
 import org.semux.net.msg.p2p.TransactionMessage;
-import org.semux.net.msg.p2p.WorldMessage;
+import org.semux.net.msg.p2p.handshake.v2.HelloMessage;
+import org.semux.net.msg.p2p.handshake.v2.InitMessage;
+import org.semux.net.msg.p2p.handshake.v2.WorldMessage;
 import org.semux.util.Bytes;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
@@ -56,9 +57,9 @@ public class MessageFactory {
             case DISCONNECT:
                 return new DisconnectMessage(encoded);
             case HELLO:
-                return new HelloMessage(encoded);
+                return new org.semux.net.msg.p2p.handshake.v1.HelloMessage(encoded);
             case WORLD:
-                return new WorldMessage(encoded);
+                return new org.semux.net.msg.p2p.handshake.v1.WorldMessage(encoded);
             case PING:
                 return new PingMessage(encoded);
             case PONG:
@@ -69,6 +70,12 @@ public class MessageFactory {
                 return new NodesMessage(encoded);
             case TRANSACTION:
                 return new TransactionMessage(encoded);
+            case HANDSHAKE_INIT:
+                return new InitMessage(encoded);
+            case HANDSHAKE_HELLO:
+                return new HelloMessage(encoded);
+            case HANDSHAKE_WORLD:
+                return new WorldMessage(encoded);
 
             case GET_BLOCK:
                 return new GetBlockMessage(encoded);

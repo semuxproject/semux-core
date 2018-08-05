@@ -128,8 +128,8 @@ public class SemuxBftTest {
                 kernelRule.getKernel().getBlockchain().getLatestBlock().getHash(),
                 from1,
                 kernelRule.getKernel().getBlockchain().getLatestBlock().getNumber() + 1,
-                Arrays.asList(tx1),
-                Arrays.asList(new TransactionResult(true)));
+                Collections.singletonList(tx1),
+                Collections.singletonList(new TransactionResult(true)));
         kernelRule.getKernel().getBlockchain().addBlock(block1);
         SemuxBft semuxBFT = new SemuxBft(kernelRule.getKernel());
 
@@ -142,8 +142,8 @@ public class SemuxBftTest {
                 kernelRule.getKernel().getBlockchain().getLatestBlock().getHash(),
                 from2,
                 kernelRule.getKernel().getBlockchain().getLatestBlock().getNumber() + 1,
-                Arrays.asList(tx2),
-                Arrays.asList(new TransactionResult(true)));
+                Collections.singletonList(tx2),
+                Collections.singletonList(new TransactionResult(true)));
 
         // this test case is valid if and only if tx1 and tx2 have the same tx hash
         assertTrue(Arrays.equals(tx1.getHash(), tx2.getHash()));

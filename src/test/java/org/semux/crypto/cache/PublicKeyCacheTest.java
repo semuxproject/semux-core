@@ -6,7 +6,8 @@
  */
 package org.semux.crypto.cache;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -24,8 +25,8 @@ public class PublicKeyCacheTest {
 
         EdDSAPublicKey p1 = PublicKeyCache.computeIfAbsent(b1);
         EdDSAPublicKey p2 = PublicKeyCache.computeIfAbsent(b2);
-        assertTrue(b1 != b2);
-        assertTrue(p1 == p2);
+        assertNotSame(b1, b2);
+        assertSame(p1, p2);
     }
 
     @Test
