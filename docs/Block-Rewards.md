@@ -29,10 +29,9 @@ The max supply of semux is capped at 100,000,000 SEM.
 
 ### Real-time API
 
-```
-Circulating Supply : http://api.semux.org/circulating-supply
-Total Supply       : http://api.semux.org/total-supply
-Max Supply         : http://api.semux.org/max-supply
-```
+- `Circulating Supply : `http://api.semux.org/circulating-supply 
+- `Total Supply       : `http://api.semux.org/total-supply
+- `Max Supply         : `http://api.semux.org/max-supply
+
 
 NOTE: Circulating supply refers to all the available coins except the foundation funds (to be locked) and the community funds (to be distributed).
