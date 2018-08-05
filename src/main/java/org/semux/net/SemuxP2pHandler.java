@@ -342,6 +342,12 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             return;
         }
 
+        // check message
+        if (!msg.validate()) {
+            this.msgQueue.disconnect(ReasonCode.INVALID_HANDSHAKE);
+            return;
+        }
+
         // record the secret
         this.secret = msg.getSecret();
         this.timestamp = msg.getTimestamp();

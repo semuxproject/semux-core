@@ -42,6 +42,11 @@ public class InitMessage extends Message {
         this.encoded = encoded;
     }
 
+    public boolean validate() {
+        return secret != null && secret.length == SECRET_LENGTH
+                && timestamp > 0;
+    }
+
     public byte[] getSecret() {
         return secret;
     }
