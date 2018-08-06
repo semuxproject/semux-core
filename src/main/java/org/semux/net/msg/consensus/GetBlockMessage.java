@@ -8,21 +8,29 @@ package org.semux.net.msg.consensus;
 
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
-import org.semux.util.Bytes;
+import org.semux.util.SimpleDecoder;
+import org.semux.util.SimpleEncoder;
 
 public class GetBlockMessage extends Message {
+
     private final long number;
 
     public GetBlockMessage(long number) {
         super(MessageCode.GET_BLOCK, BlockMessage.class);
         this.number = number;
-        this.encoded = Bytes.of(number);
+
+        SimpleEncoder enc = new SimpleEncoder();
+        enc.writeLong(number);
+        this.encoded = enc.toBytes();
     }
 
     public GetBlockMessage(byte[] encoded) {
         super(MessageCode.GET_BLOCK, BlockMessage.class);
+
+        SimpleDecoder dec = new SimpleDecoder(encoded);
+        this.number = dec.readLong();
+
         this.encoded = encoded;
-        this.number = Bytes.toLong(encoded);
     }
 
     public long getNumber() {

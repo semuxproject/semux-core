@@ -32,15 +32,14 @@ public class BlockMessage extends Message {
     public BlockMessage(byte[] encoded) {
         super(MessageCode.BLOCK, null);
 
-        this.encoded = encoded;
-
         SimpleDecoder dec = new SimpleDecoder(encoded);
         byte[] header = dec.readBytes();
         byte[] transactions = dec.readBytes();
         byte[] results = dec.readBytes();
         byte[] votes = dec.readBytes();
-
         this.block = Block.fromBytes(header, transactions, results, votes);
+
+        this.encoded = encoded;
     }
 
     public Block getBlock() {

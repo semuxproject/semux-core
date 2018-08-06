@@ -16,8 +16,8 @@ public class InitMessage extends Message {
 
     public static final int SECRET_LENGTH = 32;
 
-    private byte[] secret;
-    private long timestamp;
+    private final byte[] secret;
+    private final long timestamp;
 
     public InitMessage(byte[] secret, long timestamp) {
         super(MessageCode.HANDSHAKE_INIT, null);

@@ -48,16 +48,15 @@ public class NodesMessage extends Message {
     public NodesMessage(byte[] encoded) {
         super(MessageCode.NODES, null);
 
-        this.encoded = encoded;
-
-        nodes = new ArrayList<>();
+        this.nodes = new ArrayList<>();
         SimpleDecoder dec = new SimpleDecoder(encoded);
-        int n = dec.readInt();
-        for (int i = 0; i < n; i++) {
+        for (int i = 0, size = dec.readInt(); i < size; i++) {
             String host = dec.readString();
             int port = dec.readInt();
             nodes.add(new Node(host, port));
         }
+
+        this.encoded = encoded;
     }
 
     public boolean validate() {

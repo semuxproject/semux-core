@@ -154,7 +154,7 @@ public class Transaction {
 
     /**
      * Returns the transaction network id.
-     * 
+     *
      * @return
      */
     public byte getNetworkId() {
@@ -255,6 +255,7 @@ public class Transaction {
      */
     public static Transaction fromEncoded(byte[] encoded) {
         SimpleDecoder decoder = new SimpleDecoder(encoded);
+
         byte networkId = decoder.readByte();
         byte type = decoder.readByte();
         byte[] to = decoder.readBytes();
@@ -263,15 +264,8 @@ public class Transaction {
         long nonce = decoder.readLong();
         long timestamp = decoder.readLong();
         byte[] data = decoder.readBytes();
-        return new Transaction(
-                Network.of(networkId),
-                TransactionType.of(type),
-                to,
-                value,
-                fee,
-                nonce,
-                timestamp,
-                data);
+
+        return new Transaction(Network.of(networkId), TransactionType.of(type), to, value, fee, nonce, timestamp, data);
     }
 
     /**

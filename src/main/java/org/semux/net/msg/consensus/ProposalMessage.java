@@ -16,16 +16,19 @@ public class ProposalMessage extends Message {
 
     public ProposalMessage(Proposal proposal) {
         super(MessageCode.BFT_PROPOSAL, null);
+
         this.proposal = proposal;
 
+        // FIXME: consider wrapping by simple codec
         this.encoded = proposal.toBytes();
     }
 
     public ProposalMessage(byte[] encoded) {
         super(MessageCode.BFT_PROPOSAL, null);
-        this.encoded = encoded;
 
         this.proposal = Proposal.fromBytes(encoded);
+
+        this.encoded = encoded;
     }
 
     public Proposal getProposal() {

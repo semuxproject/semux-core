@@ -9,7 +9,8 @@ package org.semux.net.msg.p2p;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
 import org.semux.net.msg.ReasonCode;
-import org.semux.util.Bytes;
+import org.semux.util.SimpleDecoder;
+import org.semux.util.SimpleEncoder;
 
 public class DisconnectMessage extends Message {
 
@@ -25,7 +26,9 @@ public class DisconnectMessage extends Message {
 
         this.reason = reason;
 
-        this.encoded = Bytes.of(reason.toByte());
+        SimpleEncoder enc = new SimpleEncoder();
+        enc.writeByte(reason.toByte());
+        this.encoded = enc.toBytes();
     }
 
     /**
@@ -36,9 +39,10 @@ public class DisconnectMessage extends Message {
     public DisconnectMessage(byte[] encoded) {
         super(MessageCode.DISCONNECT, null);
 
-        this.encoded = encoded;
+        SimpleDecoder dec = new SimpleDecoder(encoded);
+        this.reason = ReasonCode.of(dec.readByte());
 
-        this.reason = ReasonCode.of(Bytes.toByte(encoded));
+        this.encoded = encoded;
     }
 
     public ReasonCode getReason() {

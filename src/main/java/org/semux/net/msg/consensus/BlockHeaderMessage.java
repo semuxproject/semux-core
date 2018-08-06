@@ -29,10 +29,10 @@ public class BlockHeaderMessage extends Message {
     public BlockHeaderMessage(byte[] encoded) {
         super(MessageCode.BLOCK_HEADER, null);
 
-        this.encoded = encoded;
-
         SimpleDecoder dec = new SimpleDecoder(encoded);
         this.header = BlockHeader.fromBytes(dec.readBytes());
+
+        this.encoded = encoded;
     }
 
     public BlockHeader getHeader() {

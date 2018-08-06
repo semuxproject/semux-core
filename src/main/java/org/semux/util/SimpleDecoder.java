@@ -68,6 +68,12 @@ public class SimpleDecoder {
         return NANO_SEM.of(readLong());
     }
 
+    /**
+     * Decode a byte array.
+     *
+     * @param vlq
+     *            should always be true unless we're providing pre-mainnet support.
+     */
     public byte[] readBytes(boolean vlq) {
         int len = vlq ? readSize() : readInt();
 

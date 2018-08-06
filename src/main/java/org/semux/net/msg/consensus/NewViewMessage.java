@@ -12,19 +12,23 @@ import org.semux.net.msg.MessageCode;
 
 public class NewViewMessage extends Message {
 
-    private Proof proof;
+    private final Proof proof;
 
     public NewViewMessage(Proof proof) {
         super(MessageCode.BFT_NEW_VIEW, null);
 
+        this.proof = proof;
+
+        // FIXME: consider wrapping by simple codec
         this.encoded = proof.toBytes();
     }
 
     public NewViewMessage(byte[] encoded) {
         super(MessageCode.BFT_NEW_VIEW, null);
-        this.encoded = encoded;
 
         this.proof = Proof.fromBytes(encoded);
+
+        this.encoded = encoded;
     }
 
     public Proof getProof() {
