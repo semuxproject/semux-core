@@ -14,7 +14,7 @@ import org.semux.util.Bytes;
  */
 public abstract class Message {
     /**
-     * message code.
+     * Message code.
      */
     protected final MessageCode code;
 
@@ -24,9 +24,9 @@ public abstract class Message {
     protected final Class<?> responseMessageClass;
 
     /**
-     * encoded data.
+     * Message body.
      */
-    protected byte[] encoded;
+    protected byte[] body;
 
     /**
      * Create a message instance.
@@ -37,16 +37,16 @@ public abstract class Message {
     public Message(MessageCode code, Class<?> responseMessageClass) {
         this.code = code;
         this.responseMessageClass = responseMessageClass;
-        this.encoded = Bytes.EMPTY_BYTES;
+        this.body = Bytes.EMPTY_BYTES;
     }
 
     /**
-     * Get the encoded byte array of this message
+     * Get the body of this message
      * 
      * @return
      */
-    public byte[] getEncoded() {
-        return encoded;
+    public byte[] getBody() {
+        return body;
     }
 
     /**

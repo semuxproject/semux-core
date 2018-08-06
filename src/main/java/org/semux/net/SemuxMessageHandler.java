@@ -52,7 +52,7 @@ public class SemuxMessageHandler extends MessageToMessageCodec<Frame, Message> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Message msg, List<Object> out) throws Exception {
-        byte[] data = msg.getEncoded();
+        byte[] data = msg.getBody();
         byte[] dataCompressed = data;
 
         switch (COMPRESS_TYPE) {

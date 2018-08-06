@@ -20,15 +20,15 @@ public class NewViewMessage extends Message {
         this.proof = proof;
 
         // FIXME: consider wrapping by simple codec
-        this.encoded = proof.toBytes();
+        this.body = proof.toBytes();
     }
 
-    public NewViewMessage(byte[] encoded) {
+    public NewViewMessage(byte[] body) {
         super(MessageCode.BFT_NEW_VIEW, null);
 
-        this.proof = Proof.fromBytes(encoded);
+        this.proof = Proof.fromBytes(body);
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     public Proof getProof() {

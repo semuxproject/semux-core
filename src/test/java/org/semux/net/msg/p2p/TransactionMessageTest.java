@@ -35,7 +35,7 @@ public class TransactionMessageTest {
         tx.sign(new Key());
 
         TransactionMessage msg = new TransactionMessage(tx);
-        TransactionMessage msg2 = new TransactionMessage(msg.getEncoded());
+        TransactionMessage msg2 = new TransactionMessage(msg.getBody());
         assertThat(msg2.getTransaction().getHash(), equalTo(tx.getHash()));
     }
 }

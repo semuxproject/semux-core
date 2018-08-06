@@ -26,20 +26,20 @@ public class BlockMessage extends Message {
         enc.writeBytes(block.toBytesTransactions());
         enc.writeBytes(block.toBytesResults());
         enc.writeBytes(block.toBytesVotes());
-        this.encoded = enc.toBytes();
+        this.body = enc.toBytes();
     }
 
-    public BlockMessage(byte[] encoded) {
+    public BlockMessage(byte[] body) {
         super(MessageCode.BLOCK, null);
 
-        SimpleDecoder dec = new SimpleDecoder(encoded);
+        SimpleDecoder dec = new SimpleDecoder(body);
         byte[] header = dec.readBytes();
         byte[] transactions = dec.readBytes();
         byte[] results = dec.readBytes();
         byte[] votes = dec.readBytes();
         this.block = Block.fromBytes(header, transactions, results, votes);
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     public Block getBlock() {

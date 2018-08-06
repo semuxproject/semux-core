@@ -30,7 +30,7 @@ public class HelloMessageTest {
                 config.getClientId(), config.getClientCapabilities(), 2, Bytes.random(InitMessage.SECRET_LENGTH), key);
         assertTrue(msg.validate(config));
 
-        msg = new HelloMessage(msg.getEncoded());
+        msg = new HelloMessage(msg.getBody());
         assertTrue(msg.validate(config));
 
         String ip = "127.0.0.2";

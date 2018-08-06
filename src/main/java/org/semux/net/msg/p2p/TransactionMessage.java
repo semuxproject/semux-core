@@ -24,20 +24,20 @@ public class TransactionMessage extends Message {
         this.transaction = transaction;
 
         // FIXME: consider wrapping by simple codec
-        this.encoded = transaction.toBytes();
+        this.body = transaction.toBytes();
     }
 
     /**
      * Parse a TRANSACTION message from byte array.
      * 
-     * @param encoded
+     * @param body
      */
-    public TransactionMessage(byte[] encoded) {
+    public TransactionMessage(byte[] body) {
         super(MessageCode.TRANSACTION, null);
 
-        this.transaction = Transaction.fromBytes(encoded);
+        this.transaction = Transaction.fromBytes(body);
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     public Transaction getTransaction() {

@@ -45,9 +45,9 @@ public class CompressPerformance {
 
                 blocks++;
                 transactions += b.getTransactions().size();
-                size += m.getEncoded().length;
+                size += m.getBody().length;
                 long t1 = System.nanoTime();
-                sizeCompressed += Snappy.compress(m.getEncoded()).length;
+                sizeCompressed += Snappy.compress(m.getBody()).length;
                 long t2 = System.nanoTime();
                 time += t2 - t1;
             }

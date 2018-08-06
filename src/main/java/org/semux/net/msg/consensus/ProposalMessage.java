@@ -20,15 +20,15 @@ public class ProposalMessage extends Message {
         this.proposal = proposal;
 
         // FIXME: consider wrapping by simple codec
-        this.encoded = proposal.toBytes();
+        this.body = proposal.toBytes();
     }
 
-    public ProposalMessage(byte[] encoded) {
+    public ProposalMessage(byte[] body) {
         super(MessageCode.BFT_PROPOSAL, null);
 
-        this.proposal = Proposal.fromBytes(encoded);
+        this.proposal = Proposal.fromBytes(body);
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     public Proposal getProposal() {

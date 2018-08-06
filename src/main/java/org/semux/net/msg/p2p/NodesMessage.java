@@ -37,26 +37,26 @@ public class NodesMessage extends Message {
             enc.writeString(n.getIp());
             enc.writeInt(n.getPort());
         }
-        this.encoded = enc.toBytes();
+        this.body = enc.toBytes();
     }
 
     /**
      * Parse a NODES message from byte array.
      * 
-     * @param encoded
+     * @param body
      */
-    public NodesMessage(byte[] encoded) {
+    public NodesMessage(byte[] body) {
         super(MessageCode.NODES, null);
 
         this.nodes = new ArrayList<>();
-        SimpleDecoder dec = new SimpleDecoder(encoded);
+        SimpleDecoder dec = new SimpleDecoder(body);
         for (int i = 0, size = dec.readInt(); i < size; i++) {
             String host = dec.readString();
             int port = dec.readInt();
             nodes.add(new Node(host, port));
         }
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     public boolean validate() {

@@ -27,7 +27,7 @@ public class VoteMessageTest {
         assertTrue(vote.validate());
 
         VoteMessage msg = new VoteMessage(vote);
-        VoteMessage msg2 = new VoteMessage(msg.getEncoded());
+        VoteMessage msg2 = new VoteMessage(msg.getBody());
         Vote vote2 = msg2.getVote();
         assertEquals(type, vote2.getType());
         assertEquals(height, vote2.getHeight());

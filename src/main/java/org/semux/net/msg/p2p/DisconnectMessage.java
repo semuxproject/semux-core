@@ -28,21 +28,21 @@ public class DisconnectMessage extends Message {
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeByte(reason.toByte());
-        this.encoded = enc.toBytes();
+        this.body = enc.toBytes();
     }
 
     /**
      * Parse a DISCONNECT message from byte array.
      * 
-     * @param encoded
+     * @param body
      */
-    public DisconnectMessage(byte[] encoded) {
+    public DisconnectMessage(byte[] body) {
         super(MessageCode.DISCONNECT, null);
 
-        SimpleDecoder dec = new SimpleDecoder(encoded);
+        SimpleDecoder dec = new SimpleDecoder(body);
         this.reason = ReasonCode.of(dec.readByte());
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     public ReasonCode getReason() {

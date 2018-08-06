@@ -58,14 +58,13 @@ public abstract class HandshakeMessage extends Message {
         this.signature = coinbase.sign(enc.toBytes());
         enc.writeBytes(signature.toBytes());
 
-        this.encoded = enc.toBytes();
+        this.body = enc.toBytes();
     }
 
-    public HandshakeMessage(MessageCode code, Class<?> responseMessageClass,
-            byte[] encoded) {
+    public HandshakeMessage(MessageCode code, Class<?> responseMessageClass, byte[] body) {
         super(code, responseMessageClass);
 
-        SimpleDecoder dec = new SimpleDecoder(encoded);
+        SimpleDecoder dec = new SimpleDecoder(body);
         this.network = Network.of(dec.readByte());
         this.networkVersion = dec.readShort();
         this.peerId = dec.readString();
@@ -81,7 +80,7 @@ public abstract class HandshakeMessage extends Message {
         this.timestamp = dec.readLong();
         this.signature = Key.Signature.fromBytes(dec.readBytes());
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     protected SimpleEncoder encodeBasicInfo() {

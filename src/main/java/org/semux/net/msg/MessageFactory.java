@@ -38,13 +38,13 @@ public class MessageFactory {
      *
      * @param code
      *            The message code
-     * @param encoded
-     *            The message encoded
+     * @param body
+     *            The message body
      * @return The decoded message, or NULL if the message type is not unknown
      * @throws MessageException
      *             when the encoding is illegal
      */
-    public Message create(byte code, byte[] encoded) throws MessageException {
+    public Message create(byte code, byte[] body) throws MessageException {
 
         MessageCode c = MessageCode.of(code);
         if (c == null) {
@@ -55,45 +55,45 @@ public class MessageFactory {
         try {
             switch (c) {
             case DISCONNECT:
-                return new DisconnectMessage(encoded);
+                return new DisconnectMessage(body);
             case HELLO:
-                return new org.semux.net.msg.p2p.handshake.v1.HelloMessage(encoded);
+                return new org.semux.net.msg.p2p.handshake.v1.HelloMessage(body);
             case WORLD:
-                return new org.semux.net.msg.p2p.handshake.v1.WorldMessage(encoded);
+                return new org.semux.net.msg.p2p.handshake.v1.WorldMessage(body);
             case PING:
-                return new PingMessage(encoded);
+                return new PingMessage(body);
             case PONG:
-                return new PongMessage(encoded);
+                return new PongMessage(body);
             case GET_NODES:
-                return new GetNodesMessage(encoded);
+                return new GetNodesMessage(body);
             case NODES:
-                return new NodesMessage(encoded);
+                return new NodesMessage(body);
             case TRANSACTION:
-                return new TransactionMessage(encoded);
+                return new TransactionMessage(body);
             case HANDSHAKE_INIT:
-                return new InitMessage(encoded);
+                return new InitMessage(body);
             case HANDSHAKE_HELLO:
-                return new HelloMessage(encoded);
+                return new HelloMessage(body);
             case HANDSHAKE_WORLD:
-                return new WorldMessage(encoded);
+                return new WorldMessage(body);
 
             case GET_BLOCK:
-                return new GetBlockMessage(encoded);
+                return new GetBlockMessage(body);
             case BLOCK:
-                return new BlockMessage(encoded);
+                return new BlockMessage(body);
             case GET_BLOCK_HEADER:
-                return new GetBlockHeaderMessage(encoded);
+                return new GetBlockHeaderMessage(body);
             case BLOCK_HEADER:
-                return new BlockHeaderMessage(encoded);
+                return new BlockHeaderMessage(body);
 
             case BFT_NEW_HEIGHT:
-                return new NewHeightMessage(encoded);
+                return new NewHeightMessage(body);
             case BFT_NEW_VIEW:
-                return new NewViewMessage(encoded);
+                return new NewViewMessage(body);
             case BFT_PROPOSAL:
-                return new ProposalMessage(encoded);
+                return new ProposalMessage(body);
             case BFT_VOTE:
-                return new VoteMessage(encoded);
+                return new VoteMessage(body);
 
             default:
                 throw new UnreachableException();

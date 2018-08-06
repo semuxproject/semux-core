@@ -24,7 +24,7 @@ public class InitMessageTest {
         assertArrayEquals(secret, msg.getSecret());
         assertEquals(timestamp, msg.getTimestamp());
 
-        msg = new InitMessage(msg.getEncoded());
+        msg = new InitMessage(msg.getBody());
         assertArrayEquals(secret, msg.getSecret());
         assertEquals(timestamp, msg.getTimestamp());
     }

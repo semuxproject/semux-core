@@ -38,7 +38,7 @@ public class BlockHeaderMessageTest {
         assertThat(m.getCode()).isEqualTo(MessageCode.BLOCK_HEADER);
         assertThat(m.getResponseMessageClass()).isNull();
 
-        BlockHeaderMessage m2 = new BlockHeaderMessage(m.getEncoded());
+        BlockHeaderMessage m2 = new BlockHeaderMessage(m.getBody());
         assertThat(m2.getCode()).isEqualTo(MessageCode.BLOCK_HEADER);
         assertThat(m2.getResponseMessageClass()).isNull();
         assertThat(m2.getHeader()).isEqualToComparingFieldByField(header);

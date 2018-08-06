@@ -21,16 +21,16 @@ public class NewHeightMessage extends Message {
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeLong(height);
-        this.encoded = enc.toBytes();
+        this.body = enc.toBytes();
     }
 
-    public NewHeightMessage(byte[] encoded) {
+    public NewHeightMessage(byte[] body) {
         super(MessageCode.BFT_NEW_HEIGHT, null);
 
-        SimpleDecoder dec = new SimpleDecoder(encoded);
+        SimpleDecoder dec = new SimpleDecoder(body);
         this.height = dec.readLong();
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     public long getHeight() {

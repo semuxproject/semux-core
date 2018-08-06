@@ -21,16 +21,16 @@ public class GetBlockMessage extends Message {
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeLong(number);
-        this.encoded = enc.toBytes();
+        this.body = enc.toBytes();
     }
 
-    public GetBlockMessage(byte[] encoded) {
+    public GetBlockMessage(byte[] body) {
         super(MessageCode.GET_BLOCK, BlockMessage.class);
 
-        SimpleDecoder dec = new SimpleDecoder(encoded);
+        SimpleDecoder dec = new SimpleDecoder(body);
         this.number = dec.readLong();
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     public long getNumber() {

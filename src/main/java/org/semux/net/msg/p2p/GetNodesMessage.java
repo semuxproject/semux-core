@@ -22,18 +22,18 @@ public class GetNodesMessage extends Message {
         super(MessageCode.GET_NODES, NodesMessage.class);
 
         SimpleEncoder enc = new SimpleEncoder();
-        this.encoded = enc.toBytes();
+        this.body = enc.toBytes();
     }
 
     /**
      * Parse a GET_NODES message from byte array.
      * 
-     * @param encoded
+     * @param body
      */
-    public GetNodesMessage(byte[] encoded) {
+    public GetNodesMessage(byte[] body) {
         super(MessageCode.GET_NODES, NodesMessage.class);
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     @Override

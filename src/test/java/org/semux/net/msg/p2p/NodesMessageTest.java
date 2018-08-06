@@ -24,7 +24,7 @@ public class NodesMessageTest {
         List<Node> nodes = new ArrayList<>();
         nodes.add(new Node(new InetSocketAddress("127.0.0.1", 5160)));
         nodes.add(new Node(new InetSocketAddress("127.0.0.1", 5161)));
-        NodesMessage nodesMessage = new NodesMessage(new NodesMessage(nodes).getEncoded());
+        NodesMessage nodesMessage = new NodesMessage(new NodesMessage(nodes).getBody());
         assertArrayEquals(nodes.toArray(), nodesMessage.getNodes().toArray());
     }
 
