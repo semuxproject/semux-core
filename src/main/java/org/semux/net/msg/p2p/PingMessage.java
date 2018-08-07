@@ -27,21 +27,21 @@ public class PingMessage extends Message {
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeLong(timestamp);
-        this.encoded = enc.toBytes();
+        this.body = enc.toBytes();
     }
 
     /**
      * Parse a PING message from byte array.
      * 
-     * @param encoded
+     * @param body
      */
-    public PingMessage(byte[] encoded) {
+    public PingMessage(byte[] body) {
         super(MessageCode.PING, PongMessage.class);
 
-        SimpleDecoder dec = new SimpleDecoder(encoded);
+        SimpleDecoder dec = new SimpleDecoder(body);
         this.timestamp = dec.readLong();
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     @Override

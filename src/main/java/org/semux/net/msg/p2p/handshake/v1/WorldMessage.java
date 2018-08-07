@@ -41,23 +41,23 @@ public class WorldMessage extends Message {
         this.signature = coinbase.sign(enc.toBytes());
         enc.writeBytes(signature.toBytes());
 
-        this.encoded = enc.toBytes();
+        this.body = enc.toBytes();
     }
 
     /**
      * Parse a WORLD message from byte array.
      *
-     * @param encoded
+     * @param body
      */
-    public WorldMessage(byte[] encoded) {
+    public WorldMessage(byte[] body) {
         super(MessageCode.WORLD, null);
 
-        SimpleDecoder dec = new SimpleDecoder(encoded);
+        SimpleDecoder dec = new SimpleDecoder(body);
         this.peer = PeerCodec.fromBytes(dec.readBytes());
         this.timestamp = dec.readLong();
         this.signature = Signature.fromBytes(dec.readBytes());
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     /**

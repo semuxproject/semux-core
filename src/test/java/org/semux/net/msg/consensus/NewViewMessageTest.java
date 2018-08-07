@@ -22,7 +22,7 @@ public class NewViewMessageTest {
         Proof proof = new Proof(height, view, Collections.emptyList());
 
         NewViewMessage msg = new NewViewMessage(proof);
-        NewViewMessage msg2 = new NewViewMessage(msg.getEncoded());
+        NewViewMessage msg2 = new NewViewMessage(msg.getBody());
         assertEquals(height, msg2.getHeight());
         assertEquals(view, msg2.getView());
         assertTrue(msg2.getProof().getVotes().isEmpty());

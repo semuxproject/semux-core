@@ -8,7 +8,8 @@ package org.semux.net.msg.consensus;
 
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
-import org.semux.util.Bytes;
+import org.semux.util.SimpleDecoder;
+import org.semux.util.SimpleEncoder;
 
 public class NewHeightMessage extends Message {
 
@@ -18,14 +19,18 @@ public class NewHeightMessage extends Message {
         super(MessageCode.BFT_NEW_HEIGHT, null);
         this.height = height;
 
-        this.encoded = Bytes.of(height);
+        SimpleEncoder enc = new SimpleEncoder();
+        enc.writeLong(height);
+        this.body = enc.toBytes();
     }
 
-    public NewHeightMessage(byte[] encoded) {
+    public NewHeightMessage(byte[] body) {
         super(MessageCode.BFT_NEW_HEIGHT, null);
-        this.encoded = encoded;
 
-        this.height = Bytes.toLong(encoded);
+        SimpleDecoder dec = new SimpleDecoder(body);
+        this.height = dec.readLong();
+
+        this.body = body;
     }
 
     public long getHeight() {

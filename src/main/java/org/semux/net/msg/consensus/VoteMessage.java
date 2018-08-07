@@ -16,16 +16,19 @@ public class VoteMessage extends Message {
 
     public VoteMessage(Vote vote) {
         super(MessageCode.BFT_VOTE, null);
+
         this.vote = vote;
 
-        this.encoded = vote.toBytes();
+        // FIXME: consider wrapping by simple codec
+        this.body = vote.toBytes();
     }
 
-    public VoteMessage(byte[] encoded) {
+    public VoteMessage(byte[] body) {
         super(MessageCode.BFT_VOTE, null);
-        this.encoded = encoded;
 
-        this.vote = Vote.fromBytes(encoded);
+        this.vote = Vote.fromBytes(body);
+
+        this.body = body;
     }
 
     public Vote getVote() {

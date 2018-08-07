@@ -16,7 +16,7 @@ public class NewHeightMessageTest {
         int height = 1;
 
         NewHeightMessage msg = new NewHeightMessage(height);
-        NewHeightMessage msg2 = new NewHeightMessage(msg.getEncoded());
+        NewHeightMessage msg2 = new NewHeightMessage(msg.getBody());
         assertEquals(height, msg2.getHeight());
     }
 }

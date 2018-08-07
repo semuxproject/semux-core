@@ -76,8 +76,9 @@ public class BlockTest {
         Block block = new Block(header, transactions, results, view, votes);
         hash = block.getHash();
 
-        testFields(Block.fromBytes(block.toBytesHeader(), block.toBytesTransactions(), block.toBytesResults(),
-                block.toBytesVotes()));
+        testFields(Block.fromComponents(block.getEncodedHeader(), block.getEncodedTransactions(),
+                block.getEncodedResults(),
+                block.getEncodedVotes()));
     }
 
     private void testFields(Block block) {
@@ -104,7 +105,7 @@ public class BlockTest {
         assertEquals(1, indexes.size());
 
         Pair<Integer, Integer> index = indexes.get(0);
-        SimpleDecoder dec = new SimpleDecoder(block.toBytesTransactions(), index.getLeft());
+        SimpleDecoder dec = new SimpleDecoder(block.getEncodedTransactions(), index.getLeft());
         Transaction tx2 = Transaction.fromBytes(dec.readBytes());
         assertArrayEquals(tx.getHash(), tx2.getHash());
     }

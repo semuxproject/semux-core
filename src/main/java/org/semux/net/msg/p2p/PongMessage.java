@@ -26,21 +26,21 @@ public class PongMessage extends Message {
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeLong(timestamp);
-        this.encoded = enc.toBytes();
+        this.body = enc.toBytes();
     }
 
     /**
      * Parse a PONG message from byte array.
      * 
-     * @param encoded
+     * @param body
      */
-    public PongMessage(byte[] encoded) {
+    public PongMessage(byte[] body) {
         super(MessageCode.PONG, null);
 
-        SimpleDecoder dec = new SimpleDecoder(encoded);
+        SimpleDecoder dec = new SimpleDecoder(body);
         this.timestamp = dec.readLong();
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     @Override

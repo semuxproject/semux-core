@@ -21,18 +21,15 @@ public class BlockHeaderMessage extends Message {
 
         this.header = header;
 
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBytes(header.toBytes());
-        this.encoded = enc.toBytes();
+        this.body = header.toBytes();
     }
 
-    public BlockHeaderMessage(byte[] encoded) {
+    public BlockHeaderMessage(byte[] body) {
         super(MessageCode.BLOCK_HEADER, null);
 
-        this.encoded = encoded;
+        this.header = BlockHeader.fromBytes(body);
 
-        SimpleDecoder dec = new SimpleDecoder(encoded);
-        this.header = BlockHeader.fromBytes(dec.readBytes());
+        this.body = body;
     }
 
     public BlockHeader getHeader() {

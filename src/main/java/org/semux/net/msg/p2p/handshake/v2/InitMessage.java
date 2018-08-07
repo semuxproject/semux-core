@@ -16,8 +16,8 @@ public class InitMessage extends Message {
 
     public static final int SECRET_LENGTH = 32;
 
-    private byte[] secret;
-    private long timestamp;
+    private final byte[] secret;
+    private final long timestamp;
 
     public InitMessage(byte[] secret, long timestamp) {
         super(MessageCode.HANDSHAKE_INIT, null);
@@ -29,17 +29,17 @@ public class InitMessage extends Message {
         enc.writeBytes(secret);
         enc.writeLong(timestamp);
 
-        this.encoded = enc.toBytes();
+        this.body = enc.toBytes();
     }
 
-    public InitMessage(byte[] encoded) {
+    public InitMessage(byte[] body) {
         super(MessageCode.HANDSHAKE_INIT, null);
 
-        SimpleDecoder dec = new SimpleDecoder(encoded);
+        SimpleDecoder dec = new SimpleDecoder(body);
         this.secret = dec.readBytes();
         this.timestamp = dec.readLong();
 
-        this.encoded = encoded;
+        this.body = body;
     }
 
     public boolean validate() {

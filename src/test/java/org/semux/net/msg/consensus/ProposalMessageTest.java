@@ -41,7 +41,7 @@ public class ProposalMessageTest {
         proposal.sign(new Key());
 
         ProposalMessage msg = new ProposalMessage(proposal);
-        ProposalMessage msg2 = new ProposalMessage(msg.getEncoded());
+        ProposalMessage msg2 = new ProposalMessage(msg.getBody());
 
         assertThat(msg2.getProposal()).isEqualToComparingFieldByFieldRecursively(proposal);
     }

@@ -28,7 +28,7 @@ public class WorldMessageTest {
         assertTrue(msg.validate(config));
         assertEquals(key.toAddressString(), msg.getPeer().getPeerId());
 
-        msg = new WorldMessage(msg.getEncoded());
+        msg = new WorldMessage(msg.getBody());
         assertTrue(msg.validate(config));
         assertEquals(key.toAddressString(), msg.getPeer().getPeerId());
     }

@@ -371,7 +371,7 @@ public class Block {
      *
      * @return
      */
-    public byte[] toBytesHeader() {
+    public byte[] getEncodedHeader() {
         return encodedHeader;
     }
 
@@ -380,7 +380,7 @@ public class Block {
      *
      * @return
      */
-    public byte[] toBytesTransactions() {
+    public byte[] getEncodedTransactions() {
         return encodedTransactions;
     }
 
@@ -389,7 +389,7 @@ public class Block {
      *
      * @return
      */
-    public byte[] toBytesResults() {
+    public byte[] getEncodedResults() {
         return encodedResults;
     }
 
@@ -398,7 +398,7 @@ public class Block {
      *
      * @return
      */
-    public byte[] toBytesVotes() {
+    public byte[] getEncodedVotes() {
         SimpleEncoder enc = new SimpleEncoder();
 
         enc.writeInt(view);
@@ -408,15 +408,6 @@ public class Block {
         }
 
         return enc.toBytes();
-    }
-
-    /**
-     * Get block size in bytes
-     *
-     * @return block size in bytes
-     */
-    public int size() {
-        return toBytesHeader().length + toBytesTransactions().length + toBytesResults().length + toBytesVotes().length;
     }
 
     /**
@@ -432,7 +423,7 @@ public class Block {
      *            Serialized votes
      * @return
      */
-    public static Block fromBytes(byte[] h, byte[] t, byte[] r, byte[] v) {
+    public static Block fromComponents(byte[] h, byte[] t, byte[] r, byte[] v) {
         BlockHeader header = BlockHeader.fromBytes(h);
 
         SimpleDecoder dec = new SimpleDecoder(t);
@@ -464,8 +455,33 @@ public class Block {
         return new Block(header, transactions, results, view, votes);
     }
 
-    public static Block fromBytes(byte[] h, byte[] t, byte[] r) {
-        return fromBytes(h, t, r, null);
+    public byte[] toBytes() {
+        SimpleEncoder enc = new SimpleEncoder();
+        enc.writeBytes(getEncodedHeader());
+        enc.writeBytes(getEncodedTransactions());
+        enc.writeBytes(getEncodedResults());
+        enc.writeBytes(getEncodedVotes());
+
+        return enc.toBytes();
+    }
+
+    public static Block fromBytes(byte[] bytes) {
+        SimpleDecoder dec = new SimpleDecoder(bytes);
+        byte[] header = dec.readBytes();
+        byte[] transactions = dec.readBytes();
+        byte[] results = dec.readBytes();
+        byte[] votes = dec.readBytes();
+
+        return Block.fromComponents(header, transactions, results, votes);
+    }
+
+    /**
+     * Get block size in bytes
+     *
+     * @return block size in bytes
+     */
+    public int size() {
+        return toBytes().length;
     }
 
     @Override

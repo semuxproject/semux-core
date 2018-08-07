@@ -28,7 +28,7 @@ public class HelloMessageTest {
         assertTrue(msg.validate(config));
         assertEquals(key.toAddressString(), msg.getPeer().getPeerId());
 
-        msg = new HelloMessage(msg.getEncoded());
+        msg = new HelloMessage(msg.getBody());
         assertTrue(msg.validate(config));
         assertEquals(key.toAddressString(), msg.getPeer().getPeerId());
     }

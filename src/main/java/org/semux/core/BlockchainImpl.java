@@ -246,7 +246,7 @@ public class BlockchainImpl implements Blockchain {
         byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)));
         byte[] votes = blockDB.get(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)));
 
-        return (header == null) ? null : Block.fromBytes(header, transactions, results, votes);
+        return (header == null) ? null : Block.fromComponents(header, transactions, results, votes);
     }
 
     @Override
@@ -356,10 +356,10 @@ public class BlockchainImpl implements Blockchain {
         }
 
         // [1] update block
-        blockDB.put(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)), block.toBytesHeader());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)), block.toBytesTransactions());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)), block.toBytesResults());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)), block.toBytesVotes());
+        blockDB.put(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)), block.getEncodedHeader());
+        blockDB.put(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)), block.getEncodedTransactions());
+        blockDB.put(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)), block.getEncodedResults());
+        blockDB.put(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)), block.getEncodedVotes());
 
         indexDB.put(Bytes.merge(TYPE_BLOCK_HASH, hash), Bytes.of(number));
 

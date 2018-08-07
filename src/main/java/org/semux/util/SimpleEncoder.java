@@ -60,6 +60,14 @@ public class SimpleEncoder {
         writeLong(a.getNano());
     }
 
+    /**
+     * Encode a byte array.
+     *
+     * @param bytes
+     *            the byte array to encode
+     * @param vlq
+     *            should always be true unless we're providing pre-mainnet support.
+     */
     public void writeBytes(byte[] bytes, boolean vlq) {
         if (vlq) {
             writeSize(bytes.length);
