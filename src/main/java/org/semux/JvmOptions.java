@@ -6,7 +6,6 @@
  */
 package org.semux;
 
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 import org.semux.util.SystemUtil;
@@ -23,7 +22,7 @@ public class JvmOptions {
             sb.append(" --add-opens=java.base/java.lang.reflect=ALL-UNNAMED");
         }
         if (Arrays.asList(args).contains("--gui")) {
-            sb.append(" -splash:").append(Paths.get("resources", "splash.png").toAbsolutePath());
+            sb.append(" -splash:./resources/splash.png");
         }
 
         System.out.println(sb);
