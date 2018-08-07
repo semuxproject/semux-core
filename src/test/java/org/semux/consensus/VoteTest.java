@@ -91,8 +91,9 @@ public class VoteTest {
 
         block.setView(view);
         block.setVotes(votes);
-        block = Block.fromBytes(block.toBytesHeader(), block.toBytesTransactions(), block.toBytesResults(),
-                block.toBytesVotes());
+        block = Block.fromComponents(block.getEncodedHeader(), block.getEncodedTransactions(),
+                block.getEncodedResults(),
+                block.getEncodedVotes());
 
         for (Key.Signature sig : block.getVotes()) {
             ByteArray address = ByteArray.of(Hash.h160(sig.getPublicKey()));

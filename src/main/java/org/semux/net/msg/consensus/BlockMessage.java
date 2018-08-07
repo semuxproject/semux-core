@@ -21,23 +21,13 @@ public class BlockMessage extends Message {
 
         this.block = block;
 
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBytes(block.toBytesHeader());
-        enc.writeBytes(block.toBytesTransactions());
-        enc.writeBytes(block.toBytesResults());
-        enc.writeBytes(block.toBytesVotes());
-        this.body = enc.toBytes();
+        this.body = block.toBytes();
     }
 
     public BlockMessage(byte[] body) {
         super(MessageCode.BLOCK, null);
 
-        SimpleDecoder dec = new SimpleDecoder(body);
-        byte[] header = dec.readBytes();
-        byte[] transactions = dec.readBytes();
-        byte[] results = dec.readBytes();
-        byte[] votes = dec.readBytes();
-        this.block = Block.fromBytes(header, transactions, results, votes);
+        this.block = Block.fromBytes(body);
 
         this.body = body;
     }
