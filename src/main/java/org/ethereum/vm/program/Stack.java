@@ -21,38 +21,33 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.ethereum.vm;
+package org.ethereum.vm.program;
+
+import org.ethereum.vm.DataWord;
 
 /**
- * Represents the basic info about an internal CALL or CREATE.
+ * Program runtime stack.
  */
-public class CallCreate {
+public class Stack extends java.util.Stack<DataWord> {
 
-    private final byte[] data;
-    private final byte[] destination;
-    private final byte[] gasLimit;
-    private final byte[] value;
-
-    public CallCreate(byte[] data, byte[] destination, byte[] gasLimit, byte[] value) {
-        this.data = data;
-        this.destination = destination;
-        this.gasLimit = gasLimit;
-        this.value = value;
+    @Override
+    public synchronized DataWord pop() {
+        return super.pop();
     }
 
-    public byte[] getData() {
-        return data;
+    @Override
+    public DataWord push(DataWord item) {
+        return super.push(item);
     }
 
-    public byte[] getDestination() {
-        return destination;
+    public void swap(int from, int to) {
+        if (isAccessible(from) && isAccessible(to) && (from != to)) {
+            DataWord tmp = get(from);
+            set(from, set(to, tmp));
+        }
     }
 
-    public byte[] getGasLimit() {
-        return gasLimit;
-    }
-
-    public byte[] getValue() {
-        return value;
+    private boolean isAccessible(int from) {
+        return from >= 0 && from < size();
     }
 }
