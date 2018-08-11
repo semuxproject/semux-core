@@ -21,54 +21,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.ethereum.vm.program.invoke;
+package org.ethereum.vm.config;
 
 import org.ethereum.vm.DataWord;
-import org.ethereum.vm.client.BlockStore;
-import org.ethereum.vm.client.Repository;
+import org.ethereum.vm.GasCost;
+import org.ethereum.vm.OpCode;
+import org.ethereum.vm.program.exception.OutOfGasException;
 
-/**
- * Represents a program invoke.
- */
-public interface ProgramInvoke {
+public interface Config {
 
-    DataWord getOwnerAddress();
+    DataWord getCallGas(OpCode op, DataWord requestedGas, DataWord availableGas) throws OutOfGasException;
 
-    DataWord getBalance();
+    DataWord getCreateGas(DataWord availableGas);
 
-    DataWord getOriginAddress();
+    long getTransactionCost();
 
-    DataWord getCallerAddress();
+    GasCost getGasCost();
 
-    DataWord getMinGasPrice();
-
-    DataWord getGas();
-
-    long getGasLong();
-
-    DataWord getCallValue();
-
-    DataWord getDataSize();
-
-    DataWord getDataValue(DataWord indexData);
-
-    byte[] getDataCopy(DataWord offsetData, DataWord lengthData);
-
-    DataWord getCoinbase();
-
-    DataWord getTimestamp();
-
-    DataWord getNumber();
-
-    DataWord getDifficulty();
-
-    DataWord getGaslimit();
-
-    int getCallDeep();
-
-    Repository getRepository();
-
-    BlockStore getBlockStore();
-
-    boolean isStaticCall();
+    Constants getConstants();
 }

@@ -21,20 +21,46 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.ethereum.vm.config;
+package org.ethereum.vm.program;
 
-import org.ethereum.vm.DataWord;
-import org.ethereum.vm.GasCost;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.ethereum.vm.OpCode;
-import org.ethereum.vm.program.exception.OutOfGasException;
 
-public interface VMConfig {
+/**
+ * Pre-compile the program code to speed up execution.
+ *
+ * Features included:
+ * <ul>
+ * <li>Collect the list of JUMP destinations</li>
+ * </ul>
+ */
+public class ProgramPrecompile {
+    private Set<Integer> jumpdest = new HashSet<>();
 
-    DataWord getCallGas(OpCode op, DataWord requestedGas, DataWord availableGas) throws OutOfGasException;
+    public boolean hasJumpDest(int pc) {
+        return jumpdest.contains(pc);
+    }
 
-    DataWord getCreateGas(DataWord availableGas);
+    public static ProgramPrecompile compile(byte[] ops) {
+        ProgramPrecompile ret = new ProgramPrecompile();
 
-    long getTransactionCost();
+        for (int i = 0; i < ops.length; ++i) {
+            OpCode op = OpCode.code(ops[i]);
+            if (op == null) {
+                continue;
+            }
 
-    GasCost getGasCost();
+            if (op.equals(OpCode.JUMPDEST)) {
+                ret.jumpdest.add(i);
+            }
+
+            if (op.asInt() >= OpCode.PUSH1.asInt() && op.asInt() <= OpCode.PUSH32.asInt()) {
+                i += op.asInt() - OpCode.PUSH1.asInt() + 1;
+            }
+        }
+
+        return ret;
+    }
 }

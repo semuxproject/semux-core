@@ -23,52 +23,23 @@
  */
 package org.ethereum.vm.program.invoke;
 
+import java.math.BigInteger;
+
 import org.ethereum.vm.DataWord;
+import org.ethereum.vm.client.Block;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
+import org.ethereum.vm.client.Transaction;
+import org.ethereum.vm.program.Program;
 
-/**
- * Represents a program invoke.
- */
-public interface ProgramInvoke {
+public interface ProgramInvokeFactory {
 
-    DataWord getOwnerAddress();
+    ProgramInvoke createProgramInvoke(Transaction tx, Block block, Repository repository, BlockStore blockStore);
 
-    DataWord getBalance();
+    ProgramInvoke createProgramInvoke(Program program, DataWord toAddress, DataWord callerAddress,
+            DataWord inValue, DataWord inGas,
+            BigInteger balanceInt, byte[] dataIn,
+            Repository repository, BlockStore blockStore,
+            boolean staticCall);
 
-    DataWord getOriginAddress();
-
-    DataWord getCallerAddress();
-
-    DataWord getMinGasPrice();
-
-    DataWord getGas();
-
-    long getGasLong();
-
-    DataWord getCallValue();
-
-    DataWord getDataSize();
-
-    DataWord getDataValue(DataWord indexData);
-
-    byte[] getDataCopy(DataWord offsetData, DataWord lengthData);
-
-    DataWord getCoinbase();
-
-    DataWord getTimestamp();
-
-    DataWord getNumber();
-
-    DataWord getDifficulty();
-
-    DataWord getGaslimit();
-
-    int getCallDeep();
-
-    Repository getRepository();
-
-    BlockStore getBlockStore();
-
-    boolean isStaticCall();
 }

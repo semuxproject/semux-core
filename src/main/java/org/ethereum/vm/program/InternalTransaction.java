@@ -24,12 +24,13 @@
 package org.ethereum.vm.program;
 
 import org.ethereum.vm.DataWord;
+import org.ethereum.vm.client.Transaction;
 import org.semux.crypto.Hex;
 
 /**
  * Represents an internal transaction.
  */
-public class InternalTransaction {
+public class InternalTransaction implements Transaction {
 
     private byte[] parentHash;
     private int deep;
@@ -78,5 +79,47 @@ public class InternalTransaction {
                 ", index=" + getIndex() +
                 ", note=" + getNote() +
                 "]";
+    }
+
+    // TODO: implement the following methods
+
+    @Override
+    public byte[] getHash() {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] getFrom() {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] getTo() {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] nonce() {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] getValue() {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] getData() {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] getGasLimit() {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] getGasPrice() {
+        return new byte[0];
     }
 }

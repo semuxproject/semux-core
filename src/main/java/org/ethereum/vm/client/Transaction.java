@@ -21,54 +21,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.ethereum.vm.program.invoke;
+package org.ethereum.vm.client;
 
-import org.ethereum.vm.DataWord;
-import org.ethereum.vm.client.BlockStore;
-import org.ethereum.vm.client.Repository;
+public interface Transaction {
 
-/**
- * Represents a program invoke.
- */
-public interface ProgramInvoke {
+    byte[] getHash();
 
-    DataWord getOwnerAddress();
+    byte[] getFrom();
 
-    DataWord getBalance();
+    byte[] getTo();
 
-    DataWord getOriginAddress();
+    byte[] nonce();
 
-    DataWord getCallerAddress();
+    byte[] getValue();
 
-    DataWord getMinGasPrice();
+    byte[] getData();
 
-    DataWord getGas();
+    byte[] getGasLimit();
 
-    long getGasLong();
-
-    DataWord getCallValue();
-
-    DataWord getDataSize();
-
-    DataWord getDataValue(DataWord indexData);
-
-    byte[] getDataCopy(DataWord offsetData, DataWord lengthData);
-
-    DataWord getCoinbase();
-
-    DataWord getTimestamp();
-
-    DataWord getNumber();
-
-    DataWord getDifficulty();
-
-    DataWord getGaslimit();
-
-    int getCallDeep();
-
-    Repository getRepository();
-
-    BlockStore getBlockStore();
-
-    boolean isStaticCall();
+    byte[] getGasPrice();
 }

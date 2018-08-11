@@ -30,7 +30,7 @@ import org.ethereum.vm.GasCost;
 import org.ethereum.vm.OpCode;
 import org.ethereum.vm.program.exception.OutOfGasException;
 
-public class ByzantiumConfig implements VMConfig {
+public class ByzantiumConfig implements Config {
 
     private static class GasCostByzantium extends GasCost {
         public int getBALANCE() {
@@ -66,7 +66,8 @@ public class ByzantiumConfig implements VMConfig {
         }
     }
 
-    private static final GasCost NEW_GAS_COST = new GasCostByzantium();
+    private static final GasCost feeSchedule = new GasCostByzantium();
+    private static final Constants constants = new Constants();
 
     public ByzantiumConfig() {
 
@@ -90,6 +91,11 @@ public class ByzantiumConfig implements VMConfig {
     }
 
     public GasCost getGasCost() {
-        return NEW_GAS_COST;
+        return feeSchedule;
+    }
+
+    @Override
+    public Constants getConstants() {
+        return constants;
     }
 }

@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2017-2018 The Semux Developers
  *
- * Distributed under the MIT software license, see the accompanying file LICENSE or
- * https://opensource.org/licenses/mit-license.php
+ * Distributed under the MIT software license, see the accompanying file
+ * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 /*
  * Copyright (c) [2016] [ <ether.camp> ]
@@ -24,6 +24,7 @@
 package org.ethereum.vm;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.ethereum.vm.config.Config;
 
 public class PrecompiledContracts {
 
@@ -32,7 +33,7 @@ public class PrecompiledContracts {
     private static final DataWord identityAddr = new DataWord(
             "0000000000000000000000000000000000000000000000000000000000000004");
 
-    public static PrecompiledContract getContractForAddress(DataWord address) {
+    public static PrecompiledContract getContractForAddress(DataWord address, Config config) {
         if (address == null)
             return identity;
         if (address.equals(identityAddr))
@@ -55,7 +56,7 @@ public class PrecompiledContracts {
         @Override
         public long getGasForData(byte[] data) {
             // gas charge for the execution:
-            // minimum 1 and additional 1 for each 32 bytes word (round  up)
+            // minimum 1 and additional 1 for each 32 bytes word (round up)
             if (data == null)
                 return 15;
             return 15 + (data.length + 31) / 32 * 3;

@@ -21,54 +21,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.ethereum.vm.program.invoke;
+package org.ethereum.vm.config;
 
-import org.ethereum.vm.DataWord;
-import org.ethereum.vm.client.BlockStore;
-import org.ethereum.vm.client.Repository;
+public class Constants {
 
-/**
- * Represents a program invoke.
- */
-public interface ProgramInvoke {
+    public int getMAX_CONTRACT_SZIE() {
+        return Integer.MAX_VALUE;
+    }
 
-    DataWord getOwnerAddress();
+    public boolean createEmptyContractOnOOG() {
+        return true;
+    }
 
-    DataWord getBalance();
-
-    DataWord getOriginAddress();
-
-    DataWord getCallerAddress();
-
-    DataWord getMinGasPrice();
-
-    DataWord getGas();
-
-    long getGasLong();
-
-    DataWord getCallValue();
-
-    DataWord getDataSize();
-
-    DataWord getDataValue(DataWord indexData);
-
-    byte[] getDataCopy(DataWord offsetData, DataWord lengthData);
-
-    DataWord getCoinbase();
-
-    DataWord getTimestamp();
-
-    DataWord getNumber();
-
-    DataWord getDifficulty();
-
-    DataWord getGaslimit();
-
-    int getCallDeep();
-
-    Repository getRepository();
-
-    BlockStore getBlockStore();
-
-    boolean isStaticCall();
 }
