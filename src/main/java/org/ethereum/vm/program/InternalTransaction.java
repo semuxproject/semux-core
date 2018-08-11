@@ -25,7 +25,7 @@ package org.ethereum.vm.program;
 
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.client.Transaction;
-import org.semux.crypto.Hex;
+import org.ethereum.vm.util.VMUtils;
 
 /**
  * Represents an internal transaction.
@@ -74,7 +74,7 @@ public class InternalTransaction implements Transaction {
     @Override
     public String toString() {
         return "TransactionData [" +
-                "  parentHash=" + Hex.encode(getParentHash()) +
+                "  parentHash=" + VMUtils.toHexString(getParentHash()) +
                 ", depth=" + getDeep() +
                 ", index=" + getIndex() +
                 ", note=" + getNote() +

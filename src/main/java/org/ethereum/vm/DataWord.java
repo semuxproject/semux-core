@@ -27,9 +27,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import org.semux.crypto.Hex;
-import org.semux.util.ByteArray;
-import org.semux.util.Bytes;
+import org.ethereum.vm.util.VMUtils;
 
 /**
  * DataWord is the 32-byte array representation of a 256-bit number.
@@ -37,13 +35,11 @@ import org.semux.util.Bytes;
  * NOTE: the underlying byte array should be shared across dataword; clients are
  * not supposed to modify it.
  */
-public class DataWord implements Comparable<DataWord> {
+public class DataWord implements Comparable<DataWord>, Cloneable {
 
     public static final BigInteger TWO_256 = BigInteger.valueOf(2).pow(256);
     public static final BigInteger MAX_VALUE = TWO_256.subtract(BigInteger.ONE);
     public static final DataWord ZERO = new DataWord();
-
-    public static final long MEM_SIZE = 32 + 16 + 16;
 
     private byte[] data = new byte[32];
 
@@ -51,23 +47,19 @@ public class DataWord implements Comparable<DataWord> {
     }
 
     public DataWord(int num) {
-        this(Bytes.of(num));
+        this(ByteBuffer.allocate(4).putInt(num).array());
     }
 
     public DataWord(long num) {
-        this(Bytes.of(num));
+        this(ByteBuffer.allocate(8).putLong(num).array());
     }
 
     public DataWord(BigInteger num) {
         this(num.toByteArray());
     }
 
-    public DataWord(String data) {
-        this(Hex.decode(data));
-    }
-
-    public DataWord(ByteArray wrappedData) {
-        this(wrappedData.getData());
+    public DataWord(String hex) {
+        this(VMUtils.fromHexString(hex));
     }
 
     public DataWord(byte[] data) {
@@ -88,7 +80,7 @@ public class DataWord implements Comparable<DataWord> {
     }
 
     public byte[] getNoLeadZeroesData() {
-        return Bytes.stripLeadingZeroes(data);
+        return VMUtils.stripLeadingZeroes(data);
     }
 
     public byte[] getLast20Bytes() {
@@ -313,23 +305,7 @@ public class DataWord implements Comparable<DataWord> {
 
     @Override
     public String toString() {
-        return Hex.encode(data);
-    }
-
-    public String toPrefixString() {
-        byte[] pref = getNoLeadZeroesData();
-        if (pref.length == 0)
-            return "";
-
-        if (pref.length < 7)
-            return Hex.encode(pref);
-
-        return Hex.encode(pref).substring(0, 6);
-    }
-
-    public String shortHex() {
-        String hexValue = Hex.encode(getNoLeadZeroesData()).toUpperCase();
-        return "0x" + hexValue.replaceFirst("^0+(?!$)", "");
+        return VMUtils.toHexString(data);
     }
 
     public DataWord clone() {
@@ -354,7 +330,7 @@ public class DataWord implements Comparable<DataWord> {
 
     @Override
     public int compareTo(DataWord o) {
-        return org.bouncycastle.util.Arrays.compareUnsigned(this.data, o.data);
+        return VMUtils.compareUnsigned(this.data, o.data);
     }
 
     public void signExtend(byte k) {
@@ -376,14 +352,6 @@ public class DataWord implements Comparable<DataWord> {
         }
 
         return 0;
-    }
-
-    public boolean isHex(String hex) {
-        return Hex.encode(data).equals(hex);
-    }
-
-    public String asString() {
-        return new String(getNoLeadZeroesData());
     }
 
     private static byte[] bigIntToBytes32(BigInteger num) {

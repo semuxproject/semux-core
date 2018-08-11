@@ -31,8 +31,7 @@ import java.util.stream.Collectors;
 
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
-import org.semux.util.ByteArray;
-import org.semux.util.Bytes;
+import org.ethereum.vm.util.VMUtils;
 
 /**
  * A data structure to hold the results of program.
@@ -40,12 +39,12 @@ import org.semux.util.Bytes;
 public class ProgramResult {
 
     private long gasUsed = 0;
-    private byte[] hReturn = Bytes.EMPTY_BYTES;
+    private byte[] hReturn = VMUtils.EMPTY_BYTE_ARRAY;
     private RuntimeException exception = null;
     private boolean revert = false;
 
     private Set<DataWord> deleteAccounts = new HashSet<>();
-    private Set<ByteArray> touchedAccounts = new HashSet<>();
+    private Set<DataWord> touchedAccounts = new HashSet<>();
     private List<InternalTransaction> internalTransactions = new ArrayList<>();
     private List<LogInfo> logInfoList = new ArrayList<>();
     private long futureRefund = 0;
@@ -100,11 +99,11 @@ public class ProgramResult {
     }
 
     public void addTouchAccount(byte[] addr) {
-        touchedAccounts.add(ByteArray.of(addr));
+        touchedAccounts.add(new DataWord(addr));
     }
 
     public Set<byte[]> getTouchedAccounts() {
-        return touchedAccounts.stream().map(ByteArray::getData).collect(Collectors.toSet());
+        return touchedAccounts.stream().map(DataWord::getLast20Bytes).collect(Collectors.toSet());
     }
 
     public void addTouchAccounts(Set<byte[]> accounts) {

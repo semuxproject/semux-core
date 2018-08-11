@@ -39,7 +39,6 @@ import org.ethereum.vm.program.exception.ExceptionFactory;
 import org.ethereum.vm.program.exception.ReturnDataCopyIllegalBoundsException;
 import org.ethereum.vm.program.exception.StaticCallModificationException;
 import org.ethereum.vm.util.VMUtils;
-import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -297,7 +296,7 @@ public class VM {
             switch (op) {
 
             case STOP: {
-                program.setHReturn(Bytes.EMPTY_BYTES);
+                program.setHReturn(VMUtils.EMPTY_BYTE_ARRAY);
                 program.stop();
             }
                 break;
@@ -666,7 +665,7 @@ public class VM {
             case CODECOPY:
             case EXTCODECOPY: {
 
-                byte[] fullCode = Bytes.EMPTY_BYTES;
+                byte[] fullCode = VMUtils.EMPTY_BYTE_ARRAY;
                 if (op == OpCode.CODECOPY)
                     fullCode = program.getCode();
 

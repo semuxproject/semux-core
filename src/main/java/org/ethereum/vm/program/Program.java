@@ -33,9 +33,7 @@ import static org.apache.commons.lang3.ArrayUtils.nullToEmpty;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.HashSet;
 import java.util.NavigableSet;
-import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -49,13 +47,10 @@ import org.ethereum.vm.client.Transaction;
 import org.ethereum.vm.config.Config;
 import org.ethereum.vm.program.exception.BytecodeExecutionException;
 import org.ethereum.vm.program.exception.ExceptionFactory;
-import org.ethereum.vm.program.exception.StackOverflowException;
 import org.ethereum.vm.program.exception.StackUnderflowException;
 import org.ethereum.vm.program.invoke.ProgramInvoke;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
 import org.ethereum.vm.util.VMUtils;
-import org.semux.crypto.Hex;
-import org.semux.util.ByteArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +90,6 @@ public class Program {
     private byte lastOp;
     private byte previouslyExecutedOp;
     private boolean stopped;
-    private Set<ByteArray> touchedAccounts = new HashSet<ByteArray>();
 
     public Program(byte[] ops, ProgramInvoke programInvoke, Transaction transaction, Config config) {
         this.ops = nullToEmpty(ops);
@@ -356,7 +350,7 @@ public class Program {
         byte[] programCode = memoryChunk(memStart.intValue(), memSize.intValue());
 
         if (logger.isInfoEnabled())
-            logger.info("creating a new contract inside contract run: [{}]", Hex.encode(senderAddress));
+            logger.info("creating a new contract inside contract run: [{}]", VMUtils.toHexString(senderAddress));
 
         // actual gas subtract
         DataWord gasLimit = config.getCreateGas(getGas());
@@ -395,7 +389,8 @@ public class Program {
 
         if (contractAlreadyExists) {
             result.setException(new BytecodeExecutionException(
-                    "Trying to create a contract with existing contract address: 0x" + Hex.encode(newAddress)));
+                    "Trying to create a contract with existing contract address: 0x"
+                            + VMUtils.toHexString(newAddress)));
         } else if (isNotEmpty(programCode)) {
             VM vm = new VM(config);
             Program program = new Program(programCode, programInvoke, internalTx, config);
@@ -428,7 +423,7 @@ public class Program {
 
         if (result.getException() != null || result.isRevert()) {
             logger.debug("contract run halted by Exception: contract: [{}], exception: [{}]",
-                    Hex.encode(newAddress),
+                    VMUtils.toHexString(newAddress),
                     result.getException());
 
             internalTx.reject();
@@ -455,7 +450,7 @@ public class Program {
             refundGas(refundGas, "remain gas from the internal call");
             if (logger.isInfoEnabled()) {
                 logger.info("The remaining gas is refunded, account: [{}], gas: [{}] ",
-                        Hex.encode(getOwnerAddress().getLast20Bytes()),
+                        VMUtils.toHexString(getOwnerAddress().getLast20Bytes()),
                         refundGas);
             }
         }
@@ -490,7 +485,8 @@ public class Program {
             logger.info(
                     msg.getType().name()
                             + " for existing contract: address: [{}], outDataOffs: [{}], outDataSize: [{}]  ",
-                    Hex.encode(contextAddress), msg.getOutDataOffs().longValue(), msg.getOutDataSize().longValue());
+                    VMUtils.toHexString(contextAddress), msg.getOutDataOffs().longValue(),
+                    msg.getOutDataSize().longValue());
 
         Repository track = getStorage().startTracking();
 
@@ -532,7 +528,7 @@ public class Program {
 
             if (result.getException() != null || result.isRevert()) {
                 logger.debug("contract run halted by Exception: contract: [{}], exception: [{}]",
-                        Hex.encode(contextAddress),
+                        VMUtils.toHexString(contextAddress),
                         result.getException());
 
                 internalTx.reject();
@@ -574,7 +570,7 @@ public class Program {
                 refundGas(refundGas.longValue(), "remaining gas from the internal call");
                 if (logger.isInfoEnabled())
                     logger.info("The remaining gas refunded, account: [{}], gas: [{}] ",
-                            Hex.encode(senderAddress),
+                            VMUtils.toHexString(senderAddress),
                             refundGas.toString());
             }
         } else {
@@ -857,7 +853,7 @@ public class Program {
         } else {
 
             if (logger.isDebugEnabled())
-                logger.debug("Call {}(data = {})", contract.getClass().getSimpleName(), Hex.encode(data));
+                logger.debug("Call {}(data = {})", contract.getClass().getSimpleName(), VMUtils.toHexString(data));
 
             Pair<Boolean, byte[]> out = contract.execute(data);
 

@@ -268,14 +268,4 @@ public class Bytes {
                 | ((bytes[6] & 0xffL) << 8)
                 | (bytes[7] & 0xff);
     }
-
-    public static byte[] stripLeadingZeroes(byte[] bytes) {
-        for (int i = 0; i < bytes.length; i++) {
-            if (bytes[i] != 0) {
-                return Arrays.copyOfRange(bytes, i, bytes.length);
-            }
-        }
-
-        return new byte[0];
-    }
 }

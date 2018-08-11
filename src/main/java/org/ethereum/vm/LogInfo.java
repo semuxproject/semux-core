@@ -25,7 +25,7 @@ package org.ethereum.vm;
 
 import java.util.List;
 
-import org.semux.crypto.Hex;
+import org.ethereum.vm.util.VMUtils;
 
 /**
  * Represents a Log emitted by a smart contract.
@@ -59,15 +59,15 @@ public class LogInfo {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (DataWord topic : topics) {
-            String topicStr = Hex.encode(topic.getData());
+            String topicStr = VMUtils.toHexString(topic.getData());
             sb.append(topicStr).append(" ");
         }
         sb.append("]");
 
         return "LogInfo{" +
-                "address=" + Hex.encode(address) +
+                "address=" + VMUtils.toHexString(address) +
                 ", topics=" + sb +
-                ", data=" + Hex.encode(data) +
+                ", data=" + VMUtils.toHexString(data) +
                 '}';
     }
 }

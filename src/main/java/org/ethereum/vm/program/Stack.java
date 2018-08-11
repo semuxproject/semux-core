@@ -28,26 +28,39 @@ import org.ethereum.vm.DataWord;
 /**
  * Program runtime stack.
  */
-public class Stack extends java.util.Stack<DataWord> {
+public class Stack {
 
-    @Override
+    private java.util.Stack<DataWord> stack = new java.util.Stack<>();
+
     public synchronized DataWord pop() {
-        return super.pop();
+        return stack.pop();
     }
 
-    @Override
-    public DataWord push(DataWord item) {
-        return super.push(item);
+    public void push(DataWord item) {
+        stack.push(item);
     }
 
     public void swap(int from, int to) {
         if (isAccessible(from) && isAccessible(to) && (from != to)) {
-            DataWord tmp = get(from);
-            set(from, set(to, tmp));
+            DataWord tmp = stack.get(from);
+            stack.set(from, stack.set(to, tmp));
         }
     }
 
-    private boolean isAccessible(int from) {
-        return from >= 0 && from < size();
+    public DataWord peek() {
+        return stack.peek();
     }
+
+    public DataWord get(int index) {
+        return stack.get(index);
+    }
+
+    public int size() {
+        return stack.size();
+    }
+
+    private boolean isAccessible(int from) {
+        return from >= 0 && from < stack.size();
+    }
+
 }

@@ -25,14 +25,12 @@ package org.ethereum.vm.program;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.min;
-import static java.lang.String.format;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import org.ethereum.vm.DataWord;
-import org.semux.crypto.Hex;
-import org.semux.util.Bytes;
+import org.ethereum.vm.util.VMUtils;
 
 public class Memory {
 
@@ -44,7 +42,7 @@ public class Memory {
 
     public byte[] read(int address, int size) {
         if (size <= 0) {
-            return Bytes.EMPTY_BYTES;
+            return VMUtils.EMPTY_BYTE_ARRAY;
         }
 
         extend(address, size);
@@ -183,34 +181,4 @@ public class Memory {
             chunks.add(new byte[CHUNK_SIZE]);
         }
     }
-
-    @Override
-    public String toString() {
-        StringBuilder memoryData = new StringBuilder();
-        StringBuilder firstLine = new StringBuilder();
-        StringBuilder secondLine = new StringBuilder();
-
-        for (int i = 0; i < softSize; ++i) {
-            byte value = readByte(i);
-
-            // Check if value is ASCII
-            String character = ((byte) 0x20 <= value && value <= (byte) 0x7e) ? new String(new byte[] { value }) : "?";
-            firstLine.append(character).append("");
-            secondLine.append(Hex.encode(Bytes.of(value))).append(" ");
-
-            if ((i + 1) % 8 == 0) {
-                String tmp = format("%4s", Integer.toString(i - 7, 16)).replace(" ", "0");
-                memoryData.append("").append(tmp).append(" ");
-                memoryData.append(firstLine).append(" ");
-                memoryData.append(secondLine);
-                if (i + 1 < softSize)
-                    memoryData.append("\n");
-                firstLine.setLength(0);
-                secondLine.setLength(0);
-            }
-        }
-
-        return memoryData.toString();
-    }
-
 }
