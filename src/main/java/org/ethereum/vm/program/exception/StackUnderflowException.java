@@ -21,22 +21,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.ethereum.vm.config;
+package org.ethereum.vm.program.exception;
 
-import org.ethereum.vm.DataWord;
-import org.ethereum.vm.FeeSchedule;
-import org.ethereum.vm.OpCode;
-import org.ethereum.vm.program.exception.OutOfGasException;
+import static java.lang.String.format;
 
-public interface Config {
+@SuppressWarnings("serial")
+public class StackUnderflowException extends BytecodeExecutionException {
 
-    DataWord getCallGas(OpCode op, DataWord requestedGas, DataWord availableGas) throws OutOfGasException;
-
-    DataWord getCreateGas(DataWord availableGas);
-
-    long getTransactionCost();
-
-    FeeSchedule getGasCost();
-
-    Constants getConstants();
+    public StackUnderflowException(String message, Object... args) {
+        super(format(message, args));
+    }
 }

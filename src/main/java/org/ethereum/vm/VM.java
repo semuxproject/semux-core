@@ -97,7 +97,7 @@ public class VM {
         this.config = config;
     }
 
-    private long calcMemGas(GasCost gasCosts, long oldMemSize, BigInteger newMemSize, long copySize) {
+    private long calcMemGas(FeeSchedule gasCosts, long oldMemSize, BigInteger newMemSize, long copySize) {
         long gasCost = 0;
 
         // avoid overflows
@@ -142,7 +142,7 @@ public class VM {
             Stack stack = program.getStack();
 
             long gasCost = op.getTier().asInt();
-            GasCost gasCosts = config.getGasCost();
+            FeeSchedule gasCosts = config.getGasCost();
             DataWord adjustedCallGas = null;
 
             // Calculate fees and spend gas

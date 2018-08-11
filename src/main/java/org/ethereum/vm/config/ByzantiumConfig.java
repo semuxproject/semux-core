@@ -26,13 +26,13 @@ package org.ethereum.vm.config;
 import java.math.BigInteger;
 
 import org.ethereum.vm.DataWord;
-import org.ethereum.vm.GasCost;
+import org.ethereum.vm.FeeSchedule;
 import org.ethereum.vm.OpCode;
 import org.ethereum.vm.program.exception.OutOfGasException;
 
 public class ByzantiumConfig implements Config {
 
-    private static class GasCostByzantium extends GasCost {
+    private static class FeeScheduleByzantium extends FeeSchedule {
         public int getBALANCE() {
             return 400;
         }
@@ -66,7 +66,7 @@ public class ByzantiumConfig implements Config {
         }
     }
 
-    private static final GasCost feeSchedule = new GasCostByzantium();
+    private static final FeeSchedule feeSchedule = new FeeScheduleByzantium();
     private static final Constants constants = new Constants();
 
     public ByzantiumConfig() {
@@ -90,7 +90,7 @@ public class ByzantiumConfig implements Config {
         return 21_000;
     }
 
-    public GasCost getGasCost() {
+    public FeeSchedule getGasCost() {
         return feeSchedule;
     }
 

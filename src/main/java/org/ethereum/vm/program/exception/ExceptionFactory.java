@@ -64,7 +64,11 @@ public class ExceptionFactory {
         return new BadJumpDestinationException("Operation with pc isn't 'JUMPDEST': PC[%d];", pc);
     }
 
-    public static StackTooSmallException tooSmallStack(int expectedSize, int actualSize) {
-        return new StackTooSmallException("Expected stack size %d but actual %d;", expectedSize, actualSize);
+    public static StackUnderflowException tooSmallStack(int expectedSize, int actualSize) {
+        return new StackUnderflowException("Expected stack size %d but actual %d;", expectedSize, actualSize);
+    }
+
+    public static StackOverflowException tooLargeStack(int expectedSize, int maxSize) {
+        return new StackOverflowException("Expected stack size %d exceeds stack limit %d", expectedSize, maxSize);
     }
 }

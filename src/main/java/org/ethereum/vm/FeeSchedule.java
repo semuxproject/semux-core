@@ -29,7 +29,7 @@ package org.ethereum.vm;
  * the internal Ethereum computation engine; its price is set by the Transaction
  * and miners are free to ignore Transactions whose Gas price is too low.
  */
-public class GasCost {
+public class FeeSchedule {
 
     private final int STEP = 1;
     private final int SSTORE = 300;

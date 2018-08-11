@@ -26,9 +26,8 @@ package org.ethereum.vm.program.exception;
 import static java.lang.String.format;
 
 @SuppressWarnings("serial")
-public class StackTooSmallException extends BytecodeExecutionException {
-
-    public StackTooSmallException(String message, Object... args) {
+public class StackOverflowException extends BytecodeExecutionException {
+    public StackOverflowException(String message, Object... args) {
         super(format(message, args));
     }
 }

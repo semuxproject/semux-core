@@ -49,7 +49,8 @@ import org.ethereum.vm.client.Transaction;
 import org.ethereum.vm.config.Config;
 import org.ethereum.vm.program.exception.BytecodeExecutionException;
 import org.ethereum.vm.program.exception.ExceptionFactory;
-import org.ethereum.vm.program.exception.StackTooSmallException;
+import org.ethereum.vm.program.exception.StackOverflowException;
+import org.ethereum.vm.program.exception.StackUnderflowException;
 import org.ethereum.vm.program.invoke.ProgramInvoke;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
 import org.ethereum.vm.util.VMUtils;
@@ -238,10 +239,10 @@ public class Program {
      *
      * @param stackSize
      *            int
-     * @throws StackTooSmallException
+     * @throws StackUnderflowException
      *             If the stack is smaller than <code>stackSize</code>
      */
-    public void verifyStackUnderflow(int stackSize) throws StackTooSmallException {
+    public void verifyStackUnderflow(int stackSize) throws StackUnderflowException {
         if (stack.size() < stackSize) {
             throw ExceptionFactory.tooSmallStack(stackSize, stack.size());
         }
@@ -249,7 +250,7 @@ public class Program {
 
     public void verifyStackOverflow(int argsReqs, int returnReqs) {
         if ((stack.size() - argsReqs + returnReqs) > MAX_STACKSIZE) {
-            throw new StackTooLargeException("Expected: overflow " + MAX_STACKSIZE + " elements stack limit");
+            throw ExceptionFactory.tooLargeStack((stack.size() - argsReqs + returnReqs), MAX_STACKSIZE);
         }
     }
 
@@ -873,13 +874,6 @@ public class Program {
             }
 
             this.memorySave(msg.getOutDataOffs().intValue(), msg.getOutDataSize().intValueSafe(), out.getRight());
-        }
-    }
-
-    @SuppressWarnings("serial")
-    public class StackTooLargeException extends BytecodeExecutionException {
-        public StackTooLargeException(String message) {
-            super(message);
         }
     }
 
