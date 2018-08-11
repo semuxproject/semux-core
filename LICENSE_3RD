@@ -19,6 +19,11 @@ EdDSA-Java:
     https://github.com/str4d/ed25519-java
     CC0 1.0 Universal
 
+EthereumJ:
+    Copyright (c) [2016] [ <ether.camp> ]
+    https://github.com/ethereum/ethereumj
+    GNU Lesser General Public License v3.0
+
 FasterXML Jackson:
     https://github.com/FasterXML/jackson
     Apache License, Version 2.0
