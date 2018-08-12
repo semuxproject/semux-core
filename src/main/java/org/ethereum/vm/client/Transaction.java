@@ -78,9 +78,9 @@ public interface Transaction {
     /**
      * Returns the gas limit.
      *
-     * @return the specified gas cap.
+     * @return the specified gas limit for this transaction.
      */
-    long getGasLimit();
+    DataWord getGasLimit();
 
     /**
      * Returns the gas price.

@@ -45,12 +45,12 @@ public class InternalTransaction implements Transaction {
     private long nonce;
     private DataWord value;
     private byte[] data;
-    private long gastLimit;
+    private DataWord gastLimit;
     private DataWord gasPrice;
 
-    public InternalTransaction(byte[] parentHash, int depth, int index,
-            byte[] nonce, DataWord gasPrice, DataWord gasLimit, byte[] sendAddress, byte[] receiveAddress, byte[] value,
-            byte[] data, OpCode type) {
+    public InternalTransaction(byte[] parentHash, int depth, int index, OpCode type,
+            byte[] sendAddress, byte[] receiveAddress, byte[] nonce, byte[] value, byte[] data,
+            DataWord gasLimit, DataWord gasPrice) {
         this.parentHash = parentHash;
         this.depth = depth;
         this.index = index;
@@ -114,8 +114,8 @@ public class InternalTransaction implements Transaction {
     }
 
     @Override
-    public long getGasLimit() {
-        return 0;
+    public DataWord getGasLimit() {
+        return null;
     }
 
     @Override

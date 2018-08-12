@@ -131,10 +131,11 @@ public class ProgramResult {
         return internalTransactions;
     }
 
-    public InternalTransaction addInternalTransaction(byte[] parentHash, int deep, byte[] nonce, DataWord gasPrice,
-            DataWord gasLimit, byte[] senderAddress, byte[] receiveAddress, byte[] value, byte[] data, OpCode note) {
-        InternalTransaction tx = new InternalTransaction(parentHash, deep, internalTransactions.size(), nonce, gasPrice,
-                gasLimit, senderAddress, receiveAddress, value, data, note);
+    public InternalTransaction addInternalTransaction(byte[] parentHash, int depth, OpCode type,
+            byte[] senderAddress, byte[] receiveAddress, byte[] nonce, byte[] value, byte[] data,
+            DataWord gasLimit, DataWord gasPrice) {
+        InternalTransaction tx = new InternalTransaction(parentHash, depth, internalTransactions.size(), type,
+                senderAddress, receiveAddress, nonce, value, data, gasLimit, gasPrice);
         internalTransactions.add(tx);
         return tx;
     }

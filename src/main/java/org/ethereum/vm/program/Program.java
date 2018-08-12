@@ -121,8 +121,9 @@ public class Program {
         InternalTransaction result = null;
         if (transaction != null) {
             byte[] senderNonce = isEmpty(nonce) ? getStorage().getNonce(senderAddress).toByteArray() : nonce;
-            result = getResult().addInternalTransaction(transaction.getHash(), getCallDeep(), senderNonce,
-                    getGasPrice(), gasLimit, senderAddress, receiveAddress, value.toByteArray(), data, type);
+            result = getResult().addInternalTransaction(transaction.getHash(), getCallDeep(), type, senderAddress,
+                    receiveAddress, senderNonce,
+                    value.toByteArray(), data, gasLimit, getGasPrice());
         }
 
         return result;
