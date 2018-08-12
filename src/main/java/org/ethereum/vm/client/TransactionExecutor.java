@@ -35,7 +35,6 @@ import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.DataWord;
@@ -49,6 +48,7 @@ import org.ethereum.vm.program.ProgramResult;
 import org.ethereum.vm.program.exception.ExceptionFactory;
 import org.ethereum.vm.program.invoke.ProgramInvoke;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
+import org.ethereum.vm.util.ByteArrayWrapper;
 import org.ethereum.vm.util.VMUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +82,7 @@ public class TransactionExecutor {
     long basicTxCost = 0;
     List<LogInfo> logs = null;
 
-    private Set<DataWord> touchedAccounts = new HashSet<>();
+    private Set<ByteArrayWrapper> touchedAccounts = new HashSet<>();
 
     boolean localCall = false;
 
@@ -235,7 +235,7 @@ public class TransactionExecutor {
         BigInteger endowment = tx.getValue();
         transfer(cacheTrack, tx.getFrom(), targetAddress, endowment);
 
-        touchedAccounts.add(new DataWord(targetAddress));
+        touchedAccounts.add(new ByteArrayWrapper(targetAddress));
     }
 
     private void create() {
@@ -278,7 +278,7 @@ public class TransactionExecutor {
         BigInteger endowment = tx.getValue();
         transfer(cacheTrack, tx.getFrom(), newContractAddress, endowment);
 
-        touchedAccounts.add(new DataWord(newContractAddress));
+        touchedAccounts.add(new ByteArrayWrapper(newContractAddress));
     }
 
     public void go() {
@@ -335,8 +335,7 @@ public class TransactionExecutor {
                         execError("REVERT opcode executed");
                     }
                 } else {
-                    touchedAccounts.addAll(result.getTouchedAccounts().stream().map(DataWord::new).collect(
-                            Collectors.toList()));
+                    touchedAccounts.addAll(result.getTouchedAccounts());
                     cacheTrack.commit();
                 }
 
@@ -360,7 +359,8 @@ public class TransactionExecutor {
 
         // remove touched account
         touchedAccounts
-                .remove(new DataWord(tx.isCreate() ? VMUtil.calcNewAddr(tx.getFrom(), tx.getNonce()) : tx.getTo()));
+                .remove(new ByteArrayWrapper(
+                        tx.isCreate() ? VMUtil.calcNewAddr(tx.getFrom(), tx.getNonce()) : tx.getTo()));
     }
 
     public TransactionSummary finalization() {
@@ -400,8 +400,8 @@ public class TransactionExecutor {
         if (result != null) {
             logs = result.getLogInfoList();
             // Traverse list of suicides
-            for (DataWord address : result.getDeleteAccounts()) {
-                track.delete(address.getLast20Bytes());
+            for (ByteArrayWrapper address : result.getDeleteAccounts()) {
+                track.delete(address.getData());
             }
         }
 

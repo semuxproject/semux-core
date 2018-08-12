@@ -25,7 +25,6 @@ package org.ethereum.vm.program;
 
 import java.math.BigInteger;
 
-import org.ethereum.vm.DataWord;
 import org.ethereum.vm.OpCode;
 import org.ethereum.vm.client.Transaction;
 import org.ethereum.vm.util.HexUtil;
@@ -45,18 +44,26 @@ public class InternalTransaction implements Transaction {
     private byte[] from;
     private byte[] to;
     private long nonce;
-    private DataWord value;
+    private BigInteger value;
     private byte[] data;
-    private DataWord gastLimit;
-    private DataWord gasPrice;
+    private BigInteger gastLimit;
+    private BigInteger gasPrice;
 
     public InternalTransaction(byte[] parentHash, int depth, int index, OpCode type,
-            byte[] sendAddress, byte[] receiveAddress, long nonce, byte[] value, byte[] data,
-            DataWord gasLimit, DataWord gasPrice) {
+            byte[] from, byte[] to, long nonce, BigInteger value, byte[] data,
+            BigInteger gasLimit, BigInteger gasPrice) {
         this.parentHash = parentHash;
         this.depth = depth;
         this.index = index;
         this.type = type;
+
+        this.from = from;
+        this.to = to;
+        this.nonce = nonce;
+        this.value = value;
+        this.data = data;
+        this.gastLimit = gasLimit;
+        this.gasPrice = gasPrice;
     }
 
     public void reject() {
@@ -83,8 +90,6 @@ public class InternalTransaction implements Transaction {
         return type;
     }
 
-    // TODO: implement the following methods
-
     @Override
     public boolean isCreate() {
         return type == OpCode.CREATE;
@@ -92,42 +97,43 @@ public class InternalTransaction implements Transaction {
 
     @Override
     public byte[] getHash() {
+        // TODO: implement the hash of internal transaction
         return new byte[0];
     }
 
     @Override
     public byte[] getFrom() {
-        return new byte[0];
+        return from;
     }
 
     @Override
     public byte[] getTo() {
-        return new byte[0];
+        return to;
     }
 
     @Override
     public long getNonce() {
-        return 0;
+        return nonce;
     }
 
     @Override
     public BigInteger getValue() {
-        return null;
+        return value;
     }
 
     @Override
     public byte[] getData() {
-        return new byte[0];
+        return data;
     }
 
     @Override
     public BigInteger getGasLimit() {
-        return null;
+        return gastLimit;
     }
 
     @Override
     public BigInteger getGasPrice() {
-        return null;
+        return gasPrice;
     }
 
     @Override

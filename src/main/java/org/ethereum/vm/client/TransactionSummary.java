@@ -36,6 +36,7 @@ import java.util.Set;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.program.InternalTransaction;
+import org.ethereum.vm.util.ByteArrayWrapper;
 
 public class TransactionSummary {
 
@@ -47,7 +48,7 @@ public class TransactionSummary {
     private BigInteger gasLeftover = BigInteger.ZERO;
     private BigInteger gasRefund = BigInteger.ZERO;
 
-    private List<DataWord> deletedAccounts = emptyList();
+    private List<ByteArrayWrapper> deletedAccounts = emptyList();
     private List<InternalTransaction> internalTransactions = emptyList();
     private Map<DataWord, DataWord> storageDiff = emptyMap();
 
@@ -106,7 +107,7 @@ public class TransactionSummary {
         return value;
     }
 
-    public List<DataWord> getDeletedAccounts() {
+    public List<ByteArrayWrapper> getDeletedAccounts() {
         return deletedAccounts;
     }
 
@@ -166,9 +167,9 @@ public class TransactionSummary {
             return this;
         }
 
-        public Builder deletedAccounts(Set<DataWord> deletedAccounts) {
+        public Builder deletedAccounts(Set<ByteArrayWrapper> deletedAccounts) {
             summary.deletedAccounts = new ArrayList<>();
-            for (DataWord account : deletedAccounts) {
+            for (ByteArrayWrapper account : deletedAccounts) {
                 summary.deletedAccounts.add(account);
             }
             return this;

@@ -54,6 +54,7 @@ import org.ethereum.vm.program.exception.ExceptionFactory;
 import org.ethereum.vm.program.exception.StackUnderflowException;
 import org.ethereum.vm.program.invoke.ProgramInvoke;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
+import org.ethereum.vm.util.ByteArrayUtil;
 import org.ethereum.vm.util.HexUtil;
 import org.ethereum.vm.util.VMUtil;
 import org.slf4j.Logger;
@@ -119,17 +120,18 @@ public class Program {
         return invoke.getCallDeep();
     }
 
-    private InternalTransaction addInternalTx(DataWord gasLimit, byte[] senderAddress, byte[] receiveAddress,
-            BigInteger value, byte[] data, OpCode type) {
+    private InternalTransaction addInternalTx(OpCode type, byte[] from, byte[] to, long nonce, BigInteger value,
+            byte[] data, BigInteger gasLimit) {
 
-        InternalTransaction result = null;
-        if (transaction != null) {
-            result = getResult().addInternalTransaction(transaction.getHash(), getCallDeep(), type,
-                    senderAddress, receiveAddress, getStorage().getNonce(senderAddress), value.toByteArray(), data,
-                    gasLimit, getGasPrice());
-        }
+        byte[] parentHash = transaction.getHash();
+        int depth = getCallDeep();
+        int index = result.getInternalTransactions().size();
 
-        return result;
+        InternalTransaction tx = new InternalTransaction(parentHash, depth, index, type,
+                from, to, nonce, value, data, gasLimit, getGasPrice().value());
+        result.addInternalTransaction(tx);
+
+        return tx;
     }
 
     public byte getOp(int pc) {
@@ -318,7 +320,8 @@ public class Program {
         byte[] obtainer = beneficiary.getLast20Bytes();
         BigInteger balance = getStorage().getBalance(owner);
 
-        addInternalTx(null, owner, obtainer, balance, null, OpCode.SUICIDE);
+        addInternalTx(OpCode.SUICIDE, owner, obtainer, getStorage().getNonce(owner), balance,
+                ByteArrayUtil.EMPTY_BYTE_ARRAY, BigInteger.ZERO);
 
         if (Arrays.equals(owner, obtainer)) {
             // if owner == obtainer just zeroing account according to Yellow Paper
@@ -327,7 +330,7 @@ public class Program {
             transfer(getStorage(), owner, obtainer, balance);
         }
 
-        getResult().addDeleteAccount(this.getOwnerAddress());
+        getResult().addDeleteAccount(this.getOwnerAddress().getLast20Bytes());
     }
 
     public Repository getStorage() {
@@ -383,8 +386,8 @@ public class Program {
         newBalance = track.addBalance(newAddress, endowment);
 
         // [5] COOK THE INVOKE AND EXECUTE
-        InternalTransaction internalTx = addInternalTx(getGasLimit(), senderAddress, null, endowment,
-                programCode, OpCode.CREATE);
+        InternalTransaction internalTx = addInternalTx(OpCode.CREATE, senderAddress, ByteArrayUtil.EMPTY_BYTE_ARRAY,
+                getStorage().getNonce(senderAddress), endowment, programCode, gasLimit.value());
         ProgramInvoke programInvoke = programInvokeFactory.createProgramInvoke(
                 this, new DataWord(newAddress), getOwnerAddress(), value, gasLimit,
                 newBalance, null, track, this.invoke.getBlockStore(), false);
@@ -511,8 +514,8 @@ public class Program {
         contextBalance = track.addBalance(contextAddress, endowment);
 
         // CREATE CALL INTERNAL TRANSACTION
-        InternalTransaction internalTx = addInternalTx(getGasLimit(), senderAddress, contextAddress, endowment,
-                data, msg.getType());
+        InternalTransaction internalTx = addInternalTx(msg.getType(), senderAddress, contextAddress,
+                getStorage().getNonce(senderAddress), endowment, data, msg.getGas().value());
 
         ProgramResult result = null;
         if (isNotEmpty(programCode)) {

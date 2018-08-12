@@ -22,31 +22,6 @@ public class ByteArrayUtil {
         return new byte[0];
     }
 
-    public static class ByteArrayWrapper {
-
-        private byte[] bytes;
-
-        public ByteArrayWrapper(byte[] bytes) {
-            this.bytes = bytes;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            return Arrays.equals(bytes, ((ByteArrayWrapper) o).bytes);
-        }
-
-        @Override
-        public int hashCode() {
-            return Arrays.hashCode(bytes);
-        }
-    }
-
     public static int compareUnsigned(byte[] a, byte[] b) {
         if (a == b) {
             return 0;

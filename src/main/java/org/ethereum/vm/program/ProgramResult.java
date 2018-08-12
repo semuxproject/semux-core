@@ -33,6 +33,7 @@ import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.OpCode;
 import org.ethereum.vm.util.ByteArrayUtil;
+import org.ethereum.vm.util.ByteArrayWrapper;
 
 /**
  * A data structure to hold the results of program.
@@ -44,8 +45,8 @@ public class ProgramResult {
     private RuntimeException exception = null;
     private boolean revert = false;
 
-    private Set<DataWord> deleteAccounts = new HashSet<>();
-    private Set<DataWord> touchedAccounts = new HashSet<>();
+    private Set<ByteArrayWrapper> deleteAccounts = new HashSet<>();
+    private Set<ByteArrayWrapper> touchedAccounts = new HashSet<>();
     private List<InternalTransaction> internalTransactions = new ArrayList<>();
     private List<LogInfo> logInfoList = new ArrayList<>();
     private long futureRefund = 0;
@@ -87,30 +88,28 @@ public class ProgramResult {
         return revert;
     }
 
-    public Set<DataWord> getDeleteAccounts() {
+    public Set<ByteArrayWrapper> getDeleteAccounts() {
         return deleteAccounts;
     }
 
-    public void addDeleteAccount(DataWord address) {
-        deleteAccounts.add(address);
+    public void addDeleteAccount(byte[] address) {
+        deleteAccounts.add(new ByteArrayWrapper(address));
     }
 
-    public void addDeleteAccounts(Set<DataWord> accounts) {
+    public void addDeleteAccounts(Set<ByteArrayWrapper> accounts) {
         deleteAccounts.addAll(accounts);
     }
 
-    public void addTouchAccount(byte[] addr) {
-        touchedAccounts.add(new DataWord(addr));
+    public void addTouchAccount(byte[] address) {
+        touchedAccounts.add(new ByteArrayWrapper(address));
     }
 
-    public Set<byte[]> getTouchedAccounts() {
-        return touchedAccounts.stream().map(DataWord::getLast20Bytes).collect(Collectors.toSet());
+    public Set<ByteArrayWrapper> getTouchedAccounts() {
+        return touchedAccounts;
     }
 
-    public void addTouchAccounts(Set<byte[]> accounts) {
-        for (byte[] a : accounts) {
-            addTouchAccount(a);
-        }
+    public void addTouchAccounts(Set<ByteArrayWrapper> accounts) {
+        touchedAccounts.addAll(accounts);
     }
 
     public List<LogInfo> getLogInfoList() {
@@ -131,17 +130,12 @@ public class ProgramResult {
         return internalTransactions;
     }
 
-    public InternalTransaction addInternalTransaction(byte[] parentHash, int depth, OpCode type,
-            byte[] senderAddress, byte[] receiveAddress, long nonce, byte[] value, byte[] data,
-            DataWord gasLimit, DataWord gasPrice) {
-        InternalTransaction tx = new InternalTransaction(parentHash, depth, internalTransactions.size(), type,
-                senderAddress, receiveAddress, nonce, value, data, gasLimit, gasPrice);
+    public void addInternalTransaction(InternalTransaction tx) {
         internalTransactions.add(tx);
-        return tx;
     }
 
-    public void addInternalTransactions(List<InternalTransaction> internalTransactions) {
-        internalTransactions.addAll(internalTransactions);
+    public void addInternalTransactions(List<InternalTransaction> txs) {
+        internalTransactions.addAll(txs);
     }
 
     public void rejectInternalTransactions() {
