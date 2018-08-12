@@ -32,6 +32,13 @@ import org.ethereum.vm.DataWord;
 public interface Transaction {
 
     /**
+     * Returns whether this transaction is a CREATE.
+     *
+     * @return true if it's CREATE.
+     */
+    boolean isCreate();
+
+    /**
      * Returns the hash of the transaction.
      *
      * @return a 32-byte array, not NULL.
@@ -59,7 +66,7 @@ public interface Transaction {
      *
      * @return the nonce
      */
-    long nonce();
+    long getNonce();
 
     /**
      * Returns the value being transferred.

@@ -63,12 +63,9 @@ public class DataWord implements Comparable<DataWord>, Cloneable {
     }
 
     public DataWord(byte[] data) {
-        if (data == null) {
-            // TODO: test null input data
-            // do nothing
-        } else if (data.length == 32) {
-            this.data = data;
-        } else if (data.length <= 32) {
+        if (data.length == 32) {
+            this.data = data; // shallow copy
+        } else if (data.length < 32) {
             System.arraycopy(data, 0, this.data, 32 - data.length, data.length);
         } else {
             throw new RuntimeException("Data word can't exceed 32 bytes: length = " + data.length);
@@ -309,17 +306,12 @@ public class DataWord implements Comparable<DataWord>, Cloneable {
     }
 
     public DataWord clone() {
-        return new DataWord(data);
+        return new DataWord(data.clone());
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-
-        return Arrays.equals(this.data, ((DataWord) o).data);
+        return o instanceof DataWord && Arrays.equals(this.data, ((DataWord) o).data);
 
     }
 

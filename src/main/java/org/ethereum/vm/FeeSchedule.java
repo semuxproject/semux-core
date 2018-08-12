@@ -31,20 +31,6 @@ package org.ethereum.vm;
  */
 public class FeeSchedule {
 
-    private final int STEP = 1;
-    private final int SSTORE = 300;
-
-    private final int ZEROSTEP = 0;
-    private final int QUICKSTEP = 2;
-    private final int FASTESTSTEP = 3;
-    private final int FASTSTEP = 5;
-    private final int MIDSTEP = 8;
-    private final int SLOWSTEP = 10;
-    private final int EXTSTEP = 20;
-
-    private final int GENESISGASLIMIT = 1000000;
-    private final int MINGASLIMIT = 125000;
-
     private final int BALANCE = 20;
     private final int SHA3 = 30;
     private final int SHA3_WORD = 6;
@@ -87,50 +73,6 @@ public class FeeSchedule {
     private final int EXT_CODE_SIZE = 20;
     private final int EXT_CODE_COPY = 20;
     private final int NEW_ACCT_SUICIDE = 0;
-
-    public int getSTEP() {
-        return STEP;
-    }
-
-    public int getSSTORE() {
-        return SSTORE;
-    }
-
-    public int getZEROSTEP() {
-        return ZEROSTEP;
-    }
-
-    public int getQUICKSTEP() {
-        return QUICKSTEP;
-    }
-
-    public int getFASTESTSTEP() {
-        return FASTESTSTEP;
-    }
-
-    public int getFASTSTEP() {
-        return FASTSTEP;
-    }
-
-    public int getMIDSTEP() {
-        return MIDSTEP;
-    }
-
-    public int getSLOWSTEP() {
-        return SLOWSTEP;
-    }
-
-    public int getEXTSTEP() {
-        return EXTSTEP;
-    }
-
-    public int getGENESISGASLIMIT() {
-        return GENESISGASLIMIT;
-    }
-
-    public int getMINGASLIMIT() {
-        return MINGASLIMIT;
-    }
 
     public int getBALANCE() {
         return BALANCE;
@@ -176,14 +118,6 @@ public class FeeSchedule {
         return CREATE;
     }
 
-    public int getJUMPDEST() {
-        return JUMPDEST;
-    }
-
-    public int getCREATE_DATA_BYTE() {
-        return CREATE_DATA_BYTE;
-    }
-
     public int getCALL() {
         return CALL;
     }
@@ -210,10 +144,6 @@ public class FeeSchedule {
 
     public int getSUICIDE_REFUND() {
         return SUICIDE_REFUND;
-    }
-
-    public int getQUAD_COEFF_DIV() {
-        return QUAD_COEFF_DIV;
     }
 
     public int getCREATE_DATA() {

@@ -29,6 +29,10 @@ import static org.apache.commons.lang3.ArrayUtils.getLength;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 import static org.apache.commons.lang3.ArrayUtils.nullToEmpty;
+import static org.ethereum.vm.util.BiUtil.isNotCovers;
+import static org.ethereum.vm.util.BiUtil.isPositive;
+import static org.ethereum.vm.util.BiUtil.toBI;
+import static org.ethereum.vm.util.BiUtil.transfer;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -886,26 +890,5 @@ public class Program {
      */
     public void initMem(byte[] data) {
         this.memory.write(0, data, data.length, false);
-    }
-
-    private static BigInteger toBI(long data) {
-        return BigInteger.valueOf(data);
-    }
-
-    private static boolean isPositive(BigInteger value) {
-        return value.signum() > 0;
-    }
-
-    private static boolean isCovers(BigInteger covers, BigInteger value) {
-        return !isNotCovers(covers, value);
-    }
-
-    private static boolean isNotCovers(BigInteger covers, BigInteger value) {
-        return covers.compareTo(value) < 0;
-    }
-
-    private static void transfer(Repository repository, byte[] fromAddr, byte[] toAddr, BigInteger value) {
-        repository.addBalance(fromAddr, value.negate());
-        repository.addBalance(toAddr, value);
     }
 }

@@ -26,6 +26,7 @@ package org.ethereum.vm.config;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.FeeSchedule;
 import org.ethereum.vm.OpCode;
+import org.ethereum.vm.client.Transaction;
 import org.ethereum.vm.program.exception.OutOfGasException;
 
 public interface Config {
@@ -34,7 +35,7 @@ public interface Config {
 
     DataWord getCreateGas(DataWord availableGas);
 
-    long getTransactionCost();
+    long getTransactionCost(Transaction tx);
 
     FeeSchedule getFeeSchedule();
 

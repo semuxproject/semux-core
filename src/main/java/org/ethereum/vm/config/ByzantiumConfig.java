@@ -28,6 +28,7 @@ import java.math.BigInteger;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.FeeSchedule;
 import org.ethereum.vm.OpCode;
+import org.ethereum.vm.client.Transaction;
 import org.ethereum.vm.program.exception.OutOfGasException;
 
 public class ByzantiumConfig implements Config {
@@ -77,19 +78,30 @@ public class ByzantiumConfig implements Config {
         return new DataWord(available.value().subtract(available.value().divide(BigInteger.valueOf(64))));
     }
 
+    @Override
     public DataWord getCallGas(OpCode op, DataWord requestedGas, DataWord availableGas) throws OutOfGasException {
         DataWord maxAllowed = maxAllowed(availableGas);
         return requestedGas.compareTo(maxAllowed) > 0 ? maxAllowed : requestedGas;
     }
 
+    @Override
     public DataWord getCreateGas(DataWord availableGas) {
         return maxAllowed(availableGas);
     }
 
-    public long getTransactionCost() {
-        return 21_000;
+    @Override
+    public long getTransactionCost(Transaction tx) {
+        FeeSchedule fs = getFeeSchedule();
+
+        long cost = tx.isCreate() ? fs.getTRANSACTION_CREATE_CONTRACT() : fs.getTRANSACTION();
+        for (byte b : tx.getData()) {
+            cost += (b == 0) ? fs.getTX_ZERO_DATA() : fs.getTX_NO_ZERO_DATA();
+        }
+
+        return cost;
     }
 
+    @Override
     public FeeSchedule getFeeSchedule() {
         return feeSchedule;
     }

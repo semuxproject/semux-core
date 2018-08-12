@@ -23,6 +23,9 @@
  */
 package org.ethereum.vm.client;
 
+import java.math.BigInteger;
+
 public interface Block {
 
+    BigInteger getGasLimit();
 }

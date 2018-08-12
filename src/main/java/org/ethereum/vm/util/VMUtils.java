@@ -16,7 +16,7 @@ public class VMUtils {
         return null;
     }
 
-    public static byte[] calcNewAddr(byte[] address, byte[] nonce) {
+    public static byte[] calcNewAddr(byte[] address, long nonce) {
         return null;
     }
 
