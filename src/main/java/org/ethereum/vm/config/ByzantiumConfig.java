@@ -90,7 +90,7 @@ public class ByzantiumConfig implements Config {
         return 21_000;
     }
 
-    public FeeSchedule getGasCost() {
+    public FeeSchedule getFeeSchedule() {
         return feeSchedule;
     }
 

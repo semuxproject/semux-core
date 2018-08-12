@@ -23,21 +23,69 @@
  */
 package org.ethereum.vm.client;
 
+import org.ethereum.vm.DataWord;
+
+/**
+ * A facet interface for Transaction. The client needs to wrap the native
+ * transaction to comply this specification, in order to use EVM.
+ */
 public interface Transaction {
 
+    /**
+     * Returns the hash of the transaction.
+     *
+     * @return a 32-byte array, not NULL.
+     */
     byte[] getHash();
 
+    /**
+     * Returns the address.
+     *
+     * @return a 20-byte array, not NULL.
+     */
     byte[] getFrom();
 
+    /**
+     * Returns the recipient address.
+     *
+     * @return a 20-byte array, or
+     *         {@link org.ethereum.vm.util.VMUtils#EMPTY_BYTE_ARRAY} for CREATE, not
+     *         NULL.
+     */
     byte[] getTo();
 
-    byte[] nonce();
+    /**
+     * Returns the nonce of the sender.
+     *
+     * @return the nonce
+     */
+    long nonce();
 
-    byte[] getValue();
+    /**
+     * Returns the value being transferred.
+     *
+     * @return the value with a decimal of <em>18</em>, not NULL.
+     */
+    DataWord getValue();
 
+    /**
+     * Returns the data field.
+     *
+     * @return the call data, not NULL.
+     */
     byte[] getData();
 
-    byte[] getGasLimit();
+    /**
+     * Returns the gas limit.
+     *
+     * @return the specified gas cap.
+     */
+    long getGasLimit();
 
-    byte[] getGasPrice();
+    /**
+     * Returns the gas price.
+     *
+     * @return the specified gas price with a decimal of <em>18</em>, not NULL.
+     */
+    DataWord getGasPrice();
 }

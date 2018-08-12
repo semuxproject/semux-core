@@ -82,8 +82,7 @@ public class VM {
 
     private static final BigInteger THIRTY_TWO = BigInteger.valueOf(32);
 
-    // max mem size which couldn't be paid for ever, used to reduce expensive BigInt
-    // arithmetic
+    // theoretical limit, used to reduce expensive BigInt arithmetic
     private static final BigInteger MAX_MEM_SIZE = BigInteger.valueOf(Integer.MAX_VALUE);
 
     private Config config;
@@ -141,81 +140,81 @@ public class VM {
             Stack stack = program.getStack();
 
             long gasCost = op.getTier().asInt();
-            FeeSchedule gasCosts = config.getGasCost();
+            FeeSchedule feeSchedule = config.getFeeSchedule();
             DataWord adjustedCallGas = null;
 
             // Calculate fees and spend gas
             switch (op) {
             case STOP:
-                gasCost = gasCosts.getSTOP();
+                gasCost = feeSchedule.getSTOP();
                 break;
             case SUICIDE:
-                gasCost = gasCosts.getSUICIDE();
+                gasCost = feeSchedule.getSUICIDE();
                 DataWord suicideAddressWord = stack.get(stack.size() - 1);
                 if (isDeadAccount(program, suicideAddressWord.getLast20Bytes()) &&
                         !program.getBalance(program.getOwnerAddress()).isZero()) {
-                    gasCost += gasCosts.getNEW_ACCT_SUICIDE();
+                    gasCost += feeSchedule.getNEW_ACCT_SUICIDE();
                 }
                 break;
             case SSTORE:
                 DataWord newValue = stack.get(stack.size() - 2);
                 DataWord oldValue = program.storageLoad(stack.peek());
                 if (oldValue == null && !newValue.isZero())
-                    gasCost = gasCosts.getSET_SSTORE();
+                    gasCost = feeSchedule.getSET_SSTORE();
                 else if (oldValue != null && newValue.isZero()) {
                     // TODO: GASREFUND counter policy
 
                     // refund step cost policy.
-                    program.futureRefundGas(gasCosts.getREFUND_SSTORE());
-                    gasCost = gasCosts.getCLEAR_SSTORE();
+                    program.futureRefundGas(feeSchedule.getREFUND_SSTORE());
+                    gasCost = feeSchedule.getCLEAR_SSTORE();
                 } else
-                    gasCost = gasCosts.getRESET_SSTORE();
+                    gasCost = feeSchedule.getRESET_SSTORE();
                 break;
             case SLOAD:
-                gasCost = gasCosts.getSLOAD();
+                gasCost = feeSchedule.getSLOAD();
                 break;
             case BALANCE:
-                gasCost = gasCosts.getBALANCE();
+                gasCost = feeSchedule.getBALANCE();
                 break;
 
             // These all operate on memory and therefore potentially expand it:
             case MSTORE:
-                gasCost += calcMemGas(gasCosts, oldMemSize, memNeeded(stack.peek(), new DataWord(32)), 0);
+                gasCost += calcMemGas(feeSchedule, oldMemSize, memNeeded(stack.peek(), new DataWord(32)), 0);
                 break;
             case MSTORE8:
-                gasCost += calcMemGas(gasCosts, oldMemSize, memNeeded(stack.peek(), new DataWord(1)), 0);
+                gasCost += calcMemGas(feeSchedule, oldMemSize, memNeeded(stack.peek(), new DataWord(1)), 0);
                 break;
             case MLOAD:
-                gasCost += calcMemGas(gasCosts, oldMemSize, memNeeded(stack.peek(), new DataWord(32)), 0);
+                gasCost += calcMemGas(feeSchedule, oldMemSize, memNeeded(stack.peek(), new DataWord(32)), 0);
                 break;
             case RETURN:
             case REVERT:
-                gasCost = gasCosts.getSTOP() + calcMemGas(gasCosts, oldMemSize,
+                gasCost = feeSchedule.getSTOP() + calcMemGas(feeSchedule, oldMemSize,
                         memNeeded(stack.peek(), stack.get(stack.size() - 2)), 0);
                 break;
             case SHA3:
-                gasCost = gasCosts.getSHA3() + calcMemGas(gasCosts, oldMemSize,
+                gasCost = feeSchedule.getSHA3() + calcMemGas(feeSchedule, oldMemSize,
                         memNeeded(stack.peek(), stack.get(stack.size() - 2)), 0);
                 DataWord size = stack.get(stack.size() - 2);
                 long chunkUsed = (size.longValueSafe() + 31) / 32;
-                gasCost += chunkUsed * gasCosts.getSHA3_WORD();
+                gasCost += chunkUsed * feeSchedule.getSHA3_WORD();
                 break;
             case CALLDATACOPY:
             case RETURNDATACOPY:
-                gasCost += calcMemGas(gasCosts, oldMemSize,
+                gasCost += calcMemGas(feeSchedule, oldMemSize,
                         memNeeded(stack.peek(), stack.get(stack.size() - 3)),
                         stack.get(stack.size() - 3).longValueSafe());
                 break;
             case CODECOPY:
-                gasCost += calcMemGas(gasCosts, oldMemSize,
+                gasCost += calcMemGas(feeSchedule, oldMemSize,
                         memNeeded(stack.peek(), stack.get(stack.size() - 3)),
                         stack.get(stack.size() - 3).longValueSafe());
                 break;
             case EXTCODESIZE:
-                gasCost = gasCosts.getEXT_CODE_SIZE();
+                gasCost = feeSchedule.getEXT_CODE_SIZE();
                 break;
             case EXTCODECOPY:
-                gasCost = gasCosts.getEXT_CODE_COPY() + calcMemGas(gasCosts, oldMemSize,
+                gasCost = feeSchedule.getEXT_CODE_COPY() + calcMemGas(feeSchedule, oldMemSize,
                         memNeeded(stack.get(stack.size() - 2), stack.get(stack.size() - 4)),
                         stack.get(stack.size() - 4).longValueSafe());
                 break;
@@ -224,7 +223,7 @@ public class VM {
             case DELEGATECALL:
             case STATICCALL:
 
-                gasCost = gasCosts.getCALL();
+                gasCost = feeSchedule.getCALL();
                 DataWord callGasWord = stack.get(stack.size() - 1);
 
                 DataWord callAddressWord = stack.get(stack.size() - 2);
@@ -234,20 +233,20 @@ public class VM {
                 // check to see if account does not exist and is not a precompiled contract
                 if (op == CALL) {
                     if (isDeadAccount(program, callAddressWord.getLast20Bytes()) && !value.isZero()) {
-                        gasCost += gasCosts.getNEW_ACCT_CALL();
+                        gasCost += feeSchedule.getNEW_ACCT_CALL();
                     }
                 }
 
                 // TODO: Make sure this is converted to BigInteger (256num support)
                 if (!value.isZero())
-                    gasCost += gasCosts.getVT_CALL();
+                    gasCost += feeSchedule.getVT_CALL();
 
                 int opOff = op.callHasValue() ? 4 : 3;
                 BigInteger in = memNeeded(stack.get(stack.size() - opOff),
                         stack.get(stack.size() - opOff - 1)); // in offset+size
                 BigInteger out = memNeeded(stack.get(stack.size() - opOff - 2),
                         stack.get(stack.size() - opOff - 3)); // out offset+size
-                gasCost += calcMemGas(gasCosts, oldMemSize, in.max(out), 0);
+                gasCost += calcMemGas(feeSchedule, oldMemSize, in.max(out), 0);
 
                 if (gasCost > program.getGas().longValueSafe()) {
                     throw ExceptionFactory.notEnoughOpGas(op, callGasWord, program.getGas());
@@ -259,7 +258,7 @@ public class VM {
                 gasCost += adjustedCallGas.longValueSafe();
                 break;
             case CREATE:
-                gasCost = gasCosts.getCREATE() + calcMemGas(gasCosts, oldMemSize,
+                gasCost = feeSchedule.getCREATE() + calcMemGas(feeSchedule, oldMemSize,
                         memNeeded(stack.get(stack.size() - 2), stack.get(stack.size() - 3)), 0);
                 break;
             case LOG0:
@@ -270,21 +269,21 @@ public class VM {
                 int nTopics = op.val() - OpCode.LOG0.val();
 
                 BigInteger dataSize = stack.get(stack.size() - 2).value();
-                BigInteger dataCost = dataSize.multiply(BigInteger.valueOf(gasCosts.getLOG_DATA_GAS()));
+                BigInteger dataCost = dataSize.multiply(BigInteger.valueOf(feeSchedule.getLOG_DATA_GAS()));
                 if (program.getGas().value().compareTo(dataCost) < 0) {
                     throw ExceptionFactory.notEnoughOpGas(op, dataCost, program.getGas().value());
                 }
 
-                gasCost = gasCosts.getLOG_GAS() +
-                        gasCosts.getLOG_TOPIC_GAS() * nTopics +
-                        gasCosts.getLOG_DATA_GAS() * stack.get(stack.size() - 2).longValue() +
-                        calcMemGas(gasCosts, oldMemSize, memNeeded(stack.peek(), stack.get(stack.size() - 2)), 0);
+                gasCost = feeSchedule.getLOG_GAS() +
+                        feeSchedule.getLOG_TOPIC_GAS() * nTopics +
+                        feeSchedule.getLOG_DATA_GAS() * stack.get(stack.size() - 2).longValue() +
+                        calcMemGas(feeSchedule, oldMemSize, memNeeded(stack.peek(), stack.get(stack.size() - 2)), 0);
                 break;
             case EXP:
 
                 DataWord exp = stack.get(stack.size() - 2);
                 int bytesOccupied = exp.bytesOccupied();
-                gasCost = gasCosts.getEXP_GAS() + gasCosts.getEXP_BYTE_GAS() * bytesOccupied;
+                gasCost = feeSchedule.getEXP_GAS() + feeSchedule.getEXP_BYTE_GAS() * bytesOccupied;
                 break;
             default:
                 break;
@@ -984,7 +983,7 @@ public class VM {
                     throw new StaticCallModificationException();
 
                 if (!value.isZero()) {
-                    adjustedCallGas.add(new DataWord(gasCosts.getSTIPEND_CALL()));
+                    adjustedCallGas.add(new DataWord(feeSchedule.getSTIPEND_CALL()));
                 }
 
                 DataWord inDataOffs = program.stackPop();

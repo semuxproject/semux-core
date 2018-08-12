@@ -36,7 +36,7 @@ public interface Config {
 
     long getTransactionCost();
 
-    FeeSchedule getGasCost();
+    FeeSchedule getFeeSchedule();
 
     Constants getConstants();
 }

@@ -24,6 +24,7 @@
 package org.ethereum.vm.program;
 
 import org.ethereum.vm.DataWord;
+import org.ethereum.vm.OpCode;
 import org.ethereum.vm.client.Transaction;
 import org.ethereum.vm.util.VMUtils;
 
@@ -32,53 +33,52 @@ import org.ethereum.vm.util.VMUtils;
  */
 public class InternalTransaction implements Transaction {
 
-    private byte[] parentHash;
-    private int deep;
-    private int index;
-    private String note;
-
     private boolean rejected = false;
 
-    public InternalTransaction(byte[] parentHash, int deep, int index, byte[] nonce, DataWord gasPrice,
-            DataWord gasLimit, byte[] sendAddress, byte[] receiveAddress, byte[] value, byte[] data, String note) {
+    private byte[] parentHash;
+    private int depth;
+    private int index;
+    private OpCode type;
+
+    private byte[] from;
+    private byte[] to;
+    private long nonce;
+    private DataWord value;
+    private byte[] data;
+    private long gastLimit;
+    private DataWord gasPrice;
+
+    public InternalTransaction(byte[] parentHash, int depth, int index,
+            byte[] nonce, DataWord gasPrice, DataWord gasLimit, byte[] sendAddress, byte[] receiveAddress, byte[] value,
+            byte[] data, OpCode type) {
         this.parentHash = parentHash;
-        this.deep = deep;
+        this.depth = depth;
         this.index = index;
-        this.note = note;
+        this.type = type;
     }
 
     public void reject() {
         this.rejected = true;
     }
 
+    public boolean isRejected() {
+        return rejected;
+    }
+
     public byte[] getParentHash() {
         return parentHash;
     }
 
-    public int getDeep() {
-        return deep;
+    public int getDepth() {
+        return depth;
     }
 
     public int getIndex() {
         return index;
     }
 
-    public String getNote() {
-        return note;
-    }
-
-    public boolean isRejected() {
-        return rejected;
-    }
-
-    @Override
-    public String toString() {
-        return "TransactionData [" +
-                "  parentHash=" + VMUtils.toHexString(getParentHash()) +
-                ", depth=" + getDeep() +
-                ", index=" + getIndex() +
-                ", note=" + getNote() +
-                "]";
+    public OpCode getType() {
+        return type;
     }
 
     // TODO: implement the following methods
@@ -99,13 +99,13 @@ public class InternalTransaction implements Transaction {
     }
 
     @Override
-    public byte[] nonce() {
-        return new byte[0];
+    public long nonce() {
+        return 0;
     }
 
     @Override
-    public byte[] getValue() {
-        return new byte[0];
+    public DataWord getValue() {
+        return null;
     }
 
     @Override
@@ -114,12 +114,23 @@ public class InternalTransaction implements Transaction {
     }
 
     @Override
-    public byte[] getGasLimit() {
-        return new byte[0];
+    public long getGasLimit() {
+        return 0;
     }
 
     @Override
-    public byte[] getGasPrice() {
-        return new byte[0];
+    public DataWord getGasPrice() {
+        return null;
     }
+
+    @Override
+    public String toString() {
+        return "InternalTransaction [" +
+                "  parentHash=" + VMUtils.toHexString(getParentHash()) +
+                ", depth=" + getDepth() +
+                ", index=" + getIndex() +
+                ", type=" + getType() +
+                "]";
+    }
+
 }

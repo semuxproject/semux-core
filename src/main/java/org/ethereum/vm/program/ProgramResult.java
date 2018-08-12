@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
+import org.ethereum.vm.OpCode;
 import org.ethereum.vm.util.VMUtils;
 
 /**
@@ -131,7 +132,7 @@ public class ProgramResult {
     }
 
     public InternalTransaction addInternalTransaction(byte[] parentHash, int deep, byte[] nonce, DataWord gasPrice,
-            DataWord gasLimit, byte[] senderAddress, byte[] receiveAddress, byte[] value, byte[] data, String note) {
+            DataWord gasLimit, byte[] senderAddress, byte[] receiveAddress, byte[] value, byte[] data, OpCode note) {
         InternalTransaction tx = new InternalTransaction(parentHash, deep, internalTransactions.size(), nonce, gasPrice,
                 gasLimit, senderAddress, receiveAddress, value, data, note);
         internalTransactions.add(tx);

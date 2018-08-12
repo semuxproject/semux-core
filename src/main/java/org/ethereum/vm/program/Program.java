@@ -116,13 +116,13 @@ public class Program {
 
     private InternalTransaction addInternalTx(byte[] nonce, DataWord gasLimit, byte[] senderAddress,
             byte[] receiveAddress,
-            BigInteger value, byte[] data, String note) {
+            BigInteger value, byte[] data, OpCode type) {
 
         InternalTransaction result = null;
         if (transaction != null) {
             byte[] senderNonce = isEmpty(nonce) ? getStorage().getNonce(senderAddress).toByteArray() : nonce;
             result = getResult().addInternalTransaction(transaction.getHash(), getCallDeep(), senderNonce,
-                    getGasPrice(), gasLimit, senderAddress, receiveAddress, value.toByteArray(), data, note);
+                    getGasPrice(), gasLimit, senderAddress, receiveAddress, value.toByteArray(), data, type);
         }
 
         return result;
@@ -199,12 +199,12 @@ public class Program {
         return stopped;
     }
 
-    public void stop() {
-        stopped = true;
-    }
-
     public void setHReturn(byte[] buff) {
         getResult().setHReturn(buff);
+    }
+
+    public void stop() {
+        stopped = true;
     }
 
     public void step() {
@@ -314,7 +314,7 @@ public class Program {
         byte[] obtainer = beneficiary.getLast20Bytes();
         BigInteger balance = getStorage().getBalance(owner);
 
-        addInternalTx(null, null, owner, obtainer, balance, null, "suicide");
+        addInternalTx(null, null, owner, obtainer, balance, null, OpCode.SUICIDE);
 
         if (Arrays.equals(owner, obtainer)) {
             // if owner == obtainer just zeroing account according to Yellow Paper
@@ -380,7 +380,7 @@ public class Program {
 
         // [5] COOK THE INVOKE AND EXECUTE
         InternalTransaction internalTx = addInternalTx(nonce, getGasLimit(), senderAddress, null, endowment,
-                programCode, "create");
+                programCode, OpCode.CREATE);
         ProgramInvoke programInvoke = programInvokeFactory.createProgramInvoke(
                 this, new DataWord(newAddress), getOwnerAddress(), value, gasLimit,
                 newBalance, null, track, this.invoke.getBlockStore(), false);
@@ -403,7 +403,7 @@ public class Program {
         // 4. CREATE THE CONTRACT OUT OF RETURN
         byte[] code = result.getHReturn();
 
-        long storageCost = getLength(code) * config.getGasCost().getCREATE_DATA();
+        long storageCost = getLength(code) * config.getFeeSchedule().getCREATE_DATA();
         long afterSpend = programInvoke.getGas().longValue() - storageCost - result.getGasUsed();
         if (afterSpend < 0) {
             if (!config.getConstants().createEmptyContractOnOOG()) {
@@ -508,7 +508,7 @@ public class Program {
 
         // CREATE CALL INTERNAL TRANSACTION
         InternalTransaction internalTx = addInternalTx(null, getGasLimit(), senderAddress, contextAddress, endowment,
-                data, "call");
+                data, msg.getType());
 
         ProgramResult result = null;
         if (isNotEmpty(programCode)) {

@@ -889,9 +889,7 @@ public enum OpCode {
 
         ExtTier(20),
 
-        SpecialTier(1),
-
-        InvalidTier(0);
+        SpecialTier(1);
 
         private final int level;
 
