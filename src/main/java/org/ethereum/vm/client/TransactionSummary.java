@@ -61,9 +61,9 @@ public class TransactionSummary {
 
     public TransactionSummary(Transaction transaction) {
         this.tx = transaction;
-        this.gasLimit = transaction.getGasLimit().value();
-        this.gasPrice = transaction.getGasPrice().value();
-        this.value = transaction.getValue().value();
+        this.gasLimit = transaction.getGasLimit();
+        this.gasPrice = transaction.getGasPrice();
+        this.value = transaction.getValue();
     }
 
     public Transaction getTransaction() {

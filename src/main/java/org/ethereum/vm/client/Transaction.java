@@ -23,7 +23,8 @@
  */
 package org.ethereum.vm.client;
 
-import org.ethereum.vm.DataWord;
+import java.math.BigInteger;
+
 import org.ethereum.vm.util.ByteArrayUtil;
 
 /**
@@ -73,7 +74,7 @@ public interface Transaction {
      *
      * @return the value with a decimal of <em>18</em>, not NULL.
      */
-    DataWord getValue();
+    BigInteger getValue();
 
     /**
      * Returns the data field.
@@ -83,16 +84,18 @@ public interface Transaction {
     byte[] getData();
 
     /**
-     * Returns the gas limit.
+     * Returns the gas limit. Because an invalid internal transaction will set the
+     * gas limit larger than {@link Long#MAX_VALUE}, this value is represented in
+     * BigInt.
      *
      * @return the specified gas limit for this transaction.
      */
-    DataWord getGasLimit();
+    BigInteger getGasLimit();
 
     /**
      * Returns the gas price.
      *
      * @return the specified gas price with a decimal of <em>18</em>, not NULL.
      */
-    DataWord getGasPrice();
+    BigInteger getGasPrice();
 }

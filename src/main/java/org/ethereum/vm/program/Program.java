@@ -119,16 +119,14 @@ public class Program {
         return invoke.getCallDeep();
     }
 
-    private InternalTransaction addInternalTx(BigInteger nonce, DataWord gasLimit, byte[] senderAddress,
-            byte[] receiveAddress,
+    private InternalTransaction addInternalTx(DataWord gasLimit, byte[] senderAddress, byte[] receiveAddress,
             BigInteger value, byte[] data, OpCode type) {
 
         InternalTransaction result = null;
         if (transaction != null) {
-            BigInteger senderNonce = (nonce == null) ? getStorage().getNonce(senderAddress) : nonce;
-            result = getResult().addInternalTransaction(transaction.getHash(), getCallDeep(), type, senderAddress,
-                    receiveAddress, senderNonce,
-                    value.toByteArray(), data, gasLimit, getGasPrice());
+            result = getResult().addInternalTransaction(transaction.getHash(), getCallDeep(), type,
+                    senderAddress, receiveAddress, getStorage().getNonce(senderAddress), value.toByteArray(), data,
+                    gasLimit, getGasPrice());
         }
 
         return result;
@@ -320,7 +318,7 @@ public class Program {
         byte[] obtainer = beneficiary.getLast20Bytes();
         BigInteger balance = getStorage().getBalance(owner);
 
-        addInternalTx(null, null, owner, obtainer, balance, null, OpCode.SUICIDE);
+        addInternalTx(null, owner, obtainer, balance, null, OpCode.SUICIDE);
 
         if (Arrays.equals(owner, obtainer)) {
             // if owner == obtainer just zeroing account according to Yellow Paper
@@ -363,8 +361,8 @@ public class Program {
         spendGas(gasLimit.longValue(), "internal call");
 
         // [2] CREATE THE CONTRACT ADDRESS
-        BigInteger nonce = getStorage().getNonce(senderAddress);
-        byte[] newAddress = VMUtil.calcNewAddr(getOwnerAddress().getLast20Bytes(), nonce.longValue());
+        long nonce = getStorage().getNonce(senderAddress);
+        byte[] newAddress = VMUtil.calcNewAddr(getOwnerAddress().getLast20Bytes(), nonce);
 
         boolean contractAlreadyExists = getStorage().isExist(newAddress);
 
@@ -385,7 +383,7 @@ public class Program {
         newBalance = track.addBalance(newAddress, endowment);
 
         // [5] COOK THE INVOKE AND EXECUTE
-        InternalTransaction internalTx = addInternalTx(nonce, getGasLimit(), senderAddress, null, endowment,
+        InternalTransaction internalTx = addInternalTx(getGasLimit(), senderAddress, null, endowment,
                 programCode, OpCode.CREATE);
         ProgramInvoke programInvoke = programInvokeFactory.createProgramInvoke(
                 this, new DataWord(newAddress), getOwnerAddress(), value, gasLimit,
@@ -513,7 +511,7 @@ public class Program {
         contextBalance = track.addBalance(contextAddress, endowment);
 
         // CREATE CALL INTERNAL TRANSACTION
-        InternalTransaction internalTx = addInternalTx(null, getGasLimit(), senderAddress, contextAddress, endowment,
+        InternalTransaction internalTx = addInternalTx(getGasLimit(), senderAddress, contextAddress, endowment,
                 data, msg.getType());
 
         ProgramResult result = null;
@@ -620,7 +618,7 @@ public class Program {
     public void storageSave(byte[] key, byte[] val) {
         DataWord keyWord = new DataWord(key);
         DataWord valWord = new DataWord(val);
-        getStorage().addStorageRow(getOwnerAddress().getLast20Bytes(), keyWord, valWord);
+        getStorage().putStorageRow(getOwnerAddress().getLast20Bytes(), keyWord, valWord);
     }
 
     public byte[] getCode() {
@@ -699,7 +697,7 @@ public class Program {
     }
 
     public DataWord storageLoad(DataWord key) {
-        DataWord ret = getStorage().getStorageValue(getOwnerAddress().getLast20Bytes(), key.clone());
+        DataWord ret = getStorage().getStorageRow(getOwnerAddress().getLast20Bytes(), key.clone());
         return ret == null ? null : ret.clone();
     }
 

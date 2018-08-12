@@ -28,8 +28,8 @@ import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.ethereum.vm.util.BigIntUtil.isCovers;
 import static org.ethereum.vm.util.BigIntUtil.toBI;
 import static org.ethereum.vm.util.BigIntUtil.transfer;
-import static org.ethereum.vm.util.HexUtil.toHexString;
 import static org.ethereum.vm.util.ByteArrayUtil.EMPTY_BYTE_ARRAY;
+import static org.ethereum.vm.util.HexUtil.toHexString;
 
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -105,7 +105,7 @@ public class TransactionExecutor {
         this.programInvokeFactory = programInvokeFactory;
         this.currentBlock = currentBlock;
         this.gasUsedInTheBlock = gasUsedInTheBlock;
-        this.m_endGas = tx.getGasLimit().value();
+        this.m_endGas = tx.getGasLimit();
         this.config = config;
     }
 
@@ -126,7 +126,7 @@ public class TransactionExecutor {
             return;
         }
 
-        BigInteger txGasLimit = tx.getGasLimit().value();
+        BigInteger txGasLimit = tx.getGasLimit();
         BigInteger curBlockGasLimit = currentBlock.getGasLimit();
 
         boolean cumulativeGasReached = txGasLimit.add(BigInteger.valueOf(gasUsedInTheBlock))
@@ -142,16 +142,16 @@ public class TransactionExecutor {
             return;
         }
 
-        BigInteger reqNonce = track.getNonce(tx.getFrom());
-        BigInteger txNonce = BigInteger.valueOf(tx.getNonce());
-        if (!reqNonce.equals(txNonce)) {
+        long reqNonce = track.getNonce(tx.getFrom());
+        long txNonce = tx.getNonce();
+        if (reqNonce != txNonce) {
             execError(String.format("Invalid nonce: required: %s , tx.nonce: %s", reqNonce, txNonce));
 
             return;
         }
 
-        BigInteger txGasCost = tx.getGasPrice().value().multiply(txGasLimit);
-        BigInteger totalCost = tx.getValue().value().add(txGasCost);
+        BigInteger txGasCost = tx.getGasPrice().multiply(txGasLimit);
+        BigInteger totalCost = tx.getValue().add(txGasCost);
         BigInteger senderBalance = track.getBalance(tx.getFrom());
 
         if (!isCovers(senderBalance, totalCost)) {
@@ -172,8 +172,8 @@ public class TransactionExecutor {
         if (!localCall) {
             track.increaseNonce(tx.getFrom());
 
-            BigInteger txGasLimit = tx.getGasLimit().value();
-            BigInteger txGasCost = tx.getGasPrice().value().multiply(txGasLimit);
+            BigInteger txGasLimit = tx.getGasLimit();
+            BigInteger txGasCost = tx.getGasPrice().multiply(txGasLimit);
             track.addBalance(tx.getFrom(), txGasCost.negate());
         }
 
@@ -232,7 +232,7 @@ public class TransactionExecutor {
             }
         }
 
-        BigInteger endowment = tx.getValue().value();
+        BigInteger endowment = tx.getValue();
         transfer(cacheTrack, tx.getFrom(), targetAddress, endowment);
 
         touchedAccounts.add(new DataWord(targetAddress));
@@ -275,7 +275,7 @@ public class TransactionExecutor {
             // }
         }
 
-        BigInteger endowment = tx.getValue().value();
+        BigInteger endowment = tx.getValue();
         transfer(cacheTrack, tx.getFrom(), newContractAddress, endowment);
 
         touchedAccounts.add(new DataWord(newContractAddress));
@@ -295,7 +295,7 @@ public class TransactionExecutor {
                 vm.play(program);
 
                 result = program.getResult();
-                m_endGas = tx.getGasLimit().value().subtract(toBI(program.getResult().getGasUsed()));
+                m_endGas = tx.getGasLimit().subtract(toBI(program.getResult().getGasUsed()));
 
                 if (tx.isCreate() && !result.isRevert()) {
                     int returnDataGasValue = getLength(program.getResult().getHReturn())
@@ -413,7 +413,6 @@ public class TransactionExecutor {
     }
 
     public long getGasUsed() {
-        return tx.getGasLimit().value().subtract(m_endGas).longValue();
+        return tx.getGasLimit().subtract(m_endGas).longValue();
     }
-
 }

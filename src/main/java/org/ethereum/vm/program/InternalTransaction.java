@@ -51,7 +51,7 @@ public class InternalTransaction implements Transaction {
     private DataWord gasPrice;
 
     public InternalTransaction(byte[] parentHash, int depth, int index, OpCode type,
-            byte[] sendAddress, byte[] receiveAddress, BigInteger nonce, byte[] value, byte[] data,
+            byte[] sendAddress, byte[] receiveAddress, long nonce, byte[] value, byte[] data,
             DataWord gasLimit, DataWord gasPrice) {
         this.parentHash = parentHash;
         this.depth = depth;
@@ -111,7 +111,7 @@ public class InternalTransaction implements Transaction {
     }
 
     @Override
-    public DataWord getValue() {
+    public BigInteger getValue() {
         return null;
     }
 
@@ -121,12 +121,12 @@ public class InternalTransaction implements Transaction {
     }
 
     @Override
-    public DataWord getGasLimit() {
+    public BigInteger getGasLimit() {
         return null;
     }
 
     @Override
-    public DataWord getGasPrice() {
+    public BigInteger getGasPrice() {
         return null;
     }
 

@@ -51,7 +51,7 @@ public interface Repository {
      *            of the account
      * @return new value of the nonce
      */
-    BigInteger increaseNonce(byte[] addr);
+    long increaseNonce(byte[] addr);
 
     /**
      * Sets the account nonce of the given account
@@ -62,7 +62,7 @@ public interface Repository {
      *            new nonce
      * @return new value of the nonce
      */
-    BigInteger setNonce(byte[] addr, BigInteger nonce);
+    long setNonce(byte[] addr, long nonce);
 
     /**
      * Get current nonce of a given account
@@ -71,7 +71,7 @@ public interface Repository {
      *            of the account
      * @return value of the nonce
      */
-    BigInteger getNonce(byte[] addr);
+    long getNonce(byte[] addr);
 
     /**
      * Store code associated with an account
@@ -102,7 +102,7 @@ public interface Repository {
      * @param value
      *            is the data to store
      */
-    void addStorageRow(byte[] addr, DataWord key, DataWord value);
+    void putStorageRow(byte[] addr, DataWord key, DataWord value);
 
     /**
      * Retrieve storage value from an account for a given key
@@ -113,7 +113,7 @@ public interface Repository {
      *            associated with this value
      * @return data in the form of a <code>DataWord</code>
      */
-    DataWord getStorageValue(byte[] addr, DataWord key);
+    DataWord getStorageRow(byte[] addr, DataWord key);
 
     /**
      * Retrieve balance of an account

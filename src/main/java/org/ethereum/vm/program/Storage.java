@@ -50,17 +50,17 @@ public class Storage implements Repository {
     }
 
     @Override
-    public BigInteger increaseNonce(byte[] addr) {
+    public long increaseNonce(byte[] addr) {
         return repository.increaseNonce(addr);
     }
 
     @Override
-    public BigInteger setNonce(byte[] addr, BigInteger nonce) {
+    public long setNonce(byte[] addr, long nonce) {
         return repository.setNonce(addr, nonce);
     }
 
     @Override
-    public BigInteger getNonce(byte[] addr) {
+    public long getNonce(byte[] addr) {
         return repository.getNonce(addr);
     }
 
@@ -75,13 +75,13 @@ public class Storage implements Repository {
     }
 
     @Override
-    public void addStorageRow(byte[] addr, DataWord key, DataWord value) {
-        repository.addStorageRow(addr, key, value);
+    public void putStorageRow(byte[] addr, DataWord key, DataWord value) {
+        repository.putStorageRow(addr, key, value);
     }
 
     @Override
-    public DataWord getStorageValue(byte[] addr, DataWord key) {
-        return repository.getStorageValue(addr, key);
+    public DataWord getStorageRow(byte[] addr, DataWord key) {
+        return repository.getStorageRow(addr, key);
     }
 
     @Override

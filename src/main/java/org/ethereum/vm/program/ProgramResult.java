@@ -23,7 +23,6 @@
  */
 package org.ethereum.vm.program;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -133,7 +132,7 @@ public class ProgramResult {
     }
 
     public InternalTransaction addInternalTransaction(byte[] parentHash, int depth, OpCode type,
-            byte[] senderAddress, byte[] receiveAddress, BigInteger nonce, byte[] value, byte[] data,
+            byte[] senderAddress, byte[] receiveAddress, long nonce, byte[] value, byte[] data,
             DataWord gasLimit, DataWord gasPrice) {
         InternalTransaction tx = new InternalTransaction(parentHash, depth, internalTransactions.size(), type,
                 senderAddress, receiveAddress, nonce, value, data, gasLimit, gasPrice);
