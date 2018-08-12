@@ -38,7 +38,8 @@ import org.ethereum.vm.program.Stack;
 import org.ethereum.vm.program.exception.ExceptionFactory;
 import org.ethereum.vm.program.exception.ReturnDataCopyIllegalBoundsException;
 import org.ethereum.vm.program.exception.StaticCallModificationException;
-import org.ethereum.vm.util.VMUtils;
+import org.ethereum.vm.util.ByteArrayUtil;
+import org.ethereum.vm.util.VMUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -295,7 +296,7 @@ public class VM {
             switch (op) {
 
             case STOP: {
-                program.setHReturn(VMUtils.EMPTY_BYTE_ARRAY);
+                program.setHReturn(ByteArrayUtil.EMPTY_BYTE_ARRAY);
                 program.stop();
             }
                 break;
@@ -549,7 +550,7 @@ public class VM {
                 DataWord lengthData = program.stackPop();
                 byte[] buffer = program.memoryChunk(memOffsetData.intValueSafe(), lengthData.intValueSafe());
 
-                byte[] encoded = VMUtils.sha3(buffer);
+                byte[] encoded = VMUtil.sha3(buffer);
                 DataWord word = new DataWord(encoded);
 
                 program.stackPush(word);
@@ -664,7 +665,7 @@ public class VM {
             case CODECOPY:
             case EXTCODECOPY: {
 
-                byte[] fullCode = VMUtils.EMPTY_BYTE_ARRAY;
+                byte[] fullCode = ByteArrayUtil.EMPTY_BYTE_ARRAY;
                 if (op == OpCode.CODECOPY)
                     fullCode = program.getCode();
 

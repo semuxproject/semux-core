@@ -30,7 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.ethereum.vm.DataWord;
-import org.ethereum.vm.util.VMUtils;
+import org.ethereum.vm.util.ByteArrayUtil;
 
 public class Memory {
 
@@ -42,7 +42,7 @@ public class Memory {
 
     public byte[] read(int address, int size) {
         if (size <= 0) {
-            return VMUtils.EMPTY_BYTE_ARRAY;
+            return ByteArrayUtil.EMPTY_BYTE_ARRAY;
         }
 
         extend(address, size);

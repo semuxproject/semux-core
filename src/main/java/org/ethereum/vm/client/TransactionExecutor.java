@@ -25,11 +25,11 @@ package org.ethereum.vm.client;
 
 import static org.apache.commons.lang3.ArrayUtils.getLength;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
-import static org.ethereum.vm.util.BiUtil.isCovers;
-import static org.ethereum.vm.util.BiUtil.toBI;
-import static org.ethereum.vm.util.BiUtil.transfer;
-import static org.ethereum.vm.util.VMUtils.EMPTY_BYTE_ARRAY;
-import static org.ethereum.vm.util.VMUtils.toHexString;
+import static org.ethereum.vm.util.BigIntUtil.isCovers;
+import static org.ethereum.vm.util.BigIntUtil.toBI;
+import static org.ethereum.vm.util.BigIntUtil.transfer;
+import static org.ethereum.vm.util.HexUtil.toHexString;
+import static org.ethereum.vm.util.ByteArrayUtil.EMPTY_BYTE_ARRAY;
 
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -49,7 +49,7 @@ import org.ethereum.vm.program.ProgramResult;
 import org.ethereum.vm.program.exception.ExceptionFactory;
 import org.ethereum.vm.program.invoke.ProgramInvoke;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
-import org.ethereum.vm.util.VMUtils;
+import org.ethereum.vm.util.VMUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -239,7 +239,7 @@ public class TransactionExecutor {
     }
 
     private void create() {
-        byte[] newContractAddress = VMUtils.calcNewAddr(tx.getFrom(), tx.getNonce());
+        byte[] newContractAddress = VMUtil.calcNewAddr(tx.getFrom(), tx.getNonce());
 
         if (cacheTrack.isExist(newContractAddress)) {
             execError(
@@ -319,7 +319,7 @@ public class TransactionExecutor {
                     } else {
                         // Contract successfully created
                         m_endGas = m_endGas.subtract(BigInteger.valueOf(returnDataGasValue));
-                        cacheTrack.saveCode(VMUtils.calcNewAddr(tx.getFrom(), tx.getNonce()), result.getHReturn());
+                        cacheTrack.saveCode(VMUtil.calcNewAddr(tx.getFrom(), tx.getNonce()), result.getHReturn());
                     }
                 }
 
@@ -360,7 +360,7 @@ public class TransactionExecutor {
 
         // remove touched account
         touchedAccounts
-                .remove(new DataWord(tx.isCreate() ? VMUtils.calcNewAddr(tx.getFrom(), tx.getNonce()) : tx.getTo()));
+                .remove(new DataWord(tx.isCreate() ? VMUtil.calcNewAddr(tx.getFrom(), tx.getNonce()) : tx.getTo()));
     }
 
     public TransactionSummary finalization() {
@@ -376,7 +376,7 @@ public class TransactionExecutor {
             // Accumulate refunds for suicides
             result.addFutureRefund(result.getDeleteAccounts().size() * config.getFeeSchedule().getSUICIDE_REFUND());
             long gasRefund = Math.min(result.getFutureRefund(), getGasUsed() / 2);
-            byte[] addr = tx.isCreate() ? VMUtils.calcNewAddr(tx.getFrom(), tx.getNonce()) : tx.getTo();
+            byte[] addr = tx.isCreate() ? VMUtil.calcNewAddr(tx.getFrom(), tx.getNonce()) : tx.getTo();
             m_endGas = m_endGas.add(BigInteger.valueOf(gasRefund));
 
             summaryBuilder

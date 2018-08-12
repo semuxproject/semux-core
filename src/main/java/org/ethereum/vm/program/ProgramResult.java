@@ -23,6 +23,7 @@
  */
 package org.ethereum.vm.program;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.OpCode;
-import org.ethereum.vm.util.VMUtils;
+import org.ethereum.vm.util.ByteArrayUtil;
 
 /**
  * A data structure to hold the results of program.
@@ -40,7 +41,7 @@ import org.ethereum.vm.util.VMUtils;
 public class ProgramResult {
 
     private long gasUsed = 0;
-    private byte[] hReturn = VMUtils.EMPTY_BYTE_ARRAY;
+    private byte[] hReturn = ByteArrayUtil.EMPTY_BYTE_ARRAY;
     private RuntimeException exception = null;
     private boolean revert = false;
 
@@ -132,7 +133,7 @@ public class ProgramResult {
     }
 
     public InternalTransaction addInternalTransaction(byte[] parentHash, int depth, OpCode type,
-            byte[] senderAddress, byte[] receiveAddress, byte[] nonce, byte[] value, byte[] data,
+            byte[] senderAddress, byte[] receiveAddress, BigInteger nonce, byte[] value, byte[] data,
             DataWord gasLimit, DataWord gasPrice) {
         InternalTransaction tx = new InternalTransaction(parentHash, depth, internalTransactions.size(), type,
                 senderAddress, receiveAddress, nonce, value, data, gasLimit, gasPrice);

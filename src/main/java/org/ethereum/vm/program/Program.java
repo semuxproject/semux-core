@@ -29,10 +29,10 @@ import static org.apache.commons.lang3.ArrayUtils.getLength;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 import static org.apache.commons.lang3.ArrayUtils.nullToEmpty;
-import static org.ethereum.vm.util.BiUtil.isNotCovers;
-import static org.ethereum.vm.util.BiUtil.isPositive;
-import static org.ethereum.vm.util.BiUtil.toBI;
-import static org.ethereum.vm.util.BiUtil.transfer;
+import static org.ethereum.vm.util.BigIntUtil.isNotCovers;
+import static org.ethereum.vm.util.BigIntUtil.isPositive;
+import static org.ethereum.vm.util.BigIntUtil.toBI;
+import static org.ethereum.vm.util.BigIntUtil.transfer;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -54,7 +54,8 @@ import org.ethereum.vm.program.exception.ExceptionFactory;
 import org.ethereum.vm.program.exception.StackUnderflowException;
 import org.ethereum.vm.program.invoke.ProgramInvoke;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
-import org.ethereum.vm.util.VMUtils;
+import org.ethereum.vm.util.HexUtil;
+import org.ethereum.vm.util.VMUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,13 +119,13 @@ public class Program {
         return invoke.getCallDeep();
     }
 
-    private InternalTransaction addInternalTx(byte[] nonce, DataWord gasLimit, byte[] senderAddress,
+    private InternalTransaction addInternalTx(BigInteger nonce, DataWord gasLimit, byte[] senderAddress,
             byte[] receiveAddress,
             BigInteger value, byte[] data, OpCode type) {
 
         InternalTransaction result = null;
         if (transaction != null) {
-            byte[] senderNonce = isEmpty(nonce) ? getStorage().getNonce(senderAddress).toByteArray() : nonce;
+            BigInteger senderNonce = (nonce == null) ? getStorage().getNonce(senderAddress) : nonce;
             result = getResult().addInternalTransaction(transaction.getHash(), getCallDeep(), type, senderAddress,
                     receiveAddress, senderNonce,
                     value.toByteArray(), data, gasLimit, getGasPrice());
@@ -355,15 +356,15 @@ public class Program {
         byte[] programCode = memoryChunk(memStart.intValue(), memSize.intValue());
 
         if (logger.isInfoEnabled())
-            logger.info("creating a new contract inside contract run: [{}]", VMUtils.toHexString(senderAddress));
+            logger.info("creating a new contract inside contract run: [{}]", HexUtil.toHexString(senderAddress));
 
         // actual gas subtract
         DataWord gasLimit = config.getCreateGas(getGas());
         spendGas(gasLimit.longValue(), "internal call");
 
         // [2] CREATE THE CONTRACT ADDRESS
-        byte[] nonce = getStorage().getNonce(senderAddress).toByteArray();
-        byte[] newAddress = VMUtils.calcNewAddr(getOwnerAddress().getLast20Bytes(), nonce);
+        BigInteger nonce = getStorage().getNonce(senderAddress);
+        byte[] newAddress = VMUtil.calcNewAddr(getOwnerAddress().getLast20Bytes(), nonce.longValue());
 
         boolean contractAlreadyExists = getStorage().isExist(newAddress);
 
@@ -395,7 +396,7 @@ public class Program {
         if (contractAlreadyExists) {
             result.setException(new BytecodeExecutionException(
                     "Trying to create a contract with existing contract address: 0x"
-                            + VMUtils.toHexString(newAddress)));
+                            + HexUtil.toHexString(newAddress)));
         } else if (isNotEmpty(programCode)) {
             VM vm = new VM(config);
             Program program = new Program(programCode, programInvoke, internalTx, config);
@@ -428,7 +429,7 @@ public class Program {
 
         if (result.getException() != null || result.isRevert()) {
             logger.debug("contract run halted by Exception: contract: [{}], exception: [{}]",
-                    VMUtils.toHexString(newAddress),
+                    HexUtil.toHexString(newAddress),
                     result.getException());
 
             internalTx.reject();
@@ -455,7 +456,7 @@ public class Program {
             refundGas(refundGas, "remain gas from the internal call");
             if (logger.isInfoEnabled()) {
                 logger.info("The remaining gas is refunded, account: [{}], gas: [{}] ",
-                        VMUtils.toHexString(getOwnerAddress().getLast20Bytes()),
+                        HexUtil.toHexString(getOwnerAddress().getLast20Bytes()),
                         refundGas);
             }
         }
@@ -490,7 +491,7 @@ public class Program {
             logger.info(
                     msg.getType().name()
                             + " for existing contract: address: [{}], outDataOffs: [{}], outDataSize: [{}]  ",
-                    VMUtils.toHexString(contextAddress), msg.getOutDataOffs().longValue(),
+                    HexUtil.toHexString(contextAddress), msg.getOutDataOffs().longValue(),
                     msg.getOutDataSize().longValue());
 
         Repository track = getStorage().startTracking();
@@ -533,7 +534,7 @@ public class Program {
 
             if (result.getException() != null || result.isRevert()) {
                 logger.debug("contract run halted by Exception: contract: [{}], exception: [{}]",
-                        VMUtils.toHexString(contextAddress),
+                        HexUtil.toHexString(contextAddress),
                         result.getException());
 
                 internalTx.reject();
@@ -575,7 +576,7 @@ public class Program {
                 refundGas(refundGas.longValue(), "remaining gas from the internal call");
                 if (logger.isInfoEnabled())
                     logger.info("The remaining gas refunded, account: [{}], gas: [{}] ",
-                            VMUtils.toHexString(senderAddress),
+                            HexUtil.toHexString(senderAddress),
                             refundGas.toString());
             }
         } else {
@@ -858,7 +859,7 @@ public class Program {
         } else {
 
             if (logger.isDebugEnabled())
-                logger.debug("Call {}(data = {})", contract.getClass().getSimpleName(), VMUtils.toHexString(data));
+                logger.debug("Call {}(data = {})", contract.getClass().getSimpleName(), HexUtil.toHexString(data));
 
             Pair<Boolean, byte[]> out = contract.execute(data);
 

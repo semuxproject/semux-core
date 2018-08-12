@@ -24,6 +24,7 @@
 package org.ethereum.vm.client;
 
 import org.ethereum.vm.DataWord;
+import org.ethereum.vm.util.ByteArrayUtil;
 
 /**
  * A facet interface for Transaction. The client needs to wrap the native
@@ -55,9 +56,8 @@ public interface Transaction {
     /**
      * Returns the recipient address.
      *
-     * @return a 20-byte array, or
-     *         {@link org.ethereum.vm.util.VMUtils#EMPTY_BYTE_ARRAY} for CREATE, not
-     *         NULL.
+     * @return a 20-byte array, or {@link ByteArrayUtil#EMPTY_BYTE_ARRAY} for
+     *         CREATE, not NULL.
      */
     byte[] getTo();
 

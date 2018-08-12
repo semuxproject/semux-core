@@ -27,7 +27,8 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import org.ethereum.vm.util.VMUtils;
+import org.ethereum.vm.util.ByteArrayUtil;
+import org.ethereum.vm.util.HexUtil;
 
 /**
  * DataWord is the 32-byte array representation of a 256-bit number.
@@ -59,7 +60,7 @@ public class DataWord implements Comparable<DataWord>, Cloneable {
     }
 
     public DataWord(String hex) {
-        this(VMUtils.fromHexString(hex));
+        this(HexUtil.fromHexString(hex));
     }
 
     public DataWord(byte[] data) {
@@ -77,7 +78,7 @@ public class DataWord implements Comparable<DataWord>, Cloneable {
     }
 
     public byte[] getNoLeadZeroesData() {
-        return VMUtils.stripLeadingZeroes(data);
+        return ByteArrayUtil.stripLeadingZeroes(data);
     }
 
     public byte[] getLast20Bytes() {
@@ -302,7 +303,7 @@ public class DataWord implements Comparable<DataWord>, Cloneable {
 
     @Override
     public String toString() {
-        return VMUtils.toHexString(data);
+        return HexUtil.toHexString(data);
     }
 
     public DataWord clone() {
@@ -322,7 +323,7 @@ public class DataWord implements Comparable<DataWord>, Cloneable {
 
     @Override
     public int compareTo(DataWord o) {
-        return VMUtils.compareUnsigned(this.data, o.data);
+        return ByteArrayUtil.compareUnsigned(this.data, o.data);
     }
 
     public void signExtend(byte k) {

@@ -28,7 +28,7 @@ import java.math.BigInteger;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.OpCode;
 import org.ethereum.vm.program.Program;
-import org.ethereum.vm.util.VMUtils;
+import org.ethereum.vm.util.HexUtil;
 
 public class ExceptionFactory {
 
@@ -57,7 +57,7 @@ public class ExceptionFactory {
 
     public static IllegalOperationException invalidOpCode(byte opCode) {
         return new IllegalOperationException("Invalid operation code: opCode[%s];",
-                VMUtils.toHexString(new byte[] { opCode }));
+                HexUtil.toHexString(new byte[] { opCode }));
     }
 
     public static BadJumpDestinationException badJumpDestination(int pc) {

@@ -23,10 +23,12 @@
  */
 package org.ethereum.vm.program;
 
+import java.math.BigInteger;
+
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.OpCode;
 import org.ethereum.vm.client.Transaction;
-import org.ethereum.vm.util.VMUtils;
+import org.ethereum.vm.util.HexUtil;
 
 /**
  * Represents an internal transaction.
@@ -49,7 +51,7 @@ public class InternalTransaction implements Transaction {
     private DataWord gasPrice;
 
     public InternalTransaction(byte[] parentHash, int depth, int index, OpCode type,
-            byte[] sendAddress, byte[] receiveAddress, byte[] nonce, byte[] value, byte[] data,
+            byte[] sendAddress, byte[] receiveAddress, BigInteger nonce, byte[] value, byte[] data,
             DataWord gasLimit, DataWord gasPrice) {
         this.parentHash = parentHash;
         this.depth = depth;
@@ -84,6 +86,11 @@ public class InternalTransaction implements Transaction {
     // TODO: implement the following methods
 
     @Override
+    public boolean isCreate() {
+        return type == OpCode.CREATE;
+    }
+
+    @Override
     public byte[] getHash() {
         return new byte[0];
     }
@@ -99,7 +106,7 @@ public class InternalTransaction implements Transaction {
     }
 
     @Override
-    public long nonce() {
+    public long getNonce() {
         return 0;
     }
 
@@ -126,7 +133,7 @@ public class InternalTransaction implements Transaction {
     @Override
     public String toString() {
         return "InternalTransaction [" +
-                "  parentHash=" + VMUtils.toHexString(getParentHash()) +
+                "  parentHash=" + HexUtil.toHexString(getParentHash()) +
                 ", depth=" + getDepth() +
                 ", index=" + getIndex() +
                 ", type=" + getType() +

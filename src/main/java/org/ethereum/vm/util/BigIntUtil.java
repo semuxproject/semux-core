@@ -10,7 +10,7 @@ import java.math.BigInteger;
 
 import org.ethereum.vm.client.Repository;
 
-public class BiUtil {
+public class BigIntUtil {
     public static BigInteger toBI(long data) {
         return BigInteger.valueOf(data);
     }
