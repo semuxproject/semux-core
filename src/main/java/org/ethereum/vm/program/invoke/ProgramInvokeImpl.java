@@ -147,7 +147,7 @@ public class ProgramInvokeImpl implements ProgramInvoke {
     public DataWord getDataValue(DataWord indexData) {
         BigInteger indexBI = indexData.value();
         if (indexBI.compareTo(BigInteger.valueOf(data.length)) >= 0) {
-            return new DataWord();
+            return DataWord.ZERO;
         }
 
         int idx = indexBI.intValue();

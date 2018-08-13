@@ -253,8 +253,8 @@ public class VM {
                     throw ExceptionFactory.notEnoughOpGas(op, callGasWord, program.getGas());
                 }
 
-                DataWord gasLeft = program.getGas().clone();
-                gasLeft.sub(new DataWord(gasCost));
+                DataWord gasLeft = program.getGas();
+                gasLeft = gasLeft.sub(new DataWord(gasCost));
                 adjustedCallGas = config.getCallGas(op, callGasWord, gasLeft);
                 gasCost += adjustedCallGas.longValueSafe();
                 break;
@@ -304,8 +304,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                word1.add(word2);
-                program.stackPush(word1);
+                DataWord result = word1.add(word2);
+                program.stackPush(result);
                 program.step();
 
             }
@@ -314,8 +314,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                word1.mul(word2);
-                program.stackPush(word1);
+                DataWord result = word1.mul(word2);
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -323,8 +323,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                word1.sub(word2);
-                program.stackPush(word1);
+                DataWord result = word1.sub(word2);
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -332,8 +332,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                word1.div(word2);
-                program.stackPush(word1);
+                DataWord result = word1.div(word2);
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -341,8 +341,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                word1.sDiv(word2);
-                program.stackPush(word1);
+                DataWord result = word1.sDiv(word2);
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -350,8 +350,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                word1.mod(word2);
-                program.stackPush(word1);
+                DataWord result = word1.mod(word2);
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -359,8 +359,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                word1.sMod(word2);
-                program.stackPush(word1);
+                DataWord result = word1.sMod(word2);
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -368,8 +368,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                word1.exp(word2);
-                program.stackPush(word1);
+                DataWord result = word1.exp(word2);
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -379,17 +379,17 @@ public class VM {
 
                 if (k.compareTo(THIRTY_TWO) < 0) {
                     DataWord word2 = program.stackPop();
-                    word2.signExtend(k.byteValue());
-                    program.stackPush(word2);
+                    DataWord result = word2.signExtend(k.byteValue());
+                    program.stackPush(result);
                 }
                 program.step();
             }
                 break;
             case NOT: {
                 DataWord word1 = program.stackPop();
-                word1.bnot();
+                DataWord result = word1.bnot();
 
-                program.stackPush(word1);
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -397,13 +397,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                if (word1.value().compareTo(word2.value()) == -1) {
-                    word1.and(DataWord.ZERO);
-                    word1.getData()[31] = 1;
-                } else {
-                    word1.and(DataWord.ZERO);
-                }
-                program.stackPush(word1);
+                DataWord result = (word1.value().compareTo(word2.value()) == -1) ? DataWord.ONE : DataWord.ZERO;
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -411,13 +406,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                if (word1.sValue().compareTo(word2.sValue()) == -1) {
-                    word1.and(DataWord.ZERO);
-                    word1.getData()[31] = 1;
-                } else {
-                    word1.and(DataWord.ZERO);
-                }
-                program.stackPush(word1);
+                DataWord result = (word1.sValue().compareTo(word2.sValue()) == -1) ? DataWord.ONE : DataWord.ZERO;
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -425,13 +415,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                if (word1.sValue().compareTo(word2.sValue()) == 1) {
-                    word1.and(DataWord.ZERO);
-                    word1.getData()[31] = 1;
-                } else {
-                    word1.and(DataWord.ZERO);
-                }
-                program.stackPush(word1);
+                DataWord result = (word1.sValue().compareTo(word2.sValue()) == 1) ? DataWord.ONE : DataWord.ZERO;
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -439,13 +424,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                if (word1.value().compareTo(word2.value()) == 1) {
-                    word1.and(DataWord.ZERO);
-                    word1.getData()[31] = 1;
-                } else {
-                    word1.and(DataWord.ZERO);
-                }
-                program.stackPush(word1);
+                DataWord result = (word1.value().compareTo(word2.value()) == 1) ? DataWord.ONE : DataWord.ZERO;
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -453,25 +433,15 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                if (word1.xor(word2).isZero()) {
-                    word1.and(DataWord.ZERO);
-                    word1.getData()[31] = 1;
-                } else {
-                    word1.and(DataWord.ZERO);
-                }
-                program.stackPush(word1);
+                DataWord result = word1.equals(word2) ? DataWord.ONE : DataWord.ZERO;
+                program.stackPush(result);
                 program.step();
             }
                 break;
             case ISZERO: {
                 DataWord word1 = program.stackPop();
-                if (word1.isZero()) {
-                    word1.getData()[31] = 1;
-                } else {
-                    word1.and(DataWord.ZERO);
-                }
-
-                program.stackPush(word1);
+                DataWord result = word1.isZero() ? DataWord.ONE : DataWord.ZERO;
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -483,8 +453,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                word1.and(word2);
-                program.stackPush(word1);
+                DataWord result = word1.and(word2);
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -492,8 +462,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                word1.or(word2);
-                program.stackPush(word1);
+                DataWord result = word1.or(word2);
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -501,8 +471,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                word1.xor(word2);
-                program.stackPush(word1);
+                DataWord result = word1.xor(word2);
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -512,11 +482,9 @@ public class VM {
                 final DataWord result;
                 if (word1.value().compareTo(THIRTY_TWO) == -1) {
                     byte tmp = word2.getData()[word1.intValue()];
-                    word2.and(DataWord.ZERO);
-                    word2.getData()[31] = tmp;
-                    result = word2;
+                    result = new DataWord(new byte[] { tmp });
                 } else {
-                    result = new DataWord();
+                    result = DataWord.ZERO;
                 }
 
                 program.stackPush(result);
@@ -765,10 +733,8 @@ public class VM {
             case DUP14:
             case DUP15:
             case DUP16: {
-
                 int n = op.val() - OpCode.DUP1.val() + 1;
-                DataWord word_1 = stack.get(stack.size() - n);
-                program.stackPush(word_1.clone());
+                program.stackPush(stack.get(stack.size() - n)); // same object ref
                 program.step();
 
             }
@@ -852,8 +818,9 @@ public class VM {
                 DataWord key = program.stackPop();
                 DataWord val = program.storageLoad(key);
 
-                if (val == null)
-                    val = key.and(DataWord.ZERO);
+                if (val == null) {
+                    val = DataWord.ZERO;
+                }
 
                 program.stackPush(val);
                 program.step();
@@ -984,7 +951,7 @@ public class VM {
                     throw new StaticCallModificationException();
 
                 if (!value.isZero()) {
-                    adjustedCallGas.add(new DataWord(feeSchedule.getSTIPEND_CALL()));
+                    adjustedCallGas = adjustedCallGas.add(new DataWord(feeSchedule.getSTIPEND_CALL()));
                 }
 
                 DataWord inDataOffs = program.stackPop();

@@ -113,7 +113,7 @@ public interface Repository {
      *            the account address
      * @param key
      *            associated with this value
-     * @return data in the form of a <code>DataWord</code>
+     * @return the value, or NULL if not exist
      */
     DataWord getStorageRow(byte[] address, DataWord key);
 
