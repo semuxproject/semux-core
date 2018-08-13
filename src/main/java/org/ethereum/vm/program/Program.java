@@ -54,6 +54,7 @@ import org.ethereum.vm.program.exception.ExceptionFactory;
 import org.ethereum.vm.program.exception.StackUnderflowException;
 import org.ethereum.vm.program.invoke.ProgramInvoke;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
+import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.ethereum.vm.util.ByteArrayUtil;
 import org.ethereum.vm.util.HexUtil;
 import org.ethereum.vm.util.VMUtil;
@@ -78,7 +79,7 @@ public class Program {
     private Transaction transaction;
 
     private ProgramInvoke invoke;
-    private ProgramInvokeFactory programInvokeFactory; // TODO: add implementation
+    private ProgramInvokeFactory programInvokeFactory = new ProgramInvokeFactoryImpl();
 
     private Config config;
     private ProgramPrecompile programPrecompile;
@@ -116,19 +117,19 @@ public class Program {
         return programPrecompile;
     }
 
-    public int getCallDeep() {
-        return invoke.getCallDeep();
+    public int getCallDepth() {
+        return invoke.getCallDepth();
     }
 
     private InternalTransaction addInternalTx(OpCode type, byte[] from, byte[] to, long nonce, BigInteger value,
-            byte[] data, BigInteger gasLimit) {
+            byte[] data, BigInteger gas) {
 
         byte[] parentHash = transaction.getHash();
-        int depth = getCallDeep();
+        int depth = getCallDepth();
         int index = result.getInternalTransactions().size();
 
         InternalTransaction tx = new InternalTransaction(parentHash, depth, index, type,
-                from, to, nonce, value, data, gasLimit, getGasPrice().value());
+                from, to, nonce, value, data, gas, getGasPrice().value());
         result.addInternalTransaction(tx);
 
         return tx;
@@ -341,7 +342,7 @@ public class Program {
     public void createContract(DataWord value, DataWord memStart, DataWord memSize) {
         returnDataBuffer = null; // reset return buffer right before the call
 
-        if (getCallDeep() == MAX_DEPTH) {
+        if (getCallDepth() == MAX_DEPTH) {
             stackPushZero();
             return;
         }
@@ -360,8 +361,8 @@ public class Program {
             logger.info("creating a new contract inside contract run: [{}]", HexUtil.toHexString(senderAddress));
 
         // actual gas subtract
-        DataWord gasLimit = config.getCreateGas(getGas());
-        spendGas(gasLimit.longValue(), "internal call");
+        DataWord gas = config.getCreateGas(getGas());
+        spendGas(gas.longValue(), "internal call");
 
         // [2] CREATE THE CONTRACT ADDRESS
         long nonce = getStorage().getNonce(senderAddress);
@@ -387,10 +388,10 @@ public class Program {
 
         // [5] COOK THE INVOKE AND EXECUTE
         InternalTransaction internalTx = addInternalTx(OpCode.CREATE, senderAddress, ByteArrayUtil.EMPTY_BYTE_ARRAY,
-                getStorage().getNonce(senderAddress), endowment, programCode, gasLimit.value());
+                getStorage().getNonce(senderAddress), endowment, programCode, gas.value());
         ProgramInvoke programInvoke = programInvokeFactory.createProgramInvoke(
-                this, new DataWord(newAddress), getOwnerAddress(), value, gasLimit,
-                newBalance, null, track, this.invoke.getBlockStore(), false);
+                this, getOwnerAddress(), new DataWord(newAddress), newBalance, gas, value,
+                null, track, this.invoke.getBlockStore(), false);
 
         ProgramResult result = ProgramResult.createEmpty();
 
@@ -452,7 +453,7 @@ public class Program {
         }
 
         // 5. REFUND THE REMAIN GAS
-        long refundGas = gasLimit.longValue() - result.getGasUsed();
+        long refundGas = gas.longValue() - result.getGasUsed();
         if (refundGas > 0) {
             refundGas(refundGas, "remain gas from the internal call");
             if (logger.isInfoEnabled()) {
@@ -475,7 +476,7 @@ public class Program {
     public void callToAddress(MessageCall msg) {
         returnDataBuffer = null; // reset return buffer right before the call
 
-        if (getCallDeep() == MAX_DEPTH) {
+        if (getCallDepth() == MAX_DEPTH) {
             stackPushZero();
             refundGas(msg.getGas().longValue(), " call deep limit reach");
             return;
@@ -520,10 +521,10 @@ public class Program {
         ProgramResult result = null;
         if (isNotEmpty(programCode)) {
             ProgramInvoke programInvoke = programInvokeFactory.createProgramInvoke(
-                    this, new DataWord(contextAddress),
-                    msg.getType().callIsDelegate() ? getCallerAddress() : getOwnerAddress(),
-                    msg.getType().callIsDelegate() ? getCallValue() : msg.getEndowment(),
-                    msg.getGas(), contextBalance, data, track, this.invoke.getBlockStore(),
+                    this, msg.getType().callIsDelegate() ? getCallerAddress() : getOwnerAddress(),
+                    new DataWord(contextAddress),
+                    contextBalance, msg.getGas(), msg.getType().callIsDelegate() ? getCallValue() : msg.getEndowment(),
+                    data, track, this.invoke.getBlockStore(),
                     msg.getType().callIsStatic() || isStaticCall());
 
             VM vm = new VM(config);
@@ -657,7 +658,7 @@ public class Program {
     }
 
     public DataWord getGasPrice() {
-        return invoke.getMinGasPrice().clone();
+        return invoke.getGasPrice().clone();
     }
 
     public long getGasLong() {
@@ -669,7 +670,7 @@ public class Program {
     }
 
     public DataWord getCallValue() {
-        return invoke.getCallValue().clone();
+        return invoke.getValue().clone();
     }
 
     public DataWord getDataSize() {
@@ -734,6 +735,10 @@ public class Program {
 
     public void setRuntimeFailure(RuntimeException e) {
         getResult().setException(e);
+    }
+
+    public DataWord getPrevHash() {
+        return invoke.getPrevHash();
     }
 
     static class ByteCodeIterator {
@@ -825,7 +830,7 @@ public class Program {
     public void callToPrecompiledAddress(MessageCall msg, PrecompiledContracts.PrecompiledContract contract) {
         returnDataBuffer = null; // reset return buffer right before the call
 
-        if (getCallDeep() == MAX_DEPTH) {
+        if (getCallDepth() == MAX_DEPTH) {
             stackPushZero();
             this.refundGas(msg.getGas().longValue(), " call deep limit reach");
             return;

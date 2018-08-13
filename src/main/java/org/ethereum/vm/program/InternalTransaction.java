@@ -51,7 +51,7 @@ public class InternalTransaction implements Transaction {
 
     public InternalTransaction(byte[] parentHash, int depth, int index, OpCode type,
             byte[] from, byte[] to, long nonce, BigInteger value, byte[] data,
-            BigInteger gasLimit, BigInteger gasPrice) {
+            BigInteger gas, BigInteger gasPrice) {
         this.parentHash = parentHash;
         this.depth = depth;
         this.index = index;
@@ -62,7 +62,7 @@ public class InternalTransaction implements Transaction {
         this.nonce = nonce;
         this.value = value;
         this.data = data;
-        this.gastLimit = gasLimit;
+        this.gastLimit = gas;
         this.gasPrice = gasPrice;
     }
 
@@ -127,7 +127,7 @@ public class InternalTransaction implements Transaction {
     }
 
     @Override
-    public BigInteger getGasLimit() {
+    public BigInteger getGas() {
         return gastLimit;
     }
 

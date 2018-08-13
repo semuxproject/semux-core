@@ -32,27 +32,42 @@ import org.ethereum.vm.client.Repository;
  */
 public interface ProgramInvoke {
 
-    DataWord getOwnerAddress();
+    // ===========================
+    // Transaction context
+    // ===========================
 
-    DataWord getBalance();
+    DataWord getOwnerAddress();
 
     DataWord getOriginAddress();
 
     DataWord getCallerAddress();
 
-    DataWord getMinGasPrice();
+    DataWord getBalance();
 
     DataWord getGas();
 
+    /**
+     * Returns the gas as a long integer.
+     *
+     * @return the gas value, or {@link Long#MAX_VALUE} in case of overflow
+     */
     long getGasLong();
 
-    DataWord getCallValue();
+    DataWord getGasPrice();
+
+    DataWord getValue();
 
     DataWord getDataSize();
 
-    DataWord getDataValue(DataWord indexData);
+    DataWord getDataValue(DataWord index);
 
-    byte[] getDataCopy(DataWord offsetData, DataWord lengthData);
+    byte[] getDataCopy(DataWord offset, DataWord length);
+
+    // ===========================
+    // Block context
+    // ===========================
+
+    DataWord getPrevHash();
 
     DataWord getCoinbase();
 
@@ -64,11 +79,19 @@ public interface ProgramInvoke {
 
     DataWord getGaslimit();
 
-    int getCallDeep();
+    // ===========================
+    // Database context
+    // ===========================
 
     Repository getRepository();
 
     BlockStore getBlockStore();
+
+    // ===========================
+    // Miscellaneous
+    // ===========================
+
+    int getCallDepth();
 
     boolean isStaticCall();
 }

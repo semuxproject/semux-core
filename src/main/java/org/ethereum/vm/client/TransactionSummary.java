@@ -42,8 +42,8 @@ public class TransactionSummary {
 
     private Transaction tx;
     private BigInteger value = BigInteger.ZERO;
+    private BigInteger gas = BigInteger.ZERO;
     private BigInteger gasPrice = BigInteger.ZERO;
-    private BigInteger gasLimit = BigInteger.ZERO;
     private BigInteger gasUsed = BigInteger.ZERO;
     private BigInteger gasLeftover = BigInteger.ZERO;
     private BigInteger gasRefund = BigInteger.ZERO;
@@ -62,7 +62,7 @@ public class TransactionSummary {
 
     public TransactionSummary(Transaction transaction) {
         this.tx = transaction;
-        this.gasLimit = transaction.getGasLimit();
+        this.gas = transaction.getGas();
         this.gasPrice = transaction.getGasPrice();
         this.value = transaction.getValue();
     }
@@ -76,7 +76,7 @@ public class TransactionSummary {
     }
 
     public BigInteger getFee() {
-        return calcCost(gasLimit.subtract(gasLeftover.add(gasRefund)));
+        return calcCost(gas.subtract(gasLeftover.add(gasRefund)));
     }
 
     public BigInteger getRefund() {
@@ -87,12 +87,12 @@ public class TransactionSummary {
         return calcCost(gasLeftover);
     }
 
-    public BigInteger getGasPrice() {
-        return gasPrice;
+    public BigInteger getGas() {
+        return gas;
     }
 
-    public BigInteger getGasLimit() {
-        return gasLimit;
+    public BigInteger getGasPrice() {
+        return gasPrice;
     }
 
     public BigInteger getGasUsed() {

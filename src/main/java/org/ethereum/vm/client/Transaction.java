@@ -88,9 +88,9 @@ public interface Transaction {
      * gas limit larger than {@link Long#MAX_VALUE}, this value is represented in
      * BigInt.
      *
-     * @return the specified gas limit for this transaction.
+     * @return the specified gas for this transaction.
      */
-    BigInteger getGasLimit();
+    BigInteger getGas();
 
     /**
      * Returns the gas price.

@@ -50,9 +50,9 @@ public class ExceptionFactory {
                 cause, gasValue, program.getResult().getGasUsed());
     }
 
-    public static OutOfGasException gasOverflow(BigInteger actualGas, BigInteger gasLimit) {
-        return new OutOfGasException("Gas value overflow: actualGas[%d], gasLimit[%d];", actualGas.longValue(),
-                gasLimit.longValue());
+    public static OutOfGasException gasOverflow(BigInteger actual, BigInteger limit) {
+        return new OutOfGasException("Gas value overflow: actual[%d], limit[%d];", actual.longValue(),
+                limit.longValue());
     }
 
     public static IllegalOperationException invalidOpCode(byte opCode) {

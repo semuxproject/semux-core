@@ -6,21 +6,9 @@
  */
 package org.ethereum.vm.util;
 
-import java.util.Arrays;
-
 public class ByteArrayUtil {
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
-
-    public static byte[] stripLeadingZeroes(byte[] bytes) {
-        for (int i = 0; i < bytes.length; i++) {
-            if (bytes[i] != 0) {
-                return Arrays.copyOfRange(bytes, i, bytes.length);
-            }
-        }
-
-        return new byte[0];
-    }
 
     public static int compareUnsigned(byte[] a, byte[] b) {
         if (a == b) {

@@ -28,4 +28,16 @@ import java.math.BigInteger;
 public interface Block {
 
     BigInteger getGasLimit();
+
+    byte[] getParentHash();
+
+    byte[] getCoinbase();
+
+    long getTimestamp();
+
+    long getNumber();
+
+    default BigInteger getDifficulty() {
+        return BigInteger.ZERO;
+    }
 }

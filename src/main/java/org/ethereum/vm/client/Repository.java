@@ -30,110 +30,112 @@ import org.ethereum.vm.DataWord;
 public interface Repository {
 
     /**
-     * @param addr
-     *            - account to check
-     * @return - true if account exist, false otherwise
+     * Checks whether an account exists.
+     *
+     * @param address
+     *            the account address
+     * @return true if account exist, false otherwise
      */
-    boolean isExist(byte[] addr);
+    boolean isExist(byte[] address);
 
     /**
-     * Deletes the account
+     * Deletes an account.
      *
-     * @param addr
-     *            of the account
+     * @param address
+     *            the account address
      */
-    void delete(byte[] addr);
+    void delete(byte[] address);
 
     /**
-     * Increase the account nonce of the given account by one
+     * Increases the account nonce of the given account by one.
      *
-     * @param addr
-     *            of the account
+     * @param address
+     *            the account address
      * @return new value of the nonce
      */
-    long increaseNonce(byte[] addr);
+    long increaseNonce(byte[] address);
 
     /**
      * Sets the account nonce of the given account
      *
-     * @param addr
-     *            of the account
+     * @param address
+     *            the account address
      * @param nonce
      *            new nonce
      * @return new value of the nonce
      */
-    long setNonce(byte[] addr, long nonce);
+    long setNonce(byte[] address, long nonce);
 
     /**
-     * Get current nonce of a given account
+     * Returns current nonce of a given account
      *
-     * @param addr
-     *            of the account
+     * @param address
+     *            the account address
      * @return value of the nonce
      */
-    long getNonce(byte[] addr);
+    long getNonce(byte[] address);
 
     /**
-     * Store code associated with an account
+     * Stores code associated with an account
      *
-     * @param addr
-     *            for the account
+     * @param address
+     *            the account address
      * @param code
      *            that will be associated with this account
      */
-    void saveCode(byte[] addr, byte[] code);
+    void saveCode(byte[] address, byte[] code);
 
     /**
-     * Retrieve the code associated with an account
+     * Retrieves the code associated with an account
      *
-     * @param addr
-     *            of the account
+     * @param address
+     *            the account address
      * @return code in byte-array format
      */
-    byte[] getCode(byte[] addr);
+    byte[] getCode(byte[] address);
 
     /**
-     * Put a value in storage of an account at a given key
+     * Puts a value in storage of an account at a given key
      *
-     * @param addr
-     *            of the account
+     * @param address
+     *            the account address
      * @param key
      *            of the data to store
      * @param value
      *            is the data to store
      */
-    void putStorageRow(byte[] addr, DataWord key, DataWord value);
+    void putStorageRow(byte[] address, DataWord key, DataWord value);
 
     /**
-     * Retrieve storage value from an account for a given key
+     * Retrieves storage value from an account for a given key
      *
-     * @param addr
-     *            of the account
+     * @param address
+     *            the account address
      * @param key
      *            associated with this value
      * @return data in the form of a <code>DataWord</code>
      */
-    DataWord getStorageRow(byte[] addr, DataWord key);
+    DataWord getStorageRow(byte[] address, DataWord key);
 
     /**
-     * Retrieve balance of an account
+     * Retrieves balance of an account
      *
-     * @param addr
-     *            of the account
+     * @param address
+     *            the account address
      * @return balance of the account as a <code>BigInteger</code> value
      */
-    BigInteger getBalance(byte[] addr);
+    BigInteger getBalance(byte[] address);
 
     /**
      * Add value to the balance of an account
      *
-     * @param addr
-     *            of the account
+     * @param address
+     *            the account address
      * @param value
      *            to be added
      * @return new balance of the account
      */
-    BigInteger addBalance(byte[] addr, BigInteger value);
+    BigInteger addBalance(byte[] address, BigInteger value);
 
     /**
      * Save a snapshot and start tracking future changes
@@ -143,12 +145,13 @@ public interface Repository {
     Repository startTracking();
 
     /**
-     * Store all the temporary changes made to the repository in the actual database
+     * Stores all the temporary changes made to the repository in the actual
+     * database
      */
     void commit();
 
     /**
-     * Undo all the changes made so far to a snapshot of the repository
+     * Undoes all the changes made so far to a snapshot of the repository
      */
     void rollback();
 }

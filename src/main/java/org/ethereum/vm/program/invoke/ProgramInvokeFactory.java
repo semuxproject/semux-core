@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2017-2018 The Semux Developers
  *
- * Distributed under the MIT software license, see the accompanying file
- * LICENSE or https://opensource.org/licenses/mit-license.php
+ * Distributed under the MIT software license, see the accompanying file LICENSE or
+ * https://opensource.org/licenses/mit-license.php
  */
 /*
  * Copyright (c) [2016] [ <ether.camp> ]
@@ -36,10 +36,7 @@ public interface ProgramInvokeFactory {
 
     ProgramInvoke createProgramInvoke(Transaction tx, Block block, Repository repository, BlockStore blockStore);
 
-    ProgramInvoke createProgramInvoke(Program program, DataWord toAddress, DataWord callerAddress,
-            DataWord inValue, DataWord inGas,
-            BigInteger balanceInt, byte[] dataIn,
-            Repository repository, BlockStore blockStore,
-            boolean staticCall);
-
+    ProgramInvoke createProgramInvoke(Program program, DataWord callerAddress, DataWord toAddress,
+            BigInteger balance, DataWord gas, DataWord value, byte[] data,
+            Repository repository, BlockStore blockStore, boolean isStaticCall);
 }

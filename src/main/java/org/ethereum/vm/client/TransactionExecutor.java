@@ -105,7 +105,7 @@ public class TransactionExecutor {
         this.programInvokeFactory = programInvokeFactory;
         this.currentBlock = currentBlock;
         this.gasUsedInTheBlock = gasUsedInTheBlock;
-        this.m_endGas = tx.getGasLimit();
+        this.m_endGas = tx.getGas();
         this.config = config;
     }
 
@@ -126,19 +126,19 @@ public class TransactionExecutor {
             return;
         }
 
-        BigInteger txGasLimit = tx.getGasLimit();
+        BigInteger txGas = tx.getGas();
         BigInteger curBlockGasLimit = currentBlock.getGasLimit();
 
-        boolean cumulativeGasReached = txGasLimit.add(BigInteger.valueOf(gasUsedInTheBlock))
+        boolean cumulativeGasReached = txGas.add(BigInteger.valueOf(gasUsedInTheBlock))
                 .compareTo(curBlockGasLimit) > 0;
         if (cumulativeGasReached) {
             execError("Too much gas used in this block: Require");
             return;
         }
 
-        if (txGasLimit.compareTo(BigInteger.valueOf(basicTxCost)) < 0) {
+        if (txGas.compareTo(BigInteger.valueOf(basicTxCost)) < 0) {
             execError(String.format("Not enough gas for transaction execution: Require: %s Got: %s", basicTxCost,
-                    txGasLimit));
+                    txGas));
             return;
         }
 
@@ -150,7 +150,7 @@ public class TransactionExecutor {
             return;
         }
 
-        BigInteger txGasCost = tx.getGasPrice().multiply(txGasLimit);
+        BigInteger txGasCost = tx.getGasPrice().multiply(txGas);
         BigInteger totalCost = tx.getValue().add(txGasCost);
         BigInteger senderBalance = track.getBalance(tx.getFrom());
 
@@ -172,7 +172,7 @@ public class TransactionExecutor {
         if (!localCall) {
             track.increaseNonce(tx.getFrom());
 
-            BigInteger txGasLimit = tx.getGasLimit();
+            BigInteger txGasLimit = tx.getGas();
             BigInteger txGasCost = tx.getGasPrice().multiply(txGasLimit);
             track.addBalance(tx.getFrom(), txGasCost.negate());
         }
@@ -295,7 +295,7 @@ public class TransactionExecutor {
                 vm.play(program);
 
                 result = program.getResult();
-                m_endGas = tx.getGasLimit().subtract(toBI(program.getResult().getGasUsed()));
+                m_endGas = tx.getGas().subtract(toBI(program.getResult().getGasUsed()));
 
                 if (tx.isCreate() && !result.isRevert()) {
                     int returnDataGasValue = getLength(program.getResult().getHReturn())
@@ -413,6 +413,6 @@ public class TransactionExecutor {
     }
 
     public long getGasUsed() {
-        return tx.getGasLimit().subtract(m_endGas).longValue();
+        return tx.getGas().subtract(m_endGas).longValue();
     }
 }

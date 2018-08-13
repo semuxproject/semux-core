@@ -33,16 +33,17 @@ import org.ethereum.vm.util.HexUtil;
 /**
  * DataWord is the 32-byte array representation of a 256-bit number.
  *
- * NOTE: the underlying byte array should be shared across dataword; clients are
- * not supposed to modify it.
+ * NOTE: the underlying byte array is shared across dataword and should not be
+ * modified anywhere
  */
 public class DataWord implements Comparable<DataWord>, Cloneable {
 
     public static final BigInteger TWO_256 = BigInteger.valueOf(2).pow(256);
     public static final BigInteger MAX_VALUE = TWO_256.subtract(BigInteger.ONE);
     public static final DataWord ZERO = new DataWord();
+    public static final int SIZE = 32;
 
-    private byte[] data = new byte[32];
+    private byte[] data = new byte[SIZE];
 
     public DataWord() {
     }
@@ -75,10 +76,6 @@ public class DataWord implements Comparable<DataWord>, Cloneable {
 
     public byte[] getData() {
         return data;
-    }
-
-    public byte[] getNoLeadZeroesData() {
-        return ByteArrayUtil.stripLeadingZeroes(data);
     }
 
     public byte[] getLast20Bytes() {
