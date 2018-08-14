@@ -31,7 +31,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ethereum.vm.config.ByzantiumConfig;
 import org.ethereum.vm.config.Config;
 import org.ethereum.vm.program.Program;
 import org.ethereum.vm.program.Stack;
@@ -89,7 +88,7 @@ public class VM {
     private Config config;
 
     public VM() {
-        this(new ByzantiumConfig());
+        this(Config.DEFAULT);
     }
 
     public VM(Config config) {

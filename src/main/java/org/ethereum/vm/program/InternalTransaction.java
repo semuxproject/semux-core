@@ -36,7 +36,7 @@ public class InternalTransaction implements Transaction {
 
     private boolean rejected = false;
 
-    private byte[] parentHash;
+    private Transaction parentTx;
     private int depth;
     private int index;
     private OpCode type;
@@ -49,10 +49,10 @@ public class InternalTransaction implements Transaction {
     private BigInteger gastLimit;
     private BigInteger gasPrice;
 
-    public InternalTransaction(byte[] parentHash, int depth, int index, OpCode type,
+    public InternalTransaction(Transaction parentTx, int depth, int index, OpCode type,
             byte[] from, byte[] to, long nonce, BigInteger value, byte[] data,
             BigInteger gas, BigInteger gasPrice) {
-        this.parentHash = parentHash;
+        this.parentTx = parentTx;
         this.depth = depth;
         this.index = index;
         this.type = type;
@@ -74,8 +74,8 @@ public class InternalTransaction implements Transaction {
         return rejected;
     }
 
-    public byte[] getParentHash() {
-        return parentHash;
+    public Transaction getParentTransaction() {
+        return parentTx;
     }
 
     public int getDepth() {
@@ -93,12 +93,6 @@ public class InternalTransaction implements Transaction {
     @Override
     public boolean isCreate() {
         return type == OpCode.CREATE;
-    }
-
-    @Override
-    public byte[] getHash() {
-        // TODO: implement the hash of internal transaction
-        return new byte[0];
     }
 
     @Override
@@ -139,7 +133,6 @@ public class InternalTransaction implements Transaction {
     @Override
     public String toString() {
         return "InternalTransaction [" +
-                "  parentHash=" + HexUtil.toHexString(getParentHash()) +
                 ", depth=" + getDepth() +
                 ", index=" + getIndex() +
                 ", type=" + getType() +

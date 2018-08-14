@@ -41,7 +41,6 @@ import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.PrecompiledContracts;
 import org.ethereum.vm.VM;
-import org.ethereum.vm.config.ByzantiumConfig;
 import org.ethereum.vm.config.Config;
 import org.ethereum.vm.program.Program;
 import org.ethereum.vm.program.ProgramResult;
@@ -89,7 +88,7 @@ public class TransactionExecutor {
     public TransactionExecutor(Transaction tx, byte[] coinbase, Repository track, BlockStore blockStore,
             ProgramInvokeFactory programInvokeFactory, Block currentBlock) {
 
-        this(tx, coinbase, track, blockStore, programInvokeFactory, currentBlock, 0, new ByzantiumConfig());
+        this(tx, coinbase, track, blockStore, programInvokeFactory, currentBlock, 0, Config.DEFAULT);
     }
 
     public TransactionExecutor(Transaction tx, byte[] coinbase, Repository track, BlockStore blockStore,

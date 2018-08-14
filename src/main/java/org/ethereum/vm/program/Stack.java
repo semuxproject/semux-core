@@ -63,4 +63,7 @@ public class Stack {
         return from >= 0 && from < stack.size();
     }
 
+    public DataWord[] toArray() {
+        return stack.toArray(new DataWord[0]);
+    }
 }

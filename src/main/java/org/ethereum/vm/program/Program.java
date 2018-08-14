@@ -73,7 +73,7 @@ public class Program {
     // Max size for stack checks
     private static final int MAX_STACKSIZE = 1024;
 
-    private Transaction transaction;
+    private Transaction transaction; // nullable
 
     private ProgramInvoke invoke;
     private ProgramInvokeFactory programInvokeFactory = new ProgramInvokeFactoryImpl();
@@ -107,6 +107,10 @@ public class Program {
         this.config = config;
     }
 
+    public Program(byte[] ops, ProgramInvoke programInvoke) {
+        this(ops, programInvoke, null, Config.DEFAULT);
+    }
+
     public ProgramPreprocess getProgramPreprocess() {
         if (preprocessed == null) {
             preprocessed = ProgramPreprocess.compile(ops);
@@ -121,11 +125,10 @@ public class Program {
     private InternalTransaction addInternalTx(OpCode type, byte[] from, byte[] to, long nonce, BigInteger value,
             byte[] data, BigInteger gas) {
 
-        byte[] parentHash = transaction.getHash();
         int depth = getCallDepth();
         int index = result.getInternalTransactions().size();
 
-        InternalTransaction tx = new InternalTransaction(parentHash, depth, index, type,
+        InternalTransaction tx = new InternalTransaction(transaction, depth, index, type,
                 from, to, nonce, value, data, gas, getGasPrice().value());
         result.addInternalTransaction(tx);
 

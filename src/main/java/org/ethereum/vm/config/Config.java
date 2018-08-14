@@ -31,6 +31,8 @@ import org.ethereum.vm.program.exception.OutOfGasException;
 
 public interface Config {
 
+    Config DEFAULT = new ByzantiumConfig();
+
     DataWord getCallGas(OpCode op, DataWord requestedGas, DataWord availableGas) throws OutOfGasException;
 
     DataWord getCreateGas(DataWord availableGas);

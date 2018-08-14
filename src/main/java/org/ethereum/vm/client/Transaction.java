@@ -41,13 +41,6 @@ public interface Transaction {
     boolean isCreate();
 
     /**
-     * Returns the hash of the transaction.
-     *
-     * @return a 32-byte array, not NULL.
-     */
-    byte[] getHash();
-
-    /**
      * Returns the address.
      *
      * @return a 20-byte array, not NULL.

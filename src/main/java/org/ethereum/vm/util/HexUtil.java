@@ -43,4 +43,8 @@ public class HexUtil {
 
         return new String(hex);
     }
+
+    public static String toHexString(byte b) {
+        return toHexString(new byte[] { b });
+    }
 }
