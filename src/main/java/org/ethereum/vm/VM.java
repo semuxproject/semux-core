@@ -96,7 +96,7 @@ public class VM {
         this.config = config;
     }
 
-    private long calcMemGas(FeeSchedule gasCosts, long oldMemSize, BigInteger newMemSize, long copySize) {
+    private long calcMemGas(FeeSchedule feeSchedule, long oldMemSize, BigInteger newMemSize, long copySize) {
         long gasCost = 0;
 
         // avoid overflows
@@ -109,13 +109,13 @@ public class VM {
         if (memoryUsage > oldMemSize) {
             long memWords = (memoryUsage / 32);
             long memWordsOld = (oldMemSize / 32);
-            long memGas = (gasCosts.getMEMORY() * memWords + memWords * memWords / 512)
-                    - (gasCosts.getMEMORY() * memWordsOld + memWordsOld * memWordsOld / 512);
+            long memGas = (feeSchedule.getMEMORY() * memWords + memWords * memWords / 512)
+                    - (feeSchedule.getMEMORY() * memWordsOld + memWordsOld * memWordsOld / 512);
             gasCost += memGas;
         }
 
         if (copySize > 0) {
-            long copyGas = gasCosts.getCOPY_GAS() * ((copySize + 31) / 32);
+            long copyGas = feeSchedule.getCOPY_GAS() * ((copySize + 31) / 32);
             gasCost += copyGas;
         }
         return gasCost;

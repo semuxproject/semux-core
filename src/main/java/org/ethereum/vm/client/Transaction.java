@@ -28,7 +28,7 @@ import java.math.BigInteger;
 import org.ethereum.vm.util.ByteArrayUtil;
 
 /**
- * A facet interface for Transaction. The client needs to wrap the native
+ * A facade interface for Transaction. The client needs to wrap the native
  * transaction to comply this specification, in order to use EVM.
  */
 public interface Transaction {

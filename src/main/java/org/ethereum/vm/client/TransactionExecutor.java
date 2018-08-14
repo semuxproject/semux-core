@@ -263,16 +263,6 @@ public class TransactionExecutor {
 
             this.vm = new VM(config);
             this.program = new Program(tx.getData(), programInvoke, tx, config);
-
-            // reset storage if the contract with the same address already exists
-            // TCK test case only - normally this is near-impossible situation in the real
-            // network
-            // TODO make via Trie.clear() without keyset
-            // ContractDetails contractDetails =
-            // program.getStorage().getContractDetails(newContractAddress);
-            // for (DataWord key : contractDetails.getStorageKeys()) {
-            // program.storageSave(key, DataWord.ZERO);
-            // }
         }
 
         BigInteger endowment = tx.getValue();
