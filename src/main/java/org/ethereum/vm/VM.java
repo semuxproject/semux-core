@@ -494,8 +494,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
                 DataWord word3 = program.stackPop();
-                word1.addmod(word2, word3);
-                program.stackPush(word1);
+                DataWord result = word1.addmod(word2, word3);
+                program.stackPush(result);
                 program.step();
             }
                 break;
@@ -503,8 +503,8 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
                 DataWord word3 = program.stackPop();
-                word1.mulmod(word2, word3);
-                program.stackPush(word1);
+                DataWord result = word1.mulmod(word2, word3);
+                program.stackPush(result);
                 program.step();
             }
                 break;

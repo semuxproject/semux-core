@@ -6,6 +6,8 @@
  */
 package org.ethereum.vm.util;
 
+import java.util.Random;
+
 public class ByteArrayUtil {
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
@@ -37,5 +39,13 @@ public class ByteArrayUtil {
             return 1;
         }
         return 0;
+    }
+
+    private static Random r = new Random();
+
+    public static byte[] random(int n) {
+        byte[] bytes = new byte[n];
+        r.nextBytes(bytes);
+        return bytes;
     }
 }
