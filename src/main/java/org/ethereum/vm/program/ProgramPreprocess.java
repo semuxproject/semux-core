@@ -36,15 +36,15 @@ import org.ethereum.vm.OpCode;
  * <li>Collect the list of JUMP destinations</li>
  * </ul>
  */
-public class ProgramPrecompile {
+public class ProgramPreprocess {
     private Set<Integer> jumpdest = new HashSet<>();
 
     public boolean hasJumpDest(int pc) {
         return jumpdest.contains(pc);
     }
 
-    public static ProgramPrecompile compile(byte[] ops) {
-        ProgramPrecompile ret = new ProgramPrecompile();
+    public static ProgramPreprocess compile(byte[] ops) {
+        ProgramPreprocess ret = new ProgramPreprocess();
 
         for (int i = 0; i < ops.length; ++i) {
             OpCode op = OpCode.code(ops[i]);

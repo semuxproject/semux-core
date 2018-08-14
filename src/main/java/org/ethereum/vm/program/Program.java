@@ -36,9 +36,6 @@ import static org.ethereum.vm.util.BigIntUtil.transfer;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.BitSet;
-import java.util.NavigableSet;
-import java.util.TreeSet;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.DataWord;
@@ -82,7 +79,7 @@ public class Program {
     private ProgramInvokeFactory programInvokeFactory = new ProgramInvokeFactoryImpl();
 
     private Config config;
-    private ProgramPrecompile programPrecompile;
+    private ProgramPreprocess preprocessed;
 
     private Stack stack;
     private Memory memory;
@@ -110,11 +107,11 @@ public class Program {
         this.config = config;
     }
 
-    public ProgramPrecompile getProgramPrecompile() {
-        if (programPrecompile == null) {
-            programPrecompile = ProgramPrecompile.compile(ops);
+    public ProgramPreprocess getProgramPreprocess() {
+        if (preprocessed == null) {
+            preprocessed = ProgramPreprocess.compile(ops);
         }
-        return programPrecompile;
+        return preprocessed;
     }
 
     public int getCallDepth() {
@@ -780,47 +777,12 @@ public class Program {
         }
     }
 
-    static BitSet buildReachableBytecodesMask(byte[] code) {
-        NavigableSet<Integer> gotos = new TreeSet<>();
-        ByteCodeIterator it = new ByteCodeIterator(code);
-        BitSet ret = new BitSet(code.length);
-        int lastPush = 0;
-        int lastPushPC = 0;
-        do {
-            ret.set(it.getPC()); // reachable bytecode
-            if (it.isPush()) {
-                lastPush = new BigInteger(1, it.getCurOpcodeArg()).intValue();
-                lastPushPC = it.getPC();
-            }
-            if (it.getCurOpcode() == OpCode.JUMP || it.getCurOpcode() == OpCode.JUMPI) {
-                if (it.getPC() != lastPushPC + 1) {
-                    // some PC arithmetic we totally can't deal with
-                    // assuming all bytecodes are reachable as a fallback
-                    ret.set(0, code.length);
-                    return ret;
-                }
-                int jumpPC = lastPush;
-                if (!ret.get(jumpPC)) {
-                    // code was not explored yet
-                    gotos.add(jumpPC);
-                }
-            }
-            if (it.getCurOpcode() == OpCode.JUMP || it.getCurOpcode() == OpCode.RETURN ||
-                    it.getCurOpcode() == OpCode.STOP) {
-                if (gotos.isEmpty())
-                    break;
-                it.setPC(gotos.pollFirst());
-            }
-        } while (it.next());
-        return ret;
-    }
-
     public int verifyJumpDest(DataWord nextPC) {
         if (nextPC.bytesOccupied() > 4) {
             throw ExceptionFactory.badJumpDestination(-1);
         }
         int ret = nextPC.intValue();
-        if (!getProgramPrecompile().hasJumpDest(ret)) {
+        if (!getProgramPreprocess().hasJumpDest(ret)) {
             throw ExceptionFactory.badJumpDestination(ret);
         }
         return ret;
