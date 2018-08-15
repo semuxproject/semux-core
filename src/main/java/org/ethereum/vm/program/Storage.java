@@ -40,6 +40,11 @@ public class Storage implements Repository {
     }
 
     @Override
+    public void createAccount(byte[] address) {
+        repository.createAccount(address);
+    }
+
+    @Override
     public boolean isExist(byte[] addr) {
         return repository.isExist(addr);
     }

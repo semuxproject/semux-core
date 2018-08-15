@@ -30,6 +30,14 @@ import org.ethereum.vm.DataWord;
 public interface Repository {
 
     /**
+     * Creates an account.
+     *
+     * @param address
+     *            the account address
+     */
+    void createAccount(byte[] address);
+
+    /**
      * Checks whether an account exists.
      *
      * @param address

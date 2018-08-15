@@ -29,6 +29,11 @@ public class RepositoryMockImpl implements Repository {
     }
 
     @Override
+    public void createAccount(byte[] address) {
+        getAccount(address);
+    }
+
+    @Override
     public boolean isExist(byte[] address) {
         return accounts.containsKey(new ByteArrayWrapper(address));
     }
