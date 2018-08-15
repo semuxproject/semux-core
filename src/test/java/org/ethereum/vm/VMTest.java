@@ -27,84 +27,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
-import java.math.BigInteger;
 import java.util.List;
 
-import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.program.Program;
 import org.ethereum.vm.program.exception.BadJumpDestinationException;
 import org.ethereum.vm.program.exception.StackUnderflowException;
-import org.ethereum.vm.program.invoke.ProgramInvoke;
-import org.ethereum.vm.program.invoke.ProgramInvokeImpl;
-import org.ethereum.vm.util.ByteArrayUtil;
 import org.ethereum.vm.util.BytecodeCompiler;
 import org.ethereum.vm.util.HexUtil;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class VMTest {
-
-    byte[] address = TestUtil.address(1);
-    ;
-    byte[] origin = TestUtil.address(2);
-    byte[] caller = TestUtil.address(2);
-    BigInteger balance = BigInteger.valueOf(8888L);
-    long gas = 1_000_00L;
-    BigInteger gasPrice = BigInteger.ONE;
-    BigInteger value = BigInteger.ZERO;
-    byte[] data = new byte[0];
-
-    byte[] prevHash = ByteArrayUtil.random(32);
-    byte[] coinbase = TestUtil.address(3);
-    long timestamp = System.currentTimeMillis();
-    long number = 1;
-    BigInteger difficulty = BigInteger.TEN;
-    long gasLimit = 10_000_000L;
-
-    int callDepth = 0;
-    boolean isStaticCall = false;
-
-    private Repository repository;
-    private BlockStore blockStore;
-
-    private ProgramInvoke invoke;
-    private Program program;
-
-    @Before
-    public void setup() {
-        this.repository = mock(Repository.class);
-        this.blockStore = mock(BlockStore.class);
-        this.invoke = spy(new ProgramInvokeImpl(
-                new DataWord(address),
-                new DataWord(origin),
-                new DataWord(caller),
-                new DataWord(balance),
-                new DataWord(gas),
-                new DataWord(gasPrice),
-                new DataWord(value),
-                data,
-                new DataWord(prevHash),
-                new DataWord(coinbase),
-                new DataWord(timestamp),
-                new DataWord(number),
-                new DataWord(difficulty),
-                new DataWord(gasLimit),
-                repository,
-                blockStore,
-                callDepth,
-                isStaticCall));
-    }
-
-    @After
-    public void tearDown() {
-    }
-
+public class VMTest extends TestBase {
     @Test // PUSH1 OP
     public void testPUSH1() {
         VM vm = new VM();
@@ -1080,7 +1015,7 @@ public class VMTest {
      * Generic test function for DUP1-16
      *
      * @param n
-     *         in DUPn
+     *            in DUPn
      */
     private void testDUPN_1(int n) {
         VM vm = new VM();
@@ -1130,7 +1065,7 @@ public class VMTest {
      * Generic test function for SWAP1-16
      *
      * @param n
-     *         in SWAPn
+     *            in SWAPn
      */
     private void testSWAPN_1(int n) {
         VM vm = new VM();
@@ -2497,8 +2432,32 @@ public class VMTest {
         }
     }
 
+    private byte[] testAddress = HexUtil.fromHexString("471FD3AD3E9EEADEEC4608B92D16CE6B500704CC");
+    private byte[] testCode = HexUtil.fromHexString("385E60076000396000605f556014600054601e60"
+            + "205463abcddcba6040545b51602001600a525451"
+            + "6040016014525451606001601e52545160800160"
+            + "28525460a052546016604860003960166000f260"
+            + "00603f556103e75660005460005360200235");
+
+    @Test // EXTCODESIZE OP
+    public void testEXTCODESIZE_1() {
+        repository.saveCode(testAddress, testCode);
+
+        VM vm = new VM();
+        program = new Program(HexUtil.fromHexString("73471FD3AD3E9EEADEEC4608B92D16CE6B500704CC3B"),
+                invoke);
+        String s_expected_1 = new DataWord(testCode.length).toString();
+
+        vm.step(program);
+        vm.step(program);
+
+        assertEquals(s_expected_1, HexUtil.toHexString(program.getStack().peek().getData()).toUpperCase());
+    }
+
     @Test // EXTCODECOPY OP
     public void testEXTCODECOPY_1() {
+        repository.saveCode(testAddress, testCode);
+
         VM vm = new VM();
         program = new Program(HexUtil.fromHexString("60036007600073471FD3AD3E9EEADEEC4608B92D16CE6B500704CC3C123456"),
                 invoke);
@@ -2515,6 +2474,8 @@ public class VMTest {
 
     @Test // EXTCODECOPY OP
     public void testEXTCODECOPY_2() {
+        repository.saveCode(testAddress, testCode);
+
         VM vm = new VM();
         program = new Program(HexUtil.fromHexString(
                 "603E6007600073471FD3AD3E9EEADEEC4608B92D16CE6B500704CC3C6000605f556014600054601e60205463abcddcba6040545b51602001600a5254516040016014525451606001601e5254516080016028525460a052546016604860003960166000f26000603f556103e75660005460005360200235602054"),
@@ -2532,6 +2493,8 @@ public class VMTest {
 
     @Test // EXTCODECOPY OP
     public void testEXTCODECOPY_3() {
+        repository.saveCode(testAddress, testCode);
+
         VM vm = new VM();
         program = new Program(HexUtil.fromHexString(
                 "605E6007600073471FD3AD3E9EEADEEC4608B92D16CE6B500704CC3C6000605f556014600054601e60205463abcddcba6040545b51602001600a5254516040016014525451606001601e5254516080016028525460a052546016604860003960166000f26000603f556103e75660005460005360200235"),
@@ -2550,6 +2513,8 @@ public class VMTest {
 
     @Test // EXTCODECOPY OP
     public void testEXTCODECOPY_4() {
+        repository.saveCode(testAddress, testCode);
+
         VM vm = new VM();
         program = new Program(HexUtil.fromHexString(
                 "611234600054615566602054603E6000602073471FD3AD3E9EEADEEC4608B92D16CE6B500704CC3C6000605f556014600054601e60205463abcddcba6040545b51602001600a5254516040016014525451606001601e5254516080016028525460a052546016604860003960166000f26000603f556103e756600054600053602002351234"),
@@ -2592,21 +2557,6 @@ public class VMTest {
                 "385E60076000396000605f556014600054601e60205463abcddcba6040545b51602001600a5254516040016014525451606001601e5254516080016028525460a052546016604860003960166000f26000603f556103e75660005460005360200235"),
                 invoke);
         String s_expected_1 = "0000000000000000000000000000000000000000000000000000000000000062";
-
-        vm.step(program);
-
-        DataWord item1 = program.stackPop();
-        assertEquals(s_expected_1, HexUtil.toHexString(item1.getData()).toUpperCase());
-    }
-
-    @Ignore // todo: test is not testing EXTCODESIZE
-    @Test // EXTCODESIZE OP
-    public void testEXTCODESIZE_1() {
-        VM vm = new VM();
-        program = new Program(HexUtil.fromHexString(
-                "73471FD3AD3E9EEADEEC4608B92D16CE6B500704CC395E60076000396000605f556014600054601e60205463abcddcba6040545b51602001600a5254516040016014525451606001601e5254516080016028525460a052546016604860003960166000f26000603f556103e75660005460005360200235"),
-                invoke); // Push address on the stack and perform EXTCODECOPY
-        String s_expected_1 = "000000000000000000000000471FD3AD3E9EEADEEC4608B92D16CE6B500704CC";
 
         vm.step(program);
 

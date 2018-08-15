@@ -27,11 +27,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
-import org.ethereum.vm.OpCode;
 import org.ethereum.vm.util.ByteArrayUtil;
 import org.ethereum.vm.util.ByteArrayWrapper;
 

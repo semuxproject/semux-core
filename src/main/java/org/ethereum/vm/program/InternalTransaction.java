@@ -27,7 +27,6 @@ import java.math.BigInteger;
 
 import org.ethereum.vm.OpCode;
 import org.ethereum.vm.client.Transaction;
-import org.ethereum.vm.util.HexUtil;
 
 /**
  * Represents an internal transaction.

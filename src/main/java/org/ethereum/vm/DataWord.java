@@ -57,7 +57,11 @@ public class DataWord implements Comparable<DataWord> {
     }
 
     public DataWord(BigInteger num) {
-        this(num.toByteArray());
+        // NOTE: the MAX_VALUE will produce a 33 bytes array
+        byte[] arr = num.toByteArray();
+        int offset = Math.max(arr.length - 32, 0);
+        int size = arr.length - offset;
+        System.arraycopy(arr, offset, data, SIZE - size, size);
     }
 
     public DataWord(String hex) {
