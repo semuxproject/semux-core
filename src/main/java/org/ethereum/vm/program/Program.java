@@ -588,7 +588,7 @@ public class Program {
 
     public void spendGas(long gasValue, String cause) {
         if (logger.isDebugEnabled()) {
-            logger.debug("[{}] Spent for cause: [{}], gas: [{}]", invoke.hashCode(), cause, gasValue);
+            logger.debug("cause: [{}], gas: [{}]", cause, gasValue);
         }
 
         if (getGasLong() < gasValue) {

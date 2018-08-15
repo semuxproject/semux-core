@@ -29,11 +29,43 @@ import java.util.List;
 import org.ethereum.vm.OpCode;
 
 public class BytecodeCompiler {
-    public byte[] compile(String code) {
+
+    public static void main(String[] args) {
+        byte[] code = HexUtil.fromHexString(
+                "605E60076000396000605f556014600054601e60205463abcddcba6040545b51602001600a5254516040016014525451606001601e5254516080016028525460a052546016604860003960166000f26000603f556103e75660005460005360200235");
+        System.out.println(decompile(code));
+    }
+
+    public static String decompile(byte[] code) {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < code.length; i++) {
+            OpCode op = OpCode.code(code[i]);
+            if (op == null) {
+                sb.append(HexUtil.toHexString(code[i])).append(" ");
+                continue;
+            }
+
+            sb.append(op.name()).append(" ");
+
+            if (op.val() >= OpCode.PUSH1.val() && op.val() <= OpCode.PUSH32.val()) {
+                int n = op.val() - OpCode.PUSH1.val() + 1;
+                sb.append("0x");
+                for (int j = 0; j < n; j++) {
+                    sb.append(HexUtil.toHexString(code[++i]));
+                }
+                sb.append(" ");
+            }
+        }
+
+        return sb.toString();
+    }
+
+    public static byte[] compile(String code) {
         return compile(code.split("\\s+"));
     }
 
-    private byte[] compile(String[] tokens) {
+    private static byte[] compile(String[] tokens) {
         List<Byte> bytecodes = new ArrayList<>();
         int ntokens = tokens.length;
 
