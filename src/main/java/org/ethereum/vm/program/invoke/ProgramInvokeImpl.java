@@ -36,7 +36,7 @@ public class ProgramInvokeImpl implements ProgramInvoke {
     /**
      * Transaction environment
      */
-    private final DataWord address, origin, caller, balance, gas, gasPrice, value;
+    private final DataWord address, origin, caller, gas, gasPrice, value;
     private final byte[] data;
     private final long gasLong;
 
@@ -54,7 +54,7 @@ public class ProgramInvokeImpl implements ProgramInvoke {
     private int callDepth = 0;
     private boolean isStaticCall = false;
 
-    public ProgramInvokeImpl(DataWord address, DataWord origin, DataWord caller, DataWord balance,
+    public ProgramInvokeImpl(DataWord address, DataWord origin, DataWord caller,
             DataWord gas, DataWord gasPrice, DataWord value, byte[] data, DataWord prevHash,
             DataWord coinbase, DataWord timestamp, DataWord number, DataWord difficulty,
             DataWord gasLimit, Repository repository, BlockStore blockStore,
@@ -63,7 +63,6 @@ public class ProgramInvokeImpl implements ProgramInvoke {
         Objects.requireNonNull(address);
         Objects.requireNonNull(origin);
         Objects.requireNonNull(caller);
-        Objects.requireNonNull(balance);
         Objects.requireNonNull(gas);
         Objects.requireNonNull(gasPrice);
         Objects.requireNonNull(value);
@@ -82,7 +81,6 @@ public class ProgramInvokeImpl implements ProgramInvoke {
         this.address = address;
         this.origin = origin;
         this.caller = caller;
-        this.balance = balance;
         this.gas = gas;
         this.gasLong = gas.longValueSafe();
         this.gasPrice = gasPrice;
@@ -119,11 +117,6 @@ public class ProgramInvokeImpl implements ProgramInvoke {
     }
 
     @Override
-    public DataWord getBalance() {
-        return balance;
-    }
-
-    @Override
     public DataWord getGas() {
         return gas;
     }
@@ -143,8 +136,15 @@ public class ProgramInvokeImpl implements ProgramInvoke {
         return value;
     }
 
+    // open for testing
+    public byte[] getData() {
+        return data;
+    }
+
     @Override
     public DataWord getDataValue(DataWord indexData) {
+        byte[] data = getData();
+
         BigInteger indexBI = indexData.value();
         if (indexBI.compareTo(BigInteger.valueOf(data.length)) >= 0) {
             return DataWord.ZERO;
@@ -161,11 +161,15 @@ public class ProgramInvokeImpl implements ProgramInvoke {
 
     @Override
     public DataWord getDataSize() {
+        byte[] data = getData();
+
         return new DataWord(data.length);
     }
 
     @Override
     public byte[] getDataCopy(DataWord offsetData, DataWord lengthData) {
+        byte[] data = getData();
+
         BigInteger offsetBI = offsetData.value();
         BigInteger lengthBI = lengthData.value();
 
@@ -241,7 +245,6 @@ public class ProgramInvokeImpl implements ProgramInvoke {
                 "address=" + address +
                 ", origin=" + origin +
                 ", caller=" + caller +
-                ", balance=" + balance +
                 ", gas=" + gas +
                 ", gasPrice=" + gasPrice +
                 ", value=" + value +

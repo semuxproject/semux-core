@@ -23,7 +23,6 @@ public class TestBase {
     protected byte[] address = address(1);
     protected byte[] origin = address(2);
     protected byte[] caller = address(2);
-    protected BigInteger balance = BigInteger.valueOf(8888L);
     protected long gas = 1_000_00L;
     protected BigInteger gasPrice = BigInteger.ONE;
     protected BigInteger value = BigInteger.ZERO;
@@ -42,7 +41,7 @@ public class TestBase {
     protected Repository repository;
     protected BlockStore blockStore;
 
-    protected ProgramInvoke invoke;
+    protected ProgramInvokeImpl invoke;
     protected Program program;
 
     @Before
@@ -54,7 +53,6 @@ public class TestBase {
                 new DataWord(address),
                 new DataWord(origin),
                 new DataWord(caller),
-                new DataWord(balance),
                 new DataWord(gas),
                 new DataWord(gasPrice),
                 new DataWord(value),

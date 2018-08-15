@@ -42,8 +42,6 @@ public interface ProgramInvoke {
 
     DataWord getCallerAddress();
 
-    DataWord getBalance();
-
     DataWord getGas();
 
     /**

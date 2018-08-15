@@ -153,18 +153,6 @@ public class DataWordTest {
     }
 
     @Test
-    public void testPow() {
-
-        BigInteger x = BigInteger.valueOf(Integer.MAX_VALUE);
-        BigInteger y = BigInteger.valueOf(1000);
-
-        BigInteger result1 = x.modPow(x, y);
-        BigInteger result2 = pow(x, y);
-        System.out.println(result1);
-        System.out.println(result2);
-    }
-
-    @Test
     public void testSignExtend1() {
 
         DataWord x = new DataWord(HexUtil.fromHexString("f2"));

@@ -52,9 +52,6 @@ public class ProgramInvokeFactoryImpl implements ProgramInvokeFactory {
         /** CALLER **/
         byte[] caller = tx.getFrom();
 
-        /** BALANCE **/
-        BigInteger balance = repository.getBalance(address);
-
         /** GAS op **/
         BigInteger gas = tx.getGas();
 
@@ -88,7 +85,7 @@ public class ProgramInvokeFactoryImpl implements ProgramInvokeFactory {
         BigInteger gasLimit = block.getGasLimit();
 
         return new ProgramInvokeImpl(new DataWord(address), new DataWord(origin), new DataWord(caller),
-                new DataWord(balance), new DataWord(gas), new DataWord(gasPrice), new DataWord(callValue), callData,
+                new DataWord(gas), new DataWord(gasPrice), new DataWord(callValue), callData,
                 new DataWord(prevHash), new DataWord(coinbase), new DataWord(timestamp), new DataWord(number),
                 new DataWord(difficulty), new DataWord(gasLimit),
                 repository, blockStore, 0, false);
@@ -103,7 +100,6 @@ public class ProgramInvokeFactoryImpl implements ProgramInvokeFactory {
         DataWord address = toAddress;
         DataWord origin = program.getOriginAddress();
         DataWord caller = callerAddress;
-        DataWord balance = new DataWord(balanceBI);
 
         // gas
         DataWord gasPrice = program.getGasPrice();
@@ -117,8 +113,8 @@ public class ProgramInvokeFactoryImpl implements ProgramInvokeFactory {
         DataWord difficulty = program.getDifficulty();
         DataWord gasLimit = program.getGasLimit();
 
-        return new ProgramInvokeImpl(address, origin, caller, balance, gas, gasPrice, value,
-                data, prevHash, coinbase, timestamp, number, difficulty, gasLimit,
+        return new ProgramInvokeImpl(address, origin, caller, gas, gasPrice, value, data,
+                prevHash, coinbase, timestamp, number, difficulty, gasLimit,
                 repository, blockStore, program.getCallDepth() + 1, isStaticCall);
     }
 }
