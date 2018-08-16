@@ -30,14 +30,6 @@ import org.ethereum.vm.DataWord;
 public interface Repository {
 
     /**
-     * Creates an account.
-     *
-     * @param address
-     *            the account address
-     */
-    void createAccount(byte[] address);
-
-    /**
      * Checks whether an account exists.
      *
      * @param address
@@ -45,6 +37,15 @@ public interface Repository {
      * @return true if account exist, false otherwise
      */
     boolean isExist(byte[] address);
+
+    /**
+     * Creates an account if not exist.
+     *
+     * @param address
+     *            the account address
+     * @ImplNote trigger account creation
+     */
+    void createAccount(byte[] address);
 
     /**
      * Deletes an account.
@@ -60,6 +61,7 @@ public interface Repository {
      * @param address
      *            the account address
      * @return new value of the nonce
+     * @ImplNote trigger account creation
      */
     long increaseNonce(byte[] address);
 
@@ -71,6 +73,7 @@ public interface Repository {
      * @param nonce
      *            new nonce
      * @return new value of the nonce
+     * @ImplNote trigger account creation
      */
     long setNonce(byte[] address, long nonce);
 
@@ -90,6 +93,7 @@ public interface Repository {
      *            the account address
      * @param code
      *            that will be associated with this account
+     * @ImplNote trigger account creation
      */
     void saveCode(byte[] address, byte[] code);
 
@@ -98,7 +102,7 @@ public interface Repository {
      *
      * @param address
      *            the account address
-     * @return code in byte-array format
+     * @return code in byte-array format, or NULL if not exist
      */
     byte[] getCode(byte[] address);
 
@@ -111,6 +115,7 @@ public interface Repository {
      *            of the data to store
      * @param value
      *            is the data to store
+     * @ImplNote trigger account creation
      */
     void putStorageRow(byte[] address, DataWord key, DataWord value);
 
@@ -142,6 +147,7 @@ public interface Repository {
      * @param value
      *            to be added
      * @return new balance of the account
+     * @ImplNote trigger account creation
      */
     BigInteger addBalance(byte[] address, BigInteger value);
 

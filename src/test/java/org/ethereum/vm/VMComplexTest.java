@@ -46,14 +46,13 @@ public class VMComplexTest extends TestBase {
     @Test // contract call recursive
     public void test1() {
 
-        /**
-         * #The code will run ------------------
-         * 
-         * a = contract.storage[999] if a > 0: contract.storage[999] = a - 1
-         * 
-         * # call to contract: 77045e71a7a2c50903d88e564cd72fab11e82051 send((tx.gas /
-         * 10 * 8), 0x77045e71a7a2c50903d88e564cd72fab11e82051, 0) else: stop
-         */
+        // a = contract.storage[999]
+        // if (a > 0) {
+        // contract.storage[999] = a - 1
+        // send((tx.gas / 10 * 8), 0x77045e71a7a2c50903d88e564cd72fab11e82051, 0)
+        // } else {
+        // stop
+        // }
 
         int expectedGas = 436;
 
@@ -85,18 +84,19 @@ public class VMComplexTest extends TestBase {
         Program program = new Program(codeB, pi);
 
         try {
-            while (!program.isStopped())
+            while (!program.isStopped()) {
                 vm.step(program);
+            }
         } catch (RuntimeException e) {
             program.setRuntimeFailure(e);
         }
 
-        System.out.println();
-        System.out.println("============ Results ============");
-
         BigInteger balance = repository.getBalance(callerAddrB);
 
+        System.out.println();
+        System.out.println("============ Results ============");
         System.out.println("*** Used gas: " + program.getResult().getGasUsed());
+        System.out.println("*** Exception: " + program.getResult().getException());
         System.out.println("*** Contract Balance: " + balance);
 
         // todo: assert caller balance after contract exec
@@ -110,17 +110,17 @@ public class VMComplexTest extends TestBase {
 
         /**
          * #The code will run ------------------
-         * 
+         *
          * contract A: 77045e71a7a2c50903d88e564cd72fab11e82051 --------------- a =
          * msg.data[0] b = msg.data[1]
-         * 
+         *
          * contract.storage[a] contract.storage[b]
-         * 
-         * 
+         *
+         *
          * contract B: 83c5541a6c8d2dbad642f385d8d06ca9b6c731ee ----------- a =
          * msg((tx.gas / 10 * 8), 0x77045e71a7a2c50903d88e564cd72fab11e82051, 0, [11,
          * 22, 33], 3, 6)
-         * 
+         *
          */
 
         long expectedVal_1 = 11;
@@ -189,19 +189,19 @@ public class VMComplexTest extends TestBase {
 
         /**
          * #The code will run ------------------
-         * 
+         *
          * contract A: 77045e71a7a2c50903d88e564cd72fab11e82051 ---------------
-         * 
+         *
          * a = 11 b = 22 c = 33 d = 44 e = 55 f = 66
-         * 
+         *
          * [asm 192 0 RETURN asm]
-         * 
-         * 
-         * 
+         *
+         *
+         *
          * contract B: 83c5541a6c8d2dbad642f385d8d06ca9b6c731ee ----------- a =
          * msg((tx.gas / 10 * 8), 0x77045e71a7a2c50903d88e564cd72fab11e82051, 0, [11,
          * 22, 33], 3, 6)
-         * 
+         *
          */
 
         long expectedVal_1 = 11;
@@ -272,17 +272,17 @@ public class VMComplexTest extends TestBase {
 
         /**
          * #The code will run ------------------
-         * 
+         *
          * contract A: 77045e71a7a2c50903d88e564cd72fab11e82051 -----------
-         * 
+         *
          * a = 0x7f60c860005461012c6020540000000000000000000000000000000000000000 b =
          * 0x0060005460206000f20000000000000000000000000000000000000000000000
          * create(100, 0 41)
-         * 
-         * 
+         *
+         *
          * contract B: (the contract to be created the addr will be defined to:
          * 8e45367623a2865132d9bf875d5cfa31b9a0cd94) ----------- a = 200 b = 300
-         * 
+         *
          */
 
         // Set contract into Database
@@ -335,12 +335,12 @@ public class VMComplexTest extends TestBase {
     public void test6() {
         /**
          * #The code will run ------------------
-         * 
+         *
          * contract A: 945304eb96065b2a98b57a48a06ae28d285a71b5 ---------------
-         * 
+         *
          * PUSH1 0 CALLDATALOAD SLOAD NOT PUSH1 9 JUMPI STOP PUSH1 32 CALLDATALOAD PUSH1
          * 0 CALLDATALOAD SSTORE
-         * 
+         *
          * contract B: 0f572e5295c57f15886f9b263e2f6d2d6c7b5ec6 ----------- { (MSTORE 0
          * 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) (MSTORE
          * 32 0xaaffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaa) [[ 0

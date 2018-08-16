@@ -15,91 +15,150 @@ import org.ethereum.vm.util.ByteArrayWrapper;
 
 public class RepositoryMockImpl implements Repository {
 
-    private class Account {
-        long nonce = 0;
-        BigInteger balance = BigInteger.ZERO;
-        byte[] code = new byte[0];
-        Map<DataWord, DataWord> storage = new HashMap();
-    }
-
     private Map<ByteArrayWrapper, Account> accounts = new HashMap();
+    private RepositoryMockImpl parent;
 
-    private Account getAccount(byte[] address) {
-        return accounts.computeIfAbsent(new ByteArrayWrapper(address), k -> new Account());
+    public RepositoryMockImpl() {
+        this(null);
     }
 
-    @Override
-    public void createAccount(byte[] address) {
-        getAccount(address);
+    public RepositoryMockImpl(RepositoryMockImpl parent) {
+        this.parent = parent;
+    }
+
+    /**
+     * Returns an account if exists.
+     *
+     * @param address
+     *            the account address
+     * @return an account if exists, NULL otherwise
+     */
+    protected Account getAccount(byte[] address) {
+        ByteArrayWrapper key = new ByteArrayWrapper(address);
+
+        if (accounts.containsKey(key)) {
+            return accounts.get(key);
+        } else if (parent != null && parent.isExist(address)) {
+            Account account = parent.getAccount(address);
+            Account accountTrack = new Account(account);
+            accounts.put(key, accountTrack);
+            return accountTrack;
+        } else {
+            return null;
+        }
     }
 
     @Override
     public boolean isExist(byte[] address) {
-        return accounts.containsKey(new ByteArrayWrapper(address));
+        ByteArrayWrapper key = new ByteArrayWrapper(address);
+
+        if (accounts.containsKey(new ByteArrayWrapper(address))) {
+            return accounts.get(key) != null;
+        } else if (parent != null) {
+            return parent.isExist(address);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public void createAccount(byte[] address) {
+        if (!isExist(address)) {
+            accounts.put(new ByteArrayWrapper(address), new Account());
+        }
     }
 
     @Override
     public void delete(byte[] address) {
-        accounts.remove(new ByteArrayWrapper(address));
+        accounts.put(new ByteArrayWrapper(address), null);
     }
 
     @Override
     public long increaseNonce(byte[] address) {
+        createAccount(address);
         return getAccount(address).nonce += 1;
     }
 
     @Override
     public long setNonce(byte[] address, long nonce) {
+        createAccount(address);
         return (getAccount(address).nonce = nonce);
     }
 
     @Override
     public long getNonce(byte[] address) {
-        return getAccount(address).nonce;
+        Account account = getAccount(address);
+        return account == null ? 0 : account.nonce;
     }
 
     @Override
     public void saveCode(byte[] address, byte[] code) {
+        createAccount(address);
         getAccount(address).code = code;
     }
 
     @Override
     public byte[] getCode(byte[] address) {
-        return getAccount(address).code;
+        Account account = getAccount(address);
+        return account == null ? null : account.code;
     }
 
     @Override
     public void putStorageRow(byte[] address, DataWord key, DataWord value) {
+        createAccount(address);
         getAccount(address).storage.put(key, value);
     }
 
     @Override
     public DataWord getStorageRow(byte[] address, DataWord key) {
-        return getAccount(address).storage.get(key);
+        Account account = getAccount(address);
+        return account == null ? null : account.storage.get(key);
     }
 
     @Override
     public BigInteger getBalance(byte[] address) {
-        return getAccount(address).balance;
+        Account account = getAccount(address);
+        return account == null ? null : account.balance;
     }
 
     @Override
     public BigInteger addBalance(byte[] address, BigInteger value) {
-        return getAccount(address).balance = getAccount(address).balance.add(value);
+        createAccount(address);
+        Account account = getAccount(address);
+        return account.balance = account.balance.add(value);
     }
 
     @Override
-    public Repository startTracking() {
-        throw new UnsupportedOperationException("Not implemented");
+    public RepositoryMockImpl startTracking() {
+        return new RepositoryMockImpl(this);
     }
 
     @Override
     public void commit() {
-        throw new UnsupportedOperationException("Not implemented");
+        if (parent != null) {
+            parent.accounts.putAll(accounts);
+        }
     }
 
     @Override
     public void rollback() {
-        throw new UnsupportedOperationException("Not implemented");
+        accounts.clear();
+    }
+
+    static class Account {
+        public long nonce = 0;
+        public BigInteger balance = BigInteger.ZERO;
+        public byte[] code = new byte[0];
+        public Map<DataWord, DataWord> storage = new HashMap();
+
+        public Account() {
+        }
+
+        public Account(Account parent) {
+            this.nonce = parent.nonce;
+            this.balance = parent.balance;
+            this.code = parent.code;
+            this.storage = new HashMap<>(parent.storage);
+        }
     }
 }
