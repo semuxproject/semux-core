@@ -10,9 +10,10 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import org.ethereum.vm.client.BlockStore;
+import org.ethereum.vm.client.BlockStoreMockImpl;
 import org.ethereum.vm.client.Repository;
+import org.ethereum.vm.client.RepositoryMockImpl;
 import org.ethereum.vm.program.Program;
-import org.ethereum.vm.program.invoke.ProgramInvoke;
 import org.ethereum.vm.program.invoke.ProgramInvokeImpl;
 import org.ethereum.vm.util.ByteArrayUtil;
 import org.junit.After;

@@ -4,13 +4,13 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.ethereum.vm;
+package org.ethereum.vm.client;
 
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.ethereum.vm.client.Repository;
+import org.ethereum.vm.DataWord;
 import org.ethereum.vm.util.ByteArrayWrapper;
 
 public class RepositoryMockImpl implements Repository {
