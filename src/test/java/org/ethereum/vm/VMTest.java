@@ -2196,7 +2196,6 @@ public class VMTest extends TestBase {
         vm.step(program);
 
         DataWord item1 = program.stackPop();
-        long gas = program.getResult().getGasUsed();
 
         assertEquals(s_expected_1, HexUtil.toHexString(item1.getData()).toUpperCase());
     }
@@ -2212,7 +2211,6 @@ public class VMTest extends TestBase {
         vm.step(program);
 
         DataWord item1 = program.stackPop();
-        long gas = program.getResult().getGasUsed();
 
         assertEquals(s_expected_1, HexUtil.toHexString(item1.getData()).toUpperCase());
     }
@@ -2228,7 +2226,6 @@ public class VMTest extends TestBase {
         vm.step(program);
 
         DataWord item1 = program.stackPop();
-        long gas = program.getResult().getGasUsed();
 
         assertEquals(s_expected_1, HexUtil.toHexString(item1.getData()).toUpperCase());
     }

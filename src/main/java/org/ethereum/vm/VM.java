@@ -132,7 +132,6 @@ public class VM {
                 throw ExceptionFactory.invalidOpCode(program.getCurrentOp());
             }
 
-            program.setLastOp(op.val());
             program.verifyStackUnderflow(op.require());
             program.verifyStackOverflow(op.require(), op.ret()); // Check not exceeding stack limits
 

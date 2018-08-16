@@ -88,10 +88,8 @@ public class Program {
 
     private ProgramResult result = new ProgramResult();
 
-    private byte[] codeHash;
     private byte[] ops;
     private int pc;
-    private byte lastOp;
     private byte previouslyExecutedOp;
     private boolean stopped;
 
@@ -141,13 +139,6 @@ public class Program {
 
     public byte getCurrentOp() {
         return isEmpty(ops) ? 0 : ops[pc];
-    }
-
-    /**
-     * Last Op can only be set publicly (no getLastOp method), is used for logging.
-     */
-    public void setLastOp(byte op) {
-        this.lastOp = op;
     }
 
     /**
@@ -338,7 +329,6 @@ public class Program {
         return this.storage;
     }
 
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public void createContract(DataWord value, DataWord memStart, DataWord memSize) {
         returnDataBuffer = null; // reset return buffer right before the call
 

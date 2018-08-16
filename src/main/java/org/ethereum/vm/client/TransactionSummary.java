@@ -57,9 +57,6 @@ public class TransactionSummary {
 
     private boolean failed;
 
-    private byte[] rlpEncoded;
-    private boolean parsed;
-
     public TransactionSummary(Transaction transaction) {
         this.tx = transaction;
         this.gas = transaction.getGas();
@@ -191,7 +188,6 @@ public class TransactionSummary {
         }
 
         public TransactionSummary build() {
-            summary.parsed = true;
             if (summary.failed) {
                 for (InternalTransaction transaction : summary.internalTransactions) {
                     transaction.reject();

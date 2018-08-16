@@ -32,10 +32,8 @@ import org.ethereum.vm.program.invoke.ProgramInvoke;
 public class Storage implements Repository {
 
     private final Repository repository;
-    private final DataWord address;
 
     public Storage(ProgramInvoke programInvoke) {
-        this.address = programInvoke.getOwnerAddress();
         this.repository = programInvoke.getRepository();
     }
 

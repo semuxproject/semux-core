@@ -64,10 +64,8 @@ public class TransactionExecutor {
     private BlockStore blockStore;
     private final long gasUsedInTheBlock;
     private boolean readyToExecute = false;
-    private String execError;
 
     private ProgramInvokeFactory programInvokeFactory;
-    private byte[] coinbase;
 
     private ProgramResult result = new ProgramResult();
     private Block currentBlock;
@@ -97,7 +95,6 @@ public class TransactionExecutor {
             Config config) {
 
         this.tx = tx;
-        this.coinbase = coinbase;
         this.track = track;
         this.cacheTrack = track.startTracking();
         this.blockStore = blockStore;
@@ -110,7 +107,6 @@ public class TransactionExecutor {
 
     private void execError(String err) {
         logger.warn(err);
-        execError = err;
     }
 
     /**
@@ -365,7 +361,6 @@ public class TransactionExecutor {
             // Accumulate refunds for suicides
             result.addFutureRefund(result.getDeleteAccounts().size() * config.getFeeSchedule().getSUICIDE_REFUND());
             long gasRefund = Math.min(result.getFutureRefund(), getGasUsed() / 2);
-            byte[] addr = tx.isCreate() ? VMUtil.calcNewAddr(tx.getFrom(), tx.getNonce()) : tx.getTo();
             m_endGas = m_endGas.add(BigInteger.valueOf(gasRefund));
 
             summaryBuilder

@@ -15,7 +15,7 @@ import org.ethereum.vm.util.ByteArrayWrapper;
 
 public class RepositoryMockImpl implements Repository {
 
-    private Map<ByteArrayWrapper, Account> accounts = new HashMap();
+    private Map<ByteArrayWrapper, Account> accounts = new HashMap<>();
     private RepositoryMockImpl parent;
 
     public RepositoryMockImpl() {
@@ -149,7 +149,7 @@ public class RepositoryMockImpl implements Repository {
         public long nonce = 0;
         public BigInteger balance = BigInteger.ZERO;
         public byte[] code = new byte[0];
-        public Map<DataWord, DataWord> storage = new HashMap();
+        public Map<DataWord, DataWord> storage = new HashMap<>();
 
         public Account() {
         }

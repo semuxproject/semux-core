@@ -32,12 +32,8 @@ import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.Transaction;
 import org.ethereum.vm.program.Program;
 import org.ethereum.vm.util.VMUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ProgramInvokeFactoryImpl implements ProgramInvokeFactory {
-
-    private static final Logger logger = LoggerFactory.getLogger(ProgramInvokeFactoryImpl.class);
 
     @Override
     public ProgramInvoke createProgramInvoke(Transaction tx, Block block, Repository repository,
