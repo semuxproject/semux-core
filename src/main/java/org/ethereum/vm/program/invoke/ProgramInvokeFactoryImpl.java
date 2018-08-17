@@ -40,7 +40,7 @@ public class ProgramInvokeFactoryImpl implements ProgramInvokeFactory {
             BlockStore blockStore) {
 
         /** ADDRESS **/
-        byte[] address = tx.isCreate() ? VMUtil.calcNewAddr(tx.getFrom(), tx.getNonce()) : tx.getTo();
+        byte[] address = tx.isCreate() ? VMUtil.calcNewAddress(tx.getFrom(), tx.getNonce()) : tx.getTo();
 
         /** ORIGIN **/
         byte[] origin = tx.getFrom();

@@ -356,7 +356,7 @@ public class Program {
 
         // [2] CREATE THE CONTRACT ADDRESS
         long nonce = getStorage().getNonce(senderAddress);
-        byte[] newAddress = VMUtil.calcNewAddr(getOwnerAddress().getLast20Bytes(), nonce);
+        byte[] newAddress = VMUtil.calcNewAddress(getOwnerAddress().getLast20Bytes(), nonce);
 
         boolean contractAlreadyExists = getStorage().isExist(newAddress);
 

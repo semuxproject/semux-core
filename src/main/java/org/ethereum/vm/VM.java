@@ -516,7 +516,7 @@ public class VM {
                 DataWord lengthData = program.stackPop();
                 byte[] buffer = program.memoryChunk(memOffsetData.intValueSafe(), lengthData.intValueSafe());
 
-                byte[] encoded = VMUtil.sha3(buffer);
+                byte[] encoded = VMUtil.keccak256(buffer);
                 DataWord word = new DataWord(encoded);
 
                 program.stackPush(word);

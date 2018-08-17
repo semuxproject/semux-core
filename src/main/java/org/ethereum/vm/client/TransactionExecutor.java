@@ -234,7 +234,7 @@ public class TransactionExecutor {
     }
 
     private void create() {
-        byte[] newContractAddress = VMUtil.calcNewAddr(tx.getFrom(), tx.getNonce());
+        byte[] newContractAddress = VMUtil.calcNewAddress(tx.getFrom(), tx.getNonce());
 
         if (cacheTrack.isExist(newContractAddress)) {
             execError(
@@ -304,7 +304,7 @@ public class TransactionExecutor {
                     } else {
                         // Contract successfully created
                         m_endGas = m_endGas.subtract(BigInteger.valueOf(returnDataGasValue));
-                        cacheTrack.saveCode(VMUtil.calcNewAddr(tx.getFrom(), tx.getNonce()), result.getHReturn());
+                        cacheTrack.saveCode(VMUtil.calcNewAddress(tx.getFrom(), tx.getNonce()), result.getHReturn());
                     }
                 }
 
@@ -345,7 +345,7 @@ public class TransactionExecutor {
         // remove touched account
         touchedAccounts
                 .remove(new ByteArrayWrapper(
-                        tx.isCreate() ? VMUtil.calcNewAddr(tx.getFrom(), tx.getNonce()) : tx.getTo()));
+                        tx.isCreate() ? VMUtil.calcNewAddress(tx.getFrom(), tx.getNonce()) : tx.getTo()));
     }
 
     public TransactionSummary finalization() {
