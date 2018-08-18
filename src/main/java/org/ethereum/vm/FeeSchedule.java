@@ -26,45 +26,45 @@ package org.ethereum.vm;
  */
 public class FeeSchedule {
 
-    private final int BALANCE = 20;
-    private final int SHA3 = 30;
-    private final int SHA3_WORD = 6;
-    private final int SLOAD = 50;
-    private final int STOP = 0;
-    private final int SUICIDE = 0;
-    private final int CLEAR_SSTORE = 5000;
-    private final int SET_SSTORE = 20000;
-    private final int RESET_SSTORE = 5000;
-    private final int REFUND_SSTORE = 15000;
-    private final int CREATE = 32000;
+    private static final int BALANCE = 20;
+    private static final int SHA3 = 30;
+    private static final int SHA3_WORD = 6;
+    private static final int SLOAD = 50;
+    private static final int STOP = 0;
+    private static final int SUICIDE = 0;
+    private static final int CLEAR_SSTORE = 5000;
+    private static final int SET_SSTORE = 20000;
+    private static final int RESET_SSTORE = 5000;
+    private static final int REFUND_SSTORE = 15000;
+    private static final int CREATE = 32000;
 
-    private final int CALL = 40;
-    private final int STIPEND_CALL = 2300;
-    private final int VT_CALL = 9000; // value transfer call
-    private final int NEW_ACCT_CALL = 25000; // new account call
-    private final int MEMORY = 3;
-    private final int SUICIDE_REFUND = 24000;
-    private final int CREATE_DATA = 200;
-    private final int TX_NO_ZERO_DATA = 68;
-    private final int TX_ZERO_DATA = 4;
-    private final int TRANSACTION = 21000;
-    private final int TRANSACTION_CREATE_CONTRACT = 53000;
-    private final int LOG_GAS = 375;
-    private final int LOG_DATA_GAS = 8;
-    private final int LOG_TOPIC_GAS = 375;
-    private final int COPY_GAS = 3;
-    private final int EXP_GAS = 10;
-    private final int EXP_BYTE_GAS = 10;
-    private final int IDENTITY = 15;
-    private final int IDENTITY_WORD = 3;
-    private final int RIPEMD160 = 600;
-    private final int RIPEMD160_WORD = 120;
-    private final int SHA256 = 60;
-    private final int SHA256_WORD = 12;
-    private final int EC_RECOVER = 3000;
-    private final int EXT_CODE_SIZE = 20;
-    private final int EXT_CODE_COPY = 20;
-    private final int NEW_ACCT_SUICIDE = 0;
+    private static final int CALL = 40;
+    private static final int STIPEND_CALL = 2300;
+    private static final int VT_CALL = 9000; // value transfer call
+    private static final int NEW_ACCT_CALL = 25000; // new account call
+    private static final int MEMORY = 3;
+    private static final int SUICIDE_REFUND = 24000;
+    private static final int CREATE_DATA = 200;
+    private static final int TX_NO_ZERO_DATA = 68;
+    private static final int TX_ZERO_DATA = 4;
+    private static final int TRANSACTION = 21000;
+    private static final int TRANSACTION_CREATE_CONTRACT = 53000;
+    private static final int LOG_GAS = 375;
+    private static final int LOG_DATA_GAS = 8;
+    private static final int LOG_TOPIC_GAS = 375;
+    private static final int COPY_GAS = 3;
+    private static final int EXP_GAS = 10;
+    private static final int EXP_BYTE_GAS = 10;
+    private static final int IDENTITY = 15;
+    private static final int IDENTITY_WORD = 3;
+    private static final int RIPEMD160 = 600;
+    private static final int RIPEMD160_WORD = 120;
+    private static final int SHA256 = 60;
+    private static final int SHA256_WORD = 12;
+    private static final int EC_RECOVER = 3000;
+    private static final int EXT_CODE_SIZE = 20;
+    private static final int EXT_CODE_COPY = 20;
+    private static final int NEW_ACCT_SUICIDE = 0;
 
     public int getBALANCE() {
         return BALANCE;
