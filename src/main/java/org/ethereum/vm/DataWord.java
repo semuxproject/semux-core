@@ -28,8 +28,7 @@ import org.ethereum.vm.util.HexUtil;
 /**
  * DataWord is the 32-byte array representation of a 256-bit number.
  *
- * NOTE: the underlying byte array is shared across dataword and should not be
- * modified anywhere
+ * @ImplNote DataWord objects are immutable.
  */
 public class DataWord implements Comparable<DataWord> {
 
@@ -65,7 +64,7 @@ public class DataWord implements Comparable<DataWord> {
 
     public DataWord(byte[] data) {
         if (data.length == 32) {
-            this.data = data; // shallow copy
+            this.data = data.clone();
         } else if (data.length < 32) {
             System.arraycopy(data, 0, this.data, 32 - data.length, data.length);
         } else {
@@ -73,8 +72,13 @@ public class DataWord implements Comparable<DataWord> {
         }
     }
 
+    /**
+     * Returns a clone of the underlying byte array.
+     *
+     * @return a byte array
+     */
     public byte[] getData() {
-        return data;
+        return data.clone();
     }
 
     public byte[] getLast20Bytes() {

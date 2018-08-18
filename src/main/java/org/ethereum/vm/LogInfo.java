@@ -54,8 +54,7 @@ public class LogInfo {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (DataWord topic : topics) {
-            String topicStr = HexUtil.toHexString(topic.getData());
-            sb.append(topicStr).append(" ");
+            sb.append(topic.toString()).append(" ");
         }
         sb.append("]");
 
