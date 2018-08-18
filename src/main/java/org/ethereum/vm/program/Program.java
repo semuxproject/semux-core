@@ -600,14 +600,8 @@ public class Program {
         getResult().resetFutureRefund();
     }
 
-    public void storageSave(DataWord word1, DataWord word2) {
-        storageSave(word1.getData(), word2.getData());
-    }
-
-    public void storageSave(byte[] key, byte[] val) {
-        DataWord keyWord = new DataWord(key);
-        DataWord valWord = new DataWord(val);
-        getStorage().putStorageRow(getOwnerAddress().getLast20Bytes(), keyWord, valWord);
+    public void storageSave(DataWord key, DataWord value) {
+        getStorage().putStorageRow(getOwnerAddress().getLast20Bytes(), key, value);
     }
 
     public byte[] getCode() {

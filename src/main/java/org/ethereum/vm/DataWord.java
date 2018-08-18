@@ -81,6 +81,13 @@ public class DataWord implements Comparable<DataWord> {
         return Arrays.copyOfRange(data, data.length - 20, data.length);
     }
 
+    public byte getByte(int index) {
+        if (index < 0 || index >= SIZE) {
+            throw new IndexOutOfBoundsException();
+        }
+        return data[index];
+    }
+
     public BigInteger value() {
         return new BigInteger(1, data);
     }

@@ -474,7 +474,7 @@ public class VM {
                 DataWord word2 = program.stackPop();
                 final DataWord result;
                 if (word1.value().compareTo(THIRTY_TWO) == -1) {
-                    byte tmp = word2.getData()[word1.intValue()];
+                    byte tmp = word2.getByte(word1.intValue());
                     result = new DataWord(new byte[] { tmp });
                 } else {
                     result = DataWord.ZERO;
@@ -802,7 +802,7 @@ public class VM {
             case MSTORE8: {
                 DataWord addr = program.stackPop();
                 DataWord value = program.stackPop();
-                byte[] byteVal = { value.getData()[31] };
+                byte[] byteVal = { value.getByte(31) };
                 program.memorySave(addr.intValueSafe(), byteVal);
                 program.step();
             }

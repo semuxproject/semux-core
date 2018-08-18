@@ -394,7 +394,7 @@ public class VMComplexTest extends TestBase {
         assertEquals("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", memValue1.toString());
         assertEquals("aaffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaa", memValue2.toString());
 
-        assertEquals(0x01, storeValue1.getData()[0]);
+        assertEquals(0x01, storeValue1.getByte(0));
 
         // TODO: check that the value pushed after exec is 1
     }
