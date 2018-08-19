@@ -2249,7 +2249,7 @@ public class VMTest extends TestBase {
         vm.step(program);
         vm.step(program);
 
-        assertEquals(s_expected_1, HexUtil.toHexString(program.getResult().getHReturn()).toUpperCase());
+        assertEquals(s_expected_1, HexUtil.toHexString(program.getResult().getReturnData()).toUpperCase());
         assertTrue(program.isStopped());
     }
 
@@ -2266,7 +2266,7 @@ public class VMTest extends TestBase {
         vm.step(program);
         vm.step(program);
 
-        assertEquals(s_expected_1, HexUtil.toHexString(program.getResult().getHReturn()).toUpperCase());
+        assertEquals(s_expected_1, HexUtil.toHexString(program.getResult().getReturnData()).toUpperCase());
         assertTrue(program.isStopped());
     }
 
@@ -2285,7 +2285,7 @@ public class VMTest extends TestBase {
         vm.step(program);
         vm.step(program);
 
-        assertEquals(s_expected_1, HexUtil.toHexString(program.getResult().getHReturn()).toUpperCase());
+        assertEquals(s_expected_1, HexUtil.toHexString(program.getResult().getReturnData()).toUpperCase());
         assertTrue(program.isStopped());
     }
 
@@ -2304,7 +2304,7 @@ public class VMTest extends TestBase {
         vm.step(program);
         vm.step(program);
 
-        assertEquals(s_expected_1, HexUtil.toHexString(program.getResult().getHReturn()).toUpperCase());
+        assertEquals(s_expected_1, HexUtil.toHexString(program.getResult().getReturnData()).toUpperCase());
         assertTrue(program.isStopped());
     }
 

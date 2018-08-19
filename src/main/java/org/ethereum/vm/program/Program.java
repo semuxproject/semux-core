@@ -167,7 +167,7 @@ public class Program {
     }
 
     public void setHReturn(byte[] buff) {
-        getResult().setHReturn(buff);
+        getResult().setReturnData(buff);
     }
 
     public void stop() {
@@ -376,7 +376,7 @@ public class Program {
         }
 
         // 4. CREATE THE CONTRACT OUT OF RETURN
-        byte[] code = result.getHReturn();
+        byte[] code = result.getReturnData();
 
         long storageCost = getLength(code) * config.getFeeSchedule().getCREATE_DATA();
         long afterSpend = programInvoke.getGas().longValue() - storageCost - result.getGasUsed();
@@ -389,7 +389,8 @@ public class Program {
             }
         } else if (getLength(code) > config.getConstants().getMAX_CONTRACT_SZIE()) {
             result.setException(
-                    ExceptionFactory.notEnoughSpendingGas("Contract size too large: " + getLength(result.getHReturn()),
+                    ExceptionFactory.notEnoughSpendingGas(
+                            "Contract size too large: " + getLength(result.getReturnData()),
                             storageCost, this));
         } else if (!result.isRevert()) {
             result.spendGas(storageCost);
@@ -412,7 +413,7 @@ public class Program {
             if (result.getException() != null) {
                 return;
             } else {
-                returnDataBuffer = result.getHReturn();
+                returnDataBuffer = result.getReturnData();
             }
         } else {
             track.commit();
@@ -523,9 +524,9 @@ public class Program {
             stackPushOne();
         }
 
-        // APPLY RESULTS: result.getHReturn() into out_memory allocated
+        // APPLY RESULTS: result.getReturnData() into out_memory allocated
         if (result != null) {
-            byte[] buffer = result.getHReturn();
+            byte[] buffer = result.getReturnData();
             int offset = msg.getOutDataOffs().intValue();
             int size = msg.getOutDataSize().intValue();
 

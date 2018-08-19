@@ -254,7 +254,8 @@ public class TransactionExecutor {
                 gasLeft = tx.getGas().subtract(toBI(result.getGasUsed()));
 
                 if (tx.isCreate() && !result.isRevert()) {
-                    int returnDataGasValue = getLength(result.getHReturn()) * config.getFeeSchedule().getCREATE_DATA();
+                    int returnDataGasValue = getLength(result.getReturnData())
+                            * config.getFeeSchedule().getCREATE_DATA();
 
                     if (gasLeft.compareTo(BigInteger.valueOf(returnDataGasValue)) < 0) {
                         // Not enough gas to return contract code
@@ -263,17 +264,17 @@ public class TransactionExecutor {
                                     ExceptionFactory.notEnoughSpendingGas("No gas to return just created contract",
                                             returnDataGasValue, program));
                         }
-                        result.setHReturn(EMPTY_BYTE_ARRAY);
-                    } else if (getLength(result.getHReturn()) > config.getConstants().getMAX_CONTRACT_SZIE()) {
+                        result.setReturnData(EMPTY_BYTE_ARRAY);
+                    } else if (getLength(result.getReturnData()) > config.getConstants().getMAX_CONTRACT_SZIE()) {
                         // Contract size too large
                         program.setRuntimeFailure(ExceptionFactory
-                                .notEnoughSpendingGas("Contract size too large: " + getLength(result.getHReturn()),
+                                .notEnoughSpendingGas("Contract size too large: " + getLength(result.getReturnData()),
                                         returnDataGasValue, program));
-                        result.setHReturn(EMPTY_BYTE_ARRAY);
+                        result.setReturnData(EMPTY_BYTE_ARRAY);
                     } else {
                         // Contract successfully created
                         gasLeft = gasLeft.subtract(BigInteger.valueOf(returnDataGasValue));
-                        track.saveCode(VMUtil.calcNewAddress(tx.getFrom(), tx.getNonce()), result.getHReturn());
+                        track.saveCode(VMUtil.calcNewAddress(tx.getFrom(), tx.getNonce()), result.getReturnData());
                     }
                 }
 
@@ -328,7 +329,7 @@ public class TransactionExecutor {
         return new TransactionSummary(tx, tx.getValue(), tx.getGas(), tx.getGasPrice(),
                 BigInteger.valueOf(getGasUsed()),
                 result.getException() != null,
-                result.getHReturn(),
+                result.getReturnData(),
                 result.getInternalTransactions(),
                 new ArrayList<>(result.getDeleteAccounts()),
                 result.getLogs());

@@ -34,7 +34,7 @@ import org.ethereum.vm.util.ByteArrayWrapper;
 public class ProgramResult {
 
     private long gasUsed = 0;
-    private byte[] hReturn = EMPTY_BYTE_ARRAY;
+    private byte[] returnData = EMPTY_BYTE_ARRAY;
     private RuntimeException exception = null;
     private boolean revert = false;
 
@@ -56,13 +56,12 @@ public class ProgramResult {
         gasUsed -= gas;
     }
 
-    public void setHReturn(byte[] hReturn) {
-        this.hReturn = hReturn;
-
+    public void setReturnData(byte[] returnData) {
+        this.returnData = returnData;
     }
 
-    public byte[] getHReturn() {
-        return hReturn;
+    public byte[] getReturnData() {
+        return returnData;
     }
 
     public RuntimeException getException() {
