@@ -75,8 +75,10 @@ public class DataWord implements Comparable<DataWord> {
     /**
      * Creates a DataWord instance from byte array.
      *
-     * @param data an byte array
-     * @param unsafe whether the data is safe to refer
+     * @param data
+     *            an byte array
+     * @param unsafe
+     *            whether the data is safe to refer
      */
     protected DataWord(byte[] data, boolean unsafe) {
         if (data == null || data.length > SIZE) {

@@ -451,7 +451,7 @@
                     </includes>
                     <excludes>
                         <exclude>src/main/java/org/ethereum/**/*.java</exclude>
-                        <exclude>test/main/java/org/ethereum/**/*.java</exclude>
+                        <exclude>src/test/java/org/ethereum/**/*.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
