@@ -18,6 +18,7 @@
 package org.ethereum.vm.crypto.zksnark;
 
 import java.math.BigInteger;
+import java.util.Objects;
 
 /**
  * Arithmetic in Fp_12 <br/>
@@ -29,8 +30,8 @@ import java.math.BigInteger;
  * elements of Fp_12 are represented with 2 elements of {@link Fp6} <br/>
  * <br/>
  *
- * Field arithmetic is ported from <a
- * href="https://github.com/scipr-lab/libff/blob/master/libff/algebra/fields/fp12_2over3over2.tcc">libff</a>
+ * Field arithmetic is ported from <a href=
+ * "https://github.com/scipr-lab/libff/blob/master/libff/algebra/fields/fp12_2over3over2.tcc">libff</a>
  *
  * @author Mikhail Kalinin
  * @since 02.09.2017
@@ -302,6 +303,11 @@ public class Fp12 implements Field<Fp12> {
             return false;
         return !(b != null ? !b.equals(fp12.b) : fp12.b != null);
 
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(a, b);
     }
 
     @Override

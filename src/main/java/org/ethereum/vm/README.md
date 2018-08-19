@@ -6,7 +6,7 @@ the following targets:
 - Embeddable
 - High performance
 
-It's currently hosted on the Semux Core repo, but should be treated as an independent library. 
+It's currently hosted on the Semux Core repo, but should be considered as an independent library.
 
 
 ## Dependencies

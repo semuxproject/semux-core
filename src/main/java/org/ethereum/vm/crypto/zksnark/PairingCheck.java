@@ -44,8 +44,8 @@ import java.util.List;
  * <li>get result with {@link #result()}</li>
  * </ul>
  *
- * Arithmetic has been ported from <a
- * href="https://github.com/scipr-lab/libff/blob/master/libff/algebra/curves/alt_bn128/alt_bn128_pairing.cpp">libff</a>
+ * Arithmetic has been ported from <a href=
+ * "https://github.com/scipr-lab/libff/blob/master/libff/algebra/curves/alt_bn128/alt_bn128_pairing.cpp">libff</a>
  * Ate pairing algorithms
  *
  * @author Mikhail Kalinin

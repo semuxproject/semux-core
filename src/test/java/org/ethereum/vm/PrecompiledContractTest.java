@@ -26,11 +26,9 @@ import static org.junit.Assert.assertNotNull;
 
 import java.math.BigInteger;
 
-import org.bouncycastle.util.encoders.Hex;
 import org.ethereum.vm.PrecompiledContracts.PrecompiledContract;
 import org.ethereum.vm.config.ByzantiumConfig;
 import org.ethereum.vm.crypto.ECKey;
-import org.ethereum.vm.util.BytecodeCompiler;
 import org.ethereum.vm.util.HexUtil;
 import org.junit.Test;
 

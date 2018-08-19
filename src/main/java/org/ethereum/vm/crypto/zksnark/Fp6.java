@@ -18,6 +18,7 @@
 package org.ethereum.vm.crypto.zksnark;
 
 import java.math.BigInteger;
+import java.util.Objects;
 
 /**
  * Arithmetic in Fp_6 <br/>
@@ -29,8 +30,8 @@ import java.math.BigInteger;
  * elements of Fp_6 are represented with 3 elements of {@link Fp2} <br/>
  * <br/>
  *
- * Field arithmetic is ported from <a
- * href="https://github.com/scipr-lab/libff/blob/master/libff/algebra/fields/fp6_3over2.tcc">libff</a>
+ * Field arithmetic is ported from <a href=
+ * "https://github.com/scipr-lab/libff/blob/master/libff/algebra/fields/fp6_3over2.tcc">libff</a>
  *
  * @author Mikhail Kalinin
  * @since 05.09.2017
@@ -194,6 +195,11 @@ public class Fp6 implements Field<Fp6> {
         if (b != null ? !b.equals(fp6.b) : fp6.b != null)
             return false;
         return !(c != null ? !c.equals(fp6.c) : fp6.c != null);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(a, b, c);
     }
 
     static final Fp2[] FROBENIUS_COEFFS_B = {

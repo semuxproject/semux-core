@@ -20,6 +20,7 @@ package org.ethereum.vm.crypto.zksnark;
 import static org.ethereum.vm.crypto.zksnark.Params.P;
 
 import java.math.BigInteger;
+import java.util.Objects;
 
 /**
  * Arithmetic in F_p, p =
@@ -117,6 +118,11 @@ public class Fp implements Field<Fp> {
         Fp fp = (Fp) o;
 
         return !(v != null ? v.compareTo(fp.v) != 0 : fp.v != null);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(v);
     }
 
     @Override

@@ -24,8 +24,8 @@ import java.math.BigInteger;
  * This curve is one of the keys to zkSNARKs. <br/>
  * This specific curve was introduced in
  * <a href="https://github.com/scipr-lab/libff#elliptic-curve-choices">libff</a>
- * and used by a proving system in <a
- * href="https://github.com/zcash/zcash/wiki/specification#zcash-protocol">ZCash
+ * and used by a proving system in <a href=
+ * "https://github.com/zcash/zcash/wiki/specification#zcash-protocol">ZCash
  * protocol</a> <br/>
  * <br/>
  *
@@ -41,13 +41,13 @@ import java.math.BigInteger;
  * {@link PairingCheck}<br/>
  * <br/>
  *
- * Code of curve arithmetic has been ported from <a
- * href="https://github.com/scipr-lab/libff/blob/master/libff/algebra/curves/alt_bn128/alt_bn128_g1.cpp">libff</a>
+ * Code of curve arithmetic has been ported from <a href=
+ * "https://github.com/scipr-lab/libff/blob/master/libff/algebra/curves/alt_bn128/alt_bn128_g1.cpp">libff</a>
  * <br/>
  * <br/>
  *
- * Current implementation uses Jacobian coordinate system as <a
- * href="https://github.com/scipr-lab/libff/blob/master/libff/algebra/curves/alt_bn128/alt_bn128_g1.cpp">libff</a>
+ * Current implementation uses Jacobian coordinate system as <a href=
+ * "https://github.com/scipr-lab/libff/blob/master/libff/algebra/curves/alt_bn128/alt_bn128_g1.cpp">libff</a>
  * does, use {@link #toEthNotation()} to convert Jacobian coords to Ethereum
  * encoding <br/>
  *

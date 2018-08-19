@@ -30,12 +30,8 @@ import org.ethereum.vm.program.invoke.ProgramInvoke;
 import org.ethereum.vm.util.BytecodeCompiler;
 import org.ethereum.vm.util.HexUtil;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class VMComplexTest extends TestBase {
-
-    private static Logger logger = LoggerFactory.getLogger(VMComplexTest.class);
 
     @Test // contract call recursive
     public void test1() {

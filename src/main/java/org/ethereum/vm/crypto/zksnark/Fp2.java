@@ -18,6 +18,7 @@
 package org.ethereum.vm.crypto.zksnark;
 
 import java.math.BigInteger;
+import java.util.Objects;
 
 /**
  * Arithmetic in F_p2 <br/>
@@ -29,8 +30,8 @@ import java.math.BigInteger;
  * 1" from the ring F_p[i] <br/>
  * <br/>
  *
- * Field arithmetic is ported from <a
- * href="https://github.com/scipr-lab/libff/blob/master/libff/algebra/fields/fp2.tcc">libff</a>
+ * Field arithmetic is ported from <a href=
+ * "https://github.com/scipr-lab/libff/blob/master/libff/algebra/fields/fp2.tcc">libff</a>
  * <br/>
  *
  * @author Mikhail Kalinin
@@ -158,6 +159,11 @@ public class Fp2 implements Field<Fp2> {
             return false;
         return !(b != null ? !b.equals(fp2.b) : fp2.b != null);
 
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(a, b);
     }
 
     Fp2 frobeniusMap(int power) {
