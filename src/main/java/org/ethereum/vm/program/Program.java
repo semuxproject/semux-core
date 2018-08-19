@@ -23,10 +23,10 @@ import static org.apache.commons.lang3.ArrayUtils.getLength;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 import static org.apache.commons.lang3.ArrayUtils.nullToEmpty;
-import static org.ethereum.vm.util.BigIntUtil.isNotCovers;
-import static org.ethereum.vm.util.BigIntUtil.isPositive;
-import static org.ethereum.vm.util.BigIntUtil.toBI;
-import static org.ethereum.vm.util.BigIntUtil.transfer;
+import static org.ethereum.vm.util.BigIntegerUtil.isNotCovers;
+import static org.ethereum.vm.util.BigIntegerUtil.isPositive;
+import static org.ethereum.vm.util.BigIntegerUtil.toBI;
+import static org.ethereum.vm.util.BigIntegerUtil.transfer;
 
 import java.math.BigInteger;
 import java.util.Arrays;

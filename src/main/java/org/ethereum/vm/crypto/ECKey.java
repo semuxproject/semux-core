@@ -33,7 +33,7 @@
  */
 package org.ethereum.vm.crypto;
 
-import static org.ethereum.vm.util.BigIntUtil.isLessThan;
+import static org.ethereum.vm.util.BigIntegerUtil.isLessThan;
 
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;

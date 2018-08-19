@@ -22,7 +22,7 @@ import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
 
 import java.math.BigInteger;
 
-public class ByteUtil {
+public class ByteArrayUtil {
     public static int firstNonZeroByte(byte[] data) {
         for (int i = 0; i < data.length; ++i) {
             if (data[i] != 0) {

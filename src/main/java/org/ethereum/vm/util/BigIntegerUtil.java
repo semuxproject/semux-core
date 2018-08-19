@@ -22,7 +22,7 @@ import java.math.BigInteger;
 
 import org.ethereum.vm.client.Repository;
 
-public class BigIntUtil {
+public class BigIntegerUtil {
     public static BigInteger toBI(byte[] data) {
         return new BigInteger(1, data);
     }
