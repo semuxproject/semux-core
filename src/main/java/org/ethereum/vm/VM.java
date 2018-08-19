@@ -153,16 +153,15 @@ public class VM {
             case SSTORE:
                 DataWord newValue = stack.get(stack.size() - 2);
                 DataWord oldValue = program.storageLoad(stack.peek());
-                if (oldValue == null && !newValue.isZero())
-                    gasCost = feeSchedule.getSET_SSTORE();
-                else if (oldValue != null && newValue.isZero()) {
-                    // TODO: GASREFUND counter policy
 
-                    // refund step cost policy.
+                if (oldValue == null && !newValue.isZero()) {
+                    gasCost = feeSchedule.getSET_SSTORE();
+                } else if (oldValue != null && newValue.isZero()) {
                     program.futureRefundGas(feeSchedule.getREFUND_SSTORE());
                     gasCost = feeSchedule.getCLEAR_SSTORE();
-                } else
+                } else {
                     gasCost = feeSchedule.getRESET_SSTORE();
+                }
                 break;
             case SLOAD:
                 gasCost = feeSchedule.getSLOAD();

@@ -127,7 +127,7 @@ public class InternalTransaction implements Transaction {
     @Override
     public String toString() {
         return "InternalTransaction [" +
-                ", depth=" + getDepth() +
+                "depth=" + getDepth() +
                 ", index=" + getIndex() +
                 ", type=" + getType() +
                 "]";

@@ -26,8 +26,7 @@ import org.ethereum.vm.OpCode;
 public class BytecodeCompiler {
 
     public static void main(String[] args) {
-        byte[] code = HexUtil.fromHexString(
-                "605E60076000396000605f556014600054601e60205463abcddcba6040545b51602001600a5254516040016014525451606001601e5254516080016028525460a052546016604860003960166000f26000603f556103e75660005460005360200235");
+        byte[] code = HexUtil.fromHexString(args[0]);
         System.out.println(decompile(code));
     }
 

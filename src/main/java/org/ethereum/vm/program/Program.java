@@ -341,7 +341,7 @@ public class Program {
         InternalTransaction internalTx = addInternalTx(OpCode.CREATE, senderAddress, EMPTY_BYTE_ARRAY,
                 getStorage().getNonce(senderAddress), endowment, programCode, gas.value());
         if (logger.isDebugEnabled()) {
-            logger.debug("Internal transaction: {}", internalTx);
+            logger.debug("CREATE: {}", internalTx);
         }
 
         ProgramInvoke programInvoke = programInvokeFactory.createProgramInvoke(this,
@@ -417,12 +417,7 @@ public class Program {
         // 5. REFUND THE REMAIN GAS
         long refundGas = gas.longValue() - result.getGasUsed();
         if (refundGas > 0) {
-            refundGas(refundGas, "remain gas from the internal call");
-            if (logger.isInfoEnabled()) {
-                logger.info("The remaining gas is refunded, account: [{}], gas: [{}] ",
-                        HexUtil.toHexString(getOwnerAddress().getLast20Bytes()),
-                        refundGas);
-            }
+            refundGas(refundGas, "remaining gas from create");
         }
     }
 
@@ -472,7 +467,7 @@ public class Program {
         InternalTransaction internalTx = addInternalTx(msg.getType(), senderAddress, contextAddress,
                 getStorage().getNonce(senderAddress), endowment, data, msg.getGas().value());
         if (logger.isDebugEnabled()) {
-            logger.debug("Internal transaction: {}", internalTx);
+            logger.debug("CALL: {}", internalTx);
         }
 
         ProgramResult result = null;
@@ -535,20 +530,68 @@ public class Program {
         if (result != null) {
             BigInteger refundGas = msg.getGas().value().subtract(toBI(result.getGasUsed()));
             if (isPositive(refundGas)) {
-                refundGas(refundGas.longValue(), "remaining gas from the internal call");
-                if (logger.isDebugEnabled()) {
-                    logger.debug("The remaining gas refunded, account: [{}], gas: [{}] ",
-                            HexUtil.toHexString(senderAddress),
-                            refundGas.toString());
-                }
+                refundGas(refundGas.longValue(), "remaining gas from call");
             }
         } else {
-            refundGas(msg.getGas().longValue(), "remaining gas from the internal call");
+            refundGas(msg.getGas().longValue(), "remaining gas from call");
+        }
+    }
+
+    public void callToPrecompiledAddress(MessageCall msg, PrecompiledContracts.PrecompiledContract contract) {
+        returnDataBuffer = null; // reset return buffer right before the call
+
+        if (getCallDepth() == MAX_DEPTH) {
+            stackPushZero();
+            this.refundGas(msg.getGas().longValue(), "call deep limit reach");
+            return;
+        }
+
+        Repository track = getStorage().startTracking();
+
+        byte[] senderAddress = this.getOwnerAddress().getLast20Bytes();
+        byte[] codeAddress = msg.getCodeAddress().getLast20Bytes();
+        byte[] contextAddress = msg.getType().callIsStateless() ? senderAddress : codeAddress;
+
+        BigInteger endowment = msg.getEndowment().value();
+        BigInteger senderBalance = track.getBalance(senderAddress);
+        if (senderBalance.compareTo(endowment) < 0) {
+            stackPushZero();
+            this.refundGas(msg.getGas().longValue(), "refund gas from message call");
+            return;
+        }
+
+        byte[] data = this.memoryChunk(msg.getInDataOffs().intValue(),
+                msg.getInDataSize().intValue());
+
+        // Charge for endowment - is not reversible by rollback
+        transfer(track, senderAddress, contextAddress, msg.getEndowment().value());
+
+        long requiredGas = contract.getGasForData(data);
+
+        if (requiredGas > msg.getGas().longValue()) {
+            this.refundGas(0, "refund gas from pre-compiled call");
+            this.stackPushZero();
+            track.rollback();
+        } else {
+            Pair<Boolean, byte[]> out = contract.execute(data);
+
+            if (out.getLeft()) {
+                this.refundGas(msg.getGas().longValue() - requiredGas, "refund gas from pre-compiled call");
+                this.stackPushOne();
+                returnDataBuffer = out.getRight();
+                track.commit();
+            } else {
+                this.refundGas(0, "refund gas from pre-compiled call");
+                this.stackPushZero();
+                track.rollback();
+            }
+
+            this.memorySave(msg.getOutDataOffs().intValue(), msg.getOutDataSize().intValueSafe(), out.getRight());
         }
     }
 
     public void spendGas(long gasValue, String cause) {
-        logger.debug("Spend gas: cause = [{}], amount = [{}]", cause, gasValue);
+        logger.debug("Spend: cause = [{}], gas = [{}]", cause, gasValue);
 
         if (getGasLong() < gasValue) {
             throw ExceptionFactory.notEnoughSpendingGas(cause, gasValue, this);
@@ -561,7 +604,7 @@ public class Program {
     }
 
     public void refundGas(long gasValue, String cause) {
-        logger.debug("Refund gas: cause = [{}], amount: [{}]", cause, gasValue);
+        logger.debug("Refund: cause = [{}], gas = [{}]", cause, gasValue);
 
         getResult().refundGas(gasValue);
     }
@@ -704,64 +747,6 @@ public class Program {
             throw ExceptionFactory.badJumpDestination(ret);
         }
         return ret;
-    }
-
-    public void callToPrecompiledAddress(MessageCall msg, PrecompiledContracts.PrecompiledContract contract) {
-        returnDataBuffer = null; // reset return buffer right before the call
-
-        if (getCallDepth() == MAX_DEPTH) {
-            stackPushZero();
-            this.refundGas(msg.getGas().longValue(), "call deep limit reach");
-            return;
-        }
-
-        Repository track = getStorage().startTracking();
-
-        byte[] senderAddress = this.getOwnerAddress().getLast20Bytes();
-        byte[] codeAddress = msg.getCodeAddress().getLast20Bytes();
-        byte[] contextAddress = msg.getType().callIsStateless() ? senderAddress : codeAddress;
-
-        BigInteger endowment = msg.getEndowment().value();
-        BigInteger senderBalance = track.getBalance(senderAddress);
-        if (senderBalance.compareTo(endowment) < 0) {
-            stackPushZero();
-            this.refundGas(msg.getGas().longValue(), "refund gas from message call");
-            return;
-        }
-
-        byte[] data = this.memoryChunk(msg.getInDataOffs().intValue(),
-                msg.getInDataSize().intValue());
-
-        // Charge for endowment - is not reversible by rollback
-        transfer(track, senderAddress, contextAddress, msg.getEndowment().value());
-
-        long requiredGas = contract.getGasForData(data);
-
-        if (requiredGas > msg.getGas().longValue()) {
-            this.refundGas(0, "call pre-compiled"); // matches cpp logic
-            this.stackPushZero();
-            track.rollback();
-        } else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Call {}(data = {})", contract.getClass().getSimpleName(), HexUtil.toHexString(data));
-            }
-
-            Pair<Boolean, byte[]> out = contract.execute(data);
-
-            if (out.getLeft()) { // success
-                this.refundGas(msg.getGas().longValue() - requiredGas, "call pre-compiled");
-                this.stackPushOne();
-                returnDataBuffer = out.getRight();
-                track.commit();
-            } else {
-                // spend all gas on failure, push zero and revert state changes
-                this.refundGas(0, "call pre-compiled");
-                this.stackPushZero();
-                track.rollback();
-            }
-
-            this.memorySave(msg.getOutDataOffs().intValue(), msg.getOutDataSize().intValueSafe(), out.getRight());
-        }
     }
 
     /**
