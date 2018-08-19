@@ -84,7 +84,7 @@ public class ProgramInvokeFactoryImpl implements ProgramInvokeFactory {
 
     @Override
     public ProgramInvoke createProgramInvoke(Program program,
-            DataWord callerAddress, DataWord toAddress, BigInteger balanceBI,
+            DataWord callerAddress, DataWord toAddress,
             DataWord gas, DataWord value, byte[] data,
             Repository repository, BlockStore blockStore, boolean isStaticCall) {
 

@@ -22,7 +22,6 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import org.ethereum.vm.util.ByteArrayUtil;
 import org.ethereum.vm.util.HexUtil;
 
 /**
@@ -318,18 +317,26 @@ public class DataWord implements Comparable<DataWord> {
     }
 
     @Override
-    public int hashCode() {
-        return Arrays.hashCode(this.data);
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        return Arrays.equals(data, ((DataWord) o).data);
     }
 
     @Override
-    public boolean equals(Object o) {
-        return o instanceof DataWord && Arrays.equals(this.data, ((DataWord) o).data);
+    public int hashCode() {
+        return Arrays.hashCode(data);
     }
 
     @Override
     public int compareTo(DataWord o) {
-        return ByteArrayUtil.compareUnsigned(this.data, o.data);
+        return org.bouncycastle.util.Arrays.compareUnsigned(this.data, o.data);
     }
 
     @Override

@@ -18,11 +18,11 @@
  */
 package org.ethereum.vm.program;
 
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.ethereum.vm.TestBase;
-import org.ethereum.vm.util.ByteArrayUtil;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class ProgramMemoryTest extends TestBase {
 
     @Before
     public void createProgram() {
-        program = new Program(ByteArrayUtil.EMPTY_BYTE_ARRAY, invoke);
+        program = new Program(EMPTY_BYTE_ARRAY, invoke);
     }
 
     @Test

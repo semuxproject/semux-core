@@ -18,6 +18,7 @@
  */
 package org.ethereum.vm;
 
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
 import static org.ethereum.vm.OpCode.CALL;
 import static org.ethereum.vm.OpCode.PUSH1;
 import static org.ethereum.vm.OpCode.REVERT;
@@ -32,7 +33,6 @@ import org.ethereum.vm.program.Stack;
 import org.ethereum.vm.program.exception.ExceptionFactory;
 import org.ethereum.vm.program.exception.ReturnDataCopyIllegalBoundsException;
 import org.ethereum.vm.program.exception.StaticCallModificationException;
-import org.ethereum.vm.util.ByteArrayUtil;
 import org.ethereum.vm.util.VMUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -289,7 +289,7 @@ public class VM {
             switch (op) {
 
             case STOP: {
-                program.setHReturn(ByteArrayUtil.EMPTY_BYTE_ARRAY);
+                program.setHReturn(EMPTY_BYTE_ARRAY);
                 program.stop();
             }
                 break;
@@ -626,7 +626,7 @@ public class VM {
             case CODECOPY:
             case EXTCODECOPY: {
 
-                byte[] fullCode = ByteArrayUtil.EMPTY_BYTE_ARRAY;
+                byte[] fullCode = EMPTY_BYTE_ARRAY;
                 if (op == OpCode.CODECOPY)
                     fullCode = program.getCode();
 
@@ -1005,8 +1005,6 @@ public class VM {
             default:
                 break;
             }
-
-            program.setPreviouslyExecutedOp(op.val());
 
         } catch (RuntimeException e) {
             program.spendAllGas();

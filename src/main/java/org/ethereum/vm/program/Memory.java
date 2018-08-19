@@ -20,12 +20,12 @@ package org.ethereum.vm.program;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.min;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import org.ethereum.vm.DataWord;
-import org.ethereum.vm.util.ByteArrayUtil;
 
 public class Memory {
 
@@ -37,7 +37,7 @@ public class Memory {
 
     public byte[] read(int address, int size) {
         if (size <= 0) {
-            return ByteArrayUtil.EMPTY_BYTE_ARRAY;
+            return EMPTY_BYTE_ARRAY;
         }
 
         extend(address, size);

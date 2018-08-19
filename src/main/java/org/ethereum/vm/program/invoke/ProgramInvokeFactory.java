@@ -18,8 +18,6 @@
  */
 package org.ethereum.vm.program.invoke;
 
-import java.math.BigInteger;
-
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.client.Block;
 import org.ethereum.vm.client.BlockStore;
@@ -32,6 +30,6 @@ public interface ProgramInvokeFactory {
     ProgramInvoke createProgramInvoke(Transaction tx, Block block, Repository repository, BlockStore blockStore);
 
     ProgramInvoke createProgramInvoke(Program program, DataWord callerAddress, DataWord toAddress,
-            BigInteger balance, DataWord gas, DataWord value, byte[] data,
+            DataWord gas, DataWord value, byte[] data,
             Repository repository, BlockStore blockStore, boolean isStaticCall);
 }

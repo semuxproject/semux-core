@@ -18,13 +18,14 @@
  */
 package org.ethereum.vm.program;
 
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.ethereum.vm.LogInfo;
-import org.ethereum.vm.util.ByteArrayUtil;
 import org.ethereum.vm.util.ByteArrayWrapper;
 
 /**
@@ -33,7 +34,7 @@ import org.ethereum.vm.util.ByteArrayWrapper;
 public class ProgramResult {
 
     private long gasUsed = 0;
-    private byte[] hReturn = ByteArrayUtil.EMPTY_BYTE_ARRAY;
+    private byte[] hReturn = EMPTY_BYTE_ARRAY;
     private RuntimeException exception = null;
     private boolean revert = false;
 

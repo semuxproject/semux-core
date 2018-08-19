@@ -11,6 +11,7 @@ It's currently hosted on the Semux Core repo, but should be treated as an indepe
 
 ## Dependencies
 
+- Commons Lang
 - Bouncycastle
 - SLF4J
 - JUnit and Mockito (test)

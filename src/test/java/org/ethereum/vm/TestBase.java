@@ -27,7 +27,6 @@ import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.RepositoryMockImpl;
 import org.ethereum.vm.program.Program;
 import org.ethereum.vm.program.invoke.ProgramInvokeImpl;
-import org.ethereum.vm.util.ByteArrayUtil;
 import org.junit.After;
 import org.junit.Before;
 
@@ -41,7 +40,7 @@ public class TestBase {
     protected BigInteger value = BigInteger.ZERO;
     protected byte[] data = new byte[0];
 
-    protected byte[] prevHash = ByteArrayUtil.random(32);
+    protected byte[] prevHash = new byte[32];
     protected byte[] coinbase = address(3);
     protected long timestamp = System.currentTimeMillis();
     protected long number = 1;
