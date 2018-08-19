@@ -961,10 +961,6 @@ public class VM {
                 PrecompiledContracts.PrecompiledContract contract = PrecompiledContracts
                         .getContractForAddress(codeAddress, config);
 
-                if (!op.callIsStateless()) {
-                    program.getResult().addTouchAccount(codeAddress.getLast20Bytes());
-                }
-
                 if (contract != null) {
                     program.callToPrecompiledAddress(msg, contract);
                 } else {
@@ -996,7 +992,6 @@ public class VM {
 
                 DataWord address = program.stackPop();
                 program.suicide(address);
-                program.getResult().addTouchAccount(address.getLast20Bytes());
 
                 program.stop();
             }

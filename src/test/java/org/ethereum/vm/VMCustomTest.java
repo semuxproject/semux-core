@@ -300,12 +300,11 @@ public class VMCustomTest extends TestBase {
         assertEquals(s_expected_1, item1.toString());
     }
 
-    @Ignore
     @Test // SHA3 OP
     public void testSHA3_1() {
         VM vm = new VM();
         program = new Program(HexUtil.fromHexString("60016000536001600020"), invoke);
-        String s_expected_1 = "5FE7F977E71DBA2EA1A68E21057BEEBB9BE2AC30C6410AA38D4F3FBE41DCFFD2";
+        String s_expected_1 = "5fe7f977e71dba2ea1a68e21057beebb9be2ac30c6410aa38d4f3fbe41dcffd2";
 
         vm.step(program);
         vm.step(program);
@@ -318,12 +317,11 @@ public class VMCustomTest extends TestBase {
         assertEquals(s_expected_1, item1.toString());
     }
 
-    @Ignore
     @Test // SHA3 OP
     public void testSHA3_2() {
         VM vm = new VM();
         program = new Program(HexUtil.fromHexString("6102016000526002601E20"), invoke);
-        String s_expected_1 = "114A3FE82A0219FCC31ABD15617966A125F12B0FD3409105FC83B487A9D82DE4";
+        String s_expected_1 = "114a3fe82a0219fcc31abd15617966a125f12b0fd3409105fc83b487a9d82de4";
 
         vm.step(program);
         vm.step(program);
@@ -424,12 +422,11 @@ public class VMCustomTest extends TestBase {
         assertEquals(s_expected_1, item1.toString());
     }
 
-    @Ignore
     @Test // GAS OP
     public void testGAS_1() {
         VM vm = new VM();
         program = new Program(HexUtil.fromHexString("5A"), invoke);
-        String s_expected_1 = "00000000000000000000000000000000000000000000000000000000000f423f";
+        String s_expected_1 = new DataWord(gas - OpCode.GAS.getTier().asInt()).toString();
 
         vm.step(program);
 

@@ -334,10 +334,6 @@ public class TransactionExecutor {
                 result.getLogs());
     }
 
-    public ProgramResult getResult() {
-        return result;
-    }
-
     private void rollback() {
         track.rollback();
 

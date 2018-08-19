@@ -2340,44 +2340,7 @@ public class VMTest extends TestBase {
     }
 
     @Test // CODECOPY OP
-    @Ignore
     public void testCODECOPY_3() {
-
-        // cost for that:
-        // 94 - data copied
-        // 95 - new bytes allocated
-
-        VM vm = new VM();
-        program = new Program(HexUtil.fromHexString(
-                "605E60076000396000605f556014600054601e60205463abcddcba6040545b51602001600a5254516040016014525451606001601e5254516080016028525460a052546016604860003960166000f26000603f556103e75660005460005360200235"),
-                invoke);
-
-        vm.step(program);
-        vm.step(program);
-        vm.step(program);
-        vm.step(program);
-
-        assertEquals(10, program.getResult().getGasUsed());
-    }
-
-    @Test // CODECOPY OP
-    @Ignore
-    public void testCODECOPY_4() {
-        VM vm = new VM();
-        program = new Program(HexUtil.fromHexString(
-                "605E60076000396000605f556014600054601e60205463abcddcba6040545b51602001600a5254516040016014525451606001601e5254516080016028525460a052546016604860003960166000f26000603f556103e756600054600053602002351234"),
-                invoke);
-
-        vm.step(program);
-        vm.step(program);
-        vm.step(program);
-        vm.step(program);
-
-        assertEquals(10, program.getResult().getGasUsed());
-    }
-
-    @Test // CODECOPY OP
-    public void testCODECOPY_5() {
         VM vm = new VM();
         program = new Program(HexUtil.fromHexString(
                 "611234600054615566602054607060006020396000605f556014600054601e60205463abcddcba6040545b51602001600a5254516040016014525451606001601e5254516080016028525460a052546016604860003960166000f26000603f556103e756600054600053602002351234"),
@@ -2398,7 +2361,7 @@ public class VMTest extends TestBase {
     }
 
     @Test(expected = StackUnderflowException.class) // CODECOPY OP mal
-    public void testCODECOPY_6() {
+    public void testCODECOPY_4() {
         VM vm = new VM();
         program = new Program(HexUtil.fromHexString(
                 "605E6007396000605f556014600054601e60205463abcddcba6040545b51602001600a5254516040016014525451606001601e5254516080016028525460a052546016604860003960166000f26000603f556103e756600054600053602002351234"),

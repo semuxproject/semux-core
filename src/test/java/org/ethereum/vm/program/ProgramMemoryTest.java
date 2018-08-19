@@ -44,18 +44,6 @@ public class ProgramMemoryTest extends TestBase {
     }
 
     @Test
-    @Ignore
-    public void testMemorySave() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    @Ignore
-    public void testMemoryLoad() {
-        fail("Not yet implemented");
-    }
-
-    @Test
     public void testMemoryChunk1() {
         program.initMem(new byte[64]);
         int offset = 128;
