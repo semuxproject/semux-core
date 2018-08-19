@@ -61,10 +61,9 @@ public class BytecodeCompiler {
 
     private static byte[] compile(String[] tokens) {
         List<Byte> bytecodes = new ArrayList<>();
-        int ntokens = tokens.length;
 
-        for (int i = 0; i < ntokens; i++) {
-            String token = tokens[i].trim().toUpperCase();
+        for (String t : tokens) {
+            String token = t.trim().toUpperCase();
 
             if (token.isEmpty()) {
                 continue;
@@ -77,11 +76,11 @@ public class BytecodeCompiler {
             }
         }
 
-        int nbytes = bytecodes.size();
-        byte[] bytes = new byte[nbytes];
+        byte[] bytes = new byte[bytecodes.size()];
 
-        for (int k = 0; k < nbytes; k++)
-            bytes[k] = bytecodes.get(k).byteValue();
+        for (int k = 0; k < bytes.length; k++) {
+            bytes[k] = bytecodes.get(k);
+        }
 
         return bytes;
     }

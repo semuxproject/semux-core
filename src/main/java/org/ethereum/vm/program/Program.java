@@ -294,6 +294,13 @@ public class Program {
         return this.storage;
     }
 
+    /**
+     * Creates a new smart contract account.
+     *
+     * @param value
+     * @param memStart
+     * @param memSize
+     */
     public void createContract(DataWord value, DataWord memStart, DataWord memSize) {
         returnDataBuffer = null; // reset return buffer right before the call
 
@@ -422,13 +429,14 @@ public class Program {
     }
 
     /**
-     * That method is for internal code invocations
-     * <p/>
-     * - Normal calls invoke a specified contract which updates itself - Stateless
-     * calls invoke code from another contract, within the context of the caller
+     * Makes an internal call to another address.
+     *
+     * Note: normal calls invoke a specified contract which updates itself, while
+     * Stateless calls invoke code from another contract, within the context of the
+     * caller.
      *
      * @param msg
-     *            is the message call object
+     *            the message call object
      */
     public void callToAddress(MessageCall msg) {
         returnDataBuffer = null; // reset return buffer right before the call

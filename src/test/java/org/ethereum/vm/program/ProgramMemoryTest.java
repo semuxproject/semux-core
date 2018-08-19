@@ -20,11 +20,9 @@ package org.ethereum.vm.program;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import org.ethereum.vm.TestBase;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class ProgramMemoryTest extends TestBase {

@@ -46,8 +46,8 @@ public class ProgramInvokeImpl implements ProgramInvoke {
     private final Repository repository;
     private final BlockStore blockStore;
 
-    private int callDepth = 0;
-    private boolean isStaticCall = false;
+    private int callDepth;
+    private boolean isStaticCall;
 
     public ProgramInvokeImpl(DataWord address, DataWord origin, DataWord caller,
             DataWord gas, DataWord gasPrice, DataWord value, byte[] data, DataWord prevHash,

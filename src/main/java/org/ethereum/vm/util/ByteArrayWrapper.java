@@ -22,7 +22,7 @@ import java.util.Arrays;
 
 public class ByteArrayWrapper {
 
-    private byte[] bytes;
+    private final byte[] bytes;
 
     public ByteArrayWrapper(byte[] bytes) {
         this.bytes = bytes;

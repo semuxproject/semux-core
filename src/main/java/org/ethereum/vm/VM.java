@@ -389,7 +389,7 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                DataWord result = (word1.value().compareTo(word2.value()) == -1) ? DataWord.ONE : DataWord.ZERO;
+                DataWord result = (word1.value().compareTo(word2.value()) < 0) ? DataWord.ONE : DataWord.ZERO;
                 program.stackPush(result);
                 program.step();
             }
@@ -398,7 +398,7 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                DataWord result = (word1.sValue().compareTo(word2.sValue()) == -1) ? DataWord.ONE : DataWord.ZERO;
+                DataWord result = (word1.sValue().compareTo(word2.sValue()) < 0) ? DataWord.ONE : DataWord.ZERO;
                 program.stackPush(result);
                 program.step();
             }
@@ -407,7 +407,7 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                DataWord result = (word1.sValue().compareTo(word2.sValue()) == 1) ? DataWord.ONE : DataWord.ZERO;
+                DataWord result = (word1.sValue().compareTo(word2.sValue()) > 0) ? DataWord.ONE : DataWord.ZERO;
                 program.stackPush(result);
                 program.step();
             }
@@ -416,7 +416,7 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
 
-                DataWord result = (word1.value().compareTo(word2.value()) == 1) ? DataWord.ONE : DataWord.ZERO;
+                DataWord result = (word1.value().compareTo(word2.value()) > 0) ? DataWord.ONE : DataWord.ZERO;
                 program.stackPush(result);
                 program.step();
             }
@@ -438,9 +438,6 @@ public class VM {
             }
                 break;
 
-            /**
-             * Bitwise Logic Operations
-             */
             case AND: {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
@@ -472,7 +469,7 @@ public class VM {
                 DataWord word1 = program.stackPop();
                 DataWord word2 = program.stackPop();
                 final DataWord result;
-                if (word1.value().compareTo(THIRTY_TWO) == -1) {
+                if (word1.value().compareTo(THIRTY_TWO) < 0) {
                     byte tmp = word2.getByte(word1.intValue());
                     result = new DataWord(new byte[] { tmp });
                 } else {
@@ -502,9 +499,6 @@ public class VM {
             }
                 break;
 
-            /**
-             * SHA3
-             */
             case SHA3: {
                 DataWord memOffsetData = program.stackPop();
                 DataWord lengthData = program.stackPop();
@@ -518,9 +512,6 @@ public class VM {
             }
                 break;
 
-            /**
-             * Environmental Information
-             */
             case ADDRESS: {
                 DataWord address = program.getOwnerAddress();
 
@@ -1005,7 +996,6 @@ public class VM {
             program.resetFutureRefund();
             program.stop();
             throw e;
-        } finally {
         }
     }
 

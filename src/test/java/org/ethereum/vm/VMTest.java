@@ -31,7 +31,6 @@ import org.ethereum.vm.program.Program;
 import org.ethereum.vm.program.exception.BadJumpDestinationException;
 import org.ethereum.vm.program.exception.StackUnderflowException;
 import org.ethereum.vm.util.HexUtil;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class VMTest extends TestBase {

@@ -31,7 +31,6 @@ import org.ethereum.vm.program.exception.OutOfGasException;
 import org.ethereum.vm.program.exception.StackUnderflowException;
 import org.ethereum.vm.util.HexUtil;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class VMCustomTest extends TestBase {

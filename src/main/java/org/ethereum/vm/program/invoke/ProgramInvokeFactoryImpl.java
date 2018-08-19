@@ -34,45 +34,19 @@ public class ProgramInvokeFactoryImpl implements ProgramInvokeFactory {
     public ProgramInvoke createProgramInvoke(Transaction tx, Block block, Repository repository,
             BlockStore blockStore) {
 
-        /** ADDRESS **/
         byte[] address = tx.isCreate() ? VMUtil.calcNewAddress(tx.getFrom(), tx.getNonce()) : tx.getTo();
-
-        /** ORIGIN **/
         byte[] origin = tx.getFrom();
-
-        /** CALLER **/
         byte[] caller = tx.getFrom();
-
-        /** GAS op **/
         BigInteger gas = tx.getGas();
-
-        /** GASPRICE **/
         BigInteger gasPrice = tx.getGasPrice();
-
-        /** CALLVALUE **/
         BigInteger callValue = tx.getValue();
-
-        /** CALLDATALOAD **/
-        /** CALLDATACOPY **/
-        /** CALLDATASIZE **/
         byte[] callData = tx.getData();
 
-        /** PREVHASH **/
         byte[] prevHash = block.getParentHash();
-
-        /** COINBASE **/
         byte[] coinbase = block.getCoinbase();
-
-        /** TIMESTAMP **/
         long timestamp = block.getTimestamp();
-
-        /** NUMBER **/
         long number = block.getNumber();
-
-        /** DIFFICULTY **/
         BigInteger difficulty = block.getDifficulty();
-
-        /** GASLIMIT */
         BigInteger gasLimit = block.getGasLimit();
 
         return new ProgramInvokeImpl(new DataWord(address), new DataWord(origin), new DataWord(caller),
@@ -88,14 +62,8 @@ public class ProgramInvokeFactoryImpl implements ProgramInvokeFactory {
             DataWord gas, DataWord value, byte[] data,
             Repository repository, BlockStore blockStore, boolean isStaticCall) {
 
-        DataWord address = toAddress;
         DataWord origin = program.getOriginAddress();
-        DataWord caller = callerAddress;
-
-        // gas
         DataWord gasPrice = program.getGasPrice();
-        // call value
-        // call data
 
         DataWord prevHash = program.getPrevHash();
         DataWord coinbase = program.getCoinbase();
@@ -104,7 +72,7 @@ public class ProgramInvokeFactoryImpl implements ProgramInvokeFactory {
         DataWord difficulty = program.getDifficulty();
         DataWord gasLimit = program.getGasLimit();
 
-        return new ProgramInvokeImpl(address, origin, caller, gas, gasPrice, value, data,
+        return new ProgramInvokeImpl(toAddress, origin, callerAddress, gas, gasPrice, value, data,
                 prevHash, coinbase, timestamp, number, difficulty, gasLimit,
                 repository, blockStore, program.getCallDepth() + 1, isStaticCall);
     }
