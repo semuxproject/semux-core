@@ -40,22 +40,28 @@ public class DataWord implements Comparable<DataWord> {
 
     public static final int SIZE = 32;
 
-    private byte[] data = new byte[SIZE];
+    private final byte[] data;
 
     public DataWord(int num) {
-        this(ByteBuffer.allocate(4).putInt(num).array());
+        this(ByteBuffer.allocate(Integer.BYTES).putInt(num).array());
     }
 
     public DataWord(long num) {
-        this(ByteBuffer.allocate(8).putLong(num).array());
+        this(ByteBuffer.allocate(Long.BYTES).putLong(num).array());
     }
 
     public DataWord(BigInteger num) {
-        // NOTE: the MAX_VALUE will produce a 33 bytes array
-        byte[] arr = num.toByteArray();
-        int offset = Math.max(arr.length - 32, 0);
-        int size = arr.length - offset;
-        System.arraycopy(arr, offset, data, SIZE - size, size);
+        if (num.signum() < 0 || num.compareTo(MAX_VALUE) > 0) {
+            throw new IllegalArgumentException("Input BigInt can't be negative or larger than MAX_VALUE");
+        }
+
+        // NOTE: a 33 bytes array may be produced
+        byte[] bytes = num.toByteArray();
+        int copyOffset = Math.max(bytes.length - SIZE, 0);
+        int copyLength = bytes.length - copyOffset;
+
+        this.data = new byte[SIZE];
+        System.arraycopy(bytes, copyOffset, data, SIZE - copyLength, copyLength);
     }
 
     public DataWord(String hex) {
@@ -63,12 +69,25 @@ public class DataWord implements Comparable<DataWord> {
     }
 
     public DataWord(byte[] data) {
-        if (data.length == 32) {
-            this.data = data.clone();
-        } else if (data.length < 32) {
-            System.arraycopy(data, 0, this.data, 32 - data.length, data.length);
+        this(data, true);
+    }
+
+    /**
+     * Creates a DataWord instance from byte array.
+     *
+     * @param data an byte array
+     * @param unsafe whether the data is safe to refer
+     */
+    protected DataWord(byte[] data, boolean unsafe) {
+        if (data == null || data.length > SIZE) {
+            throw new IllegalArgumentException("Input data can't be NULL or exceed " + SIZE + " bytes");
+        }
+
+        if (data.length == SIZE) {
+            this.data = unsafe ? data.clone() : data;
         } else {
-            throw new RuntimeException("Data word can't exceed 32 bytes");
+            this.data = new byte[SIZE];
+            System.arraycopy(data, 0, this.data, SIZE - data.length, data.length);
         }
     }
 
@@ -81,14 +100,22 @@ public class DataWord implements Comparable<DataWord> {
         return data.clone();
     }
 
+    /**
+     * Returns the last 20 bytes.
+     *
+     * @return
+     */
     public byte[] getLast20Bytes() {
-        return Arrays.copyOfRange(data, data.length - 20, data.length);
+        return Arrays.copyOfRange(data, SIZE - 20, SIZE);
     }
 
+    /**
+     * Returns the n-th byte.
+     *
+     * @param index
+     * @return
+     */
     public byte getByte(int index) {
-        if (index < 0 || index >= SIZE) {
-            throw new IndexOutOfBoundsException();
-        }
         return data[index];
     }
 
@@ -149,47 +176,47 @@ public class DataWord implements Comparable<DataWord> {
     }
 
     public DataWord and(DataWord w2) {
-        byte[] buffer = new byte[32];
+        byte[] buffer = new byte[SIZE];
         for (int i = 0; i < this.data.length; ++i) {
             buffer[i] = (byte) (this.data[i] & w2.data[i]);
         }
-        return new DataWord(buffer);
+        return new DataWord(buffer, false);
     }
 
     public DataWord or(DataWord w2) {
-        byte[] buffer = new byte[32];
+        byte[] buffer = new byte[SIZE];
         for (int i = 0; i < this.data.length; ++i) {
             buffer[i] = (byte) (this.data[i] | w2.data[i]);
         }
-        return new DataWord(buffer);
+        return new DataWord(buffer, false);
     }
 
     public DataWord xor(DataWord w2) {
-        byte[] buffer = new byte[32];
+        byte[] buffer = new byte[SIZE];
         for (int i = 0; i < this.data.length; ++i) {
             buffer[i] = (byte) (this.data[i] ^ w2.data[i]);
         }
-        return new DataWord(buffer);
+        return new DataWord(buffer, false);
     }
 
     // bitwise not
     public DataWord bnot() {
-        byte[] buffer = new byte[32];
+        byte[] buffer = new byte[SIZE];
         for (int i = 0; i < this.data.length; ++i) {
             buffer[i] = (byte) (~this.data[i]);
         }
-        return new DataWord(buffer);
+        return new DataWord(buffer, false);
     }
 
     // Credit -> http://stackoverflow.com/a/24023466/459349
     public DataWord add(DataWord word) {
-        byte[] result = new byte[32];
+        byte[] buffer = new byte[SIZE];
         for (int i = 31, overflow = 0; i >= 0; i--) {
             int v = (this.data[i] & 0xff) + (word.data[i] & 0xff) + overflow;
-            result[i] = (byte) v;
+            buffer[i] = (byte) v;
             overflow = v >>> 8;
         }
-        return new DataWord(result);
+        return new DataWord(buffer, false);
     }
 
     public DataWord mul(DataWord word) {
@@ -275,13 +302,13 @@ public class DataWord implements Comparable<DataWord> {
             buffer[31 - i] = mask;
         }
 
-        return new DataWord(buffer);
+        return new DataWord(buffer, false);
     }
 
     public int bytesOccupied() {
-        for (int i = 0; i < 32; i++) {
+        for (int i = 0; i < SIZE; i++) {
             if (data[i] != 0) {
-                return 32 - i;
+                return SIZE - i;
             }
         }
 

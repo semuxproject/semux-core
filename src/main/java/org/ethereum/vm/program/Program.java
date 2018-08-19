@@ -155,12 +155,11 @@ public class Program {
     }
 
     public void stackPushZero() {
-        stackPush(new DataWord(0));
+        stackPush(DataWord.ZERO);
     }
 
     public void stackPushOne() {
-        DataWord stackWord = new DataWord(1);
-        stackPush(stackWord);
+        stackPush(DataWord.ONE);
     }
 
     public void stackPush(DataWord stackWord) {
