@@ -19,11 +19,15 @@
 package org.ethereum.vm.util;
 
 import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
 
-public class VMUtil {
+public class HashUtil {
 
     /**
      * Computes the Keccak-256 hash digest.
@@ -36,6 +40,19 @@ public class VMUtil {
         Keccak.Digest256 digest = new Keccak.Digest256();
         digest.update(input);
         return digest.digest();
+    }
+
+    /**
+     * Calculates RIGTMOST160(KECCAK256(input)). This is used in address
+     * calculations. *
+     *
+     * @param input
+     *            data
+     * @return 20 right bytes of the hash keccak of the data
+     */
+    public static byte[] sha3omit12(byte[] input) {
+        byte[] hash = keccak256(input);
+        return Arrays.copyOfRange(hash, 12, hash.length);
     }
 
     /**
@@ -55,5 +72,22 @@ public class VMUtil {
         byte[] keccak256 = keccak256(buffer.array());
 
         return Arrays.copyOfRange(keccak256, 12, 32);
+    }
+
+    public static byte[] sha256(byte[] input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return digest.digest(input);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static byte[] ripemd160(byte[] data) {
+        Digest digest = new RIPEMD160Digest();
+        byte[] buffer = new byte[digest.getDigestSize()];
+        digest.update(data, 0, data.length);
+        digest.doFinal(buffer, 0);
+        return buffer;
     }
 }

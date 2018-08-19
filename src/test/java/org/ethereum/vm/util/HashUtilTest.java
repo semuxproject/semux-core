@@ -22,12 +22,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class VMUtilTest {
+public class HashUtilTest {
 
     @Test
     public void testKeccak256() {
         byte[] msg = "testing".getBytes();
-        byte[] keccak256 = VMUtil.keccak256(msg);
+        byte[] keccak256 = HashUtil.keccak256(msg);
 
         String expected = "5f16f4c7f149ac4f9510d9cf8cf384038ad348b3bcdc01915f95de12df9d1b02";
         assertEquals(expected, HexUtil.toHexString(keccak256));
@@ -37,6 +37,6 @@ public class VMUtilTest {
     public void testCalcNewAddress() {
         byte[] address = new byte[20];
         long nonce = 0;
-        assertEquals(20, VMUtil.calcNewAddress(address, nonce).length);
+        assertEquals(20, HashUtil.calcNewAddress(address, nonce).length);
     }
 }

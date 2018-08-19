@@ -46,8 +46,8 @@ import org.ethereum.vm.program.exception.StackUnderflowException;
 import org.ethereum.vm.program.invoke.ProgramInvoke;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
+import org.ethereum.vm.util.HashUtil;
 import org.ethereum.vm.util.HexUtil;
-import org.ethereum.vm.util.VMUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -325,7 +325,7 @@ public class Program {
 
         // [2] CREATE THE CONTRACT ADDRESS
         long nonce = getStorage().getNonce(senderAddress);
-        byte[] newAddress = VMUtil.calcNewAddress(getOwnerAddress().getLast20Bytes(), nonce);
+        byte[] newAddress = HashUtil.calcNewAddress(getOwnerAddress().getLast20Bytes(), nonce);
 
         boolean contractAlreadyExists = getStorage().isExist(newAddress);
 

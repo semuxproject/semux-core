@@ -26,7 +26,7 @@ import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.Transaction;
 import org.ethereum.vm.program.Program;
-import org.ethereum.vm.util.VMUtil;
+import org.ethereum.vm.util.HashUtil;
 
 public class ProgramInvokeFactoryImpl implements ProgramInvokeFactory {
 
@@ -34,7 +34,7 @@ public class ProgramInvokeFactoryImpl implements ProgramInvokeFactory {
     public ProgramInvoke createProgramInvoke(Transaction tx, Block block, Repository repository,
             BlockStore blockStore) {
 
-        byte[] address = tx.isCreate() ? VMUtil.calcNewAddress(tx.getFrom(), tx.getNonce()) : tx.getTo();
+        byte[] address = tx.isCreate() ? HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce()) : tx.getTo();
         byte[] origin = tx.getFrom();
         byte[] caller = tx.getFrom();
         BigInteger gas = tx.getGas();

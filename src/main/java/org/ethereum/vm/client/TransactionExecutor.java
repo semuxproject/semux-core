@@ -41,7 +41,7 @@ import org.ethereum.vm.program.invoke.ProgramInvoke;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.ethereum.vm.util.ByteArrayWrapper;
-import org.ethereum.vm.util.VMUtil;
+import org.ethereum.vm.util.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -207,7 +207,7 @@ public class TransactionExecutor {
     }
 
     protected void create() {
-        byte[] newContractAddress = VMUtil.calcNewAddress(tx.getFrom(), tx.getNonce());
+        byte[] newContractAddress = HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce());
 
         if (track.isExist(newContractAddress)) {
             logger.warn("Trying to create a contract with existing contract address: 0x{}",
@@ -274,7 +274,7 @@ public class TransactionExecutor {
                     } else {
                         // Contract successfully created
                         gasLeft = gasLeft.subtract(BigInteger.valueOf(returnDataGasValue));
-                        track.saveCode(VMUtil.calcNewAddress(tx.getFrom(), tx.getNonce()), result.getReturnData());
+                        track.saveCode(HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce()), result.getReturnData());
                     }
                 }
 

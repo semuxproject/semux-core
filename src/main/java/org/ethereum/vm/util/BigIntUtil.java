@@ -23,8 +23,32 @@ import java.math.BigInteger;
 import org.ethereum.vm.client.Repository;
 
 public class BigIntUtil {
+    public static BigInteger toBI(byte[] data) {
+        return new BigInteger(1, data);
+    }
+
     public static BigInteger toBI(long data) {
         return BigInteger.valueOf(data);
+    }
+
+    public static boolean isZero(BigInteger value) {
+        return value.compareTo(BigInteger.ZERO) == 0;
+    }
+
+    public static boolean isEqual(BigInteger valueA, BigInteger valueB) {
+        return valueA.compareTo(valueB) == 0;
+    }
+
+    public static boolean isNotEqual(BigInteger valueA, BigInteger valueB) {
+        return !isEqual(valueA, valueB);
+    }
+
+    public static boolean isLessThan(BigInteger valueA, BigInteger valueB) {
+        return valueA.compareTo(valueB) < 0;
+    }
+
+    public static boolean isMoreThan(BigInteger valueA, BigInteger valueB) {
+        return valueA.compareTo(valueB) > 0;
     }
 
     public static boolean isPositive(BigInteger value) {
@@ -37,6 +61,15 @@ public class BigIntUtil {
 
     public static boolean isNotCovers(BigInteger covers, BigInteger value) {
         return covers.compareTo(value) < 0;
+    }
+
+    /**
+     * Returns a result of safe addition of two {@code int} values
+     * {@code Integer.MAX_VALUE} is returned if overflow occurs
+     */
+    public static int addSafely(int a, int b) {
+        long res = (long) a + (long) b;
+        return res > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) res;
     }
 
     public static void transfer(Repository repository, byte[] fromAddr, byte[] toAddr, BigInteger value) {

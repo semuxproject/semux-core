@@ -33,7 +33,7 @@ import org.ethereum.vm.program.Stack;
 import org.ethereum.vm.program.exception.ExceptionFactory;
 import org.ethereum.vm.program.exception.ReturnDataCopyIllegalBoundsException;
 import org.ethereum.vm.program.exception.StaticCallModificationException;
-import org.ethereum.vm.util.VMUtil;
+import org.ethereum.vm.util.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -504,7 +504,7 @@ public class VM {
                 DataWord lengthData = program.stackPop();
                 byte[] buffer = program.memoryChunk(memOffsetData.intValueSafe(), lengthData.intValueSafe());
 
-                byte[] encoded = VMUtil.keccak256(buffer);
+                byte[] encoded = HashUtil.keccak256(buffer);
                 DataWord word = new DataWord(encoded);
 
                 program.stackPush(word);
