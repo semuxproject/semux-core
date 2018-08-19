@@ -26,8 +26,11 @@ import static org.junit.Assert.assertNotNull;
 
 import java.math.BigInteger;
 
+import org.bouncycastle.util.encoders.Hex;
 import org.ethereum.vm.PrecompiledContracts.PrecompiledContract;
 import org.ethereum.vm.config.ByzantiumConfig;
+import org.ethereum.vm.crypto.ECKey;
+import org.ethereum.vm.util.BytecodeCompiler;
 import org.ethereum.vm.util.HexUtil;
 import org.junit.Test;
 
@@ -98,16 +101,30 @@ public class PrecompiledContractTest {
     }
 
     @Test
-    public void ecRecoverTest1() {
-        byte[] data = HexUtil.fromHexString(
-                "18c547e4f7b0f325ad1e56f57e26c745b09a3e503d86e00e5255ff7f715d3d1c000000000000000000000000000000000000000000000000000000000000001c73b1693892219d736caba55bdb67216e485557ea6b6af75f37096c9aa6a5a75feeb940b1d03b21e36b0e47e79769f095fe2ab855bd91e3a38756b7d75a9c4549");
+    public void ecRecoverTest1() throws ECKey.SignatureException {
+        byte[] messageHash = HexUtil.fromHexString("14431339128bd25f2c7f93baa611e367472048757f4ad67f6d71a5ca0da550f5");
+        byte v = 28;
+        byte[] r = HexUtil.fromHexString("51e4dbbbcebade695a3f0fdf10beb8b5f83fda161e1a3105a14c41168bf3dce0");
+        byte[] s = HexUtil.fromHexString("46eabf35680328e26ef4579caf8aeb2cf9ece05dbf67a4f3d1f28c7b1d0e3546");
+        byte[] address = ECKey.signatureToAddress(messageHash, ECKey.ECDSASignature.fromComponents(r, s, v));
+
+        String expected = "7f8b3b04bf34618f4a1723fba96b5db211279a2b";
+        assertEquals(expected, HexUtil.toHexString(address));
+
+        byte[] data = HexUtil.fromHexString("14431339128bd25f2c7f93baa611e367"
+                + "472048757f4ad67f6d71a5ca0da550f5"
+                + "00000000000000000000000000000000"
+                + "0000000000000000000000000000001c"
+                + "51e4dbbbcebade695a3f0fdf10beb8b5"
+                + "f83fda161e1a3105a14c41168bf3dce0"
+                + "46eabf35680328e26ef4579caf8aeb2c"
+                + "f9ece05dbf67a4f3d1f28c7b1d0e3546");
         DataWord addr = new DataWord("0000000000000000000000000000000000000000000000000000000000000001");
         PrecompiledContract contract = PrecompiledContracts.getContractForAddress(addr, byzantiumConfig);
-        String expected = "000000000000000000000000ae387fcfeb723c3f5964509af111cf5a67f30661";
+        String expected2 = "0000000000000000000000007f8b3b04bf34618f4a1723fba96b5db211279a2b";
 
         byte[] result = contract.execute(data).getRight();
-
-        System.out.println(HexUtil.toHexString(result));
+        assertEquals(expected2, HexUtil.toHexString(result));
     }
 
     @Test

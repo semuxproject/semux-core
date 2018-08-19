@@ -240,6 +240,7 @@ public class ECKey {
      * This is the generic Signature exception.
      */
     public static class SignatureException extends GeneralSecurityException {
+        private static final long serialVersionUID = 1L;
 
         public SignatureException(String msg) {
             super(msg);
