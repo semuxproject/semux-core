@@ -1121,7 +1121,7 @@ public class VMTest extends TestBase {
         vm.step(program);
         vm.step(program);
 
-        List<LogInfo> logInfoList = program.getResult().getLogInfoList();
+        List<LogInfo> logInfoList = program.getResult().getLogs();
         LogInfo logInfo = logInfoList.get(0);
 
         assertEquals(HexUtil.toHexString(address), HexUtil.toHexString(logInfo.getAddress()));
@@ -1144,7 +1144,7 @@ public class VMTest extends TestBase {
         vm.step(program);
         vm.step(program);
 
-        List<LogInfo> logInfoList = program.getResult().getLogInfoList();
+        List<LogInfo> logInfoList = program.getResult().getLogs();
         LogInfo logInfo = logInfoList.get(0);
 
         assertEquals(HexUtil.toHexString(address), HexUtil.toHexString(logInfo.getAddress()));
@@ -1168,7 +1168,7 @@ public class VMTest extends TestBase {
         vm.step(program);
         vm.step(program);
 
-        List<LogInfo> logInfoList = program.getResult().getLogInfoList();
+        List<LogInfo> logInfoList = program.getResult().getLogs();
         LogInfo logInfo = logInfoList.get(0);
 
         assertEquals(HexUtil.toHexString(address), HexUtil.toHexString(logInfo.getAddress()));
@@ -1194,7 +1194,7 @@ public class VMTest extends TestBase {
         vm.step(program);
         vm.step(program);
 
-        List<LogInfo> logInfoList = program.getResult().getLogInfoList();
+        List<LogInfo> logInfoList = program.getResult().getLogs();
         LogInfo logInfo = logInfoList.get(0);
 
         assertEquals(HexUtil.toHexString(address), HexUtil.toHexString(logInfo.getAddress()));
@@ -1221,7 +1221,7 @@ public class VMTest extends TestBase {
         vm.step(program);
         vm.step(program);
 
-        List<LogInfo> logInfoList = program.getResult().getLogInfoList();
+        List<LogInfo> logInfoList = program.getResult().getLogs();
         LogInfo logInfo = logInfoList.get(0);
 
         assertEquals(HexUtil.toHexString(address), HexUtil.toHexString(logInfo.getAddress()));

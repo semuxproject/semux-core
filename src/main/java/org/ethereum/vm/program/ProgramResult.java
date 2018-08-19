@@ -38,9 +38,9 @@ public class ProgramResult {
     private RuntimeException exception = null;
     private boolean revert = false;
 
-    private Set<ByteArrayWrapper> deleteAccounts = new HashSet<>();
-    private Set<ByteArrayWrapper> touchedAccounts = new HashSet<>();
     private List<InternalTransaction> internalTransactions = new ArrayList<>();
+
+    private Set<ByteArrayWrapper> deleteAccounts = new HashSet<>();
     private List<LogInfo> logInfoList = new ArrayList<>();
     private long futureRefund = 0;
 
@@ -93,19 +93,7 @@ public class ProgramResult {
         deleteAccounts.addAll(accounts);
     }
 
-    public void addTouchAccount(byte[] address) {
-        touchedAccounts.add(new ByteArrayWrapper(address));
-    }
-
-    public Set<ByteArrayWrapper> getTouchedAccounts() {
-        return touchedAccounts;
-    }
-
-    public void addTouchAccounts(Set<ByteArrayWrapper> accounts) {
-        touchedAccounts.addAll(accounts);
-    }
-
-    public List<LogInfo> getLogInfoList() {
+    public List<LogInfo> getLogs() {
         return logInfoList;
     }
 
@@ -113,7 +101,7 @@ public class ProgramResult {
         logInfoList.add(logInfo);
     }
 
-    public void addLogInfos(List<LogInfo> logInfos) {
+    public void addLogs(List<LogInfo> logInfos) {
         for (LogInfo log : logInfos) {
             addLogInfo(log);
         }
@@ -151,11 +139,11 @@ public class ProgramResult {
 
     public void merge(ProgramResult another) {
         addInternalTransactions(another.getInternalTransactions());
+
         if (another.getException() == null && !another.isRevert()) {
             addDeleteAccounts(another.getDeleteAccounts());
-            addLogInfos(another.getLogInfoList());
+            addLogs(another.getLogs());
             addFutureRefund(another.getFutureRefund());
-            addTouchAccounts(another.getTouchedAccounts());
         }
     }
 

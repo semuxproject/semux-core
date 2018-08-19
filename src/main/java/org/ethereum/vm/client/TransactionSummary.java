@@ -36,47 +36,40 @@ import org.ethereum.vm.util.ByteArrayWrapper;
 public class TransactionSummary {
 
     private Transaction tx;
-    private BigInteger value = BigInteger.ZERO;
-    private BigInteger gas = BigInteger.ZERO;
-    private BigInteger gasPrice = BigInteger.ZERO;
-    private BigInteger gasUsed = BigInteger.ZERO;
-    private BigInteger gasLeftover = BigInteger.ZERO;
-    private BigInteger gasRefund = BigInteger.ZERO;
-
-    private List<ByteArrayWrapper> deletedAccounts = emptyList();
-    private List<InternalTransaction> internalTransactions = emptyList();
-    private Map<DataWord, DataWord> storageDiff = emptyMap();
-
-    private byte[] result;
-    private List<LogInfo> logs;
+    private BigInteger value;
+    private BigInteger gas;
+    private BigInteger gasPrice;
+    private BigInteger gasUsed;
 
     private boolean failed;
+    private byte[] returnData;
+    private List<InternalTransaction> internalTransactions;
+    private List<ByteArrayWrapper> deletedAccounts;
+    private List<LogInfo> logs;
 
-    public TransactionSummary(Transaction transaction) {
-        this.tx = transaction;
-        this.gas = transaction.getGas();
-        this.gasPrice = transaction.getGasPrice();
-        this.value = transaction.getValue();
+    public TransactionSummary(Transaction tx, BigInteger value, BigInteger gas, BigInteger gasPrice,
+            BigInteger gasUsed, boolean failed, byte[] returnData,
+            List<InternalTransaction> internalTransactions,
+            List<ByteArrayWrapper> deletedAccounts,
+            List<LogInfo> logs) {
+        this.tx = tx;
+        this.value = value;
+        this.gas = gas;
+        this.gasPrice = gasPrice;
+        this.gasUsed = gasUsed;
+        this.failed = failed;
+        this.returnData = returnData;
+        this.internalTransactions = internalTransactions;
+        this.deletedAccounts = deletedAccounts;
+        this.logs = logs;
     }
 
-    public Transaction getTransaction() {
+    public Transaction getTx() {
         return tx;
     }
 
-    private BigInteger calcCost(BigInteger gas) {
-        return gasPrice.multiply(gas);
-    }
-
-    public BigInteger getFee() {
-        return calcCost(gas.subtract(gasLeftover.add(gasRefund)));
-    }
-
-    public BigInteger getRefund() {
-        return calcCost(gasRefund);
-    }
-
-    public BigInteger getLeftover() {
-        return calcCost(gasLeftover);
+    public BigInteger getValue() {
+        return value;
     }
 
     public BigInteger getGas() {
@@ -91,104 +84,23 @@ public class TransactionSummary {
         return gasUsed;
     }
 
-    public BigInteger getGasLeftover() {
-        return gasLeftover;
+    public boolean isFailed() {
+        return failed;
     }
 
-    public BigInteger getValue() {
-        return value;
-    }
-
-    public List<ByteArrayWrapper> getDeletedAccounts() {
-        return deletedAccounts;
+    public byte[] getReturnData() {
+        return returnData;
     }
 
     public List<InternalTransaction> getInternalTransactions() {
         return internalTransactions;
     }
 
-    public Map<DataWord, DataWord> getStorageDiff() {
-        return storageDiff;
-    }
-
-    public BigInteger getGasRefund() {
-        return gasRefund;
-    }
-
-    public boolean isFailed() {
-        return failed;
-    }
-
-    public byte[] getResult() {
-        return result;
+    public List<ByteArrayWrapper> getDeletedAccounts() {
+        return deletedAccounts;
     }
 
     public List<LogInfo> getLogs() {
         return logs;
-    }
-
-    public static Builder builderFor(Transaction transaction) {
-        return new Builder(transaction);
-    }
-
-    public static class Builder {
-
-        private final TransactionSummary summary;
-
-        Builder(Transaction transaction) {
-            summary = new TransactionSummary(transaction);
-        }
-
-        public Builder gasUsed(BigInteger gasUsed) {
-            summary.gasUsed = gasUsed;
-            return this;
-        }
-
-        public Builder gasLeftover(BigInteger gasLeftover) {
-            summary.gasLeftover = gasLeftover;
-            return this;
-        }
-
-        public Builder gasRefund(BigInteger gasRefund) {
-            summary.gasRefund = gasRefund;
-            return this;
-        }
-
-        public Builder internalTransactions(List<InternalTransaction> internalTransactions) {
-            summary.internalTransactions = unmodifiableList(internalTransactions);
-            return this;
-        }
-
-        public Builder deletedAccounts(Set<ByteArrayWrapper> deletedAccounts) {
-            summary.deletedAccounts = new ArrayList<>();
-            for (ByteArrayWrapper account : deletedAccounts) {
-                summary.deletedAccounts.add(account);
-            }
-            return this;
-        }
-
-        public Builder markAsFailed() {
-            summary.failed = true;
-            return this;
-        }
-
-        public Builder logs(List<LogInfo> logs) {
-            summary.logs = logs;
-            return this;
-        }
-
-        public Builder result(byte[] result) {
-            summary.result = result;
-            return this;
-        }
-
-        public TransactionSummary build() {
-            if (summary.failed) {
-                for (InternalTransaction transaction : summary.internalTransactions) {
-                    transaction.reject();
-                }
-            }
-            return summary;
-        }
     }
 }

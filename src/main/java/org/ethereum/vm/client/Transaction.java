@@ -20,8 +20,6 @@ package org.ethereum.vm.client;
 
 import java.math.BigInteger;
 
-import org.ethereum.vm.util.ByteArrayUtil;
-
 /**
  * A facade interface for Transaction. The client needs to wrap the native
  * transaction to comply this specification, in order to use EVM.
@@ -45,7 +43,8 @@ public interface Transaction {
     /**
      * Returns the recipient address.
      *
-     * @return a 20-byte array, or {@link ByteArrayUtil#EMPTY_BYTE_ARRAY} for
+     * @return a 20-byte array, or
+     *         {@link org.apache.commons.lang3.ArrayUtils#EMPTY_BYTE_ARRAY} for
      *         CREATE, not NULL.
      */
     byte[] getTo();
