@@ -54,22 +54,14 @@ public class PrecompiledContracts {
     private static final BN128Multiplication altBN128Mul = new BN128Multiplication();
     private static final BN128Pairing altBN128Pairing = new BN128Pairing();
 
-    private static final DataWord ecRecoverAddr = new DataWord(
-            "0000000000000000000000000000000000000000000000000000000000000001");
-    private static final DataWord sha256Addr = new DataWord(
-            "0000000000000000000000000000000000000000000000000000000000000002");
-    private static final DataWord ripempd160Addr = new DataWord(
-            "0000000000000000000000000000000000000000000000000000000000000003");
-    private static final DataWord identityAddr = new DataWord(
-            "0000000000000000000000000000000000000000000000000000000000000004");
-    private static final DataWord modExpAddr = new DataWord(
-            "0000000000000000000000000000000000000000000000000000000000000005");
-    private static final DataWord altBN128AddAddr = new DataWord(
-            "0000000000000000000000000000000000000000000000000000000000000006");
-    private static final DataWord altBN128MulAddr = new DataWord(
-            "0000000000000000000000000000000000000000000000000000000000000007");
-    private static final DataWord altBN128PairingAddr = new DataWord(
-            "0000000000000000000000000000000000000000000000000000000000000008");
+    private static final DataWord ecRecoverAddr = new DataWord(1);
+    private static final DataWord sha256Addr = new DataWord(2);
+    private static final DataWord ripempd160Addr = new DataWord(3);
+    private static final DataWord identityAddr = new DataWord(4);
+    private static final DataWord modExpAddr = new DataWord(5);
+    private static final DataWord altBN128AddAddr = new DataWord(6);
+    private static final DataWord altBN128MulAddr = new DataWord(7);
+    private static final DataWord altBN128PairingAddr = new DataWord(8);
 
     public static PrecompiledContract getContractForAddress(DataWord address, Config config) {
 
