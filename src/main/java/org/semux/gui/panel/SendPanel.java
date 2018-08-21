@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.swing.ButtonGroup;
@@ -235,7 +236,7 @@ public class SendPanel extends JPanel implements ActionListener {
         clear();
     }
 
-    public String getToText() {
+    private String getToAddress() {
 
         Object selected = selectTo.getSelectedItem();
         String ret = "";
@@ -348,7 +349,7 @@ public class SendPanel extends JPanel implements ActionListener {
                 }
             }
 
-            Object toSelected = selectTo.getSelectedItem();
+            Object toSelected = selectTo.getEditor().getItem();
 
             selectTo.removeAllItems();
             for (AccountItem accountItem : accountItems) {
@@ -369,7 +370,7 @@ public class SendPanel extends JPanel implements ActionListener {
             String data = getDataText();
 
             // decode0x recipient address
-            byte[] to = Hex.decode0x(getToText());
+            byte[] to = Hex.decode0x(getToAddress());
 
             if (acc == null) {
                 showErrorDialog(GuiMessages.get("SelectAccount"));
