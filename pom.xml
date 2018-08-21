@@ -449,10 +449,6 @@
                         <include>src/main/**/*.java</include>
                         <include>src/test/**/*.java</include>
                     </includes>
-                    <excludes>
-                        <exclude>src/main/java/org/ethereum/**/*.java</exclude>
-                        <exclude>src/test/java/org/ethereum/**/*.java</exclude>
-                    </excludes>
                 </configuration>
             </plugin>
 
