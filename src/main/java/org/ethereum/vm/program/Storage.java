@@ -38,8 +38,8 @@ public class Storage implements Repository {
     }
 
     @Override
-    public boolean isExist(byte[] addr) {
-        return repository.isExist(addr);
+    public boolean exists(byte[] addr) {
+        return repository.exists(addr);
     }
 
     @Override

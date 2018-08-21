@@ -209,7 +209,7 @@ public class TransactionExecutor {
     protected void create() {
         byte[] newContractAddress = HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce());
 
-        if (track.isExist(newContractAddress)) {
+        if (track.exists(newContractAddress)) {
             logger.warn("Trying to create a contract with existing contract address: 0x{}",
                     toHexString(newContractAddress));
             gasLeft = BigInteger.ZERO;

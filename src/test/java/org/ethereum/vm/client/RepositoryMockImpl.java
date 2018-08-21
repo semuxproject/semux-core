@@ -50,7 +50,7 @@ public class RepositoryMockImpl implements Repository {
 
         if (accounts.containsKey(key)) {
             return accounts.get(key);
-        } else if (parent != null && parent.isExist(address)) {
+        } else if (parent != null && parent.exists(address)) {
             Account account = parent.getAccount(address);
             Account accountTrack = new Account(account);
             accounts.put(key, accountTrack);
@@ -61,13 +61,13 @@ public class RepositoryMockImpl implements Repository {
     }
 
     @Override
-    public boolean isExist(byte[] address) {
+    public boolean exists(byte[] address) {
         ByteArrayWrapper key = new ByteArrayWrapper(address);
 
         if (accounts.containsKey(new ByteArrayWrapper(address))) {
             return accounts.get(key) != null;
         } else if (parent != null) {
-            return parent.isExist(address);
+            return parent.exists(address);
         } else {
             return false;
         }
@@ -75,7 +75,7 @@ public class RepositoryMockImpl implements Repository {
 
     @Override
     public void createAccount(byte[] address) {
-        if (!isExist(address)) {
+        if (!exists(address)) {
             accounts.put(new ByteArrayWrapper(address), new Account());
         }
     }

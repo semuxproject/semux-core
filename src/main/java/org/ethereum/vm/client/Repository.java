@@ -31,7 +31,7 @@ public interface Repository {
      *            the account address
      * @return true if account exist, false otherwise
      */
-    boolean isExist(byte[] address);
+    boolean exists(byte[] address);
 
     /**
      * Creates an account if not exist.

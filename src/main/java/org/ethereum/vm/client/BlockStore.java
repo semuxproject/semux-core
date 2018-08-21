@@ -20,5 +20,5 @@ package org.ethereum.vm.client;
 
 public interface BlockStore {
 
-    byte[] getBlockHashByNumber(int index);
+    byte[] getBlockHashByNumber(long index);
 }

@@ -327,7 +327,7 @@ public class Program {
         long nonce = getStorage().getNonce(senderAddress);
         byte[] newAddress = HashUtil.calcNewAddress(getOwnerAddress().getLast20Bytes(), nonce);
 
-        boolean contractAlreadyExists = getStorage().isExist(newAddress);
+        boolean contractAlreadyExists = getStorage().exists(newAddress);
 
         // [3] UPDATE THE NONCE
         // (THIS STAGE IS NOT REVERTED BY ANY EXCEPTION)
@@ -466,7 +466,7 @@ public class Program {
         }
 
         // FETCH THE CODE
-        byte[] programCode = getStorage().isExist(codeAddress) ? getStorage().getCode(codeAddress) : EMPTY_BYTE_ARRAY;
+        byte[] programCode = getStorage().exists(codeAddress) ? getStorage().getCode(codeAddress) : EMPTY_BYTE_ARRAY;
 
         // TRANSFER
         track.addBalance(senderAddress, endowment.negate());
