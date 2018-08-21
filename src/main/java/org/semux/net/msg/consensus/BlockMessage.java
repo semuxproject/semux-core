@@ -9,8 +9,6 @@ package org.semux.net.msg.consensus;
 import org.semux.core.Block;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
-import org.semux.util.SimpleDecoder;
-import org.semux.util.SimpleEncoder;
 
 public class BlockMessage extends Message {
 
