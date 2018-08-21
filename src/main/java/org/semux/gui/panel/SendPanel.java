@@ -349,7 +349,6 @@ public class SendPanel extends JPanel implements ActionListener {
                 }
             }
 
-            // in some cases, the getSelectedItem does not get user input until focus is left
             Object toSelected = selectTo.getEditor().getItem();
 
             selectTo.removeAllItems();
