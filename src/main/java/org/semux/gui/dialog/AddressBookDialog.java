@@ -237,6 +237,8 @@ public class AddressBookDialog extends JDialog implements ActionListener {
             }
         }
 
+        entries.sort(AddressBookEntry::compareTo);
+
         return entries;
     }
 }
