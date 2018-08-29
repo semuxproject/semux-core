@@ -43,6 +43,11 @@
             <name>bintray</name>
             <url>https://jcenter.bintray.com</url>
         </repository>
+        <!-- temporarily add this until official release of HD wallet -->
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -1013,6 +1018,13 @@
             <artifactId>jackson-jaxrs-json-provider</artifactId>
             <version>2.9.6</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- HD wallets -->
+        <dependency>
+            <groupId>com.github.orogvany</groupId>
+            <artifactId>BIP32-Ed25519-java</artifactId>
+            <version>0f8ad3aa5d3614f09ef45ed0620d43c1026f5e0d</version>
         </dependency>
     </dependencies>
 

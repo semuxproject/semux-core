@@ -10,17 +10,27 @@ import static org.semux.util.FileUtil.POSIX_SECURED_PERMISSIONS;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.github.orogvany.bip32.Network;
+import com.github.orogvany.bip32.wallet.Bip44;
+import com.github.orogvany.bip32.wallet.CoinType;
+import com.github.orogvany.bip32.wallet.HdAddress;
+import com.github.orogvany.bip32.wallet.key.HdPrivateKey;
+import com.github.orogvany.bip32.wallet.key.HdPublicKey;
 import org.bouncycastle.crypto.generators.BCrypt;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Aes;
@@ -41,11 +51,16 @@ public class Wallet {
 
     private static final Logger logger = LoggerFactory.getLogger(Wallet.class);
 
-    private static final int VERSION = 3;
+    private static final int VERSION = 4;
     private static final int SALT_LENGTH = 16;
     private static final int BCRYPT_COST = 12;
+    private static final Bip44 BIP_44 = new Bip44();
 
     private final File file;
+
+    //hd wallet key
+    private byte[] hdSeed;
+    private int numHdAccounts = 0;
 
     private final Map<ByteArray, Key> accounts = Collections.synchronizedMap(new LinkedHashMap<>());
     private final Map<ByteArray, String> aliases = new ConcurrentHashMap<>();
@@ -102,13 +117,22 @@ public class Wallet {
 
         try {
             byte[] key;
+            byte[] salt;
 
             if (exists()) {
                 SimpleDecoder dec = new SimpleDecoder(IOUtil.readFile(file));
                 int version = dec.readInt(); // version
 
-                List<Key> newAccounts;
+                Set<Key> newAccounts;
                 Map<ByteArray, String> newAliases = new HashMap<>();
+
+                //initialize new HD wallet if not created.
+                if(version < 4) {
+                    logger.info("Creating new HD Wallet!");
+                    hdSeed = new byte[64];
+                    new SecureRandom().nextBytes(hdSeed);
+                }
+
                 switch (version) {
                 case 1:
                     key = Hash.h256(Bytes.of(password));
@@ -120,9 +144,19 @@ public class Wallet {
                     newAliases = readAddressAliases(key, dec);
                     break;
                 case 3:
-                    byte[] salt = dec.readBytes();
+                    salt = dec.readBytes();
                     key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
                     newAccounts = readAccounts(key, dec, true, version);
+                    newAliases = readAddressAliases(key, dec);
+                    break;
+                case 4:
+                    salt = dec.readBytes();
+                    key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
+                    hdSeed = dec.readBytes();
+                    numHdAccounts = dec.readInt();
+                    List<Key> hdKeys = getHdKeys(hdSeed, numHdAccounts);
+                    newAccounts = readAccounts(key, dec, true, version);
+                    newAccounts.addAll(hdKeys);
                     newAliases = readAddressAliases(key, dec);
                     break;
                 default:
@@ -151,6 +185,25 @@ public class Wallet {
         return false;
     }
 
+    private List<Key> getHdKeys(byte[] hdSeed, int numAccounts) {
+        List<Key> hdKeys = new ArrayList<>();
+        try {
+            //todo - determine testnet v mainnet
+            HdAddress<HdPrivateKey, HdPublicKey> rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, Network.mainnet, CoinType.semux);
+            for(int i =0; i < numAccounts; i++)
+            {
+                HdAddress address = BIP_44.getAddress(rootAddress, i);
+                hdKeys.add(Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey()));
+            }
+            numHdAccounts = hdKeys.size();
+        } catch (UnsupportedEncodingException e) {
+            logger.error("Unable to retrieve root address from seed.");
+            SystemUtil.exit(SystemUtil.Code.INVALID_PRIVATE_KEY);
+        }
+
+        return hdKeys;
+    }
+
     /**
      * Reads the account keys.
      * 
@@ -159,9 +212,9 @@ public class Wallet {
      * @return
      * @throws InvalidKeySpecException
      */
-    protected List<Key> readAccounts(byte[] key, SimpleDecoder dec, boolean vlq, int version)
+    protected LinkedHashSet<Key> readAccounts(byte[] key, SimpleDecoder dec, boolean vlq, int version)
             throws InvalidKeySpecException {
-        List<Key> list = new ArrayList<>();
+        LinkedHashSet<Key> keys = new LinkedHashSet<>();
         int total = dec.readInt(); // size
 
         for (int i = 0; i < total; i++) {
@@ -171,10 +224,9 @@ public class Wallet {
             }
             byte[] privateKey = Aes.decrypt(dec.readBytes(vlq), key, iv);
             Key addressKey = new Key(privateKey);
-            list.add(new Key(privateKey, addressKey.getPublicKey()));
-
+            keys.add(new Key(privateKey, addressKey.getPublicKey()));
         }
-        return list;
+        return keys;
     }
 
     /**
@@ -379,6 +431,36 @@ public class Wallet {
         }
     }
 
+
+    /**
+     * Adds a new account to the wallet.
+     *
+     * NOTE: you need to call {@link #flush()} to update the wallet on disk.
+     *
+     * @return the new account
+     * @throws WalletLockedException
+     *
+     */
+    public Key addAccount() {
+        requireUnlocked();
+
+        synchronized (accounts) {
+            //will update BIP44 to not throw exception, as we supply all encodings
+            try {
+                HdAddress<HdPrivateKey, HdPublicKey> rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, Network.mainnet, CoinType.semux);
+                HdAddress address = BIP_44.getAddress(rootAddress, numHdAccounts++);
+                Key newKey = Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey());
+                ByteArray to = ByteArray.of(newKey.toAddress());
+                accounts.put(to, newKey);
+                return newKey;
+            } catch (UnsupportedEncodingException e) {
+                logger.error("Unable to add new HD key");
+                SystemUtil.exit(SystemUtil.Code.INVALID_PRIVATE_KEY);
+                return null;
+            }
+        }
+    }
+
     /**
      * Adds a list of accounts to the wallet.
      * 
@@ -469,6 +551,9 @@ public class Wallet {
             enc.writeBytes(salt);
 
             byte[] key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
+
+            enc.writeBytes(hdSeed);
+            enc.writeInt(numHdAccounts);
 
             writeAccounts(key, enc);
             writeAddressAliases(key, enc);

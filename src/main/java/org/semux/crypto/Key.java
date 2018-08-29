@@ -15,6 +15,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 
+import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
+import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.semux.crypto.cache.PublicKeyCache;
@@ -45,6 +47,8 @@ public class Key {
     private static final Logger logger = LoggerFactory.getLogger(Key.class);
 
     private static final KeyPairGenerator gen = new KeyPairGenerator();
+    private static final EdDSAParameterSpec ED25519SPEC = EdDSANamedCurveTable.getByName("ed25519");
+
     static {
         /*
          * Algorithm specifications
@@ -90,6 +94,12 @@ public class Key {
     public Key(byte[] privateKey) throws InvalidKeySpecException {
         this.sk = new EdDSAPrivateKey(new PKCS8EncodedKeySpec(privateKey));
         this.pk = new EdDSAPublicKey(new EdDSAPublicKeySpec(sk.getA(), sk.getParams()));
+    }
+
+    private Key(EdDSAPrivateKey sk, EdDSAPublicKey pk)
+    {
+        this.sk = sk;
+        this.pk = pk;
     }
 
     /**
@@ -205,6 +215,13 @@ public class Key {
         Signature sig = Signature.fromBytes(signature);
 
         return verify(message, sig);
+    }
+
+    public static Key fromRawPrivateKey(byte[] privateKey)
+    {
+        EdDSAPrivateKey sk = new EdDSAPrivateKey(new EdDSAPrivateKeySpec(privateKey, ED25519SPEC));
+        EdDSAPublicKey pk = new EdDSAPublicKey(new EdDSAPublicKeySpec(sk.getA(), sk.getParams()));
+        return new Key(sk, pk);
     }
 
     /**

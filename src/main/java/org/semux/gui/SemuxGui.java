@@ -292,7 +292,7 @@ public class SemuxGui extends Launcher {
 
         // create an account is empty
         if (wallet.size() == 0) {
-            wallet.addAccount(new Key());
+            wallet.addAccount();
             wallet.flush();
         }
 

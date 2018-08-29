@@ -67,7 +67,7 @@ public class KernelRule extends TemporaryFolder {
         Wallet wallet = new Wallet(new File(getRoot(), "wallet.data"));
         wallet.unlock(password);
         for (int i = 0; i < 10; i++) {
-            wallet.addAccount(new Key());
+            wallet.addAccount();
         }
         wallet.flush();
         Key coinbase = wallet.getAccount(0);
