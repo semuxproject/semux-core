@@ -30,7 +30,7 @@ public class SemuxTransaction implements Transaction {
 
     @Override
     public BigInteger getValue() {
-        return transaction.getValue().getNano();
+        return null;//transaction.getValue().getNano();
     }
 
     @Override
