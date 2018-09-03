@@ -163,7 +163,16 @@ public class AccountStateImpl implements AccountState {
 
     @Override
     public boolean exists(byte[] address) {
-        return false;
+        ByteArray k = getKey(TYPE_ACCOUNT, address);
+
+        if (updates.containsKey(k)) {
+            return true;
+        } else if (prev != null) {
+            return prev.exists(address);
+        } else {
+            byte[] v = accountDB.get(k.getData());
+            return v != null;
+        }
     }
 
     @Override
