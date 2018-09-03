@@ -77,12 +77,14 @@ public class AccountStateImpl implements AccountState {
     }
 
     @Override
-    public void increaseNonce(byte[] address) {
+    public long increaseNonce(byte[] address) {
         ByteArray k = getKey(TYPE_ACCOUNT, address);
 
         Account acc = getAccount(address);
-        acc.setNonce(acc.getNonce() + 1);
+        long nonce = acc.getNonce() + 1;
+        acc.setNonce(nonce);
         updates.put(k, acc.toBytes());
+        return nonce;
     }
 
     @Override
@@ -104,7 +106,7 @@ public class AccountStateImpl implements AccountState {
     }
 
     @Override
-    public void getCode(byte[] address) {
+    public byte[] getCode(byte[] address) {
         throw new UnsupportedOperationException("getCode() is not yet supported");
     }
 
@@ -157,6 +159,21 @@ public class AccountStateImpl implements AccountState {
     @Override
     public void rollback() {
         updates.clear();
+    }
+
+    @Override
+    public boolean exists(byte[] address) {
+        return false;
+    }
+
+    @Override
+    public long setNonce(byte[] address, long nonce) {
+        ByteArray k = getKey(TYPE_ACCOUNT, address);
+
+        Account acc = getAccount(address);
+        acc.setNonce(nonce);
+        updates.put(k, acc.toBytes());
+        return nonce;
     }
 
     protected ByteArray getKey(byte type, byte[] address) {

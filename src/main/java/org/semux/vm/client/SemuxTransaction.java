@@ -4,9 +4,21 @@ import org.ethereum.vm.client.Transaction;
 
 import java.math.BigInteger;
 
+/**
+ * Facade for Transaction -> Transaction
+ */
 public class SemuxTransaction implements Transaction {
 
-    org.semux.core.Transaction transaction;
+    private final org.semux.core.Transaction transaction;
+    private final BigInteger gas;
+    private final BigInteger gasPrice;
+
+    public SemuxTransaction(org.semux.core.Transaction transaction, BigInteger gas, BigInteger gasPrice) {
+        this.transaction = transaction;
+        this.gas = gas;
+        this.gasPrice = gasPrice;
+    }
+
     @Override
     public boolean isCreate() {
         return false;
@@ -30,21 +42,22 @@ public class SemuxTransaction implements Transaction {
 
     @Override
     public BigInteger getValue() {
-        return null;//transaction.getValue().getNano();
+
+        return transaction.getValue().getBigInteger();
     }
 
     @Override
     public byte[] getData() {
-        return new byte[0];
+        return transaction.getData();
     }
 
     @Override
     public BigInteger getGas() {
-        return null;
+        return gas;
     }
 
     @Override
     public BigInteger getGasPrice() {
-        return null;
+        return gasPrice;
     }
 }
