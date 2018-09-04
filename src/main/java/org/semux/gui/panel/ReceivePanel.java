@@ -38,8 +38,10 @@ import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.gui.Action;
+import org.semux.gui.AddressBookEntry;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
+import org.semux.gui.dialog.AddressBookUpdateDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GuiMessages;
@@ -48,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.zxing.WriterException;
+
 
 public class ReceivePanel extends JPanel implements ActionListener {
 
@@ -115,6 +118,10 @@ public class ReceivePanel extends JPanel implements ActionListener {
                 .createDefaultButton(GuiMessages.get("DeleteAccount"), this, Action.DELETE_ACCOUNT);
         btnDeleteAddress.setName("btnDeleteAddress");
 
+        JButton btnToAddressBook = SwingUtil
+                .createDefaultButton(GuiMessages.get("CopyToAddressBook"), this, Action.COPY_TO_ADDRESS_BOOK);
+        btnToAddressBook.setName("btnAddressBook");
+
         JButton btnAddressBook = SwingUtil
                 .createDefaultButton(GuiMessages.get("AddressBook"), this, Action.SHOW_ADDRESS_BOOK);
         btnAddressBook.setName("btnAddressBook");
@@ -128,6 +135,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addComponent(btnAddressBook, GroupLayout.PREFERRED_SIZE, 121, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnToAddressBook)
                         .addComponent(btnDeleteAddress)
                         .addComponent(buttonNewAccount)
                         .addComponent(btnCopyAddress)
@@ -143,6 +151,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
                                 .addComponent(buttonNewAccount)
                                 .addGap(18)
                                 .addComponent(btnDeleteAddress)
+                                .addGap(18)
+                                .addComponent(btnToAddressBook)
                                 .addGap(18)
                                 .addComponent(btnAddressBook)
                                 .addContainerGap(249, Short.MAX_VALUE))
@@ -237,6 +247,9 @@ public class ReceivePanel extends JPanel implements ActionListener {
         case SHOW_ADDRESS_BOOK:
             showAddressBook();
             break;
+        case COPY_TO_ADDRESS_BOOK:
+            copyToAddressBook();
+            break;
         default:
             throw new UnreachableException();
         }
@@ -302,6 +315,19 @@ public class ReceivePanel extends JPanel implements ActionListener {
 
             JOptionPane.showMessageDialog(this, GuiMessages.get("AddressCopied", address));
         }
+    }
+
+    /**
+     * Processes the COPY_TO_ADDRESS_BOOK event
+     */
+    protected void copyToAddressBook() {
+        WalletAccount acc = getSelectedAccount();
+        String address = Hex.PREF + acc.getKey().toAddressString();
+        AddressBookEntry entry = new AddressBookEntry("", address);
+        // this is a stupid hook - maybe it is better to get access to the main frame?
+        AddressBookUpdateDialog update = new AddressBookUpdateDialog(gui.getAddressBookDialog(), entry,
+                kernel.getWallet(), gui);
+        update.setVisible(true);
     }
 
     /**

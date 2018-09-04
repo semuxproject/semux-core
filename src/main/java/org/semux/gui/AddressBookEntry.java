@@ -9,6 +9,8 @@ package org.semux.gui;
 import org.apache.commons.lang3.StringUtils;
 
 /**
+ * Entries for the Address book. <br />
+ * Names can be empty, addresses not
  */
 public class AddressBookEntry implements Comparable<AddressBookEntry> {
     private String name;
@@ -20,11 +22,11 @@ public class AddressBookEntry implements Comparable<AddressBookEntry> {
      * @param name
      *            must not be null
      * @param address
-     *            must not be null
+     *            must not be null or empty
      */
     public AddressBookEntry(String name, String address) {
-        if (StringUtils.isEmpty(name)) {
-            throw new IllegalArgumentException("Name can't be null or empty");
+        if (name == null) {
+            throw new IllegalArgumentException("Name can't be null");
         }
         if (StringUtils.isEmpty(address)) {
             throw new IllegalArgumentException("Address can't be null or empty");
