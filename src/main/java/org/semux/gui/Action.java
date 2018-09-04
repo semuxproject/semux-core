@@ -75,5 +75,7 @@ public enum Action {
 
     EXPORT_PRIVATE_KEY,
 
+    COPY_TO_ADDRESS_BOOK,
+
     COPY_PRIVATE_KEY
 }
