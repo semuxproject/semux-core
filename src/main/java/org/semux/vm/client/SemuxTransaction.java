@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2017-2018 The Semux Developers
+ *
+ * Distributed under the MIT software license, see the accompanying file
+ * LICENSE or https://opensource.org/licenses/mit-license.php
+ */
 package org.semux.vm.client;
 
 import org.ethereum.vm.client.Transaction;
@@ -10,13 +16,9 @@ import java.math.BigInteger;
 public class SemuxTransaction implements Transaction {
 
     private final org.semux.core.Transaction transaction;
-    private final BigInteger gas;
-    private final BigInteger gasPrice;
 
-    public SemuxTransaction(org.semux.core.Transaction transaction, BigInteger gas, BigInteger gasPrice) {
+    public SemuxTransaction(org.semux.core.Transaction transaction) {
         this.transaction = transaction;
-        this.gas = gas;
-        this.gasPrice = gasPrice;
     }
 
     @Override
@@ -53,11 +55,11 @@ public class SemuxTransaction implements Transaction {
 
     @Override
     public BigInteger getGas() {
-        return gas;
+        return transaction.getGas().getBigInteger();
     }
 
     @Override
     public BigInteger getGasPrice() {
-        return gasPrice;
+        return transaction.getGasLimit().getBigInteger();
     }
 }

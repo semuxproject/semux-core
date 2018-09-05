@@ -398,7 +398,8 @@ public class SendPanel extends JPanel implements ActionListener {
                     byte[] from = acc.getKey().toAddress();
                     long nonce = pendingMgr.getNonce(from);
                     long timestamp = TimeUtil.currentTimeMillis();
-                    Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, rawData);
+                    Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, rawData,
+                            Amount.ZERO, Amount.ZERO);
                     tx.sign(acc.getKey());
 
                     sendTransaction(pendingMgr, tx);

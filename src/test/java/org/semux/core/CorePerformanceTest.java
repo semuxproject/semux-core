@@ -69,7 +69,8 @@ public class CorePerformanceTest {
             long timestamp = TimeUtil.currentTimeMillis();
             byte[] data = Bytes.random(16);
 
-            Transaction tx = new Transaction(Network.DEVNET, type, to, value, fee, nonce, timestamp, data);
+            Transaction tx = new Transaction(Network.DEVNET, type, to, value, fee, nonce, timestamp, data, Amount.ZERO,
+                    Amount.ZERO);
             tx.sign(key);
             txs.add(tx);
         }
@@ -82,10 +83,11 @@ public class CorePerformanceTest {
         logger.info("Perf_transaction_1: {} μs/tx", (t2 - t1) / 1_000 / repeat);
 
         Blockchain chain = new BlockchainImpl(config, temporaryDBFactory);
-        TransactionExecutor exec = new TransactionExecutor(config);
+        TransactionExecutor exec = new TransactionExecutor(config, chain);
 
         t1 = System.nanoTime();
-        exec.execute(txs, chain.getAccountState().track(), chain.getDelegateState().track());
+        exec.execute(txs, chain.getAccountState().track(), chain.getDelegateState().track(),
+                chain.getLatestBlock().getHeader());
         t2 = System.nanoTime();
         logger.info("Perf_transaction_2: {} μs/tx", (t2 - t1) / 1_000 / repeat);
     }

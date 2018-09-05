@@ -43,6 +43,7 @@ public class TransactionExecutorTest {
     private DelegateState ds;
     private TransactionExecutor exec;
     private Network network;
+    private BlockHeader bh = null;
 
     @Before
     public void prepare() {
@@ -50,13 +51,13 @@ public class TransactionExecutorTest {
         chain = new BlockchainImpl(config, temporaryDBFactory);
         as = chain.getAccountState();
         ds = chain.getDelegateState();
-        exec = new TransactionExecutor(config);
+        exec = new TransactionExecutor(config, chain);
         network = config.network();
     }
 
     private TransactionResult executeAndCommit(TransactionExecutor exec, Transaction tx, AccountState as,
-            DelegateState ds) {
-        TransactionResult res = exec.execute(tx, as, ds);
+            DelegateState ds, BlockHeader bh) {
+        TransactionResult res = exec.execute(tx, as, ds, bh);
         as.commit();
         ds.commit();
 
@@ -76,25 +77,26 @@ public class TransactionExecutorTest {
         long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = Bytes.random(16);
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, Amount.ZERO,
+                Amount.ZERO);
         tx.sign(key);
         assertTrue(tx.validate(network));
 
         // insufficient available
-        TransactionResult result = exec.execute(tx, as.track(), ds.track());
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh);
         assertFalse(result.isSuccess());
 
         Amount available = SEM.of(1000);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
-        result = exec.execute(tx, as.track(), ds.track());
+        result = exec.execute(tx, as.track(), ds.track(), bh);
         assertTrue(result.isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getAvailable());
 
         // execute and commit
-        result = executeAndCommit(exec, tx, as.track(), ds.track());
+        result = executeAndCommit(exec, tx, as.track(), ds.track(), bh);
         assertTrue(result.isSuccess());
         assertEquals(sub(available, sum(value, fee)), as.getAccount(key.toAddress()).getAvailable());
         assertEquals(value, as.getAccount(to).getAvailable());
@@ -117,19 +119,22 @@ public class TransactionExecutorTest {
         byte[] data = Bytes.random(16);
 
         // register delegate (to != EMPTY_ADDRESS, random name)
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(delegate);
-        TransactionResult result = exec.execute(tx, as.track(), ds.track());
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, Amount.ZERO,
+                Amount.ZERO).sign(delegate);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh);
         assertFalse(result.isSuccess());
 
         // register delegate (to == EMPTY_ADDRESS, random name)
-        tx = new Transaction(network, type, Bytes.EMPTY_ADDRESS, value, fee, nonce, timestamp, data).sign(delegate);
-        result = exec.execute(tx, as.track(), ds.track());
+        tx = new Transaction(network, type, Bytes.EMPTY_ADDRESS, value, fee, nonce, timestamp, data, Amount.ZERO,
+                Amount.ZERO).sign(delegate);
+        result = exec.execute(tx, as.track(), ds.track(), bh);
         assertFalse(result.isSuccess());
 
         // register delegate (to == EMPTY_ADDRESS, normal name) and commit
         data = Bytes.of("test");
-        tx = new Transaction(network, type, Bytes.EMPTY_ADDRESS, value, fee, nonce, timestamp, data).sign(delegate);
-        result = executeAndCommit(exec, tx, as.track(), ds.track());
+        tx = new Transaction(network, type, Bytes.EMPTY_ADDRESS, value, fee, nonce, timestamp, data, Amount.ZERO,
+                Amount.ZERO).sign(delegate);
+        result = executeAndCommit(exec, tx, as.track(), ds.track(), bh);
         assertTrue(result.isSuccess());
         assertEquals(sub(available, sum(config.minDelegateBurnAmount(), fee)),
                 as.getAccount(delegate.toAddress()).getAvailable());
@@ -155,14 +160,15 @@ public class TransactionExecutorTest {
         byte[] data = {};
 
         // vote for non-existing delegate
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(voter);
-        TransactionResult result = exec.execute(tx, as.track(), ds.track());
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, Amount.ZERO,
+                Amount.ZERO).sign(voter);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh);
         assertFalse(result.isSuccess());
 
         ds.register(delegate.toAddress(), Bytes.of("delegate"));
 
         // vote for delegate
-        result = executeAndCommit(exec, tx, as.track(), ds.track());
+        result = executeAndCommit(exec, tx, as.track(), ds.track(), bh);
         assertTrue(result.isSuccess());
         assertEquals(sub(available, sum(value, fee)), as.getAccount(voter.toAddress()).getAvailable());
         assertEquals(value, as.getAccount(voter.toAddress()).getLocked());
@@ -189,21 +195,22 @@ public class TransactionExecutorTest {
         byte[] data = {};
 
         // unvote (never voted before)
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(voter);
-        TransactionResult result = exec.execute(tx, as.track(), ds.track());
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, Amount.ZERO,
+                Amount.ZERO).sign(voter);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh);
         assertFalse(result.isSuccess());
         assertEquals(INSUFFICIENT_LOCKED, result.error);
         ds.vote(voter.toAddress(), delegate.toAddress(), value);
 
         // unvote (locked = 0)
-        result = exec.execute(tx, as.track(), ds.track());
+        result = exec.execute(tx, as.track(), ds.track(), bh);
         assertFalse(result.isSuccess());
         assertEquals(INSUFFICIENT_LOCKED, result.error);
 
         as.adjustLocked(voter.toAddress(), value);
 
         // normal unvote
-        result = executeAndCommit(exec, tx, as.track(), ds.track());
+        result = executeAndCommit(exec, tx, as.track(), ds.track(), bh);
         assertTrue(result.isSuccess());
         assertEquals(sum(available, sub(value, fee)), as.getAccount(voter.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(voter.toAddress()).getLocked());
@@ -228,9 +235,10 @@ public class TransactionExecutorTest {
         byte[] data = {};
 
         // unvote (never voted before)
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(voter);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, Amount.ZERO,
+                Amount.ZERO).sign(voter);
 
-        TransactionResult result = exec.execute(tx, as.track(), ds.track());
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh);
         assertFalse(result.isSuccess());
         assertEquals(INSUFFICIENT_AVAILABLE, result.error);
     }

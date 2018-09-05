@@ -82,7 +82,8 @@ public class PendingManagerTest {
         long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES, Amount.ZERO,
+                Amount.ZERO).sign(key);
         pendingMgr.addTransaction(tx);
 
         Thread.sleep(100);
@@ -94,10 +95,12 @@ public class PendingManagerTest {
         long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES, Amount.ZERO,
+                Amount.ZERO).sign(key);
         pendingMgr.addTransaction(tx);
-        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce + 128, now, Bytes.EMPTY_BYTES)
-                .sign(key);
+        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce + 128, now, Bytes.EMPTY_BYTES,
+                Amount.ZERO, Amount.ZERO)
+                        .sign(key);
         pendingMgr.addTransaction(tx2);
 
         Thread.sleep(100);
@@ -106,7 +109,8 @@ public class PendingManagerTest {
 
     @Test
     public void testAddTransactionSyncErrorInvalidFormat() {
-        Transaction tx = new Transaction(network, type, to, value, fee, 0, 0, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx = new Transaction(network, type, to, value, fee, 0, 0, Bytes.EMPTY_BYTES, Amount.ZERO,
+                Amount.ZERO).sign(key);
         PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
         assertEquals(0, pendingMgr.getPendingTransactions().size());
         assertNotNull(result.error);
@@ -116,7 +120,7 @@ public class PendingManagerTest {
     @Test
     public void testAddTransactionSyncErrorDuplicatedHash() {
         Transaction tx = new Transaction(network, type, to, value, fee, 0, TimeUtil.currentTimeMillis(),
-                Bytes.EMPTY_BYTES)
+                Bytes.EMPTY_BYTES, Amount.ZERO, Amount.ZERO)
                         .sign(key);
 
         kernel.setBlockchain(spy(kernel.getBlockchain()));
@@ -134,7 +138,7 @@ public class PendingManagerTest {
     public void testAddTransactionSyncInvalidRecipient() {
         Transaction tx = new Transaction(network, type, Constants.COINBASE_KEY.toAddress(), value, fee, 0,
                 TimeUtil.currentTimeMillis(),
-                Bytes.EMPTY_BYTES)
+                Bytes.EMPTY_BYTES, Amount.ZERO, Amount.ZERO)
                         .sign(key);
 
         PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
@@ -148,15 +152,18 @@ public class PendingManagerTest {
         long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
-        Transaction tx3 = new Transaction(network, type, to, value, fee, nonce + 2, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx3 = new Transaction(network, type, to, value, fee, nonce + 2, now, Bytes.EMPTY_BYTES, Amount.ZERO,
+                Amount.ZERO).sign(key);
         pendingMgr.addTransaction(tx3);
-        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce + 1, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce + 1, now, Bytes.EMPTY_BYTES, Amount.ZERO,
+                Amount.ZERO).sign(key);
         pendingMgr.addTransaction(tx2);
 
         Thread.sleep(100);
         assertEquals(0, pendingMgr.getPendingTransactions().size());
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES, Amount.ZERO,
+                Amount.ZERO).sign(key);
         pendingMgr.addTransaction(tx);
 
         Thread.sleep(100);
@@ -170,15 +177,17 @@ public class PendingManagerTest {
 
         Transaction tx3 = new Transaction(network, type, to, value, fee, nonce + 2,
                 now - TimeUnit.HOURS.toMillis(2) + TimeUnit.SECONDS.toMillis(1),
-                Bytes.EMPTY_BYTES).sign(key);
+                Bytes.EMPTY_BYTES, Amount.ZERO, Amount.ZERO).sign(key);
         pendingMgr.addTransaction(tx3);
-        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce + 1, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce + 1, now, Bytes.EMPTY_BYTES, Amount.ZERO,
+                Amount.ZERO).sign(key);
         pendingMgr.addTransaction(tx2);
 
         TimeUnit.SECONDS.sleep(1);
         assertEquals(0, pendingMgr.getPendingTransactions().size());
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES, Amount.ZERO,
+                Amount.ZERO).sign(key);
         pendingMgr.addTransaction(tx);
 
         TimeUnit.SECONDS.sleep(1);
@@ -192,7 +201,7 @@ public class PendingManagerTest {
         long nonce = accountState.getAccount(from).getNonce();
 
         Transaction tx3 = new Transaction(network, type, to, value, fee, nonce, now - ALLOWED_TIME_DRIFT - 1,
-                Bytes.EMPTY_BYTES).sign(key);
+                Bytes.EMPTY_BYTES, Amount.ZERO, Amount.ZERO).sign(key);
         PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx3);
         assertEquals(INVALID_TIMESTAMP, result.error);
     }
@@ -204,8 +213,9 @@ public class PendingManagerTest {
 
         int[] perm = ArrayUtil.permutation(5000);
         for (int p : perm) {
-            Transaction tx = new Transaction(network, type, to, value, fee, nonce + p, now, Bytes.EMPTY_BYTES)
-                    .sign(key);
+            Transaction tx = new Transaction(network, type, to, value, fee, nonce + p, now, Bytes.EMPTY_BYTES,
+                    Amount.ZERO, Amount.ZERO)
+                            .sign(key);
             pendingMgr.addTransaction(tx);
         }
 
@@ -218,9 +228,11 @@ public class PendingManagerTest {
         long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES, Amount.ZERO,
+                Amount.ZERO).sign(key);
         pendingMgr.addTransaction(tx);
-        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce + 1, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce + 1, now, Bytes.EMPTY_BYTES, Amount.ZERO,
+                Amount.ZERO).sign(key);
         // pendingMgr.addTransaction(tx3);
 
         Thread.sleep(100);
@@ -243,7 +255,8 @@ public class PendingManagerTest {
         kernel.getBlockchain().getAccountState().increaseNonce(from);
         pendingMgr.onBlockAdded(block);
 
-        Transaction tx3 = new Transaction(network, type, to, value, fee, nonce + 2, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx3 = new Transaction(network, type, to, value, fee, nonce + 2, now, Bytes.EMPTY_BYTES, Amount.ZERO,
+                Amount.ZERO).sign(key);
         pendingMgr.addTransaction(tx3);
 
         Thread.sleep(100);

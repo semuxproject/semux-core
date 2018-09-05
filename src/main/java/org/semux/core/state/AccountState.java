@@ -99,7 +99,9 @@ public interface AccountState {
 
     /**
      * check if an account exists
-     * @param address address
+     * 
+     * @param address
+     *            address
      * @return exists
      */
     boolean exists(byte[] address);
@@ -107,8 +109,10 @@ public interface AccountState {
     /**
      * set the nonce to a given value.
      *
-     * @param address address
-     * @param nonce nonce
+     * @param address
+     *            address
+     * @param nonce
+     *            nonce
      * @return nonce
      */
     long setNonce(byte[] address, long nonce);

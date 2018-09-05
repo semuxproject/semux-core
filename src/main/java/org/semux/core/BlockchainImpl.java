@@ -395,7 +395,7 @@ public class BlockchainImpl implements Blockchain {
                     Amount.ZERO,
                     block.getNumber(),
                     block.getTimestamp(),
-                    Bytes.EMPTY_BYTES);
+                    Bytes.EMPTY_BYTES, Amount.ZERO, Amount.ZERO);
             tx.sign(Constants.COINBASE_KEY);
             indexDB.put(Bytes.merge(TYPE_TRANSACTION_HASH, tx.getHash()), tx.toBytes());
             indexDB.put(Bytes.merge(TYPE_COINBASE_TRANSACTION_HASH, Bytes.of(block.getNumber())), tx.getHash());
@@ -809,8 +809,9 @@ public class BlockchainImpl implements Blockchain {
 
         public void applyBlock(Block block) {
             // [0] execute transactions against local state
-            TransactionExecutor transactionExecutor = new TransactionExecutor(config);
-            transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState());
+            TransactionExecutor transactionExecutor = new TransactionExecutor(config, this);
+            transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState(),
+                    block.getHeader());
 
             // [1] apply block reward and tx fees
             Amount reward = config.getBlockReward(block.getNumber());

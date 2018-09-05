@@ -56,7 +56,8 @@ public class BlockchainPerformance {
             long nonce = 1 + i;
             long timestamp = TimeUtil.currentTimeMillis();
             byte[] data = Bytes.EMPTY_BYTES;
-            Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(key);
+            Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, Amount.ZERO,
+                    Amount.ZERO).sign(key);
 
             if (total + tx.size() > config.maxBlockTransactionsSize()) {
                 break;
@@ -122,7 +123,8 @@ public class BlockchainPerformance {
         long nonce = 1;
         long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = {};
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, Amount.ZERO,
+                Amount.ZERO);
         tx.sign(key);
 
         int repeat = 1000;

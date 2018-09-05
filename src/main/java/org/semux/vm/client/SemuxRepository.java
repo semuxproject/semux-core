@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2017-2018 The Semux Developers
+ *
+ * Distributed under the MIT software license, see the accompanying file
+ * LICENSE or https://opensource.org/licenses/mit-license.php
+ */
 package org.semux.vm.client;
 
 import org.ethereum.vm.DataWord;
@@ -10,8 +16,8 @@ import java.math.BigInteger;
 /**
  * Facade class for AccountState -> Repository
  *
- * We will probably want to make AccountState just implement repository
- * but for ease of initial integration, use a facade to limit scope
+ * We will probably want to make AccountState just implement repository but for
+ * ease of initial integration, use a facade to limit scope
  */
 public class SemuxRepository implements Repository {
     AccountState accountState;
@@ -27,15 +33,14 @@ public class SemuxRepository implements Repository {
 
     @Override
     public void createAccount(byte[] address) {
-        if(!isExist(address))
-        {
-            accountState.setCode(address, new byte[]{});
+        if (!isExist(address)) {
+            accountState.setCode(address, new byte[] {});
         }
     }
 
     @Override
     public void delete(byte[] address) {
-        if(isExist(address)) {
+        if (isExist(address)) {
             accountState.setCode(address, null);
         }
     }
@@ -73,7 +78,7 @@ public class SemuxRepository implements Repository {
     @Override
     public DataWord getStorageRow(byte[] address, DataWord key) {
         byte[] data = accountState.getStorage(address, key.getData());
-        if(data != null) {
+        if (data != null) {
             return new DataWord(data);
         }
         return null;
@@ -86,7 +91,7 @@ public class SemuxRepository implements Repository {
 
     @Override
     public BigInteger addBalance(byte[] address, BigInteger value) {
-        //todo - figure out BigInt changes
+        // todo - figure out BigInt changes
         accountState.adjustAvailable(address, Amount.Unit.NANO_SEM.of(value.longValue()));
         return value;
     }

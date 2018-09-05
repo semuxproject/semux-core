@@ -45,7 +45,8 @@ public class TransactionTest {
 
     @Test
     public void testNew() {
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, Amount.ZERO,
+                Amount.ZERO);
         assertNotNull(tx.getHash());
         assertNull(tx.getSignature());
         tx.sign(key);
@@ -59,7 +60,8 @@ public class TransactionTest {
      */
     @Test
     public void testSerialization() {
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, Amount.ZERO,
+                Amount.ZERO);
         tx.sign(key);
 
         testFields(Transaction.fromBytes(tx.toBytes()));
@@ -67,8 +69,9 @@ public class TransactionTest {
 
     @Test
     public void testTransactionSize() {
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, Bytes.random(128))
-                .sign(key);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, Bytes.random(128),
+                Amount.ZERO, Amount.ZERO)
+                        .sign(key);
         byte[] bytes = tx.toBytes();
 
         logger.info("tx size: {} B, {} GB per 1M txs", bytes.length, 1000000.0 * bytes.length / 1024 / 1024 / 1024);
@@ -87,10 +90,12 @@ public class TransactionTest {
 
     @Test
     public void testEquality() {
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, Bytes.random(128))
-                .sign(key);
-        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce, timestamp, tx.getData())
-                .sign(key);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, Bytes.random(128),
+                Amount.ZERO, Amount.ZERO)
+                        .sign(key);
+        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce, timestamp, tx.getData(), Amount.ZERO,
+                Amount.ZERO)
+                        .sign(key);
 
         assertEquals(tx, tx2);
         assertEquals(tx.hashCode(), tx2.hashCode());
@@ -109,7 +114,7 @@ public class TransactionTest {
                 fee,
                 nonce,
                 timestamp,
-                data);
+                data, Amount.ZERO, Amount.ZERO);
 
         assertArrayEquals(encodedBytes, tx.getEncoded());
     }

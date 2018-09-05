@@ -878,10 +878,10 @@ public class SemuxBft implements BftManager {
 
         AccountState as = accountState.track();
         DelegateState ds = delegateState.track();
-        TransactionExecutor exec = new TransactionExecutor(config);
+        TransactionExecutor exec = new TransactionExecutor(config, chain);
 
         // [3] evaluate transactions
-        List<TransactionResult> results = exec.execute(transactions, as, ds);
+        List<TransactionResult> results = exec.execute(transactions, as, ds, header);
         if (!Block.validateResults(header, results)) {
             logger.warn("Invalid transactions");
             return false;
@@ -941,10 +941,10 @@ public class SemuxBft implements BftManager {
 
         AccountState as = chain.getAccountState().track();
         DelegateState ds = chain.getDelegateState().track();
-        TransactionExecutor exec = new TransactionExecutor(config);
+        TransactionExecutor exec = new TransactionExecutor(config, chain);
 
         // [3] evaluate all transactions
-        List<TransactionResult> results = exec.execute(transactions, as, ds);
+        List<TransactionResult> results = exec.execute(transactions, as, ds, block.getHeader());
         if (!Block.validateResults(header, results)) {
             logger.debug("Invalid transactions");
             return;

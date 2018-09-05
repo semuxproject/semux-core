@@ -6,6 +6,7 @@
  */
 package org.semux.core;
 
+import static org.ethereum.vm.util.BytecodeCompiler.compile;
 import static org.semux.core.Amount.neg;
 import static org.semux.core.Amount.sub;
 import static org.semux.core.Amount.sum;
@@ -15,12 +16,22 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.ethereum.vm.DataWord;
+import org.ethereum.vm.VM;
+import org.ethereum.vm.client.BlockStore;
+import org.ethereum.vm.client.Repository;
+import org.ethereum.vm.config.ByzantiumConfig;
+import org.ethereum.vm.program.Program;
+import org.ethereum.vm.program.invoke.ProgramInvokeImpl;
 import org.semux.config.Config;
 import org.semux.core.TransactionResult.Error;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.util.Bytes;
+import org.semux.vm.client.SemuxBlockStore;
+import org.semux.vm.client.SemuxRepository;
+import org.semux.vm.client.SemuxTransaction;
 
 /**
  * Transaction executor
@@ -33,6 +44,10 @@ public class TransactionExecutor {
             valid[b & 0xff] = true;
         }
     }
+
+    private Blockchain blockchain;
+    // todo - verify threadsafe?
+    private static VM vm = new VM();
 
     /**
      * Validate delegate name.
@@ -60,8 +75,9 @@ public class TransactionExecutor {
      * 
      * @param config
      */
-    public TransactionExecutor(Config config) {
+    public TransactionExecutor(Config config, Blockchain blockchain) {
         this.config = config;
+        this.blockchain = blockchain;
     }
 
     /**
@@ -77,7 +93,8 @@ public class TransactionExecutor {
      *            delegate state
      * @return
      */
-    public List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds) {
+    public List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds,
+            BlockHeader blockHeader) {
         List<TransactionResult> results = new ArrayList<>();
 
         for (Transaction tx : txs) {
@@ -188,6 +205,19 @@ public class TransactionExecutor {
                 }
                 break;
             }
+
+            case CALL:
+                // todo - for calls is it gasLimit * calls? need to update cost checking here.
+                if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
+                    executeCall(result, tx, as, blockHeader);
+                } else {
+                    result.setError(Error.INSUFFICIENT_AVAILABLE);
+                }
+                break;
+
+            case CREATE:
+                result.setSuccess(true);
+                break;
             default:
                 // unsupported transaction type
                 result.setError(Error.INVALID_TYPE);
@@ -203,6 +233,46 @@ public class TransactionExecutor {
         return results;
     }
 
+    private void executeCall(TransactionResult result, Transaction tx, AccountState as, BlockHeader blockHeader) {
+
+        Repository repository = new SemuxRepository(as);
+        BlockStore blockStore = new SemuxBlockStore(blockchain);
+        ByzantiumConfig config = new ByzantiumConfig();
+
+        ProgramInvokeImpl invoke = new ProgramInvokeImpl(
+                new DataWord(tx.getTo()),
+                new DataWord(tx.getFrom()), // origin? what is this?
+                new DataWord(tx.getFrom()),
+                new DataWord(tx.getGas().getBigInteger()),
+                new DataWord(1l), // gas price
+                new DataWord(tx.getValue().getBigInteger()),
+                tx.getData(),
+                new DataWord(blockHeader.getParentHash()),
+                new DataWord(blockHeader.getCoinbase()), // coinbase
+                new DataWord(tx.getTimestamp()),
+                new DataWord(0l), // number? what is this?
+                new DataWord(1l), // difficulty
+                new DataWord(tx.getGasLimit().getBigInteger()),
+                repository,
+                blockStore,
+                100, // call depth
+                false); // isStaticCall
+        // just run a simple program, todo - look up program specified
+        // it's unclear how programs are looked up, is this correct?
+        byte[] contract = as.getCode(tx.getTo());
+        if (contract == null) {
+            result.setError(Error.FAILED);
+            result.setSuccess(false);
+            return;
+        }
+
+        Program program = new Program(contract, invoke, new SemuxTransaction(tx), config);
+
+        vm.play(program);
+
+        result.setSuccess(!program.getResult().isRevert());
+    }
+
     /**
      * Execute one transaction.
      * 
@@ -214,7 +284,7 @@ public class TransactionExecutor {
      *            delegate state
      * @return
      */
-    public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds) {
-        return execute(Collections.singletonList(tx), as, ds).get(0);
+    public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds, BlockHeader blockHeader) {
+        return execute(Collections.singletonList(tx), as, ds, blockHeader).get(0);
     }
 }

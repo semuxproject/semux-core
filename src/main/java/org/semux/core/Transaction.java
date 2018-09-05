@@ -45,9 +45,13 @@ public class Transaction {
 
     private Signature signature;
 
+    private final Amount gas;
+
+    private final Amount gasLimit;
+
     /**
      * Create a new transaction.
-     *
+     * 
      * @param network
      * @param type
      * @param to
@@ -56,9 +60,11 @@ public class Transaction {
      * @param nonce
      * @param timestamp
      * @param data
+     * @param gas
+     * @param gasLimit
      */
     public Transaction(Network network, TransactionType type, byte[] to, Amount value, Amount fee, long nonce,
-            long timestamp, byte[] data) {
+            long timestamp, byte[] data, Amount gas, Amount gasLimit) {
         this.networkId = network.id();
         this.type = type;
         this.to = to;
@@ -79,6 +85,9 @@ public class Transaction {
         enc.writeBytes(data);
         this.encoded = enc.toBytes();
         this.hash = Hash.h256(encoded);
+
+        this.gas = gas;
+        this.gasLimit = gasLimit;
     }
 
     /**
@@ -100,6 +109,9 @@ public class Transaction {
         this.nonce = decodedTx.nonce;
         this.timestamp = decodedTx.timestamp;
         this.data = decodedTx.data;
+
+        this.gas = decodedTx.gas;
+        this.gasLimit = decodedTx.gasLimit;
 
         this.encoded = encoded;
         this.signature = Signature.fromBytes(signature);
@@ -246,6 +258,14 @@ public class Transaction {
         return encoded;
     }
 
+    public Amount getGas() {
+        return gas;
+    }
+
+    public Amount getGasLimit() {
+        return gasLimit;
+    }
+
     /**
      * Decodes an byte-encoded transaction that is not yet signed by a private key.
      *
@@ -265,7 +285,18 @@ public class Transaction {
         long timestamp = decoder.readLong();
         byte[] data = decoder.readBytes();
 
-        return new Transaction(Network.of(networkId), TransactionType.of(type), to, value, fee, nonce, timestamp, data);
+        Amount gas = Amount.ZERO;
+        Amount gasLimit = Amount.ZERO;
+        try {
+            gas = decoder.readAmount();
+            gasLimit = decoder.readAmount();
+        } catch (Exception e) {
+            // old transactions will not have these fields, so need to handle backwards
+            // compatibility
+        }
+
+        return new Transaction(Network.of(networkId), TransactionType.of(type), to, value, fee, nonce, timestamp, data,
+                gas, gasLimit);
     }
 
     /**

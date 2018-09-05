@@ -72,6 +72,9 @@ public class TransactionBuilder {
      */
     private byte[] data;
 
+    private Amount gas = Amount.ZERO;
+    private Amount gasLimit = Amount.ZERO;
+
     public TransactionBuilder(Kernel kernel) {
         this.kernel = kernel;
     }
@@ -226,7 +229,7 @@ public class TransactionBuilder {
                 fee,
                 nonce != null ? nonce : kernel.getPendingManager().getNonce(account.toAddress()),
                 timestamp != null ? timestamp : TimeUtil.currentTimeMillis(),
-                data);
+                data, gas, gasLimit);
     }
 
     public Transaction buildSigned() {

@@ -270,6 +270,6 @@ public class SemuxBftTest {
                 kernelRule.getKernel().getConfig().minTransactionFee(),
                 nonce,
                 time,
-                Bytes.EMPTY_BYTES).sign(from);
+                Bytes.EMPTY_BYTES, Amount.ZERO, Amount.ZERO).sign(from);
     }
 }

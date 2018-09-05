@@ -50,7 +50,7 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
         long now = Instant.now().toEpochMilli();
         byte[] data = "some data".getBytes();
         Transaction tx = new Transaction(kernelRule1.getKernel().getConfig().network(), TRANSFER, to.toAddress(), value,
-                fee, nonce, now, data).sign(from);
+                fee, nonce, now, data, Amount.ZERO, Amount.ZERO).sign(from);
 
         TransactionDialogTestApplication application = GuiActionRunner
                 .execute(() -> new TransactionDialogTestApplication(walletModel, tx, kernelRule1.getKernel()));

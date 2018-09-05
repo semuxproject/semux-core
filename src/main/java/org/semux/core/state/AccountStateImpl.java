@@ -8,6 +8,7 @@ package org.semux.core.state;
 
 import static org.semux.core.Amount.sum;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +37,9 @@ public class AccountStateImpl implements AccountState {
 
     protected Database accountDB;
     protected AccountStateImpl prev;
+    // we will need to add persistence, but for integration/testing, seems fine to
+    // punt
+    private Map<ByteArray, Map<ByteArray, byte[]>> storage = new HashMap<>();
 
     /**
      * All updates, or deletes if the value is null.
@@ -58,6 +62,7 @@ public class AccountStateImpl implements AccountState {
      */
     public AccountStateImpl(AccountStateImpl prev) {
         this.prev = prev;
+        this.storage = new HashMap<>(prev.storage);
     }
 
     @Override
@@ -107,27 +112,35 @@ public class AccountStateImpl implements AccountState {
 
     @Override
     public byte[] getCode(byte[] address) {
-        throw new UnsupportedOperationException("getCode() is not yet supported");
+        return getStorage(address, new byte[0]);
     }
 
     @Override
     public void setCode(byte[] address, byte[] code) {
-        throw new UnsupportedOperationException("setCode() is not yet supported");
+        putStorage(address, new byte[0], code);
     }
 
     @Override
     public byte[] getStorage(byte[] address, byte[] key) {
-        throw new UnsupportedOperationException("getStorage() is not yet supported");
+        Map<ByteArray, byte[]> store = storage.get(ByteArray.of(address));
+        if (store != null) {
+            return store.get(ByteArray.of(key));
+        }
+        return null;
     }
 
     @Override
     public void putStorage(byte[] address, byte[] key, byte[] value) {
-        throw new UnsupportedOperationException("putStorage() is not yet supported");
+        Map<ByteArray, byte[]> store = storage.computeIfAbsent(ByteArray.of(address), k -> new HashMap<>());
+        store.put(ByteArray.of(key), value);
     }
 
     @Override
     public void removeStorage(byte[] address, byte[] key) {
-        throw new UnsupportedOperationException("removeStorage() is not yet yet supported");
+        Map<ByteArray, byte[]> store = storage.get(ByteArray.of(address));
+        if (store != null) {
+            store.remove(ByteArray.of(key));
+        }
     }
 
     @Override

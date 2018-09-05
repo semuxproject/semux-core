@@ -64,6 +64,7 @@ public class TestUtils {
         long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = {};
 
-        return new Transaction(network, type, to.toAddress(), value, fee, nonce, timestamp, data).sign(from);
+        return new Transaction(network, type, to.toAddress(), value, fee, nonce, timestamp, data, Amount.ZERO,
+                Amount.ZERO).sign(from);
     }
 }
