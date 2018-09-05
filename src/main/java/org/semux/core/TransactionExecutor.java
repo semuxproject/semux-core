@@ -52,6 +52,8 @@ public class TransactionExecutor {
     private Blockchain blockchain;
     // todo - verify threadsafe?
     private static VM vm = new VM();
+    private static ByzantiumConfig vmConfig = new ByzantiumConfig();
+
 
     /**
      * Validate delegate name.
@@ -242,7 +244,6 @@ public class TransactionExecutor {
         SemuxBlock block = new SemuxBlock(bh);
         Repository repository = new SemuxRepository(as);
         BlockStore blockStore = new SemuxBlockStore(blockchain);
-        ByzantiumConfig config = new ByzantiumConfig();
         ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
         long gasUsedInBlock = 0l; // todo
         boolean localCall = false; // todo?
@@ -250,7 +251,7 @@ public class TransactionExecutor {
 
         org.ethereum.vm.client.TransactionExecutor executor =
                 new org.ethereum.vm.client.TransactionExecutor(transaction,block,repository,blockStore,
-                        config,invokeFactory,gasUsedInBlock,localCall);
+                        vmConfig,invokeFactory,gasUsedInBlock,localCall);
         executor.init();
         executor.execute();
         TransactionSummary summary = executor.finish();
