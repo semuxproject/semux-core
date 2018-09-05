@@ -54,7 +54,6 @@ public class TransactionExecutor {
     private static VM vm = new VM();
     private static ByzantiumConfig vmConfig = new ByzantiumConfig();
 
-
     /**
      * Validate delegate name.
      * 
@@ -248,18 +247,17 @@ public class TransactionExecutor {
         long gasUsedInBlock = 0l; // todo
         boolean localCall = false; // todo?
 
-
-        org.ethereum.vm.client.TransactionExecutor executor =
-                new org.ethereum.vm.client.TransactionExecutor(transaction,block,repository,blockStore,
-                        vmConfig,invokeFactory,gasUsedInBlock,localCall);
+        org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
+                transaction, block, repository, blockStore,
+                vmConfig, invokeFactory, gasUsedInBlock, localCall);
         executor.init();
         executor.execute();
         TransactionSummary summary = executor.finish();
-        if(summary == null) {
+        if (summary == null) {
             result.setSuccess(false);
         } else {
             result.setSuccess(!summary.isFailed());
-            //todo - apply summary to chain
+            // todo - apply summary to chain
         }
     }
 
