@@ -879,6 +879,13 @@
             <version>2.6.2</version>
         </dependency>
 
+        <!-- EVM -->
+        <dependency>
+            <groupId>org.semux</groupId>
+            <artifactId>evm</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Testing Libraries -->
         <dependency>
             <groupId>junit</groupId>

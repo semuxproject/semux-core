@@ -6,26 +6,14 @@
  */
 package org.semux.core;
 
-import static org.ethereum.vm.util.BytecodeCompiler.compile;
-import static org.semux.core.Amount.neg;
-import static org.semux.core.Amount.sub;
-import static org.semux.core.Amount.sum;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.ethereum.vm.DataWord;
+import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.VM;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.TransactionSummary;
 import org.ethereum.vm.config.ByzantiumConfig;
-import org.ethereum.vm.program.Program;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
-import org.ethereum.vm.program.invoke.ProgramInvokeImpl;
 import org.semux.config.Config;
 import org.semux.core.TransactionResult.Error;
 import org.semux.core.state.Account;
@@ -36,6 +24,13 @@ import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.semux.vm.client.SemuxRepository;
 import org.semux.vm.client.SemuxTransaction;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.semux.core.Amount.*;
 
 /**
  * Transaction executor
@@ -250,12 +245,14 @@ public class TransactionExecutor {
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                 transaction, block, repository, blockStore,
                 vmConfig, invokeFactory, gasUsedInBlock, localCall);
-        executor.init();
-        executor.execute();
-        TransactionSummary summary = executor.finish();
+
+        TransactionSummary summary = executor.run();
         if (summary == null) {
             result.setSuccess(false);
         } else {
+            for (LogInfo logs : summary.getLogs()) {
+                System.out.println(logs.toString());
+            }
             result.setSuccess(!summary.isFailed());
             // todo - apply summary to chain
         }

@@ -27,20 +27,20 @@ public class SemuxRepository implements Repository {
     }
 
     @Override
-    public boolean isExist(byte[] address) {
+    public boolean exists(byte[] address) {
         return accountState.exists(address);
     }
 
     @Override
     public void createAccount(byte[] address) {
-        if (!isExist(address)) {
+        if (!exists(address)) {
             accountState.setCode(address, new byte[] {});
         }
     }
 
     @Override
     public void delete(byte[] address) {
-        if (isExist(address)) {
+        if (exists(address)) {
             accountState.setCode(address, null);
         }
     }
