@@ -7,6 +7,7 @@
 package org.semux.vm.client;
 
 import org.ethereum.vm.client.Transaction;
+import org.semux.core.TransactionType;
 
 import java.math.BigInteger;
 
@@ -23,7 +24,7 @@ public class SemuxTransaction implements Transaction {
 
     @Override
     public boolean isCreate() {
-        return false;
+        return transaction.getType().equals(TransactionType.CREATE);
     }
 
     @Override

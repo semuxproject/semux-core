@@ -20,8 +20,11 @@ import org.ethereum.vm.DataWord;
 import org.ethereum.vm.VM;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
+import org.ethereum.vm.client.TransactionSummary;
 import org.ethereum.vm.config.ByzantiumConfig;
 import org.ethereum.vm.program.Program;
+import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
+import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.ethereum.vm.program.invoke.ProgramInvokeImpl;
 import org.semux.config.Config;
 import org.semux.core.TransactionResult.Error;
@@ -29,6 +32,7 @@ import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.util.Bytes;
+import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.semux.vm.client.SemuxRepository;
 import org.semux.vm.client.SemuxTransaction;
@@ -233,44 +237,29 @@ public class TransactionExecutor {
         return results;
     }
 
-    private void executeCall(TransactionResult result, Transaction tx, AccountState as, BlockHeader blockHeader) {
-
+    private void executeCall(TransactionResult result, Transaction tx, AccountState as, BlockHeader bh) {
+        SemuxTransaction transaction = new SemuxTransaction(tx);
+        SemuxBlock block = new SemuxBlock(bh);
         Repository repository = new SemuxRepository(as);
         BlockStore blockStore = new SemuxBlockStore(blockchain);
         ByzantiumConfig config = new ByzantiumConfig();
+        ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
+        long gasUsedInBlock = 0l; // todo
+        boolean localCall = false; // todo?
 
-        ProgramInvokeImpl invoke = new ProgramInvokeImpl(
-                new DataWord(tx.getTo()),
-                new DataWord(tx.getFrom()), // origin? what is this?
-                new DataWord(tx.getFrom()),
-                new DataWord(tx.getGas().getBigInteger()),
-                new DataWord(1l), // gas price
-                new DataWord(tx.getValue().getBigInteger()),
-                tx.getData(),
-                new DataWord(blockHeader.getParentHash()),
-                new DataWord(blockHeader.getCoinbase()), // coinbase
-                new DataWord(tx.getTimestamp()),
-                new DataWord(0l), // number? what is this?
-                new DataWord(1l), // difficulty
-                new DataWord(tx.getGasLimit().getBigInteger()),
-                repository,
-                blockStore,
-                100, // call depth
-                false); // isStaticCall
-        // just run a simple program, todo - look up program specified
-        // it's unclear how programs are looked up, is this correct?
-        byte[] contract = as.getCode(tx.getTo());
-        if (contract == null) {
-            result.setError(Error.FAILED);
+
+        org.ethereum.vm.client.TransactionExecutor executor =
+                new org.ethereum.vm.client.TransactionExecutor(transaction,block,repository,blockStore,
+                        config,invokeFactory,gasUsedInBlock,localCall);
+        executor.init();
+        executor.execute();
+        TransactionSummary summary = executor.finish();
+        if(summary == null) {
             result.setSuccess(false);
-            return;
+        } else {
+            result.setSuccess(!summary.isFailed());
+            //todo - apply summary to chain
         }
-
-        Program program = new Program(contract, invoke, new SemuxTransaction(tx), config);
-
-        vm.play(program);
-
-        result.setSuccess(!program.getResult().isRevert());
     }
 
     /**
