@@ -9,6 +9,8 @@ package org.semux.util;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.semux.core.Amount;
 import org.semux.util.exception.SimpleCodecException;
@@ -141,5 +143,21 @@ public class SimpleDecoder {
      */
     protected long unsignedInt(int i) {
         return i & 0x00000000ffffffffL;
+    }
+
+    /**
+     * Reads a byte[] -> byte[] map
+     * @return map
+     */
+    public Map<ByteArray, byte[]> readByteMap() {
+        int numEntries = readSize();
+        Map<ByteArray, byte[]> ret = new HashMap<>();
+        for(int i = 0; i< numEntries; i++) {
+            byte[] key = readBytes();
+            byte[] value = readBytes();
+            ret.put(ByteArray.of(key), value);
+        }
+
+        return ret;
     }
 }

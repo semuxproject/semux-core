@@ -112,12 +112,17 @@ public class AccountStateImpl implements AccountState {
 
     @Override
     public byte[] getCode(byte[] address) {
-        return getStorage(address, new byte[0]);
+        Account acc = getAccount(address);
+        return acc.getCode();
     }
 
     @Override
     public void setCode(byte[] address, byte[] code) {
-        putStorage(address, new byte[0], code);
+        ByteArray k = getKey(TYPE_ACCOUNT, address);
+
+        Account acc = getAccount(address);
+        acc.setCode(code);
+        updates.put(k, acc.toBytes());
     }
 
     @Override
@@ -131,16 +136,22 @@ public class AccountStateImpl implements AccountState {
 
     @Override
     public void putStorage(byte[] address, byte[] key, byte[] value) {
-        Map<ByteArray, byte[]> store = storage.computeIfAbsent(ByteArray.of(address), k -> new HashMap<>());
+        ByteArray storeKey = getKey(TYPE_ACCOUNT, address);
+
+        Account acc = getAccount(address);
+        Map<ByteArray, byte[]> store = acc.getStorage();
         store.put(ByteArray.of(key), value);
+        updates.put(storeKey, acc.toBytes());
     }
 
     @Override
     public void removeStorage(byte[] address, byte[] key) {
-        Map<ByteArray, byte[]> store = storage.get(ByteArray.of(address));
-        if (store != null) {
-            store.remove(ByteArray.of(key));
-        }
+        ByteArray storeKey = getKey(TYPE_ACCOUNT, address);
+
+        Account acc = getAccount(address);
+        Map<ByteArray, byte[]> store = acc.getStorage();
+        store.remove(ByteArray.of(key));
+        updates.put(storeKey, acc.toBytes());
     }
 
     @Override

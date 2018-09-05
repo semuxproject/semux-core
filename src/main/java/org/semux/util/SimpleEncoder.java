@@ -8,6 +8,7 @@ package org.semux.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 import org.semux.core.Amount;
 import org.semux.util.exception.SimpleCodecException;
@@ -125,6 +126,15 @@ public class SimpleEncoder {
             } else {
                 out.write((byte) buf[i++]);
             }
+        }
+    }
+
+    public void writeByteMap(Map<ByteArray, byte[]> byteMap) {
+        writeSize(byteMap.size());
+        for(Map.Entry<ByteArray,byte[]> entry : byteMap.entrySet())
+        {
+            writeBytes(entry.getKey().getData());
+            writeBytes(entry.getValue());
         }
     }
 }

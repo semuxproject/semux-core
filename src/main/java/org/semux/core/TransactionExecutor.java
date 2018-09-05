@@ -7,7 +7,6 @@
 package org.semux.core;
 
 import org.ethereum.vm.LogInfo;
-import org.ethereum.vm.VM;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.TransactionSummary;
@@ -45,8 +44,6 @@ public class TransactionExecutor {
     }
 
     private Blockchain blockchain;
-    // todo - verify threadsafe?
-    private static VM vm = new VM();
     private static ByzantiumConfig vmConfig = new ByzantiumConfig();
 
     /**
@@ -207,17 +204,15 @@ public class TransactionExecutor {
             }
 
             case CALL:
+            case CREATE:
                 // todo - for calls is it gasLimit * calls? need to update cost checking here.
                 if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
-                    executeCall(result, tx, as, blockHeader);
+                    executeVmTransaction(result, tx, as, blockHeader);
                 } else {
                     result.setError(Error.INSUFFICIENT_AVAILABLE);
                 }
                 break;
 
-            case CREATE:
-                result.setSuccess(true);
-                break;
             default:
                 // unsupported transaction type
                 result.setError(Error.INVALID_TYPE);
@@ -233,7 +228,7 @@ public class TransactionExecutor {
         return results;
     }
 
-    private void executeCall(TransactionResult result, Transaction tx, AccountState as, BlockHeader bh) {
+    private void executeVmTransaction(TransactionResult result, Transaction tx, AccountState as, BlockHeader bh) {
         SemuxTransaction transaction = new SemuxTransaction(tx);
         SemuxBlock block = new SemuxBlock(bh);
         Repository repository = new SemuxRepository(as);

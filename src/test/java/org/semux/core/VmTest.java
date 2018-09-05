@@ -6,6 +6,7 @@
  */
 package org.semux.core;
 
+import org.ethereum.vm.util.HashUtil;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -72,7 +73,7 @@ public class VmTest {
 
         byte[] data = Bytes.random(16);
         Amount gas = Unit.NANO_SEM.of(30000);
-        Amount gasLimit = Unit.NANO_SEM.of(30000);
+        Amount gasLimit = Unit.NANO_SEM.of(1);
 
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gas, gasLimit);
         tx.sign(key);
@@ -94,6 +95,57 @@ public class VmTest {
         // execute and commit
         result = executeAndCommit(exec, tx, as.track(), ds.track(), bh);
         assertTrue(result.isSuccess());
+    }
+
+    /**
+     * Just a basic test to check wiring so far
+     */
+    @Test
+    public void testCreate() {
+        Key key = new Key();
+
+        TransactionType type = TransactionType.CREATE;
+        byte[] from = key.toAddress();
+        byte[] to = Bytes.random(20);
+        Amount value = NANO_SEM.of(5);
+        Amount fee = config.minTransactionFee();
+        long nonce = as.getAccount(from).getNonce();
+        long timestamp = TimeUtil.currentTimeMillis();
+
+        // set the contract to a simple program
+        byte[] data = compile("PUSH1 0xa0");
+
+        BlockHeader bh = new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
+                Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20));
+
+        Amount gas = Unit.NANO_SEM.of(60000);
+        Amount gasLimit = Unit.NANO_SEM.of(1);
+
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gas, gasLimit);
+        tx.sign(key);
+        assertTrue(tx.validate(network));
+
+        // insufficient available
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh);
+        assertFalse(result.isSuccess());
+
+        Amount available = SEM.of(1000);
+        as.adjustAvailable(key.toAddress(), available);
+
+        // execute but not commit
+        result = exec.execute(tx, as.track(), ds.track(), bh);
+        assertTrue(result.isSuccess());
+        assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
+        assertEquals(ZERO, as.getAccount(to).getAvailable());
+
+        // execute and commit
+        result = executeAndCommit(exec, tx, as.track(), ds.track(), bh);
+        assertTrue(result.isSuccess());
+
+        byte[] newContractAddress = HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce());
+
+        byte [] contract = as.getCode(newContractAddress);
+        assertArrayEquals(data, contract);
     }
 
     private TransactionResult executeAndCommit(TransactionExecutor exec, Transaction tx, AccountState as,

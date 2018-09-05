@@ -8,15 +8,22 @@ package org.semux.core.state;
 
 import org.semux.core.Amount;
 import org.semux.crypto.Hex;
+import org.semux.util.ByteArray;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Account {
 
+    private static final byte[] EMPTY = new byte[0];
     private final byte[] address;
     private Amount available;
     private Amount locked;
     private long nonce;
+    private byte[] code;
+    private Map<ByteArray, byte[]> storage;
 
     /**
      * Creates an account instance.
@@ -31,6 +38,16 @@ public class Account {
         this.available = available;
         this.locked = locked;
         this.nonce = nonce;
+
+        //default values
+        storage = new HashMap<>();
+        code = EMPTY;
+    }
+
+    public Account(byte[] address, Amount available, Amount locked, long nonce, byte[] code, Map<ByteArray, byte[]> storage) {
+        this(address, available, locked, nonce);
+        this.storage = storage;
+        this.code = code;
     }
 
     /**
@@ -43,6 +60,8 @@ public class Account {
         enc.writeAmount(available);
         enc.writeAmount(locked);
         enc.writeLong(nonce);
+        enc.writeBytes(code);
+        enc.writeByteMap(storage);
 
         return enc.toBytes();
     }
@@ -60,7 +79,17 @@ public class Account {
         Amount locked = dec.readAmount();
         long nonce = dec.readLong();
 
-        return new Account(address, available, locked, nonce);
+        byte[] code = null;
+        Map<ByteArray, byte[]> storage = null;
+        try {
+            code = dec.readBytes();
+            storage = dec.readByteMap();
+        } catch (Exception e)
+        {
+            //migration, old accounts may not have these fields
+        }
+
+        return new Account(address, available, locked, nonce, code, storage);
     }
 
     /**
@@ -124,6 +153,22 @@ public class Account {
      */
     void setNonce(long nonce) {
         this.nonce = nonce;
+    }
+
+    public byte[] getCode() {
+        return code;
+    }
+
+    public void setCode(byte[] code) {
+        this.code = code;
+    }
+
+    public Map<ByteArray, byte[]> getStorage() {
+        return storage;
+    }
+
+    public void setStorage(Map<ByteArray, byte[]> storage) {
+        this.storage = storage;
     }
 
     @Override
