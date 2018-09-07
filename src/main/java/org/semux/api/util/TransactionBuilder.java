@@ -132,6 +132,12 @@ public class TransactionBuilder {
             }
             return this; // ignore the provided parameter
         }
+        if (type == TransactionType.CREATE) {
+            if (to != null && !to.isEmpty()) {
+                throw new IllegalArgumentException("Parameter `to` is not needed for CREATE transaction");
+            }
+            return this; // ignore the provided parameter
+        }
 
         if (to == null) {
             throw new IllegalArgumentException("Parameter `to` is required");
@@ -214,11 +220,42 @@ public class TransactionBuilder {
         return this;
     }
 
+    public TransactionBuilder withGas(String gas) {
+        if (gas == null) {
+            throw new IllegalArgumentException("Parameter `gas` is required");
+        }
+
+        try {
+            this.gas = NANO_SEM.of(Long.parseLong(gas));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Parameter `gas` is not a valid number");
+        }
+
+        return this;
+    }
+
+    public TransactionBuilder withGasLimit(String gasLimit) {
+        if (gasLimit == null) {
+            throw new IllegalArgumentException("Parameter `gasLimit` is required");
+        }
+
+        try {
+            this.gasLimit = NANO_SEM.of(Long.parseLong(gasLimit));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Parameter `gasLimit` is not a valid number");
+        }
+
+        return this;
+    }
+
     public Transaction buildUnsigned() {
         // DELEGATE transaction has fixed receiver and value
         if (type == TransactionType.DELEGATE) {
             to = Bytes.EMPTY_ADDRESS;
             value = kernel.getConfig().minDelegateBurnAmount();
+        }
+        if (type == TransactionType.CREATE) {
+            to = Bytes.EMPTY_ADDRESS;
         }
 
         return new Transaction(

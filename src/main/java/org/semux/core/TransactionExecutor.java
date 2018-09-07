@@ -206,7 +206,10 @@ public class TransactionExecutor {
             case CALL:
             case CREATE:
                 // todo - for calls is it gasLimit * calls? need to update cost checking here.
-                if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
+                // workaround for pending manager
+                if (blockHeader == null) {
+                    result.setSuccess(true);
+                } else if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
                     executeVmTransaction(result, tx, as, blockHeader);
                 } else {
                     result.setError(Error.INSUFFICIENT_AVAILABLE);

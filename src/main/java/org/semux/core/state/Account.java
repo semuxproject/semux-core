@@ -39,12 +39,13 @@ public class Account {
         this.locked = locked;
         this.nonce = nonce;
 
-        //default values
+        // default values
         storage = new HashMap<>();
         code = EMPTY;
     }
 
-    public Account(byte[] address, Amount available, Amount locked, long nonce, byte[] code, Map<ByteArray, byte[]> storage) {
+    public Account(byte[] address, Amount available, Amount locked, long nonce, byte[] code,
+            Map<ByteArray, byte[]> storage) {
         this(address, available, locked, nonce);
         this.storage = storage;
         this.code = code;
@@ -84,9 +85,8 @@ public class Account {
         try {
             code = dec.readBytes();
             storage = dec.readByteMap();
-        } catch (Exception e)
-        {
-            //migration, old accounts may not have these fields
+        } catch (Exception e) {
+            // migration, old accounts may not have these fields
         }
 
         return new Account(address, available, locked, nonce, code, storage);

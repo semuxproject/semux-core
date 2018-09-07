@@ -73,6 +73,8 @@ public class Transaction {
         this.nonce = nonce;
         this.timestamp = timestamp;
         this.data = data;
+        this.gas = gas;
+        this.gasLimit = gasLimit;
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeByte(networkId);
@@ -83,11 +85,13 @@ public class Transaction {
         enc.writeLong(nonce);
         enc.writeLong(timestamp);
         enc.writeBytes(data);
+
+        if (TransactionType.CALL == type || TransactionType.CREATE == type) {
+            enc.writeAmount(gas);
+            enc.writeAmount(gasLimit);
+        }
         this.encoded = enc.toBytes();
         this.hash = Hash.h256(encoded);
-
-        this.gas = gas;
-        this.gasLimit = gasLimit;
     }
 
     /**
@@ -287,15 +291,19 @@ public class Transaction {
 
         Amount gas = Amount.ZERO;
         Amount gasLimit = Amount.ZERO;
-        try {
-            gas = decoder.readAmount();
-            gasLimit = decoder.readAmount();
-        } catch (Exception e) {
-            // old transactions will not have these fields, so need to handle backwards
-            // compatibility
+
+        TransactionType transactionType = TransactionType.of(type);
+        if (TransactionType.CALL == transactionType || TransactionType.CREATE == transactionType) {
+            try {
+                gas = decoder.readAmount();
+                gasLimit = decoder.readAmount();
+            } catch (Exception e) {
+                // old transactions will not have these fields, so need to handle backwards
+                // compatibility
+            }
         }
 
-        return new Transaction(Network.of(networkId), TransactionType.of(type), to, value, fee, nonce, timestamp, data,
+        return new Transaction(Network.of(networkId), transactionType, to, value, fee, nonce, timestamp, data,
                 gas, gasLimit);
     }
 
