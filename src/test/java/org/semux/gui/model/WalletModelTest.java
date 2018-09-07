@@ -43,6 +43,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.semux.config.MainnetConfig;
+import org.semux.consensus.ActivatedForks;
 import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.Amount;
 import org.semux.core.Block;
@@ -163,7 +164,7 @@ public class WalletModelTest {
 
         Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks = new HashMap<>();
         activatedForks.put(UNIFORM_DISTRIBUTION, new ValidatorActivatedFork.Activation(UNIFORM_DISTRIBUTION, 0));
-        model.setActivatedForks(activatedForks);
+        ActivatedForks.setActivatedForks(activatedForks);
 
         for (int i = 0; i < 10; i++) {
             Block block = mock(Block.class);
@@ -185,7 +186,7 @@ public class WalletModelTest {
 
         Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks = new HashMap<>();
         activatedForks.put(UNIFORM_DISTRIBUTION, new ValidatorActivatedFork.Activation(UNIFORM_DISTRIBUTION, 0));
-        model.setActivatedForks(activatedForks);
+        ActivatedForks.setActivatedForks(activatedForks);
 
         Map<Long, WalletDelegate> testCases = new HashMap<>();
 

@@ -7,6 +7,7 @@
 package org.semux.core;
 
 import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
+import static org.semux.consensus.ValidatorActivatedFork.VIRTUAL_MACHINE;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
 import org.semux.config.Constants;
+import org.semux.consensus.ActivatedForks;
 import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.Genesis.Premine;
 import org.semux.core.event.BlockchainDatabaseUpgradingEvent;
@@ -116,11 +118,6 @@ public class BlockchainImpl implements Blockchain {
     private final List<BlockchainListener> listeners = new ArrayList<>();
 
     /**
-     * Activated forks at current height.
-     */
-    private Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks = new ConcurrentHashMap<>();
-
-    /**
      * Cache of <code>(fork, height) -> activated blocks</code>. As there's only one
      * fork in this version, 2 slots are reserved for current height and current
      * height - 1.
@@ -169,7 +166,7 @@ public class BlockchainImpl implements Blockchain {
         }
 
         // load version 1 index
-        activatedForks = getActivatedForks();
+        ActivatedForks.setActivatedForks(getActivatedForks());
     }
 
     private void initializeDb() {
@@ -404,7 +401,7 @@ public class BlockchainImpl implements Blockchain {
             // [5] update validator statistics
             List<String> validators = getValidators();
             String primary = config.getPrimaryValidator(validators, number, 0,
-                    activatedForks.containsKey(UNIFORM_DISTRIBUTION));
+                    ActivatedForks.isActivated(UNIFORM_DISTRIBUTION));
             adjustValidatorStats(block.getCoinbase(), StatsType.FORGED, 1);
             if (primary.equals(Hex.encode(block.getCoinbase()))) {
                 adjustValidatorStats(Hex.decode0x(primary), StatsType.HIT, 1);
@@ -432,14 +429,24 @@ public class BlockchainImpl implements Blockchain {
      */
     private synchronized void activateForks(long number) {
         if (config.forkUniformDistributionEnabled()
-                && !activatedForks.containsKey(UNIFORM_DISTRIBUTION)
+                && !ActivatedForks.isActivated(UNIFORM_DISTRIBUTION)
                 && number <= UNIFORM_DISTRIBUTION.activationDeadline
                 && forkActivated(number, ValidatorActivatedFork.UNIFORM_DISTRIBUTION)) {
             // persist the activated fork
-            activatedForks.put(UNIFORM_DISTRIBUTION,
+            ActivatedForks.addFork(UNIFORM_DISTRIBUTION,
                     new ValidatorActivatedFork.Activation(UNIFORM_DISTRIBUTION, number));
-            setActivatedForks(activatedForks);
+            setActivatedForks(ActivatedForks.getActivatedForks());
             logger.info("Fork UNIFORM_DISTRIBUTION activated at block {}", number);
+        }
+        if (config.forkVirtualMachineEnabled()
+                && !ActivatedForks.isActivated(VIRTUAL_MACHINE)
+                && number <= VIRTUAL_MACHINE.activationDeadline
+                && forkActivated(number, ValidatorActivatedFork.VIRTUAL_MACHINE)) {
+            // persist the activated fork
+            ActivatedForks.addFork(VIRTUAL_MACHINE,
+                    new ValidatorActivatedFork.Activation(VIRTUAL_MACHINE, number));
+            setActivatedForks(ActivatedForks.getActivatedForks());
+            logger.info("Fork VIRTUAL_MACHINE activated at block {}", number);
         }
     }
 
@@ -708,8 +715,8 @@ public class BlockchainImpl implements Blockchain {
         }
 
         // checks whether the fork has been activated and recorded in database
-        if (activatedForks.containsKey(fork)) {
-            return height >= activatedForks.get(fork).activatedAt;
+        if (ActivatedForks.isActivated(fork)) {
+            return height >= ActivatedForks.getActivatedForks().get(fork).activatedAt;
         }
 
         // checks whether the local blockchain has reached the fork activation

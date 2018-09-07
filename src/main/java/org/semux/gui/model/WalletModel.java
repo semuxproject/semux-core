@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.semux.config.Config;
+import org.semux.consensus.ActivatedForks;
 import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.Amount;
 import org.semux.core.Block;
@@ -51,7 +52,6 @@ public class WalletModel {
     private volatile List<WalletAccount> accounts = new ArrayList<>();
     private volatile List<WalletDelegate> delegates = new ArrayList<>();
     private volatile List<String> validators = new ArrayList<>();
-    private volatile Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks = new HashMap<>();
 
     private Map<String, Peer> activePeers = new HashMap<>();
 
@@ -248,14 +248,14 @@ public class WalletModel {
      * @return The address of the current primary validator.
      */
     public Optional<String> getValidator(int view) {
-        if (validators == null || latestBlock == null || activatedForks == null) {
+        if (validators == null || latestBlock == null) {
             return Optional.empty();
         }
 
         return Optional.ofNullable(config.getPrimaryValidator(validators,
                 latestBlock.getNumber() + 1,
                 view,
-                activatedForks.containsKey(ValidatorActivatedFork.UNIFORM_DISTRIBUTION)));
+                ActivatedForks.isActivated(ValidatorActivatedFork.UNIFORM_DISTRIBUTION)));
     }
 
     /**
@@ -311,25 +311,6 @@ public class WalletModel {
         return Optional.of(
                 ((latestBlock.getNumber() + 1) / config.getValidatorUpdateInterval() + 1)
                         * config.getValidatorUpdateInterval());
-    }
-
-    /**
-     * Getter for property 'activatedForks'.
-     *
-     * @return Value for property 'activatedForks'.
-     */
-    public Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> getActivatedForks() {
-        return activatedForks;
-    }
-
-    /**
-     * Setter for property 'activatedForks'.
-     *
-     * @param activatedForks
-     *            Value to set for property 'activatedForks'.
-     */
-    public void setActivatedForks(Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks) {
-        this.activatedForks = activatedForks;
     }
 
     /**
