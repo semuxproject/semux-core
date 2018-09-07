@@ -37,9 +37,6 @@ public class AccountStateImpl implements AccountState {
 
     protected Database accountDB;
     protected AccountStateImpl prev;
-    // we will need to add persistence, but for integration/testing, seems fine to
-    // punt
-    private Map<ByteArray, Map<ByteArray, byte[]>> storage = new HashMap<>();
 
     /**
      * All updates, or deletes if the value is null.
@@ -62,7 +59,6 @@ public class AccountStateImpl implements AccountState {
      */
     public AccountStateImpl(AccountStateImpl prev) {
         this.prev = prev;
-        this.storage = new HashMap<>(prev.storage);
     }
 
     @Override
@@ -127,11 +123,8 @@ public class AccountStateImpl implements AccountState {
 
     @Override
     public byte[] getStorage(byte[] address, byte[] key) {
-        Map<ByteArray, byte[]> store = storage.get(ByteArray.of(address));
-        if (store != null) {
-            return store.get(ByteArray.of(key));
-        }
-        return null;
+        Account acc = getAccount(address);
+        return acc.getStorage().get(ByteArray.of(key));
     }
 
     @Override
