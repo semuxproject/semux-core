@@ -797,9 +797,9 @@ public class SemuxBft implements BftManager {
         for (PendingManager.PendingTransaction tx : pending) {
             if (tx.transaction.getType() == TransactionType.CALL
                     || tx.transaction.getType() == TransactionType.CREATE) {
-                tx.transactionResult = exec.execute(tx.transaction, as, ds, tempHeader);
-                if (tx.transactionResult.isSuccess()) {
-                    pendingResults.add(tx.transactionResult);
+                TransactionResult result = exec.execute(tx.transaction, as, ds, tempHeader);
+                if (result.isSuccess()) {
+                    pendingResults.add(result);
                     pendingTxs.add(tx.transaction);
                 }
             } else {
