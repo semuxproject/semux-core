@@ -72,7 +72,7 @@ public class TransactionBuilder {
      */
     private byte[] data;
 
-    private Amount gas = Amount.ZERO;
+    private Amount gasPrice = Amount.ZERO;
     private Amount gasLimit = Amount.ZERO;
 
     public TransactionBuilder(Kernel kernel) {
@@ -220,15 +220,15 @@ public class TransactionBuilder {
         return this;
     }
 
-    public TransactionBuilder withGas(String gas) {
-        if (gas == null) {
-            throw new IllegalArgumentException("Parameter `gas` is required");
+    public TransactionBuilder withGasPrice(String gasPrice) {
+        if (gasPrice == null) {
+            throw new IllegalArgumentException("Parameter `gasPrice` is required");
         }
 
         try {
-            this.gas = NANO_SEM.of(Long.parseLong(gas));
+            this.gasPrice = NANO_SEM.of(Long.parseLong(gasPrice));
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Parameter `gas` is not a valid number");
+            throw new IllegalArgumentException("Parameter `gasPrice` is not a valid number");
         }
 
         return this;
@@ -266,7 +266,7 @@ public class TransactionBuilder {
                 fee,
                 nonce != null ? nonce : kernel.getPendingManager().getNonce(account.toAddress()),
                 timestamp != null ? timestamp : TimeUtil.currentTimeMillis(),
-                data, gas, gasLimit);
+                data, gasPrice, gasLimit);
     }
 
     public Transaction buildSigned() {

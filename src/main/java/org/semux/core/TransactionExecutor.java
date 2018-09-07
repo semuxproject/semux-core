@@ -205,8 +205,7 @@ public class TransactionExecutor {
 
             case CALL:
             case CREATE:
-                // todo - for calls is it gasLimit * calls? need to update cost checking here.
-                // workaround for pending manager
+                // workaround for pending manager so it doesn't execute these
                 if (blockHeader == null) {
                     result.setSuccess(true);
                 } else if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
@@ -237,8 +236,8 @@ public class TransactionExecutor {
         Repository repository = new SemuxRepository(as);
         BlockStore blockStore = new SemuxBlockStore(blockchain);
         ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
-        long gasUsedInBlock = 0l; // todo
-        boolean localCall = false; // todo?
+        long gasUsedInBlock = 0l; // todo - use this
+        boolean localCall = false; // todo - what is a localCall?
 
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                 transaction, block, repository, blockStore,
@@ -248,11 +247,14 @@ public class TransactionExecutor {
         if (summary == null) {
             result.setSuccess(false);
         } else {
-            for (LogInfo logs : summary.getLogs()) {
-                System.out.println(logs.toString());
-            }
+            // todo - loginfo
+            // for (LogInfo logs : summary.getLogs()) {
+            // System.out.println(logs.toString());
+            // }
+            // result.setLogs(null);
+            result.setGasUsed(Unit.NANO_SEM.of(summary.getGasUsed().longValue()));
+            result.setReturns(summary.getReturnData());
             result.setSuccess(!summary.isFailed());
-            // todo - apply summary to chain
         }
     }
 

@@ -20,7 +20,7 @@ import java.math.BigInteger;
  * ease of initial integration, use a facade to limit scope
  */
 public class SemuxRepository implements Repository {
-    AccountState accountState;
+    private final AccountState accountState;
 
     public SemuxRepository(AccountState accountState) {
         this.accountState = accountState;
@@ -91,7 +91,7 @@ public class SemuxRepository implements Repository {
 
     @Override
     public BigInteger addBalance(byte[] address, BigInteger value) {
-        // todo - figure out BigInt changes
+        // todo - figure out BigInt changes (long overflow?)
         accountState.adjustAvailable(address, Amount.Unit.NANO_SEM.of(value.longValue()));
         return value;
     }

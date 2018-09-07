@@ -15,7 +15,7 @@ import org.semux.core.Blockchain;
  * Eventually we'll want to make blockchain just implement blockstore
  */
 public class SemuxBlockStore implements BlockStore {
-    Blockchain blockchain;
+    private final Blockchain blockchain;
 
     public SemuxBlockStore(Blockchain blockchain) {
         this.blockchain = blockchain;

@@ -1103,9 +1103,9 @@
             "pattern" : "^(0x)?[0-9a-fA-F]+$"
           },
           {
-            "name" : "gas",
+            "name" : "gasPrice",
             "in" : "query",
-            "description" : "The gas to cover the contract",
+            "description" : "The gas price",
             "required" : true,
             "type" : "string",
             "format" : "int64",
@@ -1208,9 +1208,9 @@
             "pattern" : "^(0x)?[0-9a-fA-F]+$"
           },
           {
-            "name" : "gas",
+            "name" : "gasPrice",
             "in" : "query",
-            "description" : "The gas to cover the contract",
+            "description" : "The gas price",
             "required" : true,
             "type" : "string",
             "format" : "int64",

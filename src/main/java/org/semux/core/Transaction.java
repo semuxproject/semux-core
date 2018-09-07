@@ -6,10 +6,6 @@
  */
 package org.semux.core;
 
-import static org.semux.util.Bytes.EMPTY_ADDRESS;
-
-import java.util.Arrays;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.semux.Network;
@@ -20,6 +16,10 @@ import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+
+import java.util.Arrays;
+
+import static org.semux.util.Bytes.EMPTY_ADDRESS;
 
 public class Transaction {
 
@@ -45,9 +45,9 @@ public class Transaction {
 
     private Signature signature;
 
-    private final Amount gas;
-
     private final Amount gasLimit;
+
+    private final Amount gasPrice;
 
     /**
      * Create a new transaction.
@@ -60,11 +60,11 @@ public class Transaction {
      * @param nonce
      * @param timestamp
      * @param data
-     * @param gas
      * @param gasLimit
+     * @param gasPrice
      */
     public Transaction(Network network, TransactionType type, byte[] to, Amount value, Amount fee, long nonce,
-            long timestamp, byte[] data, Amount gas, Amount gasLimit) {
+            long timestamp, byte[] data, Amount gasLimit, Amount gasPrice) {
         this.networkId = network.id();
         this.type = type;
         this.to = to;
@@ -73,8 +73,8 @@ public class Transaction {
         this.nonce = nonce;
         this.timestamp = timestamp;
         this.data = data;
-        this.gas = gas;
         this.gasLimit = gasLimit;
+        this.gasPrice = gasPrice;
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeByte(networkId);
@@ -87,8 +87,8 @@ public class Transaction {
         enc.writeBytes(data);
 
         if (TransactionType.CALL == type || TransactionType.CREATE == type) {
-            enc.writeAmount(gas);
             enc.writeAmount(gasLimit);
+            enc.writeAmount(gasPrice);
         }
         this.encoded = enc.toBytes();
         this.hash = Hash.h256(encoded);
@@ -114,8 +114,8 @@ public class Transaction {
         this.timestamp = decodedTx.timestamp;
         this.data = decodedTx.data;
 
-        this.gas = decodedTx.gas;
         this.gasLimit = decodedTx.gasLimit;
+        this.gasPrice = decodedTx.gasPrice;
 
         this.encoded = encoded;
         this.signature = Signature.fromBytes(signature);
@@ -262,12 +262,13 @@ public class Transaction {
         return encoded;
     }
 
-    public Amount getGas() {
-        return gas;
-    }
-
     public Amount getGasLimit() {
         return gasLimit;
+    }
+
+    // todo - this is gasPrice, not limit
+    public Amount getGasPrice() {
+        return gasPrice;
     }
 
     /**
@@ -289,22 +290,17 @@ public class Transaction {
         long timestamp = decoder.readLong();
         byte[] data = decoder.readBytes();
 
-        Amount gas = Amount.ZERO;
+        Amount gasPrice = Amount.ZERO;
         Amount gasLimit = Amount.ZERO;
 
         TransactionType transactionType = TransactionType.of(type);
         if (TransactionType.CALL == transactionType || TransactionType.CREATE == transactionType) {
-            try {
-                gas = decoder.readAmount();
-                gasLimit = decoder.readAmount();
-            } catch (Exception e) {
-                // old transactions will not have these fields, so need to handle backwards
-                // compatibility
-            }
+            gasPrice = decoder.readAmount();
+            gasLimit = decoder.readAmount();
         }
 
         return new Transaction(Network.of(networkId), transactionType, to, value, fee, nonce, timestamp, data,
-                gas, gasLimit);
+                gasPrice, gasLimit);
     }
 
     /**

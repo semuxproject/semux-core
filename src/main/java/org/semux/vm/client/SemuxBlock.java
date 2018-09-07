@@ -16,8 +16,9 @@ import java.math.BigInteger;
  */
 public class SemuxBlock implements Block {
 
-    private final BlockHeader blockHeader;
     private static final BigInteger GAS_LIMIT = new BigInteger("999999999");
+
+    private final BlockHeader blockHeader;
 
     public SemuxBlock(BlockHeader block) {
         this.blockHeader = block;

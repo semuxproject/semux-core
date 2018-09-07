@@ -99,6 +99,11 @@ public class TransactionResult {
     protected List<byte[]> logs;
 
     /**
+     * Gas used
+     */
+    protected Amount gasUsed;
+
+    /**
      * Error message for API/GUI, not sent over the network.
      */
     protected Error error;
@@ -110,11 +115,12 @@ public class TransactionResult {
      * @param output
      * @param logs
      */
-    public TransactionResult(boolean success, byte[] output, List<byte[]> logs) {
+    public TransactionResult(boolean success, byte[] output, List<byte[]> logs, Amount gasUsed) {
         super();
         this.success = success;
         this.returns = output;
         this.logs = logs;
+        this.gasUsed = gasUsed;
     }
 
     /**
@@ -123,7 +129,7 @@ public class TransactionResult {
      * @param success
      */
     public TransactionResult(boolean success) {
-        this(success, Bytes.EMPTY_BYTES, new ArrayList<>());
+        this(success, Bytes.EMPTY_BYTES, new ArrayList<>(), Amount.ZERO);
     }
 
     /**
@@ -173,6 +179,14 @@ public class TransactionResult {
         this.error = error;
     }
 
+    public Amount getGasUsed() {
+        return gasUsed;
+    }
+
+    public void setGasUsed(Amount gasUsed) {
+        this.gasUsed = gasUsed;
+    }
+
     public byte[] toBytes() {
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeBoolean(success);
@@ -181,6 +195,8 @@ public class TransactionResult {
         for (byte[] log : logs) {
             enc.writeBytes(log);
         }
+        // todo - add fork activated check
+        enc.writeAmount(gasUsed);
 
         return enc.toBytes();
     }
@@ -194,13 +210,20 @@ public class TransactionResult {
         for (int i = 0; i < n; i++) {
             logs.add(dec.readBytes());
         }
+        Amount gasUsed = Amount.ZERO;
+        // todo - add fork activation check
+        try {
+            gasUsed = dec.readAmount();
+        } catch (Exception e) {
+            // old blocks won't have this field
+        }
 
-        return new TransactionResult(valid, returns, logs);
+        return new TransactionResult(valid, returns, logs, gasUsed);
     }
 
     @Override
     public String toString() {
         return "TransactionResult [success=" + success + ", output=" + Arrays.toString(returns) + ", # logs="
-                + logs.size() + "]";
+                + logs.size() + ", gasUsed=" + gasUsed.toString() + "]";
     }
 }

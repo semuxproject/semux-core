@@ -731,15 +731,18 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response create(String from, String value, String data, String gas, String gasLimit, String fee,
+    public Response create(String from, String value, String data, String gasPrice, String gasLimit, String fee,
             String nonce, Boolean validateNonce) {
-        return doTransaction(TransactionType.CREATE, from, null, value, fee, nonce, validateNonce, data, gas, gasLimit);
+        return doTransaction(TransactionType.CREATE, from, null, value, fee, nonce, validateNonce, data, gasPrice,
+                gasLimit);
     }
 
     @Override
-    public Response call(String from, String to, String value, String gas, String gasLimit, String fee, String nonce,
+    public Response call(String from, String to, String value, String gasPrice, String gasLimit, String fee,
+            String nonce,
             Boolean validateNonce, String data) {
-        return doTransaction(TransactionType.CALL, from, to, value, fee, nonce, validateNonce, data, gas, gasLimit);
+        return doTransaction(TransactionType.CALL, from, to, value, fee, nonce, validateNonce, data, gasPrice,
+                gasLimit);
     }
 
     @Override
@@ -888,7 +891,7 @@ public final class SemuxApiImpl implements SemuxApi {
      * @return
      */
     private Response doTransaction(TransactionType type, String from, String to, String value, String fee, String nonce,
-            Boolean validateNonce, String data, String gas, String gasLimit) {
+            Boolean validateNonce, String data, String gasPrice, String gasLimit) {
         DoTransactionResponse resp = new DoTransactionResponse();
         try {
             TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
@@ -899,7 +902,7 @@ public final class SemuxApiImpl implements SemuxApi {
                     .withFee(fee, true)
                     .withData(data);
             if (type == TransactionType.CREATE || type == TransactionType.CALL) {
-                transactionBuilder.withGas(gas).withGasLimit(gasLimit);
+                transactionBuilder.withGasPrice(gasPrice).withGasLimit(gasLimit);
             }
 
             if (nonce != null) {

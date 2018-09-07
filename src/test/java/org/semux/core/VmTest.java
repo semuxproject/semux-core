@@ -16,6 +16,7 @@ import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
+import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
@@ -65,17 +66,20 @@ public class VmTest {
         long timestamp = TimeUtil.currentTimeMillis();
 
         // set the contract to a simple program
-        byte[] contract = compile("PUSH1 0xa0");
+        byte[] contract = compile("PUSH2 0x1234 PUSH1 0x00 MSTORE PUSH1 0x20 PUSH1 0x00 RETURN");
+        System.out.println(Hex.encode0x(contract));
+        System.out.println(
+                Hex.encode0x(HashUtil.calcNewAddress(Hex.decode0x("0x23a6049381fd2cfb0661d9de206613b83d53d7df"), 17)));
         as.setCode(to, contract);
 
         BlockHeader bh = new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
                 Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20));
 
         byte[] data = Bytes.random(16);
-        Amount gas = Unit.NANO_SEM.of(30000);
-        Amount gasLimit = Unit.NANO_SEM.of(1);
+        Amount gasLimit = Unit.NANO_SEM.of(30000);
+        Amount gasPrice = Unit.NANO_SEM.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gas, gasLimit);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gasLimit, gasPrice);
         tx.sign(key);
         assertTrue(tx.validate(network));
 
@@ -118,10 +122,10 @@ public class VmTest {
         BlockHeader bh = new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
                 Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20));
 
-        Amount gas = Unit.NANO_SEM.of(60000);
-        Amount gasLimit = Unit.NANO_SEM.of(1);
+        Amount gasLimit = Unit.NANO_SEM.of(60000);
+        Amount gasPrice = Unit.NANO_SEM.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gas, gasLimit);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gasLimit, gasPrice);
         tx.sign(key);
         assertTrue(tx.validate(network));
 

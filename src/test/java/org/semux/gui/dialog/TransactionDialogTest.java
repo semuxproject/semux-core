@@ -39,7 +39,7 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
     WalletModel walletModel;
 
     @Test
-    public void testDisplayTransferTransaction() {
+    public void testDisplayTransferTransaction() throws InterruptedException {
         kernelRule1.getKernel().start();
 
         Key from = new Key();
@@ -67,6 +67,8 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
         dialog.label("nonceText").requireVisible().requireText("0");
         dialog.label("timestampText").requireVisible().requireText(SwingUtil.formatTimestamp(now));
         dialog.textBox("dataText").requireVisible().requireText(Hex.encode0x(data));
+        dialog.label("gasUsedText").requireVisible().requireText("0");
+        dialog.textBox("outputText").requireVisible().requireText("0x");
     }
 
     @Override

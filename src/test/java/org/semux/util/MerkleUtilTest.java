@@ -49,8 +49,8 @@ public class MerkleUtilTest {
 
     @Test
     public void testComputeResultsRoot() {
-        TransactionResult res1 = new TransactionResult(true, Bytes.random(20), Collections.emptyList());
-        TransactionResult res2 = new TransactionResult(false, Bytes.random(20), Collections.emptyList());
+        TransactionResult res1 = new TransactionResult(true, Bytes.random(20), Collections.emptyList(), Amount.ZERO);
+        TransactionResult res2 = new TransactionResult(false, Bytes.random(20), Collections.emptyList(), Amount.ZERO);
         byte[] b1 = Hash.h256(res1.toBytes());
         byte[] b2 = Hash.h256(res2.toBytes());
         byte[] root = new MerkleTree(Arrays.asList(b1, b2)).getRootHash();

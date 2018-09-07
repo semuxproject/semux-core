@@ -39,6 +39,7 @@ import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
+import org.semux.core.TransactionType;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hash;
@@ -762,21 +763,6 @@ public class SemuxBft implements BftManager {
     protected Block proposeBlock() {
         long t1 = TimeUtil.currentTimeMillis();
 
-        // fetch pending transactions
-        final List<PendingManager.PendingTransaction> pending = pendingMgr
-                .getPendingTransactions(config.maxBlockTransactionsSize());
-        final List<Transaction> pendingTxs = pending.stream()
-                .map(tx -> tx.transaction)
-                .collect(Collectors.toList());
-        final List<TransactionResult> pendingResults = pending.stream()
-                .map(tx -> tx.transactionResult)
-                .collect(Collectors.toList());
-
-        // compute roots
-        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(pendingTxs);
-        byte[] resultsRoot = MerkleUtil.computeResultsRoot(pendingResults);
-        byte[] stateRoot = Bytes.EMPTY_HASH;
-
         // construct block
         BlockHeader parent = chain.getBlockHeader(height - 1);
         long number = height;
@@ -794,6 +780,38 @@ public class SemuxBft implements BftManager {
         byte[] data = signalingUniformDistribution()
                 ? BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(UNIFORM_DISTRIBUTION)).toBytes()
                 : new byte[0];
+
+        // fetch pending transactions
+        final List<PendingManager.PendingTransaction> pending = pendingMgr
+                .getPendingTransactions(config.maxBlockTransactionsSize());
+        final List<Transaction> pendingTxs = new ArrayList<>();
+        final List<TransactionResult> pendingResults = new ArrayList<>();
+
+        // for any VM requests, actually need to execute them
+        AccountState as = accountState.track();
+        DelegateState ds = delegateState.track();
+        TransactionExecutor exec = new TransactionExecutor(config, chain);
+        // todo - should pass around SemuxHeader instead blockHeader - TEMP HACK
+        BlockHeader tempHeader = new BlockHeader(height, coinbase.toAddress(), prevHash, timestamp, new byte[0],
+                new byte[0], new byte[0], data);
+        for (PendingManager.PendingTransaction tx : pending) {
+            if (tx.transaction.getType() == TransactionType.CALL
+                    || tx.transaction.getType() == TransactionType.CREATE) {
+                tx.transactionResult = exec.execute(tx.transaction, as, ds, tempHeader);
+                if (tx.transactionResult.isSuccess()) {
+                    pendingResults.add(tx.transactionResult);
+                    pendingTxs.add(tx.transaction);
+                }
+            } else {
+                pendingResults.add(tx.transactionResult);
+                pendingTxs.add(tx.transaction);
+            }
+        }
+
+        // compute roots
+        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(pendingTxs);
+        byte[] resultsRoot = MerkleUtil.computeResultsRoot(pendingResults);
+        byte[] stateRoot = Bytes.EMPTY_HASH;
 
         BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,
                 resultsRoot, stateRoot, data);

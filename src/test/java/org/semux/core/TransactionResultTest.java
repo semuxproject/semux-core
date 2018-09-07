@@ -28,7 +28,7 @@ public class TransactionResultTest {
 
     @Test
     public void testNew() {
-        TransactionResult res = new TransactionResult(valid, returns, logs);
+        TransactionResult res = new TransactionResult(valid, returns, logs, Amount.ZERO);
         assertTrue(res.validate());
 
         testFields(res);
@@ -36,14 +36,14 @@ public class TransactionResultTest {
 
     @Test
     public void testSerialization() {
-        TransactionResult res = new TransactionResult(valid, returns, logs);
+        TransactionResult res = new TransactionResult(valid, returns, logs, Amount.ZERO);
 
         testFields(TransactionResult.fromBytes(res.toBytes()));
     }
 
     @Test
     public void testTransactionResultSize() {
-        TransactionResult res = new TransactionResult(valid, returns, logs);
+        TransactionResult res = new TransactionResult(valid, returns, logs, Amount.ZERO);
         byte[] bytes = res.toBytes();
 
         logger.info("result size: {} B, {} GB per 1M txs", bytes.length, 1000000.0 * bytes.length / 1024 / 1024 / 1024);
