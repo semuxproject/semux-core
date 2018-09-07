@@ -330,7 +330,6 @@ public class PendingManager implements Runnable, BlockchainListener {
             // execute transactions
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
-            // todo - for pending we don't have the blockHeader yet, so cannot use them.
             TransactionResult result = new TransactionExecutor(kernel.getConfig(), kernel.getBlockchain()).execute(tx,
                     as, ds, null);
 

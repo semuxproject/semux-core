@@ -144,7 +144,7 @@ public class VmTest {
 
         byte[] newContractAddress = HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce());
 
-        byte [] contract = as.getCode(newContractAddress);
+        byte[] contract = as.getCode(newContractAddress);
         assertArrayEquals(data, contract);
     }
 

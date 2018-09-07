@@ -147,12 +147,13 @@ public class SimpleDecoder {
 
     /**
      * Reads a byte[] -> byte[] map
+     * 
      * @return map
      */
     public Map<ByteArray, byte[]> readByteMap() {
         int numEntries = readSize();
         Map<ByteArray, byte[]> ret = new HashMap<>();
-        for(int i = 0; i< numEntries; i++) {
+        for (int i = 0; i < numEntries; i++) {
             byte[] key = readBytes();
             byte[] value = readBytes();
             ret.put(ByteArray.of(key), value);

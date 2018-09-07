@@ -731,6 +731,18 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
+    public Response create(String from, String value, String data, String gas, String gasLimit, String fee,
+            String nonce, Boolean validateNonce) {
+        return doTransaction(TransactionType.CREATE, from, null, value, fee, nonce, validateNonce, data, gas, gasLimit);
+    }
+
+    @Override
+    public Response call(String from, String to, String value, String gas, String gasLimit, String fee, String nonce,
+            Boolean validateNonce, String data) {
+        return doTransaction(TransactionType.CALL, from, to, value, fee, nonce, validateNonce, data, gas, gasLimit);
+    }
+
+    @Override
     public Response unvote(String from, String to, String value, String fee, String nonce, Boolean validateNonce) {
         return doTransaction(TransactionType.UNVOTE, from, to, value, fee, nonce, validateNonce, null);
     }
@@ -857,6 +869,11 @@ public final class SemuxApiImpl implements SemuxApi {
         return new NodeManager.Node(host, port);
     }
 
+    private Response doTransaction(TransactionType type, String from, String to, String value, String fee, String nonce,
+            Boolean validateNonce, String data) {
+        return doTransaction(type, from, to, value, fee, nonce, validateNonce, data, null, null);
+    }
+
     /**
      * Constructs a transaction and adds it to pending manager.
      *
@@ -871,7 +888,7 @@ public final class SemuxApiImpl implements SemuxApi {
      * @return
      */
     private Response doTransaction(TransactionType type, String from, String to, String value, String fee, String nonce,
-            Boolean validateNonce, String data) {
+            Boolean validateNonce, String data, String gas, String gasLimit) {
         DoTransactionResponse resp = new DoTransactionResponse();
         try {
             TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
@@ -881,6 +898,9 @@ public final class SemuxApiImpl implements SemuxApi {
                     .withValue(value)
                     .withFee(fee, true)
                     .withData(data);
+            if (type == TransactionType.CREATE || type == TransactionType.CALL) {
+                transactionBuilder.withGas(gas).withGasLimit(gasLimit);
+            }
 
             if (nonce != null) {
                 transactionBuilder.withNonce(nonce);
