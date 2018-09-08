@@ -108,43 +108,46 @@ public class AccountStateImpl implements AccountState {
 
     @Override
     public byte[] getCode(byte[] address) {
-        Account acc = getAccount(address);
-        return acc.getCode();
+        ByteArray k = getKey(TYPE_CODE, address);
+
+        if (updates.containsKey(k)) {
+            return updates.get(k);
+        } else if (prev != null) {
+            return prev.getCode(address);
+        } else {
+            return accountDB.get(k.getData());
+        }
     }
 
     @Override
     public void setCode(byte[] address, byte[] code) {
-        ByteArray k = getKey(TYPE_ACCOUNT, address);
-
-        Account acc = getAccount(address);
-        acc.setCode(code);
-        updates.put(k, acc.toBytes());
+        ByteArray k = getKey(TYPE_CODE, address);
+        updates.put(k, code);
     }
 
     @Override
     public byte[] getStorage(byte[] address, byte[] key) {
-        Account acc = getAccount(address);
-        return acc.getStorage().get(ByteArray.of(key));
+        ByteArray k = getStorageKey(address, key);
+
+        if (updates.containsKey(k)) {
+            return updates.get(k);
+        } else if (prev != null) {
+            return prev.getStorage(address, key);
+        } else {
+            return accountDB.get(k.getData());
+        }
     }
 
     @Override
     public void putStorage(byte[] address, byte[] key, byte[] value) {
-        ByteArray storeKey = getKey(TYPE_ACCOUNT, address);
-
-        Account acc = getAccount(address);
-        Map<ByteArray, byte[]> store = acc.getStorage();
-        store.put(ByteArray.of(key), value);
-        updates.put(storeKey, acc.toBytes());
+        ByteArray storeKey = getStorageKey(address, key);
+        updates.put(storeKey, value);
     }
 
     @Override
     public void removeStorage(byte[] address, byte[] key) {
-        ByteArray storeKey = getKey(TYPE_ACCOUNT, address);
-
-        Account acc = getAccount(address);
-        Map<ByteArray, byte[]> store = acc.getStorage();
-        store.remove(ByteArray.of(key));
-        updates.put(storeKey, acc.toBytes());
+        ByteArray storeKey = getStorageKey(address, key);
+        updates.put(storeKey, null);
     }
 
     @Override

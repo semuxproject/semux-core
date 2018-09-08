@@ -22,8 +22,6 @@ public class Account {
     private Amount available;
     private Amount locked;
     private long nonce;
-    private byte[] code;
-    private Map<ByteArray, byte[]> storage;
 
     /**
      * Creates an account instance.
@@ -38,17 +36,6 @@ public class Account {
         this.available = available;
         this.locked = locked;
         this.nonce = nonce;
-
-        // default values
-        storage = new HashMap<>();
-        code = Bytes.EMPTY_BYTES;
-    }
-
-    public Account(byte[] address, Amount available, Amount locked, long nonce, byte[] code,
-            Map<ByteArray, byte[]> storage) {
-        this(address, available, locked, nonce);
-        this.storage = storage;
-        this.code = code;
     }
 
     /**
@@ -61,8 +48,6 @@ public class Account {
         enc.writeAmount(available);
         enc.writeAmount(locked);
         enc.writeLong(nonce);
-        enc.writeBytes(code);
-        enc.writeByteMap(storage);
 
         return enc.toBytes();
     }
@@ -80,16 +65,7 @@ public class Account {
         Amount locked = dec.readAmount();
         long nonce = dec.readLong();
 
-        byte[] code = null;
-        Map<ByteArray, byte[]> storage = null;
-        try {
-            code = dec.readBytes();
-            storage = dec.readByteMap();
-        } catch (Exception e) {
-            // migration, old accounts may not have these fields
-        }
-
-        return new Account(address, available, locked, nonce, code, storage);
+        return new Account(address, available, locked, nonce);
     }
 
     /**
@@ -153,22 +129,6 @@ public class Account {
      */
     void setNonce(long nonce) {
         this.nonce = nonce;
-    }
-
-    public byte[] getCode() {
-        return code;
-    }
-
-    public void setCode(byte[] code) {
-        this.code = code;
-    }
-
-    public Map<ByteArray, byte[]> getStorage() {
-        return storage;
-    }
-
-    public void setStorage(Map<ByteArray, byte[]> storage) {
-        this.storage = storage;
     }
 
     @Override
