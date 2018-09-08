@@ -76,8 +76,7 @@ public class AccountStateTest {
     }
 
     @Test
-    public void testCode()
-    {
+    public void testCode() {
         byte[] address = Bytes.random(20);
         byte[] addressCode = Bytes.random(20);
         byte[] code = state.getCode(address);
@@ -91,15 +90,14 @@ public class AccountStateTest {
     }
 
     @Test
-    public void testStorage()
-    {
+    public void testStorage() {
         byte[] address = Bytes.random(20);
         byte[] addressStorage1 = Bytes.random(20);
         byte[] storageKey1 = Bytes.random(3);
         byte[] storageKey2 = Bytes.random(3);
         byte[] addressStorage2 = Bytes.random(21);
         state.putStorage(address, storageKey2, addressStorage2);
-        byte[] storage = state.getStorage(address,storageKey1);
+        byte[] storage = state.getStorage(address, storageKey1);
         assertNull(storage);
         state.putStorage(address, storageKey1, addressStorage1);
         storage = state.getStorage(address, storageKey1);
