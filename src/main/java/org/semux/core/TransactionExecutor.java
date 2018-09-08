@@ -8,7 +8,7 @@ package org.semux.core;
 
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
-import org.ethereum.vm.client.TransactionSummary;
+import org.ethereum.vm.client.TransactionReceipt;
 import org.ethereum.vm.config.ByzantiumConfig;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
@@ -241,7 +241,7 @@ public class TransactionExecutor {
                 transaction, block, repository, blockStore,
                 vmConfig, invokeFactory, gasUsedInBlock, localCall);
 
-        TransactionSummary summary = executor.run();
+        TransactionReceipt summary = executor.run();
         if (summary == null) {
             result.setSuccess(false);
         } else {
@@ -250,9 +250,9 @@ public class TransactionExecutor {
             // System.out.println(logs.toString());
             // }
             // result.setLogs(null);
-            result.setGasUsed(summary.getGasUsed().longValue());
+            result.setGasUsed(summary.getGasUsed());
             result.setReturns(summary.getReturnData());
-            result.setSuccess(!summary.isFailed());
+            result.setSuccess(summary.isSuccess());
         }
     }
 

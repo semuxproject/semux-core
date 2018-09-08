@@ -53,8 +53,8 @@ public class SemuxTransaction implements Transaction {
     }
 
     @Override
-    public BigInteger getGas() {
-        return BigInteger.valueOf(transaction.getGas());
+    public long getGas() {
+        return transaction.getGas();
     }
 
     @Override

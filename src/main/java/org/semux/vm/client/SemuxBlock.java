@@ -16,7 +16,7 @@ import java.math.BigInteger;
  */
 public class SemuxBlock implements Block {
 
-    private static final BigInteger GAS_LIMIT = new BigInteger("999999999");
+    private static final long GAS_LIMIT = 999999999;
 
     private final BlockHeader blockHeader;
 
@@ -25,7 +25,7 @@ public class SemuxBlock implements Block {
     }
 
     @Override
-    public BigInteger getGasLimit() {
+    public long getGasLimit() {
         // TODO - deterministic gas limit
         return GAS_LIMIT;
     }
