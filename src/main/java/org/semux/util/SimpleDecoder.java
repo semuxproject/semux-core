@@ -9,8 +9,6 @@ package org.semux.util;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.semux.core.Amount;
 import org.semux.util.exception.SimpleCodecException;
