@@ -29,7 +29,6 @@ public class SemuxTransaction implements Transaction {
 
     @Override
     public byte[] getFrom() {
-
         return transaction.getFrom();
     }
 
@@ -45,7 +44,6 @@ public class SemuxTransaction implements Transaction {
 
     @Override
     public BigInteger getValue() {
-
         return transaction.getValue().getBigInteger();
     }
 
