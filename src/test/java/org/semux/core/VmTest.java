@@ -77,10 +77,10 @@ public class VmTest {
                 Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20));
 
         byte[] data = Bytes.random(16);
-        Amount gasLimit = Unit.NANO_SEM.of(30000);
-        Amount gasPrice = Unit.NANO_SEM.of(1);
+        long gas = 30000;
+        long gasPrice = 1;
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gasLimit, gasPrice);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);
         assertTrue(tx.validate(network));
 
@@ -123,10 +123,10 @@ public class VmTest {
         BlockHeader bh = new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
                 Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20));
 
-        Amount gasLimit = Unit.NANO_SEM.of(60000);
-        Amount gasPrice = Unit.NANO_SEM.of(1);
+        long gas = 60000;
+        long gasPrice = 1;
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gasLimit, gasPrice);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);
         assertTrue(tx.validate(network));
 

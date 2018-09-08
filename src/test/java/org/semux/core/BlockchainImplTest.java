@@ -56,7 +56,7 @@ public class BlockchainImplTest {
     private byte[] data = Bytes.of("test");
     private long timestamp = TimeUtil.currentTimeMillis() - 60 * 1000;
     private Transaction tx = new Transaction(network, TransactionType.TRANSFER, to, value, fee, nonce, timestamp,
-            data, Amount.ZERO, Amount.ZERO)
+            data)
                     .sign(key);
     private TransactionResult res = new TransactionResult(true);
 
@@ -249,7 +249,7 @@ public class BlockchainImplTest {
     @Test
     public void testGetTransactionsSelfTx() {
         Transaction selfTx = new Transaction(network, TransactionType.TRANSFER, key.toAddress(), value, fee, nonce,
-                timestamp, data, Amount.ZERO, Amount.ZERO).sign(key);
+                timestamp, data).sign(key);
         Block block = createBlock(
                 1,
                 Collections.singletonList(selfTx),

@@ -40,7 +40,7 @@ public class BlockTest {
 
     private Transaction tx = new Transaction(Network.DEVNET, TransactionType.TRANSFER, Bytes.random(20), ZERO,
             config.minTransactionFee(),
-            1, TimeUtil.currentTimeMillis(), Bytes.EMPTY_BYTES, Amount.ZERO, Amount.ZERO).sign(new Key());
+            1, TimeUtil.currentTimeMillis(), Bytes.EMPTY_BYTES).sign(new Key());
     private TransactionResult res = new TransactionResult(true);
     private List<Transaction> transactions = Collections.singletonList(tx);
     private List<TransactionResult> results = Collections.singletonList(res);

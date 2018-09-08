@@ -70,8 +70,7 @@ public class CorePerformanceTest {
             long timestamp = TimeUtil.currentTimeMillis();
             byte[] data = Bytes.random(16);
 
-            Transaction tx = new Transaction(Network.DEVNET, type, to, value, fee, nonce, timestamp, data, Amount.ZERO,
-                    Amount.ZERO);
+            Transaction tx = new Transaction(Network.DEVNET, type, to, value, fee, nonce, timestamp, data);
             tx.sign(key);
             txs.add(tx);
         }

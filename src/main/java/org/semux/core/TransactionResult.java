@@ -101,7 +101,7 @@ public class TransactionResult {
     /**
      * Gas used
      */
-    protected Amount gasUsed;
+    protected long gasUsed;
 
     /**
      * Error message for API/GUI, not sent over the network.
@@ -115,7 +115,7 @@ public class TransactionResult {
      * @param output
      * @param logs
      */
-    public TransactionResult(boolean success, byte[] output, List<byte[]> logs, Amount gasUsed) {
+    public TransactionResult(boolean success, byte[] output, List<byte[]> logs, long gasUsed) {
         super();
         this.success = success;
         this.returns = output;
@@ -129,7 +129,7 @@ public class TransactionResult {
      * @param success
      */
     public TransactionResult(boolean success) {
-        this(success, Bytes.EMPTY_BYTES, new ArrayList<>(), Amount.ZERO);
+        this(success, Bytes.EMPTY_BYTES, new ArrayList<>(), 0);
     }
 
     /**
@@ -179,11 +179,11 @@ public class TransactionResult {
         this.error = error;
     }
 
-    public Amount getGasUsed() {
+    public Long getGasUsed() {
         return gasUsed;
     }
 
-    public void setGasUsed(Amount gasUsed) {
+    public void setGasUsed(long gasUsed) {
         this.gasUsed = gasUsed;
     }
 
@@ -196,7 +196,7 @@ public class TransactionResult {
             enc.writeBytes(log);
         }
         // todo - add fork activated check
-        enc.writeAmount(gasUsed);
+        enc.writeLong(gasUsed);
 
         return enc.toBytes();
     }
@@ -210,10 +210,10 @@ public class TransactionResult {
         for (int i = 0; i < n; i++) {
             logs.add(dec.readBytes());
         }
-        Amount gasUsed = Amount.ZERO;
+        long gasUsed = 0;
         // todo - add fork activation check
         try {
-            gasUsed = dec.readAmount();
+            gasUsed = dec.readLong();
         } catch (Exception e) {
             // old blocks won't have this field
         }
@@ -224,6 +224,6 @@ public class TransactionResult {
     @Override
     public String toString() {
         return "TransactionResult [success=" + success + ", output=" + Arrays.toString(returns) + ", # logs="
-                + logs.size() + ", gasUsed=" + gasUsed.toString() + "]";
+                + logs.size() + ", gasUsed=" + gasUsed + "]";
     }
 }

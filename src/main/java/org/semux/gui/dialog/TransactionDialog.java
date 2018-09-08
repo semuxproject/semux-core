@@ -59,7 +59,7 @@ public class TransactionDialog extends JDialog {
         JLabel timestamp = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
         timestamp.setName("timestampText");
 
-        JLabel gasUsed = new JLabel(SwingUtil.formatNumber(result.getGasUsed().getNano()));
+        JLabel gasUsed = new JLabel(SwingUtil.formatNumber(result.getGasUsed()));
         gasUsed.setName("gasUsedText");
         JTextArea output = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(result.getReturns()));
         output.setName("outputText");

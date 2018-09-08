@@ -97,7 +97,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      */
     public PendingManager(Kernel kernel) {
         this.kernel = kernel;
-        this.blockStore =  new SemuxBlockStore(kernel.getBlockchain());
+        this.blockStore = new SemuxBlockStore(kernel.getBlockchain());
 
         this.pendingAS = kernel.getBlockchain().getAccountState().track();
         this.pendingDS = kernel.getBlockchain().getDelegateState().track();

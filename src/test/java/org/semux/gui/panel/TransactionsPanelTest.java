@@ -72,7 +72,7 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
                 MILLI_SEM.of(10),
                 0,
                 TimeUtil.currentTimeMillis(),
-                Bytes.EMPTY_BYTES, Amount.ZERO, Amount.ZERO);
+                Bytes.EMPTY_BYTES);
         tx.sign(new Key());
         acc.setTransactions(Collections.singletonList(tx));
 

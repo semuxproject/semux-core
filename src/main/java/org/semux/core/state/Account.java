@@ -9,6 +9,7 @@ package org.semux.core.state;
 import org.semux.core.Amount;
 import org.semux.crypto.Hex;
 import org.semux.util.ByteArray;
+import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
@@ -17,7 +18,6 @@ import java.util.Map;
 
 public class Account {
 
-    private static final byte[] EMPTY = new byte[0];
     private final byte[] address;
     private Amount available;
     private Amount locked;
@@ -41,7 +41,7 @@ public class Account {
 
         // default values
         storage = new HashMap<>();
-        code = EMPTY;
+        code = Bytes.EMPTY_BYTES;
     }
 
     public Account(byte[] address, Amount available, Amount locked, long nonce, byte[] code,

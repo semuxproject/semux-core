@@ -45,9 +45,9 @@ public class Transaction {
 
     private Signature signature;
 
-    private final Amount gasLimit;
+    private final long gas;
 
-    private final Amount gasPrice;
+    private final long gasPrice;
 
     /**
      * Create a new transaction.
@@ -60,11 +60,11 @@ public class Transaction {
      * @param nonce
      * @param timestamp
      * @param data
-     * @param gasLimit
+     * @param gas
      * @param gasPrice
      */
     public Transaction(Network network, TransactionType type, byte[] to, Amount value, Amount fee, long nonce,
-            long timestamp, byte[] data, Amount gasLimit, Amount gasPrice) {
+            long timestamp, byte[] data, long gas, long gasPrice) {
         this.networkId = network.id();
         this.type = type;
         this.to = to;
@@ -73,7 +73,7 @@ public class Transaction {
         this.nonce = nonce;
         this.timestamp = timestamp;
         this.data = data;
-        this.gasLimit = gasLimit;
+        this.gas = gas;
         this.gasPrice = gasPrice;
 
         SimpleEncoder enc = new SimpleEncoder();
@@ -87,8 +87,8 @@ public class Transaction {
         enc.writeBytes(data);
 
         if (TransactionType.CALL == type || TransactionType.CREATE == type) {
-            enc.writeAmount(gasLimit);
-            enc.writeAmount(gasPrice);
+            enc.writeLong(gas);
+            enc.writeLong(gasPrice);
         }
         this.encoded = enc.toBytes();
         this.hash = Hash.h256(encoded);
@@ -114,11 +114,16 @@ public class Transaction {
         this.timestamp = decodedTx.timestamp;
         this.data = decodedTx.data;
 
-        this.gasLimit = decodedTx.gasLimit;
+        this.gas = decodedTx.gas;
         this.gasPrice = decodedTx.gasPrice;
 
         this.encoded = encoded;
         this.signature = Signature.fromBytes(signature);
+    }
+
+    public Transaction(Network network, TransactionType type, byte[] toAddress, Amount value, Amount fee, long nonce,
+            long timestamp, byte[] data) {
+        this(network, type, toAddress, value, fee, nonce, timestamp, data, 0, 0);
     }
 
     /**
@@ -262,12 +267,11 @@ public class Transaction {
         return encoded;
     }
 
-    public Amount getGasLimit() {
-        return gasLimit;
+    public long getGas() {
+        return gas;
     }
 
-    // todo - this is gasPrice, not limit
-    public Amount getGasPrice() {
+    public long getGasPrice() {
         return gasPrice;
     }
 
@@ -290,17 +294,17 @@ public class Transaction {
         long timestamp = decoder.readLong();
         byte[] data = decoder.readBytes();
 
-        Amount gasPrice = Amount.ZERO;
-        Amount gasLimit = Amount.ZERO;
+        long gasPrice = 0;
+        long gas = 0;
 
         TransactionType transactionType = TransactionType.of(type);
         if (TransactionType.CALL == transactionType || TransactionType.CREATE == transactionType) {
-            gasPrice = decoder.readAmount();
-            gasLimit = decoder.readAmount();
+            gasPrice = decoder.readLong();
+            gas = decoder.readLong();
         }
 
         return new Transaction(Network.of(networkId), transactionType, to, value, fee, nonce, timestamp, data,
-                gasPrice, gasLimit);
+                gasPrice, gas);
     }
 
     /**

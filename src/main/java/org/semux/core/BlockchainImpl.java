@@ -399,7 +399,7 @@ public class BlockchainImpl implements Blockchain {
                     Amount.ZERO,
                     block.getNumber(),
                     block.getTimestamp(),
-                    Bytes.EMPTY_BYTES, Amount.ZERO, Amount.ZERO);
+                    Bytes.EMPTY_BYTES);
             tx.sign(Constants.COINBASE_KEY);
             indexDB.put(Bytes.merge(TYPE_TRANSACTION_HASH, tx.getHash()), tx.toBytes());
             indexDB.put(Bytes.merge(TYPE_COINBASE_TRANSACTION_HASH, Bytes.of(block.getNumber())), tx.getHash());

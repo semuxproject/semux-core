@@ -250,7 +250,7 @@ public class TransactionExecutor {
             // System.out.println(logs.toString());
             // }
             // result.setLogs(null);
-            result.setGasUsed(Unit.NANO_SEM.of(summary.getGasUsed().longValue()));
+            result.setGasUsed(summary.getGasUsed().longValue());
             result.setReturns(summary.getReturnData());
             result.setSuccess(!summary.isFailed());
         }

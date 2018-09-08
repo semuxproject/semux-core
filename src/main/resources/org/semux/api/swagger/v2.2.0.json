@@ -1112,9 +1112,9 @@
             "pattern" : "^\\d+$"
           },
           {
-            "name" : "gasLimit",
+            "name" : "gas",
             "in" : "query",
-            "description" : "The gas limit",
+            "description" : "The gas limit for the call",
             "required" : true,
             "type" : "string",
             "format" : "int64",
@@ -1217,9 +1217,9 @@
             "pattern" : "^\\d+$"
           },
           {
-            "name" : "gasLimit",
+            "name" : "gas",
             "in" : "query",
-            "description" : "The gas limit",
+            "description" : "The gas limit for the call",
             "required" : true,
             "type" : "string",
             "format" : "int64",

@@ -31,8 +31,7 @@ public class TransactionMessageTest {
         long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = Bytes.of("data");
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, Amount.ZERO,
-                Amount.ZERO);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
         tx.sign(new Key());
 
         TransactionMessage msg = new TransactionMessage(tx);
