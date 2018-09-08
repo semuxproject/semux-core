@@ -128,12 +128,4 @@ public class SimpleEncoder {
             }
         }
     }
-
-    public void writeByteMap(Map<ByteArray, byte[]> byteMap) {
-        writeSize(byteMap.size());
-        for (Map.Entry<ByteArray, byte[]> entry : byteMap.entrySet()) {
-            writeBytes(entry.getKey().getData());
-            writeBytes(entry.getValue());
-        }
-    }
 }
