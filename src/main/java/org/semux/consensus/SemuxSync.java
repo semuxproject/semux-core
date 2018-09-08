@@ -39,6 +39,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.config.Constants;
@@ -62,6 +63,7 @@ import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
 import org.semux.util.ByteArray;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,6 +104,7 @@ public class SemuxSync implements SyncManager {
     private Config config;
 
     private Blockchain chain;
+    private BlockStore blockStore;
     private ChannelManager channelMgr;
 
     // task queues
@@ -131,6 +134,7 @@ public class SemuxSync implements SyncManager {
         this.config = kernel.getConfig();
 
         this.chain = kernel.getBlockchain();
+        this.blockStore = new SemuxBlockStore(chain);
         this.channelMgr = kernel.getChannelManager();
 
         this.DOWNLOAD_TIMEOUT = config.syncDownloadTimeout();
@@ -550,7 +554,7 @@ public class SemuxSync implements SyncManager {
         }
 
         // [3] evaluate transactions
-        TransactionExecutor transactionExecutor = new TransactionExecutor(config, chain);
+        TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
         List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot,
                 block.getHeader());
         if (!Block.validateResults(header, results)) {

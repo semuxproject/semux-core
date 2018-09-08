@@ -22,6 +22,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.stream.Collectors;
 
+import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
 import org.semux.Network;
 import org.semux.config.Config;
@@ -61,6 +62,7 @@ import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SystemUtil;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,6 +114,8 @@ public class SemuxBft implements BftManager {
     protected Config config;
 
     protected Blockchain chain;
+    protected BlockStore blockStore;
+
     protected ChannelManager channelMgr;
 
     protected Status status;
@@ -137,6 +141,7 @@ public class SemuxBft implements BftManager {
         this.config = kernel.getConfig();
 
         this.chain = kernel.getBlockchain();
+        this.blockStore = new SemuxBlockStore(chain);
         this.activatedForks = this.chain.getActivatedForks();
         this.channelMgr = kernel.getChannelManager();
         this.pendingMgr = kernel.getPendingManager();
@@ -790,7 +795,7 @@ public class SemuxBft implements BftManager {
         // for any VM requests, actually need to execute them
         AccountState as = accountState.track();
         DelegateState ds = delegateState.track();
-        TransactionExecutor exec = new TransactionExecutor(config, chain);
+        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
         // todo - should pass around SemuxHeader instead blockHeader - TEMP HACK
         BlockHeader tempHeader = new BlockHeader(height, coinbase.toAddress(), prevHash, timestamp, new byte[0],
                 new byte[0], new byte[0], data);
@@ -896,7 +901,7 @@ public class SemuxBft implements BftManager {
 
         AccountState as = accountState.track();
         DelegateState ds = delegateState.track();
-        TransactionExecutor exec = new TransactionExecutor(config, chain);
+        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
 
         // [3] evaluate transactions
         List<TransactionResult> results = exec.execute(transactions, as, ds, header);
@@ -959,7 +964,7 @@ public class SemuxBft implements BftManager {
 
         AccountState as = chain.getAccountState().track();
         DelegateState ds = chain.getDelegateState().track();
-        TransactionExecutor exec = new TransactionExecutor(config, chain);
+        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
 
         // [3] evaluate all transactions
         List<TransactionResult> results = exec.execute(transactions, as, ds, block.getHeader());

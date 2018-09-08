@@ -6,7 +6,6 @@
  */
 package org.semux.core;
 
-import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.TransactionSummary;
@@ -43,7 +42,7 @@ public class TransactionExecutor {
         }
     }
 
-    private Blockchain blockchain;
+    private BlockStore blockStore;
     private static ByzantiumConfig vmConfig = new ByzantiumConfig();
 
     /**
@@ -72,9 +71,9 @@ public class TransactionExecutor {
      * 
      * @param config
      */
-    public TransactionExecutor(Config config, Blockchain blockchain) {
+    public TransactionExecutor(Config config, BlockStore blockStore) {
         this.config = config;
-        this.blockchain = blockchain;
+        this.blockStore = blockStore;
     }
 
     /**
@@ -234,7 +233,6 @@ public class TransactionExecutor {
         SemuxTransaction transaction = new SemuxTransaction(tx);
         SemuxBlock block = new SemuxBlock(bh);
         Repository repository = new SemuxRepository(as);
-        BlockStore blockStore = new SemuxBlockStore(blockchain);
         ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
         long gasUsedInBlock = 0l; // todo - use this
         boolean localCall = false; // todo - what is a localCall?

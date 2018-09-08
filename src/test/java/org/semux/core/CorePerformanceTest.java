@@ -24,6 +24,7 @@ import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +84,7 @@ public class CorePerformanceTest {
         logger.info("Perf_transaction_1: {} μs/tx", (t2 - t1) / 1_000 / repeat);
 
         Blockchain chain = new BlockchainImpl(config, temporaryDBFactory);
-        TransactionExecutor exec = new TransactionExecutor(config, chain);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
 
         t1 = System.nanoTime();
         exec.execute(txs, chain.getAccountState().track(), chain.getDelegateState().track(),

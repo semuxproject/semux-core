@@ -18,6 +18,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -27,6 +28,7 @@ import org.semux.util.ArrayUtil;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +64,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     private static final int PROCESSED_MAX_SIZE = 32 * 1024;
 
     private final Kernel kernel;
+    private final BlockStore blockStore;
     private AccountState pendingAS;
     private DelegateState pendingDS;
 
@@ -94,6 +97,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      */
     public PendingManager(Kernel kernel) {
         this.kernel = kernel;
+        this.blockStore =  new SemuxBlockStore(kernel.getBlockchain());
 
         this.pendingAS = kernel.getBlockchain().getAccountState().track();
         this.pendingDS = kernel.getBlockchain().getDelegateState().track();
@@ -330,7 +334,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             // execute transactions
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
-            TransactionResult result = new TransactionExecutor(kernel.getConfig(), kernel.getBlockchain()).execute(tx,
+            TransactionResult result = new TransactionExecutor(kernel.getConfig(), blockStore).execute(tx,
                     as, ds, null);
 
             if (result.isSuccess()) {

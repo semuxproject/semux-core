@@ -31,6 +31,7 @@ import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlockStore;
 
 public class TransactionExecutorTest {
 
@@ -51,7 +52,7 @@ public class TransactionExecutorTest {
         chain = new BlockchainImpl(config, temporaryDBFactory);
         as = chain.getAccountState();
         ds = chain.getDelegateState();
-        exec = new TransactionExecutor(config, chain);
+        exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
         network = config.network();
     }
 

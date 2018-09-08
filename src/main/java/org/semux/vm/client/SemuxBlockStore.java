@@ -23,6 +23,6 @@ public class SemuxBlockStore implements BlockStore {
 
     @Override
     public byte[] getBlockHashByNumber(long index) {
-        return blockchain.getBlock(index).getHash();
+        return blockchain.getBlockHeader(index).getHash();
     }
 }

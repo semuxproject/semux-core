@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.ethereum.vm.client.BlockStore;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.consensus.ValidatorActivatedFork;
@@ -43,6 +44,7 @@ import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,6 +99,8 @@ public class BlockchainImpl implements Blockchain {
     protected static final byte TYPE_BLOCK_TRANSACTIONS = 0x01;
     protected static final byte TYPE_BLOCK_RESULTS = 0x02;
     protected static final byte TYPE_BLOCK_VOTES = 0x03;
+
+    private BlockStore blockStore = new SemuxBlockStore(this);
 
     protected enum StatsType {
         FORGED, HIT, MISSED
@@ -809,7 +813,7 @@ public class BlockchainImpl implements Blockchain {
 
         public void applyBlock(Block block) {
             // [0] execute transactions against local state
-            TransactionExecutor transactionExecutor = new TransactionExecutor(config, this);
+            TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
             transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState(),
                     block.getHeader());
 
