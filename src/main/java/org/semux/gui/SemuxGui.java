@@ -30,7 +30,6 @@ import org.semux.Launcher;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.exception.ConfigException;
-import org.semux.consensus.ActivatedForks;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.Transaction;
@@ -493,7 +492,7 @@ public class SemuxGui extends Launcher {
 
         // update validators
         model.setValidators(validators);
-        ActivatedForks.setActivatedForks(chain.getActivatedForks());
+        model.setActivatedForks(chain.getActivatedForks());
 
         // update active peers
         Map<String, Peer> activePeers = new HashMap<>();

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
@@ -130,12 +131,14 @@ public class SemuxBft implements BftManager {
     protected VoteSet precommitVotes;
     protected VoteSet commitVotes;
 
+    protected Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks;
+
     public SemuxBft(Kernel kernel) {
         this.kernel = kernel;
         this.config = kernel.getConfig();
 
         this.chain = kernel.getBlockchain();
-        ActivatedForks.setActivatedForks(this.chain.getActivatedForks());
+        this.activatedForks = this.chain.getActivatedForks();
         this.channelMgr = kernel.getChannelManager();
         this.pendingMgr = kernel.getPendingManager();
         this.sync = kernel.getSyncManager();
@@ -279,7 +282,7 @@ public class SemuxBft implements BftManager {
         proposal = null;
 
         // activate forks
-        ActivatedForks.setActivatedForks(chain.getActivatedForks());
+        activatedForks = chain.getActivatedForks();
         activateForks();
 
         // update validators
@@ -672,19 +675,19 @@ public class SemuxBft implements BftManager {
      */
     private void activateForks() {
         if (config.forkUniformDistributionEnabled()
-                && !ActivatedForks.isActivated(UNIFORM_DISTRIBUTION)
+                && !activatedForks.containsKey(UNIFORM_DISTRIBUTION)
                 && height <= UNIFORM_DISTRIBUTION.activationDeadline
                 && chain.forkActivated(height, UNIFORM_DISTRIBUTION)) {
-            ActivatedForks.addFork(UNIFORM_DISTRIBUTION,
+            activatedForks.put(UNIFORM_DISTRIBUTION,
                     new ValidatorActivatedFork.Activation(UNIFORM_DISTRIBUTION, height));
             logger.info("Fork UNIFORM_DISTRIBUTION activated at height {}", height);
         }
 
         if (config.forkVirtualMachineEnabled()
-                && !ActivatedForks.isActivated(VIRTUAL_MACHINE)
+                && !activatedForks.containsKey(VIRTUAL_MACHINE)
                 && height <= VIRTUAL_MACHINE.activationDeadline
                 && chain.forkActivated(height, VIRTUAL_MACHINE)) {
-            ActivatedForks.addFork(VIRTUAL_MACHINE,
+            activatedForks.put(VIRTUAL_MACHINE,
                     new ValidatorActivatedFork.Activation(VIRTUAL_MACHINE, height));
             logger.info("Fork VIRTUAL_MACHINE activated at height {}", height);
         }
@@ -835,7 +838,7 @@ public class SemuxBft implements BftManager {
         }
 
         // do not continue signaling after fork activation to save space
-        if (ActivatedForks.isActivated(UNIFORM_DISTRIBUTION)) {
+        if (activatedForks.containsKey(UNIFORM_DISTRIBUTION)) {
             return false;
         }
 
@@ -856,7 +859,7 @@ public class SemuxBft implements BftManager {
         }
 
         // do not continue signaling after fork activation to save space
-        if (ActivatedForks.isActivated(VIRTUAL_MACHINE)) {
+        if (activatedForks.containsKey(VIRTUAL_MACHINE)) {
             return false;
         }
 
