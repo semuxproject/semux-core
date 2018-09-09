@@ -27,6 +27,7 @@ public class DevnetConfig extends AbstractConfig {
 
         // all forks should be activated upon startup.
         initForkActivationCheckpoints.put(ValidatorActivatedFork.UNIFORM_DISTRIBUTION, 1L);
+        initForkActivationCheckpoints.put(ValidatorActivatedFork.VIRTUAL_MACHINE, 1L);
 
         forkActivationCheckpoints = MapUtils.unmodifiableMap(initForkActivationCheckpoints);
     }
