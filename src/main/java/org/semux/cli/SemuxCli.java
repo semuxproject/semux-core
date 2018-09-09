@@ -358,7 +358,7 @@ public class SemuxCli extends Launcher {
     }
 
     protected Wallet loadWallet() {
-        return new Wallet(new File(getDataDir(), "wallet.data"));
+        return new Wallet(new File(getDataDir(), "wallet.data"), getConfig().network());
     }
 
 }

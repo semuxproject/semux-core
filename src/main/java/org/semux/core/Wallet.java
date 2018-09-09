@@ -10,7 +10,6 @@ import static org.semux.util.FileUtil.POSIX_SECURED_PERMISSIONS;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -30,6 +29,7 @@ import com.github.orogvany.bip32.wallet.Bip44;
 import com.github.orogvany.bip32.wallet.CoinType;
 import com.github.orogvany.bip32.wallet.HdAddress;
 import org.bouncycastle.crypto.generators.BCrypt;
+import org.semux.config.Config;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
@@ -55,8 +55,9 @@ public class Wallet {
     private static final Bip44 BIP_44 = new Bip44();
 
     private final File file;
+    private final org.semux.Network network;
 
-    //hd wallet key
+    // hd wallet key
     private byte[] hdSeed;
     private int numHdAccounts = 0;
 
@@ -71,8 +72,9 @@ public class Wallet {
      * @param file
      *            the wallet file
      */
-    public Wallet(File file) {
+    public Wallet(File file, org.semux.Network network) {
         this.file = file;
+        this.network = network;
     }
 
     /**
@@ -124,8 +126,8 @@ public class Wallet {
                 Set<Key> newAccounts;
                 Map<ByteArray, String> newAliases = new HashMap<>();
 
-                //initialize new HD wallet if not created.
-                if(version < 4) {
+                // initialize new HD wallet if not created.
+                if (version < 4) {
                     logger.info("Creating new HD Wallet!");
                     hdSeed = new byte[64];
                     new SecureRandom().nextBytes(hdSeed);
@@ -185,14 +187,24 @@ public class Wallet {
 
     private List<Key> getHdKeys(byte[] hdSeed, int numAccounts) {
         List<Key> hdKeys = new ArrayList<>();
-        //todo - determine testnet v mainnet
-        HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, Network.mainnet, CoinType.semux);
+        HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, getWalletNetwork(network), CoinType.semux);
         for (int i = 0; i < numAccounts; i++) {
             HdAddress address = BIP_44.getAddress(rootAddress, i);
             hdKeys.add(Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey()));
         }
         numHdAccounts = hdKeys.size();
         return hdKeys;
+    }
+
+    private Network getWalletNetwork(org.semux.Network network) {
+        switch (network) {
+        case DEVNET:
+        case TESTNET:
+            return Network.testnet;
+        case MAINNET:
+            return Network.mainnet;
+        }
+        throw new IllegalArgumentException("Unknown network.");
     }
 
     /**
@@ -422,7 +434,6 @@ public class Wallet {
         }
     }
 
-
     /**
      * Adds a new account to the wallet.
      *
@@ -646,5 +657,9 @@ public class Wallet {
         }
 
         return numImportedAddresses;
+    }
+
+    public org.semux.Network getNetwork() {
+        return network;
     }
 }

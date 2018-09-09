@@ -187,7 +187,7 @@ public class SemuxGui extends Launcher {
         parseOptions(args);
 
         // create/unlock wallet
-        Wallet wallet = new Wallet(new File(getDataDir(), "wallet.data"));
+        Wallet wallet = new Wallet(new File(getDataDir(), "wallet.data"), getConfig().network());
         if (!wallet.exists()) {
             showWelcome(wallet);
         } else {

@@ -96,8 +96,7 @@ public class Key {
         this.pk = new EdDSAPublicKey(new EdDSAPublicKeySpec(sk.getA(), sk.getParams()));
     }
 
-    private Key(EdDSAPrivateKey sk, EdDSAPublicKey pk)
-    {
+    private Key(EdDSAPrivateKey sk, EdDSAPublicKey pk) {
         this.sk = sk;
         this.pk = pk;
     }
@@ -217,8 +216,7 @@ public class Key {
         return verify(message, sig);
     }
 
-    public static Key fromRawPrivateKey(byte[] privateKey)
-    {
+    public static Key fromRawPrivateKey(byte[] privateKey) {
         EdDSAPrivateKey sk = new EdDSAPrivateKey(new EdDSAPrivateKeySpec(privateKey, ED25519SPEC));
         EdDSAPublicKey pk = new EdDSAPublicKey(new EdDSAPublicKeySpec(sk.getA(), sk.getParams()));
         return new Key(sk, pk);

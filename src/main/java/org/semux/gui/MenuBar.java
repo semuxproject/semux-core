@@ -26,6 +26,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.semux.Network;
 import org.semux.config.Constants;
 import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
@@ -200,7 +201,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
             String pwd = new InputDialog(frame, GuiMessages.get("EnterPassword"), true).showAndGet();
 
             if (pwd != null) {
-                Wallet w = new Wallet(file);
+                Wallet w = new Wallet(file, Network.DEVNET);
                 if (!w.unlock(pwd)) {
                     JOptionPane.showMessageDialog(frame, GuiMessages.get("UnlockFailed"));
                     return;
