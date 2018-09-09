@@ -29,8 +29,6 @@ import com.github.orogvany.bip32.Network;
 import com.github.orogvany.bip32.wallet.Bip44;
 import com.github.orogvany.bip32.wallet.CoinType;
 import com.github.orogvany.bip32.wallet.HdAddress;
-import com.github.orogvany.bip32.wallet.key.HdPrivateKey;
-import com.github.orogvany.bip32.wallet.key.HdPublicKey;
 import org.bouncycastle.crypto.generators.BCrypt;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Aes;
@@ -187,20 +185,13 @@ public class Wallet {
 
     private List<Key> getHdKeys(byte[] hdSeed, int numAccounts) {
         List<Key> hdKeys = new ArrayList<>();
-        try {
-            //todo - determine testnet v mainnet
-            HdAddress<HdPrivateKey, HdPublicKey> rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, Network.mainnet, CoinType.semux);
-            for(int i =0; i < numAccounts; i++)
-            {
-                HdAddress address = BIP_44.getAddress(rootAddress, i);
-                hdKeys.add(Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey()));
-            }
-            numHdAccounts = hdKeys.size();
-        } catch (UnsupportedEncodingException e) {
-            logger.error("Unable to retrieve root address from seed.");
-            SystemUtil.exit(SystemUtil.Code.INVALID_PRIVATE_KEY);
+        //todo - determine testnet v mainnet
+        HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, Network.mainnet, CoinType.semux);
+        for (int i = 0; i < numAccounts; i++) {
+            HdAddress address = BIP_44.getAddress(rootAddress, i);
+            hdKeys.add(Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey()));
         }
-
+        numHdAccounts = hdKeys.size();
         return hdKeys;
     }
 
@@ -445,19 +436,12 @@ public class Wallet {
         requireUnlocked();
 
         synchronized (accounts) {
-            //will update BIP44 to not throw exception, as we supply all encodings
-            try {
-                HdAddress<HdPrivateKey, HdPublicKey> rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, Network.mainnet, CoinType.semux);
-                HdAddress address = BIP_44.getAddress(rootAddress, numHdAccounts++);
-                Key newKey = Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey());
-                ByteArray to = ByteArray.of(newKey.toAddress());
-                accounts.put(to, newKey);
-                return newKey;
-            } catch (UnsupportedEncodingException e) {
-                logger.error("Unable to add new HD key");
-                SystemUtil.exit(SystemUtil.Code.INVALID_PRIVATE_KEY);
-                return null;
-            }
+            HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, Network.mainnet, CoinType.semux);
+            HdAddress address = BIP_44.getAddress(rootAddress, numHdAccounts++);
+            Key newKey = Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey());
+            ByteArray to = ByteArray.of(newKey.toAddress());
+            accounts.put(to, newKey);
+            return newKey;
         }
     }
 
