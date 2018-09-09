@@ -266,7 +266,7 @@ public class TransactionBuilder {
                 fee,
                 nonce != null ? nonce : kernel.getPendingManager().getNonce(account.toAddress()),
                 timestamp != null ? timestamp : TimeUtil.currentTimeMillis(),
-                data, gasPrice, gas);
+                data, gas, gasPrice);
     }
 
     public Transaction buildSigned() {

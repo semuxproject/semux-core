@@ -214,7 +214,7 @@ public abstract class AbstractConfig implements Config {
                     .mod(BigInteger.valueOf(size))
                     .intValue();
             subView = subView.add(BigInteger.ONE);
-        } while (deterministicRand == prevDeterministicRand);
+        } while (deterministicRand == prevDeterministicRand && size > 1);
 
         return deterministicRand;
     }

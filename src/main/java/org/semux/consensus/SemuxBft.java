@@ -976,8 +976,7 @@ public class SemuxBft implements BftManager {
         // [4] evaluate votes, skipped
 
         // [5] apply block reward and tx fees
-        Amount txsReward = block.getTransactions().stream().map(Transaction::getFee).reduce(ZERO, Amount::sum);
-        Amount reward = sum(config.getBlockReward(number), txsReward);
+        Amount reward = Block.getBlockReward(block, config);
 
         if (reward.gt0()) {
             as.adjustAvailable(block.getCoinbase(), reward);

@@ -370,11 +370,10 @@ public class BlockchainImpl implements Blockchain {
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
         List<Pair<Integer, Integer>> txIndices = block.getTransactionIndices();
-        Amount reward = config.getBlockReward(number);
+        Amount reward = Block.getBlockReward(block, config);
 
         for (int i = 0; i < txs.size(); i++) {
             Transaction tx = txs.get(i);
-            reward = Amount.sum(reward, tx.getFee());
 
             SimpleEncoder enc = new SimpleEncoder();
             enc.writeLong(number);
@@ -818,10 +817,8 @@ public class BlockchainImpl implements Blockchain {
                     block.getHeader());
 
             // [1] apply block reward and tx fees
-            Amount reward = config.getBlockReward(block.getNumber());
-            for (Transaction tx : block.getTransactions()) {
-                reward = Amount.sum(reward, tx.getFee());
-            }
+            Amount reward = Block.getBlockReward(block, config);
+
             if (reward.gt0()) {
                 getAccountState().adjustAvailable(block.getCoinbase(), reward);
             }

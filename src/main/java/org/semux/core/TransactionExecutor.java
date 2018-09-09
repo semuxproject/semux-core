@@ -19,7 +19,6 @@ import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.util.Bytes;
 import org.semux.vm.client.SemuxBlock;
-import org.semux.vm.client.SemuxBlockStore;
 import org.semux.vm.client.SemuxRepository;
 import org.semux.vm.client.SemuxTransaction;
 
@@ -204,14 +203,26 @@ public class TransactionExecutor {
 
             case CALL:
             case CREATE:
-                // workaround for pending manager so it doesn't execute these
-                if (blockHeader == null) {
-                    result.setSuccess(true);
-                } else if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
-                    executeVmTransaction(result, tx, as, blockHeader);
+                long maxGasFee = tx.getGas() * tx.getGasPrice();
+                Amount maxCost = sum(sum(value, fee), Unit.NANO_SEM.of(maxGasFee));
+                if (maxCost.lte(available)) {
+                    // todo - do these calls still use fees?
+                    as.adjustAvailable(from, neg(sum(value, fee)));
+
+                    // we charge gas later
+
+                    // workaround for pending manager so it doesn't execute these
+                    if (blockHeader == null) {
+                        result.setSuccess(true);
+                    } else if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
+                        executeVmTransaction(result, tx, as, blockHeader);
+                    } else {
+                        result.setError(Error.INSUFFICIENT_AVAILABLE);
+                    }
                 } else {
                     result.setError(Error.INSUFFICIENT_AVAILABLE);
                 }
+
                 break;
 
             default:

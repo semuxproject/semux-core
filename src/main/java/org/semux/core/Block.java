@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Network;
+import org.semux.config.Config;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key.Signature;
 import org.semux.util.MerkleUtil;
@@ -20,6 +21,9 @@ import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Amount.sum;
 
 /**
  * Represents a block in the blockchain.
@@ -211,6 +215,33 @@ public class Block {
         // validate results root
         byte[] root = MerkleUtil.computeResultsRoot(results);
         return Arrays.equals(root, header.getResultsRoot());
+    }
+
+    public static Amount getBlockReward(Block block, Config config) {
+
+        Amount txsReward = block.getTransactions().stream().map(Transaction::getFee).reduce(ZERO, Amount::sum);
+        Amount gasReward = getGasReward(block);
+        Amount reward = sum(sum(config.getBlockReward(block.getNumber()), txsReward), gasReward);
+
+        return reward;
+    }
+
+    /**
+     * Retrieve the total gas award for the block
+     * 
+     * @param block
+     * @return
+     */
+    private static Amount getGasReward(Block block) {
+        List<Transaction> transactions = block.getTransactions();
+        List<TransactionResult> results = block.getResults();
+        long sum = 0;
+        for (int i = 0; i < transactions.size(); i++) {
+            Transaction transaction = transactions.get(i);
+            TransactionResult result = results.get(i);
+            sum += (transaction.getGasPrice() * result.getGasUsed());
+        }
+        return Amount.Unit.NANO_SEM.of(sum);
     }
 
     /**

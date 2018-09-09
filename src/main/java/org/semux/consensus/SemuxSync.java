@@ -601,8 +601,7 @@ public class SemuxSync implements SyncManager {
 
     protected boolean applyBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot) {
         // [5] apply block reward and tx fees
-        Amount txsReward = block.getTransactions().stream().map(Transaction::getFee).reduce(ZERO, Amount::sum);
-        Amount reward = sum(config.getBlockReward(block.getNumber()), txsReward);
+        Amount reward = Block.getBlockReward(block, config);
 
         if (reward.gt0()) {
             asSnapshot.adjustAvailable(block.getCoinbase(), reward);
