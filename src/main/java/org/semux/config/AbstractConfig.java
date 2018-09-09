@@ -132,6 +132,7 @@ public abstract class AbstractConfig implements Config {
     // Forks
     // =========================
     protected boolean forkUniformDistributionEnabled = true;
+    protected boolean forkVirtualMachineEnabled = true;
 
     /**
      * Create an {@link AbstractConfig} instance.
@@ -502,6 +503,11 @@ public abstract class AbstractConfig implements Config {
     @Override
     public boolean forkUniformDistributionEnabled() {
         return forkUniformDistributionEnabled;
+    }
+
+    @Override
+    public boolean forkVirtualMachineEnabled() {
+        return forkVirtualMachineEnabled;
     }
 
     protected void init() {

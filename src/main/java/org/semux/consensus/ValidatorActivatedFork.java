@@ -24,6 +24,8 @@ public final class ValidatorActivatedFork implements Comparable<ValidatorActivat
     public static final ValidatorActivatedFork UNIFORM_DISTRIBUTION = new ValidatorActivatedFork((short) 1,
             "UNIFORM_DISTRIBUTION", 1500, 2000, 1000000);
 
+    public static final ValidatorActivatedFork VIRTUAL_MACHINE = new ValidatorActivatedFork((short) 2,
+            "VIRTUAL_MACHINE", 1500, 2000, 1000000);
     /**
      * An unique number of this fork.
      */
@@ -70,6 +72,9 @@ public final class ValidatorActivatedFork implements Comparable<ValidatorActivat
         short forkNumber = simpleDecoder.readShort();
         if (forkNumber == 1) {
             return UNIFORM_DISTRIBUTION;
+        }
+        if (forkNumber == 2) {
+            return VIRTUAL_MACHINE;
         }
         return null;
     }

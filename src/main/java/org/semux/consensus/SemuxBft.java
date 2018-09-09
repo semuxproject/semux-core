@@ -7,11 +7,13 @@
 package org.semux.consensus;
 
 import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
+import static org.semux.consensus.ValidatorActivatedFork.VIRTUAL_MACHINE;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sum;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -686,6 +688,16 @@ public class SemuxBft implements BftManager {
                     new ValidatorActivatedFork.Activation(UNIFORM_DISTRIBUTION, height));
             logger.info("Fork UNIFORM_DISTRIBUTION activated at height {}", height);
         }
+
+        if (config.forkVirtualMachineEnabled()
+                && !activatedForks.containsKey(VIRTUAL_MACHINE)
+                && height <= VIRTUAL_MACHINE.activationDeadline
+                && chain.forkActivated(height, VIRTUAL_MACHINE)) {
+            activatedForks.put(VIRTUAL_MACHINE,
+                    new ValidatorActivatedFork.Activation(VIRTUAL_MACHINE, height));
+            logger.info("Fork VIRTUAL_MACHINE activated at height {}", height);
+        }
+
     }
 
     /**
@@ -781,9 +793,17 @@ public class SemuxBft implements BftManager {
          */
         timestamp = timestamp > parent.getTimestamp() ? timestamp : parent.getTimestamp() + 1;
 
-        // signal UNIFORM_DISTRIBUTION fork
-        byte[] data = signalingUniformDistribution()
-                ? BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(UNIFORM_DISTRIBUTION)).toBytes()
+        // signal forks
+        Set<ValidatorActivatedFork> forks = new HashSet<>();
+        if (signalingUniformDistribution()) {
+            forks.add(UNIFORM_DISTRIBUTION);
+        }
+        if (signalingUniformDistribution()) {
+            forks.add(VIRTUAL_MACHINE);
+        }
+        byte[] data = !forks.isEmpty()
+                ? BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(
+                        forks.toArray(new ValidatorActivatedFork[forks.size()]))).toBytes()
                 : new byte[0];
 
         // fetch pending transactions
@@ -847,6 +867,27 @@ public class SemuxBft implements BftManager {
 
         // signal the fork before its activation deadline
         return height <= UNIFORM_DISTRIBUTION.activationDeadline;
+    }
+
+    /**
+     * Check whether SemuxBFT should be signaling
+     * ${@link ValidatorActivatedFork#UNIFORM_DISTRIBUTION} at current height.
+     *
+     * @return
+     */
+    private boolean signalingVirtualMachine() {
+        // do not signal the fork if this user decides not to participate in the fork
+        if (!config.forkVirtualMachineEnabled()) {
+            return false;
+        }
+
+        // do not continue signaling after fork activation to save space
+        if (activatedForks.containsKey(VIRTUAL_MACHINE)) {
+            return false;
+        }
+
+        // signal the fork before its activation deadline
+        return height <= VIRTUAL_MACHINE.activationDeadline;
     }
 
     /**

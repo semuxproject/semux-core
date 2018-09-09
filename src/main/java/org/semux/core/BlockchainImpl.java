@@ -7,6 +7,7 @@
 package org.semux.core;
 
 import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
+import static org.semux.consensus.ValidatorActivatedFork.VIRTUAL_MACHINE;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -443,6 +444,16 @@ public class BlockchainImpl implements Blockchain {
                     new ValidatorActivatedFork.Activation(UNIFORM_DISTRIBUTION, number));
             setActivatedForks(activatedForks);
             logger.info("Fork UNIFORM_DISTRIBUTION activated at block {}", number);
+        }
+        if (config.forkVirtualMachineEnabled()
+                && !activatedForks.containsKey(VIRTUAL_MACHINE)
+                && number <= VIRTUAL_MACHINE.activationDeadline
+                && forkActivated(number, ValidatorActivatedFork.VIRTUAL_MACHINE)) {
+            // persist the activated fork
+            activatedForks.put(VIRTUAL_MACHINE,
+                    new ValidatorActivatedFork.Activation(VIRTUAL_MACHINE, number));
+            setActivatedForks(activatedForks);
+            logger.info("Fork VIRTUAL_MACHINE activated at block {}", number);
         }
     }
 
