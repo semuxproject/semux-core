@@ -214,10 +214,8 @@ public class TransactionExecutor {
                     // workaround for pending manager so it doesn't execute these
                     if (blockHeader == null) {
                         result.setSuccess(true);
-                    } else if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
-                        executeVmTransaction(result, tx, as, blockHeader);
                     } else {
-                        result.setError(Error.INSUFFICIENT_AVAILABLE);
+                        executeVmTransaction(result, tx, as, blockHeader);
                     }
                 } else {
                     result.setError(Error.INSUFFICIENT_AVAILABLE);
