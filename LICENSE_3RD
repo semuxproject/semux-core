@@ -19,9 +19,10 @@ EdDSA-Java:
     https://github.com/str4d/ed25519-java
     CC0 1.0 Universal
 
-EthereumJ:
+evm:
+    Copyright (c) [2018] [ The Semux Developers ]
     Copyright (c) [2016] [ <ether.camp> ]
-    https://github.com/ethereum/ethereumj
+    https://github.com/semuxproject/evm
     GNU Lesser General Public License v3.0
 
 FasterXML Jackson:
