@@ -244,11 +244,10 @@ public class TransactionExecutor {
         Repository repository = new SemuxRepository(as);
         ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
         long gasUsedInBlock = 0l; // todo - use this
-        boolean localCall = false; // todo - what is a localCall?
 
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                 transaction, block, repository, blockStore,
-                vmConfig, invokeFactory, gasUsedInBlock, localCall);
+                vmConfig, invokeFactory, gasUsedInBlock, false);
 
         TransactionReceipt summary = executor.run();
         if (summary == null) {
