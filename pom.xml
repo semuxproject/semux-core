@@ -36,22 +36,18 @@
 
     <repositories>
         <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>central</id>
-            <name>bintray</name>
+            <id>bintray</id>
             <url>https://jcenter.bintray.com</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
     <pluginRepositories>
         <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>central</id>
-            <name>bintray-plugins</name>
+            <id>bintray</id>
             <url>https://jcenter.bintray.com</url>
         </pluginRepository>
     </pluginRepositories>
@@ -200,13 +196,13 @@
                         <excludes>
                             <exclude>junit:*</exclude>
                             <exclude>org.powermock:*</exclude>
-                            <exclude>com.github.stefanbirkner:system-rules</exclude>
                             <exclude>org.assertj:*</exclude>
                             <exclude>org.awaitility:*</exclude>
                             <exclude>org.easytesting:*</exclude>
                             <exclude>net.bytebuddy:*</exclude>
                             <exclude>org.hamcrest:*</exclude>
                             <exclude>org.mockito:*</exclude>
+                            <exclude>com.github.stefanbirkner:system-rules</exclude>
                         </excludes>
                     </artifactSet>
                     <transformers>
@@ -676,6 +672,13 @@
     </build>
 
     <dependencies>
+        <!-- EVM -->
+        <dependency>
+            <groupId>com.github.semuxproject</groupId>
+            <artifactId>evm</artifactId>
+            <version>-SNAPSHOT</version>
+        </dependency>
+
         <!-- Swagger & JAX-RS API -->
         <dependency>
             <groupId>javax.ws.rs</groupId>

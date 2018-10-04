@@ -99,26 +99,26 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  * </ul>
  */
 public class SemuxBft implements BftManager {
-    static final Logger logger = LoggerFactory.getLogger(SemuxBft.class);
+    private static final Logger logger = LoggerFactory.getLogger(SemuxBft.class);
 
-    protected final Kernel kernel;
-
-    protected final PendingManager pendingMgr;
-    protected final SyncManager sync;
-    protected final Key coinbase;
-    protected final AccountState accountState;
-    protected final DelegateState delegateState;
-    protected final Timer timer;
-    protected final Broadcaster broadcaster;
-    protected final BlockingQueue<Event> events = new LinkedBlockingQueue<>();
-    protected final Cache<ByteArray, Block> validBlocks = Caffeine.newBuilder().maximumSize(8).build();
-
+    protected Kernel kernel;
     protected Config config;
 
     protected Blockchain chain;
     protected BlockStore blockStore;
 
     protected ChannelManager channelMgr;
+    protected PendingManager pendingMgr;
+    protected SyncManager syncMgr;
+
+    protected Key coinbase;
+
+    protected AccountState accountState;
+    protected DelegateState delegateState;
+
+    protected Timer timer;
+    protected Broadcaster broadcaster;
+    protected BlockingQueue<Event> events = new LinkedBlockingQueue<>();
 
     protected Status status;
     protected State state;
@@ -127,6 +127,8 @@ public class SemuxBft implements BftManager {
     protected int view;
     protected Proof proof;
     protected Proposal proposal;
+
+    protected Cache<ByteArray, Block> validBlocks = Caffeine.newBuilder().maximumSize(8).build();
 
     protected List<String> validators;
     protected List<Channel> activeValidators;
@@ -147,7 +149,7 @@ public class SemuxBft implements BftManager {
         this.activatedForks = this.chain.getActivatedForks();
         this.channelMgr = kernel.getChannelManager();
         this.pendingMgr = kernel.getPendingManager();
-        this.sync = kernel.getSyncManager();
+        this.syncMgr = kernel.getSyncManager();
         this.coinbase = kernel.getCoinbase();
 
         this.accountState = chain.getAccountState();
@@ -174,7 +176,7 @@ public class SemuxBft implements BftManager {
             clearTimerAndEvents();
 
             // start syncing
-            sync.start(target);
+            syncMgr.start(target);
 
             // restore status if not stopped
             if (status != Status.STOPPED) {
@@ -253,7 +255,7 @@ public class SemuxBft implements BftManager {
         if (status != Status.STOPPED) {
             // interrupt sync
             if (status == Status.SYNCING) {
-                sync.stop();
+                syncMgr.stop();
             }
 
             timer.stop();
@@ -798,7 +800,7 @@ public class SemuxBft implements BftManager {
         if (signalingUniformDistribution()) {
             forks.add(UNIFORM_DISTRIBUTION);
         }
-        if (signalingUniformDistribution()) {
+        if (signalingVirtualMachine()) {
             forks.add(VIRTUAL_MACHINE);
         }
         byte[] data = !forks.isEmpty()
