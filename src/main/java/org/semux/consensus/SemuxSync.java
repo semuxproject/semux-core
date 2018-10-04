@@ -63,6 +63,7 @@ import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
 import org.semux.util.ByteArray;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -556,7 +557,7 @@ public class SemuxSync implements SyncManager {
         // [3] evaluate transactions
         TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
         List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot,
-                block.getHeader());
+                new SemuxBlock(block.getHeader()));
         if (!Block.validateResults(header, results)) {
             logger.error("Invalid transactions");
             return false;

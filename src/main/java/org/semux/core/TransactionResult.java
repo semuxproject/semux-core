@@ -211,7 +211,6 @@ public class TransactionResult {
             logs.add(dec.readBytes());
         }
         long gasUsed = 0;
-        // todo - add fork activation check
         try {
             gasUsed = dec.readLong();
         } catch (Exception e) {

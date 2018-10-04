@@ -67,7 +67,6 @@ public final class Amount {
     }
 
     public BigInteger getBigInteger() {
-        // todo - are we extending the blockchain to full 15 decimal?
         return BigInteger.valueOf(nano);
     }
 

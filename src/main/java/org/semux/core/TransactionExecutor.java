@@ -89,7 +89,7 @@ public class TransactionExecutor {
      * @return
      */
     public List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds,
-            BlockHeader blockHeader) {
+            SemuxBlock block) {
         List<TransactionResult> results = new ArrayList<>();
 
         for (Transaction tx : txs) {
@@ -210,12 +210,11 @@ public class TransactionExecutor {
                     as.adjustAvailable(from, neg(sum(value, fee)));
 
                     // we charge gas later
-
                     // workaround for pending manager so it doesn't execute these
-                    if (blockHeader == null) {
+                    if (block == null) {
                         result.setSuccess(true);
                     } else {
-                        executeVmTransaction(result, tx, as, blockHeader);
+                        executeVmTransaction(result, tx, as, block);
                     }
                 } else {
                     result.setError(Error.INSUFFICIENT_AVAILABLE);
@@ -238,9 +237,8 @@ public class TransactionExecutor {
         return results;
     }
 
-    private void executeVmTransaction(TransactionResult result, Transaction tx, AccountState as, BlockHeader bh) {
+    private void executeVmTransaction(TransactionResult result, Transaction tx, AccountState as, SemuxBlock block) {
         SemuxTransaction transaction = new SemuxTransaction(tx);
-        SemuxBlock block = new SemuxBlock(bh);
         Repository repository = new SemuxRepository(as);
         ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
         long gasUsedInBlock = 0l; // todo - use this
@@ -275,7 +273,7 @@ public class TransactionExecutor {
      *            delegate state
      * @return
      */
-    public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds, BlockHeader blockHeader) {
-        return execute(Collections.singletonList(tx), as, ds, blockHeader).get(0);
+    public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds, SemuxBlock block) {
+        return execute(Collections.singletonList(tx), as, ds, block).get(0);
     }
 }

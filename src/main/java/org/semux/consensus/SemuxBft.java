@@ -64,6 +64,7 @@ import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SystemUtil;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -818,13 +819,13 @@ public class SemuxBft implements BftManager {
         AccountState as = accountState.track();
         DelegateState ds = delegateState.track();
         TransactionExecutor exec = new TransactionExecutor(config, blockStore);
-        // todo - should pass around SemuxHeader instead blockHeader - TEMP HACK
         BlockHeader tempHeader = new BlockHeader(height, coinbase.toAddress(), prevHash, timestamp, new byte[0],
                 new byte[0], new byte[0], data);
+        SemuxBlock semuxBlock = new SemuxBlock(tempHeader);
         for (PendingManager.PendingTransaction tx : pending) {
             if (tx.transaction.getType() == TransactionType.CALL
                     || tx.transaction.getType() == TransactionType.CREATE) {
-                TransactionResult result = exec.execute(tx.transaction, as, ds, tempHeader);
+                TransactionResult result = exec.execute(tx.transaction, as, ds, semuxBlock);
                 if (result.isSuccess()) {
                     pendingResults.add(result);
                     pendingTxs.add(tx.transaction);
@@ -947,7 +948,7 @@ public class SemuxBft implements BftManager {
         TransactionExecutor exec = new TransactionExecutor(config, blockStore);
 
         // [3] evaluate transactions
-        List<TransactionResult> results = exec.execute(transactions, as, ds, header);
+        List<TransactionResult> results = exec.execute(transactions, as, ds, new SemuxBlock(header));
         if (!Block.validateResults(header, results)) {
             logger.warn("Invalid transactions");
             return false;
@@ -1010,7 +1011,7 @@ public class SemuxBft implements BftManager {
         TransactionExecutor exec = new TransactionExecutor(config, blockStore);
 
         // [3] evaluate all transactions
-        List<TransactionResult> results = exec.execute(transactions, as, ds, block.getHeader());
+        List<TransactionResult> results = exec.execute(transactions, as, ds, new SemuxBlock(block.getHeader()));
         if (!Block.validateResults(header, results)) {
             logger.debug("Invalid transactions");
             return;
