@@ -1141,8 +1141,8 @@
         "tags": [
           "semux"
         ],
-        "summary" : "Transfer coins",
-        "description" : "Call a contract.",
+        "summary" : "Call a contract.",
+        "description" : "Call a VM contract.",
         "operationId" : "call",
         "produces" : [
           "application/json"
@@ -1224,6 +1224,14 @@
             "type" : "string",
             "format" : "int64",
             "pattern" : "^\\d+$"
+          },
+          {
+            "name" : "local",
+            "in" : "query",
+            "description" : "Specifies whether this is a local (free) call, or a transaction",
+            "required" : false,
+            "default" : false,
+            "type" : "boolean"
           }
         ],
         "responses" : {

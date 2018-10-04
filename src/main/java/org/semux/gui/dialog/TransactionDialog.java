@@ -15,8 +15,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
+import org.ethereum.vm.util.HashUtil;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
+import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
 import org.semux.gui.SwingUtil;
 import org.semux.message.GuiMessages;
@@ -49,6 +51,11 @@ public class TransactionDialog extends JDialog {
         JTextArea from = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getFrom()));
         from.setName("fromText");
         JTextArea to = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getTo()));
+
+        // for creates, the TO value should display the contract address
+        if (tx.getType() == TransactionType.CREATE) {
+            to.setText(Hex.encode0x(HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce())));
+        }
         to.setName("toText");
         JLabel value = new JLabel(SwingUtil.formatAmount((tx.getValue())));
         value.setName("valueText");

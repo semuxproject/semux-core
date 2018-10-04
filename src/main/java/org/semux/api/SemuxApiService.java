@@ -9,9 +9,12 @@ package org.semux.api;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.netty.channel.ChannelOption;
+import io.netty.channel.FixedRecvByteBufAllocator;
 import org.semux.Kernel;
 import org.semux.api.http.HttpChannelInitializer;
 import org.semux.api.http.HttpHandler;
+import org.semux.net.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,6 +100,11 @@ public class SemuxApiService {
 
             logger.info("Starting API server: address = {}:{}", ip, port);
             channel = b.bind(ip, port).sync().channel();
+
+            int bufferSize = 99999999;
+            channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(bufferSize));
+            channel.config().setOption(ChannelOption.SO_RCVBUF, bufferSize);
+
             logger.info("API server started. Base URL: {}, Explorer: {}", getApiBaseUrl(), getApiExplorerUrl());
         } catch (Exception e) {
             logger.error("Failed to start API server", e);
