@@ -287,9 +287,9 @@ public class Kernel {
                 (m.getSwapTotal() - m.getSwapUsed()) / mb);
 
         // disk
-        logger.info("Disk: names = [{}], total size = {} MB",
-                Stream.of(hal.getDiskStores()).map(HWDiskStore::getName).collect(Collectors.joining(", ")),
-                Stream.of(hal.getDiskStores()).mapToLong(HWDiskStore::getSize).sum() / mb);
+        for (HWDiskStore disk : hal.getDiskStores()) {
+            logger.info("Disk: name = {}, size = {} MB", disk.getName(), disk.getSize() / mb);
+        }
 
         // network
         for (NetworkIF net : hal.getNetworkIFs()) {
