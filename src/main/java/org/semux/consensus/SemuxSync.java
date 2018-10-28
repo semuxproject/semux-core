@@ -585,7 +585,7 @@ public class SemuxSync implements SyncManager {
         // check validity of votes
         if (!block.getVotes().stream()
                 .allMatch(sig -> Key.verify(encoded, sig) && validators.contains(Hex.encode(sig.getAddress())))) {
-            logger.debug("Block votes are invalid");
+            logger.warn("Block votes are invalid");
             return false;
         }
 
@@ -593,7 +593,7 @@ public class SemuxSync implements SyncManager {
         if (block.getVotes().stream()
                 .map(sig -> new ByteArray(sig.getA()))
                 .collect(Collectors.toSet()).size() < twoThirds) {
-            logger.debug("Not enough votes, needs 2/3+");
+            logger.warn("Not enough votes, needs 2/3+");
             return false;
         }
 
