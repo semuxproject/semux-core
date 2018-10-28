@@ -1,3 +1,0 @@
-[submodule "evm"]
-	path = evm
-	url = https://github.com/semuxproject/evm

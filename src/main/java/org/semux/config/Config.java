@@ -466,6 +466,13 @@ public interface Config {
      */
     boolean forkUniformDistributionEnabled();
 
+    /**
+     * Returns whether VIRTUAL_MACHINE fork is activated
+     *
+     * @return
+     */
+    boolean forkVirtualMachineEnabled();
+
     // =========================
     // Checkpoints
     // =========================
