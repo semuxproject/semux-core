@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
+import org.ethereum.vm.chainspec.Spec;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.TransactionReceipt;
@@ -89,7 +90,6 @@ import org.semux.vm.client.SemuxTransaction;
 public final class SemuxApiImpl implements SemuxApi {
 
     private static final Charset CHARSET = UTF_8;
-    private static ByzantiumConfig vmConfig = new ByzantiumConfig();
 
     private final Kernel kernel;
 
@@ -764,7 +764,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
             org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                     transaction, block, repository, blockStore,
-                    vmConfig, invokeFactory, gasUsedInBlock, true);
+                    Spec.DEFAULT, invokeFactory, gasUsedInBlock, true);
             TransactionReceipt results = executor.run();
 
             DoTransactionResponse resp = new DoTransactionResponse();

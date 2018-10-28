@@ -21,6 +21,7 @@ import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 
 import static org.ethereum.vm.util.BytecodeCompiler.compile;
@@ -73,8 +74,9 @@ public class VmTest {
                 Hex.encode0x(HashUtil.calcNewAddress(Hex.decode0x("0x23a6049381fd2cfb0661d9de206613b83d53d7df"), 17)));
         as.setCode(to, contract);
 
-        BlockHeader bh = new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
-                Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20));
+        SemuxBlock bh = new SemuxBlock(
+                new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
+                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)));
 
         byte[] data = Bytes.random(16);
         long gas = 30000;
@@ -120,8 +122,9 @@ public class VmTest {
         // set the contract to a simple program
         byte[] data = compile("PUSH1 0xa0");
 
-        BlockHeader bh = new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
-                Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20));
+        SemuxBlock bh = new SemuxBlock(
+                new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
+                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)));
 
         long gas = 60000;
         long gasPrice = 1;
@@ -154,7 +157,7 @@ public class VmTest {
     }
 
     private TransactionResult executeAndCommit(TransactionExecutor exec, Transaction tx, AccountState as,
-            DelegateState ds, BlockHeader bh) {
+            DelegateState ds, SemuxBlock bh) {
         TransactionResult res = exec.execute(tx, as, ds, bh);
         as.commit();
         ds.commit();

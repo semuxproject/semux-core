@@ -79,7 +79,7 @@ public class SemuxRepository implements Repository {
     public DataWord getStorageRow(byte[] address, DataWord key) {
         byte[] data = accountState.getStorage(address, key.getData());
         if (data != null) {
-            return new DataWord(data);
+            return DataWord.of(data);
         }
         return null;
     }

@@ -6,6 +6,7 @@
  */
 package org.semux.core;
 
+import org.ethereum.vm.chainspec.Spec;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.TransactionReceipt;
@@ -212,6 +213,7 @@ public class TransactionExecutor {
                     // we charge gas later
                     // workaround for pending manager so it doesn't execute these
                     if (block == null) {
+                        as.increaseNonce(from);
                         result.setSuccess(true);
                     } else {
                         executeVmTransaction(result, tx, as, block);
@@ -229,7 +231,8 @@ public class TransactionExecutor {
             }
 
             // increase nonce if success
-            if (result.isSuccess()) {
+            // creates and calls increase their own nonces internal to VM
+            if (result.isSuccess() && type != TransactionType.CREATE && type != TransactionType.CALL) {
                 as.increaseNonce(from);
             }
         }
@@ -245,7 +248,7 @@ public class TransactionExecutor {
 
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                 transaction, block, repository, blockStore,
-                vmConfig, invokeFactory, gasUsedInBlock, false);
+                Spec.DEFAULT, invokeFactory, gasUsedInBlock, false);
 
         TransactionReceipt summary = executor.run();
         if (summary == null) {

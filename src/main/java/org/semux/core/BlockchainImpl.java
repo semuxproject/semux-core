@@ -45,6 +45,7 @@ import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -825,7 +826,7 @@ public class BlockchainImpl implements Blockchain {
             // [0] execute transactions against local state
             TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
             transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState(),
-                    block.getHeader());
+                    new SemuxBlock(block.getHeader()));
 
             // [1] apply block reward and tx fees
             Amount reward = Block.getBlockReward(block, config);

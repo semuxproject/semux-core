@@ -31,6 +31,7 @@ import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 
 public class TransactionExecutorTest {
@@ -44,7 +45,7 @@ public class TransactionExecutorTest {
     private DelegateState ds;
     private TransactionExecutor exec;
     private Network network;
-    private BlockHeader bh = null;
+    private SemuxBlock bh = null;
 
     @Before
     public void prepare() {
@@ -57,7 +58,7 @@ public class TransactionExecutorTest {
     }
 
     private TransactionResult executeAndCommit(TransactionExecutor exec, Transaction tx, AccountState as,
-            DelegateState ds, BlockHeader bh) {
+            DelegateState ds, SemuxBlock bh) {
         TransactionResult res = exec.execute(tx, as, ds, bh);
         as.commit();
         ds.commit();
