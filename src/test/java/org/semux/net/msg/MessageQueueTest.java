@@ -67,8 +67,7 @@ public class MessageQueueTest {
         long startTime = System.currentTimeMillis();
         while (kernel2.getChannelManager().getActiveChannels().isEmpty()) {
             Thread.sleep(100);
-            if(System.currentTimeMillis() - startTime > maxWaitTime)
-            {
+            if (System.currentTimeMillis() - startTime > maxWaitTime) {
                 fail("Took too long to connect peers");
             }
         }
