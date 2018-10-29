@@ -226,10 +226,6 @@ public class SemuxGui extends Launcher {
 
         CreateHdWalletDialog dialog = new CreateHdWalletDialog(wallet, main);
         dialog.setVisible(true);
-
-        // wait until done
-        // dialog.join();
-
         dialog.dispose();
     }
 
