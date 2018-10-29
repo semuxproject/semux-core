@@ -64,7 +64,7 @@ public class SemuxChannelInitializer extends ChannelInitializer<NioSocketChannel
                 return;
             }
 
-            Channel channel = new Channel();
+            Channel channel = new Channel(ch);
             channel.init(ch.pipeline(), isServerMode(), address, kernel);
             if (!isDiscoveryMode()) {
                 channelMgr.add(channel);

@@ -457,7 +457,7 @@ public class SemuxSyncTest {
         assert (toFinalize.size() == validatorInterval - currentSet.size() - 1);
         assert (toDownload.contains(validatorInterval - toFinalize.size()));
 
-        Channel channel2 = new Channel();
+        Channel channel2 = new Channel(null);
         currentSet.add(Pair.of(lastBlock, channel2));
         Whitebox.invokeMethod(sync, "validateSetHashes"); // only one block with the same height is added to toFinalize
 

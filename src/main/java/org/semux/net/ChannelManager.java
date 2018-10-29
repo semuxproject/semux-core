@@ -138,9 +138,11 @@ public class ChannelManager {
      * Remove blacklisted channels.
      */
     public void removeBlacklistedChannels() {
-        for (Map.Entry<InetSocketAddress, Channel> channelEntry : channels.entrySet()) {
-            if (!isAcceptable(channelEntry.getValue().getRemoteAddress())) {
-                remove(channelEntry.getValue());
+        for (Map.Entry<InetSocketAddress, Channel> entry : channels.entrySet()) {
+            Channel channel = entry.getValue();
+            if (!isAcceptable(channel.getRemoteAddress())) {
+                remove(channel);
+                channel.close();
             }
         }
     }

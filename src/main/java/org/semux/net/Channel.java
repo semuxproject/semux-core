@@ -7,6 +7,7 @@
 package org.semux.net;
 
 import java.net.InetSocketAddress;
+import java.nio.channels.SocketChannel;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -14,12 +15,14 @@ import org.semux.Kernel;
 import org.semux.net.msg.MessageQueue;
 
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 
 public class Channel {
     private static final AtomicLong cnt = new AtomicLong(0);
 
     private final long id;
+    private final NioSocketChannel socket;
 
     private boolean isInbound;
     private InetSocketAddress remoteAddress;
@@ -33,8 +36,9 @@ public class Channel {
      * Creates a new channel instance.
      * 
      */
-    public Channel() {
+    public Channel(NioSocketChannel socket) {
         this.id = cnt.getAndIncrement();
+        this.socket = socket;
     }
 
     /**
@@ -65,8 +69,15 @@ public class Channel {
     }
 
     /**
+     * Closes the underlying socket channel.
+     */
+    public void close() {
+        socket.close();
+    }
+
+    /**
      * Returns the channel id.
-     * 
+     *
      * @return
      */
     public long getId() {
