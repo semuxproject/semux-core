@@ -20,7 +20,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
-import javax.swing.JTextField;
+import javax.swing.JTextArea;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,7 +28,7 @@ import java.awt.event.ActionListener;
 public class RecoverHdWalletDialog extends JDialog implements ActionListener {
     private final transient SemuxGui gui;
 
-    private final JTextField phraseField;
+    private final JTextArea phraseField;
     private final JPasswordField passwordField;
 
     public RecoverHdWalletDialog(SemuxGui gui, JFrame parent) {
@@ -38,7 +38,10 @@ public class RecoverHdWalletDialog extends JDialog implements ActionListener {
         JLabel lblPassword = new JLabel(GuiMessages.get("Password") + ":");
         JLabel lblPhrase = new JLabel(GuiMessages.get("WalletRecoveryPhrase") + ":");
 
-        phraseField = new JTextField();
+        phraseField = new JTextArea();
+        phraseField.setLineWrap(true);
+        phraseField.setWrapStyleWord(true);
+
         passwordField = new JPasswordField();
 
         JButton btnOk = SwingUtil.createDefaultButton(GuiMessages.get("OK"), this, Action.OK);
@@ -112,7 +115,7 @@ public class RecoverHdWalletDialog extends JDialog implements ActionListener {
             }
 
             wallet.setHdSeed(seed);
-            wallet.scanForHdKeys();
+            wallet.scanForHdKeys(gui.getKernel().getBlockchain().getAccountState(), true);
             wallet.flush();
             JOptionPane.showMessageDialog(this, GuiMessages.get("HdSeedChanged"));
             this.dispose();

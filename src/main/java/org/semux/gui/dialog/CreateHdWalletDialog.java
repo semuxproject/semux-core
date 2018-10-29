@@ -20,7 +20,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
-import javax.swing.JTextField;
+import javax.swing.JTextArea;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,7 +28,7 @@ import java.awt.event.ActionListener;
 public class CreateHdWalletDialog extends JDialog implements ActionListener {
     private final transient Wallet wallet;
 
-    private final JTextField phraseField;
+    private final JTextArea phraseField;
     private final JPasswordField passwordField;
     private MnemonicGenerator generator = new MnemonicGenerator();
     String phrase;
@@ -40,8 +40,10 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
         JLabel lblPassword = new JLabel(GuiMessages.get("Password") + ":");
         JLabel lblPhrase = new JLabel(GuiMessages.get("WalletRecoveryPhrase") + ":");
 
-        phraseField = new JTextField();
+        phraseField = new JTextArea();
         phraseField.setEditable(false);
+        phraseField.setLineWrap(true);
+        phraseField.setWrapStyleWord(true);
         phrase = generator.getWordlist(128, Language.english);
 
         phraseField.setText(phrase);
@@ -115,9 +117,8 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
             }
 
             wallet.setHdSeed(seed);
-            wallet.scanForHdKeys();
+            wallet.scanForHdKeys(null, false);
             wallet.flush();
-            JOptionPane.showMessageDialog(this, GuiMessages.get("HdSeedChanged"));
             this.dispose();
             break;
         }

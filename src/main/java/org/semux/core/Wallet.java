@@ -29,6 +29,8 @@ import com.github.orogvany.bip32.wallet.CoinType;
 import com.github.orogvany.bip32.wallet.HdAddress;
 import org.bouncycastle.crypto.generators.BCrypt;
 import org.semux.core.exception.WalletLockedException;
+import org.semux.core.state.Account;
+import org.semux.core.state.AccountState;
 import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hash;
@@ -51,13 +53,14 @@ public class Wallet {
     private static final int SALT_LENGTH = 16;
     private static final int BCRYPT_COST = 12;
     private static final Bip44 BIP_44 = new Bip44();
+    private static final int MAX_HD_WALLET_SCAN_AHEAD = 20;
 
     private final File file;
     private final org.semux.Network network;
 
     // hd wallet key
     private byte[] hdSeed = new byte[0];
-    private int numHdAccounts = 0;
+    private int nextHdAccountIndex = 0;
 
     private final Map<ByteArray, Key> accounts = Collections.synchronizedMap(new LinkedHashMap<>());
     private final Map<ByteArray, String> aliases = new ConcurrentHashMap<>();
@@ -144,10 +147,8 @@ public class Wallet {
                     salt = dec.readBytes();
                     key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
                     hdSeed = dec.readBytes();
-                    numHdAccounts = dec.readInt();
-                    List<Key> hdKeys = getHdKeys(hdSeed, numHdAccounts);
+                    nextHdAccountIndex = dec.readInt();
                     newAccounts = readAccounts(key, dec, true, version);
-                    newAccounts.addAll(hdKeys);
                     newAliases = readAddressAliases(key, dec);
                     break;
                 default:
@@ -174,17 +175,6 @@ public class Wallet {
         }
 
         return false;
-    }
-
-    private List<Key> getHdKeys(byte[] hdSeed, int numAccounts) {
-        List<Key> hdKeys = new ArrayList<>();
-        HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, getWalletNetwork(network), CoinType.semux);
-        for (int i = 0; i < numAccounts; i++) {
-            HdAddress address = BIP_44.getAddress(rootAddress, i);
-            hdKeys.add(Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey()));
-        }
-        numHdAccounts = hdKeys.size();
-        return hdKeys;
     }
 
     private Network getWalletNetwork(org.semux.Network network) {
@@ -439,7 +429,7 @@ public class Wallet {
 
         synchronized (accounts) {
             HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, Network.mainnet, CoinType.semux);
-            HdAddress address = BIP_44.getAddress(rootAddress, numHdAccounts++);
+            HdAddress address = BIP_44.getAddress(rootAddress, nextHdAccountIndex++);
             Key newKey = Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey());
             ByteArray to = ByteArray.of(newKey.toAddress());
             accounts.put(to, newKey);
@@ -496,8 +486,18 @@ public class Wallet {
         requireUnlocked();
 
         synchronized (accounts) {
-            return accounts.remove(ByteArray.of(address)) != null;
+
+            boolean removed = accounts.remove(ByteArray.of(address)) != null;
+            if (removed) {
+                updateNextHdAccountIndex();
+            }
+            return removed;
+
         }
+    }
+
+    private void updateNextHdAccountIndex() {
+        // todo
     }
 
     /**
@@ -539,7 +539,7 @@ public class Wallet {
             byte[] key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
 
             enc.writeBytes(hdSeed);
-            enc.writeInt(numHdAccounts);
+            enc.writeInt(nextHdAccountIndex);
 
             writeAccounts(key, enc);
             writeAddressAliases(key, enc);
@@ -656,17 +656,58 @@ public class Wallet {
 
     public void setHdSeed(byte[] seed) {
         this.hdSeed = seed;
+        this.nextHdAccountIndex = 0;
     }
 
     /**
-     * Scan for HD keys used accounts, and add them to the account.
+     * Scan for HD keys used accounts, and add them to the account. todo - this can
+     * probably be moved out of here, not sure where it best fits
      */
-    public void scanForHdKeys() {
-        // todo!
-        // look for addresses that have activity and add to account.
-        // keep checking addresses for N past last one found with activity.
-        // Need to always add the first one.
+    public int scanForHdKeys(AccountState accountState, boolean restoreDeleted) {
+        int found = 0;
 
+        // make sure to add at least the default account
+        if (nextHdAccountIndex == 0) {
+            addAccount();
+            found++;
+        }
+        // depending on where this method eventually ends up, will need some way to
+        // create the above initial account
+        if (accountState == null) {
+            return found;
+        }
+
+        HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, getWalletNetwork(network), CoinType.semux);
+
+        if (restoreDeleted) {
+            nextHdAccountIndex = 0;
+        }
+
+        int start = nextHdAccountIndex;
+
+        int endIndex = start + MAX_HD_WALLET_SCAN_AHEAD;
+
+        for (int i = start; i < endIndex; i++) {
+            HdAddress address = BIP_44.getAddress(rootAddress, i);
+
+            Key key = Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey());
+            Account account = accountState.getAccount(key.toAddress());
+
+            ByteArray to = ByteArray.of(key.toAddress());
+            // if we find an account that has been used, we push forward our end search.
+            // an account exists if its in our wallet, has balance, or has made transactions
+            if (account.getNonce() > 0 || account.getAvailable().gt0() || accounts.containsKey(to)) {
+                endIndex += MAX_HD_WALLET_SCAN_AHEAD;
+                if (addAccount(key)) {
+                    found++;
+                }
+                if (i >= nextHdAccountIndex) {
+                    nextHdAccountIndex = i + 1;
+                }
+            }
+        }
+
+        return found;
     }
 
     public boolean isHdWalletInitialized() {

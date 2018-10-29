@@ -270,7 +270,6 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
         if (isCreate()) {
             if (wallet.unlock(password)
-                    && wallet.addAccount() != null
                     && wallet.flush()) {
                 done();
             } else {
