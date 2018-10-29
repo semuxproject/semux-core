@@ -11,7 +11,6 @@ import static org.semux.util.FileUtil.POSIX_SECURED_PERMISSIONS;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +28,6 @@ import com.github.orogvany.bip32.wallet.Bip44;
 import com.github.orogvany.bip32.wallet.CoinType;
 import com.github.orogvany.bip32.wallet.HdAddress;
 import org.bouncycastle.crypto.generators.BCrypt;
-import org.semux.config.Config;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
@@ -58,7 +56,7 @@ public class Wallet {
     private final org.semux.Network network;
 
     // hd wallet key
-    private byte[] hdSeed;
+    private byte[] hdSeed = new byte[0];
     private int numHdAccounts = 0;
 
     private final Map<ByteArray, Key> accounts = Collections.synchronizedMap(new LinkedHashMap<>());
@@ -125,13 +123,6 @@ public class Wallet {
 
                 Set<Key> newAccounts;
                 Map<ByteArray, String> newAliases = new HashMap<>();
-
-                // initialize new HD wallet if not created.
-                if (version < 4) {
-                    logger.info("Creating new HD Wallet!");
-                    hdSeed = new byte[64];
-                    new SecureRandom().nextBytes(hdSeed);
-                }
 
                 switch (version) {
                 case 1:
@@ -661,5 +652,25 @@ public class Wallet {
 
     public org.semux.Network getNetwork() {
         return network;
+    }
+
+    public void setHdSeed(byte[] seed) {
+        this.hdSeed = seed;
+    }
+
+    /**
+     * Scan for HD keys used accounts, and add them to the account.
+     */
+    public void scanForHdKeys() {
+        // todo!
+        // look for addresses that have activity and add to account.
+        // keep checking addresses for N past last one found with activity.
+        // Need to always add the first one.
+
+    }
+
+    public boolean isHdWalletInitialized() {
+        requireUnlocked();
+        return hdSeed != null && hdSeed.length > 0;
     }
 }

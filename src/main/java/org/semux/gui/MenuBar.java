@@ -35,6 +35,7 @@ import org.semux.gui.dialog.ChangePasswordDialog;
 import org.semux.gui.dialog.ConsoleDialog;
 import org.semux.gui.dialog.ExportPrivateKeyDialog;
 import org.semux.gui.dialog.InputDialog;
+import org.semux.gui.dialog.RecoverHdWalletDialog;
 import org.semux.message.GuiMessages;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
@@ -80,6 +81,12 @@ public class MenuBar extends JMenuBar implements ActionListener {
         itemRecover.setActionCommand(Action.RECOVER_ACCOUNTS.name());
         itemRecover.addActionListener(this);
         menuWallet.add(itemRecover);
+
+        JMenuItem itemHdRecover = new JMenuItem(GuiMessages.get("RecoverHdWallet"));
+        itemHdRecover.setName("itemHdRecover");
+        itemHdRecover.setActionCommand(Action.RECOVER_HD_WALLET.name());
+        itemHdRecover.addActionListener(this);
+        menuWallet.add(itemHdRecover);
 
         JMenuItem itemBackupWallet = new JMenuItem(GuiMessages.get("BackupWallet"));
         itemBackupWallet.setName("itemBackupWallet");
@@ -142,6 +149,9 @@ public class MenuBar extends JMenuBar implements ActionListener {
         case RECOVER_ACCOUNTS:
             recoverAccounts();
             break;
+        case RECOVER_HD_WALLET:
+            recoverHdWallet();
+            break;
         case BACKUP_WALLET:
             backupWallet();
             break;
@@ -169,6 +179,15 @@ public class MenuBar extends JMenuBar implements ActionListener {
         default:
             break;
         }
+    }
+
+    private void recoverHdWallet() {
+        if (showErrorIfLocked()) {
+            return;
+        }
+
+        RecoverHdWalletDialog d = new RecoverHdWalletDialog(gui, frame);
+        d.setVisible(true);
     }
 
     /**
