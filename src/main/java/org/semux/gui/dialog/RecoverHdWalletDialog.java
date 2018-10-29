@@ -115,7 +115,7 @@ public class RecoverHdWalletDialog extends JDialog implements ActionListener {
             }
 
             wallet.setHdSeed(seed);
-            wallet.scanForHdKeys(gui.getKernel().getBlockchain().getAccountState(), true);
+            wallet.scanForHdKeys(gui.getKernel().getBlockchain().getAccountState());
             wallet.flush();
             JOptionPane.showMessageDialog(this, GuiMessages.get("HdSeedChanged"));
             this.dispose();

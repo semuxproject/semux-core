@@ -196,7 +196,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
 
         Wallet wallet = gui.getKernel().getWallet();
 
-        int found = wallet.scanForHdKeys(gui.getKernel().getBlockchain().getAccountState(), true);
+        int found = wallet.scanForHdKeys(gui.getKernel().getBlockchain().getAccountState());
         if (found > 0) {
             if (!wallet.flush()) {
                 JOptionPane.showMessageDialog(frame, GuiMessages.get("SaveBackupFailed"));

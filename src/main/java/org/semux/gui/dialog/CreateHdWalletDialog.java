@@ -117,7 +117,7 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
             }
 
             wallet.setHdSeed(seed);
-            wallet.scanForHdKeys(null, false);
+            wallet.scanForHdKeys(null);
             wallet.flush();
             this.dispose();
             break;

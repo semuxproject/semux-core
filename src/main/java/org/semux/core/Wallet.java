@@ -489,15 +489,11 @@ public class Wallet {
 
             boolean removed = accounts.remove(ByteArray.of(address)) != null;
             if (removed) {
-                updateNextHdAccountIndex();
+                scanForHdKeys(null);
             }
             return removed;
 
         }
-    }
-
-    private void updateNextHdAccountIndex() {
-        // todo
     }
 
     /**
@@ -661,9 +657,9 @@ public class Wallet {
 
     /**
      * Scan for HD keys used accounts, and add them to the account. todo - this can
-     * probably be moved out of here, not sure where it best fits
+     * probably be moved out of here, not sure where it best fits.
      */
-    public int scanForHdKeys(AccountState accountState, boolean restoreDeleted) {
+    public int scanForHdKeys(AccountState accountState) {
         int found = 0;
 
         // make sure to add at least the default account
@@ -671,32 +667,24 @@ public class Wallet {
             addAccount();
             found++;
         }
-        // depending on where this method eventually ends up, will need some way to
-        // create the above initial account
-        if (accountState == null) {
-            return found;
-        }
 
         HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, getWalletNetwork(network), CoinType.semux);
 
-        if (restoreDeleted) {
-            nextHdAccountIndex = 0;
-        }
+        nextHdAccountIndex = 0;
 
         int start = nextHdAccountIndex;
-
         int endIndex = start + MAX_HD_WALLET_SCAN_AHEAD;
 
         for (int i = start; i < endIndex; i++) {
             HdAddress address = BIP_44.getAddress(rootAddress, i);
 
             Key key = Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey());
-            Account account = accountState.getAccount(key.toAddress());
+            boolean isUsedAccount = isUsedAccount(accountState, key.toAddress());
 
             ByteArray to = ByteArray.of(key.toAddress());
             // if we find an account that has been used, we push forward our end search.
             // an account exists if its in our wallet, has balance, or has made transactions
-            if (account.getNonce() > 0 || account.getAvailable().gt0() || accounts.containsKey(to)) {
+            if (isUsedAccount || accounts.containsKey(to)) {
                 endIndex += MAX_HD_WALLET_SCAN_AHEAD;
                 if (addAccount(key)) {
                     found++;
@@ -708,6 +696,14 @@ public class Wallet {
         }
 
         return found;
+    }
+
+    private boolean isUsedAccount(AccountState accountState, byte[] bytes) {
+        if (accountState == null) {
+            return false;
+        }
+        Account account = accountState.getAccount(bytes);
+        return account.getNonce() > 0 || account.getAvailable().gt0();
     }
 
     public boolean isHdWalletInitialized() {
