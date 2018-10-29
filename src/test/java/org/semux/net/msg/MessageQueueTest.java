@@ -8,6 +8,7 @@ package org.semux.net.msg;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.After;
 import org.junit.Before;
@@ -62,8 +63,14 @@ public class MessageQueueTest {
         PeerClient client = kernelRule2.getKernel().getClient();
         client.connect(remoteNode, ci).sync();
 
+        long maxWaitTime = 30_000;
+        long startTime = System.currentTimeMillis();
         while (kernel2.getChannelManager().getActiveChannels().isEmpty()) {
             Thread.sleep(100);
+            if(System.currentTimeMillis() - startTime > maxWaitTime)
+            {
+                fail("Took too long to connect peers");
+            }
         }
         return kernel2.getChannelManager().getActiveChannels().get(0);
     }
