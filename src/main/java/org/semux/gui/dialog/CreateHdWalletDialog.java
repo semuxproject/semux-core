@@ -110,7 +110,7 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
 
             byte[] seed;
             try {
-                seed = generator.getSeedFromWordlist(phrase, password);
+                seed = generator.getSeedFromWordlist(phrase, password, Language.english);
             } catch (IllegalArgumentException iae) {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidHdPhrase"));
                 break;

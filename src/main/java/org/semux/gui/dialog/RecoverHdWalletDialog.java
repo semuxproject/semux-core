@@ -6,6 +6,7 @@
  */
 package org.semux.gui.dialog;
 
+import com.github.orogvany.bip39.Language;
 import com.github.orogvany.bip39.MnemonicGenerator;
 import org.semux.core.Wallet;
 import org.semux.gui.Action;
@@ -108,7 +109,7 @@ public class RecoverHdWalletDialog extends JDialog implements ActionListener {
             MnemonicGenerator generator = new MnemonicGenerator();
             byte[] seed;
             try {
-                seed = generator.getSeedFromWordlist(phrase, password);
+                seed = generator.getSeedFromWordlist(phrase, password, Language.english);
             } catch (IllegalArgumentException iae) {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidHdPhrase"));
                 break;

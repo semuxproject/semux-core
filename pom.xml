@@ -1022,7 +1022,7 @@
         <dependency>
             <groupId>com.github.orogvany</groupId>
             <artifactId>BIP32-Ed25519-java</artifactId>
-            <version>456cfb6b048b47c7d314ea13b4245df510661c28</version>
+            <version>a5865ea2916197e2da83c38a3b50972f01a8c93c</version>
         </dependency>
     </dependencies>
 

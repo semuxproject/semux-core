@@ -433,6 +433,11 @@ public class Wallet {
             Key newKey = Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey());
             ByteArray to = ByteArray.of(newKey.toAddress());
             accounts.put(to, newKey);
+            // set a default alias
+            if (!aliases.containsKey(to)) {
+                aliases.put(to, address.getPath());
+            }
+
             return newKey;
         }
     }
@@ -492,7 +497,6 @@ public class Wallet {
                 scanForHdKeys(null);
             }
             return removed;
-
         }
     }
 
@@ -660,6 +664,7 @@ public class Wallet {
      * probably be moved out of here, not sure where it best fits.
      */
     public int scanForHdKeys(AccountState accountState) {
+        requireUnlocked();
         int found = 0;
 
         // make sure to add at least the default account
@@ -687,6 +692,9 @@ public class Wallet {
             if (isUsedAccount || accounts.containsKey(to)) {
                 endIndex += MAX_HD_WALLET_SCAN_AHEAD;
                 if (addAccount(key)) {
+                    if (!aliases.containsKey(to)) {
+                        aliases.put(to, address.getPath());
+                    }
                     found++;
                 }
                 if (i >= nextHdAccountIndex) {
