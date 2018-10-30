@@ -6,7 +6,7 @@ matrix:
     - env: NAME="License, formatter, and FindBugs check"
       os: linux
       sudo: false
-      jdk: oraclejdk8
+      jdk: openjdk8
       script:
         - mvn license:check
         - mvn formatter:validate
@@ -16,7 +16,7 @@ matrix:
     - env: NAME="Coverage report"
       os: linux
       sudo: false
-      jdk: oraclejdk8
+      jdk: openjdk8
       script:
         - mvn cobertura:cobertura -Denforcer.skip=true
       after_success:
@@ -26,7 +26,7 @@ matrix:
     - env: NAME="Linux tests (Java 8)"
       os: linux
       sudo: false
-      jdk: oraclejdk8
+      jdk: openjdk8
       script:
         - mvn test -Denforcer.skip=true
 
@@ -34,7 +34,7 @@ matrix:
     - env: NAME="Linux tests (Java 9)"
       os: linux
       sudo: false
-      jdk: oraclejdk9
+      jdk: openjdk9
       script:
         - mvn test -Denforcer.skip=true
 
@@ -44,7 +44,16 @@ matrix:
       sudo: false
       script:
         - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-        - source ./install-jdk.sh -F 10 -L BCL
+        - source ./install-jdk.sh -F 10 -L GPL
+        - mvn test -Denforcer.skip=true
+
+    # Linux tests (Java 11 LTS)
+    - env: NAME="Linux tests (Java 11)"
+      os: linux
+      sudo: false
+      script:
+        - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+        - source ./install-jdk.sh -F 11 -L GPL
         - mvn test -Denforcer.skip=true
 
     # macOS tests
