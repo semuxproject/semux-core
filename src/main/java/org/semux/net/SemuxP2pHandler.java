@@ -264,7 +264,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
     protected void onDisconnect(ChannelHandlerContext ctx, DisconnectMessage msg) {
         ReasonCode reason = msg.getReason();
-        logger.info("Received DISCONNECT message: reason = {}, remoteIP = {}",
+        logger.info("Received a DISCONNECT message: reason = {}, remoteIP = {}",
                 reason, channel.getRemoteIp());
 
         ctx.close();

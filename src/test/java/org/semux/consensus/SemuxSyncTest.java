@@ -46,6 +46,7 @@ import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
+import org.semux.core.Fork;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
@@ -118,7 +119,7 @@ public class SemuxSyncTest {
     @Test
     public void testValidateCoinbaseMagic() {
         BlockchainImpl blockchain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
-        when(blockchain.forkActivated(anyLong(), eq(ValidatorActivatedFork.UNIFORM_DISTRIBUTION))).thenReturn(true);
+        when(blockchain.isForkActivated(eq(Fork.UNIFORM_DISTRIBUTION), anyLong())).thenReturn(true);
         kernelRule.getKernel().setBlockchain(blockchain);
 
         // block.coinbase = coinbase magic account

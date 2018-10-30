@@ -16,18 +16,17 @@ import static org.mockito.Mockito.withSettings;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.powermock.reflect.Whitebox;
-import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.crypto.Hex;
 
 public class BlockHeaderDataTest {
 
-    private static final ValidatorActivatedFork[] eightPendingForks = new ValidatorActivatedFork[8];
+    private static final Fork[] eightPendingForks = new Fork[8];
 
     private static final byte[] v1_8xPendingForksEncoded = Hex.decode("01110800010002000300040005000600070008");
 
     private static final byte[] v1_0xPendingForkEncoded = Hex.decode("010100");
 
-    private static final ValidatorActivatedFork[] onePendingFork = new ValidatorActivatedFork[1];
+    private static final Fork[] onePendingFork = new Fork[1];
 
     private static final byte[] v1_1xPendingForkEncoded = Hex.decode("0103010001");
 
@@ -39,19 +38,19 @@ public class BlockHeaderDataTest {
     @BeforeClass
     public static void beforeClass() {
         for (short i = 1; i <= 8; i++) {
-            ValidatorActivatedFork a = mock(ValidatorActivatedFork.class);
+            Fork a = mock(Fork.class);
             Whitebox.setInternalState(a, "number", i);
             eightPendingForks[i - 1] = a;
         }
 
-        onePendingFork[0] = ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
+        onePendingFork[0] = Fork.UNIFORM_DISTRIBUTION;
     }
 
     @Test
     public void testV0HeaderData() {
         BlockHeaderData blockHeaderData = BlockHeaderData.v0();
         assertThat(blockHeaderData.toBytes()).hasSize(0);
-        assertFalse(blockHeaderData.signalingFork(ValidatorActivatedFork.UNIFORM_DISTRIBUTION));
+        assertFalse(blockHeaderData.signalingFork(Fork.UNIFORM_DISTRIBUTION));
         assertThat(blockHeaderData.version).isEqualTo((byte) 0x00);
         assertThat(BlockHeaderData.fromBytes(null).version).isEqualTo((byte) 0x00);
         assertThat(BlockHeaderData.fromBytes(new byte[0]).version).isEqualTo((byte) 0x00);
@@ -98,7 +97,7 @@ public class BlockHeaderDataTest {
         // eight pending forks
         blockHeaderData = BlockHeaderData.fromBytes(v1_8xPendingForksEncoded);
         assertThat(blockHeaderData.version).isEqualTo((byte) 0x01);
-        for (ValidatorActivatedFork f : eightPendingForks) {
+        for (Fork f : eightPendingForks) {
             assertTrue(blockHeaderData.signalingFork(f));
         }
     }
@@ -109,7 +108,7 @@ public class BlockHeaderDataTest {
                 .useConstructor((byte) 0xff, unrecognized_reservedDataEncoded));
         when(blockHeaderData.toBytes()).thenCallRealMethod();
         assertThat(blockHeaderData.toBytes()).isEqualTo(unrecognized_headerDataEncoded).hasSize(32);
-        assertFalse(blockHeaderData.signalingFork(ValidatorActivatedFork.UNIFORM_DISTRIBUTION));
+        assertFalse(blockHeaderData.signalingFork(Fork.UNIFORM_DISTRIBUTION));
     }
 
     @Test

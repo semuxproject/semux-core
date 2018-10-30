@@ -20,7 +20,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
+import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 
@@ -43,7 +43,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.semux.config.MainnetConfig;
-import org.semux.consensus.ValidatorActivatedFork;
+import org.semux.core.Fork;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.state.Delegate;
@@ -160,10 +160,7 @@ public class WalletModelTest {
                 new WalletDelegate(new Delegate(new Key().toAddress(), "delegate2".getBytes(), 0, Amount.ZERO)));
         model.setDelegates(delegates);
         model.setValidators(delegates.stream().map(Delegate::getAddressString).collect(Collectors.toList()));
-
-        Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks = new HashMap<>();
-        activatedForks.put(UNIFORM_DISTRIBUTION, new ValidatorActivatedFork.Activation(UNIFORM_DISTRIBUTION, 0));
-        model.setActivatedForks(activatedForks);
+        model.setUniformDistributionEnabled(true);
 
         for (int i = 0; i < 10; i++) {
             Block block = mock(Block.class);
@@ -182,10 +179,7 @@ public class WalletModelTest {
                 new WalletDelegate(new Delegate(new Key().toAddress(), "delegate2".getBytes(), 0, Amount.ZERO)));
         model.setDelegates(delegates);
         model.setValidators(delegates.stream().map(Delegate::getAddressString).collect(Collectors.toList()));
-
-        Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks = new HashMap<>();
-        activatedForks.put(UNIFORM_DISTRIBUTION, new ValidatorActivatedFork.Activation(UNIFORM_DISTRIBUTION, 0));
-        model.setActivatedForks(activatedForks);
+        model.setUniformDistributionEnabled(true);
 
         Map<Long, WalletDelegate> testCases = new HashMap<>();
 

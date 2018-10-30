@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
 import org.semux.Network;
-import org.semux.consensus.ValidatorActivatedFork;
+import org.semux.core.Fork;
 import org.semux.crypto.Hex;
 
 public class MainnetConfig extends AbstractConfig {
@@ -35,11 +35,11 @@ public class MainnetConfig extends AbstractConfig {
         checkpoints = MapUtils.unmodifiableMap(initCheckpoints);
     }
 
-    private static final Map<ValidatorActivatedFork, Long> forkActivationCheckpoints;
+    private static final Map<Fork, Long> forkActivationCheckpoints;
     static {
-        HashMap<ValidatorActivatedFork, Long> initForkActivationCheckpoints = new HashMap<>();
+        HashMap<Fork, Long> initForkActivationCheckpoints = new HashMap<>();
 
-        initForkActivationCheckpoints.put(ValidatorActivatedFork.UNIFORM_DISTRIBUTION, 233514L);
+        initForkActivationCheckpoints.put(Fork.UNIFORM_DISTRIBUTION, 233514L);
 
         forkActivationCheckpoints = MapUtils.unmodifiableMap(initForkActivationCheckpoints);
     }
@@ -54,7 +54,7 @@ public class MainnetConfig extends AbstractConfig {
     }
 
     @Override
-    public Map<ValidatorActivatedFork, Long> forkActivationCheckpoints() {
+    public Map<Fork, Long> forkActivationCheckpoints() {
         return forkActivationCheckpoints;
     }
 }

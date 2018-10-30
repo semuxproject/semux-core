@@ -6,8 +6,8 @@
  */
 package org.semux.consensus;
 
-import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
-import static org.semux.consensus.ValidatorActivatedFork.VIRTUAL_MACHINE;
+import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
+import static org.semux.core.Fork.VIRTUAL_MACHINE;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sum;
 
@@ -41,6 +41,7 @@ import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
+import org.semux.core.Fork;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hash;
@@ -133,14 +134,11 @@ public class SemuxBft implements BftManager {
     protected VoteSet precommitVotes;
     protected VoteSet commitVotes;
 
-    protected Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks;
-
     public SemuxBft(Kernel kernel) {
         this.kernel = kernel;
         this.config = kernel.getConfig();
 
         this.chain = kernel.getBlockchain();
-        this.activatedForks = this.chain.getActivatedForks();
         this.channelMgr = kernel.getChannelManager();
         this.pendingMgr = kernel.getPendingManager();
         this.syncMgr = kernel.getSyncManager();
@@ -282,10 +280,6 @@ public class SemuxBft implements BftManager {
         view = 0;
         proof = new Proof(height, view);
         proposal = null;
-
-        // activate forks
-        activatedForks = chain.getActivatedForks();
-        activateForks();
 
         // update validators
         updateValidators();
@@ -673,30 +667,6 @@ public class SemuxBft implements BftManager {
     }
 
     /**
-     * Attempt to activate pending forks at current height.
-     */
-    private void activateForks() {
-        if (config.forkUniformDistributionEnabled()
-                && !activatedForks.containsKey(UNIFORM_DISTRIBUTION)
-                && height <= UNIFORM_DISTRIBUTION.activationDeadline
-                && chain.forkActivated(height, UNIFORM_DISTRIBUTION)) {
-            activatedForks.put(UNIFORM_DISTRIBUTION,
-                    new ValidatorActivatedFork.Activation(UNIFORM_DISTRIBUTION, height));
-            logger.info("Fork UNIFORM_DISTRIBUTION activated at height {}", height);
-        }
-
-        if (config.forkVirtualMachineEnabled()
-                && !activatedForks.containsKey(VIRTUAL_MACHINE)
-                && height <= VIRTUAL_MACHINE.activationDeadline
-                && chain.forkActivated(height, VIRTUAL_MACHINE)) {
-            activatedForks.put(VIRTUAL_MACHINE,
-                    new ValidatorActivatedFork.Activation(VIRTUAL_MACHINE, height));
-            logger.info("Fork VIRTUAL_MACHINE activated at height {}", height);
-        }
-
-    }
-
-    /**
      * Update the validator sets.
      */
     protected void updateValidators() {
@@ -737,7 +707,7 @@ public class SemuxBft implements BftManager {
      */
     protected boolean isPrimary(long height, int view, String peerId) {
         return config
-                .getPrimaryValidator(validators, height, view, chain.forkActivated(height, UNIFORM_DISTRIBUTION))
+                .getPrimaryValidator(validators, height, view, chain.isForkActivated(UNIFORM_DISTRIBUTION, height))
                 .equals(peerId);
     }
 
@@ -804,18 +774,7 @@ public class SemuxBft implements BftManager {
          */
         timestamp = timestamp > parent.getTimestamp() ? timestamp : parent.getTimestamp() + 1;
 
-        // signal forks
-        Set<ValidatorActivatedFork> forks = new HashSet<>();
-        if (signalingUniformDistribution()) {
-            forks.add(UNIFORM_DISTRIBUTION);
-        }
-        if (signalingVirtualMachine()) {
-            forks.add(VIRTUAL_MACHINE);
-        }
-        byte[] data = !forks.isEmpty()
-                ? BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(
-                        forks.toArray(new ValidatorActivatedFork[forks.size()]))).toBytes()
-                : new byte[0];
+        byte[] data = chain.constructBlockData();
 
         BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,
                 resultsRoot, stateRoot, data);
@@ -825,48 +784,6 @@ public class SemuxBft implements BftManager {
         logger.debug("Block creation: # txs = {}, time = {} ms", pendingTxs.size(), t2 - t1);
 
         return block;
-    }
-
-    /**
-     * Check whether SemuxBFT should be signaling
-     * ${@link ValidatorActivatedFork#UNIFORM_DISTRIBUTION} at current height.
-     *
-     * @return
-     */
-    private boolean signalingUniformDistribution() {
-        // do not signal the fork if this user decides not to participate in the fork
-        if (!config.forkUniformDistributionEnabled()) {
-            return false;
-        }
-
-        // do not continue signaling after fork activation to save space
-        if (activatedForks.containsKey(UNIFORM_DISTRIBUTION)) {
-            return false;
-        }
-
-        // signal the fork before its activation deadline
-        return height <= UNIFORM_DISTRIBUTION.activationDeadline;
-    }
-
-    /**
-     * Check whether SemuxBFT should be signaling
-     * ${@link ValidatorActivatedFork#UNIFORM_DISTRIBUTION} at current height.
-     *
-     * @return
-     */
-    private boolean signalingVirtualMachine() {
-        // do not signal the fork if this user decides not to participate in the fork
-        if (!config.forkVirtualMachineEnabled()) {
-            return false;
-        }
-
-        // do not continue signaling after fork activation to save space
-        if (activatedForks.containsKey(VIRTUAL_MACHINE)) {
-            return false;
-        }
-
-        // signal the fork before its activation deadline
-        return height <= VIRTUAL_MACHINE.activationDeadline;
     }
 
     /**
