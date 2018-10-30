@@ -624,7 +624,7 @@ public class BlockchainImpl implements Blockchain {
                 && latestBlock.getNumber() + 1 <= UNIFORM_DISTRIBUTION.activationDeadline) {
             set.add(UNIFORM_DISTRIBUTION);
         }
-        if (config.forkUniformDistributionEnabled()
+        if (config.forkVirtualMachineEnabled()
                 && !forks.isActivated(VIRTUAL_MACHINE)
                 && latestBlock.getNumber() + 1 <= VIRTUAL_MACHINE.activationDeadline) {
             set.add(VIRTUAL_MACHINE);
@@ -642,7 +642,7 @@ public class BlockchainImpl implements Blockchain {
                 && forks.activateFork(height, UNIFORM_DISTRIBUTION)) {
             setActivatedForks(forks.getActivatedForks());
         }
-        if (config.forkUniformDistributionEnabled()
+        if (config.forkVirtualMachineEnabled()
                 && forks.activateFork(height, VIRTUAL_MACHINE)) {
             setActivatedForks(forks.getActivatedForks());
         }
