@@ -9,6 +9,8 @@ package org.semux.core;
 import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Fork.VIRTUAL_MACHINE;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,6 +24,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.core.Genesis.Premine;
+import org.semux.core.event.BlockchainDatabaseUpgradingEvent;
 import org.semux.core.exception.BlockchainException;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.AccountStateImpl;
@@ -32,9 +35,14 @@ import org.semux.crypto.Hex;
 import org.semux.db.Database;
 import org.semux.db.DatabaseFactory;
 import org.semux.db.DatabaseName;
+import org.semux.db.LeveldbDatabase;
+import org.semux.db.Migration;
+import org.semux.event.PubSub;
+import org.semux.event.PubSubFactory;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,6 +147,12 @@ public class BlockchainImpl implements Blockchain {
 
         // load the latest block
         latestBlock = getBlock(Bytes.toLong(number));
+
+        // checks if the database needs to be upgraded
+        if (getDatabaseVersion() == 0) {
+            upgradeDb0(factory);
+            return;
+        }
     }
 
     private void initializeDb() {
@@ -665,5 +679,96 @@ public class BlockchainImpl implements Blockchain {
             simpleEncoder.writeBytes(entry.getValue().toBytes());
         }
         indexDB.put(Bytes.of(TYPE_ACTIVATED_FORKS), simpleEncoder.toBytes());
+    }
+
+    /**
+     * Upgrade this database from version 0 to version 1.
+     *
+     * @param dbFactory
+     */
+    private void upgradeDb0(DatabaseFactory dbFactory) {
+        // run the migration
+        new MigrationBlockDbVersion001().migrate(config, dbFactory);
+        // reload this blockchain database
+        openDb(dbFactory);
+    }
+
+    /**
+     * A temporary blockchain for database migration. This class implements a
+     * lightweight version of
+     * ${@link org.semux.consensus.SemuxBft#applyBlock(Block)} to migrate blocks
+     * from an existing database to the latest schema.
+     */
+    private class MigrationBlockchain extends BlockchainImpl {
+        private MigrationBlockchain(Config config, DatabaseFactory dbFactory) {
+            super(config, dbFactory);
+        }
+
+        public void applyBlock(Block block) {
+            // [0] execute transactions against local state
+            TransactionExecutor transactionExecutor = new TransactionExecutor(config);
+            transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState());
+            // [1] apply block reward and tx fees
+            Amount reward = config.getBlockReward(block.getNumber());
+            for (Transaction tx : block.getTransactions()) {
+                reward = Amount.sum(reward, tx.getFee());
+            }
+            if (reward.gt0()) {
+                getAccountState().adjustAvailable(block.getCoinbase(), reward);
+            }
+            // [2] commit the updates
+            getAccountState().commit();
+            getDelegateState().commit();
+            // [3] add block to chain
+            addBlock(block);
+        }
+    }
+
+    /**
+     * Database migration from version 0 to version 1. The migration process creates
+     * a temporary ${@link MigrationBlockchain} then migrates all blocks from an
+     * existing blockchain database to the created temporary blockchain database.
+     * Once all blocks have been successfully migrated, the existing blockchain
+     * database is replaced by the migrated temporary blockchain database.
+     */
+    private class MigrationBlockDbVersion001 implements Migration {
+        private final PubSub pubSub = PubSubFactory.getDefault();
+
+        @Override
+        public void migrate(Config config, DatabaseFactory dbFactory) {
+            try {
+                logger.info("Upgrading the database... DO NOT CLOSE THE WALLET!");
+                // recreate block db in a temporary folder
+                String dbName = dbFactory.getDataDir().getFileName().toString();
+                Path tempPath = dbFactory
+                        .getDataDir()
+                        .resolveSibling(dbName + "_tmp_" + TimeUtil.currentTimeMillis());
+                LeveldbDatabase.LeveldbFactory tempDb = new LeveldbDatabase.LeveldbFactory(tempPath.toFile());
+                MigrationBlockchain migrationBlockchain = new MigrationBlockchain(config, tempDb);
+                final long latestBlockNumber = getLatestBlockNumber();
+                for (long i = 1; i <= latestBlockNumber; i++) {
+                    migrationBlockchain.applyBlock(getBlock(i));
+                    if (i % 1000 == 0) {
+                        pubSub.publish(new BlockchainDatabaseUpgradingEvent(i, latestBlockNumber));
+                        logger.info("Loaded {} / {} blocks", i, latestBlockNumber);
+                    }
+                }
+                dbFactory.close();
+                tempDb.close();
+                // move the existing database to backup folder then replace the database folder
+                // with the upgraded database
+                Path backupPath = dbFactory
+                        .getDataDir()
+                        .resolveSibling(
+                                dbFactory.getDataDir().getFileName().toString() + "_bak_"
+                                        + TimeUtil.currentTimeMillis());
+                dbFactory.moveTo(backupPath);
+                tempDb.moveTo(dbFactory.getDataDir());
+                dbFactory.open();
+                logger.info("Database upgraded to version 1.");
+            } catch (IOException e) {
+                logger.error("Failed to run migration " + MigrationBlockDbVersion001.class, e);
+            }
+        }
     }
 }
