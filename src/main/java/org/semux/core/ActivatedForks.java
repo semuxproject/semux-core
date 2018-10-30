@@ -59,15 +59,15 @@ public class ActivatedForks {
     /**
      * Tries to activate a fork.
      *
-     * @param number
      * @param fork
+     * @param number
      */
-    public boolean activateFork(long number, Fork fork) {
+    public boolean activateFork(Fork fork, long number) {
         if (!isActivated(fork)
                 && number <= fork.activationDeadline
                 && isActivated(fork, number)) {
             activatedForks.put(fork, new Fork.Activation(fork, number));
-            logger.info("Fork VIRTUAL_MACHINE activated at block {}", number);
+            logger.info("Fork {} has been activated at block {}", fork, number);
             return true;
         }
 

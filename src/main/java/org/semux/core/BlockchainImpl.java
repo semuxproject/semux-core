@@ -639,11 +639,11 @@ public class BlockchainImpl implements Blockchain {
      */
     protected void activateForks(long height) {
         if (config.forkUniformDistributionEnabled()
-                && forks.activateFork(height, UNIFORM_DISTRIBUTION)) {
+                && forks.activateFork(UNIFORM_DISTRIBUTION, height)) {
             setActivatedForks(forks.getActivatedForks());
         }
         if (config.forkVirtualMachineEnabled()
-                && forks.activateFork(height, VIRTUAL_MACHINE)) {
+                && forks.activateFork(VIRTUAL_MACHINE, height)) {
             setActivatedForks(forks.getActivatedForks());
         }
     }

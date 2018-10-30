@@ -94,6 +94,11 @@ public final class Fork implements Comparable<Fork> {
         return new HashCodeBuilder(73, 103).append(number).build();
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
     public static class Activation {
 
         public final Fork fork;
