@@ -556,7 +556,7 @@ public abstract class AbstractConfig implements Config {
                     netMaxInboundConnectionsPerIp = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 case "net.maxOutboundConnections":
-                    netMaxInboundConnections = Integer.parseInt(props.getProperty(name).trim());
+                    netMaxOutboundConnections = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 case "net.maxMessageQueueSize":
                     netMaxMessageQueueSize = Integer.parseInt(props.getProperty(name).trim());
