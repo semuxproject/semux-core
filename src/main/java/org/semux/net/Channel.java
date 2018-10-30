@@ -19,9 +19,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 
 public class Channel {
-    private static final AtomicLong cnt = new AtomicLong(0);
-
-    private final long id;
     private final NioSocketChannel socket;
 
     private boolean isInbound;
@@ -37,7 +34,6 @@ public class Channel {
      * 
      */
     public Channel(NioSocketChannel socket) {
-        this.id = cnt.getAndIncrement();
         this.socket = socket;
     }
 
@@ -73,15 +69,6 @@ public class Channel {
      */
     public void close() {
         socket.close();
-    }
-
-    /**
-     * Returns the channel id.
-     *
-     * @return
-     */
-    public long getId() {
-        return id;
     }
 
     /**
@@ -130,19 +117,19 @@ public class Channel {
     }
 
     /**
-     * When peer connection become active.
+     * Sets this channel to be active.
      * 
      * @param remotePeer
      */
-    public void onActive(Peer remotePeer) {
+    public void setActive(Peer remotePeer) {
         this.remotePeer = remotePeer;
         this.isActive = true;
     }
 
     /**
-     * When peer disconnects.
+     * Sets this channel to be inactive.
      */
-    public void onInactive() {
+    public void setInactive() {
         /*
          * Remote peer is not reset because other thread may still hold a reference to
          * this channel
@@ -181,7 +168,7 @@ public class Channel {
 
     @Override
     public String toString() {
-        return "Channel [id=" + id + ", " + (isInbound ? "IN" : "OUT") + ", remotePeer=" + remotePeer + "]";
+        return "Channel [" + (isInbound ? "Inbound" : "Outbound") + ", remoteIp = " + getRemoteIp() + ", remotePeer = "
+                + remotePeer + "]";
     }
-
 }

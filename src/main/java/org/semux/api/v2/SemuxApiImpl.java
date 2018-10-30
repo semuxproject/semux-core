@@ -108,7 +108,7 @@ public final class SemuxApiImpl implements SemuxApi {
             SemuxIpFilter ipFilter = kernel.getChannelManager().getIpFilter();
             ipFilter.blacklistIp(ip.trim());
             ipFilter.persist(new File(kernel.getConfig().configDir(), SemuxIpFilter.CONFIG_FILE).toPath());
-            kernel.getChannelManager().removeBlacklistedChannels();
+            kernel.getChannelManager().closeBlacklistedChannels();
 
             return Response.ok().entity(resp.success(true)).build();
         } catch (UnknownHostException | IllegalArgumentException ex) {
