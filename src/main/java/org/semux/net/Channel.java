@@ -7,9 +7,7 @@
 package org.semux.net;
 
 import java.net.InetSocketAddress;
-import java.nio.channels.SocketChannel;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.semux.Kernel;
 import org.semux.net.msg.MessageQueue;

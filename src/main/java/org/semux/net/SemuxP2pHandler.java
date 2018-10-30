@@ -90,7 +90,6 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private final MessageQueue msgQueue;
 
     private AtomicBoolean isHandshakeDone = new AtomicBoolean(false);
-    private AtomicBoolean isClosed = new AtomicBoolean(false);
 
     private ScheduledFuture<?> getNodes = null;
     private ScheduledFuture<?> pingPong = null;

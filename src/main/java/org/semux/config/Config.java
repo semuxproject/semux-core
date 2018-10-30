@@ -14,8 +14,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.semux.Network;
-import org.semux.core.Fork;
 import org.semux.core.Amount;
+import org.semux.core.Fork;
 import org.semux.core.TransactionType;
 import org.semux.net.CapabilitySet;
 import org.semux.net.NodeManager.Node;

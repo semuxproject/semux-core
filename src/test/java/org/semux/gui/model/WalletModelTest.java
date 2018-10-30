@@ -20,7 +20,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 
@@ -43,7 +42,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.semux.config.MainnetConfig;
-import org.semux.core.Fork;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.state.Delegate;

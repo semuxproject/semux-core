@@ -7,7 +7,6 @@
 package org.semux.core;
 
 import java.util.List;
-import java.util.Map;
 
 import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.state.AccountState;

@@ -6,16 +6,13 @@
  */
 package org.semux.consensus;
 
-import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
-import static org.semux.core.Fork.VIRTUAL_MACHINE;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sum;
+import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
@@ -34,14 +31,12 @@ import org.semux.core.Amount;
 import org.semux.core.BftManager;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
-import org.semux.core.BlockHeaderData;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
-import org.semux.core.Fork;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hash;
