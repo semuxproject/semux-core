@@ -160,22 +160,14 @@ public class BlockchainImpl implements Blockchain {
             return;
         }
 
-        // load version 0 index
         latestBlock = getBlock(Bytes.toLong(number));
 
-        // checks if the database needs to be upgraded
-        if (getDatabaseVersion() == 0) {
-            upgradeDb0(factory);
-            return;
-        }
-
-        // load version 1 index
         activatedForks = getActivatedForks();
     }
 
     private void initializeDb() {
         // initialize database version
-        indexDB.put(getDatabaseVersionKey(), Bytes.of(DATABASE_VERSION));
+        indexDB.put(Bytes.of(TYPE_DATABASE_VERSION), Bytes.of(DATABASE_VERSION));
 
         // initialize activated forks
         setActivatedForks(new HashMap<>());
@@ -194,19 +186,6 @@ public class BlockchainImpl implements Blockchain {
 
         // add block
         addBlock(genesis);
-    }
-
-    /**
-     * Upgrade this database from version 0 to version 1.
-     *
-     * @param dbFactory
-     */
-    private void upgradeDb0(DatabaseFactory dbFactory) {
-        // run the migration
-        new MigrationBlockDbVersion001().migrate(config, dbFactory);
-
-        // reload this blockchain database
-        openDb(dbFactory);
     }
 
     @Override
@@ -629,21 +608,12 @@ public class BlockchainImpl implements Blockchain {
      * @return
      */
     protected int getDatabaseVersion() {
-        byte[] versionBytes = indexDB.get(getDatabaseVersionKey());
+        byte[] versionBytes = indexDB.get(Bytes.of(TYPE_DATABASE_VERSION));
         if (versionBytes == null || versionBytes.length == 0) {
             return 0;
         } else {
             return Bytes.toInt(versionBytes);
         }
-    }
-
-    /**
-     * Returns the database key for #{@link #getDatabaseVersion}.
-     *
-     * @return
-     */
-    private byte[] getDatabaseVersionKey() {
-        return Bytes.of(TYPE_DATABASE_VERSION);
     }
 
     /**
@@ -803,93 +773,6 @@ public class BlockchainImpl implements Blockchain {
         public ForkActivationMemory(boolean lowerBoundActivated, long activatedBlocks) {
             this.lowerBoundActivated = lowerBoundActivated;
             this.activatedBlocks = activatedBlocks;
-        }
-    }
-
-    /**
-     * A temporary blockchain for database migration. This class implements a
-     * lightweight version of
-     * ${@link org.semux.consensus.SemuxBft#applyBlock(Block)} to migrate blocks
-     * from an existing database to the latest schema.
-     */
-    private class MigrationBlockchain extends BlockchainImpl {
-
-        private MigrationBlockchain(Config config, DatabaseFactory dbFactory) {
-            super(config, dbFactory);
-        }
-
-        public void applyBlock(Block block) {
-            // [0] execute transactions against local state
-            TransactionExecutor transactionExecutor = new TransactionExecutor(config);
-            transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState());
-
-            // [1] apply block reward and tx fees
-            Amount reward = config.getBlockReward(block.getNumber());
-            for (Transaction tx : block.getTransactions()) {
-                reward = Amount.sum(reward, tx.getFee());
-            }
-            if (reward.gt0()) {
-                getAccountState().adjustAvailable(block.getCoinbase(), reward);
-            }
-
-            // [2] commit the updates
-            getAccountState().commit();
-            getDelegateState().commit();
-
-            // [3] add block to chain
-            addBlock(block);
-        }
-    }
-
-    /**
-     * Database migration from version 0 to version 1. The migration process creates
-     * a temporary ${@link MigrationBlockchain} then migrates all blocks from an
-     * existing blockchain database to the created temporary blockchain database.
-     * Once all blocks have been successfully migrated, the existing blockchain
-     * database is replaced by the migrated temporary blockchain database.
-     */
-    private class MigrationBlockDbVersion001 implements Migration {
-
-        private final PubSub pubSub = PubSubFactory.getDefault();
-
-        @Override
-        public void migrate(Config config, DatabaseFactory dbFactory) {
-            try {
-                logger.info("Upgrading the database... DO NOT CLOSE THE WALLET!");
-
-                // recreate block db in a temporary folder
-                String dbName = dbFactory.getDataDir().getFileName().toString();
-                Path tempPath = dbFactory
-                        .getDataDir()
-                        .resolveSibling(dbName + "_tmp_" + TimeUtil.currentTimeMillis());
-                LeveldbDatabase.LeveldbFactory tempDb = new LeveldbDatabase.LeveldbFactory(tempPath.toFile());
-                MigrationBlockchain migrationBlockchain = new MigrationBlockchain(config, tempDb);
-                final long latestBlockNumber = getLatestBlockNumber();
-                for (long i = 1; i <= latestBlockNumber; i++) {
-                    migrationBlockchain.applyBlock(getBlock(i));
-                    if (i % 1000 == 0) {
-                        pubSub.publish(new BlockchainDatabaseUpgradingEvent(i, latestBlockNumber));
-                        logger.info("Loaded {} / {} blocks", i, latestBlockNumber);
-                    }
-                }
-                dbFactory.close();
-                tempDb.close();
-
-                // move the existing database to backup folder then replace the database folder
-                // with the upgraded database
-                Path backupPath = dbFactory
-                        .getDataDir()
-                        .resolveSibling(
-                                dbFactory.getDataDir().getFileName().toString() + "_bak_"
-                                        + TimeUtil.currentTimeMillis());
-                dbFactory.moveTo(backupPath);
-                tempDb.moveTo(dbFactory.getDataDir());
-                dbFactory.open();
-
-                logger.info("Database upgraded to version 1.");
-            } catch (IOException e) {
-                logger.error("Failed to run migration " + MigrationBlockDbVersion001.class, e);
-            }
         }
     }
 }
