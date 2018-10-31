@@ -12,7 +12,7 @@ import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
 import org.semux.Network;
-import org.semux.consensus.ValidatorActivatedFork;
+import org.semux.core.Fork;
 
 public class DevnetConfig extends AbstractConfig {
 
@@ -21,13 +21,13 @@ public class DevnetConfig extends AbstractConfig {
         this.netMaxInboundConnectionsPerIp = Integer.MAX_VALUE;
     }
 
-    private static final Map<ValidatorActivatedFork, Long> forkActivationCheckpoints;
+    private static final Map<Fork, Long> forkActivationCheckpoints;
     static {
-        HashMap<ValidatorActivatedFork, Long> initForkActivationCheckpoints = new HashMap<>();
+        HashMap<Fork, Long> initForkActivationCheckpoints = new HashMap<>();
 
         // all forks should be activated upon startup.
-        initForkActivationCheckpoints.put(ValidatorActivatedFork.UNIFORM_DISTRIBUTION, 1L);
-        initForkActivationCheckpoints.put(ValidatorActivatedFork.VIRTUAL_MACHINE, 1L);
+        initForkActivationCheckpoints.put(Fork.UNIFORM_DISTRIBUTION, 1L);
+        initForkActivationCheckpoints.put(Fork.VIRTUAL_MACHINE, 1L);
 
         forkActivationCheckpoints = MapUtils.unmodifiableMap(initForkActivationCheckpoints);
     }
@@ -38,7 +38,7 @@ public class DevnetConfig extends AbstractConfig {
     }
 
     @Override
-    public Map<ValidatorActivatedFork, Long> forkActivationCheckpoints() {
+    public Map<Fork, Long> forkActivationCheckpoints() {
         return forkActivationCheckpoints;
     }
 }

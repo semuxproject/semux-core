@@ -6,11 +6,11 @@
  */
 package org.semux.core;
 
+import org.ethereum.vm.chainspec.ByzantiumSpec;
 import org.ethereum.vm.chainspec.Spec;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.TransactionReceipt;
-import org.ethereum.vm.config.ByzantiumConfig;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.semux.config.Config;
@@ -43,7 +43,6 @@ public class TransactionExecutor {
     }
 
     private BlockStore blockStore;
-    private static ByzantiumConfig vmConfig = new ByzantiumConfig();
 
     /**
      * Validate delegate name.

@@ -8,18 +8,16 @@ package org.semux.net;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.semux.Kernel;
 import org.semux.net.msg.MessageQueue;
 
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 
 public class Channel {
-    private static final AtomicLong cnt = new AtomicLong(0);
-
-    private final long id;
+    private final NioSocketChannel socket;
 
     private boolean isInbound;
     private InetSocketAddress remoteAddress;
@@ -33,8 +31,8 @@ public class Channel {
      * Creates a new channel instance.
      * 
      */
-    public Channel() {
-        this.id = cnt.getAndIncrement();
+    public Channel(NioSocketChannel socket) {
+        this.socket = socket;
     }
 
     /**
@@ -65,12 +63,10 @@ public class Channel {
     }
 
     /**
-     * Returns the channel id.
-     * 
-     * @return
+     * Closes the underlying socket channel.
      */
-    public long getId() {
-        return id;
+    public void close() {
+        socket.close();
     }
 
     /**
@@ -119,19 +115,19 @@ public class Channel {
     }
 
     /**
-     * When peer connection become active.
+     * Sets this channel to be active.
      * 
      * @param remotePeer
      */
-    public void onActive(Peer remotePeer) {
+    public void setActive(Peer remotePeer) {
         this.remotePeer = remotePeer;
         this.isActive = true;
     }
 
     /**
-     * When peer disconnects.
+     * Sets this channel to be inactive.
      */
-    public void onInactive() {
+    public void setInactive() {
         /*
          * Remote peer is not reset because other thread may still hold a reference to
          * this channel
@@ -170,7 +166,7 @@ public class Channel {
 
     @Override
     public String toString() {
-        return "Channel [id=" + id + ", " + (isInbound ? "IN" : "OUT") + ", remotePeer=" + remotePeer + "]";
+        return "Channel [" + (isInbound ? "Inbound" : "Outbound") + ", remoteIp = " + getRemoteIp() + ", remotePeer = "
+                + remotePeer + "]";
     }
-
 }

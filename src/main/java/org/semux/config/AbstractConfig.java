@@ -132,7 +132,7 @@ public abstract class AbstractConfig implements Config {
     // Forks
     // =========================
     protected boolean forkUniformDistributionEnabled = true;
-    protected boolean forkVirtualMachineEnabled = true;
+    protected boolean forkVirtualMachineEnabled = false;
 
     /**
      * Create an {@link AbstractConfig} instance.
@@ -556,7 +556,7 @@ public abstract class AbstractConfig implements Config {
                     netMaxInboundConnectionsPerIp = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 case "net.maxOutboundConnections":
-                    netMaxInboundConnections = Integer.parseInt(props.getProperty(name).trim());
+                    netMaxOutboundConnections = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 case "net.maxMessageQueueSize":
                     netMaxMessageQueueSize = Integer.parseInt(props.getProperty(name).trim());

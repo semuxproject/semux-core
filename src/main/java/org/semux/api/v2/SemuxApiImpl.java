@@ -29,7 +29,6 @@ import org.ethereum.vm.chainspec.Spec;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.TransactionReceipt;
-import org.ethereum.vm.config.ByzantiumConfig;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.semux.Kernel;
@@ -119,7 +118,7 @@ public final class SemuxApiImpl implements SemuxApi {
             SemuxIpFilter ipFilter = kernel.getChannelManager().getIpFilter();
             ipFilter.blacklistIp(ip.trim());
             ipFilter.persist(new File(kernel.getConfig().configDir(), SemuxIpFilter.CONFIG_FILE).toPath());
-            kernel.getChannelManager().removeBlacklistedChannels();
+            kernel.getChannelManager().closeBlacklistedChannels();
 
             return Response.ok().entity(resp.success(true)).build();
         } catch (UnknownHostException | IllegalArgumentException ex) {

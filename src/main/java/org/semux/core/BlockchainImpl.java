@@ -6,25 +6,24 @@
  */
 package org.semux.core;
 
-import static org.semux.consensus.ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
-import static org.semux.consensus.ValidatorActivatedFork.VIRTUAL_MACHINE;
+import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
+import static org.semux.core.Fork.VIRTUAL_MACHINE;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.client.BlockStore;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.Genesis.Premine;
 import org.semux.core.event.BlockchainDatabaseUpgradingEvent;
 import org.semux.core.exception.BlockchainException;
@@ -50,19 +49,16 @@ import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-
 /**
  * Blockchain implementation.
- * 
+ *
  * <pre>
  * index DB structure:
- * 
+ *
  * [0] => [latest_block_number]
  * [1] => [validators]
  * [2, address] => [validator_stats]
- * 
+ *
  * [3, block_hash] => [block_number]
  * [4, transaction_hash] => [block_number, from, to] | [coinbase_transaction]
  * [5, address, n] => [transaction_hash]
@@ -73,13 +69,12 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  *
  * <pre>
  * block DB structure:
- * 
+ *
  * [0, block_number] => [block_header]
  * [1, block_number] => [block_transactions]
  * [2, block_number] => [block_results]
  * [3, block_number] => [block_votes]
  * </pre>
- * 
  */
 public class BlockchainImpl implements Blockchain {
 
@@ -108,6 +103,7 @@ public class BlockchainImpl implements Blockchain {
         FORGED, HIT, MISSED
     }
 
+    private final List<BlockchainListener> listeners = new ArrayList<>();
     private final Config config;
 
     private Database indexDB;
@@ -119,26 +115,11 @@ public class BlockchainImpl implements Blockchain {
     private Genesis genesis;
     private Block latestBlock;
 
-    private final List<BlockchainListener> listeners = new ArrayList<>();
-
-    /**
-     * Activated forks at current height.
-     */
-    private Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks = new ConcurrentHashMap<>();
-
-    /**
-     * Cache of <code>(fork, height) -> activated blocks</code>. As there's only one
-     * fork in this version, 2 slots are reserved for current height and current
-     * height - 1.
-     */
-    private final Cache<ImmutablePair<ValidatorActivatedFork, Long>, ForkActivationMemory> forkActivationMemoryCache = Caffeine
-            .newBuilder()
-            .maximumSize(2)
-            .build();
+    private ActivatedForks forks;
 
     /**
      * Create a blockchain instance.
-     * 
+     *
      * @param config
      * @param dbFactory
      */
@@ -160,12 +141,16 @@ public class BlockchainImpl implements Blockchain {
         // checks if the database needs to be initialized
         byte[] number = indexDB.get(Bytes.of(TYPE_LATEST_BLOCK_NUMBER));
 
+        // load the activate forks from database
+        forks = new ActivatedForks(this, config, getActivatedForks());
+
+        // initialize the database for the first time
         if (number == null || number.length == 0) {
             initializeDb();
             return;
         }
 
-        // load version 0 index
+        // load the latest block
         latestBlock = getBlock(Bytes.toLong(number));
 
         // checks if the database needs to be upgraded
@@ -173,17 +158,11 @@ public class BlockchainImpl implements Blockchain {
             upgradeDb0(factory);
             return;
         }
-
-        // load version 1 index
-        activatedForks = getActivatedForks();
     }
 
     private void initializeDb() {
         // initialize database version
-        indexDB.put(getDatabaseVersionKey(), Bytes.of(DATABASE_VERSION));
-
-        // initialize activated forks
-        setActivatedForks(new HashMap<>());
+        indexDB.put(Bytes.of(TYPE_DATABASE_VERSION), Bytes.of(DATABASE_VERSION));
 
         // pre-allocation
         for (Premine p : genesis.getPremines().values()) {
@@ -199,19 +178,6 @@ public class BlockchainImpl implements Blockchain {
 
         // add block
         addBlock(genesis);
-    }
-
-    /**
-     * Upgrade this database from version 0 to version 1.
-     *
-     * @param dbFactory
-     */
-    private void upgradeDb0(DatabaseFactory dbFactory) {
-        // run the migration
-        new MigrationBlockDbVersion001().migrate(config, dbFactory);
-
-        // reload this blockchain database
-        openDb(dbFactory);
     }
 
     @Override
@@ -354,7 +320,6 @@ public class BlockchainImpl implements Blockchain {
     public synchronized void addBlock(Block block) {
         long number = block.getNumber();
         byte[] hash = block.getHash();
-        activateForks(number);
 
         if (number != genesis.getNumber() && number != latestBlock.getNumber() + 1) {
             logger.error("Adding wrong block: number = {}, expected = {}", number, latestBlock.getNumber() + 1);
@@ -408,8 +373,7 @@ public class BlockchainImpl implements Blockchain {
 
             // [5] update validator statistics
             List<String> validators = getValidators();
-            String primary = config.getPrimaryValidator(validators, number, 0,
-                    activatedForks.containsKey(UNIFORM_DISTRIBUTION));
+            String primary = config.getPrimaryValidator(validators, number, 0, forks.isActivated(UNIFORM_DISTRIBUTION));
             adjustValidatorStats(block.getCoinbase(), StatsType.FORGED, 1);
             if (primary.equals(Hex.encode(block.getCoinbase()))) {
                 adjustValidatorStats(Hex.decode0x(primary), StatsType.HIT, 1);
@@ -430,32 +394,8 @@ public class BlockchainImpl implements Blockchain {
         for (BlockchainListener listener : listeners) {
             listener.onBlockAdded(block);
         }
-    }
 
-    /**
-     * Attempt to activate pending forks at current height.
-     */
-    private synchronized void activateForks(long number) {
-        if (config.forkUniformDistributionEnabled()
-                && !activatedForks.containsKey(UNIFORM_DISTRIBUTION)
-                && number <= UNIFORM_DISTRIBUTION.activationDeadline
-                && forkActivated(number, ValidatorActivatedFork.UNIFORM_DISTRIBUTION)) {
-            // persist the activated fork
-            activatedForks.put(UNIFORM_DISTRIBUTION,
-                    new ValidatorActivatedFork.Activation(UNIFORM_DISTRIBUTION, number));
-            setActivatedForks(activatedForks);
-            logger.info("Fork UNIFORM_DISTRIBUTION activated at block {}", number);
-        }
-        if (config.forkVirtualMachineEnabled()
-                && !activatedForks.containsKey(VIRTUAL_MACHINE)
-                && number <= VIRTUAL_MACHINE.activationDeadline
-                && forkActivated(number, ValidatorActivatedFork.VIRTUAL_MACHINE)) {
-            // persist the activated fork
-            activatedForks.put(VIRTUAL_MACHINE,
-                    new ValidatorActivatedFork.Activation(VIRTUAL_MACHINE, number));
-            setActivatedForks(activatedForks);
-            logger.info("Fork VIRTUAL_MACHINE activated at block {}", number);
-        }
+        activateForks(number + 1);
     }
 
     @Override
@@ -514,7 +454,7 @@ public class BlockchainImpl implements Blockchain {
 
     /**
      * Updates the validator set.
-     * 
+     *
      * @param number
      */
     protected void updateValidators(long number) {
@@ -537,7 +477,7 @@ public class BlockchainImpl implements Blockchain {
 
     /**
      * Adjusts validator statistics.
-     * 
+     *
      * @param address
      *            validator address
      * @param type
@@ -570,7 +510,7 @@ public class BlockchainImpl implements Blockchain {
 
     /**
      * Sets the total number of transaction of an account.
-     * 
+     *
      * @param address
      * @param total
      */
@@ -580,7 +520,7 @@ public class BlockchainImpl implements Blockchain {
 
     /**
      * Adds a transaction to an account.
-     * 
+     *
      * @param tx
      * @param address
      */
@@ -592,7 +532,7 @@ public class BlockchainImpl implements Blockchain {
 
     /**
      * Returns the N-th transaction index key of an account.
-     * 
+     *
      * @param address
      * @param n
      * @return
@@ -601,39 +541,13 @@ public class BlockchainImpl implements Blockchain {
         return Bytes.merge(Bytes.of(TYPE_ACCOUNT_TRANSACTION), address, Bytes.of(n));
     }
 
-    @Override
-    public Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> getActivatedForks() {
-        Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activations = new HashMap<>();
-        SimpleDecoder simpleDecoder = new SimpleDecoder(indexDB.get(getActivatedForksKey()));
-        final int numberOfForks = simpleDecoder.readInt();
-        for (int i = 0; i < numberOfForks; i++) {
-            ValidatorActivatedFork.Activation activation = ValidatorActivatedFork.Activation
-                    .fromBytes(simpleDecoder.readBytes());
-            activations.put(activation.fork, activation);
-        }
-        return activations;
-    }
-
-    private void setActivatedForks(Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> activatedForks) {
-        SimpleEncoder simpleEncoder = new SimpleEncoder();
-        simpleEncoder.writeInt(activatedForks.size());
-        for (Entry<ValidatorActivatedFork, ValidatorActivatedFork.Activation> entry : activatedForks.entrySet()) {
-            simpleEncoder.writeBytes(entry.getValue().toBytes());
-        }
-        indexDB.put(getActivatedForksKey(), simpleEncoder.toBytes());
-    }
-
-    private byte[] getActivatedForksKey() {
-        return Bytes.of(TYPE_ACTIVATED_FORKS);
-    }
-
     /**
      * Returns the version of current database.
      *
      * @return
      */
     protected int getDatabaseVersion() {
-        byte[] versionBytes = indexDB.get(getDatabaseVersionKey());
+        byte[] versionBytes = indexDB.get(Bytes.of(TYPE_DATABASE_VERSION));
         if (versionBytes == null || versionBytes.length == 0) {
             return 0;
         } else {
@@ -642,17 +556,7 @@ public class BlockchainImpl implements Blockchain {
     }
 
     /**
-     * Returns the database key for #{@link #getDatabaseVersion}.
-     *
-     * @return
-     */
-    private byte[] getDatabaseVersionKey() {
-        return Bytes.of(TYPE_DATABASE_VERSION);
-    }
-
-    /**
      * Validator statistics.
-     *
      */
     public static class ValidatorStats {
         private long blocksForged;
@@ -706,108 +610,91 @@ public class BlockchainImpl implements Blockchain {
         }
     }
 
-    /**
-     * Checks if a fork is activated at a certain height of this blockchain.
-     *
-     * @param height
-     *            A blockchain height to check.
-     * @param fork
-     *            An instance of ${@link ValidatorActivatedFork} to check.
-     * @return
-     */
     @Override
-    public synchronized boolean forkActivated(final long height, ValidatorActivatedFork fork) {
-        // skips genesis block
-        if (height <= 1) {
-            return false;
+    public boolean isForkActivated(Fork fork) {
+        return forks.isActivated(fork);
+    }
+
+    @Override
+    public boolean isForkActivated(Fork fork, long height) {
+        return forks.isActivated(fork, height);
+    }
+
+    @Override
+    public byte[] constructBlockData() {
+        Set<Fork> set = new HashSet<>();
+        if (config.forkUniformDistributionEnabled()
+                && !forks.isActivated(UNIFORM_DISTRIBUTION)
+                && latestBlock.getNumber() + 1 <= UNIFORM_DISTRIBUTION.activationDeadline) {
+            set.add(UNIFORM_DISTRIBUTION);
+        }
+        if (config.forkVirtualMachineEnabled()
+                && !forks.isActivated(VIRTUAL_MACHINE)
+                && latestBlock.getNumber() + 1 <= VIRTUAL_MACHINE.activationDeadline) {
+            set.add(VIRTUAL_MACHINE);
         }
 
-        // checks whether the fork has been activated and recorded in database
-        if (activatedForks.containsKey(fork)) {
-            return height >= activatedForks.get(fork).activatedAt;
-        }
-
-        // checks whether the local blockchain has reached the fork activation
-        // checkpoint
-        if (config.forkActivationCheckpoints().containsKey(fork)) {
-            return config.forkActivationCheckpoints().get(fork) <= height;
-        }
-
-        // returns memoized result of fork activation lookup at current height
-        ForkActivationMemory currentHeightActivationMemory = forkActivationMemoryCache
-                .getIfPresent(ImmutablePair.of(fork, height));
-        if (currentHeightActivationMemory != null) {
-            return currentHeightActivationMemory.activatedBlocks >= fork.activationBlocks;
-        }
-
-        // sets boundaries:
-        // lookup from (height - 1)
-        // to (height - fork.activationBlocksLookup)
-        final long higherBound = height - 1;
-        final long lowerBound = Math.min(Math.max(height - fork.activationBlocksLookup, 1), higherBound);
-        long activatedBlocks = 0;
-
-        // O(1) dynamic-programming lookup, see the definition of ForkActivationMemory
-        ForkActivationMemory forkActivationMemory = forkActivationMemoryCache
-                .getIfPresent(ImmutablePair.of(fork, height - 1));
-        if (forkActivationMemory != null) {
-            activatedBlocks = forkActivationMemory.activatedBlocks -
-                    (forkActivationMemory.lowerBoundActivated && lowerBound > 1 ? 1 : 0) +
-                    (getBlockHeader(higherBound).getDecodedData().signalingFork(fork) ? 1 : 0);
-        } else { // O(m) traversal lookup
-            for (long i = higherBound; i >= lowerBound; i--) {
-                activatedBlocks += getBlockHeader(i).getDecodedData().signalingFork(fork) ? 1 : 0;
-            }
-        }
-
-        // memorizes
-        forkActivationMemoryCache.put(
-                ImmutablePair.of(fork, height),
-                new ForkActivationMemory(
-                        getBlockHeader(lowerBound).getDecodedData().signalingFork(fork),
-                        activatedBlocks));
-
-        // returns
-        boolean activated = activatedBlocks >= fork.activationBlocks;
-        if (activatedBlocks > 0) {
-            logger.debug("Fork activation of {} at height {}: {} / {} (activated = {}) in the past {} blocks",
-                    fork.name,
-                    height,
-                    activatedBlocks,
-                    fork.activationBlocks, activated, fork.activationBlocksLookup);
-        }
-
-        return activated;
+        return set.isEmpty() ? new byte[0]
+                : BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(set.toArray(new Fork[0]))).toBytes();
     }
 
     /**
-     * <code>
-     * ForkActivationMemory[height].lowerBoundActivated =
-     *      forkActivated(height - ${@link ValidatorActivatedFork#activationBlocksLookup})
-     *
-     * ForkActivationMemory[height].activatedBlocks =
-     *      ForkActivationMemory[height - 1].activatedBlocks -
-     *      ForkActivationMemory[height - 1].lowerBoundActivated ? 1 : 0 +
-     *      forkActivated(height - 1) ? 1 : 0
-     * </code>
+     * Attempt to activate pending forks at current height.
      */
-    private static class ForkActivationMemory {
-
-        /**
-         * Whether the fork is activated at height
-         * <code>(current height -{@link ValidatorActivatedFork#activationBlocksLookup})</code>.
-         */
-        public final boolean lowerBoundActivated;
-
-        /**
-         * The number of activated blocks at the memorized height.
-         */
-        public final long activatedBlocks;
-
-        public ForkActivationMemory(boolean lowerBoundActivated, long activatedBlocks) {
-            this.lowerBoundActivated = lowerBoundActivated;
-            this.activatedBlocks = activatedBlocks;
+    protected void activateForks(long height) {
+        if (config.forkUniformDistributionEnabled()
+                && forks.activateFork(UNIFORM_DISTRIBUTION, height)) {
+            setActivatedForks(forks.getActivatedForks());
         }
+        if (config.forkVirtualMachineEnabled()
+                && forks.activateFork(VIRTUAL_MACHINE, height)) {
+            setActivatedForks(forks.getActivatedForks());
+        }
+    }
+
+    /**
+     * Returns the set of activate forks.
+     *
+     * @return
+     */
+    protected Map<Fork, Fork.Activation> getActivatedForks() {
+        Map<Fork, Fork.Activation> activations = new HashMap<>();
+        byte[] value = indexDB.get(Bytes.of(TYPE_ACTIVATED_FORKS));
+        if (value != null) {
+            SimpleDecoder simpleDecoder = new SimpleDecoder(value);
+            final int numberOfForks = simpleDecoder.readInt();
+            for (int i = 0; i < numberOfForks; i++) {
+                Fork.Activation activation = Fork.Activation.fromBytes(simpleDecoder.readBytes());
+                activations.put(activation.fork, activation);
+            }
+        }
+        return activations;
+    }
+
+    /**
+     * Sets the set of activate forks.
+     *
+     * @return
+     */
+    protected void setActivatedForks(Map<Fork, Fork.Activation> activatedForks) {
+        SimpleEncoder simpleEncoder = new SimpleEncoder();
+        simpleEncoder.writeInt(activatedForks.size());
+        for (Entry<Fork, Fork.Activation> entry : activatedForks.entrySet()) {
+            simpleEncoder.writeBytes(entry.getValue().toBytes());
+        }
+        indexDB.put(Bytes.of(TYPE_ACTIVATED_FORKS), simpleEncoder.toBytes());
+    }
+
+    /**
+     * Upgrade this database from version 0 to version 1.
+     *
+     * @param dbFactory
+     */
+    private void upgradeDb0(DatabaseFactory dbFactory) {
+        // run the migration
+        new MigrationBlockDbVersion001().migrate(config, dbFactory);
+        // reload this blockchain database
+        openDb(dbFactory);
     }
 
     /**
@@ -817,7 +704,6 @@ public class BlockchainImpl implements Blockchain {
      * from an existing database to the latest schema.
      */
     private class MigrationBlockchain extends BlockchainImpl {
-
         private MigrationBlockchain(Config config, DatabaseFactory dbFactory) {
             super(config, dbFactory);
         }
@@ -834,11 +720,9 @@ public class BlockchainImpl implements Blockchain {
             if (reward.gt0()) {
                 getAccountState().adjustAvailable(block.getCoinbase(), reward);
             }
-
             // [2] commit the updates
             getAccountState().commit();
             getDelegateState().commit();
-
             // [3] add block to chain
             addBlock(block);
         }
@@ -852,14 +736,12 @@ public class BlockchainImpl implements Blockchain {
      * database is replaced by the migrated temporary blockchain database.
      */
     private class MigrationBlockDbVersion001 implements Migration {
-
         private final PubSub pubSub = PubSubFactory.getDefault();
 
         @Override
         public void migrate(Config config, DatabaseFactory dbFactory) {
             try {
                 logger.info("Upgrading the database... DO NOT CLOSE THE WALLET!");
-
                 // recreate block db in a temporary folder
                 String dbName = dbFactory.getDataDir().getFileName().toString();
                 Path tempPath = dbFactory
@@ -877,7 +759,6 @@ public class BlockchainImpl implements Blockchain {
                 }
                 dbFactory.close();
                 tempDb.close();
-
                 // move the existing database to backup folder then replace the database folder
                 // with the upgraded database
                 Path backupPath = dbFactory
@@ -888,7 +769,6 @@ public class BlockchainImpl implements Blockchain {
                 dbFactory.moveTo(backupPath);
                 tempDb.moveTo(dbFactory.getDataDir());
                 dbFactory.open();
-
                 logger.info("Database upgraded to version 1.");
             } catch (IOException e) {
                 logger.error("Failed to run migration " + MigrationBlockDbVersion001.class, e);

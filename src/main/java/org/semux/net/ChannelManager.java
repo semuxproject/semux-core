@@ -130,17 +130,19 @@ public class ChannelManager {
         channels.remove(ch.getRemoteAddress());
         if (ch.isActive()) {
             activeChannels.remove(ch.getRemotePeer().getPeerId());
-            ch.onInactive();
+            ch.setInactive();
         }
     }
 
     /**
-     * Remove blacklisted channels.
+     * Closes all blacklisted channels.
      */
-    public void removeBlacklistedChannels() {
-        for (Map.Entry<InetSocketAddress, Channel> channelEntry : channels.entrySet()) {
-            if (!isAcceptable(channelEntry.getValue().getRemoteAddress())) {
-                remove(channelEntry.getValue());
+    public void closeBlacklistedChannels() {
+        for (Map.Entry<InetSocketAddress, Channel> entry : channels.entrySet()) {
+            Channel channel = entry.getValue();
+            if (!isAcceptable(channel.getRemoteAddress())) {
+                remove(channel);
+                channel.close();
             }
         }
     }
@@ -152,7 +154,7 @@ public class ChannelManager {
      * @param peer
      */
     public void onChannelActive(Channel channel, Peer peer) {
-        channel.onActive(peer);
+        channel.setActive(peer);
         activeChannels.put(peer.getPeerId(), channel);
     }
 

@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.consensus;
+package org.semux.core;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.semux.util.SimpleDecoder;
@@ -15,16 +15,16 @@ import org.semux.util.SimpleEncoder;
  * Activated Soft Fork (MASF) in Bitcoin. See:
  * https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki
  */
-public final class ValidatorActivatedFork implements Comparable<ValidatorActivatedFork> {
+public final class Fork implements Comparable<Fork> {
 
     /**
      * This soft fork introduces an uniformly-distributed hash function for choosing
      * primary validator.
      */
-    public static final ValidatorActivatedFork UNIFORM_DISTRIBUTION = new ValidatorActivatedFork((short) 1,
+    public static final Fork UNIFORM_DISTRIBUTION = new Fork((short) 1,
             "UNIFORM_DISTRIBUTION", 1500, 2000, 1000000);
 
-    public static final ValidatorActivatedFork VIRTUAL_MACHINE = new ValidatorActivatedFork((short) 2,
+    public static final Fork VIRTUAL_MACHINE = new Fork((short) 2,
             "VIRTUAL_MACHINE", 1500, 2000, 1000000);
     /**
      * An unique number of this fork.
@@ -52,7 +52,7 @@ public final class ValidatorActivatedFork implements Comparable<ValidatorActivat
      */
     public final long activationDeadline;
 
-    private ValidatorActivatedFork(short number, String name, long activationBlocks, long activationBlocksLookup,
+    private Fork(short number, String name, long activationBlocks, long activationBlocksLookup,
             long activationDeadline) {
         this.number = number;
         this.name = name;
@@ -67,7 +67,7 @@ public final class ValidatorActivatedFork implements Comparable<ValidatorActivat
         return simpleEncoder.toBytes();
     }
 
-    public static ValidatorActivatedFork fromBytes(byte[] bytes) {
+    public static Fork fromBytes(byte[] bytes) {
         SimpleDecoder simpleDecoder = new SimpleDecoder(bytes);
         short forkNumber = simpleDecoder.readShort();
         if (forkNumber == 1) {
@@ -80,13 +80,13 @@ public final class ValidatorActivatedFork implements Comparable<ValidatorActivat
     }
 
     @Override
-    public int compareTo(ValidatorActivatedFork o) {
+    public int compareTo(Fork o) {
         return Long.compare(number, o.number);
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof ValidatorActivatedFork && compareTo((ValidatorActivatedFork) o) == 0;
+        return o instanceof Fork && compareTo((Fork) o) == 0;
     }
 
     @Override
@@ -94,13 +94,18 @@ public final class ValidatorActivatedFork implements Comparable<ValidatorActivat
         return new HashCodeBuilder(73, 103).append(number).build();
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
     public static class Activation {
 
-        public final ValidatorActivatedFork fork;
+        public final Fork fork;
 
         public final long activatedAt;
 
-        public Activation(ValidatorActivatedFork fork, long activatedAt) {
+        public Activation(Fork fork, long activatedAt) {
             this.fork = fork;
             this.activatedAt = activatedAt;
         }
@@ -114,7 +119,7 @@ public final class ValidatorActivatedFork implements Comparable<ValidatorActivat
 
         public static Activation fromBytes(byte[] bytes) {
             SimpleDecoder simpleDecoder = new SimpleDecoder(bytes);
-            ValidatorActivatedFork fork = ValidatorActivatedFork.fromBytes(simpleDecoder.readBytes());
+            Fork fork = Fork.fromBytes(simpleDecoder.readBytes());
             long activatedAt = simpleDecoder.readLong();
             return new Activation(fork, activatedAt);
         }

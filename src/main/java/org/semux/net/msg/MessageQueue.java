@@ -13,6 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.config.Config;
@@ -47,7 +48,8 @@ public class MessageQueue {
 
     private ChannelHandlerContext ctx;
     private ScheduledFuture<?> timerTask;
-    private boolean initialized;
+
+    private AtomicBoolean isClosed = new AtomicBoolean(false);
 
     /**
      * Create a message queue with the specified maximum queue size.
@@ -64,29 +66,21 @@ public class MessageQueue {
      * @param ctx
      */
     public synchronized void activate(ChannelHandlerContext ctx) {
-        if (!initialized) {
-            this.ctx = ctx;
-            this.timerTask = timer.scheduleAtFixedRate(() -> {
-                try {
-                    nudgeQueue();
-                } catch (Exception t) {
-                    logger.error("Exception in MessageQueue", t);
-                }
-            }, 1, 1, TimeUnit.MILLISECONDS);
-
-            initialized = true;
-        }
+        this.ctx = ctx;
+        this.timerTask = timer.scheduleAtFixedRate(() -> {
+            try {
+                nudgeQueue();
+            } catch (Exception t) {
+                logger.error("Exception in MessageQueue", t);
+            }
+        }, 1, 1, TimeUnit.MILLISECONDS);
     }
 
     /**
      * Deactivates this message queue.
      */
     public synchronized void deactivate() {
-        if (initialized) {
-            this.timerTask.cancel(false);
-
-            initialized = false;
-        }
+        this.timerTask.cancel(false);
     }
 
     /**
@@ -106,10 +100,12 @@ public class MessageQueue {
     public void disconnect(ReasonCode code) {
         logger.debug("Disconnect: reason = {}", code);
 
-        deactivate();
-
-        ctx.writeAndFlush(new DisconnectMessage(code));
-        ctx.close();
+        // avoid repeating close requests
+        if (isClosed.compareAndSet(false, true)) {
+            ctx.writeAndFlush(new DisconnectMessage(code)).addListener((ChannelFutureListener) future -> {
+                ctx.close();
+            });
+        }
     }
 
     /**
@@ -121,11 +117,6 @@ public class MessageQueue {
      *         false
      */
     public boolean sendMessage(Message msg) {
-        // not atomic or synchronized
-        if (!initialized) {
-            return false;
-        }
-
         int maxQueueSize = config.netMaxMessageQueueSize();
         if (size() >= maxQueueSize) {
             disconnect(ReasonCode.MESSAGE_QUEUE_FULL);
@@ -190,7 +181,6 @@ public class MessageQueue {
     }
 
     protected void sendToWire(MessageWrapper mw) {
-
         if (mw != null && mw.getRetries() == 0) {
             Message msg = mw.getMessage();
 

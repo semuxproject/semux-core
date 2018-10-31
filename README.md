@@ -30,7 +30,7 @@ Apache Maven 3.5.2
 
 Build:
 ```
-git clone --recursive https://github.com/semuxproject/semux-core
+git clone https://github.com/semuxproject/semux-core
 cd semux
 mvn install -DskipTests
 ```

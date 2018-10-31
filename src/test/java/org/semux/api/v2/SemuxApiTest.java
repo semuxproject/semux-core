@@ -141,7 +141,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
         // blacklist 8.8.8.8
         assertTrue(api.addToBlacklist("8.8.8.8").isSuccess());
-        verify(channelManagerSpy).removeBlacklistedChannels();
+        verify(channelManagerSpy).closeBlacklistedChannels();
 
         // assert that 8.8.8.8 is no longer acceptable
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);

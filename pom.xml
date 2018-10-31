@@ -547,8 +547,8 @@
                                         <urn>javax.ws.rs:javax.ws.rs-api:2.1:jar:null:compile:426a0862406536e690c7caa8bb6ed32191986fac</urn>
                                         <urn>javax.xml.bind:jaxb-api:2.3.0:jar:null:compile:99f802e0cb3e953ba3d6e698795c4aeb98d37c48</urn>
                                         <urn>junit:junit:4.12:jar:null:test:2973d150c0dc1fefe998f834810d68f278ea58ec</urn>
-                                        <urn>net.bytebuddy:byte-buddy-agent:1.8.15:jar:null:test:a2dbe3457401f65ad4022617fbb3fc0e5f427c7d</urn>
-                                        <urn>net.bytebuddy:byte-buddy:1.8.15:jar:null:test:cb36fe3c70ead5fcd016856a7efff908402d86b8</urn>
+                                        <urn>net.bytebuddy:byte-buddy-agent:1.9.3:jar:null:test:f5b78c16cf4060664d80b6ca32d80dca4bd3d264</urn>
+                                        <urn>net.bytebuddy:byte-buddy:1.9.3:jar:null:test:f32e510b239620852fc9a2387fac41fd053d6a4d</urn>
                                         <urn>net.i2p.crypto:eddsa:0.3.0:jar:null:compile:1901c8d4d8bffb7d79027686cfb91e704217c3e1</urn>
                                         <urn>net.java.dev.jna:jna-platform:4.5.2:jar:null:compile:741853c07152f6c0fef5194efa6b2dabac22e9c0</urn>
                                         <urn>net.java.dev.jna:jna:4.5.2:jar:null:compile:35d000afbaa4ed425d91873b40f4df9b8236875b</urn>
@@ -676,7 +676,7 @@
         <dependency>
             <groupId>com.github.semuxproject</groupId>
             <artifactId>evm</artifactId>
-            <version>-SNAPSHOT</version>
+            <version>f0cd3256aad61634e0efb320478e8075beec076f</version>
         </dependency>
 
         <!-- Swagger & JAX-RS API -->
@@ -882,13 +882,6 @@
             <version>2.6.2</version>
         </dependency>
 
-        <!-- EVM -->
-        <dependency>
-            <groupId>org.semux</groupId>
-            <artifactId>evm</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-
         <!-- Testing Libraries -->
         <dependency>
             <groupId>junit</groupId>
@@ -979,13 +972,13 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.8.15</version>
+            <version>1.9.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy-agent</artifactId>
-            <version>1.8.15</version>
+            <version>1.9.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>

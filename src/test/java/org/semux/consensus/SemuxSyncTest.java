@@ -46,6 +46,7 @@ import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
+import org.semux.core.Fork;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
@@ -118,7 +119,7 @@ public class SemuxSyncTest {
     @Test
     public void testValidateCoinbaseMagic() {
         BlockchainImpl blockchain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
-        when(blockchain.forkActivated(anyLong(), eq(ValidatorActivatedFork.UNIFORM_DISTRIBUTION))).thenReturn(true);
+        when(blockchain.isForkActivated(eq(Fork.UNIFORM_DISTRIBUTION), anyLong())).thenReturn(true);
         kernelRule.getKernel().setBlockchain(blockchain);
 
         // block.coinbase = coinbase magic account
@@ -457,7 +458,7 @@ public class SemuxSyncTest {
         assert (toFinalize.size() == validatorInterval - currentSet.size() - 1);
         assert (toDownload.contains(validatorInterval - toFinalize.size()));
 
-        Channel channel2 = new Channel();
+        Channel channel2 = new Channel(null);
         currentSet.add(Pair.of(lastBlock, channel2));
         Whitebox.invokeMethod(sync, "validateSetHashes"); // only one block with the same height is added to toFinalize
 

@@ -101,6 +101,12 @@ public class SemuxRepository implements Repository {
     }
 
     @Override
+    public Repository clone() {
+        // todo - is a clone a track or original account state?
+        return new SemuxRepository(accountState.track());
+    }
+
+    @Override
     public void commit() {
         accountState.commit();
     }
