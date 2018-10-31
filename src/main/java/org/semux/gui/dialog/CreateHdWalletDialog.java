@@ -44,6 +44,7 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
         phraseField.setEditable(false);
         phraseField.setLineWrap(true);
         phraseField.setWrapStyleWord(true);
+        phraseField.setRows(2);
         phrase = generator.getWordlist(128, Language.english);
 
         phraseField.setText(phrase);
@@ -78,7 +79,7 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
                                 .addGap(32)
                                 .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(lblPhrase)
-                                        .addComponent(phraseField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(phraseField, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
                                 .addGap(18)
                                 .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(lblPassword)

@@ -146,10 +146,10 @@ public class Wallet {
                 case 4:
                     salt = dec.readBytes();
                     key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
-                    hdSeed = dec.readBytes();
-                    nextHdAccountIndex = dec.readInt();
                     newAccounts = readAccounts(key, dec, true, version);
                     newAliases = readAddressAliases(key, dec);
+                    hdSeed = dec.readBytes();
+                    nextHdAccountIndex = dec.readInt();
                     break;
                 default:
                     throw new CryptoException("Unknown wallet version.");
@@ -538,11 +538,11 @@ public class Wallet {
 
             byte[] key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
 
-            enc.writeBytes(hdSeed);
-            enc.writeInt(nextHdAccountIndex);
-
             writeAccounts(key, enc);
             writeAddressAliases(key, enc);
+
+            enc.writeBytes(hdSeed);
+            enc.writeInt(nextHdAccountIndex);
 
             if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
                 logger.error("Failed to create the directory for wallet");
