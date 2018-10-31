@@ -101,6 +101,8 @@ public class SemuxApiService {
             logger.info("Starting API server: address = {}:{}", ip, port);
             channel = b.bind(ip, port).sync().channel();
 
+            // allow larger messages for local contract calls.  can make this smaller, but not sure
+            // what largest contract is
             int bufferSize = 99999999;
             channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(bufferSize));
             channel.config().setOption(ChannelOption.SO_RCVBUF, bufferSize);
