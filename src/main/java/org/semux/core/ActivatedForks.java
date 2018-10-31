@@ -60,14 +60,14 @@ public class ActivatedForks {
      * Tries to activate a fork.
      *
      * @param fork
-     * @param number
+     * @param height
      */
-    public boolean activateFork(Fork fork, long number) {
+    public boolean activateFork(Fork fork, long height) {
         if (!isActivated(fork)
-                && number <= fork.activationDeadline
-                && isActivated(fork, number)) {
-            activatedForks.put(fork, new Fork.Activation(fork, number));
-            logger.info("Fork {} has been activated at block {}", fork, number);
+                && height <= fork.activationDeadline
+                && isActivated(fork, height)) {
+            activatedForks.put(fork, new Fork.Activation(fork, height));
+            logger.info("Fork {} has been activated at block height {}", fork, height);
             return true;
         }
 
