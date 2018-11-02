@@ -14,7 +14,7 @@ import static org.mockito.Mockito.spy;
 import static org.semux.core.Amount.Unit.MILLI_SEM;
 import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.PendingManager.ALLOWED_TIME_DRIFT;
-import static org.semux.core.TransactionResult.Error.INVALID_TIMESTAMP;
+import static org.semux.core.TransactionResult.Code.INVALID_TIMESTAMP;
 
 import java.util.Arrays;
 import java.util.List;
@@ -107,10 +107,10 @@ public class PendingManagerTest {
     @Test
     public void testAddTransactionSyncErrorInvalidFormat() {
         Transaction tx = new Transaction(network, type, to, value, fee, 0, 0, Bytes.EMPTY_BYTES).sign(key);
-        PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
+        PendingManager.ProcessingResult result = pendingMgr.addTransactionSync(tx);
         assertEquals(0, pendingMgr.getPendingTransactions().size());
         assertNotNull(result.error);
-        assertEquals(TransactionResult.Error.INVALID_FORMAT, result.error);
+        assertEquals(TransactionResult.Code.INVALID_FORMAT, result.error);
     }
 
     @Test
@@ -122,10 +122,10 @@ public class PendingManagerTest {
         kernel.setBlockchain(spy(kernel.getBlockchain()));
         doReturn(true).when(kernel.getBlockchain()).hasTransaction(tx.getHash());
 
-        PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
+        PendingManager.ProcessingResult result = pendingMgr.addTransactionSync(tx);
         assertEquals(0, pendingMgr.getPendingTransactions().size());
         assertNotNull(result.error);
-        assertEquals(TransactionResult.Error.DUPLICATED_HASH, result.error);
+        assertEquals(TransactionResult.Code.DUPLICATE_TRANSACTION, result.error);
 
         Mockito.reset(kernel.getBlockchain());
     }
@@ -137,10 +137,10 @@ public class PendingManagerTest {
                 Bytes.EMPTY_BYTES)
                         .sign(key);
 
-        PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
+        PendingManager.ProcessingResult result = pendingMgr.addTransactionSync(tx);
         assertEquals(0, pendingMgr.getPendingTransactions().size());
         assertNotNull(result.error);
-        assertEquals(TransactionResult.Error.INVALID_FORMAT, result.error);
+        assertEquals(TransactionResult.Code.INVALID_FORMAT, result.error);
     }
 
     @Test
@@ -182,7 +182,7 @@ public class PendingManagerTest {
         pendingMgr.addTransaction(tx);
 
         TimeUnit.SECONDS.sleep(1);
-        List<PendingManager.PendingTransaction> txs = pendingMgr.getPendingTransactions();
+        List<PendingManager.EvaluatedTransaction> txs = pendingMgr.getPendingTransactions();
         assertEquals(3, txs.size());
     }
 
@@ -193,7 +193,7 @@ public class PendingManagerTest {
 
         Transaction tx3 = new Transaction(network, type, to, value, fee, nonce, now - ALLOWED_TIME_DRIFT - 1,
                 Bytes.EMPTY_BYTES).sign(key);
-        PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx3);
+        PendingManager.ProcessingResult result = pendingMgr.addTransactionSync(tx3);
         assertEquals(INVALID_TIMESTAMP, result.error);
     }
 
@@ -235,7 +235,7 @@ public class PendingManagerTest {
         byte[] stateRoot = Bytes.random(32);
         byte[] data = {};
         List<Transaction> transactions = Arrays.asList(tx, tx2);
-        List<TransactionResult> results = Arrays.asList(new TransactionResult(true), new TransactionResult(true));
+        List<TransactionResult> results = Arrays.asList(new TransactionResult(), new TransactionResult());
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
                 stateRoot, data);
         Block block = new Block(header, transactions, results);

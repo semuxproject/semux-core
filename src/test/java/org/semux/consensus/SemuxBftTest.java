@@ -129,7 +129,7 @@ public class SemuxBftTest {
                 from1,
                 kernelRule.getKernel().getBlockchain().getLatestBlock().getNumber() + 1,
                 Collections.singletonList(tx1),
-                Collections.singletonList(new TransactionResult(true)));
+                Collections.singletonList(new TransactionResult()));
         kernelRule.getKernel().getBlockchain().addBlock(block1);
         SemuxBft semuxBFT = new SemuxBft(kernelRule.getKernel());
 
@@ -143,7 +143,7 @@ public class SemuxBftTest {
                 from2,
                 kernelRule.getKernel().getBlockchain().getLatestBlock().getNumber() + 1,
                 Collections.singletonList(tx2),
-                Collections.singletonList(new TransactionResult(true)));
+                Collections.singletonList(new TransactionResult()));
 
         // this test case is valid if and only if tx1 and tx2 have the same tx hash
         assertTrue(Arrays.equals(tx1.getHash(), tx2.getHash()));
@@ -165,8 +165,8 @@ public class SemuxBftTest {
         kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
 
         // pending manager has only tx1 (validated)
-        PendingManager.PendingTransaction pending = new PendingManager.PendingTransaction(tx1,
-                new TransactionResult(true));
+        PendingManager.EvaluatedTransaction pending = new PendingManager.EvaluatedTransaction(tx1,
+                new TransactionResult());
         when(kernelRule.getKernel().getPendingManager().getPendingTransactions())
                 .thenReturn(Collections.singletonList(pending));
 
@@ -180,8 +180,8 @@ public class SemuxBftTest {
 
         // test that invalid pending are not filtered
         when(kernelRule.getKernel().getPendingManager().getPendingTransactions(anyInt()))
-                .thenReturn(Collections.singletonList(new PendingManager.PendingTransaction(tx2,
-                        new TransactionResult(false))));
+                .thenReturn(Collections.singletonList(new PendingManager.EvaluatedTransaction(tx2,
+                        new TransactionResult(TransactionResult.Code.INVALID_FORMAT))));
 
         assertFalse(semuxBFT.getUnvalidatedTransactions(Collections.singletonList(tx2)).isEmpty());
     }
@@ -230,7 +230,7 @@ public class SemuxBftTest {
                 blockForger,
                 1,
                 Collections.singletonList(tx),
-                Collections.singletonList(new TransactionResult(true)));
+                Collections.singletonList(new TransactionResult()));
 
         SemuxBft semuxBFT = new SemuxBft(kernelRule.getKernel());
         semuxBFT.proposal = new Proposal(new Proof(block.getNumber(), 0), block.getHeader(),

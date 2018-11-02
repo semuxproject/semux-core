@@ -448,7 +448,7 @@ public class SendPanel extends JPanel implements ActionListener {
      * @param tx
      */
     protected void sendTransaction(PendingManager pendingMgr, Transaction tx) {
-        PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);
+        PendingManager.ProcessingResult result = pendingMgr.addTransactionSync(tx);
         if (result.error == null) {
             JOptionPane.showMessageDialog(
                     this,
