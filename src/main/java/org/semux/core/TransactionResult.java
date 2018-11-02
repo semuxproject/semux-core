@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bouncycastle.util.encoders.Hex;
 import org.semux.Network;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
@@ -225,7 +226,7 @@ public class TransactionResult {
 
     @Override
     public String toString() {
-        return "TransactionResult [code=" + code + ", returnData=" + Arrays.toString(returnData) + ", # logs="
+        return "TransactionResult [code=" + code + ", returnData=" + Hex.toHexString(returnData) + ", # logs="
                 + logs.size() + "]";
     }
 }
