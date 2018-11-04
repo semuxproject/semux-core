@@ -298,8 +298,7 @@ public class Kernel {
             // java version
             logger.info("Java: version = {}, xmx = {} MB", System.getProperty("java.version"),
                     Runtime.getRuntime().maxMemory() / mb);
-        } catch (RuntimeException e)
-        {
+        } catch (RuntimeException e) {
             logger.error("Unable to retrieve System information.", e);
         }
     }
