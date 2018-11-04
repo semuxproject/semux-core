@@ -518,14 +518,14 @@
                                     <urns>
                                         <urn>com.akathist.maven.plugins.launch4j:launch4j-maven-plugin:1.7.21:maven-plugin:null:runtime:58402e775916bc8824e257c8d87ad6c8064663a5</urn>
                                         <urn>com.fasterxml.jackson.core:jackson-annotations:2.9.0:jar:null:compile:07c10d545325e3a6e72e06381afe469fd40eb701</urn>
-                                        <urn>com.fasterxml.jackson.core:jackson-core:2.9.6:jar:null:compile:4e393793c37c77e042ccc7be5a914ae39251b365</urn>
-                                        <urn>com.fasterxml.jackson.core:jackson-databind:2.9.6:jar:null:compile:cfa4f316351a91bfd95cb0644c6a2c95f52db1fc</urn>
-                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.6:jar:null:test:30341c6f8a6f2d65acc37c31b570bf09403ea69e</urn>
-                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.6:jar:null:test:f7b8ccdd851c2ea43f04636a1396a242479571b3</urn>
-                                        <urn>com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.6:jar:null:test:9a4641aa784374e36b0436b707507e52997ef91c</urn>
+                                        <urn>com.fasterxml.jackson.core:jackson-core:2.9.7:jar:null:compile:4b7f0e0dc527fab032e9800ed231080fdc3ac015</urn>
+                                        <urn>com.fasterxml.jackson.core:jackson-databind:2.9.7:jar:null:compile:e6faad47abd3179666e89068485a1b88a195ceb7</urn>
+                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.7:jar:null:test:0d7f607b3a12e6e92b2f29c721e03c11b638cc32</urn>
+                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.7:jar:null:test:134f1518a9516be01b25526a935d4fd68610b89c</urn>
+                                        <urn>com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.7:jar:null:test:2774b8e960697678ca87cf54abd59c736fcd1e83</urn>
                                         <urn>com.fasterxml.woodstox:woodstox-core:5.0.3:jar:null:test:10aa199207fda142eff01cd61c69244877d71770</urn>
                                         <urn>com.github.ben-manes.caffeine:caffeine:2.6.2:jar:null:compile:c8fd8817f9d2b2ced82f8968e0dd943aab557de0</urn>
-                                        <urn>com.github.oshi:oshi-core:3.7.1:jar:null:compile:a6f3c9c6bfe6110dc7100db480297cbd37afd631</urn>
+                                        <urn>com.github.oshi:oshi-core:3.10.0:jar:null:compile:4b6daabb2d7f1bd906b334d15b3d35d8228e7fc0</urn>
                                         <urn>com.github.stefanbirkner:system-rules:1.18.0:jar:null:test:04d95a6c83a298c60195c74b8cce3cc094e56dbb</urn>
                                         <urn>com.github.zafarkhaja:java-semver:0.9.0:jar:null:compile:59a83ca73c72a5e25b3f0b1bb305230a11000329</urn>
                                         <urn>com.google.zxing:core:3.3.3:jar:null:compile:b640badcc97f18867c4dfd249ef8d20ec0204c07</urn>
@@ -607,7 +607,7 @@
                                         <urn>org.powermock:powermock-reflect:1.7.4:jar:null:test:a484263077a371165c2fa96aa52935cd580a3e3c</urn>
                                         <urn>org.rauschig:jarchivelib:0.7.1:jar:null:test:47a77274cc38cfe6c04bc2afa3ece808742dc42b</urn>
                                         <urn>org.slf4j:slf4j-api:1.7.25:jar:null:compile:da76ca59f6a57ee3102f8f9bd9cee742973efa8a</urn>
-                                        <urn>org.webjars:swagger-ui:3.14.2:jar:null:compile:05f83eebdceedad1e26ddde584e4c08c20811921</urn>
+                                        <urn>org.webjars:swagger-ui:3.19.4:jar:null:compile:6fffee50c504243a291a8aef420b399269c9923d</urn>
                                         <urn>org.xerial.snappy:snappy-java:1.1.7.2:jar:null:compile:307b286efd119ad2c6d4291128bf110bddc68088</urn>
                                         <urn>pl.project13.maven:git-commit-id-plugin:2.2.4:maven-plugin:null:runtime:43a0dc1d02821c51847d587ecc4a6943086b884c</urn>
                                     </urns>
@@ -698,7 +698,7 @@
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>swagger-ui</artifactId>
-            <version>3.14.2</version>
+            <version>3.19.4</version>
         </dependency>
         <!-- at least one runtime needs to be provided -->
         <dependency>
@@ -784,7 +784,7 @@
         <dependency>
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
-            <version>3.7.1</version>
+            <version>3.10.0</version>
         </dependency>
 
         <!-- Apache commons -->
@@ -839,12 +839,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.9.6</version>
+            <version>2.9.7</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.6</version>
+            <version>2.9.7</version>
         </dependency>
 
         <!-- ED25519 -->
@@ -990,7 +990,7 @@
         <dependency>
             <groupId>org.rauschig</groupId>
             <artifactId>jarchivelib</artifactId>
-            <version>0.7.1</version>
+            <version>0.8.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -1014,7 +1014,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-json-provider</artifactId>
-            <version>2.9.6</version>
+            <version>2.9.7</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
