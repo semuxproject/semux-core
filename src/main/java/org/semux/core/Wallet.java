@@ -142,7 +142,9 @@ public class Wallet {
             }
             this.password = password;
             return true;
-        } catch (CryptoException | InvalidKeySpecException e) {
+        } catch (CryptoException e) {
+            logger.error(e.getMessage());
+        } catch (InvalidKeySpecException e) {
             logger.error("Failed to decrypt the wallet data");
         } catch (IOException e) {
             logger.error("Failed to open wallet", e);
