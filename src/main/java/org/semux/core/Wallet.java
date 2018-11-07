@@ -438,7 +438,7 @@ public class Wallet {
             accounts.put(to, newKey);
             // set a default alias
             if (!aliases.containsKey(to)) {
-                aliases.put(to, address.getPath());
+                setAddressAlias(newKey.toAddress(), address.getPath());
             }
 
             return newKey;
@@ -497,6 +497,8 @@ public class Wallet {
 
             boolean removed = accounts.remove(ByteArray.of(address)) != null;
             if (removed && isHdWalletInitialized()) {
+                // remove the alias for the account
+                removeAddressAlias(address);
                 scanForHdKeys(null);
             }
             return removed;
