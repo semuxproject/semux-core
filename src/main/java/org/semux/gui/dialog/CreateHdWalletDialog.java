@@ -115,7 +115,7 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
             String phrase = phraseField.getText();
             String password = new String(passwordField.getPassword());
             String passwordConfirm = new String(confirmPasswordField.getPassword());
-            if(!password.equals(passwordConfirm)) {
+            if (!password.equals(passwordConfirm)) {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("RepeatPasswordError"));
                 break;
             }

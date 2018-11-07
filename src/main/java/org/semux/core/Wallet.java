@@ -426,7 +426,7 @@ public class Wallet {
      */
     public Key addAccount() {
         requireUnlocked();
-        if(!isHdWalletInitialized()) {
+        if (!isHdWalletInitialized()) {
             throw new IllegalArgumentException("Cannot add accounts until HD seed is configured");
         }
 

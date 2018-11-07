@@ -275,7 +275,6 @@ public class SemuxCliTest {
         whenNew(Key.class).withAnyArguments().thenReturn(newAccount);
         when(wallet.addAccount()).thenReturn(newAccount);
 
-
         // mock SystemUtil
         mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword(any())).thenReturn("oldpassword");

@@ -67,7 +67,8 @@ public class WelcomeFrameTest extends AssertJSwingJUnitTestCase {
 
         await().until(() -> wallet.exists());
         assertTrue(wallet.isUnlocked());
-        assertEquals(1, wallet.size());
+        // wallet size is 0 until HD wallet initialized
+        assertEquals(0, wallet.size());
         assertEquals(password, wallet.getPassword());
     }
 
