@@ -15,7 +15,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
+import org.ethereum.vm.util.HashUtil;
 import org.semux.core.Transaction;
+import org.semux.core.TransactionResult;
+import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
 import org.semux.gui.SwingUtil;
 import org.semux.message.GuiMessages;
@@ -24,7 +27,7 @@ public class TransactionDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    public TransactionDialog(JFrame parent, Transaction tx) {
+    public TransactionDialog(JFrame parent, Transaction tx, TransactionResult result) {
         super(null, GuiMessages.get("Transaction"), ModalityType.MODELESS);
         setName("TransactionDialog");
 
@@ -38,6 +41,9 @@ public class TransactionDialog extends JDialog {
         JLabel lblTimestamp = new JLabel(GuiMessages.get("Timestamp") + ":");
         JLabel lblData = new JLabel(GuiMessages.get("Data") + ":");
 
+        JLabel lblGasUsed = new JLabel(GuiMessages.get("GasUsed"));
+        JLabel lblOutput = new JLabel(GuiMessages.get("Output"));
+
         JTextArea hash = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getHash()));
         hash.setName("hashText");
         JLabel type = new JLabel(tx.getType().name());
@@ -45,6 +51,11 @@ public class TransactionDialog extends JDialog {
         JTextArea from = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getFrom()));
         from.setName("fromText");
         JTextArea to = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getTo()));
+
+        // for creates, the TO value should display the contract address
+        if (tx.getType() == TransactionType.CREATE) {
+            to.setText(Hex.encode0x(HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce())));
+        }
         to.setName("toText");
         JLabel value = new JLabel(SwingUtil.formatAmount((tx.getValue())));
         value.setName("valueText");
@@ -54,6 +65,13 @@ public class TransactionDialog extends JDialog {
         nonce.setName("nonceText");
         JLabel timestamp = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
         timestamp.setName("timestampText");
+
+        JLabel gasUsed = new JLabel(SwingUtil.formatNumber(result.getGasUsed()));
+        gasUsed.setName("gasUsedText");
+        JTextArea output = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(result.getReturns()));
+        output.setName("outputText");
+        output.setLineWrap(true);
+        JScrollPane outputScroll = new JScrollPane(output);
 
         JTextArea data = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getData()));
         data.setName("dataText");
@@ -67,6 +85,8 @@ public class TransactionDialog extends JDialog {
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGap(42)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+                        .addComponent(lblOutput)
+                        .addComponent(lblGasUsed)
                         .addComponent(lblData)
                         .addComponent(lblTimestamp)
                         .addComponent(lblNonce)
@@ -86,7 +106,9 @@ public class TransactionDialog extends JDialog {
                         .addComponent(fee)
                         .addComponent(nonce)
                         .addComponent(timestamp)
-                        .addComponent(dataScroll, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(dataScroll, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(gasUsed)
+                        .addComponent(outputScroll, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap(19, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
@@ -128,6 +150,14 @@ public class TransactionDialog extends JDialog {
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblData)
                         .addComponent(dataScroll, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(ComponentPlacement.UNRELATED)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                        .addComponent(lblGasUsed)
+                        .addComponent(gasUsed))
+                    .addPreferredGap(ComponentPlacement.UNRELATED)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                        .addComponent(lblOutput)
+                        .addComponent(outputScroll, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap(20, Short.MAX_VALUE))
         );
         getContentPane().setLayout(groupLayout);

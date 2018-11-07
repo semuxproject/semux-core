@@ -133,8 +133,7 @@ public class PendingManagerTest {
     @Test
     public void testAddTransactionSyncInvalidRecipient() {
         Transaction tx = new Transaction(network, type, Constants.COINBASE_KEY.toAddress(), value, fee, 0,
-                TimeUtil.currentTimeMillis(),
-                Bytes.EMPTY_BYTES)
+                TimeUtil.currentTimeMillis(), Bytes.EMPTY_BYTES)
                         .sign(key);
 
         PendingManager.ProcessTransactionResult result = pendingMgr.addTransactionSync(tx);

@@ -55,6 +55,7 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
+import org.ethereum.vm.util.HashUtil;
 import org.semux.core.Amount;
 import org.semux.core.Amount.Unit;
 import org.semux.core.Transaction;
@@ -562,9 +563,13 @@ public class SwingUtil {
         case VOTE:
         case UNVOTE:
         case TRANSFER:
+        case CALL:
             return describeAddress(gui, tx.getFrom()) + " => " + describeAddress(gui, tx.getTo());
         case DELEGATE:
             return GuiMessages.get("DelegateRegistration");
+        case CREATE:
+            return GuiMessages.get("CreateContract") + " => "
+                    + describeAddress(gui, HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce()));
         default:
             return StringUtil.EMPTY_STRING;
         }

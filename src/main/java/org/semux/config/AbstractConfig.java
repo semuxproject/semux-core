@@ -1,27 +1,10 @@
 /**
  * Copyright (c) 2017-2018 The Semux Developers
- *
+ * <p>
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 package org.semux.config;
-
-import static org.semux.core.Amount.ZERO;
-import static org.semux.core.Amount.Unit.MILLI_SEM;
-import static org.semux.core.Amount.Unit.SEM;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.semux.Network;
 import org.semux.config.exception.ConfigException;
@@ -38,6 +21,23 @@ import org.semux.util.SystemUtil;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import static org.semux.core.Amount.Unit.MILLI_SEM;
+import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Amount.ZERO;
 
 public abstract class AbstractConfig implements Config {
 
@@ -120,6 +120,9 @@ public abstract class AbstractConfig implements Config {
     protected boolean vmEnabled = false;
     protected int vmMaxStackSize = 1024;
     protected int vmInitHeapSize = 128;
+    protected int vmBlockGasLimit = 999_999;
+    protected int vmMaxBlockGasLimit = 9_999_999;
+    protected int vmMinGasPrice;
 
     // =========================
     // UI
@@ -215,7 +218,7 @@ public abstract class AbstractConfig implements Config {
                     .mod(BigInteger.valueOf(size))
                     .intValue();
             subView = subView.add(BigInteger.ONE);
-        } while (deterministicRand == prevDeterministicRand);
+        } while (deterministicRand == prevDeterministicRand && size > 1);
 
         return deterministicRand;
     }
@@ -486,6 +489,21 @@ public abstract class AbstractConfig implements Config {
     }
 
     @Override
+    public int vmBlockGasLimit() {
+        return vmBlockGasLimit;
+    }
+
+    @Override
+    public int vmMaxBlockGasLimit() {
+        return vmMaxBlockGasLimit;
+    }
+
+    @Override
+    public int vmMinGasPrice() {
+        return vmMinGasPrice;
+    }
+
+    @Override
     public Locale locale() {
         return locale;
     }
@@ -616,6 +634,14 @@ public abstract class AbstractConfig implements Config {
                 }
                 case "ui.fractionDigits": {
                     uiFractionDigits = Integer.parseInt(props.getProperty(name).trim());
+                    break;
+                }
+                case "vm.blockGasLimit": {
+                    vmBlockGasLimit = Integer.parseInt(props.getProperty(name).trim());
+                    break;
+                }
+                case "vm.minGasPrice": {
+                    vmMinGasPrice = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 }
                 default:

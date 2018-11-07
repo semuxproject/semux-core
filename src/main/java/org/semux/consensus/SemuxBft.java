@@ -6,8 +6,6 @@
  */
 package org.semux.consensus;
 
-import static org.semux.core.Amount.ZERO;
-import static org.semux.core.Amount.sum;
 import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
 
 import java.util.ArrayList;
@@ -21,6 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.stream.Collectors;
 
+import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
 import org.semux.Network;
 import org.semux.config.Config;
@@ -37,6 +36,7 @@ import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
+import org.semux.core.TransactionType;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hash;
@@ -58,6 +58,8 @@ import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SystemUtil;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlock;
+import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,6 +100,8 @@ public class SemuxBft implements BftManager {
     protected Config config;
 
     protected Blockchain chain;
+    protected BlockStore blockStore;
+
     protected ChannelManager channelMgr;
     protected PendingManager pendingMgr;
     protected SyncManager syncMgr;
@@ -134,6 +138,7 @@ public class SemuxBft implements BftManager {
         this.config = kernel.getConfig();
 
         this.chain = kernel.getBlockchain();
+        this.blockStore = new SemuxBlockStore(chain);
         this.channelMgr = kernel.getChannelManager();
         this.pendingMgr = kernel.getPendingManager();
         this.syncMgr = kernel.getSyncManager();
@@ -741,21 +746,6 @@ public class SemuxBft implements BftManager {
     protected Block proposeBlock() {
         long t1 = TimeUtil.currentTimeMillis();
 
-        // fetch pending transactions
-        final List<PendingManager.PendingTransaction> pending = pendingMgr
-                .getPendingTransactions(config.maxBlockTransactionsSize());
-        final List<Transaction> pendingTxs = pending.stream()
-                .map(tx -> tx.transaction)
-                .collect(Collectors.toList());
-        final List<TransactionResult> pendingResults = pending.stream()
-                .map(tx -> tx.transactionResult)
-                .collect(Collectors.toList());
-
-        // compute roots
-        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(pendingTxs);
-        byte[] resultsRoot = MerkleUtil.computeResultsRoot(pendingResults);
-        byte[] stateRoot = Bytes.EMPTY_HASH;
-
         // construct block
         BlockHeader parent = chain.getBlockHeader(height - 1);
         long number = height;
@@ -770,6 +760,51 @@ public class SemuxBft implements BftManager {
         timestamp = timestamp > parent.getTimestamp() ? timestamp : parent.getTimestamp() + 1;
 
         byte[] data = chain.constructBlockData();
+
+        // fetch pending transactions
+        final List<PendingManager.PendingTransaction> pending = pendingMgr
+                .getPendingTransactions(config.maxBlockTransactionsSize());
+        final List<Transaction> pendingTxs = new ArrayList<>();
+        final List<TransactionResult> pendingResults = new ArrayList<>();
+
+        // for any VM requests, actually need to execute them
+        AccountState as = accountState.track();
+        DelegateState ds = delegateState.track();
+        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
+        BlockHeader tempHeader = new BlockHeader(height, coinbase.toAddress(), prevHash, timestamp, new byte[0],
+                new byte[0], new byte[0], data);
+
+        // only propose gas used up to configured block gas limit
+        SemuxBlock semuxBlock = new SemuxBlock(tempHeader, config.vmBlockGasLimit());
+
+        long gasUsed = 0;
+
+        for (PendingManager.PendingTransaction tx : pending) {
+            if (tx.transaction.getType() == TransactionType.CALL
+                    || tx.transaction.getType() == TransactionType.CREATE) {
+                long maxGasForTransaction = tx.transaction.getGas() + gasUsed;
+                if (tx.transaction.getGasPrice() >= config.vmMinGasPrice()
+                        && maxGasForTransaction < config.vmBlockGasLimit()) {
+                    TransactionResult result = exec.execute(tx.transaction, as, ds, semuxBlock);
+                    gasUsed += result.getGasUsed();
+
+                    if (result.isSuccess() && gasUsed < config.vmBlockGasLimit()) {
+                        pendingResults.add(result);
+                        pendingTxs.add(tx.transaction);
+                    } else {
+                        gasUsed -= result.getGasUsed();
+                    }
+                }
+            } else {
+                pendingResults.add(tx.transactionResult);
+                pendingTxs.add(tx.transaction);
+            }
+        }
+
+        // compute roots
+        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(pendingTxs);
+        byte[] resultsRoot = MerkleUtil.computeResultsRoot(pendingResults);
+        byte[] stateRoot = Bytes.EMPTY_HASH;
 
         BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,
                 resultsRoot, stateRoot, data);
@@ -833,10 +868,14 @@ public class SemuxBft implements BftManager {
 
         AccountState as = accountState.track();
         DelegateState ds = delegateState.track();
-        TransactionExecutor exec = new TransactionExecutor(config);
+        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
 
         // [3] evaluate transactions
-        List<TransactionResult> results = exec.execute(transactions, as, ds);
+        // When we are applying or validating block, we do not track transactions
+        // against our own local limit, only
+        // when proposing
+        List<TransactionResult> results = exec.execute(transactions, as, ds,
+                new SemuxBlock(header, config.vmMaxBlockGasLimit()));
         if (!Block.validateResults(header, results)) {
             logger.warn("Invalid transactions");
             return false;
@@ -896,10 +935,11 @@ public class SemuxBft implements BftManager {
 
         AccountState as = chain.getAccountState().track();
         DelegateState ds = chain.getDelegateState().track();
-        TransactionExecutor exec = new TransactionExecutor(config);
+        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
 
         // [3] evaluate all transactions
-        List<TransactionResult> results = exec.execute(transactions, as, ds);
+        List<TransactionResult> results = exec.execute(transactions, as, ds,
+                new SemuxBlock(block.getHeader(), config.vmMaxBlockGasLimit()));
         if (!Block.validateResults(header, results)) {
             logger.debug("Invalid transactions");
             return;
@@ -908,8 +948,7 @@ public class SemuxBft implements BftManager {
         // [4] evaluate votes, skipped
 
         // [5] apply block reward and tx fees
-        Amount txsReward = block.getTransactions().stream().map(Transaction::getFee).reduce(ZERO, Amount::sum);
-        Amount reward = sum(config.getBlockReward(number), txsReward);
+        Amount reward = Block.getBlockReward(block, config);
 
         if (reward.gt0()) {
             as.adjustAvailable(block.getCoinbase(), reward);

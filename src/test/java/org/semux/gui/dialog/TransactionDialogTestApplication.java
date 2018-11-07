@@ -8,6 +8,7 @@ package org.semux.gui.dialog;
 
 import org.semux.KernelMock;
 import org.semux.core.Transaction;
+import org.semux.core.TransactionResult;
 import org.semux.gui.BaseTestApplication;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.model.WalletModel;
@@ -23,7 +24,8 @@ public class TransactionDialogTestApplication extends BaseTestApplication {
     TransactionDialogTestApplication(WalletModel walletModel, Transaction tx, KernelMock kernelMock) {
         super();
         gui = new SemuxGui(walletModel, kernelMock);
-        transactionDialog = new TransactionDialog(this, tx);
+        TransactionResult result = new TransactionResult(true);
+        transactionDialog = new TransactionDialog(this, tx, result);
         transactionDialog.setVisible(true);
     }
 }

@@ -8,6 +8,7 @@ package org.semux.core.state;
 
 import static org.semux.core.Amount.sum;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -77,12 +78,14 @@ public class AccountStateImpl implements AccountState {
     }
 
     @Override
-    public void increaseNonce(byte[] address) {
+    public long increaseNonce(byte[] address) {
         ByteArray k = getKey(TYPE_ACCOUNT, address);
 
         Account acc = getAccount(address);
-        acc.setNonce(acc.getNonce() + 1);
+        long nonce = acc.getNonce() + 1;
+        acc.setNonce(nonce);
         updates.put(k, acc.toBytes());
+        return nonce;
     }
 
     @Override
@@ -104,28 +107,47 @@ public class AccountStateImpl implements AccountState {
     }
 
     @Override
-    public void getCode(byte[] address) {
-        throw new UnsupportedOperationException("getCode() is not yet supported");
+    public byte[] getCode(byte[] address) {
+        ByteArray k = getKey(TYPE_CODE, address);
+
+        if (updates.containsKey(k)) {
+            return updates.get(k);
+        } else if (prev != null) {
+            return prev.getCode(address);
+        } else {
+            return accountDB.get(k.getData());
+        }
     }
 
     @Override
     public void setCode(byte[] address, byte[] code) {
-        throw new UnsupportedOperationException("setCode() is not yet supported");
+        ByteArray k = getKey(TYPE_CODE, address);
+        updates.put(k, code);
     }
 
     @Override
     public byte[] getStorage(byte[] address, byte[] key) {
-        throw new UnsupportedOperationException("getStorage() is not yet supported");
+        ByteArray k = getStorageKey(address, key);
+
+        if (updates.containsKey(k)) {
+            return updates.get(k);
+        } else if (prev != null) {
+            return prev.getStorage(address, key);
+        } else {
+            return accountDB.get(k.getData());
+        }
     }
 
     @Override
     public void putStorage(byte[] address, byte[] key, byte[] value) {
-        throw new UnsupportedOperationException("putStorage() is not yet supported");
+        ByteArray storeKey = getStorageKey(address, key);
+        updates.put(storeKey, value);
     }
 
     @Override
     public void removeStorage(byte[] address, byte[] key) {
-        throw new UnsupportedOperationException("removeStorage() is not yet yet supported");
+        ByteArray storeKey = getStorageKey(address, key);
+        updates.put(storeKey, null);
     }
 
     @Override
@@ -157,6 +179,30 @@ public class AccountStateImpl implements AccountState {
     @Override
     public void rollback() {
         updates.clear();
+    }
+
+    @Override
+    public boolean exists(byte[] address) {
+        ByteArray k = getKey(TYPE_ACCOUNT, address);
+
+        if (updates.containsKey(k)) {
+            return true;
+        } else if (prev != null) {
+            return prev.exists(address);
+        } else {
+            byte[] v = accountDB.get(k.getData());
+            return v != null;
+        }
+    }
+
+    @Override
+    public long setNonce(byte[] address, long nonce) {
+        ByteArray k = getKey(TYPE_ACCOUNT, address);
+
+        Account acc = getAccount(address);
+        acc.setNonce(nonce);
+        updates.put(k, acc.toBytes());
+        return nonce;
     }
 
     protected ByteArray getKey(byte type, byte[] address) {

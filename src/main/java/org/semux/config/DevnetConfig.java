@@ -7,8 +7,10 @@
 package org.semux.config;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
 import org.semux.Network;
 import org.semux.core.Fork;
 
@@ -19,6 +21,17 @@ public class DevnetConfig extends AbstractConfig {
         this.netMaxInboundConnectionsPerIp = Integer.MAX_VALUE;
     }
 
+    private static final Map<Fork, Long> forkActivationCheckpoints;
+    static {
+        HashMap<Fork, Long> initForkActivationCheckpoints = new HashMap<>();
+
+        // all forks should be activated upon startup.
+        initForkActivationCheckpoints.put(Fork.UNIFORM_DISTRIBUTION, 1L);
+        initForkActivationCheckpoints.put(Fork.VIRTUAL_MACHINE, 1L);
+
+        forkActivationCheckpoints = MapUtils.unmodifiableMap(initForkActivationCheckpoints);
+    }
+
     @Override
     public Map<Long, byte[]> checkpoints() {
         return Collections.emptyMap();
@@ -26,6 +39,6 @@ public class DevnetConfig extends AbstractConfig {
 
     @Override
     public Map<Fork, Long> forkActivationCheckpoints() {
-        return Collections.emptyMap();
+        return forkActivationCheckpoints;
     }
 }

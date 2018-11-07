@@ -1,19 +1,21 @@
 /**
  * Copyright (c) 2017-2018 The Semux Developers
- *
+ * <p>
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 package org.semux.core;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import org.ethereum.vm.DataWord;
+import org.ethereum.vm.LogInfo;
 import org.semux.Network;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class TransactionResult {
 
@@ -51,6 +53,11 @@ public class TransactionResult {
          * The transaction fee doesn't meet the minimum.
          */
         INVALID_FEE,
+
+        /**
+         * The specified gas amount is larger than any gas limit
+         */
+        INVALID_GAS,
 
         /**
          * The transaction data is invalid, typically too large.
@@ -96,7 +103,12 @@ public class TransactionResult {
     /**
      * Transaction logs.
      */
-    protected List<byte[]> logs;
+    protected List<LogInfo> logs;
+
+    /**
+     * Gas used
+     */
+    protected long gasUsed;
 
     /**
      * Error message for API/GUI, not sent over the network.
@@ -105,30 +117,31 @@ public class TransactionResult {
 
     /**
      * Create a transaction result.
-     * 
+     *
      * @param success
      * @param output
      * @param logs
      */
-    public TransactionResult(boolean success, byte[] output, List<byte[]> logs) {
+    public TransactionResult(boolean success, byte[] output, List<LogInfo> logs, long gasUsed) {
         super();
         this.success = success;
         this.returns = output;
         this.logs = logs;
+        this.gasUsed = gasUsed;
     }
 
     /**
      * Create a transaction result.
-     * 
+     *
      * @param success
      */
     public TransactionResult(boolean success) {
-        this(success, Bytes.EMPTY_BYTES, new ArrayList<>());
+        this(success, Bytes.EMPTY_BYTES, new ArrayList<>(), 0);
     }
 
     /**
      * Validate transaction result.
-     * 
+     *
      * @return
      */
     public boolean validate() {
@@ -153,15 +166,15 @@ public class TransactionResult {
         this.returns = returns;
     }
 
-    public List<byte[]> getLogs() {
+    public List<LogInfo> getLogs() {
         return logs;
     }
 
-    public void setLogs(List<byte[]> logs) {
+    public void setLogs(List<LogInfo> logs) {
         this.logs = logs;
     }
 
-    public void addLog(byte[] log) {
+    public void addLog(LogInfo log) {
         this.logs.add(log);
     }
 
@@ -173,34 +186,80 @@ public class TransactionResult {
         this.error = error;
     }
 
+    public Long getGasUsed() {
+        return gasUsed;
+    }
+
+    public void setGasUsed(long gasUsed) {
+        this.gasUsed = gasUsed;
+    }
+
     public byte[] toBytes() {
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeBoolean(success);
         enc.writeBytes(returns);
         enc.writeInt(logs.size());
-        for (byte[] log : logs) {
-            enc.writeBytes(log);
+        for (LogInfo log : logs) {
+            enc.writeBytes(serializeLog(log));
+        }
+
+        // only write gasUsed if it exists to maintain backwards compatibility
+        // this maintains backwards compatibility until VM calls are enabled with
+        // fork check
+        if (gasUsed > 0) {
+            enc.writeLong(gasUsed);
         }
 
         return enc.toBytes();
+    }
+
+    private byte[] serializeLog(LogInfo log) {
+        SimpleEncoder enc = new SimpleEncoder();
+        enc.writeBytes(log.getAddress());
+        enc.writeBytes(log.getData());
+        enc.writeInt(log.getTopics().size());
+        for (DataWord dataWord : log.getTopics()) {
+            enc.writeBytes(dataWord.getData());
+        }
+
+        return enc.toBytes();
+    }
+
+    private static LogInfo unserializeLog(byte[] bytes) {
+        SimpleDecoder dec = new SimpleDecoder(bytes);
+        byte[] address = dec.readBytes();
+        byte[] data = dec.readBytes();
+        int numTopics = dec.readInt();
+        List<DataWord> topics = new ArrayList<>();
+
+        for (int i = 0; i < numTopics; i++) {
+            topics.add(DataWord.of(dec.readBytes()));
+        }
+        return new LogInfo(address, topics, data);
     }
 
     public static TransactionResult fromBytes(byte[] bytes) {
         SimpleDecoder dec = new SimpleDecoder(bytes);
         boolean valid = dec.readBoolean();
         byte[] returns = dec.readBytes();
-        List<byte[]> logs = new ArrayList<>();
+        List<LogInfo> logs = new ArrayList<>();
         int n = dec.readInt();
         for (int i = 0; i < n; i++) {
-            logs.add(dec.readBytes());
+            logs.add(unserializeLog(dec.readBytes()));
+        }
+        long gasUsed = 0;
+        try {
+            gasUsed = dec.readLong();
+        } catch (Exception e) {
+            // old blocks won't have this field
         }
 
-        return new TransactionResult(valid, returns, logs);
+        return new TransactionResult(valid, returns, logs, gasUsed);
     }
 
     @Override
     public String toString() {
         return "TransactionResult [success=" + success + ", output=" + Arrays.toString(returns) + ", # logs="
-                + logs.size() + "]";
+                + logs.size() + ", gasUsed=" + gasUsed + "]";
     }
 }

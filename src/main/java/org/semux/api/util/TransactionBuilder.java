@@ -72,6 +72,9 @@ public class TransactionBuilder {
      */
     private byte[] data;
 
+    private long gasPrice = 0;
+    private long gas = 0;
+
     public TransactionBuilder(Kernel kernel) {
         this.kernel = kernel;
     }
@@ -126,6 +129,12 @@ public class TransactionBuilder {
         if (type == TransactionType.DELEGATE) {
             if (to != null && !to.isEmpty()) {
                 throw new IllegalArgumentException("Parameter `to` is not needed for DELEGATE transaction");
+            }
+            return this; // ignore the provided parameter
+        }
+        if (type == TransactionType.CREATE) {
+            if (to != null && !to.isEmpty()) {
+                throw new IllegalArgumentException("Parameter `to` is not needed for CREATE transaction");
             }
             return this; // ignore the provided parameter
         }
@@ -211,11 +220,42 @@ public class TransactionBuilder {
         return this;
     }
 
+    public TransactionBuilder withGasPrice(String gasPrice) {
+        if (gasPrice == null) {
+            throw new IllegalArgumentException("Parameter `gasPrice` is required");
+        }
+
+        try {
+            this.gasPrice = Long.parseLong(gasPrice);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Parameter `gasPrice` is not a valid number");
+        }
+
+        return this;
+    }
+
+    public TransactionBuilder withGas(String gasLimit) {
+        if (gasLimit == null) {
+            throw new IllegalArgumentException("Parameter `gas` is required");
+        }
+
+        try {
+            this.gas = Long.parseLong(gasLimit);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Parameter `gas` is not a valid number");
+        }
+
+        return this;
+    }
+
     public Transaction buildUnsigned() {
         // DELEGATE transaction has fixed receiver and value
         if (type == TransactionType.DELEGATE) {
             to = Bytes.EMPTY_ADDRESS;
             value = kernel.getConfig().minDelegateBurnAmount();
+        }
+        if (type == TransactionType.CREATE) {
+            to = Bytes.EMPTY_ADDRESS;
         }
 
         return new Transaction(
@@ -226,7 +266,7 @@ public class TransactionBuilder {
                 fee,
                 nonce != null ? nonce : kernel.getPendingManager().getNonce(account.toAddress()),
                 timestamp != null ? timestamp : TimeUtil.currentTimeMillis(),
-                data);
+                data, gas, gasPrice);
     }
 
     public Transaction buildSigned() {
