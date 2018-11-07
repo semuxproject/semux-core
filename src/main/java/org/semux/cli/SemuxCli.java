@@ -364,8 +364,7 @@ public class SemuxCli extends Launcher {
     }
 
     private void checkWalletHdInitialized(Wallet wallet) {
-        if(wallet.unlock(getPassword()) && !wallet.isHdWalletInitialized())
-        {
+        if (wallet.isUnlocked() && !wallet.isHdWalletInitialized()) {
             MnemonicGenerator generator = new MnemonicGenerator();
             String phrase = generator.getWordlist(128, Language.english);
             // don't display passphrase in logger, don't want it in log files

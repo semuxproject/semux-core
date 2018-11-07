@@ -185,6 +185,11 @@ public class SemuxCliTest {
         when(SystemUtil.getOsName()).thenCallRealMethod();
         when(SystemUtil.getOsArch()).thenCallRealMethod();
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
+
+        // hd key
+        when(ConsoleUtil.readPassword()).thenReturn("hdpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("hdpassword");
+
         doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
         semuxCLI.start();
 
@@ -215,6 +220,11 @@ public class SemuxCliTest {
         when(SystemUtil.getOsName()).thenCallRealMethod();
         when(SystemUtil.getOsArch()).thenCallRealMethod();
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
+
+        // hd key
+        when(ConsoleUtil.readPassword()).thenReturn("hdpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("hdpassword");
+
         doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
         semuxCLI.start(new String[] { "--network", "testnet" });
 
@@ -246,6 +256,11 @@ public class SemuxCliTest {
         when(SystemUtil.getOsArch()).thenCallRealMethod();
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
         doReturn(null).when(semuxCLI).startKernel(any(), any(), any());
+
+        // hd key
+        when(ConsoleUtil.readPassword()).thenReturn("hdpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("hdpassword");
+
         semuxCLI.start(new String[] { "--network", "devnet" });
 
         assertTrue(semuxCLI.getConfig() instanceof DevnetConfig);
@@ -265,6 +280,7 @@ public class SemuxCliTest {
         ).when(wallet).getAccounts();
         when(wallet.addAccount(any(Key.class))).thenReturn(true);
         when(wallet.flush()).thenReturn(true);
+        when(wallet.isHdWalletInitialized()).thenReturn(true);
 
         // mock CLI
         when(semuxCLI.loadWallet()).thenReturn(wallet);
@@ -359,6 +375,11 @@ public class SemuxCliTest {
         // mock SystemUtil
         mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
+
+        // hd key
+        when(ConsoleUtil.readPassword()).thenReturn("hdpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("hdpassword");
+
         when(SystemUtil.getOsName()).thenCallRealMethod();
         when(SystemUtil.getOsArch()).thenCallRealMethod();
 
@@ -393,6 +414,11 @@ public class SemuxCliTest {
         // mock SystemUtil
         mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
+
+        // hd key
+        when(ConsoleUtil.readPassword()).thenReturn("hdpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("hdpassword");
+
         when(SystemUtil.getOsName()).thenCallRealMethod();
         when(SystemUtil.getOsArch()).thenCallRealMethod();
 
@@ -420,6 +446,10 @@ public class SemuxCliTest {
         // mock SystemUtil
         mockStatic(SystemUtil.class, ConsoleUtil.class);
         when(ConsoleUtil.readPassword()).thenReturn("oldpassword");
+        // hd key
+        when(ConsoleUtil.readPassword()).thenReturn("hdpassword");
+        when(ConsoleUtil.readPassword()).thenReturn("hdpassword");
+
         Mockito.when(ConsoleUtil.readPassword(anyString())).thenReturn("newpassword");
 
         // execution
@@ -439,6 +469,7 @@ public class SemuxCliTest {
         when(wallet.unlock("oldpassword")).thenReturn(true);
         when(wallet.flush()).thenReturn(true);
         when(semuxCLI.loadWallet()).thenReturn(wallet);
+        when(wallet.isHdWalletInitialized()).thenReturn(true);
 
         // mock SystemUtil
         mockStatic(SystemUtil.class, ConsoleUtil.class);
@@ -467,6 +498,7 @@ public class SemuxCliTest {
         when(wallet.unlock("oldpassword")).thenReturn(true);
         when(semuxCLI.loadWallet()).thenReturn(wallet);
         when(wallet.getAccount(addressBytes)).thenReturn(account);
+        when(wallet.isHdWalletInitialized()).thenReturn(true);
 
         // mock SystemUtil
         mockStatic(SystemUtil.class, ConsoleUtil.class);
@@ -497,6 +529,7 @@ public class SemuxCliTest {
         when(wallet.unlock("oldpassword")).thenReturn(true);
         when(semuxCLI.loadWallet()).thenReturn(wallet);
         when(wallet.getAccount(addressBytes)).thenReturn(null);
+        when(wallet.isHdWalletInitialized()).thenReturn(true);
 
         // mock SystemUtil
         mockStatic(SystemUtil.class, ConsoleUtil.class);
@@ -524,6 +557,7 @@ public class SemuxCliTest {
         when(wallet.unlock("oldpassword")).thenReturn(true);
         when(semuxCLI.loadWallet()).thenReturn(wallet);
         when(wallet.addAccount(any(Key.class))).thenReturn(false);
+        when(wallet.isHdWalletInitialized()).thenReturn(true);
 
         // mock SystemUtil
         mockStatic(SystemUtil.class, ConsoleUtil.class);
@@ -552,6 +586,7 @@ public class SemuxCliTest {
         when(semuxCLI.loadWallet()).thenReturn(wallet);
         when(wallet.addAccount(any(Key.class))).thenReturn(true);
         when(wallet.flush()).thenReturn(false);
+        when(wallet.isHdWalletInitialized()).thenReturn(true);
 
         // mock SystemUtil
         mockStatic(SystemUtil.class, ConsoleUtil.class);
@@ -578,6 +613,7 @@ public class SemuxCliTest {
         when(semuxCLI.loadWallet()).thenReturn(wallet);
         when(wallet.addAccount(any(Key.class))).thenReturn(true);
         when(wallet.flush()).thenReturn(true);
+        when(wallet.isHdWalletInitialized()).thenReturn(true);
 
         // mock SystemUtil
         mockStatic(SystemUtil.class, ConsoleUtil.class);
