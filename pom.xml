@@ -1017,6 +1017,13 @@
             <version>2.9.7</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- HD wallets -->
+        <dependency>
+            <groupId>com.github.orogvany</groupId>
+            <artifactId>BIP32-Ed25519-java</artifactId>
+            <version>a5865ea2916197e2da83c38a3b50972f01a8c93c</version>
+        </dependency>
     </dependencies>
 
     <profiles>

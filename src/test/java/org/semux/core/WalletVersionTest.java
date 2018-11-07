@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.Test;
+import org.semux.Network;
 import org.semux.crypto.Aes;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Key;
@@ -36,7 +37,7 @@ public class WalletVersionTest {
         writeVersion1Wallet(accounts, file, "password!");
 
         // read it as current version
-        Wallet wallet = new Wallet(file);
+        Wallet wallet = new Wallet(file, Network.DEVNET);
         wallet.unlock("password!");
         List<Key> readAccounts = wallet.getAccounts();
 

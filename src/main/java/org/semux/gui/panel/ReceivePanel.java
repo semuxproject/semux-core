@@ -315,10 +315,8 @@ public class ReceivePanel extends JPanel implements ActionListener {
      * Processes the NEW_ACCOUNT event.
      */
     protected void newAccount() {
-        Key key = new Key();
-
         Wallet wallet = kernel.getWallet();
-        wallet.addAccount(key);
+        Key key = wallet.addAccount();
         boolean added = wallet.flush();
 
         if (added) {

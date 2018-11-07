@@ -178,8 +178,7 @@ public class SemuxCli extends Launcher {
         // create a new account if the wallet is empty
         List<Key> accounts = wallet.getAccounts();
         if (accounts.isEmpty()) {
-            Key key = new Key();
-            wallet.addAccount(key);
+            Key key = wallet.addAccount();
             wallet.flush();
             accounts = wallet.getAccounts();
             logger.info(CliMessages.get("NewAccountCreatedForAddress", key.toAddressString()));
@@ -215,8 +214,7 @@ public class SemuxCli extends Launcher {
     protected void createAccount() {
         Wallet wallet = loadAndUnlockWallet();
 
-        Key key = new Key();
-        wallet.addAccount(key);
+        Key key = wallet.addAccount();
 
         if (wallet.flush()) {
             logger.info(CliMessages.get("NewAccountCreatedForAddress", key.toAddressString()));
@@ -360,7 +358,7 @@ public class SemuxCli extends Launcher {
     }
 
     protected Wallet loadWallet() {
-        return new Wallet(new File(getDataDir(), "wallet.data"));
+        return new Wallet(new File(getDataDir(), "wallet.data"), getConfig().network());
     }
 
 }
