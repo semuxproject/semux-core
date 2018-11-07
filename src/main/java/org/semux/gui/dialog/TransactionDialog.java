@@ -44,6 +44,8 @@ public class TransactionDialog extends JDialog {
         JLabel lblGasUsed = new JLabel(GuiMessages.get("GasUsed"));
         JLabel lblOutput = new JLabel(GuiMessages.get("Output"));
 
+        String notAvailable = GuiMessages.get("NotAvailable");
+
         JTextArea hash = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getHash()));
         hash.setName("hashText");
         JLabel type = new JLabel(tx.getType().name());
@@ -66,9 +68,12 @@ public class TransactionDialog extends JDialog {
         JLabel timestamp = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
         timestamp.setName("timestampText");
 
-        JLabel gasUsed = new JLabel(SwingUtil.formatNumber(result.getGasUsed()));
+        String gasUsedValue = result == null ? notAvailable : SwingUtil.formatNumber(result.getGasUsed());
+        JLabel gasUsed = new JLabel(gasUsedValue);
         gasUsed.setName("gasUsedText");
-        JTextArea output = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(result.getReturns()));
+
+        String outputValue = result == null ? notAvailable : Hex.encode0x(result.getReturns());
+        JTextArea output = SwingUtil.textAreaWithCopyPopup(outputValue);
         output.setName("outputText");
         output.setLineWrap(true);
         JScrollPane outputScroll = new JScrollPane(output);
