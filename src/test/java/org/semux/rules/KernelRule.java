@@ -66,6 +66,7 @@ public class KernelRule extends TemporaryFolder {
         Config config = mockConfig(p2pPort, apiPort);
         Wallet wallet = new Wallet(new File(getRoot(), "wallet.data"), config.network());
         wallet.unlock(password);
+        wallet.setHdSeed(Bytes.random(32));
         for (int i = 0; i < 10; i++) {
             wallet.addAccount();
         }

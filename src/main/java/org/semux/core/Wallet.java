@@ -426,6 +426,9 @@ public class Wallet {
      */
     public Key addAccount() {
         requireUnlocked();
+        if(!isHdWalletInitialized()) {
+            throw new IllegalArgumentException("Cannot add accounts until HD seed is configured");
+        }
 
         synchronized (accounts) {
             HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, Network.mainnet, CoinType.semux);
@@ -493,7 +496,7 @@ public class Wallet {
         synchronized (accounts) {
 
             boolean removed = accounts.remove(ByteArray.of(address)) != null;
-            if (removed) {
+            if (removed && isHdWalletInitialized()) {
                 scanForHdKeys(null);
             }
             return removed;
