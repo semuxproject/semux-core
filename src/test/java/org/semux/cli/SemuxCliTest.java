@@ -65,7 +65,7 @@ import net.i2p.crypto.eddsa.KeyPairGenerator;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ SystemUtil.class, ConsoleUtil.class, Kernel.class, SemuxCli.class })
-@PowerMockIgnore({ "jdk.internal.*", "javax.management.*" })
+@PowerMockIgnore({ "jdk.internal.*", "javax.management.*", "javax.crypto.*" })
 public class SemuxCliTest {
 
     @Rule
@@ -273,6 +273,7 @@ public class SemuxCliTest {
         // mock new account
         Key newAccount = new Key();
         whenNew(Key.class).withAnyArguments().thenReturn(newAccount);
+        when(wallet.addAccount()).thenReturn(newAccount);
 
         // mock SystemUtil
         mockStatic(SystemUtil.class, ConsoleUtil.class);
@@ -286,7 +287,7 @@ public class SemuxCliTest {
         // verifies that a new account is added the empty wallet
         verify(wallet).unlock("oldpassword");
         verify(wallet, times(2)).getAccounts();
-        verify(wallet).addAccount(any(Key.class));
+        verify(wallet).addAccount();
         verify(wallet, atLeastOnce()).flush();
 
         // verifies that kernel starts
@@ -352,6 +353,7 @@ public class SemuxCliTest {
 
         // mock account
         Key newAccount = new Key();
+        when(wallet.addAccount()).thenReturn(newAccount);
         whenNew(Key.class).withAnyArguments().thenReturn(newAccount);
 
         // mock SystemUtil
@@ -364,7 +366,7 @@ public class SemuxCliTest {
         semuxCLI.createAccount();
 
         // verification
-        verify(wallet).addAccount(any(Key.class));
+        verify(wallet).addAccount();
         verify(wallet).flush();
 
         // assert outputs

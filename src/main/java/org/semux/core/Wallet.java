@@ -146,10 +146,10 @@ public class Wallet {
                 case 4:
                     salt = dec.readBytes();
                     key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
-                    hdSeed = dec.readBytes();
-                    nextHdAccountIndex = dec.readInt();
                     newAccounts = readAccounts(key, dec, true, version);
                     newAliases = readAddressAliases(key, dec);
+                    hdSeed = dec.readBytes();
+                    nextHdAccountIndex = dec.readInt();
                     break;
                 default:
                     throw new CryptoException("Unknown wallet version.");
@@ -428,6 +428,9 @@ public class Wallet {
      */
     public Key addAccount() {
         requireUnlocked();
+        if (!isHdWalletInitialized()) {
+            throw new IllegalArgumentException("Cannot add accounts until HD seed is configured");
+        }
 
         synchronized (accounts) {
             HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, Network.mainnet, CoinType.semux);
@@ -437,7 +440,7 @@ public class Wallet {
             accounts.put(to, newKey);
             // set a default alias
             if (!aliases.containsKey(to)) {
-                aliases.put(to, address.getPath());
+                setAddressAlias(newKey.toAddress(), address.getPath());
             }
 
             return newKey;
@@ -495,7 +498,9 @@ public class Wallet {
         synchronized (accounts) {
 
             boolean removed = accounts.remove(ByteArray.of(address)) != null;
-            if (removed) {
+            if (removed && isHdWalletInitialized()) {
+                // remove the alias for the account
+                removeAddressAlias(address);
                 scanForHdKeys(null);
             }
             return removed;
@@ -540,11 +545,11 @@ public class Wallet {
 
             byte[] key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
 
-            enc.writeBytes(hdSeed);
-            enc.writeInt(nextHdAccountIndex);
-
             writeAccounts(key, enc);
             writeAddressAliases(key, enc);
+
+            enc.writeBytes(hdSeed);
+            enc.writeInt(nextHdAccountIndex);
 
             if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
                 logger.error("Failed to create the directory for wallet");

@@ -30,6 +30,7 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
 
     private final JTextArea phraseField;
     private final JPasswordField passwordField;
+    private final JPasswordField confirmPasswordField;
     private MnemonicGenerator generator = new MnemonicGenerator();
     String phrase;
 
@@ -38,20 +39,22 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
         this.wallet = wallet;
 
         JLabel lblPassword = new JLabel(GuiMessages.get("Password") + ":");
+        JLabel lblConfirmPassword = new JLabel(GuiMessages.get("RepeatPassword") + ":");
         JLabel lblPhrase = new JLabel(GuiMessages.get("WalletRecoveryPhrase") + ":");
 
         phraseField = new JTextArea();
         phraseField.setEditable(false);
         phraseField.setLineWrap(true);
         phraseField.setWrapStyleWord(true);
+        phraseField.setRows(2);
         phrase = generator.getWordlist(128, Language.english);
 
         phraseField.setText(phrase);
         passwordField = new JPasswordField();
+        confirmPasswordField = new JPasswordField();
 
         JButton btnOk = SwingUtil.createDefaultButton(GuiMessages.get("OK"), this, Action.OK);
 
-        JButton btnCancel = SwingUtil.createDefaultButton(GuiMessages.get("Cancel"), this, Action.CANCEL);
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());
         groupLayout.setHorizontalGroup(
@@ -59,15 +62,16 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
                         .addGroup(groupLayout.createSequentialGroup()
                                 .addGap(20)
                                 .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                        .addComponent(lblConfirmPassword)
                                         .addComponent(lblPassword)
                                         .addComponent(lblPhrase))
                                 .addGap(18)
                                 .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addGroup(groupLayout.createSequentialGroup()
-                                                .addComponent(btnCancel)
                                                 .addGap(18)
                                                 .addComponent(btnOk))
                                         .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                .addComponent(confirmPasswordField, GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)
                                                 .addComponent(passwordField, GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)
                                                 .addComponent(phraseField, GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)))
                                 .addGap(23))
@@ -78,14 +82,17 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
                                 .addGap(32)
                                 .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(lblPhrase)
-                                        .addComponent(phraseField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(phraseField, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
                                 .addGap(18)
                                 .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(lblPassword)
                                         .addComponent(passwordField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
                                 .addGap(18)
                                 .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(btnCancel)
+                                        .addComponent(lblConfirmPassword)
+                                        .addComponent(confirmPasswordField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                                .addGap(18)
+                                .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(btnOk))
                                 .addContainerGap(77, Short.MAX_VALUE))
         );
@@ -95,7 +102,7 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
         this.setModal(true);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
-        this.setMinimumSize(new Dimension(400, 240));
+        this.setMinimumSize(new Dimension(400, 260));
         this.setLocationRelativeTo(parent);
     }
 
@@ -107,6 +114,11 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
         case OK: {
             String phrase = phraseField.getText();
             String password = new String(passwordField.getPassword());
+            String passwordConfirm = new String(confirmPasswordField.getPassword());
+            if (!password.equals(passwordConfirm)) {
+                JOptionPane.showMessageDialog(this, GuiMessages.get("RepeatPasswordError"));
+                break;
+            }
 
             byte[] seed;
             try {

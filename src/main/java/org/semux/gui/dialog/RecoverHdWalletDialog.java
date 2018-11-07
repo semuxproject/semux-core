@@ -41,6 +41,7 @@ public class RecoverHdWalletDialog extends JDialog implements ActionListener {
 
         phraseField = new JTextArea();
         phraseField.setLineWrap(true);
+        phraseField.setRows(2);
         phraseField.setWrapStyleWord(true);
 
         passwordField = new JPasswordField();
@@ -74,7 +75,7 @@ public class RecoverHdWalletDialog extends JDialog implements ActionListener {
                                 .addGap(32)
                                 .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(lblPhrase)
-                                        .addComponent(phraseField, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(phraseField, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
                                 .addGap(18)
                                 .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(lblPassword)
