@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
+import com.github.orogvany.bip39.Language;
+import com.github.orogvany.bip39.MnemonicGenerator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -240,7 +242,7 @@ public class SemuxCli extends Launcher {
         Wallet wallet = loadAndUnlockWallet();
 
         try {
-            String newPassword = readNewPassword();
+            String newPassword = readNewPassword("EnterNewPassword", "ReEnterNewPassword");
             if (newPassword == null) {
                 return;
             }
@@ -264,9 +266,9 @@ public class SemuxCli extends Launcher {
      *
      * @return new password, or null if the confirmation failed
      */
-    private String readNewPassword() {
-        String newPassword = ConsoleUtil.readPassword(CliMessages.get("EnterNewPassword"));
-        String newPasswordRe = ConsoleUtil.readPassword(CliMessages.get("ReEnterNewPassword"));
+    private String readNewPassword(String newPasswordMessageKey, String reEnterNewPasswordMessageKey) {
+        String newPassword = ConsoleUtil.readPassword(CliMessages.get(newPasswordMessageKey));
+        String newPasswordRe = ConsoleUtil.readPassword(CliMessages.get(reEnterNewPasswordMessageKey));
 
         if (!newPassword.equals(newPasswordRe)) {
             logger.error(CliMessages.get("ReEnterNewPasswordIncorrect"));
@@ -331,6 +333,7 @@ public class SemuxCli extends Launcher {
         if (!wallet.unlock(getPassword())) {
             SystemUtil.exit(SystemUtil.Code.FAILED_TO_UNLOCK_WALLET);
         }
+        checkWalletHdInitialized(wallet);
 
         return wallet;
     }
@@ -342,11 +345,12 @@ public class SemuxCli extends Launcher {
      * @return created new wallet, or null if it failed to create the wallet
      */
     protected Wallet createNewWallet() {
-        String newPassword = readNewPassword();
+        String newPassword = readNewPassword("EnterNewPassword", "ReEnterNewPassword");
         if (newPassword == null) {
             return null;
         }
 
+        setPassword(newPassword);
         Wallet wallet = loadWallet();
         if (!wallet.unlock(newPassword) || !wallet.flush()) {
             logger.error("CreateNewWalletError");
@@ -354,7 +358,23 @@ public class SemuxCli extends Launcher {
             return null;
         }
 
+        checkWalletHdInitialized(wallet);
+
         return wallet;
+    }
+
+    private void checkWalletHdInitialized(Wallet wallet) {
+        if (wallet.isUnlocked() && !wallet.isHdWalletInitialized()) {
+            MnemonicGenerator generator = new MnemonicGenerator();
+            String phrase = generator.getWordlist(128, Language.english);
+            // don't display passphrase in logger, don't want it in log files
+            System.out.println(CliMessages.get("HdWalletInstructions"));
+            System.out.println(phrase);
+            String passCode = readNewPassword("EnterNewHdPassword", "ReEnterNewHdPassword");
+            byte[] seed = generator.getSeedFromWordlist(phrase, passCode, Language.english);
+            wallet.setHdSeed(seed);
+            wallet.flush();
+        }
     }
 
     protected Wallet loadWallet() {
