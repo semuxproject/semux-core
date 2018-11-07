@@ -88,7 +88,7 @@ public class CorePerformanceTest {
 
         t1 = System.nanoTime();
         exec.execute(txs, chain.getAccountState().track(), chain.getDelegateState().track(),
-                new SemuxBlock(chain.getLatestBlock().getHeader()));
+                new SemuxBlock(chain.getLatestBlock().getHeader(), config.vmMaxBlockGasLimit()));
         t2 = System.nanoTime();
         logger.info("Perf_transaction_2: {} μs/tx", (t2 - t1) / 1_000 / repeat);
     }

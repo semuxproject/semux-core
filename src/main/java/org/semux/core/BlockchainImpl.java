@@ -712,7 +712,7 @@ public class BlockchainImpl implements Blockchain {
             // [0] execute transactions against local state
             TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
             transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState(),
-                    new SemuxBlock(block.getHeader()));
+                    new SemuxBlock(block.getHeader(), config.vmMaxBlockGasLimit()));
 
             // [1] apply block reward and tx fees
             Amount reward = Block.getBlockReward(block, config);

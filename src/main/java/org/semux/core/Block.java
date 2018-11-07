@@ -208,13 +208,18 @@ public class Block {
         // validate results
         for (TransactionResult result : results) {
             if (!result.validate()) {
+                logger.warn("Transaction result does not match for " + result.toString());
                 return false;
             }
         }
 
         // validate results root
         byte[] root = MerkleUtil.computeResultsRoot(results);
-        return Arrays.equals(root, header.getResultsRoot());
+        boolean rootMatches = Arrays.equals(root, header.getResultsRoot());
+        if (!rootMatches) {
+            logger.warn("Merkle root does not match expected");
+        }
+        return rootMatches;
     }
 
     public static Amount getBlockReward(Block block, Config config) {

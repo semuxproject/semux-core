@@ -76,7 +76,8 @@ public class VmTest {
 
         SemuxBlock bh = new SemuxBlock(
                 new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
-                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)));
+                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
+                config.vmMaxBlockGasLimit());
 
         byte[] data = Bytes.random(16);
         long gas = 30000;
@@ -124,7 +125,8 @@ public class VmTest {
 
         SemuxBlock bh = new SemuxBlock(
                 new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
-                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)));
+                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
+                config.vmMaxBlockGasLimit());
 
         long gas = 60000;
         long gasPrice = 1;

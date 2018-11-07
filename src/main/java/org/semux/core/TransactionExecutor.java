@@ -6,7 +6,7 @@
  */
 package org.semux.core;
 
-import org.ethereum.vm.chainspec.ByzantiumSpec;
+import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.chainspec.Spec;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
@@ -46,7 +46,7 @@ public class TransactionExecutor {
 
     /**
      * Validate delegate name.
-     * 
+     *
      * @param data
      */
     public static boolean validateDelegateName(byte[] data) {
@@ -67,7 +67,7 @@ public class TransactionExecutor {
 
     /**
      * Creates a new transaction executor.
-     * 
+     *
      * @param config
      */
     public TransactionExecutor(Config config, BlockStore blockStore) {
@@ -77,7 +77,7 @@ public class TransactionExecutor {
 
     /**
      * Execute a list of transactions.
-     * 
+     *
      * NOTE: transaction format and signature are assumed to be success.
      *
      * @param txs
@@ -92,6 +92,7 @@ public class TransactionExecutor {
             SemuxBlock block) {
         List<TransactionResult> results = new ArrayList<>();
 
+        long gasUsedInBlock = 0;
         for (Transaction tx : txs) {
             TransactionResult result = new TransactionResult(false);
             results.add(result);
@@ -206,21 +207,23 @@ public class TransactionExecutor {
                 long maxGasFee = tx.getGas() * tx.getGasPrice();
                 Amount maxCost = sum(sum(value, fee), Unit.NANO_SEM.of(maxGasFee));
                 if (maxCost.lte(available)) {
-                    // todo - do these calls still use fees?
+                    // VM calls still use fees
                     as.adjustAvailable(from, neg(sum(value, fee)));
 
-                    // we charge gas later
-                    // workaround for pending manager so it doesn't execute these
-                    if (block == null) {
+                    if (tx.getGas() > config.vmMaxBlockGasLimit()) {
+                        result.setError(Error.INVALID_GAS);
+                    } else if (block == null) {
+                        // workaround for pending manager so it doesn't execute these
+                        // we charge gas later
                         as.increaseNonce(from);
                         result.setSuccess(true);
                     } else {
-                        executeVmTransaction(result, tx, as, block);
+                        executeVmTransaction(result, tx, as, block, gasUsedInBlock);
+                        gasUsedInBlock += result.getGasUsed();
                     }
                 } else {
                     result.setError(Error.INSUFFICIENT_AVAILABLE);
                 }
-
                 break;
 
             default:
@@ -239,11 +242,11 @@ public class TransactionExecutor {
         return results;
     }
 
-    private void executeVmTransaction(TransactionResult result, Transaction tx, AccountState as, SemuxBlock block) {
+    private void executeVmTransaction(TransactionResult result, Transaction tx, AccountState as, SemuxBlock block,
+            long gasUsedInBlock) {
         SemuxTransaction transaction = new SemuxTransaction(tx);
         Repository repository = new SemuxRepository(as);
         ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
-        long gasUsedInBlock = 0l; // todo - use this
 
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                 transaction, block, repository, blockStore,
@@ -253,11 +256,9 @@ public class TransactionExecutor {
         if (summary == null) {
             result.setSuccess(false);
         } else {
-            // todo - loginfo
-            // for (LogInfo logs : summary.getLogs()) {
-            // System.out.println(logs.toString());
-            // }
-            // result.setLogs(null);
+            for (LogInfo log : summary.getLogs()) {
+                result.addLog(log);
+            }
             result.setGasUsed(summary.getGasUsed());
             result.setReturns(summary.getReturnData());
             result.setSuccess(summary.isSuccess());
@@ -266,9 +267,9 @@ public class TransactionExecutor {
 
     /**
      * Execute one transaction.
-     * 
+     *
      * NOTE: transaction format and signature are assumed to be success.
-     * 
+     *
      * @param as
      *            account state
      * @param ds

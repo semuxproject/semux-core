@@ -9,25 +9,22 @@ package org.semux.vm.client;
 import org.ethereum.vm.client.Block;
 import org.semux.core.BlockHeader;
 
-import java.math.BigInteger;
-
 /**
  * Facade for BlockHeader -> Block
  */
 public class SemuxBlock implements Block {
 
-    private static final long GAS_LIMIT = 999999999;
-
+    private final long blockGasLimit;
     private final BlockHeader blockHeader;
 
-    public SemuxBlock(BlockHeader block) {
+    public SemuxBlock(BlockHeader block, long blockGasLimit) {
         this.blockHeader = block;
+        this.blockGasLimit = blockGasLimit;
     }
 
     @Override
     public long getGasLimit() {
-        // TODO - deterministic gas limit
-        return GAS_LIMIT;
+        return blockGasLimit;
     }
 
     @Override

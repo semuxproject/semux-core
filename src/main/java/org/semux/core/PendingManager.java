@@ -308,6 +308,12 @@ public class PendingManager implements Runnable, BlockchainListener {
         int cnt = 0;
         long now = TimeUtil.currentTimeMillis();
 
+        // reject VM transactions that come in before fork
+        if (!kernel.getBlockchain().isForkActivated(Fork.VIRTUAL_MACHINE)
+                && (tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE)) {
+            return new ProcessTransactionResult(0, TransactionResult.Error.INVALID_TYPE);
+        }
+
         // reject transactions with a duplicated tx hash
         if (kernel.getBlockchain().hasTransaction(tx.getHash())) {
             return new ProcessTransactionResult(0, TransactionResult.Error.DUPLICATED_HASH);

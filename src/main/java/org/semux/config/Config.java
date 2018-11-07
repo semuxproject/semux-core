@@ -430,6 +430,27 @@ public interface Config {
      */
     int vmInitialHeapSize();
 
+    /**
+     * Returns the maximum gas limit for a block proposal
+     *
+     * @return
+     */
+    int vmBlockGasLimit();
+
+    /**
+     * Returns the maximum gas limit for any block
+     * 
+     * @return
+     */
+    int vmMaxBlockGasLimit();
+
+    /**
+     * Returns the minimum gas price for any transaction proposed
+     * 
+     * @return
+     */
+    int vmMinGasPrice();
+
     // =========================
     // UI
     // =========================
