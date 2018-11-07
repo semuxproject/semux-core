@@ -7,6 +7,7 @@
 package org.semux.core;
 
 import org.ethereum.vm.util.HashUtil;
+import org.ethereum.vm.util.HexUtil;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,7 +29,7 @@ import static org.ethereum.vm.util.BytecodeCompiler.compile;
 import static org.junit.Assert.*;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.Unit.SEM;
-import static org.semux.core.Amount.*;
+import static org.semux.core.Amount.ZERO;
 
 public class VmTest {
 
@@ -114,24 +115,26 @@ public class VmTest {
 
         TransactionType type = TransactionType.CREATE;
         byte[] from = key.toAddress();
-        byte[] to = Bytes.random(20);
-        Amount value = NANO_SEM.of(5);
+        byte[] to = Bytes.EMPTY_ADDRESS;
+        Amount value = NANO_SEM.of(0);
         Amount fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
 
         // set the contract to a simple program
-        byte[] data = compile("PUSH1 0xa0");
+        String code = "608060405234801561001057600080fd5b506040516020806100e7833981018060405281019080805190602001909291905050508060008190555050609e806100496000396000f300608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680632e52d606146044575b600080fd5b348015604f57600080fd5b506056606c565b6040518082815260200191505060405180910390f35b600054815600a165627a7a72305820efb6a6369e3c5d7fe9b3274b20753bb0fe188b763fc2adee86cd844de935c8220029";
+        byte[] create = HexUtil.fromHexString(code);
+        byte[] data = HexUtil.fromHexString(code.substring(code.indexOf("60806040", 1)));
 
         SemuxBlock bh = new SemuxBlock(
-                new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
+                new BlockHeader(1l, Bytes.random(20), Bytes.random(32), System.currentTimeMillis(),
                         Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
                 config.vmMaxBlockGasLimit());
 
-        long gas = 60000;
+        long gas = 1000000;
         long gasPrice = 1;
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, create, gas, gasPrice);
         tx.sign(key);
         assertTrue(tx.validate(network));
 
