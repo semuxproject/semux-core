@@ -19,7 +19,7 @@ import java.math.BigInteger;
  * We will probably want to make AccountState just implement repository but for
  * ease of initial integration, use a facade to limit scope
  */
-public class SemuxRepository implements Repository {
+public class SemuxRepository implements Cloneable, Repository {
     private final AccountState accountState;
 
     public SemuxRepository(AccountState accountState) {
