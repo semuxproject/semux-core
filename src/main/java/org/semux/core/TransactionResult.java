@@ -95,12 +95,12 @@ public class TransactionResult {
         /**
          * Invalid burning address.
          */
-        INVALID_BURNING_ADDRESS,
+        INVALID_DELEGATE_BURN_ADDRESS,
 
         /**
          * Invalid delegate burn amount.
          */
-        INVALID_BURNING_AMOUNT,
+        INVALID_DELEGATE_BURN_AMOUNT,
 
         /**
          * The DELEGATE operation is invalid.
@@ -130,7 +130,7 @@ public class TransactionResult {
         }
 
         public boolean isRejected() {
-            return !isSuccess() && !isFailure();
+            return !isAccepted();
         }
     }
 

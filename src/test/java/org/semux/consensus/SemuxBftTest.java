@@ -165,7 +165,7 @@ public class SemuxBftTest {
         kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
 
         // pending manager has only tx1 (validated)
-        PendingManager.EvaluatedTransaction pending = new PendingManager.EvaluatedTransaction(tx1,
+        PendingManager.PendingTransaction pending = new PendingManager.PendingTransaction(tx1,
                 new TransactionResult());
         when(kernelRule.getKernel().getPendingManager().getPendingTransactions())
                 .thenReturn(Collections.singletonList(pending));
@@ -180,7 +180,7 @@ public class SemuxBftTest {
 
         // test that invalid pending are not filtered
         when(kernelRule.getKernel().getPendingManager().getPendingTransactions(anyInt()))
-                .thenReturn(Collections.singletonList(new PendingManager.EvaluatedTransaction(tx2,
+                .thenReturn(Collections.singletonList(new PendingManager.PendingTransaction(tx2,
                         new TransactionResult(TransactionResult.Code.INVALID_FORMAT))));
 
         assertFalse(semuxBFT.getUnvalidatedTransactions(Collections.singletonList(tx2)).isEmpty());

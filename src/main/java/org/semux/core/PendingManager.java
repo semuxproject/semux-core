@@ -74,7 +74,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Transaction pool.
      */
-    private final List<EvaluatedTransaction> transactions = new ArrayList<>();
+    private final List<PendingTransaction> transactions = new ArrayList<>();
 
     /**
      * Transaction cache.
@@ -197,17 +197,17 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @param byteLimit
      * @return
      */
-    public synchronized List<EvaluatedTransaction> getPendingTransactions(int byteLimit) {
+    public synchronized List<PendingTransaction> getPendingTransactions(int byteLimit) {
         if (byteLimit < 0) {
             throw new IllegalArgumentException("Limit can't be negative");
         }
 
-        List<EvaluatedTransaction> txs = new ArrayList<>();
-        Iterator<EvaluatedTransaction> it = transactions.iterator();
+        List<PendingTransaction> txs = new ArrayList<>();
+        Iterator<PendingTransaction> it = transactions.iterator();
 
         int size = 0;
         while (it.hasNext()) {
-            EvaluatedTransaction tx = it.next();
+            PendingTransaction tx = it.next();
 
             size += tx.transaction.size();
             if (size > byteLimit) {
@@ -225,7 +225,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      *
      * @return
      */
-    public synchronized List<EvaluatedTransaction> getPendingTransactions() {
+    public synchronized List<PendingTransaction> getPendingTransactions() {
         return getPendingTransactions(Integer.MAX_VALUE);
     }
 
@@ -234,13 +234,13 @@ public class PendingManager implements Runnable, BlockchainListener {
      *
      * @return
      */
-    public synchronized List<EvaluatedTransaction> reset() {
+    public synchronized List<PendingTransaction> reset() {
         // reset state
         pendingAS = kernel.getBlockchain().getAccountState().track();
         pendingDS = kernel.getBlockchain().getDelegateState().track();
 
         // clear transaction pool
-        List<EvaluatedTransaction> txs = new ArrayList<>(transactions);
+        List<PendingTransaction> txs = new ArrayList<>(transactions);
         transactions.clear();
 
         return txs;
@@ -252,11 +252,11 @@ public class PendingManager implements Runnable, BlockchainListener {
             long t1 = TimeUtil.currentTimeMillis();
 
             // clear transaction pool
-            List<EvaluatedTransaction> txs = reset();
+            List<PendingTransaction> txs = reset();
 
             // update pending state
             long accepted = 0;
-            for (EvaluatedTransaction tx : txs) {
+            for (PendingTransaction tx : txs) {
                 accepted += processTransaction(tx.transaction, false).accepted;
             }
 
@@ -340,8 +340,8 @@ public class PendingManager implements Runnable, BlockchainListener {
 
                 // Add the successfully processed transaction into the pool of transactions
                 // which are ready to be proposed to the network.
-                EvaluatedTransaction evaluatedTransaction = new EvaluatedTransaction(tx, result);
-                transactions.add(evaluatedTransaction);
+                PendingTransaction pendingTransaction = new PendingTransaction(tx, result);
+                transactions.add(pendingTransaction);
                 cnt++;
 
                 // relay transaction
@@ -386,13 +386,13 @@ public class PendingManager implements Runnable, BlockchainListener {
      * This object represents a transaction and its execution result against a
      * snapshot of local state that is not yet confirmed by the network.
      */
-    public static class EvaluatedTransaction {
+    public static class PendingTransaction {
 
         public final Transaction transaction;
 
         public final TransactionResult result;
 
-        public EvaluatedTransaction(Transaction transaction, TransactionResult result) {
+        public PendingTransaction(Transaction transaction, TransactionResult result) {
             this.transaction = transaction;
             this.result = result;
         }

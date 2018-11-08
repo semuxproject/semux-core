@@ -742,7 +742,7 @@ public class SemuxBft implements BftManager {
         long t1 = TimeUtil.currentTimeMillis();
 
         // fetch pending transactions
-        final List<PendingManager.EvaluatedTransaction> pending = pendingMgr
+        final List<PendingManager.PendingTransaction> pending = pendingMgr
                 .getPendingTransactions(config.maxBlockTransactionsSize());
         final List<Transaction> pendingTxs = pending.stream()
                 .map(tx -> tx.transaction)

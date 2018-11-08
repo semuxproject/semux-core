@@ -182,7 +182,7 @@ public class PendingManagerTest {
         pendingMgr.addTransaction(tx);
 
         TimeUnit.SECONDS.sleep(1);
-        List<PendingManager.EvaluatedTransaction> txs = pendingMgr.getPendingTransactions();
+        List<PendingManager.PendingTransaction> txs = pendingMgr.getPendingTransactions();
         assertEquals(3, txs.size());
     }
 

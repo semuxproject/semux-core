@@ -425,7 +425,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         TransactionResult result = new TransactionResult();
         PendingManager pendingManager = spy(kernelRule.getKernel().getPendingManager());
         when(pendingManager.getPendingTransactions()).thenReturn(
-                Collections.singletonList(new PendingManager.EvaluatedTransaction(tx, result)));
+                Collections.singletonList(new PendingManager.PendingTransaction(tx, result)));
         kernelRule.getKernel().setPendingManager(pendingManager);
 
         GetPendingTransactionsResponse response = api.getPendingTransactions();
@@ -539,7 +539,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
         Thread.sleep(200);
 
-        List<PendingManager.EvaluatedTransaction> list = pendingMgr.getPendingTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), Hex.decode0x(response.getResult()));
         assertEquals(list.get(list.size() - 1).transaction.getType(), org.semux.core.TransactionType.DELEGATE);
@@ -558,7 +558,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertTrue(response.isSuccess());
 
         Thread.sleep(200);
-        List<PendingManager.EvaluatedTransaction> list = pendingMgr.getPendingTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
         assertThat(list).hasSize(1);
         assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), tx.getHash());
     }
@@ -640,7 +640,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
         Thread.sleep(200);
 
-        List<PendingManager.EvaluatedTransaction> list = pendingMgr.getPendingTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
         assertFalse(list.isEmpty());
         Transaction tx = list.get(list.size() - 1).transaction;
         assertArrayEquals(tx.getHash(), Hex.decode0x(response.getResult()));
@@ -692,7 +692,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
         Thread.sleep(200);
 
-        List<PendingManager.EvaluatedTransaction> list = pendingMgr.getPendingTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
         assertFalse(list.isEmpty());
         Transaction tx = list.get(list.size() - 1).transaction;
         assertArrayEquals(tx.getHash(), Hex.decode0x(response.getResult()));
@@ -723,7 +723,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
         Thread.sleep(200);
 
-        List<PendingManager.EvaluatedTransaction> list = pendingMgr.getPendingTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), Hex.decode0x(response.getResult()));
         assertEquals(UNVOTE, list.get(list.size() - 1).transaction.getType());
@@ -750,7 +750,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
         Thread.sleep(200);
 
-        List<PendingManager.EvaluatedTransaction> list = pendingMgr.getPendingTransactions();
+        List<PendingManager.PendingTransaction> list = pendingMgr.getPendingTransactions();
         assertFalse(list.isEmpty());
         assertArrayEquals(list.get(list.size() - 1).transaction.getHash(), Hex.decode0x(response.getResult()));
         assertEquals(VOTE, list.get(list.size() - 1).transaction.getType());

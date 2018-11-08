@@ -130,11 +130,11 @@ public class TransactionExecutor {
                     break;
                 }
                 if (value.lt(config.minDelegateBurnAmount())) {
-                    result.setCode(Code.INVALID_BURNING_AMOUNT);
+                    result.setCode(Code.INVALID_DELEGATE_BURN_AMOUNT);
                     break;
                 }
                 if (!Arrays.equals(Bytes.EMPTY_ADDRESS, to)) {
-                    result.setCode(Code.INVALID_BURNING_ADDRESS);
+                    result.setCode(Code.INVALID_DELEGATE_BURN_ADDRESS);
                     break;
                 }
 
