@@ -259,44 +259,48 @@ public class Kernel {
      * Prints system info.
      */
     protected void printSystemInfo() {
-        SystemInfo si = new SystemInfo();
-        HardwareAbstractionLayer hal = si.getHardware();
+        try {
+            SystemInfo si = new SystemInfo();
+            HardwareAbstractionLayer hal = si.getHardware();
 
-        // computer system
-        ComputerSystem cs = hal.getComputerSystem();
-        logger.info("Computer: manufacturer = {}, model = {}", cs.getManufacturer(), cs.getModel());
+            // computer system
+            ComputerSystem cs = hal.getComputerSystem();
+            logger.info("Computer: manufacturer = {}, model = {}", cs.getManufacturer(), cs.getModel());
 
-        // operating system
-        OperatingSystem os = si.getOperatingSystem();
-        logger.info("OS: name = {}", os);
+            // operating system
+            OperatingSystem os = si.getOperatingSystem();
+            logger.info("OS: name = {}", os);
 
-        // cpu
-        CentralProcessor cp = hal.getProcessor();
-        logger.info("CPU: processor = {}, cores = {} / {}", cp, cp.getPhysicalProcessorCount(),
-                cp.getLogicalProcessorCount());
+            // cpu
+            CentralProcessor cp = hal.getProcessor();
+            logger.info("CPU: processor = {}, cores = {} / {}", cp, cp.getPhysicalProcessorCount(),
+                    cp.getLogicalProcessorCount());
 
-        // memory
-        GlobalMemory m = hal.getMemory();
-        long mb = 1024L * 1024L;
-        logger.info("Memory: total = {} MB, available = {} MB, swap total = {} MB, swap available = {} MB",
-                m.getTotal() / mb,
-                m.getAvailable() / mb,
-                m.getSwapTotal() / mb,
-                (m.getSwapTotal() - m.getSwapUsed()) / mb);
+            // memory
+            GlobalMemory m = hal.getMemory();
+            long mb = 1024L * 1024L;
+            logger.info("Memory: total = {} MB, available = {} MB, swap total = {} MB, swap available = {} MB",
+                    m.getTotal() / mb,
+                    m.getAvailable() / mb,
+                    m.getSwapTotal() / mb,
+                    (m.getSwapTotal() - m.getSwapUsed()) / mb);
 
-        // disk
-        for (HWDiskStore disk : hal.getDiskStores()) {
-            logger.info("Disk: name = {}, size = {} MB", disk.getName(), disk.getSize() / mb);
+            // disk
+            for (HWDiskStore disk : hal.getDiskStores()) {
+                logger.info("Disk: name = {}, size = {} MB", disk.getName(), disk.getSize() / mb);
+            }
+
+            // network
+            for (NetworkIF net : hal.getNetworkIFs()) {
+                logger.info("Network: name = {}, ip = [{}]", net.getDisplayName(), String.join(",", net.getIPv4addr()));
+            }
+
+            // java version
+            logger.info("Java: version = {}, xmx = {} MB", System.getProperty("java.version"),
+                    Runtime.getRuntime().maxMemory() / mb);
+        } catch (RuntimeException e) {
+            logger.error("Unable to retrieve System information.", e);
         }
-
-        // network
-        for (NetworkIF net : hal.getNetworkIFs()) {
-            logger.info("Network: name = {}, ip = [{}]", net.getDisplayName(), String.join(",", net.getIPv4addr()));
-        }
-
-        // java version
-        logger.info("Java: version = {}, xmx = {} MB", System.getProperty("java.version"),
-                Runtime.getRuntime().maxMemory() / mb);
     }
 
     /**
