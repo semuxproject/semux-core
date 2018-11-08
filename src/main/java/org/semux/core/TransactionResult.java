@@ -8,30 +8,49 @@ package org.semux.core;
 
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bouncycastle.util.encoders.Hex;
 import org.semux.Network;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class TransactionResult {
 
     /**
-     * Transaction error code.
+     * Transaction result code. There are currently three categories of code:
+     * <ul>
+     * <li>REJECTED: the transaction is invalid and should not be included in the
+     * chain.</li>
+     * <li>SUCCESS: the transaction is valid and the evaluation was successful.</li>
+     * <li>FAILURE: the transaction is valid but some failure occurred during the
+     * evaluation. For this type of transaction, the fee should be charged but state
+     * changes should be reverted.</li>
+     * </ul>
      */
-    public enum Error {
+    public enum Code {
+
         /**
-         * The transaction format is invalid. See {@link Transaction#validate(Network)}
+         * The transaction was executed successfully.
          */
-        INVALID_FORMAT,
+        SUCCESS,
+
+        /**
+         * The transaction was executed with failure (reserved for virtual machine).
+         */
+        FAILURE,
 
         /**
          * The transaction hash is duplicated.
          */
-        DUPLICATED_HASH,
+        DUPLICATE_TRANSACTION,
+
+        /**
+         * The transaction format is invalid. See {@link Transaction#validate(Network)}
+         */
+        INVALID_FORMAT,
 
         /**
          * The transaction timestamp is incorrect. See
@@ -62,7 +81,7 @@ public class TransactionResult {
         /**
          * The transaction data is invalid, typically too large.
          */
-        INVALID_DATA_LENGTH,
+        INVALID_DATA,
 
         /**
          * Insufficient available balance.
@@ -80,25 +99,56 @@ public class TransactionResult {
         INVALID_DELEGATE_NAME,
 
         /**
+         * Invalid burning address.
+         */
+        INVALID_DELEGATE_BURN_ADDRESS,
+
+        /**
          * Invalid delegate burn amount.
          */
         INVALID_DELEGATE_BURN_AMOUNT,
 
         /**
-         * Transaction failed.
+         * The DELEGATE operation is invalid.
          */
-        FAILED
+        INVALID_DELEGATING,
+
+        /**
+         * The VOTE operation is invalid.
+         */
+        INVALID_VOTING,
+
+        /**
+         * The UNVOTE operation is invalid.
+         */
+        INVALID_UNVOTING;
+
+        public boolean isSuccess() {
+            return this == SUCCESS;
+        }
+
+        public boolean isFailure() {
+            return this == FAILURE;
+        }
+
+        public boolean isAccepted() {
+            return isSuccess() || isFailure();
+        }
+
+        public boolean isRejected() {
+            return !isAccepted();
+        }
     }
 
     /**
-     * Indicates whether this transaction is success or not.
+     * Transaction execution result code.
      */
-    protected boolean success;
+    protected Code code;
 
     /**
      * Transaction returns.
      */
-    protected byte[] returns;
+    protected byte[] returnData;
 
     /**
      * Transaction logs.
@@ -111,59 +161,43 @@ public class TransactionResult {
     protected long gasUsed;
 
     /**
-     * Error message for API/GUI, not sent over the network.
-     */
-    protected Error error;
-
-    /**
      * Create a transaction result.
      *
-     * @param success
+     * 
+     * @param code
      * @param output
      * @param logs
      */
-    public TransactionResult(boolean success, byte[] output, List<LogInfo> logs, long gasUsed) {
+    public TransactionResult(Code code, byte[] output, List<LogInfo> logs, long gasUsed) {
         super();
-        this.success = success;
-        this.returns = output;
+        this.code = code;
+        this.returnData = output;
         this.logs = logs;
         this.gasUsed = gasUsed;
     }
 
-    /**
-     * Create a transaction result.
-     *
-     * @param success
-     */
-    public TransactionResult(boolean success) {
-        this(success, Bytes.EMPTY_BYTES, new ArrayList<>(), 0);
+    public TransactionResult(Code code) {
+        this(code, Bytes.EMPTY_BYTES, new ArrayList<>(), 0);
     }
 
-    /**
-     * Validate transaction result.
-     *
-     * @return
-     */
-    public boolean validate() {
-        return success
-                && returns != null
-                && logs != null; // RESERVED FOR VM
+    public TransactionResult() {
+        this(Code.SUCCESS, Bytes.EMPTY_BYTES, new ArrayList<>(), 0);
     }
 
-    public boolean isSuccess() {
-        return success;
+    public Code getCode() {
+        return code;
     }
 
-    public void setSuccess(boolean success) {
-        this.success = success;
+    public void setCode(Code code) {
+        this.code = code;
     }
 
-    public byte[] getReturns() {
-        return returns;
+    public byte[] getReturnData() {
+        return returnData;
     }
 
-    public void setReturns(byte[] returns) {
-        this.returns = returns;
+    public void setReturnData(byte[] returnData) {
+        this.returnData = returnData;
     }
 
     public List<LogInfo> getLogs() {
@@ -178,14 +212,6 @@ public class TransactionResult {
         this.logs.add(log);
     }
 
-    public Error getError() {
-        return error;
-    }
-
-    public void setError(Error error) {
-        this.error = error;
-    }
-
     public Long getGasUsed() {
         return gasUsed;
     }
@@ -196,8 +222,8 @@ public class TransactionResult {
 
     public byte[] toBytes() {
         SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBoolean(success);
-        enc.writeBytes(returns);
+        enc.writeBoolean(code == Code.SUCCESS);
+        enc.writeBytes(returnData);
         enc.writeInt(logs.size());
         for (LogInfo log : logs) {
             enc.writeBytes(serializeLog(log));
@@ -240,7 +266,7 @@ public class TransactionResult {
 
     public static TransactionResult fromBytes(byte[] bytes) {
         SimpleDecoder dec = new SimpleDecoder(bytes);
-        boolean valid = dec.readBoolean();
+        boolean success = dec.readBoolean();
         byte[] returns = dec.readBytes();
         List<LogInfo> logs = new ArrayList<>();
         int n = dec.readInt();
@@ -254,12 +280,12 @@ public class TransactionResult {
             // old blocks won't have this field
         }
 
-        return new TransactionResult(valid, returns, logs, gasUsed);
+        return new TransactionResult(success ? Code.SUCCESS : Code.FAILURE, returns, logs, gasUsed);
     }
 
     @Override
     public String toString() {
-        return "TransactionResult [success=" + success + ", output=" + Arrays.toString(returns) + ", # logs="
-                + logs.size() + ", gasUsed=" + gasUsed + "]";
+        return "TransactionResult [code=" + code + ", returnData=" + Hex.toHexString(returnData) + ", # logs="
+                + logs.size() + "]";
     }
 }

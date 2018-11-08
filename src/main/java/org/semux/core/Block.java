@@ -207,7 +207,7 @@ public class Block {
     public static boolean validateResults(BlockHeader header, List<TransactionResult> results) {
         // validate results
         for (TransactionResult result : results) {
-            if (!result.validate()) {
+            if (result.getCode().isRejected()) {
                 logger.warn("Transaction result does not match for " + result.toString());
                 return false;
             }

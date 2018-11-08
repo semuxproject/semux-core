@@ -72,7 +72,7 @@ public class TransactionDialog extends JDialog {
         JLabel gasUsed = new JLabel(gasUsedValue);
         gasUsed.setName("gasUsedText");
 
-        String outputValue = result == null ? notAvailable : Hex.encode0x(result.getReturns());
+        String outputValue = result == null ? notAvailable : Hex.encode0x(result.getReturnData());
         JTextArea output = SwingUtil.textAreaWithCopyPopup(outputValue);
         output.setName("outputText");
         output.setLineWrap(true);

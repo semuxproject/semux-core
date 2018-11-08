@@ -90,20 +90,20 @@ public class VmTest {
 
         // insufficient available
         TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh);
-        assertFalse(result.isSuccess());
+        assertFalse(result.getCode().isSuccess());
 
         Amount available = SEM.of(1000);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
         result = exec.execute(tx, as.track(), ds.track(), bh);
-        assertTrue(result.isSuccess());
+        assertTrue(result.getCode().isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getAvailable());
 
         // execute and commit
         result = executeAndCommit(exec, tx, as.track(), ds.track(), bh);
-        assertTrue(result.isSuccess());
+        assertTrue(result.getCode().isSuccess());
     }
 
     /**
@@ -140,20 +140,20 @@ public class VmTest {
 
         // insufficient available
         TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh);
-        assertFalse(result.isSuccess());
+        assertFalse(result.getCode().isSuccess());
 
         Amount available = SEM.of(1000);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
         result = exec.execute(tx, as.track(), ds.track(), bh);
-        assertTrue(result.isSuccess());
+        assertTrue(result.getCode().isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getAvailable());
 
         // execute and commit
         result = executeAndCommit(exec, tx, as.track(), ds.track(), bh);
-        assertTrue(result.isSuccess());
+        assertTrue(result.getCode().isSuccess());
 
         byte[] newContractAddress = HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce());
 

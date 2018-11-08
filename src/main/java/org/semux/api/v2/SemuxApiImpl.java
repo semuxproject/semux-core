@@ -651,7 +651,7 @@ public final class SemuxApiImpl implements SemuxApi {
                 return badRequest(resp, "Invalid transaction nonce.");
             }
 
-            PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
+            PendingManager.ProcessingResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {
                 return badRequest(resp, "Transaction rejected by pending manager: " + result.error.toString());
             }
@@ -962,7 +962,7 @@ public final class SemuxApiImpl implements SemuxApi {
         try {
             Transaction tx = getTransaction(type, from, to, value, fee, nonce, validateNonce, data, gasPrice, gas);
 
-            PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
+            PendingManager.ProcessingResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {
                 return badRequest(resp, "Transaction rejected by pending manager: " + result.error.toString());
             }
