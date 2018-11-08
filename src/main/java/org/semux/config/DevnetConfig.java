@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.semux.Network;
-import org.semux.consensus.ValidatorActivatedFork;
+import org.semux.core.Fork;
 
 public class DevnetConfig extends AbstractConfig {
 
@@ -25,7 +25,7 @@ public class DevnetConfig extends AbstractConfig {
     }
 
     @Override
-    public Map<ValidatorActivatedFork, Long> forkActivationCheckpoints() {
+    public Map<Fork, Long> forkActivationCheckpoints() {
         return Collections.emptyMap();
     }
 }

@@ -108,7 +108,7 @@ public final class SemuxApiImpl implements SemuxApi {
             SemuxIpFilter ipFilter = kernel.getChannelManager().getIpFilter();
             ipFilter.blacklistIp(ip.trim());
             ipFilter.persist(new File(kernel.getConfig().configDir(), SemuxIpFilter.CONFIG_FILE).toPath());
-            kernel.getChannelManager().removeBlacklistedChannels();
+            kernel.getChannelManager().closeBlacklistedChannels();
 
             return Response.ok().entity(resp.success(true)).build();
         } catch (UnknownHostException | IllegalArgumentException ex) {
@@ -641,7 +641,7 @@ public final class SemuxApiImpl implements SemuxApi {
                 return badRequest(resp, "Invalid transaction nonce.");
             }
 
-            PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
+            PendingManager.ProcessingResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {
                 return badRequest(resp, "Transaction rejected by pending manager: " + result.error.toString());
             }
@@ -897,7 +897,7 @@ public final class SemuxApiImpl implements SemuxApi {
                 return badRequest(resp, "Invalid transaction nonce.");
             }
 
-            PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
+            PendingManager.ProcessingResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {
                 return badRequest(resp, "Transaction rejected by pending manager: " + result.error.toString());
             }

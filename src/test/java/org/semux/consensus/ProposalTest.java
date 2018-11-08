@@ -44,7 +44,7 @@ public class ProposalTest {
 
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
         tx.sign(new Key());
-        TransactionResult res = new TransactionResult(true);
+        TransactionResult res = new TransactionResult();
 
         long height = Long.MAX_VALUE;
         int view = Integer.MAX_VALUE;

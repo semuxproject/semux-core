@@ -14,28 +14,27 @@ import static org.mockito.Mockito.mock;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.powermock.reflect.Whitebox;
-import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.crypto.Hex;
 
 public class ForkSignalSetTest {
 
-    private static final ValidatorActivatedFork[] eightPendingForks = new ValidatorActivatedFork[8];
+    private static final Fork[] eightPendingForks = new Fork[8];
 
     private static final byte[] eightPendingForksEncoded = Hex.decode("0800010002000300040005000600070008");
 
-    private static final ValidatorActivatedFork[] onePendingFork = new ValidatorActivatedFork[1];
+    private static final Fork[] onePendingFork = new Fork[1];
 
     private static final byte[] onePendingForkEncoded = Hex.decode("010001");
 
     @BeforeClass
     public static void beforeClass() {
         for (short i = 1; i <= 8; i++) {
-            ValidatorActivatedFork a = mock(ValidatorActivatedFork.class);
+            Fork a = mock(Fork.class);
             Whitebox.setInternalState(a, "number", i);
             eightPendingForks[i - 1] = a;
         }
 
-        onePendingFork[0] = ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
+        onePendingFork[0] = Fork.UNIFORM_DISTRIBUTION;
     }
 
     @Test
@@ -52,7 +51,7 @@ public class ForkSignalSetTest {
     public void testForkSignalSetCodec_eightPendingForks() {
         // test decoding
         BlockHeaderData.ForkSignalSet set = new BlockHeaderData.ForkSignalSet(eightPendingForksEncoded);
-        for (ValidatorActivatedFork f : eightPendingForks) {
+        for (Fork f : eightPendingForks) {
             set.signalingFork(f);
         }
 

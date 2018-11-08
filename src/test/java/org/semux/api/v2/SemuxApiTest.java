@@ -141,7 +141,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
         // blacklist 8.8.8.8
         assertTrue(api.addToBlacklist("8.8.8.8").isSuccess());
-        verify(channelManagerSpy).removeBlacklistedChannels();
+        verify(channelManagerSpy).closeBlacklistedChannels();
 
         // assert that 8.8.8.8 is no longer acceptable
         InetSocketAddress inetSocketAddress = mock(InetSocketAddress.class);
@@ -197,7 +197,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         chain.addBlock(createBlock(
                 chain.getLatestBlockNumber() + 1,
                 Collections.singletonList(createTransaction(config, key, key, Amount.ZERO)),
-                Collections.singletonList(new TransactionResult(true))));
+                Collections.singletonList(new TransactionResult())));
 
         // request api endpoint
         GetAccountResponse response = api.getAccount(key.toAddressString());
@@ -217,7 +217,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     @Test
     public void getAccountTransactionsTest() {
         Transaction tx = createTransaction(config);
-        TransactionResult res = new TransactionResult(true);
+        TransactionResult res = new TransactionResult();
         Block block = createBlock(chain.getLatestBlockNumber() + 1, Collections.singletonList(tx),
                 Collections.singletonList(res));
         chain.addBlock(block);
@@ -422,7 +422,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     @Test
     public void getPendingTransactionsTest() {
         Transaction tx = createTransaction(config);
-        TransactionResult result = new TransactionResult(true);
+        TransactionResult result = new TransactionResult();
         PendingManager pendingManager = spy(kernelRule.getKernel().getPendingManager());
         when(pendingManager.getPendingTransactions()).thenReturn(
                 Collections.singletonList(new PendingManager.PendingTransaction(tx, result)));
@@ -438,7 +438,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     public void getTransactionTest() {
         Key from = new Key(), to = new Key();
         Transaction tx = createTransaction(config, from, to, Amount.Unit.SEM.of(1));
-        TransactionResult res = new TransactionResult(true);
+        TransactionResult res = new TransactionResult();
         Block block = createBlock(chain.getLatestBlockNumber() + 1, Collections.singletonList(tx),
                 Collections.singletonList(res));
         chain.addBlock(block);

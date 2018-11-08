@@ -7,9 +7,7 @@
 package org.semux.core;
 
 import java.util.List;
-import java.util.Map;
 
-import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -193,13 +191,6 @@ public interface Blockchain {
     ValidatorStats getValidatorStats(byte[] address);
 
     /**
-     * Get currently activated forks.
-     *
-     * @return
-     */
-    Map<ValidatorActivatedFork, ValidatorActivatedFork.Activation> getActivatedForks();
-
-    /**
      * Register a blockchain listener.
      * 
      * @param listener
@@ -207,13 +198,19 @@ public interface Blockchain {
     void addListener(BlockchainListener listener);
 
     /**
-     * Checks whether a fork is activated at a certain blockchain height.
+     * Returns whether a fork is activated at the given height.
      *
-     * @param number
-     *            The number of blockchain height to check.
      * @param fork
-     *            An instance of ${@link ValidatorActivatedFork} to check.
-     * @return
+     * @param height
      */
-    boolean forkActivated(long number, ValidatorActivatedFork fork);
+    boolean isForkActivated(Fork fork, long height);
+
+    /**
+     * Returns whether a fork has been activated.
+     * 
+     * @param fork
+     */
+    boolean isForkActivated(Fork fork);
+
+    byte[] constructBlockData();
 }

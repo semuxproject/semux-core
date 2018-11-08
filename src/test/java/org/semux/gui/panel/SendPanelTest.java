@@ -73,7 +73,7 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
 
     @Test
     public void testSendSuccessfully() {
-        testSend(100, new PendingManager.ProcessTransactionResult(1));
+        testSend(100, new PendingManager.ProcessingResult(1));
 
         // 1. a confirmation dialog should be displayed
         window.optionPane(Timeout.timeout(1000)).requireTitle(GuiMessages.get("ConfirmTransfer")).requireVisible()
@@ -95,7 +95,7 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
 
     @Test
     public void testSendFailure() {
-        testSend(10000, new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
+        testSend(10000, new PendingManager.ProcessingResult(0, TransactionResult.Code.INSUFFICIENT_AVAILABLE));
         window.optionPane(Timeout.timeout(1000)).requireTitle(GuiMessages.get("ErrorDialogTitle"));
     }
 
@@ -105,7 +105,7 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
         window.optionPane(Timeout.timeout(1000)).requireVisible().requireMessage(GuiMessages.get("EnterValidValue"));
     }
 
-    private void testSend(Integer toSendSEM, PendingManager.ProcessTransactionResult mockResult) {
+    private void testSend(Integer toSendSEM, PendingManager.ProcessingResult mockResult) {
         kernelMock = spy(kernelRule1.getKernel());
         application = GuiActionRunner.execute(() -> new SendPanelTestApplication(walletRule.walletModel, kernelMock));
 

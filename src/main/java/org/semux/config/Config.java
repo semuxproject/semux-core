@@ -14,8 +14,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.semux.Network;
-import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.Amount;
+import org.semux.core.Fork;
 import org.semux.core.TransactionType;
 import org.semux.net.CapabilitySet;
 import org.semux.net.NodeManager.Node;
@@ -490,5 +490,5 @@ public interface Config {
      * @return a map of Validator-Activated fork activation checkpoints [fork] =>
      *         [block height]
      */
-    Map<ValidatorActivatedFork, Long> forkActivationCheckpoints();
+    Map<Fork, Long> forkActivationCheckpoints();
 }

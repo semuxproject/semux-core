@@ -32,6 +32,7 @@ import org.semux.config.Constants;
 import org.semux.config.exception.ConfigException;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
+import org.semux.core.Fork;
 import org.semux.core.Transaction;
 import org.semux.core.Wallet;
 import org.semux.core.event.WalletLoadingEvent;
@@ -504,7 +505,7 @@ public class SemuxGui extends Launcher {
 
         // update validators
         model.setValidators(validators);
-        model.setActivatedForks(chain.getActivatedForks());
+        model.setUniformDistributionEnabled(chain.isForkActivated(Fork.UNIFORM_DISTRIBUTION));
 
         // update active peers
         Map<String, Peer> activePeers = new HashMap<>();

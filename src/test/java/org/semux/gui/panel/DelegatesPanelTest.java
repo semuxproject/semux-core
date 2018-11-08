@@ -161,13 +161,13 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
 
     @Test
     public void testVoteSuccess() {
-        testVote(new PendingManager.ProcessTransactionResult(1));
+        testVote(new PendingManager.ProcessingResult(1));
         window.optionPane(Timeout.timeout(1000)).requireTitle(GuiMessages.get("SuccessDialogTitle")).requireVisible();
     }
 
     @Test
     public void testVoteFailure() {
-        testVote(new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
+        testVote(new PendingManager.ProcessingResult(0, TransactionResult.Code.INSUFFICIENT_AVAILABLE));
         window.optionPane(Timeout.timeout(1000)).requireTitle(GuiMessages.get("ErrorDialogTitle")).requireVisible();
     }
 
@@ -186,7 +186,7 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
         window.optionPane(Timeout.timeout(1000)).requireMessage(GuiMessages.get("InsufficientVotes")).requireVisible();
     }
 
-    private void testVote(PendingManager.ProcessTransactionResult mockResult) {
+    private void testVote(PendingManager.ProcessingResult mockResult) {
         // mock pending manager
         when(pendingManager.getNonce(any())).thenReturn(RandomUtils.nextLong());
         when(pendingManager.addTransactionSync(any())).thenReturn(mockResult);
@@ -231,7 +231,7 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
 
     @Test
     public void testDelegateSuccess() {
-        testDelegate("test_delegate", new PendingManager.ProcessTransactionResult(1));
+        testDelegate("test_delegate", new PendingManager.ProcessingResult(1));
         confirmDelegateRegistration();
         window.optionPane(Timeout.timeout(1000)).requireTitle(GuiMessages.get("SuccessDialogTitle")).requireVisible();
 
@@ -247,7 +247,7 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testDelegateFailureInsufficientAvailable() {
         testDelegate("test_delegate",
-                new PendingManager.ProcessTransactionResult(0, TransactionResult.Error.INSUFFICIENT_AVAILABLE));
+                new PendingManager.ProcessingResult(0, TransactionResult.Code.INSUFFICIENT_AVAILABLE));
         confirmDelegateRegistration();
         window.optionPane(Timeout.timeout(1000)).requireTitle(GuiMessages.get("ErrorDialogTitle")).requireVisible();
     }
@@ -265,7 +265,7 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
         window.optionPane(Timeout.timeout(1000)).requireTitle(GuiMessages.get("ErrorDialogTitle")).requireVisible();
     }
 
-    private void testDelegate(String name, PendingManager.ProcessTransactionResult mockResult) {
+    private void testDelegate(String name, PendingManager.ProcessingResult mockResult) {
         // mock pending manager
         when(pendingManager.getNonce(any())).thenReturn(RandomUtils.nextLong());
         when(pendingManager.addTransactionSync(any())).thenReturn(mockResult);

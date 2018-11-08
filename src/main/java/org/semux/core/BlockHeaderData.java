@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
@@ -97,7 +96,7 @@ public class BlockHeaderData {
         this.reserved = reserved;
     }
 
-    public boolean signalingFork(ValidatorActivatedFork fork) {
+    public boolean signalingFork(Fork fork) {
         return forkSignalSet != null && forkSignalSet.signalingFork(fork);
     }
 
@@ -158,12 +157,12 @@ public class BlockHeaderData {
             pendingForks = Collections.emptySet();
         }
 
-        public ForkSignalSet(ValidatorActivatedFork... validatorActivatedForks) {
-            if (validatorActivatedForks.length > MAX_PENDING_FORKS) {
+        public ForkSignalSet(Fork... forks) {
+            if (forks.length > MAX_PENDING_FORKS) {
                 throw new UnreachableException("There must not be more than 8 pending forks.");
             }
 
-            pendingForks = Arrays.stream(validatorActivatedForks).map(f -> f.number).collect(Collectors.toSet());
+            pendingForks = Arrays.stream(forks).map(f -> f.number).collect(Collectors.toSet());
         }
 
         public ForkSignalSet(byte[] bytes) {
@@ -179,7 +178,7 @@ public class BlockHeaderData {
             }
         }
 
-        boolean signalingFork(ValidatorActivatedFork fork) {
+        boolean signalingFork(Fork fork) {
             return pendingForks.contains(fork.number);
         }
 

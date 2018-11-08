@@ -27,7 +27,6 @@ import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
-import org.semux.consensus.ValidatorActivatedFork;
 import org.semux.core.BlockchainImpl.StatsType;
 import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
@@ -58,7 +57,7 @@ public class BlockchainImplTest {
     private Transaction tx = new Transaction(network, TransactionType.TRANSFER, to, value, fee, nonce, timestamp,
             data)
                     .sign(key);
-    private TransactionResult res = new TransactionResult(true);
+    private TransactionResult res = new TransactionResult();
 
     @Before
     public void setUp() {
@@ -285,7 +284,7 @@ public class BlockchainImplTest {
 
     @Test
     public void testForkActivated() {
-        final ValidatorActivatedFork fork = ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
+        final Fork fork = Fork.UNIFORM_DISTRIBUTION;
         for (long i = 1; i <= fork.activationBlocksLookup; i++) {
             chain.addBlock(
                     createBlock(i, coinbase, BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(fork)).toBytes(),
@@ -293,31 +292,31 @@ public class BlockchainImplTest {
 
             if (i <= fork.activationBlocks) {
                 for (long j = 0; j <= i; j++) {
-                    assertFalse(chain.forkActivated(i, fork));
+                    assertFalse(chain.isForkActivated(fork, i));
                 }
             } else {
                 for (long j = i; j > fork.activationBlocks; j--) {
-                    assertTrue(chain.forkActivated(j, fork));
+                    assertTrue(chain.isForkActivated(fork, j));
                 }
 
                 for (long j = fork.activationBlocks; j >= 0; j--) {
-                    assertFalse(chain.forkActivated(j, fork));
+                    assertFalse(chain.isForkActivated(fork, j));
                 }
             }
         }
 
         for (long i = 0; i <= fork.activationBlocks; i++) {
-            assertFalse(chain.forkActivated(i, fork));
+            assertFalse(chain.isForkActivated(fork, i));
         }
 
         for (long i = fork.activationBlocks + 1; i <= fork.activationBlocksLookup; i++) {
-            assertTrue(chain.forkActivated(i, fork));
+            assertTrue(chain.isForkActivated(fork, i));
         }
     }
 
     @Test
     public void testForkCompatibility() {
-        ValidatorActivatedFork fork = ValidatorActivatedFork.UNIFORM_DISTRIBUTION;
+        Fork fork = Fork.UNIFORM_DISTRIBUTION;
         Block block = createBlock(1, coinbase, BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(fork)).toBytes(),
                 Collections.singletonList(tx), Collections.singletonList(res));
         Whitebox.setInternalState(config, "forkUniformDistributionEnabled", false);

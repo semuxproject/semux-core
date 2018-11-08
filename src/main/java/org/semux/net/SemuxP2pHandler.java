@@ -90,7 +90,6 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     private final MessageQueue msgQueue;
 
     private AtomicBoolean isHandshakeDone = new AtomicBoolean(false);
-    private AtomicBoolean isClosed = new AtomicBoolean(false);
 
     private ScheduledFuture<?> getNodes = null;
     private ScheduledFuture<?> pingPong = null;
@@ -140,7 +139,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        logger.debug("P2P handler active, cid = {}", channel.getId());
+        logger.debug("P2P handler active, remoteIp = {}", channel.getRemoteIp());
 
         // activate message queue
         msgQueue.activate(ctx);
@@ -166,20 +165,37 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
                         client.getCoinbase()));
             }
         }
+
+        super.channelActive(ctx);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        logger.debug("P2P handler inactive, cid = {}", channel.getId());
+        logger.debug("P2P handler inactive, remoteIp = {}", channel.getRemoteIp());
 
-        close(ctx);
+        // deactivate the message queue
+        msgQueue.deactivate();
+
+        // stop scheduled workers
+        if (getNodes != null) {
+            getNodes.cancel(false);
+            getNodes = null;
+        }
+
+        if (pingPong != null) {
+            pingPong.cancel(false);
+            pingPong = null;
+        }
+
+        super.channelInactive(ctx);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.debug("Exception in P2P handler, cid = {}", channel.getId(), cause);
+        logger.debug("Exception in P2P handler, remoteIp = {}", channel.getRemoteIp(), cause);
 
-        close(ctx);
+        // close connection on exception
+        ctx.close();
     }
 
     @Override
@@ -247,15 +263,10 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
     protected void onDisconnect(ChannelHandlerContext ctx, DisconnectMessage msg) {
         ReasonCode reason = msg.getReason();
-        logger.debug("Received DISCONNECT message: reason = {}, remoteIP = {}",
+        logger.info("Received a DISCONNECT message: reason = {}, remoteIP = {}",
                 reason, channel.getRemoteIp());
 
-        // Users often get confused with no logging why they are unable to sync
-        if (reason.equals(ReasonCode.INVALID_HANDSHAKE)) {
-            logger.warn("Disconnected from peer due to invalid handshake.");
-        }
-
-        close(ctx);
+        ctx.close();
     }
 
     protected void onHello(org.semux.net.msg.p2p.handshake.v1.HelloMessage msg) {
@@ -507,27 +518,6 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
                     channel.isInbound() ? 1 : 0, 1, TimeUnit.MINUTES);
         } else {
             msgQueue.disconnect(ReasonCode.HANDSHAKE_EXISTS);
-        }
-    }
-
-    /**
-     * Stops all scheduled timers and the message queue.
-     */
-    private void close(ChannelHandlerContext ctx) {
-        if (isClosed.compareAndSet(false, true)) {
-            if (getNodes != null) {
-                getNodes.cancel(false);
-                getNodes = null;
-            }
-
-            if (pingPong != null) {
-                pingPong.cancel(false);
-                pingPong = null;
-            }
-
-            msgQueue.deactivate();
-
-            ctx.close();
         }
     }
 }

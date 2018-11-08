@@ -15,7 +15,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.IntegrationTest;
 import org.semux.config.Config;
-import org.semux.consensus.ValidatorActivatedFork;
+import org.semux.core.Fork;
 import org.semux.core.Genesis;
 import org.semux.net.NodeManager;
 
@@ -25,7 +25,7 @@ import org.semux.net.NodeManager;
  */
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ Genesis.class, NodeManager.class, ValidatorActivatedFork.class })
+@PrepareForTest({ Genesis.class, NodeManager.class, Fork.class })
 public class UniformDistForkSyncingTest extends SyncingTest {
 
     @Override
@@ -40,12 +40,12 @@ public class UniformDistForkSyncingTest extends SyncingTest {
         super.beforeStart();
 
         // forcibly activate the fork
-        ValidatorActivatedFork fork = mock(ValidatorActivatedFork.class);
+        Fork fork = mock(Fork.class);
         setInternalState(fork, "number", (short) 1);
         setInternalState(fork, "name", "UNIFORM_DISTRIBUTION");
         setInternalState(fork, "activationBlocks", 0);
         setInternalState(fork, "activationBlocksLookup", 0);
-        setInternalState(ValidatorActivatedFork.class, "UNIFORM_DISTRIBUTION", fork);
+        setInternalState(Fork.class, "UNIFORM_DISTRIBUTION", fork);
 
         // disable the fork on kernel3 (validator)
         Config config3 = kernelRule3.getKernel().getConfig();
