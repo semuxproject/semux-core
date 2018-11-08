@@ -57,7 +57,7 @@ public class BlockchainImplTest {
     private Transaction tx = new Transaction(network, TransactionType.TRANSFER, to, value, fee, nonce, timestamp,
             data)
                     .sign(key);
-    private TransactionResult res = new TransactionResult(true);
+    private TransactionResult res = new TransactionResult();
 
     @Before
     public void setUp() {

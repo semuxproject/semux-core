@@ -63,7 +63,7 @@ public class BlockchainPerformance {
             }
 
             txs.add(tx);
-            res.add(new TransactionResult(true));
+            res.add(new TransactionResult());
             total += tx.size();
         }
 

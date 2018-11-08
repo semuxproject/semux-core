@@ -143,7 +143,7 @@ public class SemuxSyncTest {
                 new Key(),
                 kernelRule.getKernel().getBlockchain().getLatestBlockNumber() + 1,
                 Collections.singletonList(tx),
-                Collections.singletonList(new TransactionResult(true)));
+                Collections.singletonList(new TransactionResult()));
 
         assertFalse(semuxSync.validateBlock(block2, as, ds));
     }

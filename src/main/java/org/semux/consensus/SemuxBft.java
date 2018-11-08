@@ -748,7 +748,7 @@ public class SemuxBft implements BftManager {
                 .map(tx -> tx.transaction)
                 .collect(Collectors.toList());
         final List<TransactionResult> pendingResults = pending.stream()
-                .map(tx -> tx.transactionResult)
+                .map(tx -> tx.result)
                 .collect(Collectors.toList());
 
         // compute roots
@@ -861,7 +861,6 @@ public class SemuxBft implements BftManager {
 
         Set<Transaction> pendingValidatedTransactions = pendingMgr.getPendingTransactions()
                 .stream()
-                .filter(pendingTx -> pendingTx.transactionResult.isSuccess())
                 .map(pendingTx -> pendingTx.transaction)
                 .collect(Collectors.toSet());
 
