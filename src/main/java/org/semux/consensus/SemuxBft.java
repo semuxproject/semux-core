@@ -788,7 +788,7 @@ public class SemuxBft implements BftManager {
                     TransactionResult result = exec.execute(tx.transaction, as, ds, semuxBlock);
                     gasUsed += result.getGasUsed();
 
-                    if (result.isSuccess() && gasUsed < config.vmBlockGasLimit()) {
+                    if (result.getCode().isSuccess() && gasUsed < config.vmBlockGasLimit()) {
                         pendingResults.add(result);
                         pendingTxs.add(tx.transaction);
                     } else {
@@ -796,7 +796,7 @@ public class SemuxBft implements BftManager {
                     }
                 }
             } else {
-                pendingResults.add(tx.transactionResult);
+                pendingResults.add(tx.result);
                 pendingTxs.add(tx.transaction);
             }
         }
@@ -900,7 +900,6 @@ public class SemuxBft implements BftManager {
 
         Set<Transaction> pendingValidatedTransactions = pendingMgr.getPendingTransactions()
                 .stream()
-                .filter(pendingTx -> pendingTx.transactionResult.isSuccess())
                 .map(pendingTx -> pendingTx.transaction)
                 .collect(Collectors.toSet());
 

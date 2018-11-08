@@ -47,15 +47,6 @@ matrix:
         - source ./install-jdk.sh -F 10 -L GPL
         - mvn test -Denforcer.skip=true
 
-    # Linux tests (Java 11 LTS)
-    - env: NAME="Linux tests (Java 11)"
-      os: linux
-      sudo: false
-      script:
-        - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-        - source ./install-jdk.sh -F 11 -L GPL
-        - mvn test -Denforcer.skip=true
-
     # macOS tests
     - env: NAME="macOS tests"
       os: osx

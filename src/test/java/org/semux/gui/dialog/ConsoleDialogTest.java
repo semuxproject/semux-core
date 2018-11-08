@@ -90,7 +90,7 @@ public class ConsoleDialogTest extends AssertJSwingJUnitTestCase {
         byte[] stateRoot = Bytes.random(32);
         byte[] data = {};
         List<Transaction> transactions = Collections.emptyList();
-        List<TransactionResult> results = Arrays.asList(new TransactionResult(true), new TransactionResult(true));
+        List<TransactionResult> results = Arrays.asList(new TransactionResult(), new TransactionResult());
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
                 stateRoot, data);
         return new Block(header, transactions, results);

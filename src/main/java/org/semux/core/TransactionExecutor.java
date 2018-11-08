@@ -14,7 +14,7 @@ import org.ethereum.vm.client.TransactionReceipt;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.semux.config.Config;
-import org.semux.core.TransactionResult.Error;
+import org.semux.core.TransactionResult.Code;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -94,7 +94,7 @@ public class TransactionExecutor {
 
         long gasUsedInBlock = 0;
         for (Transaction tx : txs) {
-            TransactionResult result = new TransactionResult(false);
+            TransactionResult result = new TransactionResult();
             results.add(result);
 
             TransactionType type = tx.getType();
@@ -111,93 +111,85 @@ public class TransactionExecutor {
 
             // check nonce
             if (nonce != acc.getNonce()) {
-                result.setError(Error.INVALID_NONCE);
+                result.setCode(Code.INVALID_NONCE);
                 continue;
             }
 
             // check fee
             if (fee.lt(config.minTransactionFee())) {
-                result.setError(Error.INVALID_FEE);
+                result.setCode(Code.INVALID_FEE);
                 continue;
             }
 
             // check data length
             if (data.length > config.maxTransactionDataSize(type)) {
-                result.setError(Error.INVALID_DATA_LENGTH);
+                result.setCode(Code.INVALID_DATA);
                 continue;
             }
 
             switch (type) {
             case TRANSFER: {
                 if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
-
                     as.adjustAvailable(from, neg(sum(value, fee)));
                     as.adjustAvailable(to, value);
-
-                    result.setSuccess(true);
                 } else {
-                    result.setError(Error.INSUFFICIENT_AVAILABLE);
+                    result.setCode(Code.INSUFFICIENT_AVAILABLE);
                 }
                 break;
             }
             case DELEGATE: {
                 if (!validateDelegateName(data)) {
-                    result.setError(Error.INVALID_DELEGATE_NAME);
+                    result.setCode(Code.INVALID_DELEGATE_NAME);
                     break;
                 }
                 if (value.lt(config.minDelegateBurnAmount())) {
-                    result.setError(Error.INVALID_DELEGATE_BURN_AMOUNT);
+                    result.setCode(Code.INVALID_DELEGATE_BURN_AMOUNT);
+                    break;
+                }
+                if (!Arrays.equals(Bytes.EMPTY_ADDRESS, to)) {
+                    result.setCode(Code.INVALID_DELEGATE_BURN_ADDRESS);
                     break;
                 }
 
                 if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
-                    if (Arrays.equals(Bytes.EMPTY_ADDRESS, to) && ds.register(from, data)) {
-
+                    if (ds.register(from, data)) {
                         as.adjustAvailable(from, neg(sum(value, fee)));
-
-                        result.setSuccess(true);
                     } else {
-                        result.setError(Error.FAILED);
+                        result.setCode(Code.INVALID_DELEGATING);
                     }
                 } else {
-                    result.setError(Error.INSUFFICIENT_AVAILABLE);
+                    result.setCode(Code.INSUFFICIENT_AVAILABLE);
                 }
                 break;
             }
             case VOTE: {
                 if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
                     if (ds.vote(from, to, value)) {
-
                         as.adjustAvailable(from, neg(sum(value, fee)));
                         as.adjustLocked(from, value);
-
-                        result.setSuccess(true);
                     } else {
-                        result.setError(Error.FAILED);
+                        result.setCode(Code.INVALID_VOTING);
                     }
                 } else {
-                    result.setError(Error.INSUFFICIENT_AVAILABLE);
+                    result.setCode(Code.INSUFFICIENT_AVAILABLE);
                 }
                 break;
             }
             case UNVOTE: {
                 if (available.lt(fee)) {
-                    result.setError(Error.INSUFFICIENT_AVAILABLE);
+                    result.setCode(Code.INSUFFICIENT_AVAILABLE);
                     break;
                 }
-
                 if (locked.lt(value)) {
-                    result.setError(Error.INSUFFICIENT_LOCKED);
+                    result.setCode(Code.INSUFFICIENT_LOCKED);
                     break;
                 }
 
                 if (ds.unvote(from, to, value)) {
                     as.adjustAvailable(from, sub(value, fee));
                     as.adjustLocked(from, neg(value));
-
-                    result.setSuccess(true);
                 } else {
-                    result.setError(Error.FAILED);
+                    result.setCode(Code.INVALID_UNVOTING);
                 }
                 break;
             }
@@ -211,30 +203,30 @@ public class TransactionExecutor {
                     as.adjustAvailable(from, neg(sum(value, fee)));
 
                     if (tx.getGas() > config.vmMaxBlockGasLimit()) {
-                        result.setError(Error.INVALID_GAS);
+                        result.setCode(Code.INVALID_GAS);
                     } else if (block == null) {
                         // workaround for pending manager so it doesn't execute these
                         // we charge gas later
                         as.increaseNonce(from);
-                        result.setSuccess(true);
+                        result.setCode(Code.SUCCESS);
                     } else {
                         executeVmTransaction(result, tx, as, block, gasUsedInBlock);
                         gasUsedInBlock += result.getGasUsed();
                     }
                 } else {
-                    result.setError(Error.INSUFFICIENT_AVAILABLE);
+                    result.setCode(Code.INSUFFICIENT_AVAILABLE);
                 }
                 break;
 
             default:
                 // unsupported transaction type
-                result.setError(Error.INVALID_TYPE);
+                result.setCode(Code.INVALID_TYPE);
                 break;
             }
 
             // increase nonce if success
             // creates and calls increase their own nonces internal to VM
-            if (result.isSuccess() && type != TransactionType.CREATE && type != TransactionType.CALL) {
+            if (result.getCode().isAccepted() && type != TransactionType.CREATE && type != TransactionType.CALL) {
                 as.increaseNonce(from);
             }
         }
@@ -254,14 +246,14 @@ public class TransactionExecutor {
 
         TransactionReceipt summary = executor.run();
         if (summary == null) {
-            result.setSuccess(false);
+            result.setCode(Code.SUCCESS);
         } else {
             for (LogInfo log : summary.getLogs()) {
                 result.addLog(log);
             }
             result.setGasUsed(summary.getGasUsed());
-            result.setReturns(summary.getReturnData());
-            result.setSuccess(summary.isSuccess());
+            result.setReturnData(summary.getReturnData());
+            result.setCode(summary.isSuccess() ? Code.SUCCESS : Code.FAILURE);
         }
     }
 

@@ -155,7 +155,7 @@ public class KernelRule extends TemporaryFolder {
      * @return created block
      */
     public Block createBlock(List<Transaction> txs, BlockHeader lastBlock) {
-        List<TransactionResult> res = txs.stream().map(tx -> new TransactionResult(true)).collect(Collectors.toList());
+        List<TransactionResult> res = txs.stream().map(tx -> new TransactionResult()).collect(Collectors.toList());
 
         long number;
         byte[] prevHash;
