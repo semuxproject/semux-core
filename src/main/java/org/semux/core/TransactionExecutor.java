@@ -246,7 +246,7 @@ public class TransactionExecutor {
 
         TransactionReceipt summary = executor.run();
         if (summary == null) {
-            result.setCode(Code.SUCCESS);
+            result.setCode(Code.FAILURE);
         } else {
             for (LogInfo log : summary.getLogs()) {
                 result.addLog(log);
