@@ -116,4 +116,9 @@ public interface AccountState {
      * @return nonce
      */
     long setNonce(byte[] address, long nonce);
+
+    /**
+     * Clone this AccountState, including all the uncommitted changes.
+     */
+    AccountState clone();
 }

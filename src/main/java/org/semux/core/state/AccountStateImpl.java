@@ -29,7 +29,7 @@ import org.semux.util.Bytes;
  * [2, address, storage_key] = [storage_value]
  * </pre>
  */
-public class AccountStateImpl implements AccountState {
+public class AccountStateImpl implements Cloneable, AccountState {
 
     protected static final byte TYPE_ACCOUNT = 0;
     protected static final byte TYPE_CODE = 1;
@@ -203,6 +203,15 @@ public class AccountStateImpl implements AccountState {
         acc.setNonce(nonce);
         updates.put(k, acc.toBytes());
         return nonce;
+    }
+
+    @Override
+    public AccountState clone() {
+        AccountStateImpl clone = new AccountStateImpl(accountDB);
+        clone.prev = prev;
+        clone.updates.putAll(updates);
+
+        return clone;
     }
 
     protected ByteArray getKey(byte type, byte[] address) {
