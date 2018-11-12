@@ -102,8 +102,7 @@ public class SemuxRepository implements Cloneable, Repository {
 
     @Override
     public Repository clone() {
-        // todo - is a clone a track or original account state?
-        return new SemuxRepository(accountState.track());
+        return new SemuxRepository(accountState.clone());
     }
 
     @Override
