@@ -135,7 +135,7 @@ public abstract class AbstractConfig implements Config {
     // Forks
     // =========================
     protected boolean forkUniformDistributionEnabled = true;
-    protected boolean forkVirtualMachineEnabled = false;
+    protected boolean forkVirtualMachineEnabled = true;
 
     /**
      * Create an {@link AbstractConfig} instance.
