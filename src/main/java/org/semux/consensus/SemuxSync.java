@@ -212,6 +212,8 @@ public class SemuxSync implements SyncManager {
         case BLOCK: {
             BlockMessage blockMsg = (BlockMessage) msg;
             Block block = blockMsg.getBlock();
+            logger.debug("Received block " + block.getNumber());
+
             synchronized (lock) {
                 if (toDownload.remove(block.getNumber())) {
                     growToDownloadQueue();
@@ -508,6 +510,7 @@ public class SemuxSync implements SyncManager {
      */
     protected boolean validateBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot,
             boolean validateVotes) {
+        logger.debug("validating block " + block.getNumber());
         BlockHeader header = block.getHeader();
         List<Transaction> transactions = block.getTransactions();
 
@@ -561,6 +564,7 @@ public class SemuxSync implements SyncManager {
         if (validateVotes) {
             return validateBlockVotes(block);
         }
+        logger.debug("Finishing validating block");
         return true;
     }
 
@@ -595,6 +599,7 @@ public class SemuxSync implements SyncManager {
     }
 
     protected boolean applyBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot) {
+        logger.debug("Applying block " + block.getNumber() + " to the chain");
         // [5] apply block reward and tx fees
         Amount txsReward = block.getTransactions().stream().map(Transaction::getFee).reduce(ZERO, Amount::sum);
         Amount reward = sum(config.getBlockReward(block.getNumber()), txsReward);
@@ -621,6 +626,7 @@ public class SemuxSync implements SyncManager {
         }
 
         current.set(block.getNumber() + 1);
+        logger.debug("Finished applying block to chain");
         return true;
     }
 
