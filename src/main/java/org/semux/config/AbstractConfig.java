@@ -117,7 +117,6 @@ public abstract class AbstractConfig implements Config {
     // =========================
     // Virtual machine
     // =========================
-    protected boolean vmEnabled = false;
     protected int vmMaxStackSize = 1024;
     protected int vmInitHeapSize = 128;
     protected int vmBlockGasLimit = 999_999;
@@ -135,7 +134,7 @@ public abstract class AbstractConfig implements Config {
     // Forks
     // =========================
     protected boolean forkUniformDistributionEnabled = true;
-    protected boolean forkVirtualMachineEnabled = false;
+    protected boolean forkVirtualMachineEnabled = true;
 
     /**
      * Create an {@link AbstractConfig} instance.
@@ -471,11 +470,6 @@ public abstract class AbstractConfig implements Config {
     @Override
     public long maxBlockTimeDrift() {
         return maxBlockTimeDrift;
-    }
-
-    @Override
-    public boolean vmEnabled() {
-        return vmEnabled;
     }
 
     @Override
