@@ -410,13 +410,6 @@ public interface Config {
     // =========================
 
     /**
-     * Returns whether virtual machine is enabled.
-     *
-     * @return
-     */
-    boolean vmEnabled();
-
-    /**
      * Returns the max size of process stack in words.
      *
      * @return
@@ -488,7 +481,7 @@ public interface Config {
     boolean forkUniformDistributionEnabled();
 
     /**
-     * Returns whether VIRTUAL_MACHINE fork is activated
+     * Returns whether VIRTUAL_MACHINE fork is enabled.
      *
      * @return
      */
