@@ -270,7 +270,6 @@ public class WelcomeFrame extends JFrame implements ActionListener {
 
         if (isCreate()) {
             if (wallet.unlock(password)
-                    && wallet.addAccount(new Key())
                     && wallet.flush()) {
                 done();
             } else {
@@ -278,7 +277,7 @@ public class WelcomeFrame extends JFrame implements ActionListener {
                 SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_WRITE_WALLET_FILE);
             }
         } else {
-            Wallet w = new Wallet(backupFile);
+            Wallet w = new Wallet(backupFile, wallet.getNetwork());
 
             if (!w.unlock(password)) {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("UnlockFailed"));

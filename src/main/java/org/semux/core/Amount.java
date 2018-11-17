@@ -66,6 +66,10 @@ public final class Amount {
         return nano;
     }
 
+    public BigInteger getBigInteger() {
+        return BigInteger.valueOf(nano);
+    }
+
     public int compareTo(Amount other) {
         return this.lt(other) ? -1 : (this.gt(other) ? 1 : 0);
     }

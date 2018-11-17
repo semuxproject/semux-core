@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.semux</groupId>
     <artifactId>semux</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <packaging>jar</packaging>
     <description>Semux is an experimental high-performance blockchain platform that powers decentralized application.</description>
 
@@ -14,6 +14,7 @@
         <dist.windowsExecutableVersion>${project.version}.0</dist.windowsExecutableVersion>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <skip.git.info>false</skip.git.info>
     </properties>
 
     <organization>
@@ -107,7 +108,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/swagger/v2.1.0.json</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/swagger/v2.2.0.json</inputSpec>
                             <language>jaxrs-cxf</language>
                             <configOptions>
                                 <useGenericResponse>true</useGenericResponse>
@@ -137,7 +138,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/swagger/v2.1.0.json</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/swagger/v2.2.0.json</inputSpec>
                             <language>jaxrs-cxf-client</language>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
@@ -244,6 +245,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <skip>${skip.git.info}</skip>
                     <abbrevLength>7</abbrevLength>
                     <verbose>false</verbose>
                     <skipPoms>false</skipPoms>
@@ -676,7 +678,7 @@
         <dependency>
             <groupId>com.github.semuxproject</groupId>
             <artifactId>evm</artifactId>
-            <version>-SNAPSHOT</version>
+            <version>f0cd3256aad61634e0efb320478e8075beec076f</version>
         </dependency>
 
         <!-- Swagger & JAX-RS API -->
@@ -1017,9 +1019,26 @@
             <version>2.9.7</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- HD wallets -->
+        <dependency>
+            <groupId>com.github.orogvany</groupId>
+            <artifactId>BIP32-Ed25519-java</artifactId>
+            <version>a5865ea2916197e2da83c38a3b50972f01a8c93c</version>
+        </dependency>
     </dependencies>
 
     <profiles>
+        <profile>
+            <id>src-build</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <skip.git.info>true</skip.git.info>
+                <git.commit.id.abbrev>local</git.commit.id.abbrev>
+            </properties>
+        </profile>
         <profile>
             <id>windows</id>
             <activation>

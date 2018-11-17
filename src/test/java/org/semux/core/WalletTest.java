@@ -28,6 +28,9 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.semux.Network;
+import org.semux.config.Config;
+import org.semux.config.DevnetConfig;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
@@ -50,7 +53,7 @@ public class WalletTest {
             throw new RuntimeException(e);
         }
 
-        wallet = new Wallet(file);
+        wallet = new Wallet(file, Network.DEVNET);
         wallet.unlock(pwd);
         wallet.setAccounts(Collections.singletonList(new Key()));
         wallet.flush();
@@ -124,7 +127,7 @@ public class WalletTest {
         File f = File.createTempFile("wallet2", ".data");
         Key key = new Key();
 
-        Wallet wallet1 = new Wallet(f);
+        Wallet wallet1 = new Wallet(f, Network.DEVNET);
         wallet1.unlock(pwd);
         wallet1.addAccount(key);
         wallet1.setAddressAlias(key.toAddress(), "originalName");
@@ -158,14 +161,14 @@ public class WalletTest {
     @Test
     public void testFlush2() throws IOException {
         File f = File.createTempFile("wallet", ".data");
-        Wallet w = new Wallet(f);
+        Wallet w = new Wallet(f, Network.DEVNET);
 
         w.unlock(pwd);
         Key key = new Key();
         w.addAccount(key);
         w.flush();
 
-        Wallet w2 = new Wallet(f);
+        Wallet w2 = new Wallet(f, Network.DEVNET);
         w2.unlock(pwd);
         assertEquals(key.toAddressString(), w2.getAccount(0).toAddressString());
     }
@@ -235,7 +238,7 @@ public class WalletTest {
     public void testWalletNames() throws IOException {
         File tmp = File.createTempFile("wallet", ".data");
 
-        Wallet wall = new Wallet(tmp);
+        Wallet wall = new Wallet(tmp, Network.DEVNET);
         wall.unlock(pwd);
         Key k = new Key();
 
@@ -243,7 +246,7 @@ public class WalletTest {
         wall.setAddressAlias(k.toAddress(), "name");
         wall.flush();
 
-        wall = new Wallet(tmp);
+        wall = new Wallet(tmp, Network.DEVNET);
         wall.unlock(pwd);
         Optional<String> name = wall.getAddressAlias(k.toAddress());
         assertEquals("name", name.get());
@@ -261,7 +264,7 @@ public class WalletTest {
             };
             for (int i = 0; i < names.length; i++) {
                 FileUtils.copyInputStreamToFile(WalletTest.class.getResourceAsStream("/wallet/" + names[i]), tmp);
-                Wallet w = new Wallet(tmp);
+                Wallet w = new Wallet(tmp, Network.DEVNET);
                 w.unlock("password");
                 assertEquals(addresses[i], Hex.encode(Hash.h160(w.getAccount(0).getPublicKey())));
             }

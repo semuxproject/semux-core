@@ -43,7 +43,7 @@ import org.semux.rules.KernelRule;
 @Category(IntegrationTest.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Genesis.class, NodeManager.class })
-@PowerMockIgnore({ "jdk.internal.*", "javax.management.*" })
+@PowerMockIgnore({ "jdk.internal.*", "javax.management.*", "javax.crypto.*" })
 public class SyncingTest {
 
     private static final Amount PREMINE = SEM.of(5000);

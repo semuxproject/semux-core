@@ -46,6 +46,7 @@ import org.semux.event.PubSub;
 import org.semux.event.PubSubFactory;
 import org.semux.exception.LauncherException;
 import org.semux.gui.dialog.AddressBookDialog;
+import org.semux.gui.dialog.CreateHdWalletDialog;
 import org.semux.gui.dialog.InputDialog;
 import org.semux.gui.dialog.SelectDialog;
 import org.semux.gui.event.MainFrameStartedEvent;
@@ -188,12 +189,16 @@ public class SemuxGui extends Launcher {
         parseOptions(args);
 
         // create/unlock wallet
-        Wallet wallet = new Wallet(new File(getDataDir(), "wallet.data"));
+        Wallet wallet = new Wallet(new File(getDataDir(), "wallet.data"), getConfig().network());
         if (!wallet.exists()) {
             showWelcome(wallet);
         } else {
             checkFilePermissions(wallet);
             unlockWallet(wallet);
+        }
+
+        if (!wallet.isHdWalletInitialized()) {
+            initializeHdWallet(wallet);
         }
 
         // setup splash screen
@@ -216,6 +221,13 @@ public class SemuxGui extends Launcher {
             logger.error("Uncaught exception during kernel startup.", e);
             SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_LAUNCH_KERNEL);
         }
+    }
+
+    private void initializeHdWallet(Wallet wallet) {
+
+        CreateHdWalletDialog dialog = new CreateHdWalletDialog(wallet, main);
+        dialog.setVisible(true);
+        dialog.dispose();
     }
 
     /**
@@ -293,7 +305,7 @@ public class SemuxGui extends Launcher {
 
         // create an account is empty
         if (wallet.size() == 0) {
-            wallet.addAccount(new Key());
+            wallet.addAccount();
             wallet.flush();
         }
 

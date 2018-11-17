@@ -11,6 +11,10 @@ public enum Action {
 
     RECOVER_ACCOUNTS,
 
+    RECOVER_HD_WALLET,
+
+    SCAN_HD_WALLETS,
+
     OK,
 
     CANCEL,

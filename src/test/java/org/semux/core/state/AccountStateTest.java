@@ -8,6 +8,7 @@ package org.semux.core.state;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 
@@ -72,6 +73,38 @@ public class AccountStateTest {
         assertEquals(ZERO, acc.getAvailable());
         assertEquals(ZERO, acc.getLocked());
         assertEquals(0, acc.getNonce());
+    }
+
+    @Test
+    public void testCode() {
+        byte[] address = Bytes.random(20);
+        byte[] addressCode = Bytes.random(20);
+        byte[] code = state.getCode(address);
+        assertNull(code);
+        state.setCode(address, addressCode);
+        code = state.getCode(address);
+        assertArrayEquals(addressCode, code);
+        state.commit();
+        code = state.getCode(address);
+        assertArrayEquals(addressCode, code);
+    }
+
+    @Test
+    public void testStorage() {
+        byte[] address = Bytes.random(20);
+        byte[] addressStorage1 = Bytes.random(20);
+        byte[] storageKey1 = Bytes.random(3);
+        byte[] storageKey2 = Bytes.random(3);
+        byte[] addressStorage2 = Bytes.random(21);
+        state.putStorage(address, storageKey2, addressStorage2);
+        byte[] storage = state.getStorage(address, storageKey1);
+        assertNull(storage);
+        state.putStorage(address, storageKey1, addressStorage1);
+        storage = state.getStorage(address, storageKey1);
+        assertArrayEquals(addressStorage1, storage);
+        state.commit();
+        storage = state.getStorage(address, storageKey1);
+        assertArrayEquals(addressStorage1, storage);
     }
 
     @Test

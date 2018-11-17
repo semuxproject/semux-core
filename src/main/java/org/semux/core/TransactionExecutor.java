@@ -6,21 +6,29 @@
  */
 package org.semux.core;
 
-import static org.semux.core.Amount.neg;
-import static org.semux.core.Amount.sub;
-import static org.semux.core.Amount.sum;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
+import org.ethereum.vm.LogInfo;
+import org.ethereum.vm.chainspec.Spec;
+import org.ethereum.vm.client.BlockStore;
+import org.ethereum.vm.client.Repository;
+import org.ethereum.vm.client.TransactionReceipt;
+import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
+import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.semux.config.Config;
 import org.semux.core.TransactionResult.Code;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.util.Bytes;
+import org.semux.vm.client.SemuxBlock;
+import org.semux.vm.client.SemuxRepository;
+import org.semux.vm.client.SemuxTransaction;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.semux.core.Amount.*;
 
 /**
  * Transaction executor
@@ -34,9 +42,11 @@ public class TransactionExecutor {
         }
     }
 
+    private BlockStore blockStore;
+
     /**
      * Validate delegate name.
-     * 
+     *
      * @param data
      */
     public static boolean validateDelegateName(byte[] data) {
@@ -57,16 +67,17 @@ public class TransactionExecutor {
 
     /**
      * Creates a new transaction executor.
-     * 
+     *
      * @param config
      */
-    public TransactionExecutor(Config config) {
+    public TransactionExecutor(Config config, BlockStore blockStore) {
         this.config = config;
+        this.blockStore = blockStore;
     }
 
     /**
      * Execute a list of transactions.
-     * 
+     *
      * NOTE: transaction format and signature are assumed to be success.
      *
      * @param txs
@@ -77,9 +88,11 @@ public class TransactionExecutor {
      *            delegate state
      * @return
      */
-    public List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds) {
+    public List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds,
+            SemuxBlock block) {
         List<TransactionResult> results = new ArrayList<>();
 
+        long gasUsedInBlock = 0;
         for (Transaction tx : txs) {
             TransactionResult result = new TransactionResult();
             results.add(result);
@@ -180,14 +193,40 @@ public class TransactionExecutor {
                 }
                 break;
             }
+
+            case CALL:
+            case CREATE:
+                long maxGasFee = tx.getGas() * tx.getGasPrice();
+                Amount maxCost = sum(sum(value, fee), Unit.NANO_SEM.of(maxGasFee));
+                if (maxCost.lte(available)) {
+                    // VM calls still use fees
+                    as.adjustAvailable(from, neg(sum(value, fee)));
+
+                    if (tx.getGas() > config.vmMaxBlockGasLimit()) {
+                        result.setCode(Code.INVALID_GAS);
+                    } else if (block == null) {
+                        // workaround for pending manager so it doesn't execute these
+                        // we charge gas later
+                        as.increaseNonce(from);
+                        result.setCode(Code.SUCCESS);
+                    } else {
+                        executeVmTransaction(result, tx, as, block, gasUsedInBlock);
+                        gasUsedInBlock += result.getGasUsed();
+                    }
+                } else {
+                    result.setCode(Code.INSUFFICIENT_AVAILABLE);
+                }
+                break;
+
             default:
                 // unsupported transaction type
                 result.setCode(Code.INVALID_TYPE);
                 break;
             }
 
-            // increase nonce if success or failure
-            if (result.getCode().isAccepted()) {
+            // increase nonce if success
+            // creates and calls increase their own nonces internal to VM
+            if (result.getCode().isAccepted() && type != TransactionType.CREATE && type != TransactionType.CALL) {
                 as.increaseNonce(from);
             }
         }
@@ -195,18 +234,41 @@ public class TransactionExecutor {
         return results;
     }
 
+    private void executeVmTransaction(TransactionResult result, Transaction tx, AccountState as, SemuxBlock block,
+            long gasUsedInBlock) {
+        SemuxTransaction transaction = new SemuxTransaction(tx);
+        Repository repository = new SemuxRepository(as);
+        ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
+
+        org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
+                transaction, block, repository, blockStore,
+                Spec.DEFAULT, invokeFactory, gasUsedInBlock, false);
+
+        TransactionReceipt summary = executor.run();
+        if (summary == null) {
+            result.setCode(Code.FAILURE);
+        } else {
+            for (LogInfo log : summary.getLogs()) {
+                result.addLog(log);
+            }
+            result.setGasUsed(summary.getGasUsed());
+            result.setReturnData(summary.getReturnData());
+            result.setCode(summary.isSuccess() ? Code.SUCCESS : Code.FAILURE);
+        }
+    }
+
     /**
      * Execute one transaction.
-     * 
+     *
      * NOTE: transaction format and signature are assumed to be success.
-     * 
+     *
      * @param as
      *            account state
      * @param ds
      *            delegate state
      * @return
      */
-    public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds) {
-        return execute(Collections.singletonList(tx), as, ds).get(0);
+    public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds, SemuxBlock block) {
+        return execute(Collections.singletonList(tx), as, ds, block).get(0);
     }
 }
