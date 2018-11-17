@@ -38,8 +38,10 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
         super(parent, GuiMessages.get("CreateHdWallet"));
         this.wallet = wallet;
 
-        JLabel lblPassword = new JLabel(GuiMessages.get("Password") + ":");
-        JLabel lblConfirmPassword = new JLabel(GuiMessages.get("RepeatPassword") + ":");
+        JLabel lblInstructions = new JLabel(GuiMessages.get("HdWalletInstructions") + ":");
+
+        JLabel lblPassword = new JLabel(GuiMessages.get("EnterNewHdPassword") + ":");
+        JLabel lblConfirmPassword = new JLabel(GuiMessages.get("ReEnterNewHdPassword") + ":");
         JLabel lblPhrase = new JLabel(GuiMessages.get("WalletRecoveryPhrase") + ":");
 
         phraseField = new JTextArea();
@@ -59,6 +61,9 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
         GroupLayout groupLayout = new GroupLayout(getContentPane());
         groupLayout.setHorizontalGroup(
                 groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                .addGap(20)
+                                .addComponent(lblInstructions))
                         .addGroup(groupLayout.createSequentialGroup()
                                 .addGap(20)
                                 .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
@@ -81,6 +86,9 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
                         .addGroup(groupLayout.createSequentialGroup()
                                 .addGap(32)
                                 .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblInstructions, GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE))
+                                .addGap(18)
+                                .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(lblPhrase)
                                         .addComponent(phraseField, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
                                 .addGap(18)
@@ -102,7 +110,7 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
         this.setModal(true);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
-        this.setMinimumSize(new Dimension(400, 260));
+        this.setMinimumSize(new Dimension(400, 400));
         this.setLocationRelativeTo(parent);
     }
 
