@@ -14,6 +14,7 @@
         <dist.windowsExecutableVersion>${project.version}.0</dist.windowsExecutableVersion>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <skip.git.info>false</skip.git.info>
     </properties>
 
     <organization>
@@ -244,6 +245,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <skip>${skip.git.info}</skip>
                     <abbrevLength>7</abbrevLength>
                     <verbose>false</verbose>
                     <skipPoms>false</skipPoms>
@@ -1027,6 +1029,16 @@
     </dependencies>
 
     <profiles>
+        <profile>
+            <id>src-build</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <skip.git.info>true</skip.git.info>
+                <git.commit.id.abbrev>local</git.commit.id.abbrev>
+            </properties>
+        </profile>
         <profile>
             <id>windows</id>
             <activation>
