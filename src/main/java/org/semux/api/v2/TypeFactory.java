@@ -23,12 +23,14 @@ import org.semux.api.v2.model.InfoType;
 import org.semux.api.v2.model.PeerType;
 import org.semux.api.v2.model.PendingTransactionType;
 import org.semux.api.v2.model.TransactionLimitsType;
+import org.semux.api.v2.model.TransactionResultType;
 import org.semux.api.v2.model.TransactionType;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
+import org.semux.core.TransactionResult;
 import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
@@ -63,7 +65,7 @@ public class TypeFactory {
                 .stateRoot(Hex.encode0x(block.getStateRoot()))
                 .data(Hex.encode0x(block.getData()))
                 .transactions(txs.stream()
-                        .map(tx -> transactionType(block.getNumber(), tx))
+                        .map(tx -> transactionType(block.getNumber(), tx, null))
                         .collect(Collectors.toList()));
     }
 
@@ -136,7 +138,7 @@ public class TypeFactory {
                         transactionType.equals(DELEGATE) ? kernel.getConfig().minDelegateBurnAmount() : null));
     }
 
-    public static TransactionType transactionType(Long blockNumber, Transaction tx) {
+    public static TransactionType transactionType(Long blockNumber, Transaction tx, TransactionResult result) {
         return new TransactionType()
                 .blockNumber(String.valueOf(blockNumber))
                 .hash(Hex.encode0x(tx.getHash()))
@@ -147,7 +149,15 @@ public class TypeFactory {
                 .fee(encodeAmount(tx.getFee()))
                 .nonce(String.valueOf(tx.getNonce()))
                 .timestamp(String.valueOf(tx.getTimestamp()))
+                .transactionResult(transactionResultType(result))
                 .data(Hex.encode0x(tx.getData()));
+    }
+
+    private static TransactionResultType transactionResultType(TransactionResult result) {
+        // return new TransactionResultType()
+        // .(logInfoType(tx.get));
+        return null;
+
     }
 
     public static PendingTransactionType pendingTransactionType(Transaction tx) {

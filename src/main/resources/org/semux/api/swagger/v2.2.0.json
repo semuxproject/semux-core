@@ -2448,6 +2448,12 @@
           "description" : "Transaction data encoded in hexadecimal string",
           "type" : "string",
           "pattern" : "^(0x)?[0-9a-fA-F]*$"
+        },
+        "transactionResult" :
+        {
+          "description" : "Transaction results",
+          "type": "object",
+          "$ref": "#/definitions/TransactionResultType"
         }
       }
     },
@@ -2499,6 +2505,49 @@
           "description" : "Transaction data encoded in hexadecimal string",
           "type" : "string",
           "pattern" : "^(0x)?[0-9a-fA-F]*$"
+        }
+      }
+    },
+    "TransactionResultType" : {
+      "type" : "object",
+      "properties" : {
+        "logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LogInfoType"
+          }
+        },
+        "returnData": {
+          "description": "Return data encoded in hexadecimal string",
+          "type": "string",
+          "pattern": "^(0x)?[0-9a-fA-F]*$"
+        },
+        "gasUsed": {
+          "type": "string",
+          "format": "int64",
+          "pattern": "^\\d+$"
+        }
+      }
+    },
+    "LogInfoType": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "description": "Address encoded in hexadecimal string",
+          "type": "string",
+          "pattern": "^(0x)?[0-9a-fA-F]{64}$"
+        },
+        "data": {
+          "description": "Log info data encoded in hexadecimal string",
+          "type": "string",
+          "pattern": "^(0x)?[0-9a-fA-F]*$"
+        },
+        "topics": {
+          "description": "Topics encoded in hexadecimal string",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
         }
       }
     },

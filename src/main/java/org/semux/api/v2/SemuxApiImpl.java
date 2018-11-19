@@ -68,6 +68,7 @@ import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
+import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
@@ -297,7 +298,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
         resp.setResult(kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream()
                 .map(tx -> TypeFactory.transactionType(
-                        kernel.getBlockchain().getTransactionBlockNumber(tx.getHash()), tx))
+                        kernel.getBlockchain().getTransactionBlockNumber(tx.getHash()), tx, null))
                 .collect(Collectors.toList()));
 
         return success(resp);
@@ -533,9 +534,11 @@ public final class SemuxApiImpl implements SemuxApi {
             return badRequest(resp, "The request transaction was not found");
         }
 
+        TransactionResult result = kernel.getBlockchain().getTransactionResult(hashBytes);
+
         resp.setResult(TypeFactory.transactionType(
                 kernel.getBlockchain().getTransactionBlockNumber(transaction.getHash()),
-                transaction));
+                transaction, result));
 
         return success(resp);
     }
