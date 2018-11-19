@@ -20,11 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -39,6 +42,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import io.swagger.annotations.ApiOperation;
+import org.semux.util.CircularFixedSizeList;
 
 public class ConsoleDialog extends JDialog implements ActionListener {
 
@@ -52,6 +56,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
     private final transient SemuxApiImpl api;
     private final transient ObjectMapper mapper = new ObjectMapper();
     private final transient Map<String, MethodDescriptor> methods = new TreeMap<>();
+    private final transient CircularFixedSizeList<String> commandHistory = new CircularFixedSizeList<>(10);
 
     public ConsoleDialog(SemuxGui gui, JFrame parent) {
 
@@ -71,6 +76,31 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         input = new JTextField();
         input.addActionListener(this);
         input.setName("txtInput");
+
+
+        // add history for cycling through past commands
+        input.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(
+                "UP"), "historyBack");
+        input.getActionMap().put("historyBack", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String command = commandHistory.back();
+                if(command!=null) {
+                    input.setText(command);
+                }
+            }
+        });
+        input.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(
+                "DOWN"), "historyForward");
+        input.getActionMap().put("historyForward", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String command = commandHistory.forward();
+                if(command!=null) {
+                    input.setText(command);
+                }
+            }
+        });
 
         getContentPane().add(scroll, BorderLayout.CENTER);
         getContentPane().add(input, BorderLayout.SOUTH);
@@ -95,6 +125,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         String command = input.getText();
+        commandHistory.add(command);
 
         console.append("\n");
         console.append("> " + command);
