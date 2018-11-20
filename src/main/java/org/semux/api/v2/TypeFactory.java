@@ -168,7 +168,7 @@ public class TypeFactory {
                 .timestamp(String.valueOf(tx.getTimestamp()))
                 .data(Hex.encode0x(tx.getData()))
                 .gas(String.valueOf(tx.getGas()))
-                .gasPrice(String.valueOf(tx.getGas()));
+                .gasPrice(String.valueOf(tx.getGasPrice()));
     }
 
     private static TransactionResultType transactionResultType(TransactionResult result) {
@@ -198,7 +198,7 @@ public class TypeFactory {
                 .timestamp(String.valueOf(tx.getTimestamp()))
                 .data(Hex.encode0x(tx.getData()))
                 .gas(String.valueOf(tx.getGas()))
-                .gasPrice(String.valueOf(tx.getGas()));
+                .gasPrice(String.valueOf(tx.getGasPrice()));
     }
 
     public static String encodeAmount(Amount a) {
