@@ -100,7 +100,6 @@ import org.semux.api.v2.model.PeerType;
 import org.semux.api.v2.model.SignMessageResponse;
 import org.semux.api.v2.model.SignRawTransactionResponse;
 import org.semux.api.v2.model.SyncingProgressType;
-import org.semux.api.v2.model.TransactionType;
 import org.semux.api.v2.model.VerifyMessageResponse;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Amount;
