@@ -6,6 +6,29 @@
  */
 package org.semux.gui;
 
+import org.semux.Network;
+import org.semux.config.Constants;
+import org.semux.core.Wallet;
+import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
+import org.semux.gui.dialog.ChangePasswordDialog;
+import org.semux.gui.dialog.ConsoleDialog;
+import org.semux.gui.dialog.ExportPrivateKeyDialog;
+import org.semux.gui.dialog.InputDialog;
+import org.semux.gui.dialog.RecoverHdWalletDialog;
+import org.semux.message.GuiMessages;
+import org.semux.util.SystemUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.Icon;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,28 +39,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-
-import javax.swing.Icon;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import org.semux.config.Constants;
-import org.semux.core.Wallet;
-import org.semux.crypto.Hex;
-import org.semux.crypto.Key;
-import org.semux.gui.dialog.ChangePasswordDialog;
-import org.semux.gui.dialog.ConsoleDialog;
-import org.semux.gui.dialog.ExportPrivateKeyDialog;
-import org.semux.gui.dialog.InputDialog;
-import org.semux.message.GuiMessages;
-import org.semux.util.SystemUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MenuBar extends JMenuBar implements ActionListener {
 
@@ -79,6 +80,18 @@ public class MenuBar extends JMenuBar implements ActionListener {
         itemRecover.setActionCommand(Action.RECOVER_ACCOUNTS.name());
         itemRecover.addActionListener(this);
         menuWallet.add(itemRecover);
+
+        JMenuItem itemHdRecover = new JMenuItem(GuiMessages.get("RecoverHdWallet"));
+        itemHdRecover.setName("itemHdRecover");
+        itemHdRecover.setActionCommand(Action.RECOVER_HD_WALLET.name());
+        itemHdRecover.addActionListener(this);
+        menuWallet.add(itemHdRecover);
+
+        JMenuItem itemScanHdWallets = new JMenuItem(GuiMessages.get("ScanHdWallets"));
+        itemScanHdWallets.setName("itemScanHdWallets");
+        itemScanHdWallets.setActionCommand(Action.SCAN_HD_WALLETS.name());
+        itemScanHdWallets.addActionListener(this);
+        menuWallet.add(itemScanHdWallets);
 
         JMenuItem itemBackupWallet = new JMenuItem(GuiMessages.get("BackupWallet"));
         itemBackupWallet.setName("itemBackupWallet");
@@ -141,6 +154,12 @@ public class MenuBar extends JMenuBar implements ActionListener {
         case RECOVER_ACCOUNTS:
             recoverAccounts();
             break;
+        case RECOVER_HD_WALLET:
+            recoverHdWallet();
+            break;
+        case SCAN_HD_WALLETS:
+            scanHdWallet();
+            break;
         case BACKUP_WALLET:
             backupWallet();
             break;
@@ -168,6 +187,32 @@ public class MenuBar extends JMenuBar implements ActionListener {
         default:
             break;
         }
+    }
+
+    private void scanHdWallet() {
+        if (showErrorIfLocked()) {
+            return;
+        }
+
+        Wallet wallet = gui.getKernel().getWallet();
+
+        int found = wallet.scanForHdKeys(gui.getKernel().getBlockchain().getAccountState());
+        if (found > 0) {
+            if (!wallet.flush()) {
+                JOptionPane.showMessageDialog(frame, GuiMessages.get("SaveBackupFailed"));
+                return;
+            }
+        }
+        JOptionPane.showMessageDialog(frame, GuiMessages.get("ImportSuccess", found));
+    }
+
+    private void recoverHdWallet() {
+        if (showErrorIfLocked()) {
+            return;
+        }
+
+        RecoverHdWalletDialog d = new RecoverHdWalletDialog(gui, frame);
+        d.setVisible(true);
     }
 
     /**
@@ -200,7 +245,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
             String pwd = new InputDialog(frame, GuiMessages.get("EnterPassword"), true).showAndGet();
 
             if (pwd != null) {
-                Wallet w = new Wallet(file);
+                Wallet w = new Wallet(file, Network.DEVNET);
                 if (!w.unlock(pwd)) {
                     JOptionPane.showMessageDialog(frame, GuiMessages.get("UnlockFailed"));
                     return;

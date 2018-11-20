@@ -18,6 +18,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -27,6 +28,7 @@ import org.semux.util.ArrayUtil;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +64,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     private static final int PROCESSED_MAX_SIZE = 32 * 1024;
 
     private final Kernel kernel;
+    private final BlockStore blockStore;
     private AccountState pendingAS;
     private DelegateState pendingDS;
 
@@ -94,6 +97,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      */
     public PendingManager(Kernel kernel) {
         this.kernel = kernel;
+        this.blockStore = new SemuxBlockStore(kernel.getBlockchain());
 
         this.pendingAS = kernel.getBlockchain().getAccountState().track();
         this.pendingDS = kernel.getBlockchain().getDelegateState().track();
@@ -173,11 +177,11 @@ public class PendingManager implements Runnable, BlockchainListener {
      *            The transaction
      * @return The processing result
      */
-    public synchronized ProcessTransactionResult addTransactionSync(Transaction tx) {
+    public synchronized ProcessingResult addTransactionSync(Transaction tx) {
         if (/* queue/transactions limits are ignored */ tx.validate(kernel.getConfig().network())) {
             return processTransaction(tx, true);
         } else {
-            return new ProcessTransactionResult(0, TransactionResult.Error.INVALID_FORMAT);
+            return new ProcessingResult(0, TransactionResult.Code.INVALID_FORMAT);
         }
     }
 
@@ -261,7 +265,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             }
 
             long t2 = TimeUtil.currentTimeMillis();
-            logger.debug("Pending tx evaluation: # txs = {} / {},  time = {} ms", accepted, txs.size(), t2 - t1);
+            logger.debug("Pending tx re-evaluation: # txs = {} / {},  time = {} ms", accepted, txs.size(), t2 - t1);
         }
     }
 
@@ -299,27 +303,34 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @return the number of success transactions processed and the error that
      *         interrupted the process
      */
-    protected ProcessTransactionResult processTransaction(Transaction tx, boolean relay) {
+    protected ProcessingResult processTransaction(Transaction tx, boolean relay) {
 
         int cnt = 0;
         long now = TimeUtil.currentTimeMillis();
 
+        // reject VM transactions that come in before fork
+        if (!kernel.getBlockchain().isForkActivated(Fork.VIRTUAL_MACHINE)
+                && (tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE)) {
+            return new ProcessingResult(0, TransactionResult.Code.INVALID_TYPE);
+        }
+
         // reject transactions with a duplicated tx hash
         if (kernel.getBlockchain().hasTransaction(tx.getHash())) {
-            return new ProcessTransactionResult(0, TransactionResult.Error.DUPLICATED_HASH);
+            return new ProcessingResult(0, TransactionResult.Code.DUPLICATE_TRANSACTION);
         }
 
         // check transaction timestamp if this is a fresh transaction:
         // a time drift of 2 hours is allowed by default
         if (tx.getTimestamp() < now - kernel.getConfig().maxTransactionTimeDrift()
                 || tx.getTimestamp() > now + kernel.getConfig().maxTransactionTimeDrift()) {
-            return new ProcessTransactionResult(0, TransactionResult.Error.INVALID_TIMESTAMP);
+            return new ProcessingResult(0, TransactionResult.Code.INVALID_TIMESTAMP);
         }
 
-        // report INVALID_NONCE error to prevent the transaction from being silently
+        // report INVALID_NONCE error to prevent the transaction from being
+        // silently
         // ignored due to a low nonce
         if (tx.getNonce() < getNonce(tx.getFrom())) {
-            return new ProcessTransactionResult(0, TransactionResult.Error.INVALID_NONCE);
+            return new ProcessingResult(0, TransactionResult.Code.INVALID_NONCE);
         }
 
         // Check transaction nonce: pending transactions must be executed sequentially
@@ -330,9 +341,10 @@ public class PendingManager implements Runnable, BlockchainListener {
             // execute transactions
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
-            TransactionResult result = new TransactionExecutor(kernel.getConfig()).execute(tx, as, ds);
+            TransactionResult result = new TransactionExecutor(kernel.getConfig(), blockStore).execute(tx,
+                    as, ds, null);
 
-            if (result.isSuccess()) {
+            if (result.getCode().isAccepted()) {
                 // commit state updates
                 as.commit();
                 ds.commit();
@@ -357,7 +369,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                 }
             } else {
                 // exit immediately if invalid
-                return new ProcessTransactionResult(cnt, result.getError());
+                return new ProcessingResult(cnt, result.getCode());
             }
 
             tx = delayed.getIfPresent(createKey(tx.getFrom(), getNonce(tx.getFrom())));
@@ -370,7 +382,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             delayed.put(createKey(tx), tx);
         }
 
-        return new ProcessTransactionResult(cnt);
+        return new ProcessingResult(cnt);
     }
 
     private ByteArray createKey(Transaction tx) {
@@ -389,11 +401,11 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         public final Transaction transaction;
 
-        public final TransactionResult transactionResult;
+        public final TransactionResult result;
 
-        public PendingTransaction(Transaction transaction, TransactionResult transactionResult) {
+        public PendingTransaction(Transaction transaction, TransactionResult result) {
             this.transaction = transaction;
-            this.transactionResult = transactionResult;
+            this.result = result;
         }
     }
 
@@ -401,18 +413,18 @@ public class PendingManager implements Runnable, BlockchainListener {
      * This object represents the number of accepted transactions and the cause of
      * rejection by ${@link PendingManager}.
      */
-    public static class ProcessTransactionResult {
+    public static class ProcessingResult {
 
         public final int accepted;
 
-        public final TransactionResult.Error error;
+        public final TransactionResult.Code error;
 
-        public ProcessTransactionResult(int accepted, TransactionResult.Error error) {
+        public ProcessingResult(int accepted, TransactionResult.Code error) {
             this.accepted = accepted;
             this.error = error;
         }
 
-        public ProcessTransactionResult(int accepted) {
+        public ProcessingResult(int accepted) {
             this.accepted = accepted;
             this.error = null;
         }

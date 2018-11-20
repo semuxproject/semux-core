@@ -23,7 +23,7 @@ public interface AccountState {
      * 
      * @param address
      */
-    void increaseNonce(byte[] address);
+    long increaseNonce(byte[] address);
 
     /**
      * Adjusts the available balance of an account.
@@ -46,7 +46,7 @@ public interface AccountState {
      * 
      * @param address
      */
-    void getCode(byte[] address);
+    byte[] getCode(byte[] address);
 
     /**
      * Sets the code of an account.
@@ -96,4 +96,29 @@ public interface AccountState {
      * Reverts all updates since last snapshot.
      */
     void rollback();
+
+    /**
+     * check if an account exists
+     * 
+     * @param address
+     *            address
+     * @return exists
+     */
+    boolean exists(byte[] address);
+
+    /**
+     * set the nonce to a given value.
+     *
+     * @param address
+     *            address
+     * @param nonce
+     *            nonce
+     * @return nonce
+     */
+    long setNonce(byte[] address, long nonce);
+
+    /**
+     * Clone this AccountState, including all the uncommitted changes.
+     */
+    AccountState clone();
 }

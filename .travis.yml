@@ -54,19 +54,6 @@ matrix:
       script:
         - mvn test -Denforcer.skip=true
 
-    # Docker tests
-    - env: NAME="Docker tests"
-      language: none
-      os: linux
-      sudo: required
-      services:
-        - docker
-      script:
-        - docker build . -t semux:latest
-        - docker run -d -p 5161:5161 semux:latest --password=""
-        - timeout 10 .travis/docker_test_build.sh
-        - docker kill $(docker ps -q)
-
 cache:
   directories:
     - .autoconf

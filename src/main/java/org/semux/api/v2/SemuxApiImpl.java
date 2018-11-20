@@ -25,6 +25,12 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
+import org.ethereum.vm.chainspec.Spec;
+import org.ethereum.vm.client.BlockStore;
+import org.ethereum.vm.client.Repository;
+import org.ethereum.vm.client.TransactionReceipt;
+import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
+import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.semux.Kernel;
 import org.semux.api.util.TransactionBuilder;
 import org.semux.api.v2.model.AddNodeResponse;
@@ -75,6 +81,10 @@ import org.semux.net.NodeManager;
 import org.semux.net.filter.SemuxIpFilter;
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
+import org.semux.vm.client.SemuxBlock;
+import org.semux.vm.client.SemuxBlockStore;
+import org.semux.vm.client.SemuxRepository;
+import org.semux.vm.client.SemuxTransaction;
 
 public final class SemuxApiImpl implements SemuxApi {
 
@@ -641,7 +651,7 @@ public final class SemuxApiImpl implements SemuxApi {
                 return badRequest(resp, "Invalid transaction nonce.");
             }
 
-            PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
+            PendingManager.ProcessingResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {
                 return badRequest(resp, "Transaction rejected by pending manager: " + result.error.toString());
             }
@@ -728,6 +738,45 @@ public final class SemuxApiImpl implements SemuxApi {
     public Response transfer(String from, String to, String value, String fee, String nonce, Boolean validateNonce,
             String data) {
         return doTransaction(TransactionType.TRANSFER, from, to, value, fee, nonce, validateNonce, data);
+    }
+
+    @Override
+    public Response create(String from, String value, String data, String gasPrice, String gas, String fee,
+            String nonce, Boolean validateNonce) {
+        return doTransaction(TransactionType.CREATE, from, null, value, fee, nonce, validateNonce, data, gasPrice,
+                gas);
+    }
+
+    @Override
+    public Response call(String from, String to, String value, String gasPrice, String gas, String fee,
+            String nonce, Boolean validateNonce, String data, Boolean local) {
+        if (local) {
+            Transaction tx = getTransaction(TransactionType.CALL, from, to, value, fee, nonce, validateNonce, data,
+                    gasPrice, gas);
+
+            SemuxTransaction transaction = new SemuxTransaction(tx);
+            SemuxBlock block = new SemuxBlock(kernel.getBlockchain().getLatestBlock().getHeader(), 0);
+            Repository repository = new SemuxRepository(kernel.getBlockchain().getAccountState());
+            ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
+            BlockStore blockStore = new SemuxBlockStore(kernel.getBlockchain());
+            long gasUsedInBlock = 0l;
+
+            org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
+                    transaction, block, repository, blockStore,
+                    Spec.DEFAULT, invokeFactory, gasUsedInBlock, true);
+            TransactionReceipt results = executor.run();
+
+            DoTransactionResponse resp = new DoTransactionResponse();
+            resp.setResult(Hex.encode0x(results.getReturnData()));
+            if (!results.isSuccess()) {
+                return badRequest(resp, "Error calling method");
+            } else {
+                return success(resp);
+            }
+        } else {
+            return doTransaction(TransactionType.CALL, from, to, value, fee, nonce, validateNonce, data, gasPrice,
+                    gas);
+        }
     }
 
     @Override
@@ -857,6 +906,43 @@ public final class SemuxApiImpl implements SemuxApi {
         return new NodeManager.Node(host, port);
     }
 
+    private Response doTransaction(TransactionType type, String from, String to, String value, String fee, String nonce,
+            Boolean validateNonce, String data) {
+        return doTransaction(type, from, to, value, fee, nonce, validateNonce, data, null, null);
+    }
+
+    private Transaction getTransaction(TransactionType type, String from, String to, String value, String fee,
+            String nonce,
+            Boolean validateNonce, String data, String gasPrice, String gas) {
+        TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
+                .withType(type)
+                .withFrom(from)
+                .withTo(to)
+                .withValue(value)
+                .withFee(fee, true)
+                .withData(data);
+        if (type == TransactionType.CREATE || type == TransactionType.CALL) {
+            transactionBuilder.withGasPrice(gasPrice).withGas(gas);
+        }
+
+        if (nonce != null) {
+            transactionBuilder.withNonce(nonce);
+        } else {
+            // TODO: fix race condition of auto-assigned nonce
+        }
+
+        Transaction tx = transactionBuilder.buildSigned();
+
+        // tx nonce is validated in advance to avoid silently pushing the tx into
+        // delayed queue of pending manager
+        if ((validateNonce != null && validateNonce)
+                && tx.getNonce() != kernel.getPendingManager().getNonce(tx.getFrom())) {
+            throw new IllegalArgumentException("Invalid transaction nonce.");
+        }
+        return tx;
+
+    }
+
     /**
      * Constructs a transaction and adds it to pending manager.
      *
@@ -871,33 +957,12 @@ public final class SemuxApiImpl implements SemuxApi {
      * @return
      */
     private Response doTransaction(TransactionType type, String from, String to, String value, String fee, String nonce,
-            Boolean validateNonce, String data) {
+            Boolean validateNonce, String data, String gasPrice, String gas) {
         DoTransactionResponse resp = new DoTransactionResponse();
         try {
-            TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
-                    .withType(type)
-                    .withFrom(from)
-                    .withTo(to)
-                    .withValue(value)
-                    .withFee(fee, true)
-                    .withData(data);
+            Transaction tx = getTransaction(type, from, to, value, fee, nonce, validateNonce, data, gasPrice, gas);
 
-            if (nonce != null) {
-                transactionBuilder.withNonce(nonce);
-            } else {
-                // TODO: fix race condition of auto-assigned nonce
-            }
-
-            Transaction tx = transactionBuilder.buildSigned();
-
-            // tx nonce is validated in advance to avoid silently pushing the tx into
-            // delayed queue of pending manager
-            if ((validateNonce != null && validateNonce)
-                    && tx.getNonce() != kernel.getPendingManager().getNonce(tx.getFrom())) {
-                return badRequest(resp, "Invalid transaction nonce.");
-            }
-
-            PendingManager.ProcessTransactionResult result = kernel.getPendingManager().addTransactionSync(tx);
+            PendingManager.ProcessingResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {
                 return badRequest(resp, "Transaction rejected by pending manager: " + result.error.toString());
             }

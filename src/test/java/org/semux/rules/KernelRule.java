@@ -64,10 +64,11 @@ public class KernelRule extends TemporaryFolder {
 
         // generate kernel mock
         Config config = mockConfig(p2pPort, apiPort);
-        Wallet wallet = new Wallet(new File(getRoot(), "wallet.data"));
+        Wallet wallet = new Wallet(new File(getRoot(), "wallet.data"), config.network());
         wallet.unlock(password);
+        wallet.setHdSeed(Bytes.random(32));
         for (int i = 0; i < 10; i++) {
-            wallet.addAccount(new Key());
+            wallet.addAccount();
         }
         wallet.flush();
         Key coinbase = wallet.getAccount(0);
@@ -155,7 +156,7 @@ public class KernelRule extends TemporaryFolder {
      * @return created block
      */
     public Block createBlock(List<Transaction> txs, BlockHeader lastBlock) {
-        List<TransactionResult> res = txs.stream().map(tx -> new TransactionResult(true)).collect(Collectors.toList());
+        List<TransactionResult> res = txs.stream().map(tx -> new TransactionResult()).collect(Collectors.toList());
 
         long number;
         byte[] prevHash;

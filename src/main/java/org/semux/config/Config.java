@@ -410,13 +410,6 @@ public interface Config {
     // =========================
 
     /**
-     * Returns whether virtual machine is enabled.
-     *
-     * @return
-     */
-    boolean vmEnabled();
-
-    /**
      * Returns the max size of process stack in words.
      *
      * @return
@@ -429,6 +422,27 @@ public interface Config {
      * @return
      */
     int vmInitialHeapSize();
+
+    /**
+     * Returns the maximum gas limit for a block proposal
+     *
+     * @return
+     */
+    int vmBlockGasLimit();
+
+    /**
+     * Returns the maximum gas limit for any block
+     * 
+     * @return
+     */
+    int vmMaxBlockGasLimit();
+
+    /**
+     * Returns the minimum gas price for any transaction proposed
+     * 
+     * @return
+     */
+    int vmMinGasPrice();
 
     // =========================
     // UI
@@ -467,7 +481,7 @@ public interface Config {
     boolean forkUniformDistributionEnabled();
 
     /**
-     * Returns whether VIRTUAL_MACHINE fork is activated
+     * Returns whether VIRTUAL_MACHINE fork is enabled.
      *
      * @return
      */

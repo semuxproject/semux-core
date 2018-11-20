@@ -8,8 +8,13 @@ package org.semux.core.state;
 
 import org.semux.core.Amount;
 import org.semux.crypto.Hex;
+import org.semux.util.ByteArray;
+import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Account {
 

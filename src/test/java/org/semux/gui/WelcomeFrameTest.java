@@ -17,6 +17,7 @@ import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Test;
+import org.semux.Network;
 import org.semux.core.Wallet;
 import org.semux.crypto.Key;
 
@@ -30,7 +31,7 @@ public class WelcomeFrameTest extends AssertJSwingJUnitTestCase {
     @Override
     protected void onSetUp() {
         try {
-            wallet = new Wallet(File.createTempFile("wallet1", ".data"));
+            wallet = new Wallet(File.createTempFile("wallet1", ".data"), Network.DEVNET);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -66,7 +67,8 @@ public class WelcomeFrameTest extends AssertJSwingJUnitTestCase {
 
         await().until(() -> wallet.exists());
         assertTrue(wallet.isUnlocked());
-        assertEquals(1, wallet.size());
+        // wallet size is 0 until HD wallet initialized
+        assertEquals(0, wallet.size());
         assertEquals(password, wallet.getPassword());
     }
 
@@ -74,7 +76,7 @@ public class WelcomeFrameTest extends AssertJSwingJUnitTestCase {
     public void testImport() throws IOException {
         // mock a wallet
         String password = "abc";
-        Wallet w = new Wallet(File.createTempFile("wallet2", ".data"));
+        Wallet w = new Wallet(File.createTempFile("wallet2", ".data"), Network.DEVNET);
         w.unlock(password);
         w.addAccount(new Key());
         w.flush();
