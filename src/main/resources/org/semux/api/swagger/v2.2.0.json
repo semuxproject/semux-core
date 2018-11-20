@@ -1812,7 +1812,7 @@
         "transactions" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/TransactionType"
+            "$ref" : "#/definitions/BasicTransactionType"
           }
         }
       }
@@ -1934,7 +1934,7 @@
             "result" : {
               "type" : "array",
               "items" : {
-                "$ref" : "#/definitions/TransactionType"
+                "$ref" : "#/definitions/BasicTransactionType"
               }
             }
           }
@@ -2177,7 +2177,7 @@
         {
           "properties" : {
             "result" : {
-              "$ref" : "#/definitions/TransactionType"
+              "$ref" : "#/definitions/FullTransactionType"
             }
           }
         }
@@ -2395,8 +2395,9 @@
         }
       }
     },
-    "TransactionType" : {
+    "BasicTransactionType" : {
       "type" : "object",
+      "discriminator": "transactionType",
       "properties" : {
         "blockNumber" : {
           "type" : "string",
@@ -2449,13 +2450,36 @@
           "type" : "string",
           "pattern" : "^(0x)?[0-9a-fA-F]*$"
         },
-        "transactionResult" :
-        {
-          "description" : "Transaction results",
-          "type": "object",
-          "$ref": "#/definitions/TransactionResultType"
+        "gas" : {
+          "description" : "Gas supplied on call",
+          "type" : "string",
+          "format" : "int64",
+          "pattern" : "^\\d+$"
+        },
+        "gasPrice" : {
+          "description" : "Price per gas used",
+          "type" : "string",
+          "format" : "int64",
+          "pattern" : "^\\d+$"
         }
       }
+    },
+    "FullTransactionType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/definitions/BasicTransactionType"
+        },
+        {
+          "properties": {
+            "transactionResult": {
+              "description": "Transaction results",
+              "type": "object",
+              "$ref": "#/definitions/TransactionResultType"
+            }
+          }
+        }
+      ]
     },
     "PendingTransactionType" : {
       "type" : "object",
@@ -2505,6 +2529,18 @@
           "description" : "Transaction data encoded in hexadecimal string",
           "type" : "string",
           "pattern" : "^(0x)?[0-9a-fA-F]*$"
+        },
+        "gas" : {
+          "description" : "Gas supplied on call",
+          "type" : "string",
+          "format" : "int64",
+          "pattern" : "^\\d+$"
+        },
+        "gasPrice" : {
+          "description" : "Price per gas used",
+          "type" : "string",
+          "format" : "int64",
+          "pattern" : "^\\d+$"
         }
       }
     },

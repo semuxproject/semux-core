@@ -298,7 +298,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
         resp.setResult(kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream()
                 .map(tx -> TypeFactory.transactionType(
-                        kernel.getBlockchain().getTransactionBlockNumber(tx.getHash()), tx, null))
+                        kernel.getBlockchain().getTransactionBlockNumber(tx.getHash()), tx))
                 .collect(Collectors.toList()));
 
         return success(resp);
@@ -536,7 +536,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
         TransactionResult result = kernel.getBlockchain().getTransactionResult(hashBytes);
 
-        resp.setResult(TypeFactory.transactionType(
+        resp.setResult(TypeFactory.fullTransactionType(
                 kernel.getBlockchain().getTransactionBlockNumber(transaction.getHash()),
                 transaction, result));
 

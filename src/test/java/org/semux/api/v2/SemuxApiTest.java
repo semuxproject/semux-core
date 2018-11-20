@@ -69,6 +69,7 @@ import org.junit.Test;
 import org.semux.Network;
 import org.semux.TestUtils;
 import org.semux.api.v2.model.AddNodeResponse;
+import org.semux.api.v2.model.BasicTransactionType;
 import org.semux.api.v2.model.BlockType;
 import org.semux.api.v2.model.ComposeRawTransactionResponse;
 import org.semux.api.v2.model.CreateAccountResponse;
@@ -225,7 +226,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         GetAccountTransactionsResponse response = api.getAccountTransactions(Hex.encode(tx.getFrom()), "0", "1024");
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
-        for (TransactionType txType : response.getResult()) {
+        for (BasicTransactionType txType : response.getResult()) {
             assertEquals(block.getNumber(), Long.parseLong(txType.getBlockNumber()));
         }
     }
