@@ -2562,6 +2562,10 @@
           "type": "string",
           "format": "int64",
           "pattern": "^\\d+$"
+        },
+        "code": {
+          "description": "The status of the transaction",
+          "type": "string"
         }
       }
     },

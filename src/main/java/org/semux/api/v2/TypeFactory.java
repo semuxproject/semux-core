@@ -175,6 +175,7 @@ public class TypeFactory {
         return new TransactionResultType()
                 .logs(result.getLogs().stream().map(TypeFactory::logInfoType).collect(Collectors.toList()))
                 .gasUsed(String.valueOf(result.getGasUsed()))
+                .code(result.getCode().name())
                 .returnData(Hex.encode0x(result.getReturnData()));
     }
 
