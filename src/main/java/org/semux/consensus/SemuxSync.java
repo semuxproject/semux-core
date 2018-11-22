@@ -463,7 +463,7 @@ public class SemuxSync implements SyncManager {
     /**
      * Handle invalid block: Add block back to download queue. Remove block from all
      * other queues. Disconnect from the peer that sent the block.
-     * 
+     *
      * @param block
      * @param channel
      */
@@ -501,7 +501,7 @@ public class SemuxSync implements SyncManager {
 
     /**
      * Validate the block. Votes are validated only if validateVotes is true.
-     * 
+     *
      * @param block
      * @param asSnapshot
      * @param dsSnapshot
