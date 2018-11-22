@@ -83,7 +83,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setRowHeight(25);
         table.getTableHeader().setPreferredSize(new Dimension(10000, 24));
-        SwingUtil.setColumnWidths(table, 600, 0.05, 0.1, 0.55, 0.15, 0.15);
+        SwingUtil.setColumnWidths(table, 600, 0.05, 0.16, 0.55, 0.12, 0.12);
         SwingUtil.setColumnAlignments(table, false, false, false, true, true);
 
         table.getSelectionModel().addListSelectionListener(
