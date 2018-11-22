@@ -44,7 +44,8 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String HELP = "help";
+    private static final String HELP = "help";
+    private static final String NULL = "null";
 
     private final JTextArea console;
     private final JTextField input;
@@ -131,12 +132,22 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
         try {
             Method method = api.getClass().getMethod(command, md.argumentTypes);
-            Object[] arguments = new Object[commandArguments.length - 1];
-            for (int i = 0; i < arguments.length; i++) {
+            Object[] arguments = new Object[md.argumentTypes.length];
+
+            if (arguments.length < commandArguments.length - 1) {
+                return GuiMessages.get("MethodError", command);
+            }
+
+            for (int i = 0; i < commandArguments.length - 1; i++) {
+                String argument = commandArguments[i + 1];
                 if (md.argumentTypes[i] == Boolean.class) {
-                    arguments[i] = Boolean.parseBoolean(commandArguments[i + 1]);
+                    arguments[i] = Boolean.parseBoolean(argument);
                 } else {
-                    arguments[i] = commandArguments[i + 1];
+                    if (NULL.equals(argument)) {
+                        arguments[i] = null;
+                    } else {
+                        arguments[i] = commandArguments[i + 1];
+                    }
                 }
             }
 
