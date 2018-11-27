@@ -9,10 +9,13 @@ package org.semux.gui.dialog;
 import com.github.orogvany.bip39.Language;
 import com.github.orogvany.bip39.MnemonicGenerator;
 import org.semux.core.Wallet;
+import org.semux.crypto.Key;
 import org.semux.gui.Action;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
 import org.semux.message.GuiMessages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -25,9 +28,12 @@ import javax.swing.JTextArea;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
 public class RecoverHdWalletDialog extends JDialog implements ActionListener {
     private final transient SemuxGui gui;
+    private static final Logger logger = LoggerFactory.getLogger(RecoverHdWalletDialog.class);
 
     private final JTextArea phraseField;
     private final JPasswordField passwordField;
@@ -105,8 +111,6 @@ public class RecoverHdWalletDialog extends JDialog implements ActionListener {
             String phrase = phraseField.getText();
             String password = new String(passwordField.getPassword());
 
-            Wallet wallet = gui.getKernel().getWallet();
-
             MnemonicGenerator generator = new MnemonicGenerator();
             byte[] seed;
             try {
@@ -116,9 +120,31 @@ public class RecoverHdWalletDialog extends JDialog implements ActionListener {
                 break;
             }
 
-            wallet.setHdSeed(seed);
-            int found = wallet.scanForHdKeys(gui.getKernel().getBlockchain().getAccountState());
-            wallet.flush();
+            Wallet wallet = gui.getKernel().getWallet();
+            int found = 0;
+            try {
+                Wallet importedWallet = new Wallet(File.createTempFile("wallet", ".data"),
+                        wallet.getNetwork());
+                importedWallet.setHdSeed(seed);
+                found = importedWallet.scanForHdKeys(gui.getKernel().getBlockchain().getAccountState());
+
+                if (found > 0) {
+                    wallet.addAccounts(importedWallet.getAccounts());
+
+                    for (Key key : importedWallet.getAccounts()) {
+                        wallet.addAccount(key);
+                        if (!wallet.getAddressAlias(key.toAddress()).isPresent()) {
+                            wallet.setAddressAlias(key.toAddress(),
+                                    GuiMessages.get("Imported") + importedWallet.getAddressAlias(key.toAddress()));
+                        }
+                    }
+                    wallet.flush();
+                }
+
+            } catch (IOException e1) {
+                logger.error(e1.getMessage(), e);
+            }
+
             JOptionPane.showMessageDialog(this, GuiMessages.get("ImportSuccess", found));
             this.dispose();
             break;
