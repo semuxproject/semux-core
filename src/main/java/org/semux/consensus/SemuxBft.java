@@ -788,7 +788,7 @@ public class SemuxBft implements BftManager {
                     TransactionResult result = exec.execute(tx.transaction, as, ds, semuxBlock);
                     gasUsed += result.getGasUsed();
 
-                    if (result.getCode().isSuccess() && gasUsed < config.vmBlockGasLimit()) {
+                    if (result.getCode().isAccepted() && gasUsed < config.vmBlockGasLimit()) {
                         pendingResults.add(result);
                         pendingTxs.add(tx.transaction);
                     } else {
