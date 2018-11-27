@@ -280,6 +280,7 @@ public class TransactionResult {
             // old blocks won't have this field
         }
 
+        // todo - this seems problematic, !success could be any number of things
         return new TransactionResult(success ? Code.SUCCESS : Code.FAILURE, returns, logs, gasUsed);
     }
 
