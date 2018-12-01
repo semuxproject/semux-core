@@ -77,7 +77,6 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         input.addActionListener(this);
         input.setName("txtInput");
 
-
         // add history for cycling through past commands
         input.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(
                 "UP"), "historyBack");
@@ -85,7 +84,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String command = commandHistory.back();
-                if(command!=null) {
+                if (command != null) {
                     input.setText(command);
                 }
             }
@@ -96,7 +95,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String command = commandHistory.forward();
-                if(command!=null) {
+                if (command != null) {
                     input.setText(command);
                 }
             }
