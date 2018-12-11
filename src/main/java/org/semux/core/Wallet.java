@@ -35,6 +35,7 @@ import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Key;
+import org.semux.message.GuiMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.FileUtil;
@@ -54,6 +55,9 @@ public class Wallet {
     private static final int BCRYPT_COST = 12;
     private static final Bip44 BIP_44 = new Bip44();
     private static final int MAX_HD_WALLET_SCAN_AHEAD = 20;
+
+    // the BIP-44 path prefix for semux addresses
+    private static final String PATH_PREFIX = "m/44'/7562605'/0'/0'";
 
     private final File file;
     private final org.semux.Network network;
@@ -440,11 +444,27 @@ public class Wallet {
             accounts.put(to, newKey);
             // set a default alias
             if (!aliases.containsKey(to)) {
-                setAddressAlias(newKey.toAddress(), address.getPath());
+                setAddressAlias(newKey.toAddress(), getAliasFromPath(address.getPath()));
             }
 
             return newKey;
         }
+    }
+
+    /**
+     * the full BIP-44 derivation path is confusing to new users
+     *
+     * So, we adapt this name to be simpler, and mostly concentrate on the index of
+     * the address.
+     *
+     * This method converts from a derivation path to a simplified form for default
+     * wallet alias
+     * 
+     * @param path
+     * @return
+     */
+    private String getAliasFromPath(String path) {
+        return path.replace(PATH_PREFIX, GuiMessages.get("HdWalletAliasPrefix"));
     }
 
     /**
