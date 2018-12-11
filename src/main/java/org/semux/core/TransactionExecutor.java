@@ -247,6 +247,7 @@ public class TransactionExecutor {
         TransactionReceipt summary = executor.run();
         if (summary == null) {
             result.setCode(Code.FAILURE);
+            result.setGasUsed(tx.getGas());
         } else {
             for (LogInfo log : summary.getLogs()) {
                 result.addLog(log);
