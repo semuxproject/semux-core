@@ -41,6 +41,7 @@ import org.semux.IntegrationTest;
 import org.semux.Kernel;
 import org.semux.Kernel.State;
 import org.semux.KernelMock;
+import org.semux.api.v2.model.BasicTransactionType;
 import org.semux.api.v2.model.DoTransactionResponse;
 import org.semux.api.v2.model.GetAccountResponse;
 import org.semux.api.v2.model.GetAccountTransactionsResponse;
@@ -296,7 +297,7 @@ public class TransactTest {
     private void assertLatestTransaction(KernelMock kernel, byte[] address,
             TransactionType type, byte[] from, byte[] to, Amount value, Amount fee, byte[] data)
             throws IOException {
-        org.semux.api.v2.model.TransactionType result = latestTransactionOf(kernel, address);
+        org.semux.api.v2.model.BasicTransactionType result = latestTransactionOf(kernel, address);
         assertEquals(type.name(), result.getType());
         assertEquals(Hex.encode0x(from), result.getFrom());
         assertEquals(Hex.encode0x(to), result.getTo());
@@ -351,7 +352,7 @@ public class TransactTest {
      * @return
      * @throws IOException
      */
-    private org.semux.api.v2.model.TransactionType latestTransactionOf(KernelMock kernel, byte[] address)
+    private org.semux.api.v2.model.BasicTransactionType latestTransactionOf(KernelMock kernel, byte[] address)
             throws IOException {
         SimpleApiClient apiClient = kernel.getApiClient();
 
