@@ -180,7 +180,17 @@ public class ConsoleDialog extends JDialog implements ActionListener {
             // not a web method
             return null;
         }
+
         StringBuilder builder = new StringBuilder();
+
+        ApiOperation apiOperation = method.getAnnotation(ApiOperation.class);
+
+        if (apiOperation != null) {
+            String description = apiOperation.value();
+            if (!description.trim().isEmpty()) {
+                builder.append(description).append("\n\t");
+            }
+        }
 
         builder.append(method.getName());
         for (Parameter parameter : method.getParameters()) {
