@@ -264,7 +264,10 @@ public class SemuxGui extends Launcher {
     }
 
     protected void unlockWallet(Wallet wallet) {
-        if (getPassword() != null) {
+        // check empty password
+        if (wallet.unlock("")) {
+            return;
+        } else if (getPassword() != null) {
             if (!wallet.unlock(getPassword())) {
                 JOptionPane.showMessageDialog(
                         null,

@@ -325,11 +325,12 @@ public class SemuxCli extends Launcher {
     }
 
     protected Wallet loadAndUnlockWallet() {
-        if (getPassword() == null) {
+
+        Wallet wallet = loadWallet();
+        if (getPassword() == null && !wallet.unlock("")) {
             setPassword(ConsoleUtil.readPassword());
         }
 
-        Wallet wallet = loadWallet();
         if (!wallet.unlock(getPassword())) {
             SystemUtil.exit(SystemUtil.Code.FAILED_TO_UNLOCK_WALLET);
         }
