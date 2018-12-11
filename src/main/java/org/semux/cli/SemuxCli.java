@@ -332,6 +332,7 @@ public class SemuxCli extends Launcher {
         }
 
         if (!wallet.unlock(getPassword())) {
+            logger.error("Invalid password");
             SystemUtil.exit(SystemUtil.Code.FAILED_TO_UNLOCK_WALLET);
         }
         checkWalletHdInitialized(wallet);
