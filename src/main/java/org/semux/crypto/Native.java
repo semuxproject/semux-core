@@ -39,7 +39,11 @@ public class Native {
         SystemUtil.OsName os = SystemUtil.getOsName();
         switch (os) {
         case LINUX:
-            enabled = loadLibrary("/native/linux64/libsodium.so.23") && loadLibrary("/native/linux64/libcrypto.so");
+            if (SystemUtil.getOsArch().equals("aarch64")) {
+                enabled = loadLibrary("/native/aarch64/libsodium.so.23") && loadLibrary("/native/aarch64/libcrypto.so");
+            } else {
+                enabled = loadLibrary("/native/linux64/libsodium.so.23") && loadLibrary("/native/linux64/libcrypto.so");
+            }
             break;
         case MACOS:
             enabled = loadLibrary("/native/macos64/libsodium.23.dylib")
