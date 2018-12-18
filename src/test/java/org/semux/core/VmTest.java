@@ -64,7 +64,6 @@ public class VmTest {
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
         Amount value = NANO_SEM.of(5);
-        Amount fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
 
@@ -84,7 +83,7 @@ public class VmTest {
         long gas = 30000;
         long gasPrice = 1;
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);
         assertTrue(tx.validate(network));
 
@@ -117,7 +116,6 @@ public class VmTest {
         byte[] from = key.toAddress();
         byte[] to = Bytes.EMPTY_ADDRESS;
         Amount value = NANO_SEM.of(0);
-        Amount fee = config.minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
 
@@ -134,7 +132,8 @@ public class VmTest {
         long gas = 1000000;
         long gasPrice = 1;
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, create, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, create, gas,
+                gasPrice);
         tx.sign(key);
         assertTrue(tx.validate(network));
 

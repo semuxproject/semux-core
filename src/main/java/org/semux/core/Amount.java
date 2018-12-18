@@ -45,6 +45,10 @@ public final class Amount {
             return new Amount(Math.multiplyExact(a, factor));
         }
 
+        public Amount ofGas(long gas, long gasPrice) {
+            return new Amount(Math.multiplyExact(gas, gasPrice));
+        }
+
         public BigDecimal toDecimal(Amount a, int scale) {
             BigDecimal $nano = BigDecimal.valueOf(a.nano);
             return $nano.movePointLeft(exp).setScale(scale, FLOOR);
