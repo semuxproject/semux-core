@@ -115,10 +115,19 @@ public class TransactionExecutor {
                 continue;
             }
 
-            // check fee
-            if (fee.lt(config.minTransactionFee())) {
-                result.setCode(Code.INVALID_FEE);
-                continue;
+            boolean isVmCall = type == TransactionType.CREATE || type == TransactionType.CALL;
+
+            // check fee (call and create use gas instead)
+            if (isVmCall) {
+                if (fee.gt0()) {
+                    result.setCode(Code.INVALID_FEE);
+                    continue;
+                }
+            } else {
+                if (fee.lt(config.minTransactionFee())) {
+                    result.setCode(Code.INVALID_FEE);
+                    continue;
+                }
             }
 
             // check data length
@@ -197,25 +206,27 @@ public class TransactionExecutor {
             case CALL:
             case CREATE:
                 long maxGasFee = tx.getGas() * tx.getGasPrice();
-                Amount maxCost = sum(sum(value, fee), Unit.NANO_SEM.of(maxGasFee));
-                if (maxCost.lte(available)) {
-                    // VM calls still use fees
-                    as.adjustAvailable(from, neg(sum(value, fee)));
-
-                    if (tx.getGas() > config.vmMaxBlockGasLimit()) {
-                        result.setCode(Code.INVALID_GAS);
-                    } else if (block == null) {
-                        // workaround for pending manager so it doesn't execute these
-                        // we charge gas later
-                        as.increaseNonce(from);
-                        result.setCode(Code.SUCCESS);
-                    } else {
-                        executeVmTransaction(result, tx, as, block, gasUsedInBlock);
-                        gasUsedInBlock += result.getGasUsed();
-                    }
-                } else {
+                Amount maxCost = sum(value, Unit.NANO_SEM.of(maxGasFee));
+                if (available.equals(maxCost)) {
                     result.setCode(Code.INSUFFICIENT_AVAILABLE);
+                    break;
                 }
+
+                // VM calls can still take values
+                as.adjustAvailable(from, neg(value));
+
+                if (tx.getGas() > config.vmMaxBlockGasLimit()) {
+                    result.setCode(Code.INVALID_GAS);
+                } else if (block == null) {
+                    // workaround for pending manager so it doesn't execute these
+                    // we charge gas later
+                    as.increaseNonce(from);
+                    result.setCode(Code.SUCCESS);
+                } else {
+                    executeVmTransaction(result, tx, as, block, gasUsedInBlock);
+                    gasUsedInBlock += result.getGasUsed();
+                }
+
                 break;
 
             default:
@@ -226,7 +237,7 @@ public class TransactionExecutor {
 
             // increase nonce if success
             // creates and calls increase their own nonces internal to VM
-            if (result.getCode().isAccepted() && type != TransactionType.CREATE && type != TransactionType.CALL) {
+            if (result.getCode().isAccepted() && !isVmCall) {
                 as.increaseNonce(from);
             }
         }

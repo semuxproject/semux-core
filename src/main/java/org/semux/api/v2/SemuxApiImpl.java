@@ -744,17 +744,16 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response create(String from, String value, String data, String gasPrice, String gas, String fee,
-            String nonce, Boolean validateNonce) {
-        return doTransaction(TransactionType.CREATE, from, null, value, fee, nonce, validateNonce, data, gasPrice,
+    public Response create(String from, String data, String gasPrice, String gas, String nonce, Boolean validateNonce) {
+        return doTransaction(TransactionType.CREATE, from, null, null, null, nonce, validateNonce, data, gasPrice,
                 gas);
     }
 
     @Override
-    public Response call(String from, String to, String value, String gasPrice, String gas, String fee,
+    public Response call(String from, String to, String value, String gasPrice, String gas,
             String nonce, Boolean validateNonce, String data, Boolean local) {
         if (local) {
-            Transaction tx = getTransaction(TransactionType.CALL, from, to, value, fee, nonce, validateNonce, data,
+            Transaction tx = getTransaction(TransactionType.CALL, from, to, value, null, nonce, validateNonce, data,
                     gasPrice, gas);
 
             SemuxTransaction transaction = new SemuxTransaction(tx);
@@ -777,7 +776,7 @@ public final class SemuxApiImpl implements SemuxApi {
                 return success(resp);
             }
         } else {
-            return doTransaction(TransactionType.CALL, from, to, value, fee, nonce, validateNonce, data, gasPrice,
+            return doTransaction(TransactionType.CALL, from, to, value, null, nonce, validateNonce, data, gasPrice,
                     gas);
         }
     }
@@ -922,10 +921,12 @@ public final class SemuxApiImpl implements SemuxApi {
                 .withFrom(from)
                 .withTo(to)
                 .withValue(value)
-                .withFee(fee, true)
                 .withData(data);
+
         if (type == TransactionType.CREATE || type == TransactionType.CALL) {
             transactionBuilder.withGasPrice(gasPrice).withGas(gas);
+        } else {
+            transactionBuilder.withFee(fee, true);
         }
 
         if (nonce != null) {
@@ -943,7 +944,6 @@ public final class SemuxApiImpl implements SemuxApi {
             throw new IllegalArgumentException("Invalid transaction nonce.");
         }
         return tx;
-
     }
 
     /**
