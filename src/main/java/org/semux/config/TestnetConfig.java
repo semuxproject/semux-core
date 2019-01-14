@@ -31,4 +31,16 @@ public class TestnetConfig extends AbstractConfig {
     public Map<Fork, Long> forkActivationCheckpoints() {
         return Collections.emptyMap();
     }
+
+    /**
+     * Testnet maxes out at 15 validators to stop dead validators from breaking
+     * concensus
+     * 
+     * @param number
+     * @return
+     */
+    @Override
+    public int getNumberOfValidators(long number) {
+        return 15;
+    }
 }
