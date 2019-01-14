@@ -263,6 +263,7 @@ public class TransactionBuilder {
         }
         if (type == TransactionType.CREATE) {
             to = Bytes.EMPTY_ADDRESS;
+            value = Amount.ZERO;
         }
 
         return new Transaction(
