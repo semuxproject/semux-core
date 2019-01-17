@@ -119,7 +119,7 @@ public class TransactionExecutor {
 
             // check fee (call and create use gas instead)
             if (isVmCall) {
-                if (fee.gt0()) {
+                if (fee.lt(Amount.ZERO)) {
                     result.setCode(Code.INVALID_FEE);
                     continue;
                 }

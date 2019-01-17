@@ -121,7 +121,7 @@ public abstract class AbstractConfig implements Config {
     protected int vmInitHeapSize = 128;
     protected int vmBlockGasLimit = 999_999;
     protected int vmMaxBlockGasLimit = 9_999_999;
-    protected int vmMinGasPrice = 10;
+    protected int vmMinGasPrice = 1;
 
     // =========================
     // UI
