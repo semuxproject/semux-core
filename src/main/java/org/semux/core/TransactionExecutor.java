@@ -206,14 +206,16 @@ public class TransactionExecutor {
             case CALL:
             case CREATE:
                 long maxGasFee = tx.getGas() * tx.getGasPrice();
-                Amount maxCost = sum(value, Unit.NANO_SEM.of(maxGasFee));
-                if (available.equals(maxCost)) {
+
+                Amount maxCost = sum(sum(value, fee), Unit.NANO_SEM.of(maxGasFee));
+
+                if (available.lt(maxCost)) {
                     result.setCode(Code.INSUFFICIENT_AVAILABLE);
                     break;
                 }
 
-                // VM calls can still take values
-                as.adjustAvailable(from, neg(value));
+                // VM calls can have fees/values set.
+                as.adjustAvailable(from, neg(sum(value, fee)));
 
                 if (tx.getGas() > config.vmMaxBlockGasLimit()) {
                     result.setCode(Code.INVALID_GAS);
