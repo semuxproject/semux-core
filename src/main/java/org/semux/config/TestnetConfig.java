@@ -42,8 +42,7 @@ public class TestnetConfig extends AbstractConfig {
     @Override
     public int getNumberOfValidators(long number) {
 
-        // lazy fork to adjust number down to unstick testnet to more reasonable max
-        // number
+        // adjust number down to unstick testnet to more reasonable max
         if (number <= 751638) {
             return super.getNumberOfValidators(number);
         } else {
