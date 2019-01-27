@@ -677,7 +677,7 @@ public class SemuxBft implements BftManager {
         // then a configuration change has occurred (like a stuck testnet)
         // so honor the configuration value
         if (validators.size() > maxValidators) {
-            validators = validators.subList(0, maxValidators - 1);
+            validators = validators.subList(0, maxValidators);
         }
         activeValidators = channelMgr.getActiveChannels(validators);
         lastUpdate = TimeUtil.currentTimeMillis();
