@@ -164,6 +164,13 @@ public class TransactionBuilder {
             return this; // ignore the provided parameter
         }
 
+        if (type == TransactionType.CREATE) {
+            if (value != null && !value.isEmpty()) {
+                throw new IllegalArgumentException("Parameter `value` is not needed for CREATE transaction");
+            }
+            return this; // ignore the provided parameter
+        }
+
         if (value == null) {
             throw new IllegalArgumentException("Parameter `value` is required");
         }
@@ -256,6 +263,7 @@ public class TransactionBuilder {
         }
         if (type == TransactionType.CREATE) {
             to = Bytes.EMPTY_ADDRESS;
+            value = Amount.ZERO;
         }
 
         return new Transaction(

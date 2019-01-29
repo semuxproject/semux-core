@@ -1060,24 +1060,6 @@
             "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
           },
           {
-            "name" : "value",
-            "in" : "query",
-            "description" : "Amount of SEM to transfer in nano SEM",
-            "required" : true,
-            "type" : "string",
-            "format" : "int64",
-            "pattern" : "^\\d+$"
-          },
-          {
-            "name" : "fee",
-            "in" : "query",
-            "description" : "Transaction fee in nano SEM, default to minimum fee if omitted",
-            "required" : false,
-            "type" : "string",
-            "format" : "int64",
-            "pattern" : "^\\d+$"
-          },
-          {
             "name" : "nonce",
             "in" : "query",
             "description" : "Transaction nonce, default to sender's nonce if omitted",
@@ -1169,15 +1151,6 @@
             "in" : "query",
             "description" : "Amount of SEM to transfer in nano SEM",
             "required" : true,
-            "type" : "string",
-            "format" : "int64",
-            "pattern" : "^\\d+$"
-          },
-          {
-            "name" : "fee",
-            "in" : "query",
-            "description" : "Transaction fee in nano SEM, default to minimum fee if omitted",
-            "required" : false,
             "type" : "string",
             "format" : "int64",
             "pattern" : "^\\d+$"
