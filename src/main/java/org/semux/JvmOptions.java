@@ -8,18 +8,20 @@ package org.semux;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.semux.util.SystemUtil;
 
 public class JvmOptions {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnsupportedEncodingException {
         // System.out is replaced with a byte buffer to prohibit any outputs from other
         // places.
         // This is a work-around for ISSUE-119
         PrintStream out = System.out;
-        System.setOut(new PrintStream(new ByteArrayOutputStream()));
+        System.setOut(new PrintStream(new ByteArrayOutputStream(), true, "UTF-8"));
 
         StringBuilder sb = new StringBuilder();
         sb.append(" -Xmx").append(SystemUtil.getAvailableMemorySize() * 75 / 100 / 1024 / 1024).append("m");
