@@ -327,8 +327,12 @@ public class SemuxCli extends Launcher {
     protected Wallet loadAndUnlockWallet() {
 
         Wallet wallet = loadWallet();
-        if (getPassword() == null && !wallet.unlock("")) {
-            setPassword(ConsoleUtil.readPassword());
+        if (getPassword() == null) {
+            if (wallet.unlock("")) {
+                setPassword("");
+            } else {
+                setPassword(ConsoleUtil.readPassword());
+            }
         }
 
         if (!wallet.unlock(getPassword())) {
