@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.core.Amount;
@@ -513,6 +514,15 @@ public class SemuxSync implements SyncManager {
         BlockHeader header = block.getHeader();
         List<Transaction> transactions = block.getTransactions();
 
+        // a workaround to ensure testnet clients ignore bad block, can remove at later date
+        if (config.network() == Network.TESTNET) {
+            String badBlock = "0x1a472841464b9bea9e530d73a95e1213f29adef11a3661f3e98df87a9a230b7d";
+            String blockHash = Hex.encode0x(block.getHash());
+            if (badBlock.equals(blockHash)) {
+                return false;
+            }
+        }
+
         // [1] check block header
         Block latest = chain.getLatestBlock();
         if (!Block.validateHeader(latest.getHeader(), header)) {
@@ -572,8 +582,16 @@ public class SemuxSync implements SyncManager {
     }
 
     protected boolean validateBlockVotes(Block block) {
-        Set<String> validators = new HashSet<>(chain.getValidators());
-        int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
+        int maxValidators = config.getNumberOfValidators(block.getNumber());
+
+        List<String> validatorList = chain.getValidators();
+
+        if (validatorList.size() > maxValidators) {
+            validatorList = validatorList.subList(0, maxValidators);
+        }
+        Set<String> validators = new HashSet<>(validatorList);
+
+        int twoThirds = (int) Math.round(validators.size() * 2.0 / 3.0);
 
         Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
                 block.getHash());
