@@ -608,7 +608,7 @@ public class SemuxSync implements SyncManager {
         if (block.getVotes().stream()
                 .map(sig -> new ByteArray(sig.getA()))
                 .collect(Collectors.toSet()).size() < twoThirds) {
-            logger.warn("Not enough votes, needs 2/3+");
+            logger.warn("Not enough votes, needs 2/3+ twoThirds = {}, block = {}", twoThirds, block);
             return false;
         }
 

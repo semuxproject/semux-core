@@ -476,7 +476,7 @@ public class SemuxBft implements BftManager {
             OptionalLong target = activeValidators.stream()
                     .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber() + 1)
                     .sorted()
-                    .limit((int) Math.floor(activeValidators.size() * 2.0 / 3.0))
+                    .limit((int) Math.round(activeValidators.size() * 2.0 / 3.0))
                     .max();
 
             if (target.isPresent() && target.getAsLong() > height) {
@@ -489,7 +489,7 @@ public class SemuxBft implements BftManager {
         logger.trace("On new_view: {}", p);
 
         if (p.getHeight() == height // at same height
-                && p.getView() > view && state != State.COMMIT && state != State.FINALIZE) {// larger view
+                && p.getView() == view + 1 && state != State.COMMIT && state != State.FINALIZE) {// larger view
 
             // check proof-of-unlock
             VoteSet vs = new VoteSet(VoteType.PRECOMMIT, p.getHeight(), p.getView() - 1, validators);
@@ -499,7 +499,7 @@ public class SemuxBft implements BftManager {
             }
 
             // switch view
-            logger.debug("Switching view because of NEW_VIEW message");
+            logger.debug("Switching view because of NEW_VIEW message: {}", p.getView());
             jumpToView(p.getView(), p, null);
         }
     }
@@ -509,7 +509,7 @@ public class SemuxBft implements BftManager {
 
         if (p.getHeight() == height // at the same height
                 && (p.getView() == view && proposal == null && (state == State.NEW_HEIGHT || state == State.PROPOSE) // expecting
-                        || p.getView() > view && state != State.COMMIT && state != State.FINALIZE) // larger view
+                        || p.getView() == view + 1 && state != State.COMMIT && state != State.FINALIZE) // larger view
                 && isPrimary(p.getHeight(), p.getView(), Hex.encode(p.getSignature().getAddress()))) {
 
             // check proof-of-unlock
@@ -681,6 +681,12 @@ public class SemuxBft implements BftManager {
         }
         activeValidators = channelMgr.getActiveChannels(validators);
         lastUpdate = TimeUtil.currentTimeMillis();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "Max validators = {}, Number of validators = {}, validators = {}, Number of active validators = {}, Active validators = {}",
+                    maxValidators, validators.size(), String.join(",", validators), activeValidators.size());
+        }
     }
 
     /**
