@@ -514,7 +514,8 @@ public class SemuxSync implements SyncManager {
         BlockHeader header = block.getHeader();
         List<Transaction> transactions = block.getTransactions();
 
-        // a workaround to ensure testnet clients ignore bad block, can remove at later date
+        // a workaround to ensure testnet clients ignore bad block, can remove at later
+        // date
         if (config.network() == Network.TESTNET) {
             String badBlock = "0x1a472841464b9bea9e530d73a95e1213f29adef11a3661f3e98df87a9a230b7d";
             String blockHash = Hex.encode0x(block.getHash());

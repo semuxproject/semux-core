@@ -226,7 +226,7 @@ public class TransactionExecutor {
                     result.setCode(Code.SUCCESS);
                 } else {
                     executeVmTransaction(result, tx, as, block, gasUsedInBlock);
-                    if(result.getCode().isAccepted()) {
+                    if (result.getCode().isAccepted()) {
                         gasUsedInBlock += result.getGasUsed();
                     }
                 }
