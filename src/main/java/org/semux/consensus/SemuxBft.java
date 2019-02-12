@@ -472,11 +472,11 @@ public class SemuxBft implements BftManager {
             activeValidators = channelMgr.getActiveChannels(validators);
 
             // Pick 2/3th active validator's height as sync target. The sync will not be
-            // started if there are less than 2 active validators.
+            // started if there are less than 2 active validators
             OptionalLong target = activeValidators.stream()
                     .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber() + 1)
                     .sorted()
-                    .limit((int) Math.round(activeValidators.size() * 2.0 / 3.0))
+                    .limit((int) Math.floor(activeValidators.size() * 2.0 / 3.0))
                     .max();
 
             if (target.isPresent() && target.getAsLong() > height) {
