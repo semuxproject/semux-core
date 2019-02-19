@@ -28,6 +28,10 @@ public class SimpleEncoder {
         this(Bytes.EMPTY_BYTES);
     }
 
+    public SimpleEncoder(int size) {
+        out = new ByteArrayOutputStream(size);
+    }
+
     public void writeBoolean(boolean b) {
         out.write(b ? 1 : 0);
     }
