@@ -1,0 +1,6 @@
+[submodule "src/main/native/crypto/libsodium"]
+	path = src/main/native/crypto/libsodium
+	url = https://github.com/jedisct1/libsodium.git
+[submodule "src/main/native/crypto/ed25519-donna"]
+	path = src/main/native/crypto/ed25519-donna
+	url = https://github.com/cryptokat/ed25519-donna.git 

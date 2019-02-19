@@ -1,6 +1,7 @@
 #include "org_semux_crypto_Native.h"
 #include "ripemd160.h"
 #include <sodium.h>
+#include "ed25519-donna/ed25519.h"
 
 JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_h256
 (JNIEnv *env, jclass cls, jbyteArray msg)
@@ -107,13 +108,76 @@ JNIEXPORT jboolean JNICALL Java_org_semux_crypto_Native_verify
     env->GetByteArrayRegion(pk, 0, crypto_sign_ed25519_PUBLICKEYBYTES, pk_buf);
 
     // verify ed25519 signature
-    jboolean result = crypto_sign_ed25519_verify_detached((const unsigned char *)sig_buf,
-        (const unsigned char *)msg_buf, msg_size, (const unsigned char *)pk_buf) == 0;
+    jboolean result = ed25519_sign_open(
+        (const unsigned char *)msg_buf,
+        msg_size,
+        (const unsigned char *)pk_buf,
+        (const unsigned char *)sig_buf) == 0;
 
     // release buffer
     free(pk_buf);
     free(sig_buf);
     free(msg_buf);
+
+    return result;
+}
+
+JNIEXPORT jboolean JNICALL Java_org_semux_crypto_Native_verifyBatch
+(JNIEnv *env, jclass cls, jobjectArray msgs, jobjectArray sigs, jobjectArray pks)
+{
+    // check null inputs
+    if (msgs == NULL || sigs == NULL || pks == NULL) {
+        return false;
+    }
+
+    // check array lengths
+    const jsize msgs_size = env->GetArrayLength(msgs);
+    const jsize sigs_size = env->GetArrayLength(sigs);
+    const jsize pks_size = env->GetArrayLength(pks);
+    if (msgs_size != sigs_size || sigs_size != pks_size) {
+        env->ThrowNew(env->FindClass("org/semux/crypto/CryptoException"), "Input arrays must have an identical length");
+        return false;
+    }
+
+    // read byte arrays into c buffers
+    auto msg_bufs = new jbyte*[msgs_size];
+    auto msg_lens = new size_t[msgs_size];
+    auto sig_bufs = new jbyte*[sigs_size];
+    auto pk_bufs = new jbyte*[pks_size];
+    for (int i = 0;i < msgs_size;i++) {
+        jbyteArray msg = (jbyteArray) env->GetObjectArrayElement(msgs, i);
+        jbyteArray sig = (jbyteArray) env->GetObjectArrayElement(sigs, i);
+        jbyteArray pk = (jbyteArray) env->GetObjectArrayElement(pks, i);
+        if (msg == NULL || sig == NULL || env->GetArrayLength(sig) != crypto_sign_ed25519_BYTES
+            || pk == NULL || env->GetArrayLength(pk) != crypto_sign_ed25519_PUBLICKEYBYTES) {
+            return false;
+        }
+
+        const jsize msg_size = env->GetArrayLength(msg);
+        msg_lens[i] = (size_t) msg_size;
+        msg_bufs[i] = new jbyte[msg_size];
+        env->GetByteArrayRegion(msg, 0, msg_size, msg_bufs[i]);
+        sig_bufs[i] = new jbyte[crypto_sign_ed25519_BYTES];
+        env->GetByteArrayRegion(sig, 0, crypto_sign_ed25519_BYTES, sig_bufs[i]);
+        pk_bufs[i] = new jbyte[crypto_sign_ed25519_PUBLICKEYBYTES];
+        env->GetByteArrayRegion(pk, 0, crypto_sign_ed25519_PUBLICKEYBYTES, pk_bufs[i]);
+    }
+
+    // verify ed25519 signature
+    int *valid = new int[msgs_size];
+    jboolean result = ed25519_sign_open_batch((const unsigned char **)msg_bufs, msg_lens, (const unsigned char **)pk_bufs, (const unsigned char **)sig_bufs, msgs_size, valid) == 0;
+
+    // release buffers
+    for (int i = 0;i < msgs_size;i++) {
+        delete[] msg_bufs[i];
+        delete[] sig_bufs[i];
+        delete[] pk_bufs[i];
+    }
+    delete[] msg_bufs;
+    delete[] msg_lens;
+    delete[] sig_bufs;
+    delete[] pk_bufs;
+    delete[] valid;
 
     return result;
 }

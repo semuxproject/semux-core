@@ -146,9 +146,11 @@ public class Transaction {
      * </p>
      *
      * @param network
+     * @param verifySignature
+     *         Whether to verify the transaction signature or not. This is useful when there are multiple transaction signatures that can be verified in batch for performance reason.
      * @return true if success, otherwise false
      */
-    public boolean validate(Network network) {
+    public boolean validate(Network network, boolean verifySignature) {
         return hash != null && hash.length == Hash.HASH_LEN
                 && networkId == network.id()
                 && type != null
@@ -162,7 +164,7 @@ public class Transaction {
                 && signature != null && !Arrays.equals(signature.getAddress(), EMPTY_ADDRESS)
 
                 && Arrays.equals(Hash.h256(encoded), hash)
-                && Key.verify(hash, signature)
+                && (!verifySignature || Key.verify(hash, signature))
 
                 // The coinbase key is publicly available. People can use it for transactions.
                 // It won't introduce any fundamental loss to the system but could potentially
@@ -170,6 +172,10 @@ public class Transaction {
                 && (type == TransactionType.COINBASE
                         || (!Arrays.equals(signature.getAddress(), Constants.COINBASE_ADDRESS)
                                 && !Arrays.equals(to, Constants.COINBASE_ADDRESS)));
+    }
+
+    public boolean validate(Network network) {
+        return validate(network, true);
     }
 
     /**

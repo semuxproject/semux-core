@@ -13,6 +13,7 @@ import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -601,10 +602,22 @@ public class SemuxSync implements SyncManager {
         byte[] encoded = vote.getEncoded();
 
         // check validity of votes
-        if (!block.getVotes().stream()
-                .allMatch(sig -> Key.verify(encoded, sig) && validators.contains(Hex.encode(sig.getAddress())))) {
+        if (block.getVotes().stream().anyMatch(sig -> !validators.contains(Hex.encode(sig.getAddress())))) {
             logger.warn("Block votes are invalid");
             return false;
+        }
+
+        if (!Key.isVerifyBatchSupported()) {
+            if (!block.getVotes().stream()
+                    .allMatch(sig -> Key.verify(encoded, sig))) {
+                logger.warn("Block votes are invalid");
+                return false;
+            }
+        } else {
+            if (!Key.verifyBatch(Collections.nCopies(block.getVotes().size(), encoded), block.getVotes())) {
+                logger.warn("Block votes are invalid");
+                return false;
+            }
         }
 
         // at least two thirds voters

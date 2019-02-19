@@ -40,17 +40,16 @@ public class Native {
         switch (os) {
         case LINUX:
             if (SystemUtil.getOsArch().equals("aarch64")) {
-                enabled = loadLibrary("/native/aarch64/libsodium.so.23") && loadLibrary("/native/aarch64/libcrypto.so");
+                enabled = loadLibrary("/native/aarch64-linux/libsemuxcrypto.so");
             } else {
-                enabled = loadLibrary("/native/linux64/libsodium.so.23") && loadLibrary("/native/linux64/libcrypto.so");
+                enabled = loadLibrary("/native/x86_64-linux/libsemuxcrypto.so");
             }
             break;
         case MACOS:
-            enabled = loadLibrary("/native/macos64/libsodium.23.dylib")
-                    && loadLibrary("/native/macos64/libcrypto.dylib");
+            enabled = loadLibrary("/native/macos64/libsemuxcrypto.dylib");
             break;
         case WINDOWS:
-            enabled = loadLibrary("/native/win64/libsodium.dll") && loadLibrary("/native/win64/crypto.dll");
+            enabled = loadLibrary("/native/win64/libsemuxcrypto.dll");
             break;
         default:
             break;
@@ -153,4 +152,14 @@ public class Native {
      * @return
      */
     public static native boolean verify(byte[] message, byte[] signature, byte[] publicKey);
+
+    /**
+     * Batch verifies an Ed25519 signature.
+     *
+     * @param messages
+     * @param signatures
+     * @param publicKeys
+     * @return
+     */
+    public static native boolean verifyBatch(byte[][] messages, byte[][] signatures, byte[][] publicKeys);
 }

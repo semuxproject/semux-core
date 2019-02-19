@@ -3,19 +3,32 @@ cmake_minimum_required(VERSION 3.5)
 project(crypto)
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_CXX_FLAGS_RELEASE "-Os -fdata-sections -ffunction-sections -fstack-protector")
+add_definitions(-DED25519_CUSTOMHASH -DED25519_CUSTOMRANDOM)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Java JNI
-find_package(JNI REQUIRED)
-include_directories(${JNI_INCLUDE_DIRS})
+include_directories("./jni")
 
 # libsodium library
-find_package(sodium REQUIRED)
-include_directories(${sodium_INCLUDE_DIR})
+include_directories("./libsodium/src/libsodium/include")
+add_custom_target(
+    sodium
+    COMMAND make clean
+    COMMAND ./autogen.sh
+    COMMAND ./configure --enable-shared=no --enable-minimal=yes --disable-pie --host=${CMAKE_SYSTEM_PROCESSOR}-${TARGET_ABI}
+    COMMAND make -j${nproc}
+    WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/libsodium"
+)
 
 # source files
-set(SOURCE_FILES org_semux_crypto_Native.cpp ripemd160.c)
+set(SOURCE_FILES org_semux_crypto_Native.cpp ripemd160.c ed25519-donna/ed25519.c)
 
 # build
-add_library(crypto SHARED ${SOURCE_FILES})
-target_link_libraries(crypto sodium)
+add_library(semuxcrypto SHARED ${SOURCE_FILES})
+add_dependencies(semuxcrypto sodium)
+target_link_libraries(
+    semuxcrypto
+    "-Wl,--whole-archive ${CMAKE_CURRENT_LIST_DIR}/libsodium/src/libsodium/.libs/libsodium.a -Wl,--no-whole-archive"
+)
