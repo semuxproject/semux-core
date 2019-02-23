@@ -58,8 +58,7 @@ The standard wallet.data file of Semux is always encrypted even if you entered a
 The following ways are available for automatic wallet unlock which will be applied in sequence:
 
 1. Set `--password` CLI option as your wallet password when starting `semux-cli.sh` executable. This is considered as an insecured way as the way will expose your wallet password to all users through process monitor.
-2. Set `wallet.password` property as your wallet password in your `config/semux.properties` config file.
-3. Set `SEMUX_WALLET_PASSWORD` environment variable as your wallet password.
+2. Set `SEMUX_WALLET_PASSWORD` environment variable as your wallet password.
 
 ### Create a systemd service
 

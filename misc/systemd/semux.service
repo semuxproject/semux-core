@@ -16,7 +16,6 @@ ExecStart=/home/username/semux/semux-cli.sh
 
 # SEMUX_WALLET_PASSWORD environment variable is required to automatically unlock your wallet.data file.
 # Please ensure sure that the access permission of this service unit file is properly configured when you put your password here.
-# Alternatively wallet.password property in your semux.properties config file can be set for automatic unlock.
 Environment=SEMUX_WALLET_PASSWORD=YOUR_WALLET_PASSWORD
 
 [Install]
