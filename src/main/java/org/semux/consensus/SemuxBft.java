@@ -472,7 +472,7 @@ public class SemuxBft implements BftManager {
             activeValidators = channelMgr.getActiveChannels(validators);
 
             // Pick 2/3th active validator's height as sync target. The sync will not be
-            // started if there are less than 2 active validators.
+            // started if there are less than 2 active validators
             OptionalLong target = activeValidators.stream()
                     .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber() + 1)
                     .sorted()
@@ -489,7 +489,7 @@ public class SemuxBft implements BftManager {
         logger.trace("On new_view: {}", p);
 
         if (p.getHeight() == height // at same height
-                && p.getView() > view && state != State.COMMIT && state != State.FINALIZE) {// larger view
+                && p.getView() == view + 1 && state != State.COMMIT && state != State.FINALIZE) {// larger view
 
             // check proof-of-unlock
             VoteSet vs = new VoteSet(VoteType.PRECOMMIT, p.getHeight(), p.getView() - 1, validators);
@@ -499,7 +499,7 @@ public class SemuxBft implements BftManager {
             }
 
             // switch view
-            logger.debug("Switching view because of NEW_VIEW message");
+            logger.debug("Switching view because of NEW_VIEW message: {}", p.getView());
             jumpToView(p.getView(), p, null);
         }
     }
@@ -509,7 +509,7 @@ public class SemuxBft implements BftManager {
 
         if (p.getHeight() == height // at the same height
                 && (p.getView() == view && proposal == null && (state == State.NEW_HEIGHT || state == State.PROPOSE) // expecting
-                        || p.getView() > view && state != State.COMMIT && state != State.FINALIZE) // larger view
+                        || p.getView() == view + 1 && state != State.COMMIT && state != State.FINALIZE) // larger view
                 && isPrimary(p.getHeight(), p.getView(), Hex.encode(p.getSignature().getAddress()))) {
 
             // check proof-of-unlock
@@ -681,6 +681,12 @@ public class SemuxBft implements BftManager {
         }
         activeValidators = channelMgr.getActiveChannels(validators);
         lastUpdate = TimeUtil.currentTimeMillis();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "Max validators = {}, Number of validators = {}, validators = {}, Number of active validators = {}, Active validators = {}",
+                    maxValidators, validators.size(), String.join(",", validators), activeValidators.size());
+        }
     }
 
     /**
@@ -790,9 +796,10 @@ public class SemuxBft implements BftManager {
         for (PendingManager.PendingTransaction tx : pending) {
             if (tx.transaction.getType() == TransactionType.CALL
                     || tx.transaction.getType() == TransactionType.CREATE) {
-                long maxGasForTransaction = tx.transaction.getGas() + gasUsed;
+                long pendingGasForBlock = tx.transaction.getGas() + gasUsed;
+
                 if (tx.transaction.getGasPrice() >= config.vmMinGasPrice()
-                        && maxGasForTransaction < config.vmBlockGasLimit()) {
+                        && pendingGasForBlock < config.vmBlockGasLimit()) {
                     TransactionResult result = exec.execute(tx.transaction, as, ds, semuxBlock);
                     gasUsed += result.getGasUsed();
 
@@ -883,7 +890,7 @@ public class SemuxBft implements BftManager {
         // against our own local limit, only
         // when proposing
         List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(header, config.vmMaxBlockGasLimit()));
+                new SemuxBlock(header, Long.MAX_VALUE));
         if (!Block.validateResults(header, results)) {
             logger.warn("Invalid transactions");
             return false;
@@ -928,6 +935,9 @@ public class SemuxBft implements BftManager {
      * @param block
      */
     protected void applyBlock(Block block) {
+
+        long t1 = TimeUtil.currentTimeMillis();
+
         BlockHeader header = block.getHeader();
         List<Transaction> transactions = block.getTransactions();
         long number = header.getNumber();
@@ -946,7 +956,7 @@ public class SemuxBft implements BftManager {
 
         // [3] evaluate all transactions
         List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(block.getHeader(), config.vmMaxBlockGasLimit()));
+                new SemuxBlock(block.getHeader(), Long.MAX_VALUE));
         if (!Block.validateResults(header, results)) {
             logger.debug("Invalid transactions");
             return;
@@ -977,6 +987,10 @@ public class SemuxBft implements BftManager {
         } finally {
             lock.unlock();
         }
+
+        long t2 = TimeUtil.currentTimeMillis();
+        logger.debug("Block apply: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
+
     }
 
     public enum State {

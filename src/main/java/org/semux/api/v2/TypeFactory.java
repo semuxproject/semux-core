@@ -67,6 +67,9 @@ public class TypeFactory {
                 .resultsRoot(Hex.encode0x(block.getResultsRoot()))
                 .stateRoot(Hex.encode0x(block.getStateRoot()))
                 .data(Hex.encode0x(block.getData()))
+                .gasUsed(String.valueOf(block.getResults().stream()
+                        .mapToLong(TransactionResult::getGasUsed)
+                        .sum()))
                 .transactions(txs.stream()
                         .map(tx -> transactionType(block.getNumber(), tx))
                         .collect(Collectors.toList()));

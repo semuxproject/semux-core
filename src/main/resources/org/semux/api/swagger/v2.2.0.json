@@ -1782,6 +1782,11 @@
           "type" : "string",
           "pattern" : "^(0x)?[0-9a-fA-F]*$"
         },
+        "gasUsed" : {
+          "type" : "string",
+          "format" : "int64",
+          "pattern" : "^\\d+$"
+        },
         "transactions" : {
           "type" : "array",
           "items" : {

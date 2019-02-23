@@ -41,7 +41,7 @@ public class Constants {
     /**
      * Version of this client.
      */
-    public static final String CLIENT_VERSION = "1.5.1";
+    public static final String CLIENT_VERSION = "1.5.2";
 
     /**
      * Capability of this client.

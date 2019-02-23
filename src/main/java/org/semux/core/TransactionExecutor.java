@@ -226,7 +226,9 @@ public class TransactionExecutor {
                     result.setCode(Code.SUCCESS);
                 } else {
                     executeVmTransaction(result, tx, as, block, gasUsedInBlock);
-                    gasUsedInBlock += result.getGasUsed();
+                    if (result.getCode().isAccepted()) {
+                        gasUsedInBlock += result.getGasUsed();
+                    }
                 }
 
                 break;
@@ -259,7 +261,7 @@ public class TransactionExecutor {
 
         TransactionReceipt summary = executor.run();
         if (summary == null) {
-            result.setCode(Code.FAILURE);
+            result.setCode(Code.INVALID_GAS);
             result.setGasUsed(tx.getGas());
         } else {
             for (LogInfo log : summary.getLogs()) {
