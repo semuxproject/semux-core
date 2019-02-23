@@ -935,6 +935,9 @@ public class SemuxBft implements BftManager {
      * @param block
      */
     protected void applyBlock(Block block) {
+
+        long t1 = TimeUtil.currentTimeMillis();
+
         BlockHeader header = block.getHeader();
         List<Transaction> transactions = block.getTransactions();
         long number = header.getNumber();
@@ -984,6 +987,10 @@ public class SemuxBft implements BftManager {
         } finally {
             lock.unlock();
         }
+
+        long t2 = TimeUtil.currentTimeMillis();
+        logger.debug("Block apply: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
+
     }
 
     public enum State {
