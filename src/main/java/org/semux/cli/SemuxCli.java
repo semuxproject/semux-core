@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
-import com.github.orogvany.bip39.Language;
-import com.github.orogvany.bip39.MnemonicGenerator;
+import org.semux.core.bip39.Language;
+import org.semux.core.bip39.MnemonicGenerator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
