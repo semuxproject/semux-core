@@ -58,7 +58,6 @@ This release introduces Java 10 support plus a few API & documentation improveme
   - Add blockchain checkpoints
 - Security
   - Provide safe ways for automatic wallet unlock to address an issue that `--password` CLI option exposes wallet password to process explorer
-    - semux.properties: `wallet.password`
     - environment variable: `SEMUX_WALLET_PASSWORD`
 
 **Implemented enhancements:**
