@@ -6,8 +6,8 @@
  */
 package org.semux.gui.dialog;
 
-import com.github.orogvany.bip39.Language;
-import com.github.orogvany.bip39.MnemonicGenerator;
+import org.semux.core.bip39.Language;
+import org.semux.core.bip39.MnemonicGenerator;
 import org.semux.core.Wallet;
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;

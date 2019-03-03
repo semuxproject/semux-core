@@ -23,10 +23,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.orogvany.bip32.Network;
-import com.github.orogvany.bip32.wallet.Bip44;
-import com.github.orogvany.bip32.wallet.CoinType;
-import com.github.orogvany.bip32.wallet.HdAddress;
+import org.semux.core.bip32.Network;
+import org.semux.core.bip32.wallet.Bip44;
+import org.semux.core.bip32.wallet.CoinType;
+import org.semux.core.bip32.wallet.HdAddress;
 import org.bouncycastle.crypto.generators.BCrypt;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
