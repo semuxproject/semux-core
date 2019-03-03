@@ -481,6 +481,20 @@ public class SemuxBft implements BftManager {
 
             if (target.isPresent() && target.getAsLong() > height) {
                 sync(target.getAsLong());
+            } else if (activeValidators.isEmpty()) {
+                logger.warn("Unable to connect to active validators. Syncing from peers.");
+                // If the original validators are missing (a fresh sync, or no direct connection
+                // to validators)
+                // we still should be able to sync just based on peers.
+                List<Channel> activePeers = channelMgr.getActiveChannels();
+                OptionalLong activePeersTarget = activePeers.stream()
+                        .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber() + 1)
+                        .sorted()
+                        .limit((int) Math.floor(activePeers.size() * 2.0 / 3.0))
+                        .max();
+                if (activePeersTarget.isPresent() && activePeersTarget.getAsLong() > height) {
+                    sync(activePeersTarget.getAsLong());
+                }
             }
         }
     }
