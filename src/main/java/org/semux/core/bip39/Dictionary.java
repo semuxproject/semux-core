@@ -24,7 +24,7 @@ public class Dictionary {
         InputStream wordStream = this.getClass().getClassLoader()
                 .getResourceAsStream("wordlists/" + language.name() + ".txt");
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(wordStream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(wordStream, "UTF-8"));
         String word;
 
         while ((word = reader.readLine()) != null) {
