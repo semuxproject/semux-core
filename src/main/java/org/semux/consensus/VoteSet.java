@@ -53,7 +53,7 @@ public class VoteSet {
         this.view = view;
 
         this.validators = new HashSet<>(validators);
-        this.twoThirds = (int) Math.round(validators.size() * 2.0 / 3.0);
+        this.twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
     }
 
     /**
