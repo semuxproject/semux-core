@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2017-2018 The Semux Developers
- *
+ * <p>
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
@@ -19,6 +19,7 @@ import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.text.Normalizer;
 import java.util.BitSet;
 
 /**
@@ -43,8 +44,17 @@ public class MnemonicGenerator {
             password = "";
         }
 
+        password = Normalizer.normalize(password, Normalizer.Form.NFKD);
+
+        String[] wordsList;
+        if (language != Language.japanese) {
+            words = words.replaceAll(SPACE_JP, " ");
+            wordsList = words.split(" ");
+        } else {
+            wordsList = words.split("" + SPACE_JP);
+        }
+
         // validate that things look alright
-        String[] wordsList = words.split(" ");
         if (wordsList.length < 12) {
             throw new IllegalArgumentException("Must be at least 12 words");
         }
@@ -52,11 +62,12 @@ public class MnemonicGenerator {
             throw new IllegalArgumentException("Must be less than 24 words");
         }
 
+        words = Normalizer.normalize(words, Normalizer.Form.NFKD);
+
         // check all the words are found
         for (String word : wordsList) {
             if (dictionary.indexOf(word.trim()) < 0) {
                 throw new IllegalArgumentException("Unknown word: " + word);
-
             }
         }
 
@@ -124,7 +135,12 @@ public class MnemonicGenerator {
             }
             String word = dictionary.getWord(wordIdx);
             if (i > 0) {
-                ret.append(" ");
+                if (language == Language.japanese) {
+                    ret.append(SPACE_JP);
+                } else {
+                    ret.append(" ");
+                }
+
             }
             ret.append(word);
 
