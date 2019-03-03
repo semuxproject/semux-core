@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class Dictionary {
         InputStream wordStream = this.getClass().getClassLoader()
                 .getResourceAsStream("wordlists/" + language.name() + ".txt");
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(wordStream, "UTF-8"));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(wordStream, StandardCharsets.UTF_8));
         String word;
 
         while ((word = reader.readLine()) != null) {
