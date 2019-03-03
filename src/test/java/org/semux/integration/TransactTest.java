@@ -134,8 +134,6 @@ public class TransactTest {
             }
         }
 
-        int i = 0;
-
         // wait for kernels
         await().atMost(20, SECONDS).until(() -> kernelValidator1.state() == State.RUNNING
                 && kernelValidator2.state() == State.RUNNING
