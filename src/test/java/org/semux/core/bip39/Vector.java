@@ -12,12 +12,14 @@ public class Vector {
     private String mnemonic;
     private String seed;
     private String hdKey;
+    private String passphrase;
 
-    public Vector(byte[] entropy, String mnemonic, String seed, String hdKey) {
+    public Vector(byte[] entropy, String mnemonic, String seed, String hdKey, String passphrase) {
         this.entropy = entropy;
         this.mnemonic = mnemonic;
         this.seed = seed;
         this.hdKey = hdKey;
+        this.passphrase = passphrase;
     }
 
     public byte[] getEntropy() {
@@ -34,5 +36,9 @@ public class Vector {
 
     public String getHdKey() {
         return hdKey;
+    }
+
+    public String getPassphrase() {
+        return passphrase;
     }
 }

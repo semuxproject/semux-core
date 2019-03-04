@@ -6,15 +6,18 @@
  */
 package org.semux.core.bip39;
 
-import org.semux.core.bip39.Dictionary;
-import org.semux.core.bip39.Language;
-import org.semux.core.bip39.MnemonicGenerator;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class MnemonicGeneratorTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(MnemonicGeneratorTest.class);
+
+    public static final char jpSpace = '\u3000';
 
     @Test
     public void testHappyPath() {
@@ -33,6 +36,11 @@ public class MnemonicGeneratorTest {
         byte[] seed = generator.getSeedFromWordlist(phrase, "", Language.english);
         byte[] seedAgain = generator.getSeedFromWordlist(phrase, "", Language.english);
         Assert.assertArrayEquals(seed, seedAgain);
+
+        // try using japanese spaces in english phrase list
+        String jpSpacePhrase = phrase.replace(' ', jpSpace);
+        byte[] seedFromJpSpaces = generator.getSeedFromWordlist(jpSpacePhrase, "", Language.english);
+        Assert.assertArrayEquals(seed, seedFromJpSpaces);
 
         String[] words = phrase.split(" ");
 
