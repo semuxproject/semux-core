@@ -25,7 +25,7 @@ public final class Fork implements Comparable<Fork> {
             "UNIFORM_DISTRIBUTION", 1500, 2000, 1000000);
 
     public static final Fork VIRTUAL_MACHINE = new Fork((short) 2,
-            "VIRTUAL_MACHINE", 1500, 2000, 1200000);
+            "VIRTUAL_MACHINE", 1500, 2000, 1500000);
     /**
      * An unique number of this fork.
      */
