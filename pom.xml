@@ -520,11 +520,11 @@
                                     <urns>
                                         <urn>com.akathist.maven.plugins.launch4j:launch4j-maven-plugin:1.7.21:maven-plugin:null:runtime:58402e775916bc8824e257c8d87ad6c8064663a5</urn>
                                         <urn>com.fasterxml.jackson.core:jackson-annotations:2.9.0:jar:null:compile:07c10d545325e3a6e72e06381afe469fd40eb701</urn>
-                                        <urn>com.fasterxml.jackson.core:jackson-core:2.9.7:jar:null:compile:4b7f0e0dc527fab032e9800ed231080fdc3ac015</urn>
-                                        <urn>com.fasterxml.jackson.core:jackson-databind:2.9.7:jar:null:compile:e6faad47abd3179666e89068485a1b88a195ceb7</urn>
-                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.7:jar:null:test:0d7f607b3a12e6e92b2f29c721e03c11b638cc32</urn>
-                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.7:jar:null:test:134f1518a9516be01b25526a935d4fd68610b89c</urn>
-                                        <urn>com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.7:jar:null:test:2774b8e960697678ca87cf54abd59c736fcd1e83</urn>
+                                        <urn>com.fasterxml.jackson.core:jackson-core:2.9.8:jar:null:compile:0f5a654e4675769c716e5b387830d19b501ca191</urn>
+                                        <urn>com.fasterxml.jackson.core:jackson-databind:2.9.8:jar:null:compile:11283f21cc480aa86c4df7a0a3243ec508372ed2</urn>
+                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.8:jar:null:test:0113dc616852ea990255d3a820d1006ac2531ae7</urn>
+                                        <urn>com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.8:jar:null:test:cbfb046b70f764aed65426db19a3b8984482a86e</urn>
+                                        <urn>com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.8:jar:null:test:da08815ba1c7f7b435e7df02b7bf98327bad2fd4</urn>
                                         <urn>com.fasterxml.woodstox:woodstox-core:5.0.3:jar:null:test:10aa199207fda142eff01cd61c69244877d71770</urn>
                                         <urn>com.github.ben-manes.caffeine:caffeine:2.6.2:jar:null:compile:c8fd8817f9d2b2ced82f8968e0dd943aab557de0</urn>
                                         <urn>com.github.oshi:oshi-core:3.10.0:jar:null:compile:4b6daabb2d7f1bd906b334d15b3d35d8228e7fc0</urn>
@@ -841,12 +841,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.9.7</version>
+            <version>2.9.8</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.7</version>
+            <version>2.9.8</version>
         </dependency>
 
         <!-- ED25519 -->
@@ -1016,7 +1016,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-json-provider</artifactId>
-            <version>2.9.7</version>
+            <version>2.9.8</version>
             <scope>test</scope>
         </dependency>
 
