@@ -18,6 +18,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
@@ -471,29 +472,27 @@ public class SemuxBft implements BftManager {
             // update active validators (potential overhead)
             activeValidators = channelMgr.getActiveChannels(validators);
 
-            // Pick 2/3th active validator's height as sync target. The sync will not be
-            // started if there are less than 2 active validators
-            OptionalLong target = activeValidators.stream()
+            // the heights of active validators
+            long[] heights = activeValidators.stream()
                     .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber() + 1)
                     .sorted()
-                    .limit((int) Math.floor(activeValidators.size() * 2.0 / 3.0))
-                    .max();
+                    .toArray();
 
-            if (target.isPresent() && target.getAsLong() > height) {
-                sync(target.getAsLong());
-            } else if (activeValidators.isEmpty()) {
-                logger.warn("Unable to connect to active validators. Syncing from peers.");
-                // If the original validators are missing (a fresh sync, or no direct connection
-                // to validators)
-                // we still should be able to sync just based on peers.
-                List<Channel> activePeers = channelMgr.getActiveChannels();
-                OptionalLong activePeersTarget = activePeers.stream()
+            // If the original validators are missing (a fresh sync, or no direct connection
+            // to validators), we still should be able to sync just based on peers.
+            if (heights.length == 0) {
+                heights = channelMgr.getActiveChannels().stream()
                         .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber() + 1)
                         .sorted()
-                        .limit((int) Math.floor(activePeers.size() * 2.0 / 3.0))
-                        .max();
-                if (activePeersTarget.isPresent() && activePeersTarget.getAsLong() > height) {
-                    sync(activePeersTarget.getAsLong());
+                        .toArray();
+            }
+
+            // Needs at least one connected node to start syncing
+            if (heights.length != 0) {
+                int q = (int) Math.ceil(heights.length * 2.0 / 3.0);
+                long h = heights[heights.length - q];
+                if (h > height) {
+                    sync(h);
                 }
             }
         }
