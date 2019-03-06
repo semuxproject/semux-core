@@ -502,7 +502,7 @@ public class SemuxBft implements BftManager {
         logger.trace("On new_view: {}", p);
 
         if (p.getHeight() == height // at same height
-                && p.getView() == view + 1 && state != State.COMMIT && state != State.FINALIZE) {// larger view
+                && p.getView() > view && state != State.COMMIT && state != State.FINALIZE) {// larger view
 
             // check proof-of-unlock
             VoteSet vs = new VoteSet(VoteType.PRECOMMIT, p.getHeight(), p.getView() - 1, validators);
@@ -522,7 +522,7 @@ public class SemuxBft implements BftManager {
 
         if (p.getHeight() == height // at the same height
                 && (p.getView() == view && proposal == null && (state == State.NEW_HEIGHT || state == State.PROPOSE) // expecting
-                        || p.getView() == view + 1 && state != State.COMMIT && state != State.FINALIZE) // larger view
+                        || p.getView() > view && state != State.COMMIT && state != State.FINALIZE) // larger view
                 && isPrimary(p.getHeight(), p.getView(), Hex.encode(p.getSignature().getAddress()))) {
 
             // check proof-of-unlock
