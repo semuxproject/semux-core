@@ -565,7 +565,7 @@ public class SemuxSync implements SyncManager {
         // [3] evaluate transactions
         TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
         List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot,
-                new SemuxBlock(block.getHeader(), config.vmMaxBlockGasLimit()));
+                new SemuxBlock(block.getHeader(), config.vmMaxBlockGasLimit()), chain);
         if (!Block.validateResults(header, results)) {
             logger.error("Invalid transactions");
             return false;

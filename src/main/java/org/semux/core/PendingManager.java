@@ -342,7 +342,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
             TransactionResult result = new TransactionExecutor(kernel.getConfig(), blockStore).execute(tx,
-                    as, ds, null);
+                    as, ds, null, kernel.getBlockchain());
 
             if (result.getCode().isAccepted()) {
                 // commit state updates

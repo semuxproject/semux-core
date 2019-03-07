@@ -88,14 +88,14 @@ public class VmTest {
         assertTrue(tx.validate(network));
 
         // insufficient available
-        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh, null);
         assertFalse(result.getCode().isSuccess());
 
         Amount available = SEM.of(1000);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
-        result = exec.execute(tx, as.track(), ds.track(), bh);
+        result = exec.execute(tx, as.track(), ds.track(), bh, null);
         assertTrue(result.getCode().isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getAvailable());
@@ -138,14 +138,14 @@ public class VmTest {
         assertTrue(tx.validate(network));
 
         // insufficient available
-        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh, null);
         assertFalse(result.getCode().isSuccess());
 
         Amount available = SEM.of(1000);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
-        result = exec.execute(tx, as.track(), ds.track(), bh);
+        result = exec.execute(tx, as.track(), ds.track(), bh, null);
         assertTrue(result.getCode().isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getAvailable());
@@ -162,7 +162,7 @@ public class VmTest {
 
     private TransactionResult executeAndCommit(TransactionExecutor exec, Transaction tx, AccountState as,
             DelegateState ds, SemuxBlock bh) {
-        TransactionResult res = exec.execute(tx, as, ds, bh);
+        TransactionResult res = exec.execute(tx, as, ds, bh, null);
         as.commit();
         ds.commit();
 

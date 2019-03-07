@@ -813,7 +813,7 @@ public class SemuxBft implements BftManager {
 
                 if (tx.transaction.getGasPrice() >= config.vmMinGasPrice()
                         && pendingGasForBlock < config.vmBlockGasLimit()) {
-                    TransactionResult result = exec.execute(tx.transaction, as, ds, semuxBlock);
+                    TransactionResult result = exec.execute(tx.transaction, as, ds, semuxBlock, chain);
                     gasUsed += result.getGasUsed();
 
                     if (result.getCode().isAccepted() && gasUsed < config.vmBlockGasLimit()) {
@@ -903,7 +903,7 @@ public class SemuxBft implements BftManager {
         // against our own local limit, only
         // when proposing
         List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(header, Long.MAX_VALUE));
+                new SemuxBlock(header, Long.MAX_VALUE), chain);
         if (!Block.validateResults(header, results)) {
             logger.warn("Invalid transactions");
             return false;
@@ -969,7 +969,7 @@ public class SemuxBft implements BftManager {
 
         // [3] evaluate all transactions
         List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(block.getHeader(), Long.MAX_VALUE));
+                new SemuxBlock(block.getHeader(), Long.MAX_VALUE), chain);
         if (!Block.validateResults(header, results)) {
             logger.debug("Invalid transactions");
             return;
