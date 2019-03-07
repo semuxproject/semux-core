@@ -16,8 +16,12 @@ public class TestnetConfig extends AbstractConfig {
 
     public TestnetConfig(String dataDir) {
         super(dataDir, Network.TESTNET, Constants.TESTNET_VERSION);
+
         // testnet allows a much larger block size for performance tuning (10MB)
-        maxBlockTransactionsSize = 10 * 1024 * 1024;
+        this.maxBlockTransactionsSize = 10 * 1024 * 1024;
+
+        this.forkUniformDistributionEnabled = true;
+        this.forkVirtualMachineEnabled = true;
     }
 
     @Override
