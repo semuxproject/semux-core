@@ -35,13 +35,17 @@ public class SemuxBftOnNewHeightTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
+
+        // [ newHeight, height, activeValidators, target ]
         return Arrays.asList(new Object[][] {
                 // 0 validator
-                { 10L, 0L, Collections.emptyList(), null },
+                { 10L, 1L, Collections.emptyList(), null },
                 // 1 validator
-                { 10L, 0L, Collections.singletonList(mockValidator(10L)), null },
+                { 10L, 1L, Collections.singletonList(mockValidator(0L)), null },
+                // 1 validator
+                { 10L, 1L, Collections.singletonList(mockValidator(10L)), 11L },
                 // 2 validators
-                { 100L, 0L, Arrays.asList(
+                { 100L, 1L, Arrays.asList(
                         mockValidator(100L),
                         mockValidator(100L)), 101L },
                 { 100L, 99L, Arrays.asList(
@@ -56,31 +60,31 @@ public class SemuxBftOnNewHeightTest {
                         mockValidator(10L),
                         mockValidator(100L)), null },
                 // 3 validators
-                { 1000L, 0L, Arrays.asList(
+                { 1000L, 1L, Arrays.asList(
                         mockValidator(10L),
                         mockValidator(100L),
                         mockValidator(1000L)), 101L },
                 // 4 validators
-                { 10000L, 0L, Arrays.asList(
+                { 10000L, 1L, Arrays.asList(
                         mockValidator(10L),
                         mockValidator(100L),
                         mockValidator(1000L),
                         mockValidator(10000L)), 101L },
                 // 5 validators
-                { 1000000L, 0L, Arrays.asList(
+                { 1000000L, 1L, Arrays.asList(
                         mockValidator(10L),
                         mockValidator(100L),
                         mockValidator(1000L),
                         mockValidator(10000L),
-                        mockValidator(100000L)), 1001L },
+                        mockValidator(100000L)), 101L },
                 // Malicious validator with large height
-                { Long.MAX_VALUE, 0L, Arrays.asList(
+                { Long.MAX_VALUE, 1L, Arrays.asList(
                         mockValidator(10L),
                         mockValidator(Long.MAX_VALUE - 1),
                         mockValidator(100L)), 101L },
                 // 100 validators with height from 1 ~ 100
-                { 100L, 0L, LongStream.range(1L, 100L).mapToObj(SemuxBftOnNewHeightTest::mockValidator)
-                        .collect(Collectors.toList()), 67L }
+                { 100L, 1L, LongStream.range(1L, 100L).mapToObj(SemuxBftOnNewHeightTest::mockValidator)
+                        .collect(Collectors.toList()), 35L }
         });
     }
 

@@ -592,7 +592,7 @@ public class SemuxSync implements SyncManager {
         }
         Set<String> validators = new HashSet<>(validatorList);
 
-        int twoThirds = (int) Math.round(validators.size() * 2.0 / 3.0);
+        int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
 
         Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
                 block.getHash());

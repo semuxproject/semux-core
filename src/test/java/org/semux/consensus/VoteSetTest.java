@@ -13,6 +13,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +42,28 @@ public class VoteSetTest {
         list.add(v4.toAddressString());
 
         vs = new VoteSet(VoteType.VALIDATE, height, view, list);
+    }
+
+    @Test
+    public void testProofOfUnlock() {
+        Key[] keys = new Key[] {
+                new Key(),
+                new Key(),
+                new Key(),
+        };
+        List<String> validators = Stream.of(keys).map(k -> k.toAddressString()).collect(Collectors.toList());
+
+        VoteSet s = new VoteSet(VoteType.PRECOMMIT, 100, 3, validators);
+        s.addVote(Vote.newReject(VoteType.PRECOMMIT, 100, 3).sign(keys[0]));
+        s.addVote(Vote.newReject(VoteType.PRECOMMIT, 100, 3).sign(keys[1]));
+        s.addVote(Vote.newApprove(VoteType.PRECOMMIT, 100, 3, Bytes.random(32)).sign(keys[2]));
+        assertTrue(s.isRejected());
+
+        s.clear();
+        s.addVote(Vote.newReject(VoteType.PRECOMMIT, 100, 1).sign(keys[0]));
+        s.addVote(Vote.newReject(VoteType.PRECOMMIT, 100, 1).sign(keys[1]));
+        s.addVote(Vote.newApprove(VoteType.PRECOMMIT, 100, 1, Bytes.random(32)).sign(keys[2]));
+        assertFalse(s.isRejected());
     }
 
     @Test
