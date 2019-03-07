@@ -226,11 +226,6 @@ public class TransactionExecutor {
 
                 if (tx.getGas() > config.vmMaxBlockGasLimit()) {
                     result.setCode(Code.INVALID_GAS);
-                } else if (block == null) {
-                    // workaround for pending manager so it doesn't execute these
-                    // we charge gas later
-                    as.increaseNonce(from);
-                    result.setCode(Code.SUCCESS);
                 } else {
                     executeVmTransaction(result, tx, as, block, gasUsedInBlock);
                     if (result.getCode().isAccepted()) {
