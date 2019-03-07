@@ -48,11 +48,11 @@ public class MainnetConfigTest {
     @Test
     public void testBlockReward() {
         Amount total = LongStream
-                .rangeClosed(1, 100_000_000)
+                .rangeClosed(1, 20_000_000)
                 .mapToObj(config::getBlockReward)
                 .reduce(ZERO, Amount::sum);
 
-        assertEquals(SEM.of(75_000_000), total);
+        assertEquals(SEM.of(22_000_000), total);
     }
 
     @Test
