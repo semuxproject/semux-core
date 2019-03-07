@@ -174,10 +174,6 @@ public class SemuxCli extends Launcher {
             if (!wallet.isPosixPermissionSecured()) {
                 logger.warn(CliMessages.get("WarningWalletPosixPermission"));
             }
-
-            if (!FileUtil.isPosixPermissionSecured(getConfig().getFile())) {
-                logger.warn(CliMessages.get("WarningConfigPosixPermission"));
-            }
         }
 
         // check time drift

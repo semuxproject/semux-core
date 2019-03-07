@@ -259,14 +259,6 @@ public class SemuxGui extends Launcher {
                         GuiMessages.get("WarningDialogTitle"),
                         JOptionPane.WARNING_MESSAGE);
             }
-
-            if (getConfig().getFile().exists() && !FileUtil.isPosixPermissionSecured(getConfig().getFile())) {
-                JOptionPane.showMessageDialog(
-                        null,
-                        GuiMessages.get("WarningConfigPosixPermission"),
-                        GuiMessages.get("WarningDialogTitle"),
-                        JOptionPane.WARNING_MESSAGE);
-            }
         }
     }
 
