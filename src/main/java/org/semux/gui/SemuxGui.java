@@ -71,6 +71,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class SemuxGui extends Launcher {
 
+    public static final boolean HD_WALLET_ENABLED = false;
+
     private static final Logger logger = LoggerFactory.getLogger(SemuxGui.class);
 
     private static final PubSub pubSub = PubSubFactory.getDefault();
@@ -197,8 +199,11 @@ public class SemuxGui extends Launcher {
             unlockWallet(wallet);
         }
 
-        if (!wallet.isHdWalletInitialized()) {
-            initializeHdWallet(wallet);
+        // in case HD wallet is enabled, make sure the seed is properly initialized.
+        if (HD_WALLET_ENABLED) {
+            if (!wallet.isHdWalletInitialized()) {
+                initializedHdSeed(wallet);
+            }
         }
 
         // setup splash screen
@@ -223,8 +228,10 @@ public class SemuxGui extends Launcher {
         }
     }
 
-    private void initializeHdWallet(Wallet wallet) {
-
+    /**
+     * Shows the CreateHdWalletDialog.
+     */
+    protected void initializedHdSeed(Wallet wallet) {
         CreateHdWalletDialog dialog = new CreateHdWalletDialog(wallet, main);
         dialog.setVisible(true);
         dialog.dispose();
@@ -308,7 +315,11 @@ public class SemuxGui extends Launcher {
 
         // create an account is empty
         if (wallet.size() == 0) {
-            wallet.addAccount();
+            if (HD_WALLET_ENABLED) {
+                wallet.addAccountWithNextHdKey();
+            } else {
+                wallet.addAccountRandom();
+            }
             wallet.flush();
         }
 

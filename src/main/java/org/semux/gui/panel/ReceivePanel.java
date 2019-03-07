@@ -316,15 +316,17 @@ public class ReceivePanel extends JPanel implements ActionListener {
      */
     protected void newAccount() {
         Wallet wallet = kernel.getWallet();
-        Key key = wallet.addAccount();
-        boolean added = wallet.flush();
 
-        if (added) {
+        if (SemuxGui.HD_WALLET_ENABLED) {
+            wallet.addAccountWithNextHdKey();
+        } else {
+            wallet.addAccountRandom();
+        }
+
+        if (wallet.flush()) {
             gui.updateModel();
-
             JOptionPane.showMessageDialog(this, GuiMessages.get("NewAccountCreated"));
         } else {
-            wallet.removeAccount(key);
             JOptionPane.showMessageDialog(this, GuiMessages.get("WalletSaveFailed"));
         }
     }
