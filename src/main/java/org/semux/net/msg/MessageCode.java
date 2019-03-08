@@ -91,6 +91,16 @@ public enum MessageCode {
      */
     BLOCK_HEADER(0x33),
 
+    /**
+     * [0x34] Request parts of a block from the peer.
+     */
+    GET_BLOCK_PARTS(0x34),
+
+    /**
+     * [0x35] Response containing the block parts.
+     */
+    BLOCK_PARTS(0x35),
+
     // =======================================
     // [0x40, 0x4f] Reserved for BFT
     // =======================================
