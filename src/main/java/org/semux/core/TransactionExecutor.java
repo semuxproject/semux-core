@@ -89,7 +89,7 @@ public class TransactionExecutor {
      * @return
      */
     public List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds,
-            SemuxBlock block) {
+            SemuxBlock block, Blockchain chain) {
         List<TransactionResult> results = new ArrayList<>();
 
         long gasUsedInBlock = 0;
@@ -205,6 +205,13 @@ public class TransactionExecutor {
 
             case CALL:
             case CREATE:
+                // Note: the second parameter should be height = block number + 1; here we're
+                // checking if the fork is enabled at the end of last block.
+                if (!chain.isForkActivated(Fork.VIRTUAL_MACHINE, block.getNumber())) {
+                    result.setCode(Code.INVALID_TYPE);
+                    break;
+                }
+
                 long maxGasFee = tx.getGas() * tx.getGasPrice();
 
                 Amount maxCost = sum(sum(value, fee), Unit.NANO_SEM.of(maxGasFee));
@@ -219,11 +226,6 @@ public class TransactionExecutor {
 
                 if (tx.getGas() > config.vmMaxBlockGasLimit()) {
                     result.setCode(Code.INVALID_GAS);
-                } else if (block == null) {
-                    // workaround for pending manager so it doesn't execute these
-                    // we charge gas later
-                    as.increaseNonce(from);
-                    result.setCode(Code.SUCCESS);
                 } else {
                     executeVmTransaction(result, tx, as, block, gasUsedInBlock);
                     if (result.getCode().isAccepted()) {
@@ -282,9 +284,12 @@ public class TransactionExecutor {
      *            account state
      * @param ds
      *            delegate state
+     * @param chain
+     *            the blockchain instance
      * @return
      */
-    public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds, SemuxBlock block) {
-        return execute(Collections.singletonList(tx), as, ds, block).get(0);
+    public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds, SemuxBlock block,
+            Blockchain chain) {
+        return execute(Collections.singletonList(tx), as, ds, block, chain).get(0);
     }
 }

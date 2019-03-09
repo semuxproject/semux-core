@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
  */
 public class SemuxCli extends Launcher {
 
+    public static final boolean HD_WALLET_ENABLED = false;
+
     private static final Logger logger = LoggerFactory.getLogger(SemuxCli.class);
 
     public static void main(String[] args) {
@@ -154,20 +156,23 @@ public class SemuxCli extends Launcher {
     }
 
     protected void start() throws IOException {
-        // load wallet file
+        // create/unlock wallet
         Wallet wallet = loadWallet().exists() ? loadAndUnlockWallet() : createNewWallet();
         if (wallet == null) {
             return;
+        }
+
+        // in case HD wallet is enabled, make sure the seed is properly initialized.
+        if (HD_WALLET_ENABLED) {
+            if (!wallet.isHdWalletInitialized()) {
+                initializedHdSeed(wallet);
+            }
         }
 
         // check file permissions
         if (SystemUtil.isPosix()) {
             if (!wallet.isPosixPermissionSecured()) {
                 logger.warn(CliMessages.get("WarningWalletPosixPermission"));
-            }
-
-            if (!FileUtil.isPosixPermissionSecured(getConfig().getFile())) {
-                logger.warn(CliMessages.get("WarningConfigPosixPermission"));
             }
         }
 
@@ -180,8 +185,14 @@ public class SemuxCli extends Launcher {
         // create a new account if the wallet is empty
         List<Key> accounts = wallet.getAccounts();
         if (accounts.isEmpty()) {
-            Key key = wallet.addAccount();
+            Key key;
+            if (HD_WALLET_ENABLED) {
+                key = wallet.addAccountWithNextHdKey();
+            } else {
+                key = wallet.addAccountRandom();
+            }
             wallet.flush();
+
             accounts = wallet.getAccounts();
             logger.info(CliMessages.get("NewAccountCreatedForAddress", key.toAddressString()));
         }
@@ -216,7 +227,12 @@ public class SemuxCli extends Launcher {
     protected void createAccount() {
         Wallet wallet = loadAndUnlockWallet();
 
-        Key key = wallet.addAccount();
+        Key key;
+        if (HD_WALLET_ENABLED) {
+            key = wallet.addAccountWithNextHdKey();
+        } else {
+            key = wallet.addAccountRandom();
+        }
 
         if (wallet.flush()) {
             logger.info(CliMessages.get("NewAccountCreatedForAddress", key.toAddressString()));
@@ -339,7 +355,6 @@ public class SemuxCli extends Launcher {
             logger.error("Invalid password");
             SystemUtil.exit(SystemUtil.Code.FAILED_TO_UNLOCK_WALLET);
         }
-        checkWalletHdInitialized(wallet);
 
         return wallet;
     }
@@ -364,27 +379,30 @@ public class SemuxCli extends Launcher {
             return null;
         }
 
-        checkWalletHdInitialized(wallet);
-
         return wallet;
-    }
-
-    private void checkWalletHdInitialized(Wallet wallet) {
-        if (wallet.isUnlocked() && !wallet.isHdWalletInitialized()) {
-            MnemonicGenerator generator = new MnemonicGenerator();
-            String phrase = generator.getWordlist(128, Language.english);
-            // don't display passphrase in logger, don't want it in log files
-            System.out.println(CliMessages.get("HdWalletInstructions"));
-            System.out.println(phrase);
-            String passCode = readNewPassword("EnterNewHdPassword", "ReEnterNewHdPassword");
-            byte[] seed = generator.getSeedFromWordlist(phrase, passCode, Language.english);
-            wallet.setHdSeed(seed);
-            wallet.flush();
-        }
     }
 
     protected Wallet loadWallet() {
         return new Wallet(new File(getDataDir(), "wallet.data"), getConfig().network());
     }
 
+    protected void initializedHdSeed(Wallet wallet) {
+        if (wallet.isUnlocked() && !wallet.isHdWalletInitialized()) {
+            // HD Mnemonic
+            MnemonicGenerator generator = new MnemonicGenerator();
+            String phrase = generator.getWordlist(128, Language.english);
+            System.out.println(CliMessages.get("HdWalletInstructions"));
+            System.out.println(phrase);
+
+            // HD Password
+            String passCode = readNewPassword("EnterNewHdPassword", "ReEnterNewHdPassword");
+
+            // HD seed based on the mnemonics and password
+            byte[] seed = generator.getSeedFromWordlist(phrase, passCode, Language.english);
+
+            wallet.setHdSeed(seed);
+            wallet.scanForHdKeys(null);
+            wallet.flush();
+        }
+    }
 }

@@ -27,6 +27,11 @@ import org.semux.vm.client.SemuxBlockStore;
 
 import static org.ethereum.vm.util.BytecodeCompiler.compile;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Amount.ZERO;
@@ -46,11 +51,13 @@ public class VmTest {
     @Before
     public void prepare() {
         config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
-        chain = new BlockchainImpl(config, temporaryDBFactory);
+        chain = spy(new BlockchainImpl(config, temporaryDBFactory));
         as = chain.getAccountState();
         ds = chain.getDelegateState();
         exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
         network = config.network();
+
+        doReturn(true).when(chain).isForkActivated(any(), anyLong());
     }
 
     /**
@@ -88,14 +95,14 @@ public class VmTest {
         assertTrue(tx.validate(network));
 
         // insufficient available
-        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh, chain);
         assertFalse(result.getCode().isSuccess());
 
         Amount available = SEM.of(1000);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
-        result = exec.execute(tx, as.track(), ds.track(), bh);
+        result = exec.execute(tx, as.track(), ds.track(), bh, chain);
         assertTrue(result.getCode().isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getAvailable());
@@ -138,14 +145,14 @@ public class VmTest {
         assertTrue(tx.validate(network));
 
         // insufficient available
-        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh, chain);
         assertFalse(result.getCode().isSuccess());
 
         Amount available = SEM.of(1000);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
-        result = exec.execute(tx, as.track(), ds.track(), bh);
+        result = exec.execute(tx, as.track(), ds.track(), bh, chain);
         assertTrue(result.getCode().isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getAvailable());
@@ -162,7 +169,7 @@ public class VmTest {
 
     private TransactionResult executeAndCommit(TransactionExecutor exec, Transaction tx, AccountState as,
             DelegateState ds, SemuxBlock bh) {
-        TransactionResult res = exec.execute(tx, as, ds, bh);
+        TransactionResult res = exec.execute(tx, as, ds, bh, chain);
         as.commit();
         ds.commit();
 

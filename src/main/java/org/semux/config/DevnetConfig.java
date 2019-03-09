@@ -18,7 +18,11 @@ public class DevnetConfig extends AbstractConfig {
 
     public DevnetConfig(String dataDir) {
         super(dataDir, Network.DEVNET, Constants.DEVNET_VERSION);
+
         this.netMaxInboundConnectionsPerIp = Integer.MAX_VALUE;
+
+        this.forkUniformDistributionEnabled = true;
+        this.forkVirtualMachineEnabled = true;
     }
 
     private static final Map<Fork, Long> forkActivationCheckpoints;

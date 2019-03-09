@@ -422,49 +422,15 @@ public class Wallet {
     }
 
     /**
-     * Adds a new account to the wallet.
+     * Add an account with randomly generated key.
      *
-     * NOTE: you need to call {@link #flush()} to update the wallet on disk.
-     *
-     * @return the new account
+     * @return the generated key
      * @throws WalletLockedException
-     *
      */
-    public Key addAccount() {
-        requireUnlocked();
-        if (!isHdWalletInitialized()) {
-            throw new IllegalArgumentException("Cannot add accounts until HD seed is configured");
-        }
-
-        synchronized (accounts) {
-            HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, Network.mainnet, CoinType.semux);
-            HdAddress address = BIP_44.getAddress(rootAddress, nextHdAccountIndex++);
-            Key newKey = Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey());
-            ByteArray to = ByteArray.of(newKey.toAddress());
-            accounts.put(to, newKey);
-            // set a default alias
-            if (!aliases.containsKey(to)) {
-                setAddressAlias(newKey.toAddress(), getAliasFromPath(address.getPath()));
-            }
-
-            return newKey;
-        }
-    }
-
-    /**
-     * the full BIP-44 derivation path is confusing to new users
-     *
-     * So, we adapt this name to be simpler, and mostly concentrate on the index of
-     * the address.
-     *
-     * This method converts from a derivation path to a simplified form for default
-     * wallet alias
-     * 
-     * @param path
-     * @return
-     */
-    private String getAliasFromPath(String path) {
-        return path.replace(PATH_PREFIX, GuiMessages.get("HdWalletAliasPrefix"));
+    public Key addAccountRandom() throws WalletLockedException {
+        Key key = new Key();
+        addAccount(key);
+        return key;
     }
 
     /**
@@ -645,12 +611,6 @@ public class Wallet {
         return new HashMap<>(aliases);
     }
 
-    private void requireUnlocked() throws WalletLockedException {
-        if (!isUnlocked()) {
-            throw new WalletLockedException();
-        }
-    }
-
     /**
      * Adds the addresses and aliases from another wallet
      *
@@ -677,26 +637,88 @@ public class Wallet {
         return numImportedAddresses;
     }
 
+    /**
+     * Returns the targeted network.
+     *
+     * @return
+     */
     public org.semux.Network getNetwork() {
         return network;
     }
 
+    private void requireUnlocked() throws WalletLockedException {
+        if (!isUnlocked()) {
+            throw new WalletLockedException();
+        }
+    }
+
+    // ================
+    // HD wallet
+    // ================
+
+    /**
+     * Returns whether the HD seed is initialized.
+     *
+     * @return true if set, otherwise false
+     */
+    public boolean isHdWalletInitialized() {
+        requireUnlocked();
+        return hdSeed != null && hdSeed.length > 0;
+    }
+
+    /**
+     * Sets the HD seed
+     * 
+     * @param seed
+     *            the seed byte array
+     */
     public void setHdSeed(byte[] seed) {
         this.hdSeed = seed;
         this.nextHdAccountIndex = 0;
     }
 
     /**
-     * Scan for HD keys used accounts, and add them to the account. todo - this can
-     * probably be moved out of here, not sure where it best fits.
+     * Derives a key based on the current HD account index, and put it into the
+     * wallet.
+     *
+     * @return the derived key
+     */
+    public Key addAccountWithNextHdKey() {
+        requireUnlocked();
+        requireHdWalletInitialized();
+
+        synchronized (accounts) {
+            HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, Network.mainnet, CoinType.semux);
+            HdAddress address = BIP_44.getAddress(rootAddress, nextHdAccountIndex++);
+            Key newKey = Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey());
+            ByteArray to = ByteArray.of(newKey.toAddress());
+
+            // put the accounts into
+            accounts.put(to, newKey);
+
+            // set a default alias
+            if (!aliases.containsKey(to)) {
+                setAddressAlias(newKey.toAddress(), getAliasFromPath(address.getPath()));
+            }
+
+            return newKey;
+        }
+    }
+
+    /**
+     * Scan for HD keys used accounts, and add them to the account.
+     *
+     * @return the number of accounts found
      */
     public int scanForHdKeys(AccountState accountState) {
         requireUnlocked();
+        requireHdWalletInitialized();
+
         int found = 0;
 
         // make sure to add at least the default account
         if (nextHdAccountIndex == 0) {
-            addAccount();
+            addAccountWithNextHdKey();
             found++;
         }
 
@@ -733,6 +755,22 @@ public class Wallet {
         return found;
     }
 
+    /**
+     * the full BIP-44 derivation path is confusing to new users
+     *
+     * So, we adapt this name to be simpler, and mostly concentrate on the index of
+     * the address.
+     *
+     * This method converts from a derivation path to a simplified form for default
+     * wallet alias
+     *
+     * @param path
+     * @return
+     */
+    private String getAliasFromPath(String path) {
+        return path.replace(PATH_PREFIX, GuiMessages.get("HdWalletAliasPrefix"));
+    }
+
     private boolean isUsedAccount(AccountState accountState, byte[] bytes) {
         if (accountState == null) {
             return false;
@@ -741,8 +779,9 @@ public class Wallet {
         return account.getNonce() > 0 || account.getAvailable().gt0();
     }
 
-    public boolean isHdWalletInitialized() {
-        requireUnlocked();
-        return hdSeed != null && hdSeed.length > 0;
+    private void requireHdWalletInitialized() throws WalletLockedException {
+        if (!isHdWalletInitialized()) {
+            throw new IllegalArgumentException("HD Seed is not initialized");
+        }
     }
 }

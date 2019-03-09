@@ -73,8 +73,8 @@ public abstract class AbstractConfig implements Config {
     protected int netMaxInboundConnectionsPerIp = 5;
     protected int netMaxMessageQueueSize = 4096;
     protected int netMaxFrameBodySize = 128 * 1024;
-    protected int netMaxPacketSize = 8 * 1024 * 1024;
-    protected int netRelayRedundancy = 16;
+    protected int netMaxPacketSize = 16 * 1024 * 1024;
+    protected int netRelayRedundancy = 8;
     protected int netHandshakeExpiry = 5 * 60 * 1000;
     protected int netChannelIdleTimeout = 2 * 60 * 1000;
     protected Set<MessageCode> netPrioritizedMessages = new HashSet<>(Arrays.asList(
@@ -133,8 +133,8 @@ public abstract class AbstractConfig implements Config {
     // =========================
     // Forks
     // =========================
-    protected boolean forkUniformDistributionEnabled = true;
-    protected boolean forkVirtualMachineEnabled = true;
+    protected boolean forkUniformDistributionEnabled = false;
+    protected boolean forkVirtualMachineEnabled = false;
 
     /**
      * Create an {@link AbstractConfig} instance.

@@ -22,12 +22,14 @@ import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
+import org.semux.crypto.Key;
 import org.semux.net.Channel;
 import org.semux.net.msg.p2p.TransactionMessage;
 import org.semux.util.ArrayUtil;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -338,11 +340,20 @@ public class PendingManager implements Runnable, BlockchainListener {
         // delayed for the next event loop of PendingManager.
         while (tx != null && tx.getNonce() == getNonce(tx.getFrom())) {
 
+            // create a dummy block (Note: VM transaction results may depends on the block)
+            Blockchain chain = kernel.getBlockchain();
+            Block prevBlock = chain.getLatestBlock();
+            BlockHeader blockHeader = new BlockHeader(
+                    prevBlock.getNumber() + 1,
+                    new Key().toAddress(), prevBlock.getHash(), System.currentTimeMillis(), new byte[0],
+                    new byte[0], new byte[0], new byte[0]);
+            SemuxBlock block = new SemuxBlock(blockHeader, kernel.getConfig().vmBlockGasLimit());
+
             // execute transactions
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
             TransactionResult result = new TransactionExecutor(kernel.getConfig(), blockStore).execute(tx,
-                    as, ds, null);
+                    as, ds, block, chain);
 
             if (result.getCode().isAccepted()) {
                 // commit state updates
