@@ -21,6 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.validator.routines.DomainValidator;
@@ -297,8 +298,7 @@ public final class SemuxApiImpl implements SemuxApi {
         }
 
         resp.setResult(kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream()
-                .map(tx -> TypeFactory.transactionType(
-                        kernel.getBlockchain().getTransactionBlockNumber(tx.getHash()), tx))
+                .map(tx -> TypeFactory.transactionType(tx))
                 .collect(Collectors.toList()));
 
         return success(resp);
@@ -349,7 +349,7 @@ public final class SemuxApiImpl implements SemuxApi {
                 .filter(tx -> Arrays.equals(tx.getFrom(), addressBytes) || Arrays.equals(tx.getTo(), addressBytes))
                 .skip(fromInt)
                 .limit(toInt - fromInt)
-                .map(TypeFactory::pendingTransactionType)
+                .map(TypeFactory::transactionType)
                 .collect(Collectors.toList()));
 
         return success(resp);
@@ -508,7 +508,7 @@ public final class SemuxApiImpl implements SemuxApi {
         GetPendingTransactionsResponse resp = new GetPendingTransactionsResponse();
         resp.result(kernel.getPendingManager().getPendingTransactions().parallelStream()
                 .map(pendingTransaction -> pendingTransaction.transaction)
-                .map(TypeFactory::pendingTransactionType)
+                .map(TypeFactory::transactionType)
                 .collect(Collectors.toList()));
 
         return success(resp);
@@ -534,11 +534,7 @@ public final class SemuxApiImpl implements SemuxApi {
             return badRequest(resp, "The request transaction was not found");
         }
 
-        TransactionResult result = kernel.getBlockchain().getTransactionResult(hashBytes);
-
-        resp.setResult(TypeFactory.fullTransactionType(
-                kernel.getBlockchain().getTransactionBlockNumber(transaction.getHash()),
-                transaction, result));
+        resp.setResult(TypeFactory.transactionType(transaction));
 
         return success(resp);
     }
@@ -556,6 +552,13 @@ public final class SemuxApiImpl implements SemuxApi {
                             .map(TransactionType::toString)
                             .collect(Collectors.joining(","))));
         }
+    }
+
+    @Override
+    public Response getTransactionReceipt(
+            @NotNull @javax.validation.constraints.Pattern(regexp = "^(0x)?[0-9a-fA-F]{64}$") String hash) {
+        // TODO: implement get transaction receipt
+        return null;
     }
 
     @Override
