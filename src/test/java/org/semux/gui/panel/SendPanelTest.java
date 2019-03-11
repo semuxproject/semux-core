@@ -38,7 +38,7 @@ import org.semux.gui.WalletModelRule;
 import org.semux.message.GuiMessages;
 import org.semux.rules.KernelRule;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class SendPanelTest extends AssertJSwingJUnitTestCase {
 
     @Rule

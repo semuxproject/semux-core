@@ -32,7 +32,7 @@ import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class HomePanelTest extends AssertJSwingJUnitTestCase {
 
     @Rule
