@@ -29,6 +29,38 @@ import static org.semux.core.Amount.sum;
  * Represents a block in the blockchain.
  */
 public class Block {
+
+    public enum BlockPart {
+        HEADER(1 << 0), TRANSACTIONS(1 << 1), RECEIPTS(1 << 2), VOTES(1 << 3);
+
+        private int code;
+
+        BlockPart(int code) {
+            this.code = code;
+        }
+
+        public static int parts(BlockPart... parts) {
+            int result = 0;
+            for (BlockPart part : parts) {
+                result |= part.code;
+            }
+            return result;
+        }
+
+        public List<BlockPart> parts(int parts) {
+            List<BlockPart> result = new ArrayList<>();
+            // NOTE: values() returns an array containing all of the values of the enum type
+            // in the order they are declared.
+            for (BlockPart bp : BlockPart.values()) {
+                if ((parts & bp.code) != 0) {
+                    result.add(bp);
+                }
+            }
+
+            return result;
+        }
+    }
+
     static final Logger logger = LoggerFactory.getLogger(Block.class);
 
     /**

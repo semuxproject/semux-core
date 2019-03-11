@@ -13,11 +13,6 @@ import org.semux.util.SimpleEncoder;
 
 public class GetBlockPartsMessage extends Message {
 
-    public static final int BLOCK_HEADER = 1 << 0;
-    public static final int BLOCK_TRANSACTIONS = 1 << 1;
-    public static final int BLOCK_RESULTS = 1 << 2;
-    public static final int BLOCK_VOTES = 1 << 3;
-
     private final long number;
     private final int parts;
 
