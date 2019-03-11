@@ -7,28 +7,27 @@
 
 package org.semux.core.bip32.wallet;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.util.Arrays;
+
+import org.bouncycastle.math.ec.ECPoint;
 import org.semux.core.bip32.Network;
 import org.semux.core.bip32.crypto.Hash;
 import org.semux.core.bip32.crypto.HdUtil;
 import org.semux.core.bip32.crypto.HmacSha512;
 import org.semux.core.bip32.crypto.Secp256k1;
 import org.semux.core.bip32.exception.CryptoException;
-import org.semux.core.bip32.wallet.CoinType;
-import org.semux.core.bip32.wallet.HdAddress;
 import org.semux.core.bip32.wallet.key.Curve;
 import org.semux.core.bip32.wallet.key.HdPrivateKey;
 import org.semux.core.bip32.wallet.key.HdPublicKey;
+
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
 import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
 import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
-import org.bouncycastle.math.ec.ECPoint;
-
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.util.Arrays;
 
 public class HdKeyGenerator {
 

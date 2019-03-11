@@ -15,7 +15,7 @@ import static org.mockito.Mockito.withSettings;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.powermock.reflect.Whitebox;
+import org.semux.TestUtils;
 import org.semux.crypto.Hex;
 
 public class BlockHeaderDataTest {
@@ -39,7 +39,7 @@ public class BlockHeaderDataTest {
     public static void beforeClass() {
         for (short i = 1; i <= 8; i++) {
             Fork a = mock(Fork.class);
-            Whitebox.setInternalState(a, "number", i);
+            TestUtils.setInternalState(a, "number", i, Fork.class);
             eightPendingForks[i - 1] = a;
         }
 
@@ -62,24 +62,24 @@ public class BlockHeaderDataTest {
         BlockHeaderData blockHeaderData = BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(onePendingFork));
         assertThat(blockHeaderData.version).isEqualTo((byte) 0x01);
         assertThat(blockHeaderData.toBytes()).isEqualTo(v1_1xPendingForkEncoded).hasSize(5); // writeByte(1) +
-                                                                                             // writeSize(1) +
-                                                                                             // writeByte(1) +
-                                                                                             // writeShort(2)
+        // writeSize(1) +
+        // writeByte(1) +
+        // writeShort(2)
 
         // zero pending fork
         blockHeaderData = BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet());
         assertThat(blockHeaderData.version).isEqualTo((byte) 0x01);
         assertThat(blockHeaderData.toBytes()).isEqualTo(v1_0xPendingForkEncoded).hasSize(3); // writeByte(1) +
-                                                                                             // writeSize(1) +
-                                                                                             // writeByte(1)
+        // writeSize(1) +
+        // writeByte(1)
 
         // eight pending forks
         blockHeaderData = BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(eightPendingForks));
         assertThat(blockHeaderData.version).isEqualTo((byte) 0x01);
         assertThat(blockHeaderData.toBytes()).isEqualTo(v1_8xPendingForksEncoded).hasSize(19); // writeByte(1) +
-                                                                                               // writeSize(1) +
-                                                                                               // writeByte(1) +
-                                                                                               // writeShort(2) * 8
+        // writeSize(1) +
+        // writeByte(1) +
+        // writeShort(2) * 8
     }
 
     @Test
@@ -115,7 +115,7 @@ public class BlockHeaderDataTest {
     public void testUnrecognizedHeaderDataDecoding() {
         BlockHeaderData blockHeaderData = BlockHeaderData.fromBytes(unrecognized_headerDataEncoded);
         assertThat(blockHeaderData.version).isEqualTo((byte) 0xff);
-        assertThat((byte[]) Whitebox.getInternalState(blockHeaderData, "reserved"))
+        assertThat((byte[]) TestUtils.getInternalState(blockHeaderData, "reserved", BlockHeaderData.class))
                 .isEqualTo(unrecognized_reservedDataEncoded);
     }
 }

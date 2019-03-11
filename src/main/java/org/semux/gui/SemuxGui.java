@@ -33,6 +33,7 @@ import org.semux.config.exception.ConfigException;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.Fork;
+import org.semux.core.Genesis;
 import org.semux.core.Transaction;
 import org.semux.core.Wallet;
 import org.semux.core.event.WalletLoadingEvent;
@@ -58,7 +59,6 @@ import org.semux.gui.model.WalletModel.Status;
 import org.semux.message.GuiMessages;
 import org.semux.net.Peer;
 import org.semux.net.filter.exception.IpFilterJsonParseException;
-import org.semux.util.FileUtil;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -354,7 +354,7 @@ public class SemuxGui extends Launcher {
         model.setCoinbase(coinbase);
 
         // set up kernel
-        kernel = new Kernel(config, wallet, coinbase);
+        kernel = new Kernel(config, Genesis.load(config.network()), wallet, coinbase);
         kernel.start();
 
         // initialize the model with latest block

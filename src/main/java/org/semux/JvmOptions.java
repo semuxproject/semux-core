@@ -9,7 +9,6 @@ package org.semux;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.semux.util.SystemUtil;

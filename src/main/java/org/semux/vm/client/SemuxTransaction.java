@@ -6,10 +6,10 @@
  */
 package org.semux.vm.client;
 
+import java.math.BigInteger;
+
 import org.ethereum.vm.client.Transaction;
 import org.semux.core.TransactionType;
-
-import java.math.BigInteger;
 
 /**
  * Facade for Transaction -> Transaction

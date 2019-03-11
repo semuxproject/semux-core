@@ -9,18 +9,17 @@ package org.semux.api;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.netty.channel.ChannelOption;
-import io.netty.channel.FixedRecvByteBufAllocator;
 import org.semux.Kernel;
 import org.semux.api.http.HttpChannelInitializer;
 import org.semux.api.http.HttpHandler;
-import org.semux.net.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;

@@ -29,8 +29,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semux.Network;
-import org.semux.config.Config;
-import org.semux.config.DevnetConfig;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;

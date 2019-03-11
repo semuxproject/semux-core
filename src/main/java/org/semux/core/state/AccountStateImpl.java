@@ -8,7 +8,6 @@ package org.semux.core.state;
 
 import static org.semux.core.Amount.sum;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;

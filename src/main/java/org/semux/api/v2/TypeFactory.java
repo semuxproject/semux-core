@@ -20,12 +20,12 @@ import org.semux.api.v2.model.AccountType;
 import org.semux.api.v2.model.AccountVoteType;
 import org.semux.api.v2.model.BlockType;
 import org.semux.api.v2.model.DelegateType;
-import org.semux.api.v2.model.TransactionType;
 import org.semux.api.v2.model.InfoType;
 import org.semux.api.v2.model.LogInfoType;
 import org.semux.api.v2.model.PeerType;
 import org.semux.api.v2.model.TransactionLimitsType;
 import org.semux.api.v2.model.TransactionResultType;
+import org.semux.api.v2.model.TransactionType;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
@@ -153,6 +153,7 @@ public class TypeFactory {
         return txType;
     }
 
+    @SuppressWarnings("unused")
     private static TransactionResultType transactionResultType(TransactionResult result) {
         return new TransactionResultType()
                 .logs(result.getLogs().stream().map(TypeFactory::logInfoType).collect(Collectors.toList()))

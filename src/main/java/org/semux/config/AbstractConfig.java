@@ -6,6 +6,23 @@
  */
 package org.semux.config;
 
+import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Amount.Unit.MILLI_SEM;
+import static org.semux.core.Amount.Unit.SEM;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import org.semux.Network;
 import org.semux.config.exception.ConfigException;
 import org.semux.core.Amount;
@@ -21,23 +38,6 @@ import org.semux.util.SystemUtil;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import static org.semux.core.Amount.Unit.MILLI_SEM;
-import static org.semux.core.Amount.Unit.SEM;
-import static org.semux.core.Amount.ZERO;
 
 public abstract class AbstractConfig implements Config {
 

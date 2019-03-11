@@ -7,12 +7,11 @@
 
 package org.semux.core.bip32;
 
-import org.semux.core.bip32.Network;
+import java.io.UnsupportedEncodingException;
+
 import org.semux.core.bip32.wallet.CoinType;
 import org.semux.core.bip32.wallet.HdAddress;
 import org.semux.core.bip32.wallet.HdKeyGenerator;
-
-import java.io.UnsupportedEncodingException;
 
 public abstract class BaseVectorTest {
 

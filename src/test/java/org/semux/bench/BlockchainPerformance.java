@@ -102,9 +102,9 @@ public class BlockchainPerformance {
         Genesis gen = Genesis.load(Network.DEVNET);
 
         long t1 = System.nanoTime();
-        Block.validateHeader(gen.getHeader(), block.getHeader());
-        Block.validateTransactions(gen.getHeader(), block.getTransactions(), config.network());
-        Block.validateResults(gen.getHeader(), block.getResults());
+        block.validateHeader(gen.getHeader(), block.getHeader());
+        block.validateTransactions(gen.getHeader(), block.getTransactions(), config.network());
+        block.validateResults(gen.getHeader(), block.getResults());
         // block votes validation skipped
         long t2 = System.nanoTime();
 

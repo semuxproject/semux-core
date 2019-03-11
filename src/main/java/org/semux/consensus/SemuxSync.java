@@ -328,7 +328,7 @@ public class SemuxSync implements SyncManager {
      * hash. Once all hashes are validated, validate (while skipping vote
      * validation) and apply each block to the chain.
      */
-    private void process() {
+    protected void process() {
         if (!isRunning()) {
             return;
         }
@@ -526,7 +526,7 @@ public class SemuxSync implements SyncManager {
 
         // [1] check block header
         Block latest = chain.getLatestBlock();
-        if (!Block.validateHeader(latest.getHeader(), header)) {
+        if (!block.validateHeader(latest.getHeader(), header)) {
             logger.error("Invalid block header");
             return false;
         }
@@ -547,12 +547,12 @@ public class SemuxSync implements SyncManager {
         }
 
         // [2] check transactions and results
-        if (!Block.validateTransactions(header, transactions, config.network())
+        if (!block.validateTransactions(header, transactions, config.network())
                 || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
             logger.error("Invalid block transactions");
             return false;
         }
-        if (!Block.validateResults(header, block.getResults())) {
+        if (!block.validateResults(header, block.getResults())) {
             logger.error("Invalid results");
             return false;
         }
@@ -566,7 +566,7 @@ public class SemuxSync implements SyncManager {
         TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
         List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot,
                 new SemuxBlock(block.getHeader(), config.vmMaxBlockGasLimit()), chain);
-        if (!Block.validateResults(header, results)) {
+        if (!block.validateResults(header, results)) {
             logger.error("Invalid transactions");
             return false;
         }

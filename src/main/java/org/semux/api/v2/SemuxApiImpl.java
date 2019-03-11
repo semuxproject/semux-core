@@ -69,7 +69,6 @@ import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
-import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
@@ -81,12 +80,12 @@ import org.semux.crypto.Key;
 import org.semux.crypto.cache.PublicKeyCache;
 import org.semux.net.NodeManager;
 import org.semux.net.filter.SemuxIpFilter;
-
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.semux.vm.client.SemuxRepository;
 import org.semux.vm.client.SemuxTransaction;
+
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public final class SemuxApiImpl implements SemuxApi {
 

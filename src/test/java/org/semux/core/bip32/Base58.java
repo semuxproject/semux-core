@@ -22,9 +22,9 @@ package org.semux.core.bip32;
  * limitations under the License.
  */
 
-import org.semux.core.bip32.crypto.Hash;
-
 import java.util.Arrays;
+
+import org.semux.core.bip32.crypto.Hash;
 
 public class Base58 {
     public static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();

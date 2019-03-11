@@ -6,6 +6,19 @@
  */
 package org.semux.core;
 
+import static org.ethereum.vm.util.BytecodeCompiler.compile;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Amount.Unit.SEM;
+
 import org.ethereum.vm.util.HashUtil;
 import org.ethereum.vm.util.HexUtil;
 import org.junit.Before;
@@ -24,17 +37,6 @@ import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;
 import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
-
-import static org.ethereum.vm.util.BytecodeCompiler.compile;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-import static org.semux.core.Amount.Unit.NANO_SEM;
-import static org.semux.core.Amount.Unit.SEM;
-import static org.semux.core.Amount.ZERO;
 
 public class VmTest {
 

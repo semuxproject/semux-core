@@ -7,11 +7,11 @@
 
 package org.semux.core.bip32.crypto;
 
+import java.math.BigInteger;
+
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.math.ec.ECPoint;
-
-import java.math.BigInteger;
 
 public class Secp256k1 {
     static final X9ECParameters SECP = CustomNamedCurves.getByName("secp256k1");

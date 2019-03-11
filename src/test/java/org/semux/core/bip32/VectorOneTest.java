@@ -7,13 +7,13 @@
 
 package org.semux.core.bip32;
 
-import org.semux.core.bip32.extern.Hex;
-import org.semux.core.bip32.wallet.HdAddress;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.io.UnsupportedEncodingException;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import org.semux.core.bip32.extern.Hex;
+import org.semux.core.bip32.wallet.HdAddress;
 
 /**
  * Test vector from

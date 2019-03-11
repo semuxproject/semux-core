@@ -6,6 +6,10 @@
  */
 package org.semux.core;
 
+import static org.semux.util.Bytes.EMPTY_ADDRESS;
+
+import java.util.Arrays;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.semux.Network;
@@ -16,10 +20,6 @@ import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
-
-import java.util.Arrays;
-
-import static org.semux.util.Bytes.EMPTY_ADDRESS;
 
 public class Transaction {
 

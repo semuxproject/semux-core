@@ -6,12 +6,12 @@
  */
 package org.semux.core;
 
-import org.ethereum.vm.DataWord;
-import org.ethereum.vm.LogInfo;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bouncycastle.util.encoders.Hex;
+import org.ethereum.vm.DataWord;
+import org.ethereum.vm.LogInfo;
 import org.semux.Network;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;

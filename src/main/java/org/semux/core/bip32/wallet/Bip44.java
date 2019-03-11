@@ -8,9 +8,6 @@
 package org.semux.core.bip32.wallet;
 
 import org.semux.core.bip32.Network;
-import org.semux.core.bip32.wallet.CoinType;
-import org.semux.core.bip32.wallet.HdAddress;
-import org.semux.core.bip32.wallet.HdKeyGenerator;
 
 /**
  * Utility class for BIP-44 paths

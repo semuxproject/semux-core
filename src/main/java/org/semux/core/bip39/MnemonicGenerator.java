@@ -6,14 +6,6 @@
  */
 package org.semux.core.bip39;
 
-import org.semux.core.bip32.crypto.BitUtil;
-import org.semux.core.bip32.crypto.Hash;
-import org.semux.core.bip39.Dictionary;
-import org.semux.core.bip39.Language;
-
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
@@ -21,6 +13,13 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.text.Normalizer;
 import java.util.BitSet;
+
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
+import org.semux.core.bip32.crypto.BitUtil;
+import org.semux.core.bip32.crypto.Hash;
 
 /**
  * Generate and Process Mnemonic codes
@@ -176,6 +175,7 @@ public class MnemonicGenerator {
      * @param length
      * @return
      */
+    @SuppressWarnings("unused")
     private String getBitString(BitSet bitset, int length) {
         StringBuilder ret = new StringBuilder();
         for (int i = 0; i < length; i++) {

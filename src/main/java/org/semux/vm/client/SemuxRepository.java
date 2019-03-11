@@ -6,12 +6,12 @@
  */
 package org.semux.vm.client;
 
+import java.math.BigInteger;
+
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.client.Repository;
 import org.semux.core.Amount;
 import org.semux.core.state.AccountState;
-
-import java.math.BigInteger;
 
 /**
  * Facade class for AccountState -> Repository

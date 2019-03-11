@@ -7,12 +7,12 @@
 
 package org.semux.core.bip32.wallet.key;
 
-import org.semux.core.bip32.crypto.Hash;
-import org.semux.core.bip32.exception.CryptoException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+
+import org.semux.core.bip32.crypto.Hash;
+import org.semux.core.bip32.exception.CryptoException;
 
 /**
  * Marshalling code for HDKeys to base58 representations.

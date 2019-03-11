@@ -6,11 +6,11 @@
  */
 package org.semux.core.bip32.crypto;
 
-import org.semux.core.bip32.exception.CryptoException;
-import org.bouncycastle.crypto.digests.RIPEMD160Digest;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+import org.semux.core.bip32.exception.CryptoException;
 
 /**
  * Basic hash functions

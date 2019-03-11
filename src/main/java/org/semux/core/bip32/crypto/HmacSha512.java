@@ -7,12 +7,13 @@
 
 package org.semux.core.bip32.crypto;
 
-import org.semux.core.bip32.exception.CryptoException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+
+import org.semux.core.bip32.exception.CryptoException;
 
 /**
  * Utility class for Hmac SHA-512
