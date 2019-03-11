@@ -25,7 +25,7 @@ import org.semux.api.v2.model.InfoType;
 import org.semux.api.v2.model.LogInfoType;
 import org.semux.api.v2.model.PeerType;
 import org.semux.api.v2.model.TransactionLimitsType;
-import org.semux.api.v2.model.TransactionResultType;
+import org.semux.api.v2.model.TransactionReceiptType;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
@@ -153,8 +153,8 @@ public class TypeFactory {
         return txType;
     }
 
-    private static TransactionResultType transactionResultType(TransactionResult result) {
-        return new TransactionResultType()
+    public static TransactionReceiptType transactionReceiptType(TransactionResult result) {
+        return new TransactionReceiptType()
                 .logs(result.getLogs().stream().map(TypeFactory::logInfoType).collect(Collectors.toList()))
                 .gasUsed(String.valueOf(result.getGasUsed()))
                 .code(result.getCode().name())

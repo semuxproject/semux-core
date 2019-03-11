@@ -715,7 +715,7 @@
           "200" : {
             "description" : "successful operation",
             "schema" : {
-              "$ref" : "#/definitions/TransactionResultType"
+              "$ref" : "#/definitions/GetTransactionReceiptResponse"
             }
           }
         },
@@ -2174,6 +2174,24 @@
         }
       ]
     },
+    "GetTransactionReceiptResponse" : {
+      "type" : "object",
+      "required" : [
+        "success"
+      ],
+      "allOf" : [
+        {
+          "$ref" : "#/definitions/ApiHandlerResponse"
+        },
+        {
+          "properties" : {
+            "result" : {
+              "$ref" : "#/definitions/TransactionReceiptType"
+            }
+          }
+        }
+      ]
+    },
     "GetTransactionResponse" : {
       "type" : "object",
       "required" : [
@@ -2456,7 +2474,7 @@
         }
       }
     },
-    "TransactionResultType" : {
+    "TransactionReceiptType" : {
       "type" : "object",
       "properties" : {
         "logs": {
