@@ -31,7 +31,7 @@ matrix:
         - mvn test
 
     # Linux tests (Java 11 LTS)
-    - env: NAME="Linux tests (Java 10)"
+    - env: NAME="Linux tests (Java 11)"
       os: linux
       sudo: false
       script:
