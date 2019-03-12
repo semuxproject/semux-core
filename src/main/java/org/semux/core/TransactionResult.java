@@ -382,6 +382,7 @@ public class TransactionResult {
         for (int i = 0; i < n; i++) {
             internalTransactions.add(deserializeInternalTransaction(dec.readBytes()));
         }
+        result.setInternalTransactions(internalTransactions);
 
         return result;
     }
@@ -394,6 +395,8 @@ public class TransactionResult {
         for (LogInfo log : logs) {
             enc.writeBytes(serializeLog(log));
         }
+
+        // FIXME: BlockMessage becomes incompatible
 
         enc.writeLong(gas);
         enc.writeLong(gasPrice);
