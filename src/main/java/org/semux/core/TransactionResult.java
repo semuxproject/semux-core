@@ -18,7 +18,6 @@ import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
-// TODO: rename to transaction receipts
 public class TransactionResult {
 
     /**
@@ -47,7 +46,7 @@ public class TransactionResult {
         /**
          * The transaction hash is duplicated.
          */
-        DUPLICATE_TRANSACTION,
+        INVALID_DUPLICATED,
 
         /**
          * The transaction format is invalid. See {@link Transaction#validate(Network)}

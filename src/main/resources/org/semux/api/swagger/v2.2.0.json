@@ -690,14 +690,14 @@
         ]
       }
     },
-    "/transaction-receipt" : {
+    "/transaction-result" : {
       "get" : {
         "tags": [
           "semux"
         ],
-        "summary" : "Get transaction receipt",
-        "description" : "Returns the receipt of the requested transaction.",
-        "operationId" : "getTransactionReceipt",
+        "summary" : "Get transaction result",
+        "description" : "Returns the result of the requested transaction.",
+        "operationId" : "getTransactionResult",
         "produces" : [
           "application/json"
         ],
@@ -715,7 +715,7 @@
           "200" : {
             "description" : "successful operation",
             "schema" : {
-              "$ref" : "#/definitions/GetTransactionReceiptResponse"
+              "$ref" : "#/definitions/GetTransactionResultResponse"
             }
           }
         },
@@ -2174,7 +2174,7 @@
         }
       ]
     },
-    "GetTransactionReceiptResponse" : {
+    "GetTransactionResultResponse" : {
       "type" : "object",
       "required" : [
         "success"
@@ -2186,7 +2186,7 @@
         {
           "properties" : {
             "result" : {
-              "$ref" : "#/definitions/TransactionReceiptType"
+              "$ref" : "#/definitions/TransactionResultType"
             }
           }
         }
@@ -2473,7 +2473,7 @@
         }
       }
     },
-    "TransactionReceiptType" : {
+    "TransactionResultType" : {
       "type" : "object",
       "properties" : {
         "blockNumber" : {

@@ -318,7 +318,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         // reject transactions with a duplicated tx hash
         if (kernel.getBlockchain().hasTransaction(tx.getHash())) {
-            return new ProcessingResult(0, TransactionResult.Code.DUPLICATE_TRANSACTION);
+            return new ProcessingResult(0, TransactionResult.Code.INVALID_DUPLICATED);
         }
 
         // check transaction timestamp if this is a fresh transaction:
