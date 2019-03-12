@@ -46,8 +46,7 @@ public class Transaction {
     private Signature signature;
 
     private final long gas;
-
-    private final long gasPrice;
+    private final long gasPrice; // nanoSEM per gas
 
     /**
      * Create a new transaction.
@@ -163,14 +162,7 @@ public class Transaction {
                 && signature != null && !Arrays.equals(signature.getAddress(), EMPTY_ADDRESS)
 
                 && Arrays.equals(Hash.h256(encoded), hash)
-                && Key.verify(hash, signature)
-
-                // The coinbase key is publicly available. People can use it for transactions.
-                // It won't introduce any fundamental loss to the system but could potentially
-                // cause confusion for block explorer, and thus are prohibited.
-                && (type == TransactionType.COINBASE
-                        || (!Arrays.equals(signature.getAddress(), Constants.COINBASE_ADDRESS) &&
-                                !Arrays.equals(to, Constants.COINBASE_ADDRESS)));
+                && Key.verify(hash, signature);
     }
 
     /**
