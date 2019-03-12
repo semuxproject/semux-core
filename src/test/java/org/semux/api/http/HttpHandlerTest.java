@@ -8,6 +8,7 @@ package org.semux.api.http;
 
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
+
 import static junit.framework.TestCase.assertTrue;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;

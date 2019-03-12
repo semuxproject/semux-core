@@ -8,8 +8,8 @@ package org.semux.util;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Amount.ZERO;
 
 import java.util.Arrays;
 import java.util.Collections;

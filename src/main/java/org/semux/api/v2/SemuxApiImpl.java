@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.ethereum.vm.chainspec.Spec;
@@ -86,6 +85,8 @@ import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.semux.vm.client.SemuxRepository;
 import org.semux.vm.client.SemuxTransaction;
+
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public final class SemuxApiImpl implements SemuxApi {
 

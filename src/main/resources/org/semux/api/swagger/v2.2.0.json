@@ -2424,7 +2424,6 @@
     },
     "TransactionType" : {
       "type" : "object",
-      "discriminator": "transactionType",
       "properties" : {
         "hash" : {
           "type" : "string",

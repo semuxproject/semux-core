@@ -466,6 +466,26 @@
                 </configuration>
             </plugin>
 
+            <!-- eclipse import sorter -->
+            <plugin>
+                <groupId>net.revelc.code</groupId>
+                <artifactId>impsort-maven-plugin</artifactId>
+                <version>1.2.0</version>
+                <configuration>
+                    <groups>java.,javax.,org.,com.</groups>
+                    <staticGroups>java,*</staticGroups>
+                    <excludes></excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>sort-imports</id>
+                        <goals>
+                            <goal>sort</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- FindBugs -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
