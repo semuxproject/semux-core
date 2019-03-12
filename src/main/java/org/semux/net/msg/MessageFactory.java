@@ -9,8 +9,10 @@ package org.semux.net.msg;
 import org.semux.crypto.Hex;
 import org.semux.net.msg.consensus.BlockHeaderMessage;
 import org.semux.net.msg.consensus.BlockMessage;
+import org.semux.net.msg.consensus.BlockPartsMessage;
 import org.semux.net.msg.consensus.GetBlockHeaderMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
+import org.semux.net.msg.consensus.GetBlockPartsMessage;
 import org.semux.net.msg.consensus.NewHeightMessage;
 import org.semux.net.msg.consensus.NewViewMessage;
 import org.semux.net.msg.consensus.ProposalMessage;
@@ -85,6 +87,10 @@ public class MessageFactory {
                 return new GetBlockHeaderMessage(body);
             case BLOCK_HEADER:
                 return new BlockHeaderMessage(body);
+            case GET_BLOCK_PARTS:
+                return new GetBlockPartsMessage(body);
+            case BLOCK_PARTS:
+                return new BlockPartsMessage(body);
 
             case BFT_NEW_HEIGHT:
                 return new NewHeightMessage(body);

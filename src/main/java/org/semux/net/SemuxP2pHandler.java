@@ -450,6 +450,10 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             sync.onMessage(channel, msg);
             break;
         }
+        case GET_BLOCK_PARTS:
+        case BLOCK_PARTS:
+            // TODO: add handler
+            break;
         default:
             throw new UnreachableException();
         }
