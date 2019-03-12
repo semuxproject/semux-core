@@ -4,7 +4,6 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-
 package org.semux.api.v2;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -24,6 +23,7 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.ethereum.vm.chainspec.Spec;
@@ -54,6 +54,7 @@ import org.semux.api.v2.model.GetPeersResponse;
 import org.semux.api.v2.model.GetPendingTransactionsResponse;
 import org.semux.api.v2.model.GetSyncingProgressResponse;
 import org.semux.api.v2.model.GetTransactionLimitsResponse;
+import org.semux.api.v2.model.GetTransactionReceiptResponse;
 import org.semux.api.v2.model.GetTransactionResponse;
 import org.semux.api.v2.model.GetValidatorsResponse;
 import org.semux.api.v2.model.GetVoteResponse;
@@ -69,6 +70,7 @@ import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
+import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
@@ -84,8 +86,6 @@ import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.semux.vm.client.SemuxRepository;
 import org.semux.vm.client.SemuxTransaction;
-
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public final class SemuxApiImpl implements SemuxApi {
 
@@ -556,8 +556,27 @@ public final class SemuxApiImpl implements SemuxApi {
     @Override
     public Response getTransactionReceipt(
             @NotNull @javax.validation.constraints.Pattern(regexp = "^(0x)?[0-9a-fA-F]{64}$") String hash) {
-        // TODO: implement get transaction receipt
-        return null;
+        GetTransactionReceiptResponse resp = new GetTransactionReceiptResponse();
+
+        if (!isSet(hash)) {
+            return badRequest(resp, "Parameter `hash` is required");
+        }
+
+        byte[] hashBytes;
+        try {
+            hashBytes = Hex.decode0x(hash);
+        } catch (CryptoException ex) {
+            return badRequest(resp, "Parameter `hash` is not a valid hexadecimal string");
+        }
+
+        TransactionResult result = kernel.getBlockchain().getTransactionResult(hashBytes);
+        if (result == null) {
+            return badRequest(resp, "The request transaction was not found");
+        }
+
+        resp.setResult(TypeFactory.transactionReceiptType(result));
+
+        return success(resp);
     }
 
     @Override

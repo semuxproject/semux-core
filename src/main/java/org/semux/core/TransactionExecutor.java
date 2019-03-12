@@ -215,6 +215,7 @@ public class TransactionExecutor {
                     break;
                 }
 
+                // FIXME: overflow
                 long maxGasFee = tx.getGas() * tx.getGasPrice();
 
                 Amount maxCost = sum(sum(value, fee), Unit.NANO_SEM.of(maxGasFee));

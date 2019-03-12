@@ -89,6 +89,7 @@ import org.semux.api.v2.model.GetPeersResponse;
 import org.semux.api.v2.model.GetPendingTransactionsResponse;
 import org.semux.api.v2.model.GetSyncingProgressResponse;
 import org.semux.api.v2.model.GetTransactionLimitsResponse;
+import org.semux.api.v2.model.GetTransactionReceiptResponse;
 import org.semux.api.v2.model.GetTransactionResponse;
 import org.semux.api.v2.model.GetValidatorsResponse;
 import org.semux.api.v2.model.GetVoteResponse;
@@ -450,6 +451,20 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertEquals(tx.getTimestamp(), Long.parseLong(response.getResult().getTimestamp()));
         assertEquals(tx.getType().toString(), response.getResult().getType());
         assertEquals(tx.getValue().getNano(), Long.parseLong(response.getResult().getValue()));
+    }
+
+    @Test
+    public void getTransactionReceiptTest() {
+        Key from = new Key(), to = new Key();
+        Transaction tx = createTransaction(config, from, to, Amount.Unit.SEM.of(1));
+        TransactionResult res = new TransactionResult();
+        Block block = createBlock(chain.getLatestBlockNumber() + 1, Collections.singletonList(tx),
+                Collections.singletonList(res));
+        chain.addBlock(block);
+
+        GetTransactionReceiptResponse response = api.getTransactionReceipt(Hex.encode(tx.getHash()));
+        assertTrue(response.isSuccess());
+        assertEquals("SUCCESS", response.getResult().getCode());
     }
 
     @Test
