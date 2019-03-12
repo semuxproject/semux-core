@@ -23,31 +23,19 @@ import org.semux.util.SimpleEncoder;
 public class TransactionResult {
 
     /**
-     * Transaction result code. There are currently three categories of code:
-     * <ul>
-     * <li>REJECTED: the transaction is invalid and should not be included in the
-     * chain.</li>
-     * <li>SUCCESS: the transaction is valid and the evaluation was successful.</li>
-     * <li>FAILURE: the transaction is valid but some failure occurred during the
-     * evaluation. For this type of transaction, the fee should be charged but state
-     * changes should be reverted.</li>
-     * </ul>
+     * Transaction execution result code.
      */
     public enum Code {
 
         /**
-         * The transaction was executed successfully (should be included on chain).
+         * Success. The values has to be 0x01 for compatibility.
          */
-        SUCCESS(0x00),
+        SUCCESS(0x01),
 
         /**
-         * The transaction was executed with failure (should be included on chain).
+         * VM failure, e.g. REVERT, STACK_OVERFLOW, OUT_OF_GAS, etc.
          */
-        FAILURE(0x10),
-
-        // STACK_OVERFLOW
-
-        // OUT_OF_GAS
+        FAILURE(0x02),
 
         /**
          * The transaction hash is invalid (should NOT be included on chain).
@@ -134,14 +122,14 @@ public class TransactionResult {
 
         static {
             for (Code code : Code.values()) {
-                map[code.c] = code;
+                map[code.v] = code;
             }
         }
 
-        private byte c;
+        private byte v;
 
         Code(int c) {
-            this.c = (byte) c;
+            this.v = (byte) c;
         }
 
         public static Code of(int c) {
@@ -149,19 +137,19 @@ public class TransactionResult {
         }
 
         public byte toByte() {
-            return c;
+            return v;
         }
 
         public boolean isSuccess() {
-            return c == 0x00;
+            return this == SUCCESS;
         }
 
         public boolean isFailure() {
-            return c >= 0x10 & c < 0x20;
+            return this == FAILURE;
         }
 
         public boolean isRejected() {
-            return c >= 0x20;
+            return !isSuccess() && !isFailure();
         }
 
         public boolean isAcceptable() {
@@ -369,20 +357,23 @@ public class TransactionResult {
         }
         result.setLogs(logs);
 
-        long gas = dec.readLong();
-        long gasPrice = dec.readLong();
-        long gasUsed = dec.readLong();
-        result.setGas(gas, gasPrice, gasUsed);
+        // Dirty hack to maintain backward compatibility
+        if (dec.getReadIndex() != bytes.length) {
+            long gas = dec.readLong();
+            long gasPrice = dec.readLong();
+            long gasUsed = dec.readLong();
+            result.setGas(gas, gasPrice, gasUsed);
 
-        long blockNumber = dec.readLong();
-        result.setBlockNumber(blockNumber);
+            long blockNumber = dec.readLong();
+            result.setBlockNumber(blockNumber);
 
-        List<InternalTransaction> internalTransactions = new ArrayList<>();
-        n = dec.readInt();
-        for (int i = 0; i < n; i++) {
-            internalTransactions.add(deserializeInternalTransaction(dec.readBytes()));
+            List<InternalTransaction> internalTransactions = new ArrayList<>();
+            n = dec.readInt();
+            for (int i = 0; i < n; i++) {
+                internalTransactions.add(deserializeInternalTransaction(dec.readBytes()));
+            }
+            result.setInternalTransactions(internalTransactions);
         }
-        result.setInternalTransactions(internalTransactions);
 
         return result;
     }
@@ -396,7 +387,9 @@ public class TransactionResult {
             enc.writeBytes(serializeLog(log));
         }
 
-        // FIXME: BlockMessage becomes incompatible
+        // The following fields are incompatible with old versions,
+        // but it's fine because the old clients are not reading
+        // these data.
 
         enc.writeLong(gas);
         enc.writeLong(gasPrice);
