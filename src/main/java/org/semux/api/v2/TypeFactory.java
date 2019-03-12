@@ -159,6 +159,8 @@ public class TypeFactory {
                 .gasUsed(String.valueOf(result.getGasUsed()))
                 .code(result.getCode().name())
                 .returnData(Hex.encode0x(result.getReturnData()));
+
+        // TODO: add block number and internal transactions
     }
 
     private static LogInfoType logInfoType(LogInfo log) {

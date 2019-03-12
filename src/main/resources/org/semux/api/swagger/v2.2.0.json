@@ -2477,6 +2477,11 @@
     "TransactionReceiptType" : {
       "type" : "object",
       "properties" : {
+        "blockNumber" : {
+          "type" : "string",
+          "format" : "int64",
+          "pattern" : "^\\d+$"
+        },
         "logs": {
           "type": "array",
           "items": {
