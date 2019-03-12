@@ -18,16 +18,14 @@ import org.ethereum.vm.LogInfo;
 import org.semux.Kernel;
 import org.semux.api.v2.model.AccountType;
 import org.semux.api.v2.model.AccountVoteType;
-import org.semux.api.v2.model.BasicTransactionType;
 import org.semux.api.v2.model.BlockType;
 import org.semux.api.v2.model.DelegateType;
-import org.semux.api.v2.model.FullTransactionType;
+import org.semux.api.v2.model.TransactionType;
 import org.semux.api.v2.model.InfoType;
 import org.semux.api.v2.model.LogInfoType;
 import org.semux.api.v2.model.PeerType;
-import org.semux.api.v2.model.PendingTransactionType;
 import org.semux.api.v2.model.TransactionLimitsType;
-import org.semux.api.v2.model.TransactionResultType;
+import org.semux.api.v2.model.TransactionReceiptType;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
@@ -67,12 +65,7 @@ public class TypeFactory {
                 .resultsRoot(Hex.encode0x(block.getResultsRoot()))
                 .stateRoot(Hex.encode0x(block.getStateRoot()))
                 .data(Hex.encode0x(block.getData()))
-                .gasUsed(String.valueOf(block.getResults().stream()
-                        .mapToLong(TransactionResult::getGasUsed)
-                        .sum()))
-                .transactions(txs.stream()
-                        .map(tx -> transactionType(block.getNumber(), tx))
-                        .collect(Collectors.toList()));
+                .transactions(txs.stream().map(TypeFactory::transactionType).collect(Collectors.toList()));
     }
 
     public static DelegateType delegateType(BlockchainImpl.ValidatorStats validatorStats, Delegate delegate,
@@ -144,42 +137,30 @@ public class TypeFactory {
                         transactionType.equals(DELEGATE) ? kernel.getConfig().minDelegateBurnAmount() : null));
     }
 
-    public static BasicTransactionType transactionType(Long blockNumber, Transaction tx) {
-        BasicTransactionType txType = new BasicTransactionType();
-        populateTx(txType, tx);
-        txType.blockNumber(String.valueOf(blockNumber));
-        return txType;
-    }
-
-    public static FullTransactionType fullTransactionType(Long blockNumber, Transaction tx, TransactionResult result) {
-        FullTransactionType txType = new FullTransactionType();
-        populateTx(txType, tx);
-        txType.blockNumber(String.valueOf(blockNumber));
-        txType.transactionResult(transactionResultType(result));
-        return txType;
-    }
-
-    private static void populateTx(BasicTransactionType txType, Transaction tx) {
+    public static TransactionType transactionType(Transaction tx) {
+        TransactionType txType = new TransactionType();
 
         txType.hash(Hex.encode0x(tx.getHash()))
-                .type(BasicTransactionType.TypeEnum.fromValue(tx.getType().name()))
+                .type(TransactionType.TypeEnum.fromValue(tx.getType().name()))
                 .from(Hex.encode0x(tx.getFrom()))
                 .to(Hex.encode0x(tx.getTo()))
                 .value(encodeAmount(tx.getValue()))
                 .fee(encodeAmount(tx.getFee()))
                 .nonce(String.valueOf(tx.getNonce()))
                 .timestamp(String.valueOf(tx.getTimestamp()))
-                .data(Hex.encode0x(tx.getData()))
-                .gas(String.valueOf(tx.getGas()))
-                .gasPrice(String.valueOf(tx.getGasPrice()));
+                .data(Hex.encode0x(tx.getData()));
+
+        return txType;
     }
 
-    private static TransactionResultType transactionResultType(TransactionResult result) {
-        return new TransactionResultType()
+    public static TransactionReceiptType transactionReceiptType(TransactionResult result) {
+        return new TransactionReceiptType()
                 .logs(result.getLogs().stream().map(TypeFactory::logInfoType).collect(Collectors.toList()))
                 .gasUsed(String.valueOf(result.getGasUsed()))
                 .code(result.getCode().name())
                 .returnData(Hex.encode0x(result.getReturnData()));
+
+        // TODO: add block number and internal transactions
     }
 
     private static LogInfoType logInfoType(LogInfo log) {
@@ -188,21 +169,6 @@ public class TypeFactory {
                 .data(Hex.encode0x(log.getData()))
                 .topics(log.getTopics().stream().map(topic -> Hex.encode0x(topic.getData()))
                         .collect(Collectors.toList()));
-    }
-
-    public static PendingTransactionType pendingTransactionType(Transaction tx) {
-        return new PendingTransactionType()
-                .hash(Hex.encode0x(tx.getHash()))
-                .type(PendingTransactionType.TypeEnum.fromValue(tx.getType().name()))
-                .from(Hex.encode0x(tx.getFrom()))
-                .to(Hex.encode0x(tx.getTo()))
-                .value(encodeAmount(tx.getValue()))
-                .fee(encodeAmount(tx.getFee()))
-                .nonce(String.valueOf(tx.getNonce()))
-                .timestamp(String.valueOf(tx.getTimestamp()))
-                .data(Hex.encode0x(tx.getData()))
-                .gas(String.valueOf(tx.getGas()))
-                .gasPrice(String.valueOf(tx.getGasPrice()));
     }
 
     public static String encodeAmount(Amount a) {

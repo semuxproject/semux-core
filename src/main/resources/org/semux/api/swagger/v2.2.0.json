@@ -690,6 +690,42 @@
         ]
       }
     },
+    "/transaction-receipt" : {
+      "get" : {
+        "tags": [
+          "semux"
+        ],
+        "summary" : "Get transaction receipt",
+        "description" : "Returns the receipt of the requested transaction.",
+        "operationId" : "getTransactionReceipt",
+        "produces" : [
+          "application/json"
+        ],
+        "parameters" : [
+          {
+            "name" : "hash",
+            "in" : "query",
+            "description" : "Transaction hash",
+            "required" : true,
+            "type" : "string",
+            "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/GetTransactionReceiptResponse"
+            }
+          }
+        },
+        "security" : [
+          {
+            "basicAuth" : [ ]
+          }
+        ]
+      }
+    },
     "/transaction-limits" : {
       "get" : {
         "tags": [
@@ -1782,15 +1818,10 @@
           "type" : "string",
           "pattern" : "^(0x)?[0-9a-fA-F]*$"
         },
-        "gasUsed" : {
-          "type" : "string",
-          "format" : "int64",
-          "pattern" : "^\\d+$"
-        },
         "transactions" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/BasicTransactionType"
+            "$ref" : "#/definitions/TransactionType"
           }
         }
       }
@@ -1912,7 +1943,7 @@
             "result" : {
               "type" : "array",
               "items" : {
-                "$ref" : "#/definitions/BasicTransactionType"
+                "$ref" : "#/definitions/TransactionType"
               }
             }
           }
@@ -1930,7 +1961,7 @@
             "result": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/PendingTransactionType"
+                "$ref": "#/definitions/TransactionType"
               }
             }
           }
@@ -2118,7 +2149,7 @@
             "result" : {
               "type" : "array",
               "items" : {
-                "$ref" : "#/definitions/PendingTransactionType"
+                "$ref" : "#/definitions/TransactionType"
               }
             }
           }
@@ -2143,6 +2174,24 @@
         }
       ]
     },
+    "GetTransactionReceiptResponse" : {
+      "type" : "object",
+      "required" : [
+        "success"
+      ],
+      "allOf" : [
+        {
+          "$ref" : "#/definitions/ApiHandlerResponse"
+        },
+        {
+          "properties" : {
+            "result" : {
+              "$ref" : "#/definitions/TransactionReceiptType"
+            }
+          }
+        }
+      ]
+    },
     "GetTransactionResponse" : {
       "type" : "object",
       "required" : [
@@ -2155,7 +2204,7 @@
         {
           "properties" : {
             "result" : {
-              "$ref" : "#/definitions/FullTransactionType"
+              "$ref" : "#/definitions/TransactionType"
             }
           }
         }
@@ -2373,15 +2422,10 @@
         }
       }
     },
-    "BasicTransactionType" : {
+    "TransactionType" : {
       "type" : "object",
       "discriminator": "transactionType",
       "properties" : {
-        "blockNumber" : {
-          "type" : "string",
-          "format" : "int64",
-          "pattern" : "^\\d+$"
-        },
         "hash" : {
           "type" : "string",
           "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
@@ -2427,104 +2471,17 @@
           "description" : "Transaction data encoded in hexadecimal string",
           "type" : "string",
           "pattern" : "^(0x)?[0-9a-fA-F]*$"
-        },
-        "gas" : {
-          "description" : "Gas supplied on call",
-          "type" : "string",
-          "format" : "int64",
-          "pattern" : "^\\d+$"
-        },
-        "gasPrice" : {
-          "description" : "Price per gas used",
-          "type" : "string",
-          "format" : "int64",
-          "pattern" : "^\\d+$"
         }
       }
     },
-    "FullTransactionType": {
-      "type": "object",
-      "allOf": [
-        {
-          "$ref": "#/definitions/BasicTransactionType"
-        },
-        {
-          "properties": {
-            "transactionResult": {
-              "description": "Transaction results",
-              "type": "object",
-              "$ref": "#/definitions/TransactionResultType"
-            }
-          }
-        }
-      ]
-    },
-    "PendingTransactionType" : {
+    "TransactionReceiptType" : {
       "type" : "object",
       "properties" : {
-        "hash" : {
-          "type" : "string",
-          "pattern" : "^(0x)?[0-9a-fA-F]{64}$"
-        },
-        "type" : {
-          "type" : "string",
-          "enum" : ["COINBASE", "TRANSFER", "DELEGATE", "VOTE", "UNVOTE", "CREATE", "CALL"]
-        },
-        "from" : {
-          "description" : "Sender's address",
-          "type" : "string",
-          "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
-        },
-        "to" : {
-          "description" : "Recipient's address",
-          "type" : "string",
-          "pattern" : "^(0x)?[0-9a-fA-F]{40}$"
-        },
-        "value" : {
-          "description" : "Transaction value in nano SEM",
+        "blockNumber" : {
           "type" : "string",
           "format" : "int64",
           "pattern" : "^\\d+$"
         },
-        "fee" : {
-          "description" : "Transaction fee in nano SEM",
-          "type" : "string",
-          "format" : "int64",
-          "pattern" : "^\\d+$"
-        },
-        "nonce" : {
-          "type" : "string",
-          "format" : "int64",
-          "pattern" : "^\\d+$"
-        },
-        "timestamp" : {
-          "description" : "Transaction timestamp in milliseconds specified by the transaction creator. There can be a time drift up to 2 hours.",
-          "type" : "string",
-          "format" : "int64",
-          "pattern" : "^\\d+$"
-        },
-        "data" : {
-          "description" : "Transaction data encoded in hexadecimal string",
-          "type" : "string",
-          "pattern" : "^(0x)?[0-9a-fA-F]*$"
-        },
-        "gas" : {
-          "description" : "Gas supplied on call",
-          "type" : "string",
-          "format" : "int64",
-          "pattern" : "^\\d+$"
-        },
-        "gasPrice" : {
-          "description" : "Price per gas used",
-          "type" : "string",
-          "format" : "int64",
-          "pattern" : "^\\d+$"
-        }
-      }
-    },
-    "TransactionResultType" : {
-      "type" : "object",
-      "properties" : {
         "logs": {
           "type": "array",
           "items": {

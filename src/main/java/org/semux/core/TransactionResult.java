@@ -12,11 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bouncycastle.util.encoders.Hex;
+import org.ethereum.vm.program.InternalTransaction;
 import org.semux.Network;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
+// TODO: rename to transaction receipts
 public class TransactionResult {
 
     /**
@@ -161,6 +163,12 @@ public class TransactionResult {
     protected long gasUsed;
 
     /**
+     * TODO: add block number and internal transactions
+     */
+    protected long blockNumber;
+    protected List<InternalTransaction> internalTransactions;
+
+    /**
      * Create a transaction result.
      *
      * 
@@ -228,6 +236,9 @@ public class TransactionResult {
         for (LogInfo log : logs) {
             enc.writeBytes(serializeLog(log));
         }
+
+        // TODO: provide another version of toBytes() for resultsRoot validation.
+        // TODO: use the computed results, rather than network bytes.
 
         // only write gasUsed if it exists to maintain backwards compatibility
         // this maintains backwards compatibility until VM calls are enabled with

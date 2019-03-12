@@ -69,7 +69,6 @@ import org.junit.Test;
 import org.semux.Network;
 import org.semux.TestUtils;
 import org.semux.api.v2.model.AddNodeResponse;
-import org.semux.api.v2.model.BasicTransactionType;
 import org.semux.api.v2.model.BlockType;
 import org.semux.api.v2.model.ComposeRawTransactionResponse;
 import org.semux.api.v2.model.CreateAccountResponse;
@@ -90,6 +89,7 @@ import org.semux.api.v2.model.GetPeersResponse;
 import org.semux.api.v2.model.GetPendingTransactionsResponse;
 import org.semux.api.v2.model.GetSyncingProgressResponse;
 import org.semux.api.v2.model.GetTransactionLimitsResponse;
+import org.semux.api.v2.model.GetTransactionReceiptResponse;
 import org.semux.api.v2.model.GetTransactionResponse;
 import org.semux.api.v2.model.GetValidatorsResponse;
 import org.semux.api.v2.model.GetVoteResponse;
@@ -225,9 +225,6 @@ public class SemuxApiTest extends SemuxApiTestBase {
         GetAccountTransactionsResponse response = api.getAccountTransactions(Hex.encode(tx.getFrom()), "0", "1024");
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
-        for (BasicTransactionType txType : response.getResult()) {
-            assertEquals(block.getNumber(), Long.parseLong(txType.getBlockNumber()));
-        }
     }
 
     @Test
@@ -446,7 +443,6 @@ public class SemuxApiTest extends SemuxApiTestBase {
         GetTransactionResponse response = api.getTransaction(Hex.encode(tx.getHash()));
         assertTrue(response.isSuccess());
         assertEquals(Hex.encode0x(to.toAddress()), response.getResult().getTo());
-        assertEquals(block.getNumber(), Long.parseLong(response.getResult().getBlockNumber()));
         assertEquals(Hex.encode0x(tx.getHash()), response.getResult().getHash());
         assertEquals(Hex.encode0x(Bytes.EMPTY_BYTES), response.getResult().getData());
         assertEquals(tx.getFee().getNano(), Long.parseLong(response.getResult().getFee()));
@@ -455,6 +451,20 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertEquals(tx.getTimestamp(), Long.parseLong(response.getResult().getTimestamp()));
         assertEquals(tx.getType().toString(), response.getResult().getType());
         assertEquals(tx.getValue().getNano(), Long.parseLong(response.getResult().getValue()));
+    }
+
+    @Test
+    public void getTransactionReceiptTest() {
+        Key from = new Key(), to = new Key();
+        Transaction tx = createTransaction(config, from, to, Amount.Unit.SEM.of(1));
+        TransactionResult res = new TransactionResult();
+        Block block = createBlock(chain.getLatestBlockNumber() + 1, Collections.singletonList(tx),
+                Collections.singletonList(res));
+        chain.addBlock(block);
+
+        GetTransactionReceiptResponse response = api.getTransactionReceipt(Hex.encode(tx.getHash()));
+        assertTrue(response.isSuccess());
+        assertEquals("SUCCESS", response.getResult().getCode());
     }
 
     @Test
