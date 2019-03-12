@@ -125,7 +125,7 @@ public class PendingManagerTest {
         PendingManager.ProcessingResult result = pendingMgr.addTransactionSync(tx);
         assertEquals(0, pendingMgr.getPendingTransactions().size());
         assertNotNull(result.error);
-        assertEquals(TransactionResult.Code.INVALID_DUPLICATED, result.error);
+        assertEquals(TransactionResult.Code.INVALID, result.error);
 
         Mockito.reset(kernel.getBlockchain());
     }

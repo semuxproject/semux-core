@@ -48,17 +48,17 @@ public class TransactionResultTest {
             if (code.name().startsWith("SUCCESS")) {
                 assertTrue(code.isSuccess());
                 assertFalse(code.isFailure());
-                assertTrue(code.isAccepted());
+                assertTrue(code.isAcceptable());
                 assertFalse(code.isRejected());
             } else if (code.name().startsWith("FAILURE")) {
                 assertFalse(code.isSuccess());
                 assertTrue(code.isFailure());
-                assertTrue(code.isAccepted());
+                assertTrue(code.isAcceptable());
                 assertFalse(code.isRejected());
             } else {
                 assertFalse(code.isSuccess());
                 assertFalse(code.isFailure());
-                assertFalse(code.isAccepted());
+                assertFalse(code.isAcceptable());
                 assertTrue(code.isRejected());
             }
         }
@@ -66,21 +66,21 @@ public class TransactionResultTest {
 
     @Test
     public void testNew() {
-        TransactionResult res = new TransactionResult(TransactionResult.Code.SUCCESS, returns, logs, 0);
+        TransactionResult res = new TransactionResult(TransactionResult.Code.SUCCESS, returns, logs);
         testFields(res);
     }
 
     @Test
     public void testSerialization() {
 
-        TransactionResult res = new TransactionResult(TransactionResult.Code.SUCCESS, returns, logs, 0);
+        TransactionResult res = new TransactionResult(TransactionResult.Code.SUCCESS, returns, logs);
 
         testFields(TransactionResult.fromBytes(res.toBytes()));
     }
 
     @Test
     public void testTransactionResultSize() {
-        TransactionResult res = new TransactionResult(TransactionResult.Code.SUCCESS, returns, logs, 0);
+        TransactionResult res = new TransactionResult(TransactionResult.Code.SUCCESS, returns, logs);
         byte[] bytes = res.toBytes();
 
         logger.info("result size: {} B, {} GB per 1M txs", bytes.length, 1000000.0 * bytes.length / 1024 / 1024 / 1024);
