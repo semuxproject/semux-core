@@ -7,9 +7,9 @@
 
 package org.semux.core.bip32;
 
-import org.semux.core.bip32.crypto.BitUtil;
 import org.junit.Assert;
 import org.junit.Test;
+import org.semux.core.bip32.crypto.BitUtil;
 
 public class BitUtilTest {
 

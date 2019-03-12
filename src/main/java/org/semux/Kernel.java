@@ -25,6 +25,7 @@ import org.semux.consensus.SemuxSync;
 import org.semux.core.BftManager;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Wallet;
@@ -77,6 +78,7 @@ public class Kernel {
 
     protected final ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
     protected Config config;
+    protected Genesis genesis;
 
     protected Wallet wallet;
     protected Key coinbase;
@@ -101,13 +103,15 @@ public class Kernel {
      * 
      * @param config
      *            the config instance
+     * @prarm genesis the genesis instance
      * @param wallet
      *            the wallet instance
      * @param coinbase
      *            the coinbase key
      */
-    public Kernel(Config config, Wallet wallet, Key coinbase) {
+    public Kernel(Config config, Genesis genesis, Wallet wallet, Key coinbase) {
         this.config = config;
+        this.genesis = genesis;
         this.wallet = wallet;
         this.coinbase = coinbase;
     }
@@ -137,7 +141,7 @@ public class Kernel {
         // ====================================
         relocateDatabaseIfNeeded();
         dbFactory = new LeveldbFactory(config.databaseDir());
-        chain = new BlockchainImpl(config, dbFactory);
+        chain = new BlockchainImpl(config, genesis, dbFactory);
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
 

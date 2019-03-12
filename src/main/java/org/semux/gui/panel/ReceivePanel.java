@@ -36,7 +36,6 @@ import javax.swing.table.TableRowSorter;
 import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
-import org.semux.crypto.Key;
 import org.semux.gui.Action;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;

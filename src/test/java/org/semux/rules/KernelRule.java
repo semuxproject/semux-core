@@ -6,12 +6,13 @@
  */
 package org.semux.rules;
 
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.spy;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ import org.semux.config.DevnetConfig;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
@@ -43,6 +45,10 @@ public class KernelRule extends TemporaryFolder {
     private int p2pPort;
     private int apiPort;
 
+    private List<Key> keys;
+    private Key coinbase;
+    private Genesis genesis;
+
     private String password;
     private KernelMock kernel;
 
@@ -53,6 +59,16 @@ public class KernelRule extends TemporaryFolder {
 
         this.p2pPort = p2pPort;
         this.apiPort = apiPort;
+
+        this.keys = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            keys.add(new Key());
+        }
+        this.coinbase = keys.get(0);
+    }
+
+    public void setGenesis(Genesis genesis) {
+        this.genesis = genesis;
     }
 
     @Override
@@ -62,17 +78,25 @@ public class KernelRule extends TemporaryFolder {
         // generate random password
         this.password = Hex.encode(Bytes.random(12));
 
-        // generate kernel mock
+        // config
         Config config = mockConfig(p2pPort, apiPort);
+
+        // genesis
+        if (genesis == null) {
+            genesis = Genesis.load(config.network());
+        }
+
+        // wallet
         Wallet wallet = new Wallet(new File(getRoot(), "wallet.data"), config.network());
         wallet.unlock(password);
         wallet.setHdSeed(Bytes.random(32));
-        for (int i = 0; i < 10; i++) {
-            wallet.addAccount(new Key());
+        for (Key key : keys) {
+            wallet.addAccount(key);
         }
         wallet.flush();
-        Key coinbase = wallet.getAccount(0);
-        this.kernel = new KernelMock(config, wallet, coinbase);
+
+        // kernel
+        this.kernel = new KernelMock(config, genesis, wallet, coinbase);
         this.kernel.setPendingManager(mock(PendingManager.class));
     }
 
@@ -104,6 +128,14 @@ public class KernelRule extends TemporaryFolder {
      */
     public String getPassword() {
         return password;
+    }
+
+    public List<Key> getKeys() {
+        return keys;
+    }
+
+    public Key getCoinbase() {
+        return coinbase;
     }
 
     /**

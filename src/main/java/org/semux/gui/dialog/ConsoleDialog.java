@@ -36,13 +36,13 @@ import org.semux.api.v2.SemuxApi;
 import org.semux.api.v2.SemuxApiImpl;
 import org.semux.gui.SemuxGui;
 import org.semux.message.GuiMessages;
+import org.semux.util.CircularFixedSizeList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import io.swagger.annotations.ApiOperation;
-import org.semux.util.CircularFixedSizeList;
 
 public class ConsoleDialog extends JDialog implements ActionListener {
 
@@ -82,6 +82,8 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         input.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(
                 "UP"), "historyBack");
         input.getActionMap().put("historyBack", new AbstractAction() {
+            private static final long serialVersionUID = 1L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 String command = commandHistory.back();
@@ -93,6 +95,8 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         input.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(
                 "DOWN"), "historyForward");
         input.getActionMap().put("historyForward", new AbstractAction() {
+            private static final long serialVersionUID = 1L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 String command = commandHistory.forward();

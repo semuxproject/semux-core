@@ -12,13 +12,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 
 import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
@@ -157,7 +155,6 @@ public class SemuxBft implements BftManager {
 
     /**
      * Pause the bft manager, and do synchronization.
-     * 
      */
     protected void sync(long target) {
         if (status == Status.RUNNING) {
@@ -353,7 +350,8 @@ public class SemuxBft implements BftManager {
                 precommitVotes, commitVotes);
 
         // validate block proposal
-        boolean valid = (proposal != null) && validateBlock(proposal.getBlockHeader(), proposal.getTransactions());
+        boolean valid = (proposal != null)
+                && validateBlockProposal(proposal.getBlockHeader(), proposal.getTransactions());
 
         // construct vote
         Vote vote = valid ? Vote.newApprove(VoteType.VALIDATE, height, view, proposal.getBlockHeader().getHash())
@@ -463,7 +461,7 @@ public class SemuxBft implements BftManager {
      * (sorted by latest block number) is greater than local height. This avoids a
      * vulnerability that malicious validators might announce an extremely large
      * height in order to hang sync process of peers.
-     * 
+     *
      * @param newHeight
      *            new height
      */
@@ -521,7 +519,8 @@ public class SemuxBft implements BftManager {
         logger.trace("On proposal: {}", p);
 
         if (p.getHeight() == height // at the same height
-                && (p.getView() == view && proposal == null && (state == State.NEW_HEIGHT || state == State.PROPOSE) // expecting
+                && (p.getView() == view && proposal == null && (state == State.NEW_HEIGHT || state == State.PROPOSE)
+                        // expecting
                         || p.getView() > view && state != State.COMMIT && state != State.FINALIZE) // larger view
                 && isPrimary(p.getHeight(), p.getView(), Hex.encode(p.getSignature().getAddress()))) {
 
@@ -704,7 +703,7 @@ public class SemuxBft implements BftManager {
 
     /**
      * Check if this node is a validator.
-     * 
+     *
      * @return
      */
     protected boolean isValidator() {
@@ -722,8 +721,7 @@ public class SemuxBft implements BftManager {
 
     /**
      * Check if a node is the primary for the specified view.
-     * 
-     * 
+     *
      * @param height
      *            block number
      * @param view
@@ -740,7 +738,7 @@ public class SemuxBft implements BftManager {
 
     /**
      * Check if the signature is from one of the validators.
-     * 
+     *
      * @param sig
      * @return
      */
@@ -767,7 +765,7 @@ public class SemuxBft implements BftManager {
 
     /**
      * Create a block for BFT proposal.
-     * 
+     *
      * @return the proposed block
      */
     protected Block proposeBlock() {
@@ -846,17 +844,22 @@ public class SemuxBft implements BftManager {
 
     /**
      * Check if a block proposal is success.
-     * 
-     * @param header
-     * @param transactions
-     * @return
+     *
      */
-    protected boolean validateBlock(BlockHeader header, List<Transaction> transactions) {
+    protected boolean validateBlockProposal(BlockHeader header, List<Transaction> transactions) {
+        Block block = new Block(header, transactions);
+        return validateBlockProposal(block);
+    }
+
+    protected boolean validateBlockProposal(Block block) {
+        BlockHeader header = block.getHeader();
+        List<Transaction> transactions = block.getTransactions();
+
         long t1 = TimeUtil.currentTimeMillis();
 
         // [1] check block header
         Block latest = chain.getLatestBlock();
-        if (!Block.validateHeader(latest.getHeader(), header)) {
+        if (!block.validateHeader(latest.getHeader(), header)) {
             logger.warn("Invalid block header");
             return false;
         }
@@ -879,7 +882,7 @@ public class SemuxBft implements BftManager {
         // [2] check transactions and results (skipped)
         List<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
 
-        if (!Block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())) {
+        if (!block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())) {
             logger.warn("Invalid block transactions");
             return false;
         }
@@ -904,7 +907,7 @@ public class SemuxBft implements BftManager {
         // when proposing
         List<TransactionResult> results = exec.execute(transactions, as, ds,
                 new SemuxBlock(header, Long.MAX_VALUE), chain);
-        if (!Block.validateResults(header, results)) {
+        if (!block.validateResults(header, results)) {
             logger.warn("Invalid transactions");
             return false;
         }
@@ -912,7 +915,7 @@ public class SemuxBft implements BftManager {
         long t2 = TimeUtil.currentTimeMillis();
         logger.debug("Block validation: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
 
-        Block block = new Block(header, transactions, results);
+        block.setResults(results);
         validBlocks.put(ByteArray.of(block.getHash()), block);
         return true;
     }
@@ -944,7 +947,7 @@ public class SemuxBft implements BftManager {
 
     /**
      * Apply a block to the chain.
-     * 
+     *
      * @param block
      */
     protected void applyBlock(Block block) {
@@ -955,8 +958,8 @@ public class SemuxBft implements BftManager {
         List<Transaction> transactions = block.getTransactions();
         long number = header.getNumber();
 
-        if (header.getNumber() != chain.getLatestBlockNumber() + 1) {
-            throw new SemuxBftException("Applying wrong block: number = " + header.getNumber());
+        if (number != chain.getLatestBlockNumber() + 1) {
+            throw new SemuxBftException("Applying wrong block: number = " + number);
         }
 
         // [1] check block header, skipped
@@ -970,7 +973,7 @@ public class SemuxBft implements BftManager {
         // [3] evaluate all transactions
         List<TransactionResult> results = exec.execute(transactions, as, ds,
                 new SemuxBlock(block.getHeader(), Long.MAX_VALUE), chain);
-        if (!Block.validateResults(header, results)) {
+        if (!block.validateResults(header, results)) {
             logger.debug("Invalid transactions");
             return;
         }
@@ -1013,7 +1016,7 @@ public class SemuxBft implements BftManager {
     /**
      * Timer used by consensus. It's designed to be single timeout; previous timeout
      * get cleared when new one being added.
-     * 
+     *
      * NOTE: it's possible that a Timeout event has been emitted when setting a new
      * timeout.
      */

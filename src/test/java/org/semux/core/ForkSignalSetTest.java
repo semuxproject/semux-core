@@ -13,7 +13,7 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.powermock.reflect.Whitebox;
+import org.semux.TestUtils;
 import org.semux.crypto.Hex;
 
 public class ForkSignalSetTest {
@@ -30,7 +30,7 @@ public class ForkSignalSetTest {
     public static void beforeClass() {
         for (short i = 1; i <= 8; i++) {
             Fork a = mock(Fork.class);
-            Whitebox.setInternalState(a, "number", i);
+            TestUtils.setInternalState(a, "number", i, Fork.class);
             eightPendingForks[i - 1] = a;
         }
 

@@ -6,12 +6,9 @@
  */
 package org.semux.gui.dialog;
 
-import org.semux.core.bip39.Language;
-import org.semux.core.bip39.MnemonicGenerator;
-import org.semux.core.Wallet;
-import org.semux.gui.Action;
-import org.semux.gui.SwingUtil;
-import org.semux.message.GuiMessages;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -21,11 +18,17 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
+import org.semux.core.Wallet;
+import org.semux.core.bip39.Language;
+import org.semux.core.bip39.MnemonicGenerator;
+import org.semux.gui.Action;
+import org.semux.gui.SwingUtil;
+import org.semux.message.GuiMessages;
 
 public class CreateHdWalletDialog extends JDialog implements ActionListener {
+    private static final long serialVersionUID = 1L;
+
     private final transient Wallet wallet;
 
     private final JTextArea phraseField;

@@ -12,9 +12,6 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sub;
 import static org.semux.core.Amount.sum;
@@ -33,10 +30,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.semux.IntegrationTest;
 import org.semux.Kernel;
 import org.semux.Kernel.State;
@@ -50,7 +43,6 @@ import org.semux.core.Genesis;
 import org.semux.core.TransactionType;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
-import org.semux.net.NodeManager;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.SemuxChannelInitializer;
 import org.semux.rules.KernelRule;
@@ -62,9 +54,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Category(IntegrationTest.class)
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Genesis.class, NodeManager.class })
-@PowerMockIgnore({ "jdk.internal.*", "javax.management.*", "javax.crypto.*" })
 public class TransactTest {
 
     private static Logger logger = LoggerFactory.getLogger(TransactTest.class);
@@ -72,21 +61,30 @@ public class TransactTest {
     private static final Amount PREMINE = SEM.of(5000);
 
     @Rule
-    KernelRule kernelRuleValidator1 = new KernelRule(51610, 51710);
+    public KernelRule kernelRuleValidator1 = new KernelRule(51610, 51710);
 
     @Rule
-    KernelRule kernelRuleValidator2 = new KernelRule(51620, 51720);
+    public KernelRule kernelRuleValidator2 = new KernelRule(51620, 51720);
 
     @Rule
-    KernelRule kernelRulePremine = new KernelRule(51630, 51730);
+    public KernelRule kernelRulePremine = new KernelRule(51630, 51730);
 
     @Rule
-    KernelRule kernelRuleReceiver = new KernelRule(51640, 51740);
+    public KernelRule kernelRuleReceiver = new KernelRule(51640, 51740);
 
     public KernelMock kernelValidator1; // validator node
     public KernelMock kernelValidator2; // validator node
     public KernelMock kernelPremine; // normal node with balance
     public KernelMock kernelReceiver; // normal node with no balance
+
+    public TransactTest() {
+        // mock genesis.json
+        Genesis genesis = mockGenesis();
+        kernelRuleValidator1.setGenesis(genesis);
+        kernelRuleValidator2.setGenesis(genesis);
+        kernelRulePremine.setGenesis(genesis);
+        kernelRuleReceiver.setGenesis(genesis);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -99,11 +97,6 @@ public class TransactTest {
         kernelValidator2 = kernelRuleValidator2.getKernel();
         kernelPremine = kernelRulePremine.getKernel();
         kernelReceiver = kernelRuleReceiver.getKernel();
-
-        // mock genesis.json
-        Genesis genesis = mockGenesis();
-        mockStatic(Genesis.class);
-        when(Genesis.load(any())).thenReturn(genesis);
 
         // start kernels
         kernelValidator1.start();
@@ -384,12 +377,12 @@ public class TransactTest {
     private Genesis mockGenesis() {
         // mock premine
         List<Genesis.Premine> premines = new ArrayList<>();
-        premines.add(new Genesis.Premine(kernelPremine.getCoinbase().toAddress(), PREMINE, ""));
+        premines.add(new Genesis.Premine(kernelRulePremine.getCoinbase().toAddress(), PREMINE, ""));
 
         // mock delegates
         HashMap<String, String> delegates = new HashMap<>();
-        delegates.put("kernelValidator1", kernelValidator1.getCoinbase().toAddressString());
-        delegates.put("kernelValidator2", kernelValidator2.getCoinbase().toAddressString());
+        delegates.put("kernelValidator1", kernelRuleValidator1.getCoinbase().toAddressString());
+        delegates.put("kernelValidator2", kernelRuleValidator2.getCoinbase().toAddressString());
 
         // mock genesis
         return Genesis.jsonCreator(0,

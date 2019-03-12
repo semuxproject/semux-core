@@ -10,9 +10,6 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -36,26 +33,19 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 import org.semux.IntegrationTest;
 import org.semux.Kernel;
+import org.semux.TestUtils;
+import org.semux.config.AbstractConfig;
 import org.semux.config.Config;
 import org.semux.core.Genesis;
-import org.semux.net.NodeManager;
 import org.semux.rules.KernelRule;
 
 @Category(IntegrationTest.class)
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Genesis.class, NodeManager.class })
-@PowerMockIgnore({ "jdk.internal.*", "javax.management.*", "javax.crypto.*" })
 public class ConnectionTest {
 
     @Rule
-    KernelRule kernelRule1 = new KernelRule(51610, 51710);
+    public KernelRule kernelRule1 = new KernelRule(51610, 51710);
 
     Thread serverThread;
 
@@ -67,13 +57,13 @@ public class ConnectionTest {
     public void setUp() {
         // mock genesis.json
         Genesis genesis = mockGenesis();
-        mockStatic(Genesis.class);
-        when(Genesis.load(any())).thenReturn(genesis);
+        kernelRule1.setGenesis(genesis);
 
         // configure kernel
         // netMaxInboundConnectionsPerIp = 5
         Config config = kernelRule1.getKernel().getConfig();
-        Whitebox.setInternalState(config, "netMaxInboundConnectionsPerIp", netMaxInboundConnectionsPerIp);
+        TestUtils.setInternalState(config, "netMaxInboundConnectionsPerIp", netMaxInboundConnectionsPerIp,
+                AbstractConfig.class);
         kernelRule1.getKernel().setConfig(config);
 
         // start kernel

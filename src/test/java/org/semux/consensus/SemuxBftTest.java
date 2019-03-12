@@ -16,8 +16,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,8 +28,6 @@ import java.util.stream.IntStream;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.TestUtils;
 import org.semux.config.Constants;
 import org.semux.config.MainnetConfig;
@@ -49,7 +47,6 @@ import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RunWith(MockitoJUnitRunner.class)
 public class SemuxBftTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxBftTest.class);
@@ -151,7 +148,7 @@ public class SemuxBftTest {
         // the block should be rejected because of the duplicated tx
         semuxBFT.proposal = new Proposal(new Proof(block2.getNumber(), 0), block2.getHeader(), Collections.emptyList());
         semuxBFT.proposal.sign(from2);
-        assertFalse(semuxBFT.validateBlock(block2.getHeader(), block2.getTransactions()));
+        assertFalse(semuxBFT.validateBlockProposal(block2.getHeader(), block2.getTransactions()));
     }
 
     @Test
@@ -198,7 +195,7 @@ public class SemuxBftTest {
                 Collections.emptyList());
 
         SemuxBft semuxBFT = new SemuxBft(kernelRule.getKernel());
-        assertFalse(semuxBFT.validateBlock(block.getHeader(), Collections.emptyList()));
+        assertFalse(semuxBFT.validateBlockProposal(block.getHeader(), Collections.emptyList()));
     }
 
     @Test
@@ -215,7 +212,7 @@ public class SemuxBftTest {
         SemuxBft semuxBFT = new SemuxBft(kernelRule.getKernel());
         semuxBFT.proposal = new Proposal(new Proof(block.getNumber(), 0), block.getHeader(), Collections.emptyList());
         semuxBFT.proposal.sign(new Key());
-        assertFalse(semuxBFT.validateBlock(block.getHeader(), Collections.emptyList()));
+        assertFalse(semuxBFT.validateBlockProposal(block.getHeader(), Collections.emptyList()));
     }
 
     @Test
@@ -236,7 +233,7 @@ public class SemuxBftTest {
         semuxBFT.proposal = new Proposal(new Proof(block.getNumber(), 0), block.getHeader(),
                 Collections.singletonList(tx));
         semuxBFT.proposal.sign(blockForger);
-        assertFalse(semuxBFT.validateBlock(block.getHeader(), Collections.singletonList(tx)));
+        assertFalse(semuxBFT.validateBlockProposal(block.getHeader(), Collections.singletonList(tx)));
     }
 
     @Test

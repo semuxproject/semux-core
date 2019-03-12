@@ -6,12 +6,10 @@
  */
 package org.semux.core.bip32.crypto;
 
-import org.semux.core.bip32.crypto.Hash;
-import org.semux.core.bip32.crypto.Secp256k1;
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.math.BigInteger;
 import java.util.Arrays;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * General Util class for defined functions.

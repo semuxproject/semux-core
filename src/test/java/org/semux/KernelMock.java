@@ -10,6 +10,7 @@ import org.semux.config.Config;
 import org.semux.consensus.SemuxBft;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
+import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Wallet;
 import org.semux.crypto.Key;
@@ -28,11 +29,12 @@ public class KernelMock extends Kernel {
      * Creates a kernel mock with the given configuration, wallet and coinbase.
      * 
      * @param config
+     * @param genesis
      * @param wallet
      * @param coinbase
      */
-    public KernelMock(Config config, Wallet wallet, Key coinbase) {
-        super(config, wallet, coinbase);
+    public KernelMock(Config config, Genesis genesis, Wallet wallet, Key coinbase) {
+        super(config, genesis, wallet, coinbase);
     }
 
     /**

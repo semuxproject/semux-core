@@ -6,8 +6,6 @@
  */
 package org.semux.core.bip39;
 
-import org.semux.core.bip39.Language;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

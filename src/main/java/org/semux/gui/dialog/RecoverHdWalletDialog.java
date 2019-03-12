@@ -6,16 +6,11 @@
  */
 package org.semux.gui.dialog;
 
-import org.semux.core.bip39.Language;
-import org.semux.core.bip39.MnemonicGenerator;
-import org.semux.core.Wallet;
-import org.semux.crypto.Key;
-import org.semux.gui.Action;
-import org.semux.gui.SemuxGui;
-import org.semux.gui.SwingUtil;
-import org.semux.message.GuiMessages;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -25,13 +20,21 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
+
+import org.semux.core.Wallet;
+import org.semux.core.bip39.Language;
+import org.semux.core.bip39.MnemonicGenerator;
+import org.semux.crypto.Key;
+import org.semux.gui.Action;
+import org.semux.gui.SemuxGui;
+import org.semux.gui.SwingUtil;
+import org.semux.message.GuiMessages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RecoverHdWalletDialog extends JDialog implements ActionListener {
+    private static final long serialVersionUID = 1L;
+
     private final transient SemuxGui gui;
     private static final Logger logger = LoggerFactory.getLogger(RecoverHdWalletDialog.class);
 

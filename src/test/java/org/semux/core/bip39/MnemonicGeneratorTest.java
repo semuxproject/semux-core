@@ -6,16 +6,12 @@
  */
 package org.semux.core.bip39;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 
-public class MnemonicGeneratorTest {
+import org.junit.Assert;
+import org.junit.Test;
 
-    private static final Logger logger = LoggerFactory.getLogger(MnemonicGeneratorTest.class);
+public class MnemonicGeneratorTest {
 
     public static final char jpSpace = '\u3000';
 
@@ -44,6 +40,7 @@ public class MnemonicGeneratorTest {
 
         String[] words = phrase.split(" ");
 
+        @SuppressWarnings("unused")
         int index = dictionary.indexOf(words[0]);
 
         try {

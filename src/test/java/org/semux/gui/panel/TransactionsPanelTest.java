@@ -41,7 +41,7 @@ import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
 
     @Rule

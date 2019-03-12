@@ -7,8 +7,6 @@
 
 package org.semux.core.bip32.wallet.key;
 
-import org.semux.core.bip32.wallet.key.HdKey;
-
 /**
  * Defines a key with a given public key
  */

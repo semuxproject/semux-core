@@ -12,6 +12,8 @@ package org.semux.core.bip32.exception;
  */
 public class CryptoException extends RuntimeException {
 
+    private static final long serialVersionUID = -4377490593096320229L;
+
     public CryptoException(String message) {
         super(message);
     }

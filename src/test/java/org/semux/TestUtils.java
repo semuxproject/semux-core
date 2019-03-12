@@ -6,6 +6,7 @@
  */
 package org.semux;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 
@@ -65,5 +66,94 @@ public class TestUtils {
         byte[] data = {};
 
         return new Transaction(network, type, to.toAddress(), value, fee, nonce, timestamp, data).sign(from);
+    }
+
+    // From:
+    // https://github.com/noushadali/powermock/blob/master/reflect/src/main/java/org/powermock/reflect/internal/WhiteboxImpl.java
+
+    /**
+     * Get the value of a field using reflection. Use this method when you need to
+     * specify in which class the field is declared. This might be useful when you
+     * have mocked the instance you are trying to access. Use this method to avoid
+     * casting.
+     *
+     * @param <T>
+     *            the expected type of the field
+     * @param object
+     *            the object to modify
+     * @param fieldName
+     *            the name of the field
+     * @param where
+     *            which class the field is defined
+     * @return the internal state
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getInternalState(Object object, String fieldName, Class<?> where) {
+        if (object == null || fieldName == null || fieldName.equals("") || fieldName.startsWith(" ")) {
+            throw new IllegalArgumentException("object, field name, and \"where\" must not be empty or null.");
+        }
+
+        Field field = null;
+        try {
+            field = where.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return (T) field.get(object);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Field '" + fieldName + "' was not found in class " + where.getName() + ".");
+        } catch (Exception e) {
+            throw new RuntimeException("Internal error: Failed to get field in method getInternalState.", e);
+        }
+    }
+
+    /**
+     * Set the value of a field using reflection. Use this method when you need to
+     * specify in which class the field is declared. This is useful if you have two
+     * fields in a class hierarchy that has the same name but you like to modify the
+     * latter.
+     *
+     * @param object
+     *            the object to modify
+     * @param fieldName
+     *            the name of the field
+     * @param value
+     *            the new value of the field
+     * @param where
+     *            which class the field is defined
+     */
+    public static void setInternalState(Object object, String fieldName, Object value, Class<?> where) {
+        if (object == null || fieldName == null || fieldName.equals("") || fieldName.startsWith(" ")) {
+            throw new IllegalArgumentException("object, field name, and \"where\" must not be empty or null.");
+        }
+
+        final Field field = getField(fieldName, where);
+        try {
+            field.set(object, value);
+        } catch (Exception e) {
+            throw new RuntimeException("Internal Error: Failed to set field in method setInternalState.", e);
+        }
+    }
+
+    /**
+     * Gets the field.
+     *
+     * @param fieldName
+     *            the field name
+     * @param where
+     *            the where
+     * @return the field
+     */
+    private static Field getField(String fieldName, Class<?> where) {
+        if (where == null) {
+            throw new IllegalArgumentException("where cannot be null");
+        }
+
+        Field field = null;
+        try {
+            field = where.getDeclaredField(fieldName);
+            field.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Field '" + fieldName + "' was not found in class " + where.getName() + ".");
+        }
+        return field;
     }
 }

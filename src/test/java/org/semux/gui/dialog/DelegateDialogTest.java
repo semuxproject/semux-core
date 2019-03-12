@@ -26,7 +26,7 @@ import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class DelegateDialogTest extends AssertJSwingJUnitTestCase {
 
     @Rule

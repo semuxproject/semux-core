@@ -7,14 +7,13 @@
 
 package org.semux.core.bip32;
 
-import org.semux.core.bip32.Network;
+import java.io.UnsupportedEncodingException;
+
+import org.junit.Test;
 import org.semux.core.bip32.extern.Hex;
 import org.semux.core.bip32.wallet.Bip44;
 import org.semux.core.bip32.wallet.CoinType;
 import org.semux.core.bip32.wallet.HdAddress;
-import org.junit.Test;
-
-import java.io.UnsupportedEncodingException;
 
 public class Bip44Test {
     private Bip44 bip44 = new Bip44();

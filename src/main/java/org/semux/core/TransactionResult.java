@@ -6,12 +6,12 @@
  */
 package org.semux.core;
 
-import org.ethereum.vm.DataWord;
-import org.ethereum.vm.LogInfo;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bouncycastle.util.encoders.Hex;
+import org.ethereum.vm.DataWord;
+import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.program.InternalTransaction;
 import org.semux.Network;
 import org.semux.util.Bytes;
@@ -171,7 +171,7 @@ public class TransactionResult {
     /**
      * Create a transaction result.
      *
-     * 
+     *
      * @param code
      * @param output
      * @param logs

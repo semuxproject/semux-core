@@ -105,6 +105,7 @@ public class BlockchainImpl implements Blockchain {
 
     private final List<BlockchainListener> listeners = new ArrayList<>();
     private final Config config;
+    private final Genesis genesis;
 
     private Database indexDB;
     private Database blockDB;
@@ -112,19 +113,17 @@ public class BlockchainImpl implements Blockchain {
     private AccountState accountState;
     private DelegateState delegateState;
 
-    private Genesis genesis;
     private Block latestBlock;
 
     private ActivatedForks forks;
 
-    /**
-     * Create a blockchain instance.
-     *
-     * @param config
-     * @param dbFactory
-     */
     public BlockchainImpl(Config config, DatabaseFactory dbFactory) {
+        this(config, Genesis.load(config.network()), dbFactory);
+    }
+
+    public BlockchainImpl(Config config, Genesis genesis, DatabaseFactory dbFactory) {
         this.config = config;
+        this.genesis = genesis;
         openDb(dbFactory);
     }
 
@@ -135,8 +134,6 @@ public class BlockchainImpl implements Blockchain {
         this.accountState = new AccountStateImpl(factory.getDB(DatabaseName.ACCOUNT));
         this.delegateState = new DelegateStateImpl(this, factory.getDB(DatabaseName.DELEGATE),
                 factory.getDB(DatabaseName.VOTE));
-
-        this.genesis = Genesis.load(config.network());
 
         // checks if the database needs to be initialized
         byte[] number = indexDB.get(Bytes.of(TYPE_LATEST_BLOCK_NUMBER));
@@ -336,7 +333,8 @@ public class BlockchainImpl implements Blockchain {
 
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
-        List<Pair<Integer, Integer>> txIndices = block.getTransactionIndices();
+        Pair<byte[], List<Integer>> transactionIndices = block.getEncodedTransactionsAndIndices();
+        Pair<byte[], List<Integer>> resultIndices = block.getEncodedTransactionsAndIndices();
         Amount reward = Block.getBlockReward(block, config);
 
         for (int i = 0; i < txs.size(); i++) {
@@ -344,8 +342,8 @@ public class BlockchainImpl implements Blockchain {
 
             SimpleEncoder enc = new SimpleEncoder();
             enc.writeLong(number);
-            enc.writeInt(txIndices.get(i).getLeft());
-            enc.writeInt(txIndices.get(i).getRight());
+            enc.writeInt(transactionIndices.getRight().get(i));
+            enc.writeInt(resultIndices.getRight().get(i));
 
             indexDB.put(Bytes.merge(TYPE_TRANSACTION_HASH, tx.getHash()), enc.toBytes());
 
@@ -457,7 +455,7 @@ public class BlockchainImpl implements Blockchain {
      *
      * @param number
      */
-    protected void updateValidators(long number) {
+    public void updateValidators(long number) {
         List<String> validators = new ArrayList<>();
 
         List<Delegate> delegates = delegateState.getDelegates();

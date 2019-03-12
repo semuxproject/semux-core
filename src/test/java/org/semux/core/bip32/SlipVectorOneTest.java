@@ -7,18 +7,17 @@
 
 package org.semux.core.bip32;
 
-import org.semux.core.bip32.Network;
+import static org.junit.Assert.fail;
+
+import java.io.UnsupportedEncodingException;
+
+import org.junit.Assert;
+import org.junit.Test;
 import org.semux.core.bip32.extern.Hex;
 import org.semux.core.bip32.wallet.CoinType;
 import org.semux.core.bip32.wallet.HdAddress;
 import org.semux.core.bip32.wallet.HdKeyGenerator;
 import org.semux.core.bip32.wallet.key.Curve;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.io.UnsupportedEncodingException;
-
-import static org.junit.Assert.fail;
 
 public class SlipVectorOneTest {
 

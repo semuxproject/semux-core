@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -35,18 +36,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.reflect.Whitebox;
 import org.semux.TestUtils;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Fork;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
-import org.semux.core.Fork;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
@@ -216,7 +215,7 @@ public class SemuxSyncTest {
         checkpoints.put(block.getNumber(), RandomUtils.nextBytes(32));
         Config config = spy(kernelRule.getKernel().getConfig());
         when(config.checkpoints()).thenReturn(checkpoints);
-        Whitebox.setInternalState(sync, "config", config);
+        TestUtils.setInternalState(sync, "config", config, SemuxSync.class);
 
         // tests
         assertFalse(sync.validateBlock(block, chain.getAccountState(), chain.getDelegateState()));
@@ -232,10 +231,9 @@ public class SemuxSyncTest {
             validators.add(Hex.encode(keys.get(i).toAddress()));
         }
 
-        BlockchainImpl chain = PowerMockito
-                .spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        BlockchainImpl chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
         doReturn(validators).when(chain).getValidators();
-        PowerMockito.doNothing().when(chain, "updateValidators", anyLong());
+        doNothing().when(chain).updateValidators(anyLong());
         kernelRule.getKernel().setBlockchain(chain);
 
         validatorInterval = kernelRule.getKernel().getConfig().getValidatorUpdateInterval();
@@ -275,28 +273,28 @@ public class SemuxSyncTest {
             Thread.sleep(2); // to avoid duplicate time stamp
         }
 
-        AtomicBoolean isRunning = Whitebox.getInternalState(sync, "isRunning");
+        AtomicBoolean isRunning = TestUtils.getInternalState(sync, "isRunning", SemuxSync.class);
         isRunning.set(true);
-        Whitebox.setInternalState(sync, "toProcess", toProcess);
-        AtomicLong target = Whitebox.getInternalState(sync, "target");
+        TestUtils.setInternalState(sync, "toProcess", toProcess, SemuxSync.class);
+        AtomicLong target = TestUtils.getInternalState(sync, "target", SemuxSync.class);
         target.set(validatorInterval + 1);
 
-        Whitebox.invokeMethod(sync, "process");
-        TreeSet<Pair<Block, Channel>> currentSet = Whitebox.getInternalState(sync, "currentSet");
-        Map<Long, Pair<Block, Channel>> toFinalize = Whitebox.getInternalState(sync, "toFinalize");
+        sync.process();
+        TreeSet<Pair<Block, Channel>> currentSet = TestUtils.getInternalState(sync, "currentSet", SemuxSync.class);
+        Map<Long, Pair<Block, Channel>> toFinalize = TestUtils.getInternalState(sync, "toFinalize", SemuxSync.class);
 
         assert (toProcess.isEmpty());
         assert (currentSet.isEmpty());
         assert (toFinalize.size() == validatorInterval);
-        assertTrue(Whitebox.getInternalState(sync, "fastSync"));
+        assertTrue(TestUtils.getInternalState(sync, "fastSync", SemuxSync.class));
 
         for (int i = 0; i < validatorInterval; i++) {
-            Whitebox.invokeMethod(sync, "process");
+            sync.process();
         }
 
         assert (toFinalize.isEmpty());
         assert (chain.getLatestBlockNumber() == validatorInterval);
-        assertFalse(Whitebox.getInternalState(sync, "fastSync"));
+        assertFalse(TestUtils.getInternalState(sync, "fastSync", SemuxSync.class));
     }
 
     @Test
@@ -309,8 +307,7 @@ public class SemuxSyncTest {
             validators.add(Hex.encode(keys.get(i).toAddress()));
         }
 
-        BlockchainImpl chain = PowerMockito
-                .spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        BlockchainImpl chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
         doReturn(validators).when(chain).getValidators();
         kernelRule.getKernel().setBlockchain(chain);
 
@@ -325,10 +322,10 @@ public class SemuxSyncTest {
         TreeSet<Pair<Block, Channel>> toProcess = new TreeSet<>(
                 Comparator.comparingLong(o -> o.getKey().getNumber()));
 
-        AtomicBoolean isRunning = Whitebox.getInternalState(sync, "isRunning");
+        AtomicBoolean isRunning = TestUtils.getInternalState(sync, "isRunning", SemuxSync.class);
         isRunning.set(true);
-        Whitebox.setInternalState(sync, "toProcess", toProcess);
-        AtomicLong target = Whitebox.getInternalState(sync, "target");
+        TestUtils.setInternalState(sync, "toProcess", toProcess, SemuxSync.class);
+        AtomicLong target = TestUtils.getInternalState(sync, "target", SemuxSync.class);
         target.set(validatorInterval - 1); // when the remaining number of blocks to sync < validatorInterval fastSync
                                            // is not activated
 
@@ -344,11 +341,11 @@ public class SemuxSyncTest {
         }
 
         toProcess.add(Pair.of(block, channel));
-        Whitebox.invokeMethod(sync, "process");
+        sync.process();
 
         // when fastSync is not activated, votes are validated for each block
         assert (toProcess.isEmpty());
-        assertFalse(Whitebox.getInternalState(sync, "fastSync"));
+        assertFalse(TestUtils.getInternalState(sync, "fastSync", SemuxSync.class));
         assert (chain.getLatestBlockNumber() == 0);
 
         vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
@@ -362,16 +359,16 @@ public class SemuxSyncTest {
         }
 
         toProcess.add(Pair.of(block, channel));
-        Whitebox.invokeMethod(sync, "process");
+        sync.process();
 
         assert (toProcess.isEmpty());
-        assertFalse(Whitebox.getInternalState(sync, "fastSync"));
+        assertFalse(TestUtils.getInternalState(sync, "fastSync", SemuxSync.class));
         assert (chain.getLatestBlockNumber() == 1);
 
         target.set(10 * validatorInterval); // fastSync is activated only at the beginning of a validator set
-        Whitebox.invokeMethod(sync, "process");
+        sync.process();
 
-        assertFalse(Whitebox.getInternalState(sync, "fastSync"));
+        assertFalse(TestUtils.getInternalState(sync, "fastSync", SemuxSync.class));
     }
 
     @Test
@@ -391,7 +388,7 @@ public class SemuxSyncTest {
         validatorInterval = kernelRule.getKernel().getConfig().getValidatorUpdateInterval();
 
         SemuxSync sync = spy(new SemuxSync(kernelRule.getKernel()));
-        Whitebox.setInternalState(sync, "lastBlockInSet", validatorInterval);
+        TestUtils.setInternalState(sync, "lastBlockInSet", validatorInterval, SemuxSync.class);
 
         MessageQueue msgQueue = mock(MessageQueue.class);
         Channel channel = mock(Channel.class);
@@ -411,11 +408,11 @@ public class SemuxSyncTest {
             currentSet.add(Pair.of(block, channel));
         }
 
-        Whitebox.setInternalState(sync, "currentSet", currentSet);
-        Map<Long, Pair<Block, Channel>> toFinalize = Whitebox.getInternalState(sync, "toFinalize");
-        TreeSet<Long> toDownload = Whitebox.getInternalState(sync, "toDownload");
+        TestUtils.setInternalState(sync, "currentSet", currentSet, SemuxSync.class);
+        Map<Long, Pair<Block, Channel>> toFinalize = TestUtils.getInternalState(sync, "toFinalize", SemuxSync.class);
+        TreeSet<Long> toDownload = TestUtils.getInternalState(sync, "toDownload", SemuxSync.class);
 
-        Whitebox.invokeMethod(sync, "validateSetHashes");
+        sync.validateSetHashes();
 
         assert (currentSet.size() == validatorInterval / 2);
         assert (toFinalize.isEmpty());
@@ -435,7 +432,7 @@ public class SemuxSyncTest {
         Block lastBlock = kernelRule.createBlock(Collections.emptyList(), currentSet.last().getKey().getHeader());
         currentSet.add(Pair.of(lastBlock, channel));
 
-        Whitebox.invokeMethod(sync, "validateSetHashes"); // last block votes are validated
+        sync.validateSetHashes();
 
         assert (currentSet.size() == validatorInterval - 1);
         assert (toFinalize.isEmpty());
@@ -452,7 +449,7 @@ public class SemuxSyncTest {
         }
 
         currentSet.add(Pair.of(lastBlock, channel));
-        Whitebox.invokeMethod(sync, "validateSetHashes"); // invalid block is added back to the download queue
+        sync.validateSetHashes();
 
         assert (currentSet.size() == validatorInterval / 2);
         assert (toFinalize.size() == validatorInterval - currentSet.size() - 1);
@@ -460,13 +457,13 @@ public class SemuxSyncTest {
 
         Channel channel2 = new Channel(null);
         currentSet.add(Pair.of(lastBlock, channel2));
-        Whitebox.invokeMethod(sync, "validateSetHashes"); // only one block with the same height is added to toFinalize
+        sync.validateSetHashes();
 
         assert (currentSet.size() == validatorInterval / 2);
         assert (toFinalize.size() == validatorInterval - currentSet.size() - 1);
 
         currentSet.add(Pair.of(validBlock, channel));
-        Whitebox.invokeMethod(sync, "validateSetHashes");
+        sync.validateSetHashes();
 
         assert (currentSet.isEmpty());
         assert (toFinalize.size() == validatorInterval);
