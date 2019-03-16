@@ -117,10 +117,6 @@ public class Block {
         this(header, transactions, new ArrayList<>(), 0, new ArrayList<>());
     }
 
-    public Block(BlockHeader header, List<Transaction> transactions, int view, List<Signature> votes) {
-        this(header, transactions, new ArrayList<>(), view, votes);
-    }
-
     public Block(BlockHeader header, List<Transaction> transactions, List<TransactionResult> results) {
         this(header, transactions, results, 0, new ArrayList<>());
     }
@@ -476,6 +472,13 @@ public class Block {
      * @return
      */
     public static Block fromComponents(byte[] h, byte[] t, byte[] r, byte[] v) {
+        if (h == null) {
+            throw new IllegalArgumentException("Block header can't be null");
+        }
+        if (t == null) {
+            throw new IllegalArgumentException("Block transactions can't be null");
+        }
+
         BlockHeader header = BlockHeader.fromBytes(h);
 
         SimpleDecoder dec = new SimpleDecoder(t);
@@ -485,16 +488,17 @@ public class Block {
             transactions.add(Transaction.fromBytes(dec.readBytes()));
         }
 
-        dec = new SimpleDecoder(r);
         List<TransactionResult> results = new ArrayList<>();
-        n = dec.readInt();
-        for (int i = 0; i < n; i++) {
-            results.add(TransactionResult.fromBytes(dec.readBytes()));
+        if (r != null) {
+            dec = new SimpleDecoder(r);
+            n = dec.readInt();
+            for (int i = 0; i < n; i++) {
+                results.add(TransactionResult.fromBytes(dec.readBytes()));
+            }
         }
 
         int view = 0;
         List<Signature> votes = new ArrayList<>();
-
         if (v != null) {
             dec = new SimpleDecoder(v);
             view = dec.readInt();

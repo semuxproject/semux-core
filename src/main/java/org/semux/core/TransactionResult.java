@@ -6,124 +6,139 @@
  */
 package org.semux.core;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bouncycastle.util.encoders.Hex;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
+import org.ethereum.vm.OpCode;
 import org.ethereum.vm.program.InternalTransaction;
 import org.semux.Network;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
-// TODO: rename to transaction receipts
 public class TransactionResult {
 
     /**
-     * Transaction result code. There are currently three categories of code:
-     * <ul>
-     * <li>REJECTED: the transaction is invalid and should not be included in the
-     * chain.</li>
-     * <li>SUCCESS: the transaction is valid and the evaluation was successful.</li>
-     * <li>FAILURE: the transaction is valid but some failure occurred during the
-     * evaluation. For this type of transaction, the fee should be charged but state
-     * changes should be reverted.</li>
-     * </ul>
+     * Transaction execution result code.
      */
     public enum Code {
 
         /**
-         * The transaction was executed successfully.
+         * Success. The values has to be 0x01 for compatibility.
          */
-        SUCCESS,
+        SUCCESS(0x01),
 
         /**
-         * The transaction was executed with failure (reserved for virtual machine).
+         * VM failure, e.g. REVERT, STACK_OVERFLOW, OUT_OF_GAS, etc.
          */
-        FAILURE,
+        FAILURE(0x02),
 
         /**
-         * The transaction hash is duplicated.
+         * The transaction hash is invalid (should NOT be included on chain).
          */
-        DUPLICATE_TRANSACTION,
+        INVALID(0x20),
 
         /**
          * The transaction format is invalid. See {@link Transaction#validate(Network)}
          */
-        INVALID_FORMAT,
+        INVALID_FORMAT(0x21),
 
         /**
          * The transaction timestamp is incorrect. See
          * {@link PendingManager#processTransaction(Transaction, boolean)}.
          */
-        INVALID_TIMESTAMP,
+        INVALID_TIMESTAMP(0x22),
 
         /**
          * The transaction type is invalid.
          */
-        INVALID_TYPE,
+        INVALID_TYPE(0x23),
 
         /**
          * The transaction nonce does not match the account nonce.
          */
-        INVALID_NONCE,
+        INVALID_NONCE(0x24),
 
         /**
          * The transaction fee doesn't meet the minimum.
          */
-        INVALID_FEE,
+        INVALID_FEE(0x25),
 
         /**
          * The specified gas amount is larger than any gas limit
          */
-        INVALID_GAS,
+        INVALID_GAS(0x26),
 
         /**
          * The transaction data is invalid, typically too large.
          */
-        INVALID_DATA,
+        INVALID_DATA(0x27),
 
         /**
          * Insufficient available balance.
          */
-        INSUFFICIENT_AVAILABLE,
+        INSUFFICIENT_AVAILABLE(0x28),
 
         /**
          * Insufficient locked balance.
          */
-        INSUFFICIENT_LOCKED,
+        INSUFFICIENT_LOCKED(0x29),
 
         /**
          * Invalid delegate name.
          */
-        INVALID_DELEGATE_NAME,
+        INVALID_DELEGATE_NAME(0x2a),
 
         /**
          * Invalid burning address.
          */
-        INVALID_DELEGATE_BURN_ADDRESS,
+        INVALID_DELEGATE_BURN_ADDRESS(0x2b),
 
         /**
          * Invalid delegate burn amount.
          */
-        INVALID_DELEGATE_BURN_AMOUNT,
+        INVALID_DELEGATE_BURN_AMOUNT(0x2c),
 
         /**
          * The DELEGATE operation is invalid.
          */
-        INVALID_DELEGATING,
+        INVALID_DELEGATING(0x2d),
 
         /**
          * The VOTE operation is invalid.
          */
-        INVALID_VOTING,
+        INVALID_VOTING(0x2e),
 
         /**
          * The UNVOTE operation is invalid.
          */
-        INVALID_UNVOTING;
+        INVALID_UNVOTING(0x2f);
+
+        private static Code[] map = new Code[256];
+
+        static {
+            for (Code code : Code.values()) {
+                map[code.v] = code;
+            }
+        }
+
+        private byte v;
+
+        Code(int c) {
+            this.v = (byte) c;
+        }
+
+        public static Code of(int c) {
+            return map[c];
+        }
+
+        public byte toByte() {
+            return v;
+        }
 
         public boolean isSuccess() {
             return this == SUCCESS;
@@ -133,12 +148,12 @@ public class TransactionResult {
             return this == FAILURE;
         }
 
-        public boolean isAccepted() {
-            return isSuccess() || isFailure();
+        public boolean isRejected() {
+            return !isSuccess() && !isFailure();
         }
 
-        public boolean isRejected() {
-            return !isAccepted();
+        public boolean isAcceptable() {
+            return isSuccess() || isFailure();
         }
     }
 
@@ -158,38 +173,44 @@ public class TransactionResult {
     protected List<LogInfo> logs;
 
     /**
-     * Gas used
+     * Gas info
      */
+    protected long gas;
+    protected long gasPrice;
     protected long gasUsed;
 
     /**
-     * TODO: add block number and internal transactions
+     * Block info
      */
     protected long blockNumber;
+
+    /**
+     * Internal transactions
+     */
     protected List<InternalTransaction> internalTransactions;
 
     /**
      * Create a transaction result.
-     *
-     *
-     * @param code
-     * @param output
-     * @param logs
      */
-    public TransactionResult(Code code, byte[] output, List<LogInfo> logs, long gasUsed) {
-        super();
-        this.code = code;
-        this.returnData = output;
-        this.logs = logs;
-        this.gasUsed = gasUsed;
+    public TransactionResult() {
+        this(Code.SUCCESS);
     }
 
     public TransactionResult(Code code) {
-        this(code, Bytes.EMPTY_BYTES, new ArrayList<>(), 0);
+        this(code, Bytes.EMPTY_BYTES, new ArrayList<>());
     }
 
-    public TransactionResult() {
-        this(Code.SUCCESS, Bytes.EMPTY_BYTES, new ArrayList<>(), 0);
+    public TransactionResult(Code code, byte[] returnData, List<LogInfo> logs) {
+        this.code = code;
+        this.returnData = returnData;
+        this.logs = logs;
+
+        this.gas = 0;
+        this.gasPrice = 0;
+        this.gasUsed = 0;
+
+        this.blockNumber = 0;
+        this.internalTransactions = new ArrayList<>();
     }
 
     public Code getCode() {
@@ -220,34 +241,38 @@ public class TransactionResult {
         this.logs.add(log);
     }
 
-    public Long getGasUsed() {
-        return gasUsed;
+    public long getGas() {
+        return gas;
     }
 
-    public void setGasUsed(long gasUsed) {
+    public void setGas(long gas, long gasPrice, long gasUsed) {
+        this.gas = gas;
+        this.gasPrice = gasPrice;
         this.gasUsed = gasUsed;
     }
 
-    public byte[] toBytes() {
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBoolean(code == Code.SUCCESS);
-        enc.writeBytes(returnData);
-        enc.writeInt(logs.size());
-        for (LogInfo log : logs) {
-            enc.writeBytes(serializeLog(log));
-        }
+    public long getGasPrice() {
+        return gasPrice;
+    }
 
-        // TODO: provide another version of toBytes() for resultsRoot validation.
-        // TODO: use the computed results, rather than network bytes.
+    public long getGasUsed() {
+        return gasUsed;
+    }
 
-        // only write gasUsed if it exists to maintain backwards compatibility
-        // this maintains backwards compatibility until VM calls are enabled with
-        // fork check
-        if (gasUsed > 0) {
-            enc.writeLong(gasUsed);
-        }
+    public long getBlockNumber() {
+        return blockNumber;
+    }
 
-        return enc.toBytes();
+    public void setBlockNumber(long blockNumber) {
+        this.blockNumber = blockNumber;
+    }
+
+    public List<InternalTransaction> getInternalTransactions() {
+        return internalTransactions;
+    }
+
+    public void setInternalTransactions(List<InternalTransaction> internalTransactions) {
+        this.internalTransactions = internalTransactions;
     }
 
     private byte[] serializeLog(LogInfo log) {
@@ -275,24 +300,121 @@ public class TransactionResult {
         return new LogInfo(address, topics, data);
     }
 
-    public static TransactionResult fromBytes(byte[] bytes) {
+    protected static byte[] serializeInternalTransaction(InternalTransaction tx) {
+        SimpleEncoder enc = new SimpleEncoder();
+        enc.writeBoolean(tx.isRejected());
+        enc.writeInt(tx.getDepth());
+        enc.writeInt(tx.getIndex());
+        enc.writeByte(tx.getType().val());
+        enc.writeBytes(tx.getFrom());
+        enc.writeBytes(tx.getTo());
+        enc.writeLong(tx.getNonce());
+        enc.writeLong(tx.getValue().longValue()); // FIXME: value unit mismatch
+        enc.writeBytes(tx.getData());
+        enc.writeLong(tx.getGas());
+        enc.writeLong(tx.getGasPrice().longValue()); // FIXME: value unit mismatch
+
+        return enc.toBytes();
+    }
+
+    protected static InternalTransaction deserializeInternalTransaction(byte[] bytes) {
         SimpleDecoder dec = new SimpleDecoder(bytes);
-        boolean success = dec.readBoolean();
-        byte[] returns = dec.readBytes();
+        boolean isRejected = dec.readBoolean();
+        int depth = dec.readInt();
+        int index = dec.readInt();
+        OpCode type = OpCode.code(dec.readByte());
+        byte[] from = dec.readBytes();
+        byte[] to = dec.readBytes();
+        long nonce = dec.readLong();
+        BigInteger value = BigInteger.valueOf(dec.readLong());
+        byte[] data = dec.readBytes();
+        long gas = dec.readLong();
+        BigInteger gasPrice = BigInteger.valueOf(dec.readLong());
+
+        InternalTransaction tx = new InternalTransaction(null, depth, index,
+                type, from, to, nonce, value, data, gas, gasPrice);
+        if (isRejected) {
+            tx.reject();
+        }
+
+        return tx;
+    }
+
+    public static TransactionResult fromBytes(byte[] bytes) {
+        TransactionResult result = new TransactionResult();
+
+        SimpleDecoder dec = new SimpleDecoder(bytes);
+        Code code = Code.of(dec.readByte());
+        result.setCode(code);
+
+        byte[] returnData = dec.readBytes();
+        result.setReturnData(returnData);
+
         List<LogInfo> logs = new ArrayList<>();
         int n = dec.readInt();
         for (int i = 0; i < n; i++) {
             logs.add(unserializeLog(dec.readBytes()));
         }
-        long gasUsed = 0;
-        try {
-            gasUsed = dec.readLong();
-        } catch (Exception e) {
-            // old blocks won't have this field
+        result.setLogs(logs);
+
+        // Dirty hack to maintain backward compatibility
+        if (dec.getReadIndex() != bytes.length) {
+            long gas = dec.readLong();
+            long gasPrice = dec.readLong();
+            long gasUsed = dec.readLong();
+            result.setGas(gas, gasPrice, gasUsed);
+
+            long blockNumber = dec.readLong();
+            result.setBlockNumber(blockNumber);
+
+            List<InternalTransaction> internalTransactions = new ArrayList<>();
+            n = dec.readInt();
+            for (int i = 0; i < n; i++) {
+                internalTransactions.add(deserializeInternalTransaction(dec.readBytes()));
+            }
+            result.setInternalTransactions(internalTransactions);
         }
 
-        // todo - this seems problematic, !success could be any number of things
-        return new TransactionResult(success ? Code.SUCCESS : Code.FAILURE, returns, logs, gasUsed);
+        return result;
+    }
+
+    public byte[] toBytes() {
+        SimpleEncoder enc = new SimpleEncoder();
+        enc.writeByte(code.toByte());
+        enc.writeBytes(returnData);
+        enc.writeInt(logs.size());
+        for (LogInfo log : logs) {
+            enc.writeBytes(serializeLog(log));
+        }
+
+        // The following fields are incompatible with old versions,
+        // but it's fine because the old clients are not reading
+        // these data.
+
+        enc.writeLong(gas);
+        enc.writeLong(gasPrice);
+        enc.writeLong(gasUsed);
+
+        enc.writeLong(blockNumber);
+
+        enc.writeInt(internalTransactions.size());
+        for (InternalTransaction tx : internalTransactions) {
+            enc.writeBytes(serializeInternalTransaction(tx));
+        }
+
+        return enc.toBytes();
+    }
+
+    public byte[] toBytesForMerkle() {
+        SimpleEncoder enc = new SimpleEncoder();
+        enc.writeByte(code.toByte());
+        enc.writeBytes(returnData);
+        enc.writeInt(logs.size());
+        for (LogInfo log : logs) {
+            enc.writeBytes(serializeLog(log));
+        }
+
+        return enc.toBytes();
     }
 
     @Override

@@ -232,7 +232,7 @@ public class TransactionExecutor {
                     result.setCode(Code.INVALID_GAS);
                 } else {
                     executeVmTransaction(result, tx, as, block, gasUsedInBlock);
-                    if (result.getCode().isAccepted()) {
+                    if (result.getCode().isAcceptable()) {
                         gasUsedInBlock += result.getGasUsed();
                     }
                 }
@@ -247,9 +247,11 @@ public class TransactionExecutor {
 
             // increase nonce if success
             // creates and calls increase their own nonces internal to VM
-            if (result.getCode().isAccepted() && !isVmCall) {
+            if (result.getCode().isAcceptable() && !isVmCall) {
                 as.increaseNonce(from);
             }
+
+            result.setBlockNumber(block.getNumber());
         }
 
         return results;
@@ -266,16 +268,20 @@ public class TransactionExecutor {
                 Spec.DEFAULT, invokeFactory, gasUsedInBlock, false);
 
         TransactionReceipt summary = executor.run();
+
         if (summary == null) {
-            result.setCode(Code.INVALID_GAS);
-            result.setGasUsed(tx.getGas());
+            result.setCode(Code.INVALID);
         } else {
+            result.setCode(summary.isSuccess() ? Code.SUCCESS : Code.FAILURE);
+            result.setReturnData(summary.getReturnData());
             for (LogInfo log : summary.getLogs()) {
                 result.addLog(log);
             }
-            result.setGasUsed(summary.getGasUsed());
-            result.setReturnData(summary.getReturnData());
-            result.setCode(summary.isSuccess() ? Code.SUCCESS : Code.FAILURE);
+
+            result.setGas(tx.getGas(), tx.getGasPrice(), summary.getGasUsed());
+
+            result.setBlockNumber(block.getNumber());
+            result.setInternalTransactions(summary.getInternalTransactions());
         }
     }
 

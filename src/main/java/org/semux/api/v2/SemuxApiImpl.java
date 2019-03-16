@@ -53,8 +53,8 @@ import org.semux.api.v2.model.GetPeersResponse;
 import org.semux.api.v2.model.GetPendingTransactionsResponse;
 import org.semux.api.v2.model.GetSyncingProgressResponse;
 import org.semux.api.v2.model.GetTransactionLimitsResponse;
-import org.semux.api.v2.model.GetTransactionReceiptResponse;
 import org.semux.api.v2.model.GetTransactionResponse;
+import org.semux.api.v2.model.GetTransactionResultResponse;
 import org.semux.api.v2.model.GetValidatorsResponse;
 import org.semux.api.v2.model.GetVoteResponse;
 import org.semux.api.v2.model.GetVotesResponse;
@@ -555,9 +555,9 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response getTransactionReceipt(
+    public Response getTransactionResult(
             @NotNull @javax.validation.constraints.Pattern(regexp = "^(0x)?[0-9a-fA-F]{64}$") String hash) {
-        GetTransactionReceiptResponse resp = new GetTransactionReceiptResponse();
+        GetTransactionResultResponse resp = new GetTransactionResultResponse();
 
         if (!isSet(hash)) {
             return badRequest(resp, "Parameter `hash` is required");
@@ -575,7 +575,7 @@ public final class SemuxApiImpl implements SemuxApi {
             return badRequest(resp, "The request transaction was not found");
         }
 
-        resp.setResult(TypeFactory.transactionReceiptType(result));
+        resp.setResult(TypeFactory.transactionResultType(result));
 
         return success(resp);
     }
@@ -788,11 +788,11 @@ public final class SemuxApiImpl implements SemuxApi {
             org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                     transaction, block, repository, blockStore,
                     Spec.DEFAULT, invokeFactory, gasUsedInBlock, true);
-            TransactionReceipt results = executor.run();
+            TransactionReceipt receipt = executor.run();
 
             DoTransactionResponse resp = new DoTransactionResponse();
-            resp.setResult(Hex.encode0x(results.getReturnData()));
-            if (!results.isSuccess()) {
+            resp.setResult(Hex.encode0x(receipt.getReturnData()));
+            if (!receipt.isSuccess()) {
                 return badRequest(resp, "Error calling method");
             } else {
                 return success(resp);

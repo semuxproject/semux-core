@@ -281,7 +281,7 @@ public class BlockchainImpl implements Blockchain {
         if (bytes != null) {
             // coinbase transaction
             if (bytes.length > 64) {
-                return new TransactionResult();
+                return null; // no results for coinbase transaction
             }
 
             SimpleDecoder dec = new SimpleDecoder(bytes);

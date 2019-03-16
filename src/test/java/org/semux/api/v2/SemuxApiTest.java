@@ -89,8 +89,8 @@ import org.semux.api.v2.model.GetPeersResponse;
 import org.semux.api.v2.model.GetPendingTransactionsResponse;
 import org.semux.api.v2.model.GetSyncingProgressResponse;
 import org.semux.api.v2.model.GetTransactionLimitsResponse;
-import org.semux.api.v2.model.GetTransactionReceiptResponse;
 import org.semux.api.v2.model.GetTransactionResponse;
+import org.semux.api.v2.model.GetTransactionResultResponse;
 import org.semux.api.v2.model.GetValidatorsResponse;
 import org.semux.api.v2.model.GetVoteResponse;
 import org.semux.api.v2.model.GetVotesResponse;
@@ -462,7 +462,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
                 Collections.singletonList(res));
         chain.addBlock(block);
 
-        GetTransactionReceiptResponse response = api.getTransactionReceipt(Hex.encode(tx.getHash()));
+        GetTransactionResultResponse response = api.getTransactionResult(Hex.encode(tx.getHash()));
         assertTrue(response.isSuccess());
         assertEquals("SUCCESS", response.getResult().getCode());
     }
