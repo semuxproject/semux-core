@@ -15,6 +15,8 @@ Prerequisites:
 2. binutils-x86_64-linux-gnu
 3. binutils-aarch64-linux-gnu
 4. binutils-mingw-w64
+5. automake
+6. autoconf
 
 Steps to build on Debian/Ubuntu based distributions:
 ```
@@ -38,12 +40,14 @@ cp ./native/libsemuxcrypto.dll ../../resources/native/win64/
 ## Build on macOS
 
 Prerequisites:
-1. Build and install libsodium 1.0.16
+1. clang
+2. cmake
+3. autoconf
+4. automake
 
 Build:
 ```
 mkdir build && cd build
 cmake ..
 make
-install_name_tool -change "/usr/local/lib/libsodium.23.dylib" "@loader_path/libsodium.23.dylib" crypto/libcrypto.dylib
 ```

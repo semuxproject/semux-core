@@ -37,34 +37,11 @@
 # by passing -DCMAKE_FIND_ROOT_PATH=/usr/x86_64-linux-gnu on Debian-like systems.
 set(CMAKE_SYSTEM_NAME Darwin)
 set(CMAKE_SYSTEM_PROCESSOR x86_64)
-set(TARGET_ABI "linux-gnu")
 # specify the cross compiler
 SET(CMAKE_C_COMPILER   clang)
 SET(CMAKE_CXX_COMPILER clang++)
+SET(MACOSX_VERSION_MIN 10.8)
 
-# To build the tests, we need to set where the target environment containing
-# the required library is. On Debian-like systems, this is
-# /usr/x86_64-linux-gnu.
-SET(CMAKE_FIND_ROOT_PATH "/usr/x86_64-${TARGET_ABI}")
-# search for programs in the build host directories
-SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-# for libraries and headers in the target directories
-SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-
-# Set additional variables.
-# If we don't set some of these, CMake will end up using the host version.
-# We want the full path, however, so we can pass EXISTS and other checks in
-# the our CMake code.
-find_program(GCC_FULL_PATH x86_64-${TARGET_ABI}-gcc)
-if (NOT GCC_FULL_PATH)
-  message(FATAL_ERROR "Cross-compiler x86_64-${TARGET_ABI}-gcc not found")
-endif ()
-get_filename_component(GCC_DIR ${GCC_FULL_PATH} PATH)
-SET(CMAKE_LINKER       ${GCC_DIR}/x86_64-${TARGET_ABI}-ld      CACHE FILEPATH "linker")
-SET(CMAKE_ASM_COMPILER ${GCC_DIR}/x86_64-${TARGET_ABI}-as      CACHE FILEPATH "assembler")
-SET(CMAKE_OBJCOPY      ${GCC_DIR}/x86_64-${TARGET_ABI}-objcopy CACHE FILEPATH "objcopy")
-SET(CMAKE_STRIP        ${GCC_DIR}/x86_64-${TARGET_ABI}-strip   CACHE FILEPATH "strip")
-SET(CMAKE_CPP          ${GCC_DIR}/x86_64-${TARGET_ABI}-cpp     CACHE FILEPATH "cpp")
-
-set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--gc-sections -Wl,--no-undefined")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=${MACOSX_VERSION_MIN} -arch ${CMAKE_SYSTEM_PROCESSOR} -march=core2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=${MACOSX_VERSION_MIN} -arch ${CMAKE_SYSTEM_PROCESSOR} -march=core2 -std=c++11 -stdlib=libc++")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -mmacosx-version-min=${MACOSX_VERSION_MIN} -arch ${CMAKE_SYSTEM_PROCESSOR} -march=core2 -Wl,-dead_strip -Wl,-undefined,error -stdlib=libc++ -lc++")
