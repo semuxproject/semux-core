@@ -147,7 +147,9 @@ public class Transaction {
      *
      * @param network
      * @param verifySignature
-     *         Whether to verify the transaction signature or not. This is useful when there are multiple transaction signatures that can be verified in batch for performance reason.
+     *            Whether to verify the transaction signature or not. This is useful
+     *            when there are multiple transaction signatures that can be
+     *            verified in batch for performance reason.
      * @return true if success, otherwise false
      */
     public boolean validate(Network network, boolean verifySignature) {

@@ -214,8 +214,7 @@ public class Key {
         return Native.verifyBatch(
                 messages.toArray(new byte[messages.size()][]),
                 signatures.stream().map(Signature::getS).toArray(byte[][]::new),
-                signatures.stream().map(Signature::getA).toArray(byte[][]::new)
-        );
+                signatures.stream().map(Signature::getA).toArray(byte[][]::new));
     }
 
     /**

@@ -211,9 +211,8 @@ public class Block {
             }
 
             if (!Key.verifyBatch(
-                unvalidatedTransactions.stream().map(Transaction::getHash).collect(Collectors.toList()),
-                unvalidatedTransactions.stream().map(Transaction::getSignature).collect(Collectors.toList())
-            )) {
+                    unvalidatedTransactions.stream().map(Transaction::getHash).collect(Collectors.toList()),
+                    unvalidatedTransactions.stream().map(Transaction::getSignature).collect(Collectors.toList()))) {
                 return false;
             }
         }
