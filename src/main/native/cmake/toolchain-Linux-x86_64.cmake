@@ -67,4 +67,4 @@ SET(CMAKE_OBJCOPY      ${GCC_DIR}/x86_64-${TARGET_ABI}-objcopy CACHE FILEPATH "o
 SET(CMAKE_STRIP        ${GCC_DIR}/x86_64-${TARGET_ABI}-strip   CACHE FILEPATH "strip")
 SET(CMAKE_CPP          ${GCC_DIR}/x86_64-${TARGET_ABI}-cpp     CACHE FILEPATH "cpp")
 
-set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--gc-sections -Wl,--no-undefined")
+set(CMAKE_SHARED_LINKER_FLAGS "-flto -Wl,--gc-sections -Wl,--no-undefined")

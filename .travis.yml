@@ -34,9 +34,8 @@ matrix:
     - env: NAME="Linux tests (Java 11)"
       os: linux
       sudo: false
+      jdk: openjdk11
       script:
-        - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-        - source ./install-jdk.sh -F 11 -L GPL
         - mvn test
 
     # macOS tests (Java 8 LTS)
