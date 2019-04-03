@@ -6,9 +6,9 @@ libsemuxcrypto is a JNI library that aims to increase the performance Semux wall
 
 Build on linux supports cross-compiling to the following platforms:
 
-1. aarch64-linux
-2. win64
-3. x86_64-linux 
+1. Linux-aarch64
+2. Linux-x86_64
+3. Windows-x86_64
 
 Prerequisites:
 1. cmake
@@ -20,21 +20,19 @@ Prerequisites:
 
 Steps to build on Debian/Ubuntu based distributions:
 ```
-sudo apt install cmake binutils binutils-aarch64-linux-gnu binutils-mingw-w64
+sudo apt install cmake binutils automake autoconf binutils-aarch64-linux-gnu binutils-mingw-w64
 
 mkdir build && cd build
+cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-Linux-x86_64.cmake ../
+make -j$(nproc)
 
-cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-x86_64-linux.cmake ../
+cd .. && rm -rf build && mkdir build && cd build 
+cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-Linux-aarch64.cmake ../
 make -j$(nproc)
-cp ./native/libsemuxcrypto.so ../../resources/native/x86_64-linux/
- 
-cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-aarch64-linux.cmake ../
-make -j$(nproc)
-cp ./native/libsemuxcrypto.so ../../resources/native/aarch64-linux/
 
-cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-w64.cmake ../
+cd .. && rm -rf build && mkdir build && cd build
+cmake -vvv -DCMAKE_TOOLCHAIN_FILE=toolchain-Windows-x86_64.cmake ../
 make -j$(nproc)
-cp ./native/libsemuxcrypto.dll ../../resources/native/win64/
 ```
 
 ## Build on macOS
@@ -48,6 +46,6 @@ Prerequisites:
 Build:
 ```
 mkdir build && cd build
-cmake ..
-make
+cmake -vvv -DCMAKE_TOOLCHAIN_FILE=toolchain-Darwin-x86_64.cmake ../
+make -j$(nproc)
 ```

@@ -40,16 +40,17 @@ public class Native {
         switch (os) {
         case LINUX:
             if (SystemUtil.getOsArch().equals("aarch64")) {
-                enabled = loadLibrary("/native/aarch64-linux/libsemuxcrypto.so");
+                enabled = loadLibrary("/native/Linux-aarch64/libsemuxcrypto.so");
             } else {
-                enabled = loadLibrary("/native/x86_64-linux/libsemuxcrypto.so");
+                enabled = loadLibrary("/native/Linux-x86_64/libsemuxcrypto.so");
             }
             break;
         case MACOS:
-            enabled = loadLibrary("/native/x86_64-darwin/libsodium.23.dylib") && loadLibrary("/native/x86_64-darwin/libsemuxcrypto.dylib");
+            enabled = loadLibrary("/native/Darwin-x86_64/libsodium.23.dylib")
+                    && loadLibrary("/native/Darwin-x86_64/libsemuxcrypto.dylib");
             break;
         case WINDOWS:
-            enabled = loadLibrary("/native/win64/libsemuxcrypto.dll");
+            enabled = loadLibrary("/native/Windows-x86_64/libsemuxcrypto.dll");
             break;
         default:
             break;

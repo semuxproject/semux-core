@@ -140,10 +140,10 @@ JNIEXPORT jboolean JNICALL Java_org_semux_crypto_Native_verifyBatch
     }
 
     // read byte arrays into c buffers
-    auto msg_bufs = new jbyte*[msgs_size];
-    auto msg_lens = new size_t[msgs_size];
-    auto sig_bufs = new jbyte*[sigs_size];
-    auto pk_bufs = new jbyte*[pks_size];
+    jbyte** msg_bufs = new jbyte*[msgs_size];
+    size_t* msg_lens = new size_t[msgs_size];
+    jbyte** sig_bufs = new jbyte*[sigs_size];
+    jbyte** pk_bufs = new jbyte*[pks_size];
     for (int i = 0;i < msgs_size;i++) {
         jbyteArray msg = (jbyteArray) env->GetObjectArrayElement(msgs, i);
         jbyteArray sig = (jbyteArray) env->GetObjectArrayElement(sigs, i);
