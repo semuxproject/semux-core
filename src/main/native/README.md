@@ -46,6 +46,6 @@ Prerequisites:
 Build:
 ```
 mkdir build && cd build
-cmake -vvv -DCMAKE_TOOLCHAIN_FILE=toolchain-Darwin-x86_64.cmake ../
+cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-Darwin-x86_64.cmake ../
 make -j$(nproc)
 ```

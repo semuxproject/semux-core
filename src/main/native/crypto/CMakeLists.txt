@@ -18,8 +18,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_custom_target(
         sodium
         WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/libsodium"
+        COMMAND env CFLAGS='-mmacosx-version-min=${MACOSX_VERSION_MIN} -arch ${CMAKE_SYSTEM_PROCESSOR} -march=core2' | grep CFLAGS
+        COMMAND env LDFLAGS='-mmacosx-version-min=${MACOSX_VERSION_MIN} -arch ${CMAKE_SYSTEM_PROCESSOR} -march=core2' | grep LDFLAGS
         COMMAND ./autogen.sh
-        COMMAND ./configure --enable-shared=no --enable-minimal=yes --disable-pie
+        COMMAND ./configure --enable-shared=no --en able-minimal=yes --disable-pie
         COMMAND make clean check -j${nproc}
     )
 else()

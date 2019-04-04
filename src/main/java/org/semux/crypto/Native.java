@@ -46,8 +46,7 @@ public class Native {
             }
             break;
         case MACOS:
-            enabled = loadLibrary("/native/Darwin-x86_64/libsodium.23.dylib")
-                    && loadLibrary("/native/Darwin-x86_64/libsemuxcrypto.dylib");
+            enabled = loadLibrary("/native/Darwin-x86_64/libsemuxcrypto.dylib");
             break;
         case WINDOWS:
             enabled = loadLibrary("/native/Windows-x86_64/libsemuxcrypto.dll");
