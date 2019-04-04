@@ -11,16 +11,19 @@ Build on linux supports cross-compiling to the following platforms:
 3. Windows-x86_64
 
 Prerequisites:
-1. cmake
-2. binutils-x86_64-linux-gnu
-3. binutils-aarch64-linux-gnu
-4. binutils-mingw-w64
-5. automake
-6. autoconf
+- cmake
+- automake
+- autoconf
+- gcc-x86_64-linux-gnu
+- gcc-aarch64-linux-gnu 
+- gcc-mingw-w64
+- binutils-x86_64-linux-gnu
+- binutils-aarch64-linux-gnu
+- binutils-mingw-w64
 
-Steps to build on Debian/Ubuntu based distributions:
+Steps to build on Debian/Ubuntu based distributions with a x86_64 machine:
 ```
-sudo apt install cmake binutils automake autoconf binutils-aarch64-linux-gnu binutils-mingw-w64
+sudo apt install cmake automake autoconf gcc gcc-aarch64-linux-gnu gcc-mingw-w64 binutils binutils-aarch64-linux-gnu binutils-mingw-w64
 
 mkdir build && cd build
 cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-Linux-x86_64.cmake ../

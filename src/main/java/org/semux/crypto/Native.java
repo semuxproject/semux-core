@@ -154,7 +154,7 @@ public class Native {
     public static native boolean verify(byte[] message, byte[] signature, byte[] publicKey);
 
     /**
-     * Batch verifies an Ed25519 signature.
+     * Batch verifies Ed25519 signatures.
      *
      * @param messages
      * @param signatures
