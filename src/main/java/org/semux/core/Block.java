@@ -13,11 +13,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
 import org.semux.util.MerkleUtil;
 import org.semux.util.SimpleDecoder;
@@ -197,10 +199,22 @@ public class Block {
      */
     public boolean validateTransactions(BlockHeader header, Collection<Transaction> unvalidatedTransactions,
             List<Transaction> allTransactions, Network network) {
+
         // validate transactions
-        boolean valid = unvalidatedTransactions.parallelStream().allMatch(tx -> tx.validate(network));
-        if (!valid) {
-            return false;
+        if (!Key.isVerifyBatchSupported() || unvalidatedTransactions.size() < 3) {
+            if (!unvalidatedTransactions.parallelStream().allMatch(tx -> tx.validate(network))) {
+                return false;
+            }
+        } else {
+            if (!unvalidatedTransactions.parallelStream().allMatch(tx -> tx.validate(network, false))) {
+                return false;
+            }
+
+            if (!Key.verifyBatch(
+                    unvalidatedTransactions.stream().map(Transaction::getHash).collect(Collectors.toList()),
+                    unvalidatedTransactions.stream().map(Transaction::getSignature).collect(Collectors.toList()))) {
+                return false;
+            }
         }
 
         // validate transactions root
@@ -447,7 +461,7 @@ public class Block {
      * @return
      */
     public byte[] getEncodedVotes() {
-        SimpleEncoder enc = new SimpleEncoder();
+        SimpleEncoder enc = new SimpleEncoder(4 + 4 + votes.size() * Signature.LENGTH);
 
         enc.writeInt(view);
         enc.writeInt(votes.size());

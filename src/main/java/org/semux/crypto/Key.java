@@ -14,6 +14,7 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
+import java.util.Collection;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -199,6 +200,21 @@ public class Key {
         }
 
         return false;
+    }
+
+    public static boolean isVerifyBatchSupported() {
+        return Native.isEnabled();
+    }
+
+    public static boolean verifyBatch(Collection<byte[]> messages, Collection<Signature> signatures) {
+        if (!isVerifyBatchSupported()) {
+            throw new UnsupportedOperationException("Key#verifyBatch is only implemented in the native library.");
+        }
+
+        return Native.verifyBatch(
+                messages.toArray(new byte[messages.size()][]),
+                signatures.stream().map(Signature::getS).toArray(byte[][]::new),
+                signatures.stream().map(Signature::getA).toArray(byte[][]::new));
     }
 
     /**

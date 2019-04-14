@@ -1,42 +1,54 @@
 # Semux Native Library
 
-## Build on Linux
+libsemuxcrypto is a JNI library that aims to increase the performance Semux wallet by implementing cryptography functions in C++. This library relies on thrid-parties including [libsodium](https://github.com/jedisct1/libsodium) and [ed25519-donna](https://github.com/floodyberry/ed25519-donna).  
 
+## Build on x86_64 Linux
+
+Build on linux supports cross-compiling to the following platforms:
+
+1. Linux-aarch64
+2. Linux-x86_64
+3. Windows-x86_64
 
 Prerequisites:
-1. Build and install libsodium 1.0.16
+- cmake
+- automake
+- autoconf
+- gcc-x86_64-linux-gnu
+- gcc-aarch64-linux-gnu 
+- gcc-mingw-w64
+- binutils-x86_64-linux-gnu
+- binutils-aarch64-linux-gnu
+- binutils-mingw-w64
 
-Build:
+Steps to build on Debian/Ubuntu based distributions with a x86_64 machine:
 ```
+sudo apt install cmake automake autoconf gcc gcc-aarch64-linux-gnu gcc-mingw-w64 binutils binutils-aarch64-linux-gnu binutils-mingw-w64
+
 mkdir build && cd build
-cmake ..
-make
+cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-Linux-x86_64.cmake ../
+make -j$(nproc)
+
+cd .. && rm -rf build && mkdir build && cd build 
+cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-Linux-aarch64.cmake ../
+make -j$(nproc)
+
+cd .. && rm -rf build && mkdir build && cd build
+cmake -vvv -DCMAKE_TOOLCHAIN_FILE=toolchain-Windows-x86_64.cmake ../
+make -j$(nproc)
 ```
 
 ## Build on macOS
 
 Prerequisites:
-1. Build and install libsodium 1.0.16
+1. clang
+2. cmake
+3. autoconf
+4. automake
 
 Build:
 ```
 mkdir build && cd build
-cmake ..
-make
-install_name_tool -change "/usr/local/lib/libsodium.23.dylib" "@loader_path/libsodium.23.dylib" crypto/libcrypto.dylib
-```
-
-## Build on Windows
-
-Prerequisites:
-1. Visual Studio 2012 build tools
-2. CMake 3.8+
-3. Download and unpack libsodium 1.0.16 pre-built binaries
-4. Set `sodiumDIR` environment variable
-
-Build:
-```
-mkdir build && cd build
-cmake -G "Visual Studio 11 2012 x64" ..
-# Build the solution with Visual Studio
+cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-Darwin-x86_64.cmake ../
+make -j$(nproc)
 ```

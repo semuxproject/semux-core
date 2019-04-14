@@ -39,6 +39,14 @@ JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_sign
 JNIEXPORT jboolean JNICALL Java_org_semux_crypto_Native_verify
   (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray);
 
+/*
+ * Class:     org_semux_crypto_Native
+ * Method:    verifyBatch
+ * Signature: ([[B[[B[[B)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_semux_crypto_Native_verifyBatch
+  (JNIEnv *, jclass, jobjectArray, jobjectArray, jobjectArray);
+
 #ifdef __cplusplus
 }
 #endif
