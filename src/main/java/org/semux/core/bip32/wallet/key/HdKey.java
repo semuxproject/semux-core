@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.semux.core.bip32.crypto.Hash;
-import org.semux.core.bip32.exception.CryptoException;
+import org.semux.crypto.CryptoException;
 
 /**
  * Marshalling code for HDKeys to base58 representations.
