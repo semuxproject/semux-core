@@ -1,0 +1,268 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.semux</groupId>
+        <artifactId>semux</artifactId>
+        <version>1.4.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+
+    <artifactId>semux-package</artifactId>
+    <properties>
+        <dist.base>${project.basedir}/dist</dist.base>
+        <dist.windowsExecutableVersion>${project.version}.0</dist.windowsExecutableVersion>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- build fat jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <archive>
+                        <index>true</index>
+                        <manifestEntries>
+                            <Main-Class>org.semux.Main</Main-Class>
+                            <Implementation-Version>${git.commit.id.abbrev}</Implementation-Version>
+                            <X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
+                            <X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>shaded</shadedClassifierName>
+                    <artifactSet>
+                        <excludes>
+                            <exclude>junit:*</exclude>
+                            <exclude>org.powermock:*</exclude>
+                            <exclude>org.assertj:*</exclude>
+                            <exclude>org.awaitility:*</exclude>
+                            <exclude>org.easytesting:*</exclude>
+                            <exclude>net.bytebuddy:*</exclude>
+                            <exclude>org.hamcrest:*</exclude>
+                            <exclude>org.mockito:*</exclude>
+                            <exclude>com.github.stefanbirkner:system-rules</exclude>
+                        </excludes>
+                    </artifactSet>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                            <resource>.SF</resource>
+                        </transformer>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                            <resource>LICENSE</resource>
+                        </transformer>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <manifestEntries>
+                                <Main-Class>org.semux.Main</Main-Class>
+                                <Implementation-Version>${git.commit.id.abbrev}</Implementation-Version>
+                                <X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
+                                <X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
+                            </manifestEntries>
+                        </transformer>
+                    </transformers>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.2.4</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>validate-the-git-infos</id>
+                        <goals>
+                            <goal>validateRevision</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skip>${skip.git.info}</skip>
+                    <abbrevLength>7</abbrevLength>
+                    <verbose>false</verbose>
+                    <skipPoms>false</skipPoms>
+                </configuration>
+            </plugin>
+
+            <!-- build windows executable (currently GUI mode only) -->
+            <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <version>1.7.25</version>
+                <executions>
+                    <execution>
+                        <id>semux</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+                        <configuration>
+                            <headerType>gui</headerType>
+                            <jar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</jar>
+                            <outfile>target/semux.exe</outfile>
+                            <downloadUrl>http://www.oracle.com/technetwork/java/javase/downloads/index.html</downloadUrl>
+                            <classPath>
+                                <mainClass>org.semux.gui.SemuxGui</mainClass>
+                                <preCp>anything</preCp>
+                            </classPath>
+                            <icon>../core/src/main/resources/org/semux/gui/logo.ico</icon>
+                            <splash>
+                                <!-- this file must be a 24-bit BMP -->
+                                <file>../misc/design/splash.bmp</file>
+                                <waitForWindow>true</waitForWindow>
+                                <timeout>600</timeout>
+                                <timeoutErr>true</timeoutErr>
+                            </splash>
+                            <jre>
+                                <minVersion>1.8.0</minVersion>
+                                <jdkPreference>preferJre</jdkPreference>
+                                <maxHeapPercent>80</maxHeapPercent>
+                                <opts>
+                                    <opt>-Dfile.encoding=UTF-8</opt>
+                                </opts>
+                            </jre>
+                            <versionInfo>
+                                <fileVersion>${dist.windowsExecutableVersion}</fileVersion>
+                                <fileDescription>${project.description}</fileDescription>
+                                <txtFileVersion>${project.version}</txtFileVersion>
+                                <copyright>MIT</copyright>
+                                <productVersion>${dist.windowsExecutableVersion}</productVersion>
+                                <txtProductVersion>${project.version}</txtProductVersion>
+                                <productName>semux</productName>
+                                <internalName>semux</internalName>
+                                <originalFilename>semux.exe</originalFilename>
+                            </versionInfo>
+                            <singleInstance>
+                                <mutexName>semux</mutexName>
+                            </singleInstance>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- prepare distribution -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <echo file="${project.build.outputDirectory}/VERSION">${git.commit.id.abbrev}</echo>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>dist</id>
+                        <phase>${dist.phase}</phase>
+                        <configuration>
+                            <target>
+                                <!-- windows build -->
+                                <copy todir="${dist.base}/windows">
+                                    <fileset dir="${project.basedir}">
+                                        <include name="config/**" />
+                                        <include name="LICENSE*" />
+                                    </fileset>
+                                    <fileset dir="${project.basedir}/target">
+                                        <include name="semux.exe" />
+                                    </fileset>
+                                </copy>
+                                <copy file="${project.basedir}/misc/launch4j/semux.l4j.ini" tofile="${dist.base}/windows/semux.l4j.ini" />
+                                <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis" />
+                                <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis" />
+                                <fixcrlf srcdir="${dist.base}/windows" includes="LICENSE*" eol="dos" eof="asis" />
+
+                                <!-- linux build (executable jar) -->
+                                <copy todir="${dist.base}/linux">
+                                    <fileset dir="${project.basedir}">
+                                        <include name="config/**" />
+                                        <include name="LICENSE*" />
+                                    </fileset>
+                                </copy>
+                                <copy file="${project.basedir}/src/main/resources/org/semux/gui/splash.png" todir="${dist.base}/linux/resources" />
+                                <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar" tofile="${dist.base}/linux/semux.jar" />
+                                <copy file="${project.basedir}/scripts/semux-cli.sh" tofile="${dist.base}/linux/semux-cli.sh" />
+                                <copy file="${project.basedir}/scripts/semux-gui.sh" tofile="${dist.base}/linux/semux-gui.sh" />
+                                <chmod file="${dist.base}/linux/semux.jar" perm="755" />
+                                <chmod file="${dist.base}/linux/semux*.sh" perm="755" />
+                                <chmod dir="${dist.base}/linux/config" perm="700" />
+                                <chmod file="${dist.base}/linux/config/*" perm="600" />
+
+                                <!-- macos build -->
+                                <!-- use fat jar because .app bundle is not production ready -->
+                                <copy todir="${dist.base}/macos">
+                                    <fileset dir="${dist.base}/linux"/>
+                                </copy>
+                                <chmod file="${dist.base}/macos/semux.jar" perm="755" />
+                                <chmod file="${dist.base}/macos/semux*.sh" perm="755" />
+                                <chmod dir="${dist.base}/macos/config" perm="700" />
+                                <chmod file="${dist.base}/macos/config/*" perm="600" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- clean -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${dist.base}</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.semux</groupId>
+            <artifactId>semux-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.semux</groupId>
+            <artifactId>semux-swing-gui</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>
