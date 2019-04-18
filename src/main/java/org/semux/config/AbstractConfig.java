@@ -159,7 +159,7 @@ public abstract class AbstractConfig implements Config {
 
     @Override
     public Amount getBlockReward(long number) {
-        if (number <= 2_000_000L) {  // ~2 years
+        if (number <= 2_000_000L) { // ~2 years
             return SEM.of(3);
         } else if (number <= 6_000_000L) { // ~4 years
             return SEM.of(2);
