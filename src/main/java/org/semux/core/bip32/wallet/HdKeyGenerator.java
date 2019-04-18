@@ -17,10 +17,10 @@ import org.semux.core.bip32.crypto.Hash;
 import org.semux.core.bip32.crypto.HdUtil;
 import org.semux.core.bip32.crypto.HmacSha512;
 import org.semux.core.bip32.crypto.Secp256k1;
-import org.semux.core.bip32.exception.CryptoException;
 import org.semux.core.bip32.wallet.key.Curve;
 import org.semux.core.bip32.wallet.key.HdPrivateKey;
 import org.semux.core.bip32.wallet.key.HdPublicKey;
+import org.semux.crypto.CryptoException;
 
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
