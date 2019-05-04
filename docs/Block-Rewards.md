@@ -9,22 +9,21 @@ Once maximum supply is reached, new Semux will no longer be created.
 Validators receive the block reward as well as all fees contained in the block.
 
 ```
-Block        1 - 10000000 : 3 SEM
-Block 10000001 - 25000000 : 2 SEM
-Block 25000001 - 40000000 : 1 SEM
-Block 40000001 -          : 0 SEM
+Block 0 - 2000000        : 3 SEM
+Block 2000001 - 6000000  : 2 SEM
+Block 6000001 - 14000000 : 1 SEM
+Block 14000001 -         : 0 SEM
 ```
 
 ### Supply
 
-The max supply of semux is capped at 100,000,000 SEM.
+The max supply of semux is capped at 32,000,000 SEM.
 
 | Purpose       | Amount         | Note                                                                |
 |---------------|----------------|---------------------------------------------------------------------|
-| Block Rewards | 75,000,000 SEM | Distributed to Semux validators                                     |
-| Foundation    | 10,000,000 SEM | Development, marketing, promotion and bounties                      |
-| Community     | 10,000,000 SEM | Alpha/Beta/RC test participants, bitcointalk/BTC/ETH aidrdrop, etc. |
-| Founder       | 5,000,000 SEM  | Founders of Semux                                                   |
+| Block Rewards | 22,000,000 SEM | Distributed to Semux validators                                     |
+| Foundation    | 5,000,000 SEM  | Development, marketing, promotion and bounties                      |
+| Community     | 5,000,000 SEM  | Alpha/Beta/RC test participants, bitcointalk/BTC/ETH aidrdrop, etc. |
 
 
 ### Real-time API
