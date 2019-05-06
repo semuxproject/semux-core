@@ -2,13 +2,13 @@
 
 Semux is a blockchain platform powered by 'Semux BFT' consensus algorithm.
 
-It's native cryptocurrency called **SEM**.
+Its native cryptocurrency is called **SEM**.
 
 SEM is a fundamental asset for operation of Semux platform, which thereby provides a public distributed ledger for transactions. SEM is used to pay for transaction fees and as a fuel for running decentralised apps. Another crucial use case for SEM is the consensus algorithm. SEM is used for voting on Validators who forge new blocks and verify the transactions.
 
 ### Block reward
 
-New SEM coins are created each time a validator forges a new block.  
+New SEMs are created each time a validator forges a new block.
 
 Once maximum supply is reached, new SEM will no longer be created.
 
