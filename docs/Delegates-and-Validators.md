@@ -30,7 +30,7 @@
 
 ### Number of validators
 
-At the start of the network there will be **16 validators slots**. The `Top 16 validators` with the most number of votes will automatically become validators. Delegates can add more votes to remain in the `Top 16`. The number of validators will increment by **1 every 2 hours** until the **maximum of 100 validators** is reached.
+Number of validators is capped at **maximum of 100 validators**. You can check number of votes required to get in Top-100 in the explorer: https://semux.info/delegates or in the core wallet (Delegates tab).
 
 ### Recommended validator setup
 
