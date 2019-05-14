@@ -11,9 +11,11 @@ import static org.fusesource.leveldbjni.JniDBFactory.factory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -218,13 +220,16 @@ public class LeveldbDatabase implements Database {
 
     public static class LeveldbFactory implements DatabaseFactory {
 
-        private final EnumMap<DatabaseName, Database> databases = new EnumMap<>(DatabaseName.class);
+        private final Map<DatabaseName, Database> databases = Collections
+                .synchronizedMap(new EnumMap<>(DatabaseName.class));
 
         private final File dataDir;
-        private final ConcurrentHashMap<DatabaseName, AtomicBoolean> open = new ConcurrentHashMap<>();
+        private final Map<DatabaseName, AtomicBoolean> open = Collections
+                .synchronizedMap(new EnumMap<>(DatabaseName.class));
 
         public LeveldbFactory(File dataDir) {
             this.dataDir = dataDir;
+
             for (DatabaseName name : DatabaseName.values()) {
                 open.put(name, new AtomicBoolean(false));
             }

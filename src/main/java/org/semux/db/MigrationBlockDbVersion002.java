@@ -16,17 +16,23 @@ import org.semux.config.Config;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.db.exception.MigrationException;
-import org.semux.event.PubSub;
-import org.semux.event.PubSubFactory;
 import org.semux.util.Bytes;
 import org.semux.util.ClosableIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Database migration from version 1 to version 2. This migration unifies all
+ * LevelDB databases defined in ${@link DatabaseName} into a single database
+ * which is ${@link DatabaseName#BLOCK}. The migration deprecates
+ * ${@link BlockchainImpl}, ${@link org.semux.core.state.AccountStateImpl},
+ * ${@link org.semux.core.state.DelegateStateImpl} in favor of
+ * ${@link org.semux.core.BlockchainImplV2},
+ * ${@link org.semux.core.state.AccountStateImplV2},
+ * ${@link org.semux.core.state.DelegateStateImplV2}.
+ */
 public class MigrationBlockDbVersion002 implements Migration {
-    private static final Logger logger = LoggerFactory.getLogger(MigrationBlockDbVersion001.class);
-
-    private final PubSub pubSub = PubSubFactory.getDefault();
+    private static final Logger logger = LoggerFactory.getLogger(MigrationBlockDbVersion002.class);
 
     @Override
     public void checkBlockchainVersion(Blockchain blockchain) throws MigrationException {

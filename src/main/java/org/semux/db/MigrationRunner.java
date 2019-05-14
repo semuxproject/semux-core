@@ -9,8 +9,12 @@ package org.semux.db;
 import org.semux.config.Config;
 import org.semux.core.Blockchain;
 import org.semux.db.exception.MigrationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MigrationRunner {
+
+    private static final Logger logger = LoggerFactory.getLogger(MigrationRunner.class);
 
     private final Config config;
 
@@ -26,6 +30,7 @@ public class MigrationRunner {
 
     public void migrate(Migration migration) throws MigrationException {
         migration.checkBlockchainVersion(blockchain);
+        logger.info("Running migration {}...", migration.getClass().getSimpleName());
         migration.migrate(config, databaseFactory);
     }
 }

@@ -17,7 +17,7 @@ public enum DatabaseVersion {
 
     V2(Bytes.of(2));
 
-    private byte[] versionBytes;
+    private final byte[] versionBytes;
 
     DatabaseVersion(byte[] versionBytes) {
         this.versionBytes = versionBytes;
