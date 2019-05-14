@@ -22,10 +22,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Database migration from version 0 to version 1. The migration process creates
- * a temporary ${@link MigrationBlockchain} then migrates all blocks from an
- * existing blockchain database to the created temporary blockchain database.
- * Once all blocks have been successfully migrated, the existing blockchain
- * database is replaced by the migrated temporary blockchain database.
+ * a temporary ${@link BlockchainImpl.MigrationBlockchain} then migrates all
+ * blocks from an existing blockchain database to the created temporary
+ * blockchain database. Once all blocks have been successfully migrated, the
+ * existing blockchain database is replaced by the migrated temporary blockchain
+ * database.
  */
 public class MigrationBlockDbVersion001 implements Migration {
     private static final Logger logger = LoggerFactory.getLogger(MigrationBlockDbVersion001.class);

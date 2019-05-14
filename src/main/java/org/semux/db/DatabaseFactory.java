@@ -16,7 +16,7 @@ import java.nio.file.Path;
 public interface DatabaseFactory {
     /**
      * Returns a KVDB instance for the specified database.
-     * 
+     *
      * @param name
      * @return
      */
@@ -31,6 +31,11 @@ public interface DatabaseFactory {
      * Close all opened resources.
      */
     void close();
+
+    /**
+     * Checks if the database exists under the current file system.
+     */
+    boolean exists(DatabaseName name);
 
     /**
      * Returns the data directory of created databases.

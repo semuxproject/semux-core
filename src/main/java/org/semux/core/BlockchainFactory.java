@@ -69,17 +69,21 @@ public class BlockchainFactory {
         byte[] versionBytes;
 
         // check v2 version bytes
-        Database blockDB = databaseFactory.getDB(DatabaseName.BLOCK);
-        versionBytes = blockDB.get(Bytes.of(DatabasePrefixesV2.TYPE_DATABASE_VERSION));
-        if (versionBytes != null && versionBytes.length > 0) {
-            return DatabaseVersion.fromBytes(versionBytes);
+        if (databaseFactory.exists(DatabaseName.BLOCK)) {
+            Database blockDB = databaseFactory.getDB(DatabaseName.BLOCK);
+            versionBytes = blockDB.get(Bytes.of(DatabasePrefixesV2.TYPE_DATABASE_VERSION));
+            if (versionBytes != null && versionBytes.length > 0) {
+                return DatabaseVersion.fromBytes(versionBytes);
+            }
         }
 
         // check v1 version bytes
-        Database indexDB = databaseFactory.getDB(DatabaseName.INDEX);
-        versionBytes = indexDB.get(Bytes.of(DatabasePrefixesV1.IndexDB.TYPE_DATABASE_VERSION));
-        if (versionBytes != null && versionBytes.length > 0) {
-            return DatabaseVersion.fromBytes(versionBytes);
+        if (databaseFactory.exists(DatabaseName.INDEX)) {
+            Database indexDB = databaseFactory.getDB(DatabaseName.INDEX);
+            versionBytes = indexDB.get(Bytes.of(DatabasePrefixesV1.IndexDB.TYPE_DATABASE_VERSION));
+            if (versionBytes != null && versionBytes.length > 0) {
+                return DatabaseVersion.fromBytes(versionBytes);
+            }
         }
 
         return DatabaseVersion.V0;

@@ -92,7 +92,6 @@ public class MigrationBlockDbVersion002 implements Migration {
                             Arrays.copyOfRange(accountEntry.getKey(), 1, accountEntry.getKey().length)),
                     accountEntry.getValue())));
             accountDBIt.close();
-            accountDB.close();
 
             // move delegateDB
             Database delegateDB = dbFactory.getDB(DatabaseName.DELEGATE);
@@ -101,7 +100,6 @@ public class MigrationBlockDbVersion002 implements Migration {
                     Bytes.merge(DatabasePrefixesV2.TYPE_DELEGATE, delegateEntry.getKey()),
                     delegateEntry.getValue())));
             delegateDBIt.close();
-            delegateDB.close();
 
             // move voteDB
             Database voteDB = dbFactory.getDB(DatabaseName.VOTE);
@@ -110,22 +108,21 @@ public class MigrationBlockDbVersion002 implements Migration {
                     Bytes.merge(DatabasePrefixesV2.TYPE_DELEGATE_VOTE, voteEntry.getKey()),
                     voteEntry.getValue())));
             voteDBIt.close();
-            voteDB.close();
 
             // upgrade version byte
             batch.add(Pair.of(
                     Bytes.of(DatabasePrefixesV2.TYPE_DATABASE_VERSION),
-                    Bytes.of(DatabaseVersion.V2.toInt())));
+                    DatabaseVersion.V2.toBytes()));
 
             // run batch
             Database blockDB = dbFactory.getDB(DatabaseName.BLOCK);
             blockDB.updateBatch(batch);
 
-            // mark v1 db as upgraded
-            indexDB.put(
-                    Bytes.of(DatabasePrefixesV1.IndexDB.TYPE_DATABASE_VERSION),
-                    Bytes.of(DatabaseVersion.V2.toInt()));
-            indexDB.close();
+            // removed deprecated databases
+            accountDB.destroy();
+            delegateDB.destroy();
+            voteDB.destroy();
+            indexDB.destroy();
 
             logger.info("Database upgraded to version 2.");
         } catch (Exception e) {

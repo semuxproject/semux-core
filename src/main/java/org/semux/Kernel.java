@@ -143,7 +143,9 @@ public class Kernel {
         // ====================================
         relocateDatabaseIfNeeded();
         dbFactory = new LeveldbFactory(config.databaseDir());
-        chain = (new BlockchainFactory(config, genesis, dbFactory)).getBlockchainInstance();
+        BlockchainFactory blockchainFactory = new BlockchainFactory(config, genesis, dbFactory);
+        chain = blockchainFactory.getBlockchainInstance();
+        logger.info("Blockchain database version = {}", blockchainFactory.getBlockchainDatabaseVersion().toString());
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
 

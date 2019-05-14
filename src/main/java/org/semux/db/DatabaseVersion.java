@@ -8,45 +8,37 @@ package org.semux.db;
 
 import org.semux.db.exception.DatabaseException;
 import org.semux.util.Bytes;
-import org.semux.util.exception.UnreachableException;
 
 public enum DatabaseVersion {
 
-    V0,
+    V0(null),
 
-    V1,
+    V1(Bytes.of(1)),
 
-    V2;
+    V2(Bytes.of(2));
 
-    public int toInt() {
-        switch (this) {
-        case V0:
-            return 0;
-        case V1:
-            return 1;
-        case V2:
-            return 2;
-        }
-        throw new UnreachableException();
+    private byte[] versionBytes;
+
+    DatabaseVersion(byte[] versionBytes) {
+        this.versionBytes = versionBytes;
     }
 
     public byte[] toBytes() {
-        return Bytes.of(toInt());
+        return versionBytes;
     }
 
-    public static DatabaseVersion fromInt(int v) {
-        switch (v) {
-        case 0:
+    public static DatabaseVersion fromBytes(byte[] bytes) {
+        if (bytes == null) {
             return V0;
+        }
+
+        final int v = Bytes.toInt(bytes);
+        switch (v) {
         case 1:
             return V1;
         case 2:
             return V2;
         }
         throw new DatabaseException("Unsupported version " + v);
-    }
-
-    public static DatabaseVersion fromBytes(byte[] bytes) {
-        return fromInt(Bytes.toInt(bytes));
     }
 }
