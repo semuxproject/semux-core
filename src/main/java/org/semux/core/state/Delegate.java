@@ -25,7 +25,7 @@ public class Delegate {
 
     /**
      * Create a delegate instance.
-     * 
+     *
      * @param address
      * @param name
      * @param registeredAt
@@ -68,7 +68,7 @@ public class Delegate {
 
     /**
      * Serializes this delegate object into byte array.
-     * 
+     *
      * @return
      */
     public byte[] toBytes() {
@@ -82,12 +82,14 @@ public class Delegate {
 
     /**
      * Parses a delegate from a byte array.
-     * 
+     *
      * @param address
      * @param bytes
      * @return
      */
     public static Delegate fromBytes(byte[] address, byte[] bytes) {
+        assert (address.length == 20);
+
         SimpleDecoder dec = new SimpleDecoder(bytes);
         byte[] name = dec.readBytes();
         long registeredAt = dec.readLong();

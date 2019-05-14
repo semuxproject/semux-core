@@ -65,12 +65,12 @@ import org.semux.api.v2.model.SyncingProgressType;
 import org.semux.api.v2.model.VerifyMessageResponse;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
-import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
+import org.semux.core.ValidatorStats;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
@@ -444,7 +444,7 @@ public final class SemuxApiImpl implements SemuxApi {
             return badRequest(resp, "The provided address is not a delegate");
         }
 
-        BlockchainImpl.ValidatorStats validatorStats = chain.getValidatorStats(addressBytes);
+        ValidatorStats validatorStats = chain.getValidatorStats(addressBytes);
         boolean isValidator = chain.getValidators().contains(address.replace("0x", ""));
 
         resp.setResult(TypeFactory.delegateType(validatorStats, delegate, isValidator));

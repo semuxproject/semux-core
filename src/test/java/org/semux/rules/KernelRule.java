@@ -23,7 +23,10 @@ import org.semux.config.Config;
 import org.semux.config.DevnetConfig;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
+import org.semux.core.Blockchain;
+import org.semux.core.BlockchainFactory;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.BlockchainImplV2;
 import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
@@ -167,7 +170,8 @@ public class KernelRule extends TemporaryFolder {
      */
     public void openBlockchain() {
         dbFactory = new LeveldbFactory(kernel.getConfig().databaseDir());
-        BlockchainImpl chain = new BlockchainImpl(kernel.getConfig(), dbFactory);
+        BlockchainFactory blockchainFactory = new BlockchainFactory(kernel.getConfig(), genesis, dbFactory);
+        Blockchain chain = blockchainFactory.getBlockchainInstance();
         kernel.setBlockchain(chain);
     }
 

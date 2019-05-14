@@ -14,30 +14,25 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.semux.core.Amount;
 import org.semux.db.Database;
+import org.semux.db.DatabasePrefixesV2;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
 /**
- * @deprecated only being used for database upgrade from v0, v1 to v2
+ * Account state implementation.
  *
- *             Account state implementation.
- *
- *             <pre>
+ * <pre>
  * account DB structure:
  *
  * [0, address] => [account_object]
  * [1, address] => [code]
  * [2, address, storage_key] = [storage_value]
- *             </pre>
+ * </pre>
  */
-public class AccountStateImpl implements Cloneable, AccountState {
-
-    protected static final byte TYPE_ACCOUNT = 0;
-    protected static final byte TYPE_CODE = 1;
-    protected static final byte TYPE_STORAGE = 2;
+public class AccountStateImplV2 implements Cloneable, AccountState {
 
     protected Database accountDB;
-    protected AccountStateImpl prev;
+    protected AccountStateImplV2 prev;
 
     /**
      * All updates, or deletes if the value is null.
@@ -49,7 +44,7 @@ public class AccountStateImpl implements Cloneable, AccountState {
      *
      * @param accountDB
      */
-    public AccountStateImpl(Database accountDB) {
+    public AccountStateImplV2(Database accountDB) {
         this.accountDB = accountDB;
     }
 
@@ -58,13 +53,13 @@ public class AccountStateImpl implements Cloneable, AccountState {
      *
      * @param prev
      */
-    public AccountStateImpl(AccountStateImpl prev) {
+    public AccountStateImplV2(AccountStateImplV2 prev) {
         this.prev = prev;
     }
 
     @Override
     public Account getAccount(byte[] address) {
-        ByteArray k = getKey(TYPE_ACCOUNT, address);
+        ByteArray k = getKey(DatabasePrefixesV2.TYPE_ACCOUNT, address);
         Amount noAmount = Amount.ZERO;
 
         if (updates.containsKey(k)) {
@@ -80,7 +75,7 @@ public class AccountStateImpl implements Cloneable, AccountState {
 
     @Override
     public long increaseNonce(byte[] address) {
-        ByteArray k = getKey(TYPE_ACCOUNT, address);
+        ByteArray k = getKey(DatabasePrefixesV2.TYPE_ACCOUNT, address);
 
         Account acc = getAccount(address);
         long nonce = acc.getNonce() + 1;
@@ -91,7 +86,7 @@ public class AccountStateImpl implements Cloneable, AccountState {
 
     @Override
     public void adjustAvailable(byte[] address, Amount delta) {
-        ByteArray k = getKey(TYPE_ACCOUNT, address);
+        ByteArray k = getKey(DatabasePrefixesV2.TYPE_ACCOUNT, address);
 
         Account acc = getAccount(address);
         acc.setAvailable(sum(acc.getAvailable(), delta));
@@ -100,7 +95,7 @@ public class AccountStateImpl implements Cloneable, AccountState {
 
     @Override
     public void adjustLocked(byte[] address, Amount delta) {
-        ByteArray k = getKey(TYPE_ACCOUNT, address);
+        ByteArray k = getKey(DatabasePrefixesV2.TYPE_ACCOUNT, address);
 
         Account acc = getAccount(address);
         acc.setLocked(sum(acc.getLocked(), delta));
@@ -109,7 +104,7 @@ public class AccountStateImpl implements Cloneable, AccountState {
 
     @Override
     public byte[] getCode(byte[] address) {
-        ByteArray k = getKey(TYPE_CODE, address);
+        ByteArray k = getKey(DatabasePrefixesV2.TYPE_CODE, address);
 
         if (updates.containsKey(k)) {
             return updates.get(k);
@@ -122,7 +117,7 @@ public class AccountStateImpl implements Cloneable, AccountState {
 
     @Override
     public void setCode(byte[] address, byte[] code) {
-        ByteArray k = getKey(TYPE_CODE, address);
+        ByteArray k = getKey(DatabasePrefixesV2.TYPE_CODE, address);
         updates.put(k, code);
     }
 
@@ -153,7 +148,7 @@ public class AccountStateImpl implements Cloneable, AccountState {
 
     @Override
     public AccountState track() {
-        return new AccountStateImpl(this);
+        return new AccountStateImplV2(this);
     }
 
     @Override
@@ -184,7 +179,7 @@ public class AccountStateImpl implements Cloneable, AccountState {
 
     @Override
     public boolean exists(byte[] address) {
-        ByteArray k = getKey(TYPE_ACCOUNT, address);
+        ByteArray k = getKey(DatabasePrefixesV2.TYPE_ACCOUNT, address);
 
         if (updates.containsKey(k)) {
             return true;
@@ -198,7 +193,7 @@ public class AccountStateImpl implements Cloneable, AccountState {
 
     @Override
     public long setNonce(byte[] address, long nonce) {
-        ByteArray k = getKey(TYPE_ACCOUNT, address);
+        ByteArray k = getKey(DatabasePrefixesV2.TYPE_ACCOUNT, address);
 
         Account acc = getAccount(address);
         acc.setNonce(nonce);
@@ -208,7 +203,7 @@ public class AccountStateImpl implements Cloneable, AccountState {
 
     @Override
     public AccountState clone() {
-        AccountStateImpl clone = new AccountStateImpl(accountDB);
+        AccountStateImplV2 clone = new AccountStateImplV2(accountDB);
         clone.prev = prev;
         clone.updates.putAll(updates);
 
@@ -221,7 +216,7 @@ public class AccountStateImpl implements Cloneable, AccountState {
 
     protected ByteArray getStorageKey(byte[] address, byte[] key) {
         byte[] buf = new byte[1 + address.length + key.length];
-        buf[0] = TYPE_STORAGE;
+        buf[0] = DatabasePrefixesV2.TYPE_STORAGE;
         System.arraycopy(address, 0, buf, 1, address.length);
         System.arraycopy(key, 0, buf, 1 + address.length, key.length);
 

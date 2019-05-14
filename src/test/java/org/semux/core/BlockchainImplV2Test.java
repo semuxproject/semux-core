@@ -34,13 +34,14 @@ import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.semux.util.TimeUtil;
 
-public class BlockchainImplTest {
+public class BlockchainImplV2Test {
 
     @Rule
     public TemporaryDatabaseRule temporaryDBFactory = new TemporaryDatabaseRule();
 
     private Config config;
-    private BlockchainImpl chain;
+    private BlockchainImplV2 chain;
+    private BlockchainFactory blockchainFactory;
 
     private byte[] coinbase = Bytes.random(30);
     private byte[] prevHash = Bytes.random(32);
@@ -62,7 +63,9 @@ public class BlockchainImplTest {
     @Before
     public void setUp() {
         config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
-        chain = new BlockchainImpl(config, temporaryDBFactory);
+        blockchainFactory = (new BlockchainFactory(new DevnetConfig(Constants.DEFAULT_DATA_DIR),
+                Genesis.load(Network.DEVNET), temporaryDBFactory));
+        chain = (BlockchainImplV2) blockchainFactory.getBlockchainInstance();
     }
 
     @Test
@@ -320,7 +323,7 @@ public class BlockchainImplTest {
         Block block = createBlock(1, coinbase, BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(fork)).toBytes(),
                 Collections.singletonList(tx), Collections.singletonList(res));
         TestUtils.setInternalState(config, "forkUniformDistributionEnabled", false, AbstractConfig.class);
-        chain = new BlockchainImpl(config, temporaryDBFactory);
+        chain = (BlockchainImplV2) blockchainFactory.getBlockchainInstance();
         chain.addBlock(block);
     }
 

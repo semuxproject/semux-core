@@ -39,6 +39,7 @@ import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
+import org.semux.core.ValidatorStats;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Key;
@@ -79,7 +80,7 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
     private WalletDelegate delegate1;
 
     @Mock
-    private BlockchainImpl.ValidatorStats delegateStats1;
+    private ValidatorStats delegateStats1;
 
     private Key delegateAccount2;
 
@@ -87,7 +88,7 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
     private WalletDelegate delegate2;
 
     @Mock
-    private BlockchainImpl.ValidatorStats delegateStats2;
+    private ValidatorStats delegateStats2;
 
     @Mock
     PendingManager pendingManager;

@@ -248,6 +248,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             }
         }
 
+        logger.info(responseBody);
+
         return writeJsonResponse(ctx, status, responseBody);
     }
 

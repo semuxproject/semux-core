@@ -32,6 +32,7 @@ import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
+import org.semux.core.ValidatorStats;
 import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
@@ -68,7 +69,7 @@ public class TypeFactory {
                 .transactions(txs.stream().map(TypeFactory::transactionType).collect(Collectors.toList()));
     }
 
-    public static DelegateType delegateType(BlockchainImpl.ValidatorStats validatorStats, Delegate delegate,
+    public static DelegateType delegateType(ValidatorStats validatorStats, Delegate delegate,
             boolean isValidator) {
         return new DelegateType()
                 .address(Hex.encode0x(delegate.getAddress()))

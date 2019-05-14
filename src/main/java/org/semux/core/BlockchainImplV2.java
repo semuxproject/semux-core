@@ -22,32 +22,28 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.client.BlockStore;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.core.Genesis.Premine;
 import org.semux.core.exception.BlockchainException;
 import org.semux.core.state.AccountState;
-import org.semux.core.state.AccountStateImpl;
+import org.semux.core.state.AccountStateImplV2;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
-import org.semux.core.state.DelegateStateImpl;
+import org.semux.core.state.DelegateStateImplV2;
 import org.semux.crypto.Hex;
 import org.semux.db.Database;
 import org.semux.db.DatabaseFactory;
 import org.semux.db.DatabaseName;
-import org.semux.db.DatabasePrefixesV1;
+import org.semux.db.DatabasePrefixesV2;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
-import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @deprecated only being used for database upgrade from v0, v1 to v2
+ * Blockchain implementation.
  *
- *             Blockchain implementation.
- *
- *             <pre>
+ * <pre>
  * index DB structure:
  *
  * [0] => [latest_block_number]
@@ -60,37 +56,20 @@ import org.slf4j.LoggerFactory;
  * [7] => [activated forks]
  *
  * [0xff] => [database version]
- *             </pre>
+ * </pre>
  *
- *             <pre>
+ * <pre>
  * block DB structure:
  *
  * [0, block_number] => [block_header]
  * [1, block_number] => [block_transactions]
  * [2, block_number] => [block_results]
  * [3, block_number] => [block_votes]
- *             </pre>
+ * </pre>
  */
-public class BlockchainImpl implements Blockchain {
+public class BlockchainImplV2 implements Blockchain {
 
-    private static final Logger logger = LoggerFactory.getLogger(BlockchainImpl.class);
-
-    protected static final int DATABASE_VERSION = 1;
-
-    protected static final byte TYPE_LATEST_BLOCK_NUMBER = DatabasePrefixesV1.IndexDB.TYPE_LATEST_BLOCK_NUMBER;
-    protected static final byte TYPE_VALIDATORS = DatabasePrefixesV1.IndexDB.TYPE_VALIDATORS;
-    protected static final byte TYPE_VALIDATOR_STATS = DatabasePrefixesV1.IndexDB.TYPE_VALIDATOR_STATS;
-    protected static final byte TYPE_BLOCK_HASH = DatabasePrefixesV1.IndexDB.TYPE_BLOCK_HASH;
-    protected static final byte TYPE_TRANSACTION_HASH = DatabasePrefixesV1.IndexDB.TYPE_TRANSACTION_HASH;
-    protected static final byte TYPE_ACCOUNT_TRANSACTION = DatabasePrefixesV1.IndexDB.TYPE_ACCOUNT_TRANSACTION;
-    protected static final byte TYPE_ACTIVATED_FORKS = DatabasePrefixesV1.IndexDB.TYPE_ACTIVATED_FORKS;
-    protected static final byte TYPE_COINBASE_TRANSACTION_HASH = DatabasePrefixesV1.IndexDB.TYPE_COINBASE_TRANSACTION_HASH;
-    protected static final byte TYPE_DATABASE_VERSION = DatabasePrefixesV1.IndexDB.TYPE_DATABASE_VERSION;
-
-    protected static final byte TYPE_BLOCK_HEADER = DatabasePrefixesV1.BlockDB.TYPE_BLOCK_HEADER;
-    protected static final byte TYPE_BLOCK_TRANSACTIONS = DatabasePrefixesV1.BlockDB.TYPE_BLOCK_TRANSACTIONS;
-    protected static final byte TYPE_BLOCK_RESULTS = DatabasePrefixesV1.BlockDB.TYPE_BLOCK_RESULTS;
-    protected static final byte TYPE_BLOCK_VOTES = DatabasePrefixesV1.BlockDB.TYPE_BLOCK_VOTES;
+    private static final Logger logger = LoggerFactory.getLogger(BlockchainImplV2.class);
 
     private BlockStore blockStore = new SemuxBlockStore(this);
 
@@ -98,7 +77,6 @@ public class BlockchainImpl implements Blockchain {
     private final Config config;
     private final Genesis genesis;
 
-    private Database indexDB;
     private Database blockDB;
 
     private AccountState accountState;
@@ -108,58 +86,31 @@ public class BlockchainImpl implements Blockchain {
 
     private ActivatedForks forks;
 
-    public BlockchainImpl(Config config, DatabaseFactory dbFactory) {
+    public BlockchainImplV2(Config config, DatabaseFactory dbFactory) {
         this(config, Genesis.load(config.network()), dbFactory);
     }
 
-    public BlockchainImpl(Config config, Genesis genesis, DatabaseFactory dbFactory) {
+    public BlockchainImplV2(Config config, Genesis genesis, DatabaseFactory dbFactory) {
         this.config = config;
         this.genesis = genesis;
         openDb(dbFactory);
     }
 
     private synchronized void openDb(DatabaseFactory factory) {
-        this.indexDB = factory.getDB(DatabaseName.INDEX);
         this.blockDB = factory.getDB(DatabaseName.BLOCK);
 
-        this.accountState = new AccountStateImpl(factory.getDB(DatabaseName.ACCOUNT));
-        this.delegateState = new DelegateStateImpl(this, factory.getDB(DatabaseName.DELEGATE),
-                factory.getDB(DatabaseName.VOTE));
+        this.accountState = new AccountStateImplV2(this.blockDB);
+        this.delegateState = new DelegateStateImplV2(this, this.blockDB, this.blockDB);
 
-        // checks if the database needs to be initialized
-        byte[] number = indexDB.get(Bytes.of(TYPE_LATEST_BLOCK_NUMBER));
+        loadInitialData();
+    }
 
+    private void loadInitialData() {
         // load the activate forks from database
         forks = new ActivatedForks(this, config, getActivatedForks());
 
-        // initialize the database for the first time
-        if (number == null || number.length == 0) {
-            initializeDb();
-            return;
-        }
-
         // load the latest block
-        latestBlock = getBlock(Bytes.toLong(number));
-    }
-
-    private void initializeDb() {
-        // initialize database version
-        indexDB.put(Bytes.of(TYPE_DATABASE_VERSION), Bytes.of(DATABASE_VERSION));
-
-        // pre-allocation
-        for (Premine p : genesis.getPremines().values()) {
-            accountState.adjustAvailable(p.getAddress(), p.getAmount());
-        }
-        accountState.commit();
-
-        // delegates
-        for (Entry<String, byte[]> e : genesis.getDelegates().entrySet()) {
-            delegateState.register(e.getValue(), Bytes.of(e.getKey()), 0);
-        }
-        delegateState.commit();
-
-        // add block
-        addBlock(genesis);
+        latestBlock = getBlock(Bytes.toLong(blockDB.get(Bytes.of(DatabasePrefixesV2.TYPE_LATEST_BLOCK_NUMBER))));
     }
 
     @Override
@@ -189,16 +140,16 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public long getBlockNumber(byte[] hash) {
-        byte[] number = indexDB.get(Bytes.merge(TYPE_BLOCK_HASH, hash));
+        byte[] number = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HASH, hash));
         return (number == null) ? -1 : Bytes.toLong(number);
     }
 
     @Override
     public Block getBlock(long number) {
-        byte[] header = blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)));
-        byte[] transactions = blockDB.get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)));
-        byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)));
-        byte[] votes = blockDB.get(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)));
+        byte[] header = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HEADER, Bytes.of(number)));
+        byte[] transactions = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)));
+        byte[] results = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_RESULTS, Bytes.of(number)));
+        byte[] votes = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_VOTES, Bytes.of(number)));
 
         return (header == null) ? null : Block.fromComponents(header, transactions, results, votes);
     }
@@ -211,7 +162,7 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public BlockHeader getBlockHeader(long number) {
-        byte[] header = blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)));
+        byte[] header = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HEADER, Bytes.of(number)));
         return (header == null) ? null : BlockHeader.fromBytes(header);
     }
 
@@ -223,12 +174,12 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public boolean hasBlock(long number) {
-        return blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number))) != null;
+        return blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HEADER, Bytes.of(number))) != null;
     }
 
     @Override
     public Transaction getTransaction(byte[] hash) {
-        byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash));
+        byte[] bytes = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_TRANSACTION_HASH, hash));
         if (bytes != null) {
             // coinbase transaction
             if (bytes.length > 64) {
@@ -240,7 +191,8 @@ public class BlockchainImpl implements Blockchain {
             int start = dec.readInt();
             dec.readInt();
 
-            byte[] transactions = blockDB.get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)));
+            byte[] transactions = blockDB
+                    .get(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)));
             dec = new SimpleDecoder(transactions, start);
             return Transaction.fromBytes(dec.readBytes());
         }
@@ -252,17 +204,18 @@ public class BlockchainImpl implements Blockchain {
     public Transaction getCoinbaseTransaction(long blockNumber) {
         return blockNumber == 0
                 ? null
-                : getTransaction(indexDB.get(Bytes.merge(TYPE_COINBASE_TRANSACTION_HASH, Bytes.of(blockNumber))));
+                : getTransaction(blockDB
+                        .get(Bytes.merge(DatabasePrefixesV2.TYPE_COINBASE_TRANSACTION_HASH, Bytes.of(blockNumber))));
     }
 
     @Override
     public boolean hasTransaction(final byte[] hash) {
-        return indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash)) != null;
+        return blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_TRANSACTION_HASH, hash)) != null;
     }
 
     @Override
     public TransactionResult getTransactionResult(byte[] hash) {
-        byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash));
+        byte[] bytes = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_TRANSACTION_HASH, hash));
         if (bytes != null) {
             // coinbase transaction
             if (bytes.length > 64) {
@@ -274,7 +227,7 @@ public class BlockchainImpl implements Blockchain {
             dec.readInt();
             int start = dec.readInt();
 
-            byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)));
+            byte[] results = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_RESULTS, Bytes.of(number)));
             dec = new SimpleDecoder(results, start);
             return TransactionResult.fromBytes(dec.readBytes());
         }
@@ -289,7 +242,7 @@ public class BlockchainImpl implements Blockchain {
             return tx.getNonce();
         }
 
-        byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash));
+        byte[] bytes = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_TRANSACTION_HASH, hash));
         if (bytes != null) {
             SimpleDecoder dec = new SimpleDecoder(bytes);
             return dec.readLong();
@@ -309,12 +262,13 @@ public class BlockchainImpl implements Blockchain {
         }
 
         // [1] update block
-        blockDB.put(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)), block.getEncodedHeader());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)), block.getEncodedTransactions());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)), block.getEncodedResults());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)), block.getEncodedVotes());
+        blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HEADER, Bytes.of(number)), block.getEncodedHeader());
+        blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)),
+                block.getEncodedTransactions());
+        blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_RESULTS, Bytes.of(number)), block.getEncodedResults());
+        blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_VOTES, Bytes.of(number)), block.getEncodedVotes());
 
-        indexDB.put(Bytes.merge(TYPE_BLOCK_HASH, hash), Bytes.of(number));
+        blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HASH, hash), Bytes.of(number));
 
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
@@ -330,7 +284,7 @@ public class BlockchainImpl implements Blockchain {
             enc.writeInt(transactionIndices.getRight().get(i));
             enc.writeInt(resultIndices.getRight().get(i));
 
-            indexDB.put(Bytes.merge(TYPE_TRANSACTION_HASH, tx.getHash()), enc.toBytes());
+            blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_TRANSACTION_HASH, tx.getHash()), enc.toBytes());
 
             // [3] update transaction_by_account index
             addTransactionToAccount(tx, tx.getFrom());
@@ -350,8 +304,9 @@ public class BlockchainImpl implements Blockchain {
                     block.getTimestamp(),
                     Bytes.EMPTY_BYTES);
             tx.sign(Constants.COINBASE_KEY);
-            indexDB.put(Bytes.merge(TYPE_TRANSACTION_HASH, tx.getHash()), tx.toBytes());
-            indexDB.put(Bytes.merge(TYPE_COINBASE_TRANSACTION_HASH, Bytes.of(block.getNumber())), tx.getHash());
+            blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_TRANSACTION_HASH, tx.getHash()), tx.toBytes());
+            blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_COINBASE_TRANSACTION_HASH, Bytes.of(block.getNumber())),
+                    tx.getHash());
             addTransactionToAccount(tx, block.getCoinbase());
 
             // [5] update validator statistics
@@ -372,7 +327,7 @@ public class BlockchainImpl implements Blockchain {
 
         // [7] update latest_block
         latestBlock = block;
-        indexDB.put(Bytes.of(TYPE_LATEST_BLOCK_NUMBER), Bytes.of(number));
+        blockDB.put(Bytes.of(DatabasePrefixesV2.TYPE_LATEST_BLOCK_NUMBER), Bytes.of(number));
 
         for (BlockchainListener listener : listeners) {
             listener.onBlockAdded(block);
@@ -393,7 +348,7 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public int getTransactionCount(byte[] address) {
-        byte[] cnt = indexDB.get(Bytes.merge(TYPE_ACCOUNT_TRANSACTION, address));
+        byte[] cnt = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_ACCOUNT_TRANSACTION, address));
         return (cnt == null) ? 0 : Bytes.toInt(cnt);
     }
 
@@ -404,7 +359,7 @@ public class BlockchainImpl implements Blockchain {
         int total = getTransactionCount(address);
         for (int i = from; i < total && i < to; i++) {
             byte[] key = getNthTransactionIndexKey(address, i);
-            byte[] value = indexDB.get(key);
+            byte[] value = blockDB.get(key);
             list.add(getTransaction(value));
         }
 
@@ -415,7 +370,7 @@ public class BlockchainImpl implements Blockchain {
     public List<String> getValidators() {
         List<String> validators = new ArrayList<>();
 
-        byte[] v = indexDB.get(Bytes.of(TYPE_VALIDATORS));
+        byte[] v = blockDB.get(Bytes.of(DatabasePrefixesV2.TYPE_VALIDATORS));
         if (v != null) {
             SimpleDecoder dec = new SimpleDecoder(v);
             int n = dec.readInt();
@@ -429,8 +384,8 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public ValidatorStats getValidatorStats(byte[] address) {
-        byte[] key = Bytes.merge(TYPE_VALIDATOR_STATS, address);
-        byte[] value = indexDB.get(key);
+        byte[] key = Bytes.merge(DatabasePrefixesV2.TYPE_VALIDATOR_STATS, address);
+        byte[] value = blockDB.get(key);
 
         return (value == null) ? new ValidatorStats(0, 0, 0) : ValidatorStats.fromBytes(value);
     }
@@ -455,7 +410,7 @@ public class BlockchainImpl implements Blockchain {
         for (String v : validators) {
             enc.writeString(v);
         }
-        indexDB.put(Bytes.of(TYPE_VALIDATORS), enc.toBytes());
+        blockDB.put(Bytes.of(DatabasePrefixesV2.TYPE_VALIDATORS), enc.toBytes());
     }
 
     /**
@@ -469,8 +424,8 @@ public class BlockchainImpl implements Blockchain {
      *            difference
      */
     protected void adjustValidatorStats(byte[] address, ValidatorStatsType type, long delta) {
-        byte[] key = Bytes.merge(TYPE_VALIDATOR_STATS, address);
-        byte[] value = indexDB.get(key);
+        byte[] key = Bytes.merge(DatabasePrefixesV2.TYPE_VALIDATOR_STATS, address);
+        byte[] value = blockDB.get(key);
 
         ValidatorStats stats = (value == null) ? new ValidatorStats(0, 0, 0) : ValidatorStats.fromBytes(value);
 
@@ -488,7 +443,7 @@ public class BlockchainImpl implements Blockchain {
             break;
         }
 
-        indexDB.put(key, stats.toBytes());
+        blockDB.put(key, stats.toBytes());
     }
 
     /**
@@ -498,7 +453,7 @@ public class BlockchainImpl implements Blockchain {
      * @param total
      */
     protected void setTransactionCount(byte[] address, int total) {
-        indexDB.put(Bytes.merge(TYPE_ACCOUNT_TRANSACTION, address), Bytes.of(total));
+        blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_ACCOUNT_TRANSACTION, address), Bytes.of(total));
     }
 
     /**
@@ -509,7 +464,7 @@ public class BlockchainImpl implements Blockchain {
      */
     protected void addTransactionToAccount(Transaction tx, byte[] address) {
         int total = getTransactionCount(address);
-        indexDB.put(getNthTransactionIndexKey(address, total), tx.getHash());
+        blockDB.put(getNthTransactionIndexKey(address, total), tx.getHash());
         setTransactionCount(address, total + 1);
     }
 
@@ -521,21 +476,7 @@ public class BlockchainImpl implements Blockchain {
      * @return
      */
     protected byte[] getNthTransactionIndexKey(byte[] address, int n) {
-        return Bytes.merge(Bytes.of(TYPE_ACCOUNT_TRANSACTION), address, Bytes.of(n));
-    }
-
-    /**
-     * Returns the version of current database.
-     *
-     * @return
-     */
-    public int getDatabaseVersion() {
-        byte[] versionBytes = indexDB.get(Bytes.of(TYPE_DATABASE_VERSION));
-        if (versionBytes == null || versionBytes.length == 0) {
-            return 0;
-        } else {
-            return Bytes.toInt(versionBytes);
-        }
+        return Bytes.merge(Bytes.of(DatabasePrefixesV2.TYPE_ACCOUNT_TRANSACTION), address, Bytes.of(n));
     }
 
     @Override
@@ -596,7 +537,7 @@ public class BlockchainImpl implements Blockchain {
      */
     protected Map<Fork, Fork.Activation> getActivatedForks() {
         Map<Fork, Fork.Activation> activations = new HashMap<>();
-        byte[] value = indexDB.get(Bytes.of(TYPE_ACTIVATED_FORKS));
+        byte[] value = blockDB.get(Bytes.of(DatabasePrefixesV2.TYPE_ACTIVATED_FORKS));
         if (value != null) {
             SimpleDecoder simpleDecoder = new SimpleDecoder(value);
             final int numberOfForks = simpleDecoder.readInt();
@@ -625,41 +566,6 @@ public class BlockchainImpl implements Blockchain {
         for (Entry<Fork, Fork.Activation> entry : activatedForks.entrySet()) {
             simpleEncoder.writeBytes(entry.getValue().toBytes());
         }
-        indexDB.put(Bytes.of(TYPE_ACTIVATED_FORKS), simpleEncoder.toBytes());
-    }
-
-    /**
-     * A temporary blockchain for database migration. This class implements a
-     * lightweight version of
-     * ${@link org.semux.consensus.SemuxBft#applyBlock(Block)} to migrate blocks
-     * from an existing database to the latest schema.
-     */
-    public class MigrationBlockchain extends BlockchainImpl {
-        private MigrationBlockchain(Config config, DatabaseFactory dbFactory) {
-            super(config, dbFactory);
-        }
-
-        public void applyBlock(Block block) {
-            // [0] execute transactions against local state
-            TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
-            transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState(),
-                    new SemuxBlock(block.getHeader(), config.vmMaxBlockGasLimit()), this);
-
-            // [1] apply block reward and tx fees
-            Amount reward = Block.getBlockReward(block, config);
-
-            if (reward.gt0()) {
-                getAccountState().adjustAvailable(block.getCoinbase(), reward);
-            }
-            // [2] commit the updates
-            getAccountState().commit();
-            getDelegateState().commit();
-            // [3] add block to chain
-            addBlock(block);
-        }
-    }
-
-    public MigrationBlockchain getMigrationBlockchainInstance(Config config, DatabaseFactory tempDbFactory) {
-        return new MigrationBlockchain(config, tempDbFactory);
+        blockDB.put(Bytes.of(DatabasePrefixesV2.TYPE_ACTIVATED_FORKS), simpleEncoder.toBytes());
     }
 }

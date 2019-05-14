@@ -7,8 +7,12 @@
 package org.semux.db;
 
 import org.semux.config.Config;
+import org.semux.core.Blockchain;
+import org.semux.db.exception.MigrationException;
 
 public interface Migration {
+
+    void checkBlockchainVersion(Blockchain blockchain) throws MigrationException;
 
     void migrate(Config config, DatabaseFactory dbFactory);
 }
