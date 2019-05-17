@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -152,6 +151,14 @@ public class LeveldbDatabase implements Database {
             logger.error("Failed to update batch", e);
             SystemUtil.exitAsync(SystemUtil.Code.FAILED_TO_WRITE_BATCH_TO_DB);
         }
+    }
+
+    WriteBatch createWriteBatch() {
+        return db.createWriteBatch();
+    }
+
+    void writeBatch(WriteBatch batch) {
+        db.write(batch);
     }
 
     @Override

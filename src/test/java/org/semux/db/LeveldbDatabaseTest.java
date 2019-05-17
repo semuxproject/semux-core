@@ -6,10 +6,12 @@
  */
 package org.semux.db;
 
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -22,6 +24,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.semux.config.Constants;
 import org.semux.db.LeveldbDatabase.LeveldbFactory;
+import org.semux.db.exception.DatabaseException;
 import org.semux.util.Bytes;
 import org.semux.util.ClosableIterator;
 
@@ -72,6 +75,40 @@ public class LeveldbDatabaseTest {
             assertNull(db.get(Bytes.of("a")));
             assertArrayEquals(db.get(Bytes.of("b")), Bytes.of("2"));
             assertArrayEquals(db.get(Bytes.of("c")), Bytes.of("3"));
+        } finally {
+            db.destroy();
+        }
+    }
+
+    @Test
+    public void testBatchManager() {
+        LeveldbDatabase db = openDatabase();
+        try {
+            BatchManager batchManager = new LeveldbBatchManager(db);
+            Batch batch = batchManager.getBatchInstance(BatchName.ADD_BLOCK);
+            batch.add(BatchOperation.put(Bytes.of("a"), Bytes.of("1")));
+            batch.add(BatchOperation.delete(Bytes.of("a")));
+            batch.add(BatchOperation.put(Bytes.of("b"), Bytes.of("2")));
+            batch.add(BatchOperation.put(Bytes.of("c"), Bytes.of("3")));
+            batchManager.commit(batch);
+
+            assertNull(db.get(Bytes.of("a")));
+            assertArrayEquals(db.get(Bytes.of("b")), Bytes.of("2"));
+            assertArrayEquals(db.get(Bytes.of("c")), Bytes.of("3"));
+            assertThat(batchManager.getBatchInstance(BatchName.ADD_BLOCK).stream().count(), equalTo(0L));
+        } finally {
+            db.destroy();
+        }
+    }
+
+    @Test(expected = DatabaseException.class)
+    public void testBatchManagerRecommit() {
+        LeveldbDatabase db = openDatabase();
+        try {
+            BatchManager batchManager = new LeveldbBatchManager(db);
+            Batch batch = batchManager.getBatchInstance(BatchName.ADD_BLOCK);
+            batchManager.commit(batch);
+            batchManager.commit(batch);
         } finally {
             db.destroy();
         }
