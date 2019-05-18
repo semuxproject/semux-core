@@ -23,7 +23,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.ethereum.vm.client.BlockStore;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.core.exception.BlockchainException;
@@ -38,14 +37,11 @@ import org.semux.db.BatchManager;
 import org.semux.db.BatchName;
 import org.semux.db.BatchOperation;
 import org.semux.db.Database;
-import org.semux.db.DatabaseFactory;
-import org.semux.db.DatabaseName;
 import org.semux.db.DatabasePrefixesV2;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
-import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,15 +88,15 @@ public class BlockchainImplV2 implements Blockchain {
     private Block latestBlock;
     private ActivatedForks forks;
 
-    public BlockchainImplV2(Config config, Database blockDB, BatchManager batchManager) {
-        this(config, Genesis.load(config.network()), blockDB, batchManager);
-    }
+    private BlockCodec blockCodec;
 
-    public BlockchainImplV2(Config config, Genesis genesis, Database blockDB, BatchManager batchManager) {
+    public BlockchainImplV2(Config config, Genesis genesis, Database blockDB, BatchManager batchManager,
+            BlockCodec blockCodec) {
         this.config = config;
         this.genesis = genesis;
         this.blockDB = blockDB;
         this.batchManager = batchManager;
+        this.blockCodec = blockCodec;
         this.accountState = new AccountStateImplV2(blockDB, batchManager);
         this.delegateState = new DelegateStateImplV2(this, blockDB, batchManager);
         forks = new ActivatedForks((Blockchain) Proxy.newProxyInstance(
@@ -148,7 +144,7 @@ public class BlockchainImplV2 implements Blockchain {
         byte[] results = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_RESULTS, Bytes.of(number)));
         byte[] votes = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_VOTES, Bytes.of(number)));
 
-        return (header == null) ? null : Block.fromComponents(header, transactions, results, votes);
+        return (header == null) ? null : blockCodec.decoder().fromComponents(header, transactions, results, votes);
     }
 
     @Override
@@ -262,19 +258,19 @@ public class BlockchainImplV2 implements Blockchain {
         Batch batch = batchManager.getBatchInstance(BatchName.ADD_BLOCK);
         batch.add(
                 BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HEADER, Bytes.of(number)),
-                        block.getEncodedHeader()),
+                        blockCodec.encoder().getEncodedHeader(block)),
                 BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)),
-                        block.getEncodedTransactions()),
+                        blockCodec.encoder().getEncodedTransactions(block)),
                 BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_RESULTS, Bytes.of(number)),
-                        block.getEncodedResults()),
+                        blockCodec.encoder().getEncodedResults(block)),
                 BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_VOTES, Bytes.of(number)),
-                        block.getEncodedVotes()),
+                        blockCodec.encoder().getEncodedVotes(block)),
                 BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HASH, hash), Bytes.of(number)));
 
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
-        Pair<byte[], List<Integer>> transactionIndices = block.getEncodedTransactionsAndIndices();
-        Pair<byte[], List<Integer>> resultIndices = block.getEncodedTransactionsAndIndices();
+        Pair<byte[], List<Integer>> transactionIndices = blockCodec.encoder().getEncodedTransactionsAndIndices(block);
+        Pair<byte[], List<Integer>> resultIndices = blockCodec.encoder().getEncodedTransactionsAndIndices(block);
         Amount reward = Block.getBlockReward(block, config);
 
         for (int i = 0; i < txs.size(); i++) {

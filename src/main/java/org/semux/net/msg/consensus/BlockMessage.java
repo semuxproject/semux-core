@@ -7,6 +7,9 @@
 package org.semux.net.msg.consensus;
 
 import org.semux.core.Block;
+import org.semux.core.BlockDecoder;
+import org.semux.core.BlockDecoderV1;
+import org.semux.core.BlockEncoderV1;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
 
@@ -19,13 +22,14 @@ public class BlockMessage extends Message {
 
         this.block = block;
 
-        this.body = block.toBytes();
+        this.body = new BlockEncoderV1().toBytes(block);
     }
 
     public BlockMessage(byte[] body) {
         super(MessageCode.BLOCK, null);
 
-        this.block = Block.fromBytes(body);
+        BlockDecoder blockDecoder = new BlockDecoderV1();
+        this.block = blockDecoder.fromBytes(body);
 
         this.body = body;
     }

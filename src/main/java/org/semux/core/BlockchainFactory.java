@@ -17,8 +17,6 @@ import org.semux.db.DatabaseName;
 import org.semux.db.DatabasePrefixesV1;
 import org.semux.db.DatabasePrefixesV2;
 import org.semux.db.DatabaseVersion;
-import org.semux.db.LeveldbBatchManager;
-import org.semux.db.LeveldbDatabase;
 import org.semux.db.MigrationBlockDbVersion001;
 import org.semux.db.MigrationBlockDbVersion002;
 import org.semux.db.MigrationRunner;
@@ -67,7 +65,8 @@ public class BlockchainFactory {
                     config,
                     genesis,
                     database,
-                    BatchManager.getInstance(database));
+                    BatchManager.getInstance(database),
+                    new BlockCodecV1());
         } else {
             throw new BlockchainException("Unsupported blockchain database version " + databaseVersion);
         }

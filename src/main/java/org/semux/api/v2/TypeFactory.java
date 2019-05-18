@@ -29,7 +29,6 @@ import org.semux.api.v2.model.TransactionType;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
-import org.semux.core.BlockchainImpl;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.ValidatorStats;

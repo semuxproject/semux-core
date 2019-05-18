@@ -202,7 +202,8 @@ public class BlockchainImpl implements Blockchain {
         byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)));
         byte[] votes = blockDB.get(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)));
 
-        return (header == null) ? null : Block.fromComponents(header, transactions, results, votes);
+        BlockDecoder blockDecoder = new BlockDecoderV1();
+        return (header == null) ? null : blockDecoder.fromComponents(header, transactions, results, votes);
     }
 
     @Override
@@ -311,17 +312,18 @@ public class BlockchainImpl implements Blockchain {
         }
 
         // [1] update block
-        blockDB.put(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)), block.getEncodedHeader());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)), block.getEncodedTransactions());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)), block.getEncodedResults());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)), block.getEncodedVotes());
+        BlockEncoder blockEncoder = new BlockEncoderV1();
+        blockDB.put(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)), blockEncoder.getEncodedHeader(block));
+        blockDB.put(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)), blockEncoder.getEncodedTransactions(block));
+        blockDB.put(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)), blockEncoder.getEncodedResults(block));
+        blockDB.put(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)), blockEncoder.getEncodedVotes(block));
 
         indexDB.put(Bytes.merge(TYPE_BLOCK_HASH, hash), Bytes.of(number));
 
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
-        Pair<byte[], List<Integer>> transactionIndices = block.getEncodedTransactionsAndIndices();
-        Pair<byte[], List<Integer>> resultIndices = block.getEncodedTransactionsAndIndices();
+        Pair<byte[], List<Integer>> transactionIndices = blockEncoder.getEncodedTransactionsAndIndices(block);
+        Pair<byte[], List<Integer>> resultIndices = blockEncoder.getEncodedTransactionsAndIndices(block);
         Amount reward = Block.getBlockReward(block, config);
 
         for (int i = 0; i < txs.size(); i++) {

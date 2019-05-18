@@ -220,9 +220,12 @@ public class BlockchainImplTest {
     public void testSerialization() {
         Block block1 = createBlock(1);
 
-        Block block2 = Block.fromComponents(block1.getEncodedHeader(), block1.getEncodedTransactions(),
-                block1.getEncodedResults(),
-                block1.getEncodedVotes());
+        BlockEncoder blockEncoder = new BlockEncoderV1();
+        Block block2 = new BlockDecoderV1().fromComponents(
+                blockEncoder.getEncodedHeader(block1),
+                blockEncoder.getEncodedTransactions(block1),
+                blockEncoder.getEncodedResults(block1),
+                blockEncoder.getEncodedVotes(block1));
         assertArrayEquals(block1.getHash(), block2.getHash());
         assertArrayEquals(block1.getCoinbase(), block2.getCoinbase());
         assertArrayEquals(block1.getParentHash(), block2.getParentHash());

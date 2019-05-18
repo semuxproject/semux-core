@@ -76,9 +76,12 @@ public class BlockTest {
         Block block = new Block(header, transactions, results, view, votes);
         hash = block.getHash();
 
-        testFields(Block.fromComponents(block.getEncodedHeader(), block.getEncodedTransactions(),
-                block.getEncodedResults(),
-                block.getEncodedVotes()));
+        BlockEncoder blockEncoder = new BlockEncoderV1();
+        testFields(new BlockDecoderV1().fromComponents(
+                blockEncoder.getEncodedHeader(block),
+                blockEncoder.getEncodedTransactions(block),
+                blockEncoder.getEncodedResults(block),
+                blockEncoder.getEncodedVotes(block)));
     }
 
     private void testFields(Block block) {
@@ -100,12 +103,13 @@ public class BlockTest {
         BlockHeader header = new BlockHeader(number, coinbase, prevHash, timestamp, transactionsRoot, resultsRoot,
                 stateRoot, data);
         Block block = new Block(header, transactions, results, view, votes);
+        BlockEncoder blockEncoder = new BlockEncoderV1();
 
-        Pair<byte[], List<Integer>> indexes = block.getEncodedTransactionsAndIndices();
+        Pair<byte[], List<Integer>> indexes = blockEncoder.getEncodedTransactionsAndIndices(block);
         assertEquals(1, indexes.getRight().size());
 
         Integer index = indexes.getRight().get(0);
-        SimpleDecoder dec = new SimpleDecoder(block.getEncodedTransactions(), index);
+        SimpleDecoder dec = new SimpleDecoder(blockEncoder.getEncodedTransactions(block), index);
         Transaction tx2 = Transaction.fromBytes(dec.readBytes());
         assertArrayEquals(tx.getHash(), tx2.getHash());
     }

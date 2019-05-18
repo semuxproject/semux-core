@@ -16,6 +16,9 @@ import java.util.List;
 
 import org.junit.Test;
 import org.semux.core.Block;
+import org.semux.core.BlockDecoderV1;
+import org.semux.core.BlockEncoder;
+import org.semux.core.BlockEncoderV1;
 import org.semux.core.BlockHeader;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
@@ -91,9 +94,12 @@ public class VoteTest {
 
         block.setView(view);
         block.setVotes(votes);
-        block = Block.fromComponents(block.getEncodedHeader(), block.getEncodedTransactions(),
-                block.getEncodedResults(),
-                block.getEncodedVotes());
+        BlockEncoder blockEncoder = new BlockEncoderV1();
+        block = new BlockDecoderV1().fromComponents(
+                blockEncoder.getEncodedHeader(block),
+                blockEncoder.getEncodedTransactions(block),
+                blockEncoder.getEncodedResults(block),
+                blockEncoder.getEncodedVotes(block));
 
         for (Key.Signature sig : block.getVotes()) {
             ByteArray address = ByteArray.of(Hash.h160(sig.getPublicKey()));

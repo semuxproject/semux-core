@@ -18,6 +18,8 @@ import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
 import org.semux.core.Amount;
 import org.semux.core.Block;
+import org.semux.core.BlockEncoder;
+import org.semux.core.BlockEncoderV1;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
@@ -87,12 +89,13 @@ public class BlockchainPerformance {
         block.setView(1);
         block.setVotes(votes);
 
+        BlockEncoder blockEncoder = new BlockEncoderV1();
         long t2 = System.nanoTime();
         logger.info("block # of txs: {}", block.getTransactions().size());
-        logger.info("block header size: {} B", block.getEncodedHeader().length);
-        logger.info("block transaction size: {} KB", block.getEncodedTransactions().length / 1024);
-        logger.info("block results size: {} KB", block.getEncodedResults().length / 1024);
-        logger.info("block votes size: {} KB", block.getEncodedVotes().length / 1024);
+        logger.info("block header size: {} B", blockEncoder.getEncodedHeader(block).length);
+        logger.info("block transaction size: {} KB", blockEncoder.getEncodedTransactions(block).length / 1024);
+        logger.info("block results size: {} KB", blockEncoder.getEncodedResults(block).length / 1024);
+        logger.info("block votes size: {} KB", blockEncoder.getEncodedVotes(block).length / 1024);
         logger.info("block total size: {} KB", block.size() / 1024);
         logger.info("Perf_block_creation: {} ms", (t2 - t1) / 1_000_000);
         return block;
