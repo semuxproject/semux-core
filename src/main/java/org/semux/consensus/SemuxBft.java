@@ -995,12 +995,15 @@ public class SemuxBft implements BftManager {
         WriteLock lock = kernel.getStateLock().writeLock();
         lock.lock();
         try {
-            // [7] flush state to disk
+            // [7] add block to chain
+            chain.addBlock(block);
+
+            // [8] commit state updates
             chain.getAccountState().commit();
             chain.getDelegateState().commit();
 
-            // [8] add block to chain
-            chain.addBlock(block);
+            // [9] commit pending blockchain updates
+            chain.commit();
         } finally {
             lock.unlock();
         }

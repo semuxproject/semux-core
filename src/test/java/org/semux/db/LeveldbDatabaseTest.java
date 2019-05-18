@@ -86,10 +86,11 @@ public class LeveldbDatabaseTest {
         try {
             BatchManager batchManager = new LeveldbBatchManager(db);
             Batch batch = batchManager.getBatchInstance(BatchName.ADD_BLOCK);
-            batch.add(BatchOperation.put(Bytes.of("a"), Bytes.of("1")));
-            batch.add(BatchOperation.delete(Bytes.of("a")));
-            batch.add(BatchOperation.put(Bytes.of("b"), Bytes.of("2")));
-            batch.add(BatchOperation.put(Bytes.of("c"), Bytes.of("3")));
+            batch.add(
+                    BatchOperation.put(Bytes.of("a"), Bytes.of("1")),
+                    BatchOperation.delete(Bytes.of("a")),
+                    BatchOperation.put(Bytes.of("b"), Bytes.of("2")),
+                    BatchOperation.put(Bytes.of("c"), Bytes.of("3")));
             batchManager.commit(batch);
 
             assertNull(db.get(Bytes.of("a")));

@@ -138,7 +138,7 @@ public class DelegateStateV2Test {
         assertEquals(value, ds.getVote(voter, delegate));
         assertTrue(ds.vote(voter, delegate, value));
         assertEquals(SEM.of(4), ds.getVote(voter, delegate));
-        ds.commit();
+        commit();
         assertEquals(SEM.of(4), ds.getVote(voter, delegate));
     }
 
@@ -153,7 +153,7 @@ public class DelegateStateV2Test {
         ds.register(delegateKey.toAddress(), Bytes.of("test"));
         assertTrue(ds.vote(voterKey1.toAddress(), delegateKey.toAddress(), value1));
         assertTrue(ds.vote(voterKey2.toAddress(), delegateKey.toAddress(), value2));
-        ds.commit();
+        commit();
 
         Map<ByteArray, Amount> votes = ds.getVotes(delegateKey.toAddress());
         assertEquals(value1, votes.get(new ByteArray(voterKey1.toAddress())));
@@ -163,5 +163,10 @@ public class DelegateStateV2Test {
     @After
     public void rollback() {
         ds.rollback();
+    }
+
+    private void commit() {
+        ds.commit();
+        chain.commit();
     }
 }

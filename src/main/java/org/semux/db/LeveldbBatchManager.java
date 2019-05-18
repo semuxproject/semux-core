@@ -16,7 +16,7 @@ import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LeveldbBatchManager implements BatchManager {
+public class LeveldbBatchManager extends BatchManager {
 
     private static final Logger logger = LoggerFactory.getLogger(LeveldbBatchManager.class);
 

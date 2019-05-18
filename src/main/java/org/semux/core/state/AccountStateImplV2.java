@@ -13,6 +13,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.semux.core.Amount;
+import org.semux.db.BatchManager;
+import org.semux.db.BatchName;
+import org.semux.db.BatchOperation;
 import org.semux.db.Database;
 import org.semux.db.DatabasePrefixesV2;
 import org.semux.util.ByteArray;
@@ -31,7 +34,8 @@ import org.semux.util.Bytes;
  */
 public class AccountStateImplV2 implements Cloneable, AccountState {
 
-    protected Database accountDB;
+    private final Database database;
+    private final BatchManager batchManager;
     protected AccountStateImplV2 prev;
 
     /**
@@ -42,10 +46,10 @@ public class AccountStateImplV2 implements Cloneable, AccountState {
     /**
      * Create an {@link AccountState} that work directly on a database.
      *
-     * @param accountDB
      */
-    public AccountStateImplV2(Database accountDB) {
-        this.accountDB = accountDB;
+    public AccountStateImplV2(Database database, BatchManager batchManager) {
+        this.database = database;
+        this.batchManager = batchManager;
     }
 
     /**
@@ -53,7 +57,8 @@ public class AccountStateImplV2 implements Cloneable, AccountState {
      *
      * @param prev
      */
-    public AccountStateImplV2(AccountStateImplV2 prev) {
+    private AccountStateImplV2(AccountStateImplV2 prev) {
+        this(prev.database, prev.batchManager);
         this.prev = prev;
     }
 
@@ -68,7 +73,7 @@ public class AccountStateImplV2 implements Cloneable, AccountState {
         } else if (prev != null) {
             return prev.getAccount(address);
         } else {
-            byte[] v = accountDB.get(k.getData());
+            byte[] v = database.get(k.getData());
             return v == null ? new Account(address, noAmount, noAmount, 0) : Account.fromBytes(address, v);
         }
     }
@@ -111,7 +116,7 @@ public class AccountStateImplV2 implements Cloneable, AccountState {
         } else if (prev != null) {
             return prev.getCode(address);
         } else {
-            return accountDB.get(k.getData());
+            return database.get(k.getData());
         }
     }
 
@@ -130,7 +135,7 @@ public class AccountStateImplV2 implements Cloneable, AccountState {
         } else if (prev != null) {
             return prev.getStorage(address, key);
         } else {
-            return accountDB.get(k.getData());
+            return database.get(k.getData());
         }
     }
 
@@ -157,9 +162,11 @@ public class AccountStateImplV2 implements Cloneable, AccountState {
             if (prev == null) {
                 for (Entry<ByteArray, byte[]> entry : updates.entrySet()) {
                     if (entry.getValue() == null) {
-                        accountDB.delete(entry.getKey().getData());
+                        batchManager.getBatchInstance(BatchName.ADD_BLOCK)
+                                .add(BatchOperation.delete(entry.getKey().getData()));
                     } else {
-                        accountDB.put(entry.getKey().getData(), entry.getValue());
+                        batchManager.getBatchInstance(BatchName.ADD_BLOCK)
+                                .add(BatchOperation.put(entry.getKey().getData(), entry.getValue()));
                     }
                 }
             } else {
@@ -186,7 +193,7 @@ public class AccountStateImplV2 implements Cloneable, AccountState {
         } else if (prev != null) {
             return prev.exists(address);
         } else {
-            byte[] v = accountDB.get(k.getData());
+            byte[] v = database.get(k.getData());
             return v != null;
         }
     }
@@ -203,7 +210,7 @@ public class AccountStateImplV2 implements Cloneable, AccountState {
 
     @Override
     public AccountState clone() {
-        AccountStateImplV2 clone = new AccountStateImplV2(accountDB);
+        AccountStateImplV2 clone = new AccountStateImplV2(database, batchManager);
         clone.prev = prev;
         clone.updates.putAll(updates);
 

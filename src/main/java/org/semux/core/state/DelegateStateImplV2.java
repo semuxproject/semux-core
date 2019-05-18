@@ -21,6 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.semux.core.Amount;
 import org.semux.core.Blockchain;
+import org.semux.db.BatchManager;
+import org.semux.db.BatchName;
+import org.semux.db.BatchOperation;
 import org.semux.db.Database;
 import org.semux.db.DatabasePrefixesV2;
 import org.semux.util.ByteArray;
@@ -54,9 +57,9 @@ public class DelegateStateImplV2 implements DelegateState {
 
     protected final Blockchain chain;
 
-    protected Database delegateDB;
-    protected Database voteDB;
-    protected DelegateStateImplV2 prev;
+    private final Database database;
+    private final BatchManager batchManager;
+    protected final DelegateStateImplV2 prev;
 
     /**
      * Delegate updates
@@ -70,14 +73,12 @@ public class DelegateStateImplV2 implements DelegateState {
 
     /**
      * Create a DelegateState that work directly on a database.
-     *
-     * @param delegateDB
-     * @param voteDB
      */
-    public DelegateStateImplV2(Blockchain chain, Database delegateDB, Database voteDB) {
+    public DelegateStateImplV2(Blockchain chain, Database database, BatchManager batchManager) {
         this.chain = chain;
-        this.delegateDB = delegateDB;
-        this.voteDB = voteDB;
+        this.database = database;
+        this.batchManager = batchManager;
+        this.prev = null;
     }
 
     /**
@@ -87,6 +88,8 @@ public class DelegateStateImplV2 implements DelegateState {
      */
     public DelegateStateImplV2(DelegateStateImplV2 prev) {
         this.chain = prev.chain;
+        this.database = prev.database;
+        this.batchManager = prev.batchManager;
         this.prev = prev;
     }
 
@@ -152,7 +155,7 @@ public class DelegateStateImplV2 implements DelegateState {
         if (prev != null) {
             return prev.getVote(voter, delegate);
         } else {
-            byte[] bytes = voteDB.get(key.getData());
+            byte[] bytes = database.get(key.getData());
             return decodeAmount(bytes);
         }
     }
@@ -167,7 +170,7 @@ public class DelegateStateImplV2 implements DelegateState {
         } else if (prev != null) {
             return prev.getDelegateByName(name);
         } else {
-            byte[] v = delegateDB.get(k.getData());
+            byte[] v = database.get(k.getData());
             return v == null ? null : getDelegateByAddress(v);
         }
     }
@@ -182,7 +185,7 @@ public class DelegateStateImplV2 implements DelegateState {
         } else if (prev != null) {
             return prev.getDelegateByAddress(address);
         } else {
-            byte[] v = delegateDB.get(k.getData());
+            byte[] v = database.get(k.getData());
             return v == null ? null : Delegate.fromBytes(address, v);
         }
     }
@@ -218,9 +221,11 @@ public class DelegateStateImplV2 implements DelegateState {
             if (prev == null) {
                 for (Entry<ByteArray, byte[]> entry : delegateUpdates.entrySet()) {
                     if (entry.getValue() == null) {
-                        delegateDB.delete(entry.getKey().getData());
+                        batchManager.getBatchInstance(BatchName.ADD_BLOCK)
+                                .add(BatchOperation.delete(entry.getKey().getData()));
                     } else {
-                        delegateDB.put(entry.getKey().getData(), entry.getValue());
+                        batchManager.getBatchInstance(BatchName.ADD_BLOCK)
+                                .add(BatchOperation.put(entry.getKey().getData(), entry.getValue()));
                     }
                 }
             } else {
@@ -236,9 +241,11 @@ public class DelegateStateImplV2 implements DelegateState {
             if (prev == null) {
                 for (Entry<ByteArray, byte[]> entry : voteUpdates.entrySet()) {
                     if (entry.getValue() == null) {
-                        voteDB.delete(entry.getKey().getData());
+                        batchManager.getBatchInstance(BatchName.ADD_BLOCK)
+                                .add(BatchOperation.delete(entry.getKey().getData()));
                     } else {
-                        voteDB.put(entry.getKey().getData(), entry.getValue());
+                        batchManager.getBatchInstance(BatchName.ADD_BLOCK)
+                                .add(BatchOperation.put(entry.getKey().getData(), entry.getValue()));
                     }
                 }
             } else {
@@ -266,8 +273,11 @@ public class DelegateStateImplV2 implements DelegateState {
         for (Entry<ByteArray, byte[]> entry : delegateUpdates.entrySet()) {
             /* filter address */
             ByteArray k = ByteArray.of(entry.getKey().getData());
-            if (k.length() == ADDRESS_LEN + 1 && !map.containsKey(k)) {
+            if (k.length() == ADDRESS_LEN + 1) {
                 ByteArray delegateAddress = ByteArray.of(Arrays.copyOfRange(k.getData(), 1, k.length()));
+                if (map.containsKey(delegateAddress)) {
+                    continue;
+                }
 
                 if (entry.getValue() == null) {
                     map.put(delegateAddress, null);
@@ -280,16 +290,20 @@ public class DelegateStateImplV2 implements DelegateState {
         if (prev != null) {
             prev.getDelegates(map);
         } else {
-            ClosableIterator<Entry<byte[], byte[]>> itr = delegateDB
+            ClosableIterator<Entry<byte[], byte[]>> itr = database
                     .iterator(Bytes.of(DatabasePrefixesV2.TYPE_DELEGATE));
             while (itr.hasNext()) {
                 Entry<byte[], byte[]> entry = itr.next();
                 ByteArray k = ByteArray.of(entry.getKey());
                 byte[] v = entry.getValue();
 
-                if (k.length() == ADDRESS_LEN + 1 && !map.containsKey(k)) {
-                    byte[] delegateAddress = Arrays.copyOfRange(k.getData(), 1, k.length());
-                    map.put(ByteArray.of(delegateAddress), Delegate.fromBytes(delegateAddress, v));
+                if (k.length() == ADDRESS_LEN + 1) {
+                    ByteArray delegateAddress = ByteArray.of(Arrays.copyOfRange(k.getData(), 1, k.length()));
+                    if (map.containsKey(delegateAddress)) {
+                        continue;
+                    }
+
+                    map.put(delegateAddress, Delegate.fromBytes(delegateAddress.getData(), v));
                 }
             }
             itr.close();
@@ -300,7 +314,7 @@ public class DelegateStateImplV2 implements DelegateState {
     public Map<ByteArray, Amount> getVotes(byte[] delegate) {
         Map<ByteArray, Amount> result = new HashMap<>();
 
-        ClosableIterator<Entry<byte[], byte[]>> itr = voteDB
+        ClosableIterator<Entry<byte[], byte[]>> itr = database
                 .iterator(Bytes.merge(DatabasePrefixesV2.TYPE_DELEGATE_VOTE, delegate));
         while (itr.hasNext()) {
             Entry<byte[], byte[]> e = itr.next();

@@ -6,9 +6,18 @@
  */
 package org.semux.db;
 
-public interface BatchManager {
+import org.semux.util.exception.UnreachableException;
 
-    Batch getBatchInstance(BatchName batchName);
+public abstract class BatchManager {
 
-    void commit(Batch batch);
+    public abstract Batch getBatchInstance(BatchName batchName);
+
+    public abstract void commit(Batch batch);
+
+    public static BatchManager getInstance(Database database) {
+        if (database instanceof LeveldbDatabase) {
+            return new LeveldbBatchManager((LeveldbDatabase) database);
+        }
+        throw new UnreachableException();
+    }
 }

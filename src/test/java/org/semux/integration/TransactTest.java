@@ -42,6 +42,8 @@ import org.semux.api.v2.model.GetDelegateResponse;
 import org.semux.core.Amount;
 import org.semux.core.Genesis;
 import org.semux.core.TransactionType;
+import org.semux.core.state.Account;
+import org.semux.core.state.AccountState;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
 import org.semux.net.NodeManager.Node;
@@ -179,8 +181,11 @@ public class TransactTest {
                 Bytes.EMPTY_BYTES);
 
         // assert the state
-        List<Delegate> delegates = kernelPremine.getBlockchain().getDelegateState().getDelegates();
-        assertThat(delegates).anySatisfy((d) -> Arrays.equals(d.getAddress(), coinbaseOf(kernelPremine)));
+        AccountState accountState = kernelPremine.getBlockchain().getAccountState();
+        Account senderAccount = accountState.getAccount(coinbaseOf(kernelPremine));
+        assertThat(senderAccount.getAvailable()).isEqualTo(Amount.sub(PREMINE, Amount.sum(value, fee)));
+        Account receiverAccount = accountState.getAccount(coinbaseOf(kernelReceiver));
+        assertThat(receiverAccount.getAvailable()).isEqualTo(value);
     }
 
     @Test

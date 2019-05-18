@@ -76,6 +76,7 @@ public class BlockchainImplV2Test {
 
         Block newBlock = createBlock(1);
         chain.addBlock(newBlock);
+        chain.commit();
 
         assertNotEquals(0, chain.getLatestBlockNumber());
         assertEquals(newBlock.getNumber(), chain.getLatestBlock().getNumber());
@@ -98,6 +99,7 @@ public class BlockchainImplV2Test {
         long number = 1;
         Block newBlock = createBlock(number);
         chain.addBlock(newBlock);
+        chain.commit();
 
         assertEquals(number, chain.getBlock(number).getNumber());
         assertEquals(number, chain.getBlock(newBlock.getHash()).getNumber());
@@ -115,6 +117,7 @@ public class BlockchainImplV2Test {
         long number = 1;
         Block newBlock = createBlock(number);
         chain.addBlock(newBlock);
+        chain.commit();
 
         assertEquals(number, chain.getBlockNumber(newBlock.getHash()));
     }
@@ -131,6 +134,7 @@ public class BlockchainImplV2Test {
         long number = 1;
         Block newBlock = createBlock(number);
         chain.addBlock(newBlock);
+        chain.commit();
 
         assertArrayEquals(newBlock.getHash(), chain.getBlockHeader(1).getHash());
         assertEquals(newBlock.getNumber(), chain.getBlockHeader(newBlock.getHash()).getNumber());
@@ -142,6 +146,7 @@ public class BlockchainImplV2Test {
 
         Block newBlock = createBlock(1);
         chain.addBlock(newBlock);
+        chain.commit();
 
         Transaction t = chain.getTransaction(tx.getHash());
         assertNotNull(t);
@@ -159,6 +164,7 @@ public class BlockchainImplV2Test {
 
         Block newBlock = createBlock(1);
         chain.addBlock(newBlock);
+        chain.commit();
 
         assertTrue(chain.hasTransaction(tx.getHash()));
     }
@@ -169,6 +175,7 @@ public class BlockchainImplV2Test {
 
         Block newBlock = createBlock(1);
         chain.addBlock(newBlock);
+        chain.commit();
 
         TransactionResult r = chain.getTransactionResult(tx.getHash());
         assertArrayEquals(res.toBytes(), r.toBytes());
@@ -178,6 +185,7 @@ public class BlockchainImplV2Test {
     public void testGetTransactionBlockNumber() {
         Block newBlock = createBlock(1);
         chain.addBlock(newBlock);
+        chain.commit();
 
         assertEquals(newBlock.getNumber(), chain.getTransactionBlockNumber(tx.getHash()));
     }
@@ -189,6 +197,7 @@ public class BlockchainImplV2Test {
             Block newBlock = createBlock(i, coinbase, Bytes.EMPTY_BYTES, Collections.emptyList(),
                     Collections.emptyList());
             chain.addBlock(newBlock);
+            chain.commit();
             List<Transaction> transactions = chain.getTransactions(coinbase, 0, 1);
             assertEquals(1, transactions.size());
             assertEquals(newBlock.getNumber(), transactions.get(0).getNonce());
@@ -203,6 +212,7 @@ public class BlockchainImplV2Test {
 
         Block newBlock = createBlock(1);
         chain.addBlock(newBlock);
+        chain.commit();
 
         assertEquals(1, chain.getTransactionCount(tx.getFrom()));
     }
@@ -213,6 +223,7 @@ public class BlockchainImplV2Test {
 
         Block newBlock = createBlock(1);
         chain.addBlock(newBlock);
+        chain.commit();
 
         List<Transaction> txs = chain.getTransactions(tx.getFrom(), 0, 100);
         assertEquals(1, txs.size());
@@ -238,6 +249,7 @@ public class BlockchainImplV2Test {
     public void testGetTransactions() {
         Block block = createBlock(1);
         chain.addBlock(block);
+        chain.commit();
 
         List<Transaction> list = chain.getTransactions(from, 0, 1024);
         assertEquals(1, list.size());
@@ -258,6 +270,7 @@ public class BlockchainImplV2Test {
                 Collections.singletonList(res));
 
         chain.addBlock(block);
+        chain.commit();
 
         // there should be only 1 transaction added into index database
         List<Transaction> list = chain.getTransactions(key.toAddress(), 0, 1024);
@@ -274,14 +287,18 @@ public class BlockchainImplV2Test {
         assertEquals(0, chain.getValidatorStats(address).getTurnsMissed());
 
         chain.adjustValidatorStats(address, ValidatorStatsType.FORGED, 1);
+        chain.commit();
         assertEquals(1, chain.getValidatorStats(address).getBlocksForged());
 
         chain.adjustValidatorStats(address, ValidatorStatsType.HIT, 1);
+        chain.commit();
         assertEquals(1, chain.getValidatorStats(address).getTurnsHit());
 
         chain.adjustValidatorStats(address, ValidatorStatsType.MISSED, 1);
+        chain.commit();
         assertEquals(1, chain.getValidatorStats(address).getTurnsMissed());
         chain.adjustValidatorStats(address, ValidatorStatsType.MISSED, 1);
+        chain.commit();
         assertEquals(2, chain.getValidatorStats(address).getTurnsMissed());
     }
 
@@ -292,6 +309,7 @@ public class BlockchainImplV2Test {
             chain.addBlock(
                     createBlock(i, coinbase, BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(fork)).toBytes(),
                             Collections.singletonList(tx), Collections.singletonList(res)));
+            chain.commit();
 
             if (i <= fork.activationBlocks) {
                 for (long j = 0; j <= i; j++) {

@@ -10,12 +10,15 @@ import java.util.Map;
 
 import org.semux.config.Config;
 import org.semux.core.exception.BlockchainException;
+import org.semux.db.BatchManager;
 import org.semux.db.Database;
 import org.semux.db.DatabaseFactory;
 import org.semux.db.DatabaseName;
 import org.semux.db.DatabasePrefixesV1;
 import org.semux.db.DatabasePrefixesV2;
 import org.semux.db.DatabaseVersion;
+import org.semux.db.LeveldbBatchManager;
+import org.semux.db.LeveldbDatabase;
 import org.semux.db.MigrationBlockDbVersion001;
 import org.semux.db.MigrationBlockDbVersion002;
 import org.semux.db.MigrationRunner;
@@ -59,7 +62,12 @@ public class BlockchainFactory {
             migrationRunner.migrate(new MigrationBlockDbVersion002());
             return getBlockchainInstance();
         } else if (databaseVersion == DatabaseVersion.V2) {
-            return new BlockchainImplV2(config, genesis, databaseFactory);
+            Database database = databaseFactory.getDB(DatabaseName.BLOCK);
+            return new BlockchainImplV2(
+                    config,
+                    genesis,
+                    database,
+                    BatchManager.getInstance(database));
         } else {
             throw new BlockchainException("Unsupported blockchain database version " + databaseVersion);
         }

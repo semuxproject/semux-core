@@ -211,5 +211,10 @@ public interface Blockchain {
      */
     boolean isForkActivated(Fork fork);
 
+    /**
+     * Commit pending changes to database
+     */
+    void commit();
+
     byte[] constructBlockData();
 }

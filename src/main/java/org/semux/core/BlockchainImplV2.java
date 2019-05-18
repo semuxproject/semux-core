@@ -9,6 +9,10 @@ package org.semux.core;
 import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Fork.VIRTUAL_MACHINE;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,10 +33,15 @@ import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.core.state.DelegateStateImplV2;
 import org.semux.crypto.Hex;
+import org.semux.db.Batch;
+import org.semux.db.BatchManager;
+import org.semux.db.BatchName;
+import org.semux.db.BatchOperation;
 import org.semux.db.Database;
 import org.semux.db.DatabaseFactory;
 import org.semux.db.DatabaseName;
 import org.semux.db.DatabasePrefixesV2;
+import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
@@ -71,45 +80,33 @@ public class BlockchainImplV2 implements Blockchain {
 
     private static final Logger logger = LoggerFactory.getLogger(BlockchainImplV2.class);
 
-    private BlockStore blockStore = new SemuxBlockStore(this);
-
     private final List<BlockchainListener> listeners = new ArrayList<>();
     private final Config config;
     private final Genesis genesis;
 
-    private Database blockDB;
-
-    private AccountState accountState;
-    private DelegateState delegateState;
+    private final Database blockDB;
+    private final BatchManager batchManager;
+    private final AccountState accountState;
+    private final DelegateState delegateState;
 
     private Block latestBlock;
-
     private ActivatedForks forks;
 
-    public BlockchainImplV2(Config config, DatabaseFactory dbFactory) {
-        this(config, Genesis.load(config.network()), dbFactory);
+    public BlockchainImplV2(Config config, Database blockDB, BatchManager batchManager) {
+        this(config, Genesis.load(config.network()), blockDB, batchManager);
     }
 
-    public BlockchainImplV2(Config config, Genesis genesis, DatabaseFactory dbFactory) {
+    public BlockchainImplV2(Config config, Genesis genesis, Database blockDB, BatchManager batchManager) {
         this.config = config;
         this.genesis = genesis;
-        openDb(dbFactory);
-    }
-
-    private synchronized void openDb(DatabaseFactory factory) {
-        this.blockDB = factory.getDB(DatabaseName.BLOCK);
-
-        this.accountState = new AccountStateImplV2(this.blockDB);
-        this.delegateState = new DelegateStateImplV2(this, this.blockDB, this.blockDB);
-
-        loadInitialData();
-    }
-
-    private void loadInitialData() {
-        // load the activate forks from database
-        forks = new ActivatedForks(this, config, getActivatedForks());
-
-        // load the latest block
+        this.blockDB = blockDB;
+        this.batchManager = batchManager;
+        this.accountState = new AccountStateImplV2(blockDB, batchManager);
+        this.delegateState = new DelegateStateImplV2(this, blockDB, batchManager);
+        forks = new ActivatedForks((Blockchain) Proxy.newProxyInstance(
+                BlockchainImplV2.class.getClassLoader(),
+                new Class[] { Blockchain.class },
+                new PendingChainHandler(this)), config, getActivatedForks());
         latestBlock = getBlock(Bytes.toLong(blockDB.get(Bytes.of(DatabasePrefixesV2.TYPE_LATEST_BLOCK_NUMBER))));
     }
 
@@ -262,13 +259,17 @@ public class BlockchainImplV2 implements Blockchain {
         }
 
         // [1] update block
-        blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HEADER, Bytes.of(number)), block.getEncodedHeader());
-        blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)),
-                block.getEncodedTransactions());
-        blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_RESULTS, Bytes.of(number)), block.getEncodedResults());
-        blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_VOTES, Bytes.of(number)), block.getEncodedVotes());
-
-        blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HASH, hash), Bytes.of(number));
+        Batch batch = batchManager.getBatchInstance(BatchName.ADD_BLOCK);
+        batch.add(
+                BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HEADER, Bytes.of(number)),
+                        block.getEncodedHeader()),
+                BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)),
+                        block.getEncodedTransactions()),
+                BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_RESULTS, Bytes.of(number)),
+                        block.getEncodedResults()),
+                BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_VOTES, Bytes.of(number)),
+                        block.getEncodedVotes()),
+                BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HASH, hash), Bytes.of(number)));
 
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
@@ -284,7 +285,8 @@ public class BlockchainImplV2 implements Blockchain {
             enc.writeInt(transactionIndices.getRight().get(i));
             enc.writeInt(resultIndices.getRight().get(i));
 
-            blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_TRANSACTION_HASH, tx.getHash()), enc.toBytes());
+            batch.add(BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_TRANSACTION_HASH, tx.getHash()),
+                    enc.toBytes()));
 
             // [3] update transaction_by_account index
             addTransactionToAccount(tx, tx.getFrom());
@@ -304,9 +306,12 @@ public class BlockchainImplV2 implements Blockchain {
                     block.getTimestamp(),
                     Bytes.EMPTY_BYTES);
             tx.sign(Constants.COINBASE_KEY);
-            blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_TRANSACTION_HASH, tx.getHash()), tx.toBytes());
-            blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_COINBASE_TRANSACTION_HASH, Bytes.of(block.getNumber())),
-                    tx.getHash());
+            batch.add(
+                    BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_TRANSACTION_HASH, tx.getHash()),
+                            tx.toBytes()),
+                    BatchOperation.put(
+                            Bytes.merge(DatabasePrefixesV2.TYPE_COINBASE_TRANSACTION_HASH, Bytes.of(block.getNumber())),
+                            tx.getHash()));
             addTransactionToAccount(tx, block.getCoinbase());
 
             // [5] update validator statistics
@@ -327,11 +332,7 @@ public class BlockchainImplV2 implements Blockchain {
 
         // [7] update latest_block
         latestBlock = block;
-        blockDB.put(Bytes.of(DatabasePrefixesV2.TYPE_LATEST_BLOCK_NUMBER), Bytes.of(number));
-
-        for (BlockchainListener listener : listeners) {
-            listener.onBlockAdded(block);
-        }
+        batch.add(BatchOperation.put(Bytes.of(DatabasePrefixesV2.TYPE_LATEST_BLOCK_NUMBER), Bytes.of(number)));
 
         activateForks(number + 1);
     }
@@ -410,7 +411,8 @@ public class BlockchainImplV2 implements Blockchain {
         for (String v : validators) {
             enc.writeString(v);
         }
-        blockDB.put(Bytes.of(DatabasePrefixesV2.TYPE_VALIDATORS), enc.toBytes());
+        batchManager.getBatchInstance(BatchName.ADD_BLOCK)
+                .add(BatchOperation.put(Bytes.of(DatabasePrefixesV2.TYPE_VALIDATORS), enc.toBytes()));
     }
 
     /**
@@ -443,7 +445,8 @@ public class BlockchainImplV2 implements Blockchain {
             break;
         }
 
-        blockDB.put(key, stats.toBytes());
+        batchManager.getBatchInstance(BatchName.ADD_BLOCK).add(
+                BatchOperation.put(key, stats.toBytes()));
     }
 
     /**
@@ -453,7 +456,8 @@ public class BlockchainImplV2 implements Blockchain {
      * @param total
      */
     protected void setTransactionCount(byte[] address, int total) {
-        blockDB.put(Bytes.merge(DatabasePrefixesV2.TYPE_ACCOUNT_TRANSACTION, address), Bytes.of(total));
+        batchManager.getBatchInstance(BatchName.ADD_BLOCK).add(
+                BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_ACCOUNT_TRANSACTION, address), Bytes.of(total)));
     }
 
     /**
@@ -464,7 +468,8 @@ public class BlockchainImplV2 implements Blockchain {
      */
     protected void addTransactionToAccount(Transaction tx, byte[] address) {
         int total = getTransactionCount(address);
-        blockDB.put(getNthTransactionIndexKey(address, total), tx.getHash());
+        batchManager.getBatchInstance(BatchName.ADD_BLOCK).add(
+                BatchOperation.put(getNthTransactionIndexKey(address, total), tx.getHash()));
         setTransactionCount(address, total + 1);
     }
 
@@ -566,6 +571,52 @@ public class BlockchainImplV2 implements Blockchain {
         for (Entry<Fork, Fork.Activation> entry : activatedForks.entrySet()) {
             simpleEncoder.writeBytes(entry.getValue().toBytes());
         }
-        blockDB.put(Bytes.of(DatabasePrefixesV2.TYPE_ACTIVATED_FORKS), simpleEncoder.toBytes());
+        batchManager.getBatchInstance(BatchName.ADD_BLOCK).add(
+                BatchOperation.put(Bytes.of(DatabasePrefixesV2.TYPE_ACTIVATED_FORKS), simpleEncoder.toBytes()));
+    }
+
+    @Override
+    synchronized public void commit() {
+        batchManager.commit(batchManager.getBatchInstance(BatchName.ADD_BLOCK));
+
+        Block latestBlock = getLatestBlock();
+        for (BlockchainListener listener : listeners) {
+            listener.onBlockAdded(latestBlock);
+        }
+    }
+
+    class PendingChainHandler implements InvocationHandler {
+        private final BlockchainImplV2 original;
+
+        PendingChainHandler(BlockchainImplV2 original) {
+            this.original = original;
+        }
+
+        public Object invoke(Object proxy, Method method, Object[] args)
+                throws IllegalAccessException, IllegalArgumentException,
+                InvocationTargetException {
+
+            if (method.getName().equals("getBlockHeader")) {
+                return getBlockHeader((long) args[0]);
+            }
+
+            return method.invoke(original, args);
+        }
+
+        BlockHeader getBlockHeader(long number) {
+            Batch batch = batchManager.getBatchInstance(BatchName.ADD_BLOCK);
+            ByteArray key = ByteArray.of(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HEADER, Bytes.of(number)));
+
+            if (batch.containsPendingState(key)) {
+                byte[] pendingValue = batch.lookupPendingState(key);
+                if (pendingValue != null) {
+                    return BlockHeader.fromBytes(pendingValue);
+                } else {
+                    return null;
+                }
+            }
+
+            return original.getBlockHeader(number);
+        }
     }
 }

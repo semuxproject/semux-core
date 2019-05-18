@@ -160,6 +160,8 @@ public class BlockchainImpl implements Blockchain {
 
         // add block
         addBlock(genesis);
+
+        commit();
     }
 
     @Override
@@ -661,5 +663,10 @@ public class BlockchainImpl implements Blockchain {
 
     public MigrationBlockchain getMigrationBlockchainInstance(Config config, DatabaseFactory tempDbFactory) {
         return new MigrationBlockchain(config, tempDbFactory);
+    }
+
+    @Override
+    public void commit() {
+        // do nothing
     }
 }

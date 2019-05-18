@@ -54,6 +54,7 @@ import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.db.BatchName;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
@@ -603,19 +604,19 @@ public class SemuxSync implements SyncManager {
 
         // check validity of votes
         if (block.getVotes().stream().anyMatch(sig -> !validators.contains(Hex.encode(sig.getAddress())))) {
-            logger.warn("Block votes are invalid");
+            logger.warn("Invalid block vote: validator doesn't exist");
             return false;
         }
 
         if (!Key.isVerifyBatchSupported()) {
             if (!block.getVotes().stream()
                     .allMatch(sig -> Key.verify(encoded, sig))) {
-                logger.warn("Block votes are invalid");
+                logger.warn("Invalid block vote: failed to verify signatures");
                 return false;
             }
         } else {
             if (!Key.verifyBatch(Collections.nCopies(block.getVotes().size(), encoded), block.getVotes())) {
-                logger.warn("Block votes are invalid");
+                logger.warn("Invalid block vote: failed to verify signatures");
                 return false;
             }
         }
@@ -646,12 +647,15 @@ public class SemuxSync implements SyncManager {
         WriteLock writeLock = kernel.getStateLock().writeLock();
         writeLock.lock();
         try {
-            // [7] flush state to disk
+            // [7] add block to chain
+            chain.addBlock(block);
+
+            // [8] commit state updates
             chain.getAccountState().commit();
             chain.getDelegateState().commit();
 
-            // [8] add block to chain
-            chain.addBlock(block);
+            // [9] commit pending blockchain updates
+            chain.commit();
         } finally {
             writeLock.unlock();
         }

@@ -87,7 +87,7 @@ public class AccountStateV2Test {
         state.setCode(address, addressCode);
         code = state.getCode(address);
         assertArrayEquals(addressCode, code);
-        state.commit();
+        commit();
         code = state.getCode(address);
         assertArrayEquals(addressCode, code);
     }
@@ -105,7 +105,7 @@ public class AccountStateV2Test {
         state.putStorage(address, storageKey1, addressStorage1);
         storage = state.getStorage(address, storageKey1);
         assertArrayEquals(addressStorage1, storage);
-        state.commit();
+        commit();
         storage = state.getStorage(address, storageKey1);
         assertArrayEquals(addressStorage1, storage);
     }
@@ -150,5 +150,10 @@ public class AccountStateV2Test {
 
         state.rollback();
         assertEquals(0, state2.getAccount(address).getNonce());
+    }
+
+    private void commit() {
+        state.commit();
+        chain.commit();
     }
 }
