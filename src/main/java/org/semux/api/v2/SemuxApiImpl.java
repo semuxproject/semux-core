@@ -75,7 +75,6 @@ import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.CryptoException;
-import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.crypto.cache.PublicKeyCache;
@@ -828,7 +827,7 @@ public final class SemuxApiImpl implements SemuxApi {
         try {
             Key.Signature sig = Key.Signature.fromBytes(Hex.decode0x(signature));
             EdDSAPublicKey pubKey = PublicKeyCache.computeIfAbsent(sig.getPublicKey());
-            byte[] signatureAddress = Hash.h160(pubKey.getEncoded());
+            byte[] signatureAddress = Key.Address.fromX509PublicKey(pubKey.getEncoded());
 
             byte[] addressBytes;
             addressBytes = Hex.decode0x(address);

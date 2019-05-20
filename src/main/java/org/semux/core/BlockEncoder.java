@@ -12,17 +12,17 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public interface BlockEncoder {
 
-    byte[] toBytes(Block block);
+    byte[] encode(Block block);
 
-    byte[] getEncodedHeader(Block block);
+    byte[] encoderHeader(Block block);
 
-    byte[] getEncodedTransactions(Block block);
+    byte[] encodeTransactions(Block block);
 
     Pair<byte[], List<Integer>> getEncodedTransactionsAndIndices(Block block);
 
-    byte[] getEncodedResults(Block block);
+    byte[] encodeTransactionResults(Block block);
 
     Pair<byte[], List<Integer>> getEncodedResultsAndIndex(Block block);
 
-    byte[] getEncodedVotes(Block block);
+    byte[] encodeVotes(Block block);
 }

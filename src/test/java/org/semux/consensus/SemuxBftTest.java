@@ -28,13 +28,16 @@ import java.util.stream.IntStream;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.semux.Network;
 import org.semux.TestUtils;
 import org.semux.config.Constants;
 import org.semux.config.MainnetConfig;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
+import org.semux.core.BlockchainFactory;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
@@ -119,7 +122,7 @@ public class SemuxBftTest {
         Key from1 = new Key();
         long time = TimeUtil.currentTimeMillis();
         Transaction tx1 = createTransaction(to, from1, time, 0);
-        kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        kernelRule.getKernel().setBlockchain(getBlockchain());
         kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), SEM.of(1000));
         Block block1 = TestUtils.createBlock(
                 kernelRule.getKernel().getBlockchain().getLatestBlock().getHash(),
@@ -128,6 +131,7 @@ public class SemuxBftTest {
                 Collections.singletonList(tx1),
                 Collections.singletonList(new TransactionResult()));
         kernelRule.getKernel().getBlockchain().addBlock(block1);
+        kernelRule.getKernel().getBlockchain().commit();
         SemuxBft semuxBFT = new SemuxBft(kernelRule.getKernel());
 
         // create a tx with the same hash with tx1 from a different signer in the second
@@ -159,7 +163,7 @@ public class SemuxBftTest {
         Transaction tx1 = createTransaction(to, from, time, 0);
         Transaction tx2 = createTransaction(to, from, time, 1);
 
-        kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        kernelRule.getKernel().setBlockchain(getBlockchain());
 
         // pending manager has only tx1 (validated)
         PendingManager.PendingTransaction pending = new PendingManager.PendingTransaction(tx1,
@@ -185,7 +189,7 @@ public class SemuxBftTest {
 
     @Test
     public void testValidateBlockCoinbaseMagic() {
-        kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        kernelRule.getKernel().setBlockchain(getBlockchain());
 
         Block block = TestUtils.createBlock(
                 kernelRule.getKernel().getBlockchain().getLatestBlock().getHash(),
@@ -200,7 +204,7 @@ public class SemuxBftTest {
 
     @Test
     public void testValidateBlockCoinbaseProposer() {
-        kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        kernelRule.getKernel().setBlockchain(getBlockchain());
 
         Block block = TestUtils.createBlock(
                 kernelRule.getKernel().getBlockchain().getLatestBlock().getHash(),
@@ -217,7 +221,7 @@ public class SemuxBftTest {
 
     @Test
     public void testValidateTransactionRecipient() {
-        kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        kernelRule.getKernel().setBlockchain(getBlockchain());
 
         Key blockForger = new Key();
         Transaction tx = TestUtils.createTransaction(kernelRule.getKernel().getConfig(), new Key(),
@@ -238,7 +242,7 @@ public class SemuxBftTest {
 
     @Test
     public void testProposeBlock() {
-        Blockchain chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        Blockchain chain = spy(getBlockchain());
         kernelRule.getKernel().setBlockchain(chain);
 
         long timestamp = TimeUtil.currentTimeMillis() + 10000;
@@ -251,6 +255,7 @@ public class SemuxBftTest {
                 Collections.emptyList(),
                 Collections.emptyList());
         chain.addBlock(previousBlock);
+        chain.commit();
 
         SemuxBft bft = new SemuxBft(kernelRule.getKernel());
         bft.height = number + 1;
@@ -268,5 +273,10 @@ public class SemuxBftTest {
                 nonce,
                 time,
                 Bytes.EMPTY_BYTES).sign(from);
+    }
+
+    private Blockchain getBlockchain() {
+        return new BlockchainFactory(kernelRule.getKernel().getConfig(), Genesis.load(Network.DEVNET), temporaryDBRule)
+                .getBlockchainInstance();
     }
 }

@@ -9,6 +9,7 @@ package org.semux.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.semux.crypto.Key;
 import org.semux.util.SimpleDecoder;
 
@@ -28,7 +29,7 @@ public class BlockDecoderV1 implements BlockDecoder {
      * @return
      */
     @Override
-    public Block fromComponents(byte[] h, byte[] t, byte[] r, byte[] v) {
+    public Block decodeComponents(byte[] h, byte[] t, byte[] r, byte[] v) {
         if (h == null) {
             throw new IllegalArgumentException("Block header can't be null");
         }
@@ -54,28 +55,34 @@ public class BlockDecoderV1 implements BlockDecoder {
             }
         }
 
-        int view = 0;
-        List<Key.Signature> votes = new ArrayList<>();
-        if (v != null) {
-            dec = new SimpleDecoder(v);
-            view = dec.readInt();
-            n = dec.readInt();
-            for (int i = 0; i < n; i++) {
-                votes.add(Key.Signature.fromBytes(dec.readBytes()));
-            }
-        }
+        Pair<Integer, List<Key.Signature>> viewAndVotes = decodeVotes(v);
 
-        return new Block(header, transactions, results, view, votes);
+        return new Block(header, transactions, results, viewAndVotes.getLeft(), viewAndVotes.getRight());
     }
 
     @Override
-    public Block fromBytes(byte[] bytes) {
+    public Block decode(byte[] bytes) {
         SimpleDecoder dec = new SimpleDecoder(bytes);
         byte[] header = dec.readBytes();
         byte[] transactions = dec.readBytes();
         byte[] results = dec.readBytes();
         byte[] votes = dec.readBytes();
 
-        return fromComponents(header, transactions, results, votes);
+        return decodeComponents(header, transactions, results, votes);
+    }
+
+    @Override
+    public Pair<Integer, List<Key.Signature>> decodeVotes(byte[] v) {
+        int view = 0;
+        List<Key.Signature> votes = new ArrayList<>();
+        if (v != null) {
+            SimpleDecoder dec = new SimpleDecoder(v);
+            view = dec.readInt();
+            int n = dec.readInt();
+            for (int i = 0; i < n; i++) {
+                votes.add(Key.Signature.fromBytes(dec.readBytes()));
+            }
+        }
+        return Pair.of(view, votes);
     }
 }

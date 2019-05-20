@@ -22,12 +22,24 @@
         }
     ],
     "delegates": {
-        "semux1": "0xc583b6ad1d1cccfc00ae9113db6408f022822b20",
-        "semux2": "0xc5f32c2231ff2b60cdfa9c0d3a9c2e71774de472",
-        "semux3": "0x4908d29be8cc537386cd888dc9336aa7808c6ccc",
-        "semux4": "0xa46caf85690c5d340e1256902317efb488da858d"
+        "semux1": {
+            "address": "0xc583b6ad1d1cccfc00ae9113db6408f022822b20",
+            "Abyte": "0xfdd012156d14623082633b18a4d342cd37f07af3c5696e11a0947ab0e0bf7e00"
+        },
+        "semux2": {
+            "address": "0xc5f32c2231ff2b60cdfa9c0d3a9c2e71774de472",
+            "Abyte": "0xdca9f23f1a1d24972697e7ae17b19557e6d8c21fd3a115757ad85a84293dd5de"
+        },
+        "semux3": {
+            "address": "0x4908d29be8cc537386cd888dc9336aa7808c6ccc",
+            "Abyte": "0xd616690f7beb0384f7fe55ad24b7279a692015af4561621a6bf5a208a5fd9178"
+        },
+        "semux4": {
+            "address": "0xa46caf85690c5d340e1256902317efb488da858d",
+            "Abyte": "0xb839a3738392d188330ed43170d79b3084bd7e7f6639efb4801966d8456c4e62"
+        }
     },
     "config": {
-        
+
     }
 }

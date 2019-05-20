@@ -32,8 +32,11 @@ public class DatabasePrefixesV2 {
     // former delegateDB
     // [0x60][delegate address x 20 bytes]
     public static final byte TYPE_DELEGATE = 0x60;
-    // [0x61][registration block number] => list of pub keys
-    public static final byte TYPE_DELEGATE_PUBKEY = 0x61;
+    // [0x61][delegate address x 20 bytes] => index to the delegate
+    public static final byte TYPE_DELEGATE_INDEX_TO_ADDRESS = 0x61;
+    public static final byte TYPE_DELEGATE_ADDRESS_TO_INDEX = 0x62;
+    // [0x62] => number of delegates
+    public static final byte TYPE_DELEGATE_COUNT = 0x63;
 
     // former voteDB
     // [0x80][delegate address x 20 bytes][voter address x 20 bytes]

@@ -44,7 +44,7 @@ import org.mockito.stubbing.Answer;
 import org.semux.config.MainnetConfig;
 import org.semux.core.Amount;
 import org.semux.core.Block;
-import org.semux.core.state.Delegate;
+import org.semux.core.state.DelegateV1;
 import org.semux.crypto.Key;
 import org.semux.net.Peer;
 
@@ -154,10 +154,10 @@ public class WalletModelTest {
         when(config.getPrimaryValidator(any(), anyLong(), anyInt(), anyBoolean())).thenCallRealMethod();
         model = new WalletModel(config);
         List<WalletDelegate> delegates = Arrays.asList(
-                new WalletDelegate(new Delegate(new Key().toAddress(), "delegate1".getBytes(), 0, Amount.ZERO)),
-                new WalletDelegate(new Delegate(new Key().toAddress(), "delegate2".getBytes(), 0, Amount.ZERO)));
+                new WalletDelegate(new DelegateV1(new Key().toAddress(), "delegate1".getBytes(), 0, Amount.ZERO)),
+                new WalletDelegate(new DelegateV1(new Key().toAddress(), "delegate2".getBytes(), 0, Amount.ZERO)));
         model.setDelegates(delegates);
-        model.setValidators(delegates.stream().map(Delegate::getAddressString).collect(Collectors.toList()));
+        model.setValidators(delegates.stream().map(DelegateV1::getAddressString).collect(Collectors.toList()));
         model.setUniformDistributionEnabled(true);
 
         for (int i = 0; i < 10; i++) {
@@ -173,10 +173,10 @@ public class WalletModelTest {
         when(config.getValidatorUpdateInterval()).thenCallRealMethod();
         model = new WalletModel(config);
         List<WalletDelegate> delegates = Arrays.asList(
-                new WalletDelegate(new Delegate(new Key().toAddress(), "delegate1".getBytes(), 0, Amount.ZERO)),
-                new WalletDelegate(new Delegate(new Key().toAddress(), "delegate2".getBytes(), 0, Amount.ZERO)));
+                new WalletDelegate(new DelegateV1(new Key().toAddress(), "delegate1".getBytes(), 0, Amount.ZERO)),
+                new WalletDelegate(new DelegateV1(new Key().toAddress(), "delegate2".getBytes(), 0, Amount.ZERO)));
         model.setDelegates(delegates);
-        model.setValidators(delegates.stream().map(Delegate::getAddressString).collect(Collectors.toList()));
+        model.setValidators(delegates.stream().map(DelegateV1::getAddressString).collect(Collectors.toList()));
         model.setUniformDistributionEnabled(true);
 
         Map<Long, WalletDelegate> testCases = new HashMap<>();

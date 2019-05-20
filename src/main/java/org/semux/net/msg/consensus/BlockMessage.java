@@ -22,14 +22,14 @@ public class BlockMessage extends Message {
 
         this.block = block;
 
-        this.body = new BlockEncoderV1().toBytes(block);
+        this.body = new BlockEncoderV1().encode(block);
     }
 
     public BlockMessage(byte[] body) {
         super(MessageCode.BLOCK, null);
 
         BlockDecoder blockDecoder = new BlockDecoderV1();
-        this.block = blockDecoder.fromBytes(body);
+        this.block = blockDecoder.decode(body);
 
         this.body = body;
     }

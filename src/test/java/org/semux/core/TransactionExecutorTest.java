@@ -51,7 +51,7 @@ public class TransactionExecutorTest {
     @Before
     public void prepare() {
         config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
-        chain = new BlockchainImpl(config, temporaryDBFactory);
+        chain = new BlockchainFactory(config, Genesis.load(Network.DEVNET), temporaryDBFactory).getBlockchainInstance();
         as = chain.getAccountState();
         ds = chain.getDelegateState();
         exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
@@ -165,7 +165,7 @@ public class TransactionExecutorTest {
         TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain);
         assertFalse(result.getCode().isSuccess());
 
-        ds.register(delegate.toAddress(), Bytes.of("delegate"));
+        ds.register(delegate.getAbyte(), Bytes.of("delegate"));
 
         // vote for delegate
         result = executeAndCommit(exec, tx, as.track(), ds.track(), block);
@@ -183,7 +183,7 @@ public class TransactionExecutorTest {
         Amount available = SEM.of(100);
         as.adjustAvailable(voter.toAddress(), available);
 
-        ds.register(delegate.toAddress(), Bytes.of("delegate"));
+        ds.register(delegate.getAbyte(), Bytes.of("delegate"));
 
         TransactionType type = TransactionType.UNVOTE;
         byte[] from = voter.toAddress();
@@ -222,7 +222,7 @@ public class TransactionExecutorTest {
         Key delegate = new Key();
 
         as.adjustAvailable(voter.toAddress(), sub(config.minTransactionFee(), NANO_SEM.of(1)));
-        ds.register(delegate.toAddress(), Bytes.of("delegate"));
+        ds.register(delegate.getAbyte(), Bytes.of("delegate"));
 
         TransactionType type = TransactionType.UNVOTE;
         byte[] from = voter.toAddress();

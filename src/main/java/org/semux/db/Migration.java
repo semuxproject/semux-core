@@ -14,5 +14,5 @@ public interface Migration {
 
     void checkBlockchainVersion(Blockchain blockchain) throws MigrationException;
 
-    void migrate(Config config, DatabaseFactory dbFactory);
+    void migrate(Config config, DatabaseFactory dbFactory) throws MigrationException;
 }

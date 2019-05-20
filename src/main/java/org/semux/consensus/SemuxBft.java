@@ -38,7 +38,6 @@ import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
@@ -743,7 +742,7 @@ public class SemuxBft implements BftManager {
      * @return
      */
     protected boolean isFromValidator(Signature sig) {
-        return validators.contains(Hex.encode(Hash.h160(sig.getPublicKey())));
+        return validators.contains(Hex.encode(Key.Address.fromX509PublicKey(sig.getPublicKey())));
     }
 
     /**

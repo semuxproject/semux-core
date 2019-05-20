@@ -198,6 +198,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
                 chain.getLatestBlockNumber() + 1,
                 Collections.singletonList(createTransaction(config, key, key, Amount.ZERO)),
                 Collections.singletonList(new TransactionResult())));
+        chain.commit();
 
         // request api endpoint
         GetAccountResponse response = api.getAccount(key.toAddressString());
@@ -298,8 +299,8 @@ public class SemuxApiTest extends SemuxApiTestBase {
     @Test
     public void getDelegateTest() {
         Genesis gen = chain.getGenesis();
-        for (Map.Entry<String, byte[]> entry : gen.getDelegates().entrySet()) {
-            GetDelegateResponse response = api.getDelegate(Hex.encode0x(entry.getValue()));
+        for (Map.Entry<String, Genesis.Delegate> entry : gen.getDelegates().entrySet()) {
+            GetDelegateResponse response = api.getDelegate(Hex.encode0x(entry.getValue().getAddress()));
             assertTrue(response.isSuccess());
             assertEquals(entry.getKey(), response.getResult().getName());
             assertTrue("is validator", response.getResult().isValidator());
@@ -311,12 +312,12 @@ public class SemuxApiTest extends SemuxApiTestBase {
         Genesis gen = chain.getGenesis();
         GetDelegatesResponse response = api.getDelegates();
 
-        Collection<byte[]> delegates = gen.getDelegates().values();
+        Collection<Genesis.Delegate> delegates = gen.getDelegates().values();
         List<DelegateType> result = response.getResult();
 
         assertEquals(delegates.size(), result.size());
         assertEquals(
-                delegates.stream().map(Hex::encode0x).sorted().collect(Collectors.toList()),
+                delegates.stream().map(d -> Hex.encode0x(d.getAddress())).sorted().collect(Collectors.toList()),
                 result.stream().map(DelegateType::getAddress).sorted().collect(Collectors.toList()));
 
         assertTrue("is validator", result.get(0).isValidator());
@@ -361,6 +362,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
                 Collections.emptyList(),
                 Collections.emptyList());
         chain.addBlock(firstBlock);
+        chain.commit();
 
         response = api.getLatestBlock();
         assertNotNull(response);
@@ -439,6 +441,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         Block block = createBlock(chain.getLatestBlockNumber() + 1, Collections.singletonList(tx),
                 Collections.singletonList(res));
         chain.addBlock(block);
+        chain.commit();
 
         GetTransactionResponse response = api.getTransaction(Hex.encode(tx.getHash()));
         assertTrue(response.isSuccess());
@@ -461,6 +464,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         Block block = createBlock(chain.getLatestBlockNumber() + 1, Collections.singletonList(tx),
                 Collections.singletonList(res));
         chain.addBlock(block);
+        chain.commit();
 
         GetTransactionResultResponse response = api.getTransactionResult(Hex.encode(tx.getHash()));
         assertTrue(response.isSuccess());
@@ -494,7 +498,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertEquals(gen.getDelegates().size(), response.getResult().size());
-        assertThat(gen.getDelegates().entrySet().stream().map(e -> Hex.encode0x(e.getValue())).sorted()
+        assertThat(gen.getDelegates().values().stream().map(d -> Hex.encode0x(d.getAddress())).sorted()
                 .collect(Collectors.toList()))
                         .isEqualTo(response.getResult().stream().sorted().collect(Collectors.toList()));
     }
@@ -504,7 +508,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         Key key = new Key();
         Key key2 = new Key();
         DelegateState ds = chain.getDelegateState();
-        ds.register(key2.toAddress(), Bytes.of("test"));
+        ds.register(key2.getAbyte(), Bytes.of("test"));
         ds.vote(key.toAddress(), key2.toAddress(), NANO_SEM.of(200));
 
         GetVoteResponse response = api.getVote(key2.toAddressString(), key.toAddressString());
@@ -517,9 +521,10 @@ public class SemuxApiTest extends SemuxApiTestBase {
         Key voterKey = new Key();
         Key delegateKey = new Key();
         DelegateState ds = chain.getDelegateState();
-        assertTrue(ds.register(delegateKey.toAddress(), Bytes.of("test")));
+        assertTrue(ds.register(delegateKey.getAbyte(), Bytes.of("test")));
         assertTrue(ds.vote(voterKey.toAddress(), delegateKey.toAddress(), NANO_SEM.of(200)));
         ds.commit();
+        chain.commit();
 
         GetVotesResponse response = api.getVotes(delegateKey.toAddressString());
         assertTrue(response.isSuccess());
@@ -713,7 +718,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     @Test
     public void unvoteTest() throws InterruptedException {
         Key delegate = new Key();
-        delegateState.register(delegate.toAddress(), Bytes.of("test_unvote"));
+        delegateState.register(delegate.getAbyte(), Bytes.of("test_unvote"));
 
         Amount amount = NANO_SEM.of(1000000000);
         byte[] voter = wallet.getAccounts().get(0).toAddress();
@@ -742,7 +747,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     @Test
     public void voteTest() throws InterruptedException {
         Key delegate = new Key();
-        delegateState.register(delegate.toAddress(), Bytes.of("test_unvote"));
+        delegateState.register(delegate.getAbyte(), Bytes.of("test_unvote"));
 
         Amount amount = NANO_SEM.of(1000000000);
         byte[] voter = wallet.getAccounts().get(0).toAddress();

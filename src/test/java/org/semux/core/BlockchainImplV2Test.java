@@ -203,6 +203,7 @@ public class BlockchainImplV2Test {
             assertEquals(newBlock.getNumber(), transactions.get(0).getNonce());
             assertEquals(TransactionType.COINBASE, transactions.get(0).getType());
             assertEquals(newBlock.getNumber(), chain.getTransactionBlockNumber(transactions.get(0).getHash()));
+            assertEquals(chain.getCoinbaseTransaction(i), transactions.get(0));
         }
     }
 
@@ -235,11 +236,11 @@ public class BlockchainImplV2Test {
         Block block1 = createBlock(1);
 
         BlockEncoder blockEncoder = new BlockEncoderV1();
-        Block block2 = new BlockDecoderV1().fromComponents(
-                blockEncoder.getEncodedHeader(block1),
-                blockEncoder.getEncodedTransactions(block1),
-                blockEncoder.getEncodedResults(block1),
-                blockEncoder.getEncodedVotes(block1));
+        Block block2 = new BlockDecoderV1().decodeComponents(
+                blockEncoder.encoderHeader(block1),
+                blockEncoder.encodeTransactions(block1),
+                blockEncoder.encodeTransactionResults(block1),
+                blockEncoder.encodeVotes(block1));
         assertArrayEquals(block1.getHash(), block2.getHash());
         assertArrayEquals(block1.getCoinbase(), block2.getCoinbase());
         assertArrayEquals(block1.getParentHash(), block2.getParentHash());

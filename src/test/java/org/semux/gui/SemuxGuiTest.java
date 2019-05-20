@@ -22,9 +22,13 @@ import org.mockito.Mockito;
 import org.semux.KernelMock;
 import org.semux.Network;
 import org.semux.config.Config;
+import org.semux.config.Constants;
+import org.semux.config.DevnetConfig;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Blockchain;
+import org.semux.core.BlockchainFactory;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Genesis;
 import org.semux.core.Wallet;
 import org.semux.db.LeveldbDatabase;
 import org.semux.gui.model.WalletModel;
@@ -106,8 +110,8 @@ public class SemuxGuiTest {
 
         // prepare kernel
         Config config = kernel.getConfig();
-        Blockchain chain = new BlockchainImpl(config,
-                new LeveldbDatabase.LeveldbFactory(kernel.getConfig().databaseDir()));
+        Blockchain chain = new BlockchainFactory(config, Genesis.load(Network.DEVNET),
+                new LeveldbDatabase.LeveldbFactory(kernel.getConfig().databaseDir())).getBlockchainInstance();
         kernel.setBlockchain(chain);
         ChannelManager channelMgr = new ChannelManager(kernel);
         kernel.setChannelManager(channelMgr);

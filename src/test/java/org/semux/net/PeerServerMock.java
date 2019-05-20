@@ -10,14 +10,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.semux.Kernel;
 import org.semux.KernelMock;
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.consensus.SemuxBft;
 import org.semux.consensus.SemuxSync;
+import org.semux.core.BlockchainFactory;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.db.Database;
 import org.semux.db.DatabaseFactory;
 import org.semux.db.DatabaseName;
+import org.semux.db.LeveldbDatabase;
 import org.semux.db.LeveldbDatabase.LeveldbFactory;
 
 public class PeerServerMock {
@@ -41,7 +45,8 @@ public class PeerServerMock {
             dbFactory = new LeveldbFactory(config.databaseDir());
             client = new PeerClient(config.p2pListenIp(), config.p2pListenPort(), kernel.getCoinbase());
 
-            kernel.setBlockchain(new BlockchainImpl(config, dbFactory));
+            kernel.setBlockchain(
+                    new BlockchainFactory(config, Genesis.load(Network.DEVNET), dbFactory).getBlockchainInstance());
             kernel.setClient(client);
             kernel.setChannelManager(new ChannelManager(kernel));
             kernel.setPendingManager(new PendingManager(kernel));

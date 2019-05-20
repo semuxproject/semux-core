@@ -15,7 +15,7 @@ import org.semux.util.ByteArray;
 public interface DelegateState {
     /**
      * Registers a delegate.
-     * 
+     *
      * @param address
      * @param name
      * @param registeredAt
@@ -25,7 +25,7 @@ public interface DelegateState {
 
     /**
      * Registers a delegate.
-     * 
+     *
      * @param address
      * @param name
      * @return
@@ -34,29 +34,29 @@ public interface DelegateState {
 
     /**
      * Adds vote to a delegate.
-     * 
+     *
      * @param voter
      * @param delegate
      * @param value
-     * 
+     *
      * @return
      */
     boolean vote(byte[] voter, byte[] delegate, Amount value);
 
     /**
      * Removes vote of a delegate.
-     * 
+     *
      * @param voter
      * @param delegate
      * @param value
-     * 
+     *
      * @return
      */
     boolean unvote(byte[] voter, byte[] delegate, Amount value);
 
     /**
      * Returns vote that one voter has given to the specified delegate.
-     * 
+     *
      * @param voter
      * @param delegate
      * @return
@@ -73,7 +73,7 @@ public interface DelegateState {
 
     /**
      * Retrieves delegate by its name.
-     * 
+     *
      * @param name
      * @return
      */
@@ -81,7 +81,7 @@ public interface DelegateState {
 
     /**
      * Retrieves delegate by its address.
-     * 
+     *
      * @param address
      * @return
      */
@@ -89,7 +89,7 @@ public interface DelegateState {
 
     /**
      * Returns all delegates.
-     * 
+     *
      * @return
      */
     List<Delegate> getDelegates();

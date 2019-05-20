@@ -16,23 +16,23 @@ import org.semux.util.SimpleEncoder;
 public class BlockEncoderV1 implements BlockEncoder {
 
     @Override
-    public byte[] toBytes(Block block) {
+    public byte[] encode(Block block) {
         SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBytes(getEncodedHeader(block));
-        enc.writeBytes(getEncodedTransactions(block));
-        enc.writeBytes(getEncodedResults(block));
-        enc.writeBytes(getEncodedVotes(block));
+        enc.writeBytes(encoderHeader(block));
+        enc.writeBytes(encodeTransactions(block));
+        enc.writeBytes(encodeTransactionResults(block));
+        enc.writeBytes(encodeVotes(block));
 
         return enc.toBytes();
     }
 
     @Override
-    public byte[] getEncodedHeader(Block block) {
+    public byte[] encoderHeader(Block block) {
         return block.getHeader().toBytes();
     }
 
     @Override
-    public byte[] getEncodedTransactions(Block block) {
+    public byte[] encodeTransactions(Block block) {
         return getEncodedTransactionsAndIndices(block).getLeft();
     }
 
@@ -53,7 +53,7 @@ public class BlockEncoderV1 implements BlockEncoder {
     }
 
     @Override
-    public byte[] getEncodedResults(Block block) {
+    public byte[] encodeTransactionResults(Block block) {
         return getEncodedResultsAndIndex(block).getLeft();
     }
 
@@ -74,7 +74,7 @@ public class BlockEncoderV1 implements BlockEncoder {
     }
 
     @Override
-    public byte[] getEncodedVotes(Block block) {
+    public byte[] encodeVotes(Block block) {
         List<Key.Signature> votes = block.getVotes();
         SimpleEncoder enc = new SimpleEncoder(4 + 4 + votes.size() * Key.Signature.LENGTH);
 

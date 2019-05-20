@@ -17,10 +17,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.semux.core.Amount;
 import org.semux.core.Blockchain;
+import org.semux.crypto.Key;
 import org.semux.db.BatchManager;
 import org.semux.db.BatchName;
 import org.semux.db.BatchOperation;
@@ -32,8 +37,11 @@ import org.semux.util.ClosableIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
 /**
- * Delegate state implementation.
+ * DelegateV2 state implementation.
  *
  * <pre>
  * delegate DB structure:
@@ -49,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  */
-public class DelegateStateImplV2 implements DelegateState {
+public class DelegateStateImplV2 implements DelegateStateV2 {
 
     protected static final Logger logger = LoggerFactory.getLogger(DelegateStateImplV2.class);
 
@@ -61,10 +69,14 @@ public class DelegateStateImplV2 implements DelegateState {
     private final BatchManager batchManager;
     protected final DelegateStateImplV2 prev;
 
+    private final Cache<ByteArray, Integer> delegateIndexCache = Caffeine.newBuilder().maximumSize(4 * 1000).build();
+
     /**
-     * Delegate updates
+     * DelegateV2 updates
      */
     protected final Map<ByteArray, byte[]> delegateUpdates = new ConcurrentHashMap<>();
+
+    final Set<Delegate> pendingDelegates = new ConcurrentSkipListSet<>();
 
     /**
      * Vote updates
@@ -94,21 +106,22 @@ public class DelegateStateImplV2 implements DelegateState {
     }
 
     @Override
-    public boolean register(byte[] address, byte[] name, long registeredAt) {
+    public boolean register(byte[] Abyte, byte[] name, long registeredAt) {
+        byte[] address = Key.Address.fromAbyte(Abyte);
         if (getDelegateByAddress(address) != null || getDelegateByName(name) != null) {
             return false;
         } else {
-            Delegate d = new Delegate(address, name, registeredAt, ZERO);
+            DelegateV2 d = new DelegateV2(Abyte, name, registeredAt, ZERO);
             delegateUpdates.put(getDelegateNameToAddressKey(name), address);
-            delegateUpdates.put(getDelegateAddressToBinaryKey(address), d.toBytes());
-
+            delegateUpdates.put(getDelegateAddressToBinaryKey(address), new DelegateEncoderV2().encode(d));
+            pendingDelegates.add(d);
             return true;
         }
     }
 
     @Override
-    public boolean register(byte[] address, byte[] name) {
-        return register(address, name, chain.getLatestBlockNumber() + 1);
+    public boolean register(byte[] Abyte, byte[] name) {
+        return register(Abyte, name, chain.getLatestBlockNumber() + 1);
     }
 
     @Override
@@ -121,7 +134,7 @@ public class DelegateStateImplV2 implements DelegateState {
         } else {
             voteUpdates.put(getVoterAddressToVotesKey(voter, delegate), encodeAmount(sum(value, v)));
             d.setVotes(sum(d.getVotes(), v));
-            delegateUpdates.put(getDelegateAddressToBinaryKey(delegate), d.toBytes());
+            delegateUpdates.put(getDelegateAddressToBinaryKey(delegate), new DelegateEncoderV2().encode(d));
             return true;
         }
     }
@@ -137,7 +150,7 @@ public class DelegateStateImplV2 implements DelegateState {
 
             Delegate d = getDelegateByAddress(delegate);
             d.setVotes(sub(d.getVotes(), v));
-            delegateUpdates.put(getDelegateAddressToBinaryKey(delegate), d.toBytes());
+            delegateUpdates.put(getDelegateAddressToBinaryKey(delegate), new DelegateEncoderV2().encode(d));
 
             return true;
         }
@@ -181,12 +194,12 @@ public class DelegateStateImplV2 implements DelegateState {
 
         if (delegateUpdates.containsKey(k)) {
             byte[] v = delegateUpdates.get(k);
-            return v == null ? null : Delegate.fromBytes(address, v);
+            return v == null ? null : new DelegateDecoderV2().decode(address, v);
         } else if (prev != null) {
             return prev.getDelegateByAddress(address);
         } else {
             byte[] v = database.get(k.getData());
-            return v == null ? null : Delegate.fromBytes(address, v);
+            return v == null ? null : new DelegateDecoderV2().decode(address, v);
         }
     }
 
@@ -216,6 +229,51 @@ public class DelegateStateImplV2 implements DelegateState {
     }
 
     @Override
+    public int getDelegateCount() {
+        byte[] bytes = database.get(getDelegateCountKey().getData());
+        return bytes == null ? 0 : Bytes.toInt(bytes);
+    }
+
+    @Override
+    public int getDelegateIndex(byte[] delegateAddress) {
+        return delegateIndexCache.get(ByteArray.of(delegateAddress),
+                (k) -> Bytes.toInt(database.get(getDelegateAddressToIndexKey(k.getData()).getData())));
+    }
+
+    @Override
+    public Delegate getDelegateByIndex(int index) {
+        assert (index >= 0);
+        byte[] address = database.get(getDelegateIndexToAddressKey(index).getData());
+        return getDelegateByAddress(address);
+    }
+
+    private void updateDelegateIndex() {
+        if (pendingDelegates.size() > 0) {
+            final int delegateCount = getDelegateCount();
+            final AtomicInteger i = new AtomicInteger(0);
+            pendingDelegates.stream().sorted().forEach((d) -> {
+                int index = delegateCount + i.getAndIncrement();
+                batchManager.getBatchInstance(BatchName.ADD_BLOCK)
+                        .add(BatchOperation
+                                .put(getDelegateAddressToIndexKey(d.getAddress()).getData(), Bytes.of(index)));
+                batchManager.getBatchInstance(BatchName.ADD_BLOCK)
+                        .add(BatchOperation.put(getDelegateIndexToAddressKey(index).getData(), d.getAddress()));
+
+                logger.info("Update delegate index {} => {}", index, d.getAddressString());
+            });
+
+            // update delegate count
+            final int updatedDelegateCount = delegateCount + i.get();
+            batchManager.getBatchInstance(BatchName.ADD_BLOCK)
+                    .add(BatchOperation.put(getDelegateCountKey().getData(), Bytes.of(updatedDelegateCount)));
+
+            logger.info("Delegate count: {}", updatedDelegateCount);
+
+            pendingDelegates.clear();
+        }
+    }
+
+    @Override
     public void commit() {
         synchronized (delegateUpdates) {
             if (prev == null) {
@@ -228,10 +286,14 @@ public class DelegateStateImplV2 implements DelegateState {
                                 .add(BatchOperation.put(entry.getKey().getData(), entry.getValue()));
                     }
                 }
+
+                updateDelegateIndex();
             } else {
                 for (Entry<ByteArray, byte[]> e : delegateUpdates.entrySet()) {
                     prev.delegateUpdates.put(e.getKey(), e.getValue());
                 }
+
+                prev.pendingDelegates.addAll(pendingDelegates);
             }
 
             delegateUpdates.clear();
@@ -282,7 +344,8 @@ public class DelegateStateImplV2 implements DelegateState {
                 if (entry.getValue() == null) {
                     map.put(delegateAddress, null);
                 } else {
-                    map.put(delegateAddress, Delegate.fromBytes(delegateAddress.getData(), entry.getValue()));
+                    map.put(delegateAddress,
+                            new DelegateDecoderV2().decode(delegateAddress.getData(), entry.getValue()));
                 }
             }
         }
@@ -295,16 +358,18 @@ public class DelegateStateImplV2 implements DelegateState {
             while (itr.hasNext()) {
                 Entry<byte[], byte[]> entry = itr.next();
                 ByteArray k = ByteArray.of(entry.getKey());
-                byte[] v = entry.getValue();
-
-                if (k.length() == ADDRESS_LEN + 1) {
-                    ByteArray delegateAddress = ByteArray.of(Arrays.copyOfRange(k.getData(), 1, k.length()));
-                    if (map.containsKey(delegateAddress)) {
-                        continue;
-                    }
-
-                    map.put(delegateAddress, Delegate.fromBytes(delegateAddress.getData(), v));
+                if (k.length() != ADDRESS_LEN + 1 || k.getData()[0] != DatabasePrefixesV2.TYPE_DELEGATE) {
+                    continue;
                 }
+
+                byte[] v = entry.getValue();
+                ByteArray delegateAddress = ByteArray.of(Arrays.copyOfRange(k.getData(), 1, k.length()));
+                if (map.containsKey(delegateAddress)) {
+                    continue;
+                }
+
+                Delegate delegate = new DelegateDecoderV2().decode(delegateAddress.getData(), v);
+                map.put(delegateAddress, delegate);
             }
             itr.close();
         }
@@ -353,6 +418,18 @@ public class DelegateStateImplV2 implements DelegateState {
     // mapping of [delegate address] => [delegate binary]
     private ByteArray getDelegateAddressToBinaryKey(byte[] delegateAddress) {
         return ByteArray.of(Bytes.merge(DatabasePrefixesV2.TYPE_DELEGATE, delegateAddress));
+    }
+
+    private ByteArray getDelegateAddressToIndexKey(byte[] delegateAddress) {
+        return ByteArray.of(Bytes.merge(DatabasePrefixesV2.TYPE_DELEGATE_INDEX_TO_ADDRESS, delegateAddress));
+    }
+
+    private ByteArray getDelegateIndexToAddressKey(int index) {
+        return ByteArray.of(Bytes.merge(DatabasePrefixesV2.TYPE_DELEGATE_ADDRESS_TO_INDEX, Bytes.of(index)));
+    }
+
+    private ByteArray getDelegateCountKey() {
+        return ByteArray.of(Bytes.of(DatabasePrefixesV2.TYPE_DELEGATE_COUNT));
     }
 
     // mapping of [delegate address + voter address] => [votes]

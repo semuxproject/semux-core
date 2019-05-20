@@ -21,7 +21,6 @@ import static org.semux.core.Amount.sum;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -44,7 +43,6 @@ import org.semux.core.Genesis;
 import org.semux.core.TransactionType;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
-import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.SemuxChannelInitializer;
@@ -386,9 +384,11 @@ public class TransactTest {
         premines.add(new Genesis.Premine(kernelRulePremine.getCoinbase().toAddress(), PREMINE, ""));
 
         // mock delegates
-        HashMap<String, String> delegates = new HashMap<>();
-        delegates.put("kernelValidator1", kernelRuleValidator1.getCoinbase().toAddressString());
-        delegates.put("kernelValidator2", kernelRuleValidator2.getCoinbase().toAddressString());
+        HashMap<String, Genesis.Delegate> delegates = new HashMap<>();
+        delegates.put("kernelValidator1", new Genesis.Delegate(kernelRuleValidator1.getCoinbase().toAddress(),
+                kernelRuleValidator1.getCoinbase().getAbyte()));
+        delegates.put("kernelValidator2", new Genesis.Delegate(kernelRuleValidator2.getCoinbase().toAddress(),
+                kernelRuleValidator2.getCoinbase().getAbyte()));
 
         // mock genesis
         return Genesis.jsonCreator(0,

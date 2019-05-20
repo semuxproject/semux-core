@@ -403,7 +403,7 @@ public class Block {
      * @return block size in bytes
      */
     public int size() {
-        return new BlockEncoderV1().toBytes(this).length;
+        return new BlockEncoderV1().encode(this).length;
     }
 
     @Override

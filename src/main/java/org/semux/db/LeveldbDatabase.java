@@ -65,7 +65,7 @@ public class LeveldbDatabase implements Database {
     protected Options createOptions() {
         Options options = new Options();
         options.createIfMissing(true);
-        options.compressionType(CompressionType.NONE);
+        options.compressionType(CompressionType.SNAPPY);
         options.blockSize(4 * 1024 * 1024);
         options.writeBufferSize(8 * 1024 * 1024);
         options.cacheSize(64L * 1024L * 1024L);

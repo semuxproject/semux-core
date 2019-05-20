@@ -17,7 +17,6 @@ import org.semux.db.DatabaseName;
 import org.semux.db.DatabasePrefixesV1;
 import org.semux.db.DatabasePrefixesV2;
 import org.semux.db.DatabaseVersion;
-import org.semux.db.MigrationBlockDbVersion001;
 import org.semux.db.MigrationBlockDbVersion002;
 import org.semux.db.MigrationRunner;
 import org.semux.util.Bytes;
@@ -46,27 +45,14 @@ public class BlockchainFactory {
      */
     public Blockchain getBlockchainInstance() {
         final DatabaseVersion databaseVersion = getBlockchainDatabaseVersion();
-        if (needsInitialization()) {
-            new BlockchainImpl(config, genesis, databaseFactory);
-            return getBlockchainInstance();
-        } else if (databaseVersion == DatabaseVersion.V0) {
-            BlockchainImpl blockchain = new BlockchainImpl(config, genesis, databaseFactory);
-            MigrationRunner migrationRunner = new MigrationRunner(config, databaseFactory, blockchain);
-            migrationRunner.migrate(new MigrationBlockDbVersion001(blockchain));
-            return getBlockchainInstance();
-        } else if (databaseVersion == DatabaseVersion.V1) {
-            BlockchainImpl blockchain = new BlockchainImpl(config, genesis, databaseFactory);
-            MigrationRunner migrationRunner = new MigrationRunner(config, databaseFactory, blockchain);
-            migrationRunner.migrate(new MigrationBlockDbVersion002());
-            return getBlockchainInstance();
-        } else if (databaseVersion == DatabaseVersion.V2) {
+        if (needsInitialization() || databaseVersion == DatabaseVersion.V2) {
             Database database = databaseFactory.getDB(DatabaseName.BLOCK);
-            return new BlockchainImplV2(
-                    config,
-                    genesis,
-                    database,
-                    BatchManager.getInstance(database),
-                    new BlockCodecV1());
+            return new BlockchainImplV2(config, genesis, database, BatchManager.getInstance(database));
+        } else if (databaseVersion == DatabaseVersion.V0 || databaseVersion == DatabaseVersion.V1) {
+            BlockchainImpl blockchain = new BlockchainImpl(config, genesis, databaseFactory);
+            MigrationRunner migrationRunner = new MigrationRunner(config, databaseFactory, blockchain);
+            migrationRunner.migrate(new MigrationBlockDbVersion002(genesis, blockchain));
+            return getBlockchainInstance();
         } else {
             throw new BlockchainException("Unsupported blockchain database version " + databaseVersion);
         }

@@ -14,24 +14,35 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.semux.Network;
 import org.semux.core.Genesis.Premine;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 
+@RunWith(Parameterized.class)
 public class GenesisTest {
 
     private static final byte[] ZERO_ADDRESS = Hex.decode0x("0000000000000000000000000000000000000000");
     private static final byte[] ZERO_HASH = Bytes.EMPTY_HASH;
 
-    Genesis genesis;
+    private final Genesis genesis;
 
-    @Before
-    public void setUp() {
-        genesis = Genesis.load(Network.MAINNET);
+    @Parameterized.Parameters(name = "{index}: Test with {0}")
+    public static Iterable<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+                { Network.MAINNET },
+                { Network.TESTNET },
+                { Network.DEVNET },
+        });
+    }
+
+    public GenesisTest(Network network) {
+        genesis = Genesis.load(network);
     }
 
     @Test
@@ -60,11 +71,13 @@ public class GenesisTest {
 
     @Test
     public void testDelegates() {
-        Map<String, byte[]> delegates = genesis.getDelegates();
+        Map<String, Genesis.Delegate> delegates = genesis.getDelegates();
 
         assertFalse(delegates.isEmpty());
-        for (byte[] address : delegates.values()) {
-            assertEquals(20, address.length);
+        for (Genesis.Delegate delegate : delegates.values()) {
+            assertEquals(20, delegate.getAddress().length);
+            assertEquals(32, delegate.getAbyte().length);
+            assertArrayEquals(delegate.getAddress(), Key.Address.fromAbyte(delegate.getAbyte()));
         }
     }
 

@@ -6,10 +6,17 @@
  */
 package org.semux.core;
 
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.semux.crypto.Key;
+
 public interface BlockDecoder {
 
-    Block fromComponents(byte[] header, byte[] transactions, byte[] transactionResults, byte[] votes);
+    Block decodeComponents(byte[] header, byte[] transactions, byte[] transactionResults, byte[] votes);
 
-    Block fromBytes(byte[] bytes);
+    Block decode(byte[] bytes);
+
+    Pair<Integer, List<Key.Signature>> decodeVotes(byte[] v);
 
 }

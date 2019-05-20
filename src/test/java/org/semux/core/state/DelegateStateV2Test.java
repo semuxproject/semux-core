@@ -38,7 +38,7 @@ public class DelegateStateV2Test {
 
     private Blockchain chain;
     private DelegateState ds;
-    Map<String, byte[]> delegates;
+    Map<String, Genesis.Delegate> genesisDelegates;
 
     @Rule
     public TemporaryDatabaseRule temporaryDBFactory = new TemporaryDatabaseRule();
@@ -48,21 +48,21 @@ public class DelegateStateV2Test {
         chain = (new BlockchainFactory(new DevnetConfig(Constants.DEFAULT_DATA_DIR), Genesis.load(Network.DEVNET),
                 temporaryDBFactory)).getBlockchainInstance();
         ds = chain.getDelegateState();
-        delegates = chain.getGenesis().getDelegates();
+        genesisDelegates = chain.getGenesis().getDelegates();
     }
 
     @Test
     public void testAtGenesis() {
-        for (String k : delegates.keySet()) {
-            Delegate d = ds.getDelegateByAddress(delegates.get(k));
+        genesisDelegates.forEach((key, value) -> {
+            Delegate d = ds.getDelegateByAddress(value.getAddress());
             assertNotNull(d);
-            assertArrayEquals(delegates.get(k), d.getAddress());
-            assertArrayEquals(Bytes.of(k), d.getName());
+            assertArrayEquals(value.getAddress(), d.getAddress());
+            assertArrayEquals(Bytes.of(key), d.getName());
             assertEquals(ZERO, d.getVotes());
-        }
+        });
 
-        assertEquals(delegates.size(), ds.getDelegates().size());
-        assertEquals(delegates.size(), chain.getValidators().size());
+        assertEquals(genesisDelegates.size(), ds.getDelegates().size());
+        assertEquals(genesisDelegates.size(), chain.getValidators().size());
     }
 
     @Test
@@ -75,42 +75,42 @@ public class DelegateStateV2Test {
 
     @Test
     public void testVoteOneDelegate() {
-        byte[] delegate = new Key().toAddress();
+        Key delegateKey = new Key();
         byte[] delegateName = Bytes.of("delegate");
 
         byte[] voter = new Key().toAddress();
 
-        assertTrue(ds.register(delegate, delegateName));
+        assertTrue(ds.register(delegateKey.getAbyte(), delegateName));
         for (int i = 0; i < 1000; i++) {
-            assertTrue(ds.vote(voter, delegate, NANO_SEM.of(1000)));
+            assertTrue(ds.vote(voter, delegateKey.toAddress(), NANO_SEM.of(1000)));
         }
 
         List<Delegate> list = ds.getDelegates();
-        assertEquals(delegates.size() + 1, list.size());
+        assertEquals(genesisDelegates.size() + 1, list.size());
 
-        assertArrayEquals(delegate, list.get(0).getAddress());
+        assertArrayEquals(delegateKey.toAddress(), list.get(0).getAddress());
         assertArrayEquals(delegateName, list.get(0).getName());
         assertEquals(NANO_SEM.of(1000 * 1000), list.get(0).getVotes());
     }
 
     @Test
     public void testMultipleDelegates() {
-        byte[] delegate = null;
+        Key delegateKey = null;
         byte[] delegateName = null;
 
         byte[] voter = new Key().toAddress();
 
         for (int i = 0; i < 200; i++) {
-            delegate = new Key().toAddress();
+            delegateKey = new Key();
             delegateName = Bytes.of("delegate" + i);
-            assertTrue(ds.register(delegate, delegateName));
-            assertTrue(ds.vote(voter, delegate, NANO_SEM.of(i)));
+            assertTrue(ds.register(delegateKey.getAbyte(), delegateName));
+            assertTrue(ds.vote(voter, delegateKey.toAddress(), NANO_SEM.of(i)));
         }
 
         List<Delegate> list = ds.getDelegates();
-        assertEquals(delegates.size() + 200, list.size());
+        assertEquals(genesisDelegates.size() + 200, list.size());
 
-        assertArrayEquals(delegate, list.get(0).getAddress());
+        assertArrayEquals(delegateKey.toAddress(), list.get(0).getAddress());
         assertArrayEquals(delegateName, list.get(0).getName());
         assertEquals(NANO_SEM.of(200 - 1), list.get(0).getVotes());
     }
@@ -118,28 +118,28 @@ public class DelegateStateV2Test {
     @Test
     public void testUnvote() {
         byte[] voter = new Key().toAddress();
-        byte[] delegate = new Key().toAddress();
+        Key delegateKey = new Key();
         Amount value = SEM.of(2);
 
-        ds.register(delegate, Bytes.of("test"));
-        assertFalse(ds.unvote(voter, delegate, value));
-        ds.vote(voter, delegate, value);
-        assertTrue(ds.vote(voter, delegate, value));
+        ds.register(delegateKey.getAbyte(), Bytes.of("test"));
+        assertFalse(ds.unvote(voter, delegateKey.toAddress(), value));
+        ds.vote(voter, delegateKey.toAddress(), value);
+        assertTrue(ds.vote(voter, delegateKey.toAddress(), value));
     }
 
     @Test
     public void testGetVote() {
         byte[] voter = new Key().toAddress();
-        byte[] delegate = new Key().toAddress();
+        Key delegateKey = new Key();
         Amount value = SEM.of(2);
 
-        ds.register(delegate, Bytes.of("test"));
-        assertTrue(ds.vote(voter, delegate, value));
-        assertEquals(value, ds.getVote(voter, delegate));
-        assertTrue(ds.vote(voter, delegate, value));
-        assertEquals(SEM.of(4), ds.getVote(voter, delegate));
+        ds.register(delegateKey.getAbyte(), Bytes.of("test"));
+        assertTrue(ds.vote(voter, delegateKey.toAddress(), value));
+        assertEquals(value, ds.getVote(voter, delegateKey.toAddress()));
+        assertTrue(ds.vote(voter, delegateKey.toAddress(), value));
+        assertEquals(SEM.of(4), ds.getVote(voter, delegateKey.toAddress()));
         commit();
-        assertEquals(SEM.of(4), ds.getVote(voter, delegate));
+        assertEquals(SEM.of(4), ds.getVote(voter, delegateKey.toAddress()));
     }
 
     @Test
@@ -150,7 +150,7 @@ public class DelegateStateV2Test {
         Key voterKey2 = new Key();
         Amount value2 = SEM.of(2);
 
-        ds.register(delegateKey.toAddress(), Bytes.of("test"));
+        ds.register(delegateKey.getAbyte(), Bytes.of("test"));
         assertTrue(ds.vote(voterKey1.toAddress(), delegateKey.toAddress(), value1));
         assertTrue(ds.vote(voterKey2.toAddress(), delegateKey.toAddress(), value2));
         commit();

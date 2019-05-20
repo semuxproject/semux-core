@@ -24,12 +24,12 @@ public enum DatabaseName {
     ACCOUNT,
 
     /**
-     * @deprecated v0 and v1 only Delegate core data.
+     * @deprecated v0 and v1 only DelegateV1 core data.
      */
     DELEGATE,
 
     /**
-     * @deprecated v0 and v1 only Delegate vote data.
+     * @deprecated v0 and v1 only DelegateV1 vote data.
      */
     VOTE
 }

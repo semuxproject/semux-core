@@ -28,7 +28,10 @@ import org.semux.core.TransactionResult.Code;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
+import org.semux.core.state.DelegateStateImpl;
+import org.semux.core.state.DelegateStateImplV2;
 import org.semux.util.Bytes;
+import org.semux.util.exception.UnreachableException;
 import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxRepository;
 import org.semux.vm.client.SemuxTransaction;
@@ -164,7 +167,17 @@ public class TransactionExecutor {
                 }
 
                 if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
-                    if (ds.register(from, data)) {
+                    boolean registerResult;
+
+                    if (ds instanceof DelegateStateImplV2) {
+                        registerResult = ds.register(tx.getSignature().getA(), data);
+                    } else if (ds instanceof DelegateStateImpl) {
+                        registerResult = ds.register(from, data);
+                    } else {
+                        throw new UnreachableException();
+                    }
+
+                    if (registerResult) {
                         as.adjustAvailable(from, neg(sum(value, fee)));
                     } else {
                         result.setCode(Code.INVALID_DELEGATING);

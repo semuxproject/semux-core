@@ -42,7 +42,7 @@ public class BlockchainImplMigrationTest {
     }
 
     @Test
-    public void testMigrationBlockDbFromVersion1() throws IOException {
+    public void testMigrateBlockDbFromVersion1() throws IOException {
         testMigration("/database/database-v1.tgz");
     }
 

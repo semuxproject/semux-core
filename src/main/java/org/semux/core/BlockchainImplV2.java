@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.ethereum.vm.client.BlockStore;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.core.exception.BlockchainException;
@@ -31,17 +32,23 @@ import org.semux.core.state.AccountStateImplV2;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.core.state.DelegateStateImplV2;
+import org.semux.core.state.DelegateStateV2;
 import org.semux.crypto.Hex;
 import org.semux.db.Batch;
 import org.semux.db.BatchManager;
 import org.semux.db.BatchName;
 import org.semux.db.BatchOperation;
 import org.semux.db.Database;
+import org.semux.db.DatabaseFactory;
+import org.semux.db.DatabaseName;
 import org.semux.db.DatabasePrefixesV2;
+import org.semux.db.DatabaseVersion;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+import org.semux.vm.client.SemuxBlock;
+import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,34 +83,63 @@ public class BlockchainImplV2 implements Blockchain {
 
     private static final Logger logger = LoggerFactory.getLogger(BlockchainImplV2.class);
 
-    private final List<BlockchainListener> listeners = new ArrayList<>();
-    private final Config config;
-    private final Genesis genesis;
+    protected final List<BlockchainListener> listeners = new ArrayList<>();
+    protected final Config config;
+    protected final Genesis genesis;
 
-    private final Database blockDB;
-    private final BatchManager batchManager;
-    private final AccountState accountState;
-    private final DelegateState delegateState;
+    protected final Database blockDB;
+    protected final BatchManager batchManager;
+    protected final AccountState accountState;
+    protected final DelegateStateV2 delegateState;
 
-    private Block latestBlock;
-    private ActivatedForks forks;
+    protected Block latestBlock;
+    protected ActivatedForks forks;
 
-    private BlockCodec blockCodec;
+    protected final BlockCodec blockCodec;
 
-    public BlockchainImplV2(Config config, Genesis genesis, Database blockDB, BatchManager batchManager,
-            BlockCodec blockCodec) {
+    public BlockchainImplV2(Config config, Genesis genesis, Database blockDB, BatchManager batchManager) {
         this.config = config;
         this.genesis = genesis;
         this.blockDB = blockDB;
         this.batchManager = batchManager;
-        this.blockCodec = blockCodec;
         this.accountState = new AccountStateImplV2(blockDB, batchManager);
         this.delegateState = new DelegateStateImplV2(this, blockDB, batchManager);
+        this.blockCodec = new BlockCodecV2(delegateState);
         forks = new ActivatedForks((Blockchain) Proxy.newProxyInstance(
                 BlockchainImplV2.class.getClassLoader(),
                 new Class[] { Blockchain.class },
                 new PendingChainHandler(this)), config, getActivatedForks());
+
+        // initialize the database for the first time
+        byte[] number = blockDB.get(Bytes.of(DatabasePrefixesV2.TYPE_LATEST_BLOCK_NUMBER));
+        if (number == null || number.length == 0) {
+            initializeDb();
+            return;
+        }
+
         latestBlock = getBlock(Bytes.toLong(blockDB.get(Bytes.of(DatabasePrefixesV2.TYPE_LATEST_BLOCK_NUMBER))));
+    }
+
+    private void initializeDb() {
+        // initialize database version
+        blockDB.put(Bytes.of(DatabasePrefixesV2.TYPE_DATABASE_VERSION), DatabaseVersion.V2.toBytes());
+
+        // pre-allocation
+        for (Genesis.Premine p : genesis.getPremines().values()) {
+            accountState.adjustAvailable(p.getAddress(), p.getAmount());
+        }
+
+        // delegates
+        for (Entry<String, Genesis.Delegate> e : genesis.getDelegates().entrySet()) {
+            delegateState.register(e.getValue().getAbyte(), Bytes.of(e.getKey()), 0);
+        }
+
+        // add block
+        addBlock(genesis);
+
+        delegateState.commit();
+        accountState.commit();
+        commit();
     }
 
     @Override
@@ -144,7 +180,7 @@ public class BlockchainImplV2 implements Blockchain {
         byte[] results = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_RESULTS, Bytes.of(number)));
         byte[] votes = blockDB.get(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_VOTES, Bytes.of(number)));
 
-        return (header == null) ? null : blockCodec.decoder().fromComponents(header, transactions, results, votes);
+        return (header == null) ? null : blockCodec.decoder().decodeComponents(header, transactions, results, votes);
     }
 
     @Override
@@ -258,19 +294,19 @@ public class BlockchainImplV2 implements Blockchain {
         Batch batch = batchManager.getBatchInstance(BatchName.ADD_BLOCK);
         batch.add(
                 BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HEADER, Bytes.of(number)),
-                        blockCodec.encoder().getEncodedHeader(block)),
+                        blockCodec.encoder().encoderHeader(block)),
                 BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)),
-                        blockCodec.encoder().getEncodedTransactions(block)),
+                        blockCodec.encoder().encodeTransactions(block)),
                 BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_RESULTS, Bytes.of(number)),
-                        blockCodec.encoder().getEncodedResults(block)),
+                        blockCodec.encoder().encodeTransactionResults(block)),
                 BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_VOTES, Bytes.of(number)),
-                        blockCodec.encoder().getEncodedVotes(block)),
+                        blockCodec.encoder().encodeVotes(block)),
                 BatchOperation.put(Bytes.merge(DatabasePrefixesV2.TYPE_BLOCK_HASH, hash), Bytes.of(number)));
 
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
         Pair<byte[], List<Integer>> transactionIndices = blockCodec.encoder().getEncodedTransactionsAndIndices(block);
-        Pair<byte[], List<Integer>> resultIndices = blockCodec.encoder().getEncodedTransactionsAndIndices(block);
+        Pair<byte[], List<Integer>> resultIndices = blockCodec.encoder().getEncodedResultsAndIndex(block);
         Amount reward = Block.getBlockReward(block, config);
 
         for (int i = 0; i < txs.size(); i++) {
@@ -389,6 +425,8 @@ public class BlockchainImplV2 implements Blockchain {
 
     /**
      * Updates the validator set.
+     *
+     * FIXME: should be private
      *
      * @param number
      */
@@ -613,6 +651,45 @@ public class BlockchainImplV2 implements Blockchain {
             }
 
             return original.getBlockHeader(number);
+        }
+    }
+
+    /**
+     * A temporary blockchain for database migration. This class implements a
+     * lightweight version of
+     * ${@link org.semux.consensus.SemuxBft#applyBlock(Block)} to migrate blocks
+     * from an existing database to the latest schema.
+     */
+    public static class MigrationBlockchain extends BlockchainImplV2 {
+
+        private BlockStore blockStore = new SemuxBlockStore(this);
+
+        public MigrationBlockchain(Config config, Genesis genesis, Database blockDB, BatchManager batchManager) {
+            super(config, genesis, blockDB, batchManager);
+        }
+
+        public void applyBlock(Block block) {
+            // [0] execute transactions against local state
+            TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
+            transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState(),
+                    new SemuxBlock(block.getHeader(), config.vmMaxBlockGasLimit()), this);
+
+            // [1] apply block reward and tx fees
+            Amount reward = Block.getBlockReward(block, config);
+
+            if (reward.gt0()) {
+                getAccountState().adjustAvailable(block.getCoinbase(), reward);
+            }
+
+            // [2] add block to chain
+            addBlock(block);
+
+            // [3] commit state changes
+            getAccountState().commit();
+            getDelegateState().commit();
+
+            // [4] write to database
+            commit();
         }
     }
 }

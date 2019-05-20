@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.semux.Kernel;
 import org.semux.core.Amount;
 import org.semux.core.Blockchain;
-import org.semux.core.state.Delegate;
+import org.semux.core.state.DelegateV1;
 import org.semux.util.Bytes;
 
 public class WalletDelegateTest {
@@ -34,7 +34,7 @@ public class WalletDelegateTest {
     @Test
     public void testBasic() {
 
-        Delegate d = new Delegate(address, name, registeredAt, votes);
+        DelegateV1 d = new DelegateV1(address, name, registeredAt, votes);
         WalletDelegate wd = new WalletDelegate(d);
 
         assertThat(wd.getAddress(), equalTo(address));
@@ -70,11 +70,11 @@ public class WalletDelegateTest {
         when(kernel.getBlockchain()).thenReturn(blockchain);
         when(blockchain.getValidators()).thenReturn(Arrays.asList(v1, v2));
 
-        Delegate d = new Delegate(address, name, registeredAt, votes);
+        DelegateV1 d = new DelegateV1(address, name, registeredAt, votes);
         WalletDelegate wd = new WalletDelegate(d);
         assertFalse(wd.isValidator());
 
-        d = new Delegate(address, Bytes.of(v1), registeredAt, votes);
+        d = new DelegateV1(address, Bytes.of(v1), registeredAt, votes);
         wd = new WalletDelegate(d);
         assertFalse(wd.isValidator());
     }

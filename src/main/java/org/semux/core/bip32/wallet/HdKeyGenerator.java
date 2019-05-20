@@ -124,7 +124,7 @@ public class HdKeyGenerator {
 
         if (ILBigInt.compareTo(Secp256k1.getN()) > 0 || point.isInfinity()) {
             throw new CryptoException("This key is invalid, should proceed to next key");
-            // return getPublicKey(parent, child+1, isHardened);
+            // return getAbyte(parent, child+1, isHardened);
         }
 
         byte[] childKey = Secp256k1.serP(point);

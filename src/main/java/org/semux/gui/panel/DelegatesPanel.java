@@ -47,8 +47,8 @@ import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.ValidatorStats;
-import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
+import org.semux.core.state.DelegateV1;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.PlaceHolder;
@@ -439,7 +439,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         /*
          * update table model
          */
-        Delegate d = getSelectedDelegate();
+        DelegateV1 d = getSelectedDelegate();
         tableModel.setData(delegates);
 
         if (d != null) {
@@ -617,7 +617,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
      * Updates the selected delegate label.
      */
     protected void updateSelectedDelegateLabel() {
-        Delegate d = getSelectedDelegate();
+        DelegateV1 d = getSelectedDelegate();
         if (d != null) {
             labelSelectedDelegate.setText(GuiMessages.get("SelectedDelegate", d.getNameString()));
         }

@@ -108,6 +108,8 @@ public class BlockchainImpl implements Blockchain {
 
     private ActivatedForks forks;
 
+    private static final BlockCodec blockCodec = new BlockCodecV1();
+
     public BlockchainImpl(Config config, DatabaseFactory dbFactory) {
         this(config, Genesis.load(config.network()), dbFactory);
     }
@@ -153,8 +155,8 @@ public class BlockchainImpl implements Blockchain {
         accountState.commit();
 
         // delegates
-        for (Entry<String, byte[]> e : genesis.getDelegates().entrySet()) {
-            delegateState.register(e.getValue(), Bytes.of(e.getKey()), 0);
+        for (Entry<String, Genesis.Delegate> e : genesis.getDelegates().entrySet()) {
+            delegateState.register(e.getValue().getAddress(), Bytes.of(e.getKey()), 0);
         }
         delegateState.commit();
 
@@ -202,8 +204,7 @@ public class BlockchainImpl implements Blockchain {
         byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)));
         byte[] votes = blockDB.get(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)));
 
-        BlockDecoder blockDecoder = new BlockDecoderV1();
-        return (header == null) ? null : blockDecoder.fromComponents(header, transactions, results, votes);
+        return (header == null) ? null : blockCodec.decoder().decodeComponents(header, transactions, results, votes);
     }
 
     @Override
@@ -312,18 +313,19 @@ public class BlockchainImpl implements Blockchain {
         }
 
         // [1] update block
-        BlockEncoder blockEncoder = new BlockEncoderV1();
-        blockDB.put(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)), blockEncoder.getEncodedHeader(block));
-        blockDB.put(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)), blockEncoder.getEncodedTransactions(block));
-        blockDB.put(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)), blockEncoder.getEncodedResults(block));
-        blockDB.put(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)), blockEncoder.getEncodedVotes(block));
+        blockDB.put(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)), blockCodec.encoder().encoderHeader(block));
+        blockDB.put(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)),
+                blockCodec.encoder().encodeTransactions(block));
+        blockDB.put(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)),
+                blockCodec.encoder().encodeTransactionResults(block));
+        blockDB.put(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)), blockCodec.encoder().encodeVotes(block));
 
         indexDB.put(Bytes.merge(TYPE_BLOCK_HASH, hash), Bytes.of(number));
 
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
-        Pair<byte[], List<Integer>> transactionIndices = blockEncoder.getEncodedTransactionsAndIndices(block);
-        Pair<byte[], List<Integer>> resultIndices = blockEncoder.getEncodedTransactionsAndIndices(block);
+        Pair<byte[], List<Integer>> transactionIndices = blockCodec.encoder().getEncodedTransactionsAndIndices(block);
+        Pair<byte[], List<Integer>> resultIndices = blockCodec.encoder().getEncodedResultsAndIndex(block);
         Amount reward = Block.getBlockReward(block, config);
 
         for (int i = 0; i < txs.size(); i++) {
@@ -444,7 +446,7 @@ public class BlockchainImpl implements Blockchain {
      *
      * @param number
      */
-    public void updateValidators(long number) {
+    void updateValidators(long number) {
         List<String> validators = new ArrayList<>();
 
         List<Delegate> delegates = delegateState.getDelegates();

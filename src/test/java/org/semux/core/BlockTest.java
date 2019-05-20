@@ -77,11 +77,11 @@ public class BlockTest {
         hash = block.getHash();
 
         BlockEncoder blockEncoder = new BlockEncoderV1();
-        testFields(new BlockDecoderV1().fromComponents(
-                blockEncoder.getEncodedHeader(block),
-                blockEncoder.getEncodedTransactions(block),
-                blockEncoder.getEncodedResults(block),
-                blockEncoder.getEncodedVotes(block)));
+        testFields(new BlockDecoderV1().decodeComponents(
+                blockEncoder.encoderHeader(block),
+                blockEncoder.encodeTransactions(block),
+                blockEncoder.encodeTransactionResults(block),
+                blockEncoder.encodeVotes(block)));
     }
 
     private void testFields(Block block) {
@@ -109,7 +109,7 @@ public class BlockTest {
         assertEquals(1, indexes.getRight().size());
 
         Integer index = indexes.getRight().get(0);
-        SimpleDecoder dec = new SimpleDecoder(blockEncoder.getEncodedTransactions(block), index);
+        SimpleDecoder dec = new SimpleDecoder(blockEncoder.encodeTransactions(block), index);
         Transaction tx2 = Transaction.fromBytes(dec.readBytes());
         assertArrayEquals(tx.getHash(), tx2.getHash());
     }
