@@ -17,6 +17,8 @@ matrix:
       os: linux
       sudo: false
       jdk: openjdk8
+      services:
+        - xvfb
       script:
         - mvn cobertura:cobertura
       after_success:
