@@ -27,6 +27,8 @@ matrix:
       os: linux
       sudo: false
       jdk: openjdk8
+      services:
+        - xvfb
       script:
         - mvn test
 
@@ -35,6 +37,8 @@ matrix:
       os: linux
       sudo: false
       jdk: openjdk11
+      services:
+        - xvfb
       script:
         - mvn test
 
@@ -42,6 +46,8 @@ matrix:
     - env: NAME="macOS tests"
       os: osx
       osx_image: xcode9.2
+      services:
+        - xvfb
       script:
         - mvn test
 
@@ -53,4 +59,3 @@ cache:
 
 before_install:
   - rm ~/.m2/settings.xml || true # remove the default settings.xml in order to use custom repos
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then source .travis/linux_start_xvfb.sh; fi
