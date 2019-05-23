@@ -13,15 +13,16 @@ import java.util.Optional;
 
 import org.semux.core.Transaction;
 import org.semux.core.state.Account;
+import org.semux.core.state.AccountV2;
 import org.semux.crypto.Key;
 
-public class WalletAccount extends Account {
+public class WalletAccount extends AccountV2 {
     private Key key;
     private String name;
     private List<Transaction> transactions = new ArrayList<>();
 
     public WalletAccount(Key key, Account acc, String name) {
-        super(acc.getAddress(), acc.getAvailable(), acc.getLocked(), acc.getNonce());
+        super(key.getAbyte(), acc.getAvailable(), acc.getLocked(), acc.getNonce());
         this.key = key;
         this.name = name;
 

@@ -132,23 +132,30 @@ public class Genesis extends Block {
 
     public static class Premine {
         private final byte[] address;
+        private final byte[] Abyte;
         private final Amount amount;
         private final String note;
 
-        public Premine(byte[] address, Amount amount, String note) {
+        public Premine(byte[] address, byte[] Abyte, Amount amount, String note) {
             this.address = address;
+            this.Abyte = Abyte;
             this.amount = amount;
             this.note = note;
         }
 
         @JsonCreator
-        public Premine(@JsonProperty("address") String address, @JsonProperty("amount") long amount,
+        public Premine(@JsonProperty("address") String address, @JsonProperty("Abyte") String Abyte, @JsonProperty("amount") long amount,
                 @JsonProperty("note") String note) {
-            this(Hex.decode0x(address), NANO_SEM.of(amount), note);
+            this(Hex.decode0x(address), Hex.decode0x(Abyte), NANO_SEM.of(amount), note);
+            assert (Arrays.equals(this.address, Key.Address.fromAbyte(this.Abyte)));
         }
 
         public byte[] getAddress() {
             return address;
+        }
+
+        public byte[] getAbyte() {
+            return Abyte;
         }
 
         public Amount getAmount() {

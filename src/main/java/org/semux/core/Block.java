@@ -397,15 +397,6 @@ public class Block {
         return header.getData();
     }
 
-    /**
-     * Get block size in bytes
-     *
-     * @return block size in bytes
-     */
-    public int size() {
-        return new BlockEncoderV1().encode(this).length;
-    }
-
     @Override
     public String toString() {
         return "Block [number = " + getNumber() + ", view = " + getView() + ", hash = " + Hex.encode(getHash())

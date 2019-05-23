@@ -29,6 +29,7 @@ import org.semux.config.Constants;
 import org.semux.core.exception.BlockchainException;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.AccountStateImplV2;
+import org.semux.core.state.AccountStateV2;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.core.state.DelegateStateImplV2;
@@ -89,7 +90,7 @@ public class BlockchainImplV2 implements Blockchain {
 
     protected final Database blockDB;
     protected final BatchManager batchManager;
-    protected final AccountState accountState;
+    protected final AccountStateV2 accountState;
     protected final DelegateStateV2 delegateState;
 
     protected Block latestBlock;

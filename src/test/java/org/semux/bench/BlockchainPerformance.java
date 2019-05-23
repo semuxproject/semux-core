@@ -96,7 +96,7 @@ public class BlockchainPerformance {
         logger.info("block transaction size: {} KB", blockEncoder.encodeTransactions(block).length / 1024);
         logger.info("block results size: {} KB", blockEncoder.encodeTransactionResults(block).length / 1024);
         logger.info("block votes size: {} KB", blockEncoder.encodeVotes(block).length / 1024);
-        logger.info("block total size: {} KB", block.size() / 1024);
+        logger.info("block total size: {} KB", blockEncoder.encode(block).length / 1024);
         logger.info("Perf_block_creation: {} ms", (t2 - t1) / 1_000_000);
         return block;
     }

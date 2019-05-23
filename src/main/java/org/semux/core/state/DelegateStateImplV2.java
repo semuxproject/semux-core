@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.semux.core.Amount;
 import org.semux.core.Blockchain;
@@ -259,7 +258,7 @@ public class DelegateStateImplV2 implements DelegateStateV2 {
                 batchManager.getBatchInstance(BatchName.ADD_BLOCK)
                         .add(BatchOperation.put(getDelegateIndexToAddressKey(index).getData(), d.getAddress()));
 
-                logger.info("Update delegate index {} => {}", index, d.getAddressString());
+                logger.debug("Update delegate index {} => {}", index, d.getAddressString());
             });
 
             // update delegate count
@@ -267,9 +266,7 @@ public class DelegateStateImplV2 implements DelegateStateV2 {
             batchManager.getBatchInstance(BatchName.ADD_BLOCK)
                     .add(BatchOperation.put(getDelegateCountKey().getData(), Bytes.of(updatedDelegateCount)));
 
-            logger.info("Delegate count: {}", updatedDelegateCount);
-
-            pendingDelegates.clear();
+            logger.debug("Update delegate count: {}", updatedDelegateCount);
         }
     }
 
@@ -297,6 +294,7 @@ public class DelegateStateImplV2 implements DelegateStateV2 {
             }
 
             delegateUpdates.clear();
+            pendingDelegates.clear();
         }
 
         synchronized (voteUpdates) {

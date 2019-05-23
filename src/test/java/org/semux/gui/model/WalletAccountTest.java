@@ -17,6 +17,7 @@ import java.util.Collections;
 
 import org.junit.Test;
 import org.semux.core.state.Account;
+import org.semux.core.state.AccountV2;
 import org.semux.crypto.Key;
 
 public class WalletAccountTest {
@@ -24,7 +25,7 @@ public class WalletAccountTest {
     @Test
     public void testKey() {
         Key key = new Key();
-        Account acc = new Account(key.toAddress(), NANO_SEM.of(1), NANO_SEM.of(2), 3);
+        Account acc = new AccountV2(key.getAbyte(), NANO_SEM.of(1), NANO_SEM.of(2), 3);
         WalletAccount wa = new WalletAccount(key, acc, "test account");
 
         assertThat(wa.getAddress(), equalTo(key.toAddress()));
@@ -47,7 +48,7 @@ public class WalletAccountTest {
     @Test(expected = IllegalArgumentException.class)
     public void testMismatch() {
         Key key = new Key();
-        Account acc = new Account(new Key().toAddress(), NANO_SEM.of(1), NANO_SEM.of(2), 3);
+        Account acc = new AccountV2(new Key().getAbyte(), NANO_SEM.of(1), NANO_SEM.of(2), 3);
         new WalletAccount(key, acc, "test account");
     }
 

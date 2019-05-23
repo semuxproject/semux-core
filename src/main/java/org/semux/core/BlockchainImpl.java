@@ -19,7 +19,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.ethereum.vm.client.BlockStore;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.core.Genesis.Premine;
@@ -37,8 +36,6 @@ import org.semux.db.DatabasePrefixesV1;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
-import org.semux.vm.client.SemuxBlock;
-import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,8 +88,6 @@ public class BlockchainImpl implements Blockchain {
     protected static final byte TYPE_BLOCK_TRANSACTIONS = DatabasePrefixesV1.BlockDB.TYPE_BLOCK_TRANSACTIONS;
     protected static final byte TYPE_BLOCK_RESULTS = DatabasePrefixesV1.BlockDB.TYPE_BLOCK_RESULTS;
     protected static final byte TYPE_BLOCK_VOTES = DatabasePrefixesV1.BlockDB.TYPE_BLOCK_VOTES;
-
-    private BlockStore blockStore = new SemuxBlockStore(this);
 
     private final List<BlockchainListener> listeners = new ArrayList<>();
     private final Config config;
@@ -632,41 +627,6 @@ public class BlockchainImpl implements Blockchain {
             simpleEncoder.writeBytes(entry.getValue().toBytes());
         }
         indexDB.put(Bytes.of(TYPE_ACTIVATED_FORKS), simpleEncoder.toBytes());
-    }
-
-    /**
-     * A temporary blockchain for database migration. This class implements a
-     * lightweight version of
-     * ${@link org.semux.consensus.SemuxBft#applyBlock(Block)} to migrate blocks
-     * from an existing database to the latest schema.
-     */
-    public class MigrationBlockchain extends BlockchainImpl {
-        private MigrationBlockchain(Config config, DatabaseFactory dbFactory) {
-            super(config, dbFactory);
-        }
-
-        public void applyBlock(Block block) {
-            // [0] execute transactions against local state
-            TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
-            transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState(),
-                    new SemuxBlock(block.getHeader(), config.vmMaxBlockGasLimit()), this);
-
-            // [1] apply block reward and tx fees
-            Amount reward = Block.getBlockReward(block, config);
-
-            if (reward.gt0()) {
-                getAccountState().adjustAvailable(block.getCoinbase(), reward);
-            }
-            // [2] commit the updates
-            getAccountState().commit();
-            getDelegateState().commit();
-            // [3] add block to chain
-            addBlock(block);
-        }
-    }
-
-    public MigrationBlockchain getMigrationBlockchainInstance(Config config, DatabaseFactory tempDbFactory) {
-        return new MigrationBlockchain(config, tempDbFactory);
     }
 
     @Override

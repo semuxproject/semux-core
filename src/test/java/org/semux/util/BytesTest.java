@@ -10,9 +10,11 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.semux.crypto.Hex;
 
 public class BytesTest {
 
@@ -72,5 +74,18 @@ public class BytesTest {
         assertEquals(l1, Bytes.toLong(Bytes.of(l1)));
         assertEquals(l2, Bytes.toLong(Bytes.of(l2)));
         assertEquals(l3, Bytes.toLong(Bytes.of(l3)));
+    }
+
+    @Test
+    public void testBigInteger() {
+        assertBigInteger(Hex.decode("A08601"), BigInteger.valueOf(100000));
+        assertBigInteger(Hex.decode("16EB"), BigInteger.valueOf(-5354));
+        assertBigInteger(Hex.decode("0080"), BigInteger.valueOf(-32768));
+        assertBigInteger(Hex.decode("01F81D7AF1971CEDD9BBA5EFCEE100"), BigInteger.valueOf(127).pow(16));
+    }
+
+    private void assertBigInteger(byte[] bytes, BigInteger value) {
+        assertArrayEquals(bytes, Bytes.of(value));
+        assertEquals(value, Bytes.toBigInteger(bytes));
     }
 }

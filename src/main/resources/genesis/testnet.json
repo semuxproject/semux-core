@@ -7,16 +7,19 @@
     "premine": [
         {
             "address": "0xd00e49d3c1624aa90d7c6587688a53818aeae649",
+            "Abyte": "0x202ba6cf624fea859155a646a875174d7a2d4b3f3d5f0b74a22bb16931d3ba2b",
             "amount": 5000000000000000,
             "note": "founder"
         },
         {
             "address": "0x8e1ef4f810a84bea2fbf1e5f4afd8d0774ab0038",
+            "Abyte": "FIXME",
             "amount": 10000000000000000,
             "note": "development, marketing, promotion, bounties"
         },
         {
             "address": "0xc2ed00c8e05a2296ab3be4a0accb89b648bc71df",
+            "Abyte": "FIXME",
             "amount": 10000000000000000,
             "note": "community distribution"
         }

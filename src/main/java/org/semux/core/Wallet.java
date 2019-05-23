@@ -30,6 +30,7 @@ import org.semux.core.bip32.wallet.CoinType;
 import org.semux.core.bip32.wallet.HdAddress;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
+import org.semux.core.state.AccountV1;
 import org.semux.core.state.AccountState;
 import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
@@ -73,7 +74,7 @@ public class Wallet {
 
     /**
      * Creates a new wallet instance.
-     * 
+     *
      * @param file
      *            the wallet file
      */
@@ -84,7 +85,7 @@ public class Wallet {
 
     /**
      * Returns whether the wallet file exists and non-empty.
-     * 
+     *
      * @return
      */
     public boolean exists() {
@@ -100,7 +101,7 @@ public class Wallet {
 
     /**
      * Returns the file where the wallet is persisted.
-     * 
+     *
      * @return
      */
     public File getFile() {
@@ -110,7 +111,7 @@ public class Wallet {
     /**
      * Unlocks this wallet. If the wallet is unlocked, this method will reset the
      * account list on a successful trial.
-     * 
+     *
      * @param password
      *            the wallet password
      * @return true if the wallet is successfully unlocked, otherwise false
@@ -196,7 +197,7 @@ public class Wallet {
 
     /**
      * Reads the account keys.
-     * 
+     *
      * @param dec
      * @param vlq
      * @return
@@ -221,7 +222,7 @@ public class Wallet {
 
     /**
      * Writes the account keys.
-     * 
+     *
      * @param key
      * @param enc
      */
@@ -239,7 +240,7 @@ public class Wallet {
 
     /**
      * Reads the address book.
-     * 
+     *
      * @param dec
      * @return
      */
@@ -262,7 +263,7 @@ public class Wallet {
 
     /**
      * Writes the address book.
-     * 
+     *
      * @param enc
      */
     protected void writeAddressAliases(byte[] key, SimpleEncoder enc) {
@@ -295,7 +296,7 @@ public class Wallet {
 
     /**
      * Returns whether the wallet is locked.
-     * 
+     *
      * @return
      */
     public boolean isLocked() {
@@ -304,7 +305,7 @@ public class Wallet {
 
     /**
      * Returns if this wallet is unlocked.
-     * 
+     *
      * @return true if the wallet is locked, otherwise false
      */
     public boolean isUnlocked() {
@@ -313,7 +314,7 @@ public class Wallet {
 
     /**
      * Returns the password.
-     * 
+     *
      * @return
      * @throws WalletLockedException
      */
@@ -325,7 +326,7 @@ public class Wallet {
 
     /**
      * Returns the number of accounts in the wallet.
-     * 
+     *
      * @return
      * @throws WalletLockedException
      */
@@ -337,7 +338,7 @@ public class Wallet {
 
     /**
      * Returns a copy of the accounts inside this wallet.
-     * 
+     *
      * @return a list of accounts
      * @throws WalletLockedException
      */
@@ -351,9 +352,9 @@ public class Wallet {
 
     /**
      * Sets the accounts inside this wallet.
-     * 
+     *
      * DANGER: this method will remove all accounts in this wallet.
-     * 
+     *
      * @param list
      */
     public void setAccounts(List<Key> list) throws WalletLockedException {
@@ -367,7 +368,7 @@ public class Wallet {
 
     /**
      * Returns account by index.
-     * 
+     *
      * @param idx
      *            account index, starting from 0
      * @return
@@ -383,7 +384,7 @@ public class Wallet {
 
     /**
      * Returns account by address.
-     * 
+     *
      * @param address
      * @return
      * @throws WalletLockedException
@@ -398,14 +399,14 @@ public class Wallet {
 
     /**
      * Adds a new account to the wallet.
-     * 
+     *
      * NOTE: you need to call {@link #flush()} to update the wallet on disk.
-     * 
+     *
      * @param newKey
      *            a new account
      * @return true if the new account was successfully added, false otherwise
      * @throws WalletLockedException
-     * 
+     *
      */
     public boolean addAccount(Key newKey) throws WalletLockedException {
         requireUnlocked();
@@ -435,12 +436,12 @@ public class Wallet {
 
     /**
      * Adds a list of accounts to the wallet.
-     * 
+     *
      * NOTE: you need to call {@link #flush()} to update the wallet on disk.
      *
      * @return the number accounts added
      * @throws WalletLockedException
-     * 
+     *
      */
     public int addAccounts(List<Key> accounts) throws WalletLockedException {
         requireUnlocked();
@@ -454,14 +455,14 @@ public class Wallet {
 
     /**
      * Deletes an account in the wallet.
-     * 
+     *
      * NOTE: you need to call {@link #flush()} to update the wallet on disk.
-     * 
+     *
      * @param key
      *            account to delete
      * @return true if the account was successfully deleted, false otherwise
      * @throws WalletLockedException
-     * 
+     *
      */
     public boolean removeAccount(Key key) throws WalletLockedException {
         return removeAccount(key.toAddress());
@@ -495,9 +496,9 @@ public class Wallet {
 
     /**
      * Changes the password of the wallet.
-     * 
+     *
      * NOTE: you need to call {@link #flush()} to update the wallet on disk.
-     * 
+     *
      * @param newPassword
      *            a new password
      * @throws WalletLockedException
@@ -565,7 +566,7 @@ public class Wallet {
 
     /**
      * Returns the alias of the given address.
-     * 
+     *
      * @param address
      * @return
      */
@@ -577,7 +578,7 @@ public class Wallet {
 
     /**
      * Sets the alias of an address.
-     * 
+     *
      * @param address
      * @param name
      * @throws WalletLockedException
@@ -590,7 +591,7 @@ public class Wallet {
 
     /**
      * Returns the alias of an address.
-     * 
+     *
      * @param address
      * @throws WalletLockedException
      */
@@ -602,7 +603,7 @@ public class Wallet {
 
     /**
      * Returns all address aliases.
-     * 
+     *
      * @return
      */
     public Map<ByteArray, String> getAddressAliases() throws WalletLockedException {
@@ -668,7 +669,7 @@ public class Wallet {
 
     /**
      * Sets the HD seed
-     * 
+     *
      * @param seed
      *            the seed byte array
      */

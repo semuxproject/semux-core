@@ -28,6 +28,9 @@ public class DatabasePrefixesV2 {
     public static final byte TYPE_ACCOUNT = 0x40;
     public static final byte TYPE_CODE = 0x41;
     public static final byte TYPE_STORAGE = 0x42;
+    public static final byte TYPE_ACCOUNT_INDEX_TO_ADDRESS = 0x43;
+    public static final byte TYPE_ACCOUNT_ADDRESS_TO_INDEX = 0x44;
+    public static final byte TYPE_ACCOUNT_COUNT = 0x45;
 
     // former delegateDB
     // [0x60][delegate address x 20 bytes]

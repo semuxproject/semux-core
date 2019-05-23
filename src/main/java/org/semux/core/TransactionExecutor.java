@@ -26,7 +26,10 @@ import org.semux.config.Config;
 import org.semux.core.Amount.Unit;
 import org.semux.core.TransactionResult.Code;
 import org.semux.core.state.Account;
+import org.semux.core.state.AccountV1;
 import org.semux.core.state.AccountState;
+import org.semux.core.state.AccountStateImpl;
+import org.semux.core.state.AccountStateImplV2;
 import org.semux.core.state.DelegateState;
 import org.semux.core.state.DelegateStateImpl;
 import org.semux.core.state.DelegateStateImplV2;
@@ -261,7 +264,13 @@ public class TransactionExecutor {
             // increase nonce if success
             // creates and calls increase their own nonces internal to VM
             if (result.getCode().isAcceptable() && !isVmCall) {
-                as.increaseNonce(from);
+                if (as instanceof AccountStateImpl) {
+                    as.increaseNonce(from);
+                } else if (as instanceof AccountStateImplV2) {
+                    as.increaseNonce(tx.getSignature().getA());
+                } else {
+                    throw new UnreachableException();
+                }
             }
 
             result.setBlockNumber(block.getNumber());

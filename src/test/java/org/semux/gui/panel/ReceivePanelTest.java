@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.KernelMock;
 import org.semux.core.Amount;
-import org.semux.core.state.Account;
+import org.semux.core.state.AccountV2;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.gui.model.WalletAccount;
@@ -59,8 +59,8 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
         Key key2 = new Key();
         Amount $1 = NANO_SEM.of(1);
         Amount $2 = NANO_SEM.of(2);
-        WalletAccount acc1 = new WalletAccount(key1, new Account(key1.toAddress(), $1, $1, 1), null);
-        WalletAccount acc2 = new WalletAccount(key2, new Account(key2.toAddress(), $2, $2, 2), null);
+        WalletAccount acc1 = new WalletAccount(key1, new AccountV2(key1.getAbyte(), $1, $1, 1), null);
+        WalletAccount acc2 = new WalletAccount(key2, new AccountV2(key2.getAbyte(), $2, $2, 2), null);
 
         // mock walletModel
         when(walletModel.getAccounts()).thenReturn(Arrays.asList(acc1, acc2));

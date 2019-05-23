@@ -317,7 +317,7 @@ public class SemuxSync implements SyncManager {
                 task < target.get() && toDownload.size() < MAX_QUEUED_JOBS; //
                 task++) {
             latestQueuedTask.accumulateAndGet(task, (prev, next) -> next > prev ? next : prev);
-            if (!chain.hasBlock(task)) {
+            if (task > chain.getLatestBlockNumber()) {
                 toDownload.add(task);
             }
         }
@@ -558,7 +558,7 @@ public class SemuxSync implements SyncManager {
             return false;
         }
 
-        if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
+        if (transactions.parallelStream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
             logger.error("Duplicated transaction hash is not allowed");
             return false;
         }

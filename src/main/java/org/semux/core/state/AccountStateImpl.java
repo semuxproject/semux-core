@@ -63,18 +63,20 @@ public class AccountStateImpl implements Cloneable, AccountState {
     }
 
     @Override
-    public Account getAccount(byte[] address) {
+    public AccountV1 getAccount(byte[] address) {
         ByteArray k = getKey(TYPE_ACCOUNT, address);
         Amount noAmount = Amount.ZERO;
 
         if (updates.containsKey(k)) {
             byte[] v = updates.get(k);
-            return v == null ? new Account(address, noAmount, noAmount, 0) : Account.fromBytes(address, v);
+            return v == null ? new AccountV1(address, noAmount, noAmount, 0)
+                    : new AccountDecoderV1().decode(address, v);
         } else if (prev != null) {
             return prev.getAccount(address);
         } else {
             byte[] v = accountDB.get(k.getData());
-            return v == null ? new Account(address, noAmount, noAmount, 0) : Account.fromBytes(address, v);
+            return v == null ? new AccountV1(address, noAmount, noAmount, 0)
+                    : new AccountDecoderV1().decode(address, v);
         }
     }
 
@@ -82,10 +84,10 @@ public class AccountStateImpl implements Cloneable, AccountState {
     public long increaseNonce(byte[] address) {
         ByteArray k = getKey(TYPE_ACCOUNT, address);
 
-        Account acc = getAccount(address);
+        AccountV1 acc = getAccount(address);
         long nonce = acc.getNonce() + 1;
         acc.setNonce(nonce);
-        updates.put(k, acc.toBytes());
+        updates.put(k, new AccountEncoderV1().encode(acc));
         return nonce;
     }
 
@@ -93,18 +95,18 @@ public class AccountStateImpl implements Cloneable, AccountState {
     public void adjustAvailable(byte[] address, Amount delta) {
         ByteArray k = getKey(TYPE_ACCOUNT, address);
 
-        Account acc = getAccount(address);
+        AccountV1 acc = getAccount(address);
         acc.setAvailable(sum(acc.getAvailable(), delta));
-        updates.put(k, acc.toBytes());
+        updates.put(k, new AccountEncoderV1().encode(acc));
     }
 
     @Override
     public void adjustLocked(byte[] address, Amount delta) {
         ByteArray k = getKey(TYPE_ACCOUNT, address);
 
-        Account acc = getAccount(address);
+        AccountV1 acc = getAccount(address);
         acc.setLocked(sum(acc.getLocked(), delta));
-        updates.put(k, acc.toBytes());
+        updates.put(k, new AccountEncoderV1().encode(acc));
     }
 
     @Override
@@ -200,9 +202,9 @@ public class AccountStateImpl implements Cloneable, AccountState {
     public long setNonce(byte[] address, long nonce) {
         ByteArray k = getKey(TYPE_ACCOUNT, address);
 
-        Account acc = getAccount(address);
+        AccountV1 acc = getAccount(address);
         acc.setNonce(nonce);
-        updates.put(k, acc.toBytes());
+        updates.put(k, new AccountEncoderV1().encode(acc));
         return nonce;
     }
 
