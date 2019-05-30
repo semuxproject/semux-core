@@ -1,1120 +1,1795 @@
 {
-    "swagger" : "2.0",
-    "info" : {
-        "description" : "Semux is an experimental high-performance blockchain platform that powers decentralized application.",
-        "version" : "2.0.0",
-        "title" : "Semux API",
-        "contact" : {
-            "name" : "Semux Foundation",
-            "url" : "https://www.semux.org"
-        },
-        "license" : {
-            "name" : "MIT License",
-            "url" : "https://opensource.org/licenses/mit-license.php"
-        }
-    },
-    "schemes" : [
-        "http"
-    ],
-    "consumes" : [
+    "basePath": "/v2.0.0",
+    "consumes": [
         "application/x-www-form-urlencoded"
     ],
-    "produces" : [
-        "application/json"
-    ],
-    "basePath" : "/v2.0.0",
-    "securityDefinitions" : {
-        "basicAuth" : {
-            "type" : "basic"
+    "definitions": {
+        "ApiHandlerResponse": {
+            "type": "object",
+            "discriminator": "ApiHandlerResponse",
+            "required": [
+                "success"
+            ],
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "GetRootResponse": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                }
+            ]
+        },
+        "AccountType": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "available": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "locked": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "nonce": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "transactionCount": {
+                    "type": "integer",
+                    "format": "int32"
+                }
+            }
+        },
+        "AddNodeResponse": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                }
+            ]
+        },
+        "BlockType": {
+            "type": "object",
+            "properties": {
+                "hash": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "view": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "coinbase": {
+                    "type": "string"
+                },
+                "parentHash": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "transactionsRoot": {
+                    "type": "string"
+                },
+                "resultsRoot": {
+                    "type": "string"
+                },
+                "stateRoot": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string"
+                },
+                "transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TransactionType"
+                    }
+                }
+            }
+        },
+        "CreateAccountResponse": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
+        },
+        "DelegateType": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "registeredAt": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "votes": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "blocksForged": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "turnsHit": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "turnsMissed": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                }
+            }
+        },
+        "DoTransactionResponse": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
+        },
+        "GetAccountResponse": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "$ref": "#/definitions/AccountType"
+                        }
+                    }
+                }
+            ]
+        },
+        "GetAccountTransactionsResponse": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/TransactionType"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "GetBlockResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "$ref": "#/definitions/BlockType"
+                        }
+                    }
+                }
+            ]
+        },
+        "GetDelegateResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "$ref": "#/definitions/DelegateType"
+                        }
+                    }
+                }
+            ]
+        },
+        "GetDelegatesResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/DelegateType"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "GetInfoResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "$ref": "#/definitions/InfoType"
+                        }
+                    }
+                }
+            ]
+        },
+        "GetLatestBlockNumberResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "string",
+                            "format": "int64",
+                            "pattern": "^\\d+$"
+                        }
+                    }
+                }
+            ]
+        },
+        "GetLatestBlockResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "$ref": "#/definitions/BlockType"
+                        }
+                    }
+                }
+            ]
+        },
+        "GetPeersResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/PeerType"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "GetPendingTransactionsResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/TransactionType"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "GetTransactionLimitsResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "$ref": "#/definitions/TransactionLimitsType"
+                        }
+                    }
+                }
+            ]
+        },
+        "GetTransactionResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "$ref": "#/definitions/TransactionType"
+                        }
+                    }
+                }
+            ]
+        },
+        "GetValidatorsResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "GetVoteResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "string",
+                            "format": "int64",
+                            "pattern": "^\\d+$"
+                        }
+                    }
+                }
+            ]
+        },
+        "GetVotesResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string",
+                                "format": "int64",
+                                "pattern": "^\\d+$"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "InfoType": {
+            "type": "object",
+            "properties": {
+                "clientId": {
+                    "type": "string"
+                },
+                "coinbase": {
+                    "type": "string"
+                },
+                "latestBlockNumber": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "latestBlockHash": {
+                    "type": "string"
+                },
+                "activePeers": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "pendingTransactions": {
+                    "type": "integer",
+                    "format": "int32"
+                }
+            }
+        },
+        "ListAccountsResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "PeerType": {
+            "type": "object",
+            "properties": {
+                "ip": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "networkVersion": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "peerId": {
+                    "type": "string"
+                },
+                "latestBlockNumber": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "latency": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "capabilities": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "SendTransactionResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                }
+            ]
+        },
+        "SignMessageResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
+        },
+        "TransactionLimitsType": {
+            "type": "object",
+            "properties": {
+                "maxTransactionDataSize": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "minTransactionFee": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "minDelegateBurnAmount": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                }
+            }
+        },
+        "TransactionType": {
+            "type": "object",
+            "properties": {
+                "blockNumber": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "hash": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "fee": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "nonce": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "data": {
+                    "type": "string"
+                }
+            }
+        },
+        "VerifyMessageResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "validSignature": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            ]
+        },
+        "ComposeRawTransactionResponse": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
+        },
+        "SignRawTransactionResponse": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
         }
     },
-    "security" : [
-        {"basicAuth": []}
-    ],
-    "paths" : {
-        "/node" : {
-            "post" : {
+    "info": {
+        "description": "Semux is an experimental high-performance blockchain platform that powers decentralized application.",
+        "version": "2.0.0",
+        "title": "Semux API",
+        "contact": {
+            "name": "Semux Foundation",
+            "url": "https://www.semux.org"
+        },
+        "license": {
+            "name": "MIT License",
+            "url": "https://opensource.org/licenses/mit-license.php"
+        }
+    },
+    "paths": {
+        "/node": {
+            "post": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Add node",
-                "description" : "Adds a node to node manager.",
-                "operationId" : "addNode",
-                "produces" : [
+                "summary": "Add node",
+                "description": "Adds a node to node manager.",
+                "operationId": "addNode",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "node",
-                        "in" : "query",
-                        "description" : "Name of the node in host:port format",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "node",
+                        "in": "query",
+                        "description": "Name of the node in host:port format",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/AddNodeResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/AddNodeResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/blacklist" : {
-            "put" : {
+        "/blacklist": {
+            "put": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Add to blacklist",
-                "description" : "Adds an IP address to blacklist.",
-                "operationId" : "addToBlacklist",
-                "produces" : [
+                "summary": "Add to blacklist",
+                "description": "Adds an IP address to blacklist.",
+                "operationId": "addToBlacklist",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "ip",
-                        "in" : "query",
-                        "description" : "IP address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "ip",
+                        "in": "query",
+                        "description": "IP address",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/ApiHandlerResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/whitelist" : {
-            "put" : {
+        "/whitelist": {
+            "put": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Add to whitelist",
-                "description" : "Adds an IP address to whitelist.",
-                "operationId" : "addToWhitelist",
-                "produces" : [
+                "summary": "Add to whitelist",
+                "description": "Adds an IP address to whitelist.",
+                "operationId": "addToWhitelist",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "ip",
-                        "in" : "query",
-                        "description" : "IP address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "ip",
+                        "in": "query",
+                        "description": "IP address",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/ApiHandlerResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/account" : {
-            "get" : {
+        "/account": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get account",
-                "description" : "Returns an account.",
-                "operationId" : "getAccount",
-                "produces" : [
+                "summary": "Get account",
+                "description": "Returns an account.",
+                "operationId": "getAccount",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "address",
-                        "in" : "query",
-                        "description" : "Address of account",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "address",
+                        "in": "query",
+                        "description": "Address of account",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetAccountResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetAccountResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             },
-            "post" : {
+            "post": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Create account",
-                "description" : "Creates a new account.",
-                "operationId" : "createAccount",
-                "produces" : [
+                "summary": "Create account",
+                "description": "Creates a new account.",
+                "operationId": "createAccount",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "name",
-                        "in" : "query",
-                        "description" : "Assigned alias to the created account.",
-                        "required" : false,
-                        "type" : "string"
+                        "name": "name",
+                        "in": "query",
+                        "description": "Assigned alias to the created account.",
+                        "required": false,
+                        "type": "string"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/CreateAccountResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/CreateAccountResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/delegate" : {
-            "get" : {
+        "/delegate": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get a delegate",
-                "description" : "Returns a delegate.",
-                "operationId" : "getDelegate",
-                "produces" : [
+                "summary": "Get a delegate",
+                "description": "Returns a delegate.",
+                "operationId": "getDelegate",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "address",
-                        "in" : "query",
-                        "description" : "Delegate address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "address",
+                        "in": "query",
+                        "description": "Delegate address",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetDelegateResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetDelegateResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/account/transactions" : {
-            "get" : {
+        "/account/transactions": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get account transactions",
-                "description" : "Returns transactions from/to an account.",
-                "operationId" : "getAccountTransactions",
-                "produces" : [
+                "summary": "Get account transactions",
+                "description": "Returns transactions from/to an account.",
+                "operationId": "getAccountTransactions",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "address",
-                        "in" : "query",
-                        "description" : "Address of account",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "address",
+                        "in": "query",
+                        "description": "Address of account",
+                        "required": true,
+                        "type": "string"
                     },
                     {
-                        "name" : "from",
-                        "in" : "query",
-                        "description" : "Starting range of transactions",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "from",
+                        "in": "query",
+                        "description": "Starting range of transactions",
+                        "required": true,
+                        "type": "string"
                     },
                     {
-                        "name" : "to",
-                        "in" : "query",
-                        "description" : "Ending range of transactions",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "to",
+                        "in": "query",
+                        "description": "Ending range of transactions",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetAccountTransactionsResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetAccountTransactionsResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/block-by-hash" : {
-            "get" : {
+        "/block-by-hash": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get block by hash",
-                "description" : "Returns a block by block hash.",
-                "operationId" : "getBlockByHash",
-                "produces" : [
+                "summary": "Get block by hash",
+                "description": "Returns a block by block hash.",
+                "operationId": "getBlockByHash",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "hash",
-                        "in" : "query",
-                        "description" : "Hash of block",
-                        "required" : true,
-                        "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                        "name": "hash",
+                        "in": "query",
+                        "description": "Hash of block",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetBlockResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetBlockResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/block-by-number" : {
-            "get" : {
+        "/block-by-number": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get block by number",
-                "description" : "Returns a block by block number.",
-                "operationId" : "getBlockByNumber",
-                "produces" : [
+                "summary": "Get block by number",
+                "description": "Returns a block by block number.",
+                "operationId": "getBlockByNumber",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "number",
-                        "in" : "query",
-                        "description" : "Number of block",
-                        "required" : true,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^\\d+$"
+                        "name": "number",
+                        "in": "query",
+                        "description": "Number of block",
+                        "required": true,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetBlockResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetBlockResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/delegates" : {
-            "get" : {
+        "/delegates": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get all delegates",
-                "description" : "Returns a list of delegates.",
-                "operationId" : "getDelegates",
-                "produces" : [
+                "summary": "Get all delegates",
+                "description": "Returns a list of delegates.",
+                "operationId": "getDelegates",
+                "produces": [
                     "application/json"
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetDelegatesResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetDelegatesResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/info" : {
-            "get" : {
+        "/info": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get info",
-                "description" : "Returns kernel info.",
-                "operationId" : "getInfo",
-                "produces" : [
+                "summary": "Get info",
+                "description": "Returns kernel info.",
+                "operationId": "getInfo",
+                "produces": [
                     "application/json"
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetInfoResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetInfoResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/latest-block" : {
-            "get" : {
+        "/latest-block": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get latest block",
-                "description" : "Returns the latest block.",
-                "operationId" : "getLatestBlock",
-                "produces" : [
+                "summary": "Get latest block",
+                "description": "Returns the latest block.",
+                "operationId": "getLatestBlock",
+                "produces": [
                     "application/json"
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetLatestBlockResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetLatestBlockResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/latest-block-number" : {
-            "get" : {
+        "/latest-block-number": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get latest block number",
-                "description" : "Returns the number of the latest block.",
-                "operationId" : "getLatestBlockNumber",
-                "produces" : [
+                "summary": "Get latest block number",
+                "description": "Returns the number of the latest block.",
+                "operationId": "getLatestBlockNumber",
+                "produces": [
                     "application/json"
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetLatestBlockNumberResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetLatestBlockNumberResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/peers" : {
-            "get" : {
+        "/peers": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get peers",
-                "description" : "Returns connected peers.",
-                "operationId" : "getPeers",
-                "produces" : [
+                "summary": "Get peers",
+                "description": "Returns connected peers.",
+                "operationId": "getPeers",
+                "produces": [
                     "application/json"
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetPeersResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetPeersResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/pending-transactions" : {
-            "get" : {
+        "/pending-transactions": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get pending transactions",
-                "description" : "Returns all the pending transactions.",
-                "operationId" : "getPendingTransactions",
-                "produces" : [
+                "summary": "Get pending transactions",
+                "description": "Returns all the pending transactions.",
+                "operationId": "getPendingTransactions",
+                "produces": [
                     "application/json"
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetPendingTransactionsResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetPendingTransactionsResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/transaction" : {
-            "get" : {
+        "/transaction": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get transaction",
-                "description" : "Returns a transactions if exists.",
-                "operationId" : "getTransaction",
-                "produces" : [
+                "summary": "Get transaction",
+                "description": "Returns a transactions if exists.",
+                "operationId": "getTransaction",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "hash",
-                        "in" : "query",
-                        "description" : "Transaction hash",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "hash",
+                        "in": "query",
+                        "description": "Transaction hash",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetTransactionResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetTransactionResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/transaction-limits" : {
-            "get" : {
+        "/transaction-limits": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get transaction limits",
-                "description" : "Get minimum fee and maximum size.",
-                "operationId" : "getTransactionLimits",
-                "produces" : [
+                "summary": "Get transaction limits",
+                "description": "Get minimum fee and maximum size.",
+                "operationId": "getTransactionLimits",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "type",
-                        "in" : "query",
-                        "description" : "Type of transaction",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "type",
+                        "in": "query",
+                        "description": "Type of transaction",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetTransactionLimitsResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetTransactionLimitsResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/validators" : {
-            "get" : {
+        "/validators": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get validators",
-                "description" : "Returns a list of validators.",
-                "operationId" : "getValidators",
-                "produces" : [
+                "summary": "Get validators",
+                "description": "Returns a list of validators.",
+                "operationId": "getValidators",
+                "produces": [
                     "application/json"
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetValidatorsResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetValidatorsResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/vote" : {
-            "get" : {
+        "/vote": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get vote",
-                "description" : "Returns the vote from a voter to a delegate.",
-                "operationId" : "getVote",
-                "produces" : [
+                "summary": "Get vote",
+                "description": "Returns the vote from a voter to a delegate.",
+                "operationId": "getVote",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "delegate",
-                        "in" : "query",
-                        "description" : "Delegate address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "delegate",
+                        "in": "query",
+                        "description": "Delegate address",
+                        "required": true,
+                        "type": "string"
                     },
                     {
-                        "name" : "voter",
-                        "in" : "query",
-                        "description" : "Voter address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "voter",
+                        "in": "query",
+                        "description": "Voter address",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetVoteResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetVoteResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/votes" : {
-            "get" : {
+        "/votes": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Get votes",
-                "description" : "Returns all the votes to a delegate",
-                "operationId" : "getVotes",
-                "produces" : [
+                "summary": "Get votes",
+                "description": "Returns all the votes to a delegate",
+                "operationId": "getVotes",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "delegate",
-                        "in" : "query",
-                        "description" : "Delegate address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "delegate",
+                        "in": "query",
+                        "description": "Delegate address",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/GetVotesResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetVotesResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/accounts" : {
-            "get" : {
+        "/accounts": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "List accounts",
-                "description" : "Returns accounts in the wallet.",
-                "operationId" : "listAccounts",
-                "produces" : [
+                "summary": "List accounts",
+                "description": "Returns accounts in the wallet.",
+                "operationId": "listAccounts",
+                "produces": [
                     "application/json"
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/ListAccountsResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ListAccountsResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/sign-message" : {
-            "get" : {
+        "/sign-message": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Sign a message",
-                "description" : "Sign a message.",
-                "operationId" : "signMessage",
-                "produces" : [
+                "summary": "Sign a message",
+                "description": "Sign a message.",
+                "operationId": "signMessage",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "address",
-                        "in" : "query",
-                        "description" : "Signing address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "address",
+                        "in": "query",
+                        "description": "Signing address",
+                        "required": true,
+                        "type": "string"
                     },
                     {
-                        "name" : "message",
-                        "in" : "query",
-                        "description" : "Message to sign",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "message",
+                        "in": "query",
+                        "description": "Message to sign",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/SignMessageResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/SignMessageResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/verify-message" : {
-            "get" : {
+        "/verify-message": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Verify a message",
-                "description" : "Verify a signed message.",
-                "operationId" : "verifyMessage",
-                "produces" : [
+                "summary": "Verify a message",
+                "description": "Verify a signed message.",
+                "operationId": "verifyMessage",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "address",
-                        "in" : "query",
-                        "description" : "Address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "address",
+                        "in": "query",
+                        "description": "Address",
+                        "required": true,
+                        "type": "string"
                     },
                     {
-                        "name" : "message",
-                        "in" : "query",
-                        "description" : "Message",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "message",
+                        "in": "query",
+                        "description": "Message",
+                        "required": true,
+                        "type": "string"
                     },
                     {
-                        "name" : "signature",
-                        "in" : "query",
-                        "description" : "Signature to verify",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "signature",
+                        "in": "query",
+                        "description": "Signature to verify",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/VerifyMessageResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/VerifyMessageResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/transaction/transfer" : {
-            "post" : {
+        "/transaction/transfer": {
+            "post": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Transfer coins",
-                "description" : "Transfers coins to another address.",
-                "operationId" : "transfer",
-                "produces" : [
+                "summary": "Transfer coins",
+                "description": "Transfers coins to another address.",
+                "operationId": "transfer",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "from",
-                        "in" : "query",
-                        "description" : "Sending address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "from",
+                        "in": "query",
+                        "description": "Sending address",
+                        "required": true,
+                        "type": "string"
                     },
                     {
-                        "name" : "to",
-                        "in" : "query",
-                        "description" : "Receiving address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "to",
+                        "in": "query",
+                        "description": "Receiving address",
+                        "required": true,
+                        "type": "string"
                     },
                     {
-                        "name" : "value",
-                        "in" : "query",
-                        "description" : "Amount of SEM to transfer",
-                        "required" : true,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^\\d+$"
+                        "name": "value",
+                        "in": "query",
+                        "description": "Amount of SEM to transfer",
+                        "required": true,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     },
                     {
-                        "name" : "fee",
-                        "in" : "query",
-                        "description" : "Transaction fee",
-                        "required" : true,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^\\d+$"
+                        "name": "fee",
+                        "in": "query",
+                        "description": "Transaction fee",
+                        "required": true,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     },
                     {
-                        "name" : "data",
-                        "in" : "query",
-                        "description" : "Transaction data",
-                        "required" : false,
-                        "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                        "name": "data",
+                        "in": "query",
+                        "description": "Transaction data",
+                        "required": false,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/DoTransactionResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/DoTransactionResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/transaction/unvote" : {
-            "post" : {
+        "/transaction/unvote": {
+            "post": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Unvote",
-                "description" : "Unvotes for a delegate.",
-                "operationId" : "unvote",
-                "produces" : [
+                "summary": "Unvote",
+                "description": "Unvotes for a delegate.",
+                "operationId": "unvote",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "from",
-                        "in" : "query",
-                        "description" : "Voting address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "from",
+                        "in": "query",
+                        "description": "Voting address",
+                        "required": true,
+                        "type": "string"
                     },
                     {
-                        "name" : "to",
-                        "in" : "query",
-                        "description" : "Delegate address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "to",
+                        "in": "query",
+                        "description": "Delegate address",
+                        "required": true,
+                        "type": "string"
                     },
                     {
-                        "name" : "value",
-                        "in" : "query",
-                        "description" : "Vote amount",
-                        "required" : true,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^\\d+$"
+                        "name": "value",
+                        "in": "query",
+                        "description": "Vote amount",
+                        "required": true,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     },
                     {
-                        "name" : "fee",
-                        "in" : "query",
-                        "description" : "Transaction fee",
-                        "required" : true,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^\\d+$"
+                        "name": "fee",
+                        "in": "query",
+                        "description": "Transaction fee",
+                        "required": true,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/DoTransactionResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/DoTransactionResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/transaction/vote" : {
-            "post" : {
+        "/transaction/vote": {
+            "post": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Vote",
-                "description" : "Votes for a delegate.",
-                "operationId" : "vote",
-                "produces" : [
+                "summary": "Vote",
+                "description": "Votes for a delegate.",
+                "operationId": "vote",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "from",
-                        "in" : "query",
-                        "description" : "Voting address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "from",
+                        "in": "query",
+                        "description": "Voting address",
+                        "required": true,
+                        "type": "string"
                     },
                     {
-                        "name" : "to",
-                        "in" : "query",
-                        "description" : "Delegate address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "to",
+                        "in": "query",
+                        "description": "Delegate address",
+                        "required": true,
+                        "type": "string"
                     },
                     {
-                        "name" : "value",
-                        "in" : "query",
-                        "description" : "Vote amount",
-                        "required" : true,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^\\d+$"
+                        "name": "value",
+                        "in": "query",
+                        "description": "Vote amount",
+                        "required": true,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     },
                     {
-                        "name" : "fee",
-                        "in" : "query",
-                        "description" : "Transaction fee",
-                        "required" : true,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^\\d+$"
+                        "name": "fee",
+                        "in": "query",
+                        "description": "Transaction fee",
+                        "required": true,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/DoTransactionResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/DoTransactionResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
         "/transaction/delegate": {
-            "post" : {
+            "post": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Register delegate",
-                "description" : "Registers as a delegate",
-                "operationId" : "registerDelegate",
-                "produces" : [
+                "summary": "Register delegate",
+                "description": "Registers as a delegate",
+                "operationId": "registerDelegate",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "from",
-                        "in" : "query",
-                        "description" : "Registering address",
-                        "required" : true,
-                        "type" : "string"
+                        "name": "from",
+                        "in": "query",
+                        "description": "Registering address",
+                        "required": true,
+                        "type": "string"
                     },
                     {
-                        "name" : "fee",
-                        "in" : "query",
-                        "description" : "Transaction fee",
-                        "required" : true,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^\\d+$"
+                        "name": "fee",
+                        "in": "query",
+                        "description": "Transaction fee",
+                        "required": true,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     },
                     {
-                        "name" : "data",
-                        "in" : "query",
-                        "description" : "Delegate name",
-                        "required" : true,
-                        "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                        "name": "data",
+                        "in": "query",
+                        "description": "Delegate name",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/DoTransactionResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/DoTransactionResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/transaction/raw" : {
-            "post" : {
+        "/transaction/raw": {
+            "post": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Broadcast a raw transaction",
-                "description" : "Broadcasts a raw transaction to the network.",
-                "operationId" : "broadcastRawTransaction",
-                "produces" : [
+                "summary": "Broadcast a raw transaction",
+                "description": "Broadcasts a raw transaction to the network.",
+                "operationId": "broadcastRawTransaction",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "raw",
-                        "in" : "query",
-                        "description" : "Raw transaction",
-                        "required" : true,
-                        "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                        "name": "raw",
+                        "in": "query",
+                        "description": "Raw transaction",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/SendTransactionResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/SendTransactionResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/compose-raw-transaction" : {
-            "get" : {
+        "/compose-raw-transaction": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
-                "summary" : "Compose an unsigned raw transaction",
-                "description" : "Compose an unsigned raw transaction then return its hexadecimal encoded string. An unsigned raw transaction can be signed using /sign-raw-transaction API.",
-                "operationId" : "composeRawTransaction",
-                "produces" : [
+                "summary": "Compose an unsigned raw transaction",
+                "description": "Compose an unsigned raw transaction then return its hexadecimal encoded string. An unsigned raw transaction can be signed using /sign-raw-transaction API.",
+                "operationId": "composeRawTransaction",
+                "produces": [
                     "application/json"
                 ],
-                "parameters" : [
+                "parameters": [
                     {
-                        "name" : "network",
-                        "in" : "query",
-                        "description" : "Network name",
-                        "required" : true,
-                        "type" : "string",
-                        "enum" : [
+                        "name": "network",
+                        "in": "query",
+                        "description": "Network name",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
                             "MAINNET",
                             "TESTNET",
                             "DEVNET"
                         ]
                     },
                     {
-                        "name" : "type",
-                        "in" : "query",
-                        "description" : "Transaction type",
-                        "required" : true,
-                        "type" : "string",
-                        "enum" : [
+                        "name": "type",
+                        "in": "query",
+                        "description": "Transaction type",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
                             "TRANSFER",
                             "DELEGATE",
                             "VOTE",
@@ -1122,76 +1797,76 @@
                         ]
                     },
                     {
-                        "name" : "fee",
-                        "in" : "query",
-                        "description" : "Transaction fee in nano",
-                        "required" : true,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^\\d+$"
+                        "name": "fee",
+                        "in": "query",
+                        "description": "Transaction fee in nano",
+                        "required": true,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     },
                     {
-                        "name" : "nonce",
-                        "in" : "query",
-                        "description" : "Transaction nonce",
-                        "required" : true,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^\\d+$"
+                        "name": "nonce",
+                        "in": "query",
+                        "description": "Transaction nonce",
+                        "required": true,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     },
                     {
-                        "name" : "to",
-                        "in" : "query",
-                        "description" : "Recipient's address",
-                        "required" : false,
-                        "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                        "name": "to",
+                        "in": "query",
+                        "description": "Recipient's address",
+                        "required": false,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
                     },
                     {
-                        "name" : "value",
-                        "in" : "query",
-                        "description" : "Transaction value in nano",
-                        "required" : false,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^\\d+$"
+                        "name": "value",
+                        "in": "query",
+                        "description": "Transaction value in nano",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     },
                     {
-                        "name" : "timestamp",
-                        "in" : "query",
-                        "description" : "Transaction timestamp in milliseconds. Default to current time.",
-                        "required" : false,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^\\d+$"
+                        "name": "timestamp",
+                        "in": "query",
+                        "description": "Transaction timestamp in milliseconds. Default to current time.",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     },
                     {
-                        "name" : "data",
-                        "in" : "query",
-                        "description" : "Hexadecimal encoded transaction data.",
-                        "required" : false,
-                        "type" : "string",
-                        "format" : "int64",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                        "name": "data",
+                        "in": "query",
+                        "description": "Hexadecimal encoded transaction data.",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/ComposeRawTransactionResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ComposeRawTransactionResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         },
-        "/sign-raw-transaction" : {
-            "get" : {
+        "/sign-raw-transaction": {
+            "get": {
                 "tags": [
                     "semux"
                 ],
@@ -1203,726 +1878,53 @@
                 ],
                 "parameters": [
                     {
-                        "name" : "raw",
-                        "in" : "query",
-                        "description" : "Unsigned raw transaction encoded in hexadecimal string.",
-                        "required" : true,
-                        "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                        "name": "raw",
+                        "in": "query",
+                        "description": "Unsigned raw transaction encoded in hexadecimal string.",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
                     },
                     {
-                        "name" : "address",
-                        "in" : "query",
-                        "description" : "Signer's address. This address must exist in the wallet.",
-                        "required" : true,
-                        "type" : "string",
-                        "pattern" : "^(0x)?[0-9a-fA-F]+$"
+                        "name": "address",
+                        "in": "query",
+                        "description": "Signer's address. This address must exist in the wallet.",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
                     }
                 ],
-                "responses" : {
-                    "200" : {
-                        "description" : "successful operation",
-                        "schema" : {
-                            "$ref" : "#/definitions/SignRawTransactionResponse"
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/SignRawTransactionResponse"
                         }
                     }
                 },
-                "security" : [
+                "security": [
                     {
-                        "basicAuth" : [ ]
+                        "basicAuth": []
                     }
                 ]
             }
         }
     },
-    "definitions" : {
-        "ApiHandlerResponse" : {
-            "type" : "object",
-            "discriminator" : "ApiHandlerResponse",
-            "required" : [
-                "success"
-            ],
-            "properties" : {
-                "success" : {
-                    "type" : "boolean"
-                },
-                "message" : {
-                    "type" : "string"
-                }
-            }
-        },
-        "GetRootResponse" : {
-            "type" : "object",
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                }
-            ]
-        },
-        "AccountType" : {
-            "type" : "object",
-            "properties" : {
-                "address" : {
-                    "type" : "string"
-                },
-                "available" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "locked" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "nonce" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "transactionCount" : {
-                    "type" : "integer",
-                    "format" : "int32"
-                }
-            }
-        },
-        "AddNodeResponse" : {
-            "type" : "object",
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                }
-            ]
-        },
-        "BlockType" : {
-            "type" : "object",
-            "properties" : {
-                "hash" : {
-                    "type" : "string"
-                },
-                "number" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "view" : {
-                    "type" : "integer",
-                    "format" : "int32"
-                },
-                "coinbase" : {
-                    "type" : "string"
-                },
-                "parentHash" : {
-                    "type" : "string"
-                },
-                "timestamp" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "date" : {
-                    "type" : "string"
-                },
-                "transactionsRoot" : {
-                    "type" : "string"
-                },
-                "resultsRoot" : {
-                    "type" : "string"
-                },
-                "stateRoot" : {
-                    "type" : "string"
-                },
-                "data" : {
-                    "type" : "string"
-                },
-                "transactions" : {
-                    "type" : "array",
-                    "items" : {
-                        "$ref" : "#/definitions/TransactionType"
-                    }
-                }
-            }
-        },
-        "CreateAccountResponse" : {
-            "type" : "object",
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "string"
-                        }
-                    }
-                }
-            ]
-        },
-        "DelegateType" : {
-            "type" : "object",
-            "properties" : {
-                "address" : {
-                    "type" : "string"
-                },
-                "name" : {
-                    "type" : "string"
-                },
-                "registeredAt" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "votes" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "blocksForged" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "turnsHit" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "turnsMissed" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                }
-            }
-        },
-        "DoTransactionResponse" : {
-            "type" : "object",
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "string"
-                        }
-                    }
-                }
-            ]
-        },
-        "GetAccountResponse" : {
-            "type" : "object",
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "$ref" : "#/definitions/AccountType"
-                        }
-                    }
-                }
-            ]
-        },
-        "GetAccountTransactionsResponse" : {
-            "type" : "object",
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "array",
-                            "items" : {
-                                "$ref" : "#/definitions/TransactionType"
-                            }
-                        }
-                    }
-                }
-            ]
-        },
-        "GetBlockResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "$ref" : "#/definitions/BlockType"
-                        }
-                    }
-                }
-            ]
-        },
-        "GetDelegateResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "$ref" : "#/definitions/DelegateType"
-                        }
-                    }
-                }
-            ]
-        },
-        "GetDelegatesResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "array",
-                            "items" : {
-                                "$ref" : "#/definitions/DelegateType"
-                            }
-                        }
-                    }
-                }
-            ]
-        },
-        "GetInfoResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "$ref" : "#/definitions/InfoType"
-                        }
-                    }
-                }
-            ]
-        },
-        "GetLatestBlockNumberResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "string",
-                            "format" : "int64",
-                            "pattern" : "^\\d+$"
-                        }
-                    }
-                }
-            ]
-        },
-        "GetLatestBlockResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "$ref" : "#/definitions/BlockType"
-                        }
-                    }
-                }
-            ]
-        },
-        "GetPeersResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "array",
-                            "items" : {
-                                "$ref" : "#/definitions/PeerType"
-                            }
-                        }
-                    }
-                }
-            ]
-        },
-        "GetPendingTransactionsResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "array",
-                            "items" : {
-                                "$ref" : "#/definitions/TransactionType"
-                            }
-                        }
-                    }
-                }
-            ]
-        },
-        "GetTransactionLimitsResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "$ref" : "#/definitions/TransactionLimitsType"
-                        }
-                    }
-                }
-            ]
-        },
-        "GetTransactionResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "$ref" : "#/definitions/TransactionType"
-                        }
-                    }
-                }
-            ]
-        },
-        "GetValidatorsResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "array",
-                            "items" : {
-                                "type" : "string"
-                            }
-                        }
-                    }
-                }
-            ]
-        },
-        "GetVoteResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "string",
-                            "format" : "int64",
-                            "pattern" : "^\\d+$"
-                        }
-                    }
-                }
-            ]
-        },
-        "GetVotesResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "object",
-                            "additionalProperties" : {
-                                "type" : "string",
-                                "format" : "int64",
-                                "pattern" : "^\\d+$"
-                            }
-                        }
-                    }
-                }
-            ]
-        },
-        "InfoType" : {
-            "type" : "object",
-            "properties" : {
-                "clientId" : {
-                    "type" : "string"
-                },
-                "coinbase" : {
-                    "type" : "string"
-                },
-                "latestBlockNumber" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "latestBlockHash" : {
-                    "type" : "string"
-                },
-                "activePeers" : {
-                    "type" : "integer",
-                    "format" : "int32"
-                },
-                "pendingTransactions" : {
-                    "type" : "integer",
-                    "format" : "int32"
-                }
-            }
-        },
-        "ListAccountsResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "array",
-                            "items" : {
-                                "type" : "string"
-                            }
-                        }
-                    }
-                }
-            ]
-        },
-        "PeerType" : {
-            "type" : "object",
-            "properties" : {
-                "ip" : {
-                    "type" : "string"
-                },
-                "port" : {
-                    "type" : "integer",
-                    "format" : "int32"
-                },
-                "networkVersion" : {
-                    "type" : "integer",
-                    "format" : "int32"
-                },
-                "clientId" : {
-                    "type" : "string"
-                },
-                "peerId" : {
-                    "type" : "string"
-                },
-                "latestBlockNumber" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "latency" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "capabilities" : {
-                    "type" : "array",
-                    "items" : {
-                        "type" : "string"
-                    }
-                }
-            }
-        },
-        "SendTransactionResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                }
-            ]
-        },
-        "SignMessageResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "string"
-                        }
-                    }
-                }
-            ]
-        },
-        "TransactionLimitsType" : {
-            "type" : "object",
-            "properties" : {
-                "maxTransactionDataSize" : {
-                    "type" : "integer",
-                    "format" : "int32"
-                },
-                "minTransactionFee" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "minDelegateBurnAmount" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                }
-            }
-        },
-        "TransactionType" : {
-            "type" : "object",
-            "properties" : {
-                "blockNumber" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "hash" : {
-                    "type" : "string"
-                },
-                "type" : {
-                    "type" : "string"
-                },
-                "from" : {
-                    "type" : "string"
-                },
-                "to" : {
-                    "type" : "string"
-                },
-                "value" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "fee" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "nonce" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "timestamp" : {
-                    "type" : "string",
-                    "format" : "int64",
-                    "pattern" : "^\\d+$"
-                },
-                "data" : {
-                    "type" : "string"
-                }
-            }
-        },
-        "VerifyMessageResponse" : {
-            "type" : "object",
-            "required" : [
-                "success"
-            ],
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "validSignature" : {
-                            "type" : "boolean"
-                        }
-                    }
-                }
-            ]
-        },
-        "ComposeRawTransactionResponse" : {
-            "type" : "object",
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "string"
-                        }
-                    }
-                }
-            ]
-        },
-        "SignRawTransactionResponse" : {
-            "type" : "object",
-            "allOf" : [
-                {
-                    "$ref" : "#/definitions/ApiHandlerResponse"
-                },
-                {
-                    "properties" : {
-                        "result" : {
-                            "type" : "string"
-                        }
-                    }
-                }
-            ]
+    "produces": [
+        "application/json"
+    ],
+    "schemes": [
+        "http"
+    ],
+    "security": [
+        {
+            "basicAuth": []
         }
-    }
+    ],
+    "securityDefinitions": {
+        "basicAuth": {
+            "type": "basic"
+        }
+    },
+    "swagger": "2.0"
 }

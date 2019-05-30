@@ -6,7 +6,7 @@
  */
 package org.semux.core.bip32.extern;
 
-import org.semux.core.bip32.exception.CryptoException;
+import org.semux.crypto.CryptoException;
 
 /**
  * Hex utility

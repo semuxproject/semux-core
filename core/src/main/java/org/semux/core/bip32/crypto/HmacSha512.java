@@ -13,7 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.semux.core.bip32.exception.CryptoException;
+import org.semux.crypto.CryptoException;
 
 /**
  * Utility class for Hmac SHA-512

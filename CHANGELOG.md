@@ -1,5 +1,40 @@
 # Change Log
 
+## [v1.4.0](https://github.com/semuxproject/semux-core/tree/v1.4.0) (2019-04-22)
+
+This release includes incremental improvements and bugfixes since last version. Major changes
+are the block rewards adjustment and virtual machine implementation (in place but **not activated**).
+
+**Bugfixes:**
+- Fix the 2/3 BFT quorum size rounding error (#134, #142)
+- Start syncing when the number of connections is low (#130)
+
+**Improvements:**
+- Fast block validation using batch validation (#150)
+- Add `aarch64` native support (#89, #117)
+- Suggest use OpenJDK (#131)
+- Update error messages and descriptions (#81, #79, #94, #103)
+- Add empty password shortcut (#108)
+- Update dependent libraries (#79, #141)
+- Limit the number of validators on testnet (#123)
+
+**Features:**
+
+- Consensus
+    - Update the block reward function (#151)
+- VM
+    - Introduce the VM fork signal (#67, #137, #139)
+    - Refactor transaction results (#77, #149)
+    - VM tests (#90, #97, #113, #114, #117, #112, #129, #140)
+- Wallet
+    - HD wallet tests (#133, #132, #138)
+- API
+    - Bump version to v2.2.0
+    - Remove `blockNumber` from `*TransactionType`
+    - Add `/transaction-result` endpoint for transaction result
+- P2P
+    - Upgrade protocol to support light client (#146)
+
 ## [v1.3.0](https://github.com/semuxproject/semux-core/tree/v1.3.0) (2018-08-05)
 
 This release fix the validator timestamp issue and introduces fast syncing.
