@@ -265,7 +265,7 @@ public class TransactionExecutor {
 
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                 transaction, block, repository, blockStore,
-                Spec.DEFAULT, invokeFactory, gasUsedInBlock, false);
+                config.spec(), invokeFactory, gasUsedInBlock, false);
 
         TransactionReceipt summary = executor.run();
 

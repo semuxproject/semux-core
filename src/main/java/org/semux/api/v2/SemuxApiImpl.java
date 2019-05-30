@@ -787,7 +787,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
             org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                     transaction, block, repository, blockStore,
-                    Spec.DEFAULT, invokeFactory, gasUsedInBlock, true);
+                    kernel.getConfig().spec(), invokeFactory, gasUsedInBlock, true);
             TransactionReceipt receipt = executor.run();
 
             DoTransactionResponse resp = new DoTransactionResponse();

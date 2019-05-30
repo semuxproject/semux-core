@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.ethereum.vm.chainspec.Spec;
 import org.semux.Network;
 import org.semux.core.Amount;
 import org.semux.core.Fork;
@@ -505,4 +506,11 @@ public interface Config {
      *         [block height]
      */
     Map<Fork, Long> forkActivationCheckpoints();
+
+    /**
+     * Returns the VM spec.
+     * 
+     * @return
+     */
+    public Spec spec();
 }
