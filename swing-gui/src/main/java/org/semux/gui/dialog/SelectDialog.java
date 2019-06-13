@@ -24,7 +24,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 import org.semux.util.exception.UnreachableException;
 
 public class SelectDialog extends JDialog implements ActionListener {

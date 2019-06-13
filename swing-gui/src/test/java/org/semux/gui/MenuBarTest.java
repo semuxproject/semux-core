@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.mockito.Mock;
 import org.semux.gui.model.WalletModel;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 import org.semux.rules.KernelRule;
 
 /**

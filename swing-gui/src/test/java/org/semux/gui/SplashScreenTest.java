@@ -20,7 +20,7 @@ import org.semux.event.PubSub;
 import org.semux.event.PubSubFactory;
 import org.semux.gui.event.MainFrameStartedEvent;
 import org.semux.gui.event.WalletSelectionDialogShownEvent;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 
 public class SplashScreenTest extends AssertJSwingJUnitTestCase {
 

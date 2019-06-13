@@ -11,9 +11,9 @@ import java.io.IOException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.api.SemuxApiMock;
+import org.semux.client.SimpleApiClient;
 import org.semux.config.Config;
 import org.semux.rules.KernelRule;
-import org.semux.util.SimpleApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

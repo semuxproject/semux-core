@@ -6,6 +6,7 @@
  */
 package org.semux;
 
+import org.semux.client.SimpleApiClient;
 import org.semux.config.Config;
 import org.semux.consensus.SemuxBft;
 import org.semux.consensus.SemuxSync;
@@ -17,7 +18,6 @@ import org.semux.crypto.Key;
 import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
-import org.semux.util.SimpleApiClient;
 
 /**
  * This kernel mock extends the {@link Kernel} by adding a bunch of setters of

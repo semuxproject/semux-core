@@ -21,7 +21,7 @@ import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
 import org.semux.gui.SwingUtil;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 
 public class TransactionDialog extends JDialog {
 

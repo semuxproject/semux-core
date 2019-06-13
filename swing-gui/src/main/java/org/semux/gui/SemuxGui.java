@@ -56,7 +56,7 @@ import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
 import org.semux.gui.model.WalletModel.Status;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 import org.semux.net.Peer;
 import org.semux.net.filter.exception.IpFilterJsonParseException;
 import org.semux.util.SystemUtil;

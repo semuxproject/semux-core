@@ -30,7 +30,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.semux.core.Wallet;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 import org.semux.util.SystemUtil;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;

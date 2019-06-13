@@ -24,7 +24,7 @@ import org.semux.core.bip39.Language;
 import org.semux.core.bip39.MnemonicGenerator;
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 
 public class CreateHdWalletDialog extends JDialog implements ActionListener {
     private static final long serialVersionUID = 1L;

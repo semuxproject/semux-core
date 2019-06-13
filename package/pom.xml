@@ -129,7 +129,7 @@
                                 <mainClass>org.semux.gui.SemuxGui</mainClass>
                                 <preCp>anything</preCp>
                             </classPath>
-                            <icon>../core/src/main/resources/org/semux/gui/logo.ico</icon>
+                            <icon>../swing-gui/src/main/resources/org/semux/gui/logo.ico</icon>
                             <splash>
                                 <!-- this file must be a 24-bit BMP -->
                                 <file>../misc/design/splash.bmp</file>

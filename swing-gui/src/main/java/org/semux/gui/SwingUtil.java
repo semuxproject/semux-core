@@ -35,7 +35,7 @@ import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
 import org.semux.gui.model.WalletAccount;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

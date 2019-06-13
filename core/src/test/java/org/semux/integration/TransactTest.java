@@ -39,6 +39,7 @@ import org.semux.api.v2.model.DoTransactionResponse;
 import org.semux.api.v2.model.GetAccountResponse;
 import org.semux.api.v2.model.GetAccountTransactionsResponse;
 import org.semux.api.v2.model.GetDelegateResponse;
+import org.semux.client.SimpleApiClient;
 import org.semux.core.Amount;
 import org.semux.core.Genesis;
 import org.semux.core.TransactionType;
@@ -48,7 +49,6 @@ import org.semux.net.NodeManager.Node;
 import org.semux.net.SemuxChannelInitializer;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
-import org.semux.util.SimpleApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

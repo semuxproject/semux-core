@@ -15,7 +15,7 @@ import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Test;
 import org.semux.consensus.SemuxSync;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 
 public class StatusBarTest extends AssertJSwingJUnitTestCase {
 

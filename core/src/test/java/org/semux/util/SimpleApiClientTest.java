@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.api.SemuxApiMock;
+import org.semux.client.SimpleApiClient;
 import org.semux.crypto.Key;
 import org.semux.rules.KernelRule;
 

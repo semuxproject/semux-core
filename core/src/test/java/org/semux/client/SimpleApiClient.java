@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.util;
+package org.semux.client;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -17,6 +17,9 @@ import java.util.Map;
 import org.semux.api.ApiVersion;
 import org.semux.config.Constants;
 import org.semux.crypto.Hex;
+import org.semux.util.BasicAuth;
+import org.semux.util.Bytes;
+import org.semux.util.IOUtil;
 
 /**
  * A simple implementation of Semux API client. It's designed to be schemaless

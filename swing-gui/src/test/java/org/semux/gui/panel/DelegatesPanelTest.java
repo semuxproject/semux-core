@@ -24,7 +24,6 @@ import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.assertj.swing.timing.Timeout;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +37,7 @@ import org.semux.crypto.Key;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.WalletModelRule;
 import org.semux.gui.model.WalletDelegate;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
 

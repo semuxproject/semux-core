@@ -14,11 +14,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.semux.client.SimpleApiClient;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
 import org.semux.util.Bytes;
 import org.semux.util.ConsoleUtil;
-import org.semux.util.SimpleApiClient;
 import org.semux.util.TimeUtil;
 
 public class SemuxPerformance {

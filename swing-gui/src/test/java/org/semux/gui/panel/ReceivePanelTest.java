@@ -8,7 +8,6 @@ package org.semux.gui.panel;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 
 import java.awt.Toolkit;
@@ -34,7 +33,7 @@ import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 import org.semux.rules.KernelRule;
 
 @RunWith(MockitoJUnitRunner.Silent.class)

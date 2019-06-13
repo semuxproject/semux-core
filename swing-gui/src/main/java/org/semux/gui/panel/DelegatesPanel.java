@@ -58,7 +58,7 @@ import org.semux.gui.dialog.DelegateDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
 import org.semux.gui.model.WalletModel;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 import org.semux.util.Bytes;
 import org.semux.util.SystemUtil;
 import org.semux.util.TimeUtil;

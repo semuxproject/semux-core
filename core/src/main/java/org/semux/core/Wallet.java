@@ -35,7 +35,7 @@ import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Key;
-import org.semux.message.GuiMessages;
+import org.semux.message.CliMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.FileUtil;
@@ -768,7 +768,7 @@ public class Wallet {
      * @return
      */
     private String getAliasFromPath(String path) {
-        return path.replace(PATH_PREFIX, GuiMessages.get("HdWalletAliasPrefix"));
+        return path.replace(PATH_PREFIX, CliMessages.get("HdWalletAliasPrefix"));
     }
 
     private boolean isUsedAccount(AccountState accountState, byte[] bytes) {

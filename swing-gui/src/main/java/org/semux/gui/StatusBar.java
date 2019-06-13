@@ -21,7 +21,7 @@ import javax.swing.SwingConstants;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.semux.core.SyncManager;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 
 /**
  * StatusBar represents a UI component displaying current wallet status like

@@ -35,7 +35,7 @@ import javax.ws.rs.core.Response;
 import org.semux.api.v2.SemuxApi;
 import org.semux.api.v2.SemuxApiImpl;
 import org.semux.gui.SemuxGui;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 import org.semux.util.CircularFixedSizeList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

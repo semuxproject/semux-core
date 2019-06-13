@@ -36,7 +36,7 @@ import org.semux.core.state.DelegateState;
 import org.semux.crypto.Key;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;

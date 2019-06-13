@@ -32,7 +32,7 @@ import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.gui.WalletModelRule;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 import org.semux.rules.KernelRule;
 
 @RunWith(MockitoJUnitRunner.Silent.class)

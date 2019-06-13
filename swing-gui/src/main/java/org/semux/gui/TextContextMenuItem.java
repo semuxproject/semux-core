@@ -9,7 +9,7 @@ package org.semux.gui;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.TextAction;
 
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 import org.semux.util.exception.UnreachableException;
 
 /**

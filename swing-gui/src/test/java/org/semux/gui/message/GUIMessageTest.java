@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.message;
+package org.semux.gui.message;
 
 import static org.junit.Assert.assertNotNull;
 

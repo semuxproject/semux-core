@@ -19,7 +19,7 @@ import org.semux.crypto.Hex;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletDelegate;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 
 public class DelegateDialog extends JDialog {
 

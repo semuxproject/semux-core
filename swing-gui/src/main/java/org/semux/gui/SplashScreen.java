@@ -30,7 +30,7 @@ import org.semux.event.PubSubFactory;
 import org.semux.event.PubSubSubscriber;
 import org.semux.gui.event.MainFrameStartedEvent;
 import org.semux.gui.event.WalletSelectionDialogShownEvent;
-import org.semux.message.GuiMessages;
+import org.semux.gui.message.GuiMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
