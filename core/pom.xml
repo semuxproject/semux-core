@@ -87,7 +87,7 @@
                                     <useBeanValidationFeature>false</useBeanValidationFeature>
                                 </configOptions>
 
-                                <generateModels>true</generateModels>
+                                <generateModels>false</generateModels>
                                 <generateModelTests>false</generateModelTests>
                                 <generateModelDocumentation>false</generateModelDocumentation>
                                 <generateApis>true</generateApis>
@@ -159,6 +159,11 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.semux</groupId>
+            <artifactId>semux-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- EVM -->
         <dependency>
             <groupId>com.github.semuxproject</groupId>
