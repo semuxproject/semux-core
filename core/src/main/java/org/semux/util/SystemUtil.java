@@ -294,14 +294,13 @@ public class SystemUtil {
      */
     public static Object getImplementationVersion() {
         if (version == null) {
-//            try {
-//                //todo
-//                version = IOUtil.readStreamAsString(SemuxGui.class.getClassLoader().getResourceAsStream("VERSION"))
-//                        .trim();
-//            } catch (IOException ex) {
-//                logger.info("Failed to read version.");
-//                version = "unknown";
-//            }
+            try {
+                version = IOUtil.readStreamAsString(SystemUtil.class.getClassLoader().getResourceAsStream("VERSION"))
+                        .trim();
+            } catch (IOException ex) {
+                logger.info("Failed to read version.");
+                version = "unknown";
+            }
         }
 
         return version;
