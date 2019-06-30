@@ -9,8 +9,6 @@ package org.semux.crypto.bip32;
 
 import static org.junit.Assert.fail;
 
-import java.io.UnsupportedEncodingException;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.semux.crypto.Hex;
@@ -22,7 +20,7 @@ public class SlipVectorOneTest {
     public HdKeyGenerator hdKeyGenerator = new HdKeyGenerator();
 
     @Test
-    public void testVectorOneMaster() throws UnsupportedEncodingException {
+    public void testVectorOneMaster() {
         byte[] fingerprint = Hex.decode("00000000");
         byte[] chainCode = Hex.decode("90046a93de5380a72b5e45010748567d5ea02bbf6522f979e05c0d8d8ca9fffb");
         byte[] privateKey = Hex.decode("2b4be7f19ee27bbf30c667b642d5f4aa69fd169872f8fc3059c08ebae2eb19e7");
@@ -38,7 +36,7 @@ public class SlipVectorOneTest {
     }
 
     @Test
-    public void testUnableToPublicChain() throws UnsupportedEncodingException {
+    public void testUnableToPublicChain() {
         HdKeyPair address = hdKeyGenerator.getAddressFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
         try {
             hdKeyGenerator.getPublicKey(address.getPublicKey(), 0, false, Curve.ED25519);
@@ -50,7 +48,7 @@ public class SlipVectorOneTest {
     }
 
     @Test
-    public void testVector0H() throws UnsupportedEncodingException {
+    public void testVector0H() {
         byte[] fingerprint = Hex.decode("ddebc675");
         byte[] chainCode = Hex.decode("8b59aa11380b624e81507a27fedda59fea6d0b779a778918a2fd3590e16e9c69");
         byte[] privateKey = Hex.decode("68e0fe46dfb67e368c75379acec591dad19df3cde26e63b93a8e704f1dade7a3");
@@ -67,7 +65,7 @@ public class SlipVectorOneTest {
     }
 
     @Test
-    public void testVector0H1H() throws UnsupportedEncodingException {
+    public void testVector0H1H() {
         byte[] fingerprint = Hex.decode("13dab143");
         byte[] chainCode = Hex.decode("a320425f77d1b5c2505a6b1b27382b37368ee640e3557c315416801243552f14");
         byte[] privateKey = Hex.decode("b1d0bad404bf35da785a64ca1ac54b2617211d2777696fbffaf208f746ae84f2");
@@ -85,7 +83,7 @@ public class SlipVectorOneTest {
     }
 
     @Test
-    public void testVector0H1H2H() throws UnsupportedEncodingException {
+    public void testVector0H1H2H() {
         byte[] fingerprint = Hex.decode("ebe4cb29");
         byte[] chainCode = Hex.decode("2e69929e00b5ab250f49c3fb1c12f252de4fed2c1db88387094a0f8c4c9ccd6c");
         byte[] privateKey = Hex.decode("92a5b23c0b8a99e37d07df3fb9966917f5d06e02ddbd909c7e184371463e9fc9");

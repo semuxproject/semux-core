@@ -7,8 +7,6 @@
 
 package org.semux.crypto.bip44;
 
-import java.io.UnsupportedEncodingException;
-
 import org.junit.Test;
 import org.semux.crypto.Hex;
 import org.semux.crypto.bip32.CoinType;
@@ -20,13 +18,13 @@ public class Bip44Test {
     private byte[] seed = Hex.decode("abcdef");
 
     @Test
-    public void testBitcoin() throws UnsupportedEncodingException {
+    public void testBitcoin() {
         HdKeyPair address = bip44.getRootAddressFromSeed(seed, KeyVersion.MAINNET, CoinType.BITCOIN);
         bip44.getAddress(address, 0);
     }
 
     @Test
-    public void testSemux() throws UnsupportedEncodingException {
+    public void testSemux() {
         HdKeyPair address = bip44.getRootAddressFromSeed(seed, KeyVersion.MAINNET, CoinType.SEMUX);
         bip44.getAddress(address, 0);
     }

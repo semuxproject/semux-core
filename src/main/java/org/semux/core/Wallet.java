@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bouncycastle.crypto.generators.BCrypt;
+import org.semux.Network;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
@@ -183,7 +184,7 @@ public class Wallet {
         return false;
     }
 
-    private KeyVersion getWalletNetwork(org.semux.Network network) {
+    private KeyVersion getKeyVersion(Network network) {
         switch (network) {
         case DEVNET:
         case TESTNET:
@@ -722,7 +723,7 @@ public class Wallet {
             found++;
         }
 
-        HdKeyPair rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, getWalletNetwork(network), CoinType.SEMUX);
+        HdKeyPair rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, getKeyVersion(network), CoinType.SEMUX);
 
         nextHdAccountIndex = 0;
 

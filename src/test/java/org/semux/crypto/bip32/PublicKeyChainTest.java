@@ -7,8 +7,6 @@
 
 package org.semux.crypto.bip32;
 
-import java.io.UnsupportedEncodingException;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.semux.crypto.Hex;
@@ -22,7 +20,7 @@ public class PublicKeyChainTest {
     HdKeyGenerator generator = new HdKeyGenerator();
 
     @Test
-    public void testPubKey0() throws UnsupportedEncodingException {
+    public void testPubKey0() {
         HdKeyPair rootAddress = generator.getAddressFromSeed(SEED, KeyVersion.MAINNET, CoinType.BITCOIN);
         HdKeyPair address = generator.getAddress(rootAddress, 0, false);
         // test that the pub key chain generated from only public key matches the other
