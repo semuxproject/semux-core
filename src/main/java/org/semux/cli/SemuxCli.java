@@ -22,11 +22,11 @@ import org.semux.config.Constants;
 import org.semux.config.exception.ConfigException;
 import org.semux.core.Genesis;
 import org.semux.core.Wallet;
-import org.semux.core.bip39.Language;
-import org.semux.core.bip39.MnemonicGenerator;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.crypto.bip39.Language;
+import org.semux.crypto.bip39.MnemonicGenerator;
 import org.semux.exception.LauncherException;
 import org.semux.message.CliMessages;
 import org.semux.net.filter.exception.IpFilterJsonParseException;
@@ -405,7 +405,7 @@ public class SemuxCli extends Launcher {
         if (wallet.isUnlocked() && !wallet.isHdWalletInitialized()) {
             // HD Mnemonic
             MnemonicGenerator generator = new MnemonicGenerator();
-            String phrase = generator.getWordlist(128, Language.english);
+            String phrase = generator.getWordlist(128, Language.ENGLISH);
             System.out.println(CliMessages.get("HdWalletInstructions"));
             System.out.println(phrase);
 
@@ -413,7 +413,7 @@ public class SemuxCli extends Launcher {
             String passCode = readNewPassword("EnterNewHdPassword", "ReEnterNewHdPassword");
 
             // HD seed based on the mnemonics and password
-            byte[] seed = generator.getSeedFromWordlist(phrase, passCode, Language.english);
+            byte[] seed = generator.getSeedFromWordlist(phrase, passCode, Language.ENGLISH);
 
             wallet.setHdSeed(seed);
             wallet.scanForHdKeys(null);
