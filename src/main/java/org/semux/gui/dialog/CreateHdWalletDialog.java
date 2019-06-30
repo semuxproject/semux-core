@@ -20,8 +20,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
 
 import org.semux.core.Wallet;
-import org.semux.core.bip39.Language;
-import org.semux.core.bip39.MnemonicGenerator;
+import org.semux.crypto.bip39.Language;
+import org.semux.crypto.bip39.MnemonicGenerator;
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
 import org.semux.message.GuiMessages;
@@ -52,7 +52,7 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
         phraseField.setLineWrap(true);
         phraseField.setWrapStyleWord(true);
         phraseField.setRows(2);
-        phrase = generator.getWordlist(128, Language.english);
+        phrase = generator.getWordlist(128, Language.ENGLISH);
 
         phraseField.setText(phrase);
         passwordField = new JPasswordField();
@@ -133,7 +133,7 @@ public class CreateHdWalletDialog extends JDialog implements ActionListener {
 
             byte[] seed;
             try {
-                seed = generator.getSeedFromWordlist(phrase, password, Language.english);
+                seed = generator.getSeedFromWordlist(phrase, password, Language.ENGLISH);
             } catch (IllegalArgumentException iae) {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidHdPhrase"));
                 break;

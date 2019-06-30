@@ -24,10 +24,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bouncycastle.crypto.generators.BCrypt;
-import org.semux.core.bip32.Network;
-import org.semux.core.bip32.wallet.Bip44;
-import org.semux.core.bip32.wallet.CoinType;
-import org.semux.core.bip32.wallet.HdAddress;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
@@ -35,6 +31,10 @@ import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Key;
+import org.semux.crypto.bip32.CoinType;
+import org.semux.crypto.bip32.HdKeyPair;
+import org.semux.crypto.bip32.key.KeyVersion;
+import org.semux.crypto.bip44.Bip44;
 import org.semux.message.GuiMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
@@ -183,13 +183,13 @@ public class Wallet {
         return false;
     }
 
-    private Network getWalletNetwork(org.semux.Network network) {
+    private KeyVersion getWalletNetwork(org.semux.Network network) {
         switch (network) {
         case DEVNET:
         case TESTNET:
-            return Network.testnet;
+            return KeyVersion.TESTNET;
         case MAINNET:
-            return Network.mainnet;
+            return KeyVersion.MAINNET;
         }
         throw new IllegalArgumentException("Unknown network.");
     }
@@ -688,8 +688,8 @@ public class Wallet {
         requireHdWalletInitialized();
 
         synchronized (accounts) {
-            HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, Network.mainnet, CoinType.semux);
-            HdAddress address = BIP_44.getAddress(rootAddress, nextHdAccountIndex++);
+            HdKeyPair rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, KeyVersion.MAINNET, CoinType.SEMUX);
+            HdKeyPair address = BIP_44.getAddress(rootAddress, nextHdAccountIndex++);
             Key newKey = Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey());
             ByteArray to = ByteArray.of(newKey.toAddress());
 
@@ -722,7 +722,7 @@ public class Wallet {
             found++;
         }
 
-        HdAddress rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, getWalletNetwork(network), CoinType.semux);
+        HdKeyPair rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, getWalletNetwork(network), CoinType.SEMUX);
 
         nextHdAccountIndex = 0;
 
@@ -730,7 +730,7 @@ public class Wallet {
         int endIndex = start + MAX_HD_WALLET_SCAN_AHEAD;
 
         for (int i = start; i < endIndex; i++) {
-            HdAddress address = BIP_44.getAddress(rootAddress, i);
+            HdKeyPair address = BIP_44.getAddress(rootAddress, i);
 
             Key key = Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey());
             boolean isUsedAccount = isUsedAccount(accountState, key.toAddress());
