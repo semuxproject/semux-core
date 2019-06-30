@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public class Block {
 
     public enum BlockPart {
-        HEADER(1 << 0), TRANSACTIONS(1 << 1), RECEIPTS(1 << 2), VOTES(1 << 3);
+        HEADER(1 << 0), TRANSACTIONS(1 << 1), RESULTS(1 << 2), VOTES(1 << 3);
 
         private int code;
 
@@ -41,7 +41,7 @@ public class Block {
             this.code = code;
         }
 
-        public static int parts(BlockPart... parts) {
+        public static int encode(BlockPart... parts) {
             int result = 0;
             for (BlockPart part : parts) {
                 result |= part.code;
@@ -49,7 +49,7 @@ public class Block {
             return result;
         }
 
-        public List<BlockPart> parts(int parts) {
+        public static List<BlockPart> decode(int parts) {
             List<BlockPart> result = new ArrayList<>();
             // NOTE: values() returns an array containing all of the values of the enum type
             // in the order they are declared.
