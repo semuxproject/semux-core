@@ -36,7 +36,7 @@ public class VectorTest {
         String defaultPassword = "TREZOR";
         for (String language : vectorSets.keySet()) {
             List<Vector> vectors = vectorSets.get(language);
-            Language lang = Language.valueOf(language);
+            Language lang = Language.valueOf(language.toUpperCase());
             for (Vector vector : vectors) {
                 String password = vector.getPassphrase() == null ? defaultPassword : vector.getPassphrase();
                 logger.info(lang + " " + vector.getMnemonic());

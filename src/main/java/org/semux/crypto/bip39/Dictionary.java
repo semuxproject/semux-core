@@ -21,7 +21,7 @@ public class Dictionary {
     public Dictionary(Language language) throws IOException {
 
         InputStream wordStream = this.getClass().getClassLoader()
-                .getResourceAsStream("wordlists/" + language.name() + ".txt");
+                .getResourceAsStream("wordlists/" + language.name().toLowerCase() + ".txt");
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(wordStream, StandardCharsets.UTF_8));
         String word;
