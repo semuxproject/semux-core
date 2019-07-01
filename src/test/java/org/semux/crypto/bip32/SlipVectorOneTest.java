@@ -7,8 +7,6 @@
 
 package org.semux.crypto.bip32;
 
-import static org.junit.Assert.fail;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.semux.crypto.Hex;
@@ -26,25 +24,19 @@ public class SlipVectorOneTest {
         byte[] privateKey = Hex.decode("2b4be7f19ee27bbf30c667b642d5f4aa69fd169872f8fc3059c08ebae2eb19e7");
         byte[] publicKey = Hex.decode("00a4b2856bfec510abab89753fac1ac0e1112364e7d250545963f135f2a33188ed");
 
-        HdKeyPair address = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
+        HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
 
-        Assert.assertArrayEquals(fingerprint, address.getPrivateKey().getFingerprint());
-        Assert.assertArrayEquals(chainCode, address.getPrivateKey().getChainCode());
-        Assert.assertArrayEquals(privateKey, address.getPrivateKey().getPrivateKey());
-        Assert.assertArrayEquals(publicKey, address.getPublicKey().getPublicKey());
-        Assert.assertEquals(Scheme.SLIP10_ED25519, address.getCoinType().getScheme());
+        Assert.assertArrayEquals(fingerprint, master.getPrivateKey().getFingerprint());
+        Assert.assertArrayEquals(chainCode, master.getPrivateKey().getChainCode());
+        Assert.assertArrayEquals(privateKey, master.getPrivateKey().getPrivateKey());
+        Assert.assertArrayEquals(publicKey, master.getPublicKey().getPublicKey());
+        Assert.assertEquals(Scheme.SLIP10_ED25519, master.getCoinType().getScheme());
     }
 
-    @Test
+    @Test(expected = UnsupportedOperationException.class)
     public void testUnableToPublicChain() {
         HdKeyPair address = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
-        try {
-            hdKeyGenerator.getChildPublicKey(address.getPublicKey(), 0, false, Scheme.SLIP10_ED25519);
-            fail("Should not be able to chain public keys with ed25519");
-
-        } catch (UnsupportedOperationException e) {
-            // expected
-        }
+        hdKeyGenerator.getChildPublicKey(address.getPublicKey(), 0, false, Scheme.SLIP10_ED25519);
     }
 
     @Test
@@ -55,13 +47,13 @@ public class SlipVectorOneTest {
         byte[] publicKey = Hex.decode("008c8a13df77a28f3445213a0f432fde644acaa215fc72dcdf300d5efaa85d350c");
 
         HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
-        HdKeyPair address = hdKeyGenerator.getChildKeyPair(master, 0, true);
+        HdKeyPair child = hdKeyGenerator.getChildKeyPair(master, 0, true);
 
-        Assert.assertArrayEquals(fingerprint, address.getPrivateKey().getFingerprint());
-        Assert.assertArrayEquals(chainCode, address.getPrivateKey().getChainCode());
-        Assert.assertArrayEquals(privateKey, address.getPrivateKey().getPrivateKey());
-        Assert.assertArrayEquals(publicKey, address.getPublicKey().getPublicKey());
-        Assert.assertEquals(Scheme.SLIP10_ED25519, address.getCoinType().getScheme());
+        Assert.assertArrayEquals(fingerprint, child.getPrivateKey().getFingerprint());
+        Assert.assertArrayEquals(chainCode, child.getPrivateKey().getChainCode());
+        Assert.assertArrayEquals(privateKey, child.getPrivateKey().getPrivateKey());
+        Assert.assertArrayEquals(publicKey, child.getPublicKey().getPublicKey());
+        Assert.assertEquals(Scheme.SLIP10_ED25519, child.getCoinType().getScheme());
     }
 
     @Test
@@ -72,14 +64,14 @@ public class SlipVectorOneTest {
         byte[] publicKey = Hex.decode("001932a5270f335bed617d5b935c80aedb1a35bd9fc1e31acafd5372c30f5c1187");
 
         HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
-        HdKeyPair address = hdKeyGenerator.getChildKeyPair(master, 0, true);
-        address = hdKeyGenerator.getChildKeyPair(address, 1, true);
+        HdKeyPair child = hdKeyGenerator.getChildKeyPair(master, 0, true);
+        child = hdKeyGenerator.getChildKeyPair(child, 1, true);
 
-        Assert.assertArrayEquals(fingerprint, address.getPrivateKey().getFingerprint());
-        Assert.assertArrayEquals(chainCode, address.getPrivateKey().getChainCode());
-        Assert.assertArrayEquals(privateKey, address.getPrivateKey().getPrivateKey());
-        Assert.assertArrayEquals(publicKey, address.getPublicKey().getPublicKey());
-        Assert.assertEquals(Scheme.SLIP10_ED25519, address.getCoinType().getScheme());
+        Assert.assertArrayEquals(fingerprint, child.getPrivateKey().getFingerprint());
+        Assert.assertArrayEquals(chainCode, child.getPrivateKey().getChainCode());
+        Assert.assertArrayEquals(privateKey, child.getPrivateKey().getPrivateKey());
+        Assert.assertArrayEquals(publicKey, child.getPublicKey().getPublicKey());
+        Assert.assertEquals(Scheme.SLIP10_ED25519, child.getCoinType().getScheme());
     }
 
     @Test
@@ -90,14 +82,14 @@ public class SlipVectorOneTest {
         byte[] publicKey = Hex.decode("00ae98736566d30ed0e9d2f4486a64bc95740d89c7db33f52121f8ea8f76ff0fc1");
 
         HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
-        HdKeyPair address = hdKeyGenerator.getChildKeyPair(master, 0, true);
-        address = hdKeyGenerator.getChildKeyPair(address, 1, true);
-        address = hdKeyGenerator.getChildKeyPair(address, 2, true);
+        HdKeyPair child = hdKeyGenerator.getChildKeyPair(master, 0, true);
+        child = hdKeyGenerator.getChildKeyPair(child, 1, true);
+        child = hdKeyGenerator.getChildKeyPair(child, 2, true);
 
-        Assert.assertArrayEquals(fingerprint, address.getPrivateKey().getFingerprint());
-        Assert.assertArrayEquals(chainCode, address.getPrivateKey().getChainCode());
-        Assert.assertArrayEquals(privateKey, address.getPrivateKey().getPrivateKey());
-        Assert.assertArrayEquals(publicKey, address.getPublicKey().getPublicKey());
-        Assert.assertEquals(Scheme.SLIP10_ED25519, address.getCoinType().getScheme());
+        Assert.assertArrayEquals(fingerprint, child.getPrivateKey().getFingerprint());
+        Assert.assertArrayEquals(chainCode, child.getPrivateKey().getChainCode());
+        Assert.assertArrayEquals(privateKey, child.getPrivateKey().getPrivateKey());
+        Assert.assertArrayEquals(publicKey, child.getPublicKey().getPublicKey());
+        Assert.assertEquals(Scheme.SLIP10_ED25519, child.getCoinType().getScheme());
     }
 }
