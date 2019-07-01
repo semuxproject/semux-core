@@ -52,8 +52,8 @@ public class HdUtil {
     }
 
     /**
-     * ser256(p): serializes the integer p as a 32-byte sequence, most
-     * significant byte first.
+     * ser256(p): serializes the integer p as a 32-byte sequence, most significant
+     * byte first.
      *
      * @param p
      *            big integer
@@ -110,7 +110,7 @@ public class HdUtil {
      * @param arrays
      * @return
      */
-    public static byte[] merge(byte[] ...arrays) {
+    public static byte[] merge(byte[]... arrays) {
         int total = Stream.of(arrays).mapToInt(a -> a.length).sum();
 
         byte[] buffer = new byte[total];

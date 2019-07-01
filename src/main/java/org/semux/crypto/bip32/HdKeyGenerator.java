@@ -40,7 +40,7 @@ public class HdKeyGenerator {
         Scheme scheme = coinType.getScheme();
         HdPublicKey publicKey = new HdPublicKey();
         HdPrivateKey privateKey = new HdPrivateKey();
-        HdKeyPair address = new HdKeyPair(privateKey, publicKey, coinType, MASTER_PATH);
+        HdKeyPair key = new HdKeyPair(privateKey, publicKey, coinType, MASTER_PATH);
 
         byte[] I;
         try {
@@ -68,31 +68,21 @@ public class HdKeyGenerator {
         privateKey.setChainCode(IR);
         privateKey.setKeyData(HdUtil.merge(new byte[] { 0 }, IL));
 
-        ECPoint point = Secp256k1.point(masterSecretKey);
-
         publicKey.setVersion(keyVersion.getPublicKeyVersion());
         publicKey.setDepth(0);
         publicKey.setFingerprint(new byte[] { 0, 0, 0, 0 });
         publicKey.setChildNumber(new byte[] { 0, 0, 0, 0 });
         publicKey.setChainCode(IR);
-        publicKey.setKeyData(Secp256k1.serP(point));
+        publicKey.setKeyData(Secp256k1.serP(Secp256k1.point(masterSecretKey)));
 
-        switch (scheme) {
-        case BIP32:
-            privateKey.setPrivateKey(privateKey.getKeyData());
-            publicKey.setPublicKey(publicKey.getKeyData());
-            break;
-        case SLIP10_ED25519:
-        case BIP32_ED25519:
-            // FIXME: the `keyData` is incorrect
-            privateKey.setPrivateKey(IL);
+        if (scheme == Scheme.SLIP10_ED25519 || scheme == Scheme.BIP32_ED25519) {
+            privateKey.setKeyData(IL);
             EdDSAPrivateKey sk = new EdDSAPrivateKey(new EdDSAPrivateKeySpec(IL, ED25519SPEC));
             EdDSAPublicKey pk = new EdDSAPublicKey(new EdDSAPublicKeySpec(sk.getA(), sk.getParams()));
-            publicKey.setPublicKey(HdUtil.merge(new byte[] { 0 }, pk.getAbyte()));
-            break;
+            publicKey.setKeyData(HdUtil.merge(new byte[] { 0 }, pk.getAbyte()));
         }
 
-        return address;
+        return key;
     }
 
     /**
@@ -233,59 +223,53 @@ public class HdKeyGenerator {
         publicKey.setChainCode(IR);
         publicKey.setKeyData(Secp256k1.serP(point));
 
-        switch (parent.getCoinType().getScheme()) {
-        case BIP32:
-            privateKey.setPrivateKey(privateKey.getKeyData());
-            publicKey.setPublicKey(publicKey.getKeyData());
-            break;
-        case SLIP10_ED25519:
-        case BIP32_ED25519:
-            if (parent.getCoinType().getScheme() == Scheme.BIP32_ED25519) {
-                byte[] kLP = Arrays.copyOfRange(parent.getPrivateKey().getKeyData(), 1, 33);
-                byte[] kRP = parent.getPrivateKey().getChainCode();
-                byte[] AP = parent.getPublicKey().getPublicKey();
+        Scheme scheme = parent.getCoinType().getScheme();
+        if (scheme == Scheme.BIP32_ED25519) {
+            byte[] kLP = parent.getPrivateKey().getKeyData();
+            byte[] kRP = parent.getPrivateKey().getChainCode();
+            byte[] AP = Arrays.copyOfRange(parent.getPublicKey().getKeyData(), 1, 33);
 
-                byte[] Z;
-                if (isHardened) {
-                    byte[] data = HdUtil.merge(new byte[] { 0 }, kLP, kRP, HdUtil.ser32LE(child));
-                    Z = HmacSha512.hmac512(data, parent.getPrivateKey().getChainCode());
-                } else {
-                    byte[] data = HdUtil.merge(new byte[] { 2 }, AP, HdUtil.ser32LE(child));
-                    Z = HmacSha512.hmac512(data, parent.getPrivateKey().getChainCode());
-                }
-                byte[] ZL = Arrays.copyOfRange(Z, 0, 28);
-                byte[] ZR = Arrays.copyOfRange(Z, 32, 64);
-                BigInteger kLiBI = parseBigIntegerLE(ZL)
-                        .multiply(BigInteger.valueOf(8))
-                        .add(parseBigIntegerLE(kLP));
-                BigInteger order = BigInteger.valueOf(2).pow(252)
-                        .add(new BigInteger("27742317777372353535851937790883648493"));
-                if (kLiBI.mod(order).equals(BigInteger.ZERO)) {
-                    return null;
-                }
-                byte[] kLi = serializeBigIntegerLE(kLiBI);
-                BigInteger kRiBI = parseBigIntegerLE(ZR)
-                        .add(parseBigIntegerLE(kRP))
-                        .mod(BigInteger.valueOf(2).pow(256));
-                byte[] kRi = serializeBigIntegerLE(kRiBI);
-
-                IL = kLi;
-                IR = kRi;
-                privateKey.setChainCode(IR);
-                publicKey.setChainCode(IR);
+            byte[] Z;
+            if (isHardened) {
+                byte[] data = HdUtil.merge(new byte[] { 0 }, kLP, kRP, HdUtil.ser32LE(child));
+                Z = HmacSha512.hmac512(data, parent.getPrivateKey().getChainCode());
+            } else {
+                byte[] data = HdUtil.merge(new byte[] { 2 }, AP, HdUtil.ser32LE(child));
+                Z = HmacSha512.hmac512(data, parent.getPrivateKey().getChainCode());
             }
+            byte[] ZL = Arrays.copyOfRange(Z, 0, 28);
+            byte[] ZR = Arrays.copyOfRange(Z, 32, 64);
+            BigInteger kLiBI = parseBigIntegerLE(ZL)
+                    .multiply(BigInteger.valueOf(8))
+                    .add(parseBigIntegerLE(kLP));
+            BigInteger order = BigInteger.valueOf(2).pow(252)
+                    .add(new BigInteger("27742317777372353535851937790883648493"));
+            if (kLiBI.mod(order).equals(BigInteger.ZERO)) {
+                return null;
+            }
+            byte[] kLi = serializeBigIntegerLE(kLiBI);
+            BigInteger kRiBI = parseBigIntegerLE(ZR)
+                    .add(parseBigIntegerLE(kRP))
+                    .mod(BigInteger.valueOf(2).pow(256));
+            byte[] kRi = serializeBigIntegerLE(kRiBI);
 
-            privateKey.setPrivateKey(IL);
-            h160 = HashUtil.h160(parent.getPublicKey().getPublicKey());
+            IL = kLi;
+            IR = kRi;
+        }
+
+        if (scheme == Scheme.SLIP10_ED25519 || scheme == Scheme.BIP32_ED25519) {
+            h160 = HashUtil.h160(parent.getPublicKey().getKeyData());
             childFingerprint = new byte[] { h160[0], h160[1], h160[2], h160[3] };
-            publicKey.setFingerprint(childFingerprint);
+
             privateKey.setFingerprint(childFingerprint);
-            privateKey.setKeyData(HdUtil.merge(new byte[] { 0 }, IL));
+            privateKey.setChainCode(IR);
+            privateKey.setKeyData(IL);
 
             EdDSAPrivateKey sk = new EdDSAPrivateKey(new EdDSAPrivateKeySpec(IL, ED25519SPEC));
             EdDSAPublicKey pk = new EdDSAPublicKey(new EdDSAPublicKeySpec(sk.getA(), sk.getParams()));
-            publicKey.setPublicKey(HdUtil.merge(new byte[] { 0 }, pk.getAbyte()));
-            break;
+            publicKey.setFingerprint(childFingerprint);
+            privateKey.setChainCode(IR);
+            publicKey.setKeyData(HdUtil.merge(new byte[] { 0 }, pk.getAbyte()));
         }
 
         return address;

@@ -691,7 +691,7 @@ public class Wallet {
         synchronized (accounts) {
             HdKeyPair rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, KeyVersion.MAINNET, CoinType.SEMUX);
             HdKeyPair address = BIP_44.getAddress(rootAddress, nextHdAccountIndex++);
-            Key newKey = Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey());
+            Key newKey = Key.fromRawPrivateKey(address.getPrivateKey().getKeyData());
             ByteArray to = ByteArray.of(newKey.toAddress());
 
             // put the accounts into
@@ -733,7 +733,7 @@ public class Wallet {
         for (int i = start; i < endIndex; i++) {
             HdKeyPair address = BIP_44.getAddress(rootAddress, i);
 
-            Key key = Key.fromRawPrivateKey(address.getPrivateKey().getPrivateKey());
+            Key key = Key.fromRawPrivateKey(address.getPrivateKey().getKeyData());
             boolean isUsedAccount = isUsedAccount(accountState, key.toAddress());
 
             ByteArray to = ByteArray.of(key.toAddress());

@@ -28,8 +28,8 @@ public class SlipVectorOneTest {
 
         Assert.assertArrayEquals(fingerprint, master.getPrivateKey().getFingerprint());
         Assert.assertArrayEquals(chainCode, master.getPrivateKey().getChainCode());
-        Assert.assertArrayEquals(privateKey, master.getPrivateKey().getPrivateKey());
-        Assert.assertArrayEquals(publicKey, master.getPublicKey().getPublicKey());
+        Assert.assertArrayEquals(privateKey, master.getPrivateKey().getKeyData());
+        Assert.assertArrayEquals(publicKey, master.getPublicKey().getKeyData());
         Assert.assertEquals(Scheme.SLIP10_ED25519, master.getCoinType().getScheme());
     }
 
@@ -51,8 +51,8 @@ public class SlipVectorOneTest {
 
         Assert.assertArrayEquals(fingerprint, child.getPrivateKey().getFingerprint());
         Assert.assertArrayEquals(chainCode, child.getPrivateKey().getChainCode());
-        Assert.assertArrayEquals(privateKey, child.getPrivateKey().getPrivateKey());
-        Assert.assertArrayEquals(publicKey, child.getPublicKey().getPublicKey());
+        Assert.assertArrayEquals(privateKey, child.getPrivateKey().getKeyData());
+        Assert.assertArrayEquals(publicKey, child.getPublicKey().getKeyData());
         Assert.assertEquals(Scheme.SLIP10_ED25519, child.getCoinType().getScheme());
     }
 
@@ -69,8 +69,8 @@ public class SlipVectorOneTest {
 
         Assert.assertArrayEquals(fingerprint, child.getPrivateKey().getFingerprint());
         Assert.assertArrayEquals(chainCode, child.getPrivateKey().getChainCode());
-        Assert.assertArrayEquals(privateKey, child.getPrivateKey().getPrivateKey());
-        Assert.assertArrayEquals(publicKey, child.getPublicKey().getPublicKey());
+        Assert.assertArrayEquals(privateKey, child.getPrivateKey().getKeyData());
+        Assert.assertArrayEquals(publicKey, child.getPublicKey().getKeyData());
         Assert.assertEquals(Scheme.SLIP10_ED25519, child.getCoinType().getScheme());
     }
 
@@ -88,8 +88,8 @@ public class SlipVectorOneTest {
 
         Assert.assertArrayEquals(fingerprint, child.getPrivateKey().getFingerprint());
         Assert.assertArrayEquals(chainCode, child.getPrivateKey().getChainCode());
-        Assert.assertArrayEquals(privateKey, child.getPrivateKey().getPrivateKey());
-        Assert.assertArrayEquals(publicKey, child.getPublicKey().getPublicKey());
+        Assert.assertArrayEquals(privateKey, child.getPrivateKey().getKeyData());
+        Assert.assertArrayEquals(publicKey, child.getPublicKey().getKeyData());
         Assert.assertEquals(Scheme.SLIP10_ED25519, child.getCoinType().getScheme());
     }
 }
