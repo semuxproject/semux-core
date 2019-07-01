@@ -7,7 +7,6 @@
 package org.semux.integration;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertTrue;
 import static org.semux.core.Amount.Unit.SEM;

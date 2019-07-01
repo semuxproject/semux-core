@@ -25,7 +25,7 @@ public class Bip44Test {
 
     @Test
     public void testSemux() {
-        HdKeyPair key = bip44.getRootKeyPairFromSeed(seed, KeyVersion.MAINNET, CoinType.SEMUX);
+        HdKeyPair key = bip44.getRootKeyPairFromSeed(seed, KeyVersion.MAINNET, CoinType.SEMUX_SLIP10);
         bip44.getChildKeyPair(key, 0);
     }
 }

@@ -689,7 +689,7 @@ public class Wallet {
         requireHdWalletInitialized();
 
         synchronized (accounts) {
-            HdKeyPair rootKey = BIP_44.getRootKeyPairFromSeed(hdSeed, KeyVersion.MAINNET, CoinType.SEMUX);
+            HdKeyPair rootKey = BIP_44.getRootKeyPairFromSeed(hdSeed, KeyVersion.MAINNET, CoinType.SEMUX_SLIP10);
             HdKeyPair key = BIP_44.getChildKeyPair(rootKey, nextHdAccountIndex++);
             Key newKey = Key.fromRawPrivateKey(key.getPrivateKey().getKeyData());
             ByteArray to = ByteArray.of(newKey.toAddress());
@@ -723,7 +723,7 @@ public class Wallet {
             found++;
         }
 
-        HdKeyPair rootAddress = BIP_44.getRootKeyPairFromSeed(hdSeed, getKeyVersion(network), CoinType.SEMUX);
+        HdKeyPair rootAddress = BIP_44.getRootKeyPairFromSeed(hdSeed, getKeyVersion(network), CoinType.SEMUX_SLIP10);
 
         nextHdAccountIndex = 0;
 

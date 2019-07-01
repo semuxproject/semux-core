@@ -9,7 +9,9 @@ package org.semux.crypto.bip32;
 public enum CoinType {
     BITCOIN(Scheme.BIP32, 0, false),
 
-    SEMUX(Scheme.SLIP10_ED25519, 7562605, true);
+    SEMUX_SLIP10(Scheme.SLIP10_ED25519, 7562605, true),
+
+    SEMUX(Scheme.BIP32_ED25519, 7562605, false);
 
     private final Scheme scheme;
     private final long coinType;

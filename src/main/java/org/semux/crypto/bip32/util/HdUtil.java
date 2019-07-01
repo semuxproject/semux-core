@@ -10,8 +10,6 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 /**
  * General Util class for defined functions.
  */

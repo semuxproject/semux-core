@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.semux.crypto.Hex;
 import org.semux.crypto.bip32.key.KeyVersion;
 
-public class SlipVectorOneTest {
+public class Slip10Test {
 
     public static final byte[] SEED = Hex.decode("000102030405060708090a0b0c0d0e0f");
     public HdKeyGenerator hdKeyGenerator = new HdKeyGenerator();
@@ -24,7 +24,7 @@ public class SlipVectorOneTest {
         byte[] privateKey = Hex.decode("2b4be7f19ee27bbf30c667b642d5f4aa69fd169872f8fc3059c08ebae2eb19e7");
         byte[] publicKey = Hex.decode("00a4b2856bfec510abab89753fac1ac0e1112364e7d250545963f135f2a33188ed");
 
-        HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
+        HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX_SLIP10);
 
         Assert.assertArrayEquals(fingerprint, master.getPrivateKey().getFingerprint());
         Assert.assertArrayEquals(chainCode, master.getPrivateKey().getChainCode());
@@ -35,7 +35,7 @@ public class SlipVectorOneTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testUnableToPublicChain() {
-        HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
+        HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX_SLIP10);
         hdKeyGenerator.getChildPublicKey(master.getPublicKey(), 0, false, Scheme.SLIP10_ED25519);
     }
 
@@ -46,7 +46,7 @@ public class SlipVectorOneTest {
         byte[] privateKey = Hex.decode("68e0fe46dfb67e368c75379acec591dad19df3cde26e63b93a8e704f1dade7a3");
         byte[] publicKey = Hex.decode("008c8a13df77a28f3445213a0f432fde644acaa215fc72dcdf300d5efaa85d350c");
 
-        HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
+        HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX_SLIP10);
         HdKeyPair child = hdKeyGenerator.getChildKeyPair(master, 0, true);
 
         Assert.assertArrayEquals(fingerprint, child.getPrivateKey().getFingerprint());
@@ -63,7 +63,7 @@ public class SlipVectorOneTest {
         byte[] privateKey = Hex.decode("b1d0bad404bf35da785a64ca1ac54b2617211d2777696fbffaf208f746ae84f2");
         byte[] publicKey = Hex.decode("001932a5270f335bed617d5b935c80aedb1a35bd9fc1e31acafd5372c30f5c1187");
 
-        HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
+        HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX_SLIP10);
         HdKeyPair child = hdKeyGenerator.getChildKeyPair(master, 0, true);
         child = hdKeyGenerator.getChildKeyPair(child, 1, true);
 
@@ -81,7 +81,7 @@ public class SlipVectorOneTest {
         byte[] privateKey = Hex.decode("92a5b23c0b8a99e37d07df3fb9966917f5d06e02ddbd909c7e184371463e9fc9");
         byte[] publicKey = Hex.decode("00ae98736566d30ed0e9d2f4486a64bc95740d89c7db33f52121f8ea8f76ff0fc1");
 
-        HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
+        HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX_SLIP10);
         HdKeyPair child = hdKeyGenerator.getChildKeyPair(master, 0, true);
         child = hdKeyGenerator.getChildKeyPair(child, 1, true);
         child = hdKeyGenerator.getChildKeyPair(child, 2, true);
