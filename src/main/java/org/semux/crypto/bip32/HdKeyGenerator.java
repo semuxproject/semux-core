@@ -34,7 +34,7 @@ public class HdKeyGenerator {
 
     public static final String MASTER_PATH = "m";
 
-    public HdKeyPair getAddressFromSeed(byte[] seed, KeyVersion keyVersion, CoinType coinType) {
+    public HdKeyPair getMasterKeyPairFromSeed(byte[] seed, KeyVersion keyVersion, CoinType coinType) {
 
         Curve curve = coinType.getCurve();
         HdPublicKey publicKey = new HdPublicKey();
@@ -92,7 +92,22 @@ public class HdKeyGenerator {
         return address;
     }
 
-    public HdPublicKey getPublicKey(HdPublicKey parent, long child, boolean isHardened, Curve curve) {
+    /**
+     * Derive the child public key from the parent public key. This is typically
+     * used for calculating the public key (or address) without revealing the
+     * private key.
+     *
+     * @param parent
+     *            the parent key
+     * @param child
+     *            the child index
+     * @param isHardened
+     *            whether the child index is hardened
+     * @param curve
+     *            the curve
+     * @return
+     */
+    public HdPublicKey getChildPublicKey(HdPublicKey parent, long child, boolean isHardened, Curve curve) {
         if (isHardened) {
             throw new CryptoException("Cannot derive child public keys from hardened keys");
         }
@@ -124,7 +139,7 @@ public class HdKeyGenerator {
 
         if (ILBigInt.compareTo(Secp256k1.getN()) > 0 || point.isInfinity()) {
             throw new CryptoException("This key is invalid, should proceed to next key");
-            // return getPublicKey(parent, child+1, isHardened);
+            // return getChildPublicKey(parent, child+1, isHardened);
         }
 
         byte[] childKey = Secp256k1.serP(point);
@@ -137,7 +152,18 @@ public class HdKeyGenerator {
         return publicKey;
     }
 
-    public HdKeyPair getAddress(HdKeyPair parent, long child, boolean isHardened) {
+    /**
+     * Derive the child key pair (public + private) from the parent key pair.
+     * 
+     * @param parent
+     *            the parent key
+     * @param child
+     *            the child index
+     * @param isHardened
+     *            whether is child index is hardened
+     * @return
+     */
+    public HdKeyPair getChildKeyPair(HdKeyPair parent, long child, boolean isHardened) {
         HdPrivateKey privateKey = new HdPrivateKey();
         HdPublicKey publicKey = new HdPublicKey();
         HdKeyPair address = new HdKeyPair(privateKey, publicKey, parent.getCoinType(),

@@ -37,7 +37,7 @@ public class VectorThreeTest extends BaseVectorTest {
     @Test
     public void testChain0HPrivateKey() {
         String expected = "xprv9uPDJpEQgRQfDcW7BkF7eTya6RPxXeJCqCJGHuCJ4GiRVLzkTXBAJMu2qaMWPrS7AANYqdq6vcBcBUdJCVVFceUvJFjaPdGZ2y9WACViL4L";
-        HdKeyPair chain = hdKeyGenerator.getAddress(masterNode, 0, true);
+        HdKeyPair chain = hdKeyGenerator.getChildKeyPair(masterNode, 0, true);
         assertEquals(expected, Base58.encode(chain.getPrivateKey().getKey()));
     }
 

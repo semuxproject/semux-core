@@ -36,16 +36,16 @@ public class Bip44 {
      * @return
      */
     public HdKeyPair getRootAddressFromSeed(byte[] seed, KeyVersion keyVersion, CoinType coinType) {
-        HdKeyPair masterAddress = hdKeyGenerator.getAddressFromSeed(seed, keyVersion, coinType);
-        HdKeyPair purposeAddress = hdKeyGenerator.getAddress(masterAddress, PURPOSE, true);
-        HdKeyPair coinTypeAddress = hdKeyGenerator.getAddress(purposeAddress, coinType.getCoinType(), true);
-        HdKeyPair accountAddress = hdKeyGenerator.getAddress(coinTypeAddress, ACCOUNT, true);
-        HdKeyPair changeAddress = hdKeyGenerator.getAddress(accountAddress, CHANGE, coinType.getAlwaysHardened());
+        HdKeyPair masterAddress = hdKeyGenerator.getMasterKeyPairFromSeed(seed, keyVersion, coinType);
+        HdKeyPair purposeAddress = hdKeyGenerator.getChildKeyPair(masterAddress, PURPOSE, true);
+        HdKeyPair coinTypeAddress = hdKeyGenerator.getChildKeyPair(purposeAddress, coinType.getCoinType(), true);
+        HdKeyPair accountAddress = hdKeyGenerator.getChildKeyPair(coinTypeAddress, ACCOUNT, true);
+        HdKeyPair changeAddress = hdKeyGenerator.getChildKeyPair(accountAddress, CHANGE, coinType.getAlwaysHardened());
 
         return changeAddress;
     }
 
     public HdKeyPair getAddress(HdKeyPair address, int index) {
-        return hdKeyGenerator.getAddress(address, index, address.getCoinType().getAlwaysHardened());
+        return hdKeyGenerator.getChildKeyPair(address, index, address.getCoinType().getAlwaysHardened());
     }
 }

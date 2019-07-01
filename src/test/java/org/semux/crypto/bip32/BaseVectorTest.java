@@ -17,7 +17,7 @@ public abstract class BaseVectorTest {
     public HdKeyGenerator hdKeyGenerator = new HdKeyGenerator();
 
     public BaseVectorTest() throws UnsupportedEncodingException {
-        masterNode = hdKeyGenerator.getAddressFromSeed(getSeed(), KeyVersion.MAINNET, CoinType.BITCOIN);
+        masterNode = hdKeyGenerator.getMasterKeyPairFromSeed(getSeed(), KeyVersion.MAINNET, CoinType.BITCOIN);
     }
 
     protected abstract byte[] getSeed();
