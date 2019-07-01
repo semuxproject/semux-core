@@ -21,10 +21,10 @@ public class PublicKeyChainTest {
 
     @Test
     public void testPubKey0() {
-        HdKeyPair rootAddress = generator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.BITCOIN);
-        HdKeyPair address = generator.getChildKeyPair(rootAddress, 0, false);
+        HdKeyPair rootKeyPair = generator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.BITCOIN);
+        HdKeyPair childKeyPair = generator.getChildKeyPair(rootKeyPair, 0, false);
         // test that the pub key chain generated from only public key matches the other
-        HdPublicKey pubKey = generator.getChildPublicKey(rootAddress.getPublicKey(), 0, false, Scheme.BIP32);
-        Assert.assertArrayEquals(address.getPublicKey().getKey(), pubKey.getKey());
+        HdPublicKey pubKey = generator.getChildPublicKey(rootKeyPair.getPublicKey(), 0, false, Scheme.BIP32);
+        Assert.assertArrayEquals(childKeyPair.getPublicKey().getKey(), pubKey.getKey());
     }
 }

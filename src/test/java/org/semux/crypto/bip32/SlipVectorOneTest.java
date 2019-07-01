@@ -35,8 +35,8 @@ public class SlipVectorOneTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testUnableToPublicChain() {
-        HdKeyPair address = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
-        hdKeyGenerator.getChildPublicKey(address.getPublicKey(), 0, false, Scheme.SLIP10_ED25519);
+        HdKeyPair master = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
+        hdKeyGenerator.getChildPublicKey(master.getPublicKey(), 0, false, Scheme.SLIP10_ED25519);
     }
 
     @Test

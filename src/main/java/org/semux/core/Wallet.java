@@ -689,9 +689,9 @@ public class Wallet {
         requireHdWalletInitialized();
 
         synchronized (accounts) {
-            HdKeyPair rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, KeyVersion.MAINNET, CoinType.SEMUX);
-            HdKeyPair address = BIP_44.getAddress(rootAddress, nextHdAccountIndex++);
-            Key newKey = Key.fromRawPrivateKey(address.getPrivateKey().getKeyData());
+            HdKeyPair rootKey = BIP_44.getRootKeyPairFromSeed(hdSeed, KeyVersion.MAINNET, CoinType.SEMUX);
+            HdKeyPair key = BIP_44.getChildKeyPair(rootKey, nextHdAccountIndex++);
+            Key newKey = Key.fromRawPrivateKey(key.getPrivateKey().getKeyData());
             ByteArray to = ByteArray.of(newKey.toAddress());
 
             // put the accounts into
@@ -699,7 +699,7 @@ public class Wallet {
 
             // set a default alias
             if (!aliases.containsKey(to)) {
-                setAddressAlias(newKey.toAddress(), getAliasFromPath(address.getPath()));
+                setAddressAlias(newKey.toAddress(), getAliasFromPath(key.getPath()));
             }
 
             return newKey;
@@ -723,7 +723,7 @@ public class Wallet {
             found++;
         }
 
-        HdKeyPair rootAddress = BIP_44.getRootAddressFromSeed(hdSeed, getKeyVersion(network), CoinType.SEMUX);
+        HdKeyPair rootAddress = BIP_44.getRootKeyPairFromSeed(hdSeed, getKeyVersion(network), CoinType.SEMUX);
 
         nextHdAccountIndex = 0;
 
@@ -731,9 +731,9 @@ public class Wallet {
         int endIndex = start + MAX_HD_WALLET_SCAN_AHEAD;
 
         for (int i = start; i < endIndex; i++) {
-            HdKeyPair address = BIP_44.getAddress(rootAddress, i);
+            HdKeyPair childKey = BIP_44.getChildKeyPair(rootAddress, i);
 
-            Key key = Key.fromRawPrivateKey(address.getPrivateKey().getKeyData());
+            Key key = Key.fromRawPrivateKey(childKey.getPrivateKey().getKeyData());
             boolean isUsedAccount = isUsedAccount(accountState, key.toAddress());
 
             ByteArray to = ByteArray.of(key.toAddress());
@@ -743,7 +743,7 @@ public class Wallet {
                 endIndex += MAX_HD_WALLET_SCAN_AHEAD;
                 if (addAccount(key)) {
                     if (!aliases.containsKey(to)) {
-                        aliases.put(to, address.getPath());
+                        aliases.put(to, childKey.getPath());
                     }
                     found++;
                 }

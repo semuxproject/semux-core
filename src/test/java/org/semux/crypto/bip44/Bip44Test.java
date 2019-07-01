@@ -19,13 +19,13 @@ public class Bip44Test {
 
     @Test
     public void testBitcoin() {
-        HdKeyPair address = bip44.getRootAddressFromSeed(seed, KeyVersion.MAINNET, CoinType.BITCOIN);
-        bip44.getAddress(address, 0);
+        HdKeyPair key = bip44.getRootKeyPairFromSeed(seed, KeyVersion.MAINNET, CoinType.BITCOIN);
+        bip44.getChildKeyPair(key, 0);
     }
 
     @Test
     public void testSemux() {
-        HdKeyPair address = bip44.getRootAddressFromSeed(seed, KeyVersion.MAINNET, CoinType.SEMUX);
-        bip44.getAddress(address, 0);
+        HdKeyPair key = bip44.getRootKeyPairFromSeed(seed, KeyVersion.MAINNET, CoinType.SEMUX);
+        bip44.getChildKeyPair(key, 0);
     }
 }

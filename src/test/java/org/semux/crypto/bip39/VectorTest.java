@@ -44,8 +44,8 @@ public class VectorTest {
                 Assert.assertEquals(vector.getMnemonic(), words);
                 byte[] seed = generator.getSeedFromWordlist(words, password, lang);
                 Assert.assertEquals(vector.getSeed(), Hex.encode(seed));
-                HdKeyPair address = keyGenerator.getMasterKeyPairFromSeed(seed, KeyVersion.MAINNET, CoinType.BITCOIN);
-                Assert.assertEquals(vector.getHdKey(), Base58.encode(address.getPrivateKey().getKey()));
+                HdKeyPair key = keyGenerator.getMasterKeyPairFromSeed(seed, KeyVersion.MAINNET, CoinType.BITCOIN);
+                Assert.assertEquals(vector.getHdKey(), Base58.encode(key.getPrivateKey().getKey()));
             }
         }
     }

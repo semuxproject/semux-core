@@ -163,7 +163,7 @@ public class HdKeyGenerator {
     public HdKeyPair getChildKeyPair(HdKeyPair parent, long child, boolean isHardened) {
         HdPrivateKey privateKey = new HdPrivateKey();
         HdPublicKey publicKey = new HdPublicKey();
-        HdKeyPair address = new HdKeyPair(privateKey, publicKey, parent.getCoinType(),
+        HdKeyPair key = new HdKeyPair(privateKey, publicKey, parent.getCoinType(),
                 getPath(parent.getPath(), child, isHardened));
 
         if (isHardened) {
@@ -185,9 +185,8 @@ public class HdKeyGenerator {
         } else {
             // I = HMAC-SHA512(Key = cpar, Data = serP(point(kpar)) || ser32(i))
             // just use public key
-            byte[] key = parent.getPublicKey().getKeyData();
-            byte[] xPubKey = HdUtil.merge(key, HdUtil.ser32(child));
-            I = HmacSha512.hmac512(xPubKey, xChain);
+            byte[] data = HdUtil.merge(parent.getPublicKey().getKeyData(), HdUtil.ser32(child));
+            I = HmacSha512.hmac512(data, xChain);
         }
 
         // split into left/right
@@ -272,7 +271,7 @@ public class HdKeyGenerator {
             publicKey.setKeyData(HdUtil.merge(new byte[] { 0 }, pk.getAbyte()));
         }
 
-        return address;
+        return key;
     }
 
     private String getPath(String parentPath, long child, boolean isHardened) {
