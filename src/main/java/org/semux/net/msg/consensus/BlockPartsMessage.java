@@ -20,7 +20,7 @@ public class BlockPartsMessage extends Message {
     private final int parts;
     private final List<byte[]> data;
 
-    public BlockPartsMessage(int number, int parts, List<byte[]> data) {
+    public BlockPartsMessage(long number, int parts, List<byte[]> data) {
         super(MessageCode.BLOCK_PARTS, null);
 
         this.number = number;

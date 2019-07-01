@@ -59,6 +59,7 @@ import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BlockMessage;
+import org.semux.net.msg.consensus.BlockPartsMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
 import org.semux.util.ByteArray;
 import org.semux.util.TimeUtil;
@@ -206,6 +207,16 @@ public class SemuxSync implements SyncManager {
         return isRunning.get();
     }
 
+    protected void addBlock(Block block, Channel channel) {
+        synchronized (lock) {
+            if (toDownload.remove(block.getNumber())) {
+                growToDownloadQueue();
+            }
+            toComplete.remove(block.getNumber());
+            toProcess.add(Pair.of(block, channel));
+        }
+    }
+
     @Override
     public void onMessage(Channel channel, Message msg) {
         if (!isRunning()) {
@@ -216,19 +227,32 @@ public class SemuxSync implements SyncManager {
         case BLOCK: {
             BlockMessage blockMsg = (BlockMessage) msg;
             Block block = blockMsg.getBlock();
-            synchronized (lock) {
-                if (toDownload.remove(block.getNumber())) {
-                    growToDownloadQueue();
+            addBlock(block, channel);
+            break;
+        }
+        case BLOCK_PARTS: {
+            // try re-construct a block
+            BlockPartsMessage blockPartsMsg = (BlockPartsMessage) msg;
+            List<Block.BlockPart> parts = Block.BlockPart.decode(blockPartsMsg.getParts());
+            List<byte[]> data = blockPartsMsg.getData();
+            if (parts.size() != data.size()) {
+                logger.debug("Parts id and data do not match");
+                break;
+            }
+
+            // We need header, transactions, and votes
+            if (parts.get(0) != Block.BlockPart.HEADER || parts.get(1) != Block.BlockPart.TRANSACTIONS
+                    || parts.get(0) != Block.BlockPart.VOTES) {
+                try {
+                    Block block = Block.fromComponents(data.get(0), data.get(1), null, data.get(2));
+                    addBlock(block, channel);
+                } catch (Exception e) {
+                    logger.debug("Failed to parse a block from components", e);
                 }
-                toComplete.remove(block.getNumber());
-                toProcess.add(Pair.of(block, channel));
             }
             break;
         }
-        case BLOCK_HEADER: {
-            // TODO implement block header
-            break;
-        }
+        case BLOCK_HEADER: // deprecated
         default: {
             break;
         }
