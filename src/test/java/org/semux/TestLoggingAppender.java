@@ -16,6 +16,7 @@ import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
@@ -36,12 +37,12 @@ public final class TestLoggingAppender extends AbstractAppender {
 
     protected TestLoggingAppender(String name, Filter filter,
             Layout<? extends Serializable> layout) {
-        super(name, filter, layout);
+        super(name, filter, layout, true, Property.EMPTY_ARRAY);
     }
 
     protected TestLoggingAppender(String name, Filter filter,
             Layout<? extends Serializable> layout, boolean ignoreExceptions) {
-        super(name, filter, layout, ignoreExceptions);
+        super(name, filter, layout, ignoreExceptions, Property.EMPTY_ARRAY);
     }
 
     public static void prepare(Level level) {

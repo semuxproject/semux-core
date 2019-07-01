@@ -17,8 +17,8 @@ import org.semux.crypto.Hex;
 import org.semux.crypto.bip32.key.HdPrivateKey;
 import org.semux.crypto.bip32.key.HdPublicKey;
 import org.semux.crypto.bip32.key.KeyVersion;
-import org.semux.crypto.bip32.util.HashUtil;
 import org.semux.crypto.bip32.util.BytesUtil;
+import org.semux.crypto.bip32.util.HashUtil;
 import org.semux.crypto.bip32.util.Hmac;
 import org.semux.crypto.bip32.util.Secp256k1;
 

@@ -344,7 +344,7 @@ public class Key {
             if (o == null || getClass() != o.getClass())
                 return false;
 
-            return this.toBytes().equals(((Signature) o).toBytes());
+            return Arrays.equals(toBytes(), ((Signature) o).toBytes());
         }
 
         @Override

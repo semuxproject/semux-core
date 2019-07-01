@@ -7,6 +7,7 @@
 package org.semux.util;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
