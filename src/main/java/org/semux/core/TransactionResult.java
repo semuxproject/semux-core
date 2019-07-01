@@ -10,12 +10,12 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bouncycastle.util.encoders.Hex;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.OpCode;
 import org.ethereum.vm.program.InternalTransaction;
 import org.semux.Network;
+import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
@@ -419,7 +419,7 @@ public class TransactionResult {
 
     @Override
     public String toString() {
-        return "TransactionResult [code=" + code + ", returnData=" + Hex.toHexString(returnData) + ", # logs="
+        return "TransactionResult [code=" + code + ", returnData=" + Hex.encode(returnData) + ", # logs="
                 + logs.size() + "]";
     }
 }

@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 /**
  * General Util class for defined functions.
  */
-public class HdUtil {
+public class BytesUtil {
 
     /**
      * ser32(i): serialize a 32-bit unsigned integer i as a 4-byte sequence, most
@@ -129,7 +129,7 @@ public class HdUtil {
      * @return fingerprint
      */
     public static byte[] getFingerprint(byte[] keyData) {
-        byte[] point = Secp256k1.serP(Secp256k1.point(org.semux.crypto.bip32.util.HdUtil.parse256(keyData)));
+        byte[] point = Secp256k1.serP(Secp256k1.point(BytesUtil.parse256(keyData)));
         byte[] h160 = HashUtil.h160(point);
         return new byte[] { h160[0], h160[1], h160[2], h160[3] };
     }
