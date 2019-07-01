@@ -24,7 +24,7 @@ public class PublicKeyChainTest {
         HdKeyPair rootAddress = generator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.BITCOIN);
         HdKeyPair address = generator.getChildKeyPair(rootAddress, 0, false);
         // test that the pub key chain generated from only public key matches the other
-        HdPublicKey pubKey = generator.getChildPublicKey(rootAddress.getPublicKey(), 0, false, Curve.BITCOIN);
+        HdPublicKey pubKey = generator.getChildPublicKey(rootAddress.getPublicKey(), 0, false, Scheme.BIP32);
         Assert.assertArrayEquals(address.getPublicKey().getKey(), pubKey.getKey());
     }
 }

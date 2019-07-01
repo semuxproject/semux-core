@@ -32,14 +32,14 @@ public class SlipVectorOneTest {
         Assert.assertArrayEquals(chainCode, address.getPrivateKey().getChainCode());
         Assert.assertArrayEquals(privateKey, address.getPrivateKey().getPrivateKey());
         Assert.assertArrayEquals(publicKey, address.getPublicKey().getPublicKey());
-        Assert.assertEquals(Curve.ED25519, address.getCoinType().getCurve());
+        Assert.assertEquals(Scheme.SLIP10_ED25519, address.getCoinType().getScheme());
     }
 
     @Test
     public void testUnableToPublicChain() {
         HdKeyPair address = hdKeyGenerator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
         try {
-            hdKeyGenerator.getChildPublicKey(address.getPublicKey(), 0, false, Curve.ED25519);
+            hdKeyGenerator.getChildPublicKey(address.getPublicKey(), 0, false, Scheme.SLIP10_ED25519);
             fail("Should not be able to chain public keys with ed25519");
 
         } catch (UnsupportedOperationException e) {
@@ -61,7 +61,7 @@ public class SlipVectorOneTest {
         Assert.assertArrayEquals(chainCode, address.getPrivateKey().getChainCode());
         Assert.assertArrayEquals(privateKey, address.getPrivateKey().getPrivateKey());
         Assert.assertArrayEquals(publicKey, address.getPublicKey().getPublicKey());
-        Assert.assertEquals(Curve.ED25519, address.getCoinType().getCurve());
+        Assert.assertEquals(Scheme.SLIP10_ED25519, address.getCoinType().getScheme());
     }
 
     @Test
@@ -79,7 +79,7 @@ public class SlipVectorOneTest {
         Assert.assertArrayEquals(chainCode, address.getPrivateKey().getChainCode());
         Assert.assertArrayEquals(privateKey, address.getPrivateKey().getPrivateKey());
         Assert.assertArrayEquals(publicKey, address.getPublicKey().getPublicKey());
-        Assert.assertEquals(Curve.ED25519, address.getCoinType().getCurve());
+        Assert.assertEquals(Scheme.SLIP10_ED25519, address.getCoinType().getScheme());
     }
 
     @Test
@@ -98,6 +98,6 @@ public class SlipVectorOneTest {
         Assert.assertArrayEquals(chainCode, address.getPrivateKey().getChainCode());
         Assert.assertArrayEquals(privateKey, address.getPrivateKey().getPrivateKey());
         Assert.assertArrayEquals(publicKey, address.getPublicKey().getPublicKey());
-        Assert.assertEquals(Curve.ED25519, address.getCoinType().getCurve());
+        Assert.assertEquals(Scheme.SLIP10_ED25519, address.getCoinType().getScheme());
     }
 }

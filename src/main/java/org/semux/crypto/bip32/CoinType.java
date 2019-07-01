@@ -7,17 +7,17 @@
 package org.semux.crypto.bip32;
 
 public enum CoinType {
-    BITCOIN(Curve.BITCOIN, 0, false),
+    BITCOIN(Scheme.BIP32, 0, false),
 
-    SEMUX(Curve.ED25519, 7562605, true);
+    SEMUX(Scheme.SLIP10_ED25519, 7562605, true);
 
-    private final Curve curve;
+    private final Scheme scheme;
     private final long coinType;
     private boolean alwaysHardened;
 
-    CoinType(Curve curve, long coinType, boolean alwaysHardened) {
+    CoinType(Scheme scheme, long coinType, boolean alwaysHardened) {
 
-        this.curve = curve;
+        this.scheme = scheme;
         this.coinType = coinType;
         this.alwaysHardened = alwaysHardened;
     }
@@ -27,8 +27,8 @@ public enum CoinType {
      *
      * @return curve
      */
-    public Curve getCurve() {
-        return curve;
+    public Scheme getScheme() {
+        return scheme;
     }
 
     /**

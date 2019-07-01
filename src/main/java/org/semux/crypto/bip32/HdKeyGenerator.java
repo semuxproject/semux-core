@@ -36,14 +36,14 @@ public class HdKeyGenerator {
 
     public HdKeyPair getMasterKeyPairFromSeed(byte[] seed, KeyVersion keyVersion, CoinType coinType) {
 
-        Curve curve = coinType.getCurve();
+        Scheme scheme = coinType.getScheme();
         HdPublicKey publicKey = new HdPublicKey();
         HdPrivateKey privateKey = new HdPrivateKey();
         HdKeyPair address = new HdKeyPair(privateKey, publicKey, coinType, MASTER_PATH);
 
         byte[] I;
         try {
-            I = HmacSha512.hmac512(seed, curve.getSeed().getBytes("UTF-8"));
+            I = HmacSha512.hmac512(seed, scheme.getSeed().getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
             throw new CryptoException("Unable to decode seed.");
         }
@@ -55,7 +55,7 @@ public class HdKeyGenerator {
         BigInteger masterSecretKey = HdUtil.parse256(IL);
 
         // In case IL is 0 or >=n, the master key is invalid.
-        if (curve != Curve.ED25519 && masterSecretKey.compareTo(BigInteger.ZERO) == 0
+        if (scheme != Scheme.SLIP10_ED25519 && masterSecretKey.compareTo(BigInteger.ZERO) == 0
                 || masterSecretKey.compareTo(Secp256k1.getN()) > 0) {
             throw new CryptoException("The master key is invalid");
         }
@@ -76,12 +76,12 @@ public class HdKeyGenerator {
         publicKey.setChainCode(IR);
         publicKey.setKeyData(Secp256k1.serP(point));
 
-        switch (curve) {
-        case BITCOIN:
+        switch (scheme) {
+        case BIP32:
             privateKey.setPrivateKey(privateKey.getKeyData());
             publicKey.setPublicKey(publicKey.getKeyData());
             break;
-        case ED25519:
+        case SLIP10_ED25519:
             privateKey.setPrivateKey(IL);
             EdDSAPrivateKey sk = new EdDSAPrivateKey(new EdDSAPrivateKeySpec(IL, ED25519SPEC));
             EdDSAPublicKey pk = new EdDSAPublicKey(new EdDSAPublicKeySpec(sk.getA(), sk.getParams()));
@@ -103,16 +103,16 @@ public class HdKeyGenerator {
      *            the child index
      * @param isHardened
      *            whether the child index is hardened
-     * @param curve
+     * @param scheme
      *            the curve
      * @return
      */
-    public HdPublicKey getChildPublicKey(HdPublicKey parent, long child, boolean isHardened, Curve curve) {
+    public HdPublicKey getChildPublicKey(HdPublicKey parent, long child, boolean isHardened, Scheme scheme) {
         if (isHardened) {
             throw new CryptoException("Cannot derive child public keys from hardened keys");
         }
 
-        if (curve == Curve.ED25519) {
+        if (scheme == Scheme.SLIP10_ED25519) {
             throw new UnsupportedOperationException("Unable to derive ed25519 public key chaining");
         }
 
@@ -171,7 +171,7 @@ public class HdKeyGenerator {
 
         if (isHardened) {
             child += 0x80000000;
-        } else if (parent.getCoinType().getCurve() == Curve.ED25519) {
+        } else if (parent.getCoinType().getScheme() == Scheme.SLIP10_ED25519) {
             throw new CryptoException("ed25519 only supports hardened keys");
         }
 
@@ -227,12 +227,12 @@ public class HdKeyGenerator {
         publicKey.setChainCode(IR);
         publicKey.setKeyData(Secp256k1.serP(point));
 
-        switch (parent.getCoinType().getCurve()) {
-        case BITCOIN:
+        switch (parent.getCoinType().getScheme()) {
+        case BIP32:
             privateKey.setPrivateKey(privateKey.getKeyData());
             publicKey.setPublicKey(publicKey.getKeyData());
             break;
-        case ED25519:
+        case SLIP10_ED25519:
             privateKey.setPrivateKey(IL);
             h160 = HashUtil.h160(parent.getPublicKey().getPublicKey());
             childFingerprint = new byte[] { h160[0], h160[1], h160[2], h160[3] };
