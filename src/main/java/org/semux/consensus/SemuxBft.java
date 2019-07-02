@@ -800,16 +800,16 @@ public class SemuxBft implements BftManager {
                 new byte[0], new byte[0], data);
 
         // only propose gas used up to configured block gas limit
-        long blockGasLimit = config.poolBlockGasLimit();
-        SemuxBlock semuxBlock = new SemuxBlock(tempHeader, blockGasLimit);
+        long remainingBlockGas = config.poolBlockGasLimit();
+        SemuxBlock semuxBlock = new SemuxBlock(tempHeader, config.spec().maxBlockGasLimit());
 
         for (PendingManager.PendingTransaction pendingTx : pending) {
             Transaction tx = pendingTx.transaction;
             boolean isVMTransaction = tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE;
 
             if (isVMTransaction) {
-                // transactions that exceed the remaining block gas limit are ignores
-                if (tx.getGasPrice() <= blockGasLimit) {
+                // transactions that exceed the remaining block gas limit are ignored
+                if (tx.getGasPrice() <= remainingBlockGas) {
                     TransactionResult result = exec.execute(tx, as, ds, semuxBlock, chain);
 
                     // only include transaction that's acceptable
@@ -817,15 +817,15 @@ public class SemuxBft implements BftManager {
                         pendingResults.add(result);
                         pendingTxs.add(tx);
 
-                        blockGasLimit -= result.getGasUsed();
+                        remainingBlockGas -= result.getGasUsed();
                     }
                 }
             } else {
-                if (config.spec().nonVMTransactionGasCost() <= blockGasLimit
+                if (config.spec().nonVMTransactionGasCost() <= remainingBlockGas
                         && pendingTx.result.getCode().isAcceptable()) {
                     pendingResults.add(pendingTx.result);
                     pendingTxs.add(pendingTx.transaction);
-                    blockGasLimit -= config.spec().nonVMTransactionGasCost();
+                    remainingBlockGas -= config.spec().nonVMTransactionGasCost();
                 }
             }
         }
