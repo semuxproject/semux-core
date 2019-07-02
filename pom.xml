@@ -566,8 +566,7 @@
         <dependency>
             <groupId>com.github.semuxproject</groupId>
             <artifactId>evm</artifactId>
-            <!-- todo - once PR approved for VM, use this version -->
-            <version>1.0.0-SNAPSHOT</version>
+            <version>b03d83303da1a0df99de44a53094f096446a1d5b</version>
         </dependency>
 
         <!-- Swagger & JAX-RS API -->

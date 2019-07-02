@@ -8,11 +8,12 @@ package org.semux.vm.client;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.DataWord;
-import org.ethereum.vm.PrecompiledContract;
-import org.ethereum.vm.chainspec.PrecompiledContractsByzantium;
+import org.ethereum.vm.chainspec.PrecompiledContract;
+import org.ethereum.vm.chainspec.ByzantiumPrecompiledContracts;
+import org.ethereum.vm.chainspec.PrecompiledContractContext;
 import org.ethereum.vm.chainspec.Spec;
 
-public class SemuxPrecompiledContracts extends PrecompiledContractsByzantium {
+public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
 
     private static final Vote vote = new Vote();
     private static final Unvote unvote = new Unvote();
@@ -21,14 +22,14 @@ public class SemuxPrecompiledContracts extends PrecompiledContractsByzantium {
     private static final DataWord unvoteAddr = DataWord.of(101);
 
     @Override
-    public PrecompiledContract getContractForAddress(DataWord address, Spec spec) {
+    public PrecompiledContract getContractForAddress(DataWord address) {
 
         if (address.equals(voteAddr)) {
             return vote;
         } else if (address.equals(unvoteAddr)) {
             return unvote;
         }
-        return super.getContractForAddress(address, spec);
+        return super.getContractForAddress(address);
     }
 
     public static class Vote extends PrecompiledContract {
@@ -38,7 +39,11 @@ public class SemuxPrecompiledContracts extends PrecompiledContractsByzantium {
         }
 
         @Override
-        public Pair<Boolean, byte[]> execute(byte[] data) {
+        public Pair<Boolean, byte[]> execute(byte[] data, PrecompiledContractContext context) {
+
+            if (context instanceof SemuxContext) {
+
+            }
             // todo
             return Pair.of(true, data);
         }
@@ -51,7 +56,10 @@ public class SemuxPrecompiledContracts extends PrecompiledContractsByzantium {
         }
 
         @Override
-        public Pair<Boolean, byte[]> execute(byte[] data) {
+        public Pair<Boolean, byte[]> execute(byte[] data, PrecompiledContractContext context) {
+            if (context instanceof SemuxContext) {
+
+            }
             // todo
             return Pair.of(true, data);
         }

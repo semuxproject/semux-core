@@ -6,15 +6,15 @@
  */
 package org.semux.vm.client;
 
-import org.ethereum.vm.PrecompiledContracts;
 import org.ethereum.vm.chainspec.ByzantiumSpec;
+import org.ethereum.vm.chainspec.PrecompiledContracts;
 
 public class SemuxSpec extends ByzantiumSpec {
 
     private static final PrecompiledContracts precompiledContracts = new SemuxPrecompiledContracts();
 
     @Override
-    public PrecompiledContracts precompiledContracts() {
+    public PrecompiledContracts getPrecompiledContracts() {
         return precompiledContracts;
     }
 }
