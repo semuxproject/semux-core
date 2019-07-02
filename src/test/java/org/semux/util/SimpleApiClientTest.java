@@ -60,16 +60,6 @@ public class SimpleApiClientTest {
     }
 
     @Test
-    public void testPut() throws IOException {
-        String uri = "/whitelist";
-
-        SimpleApiClient apiClient = kernelRule.getKernel().getApiClient();
-        String response = apiClient.put(uri, "ip", "127.0.0.1");
-
-        assertTrue(response.contains("\"success\":true"));
-    }
-
-    @Test
     public void testDelete() throws IOException {
         // prepare
         Key key = new Key();
