@@ -7,6 +7,29 @@
 package org.semux.vm.client;
 
 import org.ethereum.vm.chainspec.PrecompiledContractContext;
+import org.semux.core.state.AccountState;
+import org.semux.core.state.DelegateState;
 
 public class SemuxContext implements PrecompiledContractContext {
+    private DelegateState delegateState;
+    private AccountState accountState;
+
+    public SemuxContext(DelegateState delegateState, AccountState accountState) {
+        this.delegateState = delegateState;
+        this.accountState = accountState;
+    }
+
+    public DelegateState getDelegateState() {
+        return delegateState;
+    }
+
+    public AccountState getAccountState() {
+        return accountState;
+    }
+
+    public void commit() {
+        delegateState.commit();
+        accountState.commit();
+    }
+
 }

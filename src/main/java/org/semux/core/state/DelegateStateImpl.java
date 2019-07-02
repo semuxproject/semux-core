@@ -241,6 +241,15 @@ public class DelegateStateImpl implements DelegateState {
     }
 
     @Override
+    public DelegateState clone() {
+        DelegateStateImpl clone = new DelegateStateImpl(this.chain, this.delegateDB, this.voteDB);
+        clone.prev = this.prev;
+        clone.voteUpdates.putAll(this.voteUpdates);
+        clone.delegateUpdates.putAll(this.delegateUpdates);
+        return clone;
+    }
+
+    @Override
     public void rollback() {
         delegateUpdates.clear();
         voteUpdates.clear();

@@ -231,7 +231,7 @@ public class TransactionExecutor {
                 if (tx.getGas() > config.vmMaxBlockGasLimit()) {
                     result.setCode(Code.INVALID_GAS);
                 } else {
-                    executeVmTransaction(result, tx, as, block, gasUsedInBlock);
+                    executeVmTransaction(result, tx, as, ds, block, gasUsedInBlock);
                     if (result.getCode().isAcceptable()) {
                         gasUsedInBlock += result.getGasUsed();
                     }
@@ -257,10 +257,11 @@ public class TransactionExecutor {
         return results;
     }
 
-    private void executeVmTransaction(TransactionResult result, Transaction tx, AccountState as, SemuxBlock block,
+    private void executeVmTransaction(TransactionResult result, Transaction tx, AccountState as, DelegateState ds,
+            SemuxBlock block,
             long gasUsedInBlock) {
         SemuxTransaction transaction = new SemuxTransaction(tx);
-        Repository repository = new SemuxRepository(as);
+        Repository repository = new SemuxRepository(as, ds);
         ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
 
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(

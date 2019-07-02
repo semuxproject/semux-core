@@ -6,10 +6,10 @@
  */
 package org.semux.vm.client;
 
+import java.math.BigInteger;
+
 import org.ethereum.vm.client.Block;
 import org.semux.core.BlockHeader;
-
-import java.math.BigInteger;
 
 /**
  * Facade for BlockHeader -> Block

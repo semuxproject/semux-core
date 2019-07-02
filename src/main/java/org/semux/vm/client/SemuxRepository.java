@@ -13,6 +13,7 @@ import org.ethereum.vm.chainspec.PrecompiledContractContext;
 import org.ethereum.vm.client.Repository;
 import org.semux.core.Amount;
 import org.semux.core.state.AccountState;
+import org.semux.core.state.DelegateState;
 
 /**
  * Facade class for AccountState -> Repository
@@ -22,9 +23,11 @@ import org.semux.core.state.AccountState;
  */
 public class SemuxRepository implements Cloneable, Repository {
     private final AccountState accountState;
+    private DelegateState delegateState;
 
-    public SemuxRepository(AccountState accountState) {
+    public SemuxRepository(AccountState accountState, DelegateState delegateState) {
         this.accountState = accountState;
+        this.delegateState = delegateState;
     }
 
     @Override
@@ -103,12 +106,12 @@ public class SemuxRepository implements Cloneable, Repository {
 
     @Override
     public Repository startTracking() {
-        return new SemuxRepository(accountState.track());
+        return new SemuxRepository(accountState.track(), delegateState.track());
     }
 
     @Override
     public Repository clone() {
-        return new SemuxRepository(accountState.clone());
+        return new SemuxRepository(accountState.clone(), delegateState.clone());
     }
 
     @Override

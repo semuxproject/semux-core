@@ -105,6 +105,11 @@ public interface DelegateState {
     void commit();
 
     /**
+     * Clone this DelegateState, including all the uncommitted changes.
+     */
+    DelegateState clone();
+
+    /**
      * Reverts all updates since last snapshot.
      */
     void rollback();
