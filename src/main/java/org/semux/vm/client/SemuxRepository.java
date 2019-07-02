@@ -94,7 +94,7 @@ public class SemuxRepository implements Cloneable, Repository {
 
     @Override
     public BigInteger getBalance(byte[] address) {
-        return accountState.getAccount(address).getAvailable().getBigInteger();
+        return Conversion.amountToWei(accountState.getAccount(address).getAvailable());
     }
 
     @Override
