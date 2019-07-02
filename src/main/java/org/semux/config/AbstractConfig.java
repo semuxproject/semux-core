@@ -165,6 +165,8 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     public int maxTransactionDataSize(TransactionType type) {
         switch (type) {
         case COINBASE:
+        case UNVOTE:
+        case VOTE:
             return 0; // not required
 
         case TRANSFER:
@@ -173,13 +175,9 @@ public abstract class AbstractConfig implements Config, ChainSpec {
         case DELEGATE:
             return 16; // for name
 
-        case UNVOTE:
-        case VOTE:
-            return 0; // not required
-
         case CREATE:
         case CALL:
-            return 64 * 1024; // for dapps
+            return 512 * 1024; // for dapps
 
         default:
             throw new UnreachableException();
