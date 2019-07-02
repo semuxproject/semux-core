@@ -989,7 +989,7 @@
             }
         },
         "/blacklist": {
-            "put": {
+            "post": {
                 "tags": [
                     "semux"
                 ],
@@ -1031,7 +1031,7 @@
             }
         },
         "/whitelist": {
-            "put": {
+            "post": {
                 "tags": [
                     "semux"
                 ],

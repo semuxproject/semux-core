@@ -57,13 +57,13 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
 
                 { POST.class, uriBuilder("addNode").queryParam("node", ".com:65536").build() },
 
-                { PUT.class, uriBuilder("addToBlacklist").build() },
+                { POST.class, uriBuilder("addToBlacklist").build() },
 
-                { PUT.class, uriBuilder("addToBlacklist").queryParam("ip", "I_am_not_an_ip").build() },
+                { POST.class, uriBuilder("addToBlacklist").queryParam("ip", "I_am_not_an_ip").build() },
 
-                { PUT.class, uriBuilder("addToWhitelist").build() },
+                { POST.class, uriBuilder("addToWhitelist").build() },
 
-                { PUT.class, uriBuilder("addToWhitelist").queryParam("ip", "I_am_not_an_ip").build() },
+                { POST.class, uriBuilder("addToWhitelist").queryParam("ip", "I_am_not_an_ip").build() },
 
                 { GET.class, uriBuilder("getBlockByNumber").build() },
 
