@@ -619,15 +619,15 @@ public abstract class AbstractConfig implements Config, ChainSpec {
                     uiFractionDigits = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 }
-                case "pool.blockGasLimit": {
+                case "txpool.blockGasLimit": {
                     poolBlockGasLimit = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 }
-                case "pool.minGasPrice": {
+                case "txpool.minGasPrice": {
                     poolMinGasPrice = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 }
-                case "pool.maxTransactionTimeDrift": {
+                case "txpool.maxTransactionTimeDrift": {
                     poolMaxTransactionTimeDrift = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 }
