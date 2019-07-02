@@ -14,12 +14,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.assertj.swing.util.Range;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

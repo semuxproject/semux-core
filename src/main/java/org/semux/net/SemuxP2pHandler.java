@@ -39,8 +39,10 @@ import org.semux.net.msg.MessageWrapper;
 import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BlockHeaderMessage;
 import org.semux.net.msg.consensus.BlockMessage;
+import org.semux.net.msg.consensus.BlockPartsMessage;
 import org.semux.net.msg.consensus.GetBlockHeaderMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
+import org.semux.net.msg.consensus.GetBlockPartsMessage;
 import org.semux.net.msg.consensus.NewHeightMessage;
 import org.semux.net.msg.p2p.DisconnectMessage;
 import org.semux.net.msg.p2p.GetNodesMessage;
@@ -244,6 +246,8 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         case BLOCK:
         case GET_BLOCK_HEADER:
         case BLOCK_HEADER:
+        case GET_BLOCK_PARTS:
+        case BLOCK_PARTS:
             onSync(msg);
             break;
 
@@ -436,24 +440,47 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             channel.getMessageQueue().sendMessage(new BlockMessage(block));
             break;
         }
-        case BLOCK: {
-            sync.onMessage(channel, msg);
-            break;
-        }
         case GET_BLOCK_HEADER: {
             GetBlockHeaderMessage m = (GetBlockHeaderMessage) msg;
             BlockHeader header = chain.getBlockHeader(m.getNumber());
             channel.getMessageQueue().sendMessage(new BlockHeaderMessage(header));
             break;
         }
-        case BLOCK_HEADER: {
+        case GET_BLOCK_PARTS: {
+            GetBlockPartsMessage m = (GetBlockPartsMessage) msg;
+            long number = m.getNumber();
+            int parts = m.getParts();
+
+            List<byte[]> partsSerilized = new ArrayList<>();
+            Block block = chain.getBlock(number);
+            for (Block.BlockPart part : Block.BlockPart.decode(parts)) {
+                switch (part) {
+                case HEADER:
+                    partsSerilized.add(block.getEncodedHeader());
+                    break;
+                case TRANSACTIONS:
+                    partsSerilized.add(block.getEncodedTransactions());
+                    break;
+                case RESULTS:
+                    partsSerilized.add(block.getEncodedResults());
+                    break;
+                case VOTES:
+                    partsSerilized.add(block.getEncodedVotes());
+                    break;
+                default:
+                    throw new UnreachableException();
+                }
+            }
+
+            channel.getMessageQueue().sendMessage(new BlockPartsMessage(number, parts, partsSerilized));
+            break;
+        }
+        case BLOCK:
+        case BLOCK_HEADER:
+        case BLOCK_PARTS: {
             sync.onMessage(channel, msg);
             break;
         }
-        case GET_BLOCK_PARTS:
-        case BLOCK_PARTS:
-            // TODO: add handler
-            break;
         default:
             throw new UnreachableException();
         }
