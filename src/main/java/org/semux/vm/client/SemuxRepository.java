@@ -11,7 +11,6 @@ import java.math.BigInteger;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.chainspec.PrecompiledContractContext;
 import org.ethereum.vm.client.Repository;
-import org.semux.core.Amount;
 import org.semux.core.state.AccountState;
 
 /**
@@ -100,7 +99,7 @@ public class SemuxRepository implements Cloneable, Repository {
 
     @Override
     public BigInteger addBalance(byte[] address, BigInteger value) {
-        accountState.adjustAvailable(address, Amount.Unit.NANO_SEM.of(value.longValue()));
+        accountState.adjustAvailable(address, Conversion.weiToAmount(value));
         return value;
     }
 
