@@ -21,6 +21,8 @@ import org.semux.crypto.bip32.util.BytesUtil;
 import org.semux.crypto.bip32.util.HashUtil;
 import org.semux.crypto.bip32.util.Hmac;
 import org.semux.crypto.bip32.util.Secp256k1;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
@@ -31,7 +33,7 @@ import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
 public class HdKeyGenerator {
 
-    private static boolean trace = true;
+    private static final Logger logger = LoggerFactory.getLogger(HdKeyGenerator.class);
 
     private static final EdDSAParameterSpec ED25519SPEC = EdDSANamedCurveTable.getByName("ed25519");
 
@@ -265,9 +267,9 @@ public class HdKeyGenerator {
             publicKey.setKeyData(BytesUtil.merge(new byte[] { 0 }, pk.getAbyte()));
             break;
         case BIP32_ED25519:
-            byte[] kL = parent.getPrivateKey().getKeyData();
-            byte[] kLP = Arrays.copyOfRange(kL, 0, 32);
-            byte[] kRP = Arrays.copyOfRange(kL, 32, 64);
+            byte[] kP = parent.getPrivateKey().getKeyData();
+            byte[] kLP = Arrays.copyOfRange(kP, 0, 32);
+            byte[] kRP = Arrays.copyOfRange(kP, 32, 64);
             byte[] AP = parent.getPublicKey().getKeyData();
             byte[] cP = parent.getPublicKey().getChainCode();
 
@@ -287,11 +289,11 @@ public class HdKeyGenerator {
             byte[] ZL = Arrays.copyOfRange(Z, 0, 28);
             byte[] ZR = Arrays.copyOfRange(Z, 32, 64);
 
-            if (trace) {
-                System.out.println("parent, kLP = " + Hex.encode(kLP));
-                System.out.println("parent, kRP = " + Hex.encode(kRP));
-                System.out.println("parent,  AP = " + Hex.encode(AP));
-                System.out.println("parent,  cP = " + Hex.encode(cP));
+            if (logger.isTraceEnabled()) {
+                logger.trace("parent, kLP = " + Hex.encode(kLP));
+                logger.trace("parent, kRP = " + Hex.encode(kRP));
+                logger.trace("parent,  AP = " + Hex.encode(AP));
+                logger.trace("parent,  cP = " + Hex.encode(cP));
             }
 
             BigInteger kLiBI = parseUnsignedLE(ZL)
@@ -318,12 +320,13 @@ public class HdKeyGenerator {
             privateKey.setChainCode(c);
             publicKey.setChainCode(c);
 
-            if (trace) {
-                System.out.println("child, IL = " + Hex.encode(IL));
-                System.out.println("child, IR = " + Hex.encode(IR));
-                System.out.println("child,  A = " + Hex.encode(A));
-                System.out.println("child,  c = " + Hex.encode(c));
+            if (logger.isTraceEnabled()) {
+                logger.trace("child, IL = " + Hex.encode(IL));
+                logger.trace("child, IR = " + Hex.encode(IR));
+                logger.trace("child,  A = " + Hex.encode(A));
+                logger.trace("child,  c = " + Hex.encode(c));
             }
+
             break;
         }
 

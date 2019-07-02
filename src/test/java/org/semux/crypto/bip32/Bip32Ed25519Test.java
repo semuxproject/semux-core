@@ -13,8 +13,12 @@ import org.semux.crypto.Hex;
 import org.semux.crypto.bip32.key.KeyVersion;
 import org.semux.crypto.bip39.Language;
 import org.semux.crypto.bip39.MnemonicGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Bip32Ed25519Test {
+
+    private static final Logger logger = LoggerFactory.getLogger(Bip32Ed25519Test.class);
 
     private byte[] SEED = new MnemonicGenerator().getSeedFromWordlist(
             "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
@@ -26,20 +30,20 @@ public class Bip32Ed25519Test {
 
     @Test
     public void testRoot() {
-        System.out.println("k = " + Hex.encode(root.getPrivateKey().getKeyData()));
-        System.out.println("A = " + Hex.encode(root.getPublicKey().getKeyData()));
-        System.out.println("c = " + Hex.encode(root.getPublicKey().getChainCode()));
+        String seed = "5eb00bbddcf069084889a8ab9155568165f5c453ccb85e70811aaed6f6da5fc19a5ac40b389cd370d086206dec8aa6c43daea6690f20ad3d8d48b2d2ce9e38e4";
+        String kL = "402b03cd9c8bed9ba9f9bd6cd9c315ce9fcc59c7c25d37c85a36096617e69d41";
+        String kR = "8e35cb4a3b737afd007f0688618f21a8831643c0e6c77fc33c06026d2a0fc938";
+        String A = "291ea7aa3766cd26a3a8688375aa07b3fed73c13d42543a9f19a48dc8b6bfd07";
+        String c = "32596435e70647d7d98ef102a32ea40319ca8fb6c851d7346d3bd8f9d1492658";
 
-        assertEquals(
-                "5eb00bbddcf069084889a8ab9155568165f5c453ccb85e70811aaed6f6da5fc19a5ac40b389cd370d086206dec8aa6c43daea6690f20ad3d8d48b2d2ce9e38e4",
-                Hex.encode(SEED));
-        assertEquals("402b03cd9c8bed9ba9f9bd6cd9c315ce9fcc59c7c25d37c85a36096617e69d41"
-                + "8e35cb4a3b737afd007f0688618f21a8831643c0e6c77fc33c06026d2a0fc938",
-                Hex.encode(root.getPrivateKey().getKeyData()));
-        assertEquals("291ea7aa3766cd26a3a8688375aa07b3fed73c13d42543a9f19a48dc8b6bfd07",
-                Hex.encode(root.getPublicKey().getKeyData()));
-        assertEquals("32596435e70647d7d98ef102a32ea40319ca8fb6c851d7346d3bd8f9d1492658",
-                Hex.encode(root.getPublicKey().getChainCode()));
+        logger.info("k = " + Hex.encode(root.getPrivateKey().getKeyData()));
+        logger.info("A = " + Hex.encode(root.getPublicKey().getKeyData()));
+        logger.info("c = " + Hex.encode(root.getPublicKey().getChainCode()));
+
+        assertEquals(seed, Hex.encode(SEED));
+        assertEquals(kL + kR, Hex.encode(root.getPrivateKey().getKeyData()));
+        assertEquals(A, Hex.encode(root.getPublicKey().getKeyData()));
+        assertEquals(c, Hex.encode(root.getPublicKey().getChainCode()));
     }
 
     @Test
@@ -54,9 +58,9 @@ public class Bip32Ed25519Test {
         HdKeyPair child2 = generator.getChildKeyPair(child1, 1, false);
         HdKeyPair child3 = generator.getChildKeyPair(child2, 2, false);
 
-        System.out.println("k = " + Hex.encode(child3.getPrivateKey().getKeyData()));
-        System.out.println("A = " + Hex.encode(child3.getPublicKey().getKeyData()));
-        System.out.println("c = " + Hex.encode(child3.getPublicKey().getChainCode()));
+        logger.info("k = " + Hex.encode(child3.getPrivateKey().getKeyData()));
+        logger.info("A = " + Hex.encode(child3.getPublicKey().getKeyData()));
+        logger.info("c = " + Hex.encode(child3.getPublicKey().getChainCode()));
 
         assertEquals(kL + kR, Hex.encode(child3.getPrivateKey().getKeyData()));
         assertEquals(A, Hex.encode(child3.getPublicKey().getKeyData()));
@@ -75,9 +79,9 @@ public class Bip32Ed25519Test {
         HdKeyPair child2 = generator.getChildKeyPair(child1, 3, true);
         HdKeyPair child3 = generator.getChildKeyPair(child2, 5, false);
 
-        System.out.println("k = " + Hex.encode(child3.getPrivateKey().getKeyData()));
-        System.out.println("A = " + Hex.encode(child3.getPublicKey().getKeyData()));
-        System.out.println("c = " + Hex.encode(child3.getPublicKey().getChainCode()));
+        logger.info("k = " + Hex.encode(child3.getPrivateKey().getKeyData()));
+        logger.info("A = " + Hex.encode(child3.getPublicKey().getKeyData()));
+        logger.info("c = " + Hex.encode(child3.getPublicKey().getChainCode()));
 
         assertEquals(kL + kR, Hex.encode(child3.getPrivateKey().getKeyData()));
         assertEquals(A, Hex.encode(child3.getPublicKey().getKeyData()));
