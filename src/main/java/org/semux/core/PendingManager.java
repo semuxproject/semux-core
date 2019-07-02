@@ -340,6 +340,8 @@ public class PendingManager implements Runnable, BlockchainListener {
         // delayed for the next event loop of PendingManager.
         while (tx != null && tx.getNonce() == getNonce(tx.getFrom())) {
 
+            // TODO: introduce block state (open, closed, signed, imported)
+
             // create a dummy block (Note: VM transaction results may depends on the block)
             Blockchain chain = kernel.getBlockchain();
             Block prevBlock = chain.getLatestBlock();

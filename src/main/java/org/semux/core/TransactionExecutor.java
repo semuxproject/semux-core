@@ -122,7 +122,11 @@ public class TransactionExecutor {
 
             // check fee (call and create use gas instead)
             if (isVmCall) {
-                if (fee.lt(Amount.ZERO)) {
+                // applying a very strict check to avoid mistakes
+                boolean valid = fee.equals(Amount.ZERO)
+                        && tx.getGas() >= 21_000 && tx.getGas() <= config.spec().maxBlockGasLimit()
+                        && tx.getGasPrice() >= 1 && tx.getGasPrice() <= Integer.MAX_VALUE; // a theoretical limit
+                if (!valid) {
                     result.setCode(Code.INVALID_FEE);
                     continue;
                 }
@@ -205,7 +209,6 @@ public class TransactionExecutor {
                 }
                 break;
             }
-
             case CALL:
             case CREATE:
                 // Note: the second parameter should be height = block number + 1; here we're
@@ -215,9 +218,8 @@ public class TransactionExecutor {
                     break;
                 }
 
-                // FIXME: overflow
+                // no overflow shall occur
                 long maxGasFee = tx.getGas() * tx.getGasPrice();
-
                 Amount maxCost = sum(sum(value, fee), Unit.NANO_SEM.of(maxGasFee));
 
                 if (available.lt(maxCost)) {
@@ -227,18 +229,11 @@ public class TransactionExecutor {
 
                 // VM calls can have fees/values set.
                 as.adjustAvailable(from, neg(sum(value, fee)));
-
-                if (tx.getGas() > config.spec().maxBlockGasLimit()) {
-                    result.setCode(Code.INVALID_GAS);
-                } else {
-                    executeVmTransaction(result, tx, as, block, gasUsedInBlock);
-                    if (result.getCode().isAcceptable()) {
-                        gasUsedInBlock += result.getGasUsed();
-                    }
+                executeVmTransaction(result, tx, as, block, gasUsedInBlock);
+                if (result.getCode().isAcceptable()) {
+                    gasUsedInBlock += result.getGasUsed();
                 }
-
                 break;
-
             default:
                 // unsupported transaction type
                 result.setCode(Code.INVALID_TYPE);
