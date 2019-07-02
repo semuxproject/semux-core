@@ -347,7 +347,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                     prevBlock.getNumber() + 1,
                     new Key().toAddress(), prevBlock.getHash(), System.currentTimeMillis(), new byte[0],
                     new byte[0], new byte[0], new byte[0]);
-            SemuxBlock block = new SemuxBlock(blockHeader, kernel.getConfig().vmBlockGasLimit());
+            SemuxBlock block = new SemuxBlock(blockHeader, kernel.getConfig().vmMaxBlockGasLimit());
 
             // execute transactions
             AccountState as = pendingAS.track();

@@ -906,7 +906,7 @@ public class SemuxBft implements BftManager {
         // against our own local limit, only
         // when proposing
         List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(header, Long.MAX_VALUE), chain);
+                new SemuxBlock(header, config.vmMaxBlockGasLimit()), chain);
         block.setResults(results);
 
         if (!block.validateResults(header, results)) {
@@ -973,7 +973,7 @@ public class SemuxBft implements BftManager {
 
         // [3] evaluate all transactions
         List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(block.getHeader(), Long.MAX_VALUE), chain);
+                new SemuxBlock(block.getHeader(), config.vmMaxBlockGasLimit()), chain);
         if (!block.validateResults(header, results)) {
             logger.debug("Invalid transactions");
             return;

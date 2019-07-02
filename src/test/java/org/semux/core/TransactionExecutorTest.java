@@ -56,7 +56,7 @@ public class TransactionExecutorTest {
         ds = chain.getDelegateState();
         exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
         network = config.network();
-        block = new SemuxBlock(mock(BlockHeader.class), 5_000_000);
+        block = new SemuxBlock(mock(BlockHeader.class), config.vmMaxBlockGasLimit());
     }
 
     private TransactionResult executeAndCommit(TransactionExecutor exec, Transaction tx, AccountState as,
