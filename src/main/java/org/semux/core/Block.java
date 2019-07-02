@@ -15,15 +15,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
 import org.semux.util.MerkleUtil;
-import org.semux.util.SimpleDecoder;
-import org.semux.util.SimpleEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -398,160 +395,6 @@ public class Block {
      */
     public byte[] getData() {
         return header.getData();
-    }
-
-    /**
-     * Serializes the block header into byte array.
-     *
-     * @return
-     */
-    public byte[] getEncodedHeader() {
-        return header.toBytes();
-    }
-
-    /**
-     * Serializes the block transactions into byte array.
-     *
-     * @return
-     */
-    public byte[] getEncodedTransactions() {
-        return getEncodedTransactionsAndIndices().getLeft();
-    }
-
-    public Pair<byte[], List<Integer>> getEncodedTransactionsAndIndices() {
-        List<Integer> indices = new ArrayList<>();
-
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeInt(transactions.size());
-        for (int i = 0; i < transactions.size(); i++) {
-            int index = enc.getWriteIndex();
-            enc.writeBytes(transactions.get(i).toBytes());
-            indices.add(index);
-        }
-
-        return Pair.of(enc.toBytes(), indices);
-    }
-
-    /**
-     * Serializes the block transactions results into byte array.
-     *
-     * @return
-     */
-    public byte[] getEncodedResults() {
-        return getEncodedResultsAndIndex().getLeft();
-    }
-
-    public Pair<byte[], List<Integer>> getEncodedResultsAndIndex() {
-        List<Integer> indices = new ArrayList<>();
-
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeInt(results.size());
-        for (int i = 0; i < results.size(); i++) {
-            int index = enc.getWriteIndex();
-            enc.writeBytes(results.get(i).toBytes());
-            indices.add(index);
-        }
-
-        return Pair.of(enc.toBytes(), indices);
-    }
-
-    /**
-     * Serializes the BFT votes into byte array.
-     *
-     * @return
-     */
-    public byte[] getEncodedVotes() {
-        SimpleEncoder enc = new SimpleEncoder(4 + 4 + votes.size() * Signature.LENGTH);
-
-        enc.writeInt(view);
-        enc.writeInt(votes.size());
-        for (Signature vote : votes) {
-            enc.writeBytes(vote.toBytes());
-        }
-
-        return enc.toBytes();
-    }
-
-    /**
-     * Parses a block instance from bytes.
-     *
-     * @param h
-     *            Serialized header
-     * @param t
-     *            Serialized transactions
-     * @param r
-     *            Serialized transaction results
-     * @param v
-     *            Serialized votes
-     * @return
-     */
-    public static Block fromComponents(byte[] h, byte[] t, byte[] r, byte[] v) {
-        if (h == null) {
-            throw new IllegalArgumentException("Block header can't be null");
-        }
-        if (t == null) {
-            throw new IllegalArgumentException("Block transactions can't be null");
-        }
-
-        BlockHeader header = BlockHeader.fromBytes(h);
-
-        SimpleDecoder dec = new SimpleDecoder(t);
-        List<Transaction> transactions = new ArrayList<>();
-        int n = dec.readInt();
-        for (int i = 0; i < n; i++) {
-            transactions.add(Transaction.fromBytes(dec.readBytes()));
-        }
-
-        List<TransactionResult> results = new ArrayList<>();
-        if (r != null) {
-            dec = new SimpleDecoder(r);
-            n = dec.readInt();
-            for (int i = 0; i < n; i++) {
-                results.add(TransactionResult.fromBytes(dec.readBytes()));
-            }
-        }
-
-        int view = 0;
-        List<Signature> votes = new ArrayList<>();
-        if (v != null) {
-            dec = new SimpleDecoder(v);
-            view = dec.readInt();
-            n = dec.readInt();
-            for (int i = 0; i < n; i++) {
-                votes.add(Signature.fromBytes(dec.readBytes()));
-            }
-        }
-
-        return new Block(header, transactions, results, view, votes);
-    }
-
-    public byte[] toBytes() {
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBytes(getEncodedHeader());
-        enc.writeBytes(getEncodedTransactions());
-        enc.writeBytes(getEncodedResults());
-        enc.writeBytes(getEncodedVotes());
-
-        return enc.toBytes();
-    }
-
-    public static Block fromBytes(byte[] bytes) {
-        SimpleDecoder dec = new SimpleDecoder(bytes);
-        byte[] header = dec.readBytes();
-        byte[] transactions = dec.readBytes();
-        byte[] results = dec.readBytes();
-        byte[] votes = dec.readBytes();
-
-        return Block.fromComponents(header, transactions, results, votes);
-    }
-
-    /**
-     * Get block size in bytes
-     *
-     * @return block size in bytes
-     */
-    public int size() {
-        return toBytes().length;
     }
 
     @Override

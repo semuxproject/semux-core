@@ -9,7 +9,7 @@ package org.semux.db;
 public enum DatabaseName {
 
     /**
-     * Block and transaction index.
+     * @deprecated v0 and v1 only Block and transaction index.
      */
     INDEX,
 
@@ -19,17 +19,17 @@ public enum DatabaseName {
     BLOCK,
 
     /**
-     * Account related data.
+     * @deprecated v0 and v1 only Account related data.
      */
     ACCOUNT,
 
     /**
-     * Delegate core data.
+     * @deprecated v0 and v1 only DelegateV1 core data.
      */
     DELEGATE,
 
     /**
-     * Delegate vote data.
+     * @deprecated v0 and v1 only DelegateV1 vote data.
      */
     VOTE
 }

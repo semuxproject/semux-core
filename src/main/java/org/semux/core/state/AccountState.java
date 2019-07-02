@@ -12,7 +12,7 @@ public interface AccountState {
 
     /**
      * Returns an account if exists.
-     * 
+     *
      * @param address
      * @return
      */
@@ -20,14 +20,14 @@ public interface AccountState {
 
     /**
      * Increases the nonce of an account.
-     * 
+     *
      * @param address
      */
     long increaseNonce(byte[] address);
 
     /**
      * Adjusts the available balance of an account.
-     * 
+     *
      * @param address
      * @param delta
      */
@@ -35,7 +35,7 @@ public interface AccountState {
 
     /**
      * Adjusts the locked balance of an account.
-     * 
+     *
      * @param address
      * @param delta
      */
@@ -43,14 +43,14 @@ public interface AccountState {
 
     /**
      * Returns the code of an account.
-     * 
+     *
      * @param address
      */
     byte[] getCode(byte[] address);
 
     /**
      * Sets the code of an account.
-     * 
+     *
      * @param address
      * @param code
      */
@@ -58,7 +58,7 @@ public interface AccountState {
 
     /**
      * Returns the value that is mapped to the key.
-     * 
+     *
      * @param address
      * @param key
      * @return the value if exists, otherwise null.
@@ -67,7 +67,7 @@ public interface AccountState {
 
     /**
      * Associates the specified value with the specified key.
-     * 
+     *
      * @param address
      * @param key
      * @param value
@@ -76,7 +76,7 @@ public interface AccountState {
 
     /**
      * Remove a key value pair from the storage if exists.
-     * 
+     *
      * @param address
      * @param key
      */
@@ -99,7 +99,7 @@ public interface AccountState {
 
     /**
      * check if an account exists
-     * 
+     *
      * @param address
      *            address
      * @return exists

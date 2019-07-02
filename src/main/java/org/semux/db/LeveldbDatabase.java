@@ -11,9 +11,11 @@ import static org.fusesource.leveldbjni.JniDBFactory.factory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -63,7 +65,7 @@ public class LeveldbDatabase implements Database {
     protected Options createOptions() {
         Options options = new Options();
         options.createIfMissing(true);
-        options.compressionType(CompressionType.NONE);
+        options.compressionType(CompressionType.SNAPPY);
         options.blockSize(4 * 1024 * 1024);
         options.writeBufferSize(8 * 1024 * 1024);
         options.cacheSize(64L * 1024L * 1024L);
@@ -151,6 +153,14 @@ public class LeveldbDatabase implements Database {
         }
     }
 
+    WriteBatch createWriteBatch() {
+        return db.createWriteBatch();
+    }
+
+    void writeBatch(WriteBatch batch) {
+        db.write(batch);
+    }
+
     @Override
     public void close() {
         try {
@@ -217,46 +227,59 @@ public class LeveldbDatabase implements Database {
 
     public static class LeveldbFactory implements DatabaseFactory {
 
-        private final EnumMap<DatabaseName, Database> databases = new EnumMap<>(DatabaseName.class);
+        private final Map<DatabaseName, Database> databases = Collections
+                .synchronizedMap(new EnumMap<>(DatabaseName.class));
 
         private final File dataDir;
-        private final AtomicBoolean open;
+        private final Map<DatabaseName, AtomicBoolean> open = Collections
+                .synchronizedMap(new EnumMap<>(DatabaseName.class));
 
         public LeveldbFactory(File dataDir) {
             this.dataDir = dataDir;
-            this.open = new AtomicBoolean(false);
 
-            open();
-        }
-
-        @Override
-        public void open() {
-            if (open.compareAndSet(false, true)) {
-                for (DatabaseName name : DatabaseName.values()) {
-                    File file = new File(dataDir.getAbsolutePath(), name.toString().toLowerCase(Locale.ROOT));
-                    databases.put(name, new LeveldbDatabase(file));
-                }
+            for (DatabaseName name : DatabaseName.values()) {
+                open.put(name, new AtomicBoolean(false));
             }
         }
 
         @Override
+        public void open() {
+            // do nothing
+            // resources will be lazy loaded
+        }
+
+        @Override
         public Database getDB(DatabaseName name) {
-            open();
+            // lazy load
+            if (open.get(name).compareAndSet(false, true)) {
+                File file = getDatabaseFile(name);
+                databases.put(name, new LeveldbDatabase(file));
+            }
+
             return databases.get(name);
         }
 
         @Override
         public void close() {
-            if (open.compareAndSet(true, false)) {
-                for (Database db : databases.values()) {
+            databases.forEach((dbName, db) -> {
+                if (open.get(dbName).compareAndSet(true, false)) {
                     db.close();
                 }
-            }
+            });
+        }
+
+        @Override
+        public boolean exists(DatabaseName name) {
+            return getDatabaseFile(name).exists();
         }
 
         @Override
         public Path getDataDir() {
             return dataDir.toPath();
+        }
+
+        private File getDatabaseFile(DatabaseName name) {
+            return new File(dataDir.getAbsolutePath(), name.toString().toLowerCase(Locale.ROOT));
         }
     }
 }

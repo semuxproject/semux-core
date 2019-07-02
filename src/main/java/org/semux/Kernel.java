@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -24,10 +26,11 @@ import org.semux.consensus.SemuxBft;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.BftManager;
 import org.semux.core.Blockchain;
-import org.semux.core.BlockchainImpl;
+import org.semux.core.BlockchainFactory;
 import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
+import org.semux.core.Transaction;
 import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
@@ -42,6 +45,7 @@ import org.semux.net.ChannelManager;
 import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
 import org.semux.net.PeerServer;
+import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +104,7 @@ public class Kernel {
 
     /**
      * Creates a kernel instance and initializes it.
-     * 
+     *
      * @param config
      *            the config instance
      * @prarm genesis the genesis instance
@@ -141,7 +145,9 @@ public class Kernel {
         // ====================================
         relocateDatabaseIfNeeded();
         dbFactory = new LeveldbFactory(config.databaseDir());
-        chain = new BlockchainImpl(config, genesis, dbFactory);
+        BlockchainFactory blockchainFactory = new BlockchainFactory(config, genesis, dbFactory);
+        chain = blockchainFactory.getBlockchainInstance();
+        logger.info("Blockchain database version = {}", blockchainFactory.getBlockchainDatabaseVersion().toString());
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
 
@@ -386,7 +392,7 @@ public class Kernel {
 
     /**
      * Returns the wallet.
-     * 
+     *
      * @return
      */
     public Wallet getWallet() {
@@ -395,7 +401,7 @@ public class Kernel {
 
     /**
      * Returns the coinbase.
-     * 
+     *
      * @return
      */
     public Key getCoinbase() {
@@ -404,7 +410,7 @@ public class Kernel {
 
     /**
      * Returns the blockchain.
-     * 
+     *
      * @return
      */
     public Blockchain getBlockchain() {
@@ -413,7 +419,7 @@ public class Kernel {
 
     /**
      * Returns the peer client.
-     * 
+     *
      * @return
      */
     public PeerClient getClient() {
@@ -422,7 +428,7 @@ public class Kernel {
 
     /**
      * Returns the pending manager.
-     * 
+     *
      * @return
      */
     public PendingManager getPendingManager() {
@@ -431,7 +437,7 @@ public class Kernel {
 
     /**
      * Returns the channel manager.
-     * 
+     *
      * @return
      */
     public ChannelManager getChannelManager() {
@@ -440,7 +446,7 @@ public class Kernel {
 
     /**
      * Returns the node manager.
-     * 
+     *
      * @return
      */
     public NodeManager getNodeManager() {
@@ -449,7 +455,7 @@ public class Kernel {
 
     /**
      * Returns the config.
-     * 
+     *
      * @return
      */
     public Config getConfig() {
@@ -458,7 +464,7 @@ public class Kernel {
 
     /**
      * Returns the state lock.
-     * 
+     *
      * @return
      */
     public ReentrantReadWriteLock getStateLock() {
@@ -467,7 +473,7 @@ public class Kernel {
 
     /**
      * Returns the syncing manager.
-     * 
+     *
      * @return
      */
     public SyncManager getSyncManager() {
@@ -476,7 +482,7 @@ public class Kernel {
 
     /**
      * Returns the BFT manager.
-     * 
+     *
      * @return
      */
     public BftManager getBftManager() {

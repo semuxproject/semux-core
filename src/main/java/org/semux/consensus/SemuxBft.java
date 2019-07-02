@@ -38,7 +38,6 @@ import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
@@ -743,7 +742,7 @@ public class SemuxBft implements BftManager {
      * @return
      */
     protected boolean isFromValidator(Signature sig) {
-        return validators.contains(Hex.encode(Hash.h160(sig.getPublicKey())));
+        return validators.contains(Hex.encode(Key.Address.fromX509PublicKey(sig.getPublicKey())));
     }
 
     /**
@@ -995,12 +994,15 @@ public class SemuxBft implements BftManager {
         WriteLock lock = kernel.getStateLock().writeLock();
         lock.lock();
         try {
-            // [7] flush state to disk
+            // [7] add block to chain
+            chain.addBlock(block);
+
+            // [8] commit state updates
             chain.getAccountState().commit();
             chain.getDelegateState().commit();
 
-            // [8] add block to chain
-            chain.addBlock(block);
+            // [9] commit pending blockchain updates
+            chain.commit();
         } finally {
             lock.unlock();
         }

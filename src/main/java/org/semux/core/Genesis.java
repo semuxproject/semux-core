@@ -10,6 +10,7 @@ import static org.semux.core.Amount.Unit.NANO_SEM;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 import org.semux.Network;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.util.ByteArray;
 import org.semux.util.ByteArray.ByteArrayKeyDeserializer;
 import org.semux.util.Bytes;
@@ -36,19 +38,19 @@ public class Genesis extends Block {
     @JsonDeserialize(keyUsing = ByteArrayKeyDeserializer.class)
     private final Map<ByteArray, Premine> premines;
 
-    private final Map<String, byte[]> delegates;
+    private final Map<String, Delegate> delegates;
 
     private final Map<String, Object> config;
 
     /**
      * Creates a {@link Genesis} block instance.
-     * 
+     *
      * @param header
      * @param premines
      * @param delegates
      * @param config
      */
-    public Genesis(BlockHeader header, Map<ByteArray, Premine> premines, Map<String, byte[]> delegates,
+    public Genesis(BlockHeader header, Map<ByteArray, Premine> premines, Map<String, Delegate> delegates,
             Map<String, Object> config) {
         super(header, Collections.emptyList(), Collections.emptyList());
 
@@ -65,7 +67,7 @@ public class Genesis extends Block {
             @JsonProperty("timestamp") long timestamp,
             @JsonProperty("data") String data,
             @JsonProperty("premine") List<Premine> premineList,
-            @JsonProperty("delegates") Map<String, String> delegates,
+            @JsonProperty("delegates") Map<String, Delegate> delegates,
             @JsonProperty("config") Map<String, Object> config) {
 
         // load premines
@@ -78,18 +80,12 @@ public class Genesis extends Block {
         BlockHeader header = new BlockHeader(number, Hex.decode0x(coinbase), Hex.decode0x(parentHash), timestamp,
                 Bytes.EMPTY_HASH, Bytes.EMPTY_HASH, Bytes.EMPTY_HASH, Bytes.of(data));
 
-        // load initial delegates
-        Map<String, byte[]> delegatesMap = new HashMap<>();
-        for (Map.Entry<String, String> entry : delegates.entrySet()) {
-            delegatesMap.put(entry.getKey(), Hex.decode0x(entry.getValue()));
-        }
-
-        return new Genesis(header, premineMap, delegatesMap, config);
+        return new Genesis(header, premineMap, delegates, config);
     }
 
     /**
      * Loads the genesis file.
-     * 
+     *
      * @return
      */
     public static Genesis load(Network network) {
@@ -109,7 +105,7 @@ public class Genesis extends Block {
 
     /**
      * Get premine.
-     * 
+     *
      * @return
      */
     public Map<ByteArray, Premine> getPremines() {
@@ -118,16 +114,16 @@ public class Genesis extends Block {
 
     /**
      * Get delegates.
-     * 
+     *
      * @return
      */
-    public Map<String, byte[]> getDelegates() {
+    public Map<String, Delegate> getDelegates() {
         return delegates;
     }
 
     /**
      * Get genesis configurations.
-     * 
+     *
      * @return
      */
     public Map<String, Object> getConfig() {
@@ -136,23 +132,30 @@ public class Genesis extends Block {
 
     public static class Premine {
         private final byte[] address;
+        private final byte[] Abyte;
         private final Amount amount;
         private final String note;
 
-        public Premine(byte[] address, Amount amount, String note) {
+        public Premine(byte[] address, byte[] Abyte, Amount amount, String note) {
             this.address = address;
+            this.Abyte = Abyte;
             this.amount = amount;
             this.note = note;
         }
 
         @JsonCreator
-        public Premine(@JsonProperty("address") String address, @JsonProperty("amount") long amount,
+        public Premine(@JsonProperty("address") String address, @JsonProperty("Abyte") String Abyte, @JsonProperty("amount") long amount,
                 @JsonProperty("note") String note) {
-            this(Hex.decode0x(address), NANO_SEM.of(amount), note);
+            this(Hex.decode0x(address), Hex.decode0x(Abyte), NANO_SEM.of(amount), note);
+            assert (Arrays.equals(this.address, Key.Address.fromAbyte(this.Abyte)));
         }
 
         public byte[] getAddress() {
             return address;
+        }
+
+        public byte[] getAbyte() {
+            return Abyte;
         }
 
         public Amount getAmount() {
@@ -161,6 +164,32 @@ public class Genesis extends Block {
 
         public String getNote() {
             return note;
+        }
+    }
+
+    public static class Delegate {
+        private final byte[] address;
+        private final byte[] Abyte;
+
+        public Delegate(byte[] address, byte[] Abyte) {
+            assert (address.length == Key.ADDRESS_LEN);
+            assert (Abyte.length == 32);
+            this.address = address;
+            this.Abyte = Abyte;
+        }
+
+        @JsonCreator
+        public Delegate(@JsonProperty("address") String address, @JsonProperty("Abyte") String Abyte) {
+            this(Hex.decode0x(address), Hex.decode0x(Abyte));
+            assert (Arrays.equals(this.address, Key.Address.fromAbyte(this.Abyte)));
+        }
+
+        public byte[] getAddress() {
+            return address;
+        }
+
+        public byte[] getAbyte() {
+            return Abyte;
         }
     }
 }

@@ -25,7 +25,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.KernelMock;
 import org.semux.core.Amount;
 import org.semux.core.Block;
-import org.semux.core.state.Delegate;
+import org.semux.core.state.DelegateV1;
 import org.semux.crypto.Key;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletDelegate;
@@ -69,13 +69,13 @@ public class HomePanelTest extends AssertJSwingJUnitTestCase {
         final String backupValidator = "bcdefghijklmnopq";
         final String nextValidator = "cdefghijklmnopqr";
         WalletDelegate primaryValidatorDelegate = new WalletDelegate(
-                new Delegate(new Key().toAddress(), primaryValidatorName.getBytes(), 0, Amount.ZERO));
+                new DelegateV1(new Key().toAddress(), primaryValidatorName.getBytes(), 0, Amount.ZERO));
         WalletDelegate backupValidatorDelegate = new WalletDelegate(
-                new Delegate(new Key().toAddress(), backupValidator.getBytes(), 0, Amount.ZERO));
+                new DelegateV1(new Key().toAddress(), backupValidator.getBytes(), 0, Amount.ZERO));
         when(walletModel.getValidatorDelegate(eq(0))).thenReturn(Optional.of(primaryValidatorDelegate));
         when(walletModel.getValidatorDelegate(eq(1))).thenReturn(Optional.of(backupValidatorDelegate));
         WalletDelegate nextPrimaryValidator = new WalletDelegate(
-                new Delegate(new Key().toAddress(), nextValidator.getBytes(), 0, Amount.ZERO));
+                new DelegateV1(new Key().toAddress(), nextValidator.getBytes(), 0, Amount.ZERO));
         when(walletModel.getNextPrimaryValidatorDelegate()).thenReturn(Optional.of(nextPrimaryValidator));
         when(walletModel.getNextValidatorSetUpdate()).thenReturn(Optional.of(200L));
 

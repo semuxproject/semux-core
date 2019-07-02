@@ -8,12 +8,15 @@ package org.semux.bench;
 
 import java.io.IOException;
 
+import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.MainnetConfig;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
+import org.semux.core.BlockchainFactory;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Genesis;
 import org.semux.db.LeveldbDatabase.LeveldbFactory;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.xerial.snappy.Snappy;
@@ -28,7 +31,8 @@ public class CompressPerformance {
         Config config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
 
         LeveldbFactory dbFactory = new LeveldbFactory(config.databaseDir());
-        Blockchain chain = new BlockchainImpl(config, dbFactory);
+        Blockchain chain = new BlockchainFactory(config, Genesis.load(Network.MAINNET), dbFactory)
+                .getBlockchainInstance();
 
         for (Mode mode : Mode.values()) {
             int blocks = 0;

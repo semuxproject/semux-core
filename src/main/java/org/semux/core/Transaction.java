@@ -50,7 +50,7 @@ public class Transaction {
 
     /**
      * Create a new transaction.
-     * 
+     *
      * @param network
      * @param type
      * @param to
@@ -74,22 +74,7 @@ public class Transaction {
         this.data = data;
         this.gas = gas;
         this.gasPrice = gasPrice;
-
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeByte(networkId);
-        enc.writeByte(type.toByte());
-        enc.writeBytes(to);
-        enc.writeAmount(value);
-        enc.writeAmount(fee);
-        enc.writeLong(nonce);
-        enc.writeLong(timestamp);
-        enc.writeBytes(data);
-
-        if (TransactionType.CALL == type || TransactionType.CREATE == type) {
-            enc.writeLong(gas);
-            enc.writeLong(gasPrice);
-        }
-        this.encoded = enc.toBytes();
+        this.encoded = new TransactionEncoderV1().encodeUnsigned(this);
         this.hash = Hash.h256(encoded);
     }
 
@@ -100,7 +85,7 @@ public class Transaction {
      * @param encoded
      * @param signature
      */
-    private Transaction(byte[] hash, byte[] encoded, byte[] signature) {
+    public Transaction(byte[] hash, byte[] encoded, byte[] signature) {
         this.hash = hash;
 
         Transaction decodedTx = fromEncoded(encoded);
@@ -290,28 +275,7 @@ public class Transaction {
      * @return the decoded transaction
      */
     public static Transaction fromEncoded(byte[] encoded) {
-        SimpleDecoder decoder = new SimpleDecoder(encoded);
-
-        byte networkId = decoder.readByte();
-        byte type = decoder.readByte();
-        byte[] to = decoder.readBytes();
-        Amount value = decoder.readAmount();
-        Amount fee = decoder.readAmount();
-        long nonce = decoder.readLong();
-        long timestamp = decoder.readLong();
-        byte[] data = decoder.readBytes();
-
-        long gasPrice = 0;
-        long gas = 0;
-
-        TransactionType transactionType = TransactionType.of(type);
-        if (TransactionType.CALL == transactionType || TransactionType.CREATE == transactionType) {
-            gasPrice = decoder.readLong();
-            gas = decoder.readLong();
-        }
-
-        return new Transaction(Network.of(networkId), transactionType, to, value, fee, nonce, timestamp, data,
-                gasPrice, gas);
+        return new TransactionDecoderV1().decodeUnsigned(encoded);
     }
 
     /**
@@ -329,12 +293,7 @@ public class Transaction {
      * @return
      */
     public byte[] toBytes() {
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBytes(hash);
-        enc.writeBytes(encoded);
-        enc.writeBytes(signature.toBytes());
-
-        return enc.toBytes();
+        return new TransactionEncoderV1().encode(this);
     }
 
     /**
@@ -344,12 +303,7 @@ public class Transaction {
      * @return
      */
     public static Transaction fromBytes(byte[] bytes) {
-        SimpleDecoder dec = new SimpleDecoder(bytes);
-        byte[] hash = dec.readBytes();
-        byte[] encoded = dec.readBytes();
-        byte[] signature = dec.readBytes();
-
-        return new Transaction(hash, encoded, signature);
+        return new TransactionDecoderV1().decode(bytes);
     }
 
     /**

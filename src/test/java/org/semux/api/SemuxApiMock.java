@@ -9,8 +9,10 @@ package org.semux.api;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.semux.KernelMock;
+import org.semux.Network;
 import org.semux.config.Config;
-import org.semux.core.BlockchainImpl;
+import org.semux.core.BlockchainFactory;
+import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.db.Database;
 import org.semux.db.DatabaseFactory;
@@ -41,7 +43,8 @@ public class SemuxApiMock {
             dbFactory = new LeveldbFactory(config.databaseDir());
             client = new PeerClient(config.p2pListenIp(), config.p2pListenPort(), kernel.getCoinbase());
 
-            kernel.setBlockchain(new BlockchainImpl(config, dbFactory));
+            kernel.setBlockchain(
+                    new BlockchainFactory(config, Genesis.load(Network.DEVNET), dbFactory).getBlockchainInstance());
             kernel.setChannelManager(new ChannelManager(kernel));
             kernel.setPendingManager(new PendingManager(kernel));
             kernel.setClient(client);

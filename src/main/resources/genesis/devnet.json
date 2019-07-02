@@ -7,29 +7,36 @@
     "premine": [
         {
             "address": "0xc583b6ad1d1cccfc00ae9113db6408f022822b20",
+            "Abyte": "FIXME",
             "amount": 1000000000000000,
             "note": "test"
         },
         {
             "address": "0xc5f32c2231ff2b60cdfa9c0d3a9c2e71774de472",
+            "Abyte": "FIXME",
             "amount": 1000000000000000,
             "note": "test"
         },
         {
             "address": "0xcb3b1a71e842d8b3a6c7137fdda9fc991b14f4e1",
+            "Abyte": "FIXME",
             "amount": 1000000000000000,
             "note": "test"
         },
         {
             "address": "0x837c1e6ceca4ccad20e59849cb7a9678394f7313",
+            "Abyte": "FIXME",
             "amount": 1000000000000000,
             "note": "test"
         }
     ],
     "delegates": {
-        "semux1": "0x23a6049381fd2cfb0661d9de206613b83d53d7df"
+        "semux1": {
+            "address": "0x23a6049381fd2cfb0661d9de206613b83d53d7df",
+            "Abyte": "0xce57fa476e2af9f81a2353a1663855e8e7262da578dd930e22711d3e5d7b5daf"
+        }
     },
     "config": {
-        
+
     }
 }

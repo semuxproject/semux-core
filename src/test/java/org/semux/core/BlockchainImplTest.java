@@ -28,7 +28,6 @@ import org.semux.config.AbstractConfig;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
-import org.semux.core.BlockchainImpl.StatsType;
 import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
@@ -221,9 +220,12 @@ public class BlockchainImplTest {
     public void testSerialization() {
         Block block1 = createBlock(1);
 
-        Block block2 = Block.fromComponents(block1.getEncodedHeader(), block1.getEncodedTransactions(),
-                block1.getEncodedResults(),
-                block1.getEncodedVotes());
+        BlockEncoder blockEncoder = new BlockEncoderV1();
+        Block block2 = new BlockDecoderV1().decodeComponents(
+                blockEncoder.encoderHeader(block1),
+                blockEncoder.encodeTransactions(block1),
+                blockEncoder.encodeTransactionResults(block1),
+                blockEncoder.encodeVotes(block1));
         assertArrayEquals(block1.getHash(), block2.getHash());
         assertArrayEquals(block1.getCoinbase(), block2.getCoinbase());
         assertArrayEquals(block1.getParentHash(), block2.getParentHash());
@@ -271,15 +273,15 @@ public class BlockchainImplTest {
         assertEquals(0, chain.getValidatorStats(address).getTurnsHit());
         assertEquals(0, chain.getValidatorStats(address).getTurnsMissed());
 
-        chain.adjustValidatorStats(address, StatsType.FORGED, 1);
+        chain.adjustValidatorStats(address, ValidatorStatsType.FORGED, 1);
         assertEquals(1, chain.getValidatorStats(address).getBlocksForged());
 
-        chain.adjustValidatorStats(address, StatsType.HIT, 1);
+        chain.adjustValidatorStats(address, ValidatorStatsType.HIT, 1);
         assertEquals(1, chain.getValidatorStats(address).getTurnsHit());
 
-        chain.adjustValidatorStats(address, StatsType.MISSED, 1);
+        chain.adjustValidatorStats(address, ValidatorStatsType.MISSED, 1);
         assertEquals(1, chain.getValidatorStats(address).getTurnsMissed());
-        chain.adjustValidatorStats(address, StatsType.MISSED, 1);
+        chain.adjustValidatorStats(address, ValidatorStatsType.MISSED, 1);
         assertEquals(2, chain.getValidatorStats(address).getTurnsMissed());
     }
 

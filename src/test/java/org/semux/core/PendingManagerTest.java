@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import org.semux.KernelMock;
 import org.semux.Network;
 import org.semux.config.Constants;
+import org.semux.config.DevnetConfig;
 import org.semux.core.state.AccountState;
 import org.semux.crypto.Key;
 import org.semux.db.LeveldbDatabase.LeveldbFactory;
@@ -60,8 +61,8 @@ public class PendingManagerTest {
     public static void setUp() {
         kernel = kernelRule.getKernel();
 
-        kernel.setBlockchain(
-                new BlockchainImpl(kernel.getConfig(), new LeveldbFactory(kernel.getConfig().databaseDir())));
+        kernel.setBlockchain(new BlockchainFactory(kernel.getConfig(), Genesis.load(Network.DEVNET),
+                new LeveldbFactory(kernel.getConfig().databaseDir())).getBlockchainInstance());
         kernel.setChannelManager(new ChannelManager(kernel));
 
         accountState = kernel.getBlockchain().getAccountState();

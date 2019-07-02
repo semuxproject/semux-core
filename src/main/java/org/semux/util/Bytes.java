@@ -7,10 +7,12 @@
 package org.semux.util;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.semux.util.exception.BytesException;
 
 public class Bytes {
@@ -206,6 +208,20 @@ public class Bytes {
     }
 
     /**
+     * Encode a BigInteger into two's-complement representation in little-endian.
+     *
+     * @param value
+     * @return
+     */
+    public static byte[] of(BigInteger value) {
+        byte[] byteArray = new byte[(int) Math.ceil((value.bitLength() + 1) / 8.0)];
+        byte[] valueBytes = value.toByteArray();
+        ArrayUtils.reverse(valueBytes);
+        System.arraycopy(valueBytes, 0, byteArray, 0, valueBytes.length);
+        return byteArray;
+    }
+
+    /**
      * Convert byte array into string.
      *
      * @param bytes
@@ -267,5 +283,16 @@ public class Bytes {
                 | ((bytes[5] & 0xffL) << 16)
                 | ((bytes[6] & 0xffL) << 8)
                 | (bytes[7] & 0xff);
+    }
+
+    /**
+     * Converts a little-endian byte array into BigInteger.
+     *
+     * @param bytes
+     * @return
+     */
+    public static BigInteger toBigInteger(byte[] bytes) {
+        ArrayUtils.reverse(bytes);
+        return new BigInteger(bytes);
     }
 }

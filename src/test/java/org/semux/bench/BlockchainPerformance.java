@@ -18,9 +18,11 @@ import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
 import org.semux.core.Amount;
 import org.semux.core.Block;
+import org.semux.core.BlockEncoder;
+import org.semux.core.BlockEncoderV1;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
-import org.semux.core.BlockchainImpl;
+import org.semux.core.BlockchainFactory;
 import org.semux.core.Genesis;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
@@ -87,13 +89,14 @@ public class BlockchainPerformance {
         block.setView(1);
         block.setVotes(votes);
 
+        BlockEncoder blockEncoder = new BlockEncoderV1();
         long t2 = System.nanoTime();
         logger.info("block # of txs: {}", block.getTransactions().size());
-        logger.info("block header size: {} B", block.getEncodedHeader().length);
-        logger.info("block transaction size: {} KB", block.getEncodedTransactions().length / 1024);
-        logger.info("block results size: {} KB", block.getEncodedResults().length / 1024);
-        logger.info("block votes size: {} KB", block.getEncodedVotes().length / 1024);
-        logger.info("block total size: {} KB", block.size() / 1024);
+        logger.info("block header size: {} B", blockEncoder.encoderHeader(block).length);
+        logger.info("block transaction size: {} KB", blockEncoder.encodeTransactions(block).length / 1024);
+        logger.info("block results size: {} KB", blockEncoder.encodeTransactionResults(block).length / 1024);
+        logger.info("block votes size: {} KB", blockEncoder.encodeVotes(block).length / 1024);
+        logger.info("block total size: {} KB", blockEncoder.encode(block).length / 1024);
         logger.info("Perf_block_creation: {} ms", (t2 - t1) / 1_000_000);
         return block;
     }
@@ -144,7 +147,8 @@ public class BlockchainPerformance {
 
         TemporaryDatabaseRule temporaryDbRule = new TemporaryDatabaseRule();
         temporaryDbRule.before();
-        Blockchain blockchain = new BlockchainImpl(config, temporaryDbRule);
+        Blockchain blockchain = new BlockchainFactory(config, Genesis.load(Network.DEVNET), temporaryDbRule)
+                .getBlockchainInstance();
         long t1 = TimeUtil.currentTimeMillis();
         for (int i = 0; i < repeat; i++) {
             blockchain.addBlock(blocks[i]);

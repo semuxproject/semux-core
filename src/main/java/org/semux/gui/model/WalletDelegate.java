@@ -10,8 +10,9 @@ import static org.semux.core.Amount.ZERO;
 
 import org.semux.core.Amount;
 import org.semux.core.state.Delegate;
+import org.semux.core.state.DelegateV1;
 
-public class WalletDelegate extends Delegate {
+public class WalletDelegate extends DelegateV1 {
 
     private Amount votesFromMe = ZERO;
 

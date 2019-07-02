@@ -34,7 +34,7 @@ public class SimpleApiClient {
 
     /**
      * Crates an API client instance.
-     * 
+     *
      * @param root
      *            the API service root
      * @param username
@@ -69,7 +69,7 @@ public class SimpleApiClient {
      * <li>Byte arrays will be converted into its hex representation</li>
      * <li>Objects will be converted into its <code>toString()</code> response</li>
      * </ul>
-     * 
+     *
      * @param method
      *            the request method, "GET", "POST", "PUT" or "DELETE"
      * @param uri

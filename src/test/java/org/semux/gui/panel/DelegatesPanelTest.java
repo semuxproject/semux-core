@@ -34,13 +34,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.KernelMock;
 import org.semux.core.Blockchain;
-import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
-import org.semux.core.state.Delegate;
+import org.semux.core.ValidatorStats;
 import org.semux.core.state.DelegateState;
+import org.semux.core.state.DelegateV1;
 import org.semux.crypto.Key;
 import org.semux.gui.SwingUtil;
 import org.semux.gui.WalletModelRule;
@@ -79,7 +79,7 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
     private WalletDelegate delegate1;
 
     @Mock
-    private BlockchainImpl.ValidatorStats delegateStats1;
+    private ValidatorStats delegateStats1;
 
     private Key delegateAccount2;
 
@@ -87,7 +87,7 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
     private WalletDelegate delegate2;
 
     @Mock
-    private BlockchainImpl.ValidatorStats delegateStats2;
+    private ValidatorStats delegateStats2;
 
     @Mock
     PendingManager pendingManager;
@@ -122,8 +122,8 @@ public class DelegatesPanelTest extends AssertJSwingJUnitTestCase {
         // mock kernel
         kernelMock = spy(kernelRule1.getKernel());
         when(delegateState.getVote(any(), any())).thenReturn(ZERO);
-        when(delegateState.getDelegateByAddress(DELEGATE_KEY.toAddress())).thenReturn(mock(Delegate.class));
-        when(delegateState.getDelegateByName(Bytes.of("semux"))).thenReturn(mock(Delegate.class));
+        when(delegateState.getDelegateByAddress(DELEGATE_KEY.toAddress())).thenReturn(mock(DelegateV1.class));
+        when(delegateState.getDelegateByName(Bytes.of("semux"))).thenReturn(mock(DelegateV1.class));
         when(blockchain.getDelegateState()).thenReturn(delegateState);
         when(blockchain.getValidatorStats(delegate1.getAddress())).thenReturn(delegateStats1);
         when(blockchain.getValidatorStats(delegate2.getAddress())).thenReturn(delegateStats2);

@@ -78,6 +78,7 @@ public class ApiHandlerImpl implements ApiHandler {
         try {
             return (Response) route.invoke(params);
         } catch (Exception e) {
+            logger.error("API Error", e);
             return Response.status(INTERNAL_SERVER_ERROR).entity(HttpHandler.INTERNAL_SERVER_ERROR_RESPONSE).build();
         }
     }

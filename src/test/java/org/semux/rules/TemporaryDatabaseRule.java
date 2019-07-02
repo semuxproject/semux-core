@@ -36,7 +36,7 @@ public class TemporaryDatabaseRule extends TemporaryFolder implements DatabaseFa
     @Override
     public void open() {
         for (DatabaseName name : DatabaseName.values()) {
-            File file = new File(getRoot(), Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
+            File file = getDatabaseFile(name);
             databases.put(name, new LeveldbDatabase(file));
         }
     }
@@ -46,6 +46,15 @@ public class TemporaryDatabaseRule extends TemporaryFolder implements DatabaseFa
         for (Database db : databases.values()) {
             db.close();
         }
+    }
+
+    @Override
+    public boolean exists(DatabaseName name) {
+        return getDatabaseFile(name).exists();
+    }
+
+    private File getDatabaseFile(DatabaseName name) {
+        return new File(getRoot(), Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
     }
 
     @Override

@@ -43,12 +43,12 @@ import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.core.Amount;
 import org.semux.core.Blockchain;
-import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.core.state.Delegate;
+import org.semux.core.ValidatorStats;
 import org.semux.core.state.DelegateState;
+import org.semux.core.state.DelegateV1;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.PlaceHolder;
@@ -177,7 +177,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     .addContainerGap(174, Short.MAX_VALUE))
                 .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 512, Short.MAX_VALUE)
         );
-        setLayout(groupLayout); 
+        setLayout(groupLayout);
         // @formatter:on
 
         textVote = SwingUtil.textFieldWithCopyPastePopup();
@@ -439,7 +439,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
         /*
          * update table model
          */
-        Delegate d = getSelectedDelegate();
+        DelegateV1 d = getSelectedDelegate();
         tableModel.setData(delegates);
 
         if (d != null) {
@@ -454,7 +454,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     /**
      * Handles vote or unvote.
-     * 
+     *
      * @param action
      */
     protected void voteOrUnvote(Action action) {
@@ -597,7 +597,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     /**
      * Adds a transaction to the pending manager.
-     * 
+     *
      * @param pendingMgr
      * @param tx
      */
@@ -617,7 +617,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
      * Updates the selected delegate label.
      */
     protected void updateSelectedDelegateLabel() {
-        Delegate d = getSelectedDelegate();
+        DelegateV1 d = getSelectedDelegate();
         if (d != null) {
             labelSelectedDelegate.setText(GuiMessages.get("SelectedDelegate", d.getNameString()));
         }
@@ -625,7 +625,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     /**
      * Returns the selected account.
-     * 
+     *
      * @return
      */
     protected WalletAccount getSelectedAccount() {
@@ -635,7 +635,7 @@ public class DelegatesPanel extends JPanel implements ActionListener {
 
     /**
      * Returns the selected delegate.
-     * 
+     *
      * @return
      */
     protected WalletDelegate getSelectedDelegate() {

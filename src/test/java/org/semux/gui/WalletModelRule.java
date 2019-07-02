@@ -17,6 +17,8 @@ import org.junit.rules.ExternalResource;
 import org.mockito.Mockito;
 import org.semux.core.Amount;
 import org.semux.core.state.Account;
+import org.semux.core.state.AccountV1;
+import org.semux.core.state.AccountV2;
 import org.semux.crypto.Key;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
@@ -44,8 +46,8 @@ public class WalletModelRule extends ExternalResource {
     @Override
     protected void before() throws Throwable {
         super.before();
-        account = new Account(
-                key.toAddress(),
+        account = new AccountV2(
+                key.getAbyte(),
                 availableSEM,
                 lockedSEM,
                 RandomUtils.nextInt(1, 100));

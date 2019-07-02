@@ -179,7 +179,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         String path = uri.getPath();
         if ("/".equals(path)) {
             lastContentFuture = writeStaticFile(ctx, "/org/semux/api/index.html");
-
         } else if (STATIC_FILE_PATTERN.matcher(path).matches()) {
             if (path.startsWith("/swagger-ui/")) {
                 lastContentFuture = writeStaticFile(ctx,
@@ -243,10 +242,13 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                     responseBody = objectMapper.writeValueAsString(entity);
                 }
             } catch (JsonProcessingException e) {
+                logger.error("Exception in API http handler", e);
                 status = INTERNAL_SERVER_ERROR;
                 responseBody = INTERNAL_SERVER_ERROR_RESPONSE;
             }
         }
+
+        logger.info(responseBody);
 
         return writeJsonResponse(ctx, status, responseBody);
     }

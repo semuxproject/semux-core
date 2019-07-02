@@ -6,100 +6,23 @@
  */
 package org.semux.core.state;
 
-import static org.semux.core.Amount.ZERO;
-
-import java.util.Arrays;
-
 import org.semux.core.Amount;
-import org.semux.crypto.Hex;
-import org.semux.util.Bytes;
-import org.semux.util.SimpleDecoder;
-import org.semux.util.SimpleEncoder;
 
-public class Delegate {
-    protected final byte[] address;
-    protected final byte[] name;
-    protected final long registeredAt;
+public interface Delegate extends Comparable<Delegate> {
 
-    protected Amount votes = ZERO;
+    byte[] getAbyte();
 
-    /**
-     * Create a delegate instance.
-     * 
-     * @param address
-     * @param name
-     * @param registeredAt
-     * @param votes
-     */
-    public Delegate(byte[] address, byte[] name, long registeredAt, Amount votes) {
-        this.address = address;
-        this.name = name;
-        this.registeredAt = registeredAt;
-        this.votes = votes;
-    }
+    byte[] getAddress();
 
-    public byte[] getAddress() {
-        return address;
-    }
+    String getAddressString();
 
-    public String getAddressString() {
-        return Hex.encode(getAddress());
-    }
+    byte[] getName();
 
-    public byte[] getName() {
-        return name;
-    }
+    String getNameString();
 
-    public String getNameString() {
-        return Bytes.toString(name);
-    }
+    long getRegisteredAt();
 
-    public long getRegisteredAt() {
-        return registeredAt;
-    }
+    Amount getVotes();
 
-    public Amount getVotes() {
-        return votes;
-    }
-
-    void setVotes(Amount votes) {
-        this.votes = votes;
-    }
-
-    /**
-     * Serializes this delegate object into byte array.
-     * 
-     * @return
-     */
-    public byte[] toBytes() {
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBytes(name);
-        enc.writeLong(registeredAt);
-        enc.writeAmount(votes);
-
-        return enc.toBytes();
-    }
-
-    /**
-     * Parses a delegate from a byte array.
-     * 
-     * @param address
-     * @param bytes
-     * @return
-     */
-    public static Delegate fromBytes(byte[] address, byte[] bytes) {
-        SimpleDecoder dec = new SimpleDecoder(bytes);
-        byte[] name = dec.readBytes();
-        long registeredAt = dec.readLong();
-        Amount votes = dec.readAmount();
-
-        return new Delegate(address, name, registeredAt, votes);
-    }
-
-    @Override
-    public String toString() {
-        return "Delegate [address=" + Hex.encode(address) + ", name=" + Arrays.toString(name) + ", registeredAt="
-                + registeredAt + ", votes=" + votes.getNano() + "]";
-    }
-
+    void setVotes(Amount votes);
 }

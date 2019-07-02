@@ -31,7 +31,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semux.Network;
 import org.semux.core.exception.WalletLockedException;
-import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.util.SystemUtil;
@@ -265,7 +264,7 @@ public class WalletTest {
                 FileUtils.copyInputStreamToFile(WalletTest.class.getResourceAsStream("/wallet/" + names[i]), tmp);
                 Wallet w = new Wallet(tmp, Network.DEVNET);
                 w.unlock("password");
-                assertEquals(addresses[i], Hex.encode(Hash.h160(w.getAccount(0).getPublicKey())));
+                assertEquals(addresses[i], Hex.encode(Key.Address.fromX509PublicKey(w.getAccount(0).getPublicKey())));
             }
         } finally {
             tmp.delete();

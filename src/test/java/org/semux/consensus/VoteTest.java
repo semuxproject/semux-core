@@ -16,10 +16,12 @@ import java.util.List;
 
 import org.junit.Test;
 import org.semux.core.Block;
+import org.semux.core.BlockDecoderV1;
+import org.semux.core.BlockEncoder;
+import org.semux.core.BlockEncoderV1;
 import org.semux.core.BlockHeader;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
-import org.semux.crypto.Hash;
 import org.semux.crypto.Key;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
@@ -91,12 +93,15 @@ public class VoteTest {
 
         block.setView(view);
         block.setVotes(votes);
-        block = Block.fromComponents(block.getEncodedHeader(), block.getEncodedTransactions(),
-                block.getEncodedResults(),
-                block.getEncodedVotes());
+        BlockEncoder blockEncoder = new BlockEncoderV1();
+        block = new BlockDecoderV1().decodeComponents(
+                blockEncoder.encoderHeader(block),
+                blockEncoder.encodeTransactions(block),
+                blockEncoder.encodeTransactionResults(block),
+                blockEncoder.encodeVotes(block));
 
         for (Key.Signature sig : block.getVotes()) {
-            ByteArray address = ByteArray.of(Hash.h160(sig.getPublicKey()));
+            ByteArray address = ByteArray.of(Key.Address.fromX509PublicKey(sig.getPublicKey()));
 
             assertTrue(
                     address.equals(ByteArray.of(key1.toAddress())) || address.equals(ByteArray.of(key2.toAddress())));

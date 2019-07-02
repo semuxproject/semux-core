@@ -32,6 +32,7 @@ import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.state.Account;
+import org.semux.core.state.AccountV2;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Key;
 import org.semux.gui.model.WalletAccount;
@@ -63,7 +64,7 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
     public void testTransactions() {
         Key key = new Key();
         Amount $1 = NANO_SEM.of(1);
-        WalletAccount acc = spy(new WalletAccount(key, new Account(key.toAddress(), $1, $1, 1), null));
+        WalletAccount acc = spy(new WalletAccount(key, new AccountV2(key.getAbyte(), $1, $1, 1), null));
 
         Transaction tx = new Transaction(kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,

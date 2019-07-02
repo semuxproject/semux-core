@@ -36,13 +36,18 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.semux.Network;
 import org.semux.TestUtils;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.core.Amount;
 import org.semux.core.Block;
+import org.semux.core.Blockchain;
+import org.semux.core.BlockchainFactory;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.BlockchainImplV2;
 import org.semux.core.Fork;
+import org.semux.core.Genesis;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
@@ -84,10 +89,11 @@ public class SemuxSyncTest {
                 0,
                 time,
                 Bytes.EMPTY_BYTES).sign(from1);
-        kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        kernelRule.getKernel().setBlockchain(getBlockchain());
         kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), SEM.of(1000));
         Block block1 = kernelRule.createBlock(Collections.singletonList(tx1));
         kernelRule.getKernel().getBlockchain().addBlock(block1);
+        kernelRule.getKernel().getBlockchain().commit();
         SemuxSync semuxSync = spy(new SemuxSync(kernelRule.getKernel()));
         doReturn(true).when(semuxSync).validateBlockVotes(any()); // we don't care about votes here
 
@@ -117,7 +123,7 @@ public class SemuxSyncTest {
 
     @Test
     public void testValidateCoinbaseMagic() {
-        BlockchainImpl blockchain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        Blockchain blockchain = spy(getBlockchain());
         when(blockchain.isForkActivated(eq(Fork.UNIFORM_DISTRIBUTION), anyLong())).thenReturn(true);
         kernelRule.getKernel().setBlockchain(blockchain);
 
@@ -157,7 +163,7 @@ public class SemuxSyncTest {
                 Hex.encode(key3.toAddress()));
 
         // mock the chain
-        BlockchainImpl chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        Blockchain chain = spy(getBlockchain());
         doReturn(validators).when(chain).getValidators();
         kernelRule.getKernel().setBlockchain(chain);
 
@@ -197,7 +203,7 @@ public class SemuxSyncTest {
         List<String> validators = Collections.singletonList(Hex.encode(key1.toAddress()));
 
         // mock the chain
-        BlockchainImpl chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
+        Blockchain chain = spy(getBlockchain());
         doReturn(validators).when(chain).getValidators();
         kernelRule.getKernel().setBlockchain(chain);
 
@@ -223,16 +229,7 @@ public class SemuxSyncTest {
 
     @Test
     public void testFastSync() throws Exception {
-        List<Key> keys = new ArrayList<>();
-        List<String> validators = new ArrayList<>();
-
-        for (int i = 0; i < 4; i++) {
-            keys.add(new Key());
-            validators.add(Hex.encode(keys.get(i).toAddress()));
-        }
-
-        BlockchainImpl chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
-        doReturn(validators).when(chain).getValidators();
+        BlockchainImplV2 chain = spy(getBlockchain());
         doNothing().when(chain).updateValidators(anyLong());
         kernelRule.getKernel().setBlockchain(chain);
 
@@ -264,9 +261,7 @@ public class SemuxSyncTest {
                         block.getHash());
             }
             List<Signature> votes = new ArrayList<>();
-            for (Key key : keys) {
-                votes.add(vote.sign(key).getSignature());
-            }
+            votes.add(vote.sign(Constants.DEVNET_KEY).getSignature());
 
             block.setVotes(votes);
             toProcess.add(Pair.of(block, channel));
@@ -299,16 +294,7 @@ public class SemuxSyncTest {
 
     @Test
     public void testNormalSync() throws Exception {
-        List<Key> keys = new ArrayList<>();
-        List<String> validators = new ArrayList<>();
-
-        for (int i = 0; i < 4; i++) {
-            keys.add(new Key());
-            validators.add(Hex.encode(keys.get(i).toAddress()));
-        }
-
-        BlockchainImpl chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
-        doReturn(validators).when(chain).getValidators();
+        Blockchain chain = spy(getBlockchain());
         kernelRule.getKernel().setBlockchain(chain);
 
         validatorInterval = kernelRule.getKernel().getConfig().getValidatorUpdateInterval();
@@ -332,13 +318,9 @@ public class SemuxSyncTest {
         Block block = kernelRule.createBlock(Collections.emptyList());
         Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_REJECT, block.getNumber(), block.getView(),
                 block.getHash());
-        for (int i = 0; i < 4; i++) {
-            List<Signature> votes = new ArrayList<>();
-            for (Key key : keys) {
-                votes.add(vote.sign(key).getSignature());
-            }
-            block.setVotes(votes);
-        }
+        List<Signature> votes = new ArrayList<>();
+        votes.add(vote.sign(Constants.DEVNET_KEY).getSignature());
+        block.setVotes(votes);
 
         toProcess.add(Pair.of(block, channel));
         sync.process();
@@ -350,13 +332,9 @@ public class SemuxSyncTest {
 
         vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
                 block.getHash());
-        for (int i = 0; i < 4; i++) {
-            List<Signature> votes = new ArrayList<>();
-            for (Key key : keys) {
-                votes.add(vote.sign(key).getSignature());
-            }
-            block.setVotes(votes);
-        }
+        votes = new ArrayList<>();
+        votes.add(vote.sign(Constants.DEVNET_KEY).getSignature());
+        block.setVotes(votes);
 
         toProcess.add(Pair.of(block, channel));
         sync.process();
@@ -373,16 +351,7 @@ public class SemuxSyncTest {
 
     @Test
     public void testValidateSetHashes() throws Exception {
-        List<Key> keys = new ArrayList<>();
-        List<String> validators = new ArrayList<>();
-
-        for (int i = 0; i < 4; i++) {
-            keys.add(new Key());
-            validators.add(Hex.encode(keys.get(i).toAddress()));
-        }
-
-        BlockchainImpl chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
-        doReturn(validators).when(chain).getValidators();
+        Blockchain chain = spy(getBlockchain());
         kernelRule.getKernel().setBlockchain(chain);
 
         validatorInterval = kernelRule.getKernel().getConfig().getValidatorUpdateInterval();
@@ -440,13 +409,9 @@ public class SemuxSyncTest {
 
         Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, lastBlock.getNumber(), lastBlock.getView(),
                 lastBlock.getHash());
-        for (int i = 0; i < 4; i++) {
-            List<Signature> votes = new ArrayList<>();
-            for (Key key : keys) {
-                votes.add(vote.sign(key).getSignature());
-            }
-            lastBlock.setVotes(votes);
-        }
+        List<Signature> votes = new ArrayList<>();
+        votes.add(vote.sign(Constants.DEVNET_KEY).getSignature());
+        lastBlock.setVotes(votes);
 
         currentSet.add(Pair.of(lastBlock, channel));
         sync.validateSetHashes();
@@ -467,5 +432,10 @@ public class SemuxSyncTest {
 
         assert (currentSet.isEmpty());
         assert (toFinalize.size() == validatorInterval);
+    }
+
+    private BlockchainImplV2 getBlockchain() {
+        return (BlockchainImplV2) new BlockchainFactory(kernelRule.getKernel().getConfig(),
+                Genesis.load(Network.DEVNET), temporaryDBRule).getBlockchainInstance();
     }
 }

@@ -340,7 +340,7 @@ public class SemuxSync implements SyncManager {
                 task < target.get() && toDownload.size() < MAX_QUEUED_JOBS; //
                 task++) {
             latestQueuedTask.accumulateAndGet(task, (prev, next) -> next > prev ? next : prev);
-            if (!chain.hasBlock(task)) {
+            if (task > chain.getLatestBlockNumber()) {
                 toDownload.add(task);
             }
         }
@@ -571,7 +571,7 @@ public class SemuxSync implements SyncManager {
             return false;
         }
 
-        if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
+        if (transactions.parallelStream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
             logger.error("Duplicated transaction hash is not allowed");
             return false;
         }
@@ -616,19 +616,19 @@ public class SemuxSync implements SyncManager {
 
         // check validity of votes
         if (block.getVotes().stream().anyMatch(sig -> !validators.contains(Hex.encode(sig.getAddress())))) {
-            logger.warn("Block votes are invalid");
+            logger.error("Invalid block vote: validator doesn't exist");
             return false;
         }
 
         if (!Key.isVerifyBatchSupported()) {
             if (!block.getVotes().stream()
                     .allMatch(sig -> Key.verify(encoded, sig))) {
-                logger.warn("Block votes are invalid");
+                logger.error("Invalid block vote: failed to verify signatures");
                 return false;
             }
         } else {
             if (!Key.verifyBatch(Collections.nCopies(block.getVotes().size(), encoded), block.getVotes())) {
-                logger.warn("Block votes are invalid");
+                logger.error("Invalid block vote: failed to verify signatures");
                 return false;
             }
         }
@@ -637,7 +637,7 @@ public class SemuxSync implements SyncManager {
         if (block.getVotes().stream()
                 .map(sig -> new ByteArray(sig.getA()))
                 .collect(Collectors.toSet()).size() < twoThirds) {
-            logger.warn("Not enough votes, needs 2/3+ twoThirds = {}, block = {}", twoThirds, block);
+            logger.error("Not enough votes, needs 2/3+ twoThirds = {}, block = {}", twoThirds, block);
             return false;
         }
 
@@ -659,12 +659,15 @@ public class SemuxSync implements SyncManager {
         WriteLock writeLock = kernel.getStateLock().writeLock();
         writeLock.lock();
         try {
-            // [7] flush state to disk
+            // [7] add block to chain
+            chain.addBlock(block);
+
+            // [8] commit state updates
             chain.getAccountState().commit();
             chain.getDelegateState().commit();
 
-            // [8] add block to chain
-            chain.addBlock(block);
+            // [9] commit pending blockchain updates
+            chain.commit();
         } finally {
             writeLock.unlock();
         }

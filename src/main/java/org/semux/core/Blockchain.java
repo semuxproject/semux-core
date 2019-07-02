@@ -8,7 +8,6 @@ package org.semux.core;
 
 import java.util.List;
 
-import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 
@@ -16,28 +15,28 @@ public interface Blockchain {
 
     /**
      * Returns the latest block.
-     * 
+     *
      * @return
      */
     Block getLatestBlock();
 
     /**
      * Returns the hash of the latest block.
-     * 
+     *
      * @return
      */
     byte[] getLatestBlockHash();
 
     /**
      * Returns the number of the latest block.
-     * 
+     *
      * @return
      */
     long getLatestBlockNumber();
 
     /**
      * Returns block number by hash.
-     * 
+     *
      * @param hash
      * @return
      */
@@ -45,14 +44,14 @@ public interface Blockchain {
 
     /**
      * Returns genesis block.
-     * 
+     *
      * @return
      */
     Genesis getGenesis();
 
     /**
      * Returns block by number.
-     * 
+     *
      * @param number
      * @return
      */
@@ -60,7 +59,7 @@ public interface Blockchain {
 
     /**
      * Returns block by its hash.
-     * 
+     *
      * @param hash
      * @return
      */
@@ -68,7 +67,7 @@ public interface Blockchain {
 
     /**
      * Returns block header by block number.
-     * 
+     *
      * @param number
      * @return
      */
@@ -76,7 +75,7 @@ public interface Blockchain {
 
     /**
      * Returns block header by block hash.
-     * 
+     *
      * @param hash
      * @return
      */
@@ -92,7 +91,7 @@ public interface Blockchain {
 
     /**
      * Returns transaction by its hash.
-     * 
+     *
      * @param hash
      * @return
      */
@@ -118,7 +117,7 @@ public interface Blockchain {
 
     /**
      * Returns transaction result.
-     * 
+     *
      * @param hash
      * @return
      */
@@ -126,7 +125,7 @@ public interface Blockchain {
 
     /**
      * Returns the block number of the given transaction.
-     * 
+     *
      * @param hash
      * @return
      */
@@ -134,7 +133,7 @@ public interface Blockchain {
 
     /**
      * Returns the total number of transactions from/to the given address.
-     * 
+     *
      * @param address
      *            account address
      * @return
@@ -143,7 +142,7 @@ public interface Blockchain {
 
     /**
      * Returns transactions from/to an address.
-     * 
+     *
      * @param address
      *            account address
      * @param from
@@ -156,35 +155,35 @@ public interface Blockchain {
 
     /**
      * Add a block to the chain.
-     * 
+     *
      * @param block
      */
     void addBlock(Block block);
 
     /**
      * Returns account state.
-     * 
+     *
      * @return
      */
     AccountState getAccountState();
 
     /**
      * Returns delegate state.
-     * 
+     *
      * @return
      */
     DelegateState getDelegateState();
 
     /**
      * Returns the validator set based on current state.
-     * 
+     *
      * @return the peerIds of validators
      */
     List<String> getValidators();
 
     /**
      * Returns the statistics of a validator.
-     * 
+     *
      * @param address
      * @return
      */
@@ -192,7 +191,7 @@ public interface Blockchain {
 
     /**
      * Register a blockchain listener.
-     * 
+     *
      * @param listener
      */
     void addListener(BlockchainListener listener);
@@ -207,10 +206,15 @@ public interface Blockchain {
 
     /**
      * Returns whether a fork has been activated.
-     * 
+     *
      * @param fork
      */
     boolean isForkActivated(Fork fork);
+
+    /**
+     * Commit pending changes to database
+     */
+    void commit();
 
     byte[] constructBlockData();
 }

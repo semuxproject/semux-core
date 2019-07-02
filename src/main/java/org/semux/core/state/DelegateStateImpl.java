@@ -29,20 +29,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Delegate state implementation.
+ * @deprecated only being used for database upgrade from v0, v1 to v2
  *
- * <pre>
+ *             DelegateV1 state implementation.
+ *
+ *             <pre>
  * delegate DB structure:
- * 
+ *
  * [name] => [address] // NOTE: assuming name_length != address_length
  * [address] => [delegate_object]
- * </pre>
+ *             </pre>
  *
- * <pre>
+ *             <pre>
  * vote DB structure:
- * 
+ *
  * [delegate, voter] => vote
- * </pre>
+ *             </pre>
  *
  */
 public class DelegateStateImpl implements DelegateState {
@@ -58,7 +60,7 @@ public class DelegateStateImpl implements DelegateState {
     protected DelegateStateImpl prev;
 
     /**
-     * Delegate updates
+     * DelegateV1 updates
      */
     protected final Map<ByteArray, byte[]> delegateUpdates = new ConcurrentHashMap<>();
 
@@ -69,7 +71,7 @@ public class DelegateStateImpl implements DelegateState {
 
     /**
      * Create a DelegateState that work directly on a database.
-     * 
+     *
      * @param delegateDB
      * @param voteDB
      */
@@ -81,7 +83,7 @@ public class DelegateStateImpl implements DelegateState {
 
     /**
      * Create an DelegateState based on a previous DelegateState.
-     * 
+     *
      * @param prev
      */
     public DelegateStateImpl(DelegateStateImpl prev) {
@@ -94,9 +96,9 @@ public class DelegateStateImpl implements DelegateState {
         if (getDelegateByAddress(address) != null || getDelegateByName(name) != null) {
             return false;
         } else {
-            Delegate d = new Delegate(address, name, registeredAt, ZERO);
+            DelegateV1 d = new DelegateV1(address, name, registeredAt, ZERO);
             delegateUpdates.put(ByteArray.of(name), address);
-            delegateUpdates.put(ByteArray.of(address), d.toBytes());
+            delegateUpdates.put(ByteArray.of(address), new DelegateEncoderV1().encode(d));
 
             return true;
         }
@@ -111,14 +113,14 @@ public class DelegateStateImpl implements DelegateState {
     public boolean vote(byte[] voter, byte[] delegate, Amount v) {
         ByteArray key = ByteArray.of(Bytes.merge(delegate, voter));
         Amount value = getVote(key);
-        Delegate d = getDelegateByAddress(delegate);
+        DelegateV1 d = getDelegateByAddress(delegate);
 
         if (d == null) {
             return false;
         } else {
             voteUpdates.put(key, encodeAmount(sum(value, v)));
             d.setVotes(sum(d.getVotes(), v));
-            delegateUpdates.put(ByteArray.of(delegate), d.toBytes());
+            delegateUpdates.put(ByteArray.of(delegate), new DelegateEncoderV1().encode(d));
             return true;
         }
     }
@@ -133,9 +135,9 @@ public class DelegateStateImpl implements DelegateState {
         } else {
             voteUpdates.put(key, encodeAmount(sub(value, v)));
 
-            Delegate d = getDelegateByAddress(delegate);
+            DelegateV1 d = getDelegateByAddress(delegate);
             d.setVotes(sub(d.getVotes(), v));
-            delegateUpdates.put(ByteArray.of(delegate), d.toBytes());
+            delegateUpdates.put(ByteArray.of(delegate), new DelegateEncoderV1().encode(d));
 
             return true;
         }
@@ -147,7 +149,7 @@ public class DelegateStateImpl implements DelegateState {
     }
 
     @Override
-    public Delegate getDelegateByName(byte[] name) {
+    public DelegateV1 getDelegateByName(byte[] name) {
         ByteArray k = ByteArray.of(name);
 
         if (delegateUpdates.containsKey(k)) {
@@ -162,17 +164,17 @@ public class DelegateStateImpl implements DelegateState {
     }
 
     @Override
-    public Delegate getDelegateByAddress(byte[] address) {
+    public DelegateV1 getDelegateByAddress(byte[] address) {
         ByteArray k = ByteArray.of(address);
 
         if (delegateUpdates.containsKey(k)) {
             byte[] v = delegateUpdates.get(k);
-            return v == null ? null : Delegate.fromBytes(k.getData(), v);
+            return v == null ? null : new DelegateDecoderV1().decode(k.getData(), v);
         } else if (prev != null) {
             return prev.getDelegateByAddress(address);
         } else {
             byte[] v = delegateDB.get(k.getData());
-            return v == null ? null : Delegate.fromBytes(k.getData(), v);
+            return v == null ? null : new DelegateDecoderV1().decode(k.getData(), v);
         }
     }
 
@@ -181,7 +183,7 @@ public class DelegateStateImpl implements DelegateState {
         long t1 = System.nanoTime();
 
         // traverse all cached update, all the way to database.
-        Map<ByteArray, Delegate> map = new HashMap<>();
+        Map<ByteArray, DelegateV1> map = new HashMap<>();
         getDelegates(map);
 
         // sort the results
@@ -248,17 +250,17 @@ public class DelegateStateImpl implements DelegateState {
 
     /**
      * Recursively compute the delegates.
-     * 
+     *
      * @param map
      */
-    protected void getDelegates(Map<ByteArray, Delegate> map) {
+    protected void getDelegates(Map<ByteArray, DelegateV1> map) {
         for (Entry<ByteArray, byte[]> entry : delegateUpdates.entrySet()) {
             /* filter address */
             if (entry.getKey().length() == ADDRESS_LEN && !map.containsKey(entry.getKey())) {
                 if (entry.getValue() == null) {
                     map.put(entry.getKey(), null);
                 } else {
-                    map.put(entry.getKey(), Delegate.fromBytes(entry.getKey().getData(), entry.getValue()));
+                    map.put(entry.getKey(), new DelegateDecoderV1().decode(entry.getKey().getData(), entry.getValue()));
                 }
             }
         }
@@ -273,7 +275,7 @@ public class DelegateStateImpl implements DelegateState {
                 byte[] v = entry.getValue();
 
                 if (k.length() == ADDRESS_LEN && !map.containsKey(k)) {
-                    map.put(k, Delegate.fromBytes(k.getData(), v));
+                    map.put(k, new DelegateDecoderV1().decode(k.getData(), v));
                 }
             }
             itr.close();
@@ -282,7 +284,7 @@ public class DelegateStateImpl implements DelegateState {
 
     /**
      * Get the vote that one voter has given to the specified delegate.
-     * 
+     *
      * @param key
      *            the byte array representation of [delegate, voter].
      * @return

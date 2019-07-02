@@ -58,7 +58,7 @@ public class AccountStateTest {
         acc.setLocked(NANO_SEM.of(2));
         acc.setNonce(3);
 
-        Account acc2 = Account.fromBytes(address, acc.toBytes());
+        Account acc2 = new AccountDecoderV2().decode(address, new AccountEncoderV2().encode(acc));
         assertEquals(NANO_SEM.of(1), acc2.getAvailable());
         assertEquals(NANO_SEM.of(2), acc2.getLocked());
         assertEquals(3L, acc2.getNonce());

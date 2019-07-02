@@ -27,6 +27,7 @@ import org.semux.config.DevnetConfig;
 import org.semux.core.Amount;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Genesis;
 import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.ByteArray;
@@ -36,7 +37,7 @@ public class DelegateStateTest {
 
     private Blockchain chain;
     private DelegateState ds;
-    Map<String, byte[]> delegates;
+    Map<String, Genesis.Delegate> delegates;
 
     @Rule
     public TemporaryDatabaseRule temporaryDBFactory = new TemporaryDatabaseRule();
@@ -50,13 +51,13 @@ public class DelegateStateTest {
 
     @Test
     public void testAtGenesis() {
-        for (String k : delegates.keySet()) {
-            Delegate d = ds.getDelegateByAddress(delegates.get(k));
+        delegates.forEach((key, value) -> {
+            Delegate d = ds.getDelegateByAddress(value.getAddress());
             assertNotNull(d);
-            assertArrayEquals(delegates.get(k), d.getAddress());
-            assertArrayEquals(Bytes.of(k), d.getName());
+            assertArrayEquals(value.getAddress(), d.getAddress());
+            assertArrayEquals(Bytes.of(key), d.getName());
             assertEquals(ZERO, d.getVotes());
-        }
+        });
 
         assertEquals(delegates.size(), ds.getDelegates().size());
         assertEquals(delegates.size(), chain.getValidators().size());

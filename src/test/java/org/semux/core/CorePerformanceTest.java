@@ -19,7 +19,7 @@ import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
-import org.semux.core.state.Delegate;
+import org.semux.core.state.DelegateV1;
 import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
@@ -40,12 +40,12 @@ public class CorePerformanceTest {
 
     @Test
     public void testSortDelegate() {
-        List<Delegate> list = new ArrayList<>();
+        List<DelegateV1> list = new ArrayList<>();
         int nDelegates = 100_000;
 
         Random r = new Random();
         for (int i = 0; i < nDelegates; i++) {
-            Delegate d = new Delegate(Bytes.random(20), Bytes.random(16), r.nextLong(), NANO_SEM.of(r.nextLong()));
+            DelegateV1 d = new DelegateV1(Bytes.random(20), Bytes.random(16), r.nextLong(), NANO_SEM.of(r.nextLong()));
             list.add(d);
         }
 
@@ -83,7 +83,8 @@ public class CorePerformanceTest {
         long t2 = System.nanoTime();
         logger.info("Perf_transaction_1: {} μs/tx", (t2 - t1) / 1_000 / repeat);
 
-        Blockchain chain = new BlockchainImpl(config, temporaryDBFactory);
+        Blockchain chain = new BlockchainFactory(config, Genesis.load(Network.DEVNET), temporaryDBFactory)
+                .getBlockchainInstance();
         TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
 
         t1 = System.nanoTime();

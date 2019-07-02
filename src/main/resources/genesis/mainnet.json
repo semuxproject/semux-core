@@ -7,27 +7,42 @@
     "premine": [
         {
             "address": "0xe30c510f3efc6e2bf98ff8f725548e6ece568f89",
+            "Abyte": "0x9bd634641324cfc2f8709ba2ffb12b4ff126ca2bab2e6140a32eeae79413ffd9",
             "amount": 5000000000000000,
             "note": "founder"
         },
         {
             "address": "0x541365fe0818ea0d2d7ab7f7bc79f719f5f72227",
+            "Abyte": "0xd6e032210d9ccccec0a65e0b658ab83a28cf850500734c6a890cbbf973c015d8",
             "amount": 10000000000000000,
             "note": "development, marketing, promotion, bounties"
         },
         {
             "address": "0x1504263ee17446ea5f8b288e1c35d05749c0e47d",
+            "Abyte": "0xb8ad3e113112db08c08b5b656e643b1e70054cf67341cefc4519150804da454c",
             "amount": 10000000000000000,
             "note": "community distribution"
         }
     ],
     "delegates": {
-        "semux1": "0x230fe26286ef1c588a29fc57e8fa54ee2409c57b",
-        "semux2": "0xe11145b4e9e05ae06ec606af4a77ae1103661025",
-        "semux3": "0xd3063743e9906ce8ea05158e4c83590d40c6a4c9",
-        "semux4": "0xd45d3b25fd1d72e9da4dab7637814f138437f447"
+        "semux1": {
+            "address": "0x230fe26286ef1c588a29fc57e8fa54ee2409c57b",
+            "Abyte": "0x85c87ffdfc48b5c072ca5a9aa0ad618432161b37759a3d7aa7ff18ac18d9b51e"
+        },
+        "semux2": {
+            "address": "0xe11145b4e9e05ae06ec606af4a77ae1103661025",
+            "Abyte": "0x99dd11bce44b02023767cd8250a430880544a6305a06bccf53acf6ba58be13ac"
+        },
+        "semux3": {
+            "address": "0xd3063743e9906ce8ea05158e4c83590d40c6a4c9",
+            "Abyte": "0x9ce0e4c12239a067b20e9ba7cad636b043a547ce7cc0088a123c0ab089662766"
+        },
+        "semux4": {
+            "address": "0xd45d3b25fd1d72e9da4dab7637814f138437f447",
+            "Abyte": "0xe9b59e9ac73113a365a20deaab444bdd916fba5a7400be97d0b1a16563cd2f09"
+        }
     },
     "config": {
-        
+
     }
 }

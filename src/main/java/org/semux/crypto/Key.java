@@ -17,10 +17,14 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.semux.crypto.cache.PublicKeyCache;
+import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
@@ -39,6 +43,7 @@ import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
  */
 public class Key {
 
+    private static final byte[] X509 = Hex.decode("302a300506032b6570032100");
     public static final int PUBLIC_KEY_LEN = 44;
     public static final int PRIVATE_KEY_LEN = 48;
     public static final int ADDRESS_LEN = 20;
@@ -51,15 +56,15 @@ public class Key {
     static {
         /*
          * Algorithm specifications
-         * 
+         *
          * Name: Ed25519
-         * 
+         *
          * Curve: ed25519curve
-         * 
+         *
          * H: SHA-512
-         * 
+         *
          * l: $q = 2^{252} + 27742317777372353535851937790883648493$
-         * 
+         *
          * B: 0x5866666666666666666666666666666666666666666666666666666666666666
          */
         try {
@@ -127,11 +132,20 @@ public class Key {
 
     /**
      * Returns the public key, encoded in "X.509".
-     * 
+     *
      * @return
      */
     public byte[] getPublicKey() {
         return pk.getEncoded();
+    }
+
+    /**
+     * Returns the raw ED25519 public key.
+     *
+     * @return
+     */
+    public byte[] getAbyte() {
+        return pk.getAbyte();
     }
 
     /**
@@ -150,7 +164,7 @@ public class Key {
 
     /**
      * Signs a message.
-     * 
+     *
      * @param message
      *            message
      * @return
@@ -174,7 +188,7 @@ public class Key {
 
     /**
      * Verifies a signature.
-     * 
+     *
      * @param message
      *            message
      * @param signature
@@ -217,7 +231,7 @@ public class Key {
 
     /**
      * Verifies a signature.
-     * 
+     *
      * @param message
      *            message hash
      * @param signature
@@ -238,7 +252,7 @@ public class Key {
 
     /**
      * Returns a string representation of this key.
-     * 
+     *
      * @return the address of this EdDSA.
      */
     @Override
@@ -248,12 +262,11 @@ public class Key {
 
     /**
      * Represents an EdDSA signature, wrapping the raw signature and public key.
-     * 
+     *
      */
     public static class Signature {
         public static final int LENGTH = 96;
 
-        private static final byte[] X509 = Hex.decode("302a300506032b6570032100");
         private static final int S_LEN = 64;
         private static final int A_LEN = 32;
 
@@ -262,7 +275,7 @@ public class Key {
 
         /**
          * Creates a Signature instance.
-         * 
+         *
          * @param s
          * @param a
          */
@@ -276,7 +289,7 @@ public class Key {
 
         /**
          * Returns the S byte array.
-         * 
+         *
          * @return
          */
         public byte[] getS() {
@@ -285,7 +298,7 @@ public class Key {
 
         /**
          * Returns the A byte array.
-         * 
+         *
          * @return
          */
         public byte[] getA() {
@@ -294,7 +307,7 @@ public class Key {
 
         /**
          * Returns the public key of the signer.
-         * 
+         *
          * @return
          */
         public byte[] getPublicKey() {
@@ -303,16 +316,16 @@ public class Key {
 
         /**
          * Returns the address of signer.
-         * 
+         *
          * @return
          */
         public byte[] getAddress() {
-            return Hash.h160(getPublicKey());
+            return Key.Address.fromX509PublicKey(getPublicKey());
         }
 
         /**
          * Converts into a byte array.
-         * 
+         *
          * @return
          */
         public byte[] toBytes() {
@@ -321,7 +334,7 @@ public class Key {
 
         /**
          * Parses from byte array.
-         * 
+         *
          * @param bytes
          * @return a {@link Signature} if success,or null
          */
@@ -351,6 +364,23 @@ public class Key {
         public int hashCode() {
             return Arrays.hashCode(toBytes());
         }
+    }
+
+    public static class Address {
+
+        private static final Cache<ByteArray, byte[]> addressCache = Caffeine.newBuilder().maximumSize(20 * 1000)
+                .build();
+
+        public static byte[] fromX509PublicKey(byte[] x509) {
+            assert (x509.length == PUBLIC_KEY_LEN);
+            return addressCache.get(ByteArray.of(x509), (k) -> Hash.h160(k.getData()));
+        }
+
+        public static byte[] fromAbyte(byte[] Abyte) {
+            assert (Abyte.length == 32);
+            return Hash.h160(Bytes.merge(X509, Abyte));
+        }
+
     }
 
     @Override

@@ -9,8 +9,6 @@ package org.semux.core;
 import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Fork.VIRTUAL_MACHINE;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,11 +19,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.ethereum.vm.client.BlockStore;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.core.Genesis.Premine;
-import org.semux.core.event.BlockchainDatabaseUpgradingEvent;
 import org.semux.core.exception.BlockchainException;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.AccountStateImpl;
@@ -36,23 +32,19 @@ import org.semux.crypto.Hex;
 import org.semux.db.Database;
 import org.semux.db.DatabaseFactory;
 import org.semux.db.DatabaseName;
-import org.semux.db.LeveldbDatabase;
-import org.semux.db.Migration;
-import org.semux.event.PubSub;
-import org.semux.event.PubSubFactory;
+import org.semux.db.DatabasePrefixesV1;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
-import org.semux.util.TimeUtil;
-import org.semux.vm.client.SemuxBlock;
-import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Blockchain implementation.
+ * @deprecated only being used for database upgrade from v0, v1 to v2
  *
- * <pre>
+ *             Blockchain implementation.
+ *
+ *             <pre>
  * index DB structure:
  *
  * [0] => [latest_block_number]
@@ -65,16 +57,16 @@ import org.slf4j.LoggerFactory;
  * [7] => [activated forks]
  *
  * [0xff] => [database version]
- * </pre>
+ *             </pre>
  *
- * <pre>
+ *             <pre>
  * block DB structure:
  *
  * [0, block_number] => [block_header]
  * [1, block_number] => [block_transactions]
  * [2, block_number] => [block_results]
  * [3, block_number] => [block_votes]
- * </pre>
+ *             </pre>
  */
 public class BlockchainImpl implements Blockchain {
 
@@ -82,26 +74,20 @@ public class BlockchainImpl implements Blockchain {
 
     protected static final int DATABASE_VERSION = 1;
 
-    protected static final byte TYPE_LATEST_BLOCK_NUMBER = 0x00;
-    protected static final byte TYPE_VALIDATORS = 0x01;
-    protected static final byte TYPE_VALIDATOR_STATS = 0x02;
-    protected static final byte TYPE_BLOCK_HASH = 0x03;
-    protected static final byte TYPE_TRANSACTION_HASH = 0x04;
-    protected static final byte TYPE_ACCOUNT_TRANSACTION = 0x05;
-    protected static final byte TYPE_ACTIVATED_FORKS = 0x06;
-    protected static final byte TYPE_COINBASE_TRANSACTION_HASH = 0x07;
-    protected static final byte TYPE_DATABASE_VERSION = (byte) 0xff;
+    protected static final byte TYPE_LATEST_BLOCK_NUMBER = DatabasePrefixesV1.IndexDB.TYPE_LATEST_BLOCK_NUMBER;
+    protected static final byte TYPE_VALIDATORS = DatabasePrefixesV1.IndexDB.TYPE_VALIDATORS;
+    protected static final byte TYPE_VALIDATOR_STATS = DatabasePrefixesV1.IndexDB.TYPE_VALIDATOR_STATS;
+    protected static final byte TYPE_BLOCK_HASH = DatabasePrefixesV1.IndexDB.TYPE_BLOCK_HASH;
+    protected static final byte TYPE_TRANSACTION_HASH = DatabasePrefixesV1.IndexDB.TYPE_TRANSACTION_HASH;
+    protected static final byte TYPE_ACCOUNT_TRANSACTION = DatabasePrefixesV1.IndexDB.TYPE_ACCOUNT_TRANSACTION;
+    protected static final byte TYPE_ACTIVATED_FORKS = DatabasePrefixesV1.IndexDB.TYPE_ACTIVATED_FORKS;
+    protected static final byte TYPE_COINBASE_TRANSACTION_HASH = DatabasePrefixesV1.IndexDB.TYPE_COINBASE_TRANSACTION_HASH;
+    protected static final byte TYPE_DATABASE_VERSION = DatabasePrefixesV1.IndexDB.TYPE_DATABASE_VERSION;
 
-    protected static final byte TYPE_BLOCK_HEADER = 0x00;
-    protected static final byte TYPE_BLOCK_TRANSACTIONS = 0x01;
-    protected static final byte TYPE_BLOCK_RESULTS = 0x02;
-    protected static final byte TYPE_BLOCK_VOTES = 0x03;
-
-    private BlockStore blockStore = new SemuxBlockStore(this);
-
-    protected enum StatsType {
-        FORGED, HIT, MISSED
-    }
+    protected static final byte TYPE_BLOCK_HEADER = DatabasePrefixesV1.BlockDB.TYPE_BLOCK_HEADER;
+    protected static final byte TYPE_BLOCK_TRANSACTIONS = DatabasePrefixesV1.BlockDB.TYPE_BLOCK_TRANSACTIONS;
+    protected static final byte TYPE_BLOCK_RESULTS = DatabasePrefixesV1.BlockDB.TYPE_BLOCK_RESULTS;
+    protected static final byte TYPE_BLOCK_VOTES = DatabasePrefixesV1.BlockDB.TYPE_BLOCK_VOTES;
 
     private final List<BlockchainListener> listeners = new ArrayList<>();
     private final Config config;
@@ -116,6 +102,8 @@ public class BlockchainImpl implements Blockchain {
     private Block latestBlock;
 
     private ActivatedForks forks;
+
+    private static final BlockCodec blockCodec = new BlockCodecV1();
 
     public BlockchainImpl(Config config, DatabaseFactory dbFactory) {
         this(config, Genesis.load(config.network()), dbFactory);
@@ -149,12 +137,6 @@ public class BlockchainImpl implements Blockchain {
 
         // load the latest block
         latestBlock = getBlock(Bytes.toLong(number));
-
-        // checks if the database needs to be upgraded
-        if (getDatabaseVersion() == 0) {
-            upgradeDb0(factory);
-            return;
-        }
     }
 
     private void initializeDb() {
@@ -168,13 +150,15 @@ public class BlockchainImpl implements Blockchain {
         accountState.commit();
 
         // delegates
-        for (Entry<String, byte[]> e : genesis.getDelegates().entrySet()) {
-            delegateState.register(e.getValue(), Bytes.of(e.getKey()), 0);
+        for (Entry<String, Genesis.Delegate> e : genesis.getDelegates().entrySet()) {
+            delegateState.register(e.getValue().getAddress(), Bytes.of(e.getKey()), 0);
         }
         delegateState.commit();
 
         // add block
         addBlock(genesis);
+
+        commit();
     }
 
     @Override
@@ -215,7 +199,7 @@ public class BlockchainImpl implements Blockchain {
         byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)));
         byte[] votes = blockDB.get(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)));
 
-        return (header == null) ? null : Block.fromComponents(header, transactions, results, votes);
+        return (header == null) ? null : blockCodec.decoder().decodeComponents(header, transactions, results, votes);
     }
 
     @Override
@@ -324,17 +308,19 @@ public class BlockchainImpl implements Blockchain {
         }
 
         // [1] update block
-        blockDB.put(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)), block.getEncodedHeader());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)), block.getEncodedTransactions());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)), block.getEncodedResults());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)), block.getEncodedVotes());
+        blockDB.put(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)), blockCodec.encoder().encoderHeader(block));
+        blockDB.put(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)),
+                blockCodec.encoder().encodeTransactions(block));
+        blockDB.put(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)),
+                blockCodec.encoder().encodeTransactionResults(block));
+        blockDB.put(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)), blockCodec.encoder().encodeVotes(block));
 
         indexDB.put(Bytes.merge(TYPE_BLOCK_HASH, hash), Bytes.of(number));
 
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
-        Pair<byte[], List<Integer>> transactionIndices = block.getEncodedTransactionsAndIndices();
-        Pair<byte[], List<Integer>> resultIndices = block.getEncodedTransactionsAndIndices();
+        Pair<byte[], List<Integer>> transactionIndices = blockCodec.encoder().getEncodedTransactionsAndIndices(block);
+        Pair<byte[], List<Integer>> resultIndices = blockCodec.encoder().getEncodedResultsAndIndex(block);
         Amount reward = Block.getBlockReward(block, config);
 
         for (int i = 0; i < txs.size(); i++) {
@@ -372,11 +358,11 @@ public class BlockchainImpl implements Blockchain {
             // [5] update validator statistics
             List<String> validators = getValidators();
             String primary = config.getPrimaryValidator(validators, number, 0, forks.isActivated(UNIFORM_DISTRIBUTION));
-            adjustValidatorStats(block.getCoinbase(), StatsType.FORGED, 1);
+            adjustValidatorStats(block.getCoinbase(), ValidatorStatsType.FORGED, 1);
             if (primary.equals(Hex.encode(block.getCoinbase()))) {
-                adjustValidatorStats(Hex.decode0x(primary), StatsType.HIT, 1);
+                adjustValidatorStats(Hex.decode0x(primary), ValidatorStatsType.HIT, 1);
             } else {
-                adjustValidatorStats(Hex.decode0x(primary), StatsType.MISSED, 1);
+                adjustValidatorStats(Hex.decode0x(primary), ValidatorStatsType.MISSED, 1);
             }
         }
 
@@ -455,7 +441,7 @@ public class BlockchainImpl implements Blockchain {
      *
      * @param number
      */
-    public void updateValidators(long number) {
+    void updateValidators(long number) {
         List<String> validators = new ArrayList<>();
 
         List<Delegate> delegates = delegateState.getDelegates();
@@ -483,7 +469,7 @@ public class BlockchainImpl implements Blockchain {
      * @param delta
      *            difference
      */
-    protected void adjustValidatorStats(byte[] address, StatsType type, long delta) {
+    protected void adjustValidatorStats(byte[] address, ValidatorStatsType type, long delta) {
         byte[] key = Bytes.merge(TYPE_VALIDATOR_STATS, address);
         byte[] value = indexDB.get(key);
 
@@ -544,67 +530,12 @@ public class BlockchainImpl implements Blockchain {
      *
      * @return
      */
-    protected int getDatabaseVersion() {
+    public int getDatabaseVersion() {
         byte[] versionBytes = indexDB.get(Bytes.of(TYPE_DATABASE_VERSION));
         if (versionBytes == null || versionBytes.length == 0) {
             return 0;
         } else {
             return Bytes.toInt(versionBytes);
-        }
-    }
-
-    /**
-     * Validator statistics.
-     */
-    public static class ValidatorStats {
-        private long blocksForged;
-        private long turnsHit;
-        private long turnsMissed;
-
-        public ValidatorStats(long forged, long hit, long missed) {
-            this.blocksForged = forged;
-            this.turnsHit = hit;
-            this.turnsMissed = missed;
-        }
-
-        public long getBlocksForged() {
-            return blocksForged;
-        }
-
-        void setBlocksForged(long forged) {
-            this.blocksForged = forged;
-        }
-
-        public long getTurnsHit() {
-            return turnsHit;
-        }
-
-        void setTurnsHit(long hit) {
-            this.turnsHit = hit;
-        }
-
-        public long getTurnsMissed() {
-            return turnsMissed;
-        }
-
-        void setTurnsMissed(long missed) {
-            this.turnsMissed = missed;
-        }
-
-        public byte[] toBytes() {
-            SimpleEncoder enc = new SimpleEncoder();
-            enc.writeLong(blocksForged);
-            enc.writeLong(turnsHit);
-            enc.writeLong(turnsMissed);
-            return enc.toBytes();
-        }
-
-        public static ValidatorStats fromBytes(byte[] bytes) {
-            SimpleDecoder dec = new SimpleDecoder(bytes);
-            long forged = dec.readLong();
-            long hit = dec.readLong();
-            long missed = dec.readLong();
-            return new ValidatorStats(forged, hit, missed);
         }
     }
 
@@ -667,15 +598,18 @@ public class BlockchainImpl implements Blockchain {
     protected Map<Fork, Fork.Activation> getActivatedForks() {
         Map<Fork, Fork.Activation> activations = new HashMap<>();
         byte[] value = indexDB.get(Bytes.of(TYPE_ACTIVATED_FORKS));
-        logger.info("Activated Forks");
         if (value != null) {
             SimpleDecoder simpleDecoder = new SimpleDecoder(value);
             final int numberOfForks = simpleDecoder.readInt();
             for (int i = 0; i < numberOfForks; i++) {
                 Fork.Activation activation = Fork.Activation.fromBytes(simpleDecoder.readBytes());
                 activations.put(activation.fork, activation);
-                logger.info(activation.fork.name + " @ block " + activation.activatedAt);
             }
+        }
+
+        if (!activations.isEmpty()) {
+            logger.info("Activated Forks");
+            activations.forEach((fork, activation) -> logger.info(fork.name + " @ block " + activation.activatedAt));
         }
 
         return activations;
@@ -695,94 +629,8 @@ public class BlockchainImpl implements Blockchain {
         indexDB.put(Bytes.of(TYPE_ACTIVATED_FORKS), simpleEncoder.toBytes());
     }
 
-    /**
-     * Upgrade this database from version 0 to version 1.
-     *
-     * @param dbFactory
-     */
-    private void upgradeDb0(DatabaseFactory dbFactory) {
-        // run the migration
-        new MigrationBlockDbVersion001().migrate(config, dbFactory);
-        // reload this blockchain database
-        openDb(dbFactory);
-    }
-
-    /**
-     * A temporary blockchain for database migration. This class implements a
-     * lightweight version of
-     * ${@link org.semux.consensus.SemuxBft#applyBlock(Block)} to migrate blocks
-     * from an existing database to the latest schema.
-     */
-    private class MigrationBlockchain extends BlockchainImpl {
-        private MigrationBlockchain(Config config, DatabaseFactory dbFactory) {
-            super(config, dbFactory);
-        }
-
-        public void applyBlock(Block block) {
-            // [0] execute transactions against local state
-            TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
-            transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState(),
-                    new SemuxBlock(block.getHeader(), config.vmMaxBlockGasLimit()), this);
-
-            // [1] apply block reward and tx fees
-            Amount reward = Block.getBlockReward(block, config);
-
-            if (reward.gt0()) {
-                getAccountState().adjustAvailable(block.getCoinbase(), reward);
-            }
-            // [2] commit the updates
-            getAccountState().commit();
-            getDelegateState().commit();
-            // [3] add block to chain
-            addBlock(block);
-        }
-    }
-
-    /**
-     * Database migration from version 0 to version 1. The migration process creates
-     * a temporary ${@link MigrationBlockchain} then migrates all blocks from an
-     * existing blockchain database to the created temporary blockchain database.
-     * Once all blocks have been successfully migrated, the existing blockchain
-     * database is replaced by the migrated temporary blockchain database.
-     */
-    private class MigrationBlockDbVersion001 implements Migration {
-        private final PubSub pubSub = PubSubFactory.getDefault();
-
-        @Override
-        public void migrate(Config config, DatabaseFactory dbFactory) {
-            try {
-                logger.info("Upgrading the database... DO NOT CLOSE THE WALLET!");
-                // recreate block db in a temporary folder
-                String dbName = dbFactory.getDataDir().getFileName().toString();
-                Path tempPath = dbFactory
-                        .getDataDir()
-                        .resolveSibling(dbName + "_tmp_" + TimeUtil.currentTimeMillis());
-                LeveldbDatabase.LeveldbFactory tempDb = new LeveldbDatabase.LeveldbFactory(tempPath.toFile());
-                MigrationBlockchain migrationBlockchain = new MigrationBlockchain(config, tempDb);
-                final long latestBlockNumber = getLatestBlockNumber();
-                for (long i = 1; i <= latestBlockNumber; i++) {
-                    migrationBlockchain.applyBlock(getBlock(i));
-                    if (i % 1000 == 0) {
-                        pubSub.publish(new BlockchainDatabaseUpgradingEvent(i, latestBlockNumber));
-                        logger.info("Loaded {} / {} blocks", i, latestBlockNumber);
-                    }
-                }
-                dbFactory.close();
-                tempDb.close();
-                // move the existing database to backup folder then replace the database folder
-                // with the upgraded database
-                Path backupPath = dbFactory
-                        .getDataDir()
-                        .resolveSibling(
-                                dbFactory.getDataDir().getFileName().toString() + "_bak_"
-                                        + TimeUtil.currentTimeMillis());
-                dbFactory.moveTo(backupPath);
-                tempDb.moveTo(dbFactory.getDataDir());
-                dbFactory.open();
-                logger.info("Database upgraded to version 1.");
-            } catch (IOException e) {
-                logger.error("Failed to run migration " + MigrationBlockDbVersion001.class, e);
-            }
-        }
+    @Override
+    public void commit() {
+        // do nothing
     }
 }

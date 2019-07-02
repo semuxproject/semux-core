@@ -35,7 +35,7 @@ import javax.swing.border.TitledBorder;
 import org.semux.core.Block;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.core.state.Delegate;
+import org.semux.core.state.DelegateV1;
 import org.semux.crypto.Hex;
 import org.semux.gui.Action;
 import org.semux.gui.SemuxGui;
@@ -346,11 +346,11 @@ public class HomePanel extends JPanel implements ActionListener {
 
         // consensus info table
         this.primaryValidator
-                .setText(model.getValidatorDelegate(0).map(Delegate::getNameString).orElse("-"));
+                .setText(model.getValidatorDelegate(0).map(DelegateV1::getNameString).orElse("-"));
         this.backupValidator
-                .setText(model.getValidatorDelegate(1).map(Delegate::getNameString).orElse("-"));
+                .setText(model.getValidatorDelegate(1).map(DelegateV1::getNameString).orElse("-"));
         this.nextValidator
-                .setText(model.getNextPrimaryValidatorDelegate().map(Delegate::getNameString).orElse("-"));
+                .setText(model.getNextPrimaryValidatorDelegate().map(DelegateV1::getNameString).orElse("-"));
         this.roundEndBlock
                 .setText(model.getNextValidatorSetUpdate()
                         .map(String::valueOf)

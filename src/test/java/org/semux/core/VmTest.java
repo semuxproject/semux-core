@@ -53,7 +53,8 @@ public class VmTest {
     @Before
     public void prepare() {
         config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
-        chain = spy(new BlockchainImpl(config, temporaryDBFactory));
+        chain = spy(new BlockchainFactory(config, Genesis.load(Network.DEVNET), temporaryDBFactory)
+                .getBlockchainInstance());
         as = chain.getAccountState();
         ds = chain.getDelegateState();
         exec = new TransactionExecutor(config, new SemuxBlockStore(chain));

@@ -182,7 +182,7 @@ public class ConnectionTest {
         List<Genesis.Premine> premines = new ArrayList<>();
 
         // mock delegates
-        HashMap<String, String> delegates = new HashMap<>();
+        HashMap<String, Genesis.Delegate> delegates = new HashMap<>();
         // mock genesis
         return Genesis.jsonCreator(0,
                 "0x0000000000000000000000000000000000000000",
