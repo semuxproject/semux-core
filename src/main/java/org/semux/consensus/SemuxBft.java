@@ -800,30 +800,29 @@ public class SemuxBft implements BftManager {
                 new byte[0], new byte[0], data);
 
         // only propose gas used up to configured block gas limit
-        SemuxBlock semuxBlock = new SemuxBlock(tempHeader, config.poolBlockGasLimit());
+        long blockGasLimit = config.poolBlockGasLimit();
+        SemuxBlock semuxBlock = new SemuxBlock(tempHeader, blockGasLimit);
 
-        long gasUsed = 0;
+        for (PendingManager.PendingTransaction pendingTx : pending) {
+            Transaction tx = pendingTx.transaction;
+            boolean isVMTransaction = tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE;
 
-        for (PendingManager.PendingTransaction tx : pending) {
-            if (tx.transaction.getType() == TransactionType.CALL
-                    || tx.transaction.getType() == TransactionType.CREATE) {
-                long pendingGasForBlock = tx.transaction.getGas() + gasUsed;
+            if (isVMTransaction) {
+                // transactions that exceed the remaining block gas limit are ignores
+                if (tx.getGasPrice() <= blockGasLimit) {
+                    TransactionResult result = exec.execute(tx, as, ds, semuxBlock, chain);
 
-                if (tx.transaction.getGasPrice() >= config.poolMinGasPrice()
-                        && pendingGasForBlock < config.poolBlockGasLimit()) {
-                    TransactionResult result = exec.execute(tx.transaction, as, ds, semuxBlock, chain);
-                    gasUsed += result.getGasUsed();
-
-                    if (result.getCode().isAcceptable() && gasUsed < config.poolBlockGasLimit()) {
+                    // only include transaction that's acceptable
+                    if (result.getCode().isAcceptable()) {
                         pendingResults.add(result);
-                        pendingTxs.add(tx.transaction);
-                    } else {
-                        gasUsed -= result.getGasUsed();
+                        pendingTxs.add(tx);
+
+                        blockGasLimit -= result.getGasUsed();
                     }
                 }
             } else {
-                pendingResults.add(tx.result);
-                pendingTxs.add(tx.transaction);
+                pendingResults.add(pendingTx.result);
+                pendingTxs.add(pendingTx.transaction);
             }
         }
 

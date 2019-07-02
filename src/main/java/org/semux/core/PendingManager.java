@@ -309,11 +309,15 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         int cnt = 0;
         long now = TimeUtil.currentTimeMillis();
+        boolean isVMTransaction = tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE;
 
         // reject VM transactions that come in before fork
-        if (!kernel.getBlockchain().isForkActivated(Fork.VIRTUAL_MACHINE)
-                && (tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE)) {
+        if (isVMTransaction && !kernel.getBlockchain().isForkActivated(Fork.VIRTUAL_MACHINE)) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_TYPE);
+        }
+        // reject VM transaction with low gas price
+        if (isVMTransaction && tx.getGasPrice() < kernel.getConfig().poolMinGasPrice()) {
+            return new ProcessingResult(0, TransactionResult.Code.INVALID_FEE);
         }
 
         // reject transactions with a duplicated tx hash

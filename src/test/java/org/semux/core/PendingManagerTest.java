@@ -6,6 +6,7 @@
  */
 package org.semux.core;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -208,8 +209,7 @@ public class PendingManagerTest {
             pendingMgr.addTransaction(tx);
         }
 
-        Thread.sleep(8000);
-        assertEquals(perm.length, pendingMgr.getPendingTransactions().size());
+        await().until(() -> pendingMgr.getPendingTransactions().size() == perm.length);
     }
 
     @Test
