@@ -6,6 +6,8 @@
  */
 package org.semux.vm.client;
 
+import java.math.BigInteger;
+
 import org.ethereum.vm.client.Block;
 import org.semux.core.BlockHeader;
 
@@ -45,5 +47,10 @@ public class SemuxBlock implements Block {
     @Override
     public long getNumber() {
         return blockHeader.getNumber();
+    }
+
+    @Override
+    public BigInteger getDifficulty() {
+        return BigInteger.ONE;
     }
 }
