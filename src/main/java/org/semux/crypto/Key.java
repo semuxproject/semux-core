@@ -363,4 +363,16 @@ public class Key {
         return (obj instanceof Key) && Arrays.equals(getPrivateKey(), ((Key) obj).getPrivateKey());
     }
 
+    public static void main(String[] args) {
+        String[] pks = {
+                "302a300506032b6570032100fdd012156d14623082633b18a4d342cd37f07af3c5696e11a0947ab0e0bf7e00",
+                "302a300506032b6570032100dca9f23f1a1d24972697e7ae17b19557e6d8c21fd3a115757ad85a84293dd5de",
+                "302a300506032b6570032100358fe04653e3364f7851d9d94d118e2e09a2add75722180017ecfef606ce5e68",
+                "302a300506032b6570032100c91464ea6062350e56c980c4bd5b3f183e3b39179b16a84b123e6f077db1eb70",
+        };
+        for (String pk : pks) {
+            byte[] address = Hash.h160(Hex.decode(pk));
+            System.out.println(Hex.encode(address));
+        }
+    }
 }
