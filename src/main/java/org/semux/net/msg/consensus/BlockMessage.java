@@ -7,9 +7,9 @@
 package org.semux.net.msg.consensus;
 
 import org.semux.core.Block;
-import org.semux.core.BlockDecoder;
-import org.semux.core.BlockDecoderV1;
-import org.semux.core.BlockEncoderV1;
+import org.semux.core.codec.BlockDecoder;
+import org.semux.core.codec.BlockDecoderV1;
+import org.semux.core.codec.BlockEncoderV1;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
 

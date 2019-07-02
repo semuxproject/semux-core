@@ -26,7 +26,6 @@ import org.semux.config.Config;
 import org.semux.core.Amount.Unit;
 import org.semux.core.TransactionResult.Code;
 import org.semux.core.state.Account;
-import org.semux.core.state.AccountV1;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.AccountStateImpl;
 import org.semux.core.state.AccountStateImplV2;

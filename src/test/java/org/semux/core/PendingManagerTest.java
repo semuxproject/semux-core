@@ -29,7 +29,6 @@ import org.mockito.Mockito;
 import org.semux.KernelMock;
 import org.semux.Network;
 import org.semux.config.Constants;
-import org.semux.config.DevnetConfig;
 import org.semux.core.state.AccountState;
 import org.semux.crypto.Key;
 import org.semux.db.LeveldbDatabase.LeveldbFactory;

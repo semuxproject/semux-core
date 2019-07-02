@@ -31,7 +31,6 @@ import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
-import org.semux.core.state.Account;
 import org.semux.core.state.AccountV2;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Key;

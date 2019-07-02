@@ -144,7 +144,8 @@ public class Genesis extends Block {
         }
 
         @JsonCreator
-        public Premine(@JsonProperty("address") String address, @JsonProperty("Abyte") String Abyte, @JsonProperty("amount") long amount,
+        public Premine(@JsonProperty("address") String address, @JsonProperty("Abyte") String Abyte,
+                @JsonProperty("amount") long amount,
                 @JsonProperty("note") String note) {
             this(Hex.decode0x(address), Hex.decode0x(Abyte), NANO_SEM.of(amount), note);
             assert (Arrays.equals(this.address, Key.Address.fromAbyte(this.Abyte)));

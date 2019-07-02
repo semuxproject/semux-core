@@ -4,9 +4,11 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.core.state;
+package org.semux.core.codec;
 
-public interface AccountEncoder {
+public interface BlockCodec {
 
-    byte[] encode(Account account);
+    BlockEncoder encoder();
+
+    BlockDecoder decoder();
 }

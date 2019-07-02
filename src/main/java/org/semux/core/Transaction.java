@@ -14,12 +14,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.semux.Network;
 import org.semux.config.Constants;
+import org.semux.core.codec.TransactionDecoderV1;
+import org.semux.core.codec.TransactionEncoderV1;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
-import org.semux.util.SimpleDecoder;
-import org.semux.util.SimpleEncoder;
 
 public class Transaction {
 

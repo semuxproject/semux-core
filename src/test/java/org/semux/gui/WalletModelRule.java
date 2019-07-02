@@ -17,7 +17,6 @@ import org.junit.rules.ExternalResource;
 import org.mockito.Mockito;
 import org.semux.core.Amount;
 import org.semux.core.state.Account;
-import org.semux.core.state.AccountV1;
 import org.semux.core.state.AccountV2;
 import org.semux.crypto.Key;
 import org.semux.gui.model.WalletAccount;

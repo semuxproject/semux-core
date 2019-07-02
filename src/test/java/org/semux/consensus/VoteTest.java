@@ -16,12 +16,12 @@ import java.util.List;
 
 import org.junit.Test;
 import org.semux.core.Block;
-import org.semux.core.BlockDecoderV1;
-import org.semux.core.BlockEncoder;
-import org.semux.core.BlockEncoderV1;
 import org.semux.core.BlockHeader;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
+import org.semux.core.codec.BlockDecoderV1;
+import org.semux.core.codec.BlockEncoder;
+import org.semux.core.codec.BlockEncoderV1;
 import org.semux.crypto.Key;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;

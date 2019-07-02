@@ -27,7 +27,6 @@ import org.bouncycastle.crypto.generators.BCrypt;
 import org.semux.Network;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
-import org.semux.core.state.AccountV1;
 import org.semux.core.state.AccountState;
 import org.semux.crypto.Aes;
 import org.semux.crypto.CryptoException;

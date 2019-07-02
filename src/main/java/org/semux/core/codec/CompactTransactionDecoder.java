@@ -1,7 +1,14 @@
-package org.semux.core;
+/**
+ * Copyright (c) 2017-2018 The Semux Developers
+ *
+ * Distributed under the MIT software license, see the accompanying file
+ * LICENSE or https://opensource.org/licenses/mit-license.php
+ */
+package org.semux.core.codec;
 
 import java.math.BigInteger;
 
+import org.semux.core.Transaction;
 import org.semux.core.state.AccountStateV2;
 import org.semux.core.state.AccountV2;
 import org.semux.crypto.Key;

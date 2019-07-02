@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.core;
+package org.semux.core.codec;
 
 import org.semux.core.state.DelegateStateV2;
 
@@ -14,7 +14,7 @@ public class BlockCodecV2 implements BlockCodec {
 
     private final BlockDecoderV2 decoder;
 
-    BlockCodecV2(DelegateStateV2 delegateState) {
+    public BlockCodecV2(DelegateStateV2 delegateState) {
         encoder = new BlockEncoderV2(delegateState);
         decoder = new BlockDecoderV2(delegateState);
     }

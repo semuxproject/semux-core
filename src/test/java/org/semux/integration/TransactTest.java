@@ -7,6 +7,7 @@
 package org.semux.integration;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
@@ -380,7 +381,8 @@ public class TransactTest {
     private Genesis mockGenesis() {
         // mock premine
         List<Genesis.Premine> premines = new ArrayList<>();
-        premines.add(new Genesis.Premine(kernelRulePremine.getCoinbase().toAddress(), kernelRulePremine.getCoinbase().getAbyte(), PREMINE, ""));
+        premines.add(new Genesis.Premine(kernelRulePremine.getCoinbase().toAddress(),
+                kernelRulePremine.getCoinbase().getAbyte(), PREMINE, ""));
 
         // mock delegates
         HashMap<String, Genesis.Delegate> delegates = new HashMap<>();

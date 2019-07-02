@@ -15,13 +15,11 @@ import org.semux.config.Config;
 import org.semux.consensus.SemuxBft;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.BlockchainFactory;
-import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.db.Database;
 import org.semux.db.DatabaseFactory;
 import org.semux.db.DatabaseName;
-import org.semux.db.LeveldbDatabase;
 import org.semux.db.LeveldbDatabase.LeveldbFactory;
 
 public class PeerServerMock {

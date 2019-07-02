@@ -152,7 +152,8 @@ public class SyncingTest {
     protected Genesis mockGenesis() {
         // mock premine
         List<Genesis.Premine> premines = new ArrayList<>();
-        premines.add(new Genesis.Premine(kernelRule4.getCoinbase().toAddress(), kernelRule4.getCoinbase().getAbyte(), PREMINE, ""));
+        premines.add(new Genesis.Premine(kernelRule4.getCoinbase().toAddress(), kernelRule4.getCoinbase().getAbyte(),
+                PREMINE, ""));
 
         // mock delegates
         HashMap<String, Genesis.Delegate> delegates = new HashMap<>();

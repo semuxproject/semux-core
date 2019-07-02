@@ -36,7 +36,6 @@ import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainFactory;
-import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;

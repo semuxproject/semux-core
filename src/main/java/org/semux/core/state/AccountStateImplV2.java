@@ -77,24 +77,26 @@ public class AccountStateImplV2 implements Cloneable, AccountStateV2 {
 
     @Override
     public Account getAccount(byte[] address) {
-        assert(address.length == 20);
+        assert (address.length == 20);
         ByteArray k = getAddressToBinaryKey(address);
         Amount noAmount = Amount.ZERO;
 
         if (updates.containsKey(k)) {
             byte[] v = updates.get(k);
-            return v == null ? new AccountV1(address, noAmount, noAmount, 0) : new AccountDecoderV2().decode(address, v);
+            return v == null ? new AccountV1(address, noAmount, noAmount, 0)
+                    : new AccountDecoderV2().decode(address, v);
         } else if (prev != null) {
             return prev.getAccount(address);
         } else {
             byte[] v = database.get(k.getData());
-            return v == null ? new AccountV1(address, noAmount, noAmount, 0) : new AccountDecoderV2().decode(address, v);
+            return v == null ? new AccountV1(address, noAmount, noAmount, 0)
+                    : new AccountDecoderV2().decode(address, v);
         }
     }
 
     @Override
     public long increaseNonce(byte[] Abyte) {
-        assert(Abyte.length == 32);
+        assert (Abyte.length == 32);
         byte[] address = Key.Address.fromAbyte(Abyte);
         ByteArray k = getAddressToBinaryKey(address);
 

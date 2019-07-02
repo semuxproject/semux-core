@@ -4,10 +4,11 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.core;
+package org.semux.core.codec;
 
 import java.util.List;
 
+import org.semux.core.Block;
 import org.semux.core.state.DelegateStateV2;
 import org.semux.crypto.Key;
 import org.semux.util.SimpleEncoder;

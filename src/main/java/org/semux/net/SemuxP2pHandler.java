@@ -32,6 +32,7 @@ import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
+import org.semux.core.codec.BlockEncoderV1;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageQueue;
@@ -453,19 +454,20 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
             List<byte[]> partsSerilized = new ArrayList<>();
             Block block = chain.getBlock(number);
+            BlockEncoderV1 encoder = new BlockEncoderV1(); // TODO: use block codec v2
             for (Block.BlockPart part : Block.BlockPart.decode(parts)) {
                 switch (part) {
                 case HEADER:
-                    partsSerilized.add(block.getEncodedHeader());
+                    partsSerilized.add(encoder.encoderHeader(block));
                     break;
                 case TRANSACTIONS:
-                    partsSerilized.add(block.getEncodedTransactions());
+                    partsSerilized.add(encoder.encodeTransactions(block));
                     break;
                 case RESULTS:
-                    partsSerilized.add(block.getEncodedResults());
+                    partsSerilized.add(encoder.encodeTransactionResults(block));
                     break;
                 case VOTES:
-                    partsSerilized.add(block.getEncodedVotes());
+                    partsSerilized.add(encoder.encodeVotes(block));
                     break;
                 default:
                     throw new UnreachableException();

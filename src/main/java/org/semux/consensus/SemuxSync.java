@@ -49,6 +49,7 @@ import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
+import org.semux.core.codec.BlockDecoderV1;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
@@ -243,7 +244,9 @@ public class SemuxSync implements SyncManager {
             if (parts.get(0) != Block.BlockPart.HEADER || parts.get(1) != Block.BlockPart.TRANSACTIONS
                     || parts.get(0) != Block.BlockPart.VOTES) {
                 try {
-                    Block block = Block.fromComponents(data.get(0), data.get(1), null, data.get(2));
+                    // TODO: consider using codec v2. it would require delegate state though.
+                    // FIXME: for future block, we may not have an account index for the delegates.
+                    Block block = new BlockDecoderV1().decodeComponents(data.get(0), data.get(1), null, data.get(2));
                     addBlock(block, channel);
                 } catch (Exception e) {
                     logger.debug("Failed to parse a block from components", e);

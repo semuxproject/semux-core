@@ -8,8 +8,6 @@ package org.semux.core.state;
 
 import org.semux.core.Amount;
 import org.semux.crypto.Hex;
-import org.semux.util.SimpleDecoder;
-import org.semux.util.SimpleEncoder;
 
 public class AccountV1 extends Account {
 

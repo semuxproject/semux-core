@@ -22,6 +22,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.core.Genesis.Premine;
+import org.semux.core.codec.BlockCodec;
+import org.semux.core.codec.BlockCodecV1;
 import org.semux.core.exception.BlockchainException;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.AccountStateImpl;
