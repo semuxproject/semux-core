@@ -408,7 +408,7 @@ public class NativeTest {
     @Test
     public void benchmarkSign() {
         byte[] data = Bytes.random(512);
-        int repeat = 20_000;
+        int repeat = 5_000;
 
         Key key = new Key();
 
@@ -438,7 +438,7 @@ public class NativeTest {
     @Test
     public void benchmarkVerify() {
         byte[] data = Bytes.random(512);
-        int repeat = 20_000;
+        int repeat = 5_000;
 
         Key key = new Key();
         Key.Signature sig = key.sign(data);

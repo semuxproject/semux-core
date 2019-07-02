@@ -16,8 +16,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.semux.crypto.cache.PublicKeyCache;
 import org.semux.util.Bytes;
 import org.semux.util.SystemUtil;
@@ -346,20 +344,12 @@ public class Key {
             if (o == null || getClass() != o.getClass())
                 return false;
 
-            Signature signature = (Signature) o;
-
-            return new EqualsBuilder()
-                    .append(s, signature.s)
-                    .append(a, signature.a)
-                    .isEquals();
+            return Arrays.equals(toBytes(), ((Signature) o).toBytes());
         }
 
         @Override
         public int hashCode() {
-            return new HashCodeBuilder(17, 37)
-                    .append(s)
-                    .append(a)
-                    .toHashCode();
+            return Arrays.hashCode(toBytes());
         }
     }
 
