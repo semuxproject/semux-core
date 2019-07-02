@@ -9,6 +9,7 @@ package org.semux.vm.client;
 import java.math.BigInteger;
 
 import org.ethereum.vm.DataWord;
+import org.ethereum.vm.chainspec.PrecompiledContractContext;
 import org.ethereum.vm.client.Repository;
 import org.semux.core.Amount;
 import org.semux.core.state.AccountState;
@@ -21,9 +22,17 @@ import org.semux.core.state.AccountState;
  */
 public class SemuxRepository implements Cloneable, Repository {
     private final AccountState accountState;
+    private final PrecompiledContractContext context;
 
     public SemuxRepository(AccountState accountState) {
         this.accountState = accountState;
+        this.context = new PrecompiledContractContext() {
+        };
+    }
+
+    @Override
+    public PrecompiledContractContext getContext() {
+        return context;
     }
 
     @Override

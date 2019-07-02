@@ -105,7 +105,7 @@ public final class SemuxApiImpl implements SemuxApi {
             kernel.getNodeManager().addNode(validateAddNodeParameter(node));
             return success(resp);
         } catch (IllegalArgumentException e) {
-            return badRequest(resp, e.getMessage());
+            return badRequest(e.getMessage());
         }
     }
 
@@ -114,7 +114,7 @@ public final class SemuxApiImpl implements SemuxApi {
         ApiHandlerResponse resp = new ApiHandlerResponse();
         try {
             if (!isSet(ip)) {
-                return badRequest(resp, "Parameter `ip` is required");
+                return badRequest("Parameter `ip` is required");
             }
 
             SemuxIpFilter ipFilter = kernel.getChannelManager().getIpFilter();
@@ -124,7 +124,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
             return Response.ok().entity(resp.success(true)).build();
         } catch (UnknownHostException | IllegalArgumentException ex) {
-            return badRequest(resp, ex.getMessage());
+            return badRequest(ex.getMessage());
         }
     }
 
@@ -133,7 +133,7 @@ public final class SemuxApiImpl implements SemuxApi {
         ApiHandlerResponse resp = new ApiHandlerResponse();
         try {
             if (!isSet(ip)) {
-                return badRequest(resp, "Parameter `ip` is required");
+                return badRequest("Parameter `ip` is required");
             }
 
             SemuxIpFilter ipFilter = kernel.getChannelManager().getIpFilter();
@@ -142,7 +142,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
             return Response.ok().entity(resp.success(true)).build();
         } catch (UnknownHostException | IllegalArgumentException ex) {
-            return badRequest(resp, ex.getMessage());
+            return badRequest(ex.getMessage());
         }
     }
 
@@ -168,7 +168,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
             return success(resp);
         } catch (IllegalArgumentException e) {
-            return badRequest(resp, e.getMessage());
+            return badRequest(e.getMessage());
         }
     }
 
@@ -185,7 +185,7 @@ public final class SemuxApiImpl implements SemuxApi {
             }
 
             if (!kernel.getWallet().addAccount(key)) {
-                return badRequest(resp, "The key already exists in this wallet.");
+                return badRequest("The key already exists in this wallet.");
             }
 
             // set alias of the address
@@ -199,12 +199,12 @@ public final class SemuxApiImpl implements SemuxApi {
 
             return success(resp);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `privateKey` is not a valid hexadecimal string");
+            return badRequest("Parameter `privateKey` is not a valid hexadecimal string");
         } catch (InvalidKeySpecException e) {
-            return badRequest(resp,
+            return badRequest(
                     "Parameter `privateKey` is not a valid ED25519 private key encoded in PKCS#8 format");
         } catch (WalletLockedException e) {
-            return badRequest(resp, e.getMessage());
+            return badRequest(e.getMessage());
         }
     }
 
@@ -213,14 +213,14 @@ public final class SemuxApiImpl implements SemuxApi {
         GetAccountResponse resp = new GetAccountResponse();
 
         if (!isSet(address)) {
-            return badRequest(resp, "Parameter `address` is required");
+            return badRequest("Parameter `address` is required");
         }
 
         byte[] addressBytes;
         try {
             addressBytes = Hex.decode0x(address);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `address` is not a valid hexadecimal string");
+            return badRequest("Parameter `address` is not a valid hexadecimal string");
         }
 
         Account account = kernel.getBlockchain().getAccountState().getAccount(addressBytes);
@@ -240,25 +240,25 @@ public final class SemuxApiImpl implements SemuxApi {
         DeleteAccountResponse resp = new DeleteAccountResponse();
 
         if (!isSet(address)) {
-            return badRequest(resp, "Parameter `address` is required");
+            return badRequest("Parameter `address` is required");
         }
 
         try {
             byte[] addressBytes = Hex.decode0x(address);
 
             if (!kernel.getWallet().removeAccount(addressBytes)) {
-                return badRequest(resp, "The provided address doesn't exist in this wallet.");
+                return badRequest("The provided address doesn't exist in this wallet.");
             }
 
             if (!kernel.getWallet().flush()) {
-                return badRequest(resp, "Failed to write the wallet.");
+                return badRequest("Failed to write the wallet.");
             }
 
             return success(resp);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `address` is not a valid hexadecimal string");
+            return badRequest("Parameter `address` is not a valid hexadecimal string");
         } catch (WalletLockedException e) {
-            return badRequest(resp, e.getMessage());
+            return badRequest(e.getMessage());
         }
     }
 
@@ -270,31 +270,31 @@ public final class SemuxApiImpl implements SemuxApi {
         int toInt;
 
         if (!isSet(address)) {
-            return badRequest(resp, "Parameter `address` is required");
+            return badRequest("Parameter `address` is required");
         }
         if (!isSet(from)) {
-            return badRequest(resp, "Parameter `from` is required");
+            return badRequest("Parameter `from` is required");
         }
         if (!isSet(to)) {
-            return badRequest(resp, "Parameter `to` is required");
+            return badRequest("Parameter `to` is required");
         }
 
         try {
             addressBytes = Hex.decode0x(address);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `address` is not a valid hexadecimal string");
+            return badRequest("Parameter `address` is not a valid hexadecimal string");
         }
 
         try {
             fromInt = Integer.parseInt(from);
         } catch (NumberFormatException ex) {
-            return badRequest(resp, "Parameter `from` is not a valid integer");
+            return badRequest("Parameter `from` is not a valid integer");
         }
 
         try {
             toInt = Integer.parseInt(to);
         } catch (NumberFormatException ex) {
-            return badRequest(resp, "Parameter `to` is not a valid integer");
+            return badRequest("Parameter `to` is not a valid integer");
         }
 
         resp.setResult(kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream()
@@ -312,35 +312,35 @@ public final class SemuxApiImpl implements SemuxApi {
         int toInt;
 
         if (!isSet(address)) {
-            return badRequest(resp, "Parameter `address` is required");
+            return badRequest("Parameter `address` is required");
         }
         if (!isSet(from)) {
-            return badRequest(resp, "Parameter `from` is required");
+            return badRequest("Parameter `from` is required");
         }
         if (!isSet(to)) {
-            return badRequest(resp, "Parameter `to` is required");
+            return badRequest("Parameter `to` is required");
         }
 
         try {
             addressBytes = Hex.decode0x(address);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `address` is not a valid hexadecimal string");
+            return badRequest("Parameter `address` is not a valid hexadecimal string");
         }
 
         try {
             fromInt = Integer.parseInt(from);
         } catch (NumberFormatException ex) {
-            return badRequest(resp, "Parameter `from` is not a valid integer");
+            return badRequest("Parameter `from` is not a valid integer");
         }
 
         try {
             toInt = Integer.parseInt(to);
         } catch (NumberFormatException ex) {
-            return badRequest(resp, "Parameter `to` is not a valid integer");
+            return badRequest("Parameter `to` is not a valid integer");
         }
 
         if (toInt <= fromInt) {
-            return badRequest(resp, "Parameter `to` must be greater than `from`");
+            return badRequest("Parameter `to` must be greater than `from`");
         }
 
         resp.setResult(kernel.getPendingManager()
@@ -361,13 +361,13 @@ public final class SemuxApiImpl implements SemuxApi {
         byte[] addressBytes;
 
         if (!isSet(address)) {
-            return badRequest(resp, "Parameter `address` is required");
+            return badRequest("Parameter `address` is required");
         }
 
         try {
             addressBytes = Hex.decode0x(address);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `address` is not a valid hexadecimal string");
+            return badRequest("Parameter `address` is not a valid hexadecimal string");
         }
 
         resp.setResult(TypeFactory.accountVotes(kernel.getBlockchain(), addressBytes));
@@ -379,19 +379,19 @@ public final class SemuxApiImpl implements SemuxApi {
     public Response getBlockByHash(String hashString) {
         GetBlockResponse resp = new GetBlockResponse();
         if (!isSet(hashString)) {
-            return badRequest(resp, "Parameter `hash` is required");
+            return badRequest("Parameter `hash` is required");
         }
 
         byte[] hash;
         try {
             hash = Hex.decode0x(hashString);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `hash` is not a valid hexadecimal string");
+            return badRequest("Parameter `hash` is not a valid hexadecimal string");
         }
 
         Block block = kernel.getBlockchain().getBlock(hash);
         if (block == null) {
-            return badRequest(resp, "The requested block was not found");
+            return badRequest("The requested block was not found");
         }
 
         resp.setResult(TypeFactory.blockType(block, kernel.getBlockchain().getCoinbaseTransaction(block.getNumber())));
@@ -404,19 +404,19 @@ public final class SemuxApiImpl implements SemuxApi {
         GetBlockResponse resp = new GetBlockResponse();
 
         if (blockNum == null) {
-            return badRequest(resp, "Parameter `number` is required");
+            return badRequest("Parameter `number` is required");
         }
 
         long blockNumLong;
         try {
             blockNumLong = Long.parseLong(blockNum);
         } catch (NumberFormatException e) {
-            return badRequest(resp, "Parameter `number` is not a valid number");
+            return badRequest("Parameter `number` is not a valid number");
         }
 
         Block block = kernel.getBlockchain().getBlock(blockNumLong);
         if (block == null) {
-            return badRequest(resp, "The requested block was not found");
+            return badRequest("The requested block was not found");
         }
 
         resp.setResult(TypeFactory.blockType(block, kernel.getBlockchain().getCoinbaseTransaction(block.getNumber())));
@@ -428,20 +428,20 @@ public final class SemuxApiImpl implements SemuxApi {
     public Response getDelegate(String address) {
         GetDelegateResponse resp = new GetDelegateResponse();
         if (!isSet(address)) {
-            return badRequest(resp, "Parameter `address` is required");
+            return badRequest("Parameter `address` is required");
         }
 
         byte[] addressBytes;
         try {
             addressBytes = Hex.decode0x(address);
         } catch (CryptoException e) {
-            return badRequest(resp, e.getMessage());
+            return badRequest(e.getMessage());
         }
         Blockchain chain = kernel.getBlockchain();
 
         Delegate delegate = chain.getDelegateState().getDelegateByAddress(addressBytes);
         if (delegate == null) {
-            return badRequest(resp, "The provided address is not a delegate");
+            return badRequest("The provided address is not a delegate");
         }
 
         BlockchainImpl.ValidatorStats validatorStats = chain.getValidatorStats(addressBytes);
@@ -519,19 +519,19 @@ public final class SemuxApiImpl implements SemuxApi {
         GetTransactionResponse resp = new GetTransactionResponse();
 
         if (!isSet(hash)) {
-            return badRequest(resp, "Parameter `hash` is required");
+            return badRequest("Parameter `hash` is required");
         }
 
         byte[] hashBytes;
         try {
             hashBytes = Hex.decode0x(hash);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `hash` is not a valid hexadecimal string");
+            return badRequest("Parameter `hash` is not a valid hexadecimal string");
         }
 
         Transaction transaction = kernel.getBlockchain().getTransaction(hashBytes);
         if (transaction == null) {
-            return badRequest(resp, "The request transaction was not found");
+            return badRequest("The request transaction was not found");
         }
 
         resp.setResult(TypeFactory.transactionType(transaction));
@@ -547,7 +547,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
             return success(resp);
         } catch (NullPointerException | IllegalArgumentException e) {
-            return badRequest(resp, String.format("Invalid transaction type. (must be one of %s)",
+            return badRequest(String.format("Invalid transaction type. (must be one of %s)",
                     Arrays.stream(TransactionType.values())
                             .map(TransactionType::toString)
                             .collect(Collectors.joining(","))));
@@ -560,19 +560,19 @@ public final class SemuxApiImpl implements SemuxApi {
         GetTransactionResultResponse resp = new GetTransactionResultResponse();
 
         if (!isSet(hash)) {
-            return badRequest(resp, "Parameter `hash` is required");
+            return badRequest("Parameter `hash` is required");
         }
 
         byte[] hashBytes;
         try {
             hashBytes = Hex.decode0x(hash);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `hash` is not a valid hexadecimal string");
+            return badRequest("Parameter `hash` is not a valid hexadecimal string");
         }
 
         TransactionResult result = kernel.getBlockchain().getTransactionResult(hashBytes);
         if (result == null) {
-            return badRequest(resp, "The request transaction was not found");
+            return badRequest("The request transaction was not found");
         }
 
         resp.setResult(TypeFactory.transactionResultType(result));
@@ -596,23 +596,23 @@ public final class SemuxApiImpl implements SemuxApi {
         byte[] delegateBytes;
 
         if (!isSet(voter)) {
-            return badRequest(resp, "Parameter `voter` is required");
+            return badRequest("Parameter `voter` is required");
         }
 
         if (!isSet(delegate)) {
-            return badRequest(resp, "Parameter `delegate` is required");
+            return badRequest("Parameter `delegate` is required");
         }
 
         try {
             voterBytes = Hex.decode0x(voter);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `voter` is not a valid hexadecimal string");
+            return badRequest("Parameter `voter` is not a valid hexadecimal string");
         }
 
         try {
             delegateBytes = Hex.decode0x(delegate);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `delegate` is not a valid hexadecimal string");
+            return badRequest("Parameter `delegate` is not a valid hexadecimal string");
         }
 
         resp.setResult(
@@ -625,14 +625,14 @@ public final class SemuxApiImpl implements SemuxApi {
     public Response getVotes(String delegate) {
         GetVotesResponse resp = new GetVotesResponse();
         if (!isSet(delegate)) {
-            return badRequest(resp, "Parameter `delegate` is required");
+            return badRequest("Parameter `delegate` is required");
         }
 
         byte[] delegateBytes;
         try {
             delegateBytes = Hex.decode0x(delegate);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `delegate` is not a valid hexadecimal string");
+            return badRequest("Parameter `delegate` is not a valid hexadecimal string");
         }
 
         resp.setResult(kernel.getBlockchain().getDelegateState().getVotes(delegateBytes).entrySet().parallelStream()
@@ -663,7 +663,7 @@ public final class SemuxApiImpl implements SemuxApi {
         DoTransactionResponse resp = new DoTransactionResponse();
 
         if (!isSet(raw)) {
-            return badRequest(resp, "Parameter `raw` is required");
+            return badRequest("Parameter `raw` is required");
         }
 
         try {
@@ -673,20 +673,20 @@ public final class SemuxApiImpl implements SemuxApi {
             // delayed queue of pending manager
             if ((validateNonce != null && validateNonce)
                     && tx.getNonce() != kernel.getPendingManager().getNonce(tx.getFrom())) {
-                return badRequest(resp, "Invalid transaction nonce.");
+                return badRequest("Invalid transaction nonce.");
             }
 
             PendingManager.ProcessingResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {
-                return badRequest(resp, "Transaction rejected by pending manager: " + result.error.toString());
+                return badRequest("Transaction rejected by pending manager: " + result.error.toString());
             }
             resp.setResult(Hex.encode0x(tx.getHash()));
 
             return success(resp);
         } catch (CryptoException e) {
-            return badRequest(resp, "Parameter `raw` is not a valid hexadecimal string");
+            return badRequest("Parameter `raw` is not a valid hexadecimal string");
         } catch (IndexOutOfBoundsException e) {
-            return badRequest(resp, "Parameter `raw` is not a valid hexadecimal raw transaction");
+            return badRequest("Parameter `raw` is not a valid hexadecimal raw transaction");
         }
     }
 
@@ -695,11 +695,11 @@ public final class SemuxApiImpl implements SemuxApi {
         SignMessageResponse resp = new SignMessageResponse();
 
         if (address == null) {
-            return badRequest(resp, "Parameter `address` is required");
+            return badRequest("Parameter `address` is required");
         }
 
         if (message == null) {
-            return badRequest(resp, "Parameter `message` is required");
+            return badRequest("Parameter `message` is required");
         }
 
         try {
@@ -707,13 +707,13 @@ public final class SemuxApiImpl implements SemuxApi {
             try {
                 addressBytes = Hex.decode0x(address);
             } catch (CryptoException ex) {
-                return badRequest(resp, "Parameter `address` is not a valid hexadecimal string");
+                return badRequest("Parameter `address` is not a valid hexadecimal string");
             }
 
             Key account = kernel.getWallet().getAccount(addressBytes);
 
             if (account == null) {
-                return badRequest(resp,
+                return badRequest(
                         String.format("The provided address %s doesn't belong to the wallet", address));
             }
 
@@ -722,7 +722,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
             return success(resp);
         } catch (NullPointerException | IllegalArgumentException e) {
-            return badRequest(resp, "Invalid message");
+            return badRequest("Invalid message");
         }
     }
 
@@ -734,19 +734,19 @@ public final class SemuxApiImpl implements SemuxApi {
         try {
             txBytes = Hex.decode0x(raw);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `raw` is not a hexadecimal string.");
+            return badRequest("Parameter `raw` is not a hexadecimal string.");
         }
 
         byte[] addressBytes;
         try {
             addressBytes = Hex.decode0x(address);
         } catch (CryptoException ex) {
-            return badRequest(resp, "Parameter `address` is not a hexadecimal string.");
+            return badRequest("Parameter `address` is not a hexadecimal string.");
         }
 
         Key signerKey = kernel.getWallet().getAccount(addressBytes);
         if (signerKey == null) {
-            return badRequest(resp, "Parameter `address` doesn't exist in the wallet.");
+            return badRequest("Parameter `address` doesn't exist in the wallet.");
         }
 
         try {
@@ -755,7 +755,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
             return success(resp);
         } catch (IndexOutOfBoundsException ex) {
-            return badRequest(resp, "Parameter `raw` is not a valid raw transaction.");
+            return badRequest("Parameter `raw` is not a valid raw transaction.");
         }
     }
 
@@ -793,7 +793,7 @@ public final class SemuxApiImpl implements SemuxApi {
             DoTransactionResponse resp = new DoTransactionResponse();
             resp.setResult(Hex.encode0x(receipt.getReturnData()));
             if (!receipt.isSuccess()) {
-                return badRequest(resp, "Error calling method");
+                return badRequest("Error calling method");
             } else {
                 return success(resp);
             }
@@ -813,15 +813,15 @@ public final class SemuxApiImpl implements SemuxApi {
         VerifyMessageResponse resp = new VerifyMessageResponse();
 
         if (address == null) {
-            return badRequest(resp, "Parameter `address` is required");
+            return badRequest("Parameter `address` is required");
         }
 
         if (message == null) {
-            return badRequest(resp, "Parameter `message` is required");
+            return badRequest("Parameter `message` is required");
         }
 
         if (signature == null) {
-            return badRequest(resp, "Parameter `signature` is required");
+            return badRequest("Parameter `signature` is required");
         }
 
         boolean isValidSignature = true;
@@ -889,11 +889,11 @@ public final class SemuxApiImpl implements SemuxApi {
     /**
      * Constructs a failure response out of bad request.
      *
-     * @param resp
      * @param message
      * @return
      */
-    private Response badRequest(ApiHandlerResponse resp, String message) {
+    private Response badRequest(String message) {
+        ApiHandlerResponse resp = new ApiHandlerResponse();
         resp.setSuccess(false);
         resp.setMessage(message);
 
@@ -988,14 +988,14 @@ public final class SemuxApiImpl implements SemuxApi {
 
             PendingManager.ProcessingResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {
-                return badRequest(resp, "Transaction rejected by pending manager: " + result.error.toString());
+                return badRequest("Transaction rejected by pending manager: " + result.error.toString());
             }
 
             resp.setResult(Hex.encode0x(tx.getHash()));
 
             return success(resp);
         } catch (IllegalArgumentException ex) {
-            return badRequest(resp, ex.getMessage());
+            return badRequest(ex.getMessage());
         }
     }
 

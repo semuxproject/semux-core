@@ -39,7 +39,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
-import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.core.Amount;

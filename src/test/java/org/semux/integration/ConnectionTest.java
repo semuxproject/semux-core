@@ -157,7 +157,7 @@ public class ConnectionTest {
 
         // blacklist 127.0.0.1
         final String blacklistedIp = "127.0.0.1";
-        kernelRule1.getKernel().getApiClient().put("/blacklist", "ip", blacklistedIp);
+        kernelRule1.getKernel().getApiClient().post("/blacklist", "ip", blacklistedIp);
 
         // all IPs should stay connected except for the blacklisted IP
         await().until(() -> kernelRule1.getKernel().getChannelManager().size() == connections - 1);
