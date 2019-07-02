@@ -39,7 +39,7 @@ public class SemuxPerformance {
             params.put("from", address);
             params.put("to", address);
             params.put("value", MILLI_SEM.of(1).getNano());
-            params.put("fee", config.minTransactionFee().getNano());
+            params.put("fee", config.spec().minTransactionFee().getNano());
             params.put("data", Bytes.EMPTY_BYTES);
             params.put("password", password);
 

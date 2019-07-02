@@ -234,9 +234,9 @@ public class SemuxApiTest extends SemuxApiTestBase {
         Transaction tx0 = createTransaction(config);
         Transaction tx1 = createTransaction(config, from, to, Amount.ZERO);
         Transaction tx2 = createTransaction(config, to, from, Amount.ZERO);
-        chain.getAccountState().adjustAvailable(tx0.getFrom(), config.minTransactionFee());
-        chain.getAccountState().adjustAvailable(from.toAddress(), config.minTransactionFee());
-        chain.getAccountState().adjustAvailable(to.toAddress(), config.minTransactionFee());
+        chain.getAccountState().adjustAvailable(tx0.getFrom(), config.spec().minTransactionFee());
+        chain.getAccountState().adjustAvailable(from.toAddress(), config.spec().minTransactionFee());
+        chain.getAccountState().adjustAvailable(to.toAddress(), config.spec().minTransactionFee());
         assert (pendingMgr.addTransactionSync(tx0).accepted == 1);
         assert (pendingMgr.addTransactionSync(tx1).accepted == 1);
         assert (pendingMgr.addTransactionSync(tx2).accepted == 1);
@@ -473,13 +473,13 @@ public class SemuxApiTest extends SemuxApiTestBase {
             GetTransactionLimitsResponse response = api.getTransactionLimits(type.toString());
             assertNotNull(response);
             assertTrue(response.isSuccess());
-            assertEquals(config.maxTransactionDataSize(type),
+            assertEquals(config.spec().maxTransactionDataSize(type),
                     response.getResult().getMaxTransactionDataSize().intValue());
-            assertEquals(config.minTransactionFee().getNano(),
+            assertEquals(config.spec().minTransactionFee().getNano(),
                     Long.parseLong(response.getResult().getMinTransactionFee()));
 
             if (type.equals(org.semux.core.TransactionType.DELEGATE)) {
-                assertEquals(config.minDelegateBurnAmount().getNano(),
+                assertEquals(config.spec().minDelegateBurnAmount().getNano(),
                         Long.parseLong(response.getResult().getMinDelegateBurnAmount()));
             } else {
                 assertNull(response.getResult().getMinDelegateBurnAmount());
@@ -540,7 +540,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     @Test
     public void registerDelegateTest() throws InterruptedException {
         String from = wallet.getAccount(0).toAddressString();
-        String fee = String.valueOf(config.minTransactionFee().getNano());
+        String fee = String.valueOf(config.spec().minTransactionFee().getNano());
         String data = Hex.encode(Bytes.of("test_delegate"));
         DoTransactionResponse response = api.registerDelegate(from, data, fee, null, null);
         assertNotNull(response);
@@ -561,7 +561,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         Key to = new Key();
         Amount value = Amount.ZERO;
         kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from.toAddress(),
-                config.minTransactionFee());
+                config.spec().minTransactionFee());
         Transaction tx = createTransaction(config, from, to, value);
 
         DoTransactionResponse response = api.broadcastRawTransaction(Hex.encode(tx.toBytes()), null);
@@ -581,7 +581,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
         // mock state
         kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from.toAddress(),
-                config.minTransactionFee());
+                config.spec().minTransactionFee());
         PendingManager pendingManager = spy(pendingMgr);
         when(pendingManager.getNonce(from.toAddress())).thenReturn(100L);
         kernelRule.getKernel().setPendingManager(pendingManager);
@@ -598,7 +598,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
         // mock state
         kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from.toAddress(),
-                config.minTransactionFee());
+                config.spec().minTransactionFee());
         PendingManager pendingManager = spy(pendingMgr);
         when(pendingManager.getNonce(from.toAddress())).thenReturn(100L);
         kernelRule.getKernel().setPendingManager(pendingManager);
@@ -707,7 +707,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         Transaction tx = list.get(list.size() - 1).transaction;
         assertArrayEquals(tx.getHash(), Hex.decode0x(response.getResult()));
         assertEquals(TRANSFER, tx.getType());
-        assertEquals(config.minTransactionFee(), tx.getFee());
+        assertEquals(config.spec().minTransactionFee(), tx.getFee());
     }
 
     @Test
@@ -752,7 +752,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String from = wallet.getAccount(0).toAddressString();
         String to = delegate.toAddressString();
         String value = String.valueOf(amount.getNano());
-        String fee = String.valueOf(config.minTransactionFee().getNano());
+        String fee = String.valueOf(config.spec().minTransactionFee().getNano());
 
         DoTransactionResponse response = api.vote(from, to, value, fee, null, null);
         assertTrue(response.isSuccess());
@@ -772,7 +772,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String type = "TRANSFER";
         String to = "0xdb7cadb25fdcdd546fb0268524107582c3f8999c";
         String value = "123456789";
-        String fee = String.valueOf(config.minTransactionFee().getNano());
+        String fee = String.valueOf(config.spec().minTransactionFee().getNano());
         String nonce = "123";
         String timestamp = "1523028482000";
         String data = Hex.encode0x("test data".getBytes());
@@ -799,7 +799,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String type = "DELEGATE";
         String to = "";
         String value = "";
-        String fee = String.valueOf(config.minTransactionFee().getNano());
+        String fee = String.valueOf(config.spec().minTransactionFee().getNano());
         String nonce = "123";
         String timestamp = "1523028482000";
         String data = Hex.encode0x("semux1".getBytes());
@@ -826,7 +826,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String type = "VOTE";
         String to = "0xdb7cadb25fdcdd546fb0268524107582c3f8999c";
         String value = "123";
-        String fee = String.valueOf(config.minTransactionFee().getNano());
+        String fee = String.valueOf(config.spec().minTransactionFee().getNano());
         String nonce = "123";
         String timestamp = "1523028482000";
         String data = Hex.encode0x("semux1".getBytes());

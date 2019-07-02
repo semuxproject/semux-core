@@ -7,7 +7,6 @@
 package org.semux.integration;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
@@ -147,7 +146,7 @@ public class TransactTest {
     @Test
     public void testTransfer() throws IOException {
         final Amount value = SEM.of(1000);
-        final Amount fee = kernelPremine.getConfig().minTransactionFee();
+        final Amount fee = kernelPremine.getConfig().spec().minTransactionFee();
 
         // prepare transaction
         HashMap<String, Object> params = new HashMap<>();
@@ -185,7 +184,7 @@ public class TransactTest {
 
     @Test
     public void testDelegate() throws IOException {
-        final Amount fee = kernelPremine.getConfig().minTransactionFee();
+        final Amount fee = kernelPremine.getConfig().spec().minTransactionFee();
 
         // prepare transaction
         HashMap<String, Object> params = new HashMap<>();
@@ -203,12 +202,12 @@ public class TransactTest {
         // wait for transaction processing
         logger.info("Waiting for the transaction to be processed...");
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
-                equalTo(sub(PREMINE, sum(kernelPremine.getConfig().minDelegateBurnAmount(), fee))));
+                equalTo(sub(PREMINE, sum(kernelPremine.getConfig().spec().minDelegateBurnAmount(), fee))));
 
         // assert that the transaction has been recorded across nodes
         assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
                 TransactionType.DELEGATE, coinbaseOf(kernelPremine), Bytes.EMPTY_ADDRESS,
-                kernelPremine.getConfig().minDelegateBurnAmount(), fee, Bytes.of("test"));
+                kernelPremine.getConfig().spec().minDelegateBurnAmount(), fee, Bytes.of("test"));
 
         // assert that the number of votes has been recorded into delegate state
         assertDelegate(kernelPremine, kernelPremine.getCoinbase().toAddress(), ZERO);
@@ -216,7 +215,7 @@ public class TransactTest {
 
     @Test
     public void testVote() throws IOException {
-        final Amount fee = kernelPremine.getConfig().minTransactionFee();
+        final Amount fee = kernelPremine.getConfig().spec().minTransactionFee();
         final Amount votes = SEM.of(100);
         final Amount votesWithFee = sum(votes, fee);
 

@@ -186,7 +186,7 @@ public class TransactionBuilder {
 
     public TransactionBuilder withFee(String fee, boolean optional) {
         if (optional && (fee == null || fee.isEmpty())) {
-            this.fee = kernel.getConfig().minTransactionFee();
+            this.fee = kernel.getConfig().spec().minTransactionFee();
             return this;
         }
 
@@ -259,7 +259,7 @@ public class TransactionBuilder {
         // DELEGATE transaction has fixed receiver and value
         if (type == TransactionType.DELEGATE) {
             to = Bytes.EMPTY_ADDRESS;
-            value = kernel.getConfig().minDelegateBurnAmount();
+            value = kernel.getConfig().spec().minDelegateBurnAmount();
         }
         if (type == TransactionType.CREATE) {
             to = Bytes.EMPTY_ADDRESS;

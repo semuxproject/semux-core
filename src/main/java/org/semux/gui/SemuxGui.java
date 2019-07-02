@@ -132,7 +132,7 @@ public class SemuxGui extends Launcher {
      * Creates a new Semux GUI instance.
      */
     public SemuxGui() {
-        SystemUtil.setLocale(getConfig().locale());
+        SystemUtil.setLocale(getConfig().uiLocale());
         SwingUtil.setDefaultFractionDigits(getConfig().uiFractionDigits());
         SwingUtil.setDefaultUnit(getConfig().uiUnit());
 
@@ -147,7 +147,7 @@ public class SemuxGui extends Launcher {
      * @param kernel
      */
     public SemuxGui(WalletModel model, Kernel kernel) {
-        SystemUtil.setLocale(getConfig().locale());
+        SystemUtil.setLocale(getConfig().uiLocale());
 
         this.model = model;
         this.kernel = kernel;

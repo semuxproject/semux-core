@@ -68,7 +68,7 @@ public class PendingManagerTest {
         accountState.adjustAvailable(from, SEM.of(10000));
 
         network = kernel.getConfig().network();
-        fee = kernel.getConfig().minTransactionFee();
+        fee = kernel.getConfig().spec().minTransactionFee();
     }
 
     @Before

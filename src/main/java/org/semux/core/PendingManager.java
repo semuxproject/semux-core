@@ -323,8 +323,8 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         // check transaction timestamp if this is a fresh transaction:
         // a time drift of 2 hours is allowed by default
-        if (tx.getTimestamp() < now - kernel.getConfig().maxTransactionTimeDrift()
-                || tx.getTimestamp() > now + kernel.getConfig().maxTransactionTimeDrift()) {
+        if (tx.getTimestamp() < now - kernel.getConfig().poolMaxTransactionTimeDrift()
+                || tx.getTimestamp() > now + kernel.getConfig().poolMaxTransactionTimeDrift()) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_TIMESTAMP);
         }
 
@@ -347,7 +347,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                     prevBlock.getNumber() + 1,
                     new Key().toAddress(), prevBlock.getHash(), System.currentTimeMillis(), new byte[0],
                     new byte[0], new byte[0], new byte[0]);
-            SemuxBlock block = new SemuxBlock(blockHeader, kernel.getConfig().vmMaxBlockGasLimit());
+            SemuxBlock block = new SemuxBlock(blockHeader, kernel.getConfig().spec().maxBlockGasLimit());
 
             // execute transactions
             AccountState as = pendingAS.track();

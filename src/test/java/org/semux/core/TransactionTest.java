@@ -35,7 +35,7 @@ public class TransactionTest {
     private TransactionType type = TransactionType.TRANSFER;
     private byte[] to = Hex.decode0x("0xdb7cadb25fdcdd546fb0268524107582c3f8999c");
     private Amount value = NANO_SEM.of(2);
-    private Amount fee = config.minTransactionFee();
+    private Amount fee = config.spec().minTransactionFee();
     private long nonce = 1;
     private long timestamp = 1523028482000L;
     private byte[] data = Bytes.of("data");

@@ -151,7 +151,7 @@ public class WalletModelTest {
 
     @Test
     public void testGetPrimaryValidatorDelegate() {
-        when(config.getPrimaryValidator(any(), anyLong(), anyInt(), anyBoolean())).thenCallRealMethod();
+        when(config.spec().getPrimaryValidator(any(), anyLong(), anyInt(), anyBoolean())).thenCallRealMethod();
         model = new WalletModel(config);
         List<WalletDelegate> delegates = Arrays.asList(
                 new WalletDelegate(new Delegate(new Key().toAddress(), "delegate1".getBytes(), 0, Amount.ZERO)),
@@ -170,7 +170,7 @@ public class WalletModelTest {
 
     @Test
     public void testGetNextPrimaryValidatorDelegate() {
-        when(config.getValidatorUpdateInterval()).thenCallRealMethod();
+        when(config.spec().getValidatorUpdateInterval()).thenCallRealMethod();
         model = new WalletModel(config);
         List<WalletDelegate> delegates = Arrays.asList(
                 new WalletDelegate(new Delegate(new Key().toAddress(), "delegate1".getBytes(), 0, Amount.ZERO)),
@@ -202,7 +202,7 @@ public class WalletModelTest {
 
     @Test
     public void testGetNextValidatorSetUpdate() {
-        when(config.getValidatorUpdateInterval()).thenCallRealMethod();
+        when(config.spec().getValidatorUpdateInterval()).thenCallRealMethod();
         model = new WalletModel(config);
 
         Map<Long, Long> testCases = new HashMap<>();

@@ -127,14 +127,14 @@ public class TransactionExecutor {
                     continue;
                 }
             } else {
-                if (fee.lt(config.minTransactionFee())) {
+                if (fee.lt(config.spec().minTransactionFee())) {
                     result.setCode(Code.INVALID_FEE);
                     continue;
                 }
             }
 
             // check data length
-            if (data.length > config.maxTransactionDataSize(type)) {
+            if (data.length > config.spec().maxTransactionDataSize(type)) {
                 result.setCode(Code.INVALID_DATA);
                 continue;
             }
@@ -154,7 +154,7 @@ public class TransactionExecutor {
                     result.setCode(Code.INVALID_DELEGATE_NAME);
                     break;
                 }
-                if (value.lt(config.minDelegateBurnAmount())) {
+                if (value.lt(config.spec().minDelegateBurnAmount())) {
                     result.setCode(Code.INVALID_DELEGATE_BURN_AMOUNT);
                     break;
                 }
@@ -228,7 +228,7 @@ public class TransactionExecutor {
                 // VM calls can have fees/values set.
                 as.adjustAvailable(from, neg(sum(value, fee)));
 
-                if (tx.getGas() > config.vmMaxBlockGasLimit()) {
+                if (tx.getGas() > config.spec().maxBlockGasLimit()) {
                     result.setCode(Code.INVALID_GAS);
                 } else {
                     executeVmTransaction(result, tx, as, block, gasUsedInBlock);

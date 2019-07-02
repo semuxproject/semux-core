@@ -50,7 +50,7 @@ public class SemuxBftValidateBlockTest {
                         },
                         (Supplier<Config>) () -> {
                             Config config = mock(Config.class);
-                            when(config.maxBlockTimeDrift()).thenReturn(TimeUnit.MINUTES.toMillis(15));
+                            when(config.bftMaxBlockTimeDrift()).thenReturn(TimeUnit.MINUTES.toMillis(15));
                             return config;
                         },
                         (Supplier<BlockHeader>) () -> {

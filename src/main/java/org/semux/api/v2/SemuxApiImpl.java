@@ -780,7 +780,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
             SemuxTransaction transaction = new SemuxTransaction(tx);
             SemuxBlock block = new SemuxBlock(kernel.getBlockchain().getLatestBlock().getHeader(),
-                    kernel.getConfig().vmMaxBlockGasLimit());
+                    kernel.getConfig().spec().maxBlockGasLimit());
             Repository repository = new SemuxRepository(kernel.getBlockchain().getAccountState());
             ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
             BlockStore blockStore = new SemuxBlockStore(kernel.getBlockchain());

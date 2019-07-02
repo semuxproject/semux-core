@@ -264,7 +264,7 @@ public class SemuxBftTest {
                 TransactionType.TRANSFER,
                 to.toAddress(),
                 SEM.of(10),
-                kernelRule.getKernel().getConfig().minTransactionFee(),
+                kernelRule.getKernel().getConfig().spec().minTransactionFee(),
                 nonce,
                 time,
                 Bytes.EMPTY_BYTES).sign(from);

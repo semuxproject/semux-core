@@ -90,7 +90,7 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
         assertEquals(TransactionType.TRANSFER, tx.getType());
         assertArrayEquals(recipient.toAddress(), tx.getTo());
         assertEquals(SEM.of(100), tx.getValue());
-        assertEquals(kernelMock.getConfig().minTransactionFee(), tx.getFee());
+        assertEquals(kernelMock.getConfig().spec().minTransactionFee(), tx.getFee());
     }
 
     @Test

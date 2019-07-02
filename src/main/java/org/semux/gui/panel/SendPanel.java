@@ -106,7 +106,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
         JLabel lblFee = new JLabel(GuiMessages.get("Fee") + ":");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblFee.setToolTipText(GuiMessages.get("FeeTip", SwingUtil.formatAmount(config.minTransactionFee())));
+        lblFee.setToolTipText(GuiMessages.get("FeeTip", SwingUtil.formatAmount(config.spec().minTransactionFee())));
 
         txtFee = SwingUtil.textFieldWithCopyPastePopup();
         txtFee.setName("txtFee");
@@ -375,15 +375,15 @@ public class SendPanel extends JPanel implements ActionListener {
                 showErrorDialog(GuiMessages.get("SelectAccount"));
             } else if (value.lte0()) {
                 showErrorDialog(GuiMessages.get("EnterValidValue"));
-            } else if (fee.lt(config.minTransactionFee())) {
+            } else if (fee.lt(config.spec().minTransactionFee())) {
                 showErrorDialog(GuiMessages.get("TransactionFeeTooLow"));
             } else if (sum(value, fee).gt(acc.getAvailable())) {
                 showErrorDialog(GuiMessages.get("InsufficientFunds", SwingUtil.formatAmount(sum(value, fee))));
             } else if (to.length != Key.ADDRESS_LEN) {
                 showErrorDialog(GuiMessages.get("InvalidReceivingAddress"));
-            } else if (Bytes.of(data).length > config.maxTransactionDataSize(TransactionType.TRANSFER)) {
+            } else if (Bytes.of(data).length > config.spec().maxTransactionDataSize(TransactionType.TRANSFER)) {
                 showErrorDialog(
-                        GuiMessages.get("InvalidData", config.maxTransactionDataSize(TransactionType.TRANSFER)));
+                        GuiMessages.get("InvalidData", config.spec().maxTransactionDataSize(TransactionType.TRANSFER)));
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
                         GuiMessages.get("TransferInfo", SwingUtil.formatAmountFull(value), Hex.encode0x(to)),
@@ -415,7 +415,7 @@ public class SendPanel extends JPanel implements ActionListener {
     protected void clear() {
         setToText(Bytes.EMPTY_BYTES);
         setAmountText(Amount.ZERO);
-        setFeeText(config.minTransactionFee());
+        setFeeText(config.spec().minTransactionFee());
         setDataText("");
     }
 

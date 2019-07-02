@@ -52,13 +52,13 @@ public class BlockchainPerformance {
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
             Amount value = NANO_SEM.of(1);
-            Amount fee = config.minTransactionFee();
+            Amount fee = config.spec().minTransactionFee();
             long nonce = 1 + i;
             long timestamp = TimeUtil.currentTimeMillis();
             byte[] data = Bytes.EMPTY_BYTES;
             Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(key);
 
-            if (total + tx.size() > config.maxBlockTransactionsSize()) {
+            if (total + tx.size() > config.spec().maxBlockTransactionsSize()) {
                 break;
             }
 
@@ -81,7 +81,7 @@ public class BlockchainPerformance {
         Block block = new Block(header, txs, res);
 
         List<Signature> votes = new ArrayList<>();
-        for (int i = 0; i < config.getNumberOfValidators(1000000L); i++) {
+        for (int i = 0; i < config.spec().getNumberOfValidators(1000000L); i++) {
             votes.add(new Key().sign(Bytes.EMPTY_BYTES));
         }
         block.setView(1);
@@ -118,7 +118,7 @@ public class BlockchainPerformance {
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
         Amount value = NANO_SEM.of(1);
-        Amount fee = config.minTransactionFee();
+        Amount fee = config.spec().minTransactionFee();
         long nonce = 1;
         long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = {};

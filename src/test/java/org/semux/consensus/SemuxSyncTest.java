@@ -80,7 +80,7 @@ public class SemuxSyncTest {
                 TransactionType.TRANSFER,
                 to.toAddress(),
                 SEM.of(10),
-                kernelRule.getKernel().getConfig().minTransactionFee(),
+                kernelRule.getKernel().getConfig().spec().minTransactionFee(),
                 0,
                 time,
                 Bytes.EMPTY_BYTES).sign(from1);
@@ -100,7 +100,7 @@ public class SemuxSyncTest {
                 TransactionType.TRANSFER,
                 to.toAddress(),
                 SEM.of(10),
-                kernelRule.getKernel().getConfig().minTransactionFee(),
+                kernelRule.getKernel().getConfig().spec().minTransactionFee(),
                 0,
                 time,
                 Bytes.EMPTY_BYTES).sign(from2);
@@ -236,7 +236,7 @@ public class SemuxSyncTest {
         doNothing().when(chain).updateValidators(anyLong());
         kernelRule.getKernel().setBlockchain(chain);
 
-        validatorInterval = kernelRule.getKernel().getConfig().getValidatorUpdateInterval();
+        validatorInterval = kernelRule.getKernel().getConfig().spec().getValidatorUpdateInterval();
 
         SemuxSync sync = spy(new SemuxSync(kernelRule.getKernel()));
         MessageQueue msgQueue = mock(MessageQueue.class);
@@ -311,7 +311,7 @@ public class SemuxSyncTest {
         doReturn(validators).when(chain).getValidators();
         kernelRule.getKernel().setBlockchain(chain);
 
-        validatorInterval = kernelRule.getKernel().getConfig().getValidatorUpdateInterval();
+        validatorInterval = kernelRule.getKernel().getConfig().spec().getValidatorUpdateInterval();
 
         SemuxSync sync = spy(new SemuxSync(kernelRule.getKernel()));
         MessageQueue msgQueue = mock(MessageQueue.class);
@@ -385,7 +385,7 @@ public class SemuxSyncTest {
         doReturn(validators).when(chain).getValidators();
         kernelRule.getKernel().setBlockchain(chain);
 
-        validatorInterval = kernelRule.getKernel().getConfig().getValidatorUpdateInterval();
+        validatorInterval = kernelRule.getKernel().getConfig().spec().getValidatorUpdateInterval();
 
         SemuxSync sync = spy(new SemuxSync(kernelRule.getKernel()));
         TestUtils.setInternalState(sync, "lastBlockInSet", validatorInterval, SemuxSync.class);

@@ -7,7 +7,6 @@
 package org.semux.core;
 
 import static java.nio.file.attribute.PosixFilePermission.OTHERS_READ;
-
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
