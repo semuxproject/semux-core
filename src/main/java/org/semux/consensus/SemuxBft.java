@@ -821,8 +821,12 @@ public class SemuxBft implements BftManager {
                     }
                 }
             } else {
-                pendingResults.add(pendingTx.result);
-                pendingTxs.add(pendingTx.transaction);
+                if (config.spec().nonVMTransactionGasCost() <= blockGasLimit
+                        && pendingTx.result.getCode().isAcceptable()) {
+                    pendingResults.add(pendingTx.result);
+                    pendingTxs.add(pendingTx.transaction);
+                    blockGasLimit -= config.spec().nonVMTransactionGasCost();
+                }
             }
         }
 

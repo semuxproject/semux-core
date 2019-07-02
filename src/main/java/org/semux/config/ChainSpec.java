@@ -54,6 +54,13 @@ public interface ChainSpec {
     Amount minDelegateBurnAmount();
 
     /**
+     * Returns the gas cost for non-VM transactions.
+     *
+     * @return
+     */
+    long nonVMTransactionGasCost();
+
+    /**
      * Returns the block reward for a specific block.
      *
      * @param number

@@ -118,10 +118,10 @@ public class TransactionExecutor {
                 continue;
             }
 
-            boolean isVmCall = type == TransactionType.CREATE || type == TransactionType.CALL;
+            boolean isVMTransaction = type == TransactionType.CREATE || type == TransactionType.CALL;
 
             // check fee (call and create use gas instead)
-            if (isVmCall) {
+            if (isVMTransaction) {
                 // applying a very strict check to avoid mistakes
                 boolean valid = fee.equals(Amount.ZERO)
                         && tx.getGas() >= 21_000 && tx.getGas() <= config.spec().maxBlockGasLimit()
@@ -230,9 +230,6 @@ public class TransactionExecutor {
                 // VM calls can have fees/values set.
                 as.adjustAvailable(from, neg(sum(value, fee)));
                 executeVmTransaction(result, tx, as, block, gasUsedInBlock);
-                if (result.getCode().isAcceptable()) {
-                    gasUsedInBlock += result.getGasUsed();
-                }
                 break;
             default:
                 // unsupported transaction type
@@ -240,10 +237,17 @@ public class TransactionExecutor {
                 break;
             }
 
-            // increase nonce if success
-            // creates and calls increase their own nonces internal to VM
-            if (result.getCode().isAcceptable() && !isVmCall) {
-                as.increaseNonce(from);
+            if (result.getCode().isAcceptable()) {
+                if (!isVMTransaction) {
+                    // CREATEs and CALLs manages the nonce inside the VM
+                    as.increaseNonce(from);
+                }
+
+                if (isVMTransaction) {
+                    gasUsedInBlock += result.getGasUsed();
+                } else {
+                    gasUsedInBlock += config.spec().nonVMTransactionGasCost();
+                }
             }
 
             result.setBlockNumber(block.getNumber());

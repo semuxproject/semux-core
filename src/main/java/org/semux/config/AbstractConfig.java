@@ -52,6 +52,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     protected int maxBlockTransactionsSize = 1024 * 1024;
     protected Amount minTransactionFee = MILLI_SEM.of(5);
     protected Amount minDelegateBurnAmount = SEM.of(1000);
+    protected long nonVMTransactionGasCost = 21_000L;
 
     // =========================
     // General
@@ -192,6 +193,11 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     @Override
     public Amount minDelegateBurnAmount() {
         return minDelegateBurnAmount;
+    }
+
+    @Override
+    public long nonVMTransactionGasCost() {
+        return nonVMTransactionGasCost;
     }
 
     @Override
