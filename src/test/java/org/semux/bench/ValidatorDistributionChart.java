@@ -20,7 +20,6 @@ import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.style.Styler;
 import org.semux.config.Constants;
 import org.semux.config.MainnetConfig;
-import org.semux.crypto.cache.PublicKeyCacheTest;
 import org.semux.util.BigIntegerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -684,11 +684,6 @@ public class SemuxBft implements BftManager {
         }
         activeValidators = channelMgr.getActiveChannels(validators);
         lastUpdate = TimeUtil.currentTimeMillis();
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Validator set: max = {}, total = {},  active = {}",
-                    maxValidators, validators.size(), activeValidators.size());
-        }
     }
 
     /**
@@ -932,9 +927,6 @@ public class SemuxBft implements BftManager {
                 .stream()
                 .filter(it -> !pendingValidatedTransactions.contains(it))
                 .collect(Collectors.toList());
-
-        logger.debug("Block validation: # txs = {}, # txs unvalidated = {}", transactions.size(),
-                unvalidatedTransactions.size());
 
         return unvalidatedTransactions;
     }

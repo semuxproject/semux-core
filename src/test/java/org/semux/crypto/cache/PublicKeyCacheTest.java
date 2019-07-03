@@ -11,7 +11,6 @@ import static org.junit.Assert.assertSame;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semux.api.v2.SemuxApiErrorTest;
 import org.semux.crypto.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
