@@ -476,15 +476,6 @@ public class SemuxBft implements BftManager {
                     .sorted()
                     .toArray();
 
-            // If the original validators are missing (a fresh sync, or no direct connection
-            // to validators), we still should be able to sync just based on peers.
-            if (heights.length == 0) {
-                heights = channelMgr.getActiveChannels().stream()
-                        .mapToLong(c -> c.getRemotePeer().getLatestBlockNumber() + 1)
-                        .sorted()
-                        .toArray();
-            }
-
             // Needs at least one connected node to start syncing
             if (heights.length != 0) {
                 int q = (int) Math.ceil(heights.length * 2.0 / 3.0);
