@@ -6,7 +6,10 @@
  */
 package org.semux.vm.client;
 
-import static org.semux.core.Amount.neg;
+import static org.semux.vm.client.Conversion.weiToAmount;
+
+import java.math.BigInteger;
+import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.ethereum.vm.DataWord;
@@ -16,7 +19,6 @@ import org.ethereum.vm.chainspec.PrecompiledContractContext;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.util.Pair;
 import org.semux.core.Amount;
-import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 
 public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
@@ -26,6 +28,11 @@ public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
 
     private static final DataWord voteAddr = DataWord.of(100);
     private static final DataWord unvoteAddr = DataWord.of(101);
+
+    private static final Pair<Boolean, byte[]> success = Pair.of(true, ArrayUtils.EMPTY_BYTE_ARRAY);
+    private static final Pair<Boolean, byte[]> failure = Pair.of(false, ArrayUtils.EMPTY_BYTE_ARRAY);
+
+    // TODO: add unit test
 
     @Override
     public PrecompiledContract getContractForAddress(DataWord address) {
@@ -46,33 +53,28 @@ public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
 
         @Override
         public Pair<Boolean, byte[]> execute(PrecompiledContractContext context) {
+            if (context.getData().length != 32) {
+                return failure;
+            }
+
+            // TODO: inside the VM, we should refund when the call is a failure.
+
             Repository track = context.getTrack();
             if (track instanceof SemuxRepository) {
                 SemuxRepository semuxTrack = (SemuxRepository) track;
                 DelegateState ds = semuxTrack.getDelegateState();
-                AccountState as = semuxTrack.getAccountState();
-                // todo - fill these out from data/ensure right from
-                byte[] from = "".getBytes();
-                byte[] to = "".getBytes();
-                long amt = 1;
-                Amount amount = Amount.Unit.NANO_SEM.of(amt);
-                Amount available = as.getAccount(from).getAvailable();
+                byte[] from = context.getCaller();
+                Amount value = weiToAmount(context.getValue()); // value passed to this contract
+                byte[] to = Arrays.copyOfRange(context.getData(), 12, 32); // last 20 bytes
 
-                if (amount.lte(available)) {
-                    if (ds.vote(from, to, amount)) {
-                        as.adjustAvailable(from, neg(amount));
-                        as.adjustLocked(from, amount);
-                    } else {
-                        return Pair.of(false, ArrayUtils.EMPTY_BYTE_ARRAY);
-                    }
+                if (ds.vote(from, to, value)) {
+                    return success;
                 } else {
-                    return Pair.of(false, ArrayUtils.EMPTY_BYTE_ARRAY);
+                    return failure;
                 }
-
-                return Pair.of(true, ArrayUtils.EMPTY_BYTE_ARRAY);
-            } else {
-                return Pair.of(false, ArrayUtils.EMPTY_BYTE_ARRAY);
             }
+
+            return failure;
         }
     }
 
@@ -84,32 +86,26 @@ public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
 
         @Override
         public Pair<Boolean, byte[]> execute(PrecompiledContractContext context) {
+            if (context.getData().length != 32 + 32) {
+                return failure;
+            }
+
             Repository track = context.getTrack();
             if (track instanceof SemuxRepository) {
                 SemuxRepository semuxTrack = (SemuxRepository) track;
                 DelegateState ds = semuxTrack.getDelegateState();
-                AccountState as = semuxTrack.getAccountState();
-                // todo - fill these out from data/ensure right from
-                byte[] from = "".getBytes();
-                byte[] to = "".getBytes();
-                long amt = 1;
-                Amount amount = Amount.Unit.NANO_SEM.of(amt);
-                Amount locked = as.getAccount(from).getLocked();
+                byte[] from = context.getCaller();
+                Amount value = weiToAmount(new BigInteger(0, Arrays.copyOfRange(context.getData(), 0, 32)));
+                byte[] to = Arrays.copyOfRange(context.getData(), 44, 64);
 
-                if (locked.lt(amount)) {
-                    return Pair.of(false, ArrayUtils.EMPTY_BYTE_ARRAY);
-                }
-
-                if (ds.unvote(from, to, amount)) {
-                    as.adjustAvailable(from, amount);
-                    as.adjustLocked(from, neg(amount));
+                if (ds.unvote(from, to, value)) {
+                    return success;
                 } else {
-                    return Pair.of(false, ArrayUtils.EMPTY_BYTE_ARRAY);
+                    return failure;
                 }
-                return Pair.of(true, ArrayUtils.EMPTY_BYTE_ARRAY);
-            } else {
-                return Pair.of(false, ArrayUtils.EMPTY_BYTE_ARRAY);
             }
+
+            return failure;
         }
     }
 }
