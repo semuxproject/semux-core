@@ -19,6 +19,7 @@ import org.ethereum.vm.chainspec.PrecompiledContractContext;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.util.Pair;
 import org.semux.core.Amount;
+import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 
 public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
@@ -93,12 +94,14 @@ public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
             Repository track = context.getTrack();
             if (track instanceof SemuxRepository) {
                 SemuxRepository semuxTrack = (SemuxRepository) track;
+                AccountState as = semuxTrack.getAccountState();
                 DelegateState ds = semuxTrack.getDelegateState();
                 byte[] from = context.getCaller();
-                Amount value = weiToAmount(new BigInteger(0, Arrays.copyOfRange(context.getData(), 0, 32)));
+                Amount value = weiToAmount(new BigInteger(1, Arrays.copyOfRange(context.getData(), 0, 32)));
                 byte[] to = Arrays.copyOfRange(context.getData(), 44, 64);
 
                 if (ds.unvote(from, to, value)) {
+                    as.adjustAvailable(from, value);
                     return success;
                 } else {
                     return failure;
