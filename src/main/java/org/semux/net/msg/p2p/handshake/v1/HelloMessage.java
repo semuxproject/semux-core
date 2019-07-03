@@ -11,6 +11,7 @@ import org.semux.config.Config;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
+import org.semux.net.CapabilityList;
 import org.semux.net.Peer;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
@@ -27,12 +28,14 @@ public class HelloMessage extends Message {
     /**
      * Create a HELLO message.
      */
-    public HelloMessage(Network network, short networkVersion, String peerId, String ip, int port, String clientId,
+    public HelloMessage(Network network, short networkVersion, String peerId, String ip, int port,
+            String clientId, CapabilityList clientCapabilities,
             long latestBlockNumber, Key coinbase) {
         super(MessageCode.HELLO, WorldMessage.class);
 
-        this.peer = new Peer(network, networkVersion, peerId, ip, port, clientId,
-                PeerCodec.mandatoryCapabilities(network), latestBlockNumber);
+        this.peer = new Peer(network, networkVersion, peerId, ip, port,
+                clientId, clientCapabilities,
+                latestBlockNumber);
         this.timestamp = TimeUtil.currentTimeMillis();
 
         SimpleEncoder enc = new SimpleEncoder();

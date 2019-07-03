@@ -13,7 +13,7 @@ import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
-import org.semux.net.CapabilitySet;
+import org.semux.net.CapabilityList;
 import org.semux.net.Peer;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
@@ -30,7 +30,7 @@ public abstract class HandshakeMessage extends Message {
     protected final int port;
 
     protected final String clientId;
-    protected final CapabilitySet capabilities;
+    protected final CapabilityList capabilities;
 
     protected final long latestBlockNumber;
 
@@ -40,7 +40,7 @@ public abstract class HandshakeMessage extends Message {
 
     public HandshakeMessage(MessageCode code, Class<?> responseMessageClass,
             Network network, short networkVersion, String peerId, int port,
-            String clientId, CapabilitySet capabilities, long latestBlockNumber,
+            String clientId, CapabilityList capabilities, long latestBlockNumber,
             byte[] secret, Key coinbase) {
         super(code, responseMessageClass);
 
@@ -74,7 +74,7 @@ public abstract class HandshakeMessage extends Message {
         for (int i = 0, size = dec.readInt(); i < size; i++) {
             capabilities.add(dec.readString());
         }
-        this.capabilities = CapabilitySet.of(capabilities.toArray(new String[0]));
+        this.capabilities = CapabilityList.of(capabilities.toArray(new String[0]));
         this.latestBlockNumber = dec.readLong();
         this.secret = dec.readBytes();
         this.timestamp = dec.readLong();
@@ -138,8 +138,7 @@ public abstract class HandshakeMessage extends Message {
      * @return
      */
     public Peer getPeer(String ip) {
-        return new Peer(network, networkVersion, peerId, ip, port, clientId, capabilities.toArray(),
-                latestBlockNumber);
+        return new Peer(network, networkVersion, peerId, ip, port, clientId, capabilities, latestBlockNumber);
     }
 
     /**

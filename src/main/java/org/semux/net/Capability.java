@@ -19,7 +19,7 @@ public enum Capability {
     /**
      * A mandatory capability for all clients.
      */
-    SEMUX,
+    SEM,
 
     /**
      * This client supports the CORE protocol.

@@ -138,7 +138,10 @@ public class TransactionsPanelFilter {
      */
     private Amount getAmount(JTextField txtField) {
         try {
-            return SwingUtil.parseAmount(txtField.getText());
+            String text = txtField.getText();
+            if (text != null && !text.isEmpty()) {
+                return SwingUtil.parseAmount(text);
+            }
         } catch (ParseException e) {
             logger.debug("Unable to parse amount for {}", txtField.getText());
         }

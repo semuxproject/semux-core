@@ -12,7 +12,7 @@ import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.net.Capability;
-import org.semux.net.CapabilitySet;
+import org.semux.net.CapabilityList;
 
 public class Constants {
 
@@ -46,7 +46,7 @@ public class Constants {
     /**
      * Capability of this client.
      */
-    public static final CapabilitySet CLIENT_CAPABILITIES = CapabilitySet.of(Capability.SEMUX, Capability.CORE,
+    public static final CapabilityList CLIENT_CAPABILITIES = CapabilityList.of(Capability.SEM, Capability.CORE,
             Capability.LIGHT);
 
     /**

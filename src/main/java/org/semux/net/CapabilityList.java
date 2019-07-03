@@ -6,6 +6,7 @@
  */
 package org.semux.net;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,20 +20,20 @@ import java.util.stream.Stream;
 /**
  * An immutable set of capabilities.
  */
-public class CapabilitySet {
+public class CapabilityList {
 
-    private final Set<Capability> capabilities;
+    private final List<Capability> capabilities;
 
-    private CapabilitySet(Collection<Capability> capabilities) {
+    private CapabilityList(Collection<Capability> capabilities) {
         /* Use TreeSet to maintain capability order, for deterministic hashcode */
-        this.capabilities = Collections.unmodifiableSet(new TreeSet<>(capabilities));
+        this.capabilities = new ArrayList<>(capabilities);
     }
 
     /**
      * Creates an empty set.
      */
-    public static CapabilitySet emptySet() {
-        return new CapabilitySet(Collections.emptySet());
+    public static CapabilityList emptyList() {
+        return new CapabilityList(Collections.emptyList());
     }
 
     /**
@@ -41,8 +42,8 @@ public class CapabilitySet {
      * @param capabilities
      *            the specified capabilities
      */
-    public static CapabilitySet of(Capability... capabilities) {
-        return new CapabilitySet(Stream.of(capabilities).filter(Objects::nonNull).collect(Collectors.toList()));
+    public static CapabilityList of(Capability... capabilities) {
+        return new CapabilityList(Stream.of(capabilities).filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
     /**
@@ -52,13 +53,13 @@ public class CapabilitySet {
      *            the specified capabilities
      * @ImplNode unknown capabilities are ignored
      */
-    public static CapabilitySet of(String... capabilities) {
-        return new CapabilitySet(
+    public static CapabilityList of(String... capabilities) {
+        return new CapabilityList(
                 Stream.of(capabilities).map(Capability::of).filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
     /**
-     * Checks whether the capability is supported by the ${@link CapabilitySet}.
+     * Checks whether the capability is supported by the ${@link CapabilityList}.
      *
      * @param capability
      *            the capability to be checked.
@@ -91,8 +92,8 @@ public class CapabilitySet {
 
     @Override
     public boolean equals(Object object) {
-        return object instanceof CapabilitySet
-                && Arrays.equals(toArray(), ((CapabilitySet) object).toArray());
+        return object instanceof CapabilityList
+                && Arrays.equals(toArray(), ((CapabilityList) object).toArray());
     }
 
     @Override

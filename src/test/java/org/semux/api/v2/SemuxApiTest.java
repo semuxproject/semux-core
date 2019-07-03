@@ -390,9 +390,9 @@ public class SemuxApiTest extends SemuxApiTestBase {
         channelMgr = spy(kernelRule.getKernel().getChannelManager());
         List<Peer> peers = Arrays.asList(
                 new Peer(Network.DEVNET, (short) 1, "peer1", "1.2.3.4", 5161, "client1",
-                        config.getClientCapabilities().toArray(), 1),
+                        config.getClientCapabilities(), 1),
                 new Peer(Network.DEVNET, (short) 2, "peer2", "2.3.4.5", 5171, "client2",
-                        config.getClientCapabilities().toArray(), 2));
+                        config.getClientCapabilities(), 2));
         when(channelMgr.getActivePeers()).thenReturn(peers);
         kernelRule.getKernel().setChannelManager(channelMgr);
 

@@ -8,13 +8,13 @@ package org.semux.net.msg.p2p.handshake.v2;
 
 import org.semux.Network;
 import org.semux.crypto.Key;
-import org.semux.net.CapabilitySet;
+import org.semux.net.CapabilityList;
 import org.semux.net.msg.MessageCode;
 
 public class WorldMessage extends HandshakeMessage {
 
     public WorldMessage(Network network, short networkVersion, String peerId, int port,
-            String clientId, CapabilitySet capabilities, long latestBlockNumber,
+            String clientId, CapabilityList capabilities, long latestBlockNumber,
             byte[] secret, Key coinbase) {
         super(MessageCode.HANDSHAKE_WORLD, null, network, networkVersion, peerId, port, clientId,
                 capabilities, latestBlockNumber, secret, coinbase);

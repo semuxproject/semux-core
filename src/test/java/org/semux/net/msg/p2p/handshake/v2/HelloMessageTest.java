@@ -14,7 +14,7 @@ import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
 import org.semux.crypto.Key;
-import org.semux.net.CapabilitySet;
+import org.semux.net.CapabilityList;
 import org.semux.net.Peer;
 import org.semux.util.Bytes;
 
@@ -41,7 +41,7 @@ public class HelloMessageTest {
         assertEquals(ip, peer.getIp());
         assertEquals(config.p2pListenPort(), peer.getPort());
         assertEquals(config.getClientId(), peer.getClientId());
-        assertEquals(config.getClientCapabilities(), CapabilitySet.of(peer.getCapabilities()));
+        assertEquals(config.getClientCapabilities(), CapabilityList.of(peer.getCapabilities()));
         assertEquals(2, peer.getLatestBlockNumber());
     }
 }

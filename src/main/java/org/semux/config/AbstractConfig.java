@@ -29,7 +29,7 @@ import org.semux.config.exception.ConfigException;
 import org.semux.core.Amount;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Hash;
-import org.semux.net.CapabilitySet;
+import org.semux.net.CapabilityList;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
 import org.semux.util.BigIntegerUtil;
@@ -318,7 +318,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     @Override
-    public CapabilitySet getClientCapabilities() {
+    public CapabilityList getClientCapabilities() {
         return Constants.CLIENT_CAPABILITIES;
     }
 

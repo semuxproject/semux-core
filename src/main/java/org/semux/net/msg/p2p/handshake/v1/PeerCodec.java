@@ -6,23 +6,12 @@
  */
 package org.semux.net.msg.p2p.handshake.v1;
 
-import org.semux.Network;
+import org.semux.net.CapabilityList;
 import org.semux.net.Peer;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
 public class PeerCodec {
-
-    public static String[] mandatoryCapabilities(Network network) {
-        switch (network) {
-        case MAINNET:
-            return new String[] { "SEM" };
-        case TESTNET:
-        case DEVNET:
-        default:
-            return new String[] { "SEM_TESTNET" };
-        }
-    }
 
     public static boolean validate(Peer peer) {
         return peer.getIp() != null && peer.getIp().length() <= 128
@@ -68,6 +57,8 @@ public class PeerCodec {
             capabilityList[i] = dec.readString();
         }
 
-        return new Peer(null, p2pVersion, peerId, ip, port, clientId, capabilityList, latestBlockNumber);
+        return new Peer(null, p2pVersion, peerId, ip, port,
+                clientId, CapabilityList.of(capabilityList),
+                latestBlockNumber);
     }
 }

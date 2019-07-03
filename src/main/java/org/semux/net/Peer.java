@@ -47,7 +47,7 @@ public class Peer {
     /**
      * The supported capabilities.
      *
-     * TODO: use CapabilitySet once we fully remove handshake v1.
+     * TODO: use CapabilityList once we fully remove handshake v1.
      */
     private final String[] capabilities;
 
@@ -71,14 +71,14 @@ public class Peer {
      * @param latestBlockNumber
      */
     public Peer(Network network, short networkVersion, String peerId, String ip, int port, String clientId,
-            String[] capabilities, long latestBlockNumber) {
+            CapabilityList capabilities, long latestBlockNumber) {
         this.network = network;
         this.ip = ip;
         this.port = port;
         this.peerId = peerId;
         this.networkVersion = networkVersion;
         this.clientId = clientId;
-        this.capabilities = capabilities;
+        this.capabilities = capabilities.toArray();
         this.latestBlockNumber = latestBlockNumber;
     }
 

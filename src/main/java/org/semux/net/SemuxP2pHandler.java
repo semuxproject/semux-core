@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.semux.Kernel;
 import org.semux.Network;
@@ -130,9 +129,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      *
      * @return
      */
-    protected boolean isNewHandShakeEnabled() {
+    protected boolean isNewHandShakeEnabled(Network network) {
 
-        if (SystemUtil.isJUnitTest()) {
+        if (SystemUtil.isJUnitTest() || network != Network.MAINNET) {
             return true;
         }
 
@@ -152,7 +151,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             return;
         }
 
-        if (isNewHandShakeEnabled()) {
+        if (isNewHandShakeEnabled(config.network())) {
             if (channel.isInbound()) {
                 msgQueue.sendMessage(new InitMessage(secret, timestamp));
             } else {
@@ -163,7 +162,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             if (channel.isOutbound()) {
                 msgQueue.sendMessage(new org.semux.net.msg.p2p.handshake.v1.HelloMessage(
                         config.network(), config.networkVersion(), client.getPeerId(),
-                        client.getIp(), client.getPort(), config.getClientId(), chain.getLatestBlockNumber(),
+                        client.getIp(), client.getPort(),
+                        config.getClientId(), config.getClientCapabilities(),
+                        chain.getLatestBlockNumber(),
                         client.getCoinbase()));
             }
         }
@@ -293,7 +294,9 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         // reply with a WORLD message
         msgQueue.sendMessage(new org.semux.net.msg.p2p.handshake.v1.WorldMessage(
                 config.network(), config.networkVersion(), client.getPeerId(),
-                client.getIp(), client.getPort(), config.getClientId(), chain.getLatestBlockNumber(),
+                client.getIp(), client.getPort(),
+                config.getClientId(), config.getClientCapabilities(),
+                chain.getLatestBlockNumber(),
                 client.getCoinbase()));
 
         // handshake done
@@ -503,9 +506,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
      */
     private ReasonCode checkPeer(Peer peer, boolean newHandShake) {
         // has to be same network
-        if (newHandShake && !config.network().equals(peer.getNetwork())
-                || !newHandShake && Stream.of(peer.getCapabilities())
-                        .noneMatch(k -> (config.network() == Network.MAINNET ? "SEM" : "SEM_TESTNET").equals(k))) {
+        if (newHandShake && !config.network().equals(peer.getNetwork())) {
             return ReasonCode.BAD_NETWORK;
         }
 

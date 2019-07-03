@@ -16,10 +16,10 @@ public class CapabilityTest {
 
     @Test
     public void testIsSupported() {
-        assertFalse(CapabilitySet.emptySet().isSupported(Capability.SEMUX));
-        assertFalse(CapabilitySet.of("SEMUX").isSupported(Capability.LIGHT));
-        assertTrue(CapabilitySet.of("SEMUX").isSupported(Capability.SEMUX));
-        assertTrue(CapabilitySet.of(Capability.SEMUX).isSupported(Capability.SEMUX));
-        assertEquals(CapabilitySet.of(Capability.SEMUX), CapabilitySet.of(Capability.SEMUX));
+        assertFalse(CapabilityList.emptyList().isSupported(Capability.SEM));
+        assertFalse(CapabilityList.of("SEMUX").isSupported(Capability.LIGHT));
+        assertTrue(CapabilityList.of("SEMUX").isSupported(Capability.SEM));
+        assertTrue(CapabilityList.of(Capability.SEM).isSupported(Capability.SEM));
+        assertEquals(CapabilityList.of(Capability.SEM), CapabilityList.of(Capability.SEM));
     }
 }
