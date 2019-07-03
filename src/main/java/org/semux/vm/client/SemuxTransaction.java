@@ -6,6 +6,8 @@
  */
 package org.semux.vm.client;
 
+import static org.semux.vm.client.Conversion.amountToWei;
+
 import java.math.BigInteger;
 
 import org.ethereum.vm.client.Transaction;
@@ -44,7 +46,7 @@ public class SemuxTransaction implements Transaction {
 
     @Override
     public BigInteger getValue() {
-        return transaction.getValue().getBigInteger();
+        return amountToWei(transaction.getValue());
     }
 
     @Override
@@ -59,6 +61,6 @@ public class SemuxTransaction implements Transaction {
 
     @Override
     public BigInteger getGasPrice() {
-        return BigInteger.valueOf(transaction.getGasPrice());
+        return amountToWei(transaction.getGasPrice());
     }
 }
