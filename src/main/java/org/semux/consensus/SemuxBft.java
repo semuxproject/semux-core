@@ -231,12 +231,12 @@ public class SemuxBft implements BftManager {
             status = Status.RUNNING;
             timer.start();
             broadcaster.start();
-            logger.info("BftManager started");
+            logger.info("Semux BFT manager started");
 
             enterNewHeight();
             eventLoop();
 
-            logger.info("BftManager stopped");
+            logger.info("Semux BFT manager stopped");
         }
     }
 
@@ -686,9 +686,8 @@ public class SemuxBft implements BftManager {
         lastUpdate = TimeUtil.currentTimeMillis();
 
         if (logger.isDebugEnabled()) {
-            logger.debug(
-                    "Max validators = {}, Number of validators = {}, validators = {}, Number of active validators = {}, Active validators = {}",
-                    maxValidators, validators.size(), String.join(",", validators), activeValidators.size());
+            logger.debug("Validator set: max = {}, total = {},  active = {}",
+                    maxValidators, validators.size(), activeValidators.size());
         }
     }
 

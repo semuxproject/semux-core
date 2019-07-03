@@ -37,12 +37,15 @@ import org.semux.api.ApiVersion;
 import org.semux.api.v2.model.ApiHandlerResponse;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The test case covers validation rules of {@link SemuxApiImpl}
  */
 @RunWith(Parameterized.class)
 public class SemuxApiErrorTest extends SemuxApiTestBase {
+    private static final Logger logger = LoggerFactory.getLogger(SemuxApiErrorTest.class);
 
     private static final String ADDRESS_PLACEHOLDER = "[wallet]";
 
@@ -221,7 +224,7 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
         assertNotNull(apiHandlerResponse);
         assertNotNull(apiHandlerResponse.getMessage());
         assertFalse(apiHandlerResponse.isSuccess());
-        System.out.println(apiHandlerResponse.getMessage());
+        logger.info(apiHandlerResponse.getMessage());
     }
 
     private static String randomHex() {

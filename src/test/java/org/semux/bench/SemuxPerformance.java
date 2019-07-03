@@ -20,8 +20,13 @@ import org.semux.util.Bytes;
 import org.semux.util.ConsoleUtil;
 import org.semux.util.SimpleApiClient;
 import org.semux.util.TimeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SemuxPerformance {
+
+    private static final Logger logger = LoggerFactory.getLogger(SemuxPerformance.class);
+
     private static String host = "127.0.0.1";
     private static int port = 5171;
     private static String username = "";
@@ -46,12 +51,12 @@ public class SemuxPerformance {
             SimpleApiClient api = new SimpleApiClient(host, port, username, password);
             String response = api.post("/transaction/transfer", params);
             if (!response.contains("\"success\":true")) {
-                System.out.println(response);
+                logger.info(response);
                 return;
             }
 
             if (i % tps == 0) {
-                System.out.println(new SimpleDateFormat("[HH:mm:ss]").format(new Date()) + " " + i);
+                logger.info(new SimpleDateFormat("[HH:mm:ss]").format(new Date()) + " " + i);
                 long t2 = TimeUtil.currentTimeMillis();
                 Thread.sleep(Math.max(0, 1000 - (t2 - t1)));
                 t1 = t2;

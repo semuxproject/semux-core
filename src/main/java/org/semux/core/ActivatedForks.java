@@ -137,11 +137,8 @@ public class ActivatedForks {
         // returns
         boolean activated = activatedBlocks >= fork.activationBlocks;
         if (activatedBlocks > 0) {
-            logger.debug("Fork activation of {} at height {}: {} / {} (activated = {}) in the past {} blocks",
-                    fork.name,
-                    height,
-                    activatedBlocks,
-                    fork.activationBlocks, activated, fork.activationBlocksLookup);
+            logger.debug("Fork: name = {}, status = {} / {}, require = {}, activated = {}",
+                    fork.name, activatedBlocks, fork.activationBlocksLookup, fork.activationBlocks, activated);
         }
 
         return activated;

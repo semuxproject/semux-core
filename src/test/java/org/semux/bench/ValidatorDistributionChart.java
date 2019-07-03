@@ -20,7 +20,10 @@ import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.style.Styler;
 import org.semux.config.Constants;
 import org.semux.config.MainnetConfig;
+import org.semux.crypto.cache.PublicKeyCacheTest;
 import org.semux.util.BigIntegerUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This program generates a chart that shows the distribution of selected
@@ -28,6 +31,8 @@ import org.semux.util.BigIntegerUtil;
  * https://github.com/r1d1-btct
  */
 public class ValidatorDistributionChart {
+
+    private static final Logger logger = LoggerFactory.getLogger(ValidatorDistributionChart.class);
 
     public static void main(String[] args) {
         Random random = new Random();
@@ -67,7 +72,7 @@ public class ValidatorDistributionChart {
         double[] percentagePRNG_fast = mapPRNG_fast.entrySet().stream().filter(e -> e.getKey() < 100)
                 .mapToDouble(e -> e.getValue().doubleValue() / (double) sumPRNG_fast * 100).toArray();
 
-        System.out.println("Number\tPRNG\tPRNG_fast");
+        logger.info("Number\tPRNG\tPRNG_fast");
         for (int i = 0; i < 100; i++) {
             System.out.format("%d\t%.2f\t%.2f\n", i, percentagePRNG[i] * 100, percentagePRNG_fast[i] * 100);
         }

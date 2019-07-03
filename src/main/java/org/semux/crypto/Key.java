@@ -372,7 +372,7 @@ public class Key {
         };
         for (String pk : pks) {
             byte[] address = Hash.h160(Hex.decode(pk));
-            System.out.println(Hex.encode(address));
+            logger.info(Hex.encode(address));
         }
     }
 }

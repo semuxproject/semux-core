@@ -16,11 +16,15 @@ import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.db.LeveldbDatabase.LeveldbFactory;
 import org.semux.net.msg.consensus.BlockMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 
 public class CompressPerformance {
 
-    enum Mode {
+    private static final Logger logger = LoggerFactory.getLogger(CompressPerformance.class);
+
+    private enum Mode {
         ALL_BLOCKS, BLOCKS_WITH_TX
     }
 
@@ -51,16 +55,16 @@ public class CompressPerformance {
                 long t2 = System.nanoTime();
                 time += t2 - t1;
             }
-            System.out.println("======================================");
-            System.out.println(mode);
-            System.out.println("======================================");
-            System.out.println("# of blocks      : " + blocks);
-            System.out.println("# of transactions: " + transactions);
-            System.out.println("Raw size         : " + size + " bytes");
-            System.out.println("Compressed size  : " + sizeCompressed + " bytes");
-            System.out.println("Ratio            : " + (100.0 * sizeCompressed / size) + " %");
-            System.out.println("Total time used  : " + time + " ns");
-            System.out.println("Average time used: " + time / blocks + " ns");
+            logger.info("======================================");
+            logger.info(mode.name());
+            logger.info("======================================");
+            logger.info("# of blocks      : " + blocks);
+            logger.info("# of transactions: " + transactions);
+            logger.info("Raw size         : " + size + " bytes");
+            logger.info("Compressed size  : " + sizeCompressed + " bytes");
+            logger.info("Ratio            : " + (100.0 * sizeCompressed / size) + " %");
+            logger.info("Total time used  : " + time + " ns");
+            logger.info("Average time used: " + time / blocks + " ns");
         }
     }
 }

@@ -11,11 +11,16 @@ import static org.junit.Assert.assertSame;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.semux.api.v2.SemuxApiErrorTest;
 import org.semux.crypto.Key;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public class PublicKeyCacheTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(PublicKeyCacheTest.class);
 
     @Test
     public void testCache() {
@@ -40,7 +45,7 @@ public class PublicKeyCacheTest {
         for (int i = 0; i < 1_000_000; i++) {
             PublicKeyCache.computeIfAbsent(new Key().getPublicKey());
             if (i % 10_000 == 0) {
-                System.out.println(Runtime.getRuntime().totalMemory() / 1024 / 1024 + " MB");
+                logger.info(Runtime.getRuntime().totalMemory() / 1024 / 1024 + " MB");
             }
         }
     }

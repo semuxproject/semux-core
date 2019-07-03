@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.db;
+package org.semux.cli;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,8 +24,7 @@ public class DatabaseScanner {
         options.cacheSize(128L * 1024L * 1024L);
         options.compressionType(CompressionType.NONE);
 
-        File f = new File("database/index");
-        System.out.println(f.exists());
+        File f = new File("database/testnet/index");
 
         try (DB db = JniDBFactory.factory.open(f, options)) {
             DBIterator itr = db.iterator();

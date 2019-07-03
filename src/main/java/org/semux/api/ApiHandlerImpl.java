@@ -123,7 +123,7 @@ public class ApiHandlerImpl implements ApiHandler {
                 if (httpMethod != null && path != null) {
                     result.put(ImmutablePair.of(httpMethod, path),
                             new Route(semuxApi, httpMethod, path, methodInterface, methodImpl));
-                    logger.debug("Loaded route: {} {}", httpMethod, path);
+                    logger.trace("Loaded route: {} {}", httpMethod, path);
                 }
             }
         } catch (SecurityException | NoSuchMethodException e) {

@@ -267,7 +267,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             }
 
             long t2 = TimeUtil.currentTimeMillis();
-            logger.debug("Pending tx re-evaluation: # txs = {} / {},  time = {} ms", accepted, txs.size(), t2 - t1);
+            logger.debug("Execute pending transactions: # txs = {} / {},  time = {} ms", accepted, txs.size(), t2 - t1);
         }
     }
 

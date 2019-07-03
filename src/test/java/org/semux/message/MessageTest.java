@@ -6,6 +6,8 @@
  */
 package org.semux.message;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -14,14 +16,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Test;
 import org.semux.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class Verifier {
+public class MessageTest {
 
-    public static void main(String[] args) throws IOException {
+    private static final Logger logger = LoggerFactory.getLogger(MessageTest.class);
+
+    @Test
+    public void testMessages() throws IOException {
         Properties props = new Properties();
-        props.load(Verifier.class.getResourceAsStream("/org/semux/gui/messages.properties"));
-        props.load(Verifier.class.getResourceAsStream("/org/semux/cli/messages.properties"));
+        props.load(MessageTest.class.getResourceAsStream("/org/semux/gui/messages.properties"));
+        props.load(MessageTest.class.getResourceAsStream("/org/semux/cli/messages.properties"));
 
         Collection<File> files = FileUtils.listFiles(new File("src/main/java/org/semux"), new String[] { "java" },
                 true);
@@ -32,11 +40,9 @@ public class Verifier {
             Matcher m = p.matcher(content);
             while (m.find()) {
                 n++;
-                if (!props.containsKey(m.group(1))) {
-                    System.err.println(m.group(1) + " is not in the messages.properties!");
-                }
+                assertTrue(props.containsKey(m.group(1)));
             }
         }
-        System.out.println(n);
+        logger.info("Total number of items = {}", n);
     }
 }

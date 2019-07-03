@@ -17,8 +17,8 @@ public class CapabilityTest {
     @Test
     public void testIsSupported() {
         assertFalse(CapabilityList.emptyList().isSupported(Capability.SEM));
-        assertFalse(CapabilityList.of("SEMUX").isSupported(Capability.LIGHT));
-        assertTrue(CapabilityList.of("SEMUX").isSupported(Capability.SEM));
+        assertFalse(CapabilityList.of("SEM").isSupported(Capability.LIGHT));
+        assertTrue(CapabilityList.of("SEM").isSupported(Capability.SEM));
         assertTrue(CapabilityList.of(Capability.SEM).isSupported(Capability.SEM));
         assertEquals(CapabilityList.of(Capability.SEM), CapabilityList.of(Capability.SEM));
     }

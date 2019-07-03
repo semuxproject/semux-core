@@ -37,8 +37,12 @@ import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;
 import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class VmTest {
+
+    private Logger logger = LoggerFactory.getLogger(VmTest.class);
 
     @Rule
     public TemporaryDatabaseRule temporaryDBFactory = new TemporaryDatabaseRule();
@@ -78,8 +82,8 @@ public class VmTest {
 
         // set the contract to a simple program
         byte[] contract = compile("PUSH2 0x1234 PUSH1 0x00 MSTORE PUSH1 0x20 PUSH1 0x00 RETURN");
-        System.out.println(Hex.encode0x(contract));
-        System.out.println(
+        logger.info(Hex.encode0x(contract));
+        logger.info(
                 Hex.encode0x(HashUtil.calcNewAddress(Hex.decode0x("0x23a6049381fd2cfb0661d9de206613b83d53d7df"), 17)));
         as.setCode(to, contract);
 

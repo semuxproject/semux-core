@@ -668,17 +668,15 @@ public class BlockchainImpl implements Blockchain {
     protected Map<Fork, Fork.Activation> getActivatedForks() {
         Map<Fork, Fork.Activation> activations = new HashMap<>();
         byte[] value = indexDB.get(Bytes.of(TYPE_ACTIVATED_FORKS));
-        logger.info("Activated Forks");
         if (value != null) {
             SimpleDecoder simpleDecoder = new SimpleDecoder(value);
             final int numberOfForks = simpleDecoder.readInt();
             for (int i = 0; i < numberOfForks; i++) {
                 Fork.Activation activation = Fork.Activation.fromBytes(simpleDecoder.readBytes());
                 activations.put(activation.fork, activation);
-                logger.info(activation.fork.name + " @ block " + activation.activatedAt);
+                logger.info("fork {} activated at block # {}", activation.fork.name, activation.activatedAt);
             }
         }
-
         return activations;
     }
 

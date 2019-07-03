@@ -35,16 +35,16 @@ public class KeyTest {
     public void testKeyStorage() {
         Key key = new Key();
 
-        System.out.println("pk_encoded     : " + Hex.encode(key.pk.getEncoded()));
-        System.out.println("pk_algo        : " + key.pk.getAlgorithm());
-        System.out.println("pk_format      : " + key.pk.getFormat());
-        System.out.println("pk_A           : " + Hex.encode(key.pk.getAbyte()));
-        System.out.println();
-        System.out.println("sk_encoded     : " + Hex.encode(key.sk.getEncoded()));
-        System.out.println("sk_algo        : " + key.sk.getAlgorithm());
-        System.out.println("sk_format      : " + key.sk.getFormat());
-        System.out.println("sk_seed        : " + Hex.encode(key.sk.getSeed()));
-        System.out.println("sk_hash_of_seed: " + Hex.encode(key.sk.getH()));
+        logger.info("pk_encoded     : " + Hex.encode(key.pk.getEncoded()));
+        logger.info("pk_algo        : " + key.pk.getAlgorithm());
+        logger.info("pk_format      : " + key.pk.getFormat());
+        logger.info("pk_A           : " + Hex.encode(key.pk.getAbyte()));
+        logger.info("");
+        logger.info("sk_encoded     : " + Hex.encode(key.sk.getEncoded()));
+        logger.info("sk_algo        : " + key.sk.getAlgorithm());
+        logger.info("sk_format      : " + key.sk.getFormat());
+        logger.info("sk_seed        : " + Hex.encode(key.sk.getSeed()));
+        logger.info("sk_hash_of_seed: " + Hex.encode(key.sk.getH()));
     }
 
     @Test
