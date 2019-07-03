@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  */
-public class DelegateStateImpl implements DelegateState {
+public class DelegateStateImpl implements Cloneable, DelegateState {
 
     protected static final Logger logger = LoggerFactory.getLogger(DelegateStateImpl.class);
 
