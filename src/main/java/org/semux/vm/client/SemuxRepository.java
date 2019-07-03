@@ -28,6 +28,14 @@ public class SemuxRepository implements Cloneable, Repository {
         this.delegateState = delegateState;
     }
 
+    public AccountState getAccountState() {
+        return accountState;
+    }
+
+    public DelegateState getDelegateState() {
+        return delegateState;
+    }
+
     @Override
     public boolean exists(byte[] address) {
         return accountState.exists(address);

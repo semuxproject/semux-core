@@ -9,11 +9,12 @@ package org.semux.vm.client;
 import static org.semux.core.Amount.neg;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.chainspec.ByzantiumPrecompiledContracts;
 import org.ethereum.vm.chainspec.PrecompiledContract;
 import org.ethereum.vm.chainspec.PrecompiledContractContext;
+import org.ethereum.vm.client.Repository;
+import org.ethereum.vm.util.Pair;
 import org.semux.core.Amount;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
@@ -37,19 +38,19 @@ public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
         return super.getContractForAddress(address);
     }
 
-    public static class Vote extends PrecompiledContract {
+    public static class Vote implements PrecompiledContract {
         @Override
         public long getGasForData(byte[] data) {
             return 21000;
         }
 
         @Override
-        public Pair<Boolean, byte[]> execute(byte[] data, PrecompiledContractContext context) {
-
-            if (context instanceof SemuxContext) {
-                SemuxContext semuxContext = (SemuxContext) context;
-                DelegateState ds = semuxContext.getDelegateState();
-                AccountState as = semuxContext.getAccountState();
+        public Pair<Boolean, byte[]> execute(PrecompiledContractContext context) {
+            Repository track = context.getTrack();
+            if (track instanceof SemuxRepository) {
+                SemuxRepository semuxTrack = (SemuxRepository) track;
+                DelegateState ds = semuxTrack.getDelegateState();
+                AccountState as = semuxTrack.getAccountState();
                 // todo - fill these out from data/ensure right from
                 byte[] from = "".getBytes();
                 byte[] to = "".getBytes();
@@ -75,19 +76,19 @@ public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
         }
     }
 
-    public static class Unvote extends PrecompiledContract {
+    public static class Unvote implements PrecompiledContract {
         @Override
         public long getGasForData(byte[] data) {
             return 21000;
         }
 
         @Override
-        public Pair<Boolean, byte[]> execute(byte[] data, PrecompiledContractContext context) {
-            if (context instanceof SemuxContext) {
-                SemuxContext semuxContext = (SemuxContext) context;
-
-                DelegateState ds = semuxContext.getDelegateState();
-                AccountState as = semuxContext.getAccountState();
+        public Pair<Boolean, byte[]> execute(PrecompiledContractContext context) {
+            Repository track = context.getTrack();
+            if (track instanceof SemuxRepository) {
+                SemuxRepository semuxTrack = (SemuxRepository) track;
+                DelegateState ds = semuxTrack.getDelegateState();
+                AccountState as = semuxTrack.getAccountState();
                 // todo - fill these out from data/ensure right from
                 byte[] from = "".getBytes();
                 byte[] to = "".getBytes();

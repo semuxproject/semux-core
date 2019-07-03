@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.ethereum.vm.LogInfo;
-import org.ethereum.vm.chainspec.Spec;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.TransactionReceipt;
@@ -229,7 +228,7 @@ public class TransactionExecutor {
 
                 // VM calls can have fees/values set.
                 as.adjustAvailable(from, neg(sum(value, fee)));
-                executeVmTransaction(result, tx, as, block, gasUsedInBlock);
+                executeVmTransaction(result, tx, as, ds, block, gasUsedInBlock);
                 break;
             default:
                 // unsupported transaction type
@@ -257,15 +256,14 @@ public class TransactionExecutor {
     }
 
     private void executeVmTransaction(TransactionResult result, Transaction tx, AccountState as, DelegateState ds,
-            SemuxBlock block,
-            long gasUsedInBlock) {
+            SemuxBlock block, long gasUsedInBlock) {
         SemuxTransaction transaction = new SemuxTransaction(tx);
         Repository repository = new SemuxRepository(as, ds);
         ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
 
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                 transaction, block, repository, blockStore,
-                config.spec(), invokeFactory, gasUsedInBlock, false);
+                config.spec().vmSpec(), invokeFactory, gasUsedInBlock, false);
 
         TransactionReceipt summary = executor.run();
 

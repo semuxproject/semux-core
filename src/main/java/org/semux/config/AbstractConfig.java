@@ -268,6 +268,11 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     @Override
+    public Spec vmSpec() {
+        return new SemuxSpec();
+    }
+
+    @Override
     public File getFile() {
         return new File(configDir(), CONFIG_FILE);
     }
@@ -515,11 +520,6 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     @Override
     public boolean forkVirtualMachineEnabled() {
         return forkVirtualMachineEnabled;
-    }
-
-    @Override
-    public Spec spec() {
-        return spec;
     }
 
     protected void init() {
