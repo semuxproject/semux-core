@@ -23,6 +23,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.ethereum.vm.chainspec.Spec;
 import org.semux.Network;
 import org.semux.config.exception.ConfigException;
 import org.semux.core.Amount;
@@ -36,6 +37,7 @@ import org.semux.util.Bytes;
 import org.semux.util.StringUtil;
 import org.semux.util.SystemUtil;
 import org.semux.util.exception.UnreachableException;
+import org.semux.vm.client.SemuxSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -513,6 +515,11 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     @Override
     public boolean forkVirtualMachineEnabled() {
         return forkVirtualMachineEnabled;
+    }
+
+    @Override
+    public Spec spec() {
+        return spec;
     }
 
     protected void init() {

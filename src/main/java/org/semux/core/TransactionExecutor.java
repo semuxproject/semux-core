@@ -256,15 +256,16 @@ public class TransactionExecutor {
         return results;
     }
 
-    private void executeVmTransaction(TransactionResult result, Transaction tx, AccountState as, SemuxBlock block,
+    private void executeVmTransaction(TransactionResult result, Transaction tx, AccountState as, DelegateState ds,
+            SemuxBlock block,
             long gasUsedInBlock) {
         SemuxTransaction transaction = new SemuxTransaction(tx);
-        Repository repository = new SemuxRepository(as);
+        Repository repository = new SemuxRepository(as, ds);
         ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
 
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                 transaction, block, repository, blockStore,
-                Spec.DEFAULT, invokeFactory, gasUsedInBlock, false);
+                config.spec(), invokeFactory, gasUsedInBlock, false);
 
         TransactionReceipt summary = executor.run();
 
