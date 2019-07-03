@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  */
-public class DelegateStateImpl implements DelegateState {
+public class DelegateStateImpl implements Cloneable, DelegateState {
 
     protected static final Logger logger = LoggerFactory.getLogger(DelegateStateImpl.class);
 
@@ -238,6 +238,15 @@ public class DelegateStateImpl implements DelegateState {
 
             voteUpdates.clear();
         }
+    }
+
+    @Override
+    public DelegateState clone() {
+        DelegateStateImpl clone = new DelegateStateImpl(this.chain, this.delegateDB, this.voteDB);
+        clone.prev = this.prev;
+        clone.voteUpdates.putAll(this.voteUpdates);
+        clone.delegateUpdates.putAll(this.delegateUpdates);
+        return clone;
     }
 
     @Override

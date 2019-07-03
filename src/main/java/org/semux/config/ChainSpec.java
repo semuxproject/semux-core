@@ -8,6 +8,7 @@ package org.semux.config;
 
 import java.util.List;
 
+import org.ethereum.vm.chainspec.Spec;
 import org.semux.core.Amount;
 import org.semux.core.TransactionType;
 
@@ -94,4 +95,11 @@ public interface ChainSpec {
      * @return
      */
     String getPrimaryValidator(List<String> validators, long height, int view, boolean uniformDist);
+
+    /**
+     * Returns the VM specification.
+     *
+     * @return
+     */
+    Spec vmSpec();
 }

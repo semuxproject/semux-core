@@ -25,7 +25,6 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
-import org.ethereum.vm.chainspec.Spec;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.TransactionReceipt;
@@ -781,14 +780,15 @@ public final class SemuxApiImpl implements SemuxApi {
             SemuxTransaction transaction = new SemuxTransaction(tx);
             SemuxBlock block = new SemuxBlock(kernel.getBlockchain().getLatestBlock().getHeader(),
                     kernel.getConfig().spec().maxBlockGasLimit());
-            Repository repository = new SemuxRepository(kernel.getBlockchain().getAccountState());
+            Repository repository = new SemuxRepository(kernel.getBlockchain().getAccountState(),
+                    kernel.getBlockchain().getDelegateState());
             ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
             BlockStore blockStore = new SemuxBlockStore(kernel.getBlockchain());
             long gasUsedInBlock = 0l;
 
             org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                     transaction, block, repository, blockStore,
-                    Spec.DEFAULT, invokeFactory, gasUsedInBlock, true);
+                    kernel.getConfig().spec().vmSpec(), invokeFactory, gasUsedInBlock, true);
             TransactionReceipt receipt = executor.run();
 
             DoTransactionResponse resp = new DoTransactionResponse();
