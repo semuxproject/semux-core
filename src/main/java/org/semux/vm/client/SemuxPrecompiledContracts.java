@@ -54,24 +54,24 @@ public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
 
         @Override
         public Pair<Boolean, byte[]> execute(PrecompiledContractContext context) {
-            if (context.getData().length != 32) {
+            if (context.getData().length != 32 + 32) {
                 return failure;
             }
-
-            // TODO: inside the VM, we should refund when the call is a failure.
 
             Repository track = context.getTrack();
             if (track instanceof SemuxRepository) {
                 SemuxRepository semuxTrack = (SemuxRepository) track;
+                AccountState as = semuxTrack.getAccountState();
                 DelegateState ds = semuxTrack.getDelegateState();
                 byte[] from = context.getCaller();
-                Amount value = weiToAmount(context.getValue()); // value passed to this contract
-                byte[] to = Arrays.copyOfRange(context.getData(), 12, 32); // last 20 bytes
+                byte[] to = Arrays.copyOfRange(context.getData(), 12, 32);
+                Amount value = weiToAmount(new BigInteger(1, Arrays.copyOfRange(context.getData(), 32, 64)));
 
-                if (ds.vote(from, to, value)) {
+                if (as.getAccount(from).getAvailable().gte(value)
+                        && ds.vote(from, to, value)) {
+                    as.adjustAvailable(from, Amount.neg(value));
+                    as.adjustLocked(from, value);
                     return success;
-                } else {
-                    return failure;
                 }
             }
 
@@ -97,14 +97,14 @@ public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
                 AccountState as = semuxTrack.getAccountState();
                 DelegateState ds = semuxTrack.getDelegateState();
                 byte[] from = context.getCaller();
-                Amount value = weiToAmount(new BigInteger(1, Arrays.copyOfRange(context.getData(), 0, 32)));
-                byte[] to = Arrays.copyOfRange(context.getData(), 44, 64);
+                byte[] to = Arrays.copyOfRange(context.getData(), 12, 32);
+                Amount value = weiToAmount(new BigInteger(1, Arrays.copyOfRange(context.getData(), 32, 64)));
 
-                if (ds.unvote(from, to, value)) {
+                if (as.getAccount(from).getLocked().gte(value)
+                        && ds.unvote(from, to, value)) {
                     as.adjustAvailable(from, value);
+                    as.adjustLocked(from, Amount.neg(value));
                     return success;
-                } else {
-                    return failure;
                 }
             }
 

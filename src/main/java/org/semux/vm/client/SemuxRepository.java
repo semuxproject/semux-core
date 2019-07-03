@@ -118,10 +118,12 @@ public class SemuxRepository implements Cloneable, Repository {
     @Override
     public void commit() {
         accountState.commit();
+        delegateState.commit();
     }
 
     @Override
     public void rollback() {
         accountState.rollback();
+        delegateState.commit();
     }
 }
