@@ -682,7 +682,7 @@ public class SemuxBft implements BftManager {
      * Update the validator sets.
      */
     protected void updateValidators() {
-        int maxValidators = config.getNumberOfValidators(height);
+        int maxValidators = config.spec().getNumberOfValidators(height);
 
         validators = chain.getValidators();
         // if the chain is reporting a larger number of validators
@@ -731,7 +731,7 @@ public class SemuxBft implements BftManager {
      * @return
      */
     protected boolean isPrimary(long height, int view, String peerId) {
-        return config
+        return config.spec()
                 .getPrimaryValidator(validators, height, view, chain.isForkActivated(UNIFORM_DISTRIBUTION, height))
                 .equals(peerId);
     }
@@ -788,7 +788,7 @@ public class SemuxBft implements BftManager {
 
         // fetch pending transactions
         final List<PendingManager.PendingTransaction> pending = pendingMgr
-                .getPendingTransactions(config.maxBlockTransactionsSize());
+                .getPendingTransactions(config.spec().maxBlockTransactionsSize());
         final List<Transaction> pendingTxs = new ArrayList<>();
         final List<TransactionResult> pendingResults = new ArrayList<>();
 
@@ -800,30 +800,33 @@ public class SemuxBft implements BftManager {
                 new byte[0], new byte[0], data);
 
         // only propose gas used up to configured block gas limit
-        SemuxBlock semuxBlock = new SemuxBlock(tempHeader, config.vmBlockGasLimit());
+        long remainingBlockGas = config.poolBlockGasLimit();
+        SemuxBlock semuxBlock = new SemuxBlock(tempHeader, config.spec().maxBlockGasLimit());
 
-        long gasUsed = 0;
+        for (PendingManager.PendingTransaction pendingTx : pending) {
+            Transaction tx = pendingTx.transaction;
+            boolean isVMTransaction = tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE;
 
-        for (PendingManager.PendingTransaction tx : pending) {
-            if (tx.transaction.getType() == TransactionType.CALL
-                    || tx.transaction.getType() == TransactionType.CREATE) {
-                long pendingGasForBlock = tx.transaction.getGas() + gasUsed;
+            if (isVMTransaction) {
+                // transactions that exceed the remaining block gas limit are ignored
+                if (tx.getGasPrice() <= remainingBlockGas) {
+                    TransactionResult result = exec.execute(tx, as, ds, semuxBlock, chain);
 
-                if (tx.transaction.getGasPrice() >= config.vmMinGasPrice()
-                        && pendingGasForBlock < config.vmBlockGasLimit()) {
-                    TransactionResult result = exec.execute(tx.transaction, as, ds, semuxBlock, chain);
-                    gasUsed += result.getGasUsed();
-
-                    if (result.getCode().isAcceptable() && gasUsed < config.vmBlockGasLimit()) {
+                    // only include transaction that's acceptable
+                    if (result.getCode().isAcceptable()) {
                         pendingResults.add(result);
-                        pendingTxs.add(tx.transaction);
-                    } else {
-                        gasUsed -= result.getGasUsed();
+                        pendingTxs.add(tx);
+
+                        remainingBlockGas -= result.getGasUsed();
                     }
                 }
             } else {
-                pendingResults.add(tx.result);
-                pendingTxs.add(tx.transaction);
+                if (config.spec().nonVMTransactionGasCost() <= remainingBlockGas
+                        && pendingTx.result.getCode().isAcceptable()) {
+                    pendingResults.add(pendingTx.result);
+                    pendingTxs.add(pendingTx.transaction);
+                    remainingBlockGas -= config.spec().nonVMTransactionGasCost();
+                }
             }
         }
 
@@ -864,7 +867,7 @@ public class SemuxBft implements BftManager {
             return false;
         }
 
-        if (header.getTimestamp() - TimeUtil.currentTimeMillis() > config.maxBlockTimeDrift()) {
+        if (header.getTimestamp() - TimeUtil.currentTimeMillis() > config.bftMaxBlockTimeDrift()) {
             logger.warn("A block in the future is not allowed");
             return false;
         }
@@ -887,7 +890,7 @@ public class SemuxBft implements BftManager {
             return false;
         }
 
-        if (transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
+        if (transactions.stream().mapToInt(Transaction::size).sum() > config.spec().maxBlockTransactionsSize()) {
             logger.warn("Block transactions size exceeds maximum");
             return false;
         }
@@ -906,7 +909,7 @@ public class SemuxBft implements BftManager {
         // against our own local limit, only
         // when proposing
         List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(header, Long.MAX_VALUE), chain);
+                new SemuxBlock(header, config.spec().maxBlockGasLimit()), chain);
         block.setResults(results);
 
         if (!block.validateResults(header, results)) {
@@ -973,7 +976,7 @@ public class SemuxBft implements BftManager {
 
         // [3] evaluate all transactions
         List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(block.getHeader(), Long.MAX_VALUE), chain);
+                new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), chain);
         if (!block.validateResults(header, results)) {
             logger.debug("Invalid transactions");
             return;

@@ -131,10 +131,10 @@ public class TypeFactory {
     public static TransactionLimitsType transactionLimitsType(Kernel kernel,
             org.semux.core.TransactionType transactionType) {
         return new TransactionLimitsType()
-                .maxTransactionDataSize(kernel.getConfig().maxTransactionDataSize(transactionType))
-                .minTransactionFee(encodeAmount(kernel.getConfig().minTransactionFee()))
+                .maxTransactionDataSize(kernel.getConfig().spec().maxTransactionDataSize(transactionType))
+                .minTransactionFee(encodeAmount(kernel.getConfig().spec().minTransactionFee()))
                 .minDelegateBurnAmount(encodeAmount(
-                        transactionType.equals(DELEGATE) ? kernel.getConfig().minDelegateBurnAmount() : null));
+                        transactionType.equals(DELEGATE) ? kernel.getConfig().spec().minDelegateBurnAmount() : null));
     }
 
     public static TransactionType transactionType(Transaction tx) {

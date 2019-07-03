@@ -309,11 +309,15 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         int cnt = 0;
         long now = TimeUtil.currentTimeMillis();
+        boolean isVMTransaction = tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE;
 
         // reject VM transactions that come in before fork
-        if (!kernel.getBlockchain().isForkActivated(Fork.VIRTUAL_MACHINE)
-                && (tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE)) {
+        if (isVMTransaction && !kernel.getBlockchain().isForkActivated(Fork.VIRTUAL_MACHINE)) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_TYPE);
+        }
+        // reject VM transaction with low gas price
+        if (isVMTransaction && tx.getGasPrice() < kernel.getConfig().poolMinGasPrice()) {
+            return new ProcessingResult(0, TransactionResult.Code.INVALID_FEE);
         }
 
         // reject transactions with a duplicated tx hash
@@ -323,8 +327,8 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         // check transaction timestamp if this is a fresh transaction:
         // a time drift of 2 hours is allowed by default
-        if (tx.getTimestamp() < now - kernel.getConfig().maxTransactionTimeDrift()
-                || tx.getTimestamp() > now + kernel.getConfig().maxTransactionTimeDrift()) {
+        if (tx.getTimestamp() < now - kernel.getConfig().poolMaxTransactionTimeDrift()
+                || tx.getTimestamp() > now + kernel.getConfig().poolMaxTransactionTimeDrift()) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_TIMESTAMP);
         }
 
@@ -340,6 +344,8 @@ public class PendingManager implements Runnable, BlockchainListener {
         // delayed for the next event loop of PendingManager.
         while (tx != null && tx.getNonce() == getNonce(tx.getFrom())) {
 
+            // TODO: introduce block state (open, closed, signed, imported)
+
             // create a dummy block (Note: VM transaction results may depends on the block)
             Blockchain chain = kernel.getBlockchain();
             Block prevBlock = chain.getLatestBlock();
@@ -347,7 +353,7 @@ public class PendingManager implements Runnable, BlockchainListener {
                     prevBlock.getNumber() + 1,
                     new Key().toAddress(), prevBlock.getHash(), System.currentTimeMillis(), new byte[0],
                     new byte[0], new byte[0], new byte[0]);
-            SemuxBlock block = new SemuxBlock(blockHeader, kernel.getConfig().vmBlockGasLimit());
+            SemuxBlock block = new SemuxBlock(blockHeader, kernel.getConfig().spec().maxBlockGasLimit());
 
             // execute transactions
             AccountState as = pendingAS.track();

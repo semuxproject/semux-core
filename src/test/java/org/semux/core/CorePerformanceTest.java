@@ -66,7 +66,7 @@ public class CorePerformanceTest {
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
             Amount value = NANO_SEM.of(5);
-            Amount fee = config.minTransactionFee();
+            Amount fee = config.spec().minTransactionFee();
             long nonce = 1;
             long timestamp = TimeUtil.currentTimeMillis();
             byte[] data = Bytes.random(16);
@@ -88,7 +88,7 @@ public class CorePerformanceTest {
 
         t1 = System.nanoTime();
         exec.execute(txs, chain.getAccountState().track(), chain.getDelegateState().track(),
-                new SemuxBlock(chain.getLatestBlock().getHeader(), config.vmMaxBlockGasLimit()), null);
+                new SemuxBlock(chain.getLatestBlock().getHeader(), config.spec().maxBlockGasLimit()), null);
         t2 = System.nanoTime();
         logger.info("Perf_transaction_2: {} μs/tx", (t2 - t1) / 1_000 / repeat);
     }

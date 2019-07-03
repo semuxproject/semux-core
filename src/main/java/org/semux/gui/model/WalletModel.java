@@ -251,7 +251,7 @@ public class WalletModel {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(config.getPrimaryValidator(validators,
+        return Optional.ofNullable(config.spec().getPrimaryValidator(validators,
                 latestBlock.getNumber() + 1,
                 view,
                 isUniformDistributionEnabled()));
@@ -286,7 +286,7 @@ public class WalletModel {
 
         // the next validator can't be predicted if the validator set is going to be
         // updated in the next round
-        if ((latestBlock.getNumber() + 2) % config.getValidatorUpdateInterval() == 0) {
+        if ((latestBlock.getNumber() + 2) % config.spec().getValidatorUpdateInterval() == 0) {
             return Optional.empty();
         }
 
@@ -308,8 +308,8 @@ public class WalletModel {
         }
 
         return Optional.of(
-                ((latestBlock.getNumber() + 1) / config.getValidatorUpdateInterval() + 1)
-                        * config.getValidatorUpdateInterval());
+                ((latestBlock.getNumber() + 1) / config.spec().getValidatorUpdateInterval() + 1)
+                        * config.spec().getValidatorUpdateInterval());
     }
 
     public void setUniformDistributionEnabled(boolean enabled) {

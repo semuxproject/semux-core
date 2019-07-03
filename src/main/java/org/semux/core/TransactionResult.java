@@ -64,14 +64,9 @@ public class TransactionResult {
         INVALID_NONCE(0x24),
 
         /**
-         * The transaction fee doesn't meet the minimum.
+         * The transaction fee (or gas * gasPrice) doesn't meet the minimum.
          */
         INVALID_FEE(0x25),
-
-        /**
-         * The specified gas amount is larger than any gas limit
-         */
-        INVALID_GAS(0x26),
 
         /**
          * The transaction data is invalid, typically too large.

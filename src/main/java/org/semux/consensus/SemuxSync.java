@@ -368,11 +368,11 @@ public class SemuxSync implements SyncManager {
         synchronized (lock) {
             if (!fastSync) {
                 // fastSync value is updated at the beginning of each set
-                if (latest % config.getValidatorUpdateInterval() == 0) {
-                    if (target.get() >= latest + config.getValidatorUpdateInterval()) {
+                if (latest % config.spec().getValidatorUpdateInterval() == 0) {
+                    if (target.get() >= latest + config.spec().getValidatorUpdateInterval()) {
                         toFinalize.clear();
                         currentSet.clear();
-                        lastBlockInSet = latest + config.getValidatorUpdateInterval();
+                        lastBlockInSet = latest + config.spec().getValidatorUpdateInterval();
                         fastSync = true;
                     }
                 }
@@ -562,7 +562,7 @@ public class SemuxSync implements SyncManager {
 
         // [2] check transactions and results
         if (!block.validateTransactions(header, transactions, config.network())
-                || transactions.stream().mapToInt(Transaction::size).sum() > config.maxBlockTransactionsSize()) {
+                || transactions.stream().mapToInt(Transaction::size).sum() > config.spec().maxBlockTransactionsSize()) {
             logger.error("Invalid block transactions");
             return false;
         }
@@ -579,7 +579,7 @@ public class SemuxSync implements SyncManager {
         // [3] evaluate transactions
         TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
         List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot,
-                new SemuxBlock(block.getHeader(), config.vmMaxBlockGasLimit()), chain);
+                new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), chain);
         block.setResults(results);
 
         if (!block.validateResults(header, results)) {
@@ -599,7 +599,7 @@ public class SemuxSync implements SyncManager {
     }
 
     protected boolean validateBlockVotes(Block block) {
-        int maxValidators = config.getNumberOfValidators(block.getNumber());
+        int maxValidators = config.spec().getNumberOfValidators(block.getNumber());
 
         List<String> validatorList = chain.getValidators();
 

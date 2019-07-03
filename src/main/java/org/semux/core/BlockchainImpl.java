@@ -371,7 +371,8 @@ public class BlockchainImpl implements Blockchain {
 
             // [5] update validator statistics
             List<String> validators = getValidators();
-            String primary = config.getPrimaryValidator(validators, number, 0, forks.isActivated(UNIFORM_DISTRIBUTION));
+            String primary = config.spec().getPrimaryValidator(validators, number, 0,
+                    forks.isActivated(UNIFORM_DISTRIBUTION));
             adjustValidatorStats(block.getCoinbase(), StatsType.FORGED, 1);
             if (primary.equals(Hex.encode(block.getCoinbase()))) {
                 adjustValidatorStats(Hex.decode0x(primary), StatsType.HIT, 1);
@@ -381,7 +382,7 @@ public class BlockchainImpl implements Blockchain {
         }
 
         // [6] update validator set
-        if (number % config.getValidatorUpdateInterval() == 0) {
+        if (number % config.spec().getValidatorUpdateInterval() == 0) {
             updateValidators(block.getNumber());
         }
 
@@ -459,7 +460,7 @@ public class BlockchainImpl implements Blockchain {
         List<String> validators = new ArrayList<>();
 
         List<Delegate> delegates = delegateState.getDelegates();
-        int max = Math.min(delegates.size(), config.getNumberOfValidators(number));
+        int max = Math.min(delegates.size(), config.spec().getNumberOfValidators(number));
         for (int i = 0; i < max; i++) {
             Delegate d = delegates.get(i);
             validators.add(Hex.encode(d.getAddress()));
@@ -722,7 +723,7 @@ public class BlockchainImpl implements Blockchain {
             // [0] execute transactions against local state
             TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
             transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState(),
-                    new SemuxBlock(block.getHeader(), config.vmMaxBlockGasLimit()), this);
+                    new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), this);
 
             // [1] apply block reward and tx fees
             Amount reward = Block.getBlockReward(block, config);

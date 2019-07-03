@@ -59,7 +59,7 @@ public class MainnetConfigTest {
     public void testNumberOfValidators() {
         int last = 0;
         for (int i = 0; i < 60 * Constants.BLOCKS_PER_DAY; i++) {
-            int n = config.getNumberOfValidators(i);
+            int n = config.spec().getNumberOfValidators(i);
             if (n != last) {
                 assertTrue(n > last && (n - last == 1 || last == 0));
                 logger.info("block # = {}, validators = {}", i, n);
@@ -84,7 +84,7 @@ public class MainnetConfigTest {
         StringBuilder validatorsCSV = new StringBuilder();
         for (long i = 0; i < blocks; i++) {
             for (int view = 0; view < views; view++) {
-                String primary = config.getPrimaryValidator(validators, i, view, true);
+                String primary = config.spec().getPrimaryValidator(validators, i, view, true);
                 primaryValidators[(int) i][view] = primary;
 
                 if (view > 0 && primaryValidators[(int) i][view].equals(primaryValidators[(int) i][view - 1])) {

@@ -118,23 +118,27 @@ public class TransactionExecutor {
                 continue;
             }
 
-            boolean isVmCall = type == TransactionType.CREATE || type == TransactionType.CALL;
+            boolean isVMTransaction = type == TransactionType.CREATE || type == TransactionType.CALL;
 
             // check fee (call and create use gas instead)
-            if (isVmCall) {
-                if (fee.lt(Amount.ZERO)) {
+            if (isVMTransaction) {
+                // applying a very strict check to avoid mistakes
+                boolean valid = fee.equals(Amount.ZERO)
+                        && tx.getGas() >= 21_000 && tx.getGas() <= config.spec().maxBlockGasLimit()
+                        && tx.getGasPrice() >= 1 && tx.getGasPrice() <= Integer.MAX_VALUE; // a theoretical limit
+                if (!valid) {
                     result.setCode(Code.INVALID_FEE);
                     continue;
                 }
             } else {
-                if (fee.lt(config.minTransactionFee())) {
+                if (fee.lt(config.spec().minTransactionFee())) {
                     result.setCode(Code.INVALID_FEE);
                     continue;
                 }
             }
 
             // check data length
-            if (data.length > config.maxTransactionDataSize(type)) {
+            if (data.length > config.spec().maxTransactionDataSize(type)) {
                 result.setCode(Code.INVALID_DATA);
                 continue;
             }
@@ -154,7 +158,7 @@ public class TransactionExecutor {
                     result.setCode(Code.INVALID_DELEGATE_NAME);
                     break;
                 }
-                if (value.lt(config.minDelegateBurnAmount())) {
+                if (value.lt(config.spec().minDelegateBurnAmount())) {
                     result.setCode(Code.INVALID_DELEGATE_BURN_AMOUNT);
                     break;
                 }
@@ -205,7 +209,6 @@ public class TransactionExecutor {
                 }
                 break;
             }
-
             case CALL:
             case CREATE:
                 // Note: the second parameter should be height = block number + 1; here we're
@@ -215,9 +218,8 @@ public class TransactionExecutor {
                     break;
                 }
 
-                // FIXME: overflow
+                // no overflow shall occur
                 long maxGasFee = tx.getGas() * tx.getGasPrice();
-
                 Amount maxCost = sum(sum(value, fee), Unit.NANO_SEM.of(maxGasFee));
 
                 if (available.lt(maxCost)) {
@@ -227,28 +229,25 @@ public class TransactionExecutor {
 
                 // VM calls can have fees/values set.
                 as.adjustAvailable(from, neg(sum(value, fee)));
-
-                if (tx.getGas() > config.vmMaxBlockGasLimit()) {
-                    result.setCode(Code.INVALID_GAS);
-                } else {
-                    executeVmTransaction(result, tx, as, block, gasUsedInBlock);
-                    if (result.getCode().isAcceptable()) {
-                        gasUsedInBlock += result.getGasUsed();
-                    }
-                }
-
+                executeVmTransaction(result, tx, as, block, gasUsedInBlock);
                 break;
-
             default:
                 // unsupported transaction type
                 result.setCode(Code.INVALID_TYPE);
                 break;
             }
 
-            // increase nonce if success
-            // creates and calls increase their own nonces internal to VM
-            if (result.getCode().isAcceptable() && !isVmCall) {
-                as.increaseNonce(from);
+            if (result.getCode().isAcceptable()) {
+                if (!isVMTransaction) {
+                    // CREATEs and CALLs manages the nonce inside the VM
+                    as.increaseNonce(from);
+                }
+
+                if (isVMTransaction) {
+                    gasUsedInBlock += result.getGasUsed();
+                } else {
+                    gasUsedInBlock += config.spec().nonVMTransactionGasCost();
+                }
             }
 
             result.setBlockNumber(block.getNumber());
