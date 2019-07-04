@@ -2309,15 +2309,6 @@
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
-                    },
-                    {
-                        "name": "value",
-                        "in": "query",
-                        "description": "Amount of SEM to transfer in nano SEM",
-                        "required": false,
-                        "type": "string",
-                        "format": "int64",
-                        "pattern": "^\\d+$"
                     }
                 ],
                 "responses": {

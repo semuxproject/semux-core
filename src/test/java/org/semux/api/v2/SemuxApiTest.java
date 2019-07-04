@@ -761,7 +761,9 @@ public class SemuxApiTest extends SemuxApiTestBase {
                 to,
                 value,
                 timestamp,
-                data);
+                data,
+                null,
+                null);
 
         assertTrue(resp.isSuccess());
         assertEquals(
@@ -788,7 +790,9 @@ public class SemuxApiTest extends SemuxApiTestBase {
                 to,
                 value,
                 timestamp,
-                data);
+                data,
+                null,
+                null);
 
         assertTrue(resp.isSuccess());
         assertEquals(
@@ -815,7 +819,9 @@ public class SemuxApiTest extends SemuxApiTestBase {
                 to,
                 value,
                 timestamp,
-                data);
+                data,
+                null,
+                null);
 
         assertTrue(resp.isSuccess());
         assertEquals(
