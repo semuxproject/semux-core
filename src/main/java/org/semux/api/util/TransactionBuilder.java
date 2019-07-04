@@ -156,29 +156,14 @@ public class TransactionBuilder {
         return this;
     }
 
+    // value is optional
     public TransactionBuilder withValue(String value) {
-        if (type == TransactionType.DELEGATE) {
-            if (value != null && !value.isEmpty()) {
-                throw new IllegalArgumentException("Parameter `value` is not needed for DELEGATE transaction");
-            }
-            return this; // ignore the provided parameter
-        }
-
-        if (type == TransactionType.CREATE) {
-            if (value != null && !value.isEmpty()) {
-                throw new IllegalArgumentException("Parameter `value` is not needed for CREATE transaction");
-            }
-            return this; // ignore the provided parameter
-        }
-
         if (value == null) {
-            throw new IllegalArgumentException("Parameter `value` is required");
-        }
-
-        try {
-            this.value = NANO_SEM.of(Long.parseLong(value));
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Parameter `value` is not a valid number");
+            try {
+                this.value = NANO_SEM.of(Long.parseLong(value));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Parameter `value` is not a valid number");
+            }
         }
 
         return this;
@@ -270,7 +255,7 @@ public class TransactionBuilder {
                 network != null ? network : kernel.getConfig().network(),
                 type,
                 to,
-                value,
+                value != null ? value : Amount.ZERO,
                 fee,
                 nonce != null ? nonce : kernel.getPendingManager().getNonce(account.toAddress()),
                 timestamp != null ? timestamp : TimeUtil.currentTimeMillis(),

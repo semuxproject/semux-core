@@ -12,6 +12,9 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doReturn;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Amount.ZERO;
@@ -25,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.ethereum.vm.util.HashUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -40,6 +44,7 @@ import org.semux.api.v2.model.GetAccountTransactionsResponse;
 import org.semux.api.v2.model.GetDelegateResponse;
 import org.semux.core.Amount;
 import org.semux.core.Genesis;
+import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
@@ -48,6 +53,7 @@ import org.semux.net.SemuxChannelInitializer;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleApiClient;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,6 +94,8 @@ public class TransactTest {
 
     @Before
     public void setUp() throws Exception {
+        SystemUtil.VM_TEST = true;
+
         // prepare kernels
         kernelRuleValidator1.speedUpConsensus();
         kernelRuleValidator2.speedUpConsensus();
@@ -136,6 +144,8 @@ public class TransactTest {
 
     @After
     public void tearDown() {
+        SystemUtil.VM_TEST = false;
+
         // stop kernels
         kernelValidator1.stop();
         kernelValidator2.stop();
@@ -295,6 +305,114 @@ public class TransactTest {
         // wait for transaction to be processed
         logger.info("Waiting for the transaction to be processed...");
         await().atMost(20, SECONDS).until(() -> kernelReceiver.getBlockchain().getTransaction(hash) != null);
+
+        Transaction tx = kernelReceiver.getBlockchain().getTransaction(hash);
+        assertEquals(TransactionType.CREATE, tx.getType());
+        assertEquals(gas, tx.getGas());
+        assertEquals(gasPrice, tx.getGasPrice());
+    }
+
+    @Test
+    public void testCREATEWithValue() throws IOException {
+        final long gas = 100_000;
+        final Amount gasPrice = NANO_SEM.of(100);
+        final Amount value = NANO_SEM.of(50);
+
+        // prepare transaction
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("from", coinbaseOf(kernelPremine));
+        params.put("gas", String.valueOf(gas));
+        params.put("gasPrice", String.valueOf(gasPrice.getNano()));
+        params.put("data", "0x60006000");
+        params.put("value", String.valueOf(value.getNano()));
+
+        // send transaction
+        logger.info("Making create request", params);
+        DoTransactionResponse response = new ObjectMapper().readValue(
+                kernelPremine.getApiClient().post("/transaction/create", params),
+                DoTransactionResponse.class);
+        assertTrue(response.isSuccess());
+        byte[] hash = Hex.decode0x(response.getResult());
+
+        // wait for transaction to be processed
+        logger.info("Waiting for the transaction to be processed...");
+        await().atMost(20, SECONDS).until(() -> kernelReceiver.getBlockchain().getTransaction(hash) != null);
+
+        Transaction tx = kernelReceiver.getBlockchain().getTransaction(hash);
+        assertEquals(TransactionType.CREATE, tx.getType());
+        assertEquals(gas, tx.getGas());
+        assertEquals(gasPrice, tx.getGasPrice());
+        byte[] contractAddress = HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce());
+        assertEquals(value,
+                kernelReceiver.getBlockchain().getAccountState().getAccount(contractAddress).getAvailable());
+    }
+
+    @Test
+    public void testCALL() throws IOException {
+        final long gas = 100_000;
+        final Amount gasPrice = NANO_SEM.of(100);
+        final byte[] contractAddress = Bytes.random(20);
+
+        // prepare transaction
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("from", coinbaseOf(kernelPremine));
+        params.put("to", Hex.encode(contractAddress));
+        params.put("gas", String.valueOf(gas));
+        params.put("gasPrice", String.valueOf(gasPrice.getNano()));
+        params.put("data", "0x60006000");
+
+        // send transaction
+        logger.info("Making CALL request", params);
+        DoTransactionResponse response = new ObjectMapper().readValue(
+                kernelPremine.getApiClient().post("/transaction/call", params),
+                DoTransactionResponse.class);
+        assertTrue(response.isSuccess());
+        byte[] hash = Hex.decode0x(response.getResult());
+
+        // wait for transaction to be processed
+        logger.info("Waiting for the transaction to be processed...");
+        await().atMost(20, SECONDS).until(() -> kernelReceiver.getBlockchain().getTransaction(hash) != null);
+
+        Transaction tx = kernelReceiver.getBlockchain().getTransaction(hash);
+        assertEquals(TransactionType.CREATE, tx.getType());
+        assertEquals(gas, tx.getGas());
+        assertEquals(gasPrice, tx.getGasPrice());
+    }
+
+    @Test
+    public void testCALLWithValue() throws IOException {
+        final long gas = 100_000;
+        final Amount gasPrice = NANO_SEM.of(100);
+        final Amount value = NANO_SEM.of(50);
+        final byte[] contractAddress = Bytes.random(20);
+
+        // prepare transaction
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("from", coinbaseOf(kernelPremine));
+        params.put("to", Hex.encode(contractAddress));
+        params.put("gas", String.valueOf(gas));
+        params.put("gasPrice", String.valueOf(gasPrice.getNano()));
+        params.put("data", "0x60006000");
+        params.put("value", String.valueOf(value.getNano()));
+
+        // send transaction
+        logger.info("Making CALL request", params);
+        DoTransactionResponse response = new ObjectMapper().readValue(
+                kernelPremine.getApiClient().post("/transaction/call", params),
+                DoTransactionResponse.class);
+        assertTrue(response.isSuccess());
+        byte[] hash = Hex.decode0x(response.getResult());
+
+        // wait for transaction to be processed
+        logger.info("Waiting for the transaction to be processed...");
+        await().atMost(20, SECONDS).until(() -> kernelReceiver.getBlockchain().getTransaction(hash) != null);
+
+        Transaction tx = kernelReceiver.getBlockchain().getTransaction(hash);
+        assertEquals(TransactionType.CREATE, tx.getType());
+        assertEquals(gas, tx.getGas());
+        assertEquals(gasPrice, tx.getGasPrice());
+        assertEquals(value,
+                kernelReceiver.getBlockchain().getAccountState().getAccount(contractAddress).getAvailable());
     }
 
     /**
