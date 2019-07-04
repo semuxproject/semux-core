@@ -2217,14 +2217,6 @@
                         "pattern": "^\\d+$"
                     },
                     {
-                        "name": "validateNonce",
-                        "in": "query",
-                        "description": "Whether validate tx nonce against the current account state, default to false if omitted",
-                        "required": false,
-                        "default": false,
-                        "type": "boolean"
-                    },
-                    {
                         "name": "data",
                         "in": "query",
                         "description": "Transaction data encoded in hexadecimal string",
@@ -2284,12 +2276,13 @@
                         "pattern": "^\\d+$"
                     },
                     {
-                        "name": "validateNonce",
+                        "name": "value",
                         "in": "query",
-                        "description": "Whether validate tx nonce against the current account state, default to false if omitted",
+                        "description": "Amount of SEM to transfer in nano SEM",
                         "required": false,
-                        "default": false,
-                        "type": "boolean"
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     },
                     {
                         "name": "data",
@@ -2384,14 +2377,6 @@
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
-                    },
-                    {
-                        "name": "validateNonce",
-                        "in": "query",
-                        "description": "Whether validate tx nonce against the current account state, default to false if omitted",
-                        "required": false,
-                        "default": false,
-                        "type": "boolean"
                     },
                     {
                         "name": "data",
@@ -2503,14 +2488,6 @@
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
-                    },
-                    {
-                        "name": "validateNonce",
-                        "in": "query",
-                        "description": "Whether validate tx nonce against the current account state, default to false if omitted",
-                        "required": false,
-                        "default": false,
-                        "type": "boolean"
                     }
                 ],
                 "responses": {
@@ -2588,14 +2565,6 @@
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
-                    },
-                    {
-                        "name": "validateNonce",
-                        "in": "query",
-                        "description": "Whether validate tx nonce against the current account state, default to false if omitted",
-                        "required": false,
-                        "default": false,
-                        "type": "boolean"
                     }
                 ],
                 "responses": {
@@ -2664,14 +2633,6 @@
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
-                    },
-                    {
-                        "name": "validateNonce",
-                        "in": "query",
-                        "description": "Whether validate tx nonce against the current account state, default to false if omitted",
-                        "required": false,
-                        "default": false,
-                        "type": "boolean"
                     }
                 ],
                 "responses": {
@@ -2714,14 +2675,6 @@
                         "required": true,
                         "type": "string",
                         "pattern": "^(0x)?[0-9a-fA-F]+$"
-                    },
-                    {
-                        "name": "validateNonce",
-                        "in": "query",
-                        "description": "Whether to validate tx nonce against the current account state, default to false if omitted",
-                        "required": false,
-                        "default": false,
-                        "type": "boolean"
                     }
                 ],
                 "responses": {

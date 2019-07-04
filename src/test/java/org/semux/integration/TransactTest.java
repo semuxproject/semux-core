@@ -272,6 +272,31 @@ public class TransactTest {
         assertDelegate(kernelValidator1, kernelValidator1.getCoinbase().toAddress(), sub(votes, unvotes));
     }
 
+    @Test
+    public void testCREATE() throws IOException {
+        final long gas = 100_000;
+        final Amount gasPrice = NANO_SEM.of(100);
+
+        // prepare transaction
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("from", coinbaseOf(kernelPremine));
+        params.put("gas", String.valueOf(gas));
+        params.put("gasPrice", String.valueOf(gasPrice.getNano()));
+        params.put("data", "0x60006000");
+
+        // send transaction
+        logger.info("Making create request", params);
+        DoTransactionResponse response = new ObjectMapper().readValue(
+                kernelPremine.getApiClient().post("/transaction/create", params),
+                DoTransactionResponse.class);
+        assertTrue(response.isSuccess());
+        byte[] hash = Hex.decode0x(response.getResult());
+
+        // wait for transaction to be processed
+        logger.info("Waiting for the transaction to be processed...");
+        await().atMost(20, SECONDS).until(() -> kernelReceiver.getBlockchain().getTransaction(hash) != null);
+    }
+
     /**
      * Assert the latest transaction of the given address, by querying the specified
      * kernel.
