@@ -158,7 +158,7 @@ public class TypeFactory {
     }
 
     public static TransactionResultType transactionResultType(TransactionResult result) {
-        //gas price is in nano sem, not wei
+        // gas price is in nano sem, not wei
         BigInteger fee = BigInteger.valueOf(result.getGasUsed()).multiply(BigInteger.valueOf(result.getGasPrice()));
         return new TransactionResultType()
                 .logs(result.getLogs().stream().map(TypeFactory::logInfoType).collect(Collectors.toList()))
