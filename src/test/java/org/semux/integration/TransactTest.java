@@ -40,6 +40,7 @@ import org.semux.api.v2.model.GetAccountResponse;
 import org.semux.api.v2.model.GetAccountTransactionsResponse;
 import org.semux.api.v2.model.GetDelegateResponse;
 import org.semux.core.Amount;
+import org.semux.core.Fork;
 import org.semux.core.Genesis;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
@@ -99,6 +100,12 @@ public class TransactTest {
         kernelValidator2 = kernelRuleValidator2.getKernel();
         kernelPremine = kernelRulePremine.getKernel();
         kernelReceiver = kernelRuleReceiver.getKernel();
+
+        // enable vm
+        kernelRuleValidator1.enableForks(Fork.VIRTUAL_MACHINE);
+        kernelRuleValidator2.enableForks(Fork.VIRTUAL_MACHINE);
+        kernelRulePremine.enableForks(Fork.VIRTUAL_MACHINE);
+        kernelRuleReceiver.enableForks(Fork.VIRTUAL_MACHINE);
 
         // start kernels
         kernelValidator1.start();

@@ -13,7 +13,9 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,6 +26,7 @@ import org.semux.config.DevnetConfig;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Fork;
 import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
@@ -42,6 +45,7 @@ import org.semux.util.TimeUtil;
  */
 public class KernelRule extends TemporaryFolder {
 
+    private Config config;
     private int p2pPort;
     private int apiPort;
 
@@ -79,7 +83,7 @@ public class KernelRule extends TemporaryFolder {
         this.password = Hex.encode(Bytes.random(12));
 
         // config
-        Config config = mockConfig(p2pPort, apiPort);
+        config = mockConfig(p2pPort, apiPort);
 
         // genesis
         if (genesis == null) {
@@ -119,6 +123,14 @@ public class KernelRule extends TemporaryFolder {
         when(config.apiPassword()).thenReturn("password");
 
         return config;
+    }
+
+    public void enableForks(Fork... forks) {
+        Map<Fork, Long> map = new HashMap<>();
+        for (Fork fork : forks) {
+            map.put(fork, 1L);
+        }
+        when(config.manuallyActivatedForks()).thenReturn(map);
     }
 
     /**

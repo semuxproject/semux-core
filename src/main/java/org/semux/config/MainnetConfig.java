@@ -57,7 +57,7 @@ public class MainnetConfig extends AbstractConfig {
     }
 
     @Override
-    public Map<Fork, Long> forkActivationCheckpoints() {
+    public Map<Fork, Long> manuallyActivatedForks() {
         return forkActivationCheckpoints;
     }
 }

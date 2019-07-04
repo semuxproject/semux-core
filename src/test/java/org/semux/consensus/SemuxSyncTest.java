@@ -118,7 +118,7 @@ public class SemuxSyncTest {
     @Test
     public void testValidateCoinbaseMagic() {
         BlockchainImpl blockchain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
-        when(blockchain.isForkActivated(eq(Fork.UNIFORM_DISTRIBUTION), anyLong())).thenReturn(true);
+        kernelRule.enableForks(Fork.UNIFORM_DISTRIBUTION);
         kernelRule.getKernel().setBlockchain(blockchain);
 
         // block.coinbase = coinbase magic account

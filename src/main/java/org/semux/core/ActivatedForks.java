@@ -91,8 +91,8 @@ public class ActivatedForks {
 
         // checks whether the local blockchain has reached the fork activation
         // checkpoint
-        if (config.forkActivationCheckpoints().containsKey(fork)) {
-            return config.forkActivationCheckpoints().get(fork) <= height;
+        if (config.manuallyActivatedForks().containsKey(fork)) {
+            return config.manuallyActivatedForks().get(fork) <= height;
         }
 
         // returns memoized result of fork activation lookup at current height
@@ -105,7 +105,7 @@ public class ActivatedForks {
         // sets boundaries:
         // lookup from (height - 1)
         // to (height - fork.activationBlocksLookup)
-        final long higherBound = height - 1;
+        final long higherBound = Math.max(0, height - 1);
         final long lowerBound = Math.min(Math.max(height - fork.activationBlocksLookup, 1), higherBound);
         long activatedBlocks = 0;
 

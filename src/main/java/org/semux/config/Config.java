@@ -420,10 +420,10 @@ public interface Config {
     Map<Long, byte[]> checkpoints();
 
     /**
-     * Get fork activation checkpoints.
+     * Returns manually activated forks.
      *
      * @return a map of Validator-Activated fork activation checkpoints [fork] =>
      *         [block height]
      */
-    Map<Fork, Long> forkActivationCheckpoints();
+    Map<Fork, Long> manuallyActivatedForks();
 }

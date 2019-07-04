@@ -25,24 +25,13 @@ public class DevnetConfig extends AbstractConfig {
         this.forkVirtualMachineEnabled = true;
     }
 
-    private static final Map<Fork, Long> forkActivationCheckpoints;
-    static {
-        HashMap<Fork, Long> initForkActivationCheckpoints = new HashMap<>();
-
-        // uncomment for local development in these forks
-        initForkActivationCheckpoints.put(Fork.UNIFORM_DISTRIBUTION, 1L);
-        initForkActivationCheckpoints.put(Fork.VIRTUAL_MACHINE, 1L);
-
-        forkActivationCheckpoints = MapUtils.unmodifiableMap(initForkActivationCheckpoints);
-    }
-
     @Override
     public Map<Long, byte[]> checkpoints() {
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<Fork, Long> forkActivationCheckpoints() {
-        return forkActivationCheckpoints;
+    public Map<Fork, Long> manuallyActivatedForks() {
+        return Collections.emptyMap();
     }
 }
