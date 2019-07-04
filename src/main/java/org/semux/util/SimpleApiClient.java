@@ -17,12 +17,16 @@ import java.util.Map;
 import org.semux.api.ApiVersion;
 import org.semux.config.Constants;
 import org.semux.crypto.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simple implementation of Semux API client. It's designed to be schemaless
  * and should be used for testing purpose only.
  */
 public class SimpleApiClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(SimpleApiClient.class);
 
     public static final String DEFAULT_HOST = "127.0.0.1";
     public static final int DEFAULT_PORT = Constants.DEFAULT_API_PORT;
@@ -34,7 +38,7 @@ public class SimpleApiClient {
 
     /**
      * Crates an API client instance.
-     * 
+     *
      * @param root
      *            the API service root
      * @param username
@@ -69,7 +73,7 @@ public class SimpleApiClient {
      * <li>Byte arrays will be converted into its hex representation</li>
      * <li>Objects will be converted into its <code>toString()</code> response</li>
      * </ul>
-     * 
+     *
      * @param method
      *            the request method, "GET", "POST", "PUT" or "DELETE"
      * @param uri
@@ -108,8 +112,13 @@ public class SimpleApiClient {
             con.setDoOutput(true);
             con.getOutputStream().write(Bytes.of(sb.substring(1)));
         }
-
-        return IOUtil.readStreamAsString(con.getInputStream());
+        try {
+            return IOUtil.readStreamAsString(con.getInputStream());
+        } catch (IOException e) {
+            String error = IOUtil.readStreamAsString(con.getErrorStream());
+            logger.error(error);
+            return error;
+        }
     }
 
     protected String request(String method, String uri, Object... params) throws IOException {
