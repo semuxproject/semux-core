@@ -774,7 +774,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String network = "TESTNET";
         String type = "DELEGATE";
         String to = "";
-        String value = "";
+        String value = "0";
         String fee = String.valueOf(config.spec().minTransactionFee().getNano());
         String nonce = "123";
         String timestamp = "1523028482000";

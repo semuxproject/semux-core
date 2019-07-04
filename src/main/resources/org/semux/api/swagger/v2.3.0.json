@@ -788,6 +788,10 @@
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
+                "code": {
+                    "description": "The status of the transaction",
+                    "type": "string"
+                },
                 "logs": {
                     "type": "array",
                     "items": {
@@ -799,14 +803,98 @@
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]*$"
                 },
-                "gasUsed": {
+                "gas": {
+                    "description": "Return the gas limit",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
-                "code": {
-                    "description": "The status of the transaction",
+                "gasPrice": {
+                    "description": "Return the gas Price",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "gasUsed": {
+                    "description": "Return the gas consumed",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "fee": {
+                    "description": "Return the transaction fee in nano SEM. For VM transaction, gasPrice * gasUsed",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "internalTransactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/InternalTransactionType"
+                    }
+                }
+            }
+        },
+        "InternalTransactionType": {
+            "type": "object",
+            "properties": {
+                "rejected": {
+                    "description": "Whether this transaction is rejected",
+                    "type": "boolean"
+                },
+                "depth": {
+                    "description": "Call depth",
+                    "type": "string",
+                    "format": "int32",
+                    "pattern": "^\\d+$"
+                },
+                "index": {
+                    "description": "Call index",
+                    "type": "string",
+                    "format": "int32",
+                    "pattern": "^\\d+$"
+                },
+                "type": {
+                    "description" : "Call type, possibly CALL, DELEGATECALL, CALLCODE, CREATE",
                     "type": "string"
+                },
+                "from": {
+                    "description" : "Sender address",
+                    "type": "string",
+                    "pattern": "^(0x)?[0-9a-fA-F]{40}$"
+                },
+                "to": {
+                    "description" : "Receiver address",
+                    "type": "string",
+                    "pattern": "^(0x)?[0-9a-fA-F]{40}$"
+                },
+                "nonce": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "gas": {
+                    "description": "Return the gas limit",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "gasPrice": {
+                    "description": "Return the gas Price",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "value": {
+                    "description": "Transaction value in nano SEM",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "data": {
+                    "description": "Transaction data encoded in hexadecimal string",
+                    "type": "string",
+                    "pattern": "^(0x)?[0-9a-fA-F]*$"
                 }
             }
         },
@@ -973,6 +1061,12 @@
                         "schema": {
                             "$ref": "#/definitions/AddNodeResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -983,7 +1077,7 @@
             }
         },
         "/blacklist": {
-            "put": {
+            "post": {
                 "tags": [
                     "semux"
                 ],
@@ -1009,6 +1103,12 @@
                         "schema": {
                             "$ref": "#/definitions/ApiHandlerResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -1019,7 +1119,7 @@
             }
         },
         "/whitelist": {
-            "put": {
+            "post": {
                 "tags": [
                     "semux"
                 ],
@@ -1042,6 +1142,12 @@
                 "responses": {
                     "200": {
                         "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
                         "schema": {
                             "$ref": "#/definitions/ApiHandlerResponse"
                         }
@@ -1080,6 +1186,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/GetAccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -1122,6 +1234,12 @@
                         "schema": {
                             "$ref": "#/definitions/CreateAccountResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -1155,6 +1273,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/DeleteAccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -1191,6 +1315,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/GetDelegateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -1246,6 +1376,12 @@
                         "schema": {
                             "$ref": "#/definitions/GetAccountTransactionsResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -1300,6 +1436,12 @@
                         "schema": {
                             "$ref": "#/definitions/GetAccountPendingTransactionsResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 }
             }
@@ -1330,6 +1472,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/GetAccountVotesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -1366,6 +1514,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/GetBlockResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -1404,6 +1558,12 @@
                         "schema": {
                             "$ref": "#/definitions/GetBlockResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -1429,6 +1589,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/GetDelegatesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -1456,6 +1622,12 @@
                         "schema": {
                             "$ref": "#/definitions/GetInfoResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -1481,6 +1653,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/GetLatestBlockResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -1508,6 +1686,12 @@
                         "schema": {
                             "$ref": "#/definitions/GetLatestBlockNumberResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -1534,6 +1718,12 @@
                         "schema": {
                             "$ref": "#/definitions/GetPeersResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -1559,6 +1749,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/GetPendingTransactionsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -1596,6 +1792,12 @@
                         "schema": {
                             "$ref": "#/definitions/GetTransactionResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -1631,6 +1833,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/GetTransactionResultResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -1676,6 +1884,12 @@
                         "schema": {
                             "$ref": "#/definitions/GetTransactionLimitsResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -1701,6 +1915,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/GetValidatorsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -1746,6 +1966,12 @@
                         "schema": {
                             "$ref": "#/definitions/GetVoteResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -1782,6 +2008,12 @@
                         "schema": {
                             "$ref": "#/definitions/GetVotesResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -1807,6 +2039,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/ListAccountsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -1850,6 +2088,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/SignMessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -1901,6 +2145,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/VerifyMessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -1967,14 +2217,6 @@
                         "pattern": "^\\d+$"
                     },
                     {
-                        "name": "validateNonce",
-                        "in": "query",
-                        "description": "Whether validate tx nonce against the current account state, default to false if omitted",
-                        "required": false,
-                        "default": false,
-                        "type": "boolean"
-                    },
-                    {
                         "name": "data",
                         "in": "query",
                         "description": "Transaction data encoded in hexadecimal string",
@@ -1988,6 +2230,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/DoTransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -2028,12 +2276,13 @@
                         "pattern": "^\\d+$"
                     },
                     {
-                        "name": "validateNonce",
+                        "name": "value",
                         "in": "query",
-                        "description": "Whether validate tx nonce against the current account state, default to false if omitted",
+                        "description": "Amount of SEM to transfer in nano SEM",
                         "required": false,
-                        "default": false,
-                        "type": "boolean"
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     },
                     {
                         "name": "data",
@@ -2067,6 +2316,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/DoTransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -2124,14 +2379,6 @@
                         "pattern": "^\\d+$"
                     },
                     {
-                        "name": "validateNonce",
-                        "in": "query",
-                        "description": "Whether validate tx nonce against the current account state, default to false if omitted",
-                        "required": false,
-                        "default": false,
-                        "type": "boolean"
-                    },
-                    {
                         "name": "data",
                         "in": "query",
                         "description": "Transaction data encoded in hexadecimal string",
@@ -2171,6 +2418,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/DoTransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -2235,14 +2488,6 @@
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
-                    },
-                    {
-                        "name": "validateNonce",
-                        "in": "query",
-                        "description": "Whether validate tx nonce against the current account state, default to false if omitted",
-                        "required": false,
-                        "default": false,
-                        "type": "boolean"
                     }
                 ],
                 "responses": {
@@ -2250,6 +2495,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/DoTransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -2314,14 +2565,6 @@
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
-                    },
-                    {
-                        "name": "validateNonce",
-                        "in": "query",
-                        "description": "Whether validate tx nonce against the current account state, default to false if omitted",
-                        "required": false,
-                        "default": false,
-                        "type": "boolean"
                     }
                 ],
                 "responses": {
@@ -2329,6 +2572,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/DoTransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -2384,14 +2633,6 @@
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
-                    },
-                    {
-                        "name": "validateNonce",
-                        "in": "query",
-                        "description": "Whether validate tx nonce against the current account state, default to false if omitted",
-                        "required": false,
-                        "default": false,
-                        "type": "boolean"
                     }
                 ],
                 "responses": {
@@ -2399,6 +2640,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/DoTransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -2428,14 +2675,6 @@
                         "required": true,
                         "type": "string",
                         "pattern": "^(0x)?[0-9a-fA-F]+$"
-                    },
-                    {
-                        "name": "validateNonce",
-                        "in": "query",
-                        "description": "Whether to validate tx nonce against the current account state, default to false if omitted",
-                        "required": false,
-                        "default": false,
-                        "type": "boolean"
                     }
                 ],
                 "responses": {
@@ -2443,6 +2682,12 @@
                         "description": "successful operation",
                         "schema": {
                             "$ref": "#/definitions/DoTransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },
@@ -2550,6 +2795,12 @@
                         "schema": {
                             "$ref": "#/definitions/ComposeRawTransactionResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -2594,6 +2845,12 @@
                         "schema": {
                             "$ref": "#/definitions/SignRawTransactionResponse"
                         }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
                     }
                 },
                 "security": [
@@ -2620,6 +2877,12 @@
                         "description": "An object about the current sync status",
                         "schema": {
                             "$ref": "#/definitions/GetSyncingProgressResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
                         }
                     }
                 },

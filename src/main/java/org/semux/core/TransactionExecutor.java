@@ -28,6 +28,7 @@ import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.util.Bytes;
+import org.semux.util.SystemUtil;
 import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxInternalTransaction;
 import org.semux.vm.client.SemuxRepository;
@@ -215,7 +216,7 @@ public class TransactionExecutor {
             case CREATE:
                 // Note: the second parameter should be height = block number + 1; here we're
                 // checking if the fork is enabled at the end of last block.
-                if (!chain.isForkActivated(Fork.VIRTUAL_MACHINE, block.getNumber())) {
+                if (!SystemUtil.isVMTest() && !chain.isForkActivated(Fork.VIRTUAL_MACHINE, block.getNumber())) {
                     result.setCode(Code.INVALID_TYPE);
                     break;
                 }

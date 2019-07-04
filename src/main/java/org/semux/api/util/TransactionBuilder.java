@@ -156,29 +156,14 @@ public class TransactionBuilder {
         return this;
     }
 
+    // value is optional
     public TransactionBuilder withValue(String value) {
-        if (type == TransactionType.DELEGATE) {
-            if (value != null && !value.isEmpty()) {
-                throw new IllegalArgumentException("Parameter `value` is not needed for DELEGATE transaction");
+        if (value != null) {
+            try {
+                this.value = NANO_SEM.of(Long.parseLong(value));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Parameter `value` is not a valid number");
             }
-            return this; // ignore the provided parameter
-        }
-
-        if (type == TransactionType.CREATE) {
-            if (value != null && !value.isEmpty()) {
-                throw new IllegalArgumentException("Parameter `value` is not needed for CREATE transaction");
-            }
-            return this; // ignore the provided parameter
-        }
-
-        if (value == null) {
-            throw new IllegalArgumentException("Parameter `value` is required");
-        }
-
-        try {
-            this.value = NANO_SEM.of(Long.parseLong(value));
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Parameter `value` is not a valid number");
         }
 
         return this;
@@ -256,25 +241,33 @@ public class TransactionBuilder {
     }
 
     public Transaction buildUnsigned() {
-        // DELEGATE transaction has fixed receiver and value
-        if (type == TransactionType.DELEGATE) {
+        if (type == TransactionType.DELEGATE || type == TransactionType.CREATE) {
             to = Bytes.EMPTY_ADDRESS;
+        }
+
+        if (type == TransactionType.DELEGATE) {
             value = kernel.getConfig().spec().minDelegateBurnAmount();
         }
-        if (type == TransactionType.CREATE) {
-            to = Bytes.EMPTY_ADDRESS;
-            value = Amount.ZERO;
+
+        // mandatory because no default value can be provided
+        if (type == null) {
+            throw new IllegalArgumentException("Parameter `type` is required");
+        }
+        if (to == null) {
+            throw new IllegalArgumentException("Parameter `to` is required");
         }
 
         return new Transaction(
                 network != null ? network : kernel.getConfig().network(),
                 type,
                 to,
-                value,
-                fee,
+                value != null ? value : Amount.ZERO,
+                fee != null ? fee : Amount.ZERO,
                 nonce != null ? nonce : kernel.getPendingManager().getNonce(account.toAddress()),
                 timestamp != null ? timestamp : TimeUtil.currentTimeMillis(),
-                data, gas, gasPrice);
+                data != null ? data : Bytes.EMPTY_BYTES,
+                gas,
+                gasPrice != null ? gasPrice : Amount.ZERO);
     }
 
     public Transaction buildSigned() {
