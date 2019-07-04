@@ -163,22 +163,22 @@ public class ApiHandlerImpl implements ApiHandler {
         }
 
         Object invoke(Map<String, String> params) throws Exception {
-            return this.methodImpl.invoke(
-                    semuxApi,
-                    queryParams.stream().map(p -> {
-                        String param = params.getOrDefault(p.getLeft().value(), null);
+            Object[] args = queryParams.stream().map(p -> {
+                String param = params.getOrDefault(p.getLeft().value(), null);
 
-                        if (param == null) {
-                            return null;
-                        }
+                if (param == null) {
+                    return null;
+                }
 
-                        // convert params
-                        if (p.getRight().equals(Boolean.class)) {
-                            return Boolean.parseBoolean(param);
-                        }
+                // convert params
+                if (p.getRight().equals(Boolean.class)) {
+                    return Boolean.parseBoolean(param);
+                }
 
-                        return param;
-                    }).toArray());
+                return param;
+            }).toArray();
+
+            return this.methodImpl.invoke(semuxApi, args);
         }
     }
 }

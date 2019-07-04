@@ -158,7 +158,7 @@ public class TransactionBuilder {
 
     // value is optional
     public TransactionBuilder withValue(String value) {
-        if (value == null) {
+        if (value != null) {
             try {
                 this.value = NANO_SEM.of(Long.parseLong(value));
             } catch (NumberFormatException e) {
@@ -242,13 +242,12 @@ public class TransactionBuilder {
 
     public Transaction buildUnsigned() {
         // DELEGATE transaction has fixed receiver and value
-        if (type == TransactionType.DELEGATE) {
+        if (type == TransactionType.DELEGATE || type == TransactionType.CREATE) {
             to = Bytes.EMPTY_ADDRESS;
-            value = kernel.getConfig().spec().minDelegateBurnAmount();
         }
-        if (type == TransactionType.CREATE) {
-            to = Bytes.EMPTY_ADDRESS;
-            value = Amount.ZERO;
+
+        if (type == TransactionType.DELEGATE) {
+            value = kernel.getConfig().spec().minDelegateBurnAmount();
         }
 
         return new Transaction(

@@ -7,6 +7,7 @@
 package org.semux.integration;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
@@ -374,7 +375,7 @@ public class TransactTest {
         await().atMost(20, SECONDS).until(() -> kernelReceiver.getBlockchain().getTransaction(hash) != null);
 
         Transaction tx = kernelReceiver.getBlockchain().getTransaction(hash);
-        assertEquals(TransactionType.CREATE, tx.getType());
+        assertEquals(TransactionType.CALL, tx.getType());
         assertEquals(gas, tx.getGas());
         assertEquals(gasPrice, tx.getGasPrice());
     }
@@ -408,7 +409,7 @@ public class TransactTest {
         await().atMost(20, SECONDS).until(() -> kernelReceiver.getBlockchain().getTransaction(hash) != null);
 
         Transaction tx = kernelReceiver.getBlockchain().getTransaction(hash);
-        assertEquals(TransactionType.CREATE, tx.getType());
+        assertEquals(TransactionType.CALL, tx.getType());
         assertEquals(gas, tx.getGas());
         assertEquals(gasPrice, tx.getGasPrice());
         assertEquals(value,
