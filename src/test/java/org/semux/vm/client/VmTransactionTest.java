@@ -178,7 +178,7 @@ public class VmTransactionTest {
                 gasPrice);
         txBadGas.sign(key);
 
-        result = exec.execute(txBadGas, as.track(), ds.track(), bh, chain);
+        result = exec.execute(txBadGas, as.track(), ds.track(), block, chain);
         //will return 0x
         logger.debug("Return data:" + Hex.encode0x(result.getReturnData()));
         assertFalse(result.getCode().isSuccess());
