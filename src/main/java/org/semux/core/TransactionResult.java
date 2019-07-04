@@ -6,14 +6,12 @@
  */
 package org.semux.core;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.OpCode;
-import org.ethereum.vm.program.InternalTransaction;
 import org.semux.Network;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
@@ -296,7 +294,7 @@ public class TransactionResult {
         return new LogInfo(address, topics, data);
     }
 
-    protected static byte[] serializeInternalTransaction(InternalTransaction tx) {
+    protected static byte[] serializeInternalTransaction(SemuxInternalTransaction tx) {
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeBoolean(tx.isRejected());
         enc.writeInt(tx.getDepth());
@@ -305,10 +303,10 @@ public class TransactionResult {
         enc.writeBytes(tx.getFrom());
         enc.writeBytes(tx.getTo());
         enc.writeLong(tx.getNonce());
-        enc.writeLong(tx.getValue().longValue());
+        enc.writeAmount(tx.getValue());
         enc.writeBytes(tx.getData());
         enc.writeLong(tx.getGas());
-        enc.writeLong(tx.getGasPrice().longValue());
+        enc.writeAmount(tx.getGasPrice());
 
         return enc.toBytes();
     }
@@ -327,12 +325,8 @@ public class TransactionResult {
         long gas = dec.readLong();
         Amount gasPrice = dec.readAmount();
 
-        // TODO: fix the null parent
-        SemuxInternalTransaction tx = new SemuxInternalTransaction(null, depth, index,
+        SemuxInternalTransaction tx = new SemuxInternalTransaction(isRejected, depth, index,
                 type, from, to, nonce, value, data, gas, gasPrice);
-        if (isRejected) {
-            tx.reject();
-        }
 
         return tx;
     }
@@ -395,7 +389,7 @@ public class TransactionResult {
         enc.writeLong(blockNumber);
 
         enc.writeInt(internalTransactions.size());
-        for (InternalTransaction tx : internalTransactions) {
+        for (SemuxInternalTransaction tx : internalTransactions) {
             enc.writeBytes(serializeInternalTransaction(tx));
         }
 

@@ -17,7 +17,6 @@ import static org.mockito.Mockito.spy;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.Unit.SEM;
 
-import org.ethereum.vm.program.InternalTransaction;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -108,9 +107,9 @@ public class InternalTransactionTest {
                 as.getAccount(Hex.decode0x("0x0000000000000000000000000000000012345678")).getAvailable().getNano());
 
         assertFalse(result.getInternalTransactions().isEmpty());
-        InternalTransaction it = result.getInternalTransactions().get(0);
+        SemuxInternalTransaction it = result.getInternalTransactions().get(0);
         assertArrayEquals(to, it.getFrom());
         assertArrayEquals(Hex.decode0x("0x0000000000000000000000000000000012345678"), it.getTo());
-        assertEquals(SEM.of(5).getBigInteger(), it.getValue());
+        assertEquals(SEM.of(5), it.getValue());
     }
 }

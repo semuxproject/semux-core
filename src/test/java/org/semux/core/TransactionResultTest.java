@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -110,7 +109,7 @@ public class TransactionResultTest {
         long blockNumber = 4;
         List<SemuxInternalTransaction> internalTransactions = new ArrayList<>();
         internalTransactions
-                .add(new SemuxInternalTransaction(null, 1, 2, OpCode.CALL, Bytes.random(20), Bytes.random(20),
+                .add(new SemuxInternalTransaction(false, 1, 2, OpCode.CALL, Bytes.random(20), Bytes.random(20),
                         3, Amount.Unit.NANO_SEM.of(1), Bytes.random(5), 4, Amount.Unit.NANO_SEM.of(10)));
 
         TransactionResult tr1 = new TransactionResult(code, returnData, logs);

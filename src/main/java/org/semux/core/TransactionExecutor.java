@@ -23,7 +23,6 @@ import org.ethereum.vm.client.TransactionReceipt;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.semux.config.Config;
-import org.semux.core.Amount.Unit;
 import org.semux.core.TransactionResult.Code;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;

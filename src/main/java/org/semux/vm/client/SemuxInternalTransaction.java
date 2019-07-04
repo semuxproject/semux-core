@@ -6,51 +6,93 @@
  */
 package org.semux.vm.client;
 
-import java.math.BigInteger;
-
 import org.ethereum.vm.OpCode;
-import org.ethereum.vm.client.Transaction;
 import org.ethereum.vm.program.InternalTransaction;
 import org.semux.core.Amount;
-
-// TODO: introduce InternalTransaction interface
 
 /**
  * Represents a Semux-flavored internal transaction.
  */
-public class SemuxInternalTransaction extends InternalTransaction {
+public class SemuxInternalTransaction {
+
+    private boolean rejected;
+    private int depth;
+    private int index;
+    private OpCode type;
+
+    private byte[] from;
+    private byte[] to;
+    private long nonce;
+    private Amount value;
+    private byte[] data;
+    private long gas;
+    private Amount gasPrice;
 
     public SemuxInternalTransaction(InternalTransaction it) {
-        super(it.getParentTransaction(), it.getDepth(), it.getIndex(), it.getType(),
-                it.getFrom(), it.getTo(), it.getNonce(), it.getValue(), it.getData(), it.getGas(), it.getGasPrice());
+        this(it.isRejected(), it.getDepth(), it.getIndex(), it.getType(),
+                it.getFrom(), it.getTo(), it.getNonce(),
+                Conversion.weiToAmount(it.getValue()),
+                it.getData(), it.getGas(),
+                Conversion.weiToAmount(it.getGasPrice()));
     }
 
-    public SemuxInternalTransaction(Transaction parentTx, int depth, int index, OpCode type,
-            byte[] from, byte[] to, long nonce, Amount value, byte[] data,
-            long gas, Amount gasPrice) {
-        super(parentTx, depth, index, type, from, to, nonce,
-                Conversion.amountToWei(value),
-                data, gas,
-                Conversion.amountToWei(gasPrice));
+    public SemuxInternalTransaction(boolean rejected, int depth, int index, OpCode type, byte[] from, byte[] to,
+            long nonce,
+            Amount value, byte[] data, long gas, Amount gasPrice) {
+        this.rejected = rejected;
+        this.depth = depth;
+        this.index = index;
+        this.type = type;
+        this.from = from;
+        this.to = to;
+        this.nonce = nonce;
+        this.value = value;
+        this.data = data;
+        this.gas = gas;
+        this.gasPrice = gasPrice;
     }
 
-    /**
-     * Returns the value in nanoSEM.
-     *
-     * @return
-     */
-    @Override
-    public BigInteger getValue() {
-        return Conversion.weiToAmount(super.getValue()).getBigInteger();
+    public boolean isRejected() {
+        return rejected;
     }
 
-    /**
-     * Returns the gas price in nanoSEM.
-     *
-     * @return
-     */
-    @Override
-    public BigInteger getGasPrice() {
-        return Conversion.weiToAmount(super.getGasPrice()).getBigInteger();
+    public int getDepth() {
+        return depth;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public OpCode getType() {
+        return type;
+    }
+
+    public byte[] getFrom() {
+        return from;
+    }
+
+    public byte[] getTo() {
+        return to;
+    }
+
+    public long getNonce() {
+        return nonce;
+    }
+
+    public Amount getValue() {
+        return value;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public long getGas() {
+        return gas;
+    }
+
+    public Amount getGasPrice() {
+        return gasPrice;
     }
 }

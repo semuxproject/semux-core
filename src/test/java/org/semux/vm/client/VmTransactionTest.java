@@ -4,7 +4,7 @@
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
-package org.semux.core;
+package org.semux.vm.client;
 
 import static org.ethereum.vm.util.BytecodeCompiler.compile;
 import static org.junit.Assert.assertArrayEquals;
@@ -14,7 +14,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Amount.ZERO;
@@ -24,10 +23,19 @@ import org.ethereum.vm.util.HexUtil;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
+import org.semux.core.Amount;
+import org.semux.core.BlockHeader;
+import org.semux.core.Blockchain;
+import org.semux.core.BlockchainImpl;
+import org.semux.core.Transaction;
+import org.semux.core.TransactionExecutor;
+import org.semux.core.TransactionResult;
+import org.semux.core.TransactionType;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
@@ -35,14 +43,12 @@ import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;
-import org.semux.vm.client.SemuxBlock;
-import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VmTest {
+public class VmTransactionTest {
 
-    private Logger logger = LoggerFactory.getLogger(VmTest.class);
+    private Logger logger = LoggerFactory.getLogger(VmTransactionTest.class);
 
     @Rule
     public TemporaryDatabaseRule temporaryDBFactory = new TemporaryDatabaseRule();
@@ -59,7 +65,7 @@ public class VmTest {
     @Before
     public void prepare() {
         config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
-        chain = spy(new BlockchainImpl(config, temporaryDBFactory));
+        chain = Mockito.spy(new BlockchainImpl(config, temporaryDBFactory));
         as = chain.getAccountState();
         ds = chain.getDelegateState();
         exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
