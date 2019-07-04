@@ -124,6 +124,9 @@ public class VmTransactionTest {
         // execute and commit
         result = exec.execute(tx, as, ds, block, chain);
         assertTrue(result.getCode().isSuccess());
+
+        // miner're reward is not yet given
+        assertEquals(ZERO, as.getAccount(block.getCoinbase()).getAvailable());
     }
 
     /**
@@ -174,6 +177,9 @@ public class VmTransactionTest {
 
         byte[] contract = as.getCode(newContractAddress);
         assertArrayEquals(data, contract);
+
+        // miner're reward is not yet given
+        assertEquals(ZERO, as.getAccount(block.getCoinbase()).getAvailable());
     }
 
     @Test
@@ -205,6 +211,9 @@ public class VmTransactionTest {
                 - tx.getGasPrice().getNano() * result.getGasUsed(),
                 as.getAccount(from).getAvailable().getNano());
         assertEquals(value.getNano(), as.getAccount(to).getAvailable().getNano());
+
+        // miner're reward is not yet given
+        assertEquals(ZERO, as.getAccount(block.getCoinbase()).getAvailable());
     }
 
     @Test
@@ -231,9 +240,12 @@ public class VmTransactionTest {
 
         TransactionResult result = exec.execute(tx, as, ds, block, chain);
         assertTrue(result.getCode().isFailure());
+        // value transfer reverted
         assertEquals(SEM.of(1000).getNano() - tx.getGasPrice().getNano() * result.getGasUsed(),
                 as.getAccount(from).getAvailable().getNano());
         assertEquals(0, as.getAccount(to).getAvailable().getNano());
-        // value transfer reverted
+
+        // miner're reward is not yet given
+        assertEquals(ZERO, as.getAccount(block.getCoinbase()).getAvailable());
     }
 }
