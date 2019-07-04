@@ -465,6 +465,16 @@ public class SemuxApiTest extends SemuxApiTestBase {
         GetTransactionResultResponse response = api.getTransactionResult(Hex.encode(tx.getHash()));
         assertTrue(response.isSuccess());
         assertEquals("SUCCESS", response.getResult().getCode());
+
+        assertEquals(Long.toString(block.getNumber()), response.getResult().getBlockNumber());
+        assertEquals(res.getCode().name(), response.getResult().getCode());
+        assertEquals(Long.toString(tx.getFee().getNano()), response.getResult().getFee());
+        assertEquals("0", response.getResult().getGas());
+        assertEquals("0", response.getResult().getGasPrice());
+        assertEquals("0", response.getResult().getGasUsed());
+        assertTrue(response.getResult().getLogs().isEmpty());
+        assertTrue(response.getResult().getInternalTransactions().isEmpty());
+        assertEquals("0x", response.getResult().getReturnData());
     }
 
     @Test

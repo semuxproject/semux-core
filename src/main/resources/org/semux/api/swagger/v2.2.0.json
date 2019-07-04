@@ -788,6 +788,10 @@
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
+                "code": {
+                    "description": "The status of the transaction",
+                    "type": "string"
+                },
                 "logs": {
                     "type": "array",
                     "items": {
@@ -799,25 +803,29 @@
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]*$"
                 },
-                "gasUsed": {
+                "gas": {
+                    "description": "Return the gas limit",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "gasPrice": {
+                    "description": "Return the gas Price",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "gasUsed": {
+                    "description": "Return the gas consumed",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "fee": {
-                    "description": "Return the transaction fee in nano SEM",
+                    "description": "Return the transaction fee in nano SEM. For VM transaction, gasPrice * gasUsed",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
-                },
-                "code": {
-                    "description": "The status of the transaction",
-                    "type": "string"
                 },
                 "internalTransactions": {
                     "type": "array",
@@ -830,8 +838,24 @@
         "InternalTransactionType": {
             "type": "object",
             "properties": {
+                "rejected": {
+                    "description": "Whether this transaction is rejected",
+                    "type": "boolean"
+                },
+                "depth": {
+                    "description": "Call depth",
+                    "type": "string",
+                    "format": "int32",
+                    "pattern": "^\\d+$"
+                },
+                "index": {
+                    "description": "Call index",
+                    "type": "string",
+                    "format": "int32",
+                    "pattern": "^\\d+$"
+                },
                 "type": {
-                    "description" : "Transaction type",
+                    "description" : "Call type, possibly CALL, DELEGATECALL, CALLCODE, CREATE",
                     "type": "string"
                 },
                 "from": {
@@ -844,11 +868,33 @@
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]{40}$"
                 },
-                "amount": {
-                    "description" : "Transaction amount",
+                "nonce": {
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
+                },
+                "gas": {
+                    "description": "Return the gas limit",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "gasPrice": {
+                    "description": "Return the gas Price",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "value": {
+                    "description": "Transaction value in nano SEM",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "data": {
+                    "description": "Transaction data encoded in hexadecimal string",
+                    "type": "string",
+                    "pattern": "^(0x)?[0-9a-fA-F]*$"
                 }
             }
         },

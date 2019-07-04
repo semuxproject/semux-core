@@ -8,7 +8,6 @@ package org.semux.api.v2;
 
 import static org.semux.core.TransactionType.DELEGATE;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -16,7 +15,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.ethereum.vm.LogInfo;
-import org.ethereum.vm.program.InternalTransaction;
 import org.semux.Kernel;
 import org.semux.api.v2.model.AccountType;
 import org.semux.api.v2.model.AccountVoteType;
@@ -39,7 +37,7 @@ import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
 import org.semux.net.Peer;
-import org.semux.vm.client.Conversion;
+import org.semux.vm.client.SemuxInternalTransaction;
 
 public class TypeFactory {
 
@@ -157,14 +155,20 @@ public class TypeFactory {
         return txType;
     }
 
-    public static TransactionResultType transactionResultType(TransactionResult result) {
+    public static TransactionResultType transactionResultType(Transaction tx, TransactionResult result, long number) {
         // gas price is in nano sem, not wei
-        BigInteger fee = BigInteger.valueOf(result.getGasUsed()).multiply(BigInteger.valueOf(result.getGasPrice()));
+        boolean isVMTransaction = (tx.getType() == org.semux.core.TransactionType.CREATE
+                || tx.getType() == org.semux.core.TransactionType.CALL);
+        Amount fee = isVMTransaction ? Amount.mul(result.getGasPrice(), result.getGasUsed()) : tx.getFee();
+
         return new TransactionResultType()
+                .blockNumber(Long.toString(number))
+                .code(result.getCode().name())
                 .logs(result.getLogs().stream().map(TypeFactory::logInfoType).collect(Collectors.toList()))
+                .gas(Long.toString(result.getGas()))
                 .gasUsed(String.valueOf(result.getGasUsed()))
-                .gasPrice(String.valueOf(result.getGasPrice()))
-                .fee(encodeAmount(Amount.Unit.NANO_SEM.of(fee.longValue())))
+                .gasPrice(encodeAmount(result.getGasPrice()))
+                .fee(encodeAmount(fee))
                 .code(result.getCode().name())
                 .internalTransactions(result.getInternalTransactions().stream()
                         .map(TypeFactory::internalTransactionType).collect(Collectors.toList()))
@@ -181,12 +185,19 @@ public class TypeFactory {
                         .collect(Collectors.toList()));
     }
 
-    private static InternalTransactionType internalTransactionType(InternalTransaction internalTransaction) {
+    private static InternalTransactionType internalTransactionType(SemuxInternalTransaction it) {
         return new InternalTransactionType()
-                .from(Hex.encode0x(internalTransaction.getFrom()))
-                .to(Hex.encode0x(internalTransaction.getTo()))
-                .type(internalTransaction.getType().toString())
-                .amount(encodeAmount(Conversion.weiToAmount(internalTransaction.getValue())));
+                .rejected(it.isRejected())
+                .depth(Integer.toString(it.getDepth()))
+                .index(Integer.toString(it.getIndex()))
+                .type(it.getType().name())
+                .from(Hex.encode0x(it.getFrom()))
+                .to(Hex.encode0x(it.getTo()))
+                .nonce(Long.toString(it.getNonce()))
+                .gas(Long.toString(it.getGas()))
+                .gasPrice(encodeAmount(it.getGasPrice()))
+                .value(encodeAmount(it.getValue()))
+                .data(Hex.encode0x(it.getData()));
     }
 
     public static String encodeAmount(Amount a) {
