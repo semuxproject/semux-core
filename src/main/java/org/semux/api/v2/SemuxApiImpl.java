@@ -662,12 +662,12 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response registerDelegate(String from, String data, String fee, String nonce, Boolean validateNonce) {
-        return doTransaction(TransactionType.DELEGATE, from, null, null, fee, nonce, validateNonce, data);
+    public Response registerDelegate(String from, String data, String fee, String nonce) {
+        return doTransaction(TransactionType.DELEGATE, from, null, null, fee, nonce, data);
     }
 
     @Override
-    public Response broadcastRawTransaction(String raw, Boolean validateNonce) {
+    public Response broadcastRawTransaction(String raw) {
         DoTransactionResponse resp = new DoTransactionResponse();
 
         if (!isSet(raw)) {
@@ -676,13 +676,6 @@ public final class SemuxApiImpl implements SemuxApi {
 
         try {
             Transaction tx = Transaction.fromBytes(Hex.decode0x(raw));
-
-            // tx nonce is validated in advance to avoid silently pushing the tx into
-            // delayed queue of pending manager
-            if ((validateNonce != null && validateNonce)
-                    && tx.getNonce() != kernel.getPendingManager().getNonce(tx.getFrom())) {
-                return badRequest("Invalid transaction nonce.");
-            }
 
             PendingManager.ProcessingResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {
@@ -768,23 +761,21 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response transfer(String from, String to, String value, String fee, String nonce, Boolean validateNonce,
-            String data) {
-        return doTransaction(TransactionType.TRANSFER, from, to, value, fee, nonce, validateNonce, data);
+    public Response transfer(String from, String to, String value, String fee, String nonce, String data) {
+        return doTransaction(TransactionType.TRANSFER, from, to, value, fee, nonce, data);
     }
 
     @Override
-    public Response create(String from, String data, String gasPrice, String gas, String nonce, Boolean validateNonce,
-            String value) {
-        return doTransaction(TransactionType.CREATE, from, null, value, "0", nonce, validateNonce, data, gasPrice,
+    public Response create(String from, String data, String gasPrice, String gas, String nonce, String value) {
+        return doTransaction(TransactionType.CREATE, from, null, value, "0", nonce, data, gasPrice,
                 gas);
     }
 
     @Override
     public Response call(String from, String to, String value, String gasPrice, String gas,
-            String nonce, Boolean validateNonce, String data, Boolean local) {
+            String nonce, String data, Boolean local) {
         if (local) {
-            Transaction tx = getTransaction(TransactionType.CALL, from, to, value, "0", nonce, validateNonce, data,
+            Transaction tx = getTransaction(TransactionType.CALL, from, to, value, "0", nonce, data,
                     gasPrice, gas);
 
             SemuxTransaction transaction = new SemuxTransaction(tx);
@@ -809,14 +800,14 @@ public final class SemuxApiImpl implements SemuxApi {
                 return success(resp);
             }
         } else {
-            return doTransaction(TransactionType.CALL, from, to, value, "0", nonce, validateNonce, data, gasPrice,
+            return doTransaction(TransactionType.CALL, from, to, value, "0", nonce, data, gasPrice,
                     gas);
         }
     }
 
     @Override
-    public Response unvote(String from, String to, String value, String fee, String nonce, Boolean validateNonce) {
-        return doTransaction(TransactionType.UNVOTE, from, to, value, fee, nonce, validateNonce, null);
+    public Response unvote(String from, String to, String value, String fee, String nonce) {
+        return doTransaction(TransactionType.UNVOTE, from, to, value, fee, nonce, null);
     }
 
     @Override
@@ -860,8 +851,8 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response vote(String from, String to, String value, String fee, String nonce, Boolean validateNonce) {
-        return doTransaction(TransactionType.VOTE, from, to, value, fee, nonce, validateNonce, null);
+    public Response vote(String from, String to, String value, String fee, String nonce) {
+        return doTransaction(TransactionType.VOTE, from, to, value, fee, nonce, null);
     }
 
     @Override
@@ -942,13 +933,12 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     private Response doTransaction(TransactionType type, String from, String to, String value, String fee, String nonce,
-            Boolean validateNonce, String data) {
-        return doTransaction(type, from, to, value, fee, nonce, validateNonce, data, null, null);
+            String data) {
+        return doTransaction(type, from, to, value, fee, nonce, data, null, null);
     }
 
     private Transaction getTransaction(TransactionType type, String from, String to, String value, String fee,
-            String nonce,
-            Boolean validateNonce, String data, String gasPrice, String gas) {
+            String nonce, String data, String gasPrice, String gas) {
         TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
                 .withType(type)
                 .withFrom(from)
@@ -963,18 +953,10 @@ public final class SemuxApiImpl implements SemuxApi {
 
         if (nonce != null) {
             transactionBuilder.withNonce(nonce);
-        } else {
-            // TODO: fix race condition of auto-assigned nonce
         }
 
         Transaction tx = transactionBuilder.buildSigned();
 
-        // tx nonce is validated in advance to avoid silently pushing the tx into
-        // delayed queue of pending manager
-        if ((validateNonce != null && validateNonce)
-                && tx.getNonce() != kernel.getPendingManager().getNonce(tx.getFrom())) {
-            throw new IllegalArgumentException("Invalid transaction nonce.");
-        }
         return tx;
     }
 
@@ -987,15 +969,14 @@ public final class SemuxApiImpl implements SemuxApi {
      * @param value
      * @param fee
      * @param nonce
-     * @param validateNonce
      * @param data
      * @return
      */
     private Response doTransaction(TransactionType type, String from, String to, String value, String fee, String nonce,
-            Boolean validateNonce, String data, String gasPrice, String gas) {
+            String data, String gasPrice, String gas) {
         DoTransactionResponse resp = new DoTransactionResponse();
         try {
-            Transaction tx = getTransaction(type, from, to, value, fee, nonce, validateNonce, data, gasPrice, gas);
+            Transaction tx = getTransaction(type, from, to, value, fee, nonce, data, gasPrice, gas);
 
             PendingManager.ProcessingResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {
