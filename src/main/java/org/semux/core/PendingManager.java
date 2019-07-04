@@ -316,7 +316,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_TYPE);
         }
         // reject VM transaction with low gas price
-        if (isVMTransaction && tx.getGasPrice() < kernel.getConfig().poolMinGasPrice()) {
+        if (isVMTransaction && tx.getGasPrice().lt(kernel.getConfig().poolMinGasPrice())) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_FEE);
         }
 

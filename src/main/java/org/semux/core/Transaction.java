@@ -46,7 +46,7 @@ public class Transaction {
     private Signature signature;
 
     private final long gas;
-    private final long gasPrice; // nanoSEM per gas
+    private final Amount gasPrice; // nanoSEM per gas
 
     /**
      * Create a new transaction.
@@ -63,7 +63,7 @@ public class Transaction {
      * @param gasPrice
      */
     public Transaction(Network network, TransactionType type, byte[] to, Amount value, Amount fee, long nonce,
-            long timestamp, byte[] data, long gas, long gasPrice) {
+            long timestamp, byte[] data, long gas, Amount gasPrice) {
         this.networkId = network.id();
         this.type = type;
         this.to = to;
@@ -87,7 +87,7 @@ public class Transaction {
 
         if (TransactionType.CALL == type || TransactionType.CREATE == type) {
             enc.writeLong(gas);
-            enc.writeLong(gasPrice);
+            enc.writeAmount(gasPrice);
         }
         this.encoded = enc.toBytes();
         this.hash = Hash.h256(encoded);
@@ -122,7 +122,7 @@ public class Transaction {
 
     public Transaction(Network network, TransactionType type, byte[] toAddress, Amount value, Amount fee, long nonce,
             long timestamp, byte[] data) {
-        this(network, type, toAddress, value, fee, nonce, timestamp, data, 0, 0);
+        this(network, type, toAddress, value, fee, nonce, timestamp, data, 0, Amount.ZERO);
     }
 
     /**
@@ -278,7 +278,7 @@ public class Transaction {
         return gas;
     }
 
-    public long getGasPrice() {
+    public Amount getGasPrice() {
         return gasPrice;
     }
 
@@ -301,17 +301,17 @@ public class Transaction {
         long timestamp = decoder.readLong();
         byte[] data = decoder.readBytes();
 
-        long gasPrice = 0;
         long gas = 0;
+        Amount gasPrice = Amount.ZERO;
 
         TransactionType transactionType = TransactionType.of(type);
         if (TransactionType.CALL == transactionType || TransactionType.CREATE == transactionType) {
-            gasPrice = decoder.readLong();
             gas = decoder.readLong();
+            gasPrice = decoder.readAmount();
         }
 
         return new Transaction(Network.of(networkId), transactionType, to, value, fee, nonce, timestamp, data,
-                gasPrice, gas);
+                gas, gasPrice);
     }
 
     /**

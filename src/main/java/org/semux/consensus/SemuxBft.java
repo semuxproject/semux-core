@@ -794,7 +794,7 @@ public class SemuxBft implements BftManager {
 
             if (isVMTransaction) {
                 // transactions that exceed the remaining block gas limit are ignored
-                if (tx.getGasPrice() <= remainingBlockGas) {
+                if (tx.getGas() <= remainingBlockGas) {
                     TransactionResult result = exec.execute(tx, as, ds, semuxBlock, chain);
 
                     // only include transaction that's acceptable

@@ -102,7 +102,7 @@ public class VmTransactionTest {
 
         byte[] data = Bytes.random(16);
         long gas = 30000;
-        long gasPrice = 1;
+        Amount gasPrice = NANO_SEM.of(1);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);
@@ -146,7 +146,7 @@ public class VmTransactionTest {
         byte[] data = HexUtil.fromHexString(code.substring(code.indexOf("60806040", 1)));
 
         long gas = 1000000;
-        long gasPrice = 1;
+        Amount gasPrice = NANO_SEM.of(1);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, create, gas,
                 gasPrice);
@@ -193,14 +193,16 @@ public class VmTransactionTest {
 
         byte[] data = contract;
         long gas = 100000;
-        long gasPrice = 1;
+        Amount gasPrice = NANO_SEM.of(1);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);
 
         TransactionResult result = exec.execute(tx, as, ds, block, chain);
         assertTrue(result.getCode().isSuccess());
-        assertEquals(SEM.of(1000).getNano() - value.getNano() - tx.getGasPrice() * result.getGasUsed(),
+        assertEquals(SEM.of(1000).getNano()
+                - value.getNano()
+                - tx.getGasPrice().getNano() * result.getGasUsed(),
                 as.getAccount(from).getAvailable().getNano());
         assertEquals(value.getNano(), as.getAccount(to).getAvailable().getNano());
     }
@@ -222,14 +224,14 @@ public class VmTransactionTest {
 
         byte[] data = contract;
         long gas = 21073;
-        long gasPrice = 1;
+        Amount gasPrice = NANO_SEM.of(1);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);
 
         TransactionResult result = exec.execute(tx, as, ds, block, chain);
         assertTrue(result.getCode().isFailure());
-        assertEquals(SEM.of(1000).getNano() - tx.getGasPrice() * result.getGasUsed(),
+        assertEquals(SEM.of(1000).getNano() - tx.getGasPrice().getNano() * result.getGasUsed(),
                 as.getAccount(from).getAvailable().getNano());
         assertEquals(0, as.getAccount(to).getAvailable().getNano());
         // value transfer reverted

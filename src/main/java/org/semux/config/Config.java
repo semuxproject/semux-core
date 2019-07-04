@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.semux.Network;
+import org.semux.core.Amount;
 import org.semux.core.Fork;
 import org.semux.net.CapabilityList;
 import org.semux.net.NodeManager.Node;
@@ -354,7 +355,7 @@ public interface Config {
      * 
      * @return
      */
-    int poolMinGasPrice();
+    Amount poolMinGasPrice();
 
     /**
      * Returns the maximum allowed time drift between transaction timestamp and

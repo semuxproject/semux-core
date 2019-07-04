@@ -95,7 +95,7 @@ public class InternalTransactionTest {
 
         byte[] data = contract;
         long gas = 100000;
-        long gasPrice = 1;
+        Amount gasPrice = NANO_SEM.of(1);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);

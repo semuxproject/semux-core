@@ -170,7 +170,7 @@ public class TransactionResult {
      * Gas info
      */
     protected long gas;
-    protected long gasPrice;
+    protected Amount gasPrice;
     protected long gasUsed;
 
     /**
@@ -200,7 +200,7 @@ public class TransactionResult {
         this.logs = logs;
 
         this.gas = 0;
-        this.gasPrice = 0;
+        this.gasPrice = Amount.ZERO;
         this.gasUsed = 0;
 
         this.blockNumber = 0;
@@ -239,13 +239,13 @@ public class TransactionResult {
         return gas;
     }
 
-    public void setGas(long gas, long gasPrice, long gasUsed) {
+    public void setGas(long gas, Amount gasPrice, long gasUsed) {
         this.gas = gas;
         this.gasPrice = gasPrice;
         this.gasUsed = gasUsed;
     }
 
-    public long getGasPrice() {
+    public Amount getGasPrice() {
         return gasPrice;
     }
 
@@ -351,7 +351,7 @@ public class TransactionResult {
         // Dirty hack to maintain backward compatibility
         if (dec.getReadIndex() != bytes.length) {
             long gas = dec.readLong();
-            long gasPrice = dec.readLong();
+            Amount gasPrice = dec.readAmount();
             long gasUsed = dec.readLong();
             result.setGas(gas, gasPrice, gasUsed);
 
@@ -383,7 +383,7 @@ public class TransactionResult {
         // these data.
 
         enc.writeLong(gas);
-        enc.writeLong(gasPrice);
+        enc.writeAmount(gasPrice);
         enc.writeLong(gasUsed);
 
         enc.writeLong(blockNumber);
