@@ -241,7 +241,6 @@ public class TransactionBuilder {
     }
 
     public Transaction buildUnsigned() {
-        // DELEGATE transaction has fixed receiver and value
         if (type == TransactionType.DELEGATE || type == TransactionType.CREATE) {
             to = Bytes.EMPTY_ADDRESS;
         }
@@ -250,15 +249,25 @@ public class TransactionBuilder {
             value = kernel.getConfig().spec().minDelegateBurnAmount();
         }
 
+        // mandatory because no default value can be provided
+        if (type == null) {
+            throw new IllegalArgumentException("Parameter `type` is required");
+        }
+        if (to == null) {
+            throw new IllegalArgumentException("Parameter `to` is required");
+        }
+
         return new Transaction(
                 network != null ? network : kernel.getConfig().network(),
                 type,
                 to,
                 value != null ? value : Amount.ZERO,
-                fee,
+                fee != null ? fee : Amount.ZERO,
                 nonce != null ? nonce : kernel.getPendingManager().getNonce(account.toAddress()),
                 timestamp != null ? timestamp : TimeUtil.currentTimeMillis(),
-                data, gas, gasPrice);
+                data != null ? data : Bytes.EMPTY_BYTES,
+                gas,
+                gasPrice != null ? gasPrice : Amount.ZERO);
     }
 
     public Transaction buildSigned() {
