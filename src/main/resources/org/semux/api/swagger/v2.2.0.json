@@ -2316,6 +2316,15 @@
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
+                    },
+                    {
+                        "name": "value",
+                        "in": "query",
+                        "description": "Amount of SEM to transfer in nano SEM",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     }
                 ],
                 "responses": {
@@ -2371,7 +2380,7 @@
                         "name": "value",
                         "in": "query",
                         "description": "Amount of SEM to transfer in nano SEM",
-                        "required": true,
+                        "required": false,
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
@@ -2779,7 +2788,9 @@
                             "TRANSFER",
                             "DELEGATE",
                             "VOTE",
-                            "UNVOTE"
+                            "UNVOTE",
+                            "CREATE",
+                            "CALL"
                         ]
                     },
                     {
@@ -2834,6 +2845,24 @@
                         "type": "string",
                         "format": "int64",
                         "pattern": "^(0x)?[0-9a-fA-F]+$"
+                    },
+                    {
+                        "name": "gasPrice",
+                        "in": "query",
+                        "description": "The gas price",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    },
+                    {
+                        "name": "gas",
+                        "in": "query",
+                        "description": "The gas limit for the call",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     }
                 ],
                 "responses": {

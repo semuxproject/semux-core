@@ -7,6 +7,7 @@
 package org.semux.gui;
 
 import static java.util.Arrays.stream;
+
 import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.gui.TextContextMenuItem.COPY;
 import static org.semux.gui.TextContextMenuItem.CUT;
