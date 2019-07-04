@@ -162,6 +162,20 @@ public class VmTest {
         assertTrue(result.getCode().isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getAvailable());
+        //will return contract
+        logger.debug("Return data:" + Hex.encode0x(result.getReturnData()));
+
+
+        // insufficient gas
+        gas = result.getGasUsed()-10;
+        Transaction txBadGas = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, create, gas,
+                gasPrice);
+        txBadGas.sign(key);
+
+        result = exec.execute(txBadGas, as.track(), ds.track(), bh, chain);
+        //will return 0x
+        logger.debug("Return data:" + Hex.encode0x(result.getReturnData()));
+        assertFalse(result.getCode().isSuccess());
 
         // execute and commit
         result = executeAndCommit(exec, tx, as.track(), ds.track(), bh);
