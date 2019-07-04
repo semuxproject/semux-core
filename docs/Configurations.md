@@ -79,6 +79,19 @@ api.password = YOUR_API_PASSWORD
 # ui.unit must be one of SEM, mSEM, μSEM
 ui.unit = SEM
 ui.fractionDigits = 9
+
+#================
+# VM
+#================
+
+# Set the maximum gas this client can process in one block proposal
+txpool.blockGasLimit = 10000000
+
+# The minimum price this client will accept for gas
+txpool.minGasPrice = 1
+
+# The max transaction time drift in milliseconds
+txpool.maxTransactionTimeDrift = 7200000
 ```
 
 ### IP whitelist and blacklist

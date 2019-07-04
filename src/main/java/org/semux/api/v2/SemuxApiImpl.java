@@ -774,7 +774,7 @@ public final class SemuxApiImpl implements SemuxApi {
     @Override
     public Response call(String from, String to, String value, String gasPrice, String gas,
             String nonce, String data, Boolean local) {
-        if (local) {
+        if (Boolean.TRUE.equals(local)) {
             Transaction tx = getTransaction(TransactionType.CALL, from, to, value, "0", nonce, data,
                     gasPrice, gas);
 
