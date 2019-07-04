@@ -11,9 +11,13 @@ import java.math.BigInteger;
 import org.ethereum.vm.OpCode;
 import org.ethereum.vm.client.Transaction;
 import org.ethereum.vm.program.InternalTransaction;
+import org.semux.core.Amount;
 
 // TODO: introduce InternalTransaction interface
 
+/**
+ * Represents a Semux-flavored internal transaction.
+ */
 public class SemuxInternalTransaction extends InternalTransaction {
 
     public SemuxInternalTransaction(InternalTransaction it) {
@@ -22,19 +26,29 @@ public class SemuxInternalTransaction extends InternalTransaction {
     }
 
     public SemuxInternalTransaction(Transaction parentTx, int depth, int index, OpCode type,
-            byte[] from, byte[] to, long nonce, BigInteger value, byte[] data,
-            long gas, BigInteger gasPrice) {
+            byte[] from, byte[] to, long nonce, Amount value, byte[] data,
+            long gas, Amount gasPrice) {
         super(parentTx, depth, index, type, from, to, nonce,
-                Conversion.amountToWei(value.longValue()),
+                Conversion.amountToWei(value),
                 data, gas,
-                Conversion.amountToWei(gasPrice.longValue()));
+                Conversion.amountToWei(gasPrice));
     }
 
+    /**
+     * Returns the value in nanoSEM.
+     *
+     * @return
+     */
     @Override
     public BigInteger getValue() {
         return Conversion.weiToAmount(super.getValue()).getBigInteger();
     }
 
+    /**
+     * Returns the gas price in nanoSEM.
+     *
+     * @return
+     */
     @Override
     public BigInteger getGasPrice() {
         return Conversion.weiToAmount(super.getGasPrice()).getBigInteger();

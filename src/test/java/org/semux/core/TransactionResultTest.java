@@ -111,7 +111,7 @@ public class TransactionResultTest {
         List<SemuxInternalTransaction> internalTransactions = new ArrayList<>();
         internalTransactions
                 .add(new SemuxInternalTransaction(null, 1, 2, OpCode.CALL, Bytes.random(20), Bytes.random(20),
-                        3, BigInteger.ONE, Bytes.random(5), 4, BigInteger.TEN));
+                        3, Amount.Unit.NANO_SEM.of(1), Bytes.random(5), 4, Amount.Unit.NANO_SEM.of(10)));
 
         TransactionResult tr1 = new TransactionResult(code, returnData, logs);
         tr1.setGas(gas, gasPrice, gasUsed);

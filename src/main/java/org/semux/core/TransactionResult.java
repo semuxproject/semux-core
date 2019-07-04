@@ -322,10 +322,10 @@ public class TransactionResult {
         byte[] from = dec.readBytes();
         byte[] to = dec.readBytes();
         long nonce = dec.readLong();
-        BigInteger value = BigInteger.valueOf(dec.readLong());
+        Amount value = dec.readAmount();
         byte[] data = dec.readBytes();
         long gas = dec.readLong();
-        BigInteger gasPrice = BigInteger.valueOf(dec.readLong());
+        Amount gasPrice = dec.readAmount();
 
         // TODO: fix the null parent
         SemuxInternalTransaction tx = new SemuxInternalTransaction(null, depth, index,
