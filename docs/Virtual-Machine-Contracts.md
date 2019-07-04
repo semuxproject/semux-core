@@ -51,7 +51,24 @@ This is your contract address.
 
 Since we made this an on-chain call, you will need to expend gas to call this contract, though you could make it a local call.
 
-If you call the contract with ```0x``` as your data, you will get a transaction hash.  Wait until the contract has completed and retrieve the 
+
+If you call the contract with the ```data``` field specifying your method signature, and parameters.
+Supply the method name, along with method parameter types, keccak256 the result, and take the first 4 bytes of the 
+result.  Then append your parameters (in this case, there are no parameters);
+
+```java
+byte[] method = HashUtil.keccak256("hello()".getBytes(StandardCharsets.UTF_8));
+byte[] methodData = ByteArrayUtil.merge(Arrays.copyOf(method, 4),DataWord.ZERO.getData());
+
+```
+
+Now use your client to call ```call()```
+
+```java
+String txId = client.call(from, contractAddress, 1, 136363, methodData,0, false);
+```
+
+, you will get a transaction hash.  Wait until the contract has completed and retrieve the 
 transactionResult, you will see
 
 ```json
