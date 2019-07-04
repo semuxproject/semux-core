@@ -1,5 +1,5 @@
 {
-    "basePath": "/v2.2.0",
+    "basePath": "/v2.3.0",
     "consumes": [
         "application/x-www-form-urlencoded"
     ],
@@ -2732,7 +2732,9 @@
                             "TRANSFER",
                             "DELEGATE",
                             "VOTE",
-                            "UNVOTE"
+                            "UNVOTE",
+                            "CREATE",
+                            "CALL"
                         ]
                     },
                     {
@@ -2787,6 +2789,24 @@
                         "type": "string",
                         "format": "int64",
                         "pattern": "^(0x)?[0-9a-fA-F]+$"
+                    },
+                    {
+                      "name": "gasPrice",
+                      "in": "query",
+                      "description": "The gas price",
+                      "required": false,
+                      "type": "string",
+                      "format": "int64",
+                      "pattern": "^\\d+$"
+                    },
+                    {
+                      "name": "gas",
+                      "in": "query",
+                      "description": "The gas limit for the call",
+                      "required": false,
+                      "type": "string",
+                      "format": "int64",
+                      "pattern": "^\\d+$"
                     }
                 ],
                 "responses": {

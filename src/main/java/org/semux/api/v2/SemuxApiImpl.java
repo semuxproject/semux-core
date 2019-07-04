@@ -147,8 +147,8 @@ public final class SemuxApiImpl implements SemuxApi {
 
     @Override
     public Response composeRawTransaction(String network, String type, String fee, String nonce, String to,
-            String value,
-            String timestamp, String data) {
+            String value, String timestamp, String data, String gasPrice, String gas) {
+
         ComposeRawTransactionResponse resp = new ComposeRawTransactionResponse();
 
         try {
@@ -161,6 +161,12 @@ public final class SemuxApiImpl implements SemuxApi {
                     .withNonce(nonce)
                     .withTimestamp(timestamp)
                     .withData(data);
+            if (gasPrice != null) {
+                transactionBuilder.withGasPrice(gasPrice);
+            }
+            if (gas != null) {
+                transactionBuilder.withGas(gas);
+            }
 
             Transaction transaction = transactionBuilder.buildUnsigned();
             resp.setResult(Hex.encode0x(transaction.getEncoded()));

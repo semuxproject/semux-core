@@ -761,7 +761,9 @@ public class SemuxApiTest extends SemuxApiTestBase {
                 to,
                 value,
                 timestamp,
-                data);
+                data,
+                null,
+                null);
 
         assertTrue(resp.isSuccess());
         assertEquals(
@@ -788,7 +790,9 @@ public class SemuxApiTest extends SemuxApiTestBase {
                 to,
                 value,
                 timestamp,
-                data);
+                data,
+                null,
+                null);
 
         assertTrue(resp.isSuccess());
         assertEquals(
@@ -815,11 +819,75 @@ public class SemuxApiTest extends SemuxApiTestBase {
                 to,
                 value,
                 timestamp,
-                data);
+                data,
+                null,
+                null);
 
         assertTrue(resp.isSuccess());
         assertEquals(
                 "0x010314db7cadb25fdcdd546fb0268524107582c3f8999c000000000000007b00000000004c4b40000000000000007b000001629b9257d00673656d757831",
+                resp.getResult());
+    }
+
+    @Test
+    public void composeRawTransactionCreateTest() {
+        String network = "TESTNET";
+        String type = "CREATE";
+        String to = null;
+        String value = null; // should be able to set value here
+        String fee = null;
+        String nonce = "123";
+        String timestamp = "1523028482000";
+        String data = Hex.encode0x("semux1".getBytes());
+        String gas = "100000";
+        String gasPrice = "1";
+
+        ComposeRawTransactionResponse resp = api.composeRawTransaction(
+                network,
+                type,
+                fee,
+                nonce,
+                to,
+                value,
+                timestamp,
+                data,
+                gasPrice,
+                gas);
+
+        assertTrue(resp.isSuccess());
+        assertEquals(
+                "0x0105140000000000000000000000000000000000000000000000000000000000000000004c4b40000000000000007b000001629b9257d00673656d75783100000000000186a00000000000000001",
+                resp.getResult());
+    }
+
+    @Test
+    public void composeRawTransactionCallTest() {
+        String network = "TESTNET";
+        String type = "CALL";
+        String to = "0xdb7cadb25fdcdd546fb0268524107582c3f8999c";
+        String value = "100";
+        String fee = null;
+        String nonce = "123";
+        String timestamp = "1523028482000";
+        String data = Hex.encode0x("semux1".getBytes());
+        String gas = "100000";
+        String gasPrice = "1";
+
+        ComposeRawTransactionResponse resp = api.composeRawTransaction(
+                network,
+                type,
+                fee,
+                nonce,
+                to,
+                value,
+                timestamp,
+                data,
+                gasPrice,
+                gas);
+
+        assertTrue(resp.isSuccess());
+        assertEquals(
+                "0x010614db7cadb25fdcdd546fb0268524107582c3f8999c000000000000006400000000004c4b40000000000000007b000001629b9257d00673656d75783100000000000186a00000000000000001",
                 resp.getResult());
     }
 
