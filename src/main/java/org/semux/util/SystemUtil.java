@@ -41,8 +41,6 @@ public class SystemUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemUtil.class);
 
-    public static boolean VM_TEST = false;
-
     public static class Code {
         // success
         public static final int OK = 0;
@@ -376,10 +374,6 @@ public class SystemUtil {
         } catch (ClassNotFoundException e) {
             return false;
         }
-    }
-
-    public static boolean isVMTest() {
-        return VM_TEST;
     }
 
     private SystemUtil() {

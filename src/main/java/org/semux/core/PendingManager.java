@@ -28,7 +28,6 @@ import org.semux.net.msg.p2p.TransactionMessage;
 import org.semux.util.ArrayUtil;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
-import org.semux.util.SystemUtil;
 import org.semux.util.TimeUtil;
 import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
@@ -318,8 +317,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         boolean isVMTransaction = tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE;
 
         // reject VM transactions that come in before fork
-        if (isVMTransaction && !SystemUtil.isVMTest()
-                && !kernel.getBlockchain().isForkActivated(Fork.VIRTUAL_MACHINE)) {
+        if (isVMTransaction && !kernel.getBlockchain().isForkActivated(Fork.VIRTUAL_MACHINE)) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_TYPE);
         }
         // reject VM transaction with low gas price

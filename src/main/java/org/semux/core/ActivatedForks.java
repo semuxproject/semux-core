@@ -63,7 +63,7 @@ public class ActivatedForks {
      * @param height
      */
     public boolean activateFork(Fork fork, long height) {
-        if (!isActivated(fork)
+        if (!isActivated(fork, height - 1)
                 && height <= fork.activationDeadline
                 && isActivated(fork, height)) {
             activatedForks.put(fork, new Fork.Activation(fork, height));
@@ -84,11 +84,6 @@ public class ActivatedForks {
      * @return
      */
     public boolean isActivated(Fork fork, final long height) {
-        // skips genesis block
-        if (height <= 1) {
-            return false;
-        }
-
         // checks whether the fork has been activated and recorded in database
         if (activatedForks.containsKey(fork)) {
             return height >= activatedForks.get(fork).activatedAt;
@@ -151,7 +146,7 @@ public class ActivatedForks {
      * @return
      */
     public boolean isActivated(Fork fork) {
-        return activatedForks.containsKey(fork);
+        return isActivated(fork, chain.getLatestBlockNumber() + 1);
     }
 
     /**

@@ -7,7 +7,6 @@
 package org.semux.integration;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
@@ -51,7 +50,6 @@ import org.semux.net.SemuxChannelInitializer;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleApiClient;
-import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,8 +90,6 @@ public class TransactTest {
 
     @Before
     public void setUp() throws Exception {
-        SystemUtil.VM_TEST = true;
-
         // prepare kernels
         kernelRuleValidator1.speedUpConsensus();
         kernelRuleValidator2.speedUpConsensus();
@@ -142,8 +138,6 @@ public class TransactTest {
 
     @After
     public void tearDown() {
-        SystemUtil.VM_TEST = false;
-
         // stop kernels
         kernelValidator1.stop();
         kernelValidator2.stop();
