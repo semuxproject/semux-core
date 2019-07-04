@@ -1,4 +1,4 @@
-Welcome to the semux documentation!
+Welcome to the Semux Documentation!
 
 ### How it Works
 * [Block Rewards](./Block-Rewards.md)
@@ -11,11 +11,13 @@ Welcome to the semux documentation!
 * [Block Explorers](./Block-Explorers.md)
 * [Delegate Pools](./Delegate-Pools.md)
 * [Full Node Setup](./Full-Node-Setup.md)
+* [Using the Virtual Machine](./Virtual-Machine-Contracts.md)
 
 ### Development
 * [Bug Bounty Program](./Bug-Bounty-Program.md)
 * [Devnet](./Devnet.md)
+* [Testnet](./Testnet.md)
 * [IDE Setup](./IDE-Setup.md)
 * [RESTful API](./RESTful-API.md)
-* [Testnet](./Testnet.md)
+* [API Console](./Console.md)
 * [Network Protocol](./Network-Protocol.md)
