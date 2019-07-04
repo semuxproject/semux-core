@@ -8,6 +8,7 @@ package org.semux.api.v2;
 
 import static org.semux.core.TransactionType.DELEGATE;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -157,9 +158,13 @@ public class TypeFactory {
     }
 
     public static TransactionResultType transactionResultType(TransactionResult result) {
+        //gas price is in nano sem, not wei
+        BigInteger fee = BigInteger.valueOf(result.getGasUsed()).multiply(BigInteger.valueOf(result.getGasPrice()));
         return new TransactionResultType()
                 .logs(result.getLogs().stream().map(TypeFactory::logInfoType).collect(Collectors.toList()))
                 .gasUsed(String.valueOf(result.getGasUsed()))
+                .gasPrice(String.valueOf(result.getGasPrice()))
+                .fee(encodeAmount(Amount.Unit.NANO_SEM.of(fee.longValue())))
                 .code(result.getCode().name())
                 .internalTransactions(result.getInternalTransactions().stream()
                         .map(TypeFactory::internalTransactionType).collect(Collectors.toList()))

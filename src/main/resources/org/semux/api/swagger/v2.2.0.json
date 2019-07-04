@@ -804,6 +804,17 @@
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
+                "gasPrice": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "fee": {
+                    "description": "Return the transaction fee in nano SEM",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
                 "code": {
                     "description": "The status of the transaction",
                     "type": "string"
