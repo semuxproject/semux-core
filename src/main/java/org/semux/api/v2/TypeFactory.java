@@ -15,12 +15,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.ethereum.vm.LogInfo;
+import org.ethereum.vm.program.InternalTransaction;
 import org.semux.Kernel;
 import org.semux.api.v2.model.AccountType;
 import org.semux.api.v2.model.AccountVoteType;
 import org.semux.api.v2.model.BlockType;
 import org.semux.api.v2.model.DelegateType;
 import org.semux.api.v2.model.InfoType;
+import org.semux.api.v2.model.InternalTransactionType;
 import org.semux.api.v2.model.LogInfoType;
 import org.semux.api.v2.model.PeerType;
 import org.semux.api.v2.model.TransactionLimitsType;
@@ -36,6 +38,7 @@ import org.semux.core.state.Account;
 import org.semux.core.state.Delegate;
 import org.semux.crypto.Hex;
 import org.semux.net.Peer;
+import org.semux.vm.client.Conversion;
 
 public class TypeFactory {
 
@@ -158,9 +161,11 @@ public class TypeFactory {
                 .logs(result.getLogs().stream().map(TypeFactory::logInfoType).collect(Collectors.toList()))
                 .gasUsed(String.valueOf(result.getGasUsed()))
                 .code(result.getCode().name())
+                .internalTransactions(result.getInternalTransactions().stream()
+                        .map(TypeFactory::internalTransactionType).collect(Collectors.toList()))
                 .returnData(Hex.encode0x(result.getReturnData()));
 
-        // TODO: add block number and internal transactions
+        // TODO: add block number
     }
 
     private static LogInfoType logInfoType(LogInfo log) {
@@ -169,6 +174,14 @@ public class TypeFactory {
                 .data(Hex.encode0x(log.getData()))
                 .topics(log.getTopics().stream().map(topic -> Hex.encode0x(topic.getData()))
                         .collect(Collectors.toList()));
+    }
+
+    private static InternalTransactionType internalTransactionType(InternalTransaction internalTransaction) {
+        return new InternalTransactionType()
+                .from(Hex.encode0x(internalTransaction.getFrom()))
+                .to(Hex.encode0x(internalTransaction.getTo()))
+                .type(internalTransaction.getType().toString())
+                .amount(encodeAmount(Conversion.weiToAmount(internalTransaction.getValue())));
     }
 
     public static String encodeAmount(Amount a) {
