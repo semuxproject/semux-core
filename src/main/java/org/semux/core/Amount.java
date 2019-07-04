@@ -137,4 +137,8 @@ public final class Amount {
         return new Amount(Math.subtractExact(a1.nano, a2.nano));
     }
 
+    public static Amount mul(Amount a1, long a2) {
+        return new Amount(Math.multiplyExact(a1.nano, a2));
+    }
+
 }

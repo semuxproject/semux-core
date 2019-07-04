@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.client.BlockStore;
@@ -22,13 +23,13 @@ import org.ethereum.vm.client.TransactionReceipt;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.semux.config.Config;
-import org.semux.core.Amount.Unit;
 import org.semux.core.TransactionResult.Code;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.util.Bytes;
 import org.semux.vm.client.SemuxBlock;
+import org.semux.vm.client.SemuxInternalTransaction;
 import org.semux.vm.client.SemuxRepository;
 import org.semux.vm.client.SemuxTransaction;
 
@@ -124,7 +125,9 @@ public class TransactionExecutor {
                 // applying a very strict check to avoid mistakes
                 boolean valid = fee.equals(Amount.ZERO)
                         && tx.getGas() >= 21_000 && tx.getGas() <= config.spec().maxBlockGasLimit()
-                        && tx.getGasPrice() >= 1 && tx.getGasPrice() <= Integer.MAX_VALUE; // a theoretical limit
+                        && tx.getGasPrice().getNano() >= 1 && tx.getGasPrice().getNano() <= Integer.MAX_VALUE; // a
+                                                                                                               // theoretical
+                                                                                                               // limit
                 if (!valid) {
                     result.setCode(Code.INVALID_FEE);
                     continue;
@@ -217,17 +220,9 @@ public class TransactionExecutor {
                     break;
                 }
 
-                // no overflow shall occur
-                long maxGasFee = tx.getGas() * tx.getGasPrice();
-                Amount maxCost = sum(sum(value, fee), Unit.NANO_SEM.of(maxGasFee));
+                // the VM transaction executor will check balance and gas cost.
+                // do proper refunds afterwards.
 
-                if (available.lt(maxCost)) {
-                    result.setCode(Code.INSUFFICIENT_AVAILABLE);
-                    break;
-                }
-
-                // VM calls can have fees/values set.
-                as.adjustAvailable(from, neg(sum(value, fee)));
                 executeVmTransaction(result, tx, as, ds, block, gasUsedInBlock);
                 break;
             default:
@@ -279,7 +274,10 @@ public class TransactionExecutor {
             result.setGas(tx.getGas(), tx.getGasPrice(), summary.getGasUsed());
 
             result.setBlockNumber(block.getNumber());
-            result.setInternalTransactions(summary.getInternalTransactions());
+            result.setInternalTransactions(summary.getInternalTransactions()
+                    .stream()
+                    .map(SemuxInternalTransaction::new)
+                    .collect(Collectors.toList()));
         }
     }
 

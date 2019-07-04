@@ -72,8 +72,8 @@ public class TransactionBuilder {
      */
     private byte[] data;
 
-    private long gasPrice = 0;
     private long gas = 0;
+    private Amount gasPrice = Amount.ZERO;
 
     public TransactionBuilder(Kernel kernel) {
         this.kernel = kernel;
@@ -233,7 +233,7 @@ public class TransactionBuilder {
         }
 
         try {
-            this.gasPrice = Long.parseLong(gasPrice);
+            this.gasPrice = NANO_SEM.of(Long.parseLong(gasPrice));
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Parameter `gasPrice` is not a valid number");
         }
