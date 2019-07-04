@@ -312,7 +312,7 @@ public class SemuxSync implements SyncManager {
 
             // request the block
             if (c.getRemotePeer().getLatestBlockNumber() >= task) {
-                logger.debug("Request block #{} from {}", task, c.getRemoteIp());
+                logger.trace("Request block #{} from {}", task, c.getRemoteIp());
                 c.getMessageQueue().sendMessage(new GetBlockMessage(task));
 
                 if (toDownload.remove(task)) {

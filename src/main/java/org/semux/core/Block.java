@@ -265,13 +265,13 @@ public class Block {
     private static Amount getGasReward(Block block) {
         List<Transaction> transactions = block.getTransactions();
         List<TransactionResult> results = block.getResults();
-        long sum = 0;
+        Amount sum = ZERO;
         for (int i = 0; i < transactions.size(); i++) {
             Transaction transaction = transactions.get(i);
             TransactionResult result = results.get(i);
-            sum += (transaction.getGasPrice() * result.getGasUsed());
+            sum = Amount.sum(sum, Amount.mul(transaction.getGasPrice(), result.getGasUsed()));
         }
-        return Amount.Unit.NANO_SEM.of(sum);
+        return sum;
     }
 
     /**

@@ -101,7 +101,7 @@ public class PrecompiledContractTest {
                 Hex.decode("000000000000000000000000"), delegate,
                 Hex.decode("000000000000000000000000000000000000000000000000000000003B9ACA00")); // 1 nanoSEM
         long gas = 100000;
-        long gasPrice = 1;
+        Amount gasPrice = NANO_SEM.of(1);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);
@@ -114,7 +114,7 @@ public class PrecompiledContractTest {
         TransactionResult result = exec.execute(tx, as, ds, bh, chain);
         assertTrue(result.getCode().isSuccess());
         assertEquals(21_000 + 21_000 + dataGasCost + 1088, result.getGasUsed());
-        assertEquals(SEM.of(1000).getNano() - result.getGasUsed() * gasPrice,
+        assertEquals(SEM.of(1000).getNano() - result.getGasUsed() * gasPrice.getNano(),
                 as.getAccount(from).getAvailable().getNano());
         assertEquals(SEM.of(1000).getNano() - 1, as.getAccount(to).getAvailable().getNano());
         assertEquals(1, as.getAccount(to).getLocked().getNano());

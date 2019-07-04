@@ -569,12 +569,14 @@ public final class SemuxApiImpl implements SemuxApi {
             return badRequest("Parameter `hash` is not a valid hexadecimal string");
         }
 
+        long number = kernel.getBlockchain().getTransactionBlockNumber(hashBytes);
+        Transaction tx = kernel.getBlockchain().getTransaction(hashBytes);
         TransactionResult result = kernel.getBlockchain().getTransactionResult(hashBytes);
         if (result == null) {
             return badRequest("The request transaction was not found");
         }
 
-        resp.setResult(TypeFactory.transactionResultType(result));
+        resp.setResult(TypeFactory.transactionResultType(tx, result, number));
 
         return success(resp);
     }

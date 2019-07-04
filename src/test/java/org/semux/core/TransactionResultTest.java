@@ -10,8 +10,8 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.semux.core.Amount.Unit.NANO_SEM;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,9 +19,9 @@ import java.util.List;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.OpCode;
-import org.ethereum.vm.program.InternalTransaction;
 import org.junit.Test;
 import org.semux.util.Bytes;
+import org.semux.vm.client.SemuxInternalTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,12 +105,13 @@ public class TransactionResultTest {
         List<LogInfo> logs = new ArrayList<>();
         logs.add(new LogInfo(Bytes.random(20), Arrays.asList(DataWord.ONE, DataWord.ZERO), Bytes.random(48)));
         long gas = 1;
-        long gasPrice = 2;
+        Amount gasPrice = NANO_SEM.of(2);
         long gasUsed = 3;
         long blockNumber = 4;
-        List<InternalTransaction> internalTransactions = new ArrayList<>();
-        internalTransactions.add(new InternalTransaction(null, 1, 2, OpCode.CALL, Bytes.random(20), Bytes.random(20),
-                3, BigInteger.ONE, Bytes.random(5), 4, BigInteger.TEN));
+        List<SemuxInternalTransaction> internalTransactions = new ArrayList<>();
+        internalTransactions
+                .add(new SemuxInternalTransaction(false, 1, 2, OpCode.CALL, Bytes.random(20), Bytes.random(20),
+                        3, NANO_SEM.of(1), Bytes.random(5), 4, NANO_SEM.of(10)));
 
         TransactionResult tr1 = new TransactionResult(code, returnData, logs);
         tr1.setGas(gas, gasPrice, gasUsed);
