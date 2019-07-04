@@ -54,6 +54,8 @@ public class VmTest {
     private TransactionExecutor exec;
     private Network network;
 
+    private SemuxBlock block;
+
     @Before
     public void prepare() {
         config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
@@ -64,6 +66,11 @@ public class VmTest {
         network = config.network();
 
         doReturn(true).when(chain).isForkActivated(any(), anyLong());
+
+        block = new SemuxBlock(
+                new BlockHeader(1l, Bytes.random(20), Bytes.random(32), System.currentTimeMillis(),
+                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
+                config.spec().maxBlockGasLimit());
     }
 
     /**
@@ -87,11 +94,6 @@ public class VmTest {
                 Hex.encode0x(HashUtil.calcNewAddress(Hex.decode0x("0x23a6049381fd2cfb0661d9de206613b83d53d7df"), 17)));
         as.setCode(to, contract);
 
-        SemuxBlock bh = new SemuxBlock(
-                new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
-                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
-                config.spec().maxBlockGasLimit());
-
         byte[] data = Bytes.random(16);
         long gas = 30000;
         long gasPrice = 1;
@@ -101,20 +103,20 @@ public class VmTest {
         assertTrue(tx.validate(network));
 
         // insufficient available
-        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh, chain);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain);
         assertFalse(result.getCode().isSuccess());
 
         Amount available = SEM.of(1000);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
-        result = exec.execute(tx, as.track(), ds.track(), bh, chain);
+        result = exec.execute(tx, as.track(), ds.track(), block, chain);
         assertTrue(result.getCode().isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getAvailable());
 
         // execute and commit
-        result = executeAndCommit(exec, tx, as.track(), ds.track(), bh);
+        result = exec.execute(tx, as, ds, block, chain);
         assertTrue(result.getCode().isSuccess());
     }
 
@@ -137,11 +139,6 @@ public class VmTest {
         byte[] create = HexUtil.fromHexString(code);
         byte[] data = HexUtil.fromHexString(code.substring(code.indexOf("60806040", 1)));
 
-        SemuxBlock bh = new SemuxBlock(
-                new BlockHeader(1l, Bytes.random(20), Bytes.random(32), System.currentTimeMillis(),
-                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
-                config.spec().maxBlockGasLimit());
-
         long gas = 1000000;
         long gasPrice = 1;
 
@@ -151,20 +148,20 @@ public class VmTest {
         assertTrue(tx.validate(network));
 
         // insufficient available
-        TransactionResult result = exec.execute(tx, as.track(), ds.track(), bh, chain);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain);
         assertFalse(result.getCode().isSuccess());
 
         Amount available = SEM.of(1000);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
-        result = exec.execute(tx, as.track(), ds.track(), bh, chain);
+        result = exec.execute(tx, as.track(), ds.track(), block, chain);
         assertTrue(result.getCode().isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getAvailable());
 
         // execute and commit
-        result = executeAndCommit(exec, tx, as.track(), ds.track(), bh);
+        result = exec.execute(tx, as, ds, block, chain);
         assertTrue(result.getCode().isSuccess());
 
         byte[] newContractAddress = HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce());
@@ -173,12 +170,62 @@ public class VmTest {
         assertArrayEquals(data, contract);
     }
 
-    private TransactionResult executeAndCommit(TransactionExecutor exec, Transaction tx, AccountState as,
-            DelegateState ds, SemuxBlock bh) {
-        TransactionResult res = exec.execute(tx, as, ds, bh, chain);
-        as.commit();
-        ds.commit();
+    @Test
+    public void testTransferToContract() {
+        Key key = new Key();
 
-        return res;
+        TransactionType type = TransactionType.CALL;
+        byte[] from = key.toAddress();
+        byte[] to = Bytes.random(20);
+        Amount value = NANO_SEM.of(50);
+        long nonce = as.getAccount(from).getNonce();
+        long timestamp = TimeUtil.currentTimeMillis();
+
+        byte[] contract = Hex.decode("60006000");
+        as.setCode(to, contract);
+        as.adjustAvailable(from, SEM.of(1000));
+
+        byte[] data = contract;
+        long gas = 100000;
+        long gasPrice = 1;
+
+        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx.sign(key);
+
+        TransactionResult result = exec.execute(tx, as, ds, block, chain);
+        assertTrue(result.getCode().isSuccess());
+        assertEquals(SEM.of(1000).getNano() - value.getNano() - tx.getGasPrice() * result.getGasUsed(),
+                as.getAccount(from).getAvailable().getNano());
+        assertEquals(value.getNano(), as.getAccount(to).getAvailable().getNano());
+    }
+
+    @Test
+    public void testTransferToContractOutOfGas() {
+        Key key = new Key();
+
+        TransactionType type = TransactionType.CALL;
+        byte[] from = key.toAddress();
+        byte[] to = Bytes.random(20);
+        Amount value = NANO_SEM.of(50);
+        long nonce = as.getAccount(from).getNonce();
+        long timestamp = TimeUtil.currentTimeMillis();
+
+        byte[] contract = Hex.decode("6000");
+        as.setCode(to, contract);
+        as.adjustAvailable(from, SEM.of(1000));
+
+        byte[] data = contract;
+        long gas = 21073;
+        long gasPrice = 1;
+
+        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx.sign(key);
+
+        TransactionResult result = exec.execute(tx, as, ds, block, chain);
+        assertTrue(result.getCode().isFailure());
+        assertEquals(SEM.of(1000).getNano() - tx.getGasPrice() * result.getGasUsed(),
+                as.getAccount(from).getAvailable().getNano());
+        assertEquals(0, as.getAccount(to).getAvailable().getNano());
+        // value transfer reverted
     }
 }

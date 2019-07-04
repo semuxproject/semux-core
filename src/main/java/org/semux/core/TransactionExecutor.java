@@ -219,17 +219,9 @@ public class TransactionExecutor {
                     break;
                 }
 
-                // no overflow shall occur
-                long maxGasFee = tx.getGas() * tx.getGasPrice();
-                Amount maxCost = sum(sum(value, fee), Unit.NANO_SEM.of(maxGasFee));
+                // the VM transaction executor will check balance and gas cost.
+                // do proper refunds afterwards.
 
-                if (available.lt(maxCost)) {
-                    result.setCode(Code.INSUFFICIENT_AVAILABLE);
-                    break;
-                }
-
-                // VM calls can have fees/values set.
-                as.adjustAvailable(from, neg(sum(value, fee)));
                 executeVmTransaction(result, tx, as, ds, block, gasUsedInBlock);
                 break;
             default:
