@@ -2,7 +2,8 @@
 
 ### What is a delegate
 
-**Delegates** are special accounts on the **Semux BFT** consensus. Delegates are accounts that are available for voting and could become a validator. To register as a delegate you need to have `1000 SEMs` + transaction fee.
+**Delegates** are special accounts on the **Semux BFT** consensus. Delegates are accounts that are available for voting 
+and could become a validator. To register as a delegate you need to have `1000 SEMs` + transaction fee.
 
 ### How to register as a delegate
 
@@ -15,7 +16,9 @@
 
 ### What is validator
 
-**Validators** are delegates who are allowed to forge/mine blocks and validate transaction for the BFT Protocol. To become a `Validator`, a `Delegate` need to have enough number of votes to make it to the `Top 100` of the list. **Validators** are indicated with the **V** symbol compared to **S** symbol for other delegates.
+**Validators** are delegates who are allowed to forge/mine blocks and validate transaction for the BFT Protocol. To 
+become a `Validator`, a `Delegate` need to have enough number of votes to make it to the `Top 100` of the list. 
+**Validators** are indicated with the **V** symbol compared to **S** symbol for other delegates.
 
 ### How to become a validator
 

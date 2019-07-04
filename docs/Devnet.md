@@ -1,6 +1,7 @@
 # Devnet 
 
-Devnet is a feature similiar to [Bitcoin's Regtest Mode](https://bitcoin.org/en/glossary/regression-test-mode) that allows developers to run a local blockchain with a single Semux node for testing purpose.
+Devnet is a feature similiar to [Bitcoin's Regtest Mode](https://bitcoin.org/en/glossary/regression-test-mode) that 
+allows developers to run a local blockchain with a single Semux node for testing purpose.
 
 To start a devnet, run:
 

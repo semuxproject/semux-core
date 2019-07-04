@@ -111,6 +111,10 @@ Message:
 - data (byte[])
 - signature (byte[])
 
+for CALL and CREATE types
+- gas (long)
+- gasPrice (long)
+
 
 ### Get Block Header
 
