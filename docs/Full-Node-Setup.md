@@ -42,7 +42,9 @@ The compiled binaries should be available at `dist/linux` once the compilation h
 
 ### Create a wallet.data file
 
-A `wallet.data` file that stores a new private key should be automatically created in your installation directory during the startup of a fresh install of Semux wallet. This file is encrypted by a password specified in a CLI/GUI prompt during the first time of wallet startup.
+A `wallet.data` file that stores a new private key should be automatically created in your installation directory during 
+the startup of a fresh install of Semux wallet. This file is encrypted by a password specified in a CLI/GUI prompt during 
+the first time of wallet startup.
 
 ```bash
 $ ./semux-cli.sh                    
@@ -53,16 +55,19 @@ Please re-enter the new password:
 
 ### Automatic wallet unlock
 
-The standard wallet.data file of Semux is always encrypted even if you entered an empty password during wallet creation. Therefore a wallet password is required to be provided for automatic unlock when you setup a full node.
+The standard wallet.data file of Semux is always encrypted even if you entered an empty password during wallet creation. 
+Therefore a wallet password is required to be provided for automatic unlock when you setup a full node.
 
 The following ways are available for automatic wallet unlock which will be applied in sequence:
 
-1. Set `--password` CLI option as your wallet password when starting `semux-cli.sh` executable. This is considered as an insecured way as the way will expose your wallet password to all users through process monitor.
+1. Set `--password` CLI option as your wallet password when starting `semux-cli.sh` executable. This is considered as an 
+insecured way as the way will expose your wallet password to all users through process monitor.
 2. Set `SEMUX_WALLET_PASSWORD` environment variable as your wallet password.
 
 ### Create a systemd service
 
-A systemd service unit can be created at `/etc/systemd/system/semux.service` using this template file: [semux.service](../misc/systemd/semux.service).
+A systemd service unit can be created at `/etc/systemd/system/semux.service` using this template file: 
+[semux.service](../misc/systemd/semux.service).
 
 ```bash
 sudo cp semux.service /etc/systemd/system/semux.service
