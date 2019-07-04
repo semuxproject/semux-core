@@ -147,8 +147,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
     @Override
     public Response composeRawTransaction(String network, String type, String fee, String nonce, String to,
-            String value,
-            String timestamp, String data, String gasPrice, String gas) {
+            String value, String timestamp, String data, String gasPrice, String gas) {
 
         ComposeRawTransactionResponse resp = new ComposeRawTransactionResponse();
 
