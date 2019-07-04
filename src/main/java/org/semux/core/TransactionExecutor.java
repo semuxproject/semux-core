@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.client.BlockStore;
@@ -29,6 +30,7 @@ import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.util.Bytes;
 import org.semux.vm.client.SemuxBlock;
+import org.semux.vm.client.SemuxInternalTransaction;
 import org.semux.vm.client.SemuxRepository;
 import org.semux.vm.client.SemuxTransaction;
 
@@ -279,7 +281,10 @@ public class TransactionExecutor {
             result.setGas(tx.getGas(), tx.getGasPrice(), summary.getGasUsed());
 
             result.setBlockNumber(block.getNumber());
-            result.setInternalTransactions(summary.getInternalTransactions());
+            result.setInternalTransactions(summary.getInternalTransactions()
+                    .stream()
+                    .map(SemuxInternalTransaction::new)
+                    .collect(Collectors.toList()));
         }
     }
 

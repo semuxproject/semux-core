@@ -19,6 +19,7 @@ import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+import org.semux.vm.client.SemuxInternalTransaction;
 
 public class TransactionResult {
 
@@ -182,7 +183,7 @@ public class TransactionResult {
     /**
      * Internal transactions
      */
-    protected List<InternalTransaction> internalTransactions;
+    protected List<SemuxInternalTransaction> internalTransactions;
 
     /**
      * Create a transaction result.
@@ -262,11 +263,11 @@ public class TransactionResult {
         this.blockNumber = blockNumber;
     }
 
-    public List<InternalTransaction> getInternalTransactions() {
+    public List<SemuxInternalTransaction> getInternalTransactions() {
         return internalTransactions;
     }
 
-    public void setInternalTransactions(List<InternalTransaction> internalTransactions) {
+    public void setInternalTransactions(List<SemuxInternalTransaction> internalTransactions) {
         this.internalTransactions = internalTransactions;
     }
 
@@ -304,15 +305,15 @@ public class TransactionResult {
         enc.writeBytes(tx.getFrom());
         enc.writeBytes(tx.getTo());
         enc.writeLong(tx.getNonce());
-        enc.writeLong(tx.getValue().longValue()); // FIXME: value unit mismatch
+        enc.writeLong(tx.getValue().longValue());
         enc.writeBytes(tx.getData());
         enc.writeLong(tx.getGas());
-        enc.writeLong(tx.getGasPrice().longValue()); // FIXME: value unit mismatch
+        enc.writeLong(tx.getGasPrice().longValue());
 
         return enc.toBytes();
     }
 
-    protected static InternalTransaction deserializeInternalTransaction(byte[] bytes) {
+    protected static SemuxInternalTransaction deserializeInternalTransaction(byte[] bytes) {
         SimpleDecoder dec = new SimpleDecoder(bytes);
         boolean isRejected = dec.readBoolean();
         int depth = dec.readInt();
@@ -326,7 +327,8 @@ public class TransactionResult {
         long gas = dec.readLong();
         BigInteger gasPrice = BigInteger.valueOf(dec.readLong());
 
-        InternalTransaction tx = new InternalTransaction(null, depth, index,
+        // TODO: fix the null parent
+        SemuxInternalTransaction tx = new SemuxInternalTransaction(null, depth, index,
                 type, from, to, nonce, value, data, gas, gasPrice);
         if (isRejected) {
             tx.reject();
@@ -362,7 +364,7 @@ public class TransactionResult {
             long blockNumber = dec.readLong();
             result.setBlockNumber(blockNumber);
 
-            List<InternalTransaction> internalTransactions = new ArrayList<>();
+            List<SemuxInternalTransaction> internalTransactions = new ArrayList<>();
             n = dec.readInt();
             for (int i = 0; i < n; i++) {
                 internalTransactions.add(deserializeInternalTransaction(dec.readBytes()));

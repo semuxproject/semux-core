@@ -19,9 +19,9 @@ import java.util.List;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.OpCode;
-import org.ethereum.vm.program.InternalTransaction;
 import org.junit.Test;
 import org.semux.util.Bytes;
+import org.semux.vm.client.SemuxInternalTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,9 +108,10 @@ public class TransactionResultTest {
         long gasPrice = 2;
         long gasUsed = 3;
         long blockNumber = 4;
-        List<InternalTransaction> internalTransactions = new ArrayList<>();
-        internalTransactions.add(new InternalTransaction(null, 1, 2, OpCode.CALL, Bytes.random(20), Bytes.random(20),
-                3, BigInteger.ONE, Bytes.random(5), 4, BigInteger.TEN));
+        List<SemuxInternalTransaction> internalTransactions = new ArrayList<>();
+        internalTransactions
+                .add(new SemuxInternalTransaction(null, 1, 2, OpCode.CALL, Bytes.random(20), Bytes.random(20),
+                        3, BigInteger.ONE, Bytes.random(5), 4, BigInteger.TEN));
 
         TransactionResult tr1 = new TransactionResult(code, returnData, logs);
         tr1.setGas(gas, gasPrice, gasUsed);

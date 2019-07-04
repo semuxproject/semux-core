@@ -67,11 +67,11 @@ public class InternalTransactionTest {
 
     // pragma solidity ^0.5.0;
     //
-    //contract InternalTransfer {
-    //    constructor() public  {
-    //        0x0000000000000000000000000000000012345678.transfer(5 ether);
-    //    }
-    //}
+    // contract InternalTransfer {
+    // constructor() public {
+    // 0x0000000000000000000000000000000012345678.transfer(5 ether);
+    // }
+    // }
     @Test
     public void testInternalTransfer() {
         Key key = new Key();
@@ -111,6 +111,6 @@ public class InternalTransactionTest {
         InternalTransaction it = result.getInternalTransactions().get(0);
         assertArrayEquals(to, it.getFrom());
         assertArrayEquals(Hex.decode0x("0x0000000000000000000000000000000012345678"), it.getTo());
-        assertEquals(SEM.of(5).getNano(), it.getValue());
+        assertEquals(SEM.of(5).getBigInteger(), it.getValue());
     }
 }
