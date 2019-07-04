@@ -30,8 +30,8 @@ public class DevnetConfig extends AbstractConfig {
         HashMap<Fork, Long> initForkActivationCheckpoints = new HashMap<>();
 
         // uncomment for local development in these forks
-        initForkActivationCheckpoints.put(Fork.UNIFORM_DISTRIBUTION, 1L);
-        initForkActivationCheckpoints.put(Fork.VIRTUAL_MACHINE, 1L);
+        // initForkActivationCheckpoints.put(Fork.UNIFORM_DISTRIBUTION, 1L);
+        // initForkActivationCheckpoints.put(Fork.VIRTUAL_MACHINE, 1L);
 
         forkActivationCheckpoints = MapUtils.unmodifiableMap(initForkActivationCheckpoints);
     }

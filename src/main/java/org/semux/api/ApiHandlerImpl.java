@@ -60,6 +60,7 @@ public class ApiHandlerImpl implements ApiHandler {
         this.routes.put(ApiVersion.v2_0_0, routesV2);
         this.routes.put(ApiVersion.v2_1_0, routesV2);
         this.routes.put(ApiVersion.v2_2_0, routesV2);
+        this.routes.put(ApiVersion.v2_3_0, routesV2);
     }
 
     @Override
