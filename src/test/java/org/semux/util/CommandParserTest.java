@@ -15,9 +15,7 @@ public class CommandParserTest {
 
     @Test
     public void testDelimiting() {
-
         String input = "foo and \"bar stuff\" \"stuff \\\" with quotes \\\" \" more \"\"";
-
         List<String> parsed = CommandParser.parseInput(input);
 
         Assert.assertEquals(6, parsed.size());
@@ -36,6 +34,5 @@ public class CommandParserTest {
         Assert.assertEquals(2, parsed.size());
         Assert.assertEquals("getBlockByNumber", parsed.get(0));
         Assert.assertEquals("1", parsed.get(1));
-
     }
 }
