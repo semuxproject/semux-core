@@ -772,7 +772,7 @@ public final class SemuxApiImpl implements SemuxApi {
     public Response call(String from, String to, String value, String gasPrice, String gas,
             String nonce, String data, Boolean local) {
         if (Boolean.TRUE.equals(local)) {
-           return callLocal(to, data);
+            return callLocal(to, data);
         } else {
             return doTransaction(TransactionType.CALL, from, to, value, "0", nonce, data, gasPrice,
                     gas);
