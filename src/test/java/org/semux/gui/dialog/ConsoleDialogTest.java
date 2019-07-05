@@ -14,6 +14,8 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.DialogFixture;
@@ -72,7 +74,7 @@ public class ConsoleDialogTest extends AssertJSwingJUnitTestCase {
         when(blockChain.getBlock(anyLong())).thenReturn(block);
         kernelRule1.getKernel().setBlockchain(blockChain);
 
-        console.textBox("txtInput").enterText("getBlockByNumber 1\n");
+        console.textBox("txtInput").enterText("getBlockByNumber \"1\"\n");
 
         await().until(() -> consoleText.text().contains("transactionsRoot"));
     }

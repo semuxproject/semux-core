@@ -43,6 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import io.swagger.annotations.ApiOperation;
+import org.semux.util.CommandParser;
 
 public class ConsoleDialog extends JDialog implements ActionListener {
 
@@ -156,8 +157,9 @@ public class ConsoleDialog extends JDialog implements ActionListener {
      * @param input
      */
     protected String callApi(String input) {
-        String[] commandArguments = input.split(" ");
-        String command = commandArguments[0];
+        List<String> commandArguments = CommandParser.parseInput(input);
+
+        String command = commandArguments.get(0);
 
         MethodDescriptor md = methods.get(command);
         if (md == null) {
@@ -168,19 +170,19 @@ public class ConsoleDialog extends JDialog implements ActionListener {
             Method method = api.getClass().getMethod(command, md.argumentTypes);
             Object[] arguments = new Object[md.argumentTypes.length];
 
-            if (arguments.length < commandArguments.length - 1) {
+            if (arguments.length < commandArguments.size() - 1) {
                 return GuiMessages.get("MethodError", command);
             }
 
-            for (int i = 0; i < commandArguments.length - 1; i++) {
-                String argument = commandArguments[i + 1];
+            for (int i = 0; i < commandArguments.size() - 1; i++) {
+                String argument = commandArguments.get(i + 1);
                 if (md.argumentTypes[i] == Boolean.class) {
                     arguments[i] = Boolean.parseBoolean(argument);
                 } else {
                     if (NULL.equals(argument)) {
                         arguments[i] = null;
                     } else {
-                        arguments[i] = commandArguments[i + 1];
+                        arguments[i] = commandArguments.get(i + 1);
                     }
                 }
             }
