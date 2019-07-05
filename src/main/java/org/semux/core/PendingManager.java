@@ -181,7 +181,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      */
     public synchronized ProcessingResult addTransactionSync(Transaction tx) {
         // nonce check for transactions from this client
-        if (tx.getNonce() != kernel.getBlockchain().getAccountState().getAccount(tx.getFrom()).getNonce()) {
+        if (tx.getNonce() != getNonce(tx.getFrom())) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_NONCE);
         }
 
