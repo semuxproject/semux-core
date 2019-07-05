@@ -20,7 +20,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.validator.routines.DomainValidator;
@@ -560,8 +559,7 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response getTransactionResult(
-            @NotNull @javax.validation.constraints.Pattern(regexp = "^(0x)?[0-9a-fA-F]{64}$") String hash) {
+    public Response getTransactionResult(String hash) {
         GetTransactionResultResponse resp = new GetTransactionResultResponse();
 
         if (!isSet(hash)) {
@@ -774,33 +772,40 @@ public final class SemuxApiImpl implements SemuxApi {
     public Response call(String from, String to, String value, String gasPrice, String gas,
             String nonce, String data, Boolean local) {
         if (Boolean.TRUE.equals(local)) {
-            Transaction tx = getTransaction(TransactionType.CALL, from, to, value, "0", nonce, data,
-                    gasPrice, gas);
-
-            SemuxTransaction transaction = new SemuxTransaction(tx);
-            SemuxBlock block = new SemuxBlock(kernel.getBlockchain().getLatestBlock().getHeader(),
-                    kernel.getConfig().spec().maxBlockGasLimit());
-            Repository repository = new SemuxRepository(kernel.getBlockchain().getAccountState(),
-                    kernel.getBlockchain().getDelegateState());
-            ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
-            BlockStore blockStore = new SemuxBlockStore(kernel.getBlockchain());
-            long gasUsedInBlock = 0l;
-
-            org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
-                    transaction, block, repository, blockStore,
-                    kernel.getConfig().spec().vmSpec(), invokeFactory, gasUsedInBlock, true);
-            TransactionReceipt receipt = executor.run();
-
-            DoTransactionResponse resp = new DoTransactionResponse();
-            resp.setResult(Hex.encode0x(receipt.getReturnData()));
-            if (!receipt.isSuccess()) {
-                return badRequest("Error calling method");
-            } else {
-                return success(resp);
-            }
+           return callLocal(to, data);
         } else {
             return doTransaction(TransactionType.CALL, from, to, value, "0", nonce, data, gasPrice,
                     gas);
+        }
+    }
+
+    @Override
+    public Response callLocal(String to, String data) {
+        TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
+                .withType("CALL")
+                .withTo(to)
+                .withData(data);
+
+        SemuxTransaction transaction = new SemuxTransaction(transactionBuilder.buildUnsigned());
+        SemuxBlock block = new SemuxBlock(kernel.getBlockchain().getLatestBlock().getHeader(),
+                kernel.getConfig().spec().maxBlockGasLimit());
+        Repository repository = new SemuxRepository(kernel.getBlockchain().getAccountState(),
+                kernel.getBlockchain().getDelegateState());
+        ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
+        BlockStore blockStore = new SemuxBlockStore(kernel.getBlockchain());
+        long gasUsedInBlock = 0l;
+
+        org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
+                transaction, block, repository, blockStore,
+                kernel.getConfig().spec().vmSpec(), invokeFactory, gasUsedInBlock, true);
+        TransactionReceipt receipt = executor.run();
+
+        DoTransactionResponse resp = new DoTransactionResponse();
+        resp.setResult(Hex.encode0x(receipt.getReturnData()));
+        if (!receipt.isSuccess()) {
+            return badRequest("Error calling method");
+        } else {
+            return success(resp);
         }
     }
 
