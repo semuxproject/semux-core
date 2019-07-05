@@ -784,6 +784,7 @@ public final class SemuxApiImpl implements SemuxApi {
         TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
                 .withType("CALL")
                 .withTo(to)
+                .withNonce("0")
                 .withData(data);
 
         SemuxTransaction transaction = new SemuxTransaction(transactionBuilder.buildUnsigned());
