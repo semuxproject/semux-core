@@ -17,7 +17,7 @@ mvn formatter:format license:format
 
 To check code style and potential security bugs, run:
 ```
-mvn formatter:validate findbugs:check
+mvn formatter:validate license:check findbugs:check
 ```
 
 For IDE setup, visit [here](../docs/IDE-Setup.md).
@@ -49,19 +49,19 @@ See also: #12, #34
 
 The title of the pull request should be prefixed by the component or area that the pull request affects. Valid areas as:
 
-  - **API** for changes to the RESTful API code
-  - **CLI** for changes to the wallet CLI code
-  - **Config** for changes to configurations
-  - **Consensus** for changes to the consensus code
-  - **Core** for changes to the core data structures and algorithms
-  - **Crypto** for changes to the crypto code
-  - **DB** for changes to the database code
-  - **GUI** for changes to the wallet GUI code
-  - **Net** OR **P2P** for changes to the peer-to-peer network code
-  - **Util** for changes to the utils and libraries
-  - **VM** for changes to the database code
-  - **Docs** for changes to the docs
-  - **Tests** for changes to the unit test and QA tests
+  - **API** for changes to the Semux RESTful API
+  - **CLI** for changes to the command line interface
+  - **Config** for changes to the configurations and specifications
+  - **Consensus** for changes to the Semux BFT consensus
+  - **Core** for changes to the core data structures, procedures and algorithms
+  - **Crypto** for changes to the crypto library
+  - **DB** for changes to the database implementation
+  - **GUI** for changes to the GUI
+  - **Net** OR **P2P** for changes to the P2P protocol implementation
+  - **Util** for changes to the utilities and libraries
+  - **VM** for changes to the virtual machine
+  - **Docs** for changes to the documentations
+  - **Tests** for changes to the unit tests
   - **Tools** for changes to the scripts and tools
   - **Trivial** should **only** be used for PRs that do not change generated executable code:
     - comments
@@ -102,23 +102,13 @@ git push -f # (force push to GitHub)
 Patchsets should always be focused. For example, a pull request could add a feature, fix a bug, or refactor code; but not a mixture. Please also avoid super pull requests which attempt to do too much, are overly large, or overly complex as this makes review difficult.
 
 
-## Maintainer
-
-For maintainer, make sure the PR you're going to merge passes all the checks and complies with this contributing guide. It's also advised to update the merge commit message to the following format:
-
-```
-Merge #123: Component: pull request title
-
-Optional clarification or descriptions
-```
-
 ## Copyright
 
 By contributing to this repository, you agree to license your work under the MIT license. Any work contributed where you are not the original author must contain its license header with the original author(s) and source.
 
 ```
 /**
- * Copyright (c) 2017-2018 The Semux Developers
+ * Copyright (c) 2017-2019 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
