@@ -26,14 +26,6 @@ public interface ChainSpec {
     long maxBlockGasLimit();
 
     /**
-     * Returns the max total size of all transactions in a block, encoding overhead
-     * not counted.
-     *
-     * @return
-     */
-    int maxBlockTransactionsSize();
-
-    /**
      * Returns the max data size for the given transaction type.
      *
      * @return

@@ -561,8 +561,7 @@ public class SemuxSync implements SyncManager {
         }
 
         // [2] check transactions and results
-        if (!block.validateTransactions(header, transactions, config.network())
-                || transactions.stream().mapToInt(Transaction::size).sum() > config.spec().maxBlockTransactionsSize()) {
+        if (!block.validateTransactions(header, transactions, config.network())) {
             logger.error("Invalid block transactions");
             return false;
         }

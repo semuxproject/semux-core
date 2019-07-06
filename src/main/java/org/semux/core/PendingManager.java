@@ -205,13 +205,13 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Returns pending transactions, limited by the given total size in bytes.
      *
-     * @param byteLimit
+     *
      * @return
      */
-    public synchronized List<PendingTransaction> getPendingTransactions(int byteLimit) {
-        if (byteLimit < 0) {
-            throw new IllegalArgumentException("Limit can't be negative");
-        }
+    public synchronized List<PendingTransaction> getPendingTransactions(long blockGasLimit) {
+        int byteLimit = 1024 * 1024;
+
+        // TODO: include transactions based on the block gas limit
 
         List<PendingTransaction> txs = new ArrayList<>();
         Iterator<PendingTransaction> it = transactions.iterator();
@@ -237,7 +237,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @return
      */
     public synchronized List<PendingTransaction> getPendingTransactions() {
-        return getPendingTransactions(Integer.MAX_VALUE);
+        return getPendingTransactions(Long.MAX_VALUE);
     }
 
     /**

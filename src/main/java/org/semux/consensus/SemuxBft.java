@@ -772,8 +772,7 @@ public class SemuxBft implements BftManager {
         byte[] data = chain.constructBlockData();
 
         // fetch pending transactions
-        final List<PendingManager.PendingTransaction> pending = pendingMgr
-                .getPendingTransactions(config.spec().maxBlockTransactionsSize());
+        final List<PendingManager.PendingTransaction> pending = pendingMgr.getPendingTransactions(config.poolBlockGasLimit());
         final List<Transaction> pendingTxs = new ArrayList<>();
         final List<TransactionResult> pendingResults = new ArrayList<>();
 
@@ -872,11 +871,6 @@ public class SemuxBft implements BftManager {
 
         if (!block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())) {
             logger.warn("Invalid block transactions");
-            return false;
-        }
-
-        if (transactions.stream().mapToInt(Transaction::size).sum() > config.spec().maxBlockTransactionsSize()) {
-            logger.warn("Block transactions size exceeds maximum");
             return false;
         }
 

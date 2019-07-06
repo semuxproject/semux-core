@@ -46,6 +46,8 @@ public class BlockchainPerformance {
         List<Transaction> txs = new ArrayList<>();
         List<TransactionResult> res = new ArrayList<>();
 
+        // TODO: use block gas limit
+
         int total = 0;
         for (int i = 0;; i++) {
             Network network = config.network();
@@ -58,7 +60,7 @@ public class BlockchainPerformance {
             byte[] data = Bytes.EMPTY_BYTES;
             Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(key);
 
-            if (total + tx.size() > config.spec().maxBlockTransactionsSize()) {
+            if (total + tx.size() > 1024 * 1024) {
                 break;
             }
 
