@@ -7,10 +7,8 @@
 package org.semux.config;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.collections4.MapUtils;
 import org.semux.Network;
 import org.semux.core.Fork;
 

@@ -37,13 +37,13 @@ import org.semux.api.v2.SemuxApiImpl;
 import org.semux.gui.SemuxGui;
 import org.semux.message.GuiMessages;
 import org.semux.util.CircularFixedSizeList;
+import org.semux.util.CommandParser;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import io.swagger.annotations.ApiOperation;
-import org.semux.util.CommandParser;
 
 public class ConsoleDialog extends JDialog implements ActionListener {
 
