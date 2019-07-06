@@ -628,16 +628,8 @@ public class BlockchainImpl implements Blockchain {
             set.add(UNIFORM_DISTRIBUTION);
         }
 
-        /**
-         * For prior forks, if a validator did not update, their node would stop syncing
-         * at point of fork. However, VM will only stop syncing at point a smart
-         * contract is created.
-         *
-         * Because of this, we need to keep signalling until activation deadline, rather
-         * than short circuiting (or until all nodes are shown to be updated).
-         */
         if (config.forkVirtualMachineEnabled()
-                // && !forks.isActivated(VIRTUAL_MACHINE)
+                && !forks.isActivated(VIRTUAL_MACHINE)
                 && latestBlock.getNumber() + 1 <= VIRTUAL_MACHINE.activationDeadline) {
             set.add(VIRTUAL_MACHINE);
         }
