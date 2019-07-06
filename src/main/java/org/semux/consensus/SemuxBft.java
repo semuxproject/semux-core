@@ -783,17 +783,20 @@ public class SemuxBft implements BftManager {
         BlockHeader tempHeader = new BlockHeader(height, coinbase.toAddress(), prevHash, timestamp, new byte[0],
                 new byte[0], new byte[0], data);
 
-        // only propose gas used up to configured block gas limit
-        long remainingBlockGas = config.poolBlockGasLimit();
         SemuxBlock semuxBlock = new SemuxBlock(tempHeader, config.spec().maxBlockGasLimit());
+
+        // only propose gas used up to configured block gas limit
+        long remainingBlockGas = semuxBlock.getGasLimit();
+        long myRemainingBlockGas = config.poolBlockGasLimit();
 
         for (PendingManager.PendingTransaction pendingTx : pending) {
             Transaction tx = pendingTx.transaction;
-            boolean isVMTransaction = tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE;
-
-            if (isVMTransaction) {
-                // transactions that exceed the remaining block gas limit are ignored
-                if (tx.getGas() <= remainingBlockGas) {
+            if (tx.isVMTransaction()) {
+                // Note: transactions that exceed the remaining block gas limit are ignored; however,
+                // this doesn't mean they're invalid because the gas usage will be less
+                // than gas limit.
+                if (tx.getGas() <= myRemainingBlockGas) {
+                    // FIXME: transaction executor does not know the remaining gas in block
                     TransactionResult result = exec.execute(tx, as, ds, semuxBlock, chain);
 
                     // only include transaction that's acceptable
@@ -801,15 +804,20 @@ public class SemuxBft implements BftManager {
                         pendingResults.add(result);
                         pendingTxs.add(tx);
 
-                        remainingBlockGas -= result.getGasUsed();
+                        myRemainingBlockGas -= result.getGasUsed();
                     }
                 }
             } else {
-                if (config.spec().nonVMTransactionGasCost() <= remainingBlockGas
+                // FIXME: this is wrong because the results from pending manager may be wrong!!!
+                if (config.spec().nonVMTransactionGasCost() <= myRemainingBlockGas
                         && pendingTx.result.getCode().isAcceptable()) {
-                    pendingResults.add(pendingTx.result);
-                    pendingTxs.add(pendingTx.transaction);
-                    remainingBlockGas -= config.spec().nonVMTransactionGasCost();
+                    TransactionResult result = pendingTx.result;
+
+                    if (result.getCode().isAcceptable()) {
+                        pendingResults.add(pendingTx.result);
+                        pendingTxs.add(pendingTx.transaction);
+                        myRemainingBlockGas -= config.spec().nonVMTransactionGasCost();
+                    }
                 }
             }
         }
@@ -954,7 +962,7 @@ public class SemuxBft implements BftManager {
         List<TransactionResult> results = exec.execute(transactions, as, ds,
                 new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), chain);
         if (!block.validateResults(header, results)) {
-            logger.debug("Invalid transactions");
+            logger.warn("Invalid transactions");
             return;
         }
 

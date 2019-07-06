@@ -95,6 +95,7 @@ public class TransactionExecutor {
             SemuxBlock block, Blockchain chain) {
         List<TransactionResult> results = new ArrayList<>();
 
+        // FIXME: gas usage should be provided by caller
         long gasUsedInBlock = 0;
         for (Transaction tx : txs) {
             TransactionResult result = new TransactionResult();
@@ -118,16 +119,12 @@ public class TransactionExecutor {
                 continue;
             }
 
-            boolean isVMTransaction = type == TransactionType.CREATE || type == TransactionType.CALL;
-
             // check fee (call and create use gas instead)
-            if (isVMTransaction) {
+            if (tx.isVMTransaction()) {
                 // applying a very strict check to avoid mistakes
                 boolean valid = fee.equals(Amount.ZERO)
                         && tx.getGas() >= 21_000 && tx.getGas() <= config.spec().maxBlockGasLimit()
-                        && tx.getGasPrice().getNano() >= 1 && tx.getGasPrice().getNano() <= Integer.MAX_VALUE; // a
-                                                                                                               // theoretical
-                                                                                                               // limit
+                        && tx.getGasPrice().getNano() >= 1 && tx.getGasPrice().getNano() <= Integer.MAX_VALUE;
                 if (!valid) {
                     result.setCode(Code.INVALID_FEE);
                     continue;
@@ -144,6 +141,8 @@ public class TransactionExecutor {
                 result.setCode(Code.INVALID_DATA);
                 continue;
             }
+
+            // TODO: check remaining gas
 
             switch (type) {
             case TRANSFER: {
@@ -232,12 +231,12 @@ public class TransactionExecutor {
             }
 
             if (result.getCode().isAcceptable()) {
-                if (!isVMTransaction) {
+                if (!tx.isVMTransaction()) {
                     // CREATEs and CALLs manages the nonce inside the VM
                     as.increaseNonce(from);
                 }
 
-                if (isVMTransaction) {
+                if (tx.isVMTransaction()) {
                     gasUsedInBlock += result.getGasUsed();
                 } else {
                     gasUsedInBlock += config.spec().nonVMTransactionGasCost();

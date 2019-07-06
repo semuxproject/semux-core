@@ -157,9 +157,7 @@ public class TypeFactory {
 
     public static TransactionResultType transactionResultType(Transaction tx, TransactionResult result, long number) {
         // gas price is in nano sem, not wei
-        boolean isVMTransaction = (tx.getType() == org.semux.core.TransactionType.CREATE
-                || tx.getType() == org.semux.core.TransactionType.CALL);
-        Amount fee = isVMTransaction ? Amount.mul(result.getGasPrice(), result.getGasUsed()) : tx.getFee();
+        Amount fee = tx.isVMTransaction() ? Amount.mul(result.getGasPrice(), result.getGasUsed()) : tx.getFee();
 
         return new TransactionResultType()
                 .blockNumber(Long.toString(number))

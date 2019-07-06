@@ -209,22 +209,16 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @return
      */
     public synchronized List<PendingTransaction> getPendingTransactions(long blockGasLimit) {
-        int byteLimit = 1024 * 1024;
-
-        // TODO: include transactions based on the block gas limit
-
         List<PendingTransaction> txs = new ArrayList<>();
         Iterator<PendingTransaction> it = transactions.iterator();
 
-        int size = 0;
-        while (it.hasNext()) {
+        while (it.hasNext() && blockGasLimit > 0) {
             PendingTransaction tx = it.next();
 
-            size += tx.transaction.size();
-            if (size > byteLimit) {
-                break;
-            } else {
+            long gasUsage = tx.transaction.isVMTransaction() ? tx.result.getGasUsed() : kernel.getConfig().spec().nonVMTransactionGasCost();
+            if (blockGasLimit > gasUsage) {
                 txs.add(tx);
+                blockGasLimit -= gasUsage;
             }
         }
 
@@ -314,14 +308,13 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         int cnt = 0;
         long now = TimeUtil.currentTimeMillis();
-        boolean isVMTransaction = tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE;
 
         // reject VM transactions that come in before fork
-        if (isVMTransaction && !kernel.getBlockchain().isForkActivated(Fork.VIRTUAL_MACHINE)) {
+        if (tx.isVMTransaction() && !kernel.getBlockchain().isForkActivated(Fork.VIRTUAL_MACHINE)) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_TYPE);
         }
         // reject VM transaction with low gas price
-        if (isVMTransaction && tx.getGasPrice().lt(kernel.getConfig().poolMinGasPrice())) {
+        if (tx.isVMTransaction() && tx.getGasPrice().lt(kernel.getConfig().poolMinGasPrice())) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_FEE);
         }
 
@@ -356,8 +349,8 @@ public class PendingManager implements Runnable, BlockchainListener {
             Block prevBlock = chain.getLatestBlock();
             BlockHeader blockHeader = new BlockHeader(
                     prevBlock.getNumber() + 1,
-                    new Key().toAddress(), prevBlock.getHash(), System.currentTimeMillis(), new byte[0],
-                    new byte[0], new byte[0], new byte[0]);
+                    new Key().toAddress(), prevBlock.getHash(), System.currentTimeMillis(), Bytes.EMPTY_BYTES,
+                    Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES);
             SemuxBlock block = new SemuxBlock(blockHeader, kernel.getConfig().spec().maxBlockGasLimit());
 
             // execute transactions
