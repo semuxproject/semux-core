@@ -775,29 +775,22 @@ public class SemuxBft implements BftManager {
         SemuxBlock semuxBlock = new SemuxBlock(tempHeader, config.spec().maxBlockGasLimit());
 
         // only propose gas used up to configured block gas limit
-        long myBlockGasLimit = config.poolBlockGasLimit();
-        long totalGasUsed = 0;
+        long remainingBlockGas = config.poolBlockGasLimit();
         for (PendingManager.PendingTransaction pendingTx : pendingTxs) {
             Transaction tx = pendingTx.transaction;
 
-            // FIXME: the vm transaction executor check block gas limit based on gas not
-            // gasUsed
+            long gas = tx.isVMTransaction() ? tx.getGas() : config.spec().nonVMTransactionGasCost();
+            if (gas > remainingBlockGas) {
+                break;
+            }
 
             // re-evaluate the transaction
-            AccountState asTrack = as.track(); // use another level of track to allow rollback
-            DelegateState dsTrack = ds.track();
-            TransactionResult result = exec.execute(tx, asTrack, dsTrack, semuxBlock, chain, 0);
+            TransactionResult result = exec.execute(tx, as, ds, semuxBlock, chain, 0);
             if (result.getCode().isAcceptable()) {
                 long gasUsed = tx.isVMTransaction() ? result.getGasUsed() : config.spec().nonVMTransactionGasCost();
-                if (totalGasUsed + gasUsed > myBlockGasLimit) {
-                    break; // stop including blocks
-                }
-
                 includedTxs.add(tx);
                 includedResults.add(result);
-                totalGasUsed += gasUsed;
-                asTrack.commit();
-                dsTrack.commit();
+                remainingBlockGas -= gasUsed;
             }
         }
 
